@@ -13,5 +13,3 @@ data/backups/
 
 # Tests / cache
 pytest_cache/
-*.log
-logs/
