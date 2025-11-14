@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+
+.venv/
+
+# Streamlit
+.streamlit/
+
+# SQLite local
+data/*.db
+data/backups/
+
+# Tests / cache
+pytest_cache/
+*.log
+logs/

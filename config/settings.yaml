@@ -1,0 +1,5 @@
+app:
+  default_city: "Clermont-Ferrand"
+  theme: "light"
+  notifications: true
+  update_check: true

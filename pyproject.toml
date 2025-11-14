@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "assistant-matanne"
+version = "0.1.0"
+description = "Assistant familial intelligent pour la gestion du quotidien (repas, routines, projets, bien-être)."
+authors = [{ name = "Anne", email = "contact@example.com" }]
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+
+dependencies = [
+    "streamlit>=1.30.0",
+    "sqlalchemy>=2.0.0",
+    "pandas",
+    "requests",
+    "python-dateutil",
+    "plotly",
+    "matplotlib",
+    "pydantic",
+    "openai",
+    "reportlab"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "black",
+    "flake8",
+    "isort"
+]
+
+[tool.setuptools]
+packages = ["assistant_matanne"]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+line-length = 88
+target-version = ["py39"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
