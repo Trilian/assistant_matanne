@@ -261,17 +261,42 @@ SCHEMA = {
                                                                             FOREIGN KEY(user_id) REFERENCES users(id)
                               )
                           """,
+    # Événements de calendrier externes (Google Calendar)
+    "external_calendar_events": """
+                                CREATE TABLE IF NOT EXISTS external_calendar_events (
+                                                                                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                                                                        gcal_id TEXT UNIQUE,
+                                                                                        title TEXT,
+                                                                                        start_date TEXT,
+                                                                                        end_date TEXT,
+                                                                                        raw_json TEXT
+                                )
+                                """,
 }
 
 # --- Fonctions utilitaires ---
 def create_all_tables():
     conn = get_connection()
     cursor = conn.cursor()
+
+    # Création de toutes les tables
     for name, ddl in SCHEMA.items():
         cursor.execute(ddl)
         log_event(f"Table '{name}' vérifiée/créée")
+
+    # Important : valider d'abord la création des tables
+    conn.commit()
+
+    # Maintenant que les tables existent, on peut créer les index
+    cursor.execute("""
+                   CREATE INDEX IF NOT EXISTS idx_external_events_start
+                       ON external_calendar_events(start_date)
+                   """)
+
     conn.commit()
     conn.close()
+
+
 
 def drop_all_tables():
     conn = get_connection()

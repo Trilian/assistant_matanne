@@ -21,7 +21,13 @@ dependencies = [
     "matplotlib",
     "pydantic",
     "openai",
-    "reportlab"
+    "reportlab",
+    "google-api-python-client",
+    "google-auth-httplib2",
+    "google-auth-oauthlib",
+    "streamlit-calendar",
+    "PyYAML",
+    " python-dotenv",
 ]
 
 [project.optional-dependencies]
@@ -32,9 +38,12 @@ dev = [
     "isort"
 ]
 
-[tool.setuptools]
-packages = ["assistant_matanne"]
+# --- Partie essentielle pour que ton package fonctionne à la racine ---
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["*"]
 
+# --- Config outils ---
 [tool.black]
 line-length = 88
 target-version = ["py39"]

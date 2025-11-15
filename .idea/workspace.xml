@@ -4,8 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment="Fix">
+    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment="Fix module recettes">
+      <change afterPath="$PROJECT_DIR$/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/schema_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/schema_manager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/logs/app.log" beforeDir="false" afterPath="$PROJECT_DIR$/logs/app.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/accueil.py" beforeDir="false" afterPath="$PROJECT_DIR$/modules/accueil.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/bien_etre.py" beforeDir="false" afterPath="$PROJECT_DIR$/modules/bien_etre.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/calendrier.py" beforeDir="false" afterPath="$PROJECT_DIR$/modules/calendrier.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -169,7 +177,7 @@
       <workItem from="1762697936409" duration="3457000" />
       <workItem from="1762844678692" duration="38694000" />
       <workItem from="1763036494014" duration="13267000" />
-      <workItem from="1763142266273" duration="6842000" />
+      <workItem from="1763142266273" duration="12426000" />
     </task>
     <task id="LOCAL-00001" summary="Init commit">
       <option name="closed" value="true" />
@@ -195,7 +203,23 @@
       <option name="project" value="LOCAL" />
       <updated>1763152828286</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Fix module recettes">
+      <option name="closed" value="true" />
+      <created>1763153853363</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1763153853363</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Fix module recettes">
+      <option name="closed" value="true" />
+      <created>1763154068093</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1763154068093</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -205,7 +229,8 @@
     <MESSAGE value="Init comit" />
     <MESSAGE value="Init commit" />
     <MESSAGE value="Fix" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fix" />
+    <MESSAGE value="Fix module recettes" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix module recettes" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
