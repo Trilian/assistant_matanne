@@ -9,108 +9,139 @@ from core.helpers import log_function
 
 @log_function
 def app():
-    st.header("Accueil")
-    st.subheader("Bienvenue dans Assistant MaTanne")
+    # --- STYLE MODERNE ---
+    st.markdown("""
+        <style>
+            .card {
+                padding: 20px;
+                border-radius: 16px;
+                background: #f6f8f7;
+                border: 1px solid #e2e8e5;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+                margin-bottom: 10px;
+            }
+            .stat {
+                font-size: 1.8rem;
+                font-weight: 700;
+                color: #2d4d36;
+                margin-bottom: -5px;
+            }
+            .label {
+                font-size: 0.9rem;
+                color: #5e7a6a;
+            }
+            .tile {
+                padding: 18px;
+                background: #ffffff;
+                border-radius: 14px;
+                border: 1px solid #dfe7e2;
+                transition: 0.15s ease;
+                text-align: center;
+                cursor: pointer;
+                font-size: 1.1rem;
+            }
+            .tile:hover {
+                background: #eef5f1;
+                transform: translateY(-2px);
+            }
+        </style>
+    """, unsafe_allow_html=True)
 
-    # Connexion DB
+    st.markdown("## 👋 Bienvenue dans **Assistant MaTanne**")
+    st.caption("Votre tableau de bord familial : organisation, repas, jardin et projets.")
+
     conn = get_connection()
     conn.row_factory = lambda cursor, row: {col[0]: row[idx] for idx, col in enumerate(cursor.description)}
     cursor = conn.cursor()
 
-    if "refresh" not in st.session_state:
-        st.session_state["refresh"] = False
+    # === Stats globales ===
+    def quick_count(query):
+        try:
+            cursor.execute(query)
+            return cursor.fetchone()["c"]
+        except:
+            return 0
 
-    try:
-        # --- Statistiques globales ---
-        def safe_count(query: str, label: str):
-            """Exécute un COUNT(*) sécurisé avec clé 'c'."""
-            try:
-                cursor.execute(f"{query} as c")
-                return cursor.fetchone()["c"]
-            except Exception as e:
-                st.warning(f"Erreur lors de la récupération de {label} : {e}")
-                return 0
+    recipes = quick_count("SELECT COUNT(*) as c FROM recipes")
+    items = quick_count("SELECT COUNT(*) as c FROM inventory_items")
+    batch = quick_count("SELECT COUNT(*) as c FROM batch_meals")
 
-        recipes_count = safe_count("SELECT COUNT(*) FROM recipes", "recettes")
-        inventory_count = safe_count("SELECT COUNT(*) FROM inventory_items", "inventaire")
-        batch_count = safe_count("SELECT COUNT(*) FROM batch_meals", "batch meals")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown("<div class='card'><div class='stat'>" + str(recipes) +
+                    "</div><div class='label'>Recettes</div></div>", unsafe_allow_html=True)
+    with col2:
+        st.markdown("<div class='card'><div class='stat'>" + str(items) +
+                    "</div><div class='label'>Articles inventaire</div></div>", unsafe_allow_html=True)
+    with col3:
+        st.markdown("<div class='card'><div class='stat'>" + str(batch) +
+                    "</div><div class='label'>Batch meals</div></div>", unsafe_allow_html=True)
 
-        st.write(f"📘 Nombre de recettes : **{recipes_count}**")
-        st.write(f"📦 Nombre d'items en inventaire : **{inventory_count}**")
-        st.write(f"🍱 Nombre de repas batch : **{batch_count}**")
+    st.markdown("---")
 
-        st.markdown("---")
+    # === Profil enfant Jules ===
+    st.markdown("### 👶 Aujourd’hui pour Jules")
 
-        # --- Profil enfant ---
-        cursor.execute("SELECT name, birth_date FROM child_profiles LIMIT 1")
-        row = cursor.fetchone()
+    cursor.execute("SELECT name, birth_date FROM child_profiles LIMIT 1")
+    row = cursor.fetchone()
 
-        st.subheader("👶 Profil enfant")
-        if row:
-            name = row.get("name")
-            birth_raw = row.get("birth_date")
+    if row:
+        name = row["name"]
+        bd = row["birth_date"]
 
-            try:
-                birth_date = date.fromisoformat(birth_raw)
-                age_months = (date.today().year - birth_date.year) * 12 + (date.today().month - birth_date.month)
+        try:
+            birth_date = date.fromisoformat(bd)
+            months = (date.today().year - birth_date.year) * 12 + (date.today().month - birth_date.month)
+        except:
+            months = "?"
 
-                st.info(f"**{name}**, {age_months} mois")
-            except Exception:
-                st.error(f"Date de naissance invalide dans la base : '{birth_raw}'")
-        else:
-            st.info("Aucun profil enfant trouvé.")
+        st.markdown(f"""
+        <div class='card'>
+            <b>{name}</b> — {months} mois<br>
+            ❤️ Suivi enfant disponible dans le menu.
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.info("Aucun profil enfant enregistré.")
 
-        st.markdown("---")
+    st.markdown("---")
 
-        # --- Boutons d'export ---
-        st.subheader("📤 Export de données")
+    # === Actions rapides ===
+    st.markdown("### ⚡ Actions rapides")
+    colA, colB = st.columns(2)
 
-        if st.button("Exporter recettes"):
-            df = pd.read_sql("SELECT * FROM recipes", conn)
-            st.download_button(
-                "Télécharger CSV recettes",
-                df.to_csv(index=False),
-                "recettes.csv",
-                "text/csv"
-            )
+    with colA:
+        if st.button("➕ Ajouter un item à l’inventaire"):
+            st.session_state["force_open_inventory"] = True
+            st.success("Aller à Inventaire → Ajout")
 
-        if st.button("Exporter inventaire"):
-            df = pd.read_sql("SELECT * FROM inventory_items", conn)
-            st.download_button(
-                "Télécharger CSV inventaire",
-                df.to_csv(index=False),
-                "inventaire.csv",
-                "text/csv"
-            )
+    with colB:
+        if st.button("🍲 Ajouter une recette"):
+            st.session_state["force_open_recipes"] = True
+            st.success("Aller à Recettes → Ajout")
 
-        st.markdown("---")
+    st.markdown("---")
 
-        # --- Ajout rapide à l’inventaire ---
-        st.subheader("➕ Ajouter un item à l'inventaire")
-        with st.expander("Ajouter un item"):
+    # === Accès rapides — Tuiles modernes ===
+    st.markdown("### 🚀 Accès rapides")
 
-            name = st.text_input("Nom *")
-            category = st.text_input("Catégorie")
-            quantity = st.number_input("Quantité", min_value=0.0, format="%.2f")
-            unit = st.text_input("Unité")
+    tiles = {
+        "🍲 Recettes": "🍲 Recettes",
+        "📦 Inventaire": "📦 Inventaire",
+        "🥘 Batch Cooking": "🥘 Repas Batch",
+        "🏡 Projets": "🏡 Projets Maison",
+        "🌱 Jardin": "🌱 Jardin",
+        "⏰ Routines": "⏰ Routines",
+    }
 
-            if st.button("Ajouter", key="add_inventory"):
-                if not name.strip():
-                    st.error("Le nom de l'item est requis.")
-                else:
-                    try:
-                        cursor.execute(
-                            """
-                            INSERT INTO inventory_items (name, category, quantity, unit)
-                            VALUES (?, ?, ?, ?)
-                            """,
-                            (name.strip(), category.strip(), quantity, unit.strip())
-                        )
-                        conn.commit()
-                        st.success(f"Item '{name}' ajouté à l'inventaire !")
-                        st.session_state["refresh"] = not st.session_state["refresh"]
-                    except Exception as e:
-                        st.error(f"Erreur lors de l'ajout : {e}")
+    cols = st.columns(3)
+    i = 0
+    for label in tiles:
+        col = cols[i % 3]
+        with col:
+            if st.button(label, key=f"tile_{label}", use_container_width=True):
+                st.session_state["sidebar_module_radio"] = tiles[label]
+                st.experimental_rerun()
+        i += 1
 
-    finally:
-        conn.close()
+    conn.close()

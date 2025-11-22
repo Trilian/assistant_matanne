@@ -6,7 +6,10 @@ from core.helpers import log_event
 
 # --- Définition du schéma global de la base ---
 SCHEMA = {
+
+    # -------------------------
     # Recettes et ingrédients
+    # -------------------------
     "recipes": """
                CREATE TABLE IF NOT EXISTS recipes (
                                                       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -15,6 +18,7 @@ SCHEMA = {
                                                       instructions TEXT
                )
                """,
+
     "ingredients": """
                    CREATE TABLE IF NOT EXISTS ingredients (
                                                               id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -22,6 +26,7 @@ SCHEMA = {
                                                               unit TEXT
                    )
                    """,
+
     "recipe_ingredients": """
                           CREATE TABLE IF NOT EXISTS recipe_ingredients (
                                                                             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -33,7 +38,9 @@ SCHEMA = {
                               )
                           """,
 
+    # -------------------------
     # Inventaire et courses
+    # -------------------------
     "inventory_items": """
                        CREATE TABLE IF NOT EXISTS inventory_items (
                                                                       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -43,6 +50,7 @@ SCHEMA = {
                                                                       unit TEXT
                        )
                        """,
+
     "courses": """
                CREATE TABLE IF NOT EXISTS courses (
                                                       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -52,7 +60,9 @@ SCHEMA = {
                    )
                """,
 
+    # -------------------------
     # Repas batch
+    # -------------------------
     "batch_meals": """
                    CREATE TABLE IF NOT EXISTS batch_meals (
                                                               id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -61,6 +71,7 @@ SCHEMA = {
                                                               FOREIGN KEY(recipe_id) REFERENCES recipes(id)
                        )
                    """,
+
     "batch_meal_items": """
                         CREATE TABLE IF NOT EXISTS batch_meal_items (
                                                                         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -72,7 +83,9 @@ SCHEMA = {
                             )
                         """,
 
-    # Suggestions
+    # -------------------------
+    # Suggestions intelligentes
+    # -------------------------
     "suggestions": """
                    CREATE TABLE IF NOT EXISTS suggestions (
                                                               id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -84,6 +97,7 @@ SCHEMA = {
                        FOREIGN KEY(child_id) REFERENCES child_profiles(id)
                        )
                    """,
+
     "suggestion_history": """
                           CREATE TABLE IF NOT EXISTS suggestion_history (
                                                                             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -94,7 +108,9 @@ SCHEMA = {
                               )
                           """,
 
-    # Routines et tâches
+    # -------------------------
+    # Routines
+    # -------------------------
     "routines": """
                 CREATE TABLE IF NOT EXISTS routines (
                                                         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -103,6 +119,7 @@ SCHEMA = {
                                                         FOREIGN KEY(child_id) REFERENCES child_profiles(id)
                     )
                 """,
+
     "routine_tasks": """
                      CREATE TABLE IF NOT EXISTS routine_tasks (
                                                                   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -113,6 +130,7 @@ SCHEMA = {
                                                                   FOREIGN KEY(routine_id) REFERENCES routines(id)
                          )
                      """,
+
     "routine_logs": """
                     CREATE TABLE IF NOT EXISTS routine_logs (
                                                                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -122,7 +140,9 @@ SCHEMA = {
                         )
                     """,
 
+    # -------------------------
     # Profil enfant
+    # -------------------------
     "child_profiles": """
                       CREATE TABLE IF NOT EXISTS child_profiles (
                                                                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -131,7 +151,9 @@ SCHEMA = {
                       )
                       """,
 
+    # -------------------------
     # Projets maison
+    # -------------------------
     "projects": """
                 CREATE TABLE IF NOT EXISTS projects (
                                                         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -154,7 +176,9 @@ SCHEMA = {
                          )
                      """,
 
+    # -------------------------
     # Bien-être
+    # -------------------------
     "wellbeing_entries": """
                          CREATE TABLE IF NOT EXISTS wellbeing_entries (
                                                                           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -169,7 +193,9 @@ SCHEMA = {
                              )
                          """,
 
+    # -------------------------
     # Jardin
+    # -------------------------
     "garden_items": """
                     CREATE TABLE IF NOT EXISTS garden_items (
                                                                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -179,7 +205,7 @@ SCHEMA = {
                                                                 unit TEXT,
                                                                 planting_date TEXT,
                                                                 harvest_date TEXT,
-                                                                watering_frequency_days INTEGER  -- fréquence d'arrosage en jours
+                                                                watering_frequency_days INTEGER
                     )
                     """,
 
@@ -187,7 +213,7 @@ SCHEMA = {
                         CREATE TABLE IF NOT EXISTS garden_reminders (
                                                                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                                                                         item_id INTEGER,
-                                                                        reminder_type TEXT,        -- "arrosage" ou "recolte"
+                                                                        reminder_type TEXT,
                                                                         scheduled_date TEXT,
                                                                         status TEXT DEFAULT 'pending',
                                                                         created_at TEXT DEFAULT (datetime('now')),
@@ -199,7 +225,7 @@ SCHEMA = {
                    CREATE TABLE IF NOT EXISTS garden_logs (
                                                               id INTEGER PRIMARY KEY AUTOINCREMENT,
                                                               item_id INTEGER,
-                                                              action TEXT,               -- "arrose", "recolte", "seme", etc.
+                                                              action TEXT,
                                                               date TEXT,
                                                               notes TEXT,
                                                               created_at TEXT DEFAULT (datetime('now')),
@@ -207,7 +233,9 @@ SCHEMA = {
                        )
                    """,
 
+    # -------------------------
     # Notifications
+    # -------------------------
     "notifications": """
                      CREATE TABLE IF NOT EXISTS notifications (
                                                                   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -218,7 +246,22 @@ SCHEMA = {
                      )
                      """,
 
-    # Analytics / dashboards
+    # Notifications utilisateur
+    "user_notifications": """
+                          CREATE TABLE IF NOT EXISTS user_notifications (
+                                                                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                                                            user_id INTEGER,
+                                                                            module TEXT,
+                                                                            message TEXT,
+                                                                            created_at TEXT DEFAULT (datetime('now')),
+                              read INTEGER DEFAULT 0,
+                              FOREIGN KEY(user_id) REFERENCES users(id)
+                              )
+                          """,
+
+    # -------------------------
+    # Analytics
+    # -------------------------
     "analytics": """
                  CREATE TABLE IF NOT EXISTS analytics (
                                                           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -228,7 +271,9 @@ SCHEMA = {
                  )
                  """,
 
-    # Utilisateurs / paramètres
+    # -------------------------
+    # Users / Profils
+    # -------------------------
     "users": """
              CREATE TABLE IF NOT EXISTS users (
                                                   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -237,7 +282,6 @@ SCHEMA = {
              )
              """,
 
-    # Profils utilisateurs (multi-profils)
     "user_profiles": """
                      CREATE TABLE IF NOT EXISTS user_profiles (
                                                                   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -249,19 +293,9 @@ SCHEMA = {
                          )
                      """,
 
-    # Notifications liées aux utilisateurs
-    "user_notifications": """
-                          CREATE TABLE IF NOT EXISTS user_notifications (
-                                                                            id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                                                            user_id INTEGER,
-                                                                            module TEXT,
-                                                                            message TEXT,
-                                                                            created_at TEXT DEFAULT (datetime('now')),
-                                                                            read INTEGER DEFAULT 0,
-                                                                            FOREIGN KEY(user_id) REFERENCES users(id)
-                              )
-                          """,
-    # Événements de calendrier externes (Google Calendar)
+    # -------------------------
+    # Événements Google Calendar
+    # -------------------------
     "external_calendar_events": """
                                 CREATE TABLE IF NOT EXISTS external_calendar_events (
                                                                                         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -274,7 +308,10 @@ SCHEMA = {
                                 """,
 }
 
-# --- Fonctions utilitaires ---
+# ======================================================================
+# Fonctions gestion BDD
+# ======================================================================
+
 def create_all_tables():
     conn = get_connection()
     cursor = conn.cursor()
@@ -284,10 +321,9 @@ def create_all_tables():
         cursor.execute(ddl)
         log_event(f"Table '{name}' vérifiée/créée")
 
-    # Important : valider d'abord la création des tables
     conn.commit()
 
-    # Maintenant que les tables existent, on peut créer les index
+    # Création des index (uniquement après commit)
     cursor.execute("""
                    CREATE INDEX IF NOT EXISTS idx_external_events_start
                        ON external_calendar_events(start_date)
@@ -295,7 +331,6 @@ def create_all_tables():
 
     conn.commit()
     conn.close()
-
 
 
 def drop_all_tables():
@@ -307,16 +342,17 @@ def drop_all_tables():
     conn.commit()
     conn.close()
 
+
 def reset_tables():
     drop_all_tables()
     create_all_tables()
 
+
 def check_missing_tables():
     conn = get_connection()
     cursor = conn.cursor()
-    existing_tables = [row[0] for row in cursor.execute(
-        "SELECT name FROM sqlite_master WHERE type='table';"
+    existing = [r[0] for r in cursor.execute(
+        "SELECT name FROM sqlite_master WHERE type='table'"
     ).fetchall()]
-    missing = [name for name in SCHEMA.keys() if name not in existing_tables]
     conn.close()
-    return missing
+    return [t for t in SCHEMA.keys() if t not in existing]

@@ -4,16 +4,33 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment="Fix module recettes">
-      <change afterPath="$PROJECT_DIR$/__init__.py" afterDir="false" />
+    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment="Fix module">
+      <change afterPath="$PROJECT_DIR$/core/services/courses_service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modules/cuisine/courses.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modules/cuisine/inventaire.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modules/cuisine/recettes.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modules/cuisine/repas_batch.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modules/maison/maison.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/modules/maison/projets_maison.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/test_cuisine_inventaire.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/schema_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/schema_manager.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/logs/app.log" beforeDir="false" afterPath="$PROJECT_DIR$/logs/app.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/modules/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/modules/accueil.py" beforeDir="false" afterPath="$PROJECT_DIR$/modules/accueil.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/bien_etre.py" beforeDir="false" afterPath="$PROJECT_DIR$/modules/bien_etre.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/calendrier.py" beforeDir="false" afterPath="$PROJECT_DIR$/modules/calendrier.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/bien_etre.py" beforeDir="false" afterPath="$PROJECT_DIR$/modules/famille/bien_etre.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/calendrier.py" beforeDir="false" afterPath="$PROJECT_DIR$/modules/outils/calendrier.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/inventaire.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/jardin.py" beforeDir="false" afterPath="$PROJECT_DIR$/modules/maison/jardin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/projets_maison.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/recettes.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/repas_batch.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/routines.py" beforeDir="false" afterPath="$PROJECT_DIR$/modules/maison/routines.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/suggestions.py" beforeDir="false" afterPath="$PROJECT_DIR$/modules/outils/suggestions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/suivi_enfant.py" beforeDir="false" afterPath="$PROJECT_DIR$/modules/famille/suivi_enfant.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/test_mode.py" beforeDir="false" afterPath="$PROJECT_DIR$/modules/outils/test_mode.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules/weather_ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/modules/outils/weather_ui.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,18 +47,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "Trilian"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Trilian&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/Trilian/assistant_matanne.git",
-    "accountId": "43185446-3cd5-4901-9509-b728f45bf84d"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Trilian/assistant_matanne.git&quot;,
+    &quot;accountId&quot;: &quot;43185446-3cd5-4901-9509-b728f45bf84d&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 8
 }</component>
@@ -50,31 +67,32 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultAutoModeForALLUsers.v1": "true",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "main",
-    "ignore.virus.scanning.warn.message": "true",
-    "junie.onboarding.icon.badge.shown": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/Projet_streamlit/assistant_matanne/config",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.0",
-    "to.speed.mode.migration.done": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultAutoModeForALLUsers.v1&quot;: &quot;true&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/Projet_streamlit/assistant_matanne/config&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\Projet_streamlit\assistant_matanne\config" />
@@ -84,42 +102,20 @@
       <recent name="D:\Projet_streamlit\assistant_matanne" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Projet_streamlit\assistant_matanne\modules\outils" />
+      <recent name="D:\Projet_streamlit\assistant_matanne\modules\famille" />
+      <recent name="D:\Projet_streamlit\assistant_matanne\modules\maison" />
+      <recent name="D:\Projet_streamlit\assistant_matanne\modules\cuisine" />
       <recent name="D:\Projet_streamlit\assistant_matanne\modules" />
-      <recent name="D:\Projet_streamlit\assistant_matanne" />
-      <recent name="D:\Projet_streamlit\assistant_matanne\assistant_matanne" />
     </key>
   </component>
   <component name="RunManager">
-    <configuration default="true" type="JetRunConfigurationType">
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
       <module name="assistant_matanne" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
-      <module name="assistant_matanne" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
+      <option name="filePath" />
       <method v="2" />
     </configuration>
-    <configuration default="true" type="tests" factoryName="Autodetect">
+    <configuration default="true" type="Python.FlaskServer">
       <module name="assistant_matanne" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -130,12 +126,10 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;&quot;" />
-      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <option name="launchJavascriptDebuger" value="false" />
       <method v="2" />
     </configuration>
-    <configuration default="true" type="tests" factoryName="Doctests">
+    <configuration default="true" type="Tox" factoryName="Tox">
       <module name="assistant_matanne" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -146,13 +140,6 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="" />
-      <option name="CLASS_NAME" value="" />
-      <option name="METHOD_NAME" value="" />
-      <option name="FOLDER_NAME" value="" />
-      <option name="TEST_TYPE" value="TEST_SCRIPT" />
-      <option name="PATTERN" value="" />
-      <option name="USE_PATTERN" value="false" />
       <method v="2" />
     </configuration>
   </component>
@@ -177,7 +164,9 @@
       <workItem from="1762697936409" duration="3457000" />
       <workItem from="1762844678692" duration="38694000" />
       <workItem from="1763036494014" duration="13267000" />
-      <workItem from="1763142266273" duration="12426000" />
+      <workItem from="1763142266273" duration="15707000" />
+      <workItem from="1763294501266" duration="8300000" />
+      <workItem from="1763563571728" duration="9541000" />
     </task>
     <task id="LOCAL-00001" summary="Init commit">
       <option name="closed" value="true" />
@@ -219,7 +208,15 @@
       <option name="project" value="LOCAL" />
       <updated>1763154068093</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Fix module">
+      <option name="closed" value="true" />
+      <created>1763239544323</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1763239544323</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -230,14 +227,20 @@
     <MESSAGE value="Init commit" />
     <MESSAGE value="Fix" />
     <MESSAGE value="Fix module recettes" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fix module recettes" />
+    <MESSAGE value="Fix module" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix module" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/modules/routines.py</url>
+          <url>file://$PROJECT_DIR$/modules/maison/routines.py</url>
           <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/core/models.py</url>
+          <line>1</line>
+          <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
