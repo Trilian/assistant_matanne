@@ -252,8 +252,9 @@ def init_app():
         # Créer les tables si nécessaire (dev uniquement)
         if settings.ENV == "development":
             try:
+                from src.core.database import create_all_tables
                 create_all_tables()
-                st.sidebar.success("✅ Tables vérifiées/creées")
+                st.sidebar.success("✅ Tables vérifiées/créées")
             except Exception as e:
                 logger.error(f"Erreur création tables: {e}")
                 st.sidebar.warning(f"⚠️ Erreur tables: {str(e)[:50]}...")
