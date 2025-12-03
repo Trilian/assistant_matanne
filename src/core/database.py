@@ -156,3 +156,16 @@ def get_db_info():
             }
     except Exception as e:
         return {"status": "error", "error": str(e)}
+# ===================================
+# INITIALISATION & MIGRATIONS
+# ===================================
+def create_all_tables():
+    """Crée toutes les tables nécessaires (développement uniquement)"""
+    try:
+        logger.info("Création des tables...")
+        from src.core.models import Base  # Import local pour éviter les dépendances circulaires
+        Base.metadata.create_all(bind=engine)
+        logger.info("✅ Tables créées avec succès")
+    except Exception as e:
+        logger.error(f"Erreur lors de la création des tables: {e}")
+        raise
