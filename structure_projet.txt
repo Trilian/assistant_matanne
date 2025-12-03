@@ -1,0 +1,121 @@
+.
+├── alembic
+│   ├── __pycache__
+│   │   └── env.cpython-312.pyc
+│   ├── versions
+│   │   ├── __pycache__
+│   │   └── 001_initial_schema.py
+│   ├── README
+│   ├── env.py
+│   └── script.py.mako
+├── data
+│   └── backups
+├── logs
+│   └── app.log
+├── scripts
+│   ├── init_db.sql
+│   ├── fix_database.sh
+│   ├── fix_enums.py
+│   ├── init_alembic.sh
+│   ├── seed_data.py
+│   └── start.sh
+├── src
+│   ├── __pycache__
+│   │   └── __init__.cpython-312.pyc
+│   ├── core
+│   │   ├── __pycache__
+│   │   ├── __init__.py
+│   │   ├── ai_agent.py
+│   │   ├── config.py
+│   │   ├── database.py
+│   │   └── models.py
+│   ├── modules
+│   │   ├── __pycache__
+│   │   ├── cuisine
+│   │   ├── famille
+│   │   ├── maison
+│   │   ├── planning
+│   │   ├── __init__.py
+│   │   ├── accueil.py
+│   │   └── parametres.py
+│   ├── services
+│   │   ├── __init__.py
+│   │   └── weather.py
+│   ├── __init__.py
+│   └── app.py
+├── tests
+│   ├── test_modules
+│   │   ├── __init__.py
+│   │   └── test_cuisine.py
+│   ├── __init__.py
+│   └── conftest.py
+├── venv
+│   ├── bin
+│   │   ├── Activate.ps1
+│   │   ├── activate
+│   │   ├── activate.csh
+│   │   ├── activate.fish
+│   │   ├── alembic
+│   │   ├── black
+│   │   ├── blackd
+│   │   ├── celery
+│   │   ├── coverage
+│   │   ├── coverage-3.12
+│   │   ├── coverage3
+│   │   ├── dmypy
+│   │   ├── dotenv
+│   │   ├── f2py
+│   │   ├── httpx
+│   │   ├── identify-cli
+│   │   ├── jsonschema
+│   │   ├── mako-render
+│   │   ├── matanne
+│   │   ├── mypy
+│   │   ├── mypyc
+│   │   ├── nodeenv
+│   │   ├── normalizer
+│   │   ├── numpy-config
+│   │   ├── pip
+│   │   ├── pip3
+│   │   ├── pip3.12
+│   │   ├── pre-commit
+│   │   ├── py.test
+│   │   ├── pytest
+│   │   ├── python -> python3
+│   │   ├── python3 -> /usr/bin/python3
+│   │   ├── python3.12 -> python3
+│   │   ├── ruff
+│   │   ├── streamlit
+│   │   ├── streamlit.cmd
+│   │   ├── stubgen
+│   │   ├── stubtest
+│   │   ├── virtualenv
+│   │   └── watchmedo
+│   ├── etc
+│   │   └── jupyter
+│   ├── include
+│   │   ├── python3.12
+│   │   └── site
+│   ├── lib
+│   │   ├── python3
+│   │   └── python3.12
+│   ├── lib64 -> lib
+│   ├── local
+│   │   └── lib
+│   ├── share
+│   │   └── jupyter
+│   └── pyvenv.cfg
+├── Architecture Complète - README.md
+├── Dockerfile
+├── GUIDE_COMPLET_INTEGRATION.md
+├── Makefile
+├── QUICK_START.md
+├── README.md
+├── WINDOWS_WSL_SETUP.md
+├── alembic.ini
+├── docker-compose.yml
+├── poetry.lock
+├── pyproject.toml
+└── structure_projet.txt
+
+38 directories, 81 files
