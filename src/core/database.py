@@ -16,19 +16,47 @@ logger = logging.getLogger(__name__)
 # RÉCUPÉRATION DES SECRETS
 # ===================================
 def get_db_url():
-    """Récupère l'URL de la base de données depuis les secrets Streamlit"""
+    """Récupère l'URL de la base de données avec gestion des erreurs détaillée"""
     try:
-        # Vérifie que les secrets sont bien chargés
-        if not st.secrets:
-            raise ValueError("Les secrets Streamlit ne sont pas chargés")
+        # Affiche tous les secrets disponibles (pour débogage)
+        st.write("Secrets disponibles :", list(st.secrets.keys()))
 
-        # Construction de l'URL de connexion
+        # Vérifie que la section [db] existe
+        if 'db' not in st.secrets:
+            raise ValueError("""
+            La section [db] est manquante dans les secrets.
+            Voici ce que tu dois ajouter dans les secrets Streamlit :
+
+            [db]
+            host = "db.tu_identifiant_supabase.supabase.co"
+            port = "5432"
+            name = "postgres"
+            user = "postgres"
+            password = "ton_mot_de_passe"
+            """)
+
+        # Vérifie que tous les champs sont présents
+        required_keys = ['host', 'port', 'name', 'user', 'password']
+        for key in required_keys:
+            if key not in st.secrets['db']:
+                raise ValueError(f"""
+                Le champ '{key}' est manquant dans la section [db].
+                Voici la structure complète attendue :
+
+                [db]
+                host = "db.tu_identifiant_supabase.supabase.co"
+                port = "5432"
+                name = "postgres"
+                user = "postgres"
+                password = "ton_mot_de_passe"
+                """)
+
+        # Construction de l'URL
         return f"postgresql://{st.secrets['db']['user']}:{st.secrets['db']['password']}@{st.secrets['db']['host']}:{st.secrets['db']['port']}/{st.secrets['db']['name']}"
 
-    except KeyError as e:
-        raise ValueError(f"Secret manquant dans Streamlit: {e}. Vérifie que tous les champs [db] sont configurés dans les secrets.")
     except Exception as e:
-        raise ValueError(f"Erreur lors de la construction de l'URL de la base de données: {e}")
+        st.error(f"Erreur de configuration : {str(e)}")
+        st.stop()  # Arrête l'application
 # ===================================
 # CONFIGURATION ENGINE
 # ===================================
