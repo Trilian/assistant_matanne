@@ -16,9 +16,19 @@ logger = logging.getLogger(__name__)
 # RÉCUPÉRATION DES SECRETS
 # ===================================
 def get_db_url():
-    """Récupère l'URL de la base de données depuis les secrets"""
-    return f"postgresql://{st.secrets['db']['user']}:{st.secrets['db']['password']}@{st.secrets['db']['host']}:{st.secrets['db']['port']}/{st.secrets['db']['name']}"
+    """Récupère l'URL de la base de données depuis les secrets Streamlit"""
+    try:
+        # Vérifie que les secrets sont bien chargés
+        if not st.secrets:
+            raise ValueError("Les secrets Streamlit ne sont pas chargés")
 
+        # Construction de l'URL de connexion
+        return f"postgresql://{st.secrets['db']['user']}:{st.secrets['db']['password']}@{st.secrets['db']['host']}:{st.secrets['db']['port']}/{st.secrets['db']['name']}"
+
+    except KeyError as e:
+        raise ValueError(f"Secret manquant dans Streamlit: {e}. Vérifie que tous les champs [db] sont configurés dans les secrets.")
+    except Exception as e:
+        raise ValueError(f"Erreur lors de la construction de l'URL de la base de données: {e}")
 # ===================================
 # CONFIGURATION ENGINE
 # ===================================

@@ -59,6 +59,7 @@ dmypy.json
 .env
 .env.local
 .env.*.local
+secrets.toml
 
 # Base de données
 *.db

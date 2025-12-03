@@ -10,9 +10,21 @@ load_dotenv()
 ai_service = AIRecetteService()
 
 # Vérifie la connexion à la base de données au démarrage
+# Test de connexion au démarrage
 if not check_connection():
-    st.error("❌ Impossible de se connecter à la base de données")
-    st.stop()
+    st.error("❌ Impossible de se connecter à la base de données Supabase")
+    st.write("Vérifie que :")
+    st.write("- Tes secrets Streamlit sont bien configurés")
+    st.write("- Ton projet Supabase est bien démarré")
+    st.write("- Le mot de passe est correct")
+    st.write("- L'IP de Streamlit Cloud est autorisée dans Supabase")
+    st.stop()  # Arrête l'application si la connexion échoue
+
+# Affiche les infos de connexion (pour débogage)
+db_info = get_db_info()
+st.write("🔌 Connexion à la base de données établie avec succès !")
+st.write(f"📡 Connecté à : {db_info['host']}")
+st.write(f"👤 Utilisateur : {db_info['user']}")
 # =============================================
 # FONCTIONS EXISTANTES (sans modification)
 # =============================================
