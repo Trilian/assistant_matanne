@@ -4,33 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment="Fix module">
-      <change afterPath="$PROJECT_DIR$/core/services/courses_service.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modules/cuisine/courses.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modules/cuisine/inventaire.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modules/cuisine/recettes.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modules/cuisine/repas_batch.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modules/maison/maison.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/modules/maison/projets_maison.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/test_cuisine_inventaire.py" afterDir="false" />
+    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment="Mise à jour du module">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/schema_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/schema_manager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/logs/app.log" beforeDir="false" afterPath="$PROJECT_DIR$/logs/app.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/modules/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/accueil.py" beforeDir="false" afterPath="$PROJECT_DIR$/modules/accueil.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/bien_etre.py" beforeDir="false" afterPath="$PROJECT_DIR$/modules/famille/bien_etre.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/calendrier.py" beforeDir="false" afterPath="$PROJECT_DIR$/modules/outils/calendrier.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/inventaire.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/jardin.py" beforeDir="false" afterPath="$PROJECT_DIR$/modules/maison/jardin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/projets_maison.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/recettes.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/repas_batch.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/routines.py" beforeDir="false" afterPath="$PROJECT_DIR$/modules/maison/routines.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/suggestions.py" beforeDir="false" afterPath="$PROJECT_DIR$/modules/outils/suggestions.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/suivi_enfant.py" beforeDir="false" afterPath="$PROJECT_DIR$/modules/famille/suivi_enfant.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/test_mode.py" beforeDir="false" afterPath="$PROJECT_DIR$/modules/outils/test_mode.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/weather_ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/modules/outils/weather_ui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/database.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/recettes.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/cuisine/recettes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/ai_recette_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/ai_recette_service.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,32 +45,32 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultAutoModeForALLUsers.v1&quot;: &quot;true&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/Projet_streamlit/assistant_matanne/config&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultAutoModeForALLUsers.v1": "true",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+    "junie.onboarding.icon.badge.shown": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/Projet_streamlit/assistant_matanne",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.0",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\Projet_streamlit\assistant_matanne\config" />
@@ -167,6 +145,7 @@
       <workItem from="1763142266273" duration="15707000" />
       <workItem from="1763294501266" duration="8300000" />
       <workItem from="1763563571728" duration="9541000" />
+      <workItem from="1764767784679" duration="2664000" />
     </task>
     <task id="LOCAL-00001" summary="Init commit">
       <option name="closed" value="true" />
@@ -216,7 +195,15 @@
       <option name="project" value="LOCAL" />
       <updated>1763239544323</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Mise à jour du module">
+      <option name="closed" value="true" />
+      <created>1764768759732</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1764768759732</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -228,7 +215,8 @@
     <MESSAGE value="Fix" />
     <MESSAGE value="Fix module recettes" />
     <MESSAGE value="Fix module" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fix module" />
+    <MESSAGE value="Mise à jour du module" />
+    <option name="LAST_COMMIT_MESSAGE" value="Mise à jour du module" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -236,11 +224,6 @@
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/modules/maison/routines.py</url>
           <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/core/models.py</url>
-          <line>1</line>
-          <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

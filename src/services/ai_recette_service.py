@@ -9,10 +9,10 @@ load_dotenv()
 
 class AIRecetteService:
     def __init__(self):
-        mistral_api_key = os.getenv("MISTRAL_API_KEY")
-        if not mistral_api_key:
-            raise ValueError("MISTRAL_API_KEY non trouvée. Vérifie ton fichier .env.")
-        self.client = MistralClient(api_key=mistral_api_key)
+        api_key = st.secrets["mistral"]["api_key"]
+        if not api_key:
+            raise ValueError("MISTRAL_API_KEY manquante dans les secrets")
+        self.client = MistralClient(api_key=api_key)
         self.model = "mistral-small"
 
     def générer_recettes(

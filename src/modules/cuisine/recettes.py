@@ -1,33 +1,40 @@
 import streamlit as st
 from dotenv import load_dotenv
 import os
-from src.core.database import SessionLocal
+from src.core.database import get_db_context, check_connection
 from src.core.models import Recette, IngrédientRecette, ÉtapeRecette, Produit
 from src.services.ai_recette_service import AIRecetteService
 
 # Chargement des variables d'environnement et initialisation
 load_dotenv()
-db = SessionLocal()
 ai_service = AIRecetteService()
 
+# Vérifie la connexion à la base de données au démarrage
+if not check_connection():
+    st.error("❌ Impossible de se connecter à la base de données")
+    st.stop()
 # =============================================
 # FONCTIONS EXISTANTES (sans modification)
 # =============================================
-
 def afficher_recettes_existantes():
     """Affiche la liste des recettes existantes."""
     st.subheader("📚 Mes recettes")
-    recettes = db.query(Recette).all()
-    for recette in recettes:
-        with st.expander(f"🍽️ {recette.nom}"):
-            st.markdown(f"**Temps** : {recette.temps_preparation + recette.temps_cuisson} min | "
-                        f"**Portions** : {recette.portions_adultes} adultes, {recette.portions_bébé} bébé(s)")
-            if st.button(f"Modifier {recette.nom}"):
-                modifier_recette(recette.id)
-            if st.button(f"Supprimer {recette.nom}"):
-                db.delete(recette)
-                db.commit()
-                st.rerun()
+    try:
+        with get_db_context() as db:
+            from src.core.models import Recette
+            recettes = db.query(Recette).all()
+        for recette in recettes:
+            with st.expander(f"🍽️ {recette.nom}"):
+                st.markdown(f"**Temps** : {recette.temps_preparation + recette.temps_cuisson} min | "
+                            f"**Portions** : {recette.portions_adultes} adultes, {recette.portions_bébé} bébé(s)")
+                if st.button(f"Modifier {recette.nom}"):
+                    modifier_recette(recette.id)
+                if st.button(f"Supprimer {recette.nom}"):
+                    db.delete(recette)
+                    db.commit()
+                    st.rerun()
+    except Exception as e:
+        st.error(f"Erreur lors de la récupération des recettes: {e}")
 
 def ajouter_ingrédients_étapes(recette_id: int):
     """Ajoute les ingrédients et étapes pour une recette."""
