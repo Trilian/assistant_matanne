@@ -557,6 +557,100 @@ def app():
     with tab3:
         st.subheader("➕ Ajouter une recette manuellement")
 
+        # ============================================================
+        # SECTION 1 : INGRÉDIENTS (EN DEHORS DU FORM) ⬅️ ICI
+        # ============================================================
+        st.markdown("### 🥕 Ingrédients")
+
+        if "manual_ingredients" not in st.session_state:
+            st.session_state.manual_ingredients = []
+
+        with st.expander("➕ Ajouter des ingrédients", expanded=True):
+            col_ing1, col_ing2, col_ing3, col_ing4 = st.columns([2, 1, 1, 1])
+
+            with col_ing1:
+                ing_name = st.text_input("Ingrédient", key="ing_name")
+            with col_ing2:
+                ing_qty = st.number_input("Quantité", 0.0, 10000.0, 1.0, key="ing_qty")
+            with col_ing3:
+                ing_unit = st.text_input("Unité", key="ing_unit", placeholder="g, ml, etc.")
+            with col_ing4:
+                ing_optional = st.checkbox("Optionnel", key="ing_optional")
+
+            if st.button("➕ Ajouter l'ingrédient", key="add_ingredient"):
+                if ing_name:
+                    st.session_state.manual_ingredients.append({
+                        "name": ing_name,
+                        "quantity": ing_qty,
+                        "unit": ing_unit,
+                        "optional": ing_optional
+                    })
+                    st.rerun()
+
+        # Afficher les ingrédients ajoutés
+        if st.session_state.manual_ingredients:
+            st.markdown("**Ingrédients ajoutés :**")
+            for idx, ing in enumerate(st.session_state.manual_ingredients):
+                col_ing_d1, col_ing_d2, col_ing_d3 = st.columns([4, 1, 1])
+                with col_ing_d1:
+                    st.write(f"{ing['quantity']} {ing['unit']} de {ing['name']}")
+                with col_ing_d2:
+                    if ing['optional']:
+                        st.caption("Optionnel")
+                with col_ing_d3:
+                    if st.button("❌", key=f"del_ing_{idx}"):
+                        st.session_state.manual_ingredients.pop(idx)
+                        st.rerun()
+
+        st.markdown("---")
+
+        # ============================================================
+        # SECTION 2 : ÉTAPES (EN DEHORS DU FORM) ⬅️ ICI
+        # ============================================================
+        st.markdown("### 📝 Étapes de préparation")
+
+        if "manual_steps" not in st.session_state:
+            st.session_state.manual_steps = []
+
+        with st.expander("➕ Ajouter des étapes", expanded=True):
+            col_step1, col_step2, col_step3 = st.columns([3, 1, 1])
+
+            with col_step1:
+                step_desc = st.text_area("Description de l'étape", key="step_desc", height=80)
+            with col_step2:
+                step_order = st.number_input("Ordre", 1, 20, len(st.session_state.manual_steps)+1, key="step_order")
+            with col_step3:
+                step_duration = st.number_input("Durée (min)", 0, 120, 0, key="step_duration")
+
+            if st.button("➕ Ajouter l'étape", key="add_step"):
+                if step_desc:
+                    st.session_state.manual_steps.append({
+                        "order": step_order,
+                        "description": step_desc,
+                        "duration": step_duration
+                    })
+                    st.rerun()
+
+        # Afficher les étapes ajoutées
+        if st.session_state.manual_steps:
+            st.markdown("**Étapes ajoutées :**")
+            for idx, step in enumerate(sorted(st.session_state.manual_steps, key=lambda x: x['order'])):
+                col_step_d1, col_step_d2, col_step_d3 = st.columns([4, 1, 1])
+                with col_step_d1:
+                    st.write(f"{step['order']}. {step['description']}")
+                with col_step_d2:
+                    if step['duration']:
+                        st.caption(f"{step['duration']}min")
+                with col_step_d3:
+                    if st.button("❌", key=f"del_step_{idx}"):
+                        st.session_state.manual_steps = [s for i, s in enumerate(st.session_state.manual_steps) if i != idx]
+                        st.rerun()
+
+        st.markdown("---")
+
+        # ============================================================
+        # SECTION 3 : FORMULAIRE PRINCIPAL (INFOS DE BASE + VERSIONS) ⬅️ ICI
+        # ============================================================
         with st.form("manual_recipe"):
             # Infos de base
             st.markdown("### 📝 Informations de base")
@@ -597,8 +691,8 @@ def app():
             col_c1, col_c2 = st.columns(2)
 
             with col_c1:
-                meal_type = st.selectbox("Type de repas", [m.value for m in MealTypeEnum])
-                season = st.selectbox("Saison", [s.value for s in SeasonEnum])
+                meal_type = st.selectbox("Type de repas", ["breakfast", "lunch", "dinner", "snack"])
+                season = st.selectbox("Saison", ["spring", "summer", "fall", "winter", "all_year"])
                 category = st.text_input("Catégorie", placeholder="Végétarien, Italien, etc.")
 
             with col_c2:
@@ -608,92 +702,6 @@ def app():
                 is_batch_friendly = st.checkbox("🍳 Compatible batch")
                 is_freezable = st.checkbox("❄️ Congélable")
 
-            # Ingrédients
-            st.markdown("### 🥕 Ingrédients")
-
-            if "manual_ingredients" not in st.session_state:
-                st.session_state.manual_ingredients = []
-
-            with st.expander("➕ Ajouter des ingrédients", expanded=True):
-                col_ing1, col_ing2, col_ing3, col_ing4 = st.columns([2, 1, 1, 1])
-
-                with col_ing1:
-                    ing_name = st.text_input("Ingrédient", key="ing_name")
-                with col_ing2:
-                    ing_qty = st.number_input("Quantité", 0.0, 10000.0, 1.0, key="ing_qty")
-                with col_ing3:
-                    ing_unit = st.text_input("Unité", key="ing_unit", placeholder="g, ml, etc.")
-                with col_ing4:
-                    ing_optional = st.checkbox("Optionnel", key="ing_optional")
-
-                if st.button("➕ Ajouter l'ingrédient", key="add_ingredient"):
-                    if ing_name:
-                        st.session_state.manual_ingredients.append({
-                            "name": ing_name,
-                            "quantity": ing_qty,
-                            "unit": ing_unit,
-                            "optional": ing_optional
-                        })
-                        st.rerun()
-
-            # Afficher les ingrédients ajoutés
-            if st.session_state.manual_ingredients:
-                st.markdown("**Ingrédients ajoutés :**")
-                for idx, ing in enumerate(st.session_state.manual_ingredients):
-                    col_ing_d1, col_ing_d2, col_ing_d3 = st.columns([4, 1, 1])
-                    with col_ing_d1:
-                        st.write(f"{ing['quantity']} {ing['unit']} de {ing['name']}")
-                    with col_ing_d2:
-                        if ing['optional']:
-                            st.caption("Optionnel")
-                    with col_ing_d3:
-                        if st.button("❌", key=f"del_ing_{idx}"):
-                            st.session_state.manual_ingredients.pop(idx)
-                            st.rerun()
-
-            st.markdown("---")
-
-            # Étapes de préparation
-            st.markdown("### 📝 Étapes de préparation")
-
-            if "manual_steps" not in st.session_state:
-                st.session_state.manual_steps = []
-
-            with st.expander("➕ Ajouter des étapes", expanded=True):
-                col_step1, col_step2, col_step3 = st.columns([3, 1, 1])
-
-                with col_step1:
-                    step_desc = st.text_area("Description de l'étape", key="step_desc", height=80)
-                with col_step2:
-                    step_order = st.number_input("Ordre", 1, 20, len(st.session_state.manual_steps)+1, key="step_order")
-                with col_step3:
-                    step_duration = st.number_input("Durée (min)", 0, 120, 0, key="step_duration")
-
-                if st.button("➕ Ajouter l'étape", key="add_step"):
-                    if step_desc:
-                        st.session_state.manual_steps.append({
-                            "order": step_order,
-                            "description": step_desc,
-                            "duration": step_duration
-                        })
-                        st.rerun()
-
-            # Afficher les étapes ajoutées
-            if st.session_state.manual_steps:
-                st.markdown("**Étapes ajoutées :**")
-                for idx, step in enumerate(sorted(st.session_state.manual_steps, key=lambda x: x['order'])):
-                    col_step_d1, col_step_d2, col_step_d3 = st.columns([4, 1, 1])
-                    with col_step_d1:
-                        st.write(f"{step['order']}. {step['description']}")
-                    with col_step_d2:
-                        if step['duration']:
-                            st.caption(f"{step['duration']}min")
-                    with col_step_d3:
-                        if st.button("❌", key=f"del_step_{idx}"):
-                            st.session_state.manual_steps = [s for i, s in enumerate(st.session_state.manual_steps) if i != idx]
-                            st.rerun()
-
-            st.markdown("---")
             # Versions spéciales
             st.markdown("### 🔄 Versions spéciales (optionnel)")
 
@@ -721,6 +729,7 @@ def app():
                     "Temps optimisé (min)",
                     0,
                     600,
+                    0,
                     key="batch_time"
                 )
 
@@ -773,7 +782,7 @@ def app():
                             version_data = {}
                         version_data[RecipeVersionEnum.BATCH_COOKING] = {
                             "parallel_steps": [s.strip() for s in batch_parallel.split('\n') if s.strip()],
-                            "optimized_time": batch_time
+                            "optimized_time": batch_time if batch_time > 0 else None
                         }
 
                     # Sauvegarder
