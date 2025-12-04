@@ -1,8 +1,11 @@
 [tool.poetry]
 name = "assistant-matanne"
-version = "2.0.0"
+version = "1.0.0"
 description = "Assistant familial intelligent avec IA - Streamlit Cloud"
 authors = ["Anne <contact@example.com>"]
+packages = [
+    { include = "assistant_matanne" }
+]
 readme = "README.md"
 
 [tool.poetry.dependencies]
