@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "assistant-matanne-v2"
+name = "assistant-matanne"
 version = "2.0.0"
 description = "Assistant familial intelligent avec IA - Streamlit Cloud"
 authors = ["Anne <contact@example.com>"]

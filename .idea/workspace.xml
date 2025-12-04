@@ -4,30 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment="PostgresSQL">
-      <change afterPath="$PROJECT_DIR$/manage.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment="Menage dans l'app">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Architecture Complète - README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/GUIDE_COMPLET_INTEGRATION.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/QUICK_START.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WINDOWS_WSL_SETUP.md" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/alembic.ini" beforeDir="false" afterPath="$PROJECT_DIR$/alembic.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/logs/app.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/poetry.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/start.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/ai_agent.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/ai_agent.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/database.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/recettes.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/cuisine/recettes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/structure_projet.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/alembic/README" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/alembic/env.py" beforeDir="false" afterPath="$PROJECT_DIR$/alembic/env.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/alembic/script.py.mako" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/models.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -92,11 +75,11 @@
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Projet_streamlit\assistant_matanne" />
       <recent name="D:\Projet_streamlit\assistant_matanne\config" />
       <recent name="D:\Projet_streamlit\assistant_matanne\data" />
       <recent name="D:\Projet_streamlit\assistant_matanne\logs" />
       <recent name="D:\Projet_streamlit\assistant_matanne\assets" />
-      <recent name="D:\Projet_streamlit\assistant_matanne" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\Projet_streamlit\assistant_matanne\modules\outils" />
@@ -132,7 +115,8 @@
       <workItem from="1763563571728" duration="9541000" />
       <workItem from="1764767784679" duration="3818000" />
       <workItem from="1764794140139" duration="3293000" />
-      <workItem from="1764836092457" duration="7435000" />
+      <workItem from="1764836092457" duration="8161000" />
+      <workItem from="1764852791259" duration="1776000" />
     </task>
     <task id="LOCAL-00001" summary="Init commit">
       <option name="closed" value="true" />
@@ -214,7 +198,15 @@
       <option name="project" value="LOCAL" />
       <updated>1764839234432</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Menage dans l'app">
+      <option name="closed" value="true" />
+      <created>1764851639273</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1764851639273</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -228,7 +220,8 @@
     <MESSAGE value="Fix module" />
     <MESSAGE value="Mise à jour du module" />
     <MESSAGE value="PostgresSQL" />
-    <option name="LAST_COMMIT_MESSAGE" value="PostgresSQL" />
+    <MESSAGE value="Menage dans l'app" />
+    <option name="LAST_COMMIT_MESSAGE" value="Menage dans l'app" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

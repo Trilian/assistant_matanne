@@ -196,16 +196,6 @@ class IngrédientRecette(Base):
     quantité = Column(Float)
     unité = Column(String(50))
     # Le champ 'optionnel' est intentionnellement omis pour l'instant
-# ===================================
-# CONFIGURATION DES RELATIONS (après création des classes)
-# ===================================
-# Après que toutes les classes soient définies, on configure les relations
-Recette.étapes = relationship("ÉtapeRecette", back_populates="recette", cascade="all, delete-orphan")
-Recette.ingrédients = relationship("IngrédientRecette", back_populates="recette", cascade="all, delete-orphan")
-
-ÉtapeRecette.recette = relationship("Recette", back_populates="étapes")
-IngrédientRecette.recette = relationship("Recette", back_populates="ingrédients")
-
 
 # ===================================
 # RECIPE INGREDIENT
@@ -568,3 +558,11 @@ class AIInteraction(Base):
 
     # NOUVEAU CHAMP POUR LES RECETTES
     recipe_id: Mapped[Optional[int]] = mapped_column(ForeignKey("recipes.id"))  # Lien avec une recette si applicable
+
+
+
+Recette.étapes = relationship("ÉtapeRecette", back_populates="recette", cascade="all, delete-orphan")
+Recette.ingrédients = relationship("IngrédientRecette", back_populates="recette", cascade="all, delete-orphan")
+
+ÉtapeRecette.recette = relationship("Recette", back_populates="étapes")
+IngrédientRecette.recette = relationship("Recette", back_populates="ingrédients")
