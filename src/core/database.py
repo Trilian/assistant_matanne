@@ -1,5 +1,5 @@
 """
-Connexion PostgreSQL et gestion des sessions - Version adaptée pour Streamlit Cloud
+Connexion PostgreSQL et gestion des sessions - Version Streamlit Cloud + Supabase
 """
 from contextlib import contextmanager
 from typing import Generator
@@ -16,65 +16,71 @@ logger = logging.getLogger(__name__)
 # RÉCUPÉRATION DES SECRETS
 # ===================================
 def get_db_url():
-    """Récupère l'URL de la base de données avec gestion des erreurs détaillée"""
+    """Récupère l'URL de la base de données avec gestion des erreurs"""
     try:
-        # Affiche tous les secrets disponibles (pour débogage)
-        st.write("Secrets disponibles :", list(st.secrets.keys()))
+        # ❌ NE JAMAIS AFFICHER LES SECRETS EN PRODUCTION
+        # st.write("Secrets disponibles :", list(st.secrets.keys()))  # DANGEREUX !
 
         # Vérifie que la section [db] existe
         if 'db' not in st.secrets:
-            raise ValueError("""
-            La section [db] est manquante dans les secrets.
-            Voici ce que tu dois ajouter dans les secrets Streamlit :
-
-            [db]
-            host = "db.tu_identifiant_supabase.supabase.co"
-            port = "5432"
-            name = "postgres"
-            user = "postgres"
-            password = "ton_mot_de_passe"
-            """)
+            raise ValueError(
+                "La section [db] est manquante dans les secrets.\n"
+                "Ajoute dans Streamlit Cloud :\n\n"
+                "[db]\n"
+                'host = "db.xxxxx.supabase.co"\n'
+                'port = "5432"\n'
+                'name = "postgres"\n'
+                'user = "postgres"\n'
+                'password = "ton_mot_de_passe"'
+            )
 
         # Vérifie que tous les champs sont présents
         required_keys = ['host', 'port', 'name', 'user', 'password']
-        for key in required_keys:
-            if key not in st.secrets['db']:
-                raise ValueError(f"""
-                Le champ '{key}' est manquant dans la section [db].
-                Voici la structure complète attendue :
+        missing = [key for key in required_keys if key not in st.secrets['db']]
 
-                [db]
-                host = "db.tu_identifiant_supabase.supabase.co"
-                port = "5432"
-                name = "postgres"
-                user = "postgres"
-                password = "ton_mot_de_passe"
-                """)
+        if missing:
+            raise ValueError(
+                f"Champs manquants dans [db] : {', '.join(missing)}\n"
+                "Structure attendue :\n\n"
+                "[db]\n"
+                'host = "db.xxxxx.supabase.co"\n'
+                'port = "5432"\n'
+                'name = "postgres"\n'
+                'user = "postgres"\n'
+                'password = "ton_mot_de_passe"'
+            )
 
-        # Construction de l'URL
-        return f"postgresql://{st.secrets['db']['user']}:{st.secrets['db']['password']}@{st.secrets['db']['host']}:{st.secrets['db']['port']}/{st.secrets['db']['name']}"
+        # Construction de l'URL sécurisée
+        db = st.secrets['db']
+        return f"postgresql://{db['user']}:{db['password']}@{db['host']}:{db['port']}/{db['name']}"
 
     except Exception as e:
-        st.error(f"Erreur de configuration : {str(e)}")
-        st.stop()  # Arrête l'application
+        logger.error(f"Erreur configuration DB : {e}")
+        st.error(f"❌ Erreur de configuration : {str(e)}")
+        st.stop()
+
 # ===================================
 # CONFIGURATION ENGINE
 # ===================================
 def get_engine():
-    """Crée l'engine PostgreSQL avec configuration optimisée pour Streamlit Cloud"""
+    """Crée l'engine PostgreSQL optimisé pour Streamlit Cloud"""
     engine_kwargs = {
-        "echo": False,  # Désactive les logs SQL en production
+        "echo": False,
         "future": True,
         "poolclass": QueuePool,
-        "pool_size": 5,  # Taille réduite pour Streamlit Cloud
+        "pool_size": 5,
         "max_overflow": 10,
         "pool_pre_ping": True,
-        "pool_recycle": 300  # Recycler après 5 minutes
+        "pool_recycle": 300,
+        "connect_args": {
+            "connect_timeout": 10,
+            "options": "-c timezone=utc"
+        }
     }
 
     engine = create_engine(get_db_url(), **engine_kwargs)
 
-    # Configuration spécifique PostgreSQL
+    # Configuration PostgreSQL
     @event.listens_for(engine, "connect")
     def set_postgresql_config(dbapi_conn, connection_record):
         cursor = dbapi_conn.cursor()
@@ -98,13 +104,7 @@ SessionLocal = sessionmaker(
 
 @contextmanager
 def get_db_context() -> Generator[Session, None, None]:
-    """
-    Context manager pour gérer automatiquement les sessions
-    Usage:
-        with get_db_context() as db:
-            # Faire des opérations
-            db.query(...)
-    """
+    """Context manager pour gérer les sessions"""
     db = SessionLocal()
     try:
         yield db
@@ -117,9 +117,7 @@ def get_db_context() -> Generator[Session, None, None]:
         db.close()
 
 def get_db() -> Generator[Session, None, None]:
-    """
-    Générateur de session pour Streamlit
-    """
+    """Générateur de session pour Streamlit"""
     db = SessionLocal()
     try:
         yield db
@@ -137,33 +135,46 @@ def check_connection() -> bool:
         return True
     except Exception as e:
         logger.error(f"❌ Connexion DB échouée: {e}")
-        st.error(f"Erreur de connexion à la base de données: {e}")
+        # NE PAS afficher le détail de l'erreur en production
+        if st.secrets.get("ENV", "production") == "development":
+            st.error(f"Erreur de connexion : {e}")
+        else:
+            st.error("❌ Impossible de se connecter à la base de données")
         return False
 
 def get_db_info():
-    """Affiche des infos sur la base de données (pour débogage)"""
+    """Retourne les infos de connexion (sans mot de passe)"""
     try:
         with get_db_context() as db:
             result = db.execute(text("""
-                SELECT version() as version, current_database() as database, current_user as user
+                SELECT version() as version, 
+                       current_database() as database, 
+                       current_user as user
             """)).fetchone()
+
             return {
                 "status": "connected",
-                "version": result[0],
+                "version": result[0].split(",")[0],  # Version courte
                 "database": result[1],
                 "user": result[2],
-                "host": st.secrets['db']['host']
+                "host": st.secrets['db']['host'].split('.')[0]  # Masque le domaine complet
             }
     except Exception as e:
-        return {"status": "error", "error": str(e)}
+        logger.error(f"Erreur get_db_info : {e}")
+        return {"status": "error", "error": "Connexion échouée"}
+
 # ===================================
-# INITIALISATION & MIGRATIONS
+# INITIALISATION
 # ===================================
 def create_all_tables():
-    """Crée toutes les tables nécessaires (développement uniquement)"""
+    """Crée toutes les tables (développement uniquement)"""
+    if st.secrets.get("ENV", "production") != "development":
+        logger.warning("create_all_tables() appelé en production - ignoré")
+        return
+
     try:
         logger.info("Création des tables...")
-        from src.core.models import Base  # Import local pour éviter les dépendances circulaires
+        from src.core.models import Base
         Base.metadata.create_all(bind=engine)
         logger.info("✅ Tables créées avec succès")
     except Exception as e:

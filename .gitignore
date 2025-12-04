@@ -132,3 +132,5 @@ alembic/versions/*.pyc
 secrets.yaml
 credentials.json
 token.json
+
+.idea/

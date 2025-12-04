@@ -623,3 +623,12 @@ WHERE recipes.id = %(id_1)s
 2025-12-03 13:18:05,123 - src.core.database - INFO - database.py:122 - ✅ Tables créées
 2025-12-03 13:18:05,631 - src.core.database - INFO - database.py:120 - Création des tables...
 2025-12-03 13:18:05,703 - src.core.database - INFO - database.py:122 - ✅ Tables créées
+2025-12-03 22:09:47,897 - src.core.database - ERROR - database.py:95 - Erreur base de données: (psycopg2.OperationalError) connection to server at "db.haieczwixbkeuwcgdzvn.supabase.co" (2a05:d014:1c06:5f27:cc32:d2f4:489c:851a), port 5432 failed: Network is unreachable
+	Is the server running on that host and accepting TCP/IP connections?
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-12-03 22:09:47,908 - src.core.database - ERROR - database.py:120 - ❌ Connexion DB échouée: (psycopg2.OperationalError) connection to server at "db.haieczwixbkeuwcgdzvn.supabase.co" (2a05:d014:1c06:5f27:cc32:d2f4:489c:851a), port 5432 failed: Network is unreachable
+	Is the server running on that host and accepting TCP/IP connections?
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-12-03 22:18:26,628 - src.core.database - ERROR - database.py:80 - ❌ Échec de la connexion à la base de données: name 'settings' is not defined

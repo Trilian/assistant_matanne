@@ -18,6 +18,41 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
+def test_supabase_connection():
+    """Teste la connexion à Supabase avec psycopg2"""
+    try:
+        import psycopg2
+        from psycopg2 import OperationalError
+
+        conn = psycopg2.connect(
+            host=st.secrets['db']['host'],
+            port=st.secrets['db']['port'],
+            dbname=st.secrets['db']['name'],
+            user=st.secrets['db']['user'],
+            password=st.secrets['db']['password'],
+            sslmode='require',  # ✅ Force SSL
+            connect_timeout=10  # ✅ Timeout de 10 secondes
+        )
+
+        cursor = conn.cursor()
+        cursor.execute("SELECT version();")
+        version = cursor.fetchone()
+        st.success(f"✅ Connexion réussie ! Version PostgreSQL: {version[0]}")
+        conn.close()
+
+    except OperationalError as e:
+        st.error(f"❌ Échec de la connexion: {e}")
+        st.info("Vérifie que :")
+        st.info("- Le host commence bien par 'db.'")
+        st.info("- Le mot de passe est correct")
+        st.info("- Les règles réseau Supabase autorisent Streamlit Cloud")
+        st.info("- IPv6 est activé dans Supabase")
+    except Exception as e:
+        st.error(f"❌ Erreur inattendue: {e}")
+
+# Appelle cette fonction au début de ton app
+test_supabase_connection()
 # ===================================
 # VÉRIFICATION DES SECRETS
 # ===================================
