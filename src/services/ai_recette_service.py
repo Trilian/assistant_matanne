@@ -8,6 +8,8 @@ import json
 import logging
 from typing import List, Dict, Optional
 from datetime import datetime
+from mistralai.client import MistralClient
+from mistralai.models.chat_completion import ChatCompletionRequest, ChatMessage
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +20,8 @@ class AIRecipeService:
     def __init__(self):
         """Initialise le service avec la clé API Mistral"""
         try:
-            self.api_key = st.secrets["mistral"]["api_key"]
+            self.api_key = api_key or st.secrets["mistral"]["api_key"]
+            self.client = MistralClient(api_key=self.api_key)
             self.model = st.secrets.get("mistral", {}).get("model", "mistral-small")
             self.base_url = "https://api.mistral.ai/v1"
             self.timeout = 30
@@ -26,63 +29,38 @@ class AIRecipeService:
         except KeyError:
             raise ValueError("Clé API Mistral manquante dans les secrets Streamlit")
 
-    async def generate_recipes(
-            self,
-            count: int = 3,
-            filters: Optional[Dict] = None,
-            version_type: str = "standard"
-    ) -> List[Dict]:
-        """
-        Génère des recettes selon les filtres
 
-        Args:
-            count: Nombre de recettes à générer
-            filters: Filtres (season, is_quick, is_balanced, etc.)
-            version_type: standard, baby, batch_cooking
-
-        Returns:
-            Liste de recettes au format structuré
-        """
-        filters = filters or {}
-
-        # Construction du prompt
-        prompt = self._build_prompt(count, filters, version_type)
-        system_prompt = self._build_system_prompt(version_type)
-
+    async def generate_recipes(self, count: int, filters: Dict, version_type: str = "standard") -> List[Dict]:
+        """Génère des recettes avec l'API Mistral 0.4.2"""
         try:
-            # Appel API Mistral
-            async with httpx.AsyncClient(timeout=self.timeout) as client:
-                response = await client.post(
-                    f"{self.base_url}/chat/completions",
-                    headers={
-                        "Authorization": f"Bearer {self.api_key}",
-                        "Content-Type": "application/json"
-                    },
-                    json={
-                        "model": self.model,
-                        "messages": [
-                            {"role": "system", "content": system_prompt},
-                            {"role": "user", "content": prompt}
-                        ],
-                        "temperature": 0.8,
-                        "max_tokens": 2000
-                    }
-                )
+            # Préparation du prompt selon le type de version
+            if version_type == "standard":
+                prompt = self._build_standard_prompt(filters)
+            elif version_type == "baby":
+                prompt = self._build_baby_prompt(filters)
+            elif version_type == "batch_cooking":
+                prompt = self._build_batch_prompt(filters)
+            else:
+                raise ValueError(f"Type de version inconnu: {version_type}")
 
-                response.raise_for_status()
-                result = response.json()
-                content = result["choices"][0]["message"]["content"]
+            # Appel à l'API Mistral
+            chat_completion = await self.client.chat(
+                model=self.model,
+                messages=[
+                    ChatMessage(role="user", content=prompt)
+                ],
+                max_tokens=2000,
+                temperature=0.7
+            )
 
-                # Parse JSON
-                recipes = self._parse_response(content, count)
-                return recipes
+            # Traitement de la réponse
+            response_content = chat_completion.choices[0].message.content
+            return self._parse_recipe_response(response_content, version_type)
 
-        except httpx.HTTPError as e:
-            logger.error(f"Erreur API Mistral: {e}")
-            raise ValueError(f"Erreur API: {str(e)}")
         except Exception as e:
             logger.error(f"Erreur génération recettes: {e}")
-            raise ValueError(f"Erreur: {str(e)}")
+            raise
+
 
     def _build_system_prompt(self, version_type: str) -> str:
         """Construit le system prompt selon le type de version"""
@@ -249,6 +227,71 @@ Ajoute pour chaque recette :
             logger.error(f"Contenu: {content[:500]}")
             raise ValueError("Réponse JSON invalide de l'IA")
 
+    def _build_standard_prompt(self, filters: Dict) -> str:
+        """Construit le prompt pour une recette standard"""
+        ingredients = ", ".join(filters.get("ingredients", []))
+        prompt = f"""
+        Génère {filters.get('count', 1)} recette(s) {filters.get('meal_type', 'dîner')} pour {filters.get('servings', 4)} personnes.
+        Saison: {filters.get('season', 'toutes saisons')}.
+        Catégorie: {filters.get('category', 'sans précision')}.
+        Ingrédients à utiliser: {ingredients if ingredients else 'aucun ingrédient spécifique'}.
+    
+        Pour chaque recette, retourne un JSON avec cette structure exacte:
+        {{
+            "name": "Nom de la recette",
+            "description": "Description courte",
+            "prep_time": 15,
+            "cook_time": 30,
+            "servings": 4,
+            "difficulty": "easy|medium|hard",
+            "ingredients": [
+                {{"name": "ingrédient", "quantity": 100, "unit": "g"}}
+            ],
+            "steps": [
+                {{"order": 1, "description": "Étape 1"}}
+            ],
+            "is_quick": true|false,
+            "is_balanced": true|false
+        }}
+        """
+        return prompt
+
+    def _build_baby_prompt(self, filters: Dict) -> str:
+        """Construit le prompt pour une version bébé"""
+        base_prompt = self._build_standard_prompt(filters)
+        return f"""
+        {base_prompt}
+    
+        Adapte cette recette pour un bébé de 6-12 mois.
+        Ajoute des instructions spécifiques pour bébé et des notes de précaution.
+        Retourne un JSON avec cette structure supplémentaire:
+        {{
+            "baby_version": {{
+                "modified_instructions": "Instructions adaptées pour bébé",
+                "baby_notes": "Précautions spécifiques"
+            }}
+        }}
+        """
+
+    def _parse_recipe_response(self, response: str, version_type: str) -> List[Dict]:
+        """Parse la réponse de l'API et retourne une liste de recettes"""
+        import json
+        try:
+            # Nettoyage de la réponse (l'API peut retourner du texte avant/après le JSON)
+            json_start = response.find('{')
+            json_end = response.rfind('}') + 1
+            clean_response = response[json_start:json_end]
+
+            data = json.loads(clean_response)
+
+            # Si c'est une seule recette, on la met dans une liste
+            if isinstance(data, dict):
+                return [data]
+            return data
+        except json.JSONDecodeError as e:
+            logger.error(f"Erreur parsing JSON: {e}\nRéponse reçue: {response}")
+            raise
+
     def _validate_recipe(self, recipe: Dict) -> bool:
         """Valide qu'une recette a les champs requis"""
         required = ["name", "description", "prep_time", "cook_time", "servings", "ingredients", "steps"]
@@ -270,38 +313,22 @@ Ajoute pour chaque recette :
 
         return True
 
-    async def generate_image_url(self, recipe_name: str, description: str) -> Optional[str]:
-        """
-        Génère une URL d'image pour la recette (Unsplash API)
-        Alternative gratuite à la génération d'images
-        """
-        try:
-            # Utiliser Unsplash API pour trouver une image correspondante
-            query = f"{recipe_name} food"
+async def generate_image_url(self, recipe_name: str, description: str) -> str:
+    """Génère une URL d'image pour une recette (mock pour l'instant)"""
+    # Pour l'instant, retourne une image placeholder
+    # Tu peux remplacer par un vrai service d'images plus tard
+    return f"https://source.unsplash.com/400x300/?{recipe_name.replace(' ', ',')}"
 
-            async with httpx.AsyncClient(timeout=10) as client:
-                response = await client.get(
-                    "https://api.unsplash.com/search/photos",
-                    params={
-                        "query": query,
-                        "per_page": 1,
-                        "orientation": "landscape"
-                    },
-                    headers={
-                        "Authorization": f"Client-ID {st.secrets.get('unsplash', {}).get('access_key', '')}"
-                    }
-                )
-
-                if response.status_code == 200:
-                    data = response.json()
-                    if data["results"]:
-                        return data["results"][0]["urls"]["regular"]
-
-        except Exception as e:
-            logger.warning(f"Impossible de récupérer une image: {e}")
-
-        # Fallback : URL placeholder
-        return f"https://via.placeholder.com/400x300.png?text={recipe_name.replace(' ', '+')}"
+    # Si tu veux utiliser un vrai service d'images, voici un exemple avec DALL-E:
+    # prompt = f"Créé une image réaliste de {recipe_name}. {description}"
+    # response = await self.client.images.generate(
+    #     model="dall-e-3",
+    #     prompt=prompt,
+    #     size="1024x1024",
+    #     quality="standard",
+    #     n=1
+    # )
+    # return response.data[0].url
 
 
 # Instance globale
