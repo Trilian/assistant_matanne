@@ -12,7 +12,7 @@ from src.core.models import (
     Recipe, RecipeIngredient, RecipeStep, RecipeVersion,
     Ingredient, RecipeVersionEnum, SeasonEnum, MealTypeEnum
 )
-from src.services.ai_recipe_service import ai_recipe_service
+from src.services.ai_recette_service import ai_recipe_service
 # ===================================
 # HELPERS - CRUD RECETTES
 # ===================================
