@@ -364,17 +364,19 @@ def app():
             # Afficher les recettes
             for idx, recipe in df.iterrows():
                 render_recipe_card(recipe)
-                # Actions
-                col_a1, col_a2, col_a3 = st.columns([1, 1, 3])
-                with col_a1:
-                    if st.button("👁️ Détails", key=f"view_{recipe['id']}", use_container_width=True):
-                        st.session_state[f"viewing_{recipe['id']}"] = True
-                        st.rerun()
-                with col_a2:
-                    if st.button("🗑️ Supprimer", key=f"del_{recipe['id']}", use_container_width=True):
-                        delete_recipe(recipe['id'])
-                        st.success("Recette supprimée")
-                        st.rerun()
+            # Actions
+            col_a1, col_a2, col_a3 = st.columns([1, 1, 3])
+
+            with col_a1:
+                if st.button("👁️ Détails", key=f"view_{recipe['id']}", use_container_width=True):
+                    st.session_state[f"viewing_{recipe['id']}"] = True
+                    st.rerun()
+
+            with col_a2:
+                if st.button("🗑️ Supprimer", key=f"del_{recipe['id']}", use_container_width=True):
+                    delete_recipe(recipe['id'])
+                    st.success("Recette supprimée")
+                    st.rerun()
                 # Afficher détails si demandé
                 if st.session_state.get(f"viewing_{recipe['id']}", False):
                     with st.expander("Détails complets", expanded=True):
@@ -612,26 +614,27 @@ def app():
             if "manual_ingredients" not in st.session_state:
                 st.session_state.manual_ingredients = []
 
-            col_ing1, col_ing2, col_ing3, col_ing4 = st.columns([2, 1, 1, 1])
+            with st.expander("➕ Ajouter des ingrédients", expanded=True):
+                col_ing1, col_ing2, col_ing3, col_ing4 = st.columns([2, 1, 1, 1])
 
-            with col_ing1:
-                ing_name = st.text_input("Ingrédient", key="ing_name")
-            with col_ing2:
-                ing_qty = st.number_input("Quantité", 0.0, 10000.0, 1.0)
-            with col_ing3:
-                ing_unit = st.text_input("Unité", key="ing_unit", placeholder="g, ml, etc.")
-            with col_ing4:
-                ing_optional = st.checkbox("Optionnel", key="ing_optional")
+                with col_ing1:
+                    ing_name = st.text_input("Ingrédient", key="ing_name")
+                with col_ing2:
+                    ing_qty = st.number_input("Quantité", 0.0, 10000.0, 1.0, key="ing_qty")
+                with col_ing3:
+                    ing_unit = st.text_input("Unité", key="ing_unit", placeholder="g, ml, etc.")
+                with col_ing4:
+                    ing_optional = st.checkbox("Optionnel", key="ing_optional")
 
-            if st.button("➕ Ajouter l'ingrédient", key="add_ingredient"):
-                if ing_name:
-                    st.session_state.manual_ingredients.append({
-                        "name": ing_name,
-                        "quantity": ing_qty,
-                        "unit": ing_unit,
-                        "optional": ing_optional
-                    })
-                    st.rerun()
+                if st.button("➕ Ajouter l'ingrédient", key="add_ingredient"):
+                    if ing_name:
+                        st.session_state.manual_ingredients.append({
+                            "name": ing_name,
+                            "quantity": ing_qty,
+                            "unit": ing_unit,
+                            "optional": ing_optional
+                        })
+                        st.rerun()
 
             # Afficher les ingrédients ajoutés
             if st.session_state.manual_ingredients:
@@ -648,29 +651,32 @@ def app():
                             st.session_state.manual_ingredients.pop(idx)
                             st.rerun()
 
+            st.markdown("---")
+
             # Étapes de préparation
             st.markdown("### 📝 Étapes de préparation")
 
             if "manual_steps" not in st.session_state:
                 st.session_state.manual_steps = []
 
-            col_step1, col_step2, col_step3 = st.columns([3, 1, 1])
+            with st.expander("➕ Ajouter des étapes", expanded=True):
+                col_step1, col_step2, col_step3 = st.columns([3, 1, 1])
 
-            with col_step1:
-                step_desc = st.text_area("Description de l'étape", key="step_desc", height=80)
-            with col_step2:
-                step_order = st.number_input("Ordre", 1, 20, len(st.session_state.manual_steps)+1)
-            with col_step3:
-                step_duration = st.number_input("Durée (min)", 0, 120, 0)
+                with col_step1:
+                    step_desc = st.text_area("Description de l'étape", key="step_desc", height=80)
+                with col_step2:
+                    step_order = st.number_input("Ordre", 1, 20, len(st.session_state.manual_steps)+1, key="step_order")
+                with col_step3:
+                    step_duration = st.number_input("Durée (min)", 0, 120, 0, key="step_duration")
 
-            if st.button("➕ Ajouter l'étape", key="add_step"):
-                if step_desc:
-                    st.session_state.manual_steps.append({
-                        "order": step_order,
-                        "description": step_desc,
-                        "duration": step_duration
-                    })
-                    st.rerun()
+                if st.button("➕ Ajouter l'étape", key="add_step"):
+                    if step_desc:
+                        st.session_state.manual_steps.append({
+                            "order": step_order,
+                            "description": step_desc,
+                            "duration": step_duration
+                        })
+                        st.rerun()
 
             # Afficher les étapes ajoutées
             if st.session_state.manual_steps:
@@ -687,6 +693,7 @@ def app():
                             st.session_state.manual_steps = [s for i, s in enumerate(st.session_state.manual_steps) if i != idx]
                             st.rerun()
 
+            st.markdown("---")
             # Versions spéciales
             st.markdown("### 🔄 Versions spéciales (optionnel)")
 
