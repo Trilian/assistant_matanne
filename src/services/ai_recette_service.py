@@ -264,4 +264,36 @@ Ajoute pour chaque recette :
 
         except json.JSONDecodeError as e:
             logger.error(f"Erreur JSON: {e}")
-            logger.error(f"Contenu: {
+            logger.error(f"Contenu: {content[:500]}")
+            raise ValueError("Réponse JSON invalide de l'IA")
+
+    def _validate_recipe(self, recipe: Dict) -> bool:
+        """Valide qu'une recette a les champs requis"""
+        required = ["name", "description", "prep_time", "cook_time", "servings", "ingredients", "steps"]
+
+        for field in required:
+            if field not in recipe:
+                logger.warning(f"Champ '{field}' manquant dans la recette '{recipe.get('name', 'inconnue')}'")
+                return False
+
+        # Valider ingrédients
+        if not isinstance(recipe["ingredients"], list) or len(recipe["ingredients"]) == 0:
+            logger.warning(f"Ingrédients invalides pour '{recipe['name']}'")
+            return False
+
+        # Valider étapes
+        if not isinstance(recipe["steps"], list) or len(recipe["steps"]) == 0:
+            logger.warning(f"Étapes invalides pour '{recipe['name']}'")
+            return False
+
+        return True
+
+    async def generate_image_url(self, recipe_name: str, description: str) -> str:
+        """Génère une URL d'image pour une recette (placeholder)"""
+        # Pour l'instant, retourne une image placeholder Unsplash
+        safe_name = recipe_name.replace(' ', ',')
+        return f"https://source.unsplash.com/400x300/?{safe_name},food"
+
+
+# Instance globale
+ai_recipe_service = AIRecipeService()
