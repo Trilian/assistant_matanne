@@ -28,6 +28,7 @@ class AIRecipeService:
             logger.info("✅ AIRecipeService initialisé")
         except KeyError:
             raise ValueError("Clé API Mistral manquante dans les secrets Streamlit")
+            self.api_key = api_key or st.secrets["mistral"]["api_key"]
 
 
     async def generate_recipes(self, count: int, filters: Dict, version_type: str = "standard") -> List[Dict]:
