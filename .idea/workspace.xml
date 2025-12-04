@@ -4,8 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment="Menage dans l'app">
-      <change beforePath="$PROJECT_DIR$/src/services/ai_recette_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/ai_recette_service.py" afterDir="false" />
+    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment="Recette amelioration">
+      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/recettes.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/cuisine/recettes.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -175,7 +175,7 @@
       <workItem from="1764794140139" duration="3293000" />
       <workItem from="1764836092457" duration="8161000" />
       <workItem from="1764852791259" duration="4608000" />
-      <workItem from="1764864455782" duration="1384000" />
+      <workItem from="1764864455782" duration="2045000" />
     </task>
     <task id="LOCAL-00001" summary="Init commit">
       <option name="closed" value="true" />
@@ -305,7 +305,23 @@
       <option name="project" value="LOCAL" />
       <updated>1764865054499</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="Recette amelioration">
+      <option name="closed" value="true" />
+      <created>1764865888270</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1764865888270</updated>
+    </task>
+    <task id="LOCAL-00018" summary="Recette amelioration">
+      <option name="closed" value="true" />
+      <created>1764865984328</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1764865984328</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -320,7 +336,8 @@
     <MESSAGE value="Mise à jour du module" />
     <MESSAGE value="PostgresSQL" />
     <MESSAGE value="Menage dans l'app" />
-    <option name="LAST_COMMIT_MESSAGE" value="Menage dans l'app" />
+    <MESSAGE value="Recette amelioration" />
+    <option name="LAST_COMMIT_MESSAGE" value="Recette amelioration" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
