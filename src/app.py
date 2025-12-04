@@ -356,14 +356,6 @@ def render_header():
             </div>
             """, unsafe_allow_html=True)
 
-    with col3:
-        # Infos environnement et DB
-        if settings.DEBUG:
-            st.caption(f"🔧 {settings.ENV.upper()}")
-            db_info = get_db_info()
-            if db_info["status"] == "connected":
-                st.caption(f"✅ DB: {db_info['database']}")
-
 # ===================================
 # SIDEBAR AMÉLIORÉE
 # ===================================
@@ -514,8 +506,6 @@ def load_module(module_name: str):
 
         except Exception as e:
             st.error(f"Erreur dans le module: {e}")
-            if settings.DEBUG:
-                st.exception(e)
 
     except Exception as e:
         st.error(f"Erreur inattendue: {e}")

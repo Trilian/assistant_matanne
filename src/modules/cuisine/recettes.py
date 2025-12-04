@@ -7,7 +7,11 @@ from src.services.ai_recette_service import AIRecetteService
 
 # Chargement des variables d'environnement et initialisation
 load_dotenv()
-ai_service = AIRecetteService()
+try:
+    ai_service = AIRecetteService()
+except Exception as e:
+    st.error(f"❌ Impossible d'initialiser le service AI: {e}")
+    ai_service = None  # Permet au reste du code de fonctionner
 
 # Vérifie la connexion à la base de données au démarrage
 # Test de connexion au démarrage

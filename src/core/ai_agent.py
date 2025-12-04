@@ -1,49 +1,33 @@
 """
-Agent IA central - Version Mistral AI pour Streamlit Cloud
+Agent IA - Version Mistral AI pour Streamlit Cloud
 """
 import httpx
 import json
 import streamlit as st
 from typing import Dict, List, Optional, Any
 from datetime import datetime
-from pydantic import BaseModel, Field
 import logging
 
 logger = logging.getLogger(__name__)
 
-class AIRequest(BaseModel):
-    """Requête vers l'agent IA"""
-    prompt: str
-    context: Optional[Dict[str, Any]] = None
-    max_tokens: int = Field(default=500, gt=0, le=2000)
-    temperature: float = Field(default=0.7, ge=0.0, le=2.0)
-    system_prompt: Optional[str] = None
-
-class AIResponse(BaseModel):
-    """Réponse de l'agent IA"""
-    text: str
-    metadata: Dict[str, Any] = Field(default_factory=dict)
-    timestamp: datetime = Field(default_factory=datetime.now)
 
 class AgentIA:
-    """
-    Agent IA central utilisant Mistral AI
-    Compatible Streamlit Cloud
-    """
+    """Agent IA central utilisant Mistral AI"""
 
     def __init__(self):
-        # Récupération de la clé API depuis les secrets
+        """Initialise l'agent avec la clé API depuis les secrets"""
         try:
             self.api_key = st.secrets["mistral"]["api_key"]
-            self.model = "mistral-small"  # Modèle économique et performant
+            self.model = st.secrets.get("mistral", {}).get("model", "mistral-small")
             self.base_url = "https://api.mistral.ai/v1"
-            self.client = httpx.AsyncClient(timeout=30.0)
+            self.timeout = 30
             logger.info("✅ Agent IA Mistral initialisé")
         except KeyError:
-            logger.error("❌ Clé API Mistral manquante dans les secrets")
+            error_msg = "Clé API Mistral manquante dans les secrets"
+            logger.error(error_msg)
             raise ValueError(
-                "Clé API Mistral manquante.\n"
-                "Ajoute dans les secrets Streamlit :\n"
+                f"{error_msg}\n"
+                "Ajoute dans les secrets Streamlit:\n"
                 "[mistral]\n"
                 'api_key = "ta_cle_api"'
             )
@@ -55,48 +39,49 @@ class AgentIA:
             temperature: float = 0.7,
             max_tokens: int = 500
     ) -> str:
-        """Appel API Mistral"""
+        """Appel API Mistral avec gestion d'erreurs"""
         try:
-            messages = []
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                messages = []
 
-            if system_prompt:
+                if system_prompt:
+                    messages.append({
+                        "role": "system",
+                        "content": system_prompt
+                    })
+
                 messages.append({
-                    "role": "system",
-                    "content": system_prompt
+                    "role": "user",
+                    "content": prompt
                 })
 
-            messages.append({
-                "role": "user",
-                "content": prompt
-            })
+                response = await client.post(
+                    f"{self.base_url}/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {self.api_key}",
+                        "Content-Type": "application/json"
+                    },
+                    json={
+                        "model": self.model,
+                        "messages": messages,
+                        "temperature": temperature,
+                        "max_tokens": max_tokens
+                    }
+                )
 
-            response = await self.client.post(
-                f"{self.base_url}/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {self.api_key}",
-                    "Content-Type": "application/json"
-                },
-                json={
-                    "model": self.model,
-                    "messages": messages,
-                    "temperature": temperature,
-                    "max_tokens": max_tokens
-                }
-            )
-
-            response.raise_for_status()
-            result = response.json()
-            return result["choices"][0]["message"]["content"]
+                response.raise_for_status()
+                result = response.json()
+                return result["choices"][0]["message"]["content"]
 
         except httpx.HTTPError as e:
             logger.error(f"Erreur Mistral API: {e}")
-            return f"[IA indisponible] Erreur : {str(e)}"
+            return f"[IA indisponible] Erreur HTTP: {str(e)}"
         except Exception as e:
             logger.error(f"Erreur inattendue: {e}")
-            return "[IA indisponible] Erreur interne"
+            return f"[IA indisponible] Erreur: {str(e)}"
 
     # ===================================
-    # 🍲 CUISINE - Suggestions recettes
+    # MÉTHODES MÉTIER
     # ===================================
 
     async def suggerer_recettes(
@@ -114,13 +99,13 @@ class AgentIA:
         pref_text = f"\nPréférences: {', '.join(preferences)}" if preferences else ""
 
         system_prompt = (
-            f"Tu es un chef cuisinier expert. "
+            "Tu es un chef cuisinier expert. "
             f"Suggère {nb_suggestions} recettes RÉALISABLES avec les ingrédients disponibles.\n"
-            f"Réponds UNIQUEMENT en JSON valide (sans markdown) :\n"
-            f"[\n"
-            f'  {{"nom": "Nom", "ingredients": ["ing1"], "faisabilite": 85, '
-            f'"raison": "Explication", "temps_preparation": 30}}\n'
-            f"]"
+            "Réponds UNIQUEMENT en JSON valide :\n"
+            "[\n"
+            '  {"nom": "Nom", "ingredients": ["ing1"], "faisabilite": 85, '
+            '"raison": "Explication", "temps_preparation": 30}\n'
+            "]"
         )
 
         prompt = f"Inventaire :\n{items_text}{pref_text}\n\nSuggère {nb_suggestions} recettes."
@@ -140,18 +125,17 @@ class AgentIA:
             suggestions = json.loads(cleaned.strip())
             return suggestions[:nb_suggestions]
 
-        except json.JSONDecodeError as e:
-            logger.error(f"Erreur parsing JSON : {e}")
+        except json.JSONDecodeError:
+            logger.error("Erreur parsing JSON suggestions")
             return [{
                 "nom": "Erreur parsing",
-                "ingredients": [item["nom"] for item in inventaire[:3]],
+                "ingredients": [],
                 "faisabilite": 0,
-                "raison": "Impossible de parser la réponse IA",
-                "temps_preparation": 0
+                "raison": "Impossible de parser la réponse IA"
             }]
 
     async def detecter_gaspillage(self, inventaire: List[Dict]) -> Dict:
-        """Détecte les items à risque"""
+        """Détecte les items à risque de gaspillage"""
         items_faibles = [i for i in inventaire if i.get("quantite", 0) < 2]
 
         if not items_faibles:
@@ -169,7 +153,7 @@ class AgentIA:
             'Format JSON: {"recettes_urgentes": ["recette1"], "conseil": "conseil"}'
         )
 
-        prompt = f"Items à utiliser : {items_text}"
+        prompt = f"Items à utiliser rapidement : {items_text}"
         response = await self._call_mistral(prompt, system_prompt)
 
         try:
@@ -185,39 +169,30 @@ class AgentIA:
                 "conseil": "À consommer rapidement"
             }
 
-    # ===================================
-    # 👶 FAMILLE - Conseils
-    # ===================================
-
-    async def conseiller_developpement(
+    async def optimiser_courses(
             self,
-            age_mois: int,
-            contexte: Optional[Dict] = None
+            inventaire: List[Dict],
+            recettes_prevues: List[str]
     ) -> Dict:
-        """Conseils développement selon l'âge"""
+        """Optimise la liste de courses"""
+        inv_text = ", ".join([f"{i['nom']} ({i['quantite']} {i['unite']})" for i in inventaire])
+        recettes_text = ", ".join(recettes_prevues)
+
         system_prompt = (
-            f"Tu es un pédiatre expert. "
-            f"Donne des conseils pour un bébé de {age_mois} mois. "
-            'Format JSON: {"conseils": ["c1"], "activites": ["a1"], "alertes": []}'
+            "Tu es un expert en optimisation de courses. "
+            'Format JSON: {"par_rayon": {"Fruits": ["pomme"]}, "budget_estime": 50}'
         )
 
-        ctx_text = f"\nContexte: {json.dumps(contexte)}" if contexte else ""
-        prompt = f"Bébé de {age_mois} mois.{ctx_text}\nConseils ?"
-
-        response = await self._call_mistral(prompt, system_prompt, temperature=0.5)
+        prompt = f"Inventaire: {inv_text}\nRecettes prévues: {recettes_text}\nOptimise les courses."
+        response = await self._call_mistral(prompt, system_prompt)
 
         try:
             return json.loads(response.strip().replace("```json", "").replace("```", ""))
         except:
             return {
-                "conseils": ["Consulter un pédiatre"],
-                "activites": ["Adaptées à l'âge"],
-                "alertes": []
+                "par_rayon": {"Courses": ["Articles nécessaires"]},
+                "budget_estime": 0
             }
-
-    # ===================================
-    # 💬 CHAT - Interface conversationnelle
-    # ===================================
 
     async def chat(
             self,
@@ -236,7 +211,7 @@ class AgentIA:
         system_prompt = (
             "Tu es l'assistant familial MaTanne. "
             "Tu aides avec : Cuisine, Famille, Maison, Planning. "
-            f"Réponds de manière concise et actionnable.{ctx_text}"
+            f"Réponds de manière concise.{ctx_text}"
         )
 
         prompt = f"Historique:\n{hist_text}\n\nUtilisateur: {message}"

@@ -1,182 +1,154 @@
 """
-Connexion PostgreSQL et gestion des sessions - Version Streamlit Cloud + Supabase
+Connexion PostgreSQL optimisée pour Supabase + Streamlit Cloud
 """
 from contextlib import contextmanager
 from typing import Generator
-from datetime import datetime
 import streamlit as st
 from sqlalchemy import create_engine, event, text
 from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.pool import NullPool, QueuePool
+from sqlalchemy.pool import NullPool
 import logging
 
 logger = logging.getLogger(__name__)
 
+
 # ===================================
-# RÉCUPÉRATION DES SECRETS
+# CONFIGURATION ENGINE SUPABASE
 # ===================================
-def get_db_url():
-    """Récupère l'URL de la base de données avec gestion des erreurs"""
+@st.cache_resource
+def get_engine():
+    """Crée l'engine PostgreSQL optimisé pour Supabase (avec cache)"""
+
     try:
-        # ❌ NE JAMAIS AFFICHER LES SECRETS EN PRODUCTION
-        # st.write("Secrets disponibles :", list(st.secrets.keys()))  # DANGEREUX !
+        # Récupérer l'URL depuis les secrets
+        db = st.secrets["db"]
+        database_url = (
+            f"postgresql://{db['user']}:{db['password']}"
+            f"@{db['host']}:{db['port']}/{db['name']}"
+            f"?sslmode=require"  # CRITIQUE pour Supabase
+        )
 
-        # Vérifie que la section [db] existe
-        if 'db' not in st.secrets:
-            raise ValueError(
-                "La section [db] est manquante dans les secrets.\n"
-                "Ajoute dans Streamlit Cloud :\n\n"
-                "[db]\n"
-                'host = "db.xxxxx.supabase.co"\n'
-                'port = "5432"\n'
-                'name = "postgres"\n'
-                'user = "postgres"\n'
-                'password = "ton_mot_de_passe"'
-            )
+        # Configuration optimisée pour Streamlit Cloud
+        engine = create_engine(
+            database_url,
+            poolclass=NullPool,  # Pas de pool pour Streamlit Cloud
+            echo=False,
+            connect_args={
+                "connect_timeout": 10,
+                "options": "-c timezone=utc",
+                "sslmode": "require"  # Force SSL
+            }
+        )
 
-        # Vérifie que tous les champs sont présents
-        required_keys = ['host', 'port', 'name', 'user', 'password']
-        missing = [key for key in required_keys if key not in st.secrets['db']]
+        # Test de connexion
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
 
-        if missing:
-            raise ValueError(
-                f"Champs manquants dans [db] : {', '.join(missing)}\n"
-                "Structure attendue :\n\n"
-                "[db]\n"
-                'host = "db.xxxxx.supabase.co"\n'
-                'port = "5432"\n'
-                'name = "postgres"\n'
-                'user = "postgres"\n'
-                'password = "ton_mot_de_passe"'
-            )
+        logger.info("✅ Connexion Supabase établie")
+        return engine
 
-        # Construction de l'URL sécurisée
-        db = st.secrets['db']
-        return f"postgresql://{db['user']}:{db['password']}@{db['host']}:{db['port']}/{db['name']}"
-
-    except Exception as e:
-        logger.error(f"Erreur configuration DB : {e}")
-        st.error(f"❌ Erreur de configuration : {str(e)}")
+    except KeyError as e:
+        error_msg = f"Secret DB manquant: {e}"
+        logger.error(error_msg)
+        st.error(f"❌ {error_msg}")
         st.stop()
 
-# ===================================
-# CONFIGURATION ENGINE
-# ===================================
-def get_engine():
-    """Crée l'engine PostgreSQL optimisé pour Streamlit Cloud"""
-    engine_kwargs = {
-        "echo": False,
-        "future": True,
-        "poolclass": QueuePool,
-        "pool_size": 5,
-        "max_overflow": 10,
-        "pool_pre_ping": True,
-        "pool_recycle": 300,
-        "connect_args": {
-            "connect_timeout": 10,
-            "options": "-c timezone=utc"
-        }
-    }
+    except Exception as e:
+        logger.error(f"Erreur connexion Supabase: {e}")
+        st.error(f"❌ Impossible de se connecter à Supabase: {e}")
+        st.stop()
 
-    engine = create_engine(get_db_url(), **engine_kwargs)
-
-    # Configuration PostgreSQL
-    @event.listens_for(engine, "connect")
-    def set_postgresql_config(dbapi_conn, connection_record):
-        cursor = dbapi_conn.cursor()
-        cursor.execute("SET timezone='UTC'")
-        cursor.close()
-
-    return engine
-
-# Engine global
-engine = get_engine()
 
 # ===================================
-# GESTION DES SESSIONS
+# SESSION FACTORY
 # ===================================
-SessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
-    bind=engine,
-    expire_on_commit=False
-)
+def get_session_factory():
+    """Retourne une session factory"""
+    engine = get_engine()
+    return sessionmaker(
+        autocommit=False,
+        autoflush=False,
+        bind=engine,
+        expire_on_commit=False
+    )
 
+
+SessionLocal = get_session_factory()
+
+
+# ===================================
+# CONTEXT MANAGER
+# ===================================
 @contextmanager
 def get_db_context() -> Generator[Session, None, None]:
-    """Context manager pour gérer les sessions"""
+    """Context manager pour gérer les sessions (avec auto-rollback)"""
     db = SessionLocal()
     try:
         yield db
         db.commit()
     except Exception as e:
         db.rollback()
-        logger.error(f"Erreur base de données: {e}")
+        logger.error(f"Erreur DB: {e}")
         raise
     finally:
         db.close()
 
-def get_db() -> Generator[Session, None, None]:
-    """Générateur de session pour Streamlit"""
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 # ===================================
 # VÉRIFICATIONS
 # ===================================
+@st.cache_data(ttl=60)
 def check_connection() -> bool:
-    """Vérifie que la connexion fonctionne"""
+    """Vérifie que la connexion fonctionne (avec cache 60s)"""
     try:
-        with get_db_context() as db:
-            db.execute(text("SELECT 1"))
+        engine = get_engine()
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
         return True
     except Exception as e:
-        logger.error(f"❌ Connexion DB échouée: {e}")
-        # NE PAS afficher le détail de l'erreur en production
-        if st.secrets.get("ENV", "production") == "development":
-            st.error(f"Erreur de connexion : {e}")
-        else:
-            st.error("❌ Impossible de se connecter à la base de données")
+        logger.error(f"Test connexion échoué: {e}")
         return False
 
-def get_db_info():
-    """Retourne les infos de connexion (sans mot de passe)"""
+
+@st.cache_data(ttl=300)
+def get_db_info() -> dict:
+    """Retourne les infos de connexion (cache 5min)"""
     try:
-        with get_db_context() as db:
-            result = db.execute(text("""
-                SELECT version() as version, 
-                       current_database() as database, 
-                       current_user as user
+        engine = get_engine()
+        with engine.connect() as conn:
+            result = conn.execute(text("""
+                SELECT 
+                    version() as version,
+                    current_database() as database,
+                    current_user as user
             """)).fetchone()
 
             return {
                 "status": "connected",
-                "version": result[0].split(",")[0],  # Version courte
+                "version": result[0].split(",")[0],
                 "database": result[1],
                 "user": result[2],
-                "host": st.secrets['db']['host'].split('.')[0]  # Masque le domaine complet
+                "host": st.secrets["db"]["host"].split(".")[0]
             }
     except Exception as e:
-        logger.error(f"Erreur get_db_info : {e}")
-        return {"status": "error", "error": "Connexion échouée"}
+        logger.error(f"get_db_info error: {e}")
+        return {"status": "error", "error": str(e)}
+
 
 # ===================================
-# INITIALISATION
+# INITIALISATION (dev uniquement)
 # ===================================
 def create_all_tables():
-    """Crée toutes les tables (développement uniquement)"""
+    """Crée toutes les tables (uniquement si nécessaire)"""
     if st.secrets.get("ENV", "production") != "development":
-        logger.warning("create_all_tables() appelé en production - ignoré")
+        logger.warning("create_all_tables appelé en production - ignoré")
         return
 
     try:
-        logger.info("Création des tables...")
         from src.core.models import Base
+        engine = get_engine()
         Base.metadata.create_all(bind=engine)
-        logger.info("✅ Tables créées avec succès")
+        logger.info("✅ Tables créées/vérifiées")
     except Exception as e:
-        logger.error(f"Erreur lors de la création des tables: {e}")
+        logger.error(f"Erreur création tables: {e}")
         raise
