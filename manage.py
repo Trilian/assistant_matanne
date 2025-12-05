@@ -96,6 +96,10 @@ def clean():
 
     print("✅ Nettoyage terminé")
 
+def reset_supabase():
+    """Reset complet de la base Supabase"""
+    print("🔥 Lancement du reset Supabase...")
+    run_cmd("python scripts/reset_supabase.py")
 
 def help_cmd():
     """Affiche l'aide"""
@@ -113,6 +117,7 @@ Développement:
 Base de données:
   migrate              Applique les migrations
   create-migration     Crée une nouvelle migration
+  reset-supabase       🔥 Reset COMPLET Supabase (DANGER)
 
 Déploiement:
   requirements         Génère requirements.txt
@@ -130,6 +135,7 @@ COMMANDS = {
     "lint": lint,
     "migrate": migrate,
     "create-migration": create_migration,
+    "reset-supabase": reset_supabase,
     "requirements": generate_requirements,
     "clean": clean,
     "help": help_cmd,

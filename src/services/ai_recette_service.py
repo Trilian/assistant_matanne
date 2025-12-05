@@ -289,10 +289,19 @@ Ajoute pour chaque recette :
         return True
 
     async def generate_image_url(self, recipe_name: str, description: str) -> str:
-        """Génère une URL d'image pour une recette (placeholder)"""
-        # Pour l'instant, retourne une image placeholder Unsplash
-        safe_name = recipe_name.replace(' ', ',')
-        return f"https://source.unsplash.com/400x300/?{safe_name},food"
+        """Génère une URL d'image via Unsplash (gratuit)"""
+        import urllib.parse
+
+        # Nettoyer le nom pour l'URL
+        keywords = recipe_name.lower()
+        keywords = keywords.replace("aux", "").replace("au", "").replace("de", "").replace("à", "")
+        keywords = " ".join(keywords.split()[:3])  # Max 3 mots
+
+        # Encoder pour URL
+        query = urllib.parse.quote(f"{keywords} food dish cuisine")
+
+        # Unsplash Source API (gratuit, pas de clé requise)
+        return f"https://source.unsplash.com/800x600/?{query}"
 
 
 # Instance globale
