@@ -555,7 +555,7 @@ def app():
                         # Générer images
                         for recipe in recipes:
                             image_url = loop.run_until_complete(
-                                ai_recipe_service.generate_image_url(
+                                ai_recette_service.generate_image_url(
                                     recipe["name"],
                                     recipe["description"]
                                 )
