@@ -10,8 +10,8 @@ from typing import List, Dict, Optional
 
 from src.core.database import get_db_context
 from src.core.models import (
-    Recette, IngredientRecette, EtapeRecette, VersionRecette,
-    Ingredient, TypeVersionEnum, SaisonEnum, TypeRepasEnum
+    Recette, RecetteIngredient, EtapeRecette, VersionRecette,
+    Ingredient
 )
 from src.services.ai_recette_service import ai_recipe_service
 

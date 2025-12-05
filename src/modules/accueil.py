@@ -11,7 +11,7 @@ from typing import Dict, List
 
 from src.core.database import get_db_context
 from src.core.models import (
-    Recipe, InventoryItem, Ingredient, BatchMeal,
+    Recette, IngredientRecette, Ingredient, BatchMeal,
     Project, RoutineTask, ChildProfile, Notification
 )
 from src.core.ai_agent import AgentIA
