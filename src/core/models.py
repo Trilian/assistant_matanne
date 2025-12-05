@@ -123,9 +123,10 @@ class Recette(Base):
     versions: Mapped[List["VersionRecette"]] = relationship(
         back_populates="recette_base", cascade="all, delete-orphan"
     )
-    repas_planifies: Mapped[List["RepasPlanifie"]] = relationship(
+    repas_planning: Mapped[List["RepasPlanning"]] = relationship(
         back_populates="recette", cascade="all, delete-orphan"
     )
+
 
 
 class RecetteIngredient(Base):
@@ -236,6 +237,7 @@ class PlanningHebdomadaire(Base):
 
     # Relations
     repas: Mapped[List["RepasPlanning"]] = relationship(
+        "RepasPlanning",
         back_populates="planning",
         cascade="all, delete-orphan",
         order_by="RepasPlanning.jour_semaine, RepasPlanning.ordre"
@@ -262,7 +264,7 @@ class RepasPlanning(Base):
 
     # Relations
     planning: Mapped["PlanningHebdomadaire"] = relationship(back_populates="repas")
-    recette: Mapped[Optional["Recette"]] = relationship()
+    recette: Mapped[Optional["Recette"]] = relationship(back_populates="repas_planning")
 
 class ConfigPlanningUtilisateur(Base):
     """Configuration utilisateur pour le planning"""
