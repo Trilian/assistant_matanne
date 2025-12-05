@@ -297,220 +297,218 @@ def app():
         st.session_state.active_tab = "📚 Mes Recettes"  # Onglet par défaut
 
     tab1, tab2, tab3 = st.tabs(["📚 Mes Recettes", "✨ Générer avec l'IA", "➕ Ajouter Manuellement"])
-    if st.session_state.active_tab == "📚 Mes Recettes":
-        with tab1:
-            st.subheader("Ma collection de recettes")
-            col_f1, col_f2, col_f3, col_f4 = st.columns(4)
-            with col_f1:
-                search = st.text_input("🔍 Rechercher", placeholder="Nom de recette...")
-            with col_f2:
-                saison_filter = st.selectbox(
-                    "Saison",
-                    ["Toutes"] + [s.value for s in SaisonEnum]
-                )
-            with col_f3:
-                repas_filter = st.selectbox(
-                    "Type de repas",
-                    ["Tous"] + [m.value for m in TypeRepasEnum]
-                )
-            with col_f4:
-                quick_only = st.checkbox("⚡ Rapides uniquement")
-            with st.expander("🔧 Filtres avancés"):
-                col_fa1, col_fa2 = st.columns(2)
-                with col_fa1:
-                    balanced_only = st.checkbox("🥗 Équilibrées")
-                    baby_friendly_only = st.checkbox("👶 Compatible bébé")
-                with col_fa2:
-                    batch_friendly_only = st.checkbox("🍳 Compatible batch")
-                    ai_only = st.checkbox("🤖 Générées par IA")
-            filters = {}
-            if search:
-                filters["search"] = search
-            if saison_filter != "Toutes":
-                filters["saison"] = saison_filter
-            if repas_filter != "Tous":
-                filters["type_repas"] = repas_filter
-            if quick_only:
-                filters["is_quick"] = True
-            if balanced_only:
-                filters["is_balanced"] = True
-            if baby_friendly_only:
-                filters["is_baby_friendly"] = True
-            df = load_recipes(filters)
-            if df.empty:
-                st.info("Aucune recette trouvée. Génère-en avec l'IA ou ajoute-en manuellement !")
-            else:
-                col_s1, col_s2, col_s3, col_s4 = st.columns(4)
-                with col_s1:
-                    st.metric("Total", len(df))
-                with col_s2:
-                    quick_count = len(df[df["est_rapide"] == True])
-                    st.metric("Rapides", quick_count)
-                with col_s3:
-                    ai_count = len(df[df["genere_par_ia"] == True])
-                    st.metric("Générées IA", ai_count)
-                with col_s4:
-                    avg_time = df["temps_total"].mean()
-                    st.metric("Temps moyen", f"{avg_time:.0f}min")
-                st.markdown("---")
-                for idx, recette in df.iterrows():
-                    render_recipe_card(recette)
-                    col_a1, col_a2 = st.columns([1, 4])
-                    with col_a1:
-                        if st.button("👁️ Détails", key=f"view_{recette['id']}", use_container_width=True):
-                            st.session_state[f"viewing_{recette['id']}"] = True
-                            st.rerun()
-                    with col_a2:
-                        if st.button("🗑️ Supprimer", key=f"del_{recette['id']}", use_container_width=True):
-                            delete_recipe(recette['id'])
-                            st.success("Recette supprimée")
-                            st.rerun()
-                    if st.session_state.get(f"viewing_{recette['id']}", False):
-                        with st.expander("Détails complets", expanded=True):
-                            render_recipe_details(recette['id'])
-                            if st.button("Fermer", key=f"close_{recette['id']}"):
-                                del st.session_state[f"viewing_{recette['id']}"]
-                                st.rerun()
-                    st.markdown("---")
-    elif st.session_state.active_tab == "✨ Générer avec l'IA":
-        with tab2:
-            st.subheader("✨ Générer des recettes avec l'IA")
-            st.info("💡 L'IA génère des recettes selon tes critères")
-            with st.form("ai_generation"):
-                col_g1, col_g2 = st.columns(2)
-                with col_g1:
-                    st.markdown("**Critères de base**")
-                    count = st.slider("Nombre de recettes", 1, 5, 3)
-                    saison = st.selectbox("Saison", [s.value for s in SaisonEnum])
-                    type_repas = st.selectbox("Type de repas", [m.value for m in TypeRepasEnum])
-                with col_g2:
-                    st.markdown("**Filtres**")
-                    is_quick = st.checkbox("⚡ Rapide (<30min)")
-                    is_balanced = st.checkbox("🥗 Équilibré", value=True)
-                    is_baby_friendly = st.checkbox("👶 Compatible bébé")
-                    is_batch_friendly = st.checkbox("🍳 Compatible batch cooking")
-                    is_freezable = st.checkbox("❄️ Congélable")
-                    ingredients_input = st.text_input(
-                        "Ingrédients à utiliser (optionnel)",
-                        placeholder="tomate, basilic, mozzarella"
-                    )
-                st.markdown("**Versions à générer**")
-                col_v1, col_v2, col_v3 = st.columns(3)
-                with col_v1:
-                    gen_standard = st.checkbox("📋 Standard", value=True)
-                with col_v2:
-                    gen_baby = st.checkbox("👶 Bébé")
-                with col_v3:
-                    gen_batch = st.checkbox("🍳 Batch Cooking")
-                submitted = st.form_submit_button("✨ Générer les recettes", type="primary", use_container_width=True)
-            if submitted:
-                if not gen_standard and not gen_baby and not gen_batch:
-                    st.error("Sélectionne au moins une version à générer")
-                else:
-                    with st.spinner("🤖 L'IA génère les recettes..."):
-                        try:
-                            filters = {
-                                "saison": saison,
-                                "type_repas": type_repas,
-                                "is_quick": is_quick,
-                                "is_balanced": is_balanced,
-                                "ingredients": [i.strip() for i in ingredients_input.split(",")] if ingredients_input else None
-                            }
-                            loop = asyncio.new_event_loop()
-                            asyncio.set_event_loop(loop)
-                            recipes = loop.run_until_complete(
-                                ai_recette_service.generate_recipes(
-                                    count=count,
-                                    filters=filters,
-                                    version_type=TypeVersionRecetteEnum.STANDARD.value
-                                )
-                            )
-                            if gen_baby or gen_batch:
-                                for recipe in recipes:
-                                    versions = {}
-                                    if gen_baby:
-                                        baby_recipes = loop.run_until_complete(
-                                            ai_recette_service.generate_recipes(
-                                                count=1,
-                                                filters={"nom": recipe["nom"]},
-                                                version_type=TypeVersionRecetteEnum.BEBE.value
-                                            )
-                                        )
-                                        if baby_recipes:
-                                            versions[TypeVersionRecetteEnum.BEBE] = baby_recipes[0].get("version_bebe", {})
-                                    if gen_batch:
-                                        batch_recipes = loop.run_until_complete(
-                                            ai_recette_service.generate_recipes(
-                                                count=1,
-                                                filters={"nom": recipe["nom"]},
-                                                version_type=TypeVersionRecetteEnum.BATCH_COOKING.value
-                                            )
-                                        )
-                                        if batch_recipes:
-                                            versions[TypeVersionRecetteEnum.BATCH_COOKING] = batch_recipes[0].get("version_batch", {})
-                                    recipe["versions"] = versions
-                            for recipe in recipes:
-                                recipe["url_image"] =  ai_recette_service.generate_image_url(
-                                    recipe["nom"],
-                                    recipe["description"]
-                                )
-
-                            st.session_state["generated_recipes"] = recipes
-                            st.success(f"✅ {len(recipes)} recette(s) générée(s) !")
-                        except Exception as e:
-                            st.error(f"❌ Erreur : {str(e)}")
-            if "generated_recipes" in st.session_state:
-                st.markdown("---")
-                st.markdown("### 📋 Recettes générées")
-                recipes = st.session_state["generated_recipes"]
-                selected_recipes = []
-                for idx, recipe in enumerate(recipes):
-                    with st.expander(f"🍽️ {recipe['nom']}", expanded=True):
-                        col_r1, col_r2 = st.columns([1, 2])
-                        with col_r1:
-                            if recipe.get("url_image"):
-                                st.image(recipe["url_image"], use_container_width=True)
-                        with col_r2:
-                            st.write(f"**{recipe['description']}**")
-                            col_info1, col_info2, col_info3 = st.columns(3)
-                            with col_info1:
-                                st.caption(f"⏱️ {recipe['temps_preparation'] + recipe['temps_cuisson']}min")
-                            with col_info2:
-                                st.caption(f"🍽️ {recipe['portions']} portions")
-                            with col_info3:
-                                st.caption(f"😊 {recipe['difficulte'].capitalize()}")
-                        st.markdown("**Ingrédients :**")
-                        for ing in recipe["ingredients"]:
-                            st.write(f"• {ing['quantite']} {ing['unite']} de {ing['nom']}")
-                        st.markdown("**Étapes :**")
-                        for step in recipe["etapes"]:
-                            st.write(f"{step['ordre']}. {step['description']}")
-                        if recipe.get("versions"):
-                            st.markdown("**Versions disponibles :**")
-                            versions_str = []
-                            if TypeVersionRecetteEnum.BEBE in recipe["versions"]:
-                                versions_str.append("👶 Bébé")
-                            if TypeVersionRecetteEnum.BATCH_COOKING in recipe["versions"]:
-                                versions_str.append("🍳 Batch")
-                            st.caption(" • ".join(versions_str))
-                        if st.checkbox(f"Sélectionner cette recette", key=f"select_{idx}"):
-                            selected_recipes.append(recipe)
-                if selected_recipes:
-                    if st.button(f"➕ Ajouter {len(selected_recipes)} recette(s) sélectionnée(s)", type="primary"):
-                        for recipe in selected_recipes:
-                            version_data = None
-                            if recipe.get("versions"):
-                                version_data = {}
-                                if TypeVersionRecetteEnum.BEBE in recipe["versions"]:
-                                    version_data[TypeVersionRecetteEnum.BEBE] = recipe["versions"][TypeVersionRecetteEnum.BEBE]
-                                if TypeVersionRecetteEnum.BATCH_COOKING in recipe["versions"]:
-                                    version_data[TypeVersionRecetteEnum.BATCH_COOKING] = recipe["versions"][TypeVersionRecetteEnum.BATCH_COOKING]
-                            save_recipe(recipe, version_data)
-                        st.success(f"✅ {len(selected_recipes)} recette(s) ajoutée(s) !")
-                        del st.session_state["generated_recipes"]
-                        st.balloons()
+    with tab1:
+        st.subheader("Ma collection de recettes")
+        col_f1, col_f2, col_f3, col_f4 = st.columns(4)
+        with col_f1:
+            search = st.text_input("🔍 Rechercher", placeholder="Nom de recette...")
+        with col_f2:
+            saison_filter = st.selectbox(
+                "Saison",
+                ["Toutes"] + [s.value for s in SaisonEnum]
+            )
+        with col_f3:
+            repas_filter = st.selectbox(
+                "Type de repas",
+                ["Tous"] + [m.value for m in TypeRepasEnum]
+            )
+        with col_f4:
+            quick_only = st.checkbox("⚡ Rapides uniquement")
+        with st.expander("🔧 Filtres avancés"):
+            col_fa1, col_fa2 = st.columns(2)
+            with col_fa1:
+                balanced_only = st.checkbox("🥗 Équilibrées")
+                baby_friendly_only = st.checkbox("👶 Compatible bébé")
+            with col_fa2:
+                batch_friendly_only = st.checkbox("🍳 Compatible batch")
+                ai_only = st.checkbox("🤖 Générées par IA")
+        filters = {}
+        if search:
+            filters["search"] = search
+        if saison_filter != "Toutes":
+            filters["saison"] = saison_filter
+        if repas_filter != "Tous":
+            filters["type_repas"] = repas_filter
+        if quick_only:
+            filters["is_quick"] = True
+        if balanced_only:
+            filters["is_balanced"] = True
+        if baby_friendly_only:
+            filters["is_baby_friendly"] = True
+        df = load_recipes(filters)
+        if df.empty:
+            st.info("Aucune recette trouvée. Génère-en avec l'IA ou ajoute-en manuellement !")
+        else:
+            col_s1, col_s2, col_s3, col_s4 = st.columns(4)
+            with col_s1:
+                st.metric("Total", len(df))
+            with col_s2:
+                quick_count = len(df[df["est_rapide"] == True])
+                st.metric("Rapides", quick_count)
+            with col_s3:
+                ai_count = len(df[df["genere_par_ia"] == True])
+                st.metric("Générées IA", ai_count)
+            with col_s4:
+                avg_time = df["temps_total"].mean()
+                st.metric("Temps moyen", f"{avg_time:.0f}min")
+            st.markdown("---")
+            for idx, recette in df.iterrows():
+                render_recipe_card(recette)
+                col_a1, col_a2 = st.columns([1, 4])
+                with col_a1:
+                    if st.button("👁️ Détails", key=f"view_{recette['id']}", use_container_width=True):
+                        st.session_state[f"viewing_{recette['id']}"] = True
                         st.rerun()
-    elif st.session_state.active_tab == "➕ Ajouter Manuellement":
+                with col_a2:
+                    if st.button("🗑️ Supprimer", key=f"del_{recette['id']}", use_container_width=True):
+                        delete_recipe(recette['id'])
+                        st.success("Recette supprimée")
+                        st.rerun()
+                if st.session_state.get(f"viewing_{recette['id']}", False):
+                    with st.expander("Détails complets", expanded=True):
+                        render_recipe_details(recette['id'])
+                        if st.button("Fermer", key=f"close_{recette['id']}"):
+                            del st.session_state[f"viewing_{recette['id']}"]
+                            st.rerun()
+                st.markdown("---")
+    with tab2:
+        st.subheader("✨ Générer des recettes avec l'IA")
+        st.info("💡 L'IA génère des recettes selon tes critères")
+        with st.form("ai_generation"):
+            col_g1, col_g2 = st.columns(2)
+            with col_g1:
+                st.markdown("**Critères de base**")
+                count = st.slider("Nombre de recettes", 1, 5, 3)
+                saison = st.selectbox("Saison", [s.value for s in SaisonEnum])
+                type_repas = st.selectbox("Type de repas", [m.value for m in TypeRepasEnum])
+            with col_g2:
+                st.markdown("**Filtres**")
+                is_quick = st.checkbox("⚡ Rapide (<30min)")
+                is_balanced = st.checkbox("🥗 Équilibré", value=True)
+                is_baby_friendly = st.checkbox("👶 Compatible bébé")
+                is_batch_friendly = st.checkbox("🍳 Compatible batch cooking")
+                is_freezable = st.checkbox("❄️ Congélable")
+                ingredients_input = st.text_input(
+                    "Ingrédients à utiliser (optionnel)",
+                    placeholder="tomate, basilic, mozzarella"
+                )
+            st.markdown("**Versions à générer**")
+            col_v1, col_v2, col_v3 = st.columns(3)
+            with col_v1:
+                gen_standard = st.checkbox("📋 Standard", value=True)
+            with col_v2:
+                gen_baby = st.checkbox("👶 Bébé")
+            with col_v3:
+                gen_batch = st.checkbox("🍳 Batch Cooking")
+            submitted = st.form_submit_button("✨ Générer les recettes", type="primary", use_container_width=True)
+        if submitted:
+            if not gen_standard and not gen_baby and not gen_batch:
+                st.error("Sélectionne au moins une version à générer")
+            else:
+                with st.spinner("🤖 L'IA génère les recettes..."):
+                    try:
+                        filters = {
+                            "saison": saison,
+                            "type_repas": type_repas,
+                            "is_quick": is_quick,
+                            "is_balanced": is_balanced,
+                            "ingredients": [i.strip() for i in ingredients_input.split(",")] if ingredients_input else None
+                        }
+                        loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(loop)
+                        recipes = loop.run_until_complete(
+                            ai_recette_service.generate_recipes(
+                                count=count,
+                                filters=filters,
+                                version_type=TypeVersionRecetteEnum.STANDARD.value
+                            )
+                        )
+                        if gen_baby or gen_batch:
+                            for recipe in recipes:
+                                versions = {}
+                                if gen_baby:
+                                    baby_recipes = loop.run_until_complete(
+                                        ai_recette_service.generate_recipes(
+                                            count=1,
+                                            filters={"nom": recipe["nom"]},
+                                            version_type=TypeVersionRecetteEnum.BEBE.value
+                                        )
+                                    )
+                                    if baby_recipes:
+                                        versions[TypeVersionRecetteEnum.BEBE] = baby_recipes[0].get("version_bebe", {})
+                                if gen_batch:
+                                    batch_recipes = loop.run_until_complete(
+                                        ai_recette_service.generate_recipes(
+                                            count=1,
+                                            filters={"nom": recipe["nom"]},
+                                            version_type=TypeVersionRecetteEnum.BATCH_COOKING.value
+                                        )
+                                    )
+                                    if batch_recipes:
+                                        versions[TypeVersionRecetteEnum.BATCH_COOKING] = batch_recipes[0].get("version_batch", {})
+                                recipe["versions"] = versions
+                        for recipe in recipes:
+                            recipe["url_image"] =  ai_recette_service.generate_image_url(
+                                recipe["nom"],
+                                recipe["description"]
+                            )
+
+                        st.session_state["generated_recipes"] = recipes
+                        st.success(f"✅ {len(recipes)} recette(s) générée(s) !")
+                    except Exception as e:
+                        st.error(f"❌ Erreur : {str(e)}")
+        if "generated_recipes" in st.session_state:
+            st.markdown("---")
+            st.markdown("### 📋 Recettes générées")
+            recipes = st.session_state["generated_recipes"]
+            selected_recipes = []
+            for idx, recipe in enumerate(recipes):
+                with st.expander(f"🍽️ {recipe['nom']}", expanded=True):
+                    col_r1, col_r2 = st.columns([1, 2])
+                    with col_r1:
+                        if recipe.get("url_image"):
+                            st.image(recipe["url_image"], use_container_width=True)
+                    with col_r2:
+                        st.write(f"**{recipe['description']}**")
+                        col_info1, col_info2, col_info3 = st.columns(3)
+                        with col_info1:
+                            st.caption(f"⏱️ {recipe['temps_preparation'] + recipe['temps_cuisson']}min")
+                        with col_info2:
+                            st.caption(f"🍽️ {recipe['portions']} portions")
+                        with col_info3:
+                            st.caption(f"😊 {recipe['difficulte'].capitalize()}")
+                    st.markdown("**Ingrédients :**")
+                    for ing in recipe["ingredients"]:
+                        st.write(f"• {ing['quantite']} {ing['unite']} de {ing['nom']}")
+                    st.markdown("**Étapes :**")
+                    for step in recipe["etapes"]:
+                        st.write(f"{step['ordre']}. {step['description']}")
+                    if recipe.get("versions"):
+                        st.markdown("**Versions disponibles :**")
+                        versions_str = []
+                        if TypeVersionRecetteEnum.BEBE in recipe["versions"]:
+                            versions_str.append("👶 Bébé")
+                        if TypeVersionRecetteEnum.BATCH_COOKING in recipe["versions"]:
+                            versions_str.append("🍳 Batch")
+                        st.caption(" • ".join(versions_str))
+                    if st.checkbox(f"Sélectionner cette recette", key=f"select_{idx}"):
+                        selected_recipes.append(recipe)
+            if selected_recipes:
+                if st.button(f"➕ Ajouter {len(selected_recipes)} recette(s) sélectionnée(s)", type="primary"):
+                    for recipe in selected_recipes:
+                        version_data = None
+                        if recipe.get("versions"):
+                            version_data = {}
+                            if TypeVersionRecetteEnum.BEBE in recipe["versions"]:
+                                version_data[TypeVersionRecetteEnum.BEBE] = recipe["versions"][TypeVersionRecetteEnum.BEBE]
+                            if TypeVersionRecetteEnum.BATCH_COOKING in recipe["versions"]:
+                                version_data[TypeVersionRecetteEnum.BATCH_COOKING] = recipe["versions"][TypeVersionRecetteEnum.BATCH_COOKING]
+                        save_recipe(recipe, version_data)
+                    st.success(f"✅ {len(selected_recipes)} recette(s) ajoutée(s) !")
+                    del st.session_state["generated_recipes"]
+                    st.balloons()
+                    st.rerun()
+
         with tab3:
             st.subheader("➕ Ajouter une recette manuellement")
             if "manual_ingredients" not in st.session_state:
