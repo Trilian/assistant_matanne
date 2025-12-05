@@ -1,13 +1,11 @@
 """
-Service IA pour la génération de recettes avec Mistral
-Supporte les versions standard, bébé et batch cooking
+Service IA pour la génération de recettes - Compatible models.py français
 """
 import streamlit as st
 import httpx
 import json
 import logging
 from typing import List, Dict, Optional
-from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +31,7 @@ class AIRecipeService:
             temperature: float = 0.7,
             max_tokens: int = 2000
     ) -> str:
-        """Appel direct à l'API Mistral via httpx"""
+        """Appel direct à l'API Mistral"""
         try:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 messages = []
@@ -82,11 +80,9 @@ class AIRecipeService:
     ) -> List[Dict]:
         """Génère des recettes avec l'API Mistral"""
         try:
-            # Construire les prompts
             system_prompt = self._build_system_prompt(version_type)
             user_prompt = self._build_prompt(count, filters, version_type)
 
-            # Appel API
             response_content = await self._call_mistral_api(
                 prompt=user_prompt,
                 system_prompt=system_prompt,
@@ -94,7 +90,6 @@ class AIRecipeService:
                 max_tokens=2000
             )
 
-            # Parser la réponse
             recipes = self._parse_response(response_content, count)
             return recipes
 
@@ -103,14 +98,15 @@ class AIRecipeService:
             raise
 
     def _build_system_prompt(self, version_type: str) -> str:
-        """Construit le system prompt selon le type de version"""
+        """Construit le system prompt"""
         base = (
-            "Tu es un chef cuisinier expert et nutritionniste. "
+            "Tu es un chef cuisinier expert et nutritionniste français. "
             "Tu génères des recettes précises, réalisables et équilibrées. "
-            "Réponds UNIQUEMENT en JSON valide, sans commentaires, sans balises markdown."
+            "Réponds UNIQUEMENT en JSON valide, sans commentaires, sans balises markdown. "
+            "Utilise des noms français pour tous les champs."
         )
 
-        if version_type == "baby":
+        if version_type == "bebe":
             base += (
                 "\n\nTu adaptes les recettes pour bébés (6-18 mois) : "
                 "- Aucun sel, sucre ajouté, miel\n"
@@ -127,101 +123,97 @@ class AIRecipeService:
 
         return base
 
-    def _build_prompt(
-            self,
-            count: int,
-            filters: Dict,
-            version_type: str
-    ) -> str:
+    def _build_prompt(self, count: int, filters: Dict, version_type: str) -> str:
         """Construit le prompt utilisateur"""
-        prompt_parts = [f"Génère {count} recette(s)"]
+        prompt_parts = [f"Génère {count} recette(s) française(s)"]
 
-        # Filtres
-        if filters.get("season"):
-            prompt_parts.append(f"de saison ({filters['season']})")
+        if filters.get("saison"):
+            prompt_parts.append(f"de saison ({filters['saison']})")
 
         if filters.get("is_quick"):
             prompt_parts.append("rapides (<30 minutes)")
 
         if filters.get("is_balanced"):
-            prompt_parts.append("équilibrées (protéines, légumes, féculents)")
+            prompt_parts.append("équilibrées")
 
-        if filters.get("meal_type"):
-            prompt_parts.append(f"pour le {filters['meal_type']}")
+        if filters.get("type_repas"):
+            prompt_parts.append(f"pour le {filters['type_repas']}")
 
         if filters.get("ingredients"):
             ing_list = ", ".join(filters["ingredients"])
-            prompt_parts.append(f"avec ces ingrédients : {ing_list}")
-
-        if filters.get("category"):
-            prompt_parts.append(f"de type {filters['category']}")
+            prompt_parts.append(f"avec : {ing_list}")
 
         prompt = " ".join(prompt_parts) + ".\n\n"
-
-        # Format JSON
         prompt += self._get_json_format(version_type)
 
         return prompt
 
     def _get_json_format(self, version_type: str) -> str:
-        """Retourne le format JSON attendu"""
+        """Retourne le format JSON attendu (noms français)"""
         base_format = """
-Format JSON requis (structure EXACTE) :
+Format JSON EXACT (structure française) :
 {
-  "recipes": [
+  "recettes": [
     {
-      "name": "Nom de la recette",
-      "description": "Description courte et appétissante (2-3 phrases)",
-      "prep_time": 15,
-      "cook_time": 30,
-      "servings": 4,
-      "difficulty": "easy",
-      "meal_type": "dinner",
-      "season": "all_year",
-      "category": "Végétarien",
-      "is_quick": true,
-      "is_balanced": true,
-      "is_baby_friendly": false,
-      "is_batch_friendly": true,
-      "is_freezable": true,
+      "nom": "Nom de la recette",
+      "description": "Description courte (2-3 phrases)",
+      "temps_preparation": 15,
+      "temps_cuisson": 30,
+      "portions": 4,
+      "difficulte": "facile",
+      "type_repas": "diner",
+      "saison": "toute_annee",
+      "categorie": "Végétarien",
+      "tag_rapide": true,
+      "tag_equilibre": true,
+      "compatible_bebe": false,
+      "compatible_batch": true,
+      "congelable": true,
       "ingredients": [
         {
-          "name": "Tomates",
-          "quantity": 500,
-          "unit": "g",
-          "optional": false
+          "nom": "Tomates",
+          "quantite": 500,
+          "unite": "g",
+          "optionnel": false
         }
       ],
-      "steps": [
+      "etapes": [
         {
-          "order": 1,
+          "ordre": 1,
           "description": "Éplucher et couper les tomates",
-          "duration": 5
+          "duree": 5
         }
       ]
     }
   ]
 }
+
+IMPORTANT : 
+- Tous les champs doivent être en français
+- Les noms de champs doivent correspondre exactement au modèle
+- Utilise "facile", "moyen", "difficile" pour difficulte
+- Utilise "petit_dejeuner", "dejeuner", "diner", "gouter" pour type_repas
+- Utilise "printemps", "ete", "automne", "hiver", "toute_annee" pour saison
 """
 
-        if version_type == "baby":
+        if version_type == "bebe":
             base_format += """
 Ajoute pour chaque recette :
-"baby_version": {
-  "modified_instructions": "Mixez finement avant de servir. Ne pas ajouter de sel.",
-  "baby_notes": "Introduire la tomate dès 6 mois. Surveiller les allergies.",
-  "modified_ingredients": [
-    {"name": "Tomates", "quantity": 100, "unit": "g", "note": "Pelées et épépinées"}
+"version_bebe": {
+  "instructions_modifiees": "Mixez finement. Pas de sel.",
+  "notes_bebe": "Dès 6 mois. Surveiller allergies.",
+  "ingredients_modifies": [
+    {"nom": "Tomates", "quantite": 100, "unite": "g", "note": "Pelées"}
   ]
 }
 """
         elif version_type == "batch_cooking":
             base_format += """
 Ajoute pour chaque recette :
-"batch_version": {
-  "parallel_steps": ["Éplucher légumes pendant que l'eau chauffe", "Préparer la sauce pendant la cuisson"],
-  "optimized_time": 45,
-  "batch_tips": "Préparer x4 portions. Se congèle 3 mois."
+"version_batch": {
+  "etapes_paralleles": ["Éplucher pendant que l'eau chauffe"],
+  "temps_optimise": 45,
+  "conseils_batch": "x4 portions. Congèle 3 mois."
 }
 """
 
@@ -230,10 +222,9 @@ Ajoute pour chaque recette :
     def _parse_response(self, content: str, expected_count: int) -> List[Dict]:
         """Parse et valide la réponse JSON"""
         try:
-            # Nettoyer la réponse
+            # Nettoyer
             cleaned = content.strip()
 
-            # Retirer markdown si présent
             if cleaned.startswith("```json"):
                 cleaned = cleaned[7:]
             if cleaned.startswith("```"):
@@ -243,19 +234,22 @@ Ajoute pour chaque recette :
 
             cleaned = cleaned.strip()
 
-            # Parser JSON
+            # Parser
             data = json.loads(cleaned)
 
-            if "recipes" not in data:
-                raise ValueError("Clé 'recipes' manquante dans la réponse")
+            # Vérifier clé (accepter "recettes" ou "recipes" pour compatibilité)
+            if "recettes" in data:
+                recettes = data["recettes"][:expected_count]
+            elif "recipes" in data:
+                recettes = data["recipes"][:expected_count]
+            else:
+                raise ValueError("Clé 'recettes' ou 'recipes' manquante")
 
-            recipes = data["recipes"][:expected_count]
-
-            # Valider chaque recette
+            # Valider
             validated = []
-            for recipe in recipes:
-                if self._validate_recipe(recipe):
-                    validated.append(recipe)
+            for recette in recettes:
+                if self._validate_recipe(recette):
+                    validated.append(recette)
 
             if not validated:
                 raise ValueError("Aucune recette valide générée")
@@ -267,41 +261,30 @@ Ajoute pour chaque recette :
             logger.error(f"Contenu: {content[:500]}")
             raise ValueError("Réponse JSON invalide de l'IA")
 
-    def _validate_recipe(self, recipe: Dict) -> bool:
+    def _validate_recipe(self, recette: Dict) -> bool:
         """Valide qu'une recette a les champs requis"""
-        required = ["name", "description", "prep_time", "cook_time", "servings", "ingredients", "steps"]
+        required = ["nom", "description", "temps_preparation", "temps_cuisson",
+                    "portions", "ingredients", "etapes"]
 
         for field in required:
-            if field not in recipe:
-                logger.warning(f"Champ '{field}' manquant dans la recette '{recipe.get('name', 'inconnue')}'")
+            if field not in recette:
+                logger.warning(f"Champ '{field}' manquant dans '{recette.get('nom', 'inconnue')}'")
                 return False
 
-        # Valider ingrédients
-        if not isinstance(recipe["ingredients"], list) or len(recipe["ingredients"]) == 0:
-            logger.warning(f"Ingrédients invalides pour '{recipe['name']}'")
+        if not isinstance(recette["ingredients"], list) or len(recette["ingredients"]) == 0:
+            logger.warning(f"Ingrédients invalides pour '{recette['nom']}'")
             return False
 
-        # Valider étapes
-        if not isinstance(recipe["steps"], list) or len(recipe["steps"]) == 0:
-            logger.warning(f"Étapes invalides pour '{recipe['name']}'")
+        if not isinstance(recette["etapes"], list) or len(recette["etapes"]) == 0:
+            logger.warning(f"Étapes invalides pour '{recette['nom']}'")
             return False
 
         return True
 
     async def generate_image_url(self, recipe_name: str, description: str) -> str:
-        """Génère une URL d'image via Unsplash (gratuit)"""
-        import urllib.parse
-
-        # Nettoyer le nom pour l'URL
-        keywords = recipe_name.lower()
-        keywords = keywords.replace("aux", "").replace("au", "").replace("de", "").replace("à", "")
-        keywords = " ".join(keywords.split()[:3])  # Max 3 mots
-
-        # Encoder pour URL
-        query = urllib.parse.quote(f"{keywords} food dish cuisine")
-
-        # Unsplash Source API (gratuit, pas de clé requise)
-        return f"https://source.unsplash.com/800x600/?{query}"
+        """Génère une URL d'image (placeholder Unsplash)"""
+        safe_name = recipe_name.replace(' ', ',')
+        return f"https://source.unsplash.com/400x300/?{safe_name},food"
 
 
 # Instance globale
