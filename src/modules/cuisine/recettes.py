@@ -487,12 +487,143 @@ def app():
                 is_quick = st.checkbox("⚡ Rapide (<30min)")
                 is_balanced = st.checkbox("🥗 Équilibré", value=True)
                 is_baby_friendly = st.checkbox("👶 Compatible bébé")
-
-            submitted = st.form_submit_button("✨ Générer", type="primary", use_container_width=True)
-
+                is_batch_friendly = st.checkbox("🍳 Compatible batch cooking")
+                is_freezable = st.checkbox("❄️ Congélable")
+                ingredients_input = st.text_input(
+                    "Ingrédients à utiliser (optionnel)",
+                    placeholder="tomate, basilic, mozzarella"
+                )
+            st.markdown("**Versions à générer**")
+            col_v1, col_v2, col_v3 = st.columns(3)
+            with col_v1:
+                gen_standard = st.checkbox("📋 Standard", value=True)
+            with col_v2:
+                gen_baby = st.checkbox("👶 Bébé")
+            with col_v3:
+                gen_batch = st.checkbox("🍳 Batch Cooking")
+            submitted = st.form_submit_button("✨ Générer les recettes", type="primary", use_container_width=True)
         if submitted:
-            st.info("Génération IA à implémenter avec ai_recette_service.py")
-
+            if not gen_standard and not gen_baby and not gen_batch:
+                st.error("Sélectionne au moins une version à générer")
+            else:
+                with st.spinner("🤖 L'IA génère les recettes..."):
+                    try:
+                        # Préparer filtres
+                        filters = {
+                            "season": season,
+                            "meal_type": meal_type,
+                            "is_quick": is_quick,
+                            "is_balanced": is_balanced,
+                            "category": category if category else None,
+                            "ingredients": [i.strip() for i in ingredients_input.split(",")] if ingredients_input else None
+                        }
+                        # Générer recettes
+                        loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(loop)
+                        recipes = loop.run_until_complete(
+                            ai_recipe_service.generate_recipes(
+                                count=count,
+                                filters=filters,
+                                version_type="standard"
+                            )
+                        )
+                        # Générer versions supplémentaires si demandé
+                        if gen_baby or gen_batch:
+                            for recipe in recipes:
+                                versions = {}
+                                if gen_baby:
+                                    baby_recipes = loop.run_until_complete(
+                                        ai_recipe_service.generate_recipes(
+                                            count=1,
+                                            filters={"name": recipe["name"]},
+                                            version_type="baby"
+                                        )
+                                    )
+                                    if baby_recipes:
+                                        versions["baby"] = baby_recipes[0].get("baby_version", {})
+                                if gen_batch:
+                                    batch_recipes = loop.run_until_complete(
+                                        ai_recipe_service.generate_recipes(
+                                            count=1,
+                                            filters={"name": recipe["name"]},
+                                            version_type="batch_cooking"
+                                        )
+                                    )
+                                    if batch_recipes:
+                                        versions["batch"] = batch_recipes[0].get("batch_version", {})
+                                recipe["versions"] = versions
+                        # Générer images
+                        for recipe in recipes:
+                            image_url = loop.run_until_complete(
+                                ai_recipe_service.generate_image_url(
+                                    recipe["name"],
+                                    recipe["description"]
+                                )
+                            )
+                            recipe["image_url"] = image_url
+                        st.session_state["generated_recipes"] = recipes
+                        st.success(f"✅ {len(recipes)} recette(s) générée(s) !")
+                    except Exception as e:
+                        st.error(f"❌ Erreur : {str(e)}")
+        # Afficher recettes générées
+        if "generated_recipes" in st.session_state:
+            st.markdown("---")
+            st.markdown("### 📋 Recettes générées")
+            recipes = st.session_state["generated_recipes"]
+            selected_recipes = []
+            for idx, recipe in enumerate(recipes):
+                with st.expander(f"🍽️ {recipe['name']}", expanded=True):
+                    col_r1, col_r2 = st.columns([1, 2])
+                    with col_r1:
+                        if recipe.get("image_url"):
+                            st.image(recipe["image_url"], use_container_width=True)
+                    with col_r2:
+                        st.write(f"**{recipe['description']}**")
+                        col_info1, col_info2, col_info3 = st.columns(3)
+                        with col_info1:
+                            st.caption(f"⏱️ {recipe['prep_time'] + recipe['cook_time']}min")
+                        with col_info2:
+                            st.caption(f"🍽️ {recipe['servings']} portions")
+                        with col_info3:
+                            st.caption(f"😊 {recipe['difficulty'].capitalize()}")
+                    # Ingrédients
+                    st.markdown("**Ingrédients :**")
+                    for ing in recipe["ingredients"]:
+                        st.write(f"• {ing['quantity']} {ing['unit']} de {ing['name']}")
+                    # Étapes
+                    st.markdown("**Étapes :**")
+                    for step in recipe["steps"]:
+                        st.write(f"{step['order']}. {step['description']}")
+                    # Versions
+                    if recipe.get("versions"):
+                        st.markdown("**Versions disponibles :**")
+                        versions_str = []
+                        if "baby" in recipe["versions"]:
+                            versions_str.append("👶 Bébé")
+                        if "batch" in recipe["versions"]:
+                            versions_str.append("🍳 Batch")
+                        st.caption(" • ".join(versions_str))
+                    # Sélection
+                    if st.checkbox(f"Sélectionner cette recette", key=f"select_{idx}"):
+                        selected_recipes.append(recipe)
+            # Bouton ajout
+            if selected_recipes:
+                if st.button(f"➕ Ajouter {len(selected_recipes)} recette(s) sélectionnée(s)", type="primary"):
+                    for recipe in selected_recipes:
+                        # Préparer versions
+                        version_data = None
+                        if recipe.get("versions"):
+                            version_data = {}
+                            if "baby" in recipe["versions"]:
+                                version_data[RecipeVersionEnum.BABY] = recipe["versions"]["baby"]
+                            if "batch" in recipe["versions"]:
+                                version_data[RecipeVersionEnum.BATCH_COOKING] = recipe["versions"]["batch"]
+                        # Sauvegarder
+                        save_recipe(recipe, version_data)
+                    st.success(f"✅ {len(selected_recipes)} recette(s) ajoutée(s) !")
+                    del st.session_state["generated_recipes"]
+                    st.balloons()
+                    st.rerun()
     # ===================================
     # TAB 3 : AJOUT MANUEL
     # ===================================
