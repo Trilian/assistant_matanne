@@ -221,9 +221,9 @@ Ajoute pour chaque recette :
 
             # 3. Vérification des clés attendues
             if "recettes" in data:
-                recettes = data["recettes"][\:expected_count]
+                recettes = data["recettes"][:expected_count]
                 elif "recipes" in data:
-                recettes = data["recipes"][\:expected_count]
+                recettes = data["recipes"][:expected_count]
                 else:
                 # Si le format est différent, essaie de deviner
                 if isinstance(data, list):
