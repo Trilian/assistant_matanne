@@ -3,13 +3,13 @@ Modèles SQLAlchemy - Version française
 Tous les noms de tables et colonnes en français
 """
 from datetime import datetime, date
-from typing import Optional, List
+from typing import Optional, List, Dict
 from sqlalchemy import (
     Column, Integer, String, DateTime, Date, Float, Boolean,
     ForeignKey, Text, JSON, Enum as SQLEnum, CheckConstraint,
 )
 from sqlalchemy.orm import relationship, Mapped, mapped_column, declarative_base
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import JSONB, ARRAY
 import enum
 
 Base = declarative_base()
@@ -145,7 +145,7 @@ class RecetteIngredient(Base):
 
 
 class EtapeRecette(Base):
-    """Étape d'une recette"""
+    """Étape xxxd'une recette"""
     __tablename__ = "etapes_recette"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -217,21 +217,74 @@ class ArticleCourses(Base):
     achete_le: Mapped[Optional[datetime]] = mapped_column(DateTime)
 
 
-class RepasPlanifie(Base):
-    """Repas planifié (batch cooking)"""
-    __tablename__ = "repas_planifies"
+# ===================================
+# PLANNING HEBDOMADAIRE
+# ===================================
+
+class PlanningHebdomadaire(Base):
+    """Planning d'une semaine"""
+    __tablename__ = "plannings_hebdomadaires"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    recette_id: Mapped[int] = mapped_column(ForeignKey("recettes.id", ondelete="CASCADE"))
-    date_prevue: Mapped[date] = mapped_column(Date, nullable=False)
-    portions: Mapped[int] = mapped_column(Integer, default=4)
-    statut: Mapped[str] = mapped_column(String(50), default="à faire")
-    planifie_par_ia: Mapped[bool] = mapped_column(Boolean, default=False)
+    semaine_debut: Mapped[date] = mapped_column(Date, nullable=False)  # Lundi
+    nom: Mapped[Optional[str]] = mapped_column(String(200))
+    genere_par_ia: Mapped[bool] = mapped_column(Boolean, default=False)
+    statut: Mapped[str] = mapped_column(String(50), default="brouillon")  # brouillon, actif, archive
     notes: Mapped[Optional[str]] = mapped_column(Text)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relations
+    repas: Mapped[List["RepasPlanning"]] = relationship(
+        back_populates="planning",
+        cascade="all, delete-orphan",
+        order_by="RepasPlanning.jour_semaine, RepasPlanning.ordre"
+    )
+
+class RepasPlanning(Base):
+    """Repas individuel dans un planning"""
+    __tablename__ = "repas_planning"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    planning_id: Mapped[int] = mapped_column(ForeignKey("plannings_hebdomadaires.id", ondelete="CASCADE"))
+    jour_semaine: Mapped[int] = mapped_column(Integer, nullable=False)  # 0=lundi, 6=dimanche
+    date: Mapped[date] = mapped_column(Date, nullable=False)
+    type_repas: Mapped[str] = mapped_column(String(50), nullable=False)
+    recette_id: Mapped[Optional[int]] = mapped_column(ForeignKey("recettes.id", ondelete="SET NULL"))
+    portions: Mapped[int] = mapped_column(Integer, default=4)
+    est_adapte_bebe: Mapped[bool] = mapped_column(Boolean, default=False)
+    est_batch_cooking: Mapped[bool] = mapped_column(Boolean, default=False)
+    recettes_batch: Mapped[Optional[List[int]]] = mapped_column(ARRAY(Integer))  # IDs recettes produites
+    notes: Mapped[Optional[str]] = mapped_column(Text)
+    ordre: Mapped[int] = mapped_column(Integer, default=0)  # Ordre dans la journée
+    statut: Mapped[str] = mapped_column(String(50), default="planifié")
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     # Relations
-    recette: Mapped["Recette"] = relationship(back_populates="repas_planifies")
+    planning: Mapped["PlanningHebdomadaire"] = relationship(back_populates="repas")
+    recette: Mapped[Optional["Recette"]] = relationship()
+
+class ConfigPlanningUtilisateur(Base):
+    """Configuration utilisateur pour le planning"""
+    __tablename__ = "config_planning_utilisateur"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    utilisateur_id: Mapped[Optional[int]] = mapped_column(ForeignKey("utilisateurs.id", ondelete="CASCADE"))
+    repas_actifs: Mapped[Dict] = mapped_column(JSONB, default={
+        "petit_déjeuner": False,
+        "déjeuner": True,
+        "dîner": True,
+        "goûter": False,
+        "bébé": False,
+        "batch_cooking": False
+    })
+    nb_adultes: Mapped[int] = mapped_column(Integer, default=2)
+    nb_enfants: Mapped[int] = mapped_column(Integer, default=0)
+    a_bebe: Mapped[bool] = mapped_column(Boolean, default=False)
+    batch_cooking_actif: Mapped[bool] = mapped_column(Boolean, default=False)
+    jours_batch: Mapped[List[int]] = mapped_column(ARRAY(Integer), default=[])  # [0, 6] = lundi/dimanche
+    preferences: Mapped[Dict] = mapped_column(JSONB, default={})
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 
 # ===================================

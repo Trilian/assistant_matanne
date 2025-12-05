@@ -370,7 +370,7 @@ def render_sidebar():
             "🍳 Cuisine": {
                 "📚 Recettes": "cuisine.recettes",
                 "🥫 Inventaire": "cuisine.inventaire",
-                "👨‍🍳 Batch Cooking": "cuisine.batch_cooking",
+                "👨‍🍳 Planning de la semaine": "cuisine.planning_semaine",
                 "🛒 Courses": "cuisine.courses",
             },
             "👨‍👩‍👧‍👦 Famille": {
