@@ -89,8 +89,8 @@ class Recette(Base):
     difficulte: Mapped[str] = mapped_column(String(50), default="moyen")
 
     # Catégories & Tags
-    type_repas: Mapped[str] = mapped_column(String(50), default="dîner")
-    saison: Mapped[str] = mapped_column(String(50), default="toute_année")
+    type_repas: Mapped[str] = mapped_column(String(50), default=TypeRepasEnum.DINER.value)
+    saison: Mapped[str] = mapped_column(String(50), default=SaisonEnum.TOUTE_ANNEE.value)
     categorie: Mapped[Optional[str]] = mapped_column(String(100))
 
     # Tags booléens
