@@ -469,7 +469,7 @@ def load_module(module_name: str):
             "accueil": "src.modules.accueil",
             "cuisine.recettes": "src.modules.cuisine.recettes",
             "cuisine.inventaire": "src.modules.cuisine.inventaire",
-            "cuisine.batch_cooking": "src.modules.cuisine.batch_cooking",
+            "cuisine.planning_semaine": "src.modules.cuisine.planning_semaine",
             "cuisine.courses": "src.modules.cuisine.courses",
             "famille.suivi_jules": "src.modules.famille.suivi_jules",
             "famille.bien_etre": "src.modules.famille.bien_etre",
