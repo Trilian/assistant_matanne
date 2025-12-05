@@ -287,4 +287,4 @@ Ajoute pour chaque recette :
         return f"https://source.unsplash.com/400x300/?{safe_name},food"
 
 # Instance globale
-ai_recipe_service = AIRecipeService()
+ai_recette_service = AIRecipeService()

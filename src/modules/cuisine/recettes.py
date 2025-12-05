@@ -13,7 +13,7 @@ from src.core.models import (
     Recette, RecetteIngredient, EtapeRecette, VersionRecette,
     Ingredient,TypeVersionRecetteEnum,SaisonEnum,TypeRepasEnum
 )
-from src.services.ai_recette_service import ai_recipe_service
+from src.services.ai_recette_service import ai_recette_service
 
 
 # ===================================
