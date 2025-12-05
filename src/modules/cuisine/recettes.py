@@ -9,8 +9,8 @@ from datetime import datetime, date
 from typing import List, Dict, Optional
 from src.core.database import get_db_context
 from src.core.models import (
-    Recipe, RecipeIngredient, RecipeStep, RecipeVersion,
-    Ingredient, RecipeVersionEnum, SeasonEnum, MealTypeEnum
+    Recette, RecetteIngredient, EtapeRecette, VersionRecette,
+    Ingredient
 )
 from src.services.ai_recette_service import ai_recipe_service
 # ===================================
@@ -19,169 +19,189 @@ from src.services.ai_recette_service import ai_recipe_service
 def load_recipes(filters: Optional[Dict] = None) -> pd.DataFrame:
     """Charge les recettes avec filtres"""
     with get_db_context() as db:
-        query = db.query(Recipe)
+        query = db.query(Recette)
+
         if filters:
-            if filters.get("season"):
-                query = query.filter(Recipe.season == filters["season"])
-            if filters.get("meal_type"):
-                query = query.filter(Recipe.meal_type == filters["meal_type"])
-            if filters.get("is_quick"):
-                query = query.filter(Recipe.is_quick == True)
-            if filters.get("is_balanced"):
-                query = query.filter(Recipe.is_balanced == True)
-            if filters.get("is_baby_friendly"):
-                query = query.filter(Recipe.is_baby_friendly == True)
-            if filters.get("search"):
-                query = query.filter(Recipe.name.ilike(f"%{filters['search']}%"))
-        recipes = query.order_by(Recipe.created_at.desc()).all()
+            if filters.get("saison"):
+                query = query.filter(Recette.saison == filters["saison"])
+            if filters.get("type_repas"):
+                query = query.filter(Recette.type_repas == filters["type_repas"])
+            if filters.get("est_rapide"):
+                query = query.filter(Recette.est_rapide == True)
+            if filters.get("est_equilibre"):
+                query = query.filter(Recette.est_equilibre == True)
+            if filters.get("compatible_bebe"):
+                query = query.filter(Recette.compatible_bebe == True)
+            if filters.get("recherche"):
+                query = query.filter(Recette.nom.ilike(f"%{filters['recherche']}%"))
+
+        recettes = query.order_by(Recette.cree_le.desc()).all()
+
         return pd.DataFrame([{
             "id": r.id,
-            "name": r.name,
+            "nom": r.nom,
             "description": r.description,
-            "prep_time": r.prep_time,
-            "cook_time": r.cook_time,
-            "total_time": r.prep_time + r.cook_time,
-            "servings": r.servings,
-            "difficulty": r.difficulty,
-            "meal_type": r.meal_type,
-            "season": r.season,
-            "category": r.category or "—",
-            "is_quick": r.is_quick,
-            "is_balanced": r.is_balanced,
-            "is_baby_friendly": r.is_baby_friendly,
-            "is_batch_friendly": r.is_batch_friendly,
-            "is_freezable": r.is_freezable,
-            "ai_generated": r.ai_generated,
-            "ai_score": r.ai_score or 0,
-            "image_url": r.image_url,
-            "created_at": r.created_at
-        } for r in recipes])
+            "temps_preparation": r.temps_preparation,
+            "temps_cuisson": r.temps_cuisson,
+            "temps_total": r.temps_preparation + r.temps_cuisson,
+            "portions": r.portions,
+            "difficulte": r.difficulte,
+            "type_repas": r.type_repas,
+            "saison": r.saison,
+            "categorie": r.categorie or "—",
+            "est_rapide": r.est_rapide,
+            "est_equilibre": r.est_equilibre,
+            "compatible_bebe": r.compatible_bebe,
+            "compatible_batch": r.compatible_batch,
+            "congelable": r.congelable,
+            "genere_par_ia": r.genere_par_ia,
+            "score_ia": r.score_ia or 0,
+            "url_image": r.url_image,
+            "cree_le": r.cree_le
+        } for r in recettes])
+
 def load_recipe_details(recipe_id: int) -> Dict:
     """Charge les détails complets d'une recette"""
     with get_db_context() as db:
-        recipe = db.query(Recipe).get(recipe_id)
-        if not recipe:
+        recette = db.query(Recette).get(recipe_id)
+        if not recette:
             return None
+
         return {
-            "recipe": recipe,
+            "recette": recette,
             "ingredients": [
                 {
-                    "name": ri.ingredient.name,
-                    "quantity": ri.quantity,
-                    "unit": ri.unit,
-                    "optional": ri.optional
+                    "nom": ri.ingredient.nom,
+                    "quantite": ri.quantite,
+                    "unite": ri.unite,
+                    "optionnel": ri.optionnel
                 }
-                for ri in recipe.ingredients
+                for ri in recette.ingredients
             ],
-            "steps": [
+            "etapes": [
                 {
-                    "order": step.order,
+                    "ordre": step.ordre,
                     "description": step.description,
-                    "duration": step.duration
+                    "duree": step.duree
                 }
-                for step in sorted(recipe.steps, key=lambda x: x.order)
+                for step in sorted(recette.etapes, key=lambda x: x.ordre)
             ],
             "versions": [
                 {
-                    "type": v.version_type,
-                    "instructions": v.modified_instructions,
-                    "baby_notes": v.baby_notes,
-                    "batch_info": {
-                        "parallel_steps": v.batch_parallel_steps,
-                        "optimized_time": v.batch_optimized_time
-                    } if v.version_type == RecipeVersionEnum.BATCH_COOKING else None
+                    "type": v.type_version,
+                    "instructions": v.instructions_modifiees,
+                    "notes_bebe": v.notes_bebe,
+                    "infos_batch": {
+                        "etapes_paralleles": v.etapes_paralleles_batch,
+                        "temps_optimise": v.temps_optimise_batch
+                    } if v.type_version == "batch_cooking" else None
                 }
-                for v in recipe.versions
+                for v in recette.versions
             ]
         }
 def save_recipe(recipe_data: Dict, version_data: Optional[Dict] = None) -> int:
     """Sauvegarde une recette avec ses ingrédients, étapes et versions"""
     with get_db_context() as db:
         # Créer la recette
-        recipe = Recipe(
-            name=recipe_data["name"],
+        recette = Recette(
+            nom=recipe_data["nom"],
             description=recipe_data.get("description"),
-            prep_time=recipe_data["prep_time"],
-            cook_time=recipe_data["cook_time"],
-            servings=recipe_data["servings"],
-            difficulty=recipe_data.get("difficulty", "medium"),
-            meal_type=recipe_data.get("meal_type", MealTypeEnum.DINNER),
-            season=recipe_data.get("season", SeasonEnum.ALL_YEAR),
-            category=recipe_data.get("category"),
-            is_quick=recipe_data.get("is_quick", False),
-            is_balanced=recipe_data.get("is_balanced", False),
-            is_baby_friendly=recipe_data.get("is_baby_friendly", False),
-            is_batch_friendly=recipe_data.get("is_batch_friendly", False),
-            is_freezable=recipe_data.get("is_freezable", False),
-            ai_generated=recipe_data.get("ai_generated", False),
-            ai_score=recipe_data.get("ai_score"),
-            image_url=recipe_data.get("image_url")
+            temps_preparation=recipe_data["temps_preparation"],
+            temps_cuisson=recipe_data["temps_cuisson"],
+            portions=recipe_data["portions"],
+            difficulte=recipe_data.get("difficulte", "moyen"),
+            type_repas=recipe_data.get("type_repas", "dîner"),
+            saison=recipe_data.get("saison", "toute_année"),
+            categorie=recipe_data.get("categorie"),
+            est_rapide=recipe_data.get("est_rapide", False),
+            est_equilibre=recipe_data.get("est_equilibre", False),
+            compatible_bebe=recipe_data.get("compatible_bebe", False),
+            compatible_batch=recipe_data.get("compatible_batch", False),
+            congelable=recipe_data.get("congelable", False),
+            genere_par_ia=recipe_data.get("genere_par_ia", False),
+            score_ia=recipe_data.get("score_ia"),
+            url_image=recipe_data.get("url_image")
         )
-        db.add(recipe)
+        db.add(recette)
         db.flush()
+
         # Ajouter ingrédients
         for ing_data in recipe_data.get("ingredients", []):
-            # Récupérer ou créer l'ingrédient
             ingredient = db.query(Ingredient).filter(
-                Ingredient.name == ing_data["name"]
+                Ingredient.nom == ing_data["nom"]
             ).first()
+
             if not ingredient:
                 ingredient = Ingredient(
-                    name=ing_data["name"],
-                    unit=ing_data["unit"],
-                    category=ing_data.get("category")
+                    nom=ing_data["nom"],
+                    unite=ing_data["unite"],
+                    categorie=ing_data.get("categorie")
                 )
                 db.add(ingredient)
                 db.flush()
-            # Ajouter à la recette
-            recipe_ing = RecipeIngredient(
-                recipe_id=recipe.id,
+
+            recette_ing = RecetteIngredient(
+                recette_id=recette.id,
                 ingredient_id=ingredient.id,
-                quantity=ing_data["quantity"],
-                unit=ing_data["unit"],
-                optional=ing_data.get("optional", False)
+                quantite=ing_data["quantite"],
+                unite=ing_data["unite"],
+                optionnel=ing_data.get("optionnel", False)
             )
-            db.add(recipe_ing)
+            db.add(recette_ing)
+
         # Ajouter étapes
-        for step_data in recipe_data.get("steps", []):
-            step = RecipeStep(
-                recipe_id=recipe.id,
-                order=step_data["order"],
+        for step_data in recipe_data.get("etapes", []):
+            etape = EtapeRecette(
+                recette_id=recette.id,
+                ordre=step_data["ordre"],
                 description=step_data["description"],
-                duration=step_data.get("duration")
+                duree=step_data.get("duree")
             )
-            db.add(step)
+            db.add(etape)
+
         # Ajouter versions
         if version_data:
             for v_type, v_data in version_data.items():
-                version = RecipeVersion(
-                    base_recipe_id=recipe.id,
-                    version_type=v_type,
-                    modified_instructions=v_data.get("modified_instructions"),
-                    modified_ingredients=v_data.get("modified_ingredients"),
-                    baby_notes=v_data.get("baby_notes"),
-                    batch_parallel_steps=v_data.get("parallel_steps"),
-                    batch_optimized_time=v_data.get("optimized_time")
+                version = VersionRecette(
+                    recette_base_id=recette.id,
+                    type_version=v_type,
+                    instructions_modifiees=v_data.get("instructions_modifiees"),
+                    ingredients_modifies=v_data.get("ingredients_modifies"),
+                    notes_bebe=v_data.get("notes_bebe"),
+                    etapes_paralleles_batch=v_data.get("etapes_paralleles"),
+                    temps_optimise_batch=v_data.get("temps_optimise")
                 )
                 db.add(version)
+
         db.commit()
-        return recipe.id
+        return recette.id
+
 def delete_recipe(recipe_id: int):
     """Supprime une recette"""
     with get_db_context() as db:
-        db.query(Recipe).filter(Recipe.id == recipe_id).delete()
+        db.query(Recette).filter(Recette.id == recipe_id).delete()
         db.commit()
 # ===================================
 # UI COMPONENTS
 # ===================================
-def render_recipe_card(recipe: pd.Series):
+def render_recipe_card(recette: pd.Series):
     """Affiche une carte recette moderne"""
     with st.container():
         col1, col2 = st.columns([1, 3])
+
         with col1:
-            # Image
-            if recipe["image_url"]:
-                st.image(recipe["image_url"], use_container_width=True)
+            # Image - FIX
+            if pd.notna(recette["url_image"]) and recette["url_image"]:
+                try:
+                    st.image(recette["url_image"], use_container_width=True)
+                except:
+                    st.markdown("""
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                                    height: 150px; border-radius: 8px; display: flex; 
+                                    align-items: center; justify-content: center; color: white;">
+                            <span style="font-size: 3rem;">🍽️</span>
+                        </div>
+                    """, unsafe_allow_html=True)
             else:
                 st.markdown("""
                     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
@@ -190,96 +210,116 @@ def render_recipe_card(recipe: pd.Series):
                         <span style="font-size: 3rem;">🍽️</span>
                     </div>
                 """, unsafe_allow_html=True)
+
         with col2:
             # Titre et tags
-            st.markdown(f"### {recipe['name']}")
+            st.markdown(f"### {recette['nom']}")
+
             # Tags
             tags = []
-            if recipe["is_quick"]:
+            if recette["est_rapide"]:
                 tags.append("⚡ Rapide")
-            if recipe["is_balanced"]:
+            if recette["est_equilibre"]:
                 tags.append("🥗 Équilibré")
-            if recipe["is_baby_friendly"]:
+            if recette["compatible_bebe"]:
                 tags.append("👶 Bébé OK")
-            if recipe["is_batch_friendly"]:
+            if recette["compatible_batch"]:
                 tags.append("🍳 Batch")
-            if recipe["is_freezable"]:
+            if recette["congelable"]:
                 tags.append("❄️ Congélation")
-            if recipe["ai_generated"]:
-                tags.append(f"🤖 IA ({recipe['ai_score']:.0f}%)")
+            if recette["genere_par_ia"]:
+                tags.append(f"🤖 IA ({recette['score_ia']:.0f}%)")
+
             st.caption(" • ".join(tags) if tags else "—")
+
             # Description
-            if recipe["description"]:
-                st.write(recipe["description"][:150] + "..." if len(recipe["description"]) > 150 else recipe["description"])
+            if recette["description"]:
+                desc = recette["description"]
+                st.write(desc[:150] + "..." if len(desc) > 150 else desc)
+
             # Infos
             col_info1, col_info2, col_info3, col_info4 = st.columns(4)
+
             with col_info1:
-                st.caption(f"⏱️ {recipe['total_time']}min")
+                st.caption(f"⏱️ {recette['temps_total']}min")
             with col_info2:
-                st.caption(f"🍽️ {recipe['servings']} pers.")
+                st.caption(f"🍽️ {recette['portions']} pers.")
             with col_info3:
-                difficulty_emoji = {"easy": "😊", "medium": "😐", "hard": "😰"}
-                st.caption(f"{difficulty_emoji.get(recipe['difficulty'], '😐')} {recipe['difficulty'].capitalize()}")
+                difficulty_emoji = {"facile": "😊", "moyen": "😐", "difficile": "😰"}
+                st.caption(f"{difficulty_emoji.get(recette['difficulte'], '😐')} {recette['difficulte'].capitalize()}")
             with col_info4:
-                st.caption(f"📅 {recipe['season'].replace('_', ' ').capitalize()}")
+                st.caption(f"📅 {recette['saison'].replace('_', ' ').capitalize()}")
+
 def render_recipe_details(recipe_id: int):
     """Affiche les détails complets d'une recette"""
     details = load_recipe_details(recipe_id)
     if not details:
         st.error("Recette introuvable")
         return
-    recipe = details["recipe"]
+
+    recette = details["recette"]
+
     # Header
     col_h1, col_h2 = st.columns([2, 1])
+
     with col_h1:
-        st.markdown(f"# {recipe.name}")
-        st.caption(recipe.description or "")
+        st.markdown(f"# {recette.nom}")
+        st.caption(recette.description or "")
+
     with col_h2:
-        if recipe.image_url:
-            st.image(recipe.image_url, use_container_width=True)
+        if recette.url_image:
+            st.image(recette.url_image, use_container_width=True)
+
     # Onglets
     tab1, tab2, tab3 = st.tabs(["📋 Recette", "👶 Version Bébé", "🍳 Version Batch"])
+
     with tab1:
         # Ingrédients
         st.markdown("### 🥕 Ingrédients")
         for ing in details["ingredients"]:
-            optional = " (optionnel)" if ing["optional"] else ""
-            st.write(f"• {ing['quantity']} {ing['unit']} de {ing['name']}{optional}")
+            optionnel = " (optionnel)" if ing["optionnel"] else ""
+            st.write(f"• {ing['quantite']} {ing['unite']} de {ing['nom']}{optionnel}")
+
         st.markdown("---")
+
         # Étapes
         st.markdown("### 📝 Étapes")
-        for step in details["steps"]:
-            duration = f" ({step['duration']}min)" if step["duration"] else ""
-            st.markdown(f"**{step['order']}.** {step['description']}{duration}")
+        for step in details["etapes"]:
+            duree = f" ({step['duree']}min)" if step["duree"] else ""
+            st.markdown(f"**{step['ordre']}.** {step['description']}{duree}")
+
     with tab2:
         baby_version = next(
-            (v for v in details["versions"] if v["type"] == RecipeVersionEnum.BABY),
+            (v for v in details["versions"] if v["type"] == "bébé"),
             None
         )
         if baby_version:
             st.markdown("### 👶 Adaptation pour bébé")
             st.info(baby_version["instructions"] or "Pas d'instructions spécifiques")
-            if baby_version["baby_notes"]:
-                st.warning(f"⚠️ **Précautions :** {baby_version['baby_notes']}")
+            if baby_version["notes_bebe"]:
+                st.warning(f"⚠️ **Précautions :** {baby_version['notes_bebe']}")
         else:
             st.info("Aucune version bébé disponible pour cette recette")
+
     with tab3:
         batch_version = next(
-            (v for v in details["versions"] if v["type"] == RecipeVersionEnum.BATCH_COOKING),
+            (v for v in details["versions"] if v["type"] == "batch_cooking"),
             None
         )
-        if batch_version and batch_version["batch_info"]:
-            info = batch_version["batch_info"]
+        if batch_version and batch_version["infos_batch"]:
+            info = batch_version["infos_batch"]
             st.markdown("### 🍳 Optimisation Batch Cooking")
-            if info.get("parallel_steps"):
+
+            if info.get("etapes_paralleles"):
                 st.markdown("**Étapes parallélisables :**")
-                for step in info["parallel_steps"]:
+                for step in info["etapes_paralleles"]:
                     st.write(f"• {step}")
-            if info.get("optimized_time"):
+
+            if info.get("temps_optimise"):
                 st.metric(
                     "Temps optimisé",
-                    f"{info['optimized_time']}min",
-                    delta=f"-{(recipe.prep_time + recipe.cook_time) - info['optimized_time']}min"
+                    f"{info['temps_optimise']}min",
+                    delta=f"-{(recette.temps_preparation + recette.temps_cuisson) - info['temps_optimise']}min"
                 )
         else:
             st.info("Aucune optimisation batch cooking disponible")
@@ -328,20 +368,22 @@ def app():
                 freezable_only = st.checkbox("❄️ Congélable")
             with col_fa3:
                 ai_only = st.checkbox("🤖 Générées par IA")
+
         # Construire les filtres
-        filters = {}
-        if search:
-            filters["search"] = search
-        if season_filter != "Toutes":
-            filters["season"] = season_filter
-        if meal_filter != "Tous":
-            filters["meal_type"] = meal_filter
-        if quick_only:
-            filters["is_quick"] = True
-        if balanced_only:
-            filters["is_balanced"] = True
-        if baby_friendly_only:
-            filters["is_baby_friendly"] = True
+        filtres = {}
+        if recherche:
+            filtres["recherche"] = recherche
+        if filtre_saison != "Toutes":
+            filtres["saison"] = filtre_saison
+        if filtre_repas != "Tous":
+            filtres["type_repas"] = filtre_repas
+        if rapide_uniquement:
+            filtres["est_rapide"] = True
+        if equilibre_uniquement:
+            filtres["est_equilibre"] = True
+        if bebe_uniquement:
+            filtres["compatible_bebe"] = True
+
         # Charger recettes
         df = load_recipes(filters)
         if df.empty:
@@ -349,41 +391,46 @@ def app():
         else:
             # Statistiques
             col_s1, col_s2, col_s3, col_s4 = st.columns(4)
+
             with col_s1:
                 st.metric("Total", len(df))
             with col_s2:
-                quick_count = len(df[df["is_quick"] == True])
-                st.metric("Rapides", quick_count)
+                rapides = len(df[df["est_rapide"] == True])
+                st.metric("Rapides", rapides)
             with col_s3:
-                ai_count = len(df[df["ai_generated"] == True])
-                st.metric("Générées IA", ai_count)
+                ia_count = len(df[df["genere_par_ia"] == True])
+                st.metric("Générées IA", ia_count)
             with col_s4:
-                avg_time = df["total_time"].mean()
-                st.metric("Temps moyen", f"{avg_time:.0f}min")
+                temps_moyen = df["temps_total"].mean()
+                st.metric("Temps moyen", f"{temps_moyen:.0f}min")
             st.markdown("---")
+
             # Afficher les recettes
-            for idx, recipe in df.iterrows():
-                render_recipe_card(recipe)
-            # Actions
-            col_a1, col_a2, col_a3 = st.columns([1, 1, 3])
+            for idx, recette in df.iterrows():
+                render_recipe_card(recette)
 
-            with col_a1:
-                if st.button("👁️ Détails", key=f"view_{recipe['id']}", use_container_width=True):
-                    st.session_state[f"viewing_{recipe['id']}"] = True
-                    st.rerun()
+                # Actions
+                col_a1, col_a2, col_a3 = st.columns([1, 1, 3])
 
-            with col_a2:
-                if st.button("🗑️ Supprimer", key=f"del_{recipe['id']}", use_container_width=True):
-                    delete_recipe(recipe['id'])
-                    st.success("Recette supprimée")
-                    st.rerun()
+                with col_a1:
+                    if st.button("👁️ Détails", key=f"view_{recette['id']}", use_container_width=True):
+                        st.session_state[f"viewing_{recette['id']}"] = True
+                        st.rerun()
+
+                with col_a2:
+                    if st.button("🗑️ Supprimer", key=f"del_{recette['id']}", use_container_width=True):
+                        delete_recipe(recette['id'])
+                        st.success("Recette supprimée")
+                        st.rerun()
+
                 # Afficher détails si demandé
-                if st.session_state.get(f"viewing_{recipe['id']}", False):
+                if st.session_state.get(f"viewing_{recette['id']}", False):
                     with st.expander("Détails complets", expanded=True):
-                        render_recipe_details(recipe['id'])
-                        if st.button("Fermer", key=f"close_{recipe['id']}"):
-                            del st.session_state[f"viewing_{recipe['id']}"]
+                        render_recipe_details(recette['id'])
+                        if st.button("Fermer", key=f"close_{recette['id']}"):
+                            del st.session_state[f"viewing_{recette['id']}"]
                             st.rerun()
+
                 st.markdown("---")
     # ===================================
     # TAB 2 : GÉNÉRATION IA
@@ -558,7 +605,7 @@ def app():
         st.subheader("➕ Ajouter une recette manuellement")
 
         # ============================================================
-        # SECTION 1 : INGRÉDIENTS (EN DEHORS DU FORM) ⬅️ ICI
+        # SECTION 1 : INGRÉDIENTS
         # ============================================================
         st.markdown("### 🥕 Ingrédients")
 
@@ -605,7 +652,7 @@ def app():
         st.markdown("---")
 
         # ============================================================
-        # SECTION 2 : ÉTAPES (EN DEHORS DU FORM) ⬅️ ICI
+        # SECTION 2 : ÉTAPES
         # ============================================================
         st.markdown("### 📝 Étapes de préparation")
 
@@ -649,7 +696,7 @@ def app():
         st.markdown("---")
 
         # ============================================================
-        # SECTION 3 : FORMULAIRE PRINCIPAL (INFOS DE BASE + VERSIONS) ⬅️ ICI
+        # SECTION 3 : FORMULAIRE PRINCIPAL (INFOS DE BASE + VERSIONS)
         # ============================================================
         with st.form("manual_recipe"):
             # Infos de base
