@@ -93,7 +93,12 @@ class AIRecipeService:
         base = (
             "Tu es un chef cuisinier expert et nutritionniste français. "
             "Tu génères des recettes précises, réalisables et équilibrées. "
-            "Réponds UNIQUEMENT en JSON valide, sans commentaires, sans balises markdown."
+            "Réponds UNIQUEMENT avec un objet JSON unique. "
+            "Aucun texte avant. Aucun texte après. "
+            "Aucune explication. Aucun commentaire. Pas de markdown. "
+            "N'utilise que des doubles guillemets dans les clés et valeurs. "
+            "Ne mets jamais d'apostrophes dans les valeurs texte. "
+            "Le JSON doit être strictement valide."
         )
         if version_type == TypeVersionRecetteEnum.BEBE.value:
             base += (
@@ -176,36 +181,41 @@ Chaque recette doit inclure :
         return base
 
     def _parse_response(self, content: str, expected_count: int) -> List[Dict]:
-        """Parse et valide la réponse JSON avec nettoyage robuste."""
         try:
             import re
 
-            # --- 1. Nettoyage brutal des caractères parasites ---
-            cleaned = content
-
-            # Supprime BOM UTF-8
-            cleaned = cleaned.replace("\ufeff", "")
-
-            # Remplace caractères invisibles / unicode de contrôle
+            # --- Nettoyage de base ---
+            cleaned = content.replace("\ufeff", "")
             cleaned = re.sub(r"[\x00-\x1F\x7F]", "", cleaned)
+            cleaned = cleaned.strip()
 
-            # Supprime les "?" parasites avant JSON (souvent ajoutés par Mistral)
-            cleaned = re.sub(r"^\?+", "", cleaned.strip())
+            # --- Suppression du texte avant/après JSON ---
+            # On va chercher le premier objet JSON équilibré
+            level = 0
+            start = None
+            end = None
 
-            # Supprime tout ce qui n'est pas ASCII basique avant la première '{'
-            cleaned = re.sub(r"^[^\{]*", "", cleaned)
+            for i, ch in enumerate(cleaned):
+                if ch == '{':
+                    if level == 0:
+                        start = i
+                    level += 1
+                elif ch == '}':
+                    if level > 0:
+                        level -= 1
+                        if level == 0:
+                            end = i + 1
+                            break
 
-            # --- 2. Extraire le bloc JSON ---
-            json_match = re.search(r'\{.*\}', cleaned, re.DOTALL)
-            if not json_match:
-                raise ValueError(f"Aucun JSON détecté. Nettoyé = {cleaned[:200]}")
+            if start is None or end is None:
+                raise ValueError("Impossible de trouver un objet JSON complet.")
 
-            json_str = json_match.group(0)
+            json_str = cleaned[start:end]
 
-            # --- 3. Charger le JSON ---
+            # --- Tentative de décodage stricte ---
             data = json.loads(json_str)
 
-            # --- 4. Extraire les recettes attendues ---
+            # --- Extraction des recettes attendues ---
             if "recettes" in data:
                 recettes = data["recettes"][:expected_count]
             elif "recipes" in data:
@@ -213,24 +223,24 @@ Chaque recette doit inclure :
             elif isinstance(data, list):
                 recettes = data[:expected_count]
             else:
-                raise ValueError("Structure JSON inattendue (pas de 'recettes').")
+                raise ValueError("Structure JSON inattendue (clé 'recettes' absente).")
 
-            # --- 5. Vérification recette par recette ---
+            # --- Validation ---
             validated = []
             for recette in recettes:
                 if self._validate_recipe(recette):
                     validated.append(recette)
 
             if not validated:
-                raise ValueError("Aucune recette valide trouvée après parsing.")
+                raise ValueError("Aucune recette valide dans le JSON extrait.")
 
             return validated
 
         except json.JSONDecodeError as e:
-            logger.error(f"Erreur JSON: {e}\nContenu reçu après clean:\n{cleaned[:500]}")
-            raise ValueError(f"Réponse JSON invalide. Détails: {e}")
+            logger.error(f"Erreur JSON: {e}\nJSON extrait:\n{json_str[:400]}")
+            raise ValueError(f"Réponse JSON invalide : {e}")
         except Exception as e:
-            logger.error(f"Erreur parsing: {e}\nRéponse brute:\n{content[:500]}")
+            logger.error(f"Erreur parsing: {e}\nRéponse brute:\n{content[:400]}")
             raise ValueError(f"Échec du parsing : {e}")
 
 
