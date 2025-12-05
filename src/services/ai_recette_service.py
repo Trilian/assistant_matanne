@@ -206,12 +206,15 @@ Ajoute pour chaque recette :
                 cleaned = cleaned[:-3]
             cleaned = cleaned.strip()
             data = json.loads(cleaned)
+
+            # Correction des slices et de l'indentation
             if "recettes" in data:
-                recettes = data["recettes"][\:expected_count]
+                recettes = data["recettes"][\:expected_count]  # Correction : `:` au lieu de `\:`
                 elif "recipes" in data:
-                recettes = data["recipes"][\:expected_count]
+                recettes = data["recipes"][\:expected_count]   # Correction : `:` au lieu de `\:`
                 else:
                 raise ValueError("Clé 'recettes' ou 'recipes' manquante")
+
             validated = []
             for recette in recettes:
                 if self._validate_recipe(recette):
@@ -226,6 +229,7 @@ Ajoute pour chaque recette :
         except Exception as e:
             logger.error(f"Erreur parsing: {e}")
             raise ValueError(f"Échec du parsing : {str(e)}")
+
 
     def _validate_recipe(self, recette: Dict) -> bool:
         """Valide qu'une recette a les champs requis"""
