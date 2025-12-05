@@ -209,10 +209,10 @@ Ajoute pour chaque recette :
 
             # Correction des slices et de l'indentation
             if "recettes" in data:
-                recettes = data["recettes"][\:expected_count]  # Correction : `:` au lieu de `\:`
-                elif "recipes" in data:
-                recettes = data["recipes"][\:expected_count]   # Correction : `:` au lieu de `\:`
-                else:
+                recettes = data["recettes"][:expected_count]
+            elif "recipes" in data:
+                recettes = data["recipes"][:expected_count]
+            else:
                 raise ValueError("Clé 'recettes' ou 'recipes' manquante")
 
             validated = []
