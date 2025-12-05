@@ -543,7 +543,7 @@ def app():
                                         versions["baby"] = baby_recipes[0].get("baby_version", {})
                                 if gen_batch:
                                     batch_recipes = loop.run_until_complete(
-                                        ai_recipe_service.generate_recipes(
+                                        ai_recette_service.generate_recipes(
                                             count=1,
                                             filters={"name": recipe["name"]},
                                             version_type="batch_cooking"
