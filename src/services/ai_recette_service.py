@@ -176,47 +176,63 @@ Chaque recette doit inclure :
         return base
 
     def _parse_response(self, content: str, expected_count: int) -> List[Dict]:
-        """Parse robuste"""
-
+        """Parse et valide la réponse JSON avec nettoyage robuste."""
         try:
-            cleaned = content.strip()
+            import re
 
-            # Retire les blocs markdown
-            cleaned = cleaned.replace("```json", "").replace("```", "")
+            # --- 1. Nettoyage brutal des caractères parasites ---
+            cleaned = content
 
-            # Enlève BOM éventuel
-            cleaned = cleaned.lstrip("\ufeff")
+            # Supprime BOM UTF-8
+            cleaned = cleaned.replace("\ufeff", "")
 
-            # Fix guillemets tordus
-            cleaned = cleaned.replace("“", "\"").replace("”", "\"")
+            # Remplace caractères invisibles / unicode de contrôle
+            cleaned = re.sub(r"[\x00-\x1F\x7F]", "", cleaned)
 
-            # Extraction stricte du JSON le plus long
-            matches = re.findall(r'\{(?:[^{}]|(?R))*\}', cleaned)
-            if not matches:
-                raise ValueError("Aucun JSON détecté")
+            # Supprime les "?" parasites avant JSON (souvent ajoutés par Mistral)
+            cleaned = re.sub(r"^\?+", "", cleaned.strip())
 
-            # On prend le plus long bloc JSON (celui qui a le plus de chance d’être complet)
-            json_str = max(matches, key=len)
+            # Supprime tout ce qui n'est pas ASCII basique avant la première '{'
+            cleaned = re.sub(r"^[^\{]*", "", cleaned)
 
+            # --- 2. Extraire le bloc JSON ---
+            json_match = re.search(r'\{.*\}', cleaned, re.DOTALL)
+            if not json_match:
+                raise ValueError(f"Aucun JSON détecté. Nettoyé = {cleaned[:200]}")
+
+            json_str = json_match.group(0)
+
+            # --- 3. Charger le JSON ---
             data = json.loads(json_str)
 
-            # Cas standard
+            # --- 4. Extraire les recettes attendues ---
             if "recettes" in data:
-                recettes = data["recettes"]
+                recettes = data["recettes"][:expected_count]
+            elif "recipes" in data:
+                recettes = data["recipes"][:expected_count]
+            elif isinstance(data, list):
+                recettes = data[:expected_count]
             else:
-                raise ValueError("Champ 'recettes' manquant")
+                raise ValueError("Structure JSON inattendue (pas de 'recettes').")
 
-            recettes = recettes[:expected_count]
+            # --- 5. Vérification recette par recette ---
+            validated = []
+            for recette in recettes:
+                if self._validate_recipe(recette):
+                    validated.append(recette)
 
-            validated = [r for r in recettes if self._validate_recipe(r)]
             if not validated:
-                raise ValueError("Aucune recette valide trouvée")
+                raise ValueError("Aucune recette valide trouvée après parsing.")
 
             return validated
 
+        except json.JSONDecodeError as e:
+            logger.error(f"Erreur JSON: {e}\nContenu reçu après clean:\n{cleaned[:500]}")
+            raise ValueError(f"Réponse JSON invalide. Détails: {e}")
         except Exception as e:
-            logger.error(f"Erreur parsing JSON: {e}\nRéponse brute:\n{content[:1000]}")
-            raise ValueError(f"Réponse JSON invalide. Détails: {str(e)}")
+            logger.error(f"Erreur parsing: {e}\nRéponse brute:\n{content[:500]}")
+            raise ValueError(f"Échec du parsing : {e}")
+
 
     def _validate_recipe(self, recette: Dict) -> bool:
         required = ["nom", "description", "temps_preparation", "temps_cuisson",
