@@ -3,6 +3,7 @@ Service IA pour la génération de recettes - Compatible models.py français
 """
 import streamlit as st
 import httpx
+import base64
 import json
 import logging
 from typing import List, Dict, Optional
@@ -11,7 +12,8 @@ from src.core.models import TypeVersionRecetteEnum
 logger = logging.getLogger(__name__)
 
 class AIRecipeService:
-    """Service de génération de recettes avec Mistral AI"""
+    """Service de génération de recettes avec Mistral AI et images avec Stability AI"""
+
     def __init__(self, api_key: Optional[str] = None):
         """Initialise le service avec la clé API Mistral"""
         try:
@@ -207,7 +209,6 @@ Ajoute pour chaque recette :
             cleaned = cleaned.strip()
             data = json.loads(cleaned)
 
-            # Correction des slices et de l'indentation
             if "recettes" in data:
                 recettes = data["recettes"][:expected_count]
             elif "recipes" in data:
@@ -230,7 +231,6 @@ Ajoute pour chaque recette :
             logger.error(f"Erreur parsing: {e}")
             raise ValueError(f"Échec du parsing : {str(e)}")
 
-
     def _validate_recipe(self, recette: Dict) -> bool:
         """Valide qu'une recette a les champs requis"""
         required = ["nom", "description", "temps_preparation", "temps_cuisson",
@@ -247,8 +247,34 @@ Ajoute pour chaque recette :
             return False
         return True
 
-    async def generate_image_url(self, recipe_name: str, description: str) -> str:
-        """Génère une URL d'image (placeholder Unsplash)"""
+    def generate_image_url(self, recipe_name: str, description: str) -> str:
+        """Génère une image via Stability AI (25/jour gratuites)"""
+        try:
+            STABILITY_KEY = st.secrets.get("stability", {}).get("api_key")
+            if not STABILITY_KEY:
+                logger.warning("Clé API Stability manquante, utilisation du fallback")
+                return self._fallback_image(recipe_name)
+
+            with httpx.Client(timeout=30) as client:
+                response = client.post(
+                    "https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image",
+                    headers={"Authorization": f"Bearer {STABILITY_KEY}"},
+                    json={
+                        "text_prompts": [{"text": f"Food photography, realistic, delicious, {recipe_name}. {description}. Natural lighting, vibrant colors, 4K."}],
+                        "width": 512,
+                        "height": 512,
+                        "samples": 1
+                    }
+                )
+                response.raise_for_status()
+                data = response.json()
+                return f"data\:image/png;base64,{data['artifacts'][0]['base64']}"
+        except Exception as e:
+            logger.error(f"Erreur génération image Stability AI: {e}")
+            return self._fallback_image(recipe_name)
+
+    def _fallback_image(self, recipe_name: str) -> str:
+        """Image de secours si la génération échoue"""
         safe_name = recipe_name.replace(' ', ',')
         return f"https://source.unsplash.com/400x300/?{safe_name},food"
 

@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment="Recette amelioration" />
+    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment="Recette amelioration">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/recettes.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/cuisine/recettes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/ai_recette_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/ai_recette_service.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -174,7 +178,7 @@
       <workItem from="1764836092457" duration="8161000" />
       <workItem from="1764852791259" duration="4608000" />
       <workItem from="1764864455782" duration="6942000" />
-      <workItem from="1764923035460" duration="7252000" />
+      <workItem from="1764923035460" duration="10052000" />
     </task>
     <task id="LOCAL-00001" summary="Init commit">
       <option name="closed" value="true" />
@@ -464,7 +468,23 @@
       <option name="project" value="LOCAL" />
       <updated>1764933624686</updated>
     </task>
-    <option name="localTasksCounter" value="37" />
+    <task id="LOCAL-00037" summary="Recette amelioration">
+      <option name="closed" value="true" />
+      <created>1764933929726</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1764933929726</updated>
+    </task>
+    <task id="LOCAL-00038" summary="Recette amelioration">
+      <option name="closed" value="true" />
+      <created>1764934180737</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1764934180737</updated>
+    </task>
+    <option name="localTasksCounter" value="39" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
