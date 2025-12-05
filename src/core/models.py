@@ -124,7 +124,9 @@ class Recette(Base):
         back_populates="recette_base", cascade="all, delete-orphan"
     )
     repas_planning: Mapped[List["RepasPlanning"]] = relationship(
-        back_populates="recette", cascade="all, delete-orphan"
+        back_populates="recette",
+        cascade="all, delete-orphan",
+        foreign_keys="[RepasPlanning.recette_id]"  # Explicite la clé étrangère
     )
 
 
