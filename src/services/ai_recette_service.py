@@ -286,6 +286,5 @@ Ajoute pour chaque recette :
         safe_name = recipe_name.replace(' ', ',')
         return f"https://source.unsplash.com/400x300/?{safe_name},food"
 
-
 # Instance globale
 ai_recipe_service = AIRecipeService()
