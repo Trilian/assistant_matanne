@@ -6,6 +6,7 @@ import httpx
 import base64
 import json
 import logging
+import re
 from typing import List, Dict, Optional
 from src.core.models import TypeVersionRecetteEnum
 
@@ -15,13 +16,12 @@ class AIRecipeService:
     """Service de génération de recettes avec Mistral AI et images avec Stability AI"""
 
     def __init__(self, api_key: Optional[str] = None):
-        """Initialise le service avec la clé API Mistral"""
         try:
             self.api_key = api_key or st.secrets["mistral"]["api_key"]
             self.model = st.secrets.get("mistral", {}).get("model", "mistral-small-latest")
             self.base_url = "https://api.mistral.ai/v1"
             self.timeout = 30
-            logger.info("✅ AIRecipeService initialisé")
+            logger.info("AIRecipeService initialisé")
         except KeyError:
             raise ValueError("Clé API Mistral manquante dans les secrets Streamlit")
 
@@ -39,6 +39,7 @@ class AIRecipeService:
                 if system_prompt:
                     messages.append({"role": "system", "content": system_prompt})
                 messages.append({"role": "user", "content": prompt})
+
                 response = await client.post(
                     f"{self.base_url}/chat/completions",
                     headers={
@@ -55,6 +56,7 @@ class AIRecipeService:
                 response.raise_for_status()
                 result = response.json()
                 return result["choices"][0]["message"]["content"]
+
         except httpx.HTTPError as e:
             logger.error(f"Erreur HTTP Mistral: {e}")
             raise ValueError("Erreur de connexion à l'API Mistral")
@@ -68,75 +70,69 @@ class AIRecipeService:
             filters: Dict,
             version_type: str = TypeVersionRecetteEnum.STANDARD.value
     ) -> List[Dict]:
-        """Génère des recettes avec l'API Mistral"""
+
         try:
             system_prompt = self._build_system_prompt(version_type)
             user_prompt = self._build_prompt(count, filters, version_type)
+
             response_content = await self._call_mistral_api(
                 prompt=user_prompt,
                 system_prompt=system_prompt,
                 temperature=0.7,
                 max_tokens=2000
             )
+
             recipes = self._parse_response(response_content, count)
             return recipes
+
         except Exception as e:
             logger.error(f"Erreur génération recettes: {e}")
             raise ValueError(f"Échec de la génération : {str(e)}")
 
     def _build_system_prompt(self, version_type: str) -> str:
-        """Construit le system prompt"""
         base = (
             "Tu es un chef cuisinier expert et nutritionniste français. "
             "Tu génères des recettes précises, réalisables et équilibrées. "
-            "Réponds UNIQUEMENT en JSON valide, sans commentaires, sans balises markdown. "
-            "Utilise des noms français pour tous les champs."
+            "Réponds UNIQUEMENT en JSON valide, sans commentaires, sans balises markdown."
         )
         if version_type == TypeVersionRecetteEnum.BEBE.value:
             base += (
-                "\n\nTu adaptes les recettes pour bébés (6-18 mois) : "
-                "- Aucun sel, sucre ajouté, miel\n"
-                "- Textures adaptées (purée, morceaux fondants)\n"
-                "- Ingrédients sûrs et nutritifs"
+                "\n\nPour bébés (6-18 mois): pas de sel, pas de sucre ajouté, pas de miel."
             )
         elif version_type == TypeVersionRecetteEnum.BATCH_COOKING.value:
             base += (
-                "\n\nTu optimises les recettes pour le batch cooking : "
-                "- Identifie les étapes parallélisables\n"
-                "- Optimise le temps total\n"
-                "- Suggère des quantités pour préparer plusieurs portions"
+                "\n\nOptimise les recettes pour le batch cooking : étapes parallélisables, portions multiples."
             )
         return base
 
     def _build_prompt(self, count: int, filters: Dict, version_type: str) -> str:
-        """Construit le prompt utilisateur"""
-        prompt_parts = [f"Génère {count} recette(s) française(s)"]
+        parts = [f"Génère {count} recette(s) françaises"]
+
         if filters.get("saison"):
-            prompt_parts.append(f"de saison {filters['saison']}")
+            parts.append(f"de saison {filters['saison']}")
         if filters.get("is_quick"):
-            prompt_parts.append("rapides (<30 minutes)")
+            parts.append("rapides (<30 minutes)")
         if filters.get("is_balanced"):
-            prompt_parts.append("équilibrées")
+            parts.append("équilibrées")
         if filters.get("type_repas"):
-            prompt_parts.append(f"pour le {filters['type_repas']}")
+            parts.append(f"pour le {filters['type_repas']}")
         if filters.get("ingredients"):
-            ing_list = ", ".join(filters["ingredients"])
-            prompt_parts.append(f"avec : {ing_list}")
+            parts.append("avec : " + ", ".join(filters["ingredients"]))
         if filters.get("nom"):
-            prompt_parts.append(f"similaires à '{filters['nom']}'")
-        prompt = " ".join(prompt_parts) + ".\n\n"
+            parts.append(f"similaires à '{filters['nom']}'")
+
+        prompt = " ".join(parts) + ".\n\n"
         prompt += self._get_json_format(version_type)
         return prompt
 
     def _get_json_format(self, version_type: str) -> str:
-        """Retourne le format JSON attendu (noms français)"""
-        base_format = """
-Format JSON EXACT (structure française) :
+        base = """
+Format JSON EXACT attendu :
 {
   "recettes": [
     {
-      "nom": "Nom de la recette",
-      "description": "Description courte (2-3 phrases)",
+      "nom": "Nom",
+      "description": "Description",
       "temps_preparation": 15,
       "temps_cuisson": 30,
       "portions": 4,
@@ -147,155 +143,130 @@ Format JSON EXACT (structure française) :
       "est_rapide": true,
       "est_equilibre": true,
       "compatible_bebe": false,
-      "compatible_batch": true,
+      "compatible_batch": false,
       "congelable": true,
       "ingredients": [
-        {
-          "nom": "Tomates",
-          "quantite": 500,
-          "unite": "g",
-          "optionnel": false
-        }
+        {"nom": "Tomates", "quantite": 500, "unite": "g", "optionnel": false}
       ],
       "etapes": [
-        {
-          "ordre": 1,
-          "description": "Éplucher et couper les tomates",
-          "duree": 5
-        }
+        {"ordre": 1, "description": "Couper les tomates", "duree": 5}
       ]
     }
   ]
 }
-IMPORTANT :
-- Tous les champs doivent être en français
-- Les noms de champs doivent correspondre exactement au modèle
-- Utilise "facile", "moyen", "difficile" pour difficulte
-- Utilise "petit_dejeuner", "dejeuner", "dîner", "goûter" pour type_repas
-- Utilise "printemps", "été", "automne", "hiver", "toute_année" pour saison
 """
         if version_type == TypeVersionRecetteEnum.BEBE.value:
-            base_format += """
-Ajoute pour chaque recette :
-"version_bébé": {
-  "instructions_modifiees": "Mixez finement. Pas de sel.",
-  "notes_bebe": "Dès 6 mois. Surveiller allergies.",
-  "ingredients_modifies": [
-    {"nom": "Tomates", "quantite": 100, "unite": "g", "note": "Pelées"}
-  ]
+            base += """
+Chaque recette doit inclure :
+"version_bebe": {
+  "instructions_modifiees": "Mixez finement",
+  "notes_bebe": "Dès 6 mois",
+  "ingredients_modifies": []
 }
 """
-        elif version_type == TypeVersionRecetteEnum.BATCH_COOKING.value:
-            base_format += """
-Ajoute pour chaque recette :
+        if version_type == TypeVersionRecetteEnum.BATCH_COOKING.value:
+            base += """
+Chaque recette doit inclure :
 "version_batch": {
-  "etapes_paralleles": ["Éplucher pendant que l'eau chauffe"],
+  "etapes_paralleles": [],
   "temps_optimise": 45,
-  "conseils_batch": "x4 portions. Congèle 3 mois."
+  "conseils_batch": "Préparer en lot"
 }
 """
-        return base_format
+        return base
 
     def _parse_response(self, content: str, expected_count: int) -> List[Dict]:
-        """Parse et valide la réponse JSON (version robuste)"""
+        """Parse robuste"""
+
         try:
-            # 1. Nettoyage agressif de la réponse
             cleaned = content.strip()
 
-            # Supprime les balises markdown (```json ... ```)
-            if cleaned.startswith("```json"):
-                cleaned = cleaned[7:]
-            if cleaned.startswith("```"):
-                cleaned = cleaned[3:]
-            if cleaned.endswith("```"):
-                cleaned = cleaned[:-3]
+            # Retire les blocs markdown
+            cleaned = cleaned.replace("```json", "").replace("```", "")
 
-            # 2. Extraction du JSON (même s'il est entouré de texte)
-            import re
-            json_match = re.search(r'\{.*\}', cleaned, re.DOTALL)
-            if not json_match:
-                raise ValueError("Aucun JSON trouvé dans la réponse de l'IA")
+            # Enlève BOM éventuel
+            cleaned = cleaned.lstrip("\ufeff")
 
-            json_str = json_match.group(0)
+            # Fix guillemets tordus
+            cleaned = cleaned.replace("“", "\"").replace("”", "\"")
+
+            # Extraction stricte du JSON le plus long
+            matches = re.findall(r'\{(?:[^{}]|(?R))*\}', cleaned)
+            if not matches:
+                raise ValueError("Aucun JSON détecté")
+
+            # On prend le plus long bloc JSON (celui qui a le plus de chance d’être complet)
+            json_str = max(matches, key=len)
+
             data = json.loads(json_str)
 
-            # 3. Vérification des clés attendues
+            # Cas standard
             if "recettes" in data:
-                recettes = data["recettes"][:expected_count]
-            elif "recipes" in data:
-                recettes = data["recipes"][:expected_count]
+                recettes = data["recettes"]
             else:
-                # Si le format est différent, essaie de deviner
-                if isinstance(data, list):
-                    recettes = data[:expected_count]
-                else:
-                    raise ValueError("Format JSON inattendu : ni 'recettes' ni 'recipes' trouvés")
+                raise ValueError("Champ 'recettes' manquant")
 
-            # 4. Validation des recettes
-            validated = []
-            for recette in recettes:
-                if self._validate_recipe(recette):
-                    validated.append(recette)
+            recettes = recettes[:expected_count]
 
+            validated = [r for r in recettes if self._validate_recipe(r)]
             if not validated:
-                raise ValueError("Aucune recette valide générée")
+                raise ValueError("Aucune recette valide trouvée")
 
             return validated
 
-        except json.JSONDecodeError as e:
-            logger.error(f"Erreur JSON: {e}\nContenu reçu:\n{content[:1000]}")
-            raise ValueError(f"Réponse JSON invalide de l'IA. Détails: {str(e)}")
         except Exception as e:
-            logger.error(f"Erreur parsing: {e}\nContenu reçu:\n{content[:1000]}")
-            raise ValueError(f"Échec du parsing : {str(e)}")
-
+            logger.error(f"Erreur parsing JSON: {e}\nRéponse brute:\n{content[:1000]}")
+            raise ValueError(f"Réponse JSON invalide. Détails: {str(e)}")
 
     def _validate_recipe(self, recette: Dict) -> bool:
-        """Valide qu'une recette a les champs requis"""
         required = ["nom", "description", "temps_preparation", "temps_cuisson",
                     "portions", "ingredients", "etapes"]
-        for field in required:
-            if field not in recette:
-                logger.warning(f"Champ '{field}' manquant dans '{recette.get('nom', 'inconnue')}'")
+
+        for f in required:
+            if f not in recette:
+                logger.warning(f"Champ manquant : {f}")
                 return False
-        if not isinstance(recette["ingredients"], list) or len(recette["ingredients"]) == 0:
-            logger.warning(f"Ingrédients invalides pour '{recette['nom']}'")
+
+        if not isinstance(recette["ingredients"], list) or not recette["ingredients"]:
             return False
-        if not isinstance(recette["etapes"], list) or len(recette["etapes"]) == 0:
-            logger.warning(f"Étapes invalides pour '{recette['nom']}'")
+
+        if not isinstance(recette["etapes"], list) or not recette["etapes"]:
             return False
+
         return True
 
     def generate_image_url(self, recipe_name: str, description: str) -> str:
-        """Génère une image via Stability AI (25/jour gratuites)"""
+        """Retourne un data:image propre ou fallback"""
         try:
-            STABILITY_KEY = st.secrets.get("stability", {}).get("api_key")
-            if not STABILITY_KEY:
-                logger.warning("Clé API Stability manquante, utilisation du fallback")
+            key = st.secrets.get("stability", {}).get("api_key")
+            if not key:
                 return self._fallback_image(recipe_name)
 
             with httpx.Client(timeout=30) as client:
-                response = client.post(
+                resp = client.post(
                     "https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image",
-                    headers={"Authorization": f"Bearer {STABILITY_KEY}"},
+                    headers={"Authorization": f"Bearer {key}"},
                     json={
-                        "text_prompts": [{"text": f"Food photography, realistic, delicious, {recipe_name}. {description}. Natural lighting, vibrant colors, 4K."}],
+                        "text_prompts": [{"text": f"{recipe_name}, {description}, food photography"}],
                         "width": 512,
                         "height": 512,
                         "samples": 1
                     }
                 )
-                response.raise_for_status()
-                data = response.json()
-                return f"data\:image/png;base64,{data['artifacts'][0]['base64']}"
+                resp.raise_for_status()
+                data = resp.json()
+
+                b64 = data["artifacts"][0]["base64"]
+                return f"data:image/png;base64,{b64}"
+
         except Exception as e:
-            logger.error(f"Erreur génération image Stability AI: {e}")
+            logger.error(f"Erreur génération image : {e}")
             return self._fallback_image(recipe_name)
 
     def _fallback_image(self, recipe_name: str) -> str:
-        """Image de secours si la génération échoue"""
-        safe_name = recipe_name.replace(' ', ',')
-        return f"https://source.unsplash.com/400x300/?{safe_name},food"
+        safe = recipe_name.replace(" ", ",")
+        return f"https://source.unsplash.com/400x300/?{safe},food"
 
-# Instance globale
+
+# instance globale
 ai_recette_service = AIRecipeService()
