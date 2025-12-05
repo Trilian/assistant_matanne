@@ -197,39 +197,58 @@ Ajoute pour chaque recette :
         return base_format
 
     def _parse_response(self, content: str, expected_count: int) -> List[Dict]:
-        """Parse et valide la réponse JSON"""
+        """Parse et valide la réponse JSON (version robuste)"""
         try:
+            # 1. Nettoyage agressif de la réponse
             cleaned = content.strip()
+
+            # Supprime les balises markdown (```json ... ```)
             if cleaned.startswith("```json"):
                 cleaned = cleaned[7:]
             if cleaned.startswith("```"):
                 cleaned = cleaned[3:]
             if cleaned.endswith("```"):
                 cleaned = cleaned[:-3]
-            cleaned = cleaned.strip()
-            data = json.loads(cleaned)
 
+            # 2. Extraction du JSON (même s'il est entouré de texte)
+            import re
+            json_match = re.search(r'\{.*\}', cleaned, re.DOTALL)
+            if not json_match:
+                raise ValueError("Aucun JSON trouvé dans la réponse de l'IA")
+
+            json_str = json_match.group(0)
+            data = json.loads(json_str)
+
+            # 3. Vérification des clés attendues
             if "recettes" in data:
-                recettes = data["recettes"][:expected_count]
-            elif "recipes" in data:
-                recettes = data["recipes"][:expected_count]
-            else:
-                raise ValueError("Clé 'recettes' ou 'recipes' manquante")
+                recettes = data["recettes"][\:expected_count]
+                elif "recipes" in data:
+                recettes = data["recipes"][\:expected_count]
+                else:
+                # Si le format est différent, essaie de deviner
+                if isinstance(data, list):
+                    recettes = data[\:expected_count]
+                    else:
+                    raise ValueError("Format JSON inattendu : ni 'recettes' ni 'recipes' trouvés")
 
+            # 4. Validation des recettes
             validated = []
             for recette in recettes:
                 if self._validate_recipe(recette):
                     validated.append(recette)
+
             if not validated:
                 raise ValueError("Aucune recette valide générée")
+
             return validated
+
         except json.JSONDecodeError as e:
-            logger.error(f"Erreur JSON: {e}")
-            logger.error(f"Contenu: {content[:500]}")
-            raise ValueError("Réponse JSON invalide de l'IA")
+            logger.error(f"Erreur JSON: {e}\nContenu reçu:\n{content[:1000]}")
+            raise ValueError(f"Réponse JSON invalide de l'IA. Détails: {str(e)}")
         except Exception as e:
-            logger.error(f"Erreur parsing: {e}")
+            logger.error(f"Erreur parsing: {e}\nContenu reçu:\n{content[:1000]}")
             raise ValueError(f"Échec du parsing : {str(e)}")
+
 
     def _validate_recipe(self, recette: Dict) -> bool:
         """Valide qu'une recette a les champs requis"""
