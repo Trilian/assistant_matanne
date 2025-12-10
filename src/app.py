@@ -1,12 +1,13 @@
 """
-Application principale Streamlit - Version adaptée pour Streamlit Cloud + Supabase
-Assistant MaTanne v2 avec Agent IA intégré
+Application principale Streamlit - Version Refactorisée
+Assistant MaTanne v2 avec architecture moderne
 """
 import streamlit as st
 import sys
 from pathlib import Path
 import logging
-from contextlib import contextmanager
+import importlib
+from typing import Optional
 
 # Ajouter le répertoire src au path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -19,51 +20,24 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def test_supabase_connection():
-    """Teste la connexion à Supabase avec psycopg2"""
-    try:
-        import psycopg2
-        from psycopg2 import OperationalError
-
-        conn = psycopg2.connect(
-            host=st.secrets['db']['host'],
-            port=st.secrets['db']['port'],
-            dbname=st.secrets['db']['name'],
-            user=st.secrets['db']['user'],
-            password=st.secrets['db']['password'],
-            sslmode='require',  # ✅ Force SSL
-            connect_timeout=10  # ✅ Timeout de 10 secondes
-        )
-
-        cursor = conn.cursor()
-        cursor.execute("SELECT version();")
-        version = cursor.fetchone()
-        st.success(f"✅ Connexion réussie ! Version PostgreSQL: {version[0]}")
-        conn.close()
-
-    except OperationalError as e:
-        st.error(f"❌ Échec de la connexion: {e}")
-        st.info("Vérifie que :")
-        st.info("- Le host commence bien par 'db.'")
-        st.info("- Le mot de passe est correct")
-        st.info("- Les règles réseau Supabase autorisent Streamlit Cloud")
-        st.info("- IPv6 est activé dans Supabase")
-    except Exception as e:
-        st.error(f"❌ Erreur inattendue: {e}")
-
-# Appelle cette fonction au début de ton app
-test_supabase_connection()
 # ===================================
 # VÉRIFICATION DES SECRETS
 # ===================================
-def verify_secrets():
-    """Vérifie que tous les secrets nécessaires sont présents"""
+
+def verify_secrets() -> bool:
+    """
+    Vérifie que tous les secrets nécessaires sont présents
+
+    Returns:
+        True si OK, False sinon
+    """
     required_secrets = {
         'db': ['host', 'port', 'name', 'user', 'password'],
         'mistral': ['api_key']
     }
 
     missing = []
+
     for section, keys in required_secrets.items():
         if section not in st.secrets:
             missing.append(f"Section [{section}] manquante")
@@ -74,29 +48,50 @@ def verify_secrets():
                 missing.append(f"{section}.{key} manquant")
 
     if missing:
-        st.error("❌ Configuration manquante :")
+        st.error("❌ Configuration manquante dans les secrets Streamlit")
+        st.error("Ajoute ces éléments dans `.streamlit/secrets.toml` (local) ou dans les Settings (cloud) :")
         for item in missing:
-            st.error(f"- {item}")
-        st.stop()
+            st.error(f"  - {item}")
 
-# ===================================
-# IMPORTS APRES VERIFICATION
-# ===================================
+        with st.expander("💡 Exemple de configuration", expanded=True):
+            st.code("""
+[db]
+host = "db.xxxxx.supabase.co"
+port = "5432"
+name = "postgres"
+user = "postgres"
+password = "ton_mot_de_passe"
+
+[mistral]
+api_key = "ta_cle_api_mistral"
+            """, language="toml")
+
+        st.stop()
+        return False
+
+    return True
+
+
+# Vérifier les secrets au démarrage
 verify_secrets()
 
+
+# ===================================
+# IMPORTS APRÈS VÉRIFICATION
+# ===================================
+
 from src.core.config import settings
-from src.core.database import (
-    get_db_context,
-    check_connection,
-    get_db_info,
-    SessionLocal,
-    create_all_tables
-)
+from src.core.database import check_connection, get_db_info
 from src.core.ai_agent import AgentIA
+from src.core.state_manager import StateManager, get_state
+from src.ui.components import render_stat_row, render_badge
+from src.core.ai_cache import render_cache_stats
+
 
 # ===================================
 # CONFIGURATION STREAMLIT
 # ===================================
+
 st.set_page_config(
     page_title=settings.APP_NAME,
     page_icon="🤖",
@@ -109,9 +104,11 @@ st.set_page_config(
     }
 )
 
+
 # ===================================
-# STYLE CSS PERSONNALISÉ
+# CSS PERSONNALISÉ
 # ===================================
+
 def load_custom_css():
     """Charge le CSS personnalisé pour une interface moderne"""
     st.markdown("""
@@ -123,8 +120,6 @@ def load_custom_css():
         --accent-color: #4caf50;
         --background: #f6f8f7;
         --card-bg: #ffffff;
-        --error-color: #f8d7da;
-        --success-color: #d4edda;
     }
 
     /* Header personnalisé */
@@ -132,12 +127,6 @@ def load_custom_css():
         padding: 1rem 0;
         border-bottom: 2px solid var(--accent-color);
         margin-bottom: 2rem;
-    }
-
-    .main-header h1 {
-        color: var(--primary-color);
-        font-weight: 700;
-        margin: 0;
     }
 
     /* Cards modernes */
@@ -155,222 +144,147 @@ def load_custom_css():
         box-shadow: 0 4px 8px rgba(0,0,0,0.08);
     }
 
-    /* Boutons AI */
-    .ai-button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        border: none;
-        cursor: pointer;
-        font-weight: 600;
-    }
-
-    /* Status badges */
-    .status-badge {
-        display: inline-block;
-        padding: 0.25rem 0.75rem;
-        border-radius: 12px;
-        font-size: 0.875rem;
-        font-weight: 600;
-    }
-
-    .status-success {
-        background: var(--success-color);
-        color: #155724;
-    }
-
-    .status-warning {
-        background: #fff3cd;
-        color: #856404;
-    }
-
-    .status-error {
-        background: var(--error-color);
-        color: #721c24;
-    }
-
-    /* Animation de chargement IA */
-    .ai-thinking {
-        display: inline-block;
-        animation: pulse 1.5s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.5; }
-    }
-
     /* Sidebar */
     .css-1d391kg {
         background-color: var(--background);
     }
 
-    /* Cache le menu hamburger en production */
+    /* Masquer menu hamburger en production */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
 
-    /* Nouveaux styles pour les messages d'erreur/succès */
-    .alert {
-        padding: 0.75rem 1.25rem;
-        margin-bottom: 1rem;
-        border: 1px solid transparent;
-        border-radius: 0.25rem;
-    }
-
-    .alert-success {
-        color: #155724;
-        background-color: var(--success-color);
-        border-color: #c3e6cb;
-    }
-
-    .alert-error {
-        color: #721c24;
-        background-color: var(--error-color);
-        border-color: #f5c6cb;
-    }
-
-    /* Style pour les onglets */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 0.5rem;
-    }
-
-    .stTabs [data-baseweb="tab"] {
-        padding: 0.75rem 1.25rem;
-        border-radius: 6px;
-        background-color: #f8f9fa;
-        border: 1px solid #dee2e6;
-    }
-
-    .stTabs [data-baseweb="tab"][aria-selected="true"] {
-        background-color: var(--primary-color);
+    /* Notifications */
+    .notification-badge {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #dc3545;
         color: white;
-        border-color: var(--primary-color);
+        border-radius: 50%;
+        padding: 2px 6px;
+        font-size: 0.75rem;
+        font-weight: bold;
     }
     </style>
     """, unsafe_allow_html=True)
 
 load_custom_css()
 
+
 # ===================================
-# INITIALISATION ROBUSTE
+# INITIALISATION
 # ===================================
+
 def init_app():
-    """Initialise l'application au démarrage avec gestion des erreurs"""
+    """Initialise l'application au démarrage"""
     try:
-        # Vérifier la connexion DB
+        # 1. Initialiser StateManager
+        StateManager.init()
+        logger.info("✅ StateManager initialisé")
+
+        # 2. Vérifier connexion DB
         if not check_connection():
             st.error("❌ Impossible de se connecter à la base de données")
-            st.write("Vérifie que :")
-            st.write("- Les secrets sont bien configurés dans Streamlit Cloud")
+            st.write("**Vérifications :**")
+            st.write("- Les secrets sont bien configurés")
             st.write("- Le projet Supabase est accessible")
             st.write("- Le mot de passe est correct")
             st.stop()
 
-        # Afficher les infos de connexion dans la sidebar
-        db_info = get_db_info()
-        if db_info["status"] == "connected":
-            st.sidebar.markdown("### 🔌 Base de données")
-            st.sidebar.markdown(f"""
-            <div class="status-badge status-success">
-                ✅ Connecté à {db_info['host']}
-            </div>
-            <small>Utilisateur: {db_info['user']}</small>
-            """, unsafe_allow_html=True)
-        else:
-            st.sidebar.markdown(f"""
-            <div class="status-badge status-error">
-                ❌ Erreur: {db_info['error']}
-            </div>
-            """, unsafe_allow_html=True)
+        logger.info("✅ Base de données connectée")
 
-        # Créer les tables si nécessaire (dev uniquement)
-        if settings.ENV == "development":
+        # 3. Initialiser l'agent IA
+        state = get_state()
+        if not state.agent_ia:
             try:
-                from src.core.database import create_all_tables
-                create_all_tables()
-                st.sidebar.success("✅ Tables vérifiées/créées")
+                state.agent_ia = AgentIA()
+                logger.info("✅ Agent IA initialisé")
             except Exception as e:
-                logger.error(f"Erreur création tables: {e}")
-                st.sidebar.warning(f"⚠️ Erreur tables: {str(e)[:50]}...")
+                logger.error(f"⚠️ Agent IA non disponible: {e}")
+                st.sidebar.warning("⚠️ Agent IA non disponible")
 
-        # Initialiser l'agent IA dans la session
-        if "agent_ia" not in st.session_state:
-            try:
-                st.session_state.agent_ia = AgentIA()
-                logger.info("🤖 Agent IA initialisé")
-                st.sidebar.markdown("""
-                <div class="status-badge status-success">
-                    🤖 IA Prête
-                </div>
-                """, unsafe_allow_html=True)
-            except Exception as e:
-                st.sidebar.error(f"❌ Erreur IA: {str(e)[:50]}...")
-                logger.exception("Erreur initialisation IA")
-
-        # Initialiser l'état de navigation
-        if "current_module" not in st.session_state:
-            st.session_state.current_module = "accueil"
-
-        # Historique de chat
-        if "chat_history" not in st.session_state:
-            st.session_state.chat_history = []
+        # 4. Afficher infos DB dans sidebar (mode debug)
+        if state.debug_mode:
+            with st.sidebar.expander("🗄️ Info Base de Données", expanded=False):
+                db_info = get_db_info()
+                if db_info["status"] == "connected":
+                    st.success(f"✅ Connecté à {db_info['host']}")
+                    st.caption(f"Base: {db_info['database']}")
+                    st.caption(f"User: {db_info['user']}")
+                else:
+                    st.error(f"❌ Erreur: {db_info.get('error', 'Inconnue')}")
 
     except Exception as e:
+        logger.exception("❌ Erreur d'initialisation")
         st.error(f"❌ Erreur d'initialisation: {str(e)}")
-        logger.exception("Erreur init_app")
         st.stop()
+
 
 # Initialiser l'app
 init_app()
 
+
 # ===================================
-# HEADER AMÉLIORÉ
+# HEADER
 # ===================================
+
 def render_header():
-    """Affiche l'en-tête de l'application avec infos supplémentaires"""
-    col1, col2, col3 = st.columns([2, 1, 1])
+    """Affiche l'en-tête de l'application"""
+    state = get_state()
+
+    col1, col2, col3 = st.columns([3, 1, 1])
 
     with col1:
         st.markdown(f"""
             <div class="main-header">
                 <h1>🤖 {settings.APP_NAME}</h1>
                 <p style="color: var(--secondary-color); margin: 0;">
-                    Assistant intelligent pour le quotidien familial
+                    Ton copilote quotidien propulsé par l'IA
                 </p>
             </div>
         """, unsafe_allow_html=True)
 
     with col2:
-        # Status IA amélioré
-        if "agent_ia" in st.session_state:
-            st.markdown("""
-            <div class="status-badge status-success">
-                🤖 IA Active
-            </div>
-            """, unsafe_allow_html=True)
+        # Status IA
+        if state.agent_ia:
+            render_badge("🤖 IA Active", color="#4CAF50")
         else:
-            st.markdown("""
-            <div class="status-badge status-warning">
-                🤖 IA Indisponible
-            </div>
-            """, unsafe_allow_html=True)
+            render_badge("🤖 IA Indispo", color="#FFC107")
+
+    with col3:
+        # Notifications
+        if state.unread_notifications > 0:
+            if st.button(f"🔔 {state.unread_notifications}", key="notifs"):
+                st.session_state.show_notifications = True
+
 
 # ===================================
-# SIDEBAR AMÉLIORÉE
+# SIDEBAR - NAVIGATION
 # ===================================
+
 def render_sidebar():
-    """Affiche la sidebar avec navigation et infos supplémentaires"""
+    """Affiche la sidebar avec navigation"""
+    state = get_state()
+
     with st.sidebar:
         st.title("Navigation")
 
-        # Modules principaux avec icônes améliorées
+        # Fil d'Ariane
+        breadcrumb = StateManager.get_navigation_breadcrumb()
+        if len(breadcrumb) > 1:
+            st.caption(" → ".join(breadcrumb[-3:]))
+            if st.button("⬅️ Retour", key="back_btn"):
+                StateManager.go_back()
+                st.rerun()
+            st.markdown("---")
+
+        # Modules principaux
         modules = {
             "🏠 Accueil": "accueil",
             "🍳 Cuisine": {
                 "📚 Recettes": "cuisine.recettes",
                 "🥫 Inventaire": "cuisine.inventaire",
-                "👨‍🍳 Planning de la semaine": "cuisine.planning_semaine",
+                "🗓️ Planning Semaine": "cuisine.planning_semaine",
                 "🛒 Courses": "cuisine.courses",
             },
             "👨‍👩‍👧‍👦 Famille": {
@@ -390,175 +304,275 @@ def render_sidebar():
             "⚙️ Paramètres": "parametres",
         }
 
-        # Afficher les modules avec expanders
         for label, value in modules.items():
             if isinstance(value, dict):
-                with st.expander(label, expanded=(label == "🍳 Cuisine")):
+                # Module avec sous-menus
+                is_expanded = any(
+                    state.current_module.startswith(sub_value)
+                    for sub_value in value.values()
+                )
+
+                with st.expander(label, expanded=is_expanded):
                     for sub_label, sub_value in value.items():
+                        # Highlight si actif
+                        is_active = state.current_module == sub_value
+                        button_type = "primary" if is_active else "secondary"
+
                         if st.button(
                                 sub_label,
                                 key=f"btn_{sub_value}",
                                 use_container_width=True,
-                                help=f"Accéder à {sub_label}"
+                                type=button_type,
+                                disabled=is_active
                         ):
-                            st.session_state.current_module = sub_value
+                            StateManager.navigate_to(sub_value)
                             st.rerun()
             else:
+                # Module simple
+                is_active = state.current_module == value
+                button_type = "primary" if is_active else "secondary"
+
                 if st.button(
                         label,
                         key=f"btn_{value}",
                         use_container_width=True,
-                        help=f"Accéder à {label}"
+                        type=button_type,
+                        disabled=is_active
                 ):
-                    st.session_state.current_module = value
+                    StateManager.navigate_to(value)
                     st.rerun()
 
-        # Séparateur et stats
         st.markdown("---")
-        st.subheader("📊 Aperçu rapide")
 
-        # Stats avec cards modernes
-        col_s1, col_s2 = st.columns(2)
-        with col_s1:
-            st.markdown("""
-            <div class="metric-card">
-                <h4>Recettes</h4>
-                <p style="font-size: 1.5rem; margin: 0;">42</p>
-            </div>
-            """, unsafe_allow_html=True)
-            st.markdown("""
-            <div class="metric-card">
-                <h4>Projets</h4>
-                <p style="font-size: 1.5rem; margin: 0;">5</p>
-            </div>
-            """, unsafe_allow_html=True)
+        # Stats IA (si agent disponible)
+        if state.agent_ia:
+            render_cache_stats()
 
-        with col_s2:
-            st.markdown("""
-            <div class="metric-card">
-                <h4>Stock bas</h4>
-                <p style="font-size: 1.5rem; margin: 0;">3</p>
-            </div>
-            """, unsafe_allow_html=True)
-            st.markdown("""
-            <div class="metric-card">
-                <h4>Tâches</h4>
-                <p style="font-size: 1.5rem; margin: 0;">12</p>
-            </div>
-            """, unsafe_allow_html=True)
-
-        # Bouton urgences IA amélioré
         st.markdown("---")
-        if st.button(
-                "⚡ Actions urgentes IA",
-                key="urgences_ia",
-                use_container_width=True,
-                help="Demander à l'IA de gérer les urgences"
-        ):
-            st.session_state.current_module = "urgences_ia"
+
+        # Mode Debug
+        if st.checkbox("🐛 Mode Debug", key="debug_toggle"):
+            state.debug_mode = True
+
+            with st.expander("État de l'App", expanded=False):
+                summary = StateManager.get_state_summary()
+                st.json(summary)
+
+                if st.button("🔄 Reset State"):
+                    StateManager.reset()
+                    st.success("State reset")
+                    st.rerun()
+        else:
+            state.debug_mode = False
+
+
+# ===================================
+# ROUTAGE DES MODULES
+# ===================================
+
+# Mapping des modules
+MODULE_REGISTRY = {
+    "accueil": "src.modules.accueil",
+    "cuisine.recettes": "src.modules.cuisine.recettes",
+    "cuisine.inventaire": "src.modules.cuisine.inventaire",
+    "cuisine.planning_semaine": "src.modules.cuisine.planning_semaine",
+    "cuisine.courses": "src.modules.cuisine.courses",
+    "famille.suivi_jules": "src.modules.famille.suivi_jules",
+    "famille.bien_etre": "src.modules.famille.bien_etre",
+    "famille.routines": "src.modules.famille.routines",
+    "maison.projets": "src.modules.maison.projets",
+    "maison.jardin": "src.modules.maison.jardin",
+    "maison.entretien": "src.modules.maison.entretien",
+    "planning.calendrier": "src.modules.planning.calendrier",
+    "planning.vue_ensemble": "src.modules.planning.vue_ensemble",
+    "parametres": "src.modules.parametres",
+}
+
+
+def load_module(module_name: str):
+    """
+    Charge et affiche le module demandé
+
+    Args:
+        module_name: Nom du module (ex: "cuisine.recettes")
+    """
+    if module_name not in MODULE_REGISTRY:
+        st.error(f"❌ Module '{module_name}' non trouvé")
+        st.info("Modules disponibles :")
+        for name in MODULE_REGISTRY.keys():
+            st.write(f"  - {name}")
+        return
+
+    try:
+        # Import dynamique avec cache
+        state = get_state()
+        cache_key = f"module_{module_name}"
+
+        # Vérifier cache
+        module = StateManager.cache_get(cache_key, ttl=300)
+
+        if not module:
+            # Import
+            module = importlib.import_module(MODULE_REGISTRY[module_name])
+            StateManager.cache_set(cache_key, module)
+            logger.info(f"📦 Module '{module_name}' chargé")
+
+        # Appeler la fonction app()
+        if hasattr(module, "app"):
+            module.app()
+        else:
+            st.error(f"❌ Le module {module_name} n'a pas de fonction app()")
+
+    except ImportError as e:
+        logger.error(f"❌ Import error: {e}")
+        st.error(f"❌ Impossible de charger le module: {e}")
+
+        st.info("ℹ️ Ce module est peut-être en cours de développement")
+
+        # Module placeholder
+        st.markdown(f"## 🚧 Module {module_name}")
+        st.info("Ce module sera bientôt disponible !")
+
+        if st.button("🏠 Retour à l'accueil"):
+            StateManager.navigate_to("accueil")
             st.rerun()
 
-# ===================================
-# ROUTAGE DES MODULES AVEC GESTION D'ERREURS
-# ===================================
-def load_module(module_name: str):
-    """Charge et affiche le module demandé avec gestion des erreurs"""
-    try:
-        # Mapping des modules
-        module_map = {
-            "accueil": "src.modules.accueil",
-            "cuisine.recettes": "src.modules.cuisine.recettes",
-            "cuisine.inventaire": "src.modules.cuisine.inventaire",
-            "cuisine.planning_semaine": "src.modules.cuisine.planning_semaine",
-            "cuisine.courses": "src.modules.cuisine.courses",
-            "famille.suivi_jules": "src.modules.famille.suivi_jules",
-            "famille.bien_etre": "src.modules.famille.bien_etre",
-            "famille.routines": "src.modules.famille.routines",
-            "maison.projets": "src.modules.maison.projets",
-            "maison.jardin": "src.modules.maison.jardin",
-            "maison.entretien": "src.modules.maison.entretien",
-            "planning.calendrier": "src.modules.planning.calendrier",
-            "planning.vue_ensemble": "src.modules.planning.vue_ensemble",
-            "parametres": "src.modules.parametres",
-            "urgences_ia": "src.modules.urgences_ia",
-        }
-
-        if module_name not in module_map:
-            st.error(f"Module '{module_name}' non trouvé")
-            return
-
-        # Import dynamique avec gestion des erreurs
-        try:
-            import importlib
-            module = importlib.import_module(module_map[module_name])
-
-            # Appeler la fonction app() du module
-            if hasattr(module, "app"):
-                module.app()
-            else:
-                st.error(f"Le module {module_name} n'a pas de fonction app()")
-
-        except ImportError as e:
-            st.error(f"Impossible de charger le module: {e}")
-            st.info("Module en cours de développement...")
-            st.markdown(f"## 🚧 Module {module_name}")
-            st.info("Ce module sera bientôt disponible !")
-
-        except Exception as e:
-            st.error(f"Erreur dans le module: {e}")
-
     except Exception as e:
-        st.error(f"Erreur inattendue: {e}")
-        logger.exception("Erreur dans load_module")
+        logger.exception(f"❌ Erreur dans le module {module_name}")
+        st.error(f"❌ Erreur dans le module: {e}")
+
+        if state.debug_mode:
+            st.exception(e)
+
 
 # ===================================
-# FOOTER AMÉLIORÉ
+# NOTIFICATIONS
 # ===================================
+
+def render_notifications():
+    """Affiche les notifications non lues"""
+    state = get_state()
+
+    if not hasattr(st.session_state, 'show_notifications') or not st.session_state.show_notifications:
+        return
+
+    notifs = StateManager.get_unread_notifications()
+
+    if not notifs:
+        st.info("📭 Aucune notification")
+        return
+
+    with st.expander(f"🔔 Notifications ({len(notifs)})", expanded=True):
+        for notif in notifs:
+            icon = {
+                "info": "ℹ️",
+                "success": "✅",
+                "warning": "⚠️",
+                "error": "❌"
+            }.get(notif["type"], "ℹ️")
+
+            col1, col2 = st.columns([4, 1])
+
+            with col1:
+                st.markdown(f"{icon} **{notif['message']}**")
+                if notif.get('module'):
+                    st.caption(f"Module: {notif['module']}")
+                st.caption(notif['timestamp'].strftime("%H:%M"))
+
+            with col2:
+                if notif.get('action_link'):
+                    if st.button("Aller", key=f"notif_action_{notif['id']}"):
+                        StateManager.navigate_to(notif['action_link'])
+                        StateManager.mark_notification_read(notif['id'])
+                        st.rerun()
+
+                if st.button("✓", key=f"notif_read_{notif['id']}"):
+                    StateManager.mark_notification_read(notif['id'])
+                    st.rerun()
+
+            st.markdown("---")
+
+        if st.button("🗑️ Tout effacer", use_container_width=True):
+            StateManager.clear_notifications()
+            st.session_state.show_notifications = False
+            st.rerun()
+
+
+# ===================================
+# FOOTER
+# ===================================
+
 def render_footer():
-    """Affiche le footer avec infos supplémentaires"""
+    """Affiche le footer"""
     st.markdown("---")
-    footer_col1, footer_col2, footer_col3 = st.columns([2, 1, 1])
 
-    with footer_col1:
+    col1, col2, col3 = st.columns([2, 1, 1])
+
+    with col1:
         st.caption(f"💚 {settings.APP_NAME} v{settings.APP_VERSION}")
-        st.caption("Assistant familial intelligent propulsé par IA")
+        st.caption("Assistant familial intelligent")
 
-    with footer_col2:
+    with col2:
         if st.button("🐛 Reporter un bug", key="report_bug"):
             st.info("Ouvrir une issue sur GitHub")
 
-    with footer_col3:
+    with col3:
         if st.button("ℹ️ À propos", key="about"):
-            st.info("""
-            **Assistant MaTanne v2**
-            Développé avec ❤️ pour réduire la charge mentale familiale.
-            """)
+            with st.expander("À propos", expanded=True):
+                st.markdown(f"""
+                ### {settings.APP_NAME}
+                
+                **Version:** {settings.APP_VERSION}
+                
+                **Stack:**
+                - Frontend: Streamlit
+                - Database: Supabase PostgreSQL
+                - IA: Mistral AI
+                - Hosting: Streamlit Cloud
+                
+                **Développé avec ❤️**
+                """)
+
 
 # ===================================
-# PAGE PRINCIPALE AVEC GESTION DES ERREURS
+# PAGE PRINCIPALE
 # ===================================
+
 def main():
-    """Fonction principale de l'application avec gestion des erreurs"""
+    """Fonction principale de l'application"""
     try:
-        # Affichage du header et sidebar
+        # Header
         render_header()
+
+        # Sidebar
         render_sidebar()
 
-        # Chargement du module actuel
-        current = st.session_state.current_module
-        load_module(current)
+        # Notifications
+        render_notifications()
 
-        # Affichage du footer
+        # Charger le module actuel
+        state = get_state()
+        load_module(state.current_module)
+
+        # Footer
         render_footer()
 
     except Exception as e:
-        st.error(f"❌ Erreur critique dans l'application: {str(e)}")
-        logger.exception("Erreur dans main()")
-        if settings.DEBUG:
+        logger.exception("❌ Erreur critique dans main()")
+        st.error(f"❌ Erreur critique: {str(e)}")
+
+        if get_state().debug_mode:
             st.exception(e)
+
+        # Bouton de reset
+        if st.button("🔄 Redémarrer l'application"):
+            StateManager.reset()
+            st.rerun()
+
 
 # ===================================
 # POINT D'ENTRÉE
 # ===================================
+
 if __name__ == "__main__":
     main()

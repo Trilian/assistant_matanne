@@ -218,6 +218,9 @@ class ArticleCourses(Base):
     suggere_par_ia: Mapped[bool] = mapped_column(Boolean, default=False)
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     achete_le: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    rayon_magasin: Mapped[Optional[str]] = mapped_column(String(100))
+    magasin_cible: Mapped[Optional[str]] = mapped_column(String(50))
+    notes: Mapped[Optional[str]] = mapped_column(Text)
 
 
 # ===================================

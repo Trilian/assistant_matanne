@@ -5,7 +5,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment=" amelioration inventaire">
+      <change afterPath="$PROJECT_DIR$/MIGRATION_GUIDE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/README_TECHNIQUE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/core/ai_cache.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/core/base_service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/core/state_manager.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/core/validators.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/services/import_export.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/services/recette_service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ui/components.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/recettes.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/cuisine/recettes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/ai_recette_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/ai_recette_service.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -77,11 +90,11 @@
       <recent name="D:\Projet_streamlit\assistant_matanne\assets" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Projet_streamlit\assistant_matanne\src\core" />
       <recent name="D:\Projet_streamlit\assistant_matanne\modules\outils" />
       <recent name="D:\Projet_streamlit\assistant_matanne\modules\famille" />
       <recent name="D:\Projet_streamlit\assistant_matanne\modules\maison" />
       <recent name="D:\Projet_streamlit\assistant_matanne\modules\cuisine" />
-      <recent name="D:\Projet_streamlit\assistant_matanne\modules" />
     </key>
   </component>
   <component name="RunManager">
@@ -211,14 +224,6 @@
       <workItem from="1764864455782" duration="6942000" />
       <workItem from="1764923035460" duration="23405000" />
       <workItem from="1765096794626" duration="16000" />
-    </task>
-    <task id="LOCAL-00004" summary="Fix module recettes">
-      <option name="closed" value="true" />
-      <created>1763153853363</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1763153853363</updated>
     </task>
     <task id="LOCAL-00005" summary="Fix module recettes">
       <option name="closed" value="true" />
@@ -604,7 +609,15 @@
       <option name="project" value="LOCAL" />
       <updated>1764968424784</updated>
     </task>
-    <option name="localTasksCounter" value="53" />
+    <task id="LOCAL-00053" summary=" amelioration inventaire">
+      <option name="closed" value="true" />
+      <created>1765097156329</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1765097156329</updated>
+    </task>
+    <option name="localTasksCounter" value="54" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -630,6 +643,11 @@
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/modules/maison/routines.py</url>
           <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/app.py</url>
+          <line>4</line>
+          <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
