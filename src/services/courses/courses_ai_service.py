@@ -1,12 +1,12 @@
 """
-Service IA Courses - Génération et Optimisation
-Toute la logique IA isolée dans ce service
+Service IA Courses
+
 """
 import asyncio
 import json
 import logging
 from typing import List, Dict, Optional
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 
 from src.core.ai_agent import AgentIA
 from src.core.ai_cache import AICache, RateLimiter
@@ -29,7 +29,8 @@ class ArticleOptimise(BaseModel):
     alternatives: List[str] = Field(default_factory=list)
     conseil: Optional[str] = None
 
-    @validator('article')
+    @field_validator('article')
+    @classmethod
     def clean_article(cls, v):
         return v.strip()
 
@@ -53,7 +54,7 @@ class Alternative(BaseModel):
 
 
 # ===================================
-# SERVICE IA
+# SERVICE IA (reste identique)
 # ===================================
 
 class CoursesAIService:
@@ -61,10 +62,6 @@ class CoursesAIService:
 
     def __init__(self, agent: AgentIA):
         self.agent = agent
-
-    # ===================================
-    # GÉNÉRATION LISTE OPTIMISÉE
-    # ===================================
 
     async def generer_liste_optimisee(
             self,
@@ -76,28 +73,15 @@ class CoursesAIService:
     ) -> ListeOptimisee:
         """
         Génère une liste optimisée avec l'IA
-
-        Args:
-            articles_base: Articles bruts à optimiser
-            magasin: Nom du magasin cible
-            rayons_disponibles: Liste des rayons du magasin
-            budget_max: Budget maximum en €
-            preferences: Dict optionnel de préférences (bio, local, etc.)
-
-        Returns:
-            ListeOptimisee validée par Pydantic
         """
         logger.info(f"Génération liste IA: {len(articles_base)} articles, magasin={magasin}")
 
-        # Vérifier rate limit
         can_call, error = RateLimiter.can_call()
         if not can_call:
             raise ValueError(error)
 
-        # Consolider doublons AVANT l'IA
         consolides = self._consolider_doublons(articles_base)
 
-        # Construire prompt
         prompt = self._build_prompt_optimisation(
             consolides,
             magasin,
@@ -106,20 +90,17 @@ class CoursesAIService:
             preferences
         )
 
-        # Appel IA avec retry
         response = await self._call_with_retry(
             prompt,
             system_prompt="Expert en courses alimentaires. Réponds UNIQUEMENT en JSON valide.",
             max_tokens=2000
         )
 
-        # Parser et valider
         try:
             data = self._parse_json_response(response)
             return ListeOptimisee(**data)
         except Exception as e:
             logger.error(f"Erreur parsing réponse IA: {e}")
-            # Fallback simple
             return self._fallback_liste(consolides, rayons_disponibles)
 
     def _consolider_doublons(self, articles: List[Dict]) -> List[Dict]:
@@ -129,12 +110,10 @@ class CoursesAIService:
         for art in articles:
             key = art["nom"].lower().strip()
             if key in consolidation:
-                # Fusion
                 consolidation[key]["quantite"] = max(
                     consolidation[key]["quantite"],
                     art["quantite"]
                 )
-                # Upgrade priorité
                 priorites = {"basse": 1, "moyenne": 2, "haute": 3}
                 if priorites.get(art.get("priorite", "moyenne"), 2) > priorites.get(consolidation[key]["priorite"], 2):
                     consolidation[key]["priorite"] = art.get("priorite", "moyenne")
@@ -233,14 +212,12 @@ UNIQUEMENT le JSON, aucun texte !"""
                 if attempt == max_retries - 1:
                     logger.error(f"IA failed after {max_retries} attempts: {e}")
                     raise
-                await asyncio.sleep(2 ** attempt)  # Exponential backoff
+                await asyncio.sleep(2 ** attempt)
 
     def _parse_json_response(self, response: str) -> Dict:
         """Parse la réponse JSON de l'IA"""
-        # Nettoyer
         cleaned = response.strip()
 
-        # Supprimer markdown
         if cleaned.startswith("```json"):
             cleaned = cleaned[7:]
         if cleaned.startswith("```"):
@@ -249,8 +226,6 @@ UNIQUEMENT le JSON, aucun texte !"""
             cleaned = cleaned[:-3]
 
         cleaned = cleaned.strip()
-
-        # Parser
         return json.loads(cleaned)
 
     def _fallback_liste(
@@ -261,7 +236,6 @@ UNIQUEMENT le JSON, aucun texte !"""
         """Liste de fallback si IA échoue"""
         logger.warning("Utilisation du fallback (IA indisponible)")
 
-        # Organisation basique par catégorie
         par_rayon = {rayons[0]: []}
 
         for art in articles:
@@ -279,27 +253,13 @@ UNIQUEMENT le JSON, aucun texte !"""
             conseils_globaux=["Service IA temporairement indisponible"]
         )
 
-    # ===================================
-    # ALTERNATIVES
-    # ===================================
-
     async def proposer_alternatives(
             self,
             article: str,
             magasin: str,
             contexte: Optional[str] = None
     ) -> List[Alternative]:
-        """
-        Propose des alternatives pour un article
-
-        Args:
-            article: Nom de l'article
-            magasin: Magasin cible
-            contexte: Contexte optionnel (ex: "pour un gâteau")
-
-        Returns:
-            Liste d'alternatives
-        """
+        """Propose des alternatives pour un article"""
         logger.info(f"Recherche alternatives: {article} @ {magasin}")
 
         prompt = f"""Propose 3 alternatives pour cet article dans {magasin}:
@@ -340,25 +300,12 @@ UNIQUEMENT JSON !"""
             logger.error(f"Erreur alternatives: {e}")
             return []
 
-    # ===================================
-    # ANALYSE HABITUDES
-    # ===================================
-
     async def analyser_habitudes(
             self,
             historique: List[Dict],
             stats: Dict
     ) -> Dict[str, List[str]]:
-        """
-        Analyse les habitudes d'achat
-
-        Args:
-            historique: Liste articles achetés
-            stats: Stats globales
-
-        Returns:
-            Dict avec {conseils: [...], opportunites: [...]}
-        """
+        """Analyse les habitudes d'achat"""
         logger.info("Analyse habitudes d'achat par IA")
 
         articles_freq = stats.get("articles_frequents", {})
@@ -409,10 +356,6 @@ JSON uniquement !"""
                 "opportunites": ["Analyse IA indisponible"]
             }
 
-
-# ===================================
-# HELPER INSTANTIATION
-# ===================================
 
 def create_courses_ai_service(agent: AgentIA) -> CoursesAIService:
     """Factory pour créer le service IA"""
