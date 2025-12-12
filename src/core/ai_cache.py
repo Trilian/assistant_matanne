@@ -1,6 +1,6 @@
 """
 Système de Cache pour Réponses IA
-Évite les appels coûteux et améliore les performances
+Clés Streamlit uniques pour éviter les conflits
 """
 import hashlib
 import json
@@ -13,15 +13,9 @@ logger = logging.getLogger(__name__)
 
 
 class AICache:
-    """
-    Cache en mémoire pour réponses IA
-    Utilise st.session_state pour persistance durant la session
-    """
+    """Cache en mémoire pour réponses IA"""
 
-    # Durées par défaut (secondes)
-    DEFAULT_TTL = 3600  # 1 heure
-
-    # Limite de taille du cache
+    DEFAULT_TTL = 3600
     MAX_CACHE_SIZE = 100
 
     @staticmethod
@@ -33,64 +27,37 @@ class AICache:
 
     @staticmethod
     def _make_key(prompt: str, params: Dict[str, Any]) -> str:
-        """
-        Génère une clé unique pour le cache
-
-        Args:
-            prompt: Le prompt envoyé à l'IA
-            params: Paramètres (temperature, max_tokens, etc.)
-
-        Returns:
-            Hash MD5 unique
-        """
-        # Sérialiser de manière déterministe
+        """Génère une clé unique pour le cache"""
         data = {
             "prompt": prompt,
             "params": params
         }
-
         serialized = json.dumps(data, sort_keys=True)
-
-        # Hash MD5
         return hashlib.md5(serialized.encode()).hexdigest()
 
     @staticmethod
     def get(prompt: str, params: Dict[str, Any] = None) -> Optional[str]:
-        """
-        Récupère une réponse du cache
-
-        Args:
-            prompt: Prompt original
-            params: Paramètres de l'appel
-
-        Returns:
-            Réponse en cache ou None
-        """
+        """Récupère une réponse du cache"""
         AICache._init_cache()
 
         params = params or {}
         key = AICache._make_key(prompt, params)
 
-        # Vérifier existence
         if key not in st.session_state.ai_cache:
             logger.debug(f"Cache MISS: {key[:8]}...")
             return None
 
         entry = st.session_state.ai_cache[key]
 
-        # Vérifier expiration
         now = datetime.now()
         expires_at = entry["timestamp"] + timedelta(seconds=entry["ttl"])
 
         if now > expires_at:
-            # Expiré, supprimer
             del st.session_state.ai_cache[key]
             logger.debug(f"Cache EXPIRED: {key[:8]}...")
             return None
 
         logger.info(f"Cache HIT: {key[:8]}...")
-
-        # Incrémenter compteur hits
         entry["hits"] = entry.get("hits", 0) + 1
 
         return entry["response"]
@@ -102,27 +69,17 @@ class AICache:
             response: str,
             ttl: int = DEFAULT_TTL
     ):
-        """
-        Sauvegarde une réponse dans le cache
-
-        Args:
-            prompt: Prompt original
-            params: Paramètres de l'appel
-            response: Réponse de l'IA
-            ttl: Durée de vie en secondes
-        """
+        """Sauvegarde une réponse dans le cache"""
         AICache._init_cache()
 
         params = params or {}
         key = AICache._make_key(prompt, params)
 
-        # Vérifier taille du cache
         if len(st.session_state.ai_cache) >= AICache.MAX_CACHE_SIZE:
             AICache._evict_oldest()
 
-        # Sauvegarder
         st.session_state.ai_cache[key] = {
-            "prompt": prompt[:100],  # Truncate pour économiser mémoire
+            "prompt": prompt[:100],
             "response": response,
             "timestamp": datetime.now(),
             "ttl": ttl,
@@ -137,13 +94,11 @@ class AICache:
         if "ai_cache" not in st.session_state or not st.session_state.ai_cache:
             return
 
-        # Trier par timestamp
         sorted_entries = sorted(
             st.session_state.ai_cache.items(),
             key=lambda x: x[1]["timestamp"]
         )
 
-        # Supprimer les 10% les plus vieux
         to_remove = max(1, len(sorted_entries) // 10)
 
         for key, _ in sorted_entries[:to_remove]:
@@ -193,12 +148,7 @@ class AICache:
 
     @staticmethod
     def invalidate_pattern(pattern: str):
-        """
-        Invalide toutes les entrées contenant un pattern
-
-        Args:
-            pattern: Motif à rechercher dans les prompts
-        """
+        """Invalide toutes les entrées contenant un pattern"""
         AICache._init_cache()
 
         to_remove = []
@@ -218,12 +168,8 @@ class AICache:
 # ===================================
 
 class RateLimiter:
-    """
-    Limite le nombre d'appels IA par période
-    Protection contre abus et dépassement de quotas
-    """
+    """Limite le nombre d'appels IA par période"""
 
-    # Limites par défaut
     MAX_CALLS_PER_HOUR = 30
     MAX_CALLS_PER_DAY = 100
 
@@ -235,23 +181,16 @@ class RateLimiter:
 
     @staticmethod
     def can_call() -> tuple[bool, str]:
-        """
-        Vérifie si un appel IA est autorisé
-
-        Returns:
-            (autorisé: bool, message_erreur: str)
-        """
+        """Vérifie si un appel IA est autorisé"""
         RateLimiter._init_limiter()
 
         now = datetime.now()
 
-        # Nettoyer les vieux appels
         st.session_state.ai_calls = [
             timestamp for timestamp in st.session_state.ai_calls
             if now - timestamp < timedelta(hours=24)
         ]
 
-        # Vérifier limite horaire
         hour_ago = now - timedelta(hours=1)
         calls_last_hour = sum(
             1 for ts in st.session_state.ai_calls
@@ -259,7 +198,6 @@ class RateLimiter:
         )
 
         if calls_last_hour >= RateLimiter.MAX_CALLS_PER_HOUR:
-            # Calculer temps restant
             oldest_in_hour = min(
                 (ts for ts in st.session_state.ai_calls if ts >= hour_ago),
                 default=None
@@ -271,7 +209,6 @@ class RateLimiter:
 
                 return False, f"⏳ Limite horaire atteinte ({calls_last_hour}/{RateLimiter.MAX_CALLS_PER_HOUR}). Réessaye dans {minutes} min"
 
-        # Vérifier limite journalière
         calls_today = len(st.session_state.ai_calls)
 
         if calls_today >= RateLimiter.MAX_CALLS_PER_DAY:
@@ -321,11 +258,17 @@ class RateLimiter:
 
 
 # ===================================
-# HELPER UI
+# HELPER UI AVEC CLÉS UNIQUES
 # ===================================
 
-def render_cache_stats():
-    """Affiche les stats du cache (pour debug)"""
+def render_cache_stats(key_prefix: str = "default"):
+    """
+    Affiche les stats du cache (pour debug)
+
+    Args:
+        key_prefix: Préfixe unique pour éviter les conflits de clés
+                   Ex: "recettes", "courses", "sidebar"
+    """
     import streamlit as st
 
     stats = AICache.get_stats()
@@ -356,17 +299,25 @@ def render_cache_stats():
 
             st.progress(usage['percentage_used'] / 100)
 
-        # Actions
+        # Actions avec clés UNIQUES
         col_a1, col_a2 = st.columns(2)
 
         with col_a1:
-            if st.button("🗑️ Vider cache", key="clear_cache_btn"):
+            if st.button(
+                    "🗑️ Vider cache",
+                    key=f"clear_cache_btn_{key_prefix}",  # ✅ CLÉ UNIQUE
+                    use_container_width=True
+            ):
                 AICache.clear()
                 st.success("Cache vidé")
                 st.rerun()
 
         with col_a2:
-            if st.button("🔄 Reset limites", key="reset_limits_btn"):
+            if st.button(
+                    "🔄 Reset limites",
+                    key=f"reset_limits_btn_{key_prefix}",  # ✅ CLÉ UNIQUE
+                    use_container_width=True
+            ):
                 RateLimiter.reset()
                 st.success("Limites reset")
                 st.rerun()

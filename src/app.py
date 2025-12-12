@@ -346,7 +346,7 @@ def render_sidebar():
 
         # Stats IA (si agent disponible)
         if state.agent_ia:
-            render_cache_stats()
+            render_cache_stats(key_prefix="sidebar")
 
         st.markdown("---")
 

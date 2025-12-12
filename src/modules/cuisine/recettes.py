@@ -252,7 +252,7 @@ def app():
 
     # Stats cache IA (sidebar)
     with st.sidebar:
-        render_cache_stats()
+        render_cache_stats(key_prefix="recettes")
 
     # ===================================
     # TABS PRINCIPAUX
