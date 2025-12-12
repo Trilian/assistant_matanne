@@ -4,7 +4,22 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment=" amelioration inventaire" />
+    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment=" amelioration inventaire">
+      <change afterPath="$PROJECT_DIR$/src/services/courses/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/services/courses/courses_service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/services/inventaire/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/services/inventaire/inventaire_ai_service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/services/inventaire/inventaire_io_service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/services/inventaire/inventaire_service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/services/planning/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/services/planning/planning_generation_service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/services/planning/repas_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/courses.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/cuisine/courses.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/inventaire.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/cuisine/inventaire.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/planning_semaine.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/cuisine/planning_semaine.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/planning_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/planning/planning_service.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -209,14 +224,6 @@
       <workItem from="1764864455782" duration="6942000" />
       <workItem from="1764923035460" duration="23405000" />
       <workItem from="1765096794626" duration="16000" />
-    </task>
-    <task id="LOCAL-00006" summary="Fix module">
-      <option name="closed" value="true" />
-      <created>1763239544323</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1763239544323</updated>
     </task>
     <task id="LOCAL-00007" summary="Mise à jour du module">
       <option name="closed" value="true" />
@@ -602,7 +609,15 @@
       <option name="project" value="LOCAL" />
       <updated>1765380676780</updated>
     </task>
-    <option name="localTasksCounter" value="55" />
+    <task id="LOCAL-00055" summary=" amelioration inventaire">
+      <option name="closed" value="true" />
+      <created>1765469358033</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1765469358034</updated>
+    </task>
+    <option name="localTasksCounter" value="56" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
