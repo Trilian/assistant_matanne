@@ -6,6 +6,7 @@ import streamlit as st
 import asyncio
 import pandas as pd
 from datetime import datetime, date
+from typing import List, Dict, Optional
 
 from src.services.inventaire.inventaire_service import (
     inventaire_service, CATEGORIES, EMPLACEMENTS

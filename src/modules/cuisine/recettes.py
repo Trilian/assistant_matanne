@@ -14,7 +14,7 @@ from src.ui.components import (
     render_pagination, render_confirmation_dialog, render_toast
 )
 from src.services.recette_service import recette_service
-from src.services.ai_recette_service_v2 import ai_recette_service
+from src.services.ai_recette_service import ai_recette_service
 from src.core.validators import RecetteInput, validate_model
 from src.core.ai_cache import RateLimiter, render_cache_stats
 from src.core.models import TypeVersionRecetteEnum, SaisonEnum, TypeRepasEnum
