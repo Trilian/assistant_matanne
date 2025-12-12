@@ -69,14 +69,14 @@ class RecetteInput(BaseModel):
     temps_preparation: int = Field(..., gt=0, le=300)
     temps_cuisson: int = Field(..., ge=0, le=300)
     portions: int = Field(..., gt=0, le=20)
-    difficulte: str = Field(..., regex="^(facile|moyen|difficile)$")
+    difficulte: str = Field(..., pattern="^(facile|moyen|difficile)$")
     type_repas: str = Field(
         ...,
-        regex="^(petit_déjeuner|déjeuner|dîner|goûter)$"
+        pattern="^(petit_déjeuner|déjeuner|dîner|goûter)$"
     )
     saison: str = Field(
         ...,
-        regex="^(printemps|été|automne|hiver|toute_année)$"
+        pattern="^(printemps|été|automne|hiver|toute_année)$"
     )
     categorie: Optional[str] = Field(None, max_length=100)
 
@@ -186,7 +186,7 @@ class ArticleCoursesInput(BaseModel):
     nom: str = Field(..., min_length=2, max_length=200)
     quantite: float = Field(..., gt=0, le=10000)
     unite: str = Field(..., min_length=1, max_length=50)
-    priorite: str = Field("moyenne", regex="^(haute|moyenne|basse)$")
+    priorite: str = Field("moyenne", pattern="^(haute|moyenne|basse)$")
     magasin: Optional[str] = Field(None, max_length=100)
     rayon: Optional[str] = Field(None, max_length=100)
 
@@ -206,7 +206,7 @@ class RepasInput(BaseModel):
     date_repas: date
     type_repas: str = Field(
         ...,
-        regex="^(petit_déjeuner|déjeuner|dîner|goûter|bébé|batch_cooking)$"
+        pattern="^(petit_déjeuner|déjeuner|dîner|goûter|bébé|batch_cooking)$"
     )
     recette_id: Optional[int] = Field(None, gt=0)
     portions: int = Field(4, gt=0, le=20)
@@ -257,7 +257,7 @@ class EntreeBienEtreInput(BaseModel):
     """Validation entrée bien-être"""
     enfant_id: Optional[int] = Field(None, gt=0)
     date_entree: date = Field(default_factory=date.today)
-    humeur: str = Field(..., regex="^(😊 Bien|😐 Moyen|😞 Mal)$")
+    humeur: str = Field(..., pattern="^(😊 Bien|😐 Moyen|😞 Mal)$")
     heures_sommeil: Optional[float] = Field(None, ge=0, le=24)
     activite: Optional[str] = Field(None, max_length=200)
     notes: Optional[str] = Field(None, max_length=1000)
@@ -291,10 +291,10 @@ class ProjetInput(BaseModel):
     categorie: Optional[str] = Field(None, max_length=100)
     date_debut: Optional[date] = None
     date_fin: Optional[date] = None
-    priorite: str = Field("moyenne", regex="^(haute|moyenne|basse)$")
+    priorite: str = Field("moyenne", pattern="^(haute|moyenne|basse)$")
     statut: str = Field(
         "à faire",
-        regex="^(à faire|en cours|terminé|annulé)$"
+        pattern="^(à faire|en cours|terminé|annulé)$"
     )
     progression: int = Field(0, ge=0, le=100)
 
