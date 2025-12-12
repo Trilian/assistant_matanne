@@ -210,14 +210,6 @@
       <workItem from="1764923035460" duration="23405000" />
       <workItem from="1765096794626" duration="16000" />
     </task>
-    <task id="LOCAL-00009" summary="Mise à jour du module">
-      <option name="closed" value="true" />
-      <created>1764795134563</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
-      <option name="project" value="LOCAL" />
-      <updated>1764795134564</updated>
-    </task>
     <task id="LOCAL-00010" summary="PostgresSQL">
       <option name="closed" value="true" />
       <created>1764839234432</created>
@@ -602,7 +594,15 @@
       <option name="project" value="LOCAL" />
       <updated>1765550882652</updated>
     </task>
-    <option name="localTasksCounter" value="58" />
+    <task id="LOCAL-00058" summary=" amelioration inventaire">
+      <option name="closed" value="true" />
+      <created>1765551360983</created>
+      <option name="number" value="00058" />
+      <option name="presentableId" value="LOCAL-00058" />
+      <option name="project" value="LOCAL" />
+      <updated>1765551360983</updated>
+    </task>
+    <option name="localTasksCounter" value="59" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

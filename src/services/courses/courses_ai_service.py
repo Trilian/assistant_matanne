@@ -23,7 +23,7 @@ class ArticleOptimise(BaseModel):
     article: str = Field(..., min_length=2)
     quantite: float = Field(..., gt=0)
     unite: str
-    priorite: str = Field("moyenne", regex="^(haute|moyenne|basse)$")
+    priorite: str = Field("moyenne", pattern="^(haute|moyenne|basse)$")
     prix_estime: Optional[float] = Field(None, ge=0)
     rayon: Optional[str] = None
     alternatives: List[str] = Field(default_factory=list)

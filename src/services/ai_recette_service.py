@@ -69,8 +69,8 @@ class RecetteAI(BaseModel):
     temps_preparation: int = Field(..., gt=0, le=300)
     temps_cuisson: int = Field(..., ge=0, le=300)
     portions: int = Field(..., gt=0, le=20)
-    difficulte: str = Field("moyen", regex="^(facile|moyen|difficile)$")
-    type_repas: str = Field("dîner", regex="^(petit_déjeuner|déjeuner|dîner|goûter)$")
+    difficulte: str = Field("moyen", pattern="^(facile|moyen|difficile)$")
+    type_repas: str = Field("dîner", pattern="^(petit_déjeuner|déjeuner|dîner|goûter)$")
     saison: str = Field("toute_année")
     categorie: Optional[str] = Field(None, max_length=100)
 

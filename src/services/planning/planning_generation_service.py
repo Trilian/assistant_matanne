@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 class RepasGenere(BaseModel):
     """Repas généré par IA"""
-    type: str = Field(..., regex="^(petit_déjeuner|déjeuner|dîner|goûter|bébé|batch_cooking)$")
+    type: str = Field(..., pattern="^(petit_déjeuner|déjeuner|dîner|goûter|bébé|batch_cooking)$")
     recette_nom: str = Field(..., min_length=2)
     portions: int = Field(4, gt=0, le=20)
     adapte_bebe: bool = False
