@@ -169,9 +169,11 @@ class AICache:
         if not cache:
             return {
                 "size": 0,
+                "max_size": AICache.MAX_CACHE_SIZE,
                 "total_hits": 0,
                 "oldest_entry": None,
-                "newest_entry": None
+                "newest_entry": None,
+                "avg_hits": 0
             }
 
         total_hits = sum(entry.get("hits", 0) for entry in cache.values())
@@ -186,7 +188,7 @@ class AICache:
             "total_hits": total_hits,
             "oldest_entry": oldest,
             "newest_entry": newest,
-            "avg_hits": total_hits / len(cache) if cache else 0
+            "avg_hits": round(total_hits / len(cache), 1) if cache else 0
         }
 
     @staticmethod
@@ -358,13 +360,13 @@ def render_cache_stats():
         col_a1, col_a2 = st.columns(2)
 
         with col_a1:
-            if st.button("🗑️ Vider cache"):
+            if st.button("🗑️ Vider cache", key="clear_cache_btn"):
                 AICache.clear()
                 st.success("Cache vidé")
                 st.rerun()
 
         with col_a2:
-            if st.button("🔄 Reset limites"):
+            if st.button("🔄 Reset limites", key="reset_limits_btn"):
                 RateLimiter.reset()
                 st.success("Limites reset")
                 st.rerun()
