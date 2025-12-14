@@ -526,3 +526,122 @@ def render_import_ui(service):
 
         except Exception as e:
             st.error(f"Erreur lors de l'import: {e}")
+
+# ===================================
+# IMPORT DEPUIS WEB
+# ===================================
+
+def render_import_from_web_ui(service):
+    """Widget Streamlit pour import depuis URL"""
+    import streamlit as st
+    from src.services.web_scraper import RecipeWebScraper, RecipeImageGenerator
+
+    st.markdown("### 🌐 Importer depuis le Web")
+
+    st.info("💡 Supporte : Marmiton, 750g, Cuisine AZ et autres sites")
+
+    # Afficher sites supportés
+    with st.expander("📋 Sites supportés", expanded=False):
+        sites = RecipeWebScraper.get_supported_sites()
+        for site in sites:
+            st.write(f"• {site}")
+
+    # Input URL
+    url = st.text_input(
+        "🔗 URL de la recette",
+        placeholder="https://www.marmiton.org/recettes/...",
+        key="import_web_url"
+    )
+
+    col1, col2 = st.columns([1, 1])
+
+    with col1:
+        auto_image = st.checkbox(
+            "🖼️ Générer image automatiquement",
+            value=True,
+            help="Utilise Unsplash pour trouver une belle image"
+        )
+
+    with col2:
+        image_keywords = st.text_input(
+            "Mots-clés image (optionnel)",
+            placeholder="Ex: italien, pasta",
+            key="image_keywords"
+        )
+
+    if st.button("📥 Importer la recette", type="primary", use_container_width=True):
+        if not url:
+            st.error("❌ URL obligatoire")
+            return
+
+        with st.spinner("🔍 Extraction de la recette..."):
+            try:
+                # Scraper
+                recipe_data = RecipeWebScraper.scrape_url(url)
+
+                if not recipe_data:
+                    st.error("❌ Impossible d'extraire la recette. Vérifie l'URL ou essaie un autre site.")
+                    return
+
+                # Générer image si demandé
+                if auto_image:
+                    keywords = [k.strip() for k in image_keywords.split(",")] if image_keywords else []
+                    recipe_data["url_image"] = RecipeImageGenerator.generate_from_unsplash(
+                        recipe_data["nom"],
+                        keywords
+                    )
+
+                # Afficher aperçu
+                st.success(f"✅ Recette trouvée : **{recipe_data['nom']}**")
+
+                with st.expander("👁️ Aperçu de la recette", expanded=True):
+                    col_prev1, col_prev2 = st.columns([1, 2])
+
+                    with col_prev1:
+                        if recipe_data.get("url_image"):
+                            st.image(recipe_data["url_image"], use_container_width=True)
+
+                    with col_prev2:
+                        st.write(f"**Temps:** {recipe_data['temps_preparation']}min + {recipe_data['temps_cuisson']}min")
+                        st.write(f"**Portions:** {recipe_data['portions']}")
+                        st.write(f"**Ingrédients:** {len(recipe_data['ingredients'])}")
+                        st.write(f"**Étapes:** {len(recipe_data['etapes'])}")
+
+                    if recipe_data["ingredients"]:
+                        st.markdown("**Ingrédients :**")
+                        for ing in recipe_data["ingredients"][:5]:
+                            st.write(f"• {ing['quantite']} {ing['unite']} {ing['nom']}")
+                        if len(recipe_data["ingredients"]) > 5:
+                            st.caption(f"... et {len(recipe_data['ingredients']) - 5} autres")
+
+                # Bouton d'import
+                if st.button("➕ Ajouter à mes recettes", type="primary", use_container_width=True):
+                    try:
+                        # Préparer données
+                        recette_data = {
+                            k: v for k, v in recipe_data.items()
+                            if k not in ['ingredients', 'etapes', 'image_url']
+                        }
+
+                        recette_data['type_repas'] = 'dîner'
+                        recette_data['saison'] = 'toute_année'
+                        recette_data['genere_par_ia'] = False
+                        recette_data['url_image'] = recipe_data.get('url_image')
+
+                        # Créer recette
+                        recipe_id = service.create_full(
+                            recette_data=recette_data,
+                            ingredients_data=recipe_data['ingredients'],
+                            etapes_data=recipe_data['etapes']
+                        )
+
+                        st.success(f"✅ Recette '{recipe_data['nom']}' importée !")
+                        st.balloons()
+                        st.rerun()
+
+                    except Exception as e:
+                        st.error(f"❌ Erreur lors de l'import: {e}")
+
+            except Exception as e:
+                st.error(f"❌ Erreur: {str(e)}")
+                st.info("💡 Essaie avec une autre URL ou utilise l'import manuel")

@@ -22,6 +22,7 @@ from src.services.recette_service import recette_service
 from src.services.recette_edition_service import recette_edition_service
 from src.services.recette_version_service import create_recette_version_service
 from src.services.ai_recette_service import ai_recette_service
+from src.services.import_export import render_import_from_web_ui
 from src.services.import_export import RecetteExporter, RecetteImporter, render_export_ui, render_import_ui
 from src.core.validators import RecetteInput, validate_model
 from src.core.ai_cache import RateLimiter, render_cache_stats
@@ -759,7 +760,12 @@ def app():
     with tab4:
         st.subheader("📤 Import / Export de Recettes")
 
-        tab_exp, tab_imp = st.tabs(["📤 Exporter", "📥 Importer"])
+        tab_exp, tab_imp_file, tab_imp_web = st.tabs([
+            "📤 Exporter",
+            "📥 Importer Fichier",
+            "🌐 Importer depuis Web"  # ✅ NOUVEAU
+        ])
+
 
         with tab_exp:
             st.markdown("### Exporter tes recettes")
@@ -785,6 +791,9 @@ def app():
                 if selected_ids:
                     render_export_ui(selected_ids)
 
-        with tab_imp:
+        with tab_imp_file:
             st.markdown("### Importer des recettes")
             render_import_ui(recette_service)
+
+        with tab_imp_web:
+            render_import_from_web_ui(recette_service)
