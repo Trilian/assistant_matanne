@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment=" amelioration inventaire">
-      <change afterPath="$PROJECT_DIR$/src/services/recette_edition_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment=" amelioration inventaire" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -78,11 +75,11 @@
       <recent name="D:\Projet_streamlit\assistant_matanne\assets" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Projet_streamlit\assistant_matanne\src\services" />
       <recent name="D:\Projet_streamlit\assistant_matanne\src\services\planning" />
       <recent name="D:\Projet_streamlit\assistant_matanne\src\core" />
       <recent name="D:\Projet_streamlit\assistant_matanne\modules\outils" />
       <recent name="D:\Projet_streamlit\assistant_matanne\modules\famille" />
-      <recent name="D:\Projet_streamlit\assistant_matanne\modules\maison" />
     </key>
   </component>
   <component name="RunManager">
@@ -212,14 +209,6 @@
       <workItem from="1764864455782" duration="6942000" />
       <workItem from="1764923035460" duration="23405000" />
       <workItem from="1765096794626" duration="16000" />
-    </task>
-    <task id="LOCAL-00014" summary="Menage dans l'app">
-      <option name="closed" value="true" />
-      <created>1764855346859</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
-      <option name="project" value="LOCAL" />
-      <updated>1764855346859</updated>
     </task>
     <task id="LOCAL-00015" summary="Menage dans l'app">
       <option name="closed" value="true" />
@@ -605,7 +594,15 @@
       <option name="project" value="LOCAL" />
       <updated>1765568869030</updated>
     </task>
-    <option name="localTasksCounter" value="63" />
+    <task id="LOCAL-00063" summary=" amelioration inventaire">
+      <option name="closed" value="true" />
+      <created>1765701991834</created>
+      <option name="number" value="00063" />
+      <option name="presentableId" value="LOCAL-00063" />
+      <option name="project" value="LOCAL" />
+      <updated>1765701991834</updated>
+    </task>
+    <option name="localTasksCounter" value="64" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

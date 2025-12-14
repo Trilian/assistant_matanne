@@ -447,10 +447,15 @@ def render_export_ui(recette_ids: List[int]):
             st.error(f"Erreur lors de l'export: {e}")
 
 
-def render_import_ui():
-    """Widget Streamlit pour l'import"""
+# Remplacer la fonction render_import_ui existante par :
+
+def render_import_ui(service):
+    """Widget Streamlit pour l'import
+
+    Args:
+        service: Service de recettes (recette_service)
+    """
     import streamlit as st
-    from src.services.recette_service import recette_service
 
     st.markdown("### 📥 Importer des recettes")
 
@@ -500,8 +505,8 @@ def render_import_ui():
                                 if k not in ['ingredients', 'etapes']
                             }
 
-                            # Créer
-                            recette_service.create_full(
+                            # Créer avec le service passé en paramètre
+                            service.create_full(
                                 recette_data=recette_data,
                                 ingredients_data=recipe['ingredients'],
                                 etapes_data=recipe['etapes']
@@ -514,6 +519,7 @@ def render_import_ui():
 
                     st.success(f"✅ {imported_count} recette(s) importée(s)")
                     st.balloons()
+                    st.rerun()
 
             else:
                 st.warning("Aucune recette valide détectée")
