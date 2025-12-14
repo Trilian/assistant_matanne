@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment=" amelioration inventaire" />
+    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment=" amelioration inventaire">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/import_export.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/import_export.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -209,22 +212,6 @@
       <workItem from="1764864455782" duration="6942000" />
       <workItem from="1764923035460" duration="23405000" />
       <workItem from="1765096794626" duration="16000" />
-    </task>
-    <task id="LOCAL-00020" summary="Recette amelioration">
-      <option name="closed" value="true" />
-      <created>1764866991868</created>
-      <option name="number" value="00020" />
-      <option name="presentableId" value="LOCAL-00020" />
-      <option name="project" value="LOCAL" />
-      <updated>1764866991868</updated>
-    </task>
-    <task id="LOCAL-00021" summary="Recette amelioration">
-      <option name="closed" value="true" />
-      <created>1764876993057</created>
-      <option name="number" value="00021" />
-      <option name="presentableId" value="LOCAL-00021" />
-      <option name="project" value="LOCAL" />
-      <updated>1764876993057</updated>
     </task>
     <task id="LOCAL-00022" summary="Recette amelioration">
       <option name="closed" value="true" />
@@ -602,7 +589,23 @@
       <option name="project" value="LOCAL" />
       <updated>1765724476733</updated>
     </task>
-    <option name="localTasksCounter" value="69" />
+    <task id="LOCAL-00069" summary=" amelioration inventaire">
+      <option name="closed" value="true" />
+      <created>1765724871061</created>
+      <option name="number" value="00069" />
+      <option name="presentableId" value="LOCAL-00069" />
+      <option name="project" value="LOCAL" />
+      <updated>1765724871061</updated>
+    </task>
+    <task id="LOCAL-00070" summary=" amelioration inventaire">
+      <option name="closed" value="true" />
+      <created>1765725448307</created>
+      <option name="number" value="00070" />
+      <option name="presentableId" value="LOCAL-00070" />
+      <option name="project" value="LOCAL" />
+      <updated>1765725448307</updated>
+    </task>
+    <option name="localTasksCounter" value="71" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

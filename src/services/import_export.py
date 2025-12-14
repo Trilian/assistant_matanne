@@ -532,15 +532,13 @@ def render_import_ui(service):
 # ===================================
 
 def render_import_from_web_ui(service):
-    """Widget Streamlit pour import depuis URL"""
+    """Widget Streamlit pour import depuis URL - VERSION CORRIGÉE"""
     import streamlit as st
     from src.services.web_scraper import RecipeWebScraper, RecipeImageGenerator
 
     st.markdown("### 🌐 Importer depuis le Web")
-
     st.info("💡 Supporte : Marmiton, 750g, Cuisine AZ et autres sites")
 
-    # Afficher sites supportés
     with st.expander("📋 Sites supportés", expanded=False):
         sites = RecipeWebScraper.get_supported_sites()
         for site in sites:
@@ -569,6 +567,7 @@ def render_import_from_web_ui(service):
             key="image_keywords"
         )
 
+    # ✅ CORRECTION : Stocker la recette dans session_state
     if st.button("📥 Importer la recette", type="primary", use_container_width=True):
         if not url:
             st.error("❌ URL obligatoire")
@@ -576,7 +575,6 @@ def render_import_from_web_ui(service):
 
         with st.spinner("🔍 Extraction de la recette..."):
             try:
-                # Scraper
                 recipe_data = RecipeWebScraper.scrape_url(url)
 
                 if not recipe_data:
@@ -591,57 +589,94 @@ def render_import_from_web_ui(service):
                         keywords
                     )
 
-                # Afficher aperçu
-                st.success(f"✅ Recette trouvée : **{recipe_data['nom']}**")
-
-                with st.expander("👁️ Aperçu de la recette", expanded=True):
-                    col_prev1, col_prev2 = st.columns([1, 2])
-
-                    with col_prev1:
-                        if recipe_data.get("url_image"):
-                            st.image(recipe_data["url_image"], use_container_width=True)
-
-                    with col_prev2:
-                        st.write(f"**Temps:** {recipe_data['temps_preparation']}min + {recipe_data['temps_cuisson']}min")
-                        st.write(f"**Portions:** {recipe_data['portions']}")
-                        st.write(f"**Ingrédients:** {len(recipe_data['ingredients'])}")
-                        st.write(f"**Étapes:** {len(recipe_data['etapes'])}")
-
-                    if recipe_data["ingredients"]:
-                        st.markdown("**Ingrédients :**")
-                        for ing in recipe_data["ingredients"][:5]:
-                            st.write(f"• {ing['quantite']} {ing['unite']} {ing['nom']}")
-                        if len(recipe_data["ingredients"]) > 5:
-                            st.caption(f"... et {len(recipe_data['ingredients']) - 5} autres")
-
-                # Bouton d'import
-                if st.button("➕ Ajouter à mes recettes", type="primary", use_container_width=True):
-                    try:
-                        # Préparer données
-                        recette_data = {
-                            k: v for k, v in recipe_data.items()
-                            if k not in ['ingredients', 'etapes', 'image_url']
-                        }
-
-                        recette_data['type_repas'] = 'dîner'
-                        recette_data['saison'] = 'toute_année'
-                        recette_data['genere_par_ia'] = False
-                        recette_data['url_image'] = recipe_data.get('url_image')
-
-                        # Créer recette
-                        recipe_id = service.create_full(
-                            recette_data=recette_data,
-                            ingredients_data=recipe_data['ingredients'],
-                            etapes_data=recipe_data['etapes']
-                        )
-
-                        st.success(f"✅ Recette '{recipe_data['nom']}' importée !")
-                        st.balloons()
-                        st.rerun()
-
-                    except Exception as e:
-                        st.error(f"❌ Erreur lors de l'import: {e}")
+                # ✅ STOCKER dans session_state
+                st.session_state.scraped_recipe = recipe_data
+                st.rerun()
 
             except Exception as e:
                 st.error(f"❌ Erreur: {str(e)}")
-                st.info("💡 Essaie avec une autre URL ou utilise l'import manuel")
+
+    # ✅ AFFICHER la recette stockée
+    if "scraped_recipe" in st.session_state:
+        recipe_data = st.session_state.scraped_recipe
+
+        st.success(f"✅ Recette trouvée : **{recipe_data['nom']}**")
+
+        # Afficher aperçu
+        col_prev1, col_prev2 = st.columns([1, 2])
+
+        with col_prev1:
+            if recipe_data.get("url_image"):
+                try:
+                    st.image(recipe_data["url_image"], use_column_width=True)
+                except Exception as e:
+                    st.warning(f"⚠️ Image non disponible")
+                    # Générer une image de fallback
+                    fallback_img = f"https://via.placeholder.com/400x300/4CAF50/FFFFFF?text={recipe_data['nom'][:20]}"
+                    st.image(fallback_img, use_column_width=True)
+
+        with col_prev2:
+            st.write(f"**⏱️ Temps:** {recipe_data['temps_preparation']}min + {recipe_data['temps_cuisson']}min")
+            st.write(f"**🍽️ Portions:** {recipe_data['portions']}")
+            st.write(f"**🥕 Ingrédients:** {len(recipe_data['ingredients'])}")
+            st.write(f"**📝 Étapes:** {len(recipe_data['etapes'])}")
+
+        # Détails ingrédients
+        with st.expander("👁️ Voir les détails", expanded=False):
+            if recipe_data["ingredients"]:
+                st.markdown("**Ingrédients :**")
+                for ing in recipe_data["ingredients"]:
+                    st.write(f"• {ing['quantite']} {ing['unite']} {ing['nom']}")
+
+            if recipe_data["etapes"]:
+                st.markdown("**Étapes :**")
+                for etape in recipe_data["etapes"][:3]:
+                    st.write(f"{etape['ordre']}. {etape['description'][:100]}...")
+                if len(recipe_data["etapes"]) > 3:
+                    st.caption(f"... et {len(recipe_data['etapes']) - 3} autres étapes")
+
+        st.markdown("---")
+
+        # ✅ Boutons d'action HORS de l'expander
+        col_btn1, col_btn2 = st.columns([2, 1])
+
+        with col_btn1:
+            if st.button("✅ Ajouter à mes recettes", type="primary", use_container_width=True, key="add_scraped_recipe"):
+                try:
+                    # Préparer données
+                    recette_data = {
+                        k: v for k, v in recipe_data.items()
+                        if k not in ['ingredients', 'etapes', 'image_url']
+                    }
+
+                    # Valeurs par défaut
+                    recette_data['type_repas'] = 'dîner'
+                    recette_data['saison'] = 'toute_année'
+                    recette_data['genere_par_ia'] = False
+                    recette_data['url_image'] = recipe_data.get('url_image')
+                    recette_data['est_rapide'] = (recipe_data['temps_preparation'] + recipe_data['temps_cuisson']) < 30
+                    recette_data['est_equilibre'] = True
+
+                    # Créer recette
+                    recipe_id = service.create_full(
+                        recette_data=recette_data,
+                        ingredients_data=recipe_data['ingredients'],
+                        etapes_data=recipe_data['etapes']
+                    )
+
+                    # Nettoyer session_state
+                    del st.session_state.scraped_recipe
+
+                    st.success(f"✅ Recette '{recipe_data['nom']}' importée !")
+                    st.balloons()
+                    st.rerun()
+
+                except Exception as e:
+                    st.error(f"❌ Erreur lors de l'import: {e}")
+                    import traceback
+                    st.code(traceback.format_exc())
+
+        with col_btn2:
+            if st.button("❌ Annuler", use_container_width=True, key="cancel_scraped"):
+                del st.session_state.scraped_recipe
+                st.rerun()
