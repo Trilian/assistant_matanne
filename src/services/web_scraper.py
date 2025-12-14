@@ -56,7 +56,7 @@ class RecipeWebScraper:
 
     @staticmethod
     def _scrape_marmiton(url: str) -> Dict:
-        """Scraper spécifique Marmiton"""
+        """Scraper spécifique Marmiton (structure 2024)"""
         soup = RecipeWebScraper._fetch_html(url)
 
         recipe = {
@@ -71,62 +71,209 @@ class RecipeWebScraper:
             "image_url": None
         }
 
-        # Titre
-        title_tag = soup.find('h1', class_='SHRD__sc-10plygc-0')
-        if title_tag:
-            recipe["nom"] = title_tag.get_text(strip=True)
+        # Titre - Structure Marmiton actuelle
+        title_selectors = [
+            soup.find('h1', class_='recipe-header__title'),
+            soup.find('h1', {'itemprop': 'name'}),
+            soup.find('h1')
+        ]
+        for selector in title_selectors:
+            if selector:
+                recipe["nom"] = selector.get_text(strip=True)
+                break
 
-        # Image
-        img_tag = soup.find('img', class_='RCP__sc-1wtzf9a-4')
-        if img_tag and img_tag.get('src'):
-            recipe["image_url"] = img_tag['src']
+        # Image - Plusieurs patterns possibles
+        img_selectors = [
+            soup.find('img', {'itemprop': 'image'}),
+            soup.find('img', class_='recipe-media__image'),
+            soup.find('picture', class_='recipe-media__image'),
+            soup.find('img', class_='main-picture')
+        ]
 
-        # Temps
-        time_tags = soup.find_all('span', class_='SHRD__sc-10plygc-0')
-        for tag in time_tags:
-            text = tag.get_text(strip=True).lower()
-            if 'préparation' in text:
-                match = re.search(r'(\d+)', text)
+        for selector in img_selectors:
+            if selector:
+                if selector.name == 'picture':
+                    img = selector.find('img')
+                    if img and img.get('src'):
+                        recipe["image_url"] = img['src']
+                        break
+                elif selector.get('src'):
+                    recipe["image_url"] = selector['src']
+                    break
+                elif selector.get('data-src'):
+                    recipe["image_url"] = selector['data-src']
+                    break
+
+        # Description
+        desc_selectors = [
+            soup.find('p', class_='recipe-header__description'),
+            soup.find('div', {'itemprop': 'description'}),
+            soup.find('p', class_='recipe-description')
+        ]
+        for selector in desc_selectors:
+            if selector:
+                recipe["description"] = selector.get_text(strip=True)
+                break
+
+        # Temps de préparation et cuisson
+        time_container = soup.find('div', class_='recipe-infos__timmings')
+        if time_container:
+            prep_time = time_container.find('span', class_='recipe-infos__timmings__preparation')
+            if prep_time:
+                time_text = prep_time.get_text()
+                match = re.search(r'(\d+)', time_text)
                 if match:
                     recipe["temps_preparation"] = int(match.group(1))
-            elif 'cuisson' in text:
-                match = re.search(r'(\d+)', text)
+
+            cook_time = time_container.find('span', class_='recipe-infos__timmings__cooking')
+            if cook_time:
+                time_text = cook_time.get_text()
+                match = re.search(r'(\d+)', time_text)
                 if match:
                     recipe["temps_cuisson"] = int(match.group(1))
 
-        # Portions
-        portion_tag = soup.find('span', string=re.compile(r'personnes?', re.I))
-        if portion_tag:
-            match = re.search(r'(\d+)', portion_tag.get_text())
-            if match:
-                recipe["portions"] = int(match.group(1))
+        # Portions - Chercher "personnes"
+        portions_patterns = [
+            soup.find('span', class_='recipe-infos__quantity'),
+            soup.find('span', string=re.compile(r'personnes?', re.I)),
+            soup.find(text=re.compile(r'(\d+)\s*personnes?', re.I))
+        ]
 
-        # Ingrédients
-        ing_section = soup.find('div', class_='RCP__sc-1wtzf9a-0')
-        if ing_section:
-            ing_items = ing_section.find_all('li')
-            for idx, item in enumerate(ing_items, 1):
-                text = item.get_text(strip=True)
-                # Parser "200g de tomates"
-                parsed = RecipeWebScraper._parse_ingredient(text)
-                if parsed:
-                    recipe["ingredients"].append(parsed)
+        for pattern in portions_patterns:
+            if pattern:
+                text = pattern if isinstance(pattern, str) else pattern.get_text()
+                match = re.search(r'(\d+)', text)
+                if match:
+                    recipe["portions"] = int(match.group(1))
+                    break
 
-        # Étapes
-        steps_section = soup.find('div', class_='RCP__sc-1wtzf9a-1')
-        if steps_section:
-            step_items = steps_section.find_all('li')
-            for idx, item in enumerate(step_items, 1):
-                text = item.get_text(strip=True)
-                if text:
-                    recipe["etapes"].append({
-                        "ordre": idx,
-                        "description": text,
-                        "duree": None
-                    })
+        # Difficulté
+        difficulty = soup.find('span', class_='recipe-infos__level')
+        if difficulty:
+            diff_text = difficulty.get_text(strip=True).lower()
+            if 'facile' in diff_text:
+                recipe["difficulte"] = "facile"
+            elif 'difficile' in diff_text:
+                recipe["difficulte"] = "difficile"
+            else:
+                recipe["difficulte"] = "moyen"
 
-        return recipe if recipe["nom"] else None
+        # Ingrédients - Structure JSON-LD ou liste
+        # 1. Essayer JSON-LD (Schema.org)
+        json_ld = soup.find('script', {'type': 'application/ld+json'})
+        if json_ld:
+            try:
+                import json
+                data = json.loads(json_ld.string)
+                if isinstance(data, list):
+                    data = data[0]
 
+                if 'recipeIngredient' in data:
+                    for idx, ing_text in enumerate(data['recipeIngredient']):
+                        parsed = RecipeWebScraper._parse_ingredient(ing_text)
+                        if parsed:
+                            recipe["ingredients"].append(parsed)
+
+                if 'recipeInstructions' in data and not recipe["etapes"]:
+                    instructions = data['recipeInstructions']
+                    if isinstance(instructions, list):
+                        for idx, step in enumerate(instructions, 1):
+                            if isinstance(step, dict):
+                                text = step.get('text', '')
+                            else:
+                                text = str(step)
+
+                            if text:
+                                recipe["etapes"].append({
+                                    "ordre": idx,
+                                    "description": text.strip(),
+                                    "duree": None
+                                })
+            except:
+                pass
+
+        # 2. Si pas de JSON-LD, chercher dans le HTML
+        if not recipe["ingredients"]:
+            ing_containers = [
+                soup.find('div', class_='card-ingredient-list'),
+                soup.find('ul', class_='recipe-ingredients__list'),
+                soup.find('div', class_='recipe-ingredients')
+            ]
+
+            for container in ing_containers:
+                if container:
+                    # Chercher tous les items d'ingrédients
+                    ing_items = container.find_all(['li', 'div'], class_=re.compile(r'ingredient', re.I))
+
+                    for item in ing_items:
+                        # Extraire le texte complet
+                        text = item.get_text(strip=True)
+
+                        # Parfois la quantité est dans un span séparé
+                        qty_span = item.find('span', class_=re.compile(r'quantity|qty', re.I))
+                        name_span = item.find('span', class_=re.compile(r'name|label', re.I))
+
+                        if qty_span and name_span:
+                            qty_text = qty_span.get_text(strip=True)
+                            name_text = name_span.get_text(strip=True)
+                            text = f"{qty_text} {name_text}"
+
+                        parsed = RecipeWebScraper._parse_ingredient(text)
+                        if parsed:
+                            recipe["ingredients"].append(parsed)
+
+                    if recipe["ingredients"]:
+                        break
+
+        # Étapes - Si pas déjà dans JSON-LD
+        if not recipe["etapes"]:
+            steps_containers = [
+                soup.find('div', class_='recipe-preparation__list'),
+                soup.find('ol', class_='recipe-steps'),
+                soup.find('div', class_='recipe-instructions')
+            ]
+
+            for container in steps_containers:
+                if container:
+                    step_items = container.find_all(['li', 'p', 'div'], class_=re.compile(r'step|instruction', re.I))
+
+                    for idx, item in enumerate(step_items, 1):
+                        text = item.get_text(strip=True)
+
+                        # Nettoyer les numéros d'étapes si présents
+                        text = re.sub(r'^étape\s+\d+\s*:?\s*', '', text, flags=re.I)
+                        text = re.sub(r'^\d+\.\s*', '', text)
+
+                        if text and len(text) > 10:  # Ignorer les étapes trop courtes
+                            recipe["etapes"].append({
+                                "ordre": idx,
+                                "description": text,
+                                "duree": None
+                            })
+
+                    if recipe["etapes"]:
+                        break
+
+        # Fallback : chercher toutes les listes ordonnées
+        if not recipe["etapes"]:
+            all_ols = soup.find_all('ol')
+            for ol in all_ols:
+                items = ol.find_all('li')
+                if len(items) >= 3:  # Au moins 3 étapes
+                    for idx, li in enumerate(items, 1):
+                        text = li.get_text(strip=True)
+                        if text and len(text) > 10:
+                            recipe["etapes"].append({
+                                "ordre": idx,
+                                "description": text,
+                                "duree": None
+                            })
+                    if recipe["etapes"]:
+                        break
+
+        logger.info(f"Marmiton scraped: {recipe['nom']}, {len(recipe['ingredients'])} ing, {len(recipe['etapes'])} steps")
+
+        return recipe if recipe["nom"] and recipe["ingredients"] else None
     @staticmethod
     def _scrape_750g(url: str) -> Dict:
         """Scraper 750g"""
@@ -281,42 +428,101 @@ class RecipeWebScraper:
     @staticmethod
     def _parse_ingredient(text: str) -> Optional[Dict]:
         """
-        Parse une ligne d'ingrédient
+        Parse une ligne d'ingrédient (version améliorée)
 
         Exemples:
-        - "200g de tomates"
+        - "200 g de tomates"
         - "2 cuillères à soupe d'huile d'olive"
         - "1 oignon"
+        - "sel, poivre"
         """
         text = text.strip()
 
-        # Pattern : "quantité unité de/d' ingrédient"
-        pattern = r'^(\d+(?:[.,]\d+)?)\s*([a-zA-Zàéèêë]+)?\s*(?:de |d\')?(.+)$'
-        match = re.match(pattern, text, re.I)
+        if not text or len(text) < 2:
+            return None
+
+        # Pattern 1: "200 g de tomates" ou "200g tomates"
+        pattern1 = r'^(\d+(?:[.,]\d+)?)\s*([a-zA-Zàéèêë]+)?\s*(?:de |d\'|d')?(.+)$'
+        match = re.match(pattern1, text, re.I)
 
         if match:
             qty_str = match.group(1).replace(',', '.')
-            unit = match.group(2) or "pcs"
-            name = match.group(3).strip()
+        unit = match.group(2) or "pcs"
+        name = match.group(3).strip()
 
-            try:
-                qty = float(qty_str)
-                return {
-                    "nom": name,
-                    "quantite": qty,
-                    "unite": unit,
-                    "optionnel": False
-                }
-            except ValueError:
-                pass
+        try:
+            qty = float(qty_str)
 
-        # Fallback : considérer tout comme 1 unité
-        return {
-            "nom": text,
-            "quantite": 1.0,
-            "unite": "pcs",
-            "optionnel": False
-        }
+            # Normaliser unités
+            unit = unit.lower()
+            if unit in ['g', 'gr', 'gramme', 'grammes']:
+                unit = 'g'
+            elif unit in ['kg', 'kilo', 'kilogramme']:
+                unit = 'kg'
+            elif unit in ['ml', 'millilitre']:
+                unit = 'mL'
+            elif unit in ['l', 'litre']:
+                unit = 'L'
+            elif unit in ['cl', 'centilitre']:
+                unit = 'cL'
+            elif unit in ['cuillère', 'cuilleres', 'cuillère', 'cs', 'càs']:
+                unit = 'c. à soupe'
+            elif unit in ['cc', 'càc']:
+                unit = 'c. à café'
+
+            return {
+                "nom": name,
+                "quantite": qty,
+                "unite": unit,
+                "optionnel": False
+            }
+        except ValueError:
+            pass
+
+        # Pattern 2: "une pincée de sel" -> 1 pincée
+        pattern2 = r'^(une?|deux|trois|quatre|cinq)\s+(.+)$'
+        match = re.match(pattern2, text, re.I)
+        if match:
+            qty_word = match.group(1).lower()
+            rest = match.group(2)
+
+            qty_map = {
+                'un': 1, 'une': 1,
+                'deux': 2,
+                'trois': 3,
+                'quatre': 4,
+                'cinq': 5
+            }
+
+            qty = qty_map.get(qty_word, 1)
+
+            # Chercher unité dans rest
+            unit_match = re.match(r'^([a-zàéèê\s]+)\s+(?:de |d\'|d')?(.+)$', rest, re.I)
+            if unit_match:
+                unit = unit_match.group(1).strip()
+                name = unit_match.group(2).strip()
+            else:
+                unit = "pcs"
+                name = rest
+
+            return {
+                "nom": name,
+                "quantite": float(qty),
+                "unite": unit,
+                "optionnel": False
+            }
+
+        # Pattern 3: Juste un ingrédient sans quantité -> 1 pcs
+        # Vérifier que ce n'est pas un titre/section
+        if not any(word in text.lower() for word in ['pour', 'ingrédients', 'préparation']):
+            return {
+                "nom": text,
+                "quantite": 1.0,
+                "unite": "pcs",
+                "optionnel": False
+            }
+
+        return None
 
     @staticmethod
     def get_supported_sites() -> List[str]:
