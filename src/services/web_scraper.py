@@ -274,6 +274,7 @@ class RecipeWebScraper:
         logger.info(f"Marmiton scraped: {recipe['nom']}, {len(recipe['ingredients'])} ing, {len(recipe['etapes'])} steps")
 
         return recipe if recipe["nom"] and recipe["ingredients"] else None
+
     @staticmethod
     def _scrape_750g(url: str) -> Dict:
         """Scraper 750g"""
