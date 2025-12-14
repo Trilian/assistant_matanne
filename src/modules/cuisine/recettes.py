@@ -71,13 +71,17 @@ def render_recipe_card_modern(recette: Dict, key: str):
             st.rerun()
 
     def delete_recipe():
-        if f"confirm_delete_{recette['id']}" not in st.session_state:
-            st.session_state[f"confirm_delete_{recette['id']}"] = True
+        confirm_key = f"confirm_delete_{recette['id']}"
+        if confirm_key not in st.session_state:
+            st.session_state[confirm_key] = True
+            st.rerun()
         else:
             recette_service.delete(recette['id'])
+            del st.session_state[confirm_key]
             render_toast("Recette supprimée", "success")
             st.rerun()
 
+    # ✅ CORRECTION : Utiliser l'ID de la recette dans la clé pour garantir l'unicité
     actions = [
         ("👁️ Détails", view_details),
         ("✏️ Éditer", edit_recipe),
@@ -85,21 +89,57 @@ def render_recipe_card_modern(recette: Dict, key: str):
         ("🗑️ Supprimer", delete_recipe)
     ]
 
-    render_card(
-        title=recette['nom'],
-        content=recette.get('description', '')[:150] + "..." if len(recette.get('description', '')) > 150 else recette.get('description', ''),
-        icon="🍽️",
-        color="#4CAF50",
-        actions=actions,
-        footer=" • ".join(metadata),
-        image_url=recette.get('url_image')
-    )
+    # Container unique par recette
+    with st.container():
+        col1, col2 = st.columns([2, 1])
 
-    if tags:
-        render_tags(tags)
+        with col1:
+            st.markdown(f"### 🍽️ {recette['nom']}")
+            desc = recette.get('description', '')
+            if len(desc) > 150:
+                desc = desc[:150] + "..."
+            if desc:
+                st.caption(desc)
+
+            if tags:
+                st.caption(" • ".join(tags))
+
+        with col2:
+            if recette.get('url_image'):
+                st.image(recette['url_image'], use_container_width=True)
+
+        st.caption(" • ".join(metadata))
+
+        # Actions avec clés UNIQUES
+        col_act1, col_act2, col_act3, col_act4 = st.columns(4)
+
+        with col_act1:
+            # ✅ Clé unique : recipe_view_{id}
+            if st.button("👁️ Détails", key=f"recipe_view_{recette['id']}", use_container_width=True):
+                view_details()
+
+        with col_act2:
+            # ✅ Clé unique : recipe_edit_{id}
+            if st.button("✏️ Éditer", key=f"recipe_edit_{recette['id']}", use_container_width=True):
+                edit_recipe()
+
+        with col_act3:
+            # ✅ Clé unique : recipe_dup_{id}
+            if st.button("📋 Dupliquer", key=f"recipe_dup_{recette['id']}", use_container_width=True):
+                duplicate_recipe()
+
+        with col_act4:
+            # ✅ Clé unique : recipe_del_{id}
+            confirm_key = f"confirm_delete_{recette['id']}"
+            if confirm_key in st.session_state and st.session_state[confirm_key]:
+                if st.button("⚠️ Confirmer ?", key=f"recipe_del_confirm_{recette['id']}", type="primary", use_container_width=True):
+                    delete_recipe()
+            else:
+                if st.button("🗑️ Supprimer", key=f"recipe_del_{recette['id']}", use_container_width=True):
+                    st.session_state[confirm_key] = True
+                    st.rerun()
 
     st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
-
 
 def render_recipe_details_modern(recette_id: int):
     """Affiche les détails complets d'une recette"""
@@ -527,16 +567,26 @@ def app():
                                 "url_image": recette.url_image
                             }
                             render_recipe_card_grid(recette_dict, f"grid_recipe_{recette.id}", lambda r_id=recette.id: (StateManager.set_viewing_recipe(r_id), st.rerun()))
-            else:
+
+            else:  # Mode liste
                 for recette in recettes[start_idx:end_idx]:
                     recette_dict = {
-                        "id": recette.id, "nom": recette.nom, "description": recette.description,
-                        "temps_total": recette.temps_preparation + recette.temps_cuisson, "portions": recette.portions,
-                        "difficulte": recette.difficulte, "est_rapide": recette.est_rapide, "est_equilibre": recette.est_equilibre,
-                        "compatible_bebe": recette.compatible_bebe, "compatible_batch": recette.compatible_batch,
-                        "genere_par_ia": recette.genere_par_ia, "score_ia": recette.score_ia, "url_image": recette.url_image
+                        "id": recette.id,
+                        "nom": recette.nom,
+                        "description": recette.description,
+                        "temps_total": recette.temps_preparation + recette.temps_cuisson,
+                        "portions": recette.portions,
+                        "difficulte": recette.difficulte,
+                        "est_rapide": recette.est_rapide,
+                        "est_equilibre": recette.est_equilibre,
+                        "compatible_bebe": recette.compatible_bebe,
+                        "compatible_batch": recette.compatible_batch,
+                        "genere_par_ia": recette.genere_par_ia,
+                        "score_ia": recette.score_ia,
+                        "url_image": recette.url_image
                     }
-                    render_recipe_card_modern(recette_dict, f"recipe_{recette.id}")
+                    # ✅ Clé UNIQUE : utiliser l'ID de la recette
+                    render_recipe_card_modern(recette_dict, f"list_recipe_{recette.id}")
 
     with tab2:
         st.subheader("✨ Générer des recettes avec l'IA")

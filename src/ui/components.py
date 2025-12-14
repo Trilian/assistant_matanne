@@ -19,7 +19,8 @@ def render_card(
         color: str = "#4CAF50",
         actions: Optional[List[Tuple[str, Callable]]] = None,
         footer: Optional[str] = None,
-        image_url: Optional[str] = None
+        image_url: Optional[str] = None,
+        unique_id: Optional[str] = None  # ✅ Nouveau paramètre
 ):
     """
     Carte moderne avec titre, contenu, actions
@@ -32,7 +33,13 @@ def render_card(
         actions: Liste de (label, callback)
         footer: Texte en bas
         image_url: URL image optionnelle
+        unique_id: ID unique pour les clés Streamlit (IMPORTANT!)
     """
+    # Générer un ID unique si non fourni
+    if unique_id is None:
+        import hashlib
+        unique_id = hashlib.md5(title.encode()).hexdigest()[:8]
+
     with st.container():
         # Bordure colorée
         st.markdown(f"""
@@ -58,17 +65,17 @@ def render_card(
             if content:
                 st.write(content)
 
-        # Actions
+        # Actions avec clés UNIQUES
         if actions:
             cols = st.columns(len(actions))
             for i, (label, callback) in enumerate(actions):
-                if cols[i].button(label, key=f"card_{title}_{i}", use_container_width=True):
+                # ✅ Clé unique : card_{unique_id}_{i}
+                if cols[i].button(label, key=f"card_{unique_id}_{i}", use_container_width=True):
                     callback()
 
         # Footer
         if footer:
             st.caption(footer)
-
 
 def render_info_card(
         label: str,
