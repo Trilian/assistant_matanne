@@ -443,7 +443,7 @@ class RecipeWebScraper:
             return None
 
         # Pattern 1: "200 g de tomates" ou "200g tomates"
-        pattern1 = r'^(\d+(?:[.,]\d+)?)\s*([a-zA-Zàéèêë]+)?\s*(?:de |d\'|d')?(.+)$'
+        pattern1 = r"^(\d+(?:[.,]\d+)?)\s*([a-zA-Zàéèêë]+)?\s*(?:de |d'|d’)?(.+)$"
         match = re.match(pattern1, text, re.I)
 
         if match:
@@ -498,7 +498,12 @@ class RecipeWebScraper:
             qty = qty_map.get(qty_word, 1)
 
             # Chercher unité dans rest
-            unit_match = re.match(r'^([a-zàéèê\s]+)\s+(?:de |d\'|d')?(.+)$', rest, re.I)
+            unit_match = re.match(
+                r"^([a-zàéèê\s]+)\s+(?:de\s+|d['’])?(.+)$",
+                rest,
+                re.I
+            )
+
             if unit_match:
                 unit = unit_match.group(1).strip()
                 name = unit_match.group(2).strip()
