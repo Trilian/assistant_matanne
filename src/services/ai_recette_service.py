@@ -262,19 +262,22 @@ class AIRecetteService:
     # PARSING ROBUSTE
     # ===================================
 
+    # src/services/ai_recette_service.py - CORRIGER la méthode _parse_with_pydantic
+
     def _parse_with_pydantic(self, content: str, expected_count: int) -> List[Dict]:
         """
-        Parse la réponse avec Pydantic (méthode principale)
-
-        Stratégies:
-        1. Parse direct avec Pydantic
-        2. Nettoyage JSON + Pydantic
-        3. Extraction forcée + Pydantic
-        4. Fallback manuel
+        Parse la réponse avec Pydantic - VERSION ULTRA-ROBUSTE
         """
         logger.info("🔍 Parsing JSON avec Pydantic")
 
+        # ===================================
+        # STRATÉGIE 0: Log pour debug
+        # ===================================
+        logger.debug(f"Contenu brut (500 premiers chars): {content[:500]}")
+
+        # ===================================
         # STRATÉGIE 1: Parse direct
+        # ===================================
         try:
             cleaned = self._clean_json(content)
             response = RecettesResponse.parse_raw(cleaned)
@@ -284,11 +287,20 @@ class AIRecetteService:
             return recipes
 
         except ValidationError as e:
+            logger.warning(f"⚠️ Stratégie 1 échouée - Erreurs Pydantic:")
+            for error in e.errors():
+                logger.warning(f"  - {error['loc']}: {error['msg']}")
+
+        except Exception as e:
             logger.warning(f"⚠️ Stratégie 1 échouée: {e}")
 
+        # ===================================
         # STRATÉGIE 2: Extraction JSON objet
+        # ===================================
         try:
             json_obj = self._extract_json_object(content)
+            logger.debug(f"JSON extrait (stratégie 2): {json_obj[:200]}")
+
             response = RecettesResponse.parse_raw(json_obj)
             recipes = [r.dict() for r in response.recettes[:expected_count]]
 
@@ -298,24 +310,108 @@ class AIRecetteService:
         except (ValidationError, ValueError) as e:
             logger.warning(f"⚠️ Stratégie 2 échouée: {e}")
 
-        # STRATÉGIE 3: Extraction tableau recettes
+        # ===================================
+        # STRATÉGIE 3: Parse manuel + validation individuelle
+        # ===================================
         try:
-            recipes_array = self._extract_recipes_array(content)
-            response = RecettesResponse.parse_raw(recipes_array)
-            recipes = [r.dict() for r in response.recettes[:expected_count]]
+            import json
 
-            logger.info("✅ Parse réussi (stratégie 3: array)")
-            return recipes
+            cleaned = self._clean_json(content)
+            data = json.loads(cleaned)
 
-        except (ValidationError, ValueError) as e:
+            # Extraire recettes
+            if isinstance(data, dict) and "recettes" in data:
+                recettes_raw = data["recettes"]
+            elif isinstance(data, list):
+                recettes_raw = data
+            else:
+                raise ValueError("Structure JSON non reconnue")
+
+            # Valider chaque recette individuellement
+            recipes = []
+            for idx, recette_data in enumerate(recettes_raw[:expected_count]):
+                try:
+                    # Valider avec Pydantic
+                    recette_validated = RecetteAI(**recette_data)
+                    recipes.append(recette_validated.dict())
+                    logger.info(f"✅ Recette {idx+1} validée: {recette_validated.nom}")
+
+                except ValidationError as e:
+                    logger.error(f"❌ Recette {idx+1} invalide:")
+                    for error in e.errors():
+                        logger.error(f"  - {error['loc']}: {error['msg']}")
+
+                    # Essayer de corriger les erreurs courantes
+                    try:
+                        recette_corrigee = RecipeImageGenerator._fix_common_errors(recette_data)
+                        recette_validated = RecetteAI(**recette_corrigee)
+                        recipes.append(recette_validated.dict())
+                        logger.info(f"✅ Recette {idx+1} corrigée et validée")
+                    except:
+                        logger.error(f"❌ Impossible de corriger la recette {idx+1}, ignorée")
+                        continue
+
+            if recipes:
+                logger.info(f"✅ Parse réussi (stratégie 3: manuel) - {len(recipes)} recettes")
+                return recipes
+
+        except Exception as e:
             logger.warning(f"⚠️ Stratégie 3 échouée: {e}")
 
-        # STRATÉGIE 4: Fallback manuel
-        logger.error("❌ Toutes les stratégies Pydantic ont échoué")
-        logger.debug(f"Contenu reçu: {content[:500]}")
+        # ===================================
+        # STRATÉGIE 4: Fallback recettes
+        # ===================================
+        logger.error("❌ Toutes les stratégies ont échoué")
+        logger.error(f"Contenu problématique: {content[:1000]}")
 
         return self._fallback_recipes(expected_count)
 
+    @staticmethod
+    def _fix_common_errors(recette_data: dict) -> dict:
+        """Corrige les erreurs courantes dans les données recette"""
+
+        # Fix 1: Temps négatifs ou nuls
+        if recette_data.get("temps_preparation", 0) <= 0:
+            recette_data["temps_preparation"] = 15
+
+        if recette_data.get("temps_cuisson", 0) < 0:
+            recette_data["temps_cuisson"] = 0
+
+        # Fix 2: Portions invalides
+        if recette_data.get("portions", 0) <= 0:
+            recette_data["portions"] = 4
+
+        # Fix 3: Difficulté invalide
+        if recette_data.get("difficulte") not in ["facile", "moyen", "difficile"]:
+            recette_data["difficulte"] = "moyen"
+
+        # Fix 4: Type repas invalide
+        valid_types = ["petit_déjeuner", "déjeuner", "dîner", "goûter"]
+        if recette_data.get("type_repas") not in valid_types:
+            recette_data["type_repas"] = "dîner"
+
+        # Fix 5: Saison invalide
+        valid_saisons = ["printemps", "été", "automne", "hiver", "toute_année"]
+        if recette_data.get("saison") not in valid_saisons:
+            recette_data["saison"] = "toute_année"
+
+        # Fix 6: Ingrédients vides
+        if not recette_data.get("ingredients"):
+            recette_data["ingredients"] = [
+                {"nom": "Ingrédient 1", "quantite": 1.0, "unite": "pcs", "optionnel": False}
+            ]
+
+        # Fix 7: Étapes vides
+        if not recette_data.get("etapes"):
+            recette_data["etapes"] = [
+                {"ordre": 1, "description": "Préparer les ingrédients", "duree": None}
+            ]
+
+        # Fix 8: Ordre des étapes
+        for idx, etape in enumerate(recette_data.get("etapes", []), 1):
+            etape["ordre"] = idx
+
+        return recette_data
     def _clean_json(self, content: str) -> str:
         """Nettoie le JSON basique"""
         # Supprimer BOM et caractères invisibles

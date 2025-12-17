@@ -1,3 +1,4 @@
+# src/services/planning/planning_generation_service.py
 """
 Service Génération Planning - IA Isolée
 Toute la logique de génération automatique de planning
@@ -7,7 +8,7 @@ import json
 import logging
 from typing import List, Dict, Optional
 from datetime import date, timedelta
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 from src.core.ai_agent import AgentIA
 from src.core.ai_cache import AICache, RateLimiter
@@ -34,7 +35,8 @@ class RepasGenere(BaseModel):
     raison: Optional[str] = None
     heure_suggeree: Optional[str] = None
 
-    @validator('recette_nom')
+    @field_validator('recette_nom')
+    @classmethod
     def clean_nom(cls, v):
         return v.strip()
 
@@ -42,13 +44,13 @@ class RepasGenere(BaseModel):
 class JourPlanning(BaseModel):
     """Planning d'un jour"""
     jour: int = Field(..., ge=0, le=6)  # 0=lundi, 6=dimanche
-    repas: List[RepasGenere] = Field(..., min_items=1)
+    repas: List[RepasGenere] = Field(..., min_length=1)
     conseils_jour: Optional[List[str]] = Field(default_factory=list)
 
 
 class PlanningGenere(BaseModel):
     """Planning complet généré"""
-    planning: List[JourPlanning] = Field(..., min_items=7, max_items=7)
+    planning: List[JourPlanning] = Field(..., min_length=7, max_length=7)
     conseils_globaux: List[str] = Field(default_factory=list)
     score_equilibre: int = Field(0, ge=0, le=100)
     score_variete: int = Field(0, ge=0, le=100)
