@@ -12,6 +12,7 @@ from typing import Dict, List
 from src.core.database import get_db_context
 from src.core.models import ChildProfile, WellbeingEntry
 from src.core.ai_agent import AgentIA
+from src.utils.formatters import format_quantity, format_quantity_with_unit
 
 
 # ===================================
@@ -541,7 +542,7 @@ def app():
 
             with col_m2:
                 avg_sleep = df_stats["sommeil"].mean()
-                st.metric("Sommeil moyen", f"{avg_sleep:.1f}h")
+                st.metric("Sommeil moyen", f"{format_quantity(avg_sleep)}h")
 
             with col_m3:
                 humeur_bien = len(df_stats[df_stats["humeur"] == "😊 Bien"])

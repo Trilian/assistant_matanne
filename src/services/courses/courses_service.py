@@ -11,6 +11,7 @@ import logging
 
 from src.core.database import get_db_context
 from src.core.models import (
+from src.utils.formatters import format_quantity, format_quantity_with_unit
     ArticleCourses, Ingredient, ArticleInventaire,
     Recette, RecetteIngredient, RepasPlanning, PlanningHebdomadaire
 )
@@ -502,7 +503,7 @@ class CoursesService(BaseService[ArticleCourses]):
                 "quantite": manque,
                 "unite": unite,
                 "priorite": "haute",
-                "raison": f"Stock: {qty:.1f}/{seuil:.1f}"
+                "raison": f"Stock: {qty:.1f}/{format_quantity(seuil)}"
             })
 
         logger.info(f"{len(suggestions)} articles en stock bas détectés")

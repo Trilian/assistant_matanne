@@ -11,6 +11,7 @@ from src.services.courses.courses_service import courses_service, MAGASINS_CONFI
 from src.services.courses.courses_ai_service import create_courses_ai_service
 from src.core.state_manager import StateManager, get_state
 from src.ui.components import (
+from src.utils.formatters import format_quantity, format_quantity_with_unit
     render_stat_row, render_badge, render_empty_state,
     render_confirmation_dialog, render_toast
 )
@@ -41,7 +42,7 @@ def render_article_simple(article: Dict, key: str):
             st.caption(article["notes"])
 
     with col2:
-        st.write(f"{article['quantite']:.1f} {article['unite']}")
+        st.write(f"{format_quantity(article['quantite'])} {article['unite']}")
         if article.get("rayon"):
             st.caption(f"📍 {article['rayon']}")
 
@@ -116,10 +117,10 @@ def render_article_carte_ia(article: Dict, magasin: str, key: str):
             if article.get("conseil"):
                 st.info(f"💡 {article['conseil']}")
 
-            st.caption(f"{article['quantite']:.1f} {article['unite']}")
+            st.caption(f"{format_quantity(article['quantite'])} {article['unite']}")
 
             if article.get("prix_estime"):
-                st.caption(f"💶 ~{article['prix_estime']:.2f}€")
+                st.caption(f"💶 ~{format_quantity(article['prix_estime'])}€")
 
         with col2:
             if st.button("➕ Ajouter", key=f"add_{key}", use_container_width=True):
@@ -305,7 +306,7 @@ def tab_generation_ia():
         # Budget
         col_b1, col_b2, col_b3 = st.columns(3)
         with col_b1:
-            st.metric("Budget estimé", f"{result_data['budget_estime']:.2f}€")
+            st.metric("Budget estimé", f"{format_quantity(result_data['budget_estime'])}€")
         with col_b2:
             if result_data["depasse_budget"]:
                 st.error("⚠️ Dépassement")
@@ -313,7 +314,7 @@ def tab_generation_ia():
                 st.success("✅ OK")
         with col_b3:
             if result_data.get("economies_possibles"):
-                st.metric("Économies", f"{result_data['economies_possibles']:.2f}€")
+                st.metric("Économies", f"{format_quantity(result_data['economies_possibles'])}€")
 
         st.markdown("---")
 
@@ -413,7 +414,7 @@ def tab_historique():
     stats_data = [
         {"label": "Achetés", "value": stats["total_achetes"]},
         {"label": "IA", "value": stats["part_ia_achetes"]},
-        {"label": "Moy/semaine", "value": f"{stats['moyenne_semaine']:.1f}"},
+        {"label": "Moy/semaine", "value": f"{format_quantity(stats['moyenne_semaine'])}"},
     ]
     render_stat_row(stats_data, cols=3)
 

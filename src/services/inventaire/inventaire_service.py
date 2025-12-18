@@ -10,6 +10,7 @@ import logging
 
 from src.core.database import get_db_context
 from src.core.models import (
+from src.utils.formatters import format_quantity, format_quantity_with_unit
     ArticleInventaire, Ingredient, ArticleCourses,
     Recette, RecetteIngredient
 )
@@ -439,7 +440,7 @@ class InventaireService(BaseService[ArticleInventaire]):
             if qty_dispo < recette_ing.quantite:
                 manque = recette_ing.quantite - qty_dispo
                 manquants.append(
-                    f"{recette_ing.ingredient.nom} (manque: {manque:.1f} {recette_ing.unite})"
+                    f"{recette_ing.ingredient.nom} (manque: {format_quantity(manque)} {recette_ing.unite})"
                 )
 
         return len(manquants) == 0, manquants

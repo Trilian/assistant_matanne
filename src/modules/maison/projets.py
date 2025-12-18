@@ -12,6 +12,7 @@ from typing import List, Dict
 from src.core.database import get_db_context
 from src.core.models import Project, ProjectTask
 from src.core.ai_agent import AgentIA
+from src.utils.formatters import format_quantity, format_quantity_with_unit
 
 
 # ===================================
@@ -614,4 +615,4 @@ def app():
             if not df_all.empty:
                 avg_progress = df_all["progres"].mean()
                 st.progress(avg_progress / 100)
-                st.write(f"Progression moyenne : {avg_progress:.1f}%")
+                st.write(f"Progression moyenne : {format_quantity(avg_progress)}%")

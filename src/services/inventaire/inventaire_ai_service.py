@@ -10,6 +10,7 @@ from datetime import date, timedelta
 
 from src.core.ai_agent import AgentIA
 from src.core.ai_cache import RateLimiter
+from src.utils.formatters import format_quantity, format_quantity_with_unit
 
 logger = logging.getLogger(__name__)
 
@@ -122,7 +123,7 @@ JSON uniquement !"""
 
         # Filtrer items disponibles
         items_dispo = [
-            f"{i['nom']} ({i['quantite']:.1f} {i['unite']})"
+            f"{i['nom']} ({format_quantity(i['quantite'])} {i['unite']})"
             for i in inventaire
             if i["quantite"] > 0
         ][:30]  # Limiter pour le prompt
@@ -260,7 +261,7 @@ STOCK BAS: {stock_bas}
 PÉREMPTION PROCHE: {peremption}
 
 TOP 10 ARTICLES:
-{chr(10).join([f"- {i['nom']}: {i['quantite']:.1f} {i['unite']} ({i['statut']})" for i in top_items])}
+{chr(10).join([f"- {i['nom']}: {format_quantity(i['quantite'])} {i['unite']} ({i['statut']})" for i in top_items])}
 
 FOURNIS:
 1. Score global (0-100)

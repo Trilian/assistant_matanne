@@ -12,6 +12,7 @@ from typing import Dict, List
 from src.core.database import get_db_context
 from src.core.models import WellbeingEntry, ChildProfile
 from src.core.ai_agent import AgentIA
+from src.utils.formatters import format_quantity, format_quantity_with_unit
 
 
 # ===================================
@@ -125,7 +126,7 @@ def detecter_alertes() -> List[Dict]:
                     alertes.append({
                         "type": "INFO",
                         "personne": personne,
-                        "message": f"Sommeil moyen bas : {avg_sleep:.1f}h/nuit",
+                        "message": f"Sommeil moyen bas : {format_quantity(avg_sleep)}h/nuit",
                         "action": "Améliorer l'hygiène de sommeil"
                     })
 
@@ -157,7 +158,7 @@ def app():
         st.metric("Entrées (7j)", stats["total_entries"])
 
     with col_s2:
-        st.metric("Sommeil moyen", f"{stats['avg_sleep']:.1f}h")
+        st.metric("Sommeil moyen", f"{format_quantity(stats['avg_sleep'])}h")
 
     with col_s3:
         st.metric("Jours \"Bien\"", f"{stats['pct_bien']:.0f}%")
@@ -478,7 +479,7 @@ def app():
 
             with col_t3:
                 avg_entries = len(df_tendances) / 90
-                st.metric("Entrées/jour", f"{avg_entries:.1f}")
+                st.metric("Entrées/jour", f"{format_quantity(avg_entries)}")
 
             st.markdown("---")
 

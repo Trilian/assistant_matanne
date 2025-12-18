@@ -2,6 +2,8 @@
 Service Import/Export Inventaire
 Format CSV pour faciliter la gestion
 """
+from src.utils.formatters import format_quantity, format_quantity_with_unit
+
 import csv
 import io
 import logging
@@ -49,9 +51,9 @@ class InventaireExporter:
             writer.writerow({
                 "Nom": item["nom"],
                 "Catégorie": item["categorie"],
-                "Quantité": f"{item['quantite']:.2f}",
+                "Quantité": f"{format_quantity(item['quantite'])}",
                 "Unité": item["unite"],
-                "Seuil": f"{item['seuil']:.2f}",
+                "Seuil": f"{format_quantity(item['seuil'])}",
                 "Emplacement": item["emplacement"],
                 "Péremption": item["date_peremption"].strftime("%d/%m/%Y") if item.get("date_peremption") else "",
                 "Statut": item["statut"]

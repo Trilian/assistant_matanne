@@ -9,6 +9,7 @@ from datetime import datetime, date
 from typing import List, Dict, Optional
 
 from src.services.inventaire.inventaire_service import (
+from src.utils.formatters import format_quantity, format_quantity_with_unit
     inventaire_service, CATEGORIES, EMPLACEMENTS
 )
 from src.services.inventaire.inventaire_ai_service import create_inventaire_ai_service
@@ -72,7 +73,7 @@ def render_article_card(article: Dict, key: str):
 
             st.metric(
                 "Stock",
-                f"{article['quantite']:.1f} {article['unite']}",
+                f"{format_quantity(article['quantite'])} {article['unite']}",
                 delta=delta,
                 delta_color="inverse" if delta else "off"
             )
@@ -423,7 +424,7 @@ def tab_stats():
         top10 = sorted(inventaire, key=lambda x: x["quantite"], reverse=True)[:10]
 
         for item in top10:
-            st.write(f"• **{item['nom']}** : {item['quantite']:.1f} {item['unite']}")
+            st.write(f"• **{item['nom']}** : {format_quantity(item['quantite'])} {item['unite']}")
 
     with col_top2:
         st.markdown("### 📉 Stocks critiques")
@@ -431,7 +432,7 @@ def tab_stats():
 
         if critiques:
             for item in critiques[:10]:
-                st.write(f"• {item['icone']} **{item['nom']}** : {item['quantite']:.1f}/{item['seuil']}")
+                st.write(f"• {item['icone']} **{item['nom']}** : {format_quantity(item['quantite'])}/{item['seuil']}")
         else:
             st.success("✅ Aucun stock critique")
 
