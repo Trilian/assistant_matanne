@@ -19,23 +19,29 @@ from src.utils.formatters import format_quantity, format_quantity_with_unit
 # HELPERS
 # ===================================
 
+
 def charger_entrees_famille(limit: int = 30) -> pd.DataFrame:
     """Charge toutes les entrées de bien-être (enfants + adultes)"""
     with get_db_context() as db:
-        entries = db.query(WellbeingEntry).order_by(
-            WellbeingEntry.date.desc()
-        ).limit(limit).all()
+        entries = db.query(WellbeingEntry).order_by(WellbeingEntry.date.desc()).limit(limit).all()
 
-        return pd.DataFrame([{
-            "id": e.id,
-            "date": e.date,
-            "personne": db.query(ChildProfile).get(e.child_id).name if e.child_id else e.username,
-            "humeur": e.mood,
-            "sommeil": e.sleep_hours,
-            "activite": e.activity,
-            "notes": e.notes or "",
-            "is_child": e.child_id is not None
-        } for e in entries])
+        return pd.DataFrame(
+            [
+                {
+                    "id": e.id,
+                    "date": e.date,
+                    "personne": db.query(ChildProfile).get(e.child_id).name
+                    if e.child_id
+                    else e.username,
+                    "humeur": e.mood,
+                    "sommeil": e.sleep_hours,
+                    "activite": e.activity,
+                    "notes": e.notes or "",
+                    "is_child": e.child_id is not None,
+                }
+                for e in entries
+            ]
+        )
 
 
 def ajouter_entree_adulte(username: str, humeur: str, sommeil: float, activite: str, notes: str):
@@ -48,7 +54,7 @@ def ajouter_entree_adulte(username: str, humeur: str, sommeil: float, activite: 
             mood=humeur,
             sleep_hours=sommeil,
             activity=activite,
-            notes=notes
+            notes=notes,
         )
         db.add(entry)
         db.commit()
@@ -60,20 +66,15 @@ def get_statistiques_globales() -> Dict:
         # 7 derniers jours
         cutoff = date.today() - timedelta(days=7)
 
-        entries = db.query(WellbeingEntry).filter(
-            WellbeingEntry.date >= cutoff
-        ).all()
+        entries = db.query(WellbeingEntry).filter(WellbeingEntry.date >= cutoff).all()
 
         if not entries:
-            return {
-                "total_entries": 0,
-                "avg_sleep": 0,
-                "pct_bien": 0,
-                "activites_count": 0
-            }
+            return {"total_entries": 0, "avg_sleep": 0, "pct_bien": 0, "activites_count": 0}
 
         total = len(entries)
-        avg_sleep = sum([e.sleep_hours for e in entries if e.sleep_hours]) / total if total > 0 else 0
+        avg_sleep = (
+            sum([e.sleep_hours for e in entries if e.sleep_hours]) / total if total > 0 else 0
+        )
         bien_count = len([e for e in entries if "Bien" in e.mood])
         pct_bien = (bien_count / total) * 100 if total > 0 else 0
         activites = len(set([e.activity for e in entries if e.activity]))
@@ -82,7 +83,7 @@ def get_statistiques_globales() -> Dict:
             "total_entries": total,
             "avg_sleep": avg_sleep,
             "pct_bien": pct_bien,
-            "activites_count": activites
+            "activites_count": activites,
         }
 
 
@@ -94,14 +95,14 @@ def detecter_alertes() -> List[Dict]:
         # Dernières 7 entrées par personne
         cutoff = date.today() - timedelta(days=7)
 
-        entries = db.query(WellbeingEntry).filter(
-            WellbeingEntry.date >= cutoff
-        ).all()
+        entries = db.query(WellbeingEntry).filter(WellbeingEntry.date >= cutoff).all()
 
         # Grouper par personne
         personnes = {}
         for e in entries:
-            key = e.username or (db.query(ChildProfile).get(e.child_id).name if e.child_id else "Inconnu")
+            key = e.username or (
+                db.query(ChildProfile).get(e.child_id).name if e.child_id else "Inconnu"
+            )
             if key not in personnes:
                 personnes[key] = []
             personnes[key].append(e)
@@ -111,24 +112,28 @@ def detecter_alertes() -> List[Dict]:
             # Mauvaise humeur répétée
             mauvaise_humeur = [e for e in entrees if "Mal" in e.mood]
             if len(mauvaise_humeur) >= 3:
-                alertes.append({
-                    "type": "ATTENTION",
-                    "personne": personne,
-                    "message": f"Humeur basse répétée ({len(mauvaise_humeur)}/7 jours)",
-                    "action": "Consulter un professionnel si persistant"
-                })
+                alertes.append(
+                    {
+                        "type": "ATTENTION",
+                        "personne": personne,
+                        "message": f"Humeur basse répétée ({len(mauvaise_humeur)}/7 jours)",
+                        "action": "Consulter un professionnel si persistant",
+                    }
+                )
 
             # Sommeil insuffisant
             sommeils = [e.sleep_hours for e in entrees if e.sleep_hours]
             if sommeils:
                 avg_sleep = sum(sommeils) / len(sommeils)
                 if avg_sleep < 6.0:
-                    alertes.append({
-                        "type": "INFO",
-                        "personne": personne,
-                        "message": f"Sommeil moyen bas : {format_quantity(avg_sleep)}h/nuit",
-                        "action": "Améliorer l'hygiène de sommeil"
-                    })
+                    alertes.append(
+                        {
+                            "type": "INFO",
+                            "personne": personne,
+                            "message": f"Sommeil moyen bas : {format_quantity(avg_sleep)}h/nuit",
+                            "action": "Améliorer l'hygiène de sommeil",
+                        }
+                    )
 
     return alertes
 
@@ -136,6 +141,7 @@ def detecter_alertes() -> List[Dict]:
 # ===================================
 # MODULE PRINCIPAL
 # ===================================
+
 
 def app():
     """Module Bien-être familial avec IA intégrée"""
@@ -161,7 +167,7 @@ def app():
         st.metric("Sommeil moyen", f"{format_quantity(stats['avg_sleep'])}h")
 
     with col_s3:
-        st.metric("Jours \"Bien\"", f"{stats['pct_bien']:.0f}%")
+        st.metric('Jours "Bien"', f"{stats['pct_bien']:.0f}%")
 
     with col_s4:
         st.metric("Activités variées", stats["activites_count"])
@@ -179,9 +185,13 @@ def app():
 
         for alerte in alertes:
             if alerte["type"] == "ATTENTION":
-                st.warning(f"⚠️ **{alerte['personne']}** : {alerte['message']}\n\n💡 {alerte['action']}")
+                st.warning(
+                    f"⚠️ **{alerte['personne']}** : {alerte['message']}\n\n💡 {alerte['action']}"
+                )
             else:
-                st.info(f"ℹ️ **{alerte['personne']}** : {alerte['message']}\n\n💡 {alerte['action']}")
+                st.info(
+                    f"ℹ️ **{alerte['personne']}** : {alerte['message']}\n\n💡 {alerte['action']}"
+                )
 
         st.markdown("---")
 
@@ -189,12 +199,9 @@ def app():
     # TABS PRINCIPAUX
     # ===================================
 
-    tab1, tab2, tab3, tab4 = st.tabs([
-        "📊 Vue d'ensemble",
-        "➕ Ajouter une entrée",
-        "🤖 Analyse IA",
-        "📈 Tendances"
-    ])
+    tab1, tab2, tab3, tab4 = st.tabs(
+        ["📊 Vue d'ensemble", "➕ Ajouter une entrée", "🤖 Analyse IA", "📈 Tendances"]
+    )
 
     # ===================================
     # TAB 1 : VUE D'ENSEMBLE
@@ -257,8 +264,8 @@ def app():
                         "humeur": "Humeur",
                         "sommeil": st.column_config.NumberColumn("Sommeil (h)", format="%.1f"),
                         "activite": "Activité",
-                        "notes": st.column_config.TextColumn("Notes", width="large")
-                    }
+                        "notes": st.column_config.TextColumn("Notes", width="large"),
+                    },
                 )
             else:
                 st.info("Aucune donnée pour cette période")
@@ -274,39 +281,25 @@ def app():
             col_a1, col_a2 = st.columns(2)
 
             with col_a1:
-                personne = st.text_input(
-                    "Pour qui ? *",
-                    value="Anne",
-                    placeholder="Prénom"
-                )
+                personne = st.text_input("Pour qui ? *", value="Anne", placeholder="Prénom")
 
-                humeur = st.selectbox(
-                    "Humeur *",
-                    ["😊 Bien", "😐 Moyen", "😞 Mal"]
-                )
+                humeur = st.selectbox("Humeur *", ["😊 Bien", "😐 Moyen", "😞 Mal"])
 
-                sommeil = st.number_input(
-                    "Heures de sommeil",
-                    0.0, 24.0, 7.5, 0.5
-                )
+                sommeil = st.number_input("Heures de sommeil", 0.0, 24.0, 7.5, 0.5)
 
             with col_a2:
                 date_entry = st.date_input("Date", value=date.today())
 
                 activite = st.text_input(
-                    "Activité principale",
-                    placeholder="Ex: Travail, Sport, Repos..."
+                    "Activité principale", placeholder="Ex: Travail, Sport, Repos..."
                 )
 
-                stress_level = st.slider(
-                    "Niveau de stress",
-                    0, 10, 5
-                )
+                stress_level = st.slider("Niveau de stress", 0, 10, 5)
 
             notes = st.text_area(
                 "Notes / Ressenti",
                 height=150,
-                placeholder="Comment s'est passée ta journée ? Des préoccupations ? Des moments positifs ?"
+                placeholder="Comment s'est passée ta journée ? Des préoccupations ? Des moments positifs ?",
             )
 
             # Ajouter le stress aux notes
@@ -338,7 +331,7 @@ def app():
             "📵 Moments sans écrans",
             "🎨 Activité créative ou hobby",
             "🌳 Temps dans la nature",
-            "📖 Lecture relaxante"
+            "📖 Lecture relaxante",
         ]
 
         for sugg in suggestions_base[:4]:
@@ -360,11 +353,10 @@ def app():
             df_analyse = charger_entrees_famille(limit=30)
 
             if not df_analyse.empty:
-                personnes_dispo = ["Toute la famille"] + sorted(df_analyse["personne"].unique().tolist())
-                personne_analyse = st.selectbox(
-                    "Analyser pour",
-                    personnes_dispo
+                personnes_dispo = ["Toute la famille"] + sorted(
+                    df_analyse["personne"].unique().tolist()
                 )
+                personne_analyse = st.selectbox("Analyser pour", personnes_dispo)
 
                 if st.button("🤖 Lancer l'analyse", type="primary", use_container_width=True):
                     with st.spinner("🤖 Analyse en cours..."):
@@ -426,13 +418,16 @@ def app():
                                 emoji = "😞"
                                 msg = "À améliorer"
 
-                            st.markdown(f"""
+                            st.markdown(
+                                f"""
                                 <div style='text-align: center; padding: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white;'>
                                     <h1 style='font-size: 4rem; margin: 0;'>{emoji}</h1>
                                     <h2 style='margin: 0.5rem 0;'>{score}/100</h2>
                                     <p style='margin: 0; font-size: 1.2rem;'>{msg}</p>
                                 </div>
-                            """, unsafe_allow_html=True)
+                            """,
+                                unsafe_allow_html=True,
+                            )
 
                     st.markdown("---")
 
@@ -522,5 +517,5 @@ def app():
                     "Télécharger",
                     csv,
                     f"bien_etre_famille_{date.today().strftime('%Y%m%d')}.csv",
-                    "text/csv"
+                    "text/csv",
                 )

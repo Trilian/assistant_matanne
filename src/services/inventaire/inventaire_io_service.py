@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 # EXPORT
 # ===================================
 
+
 class InventaireExporter:
     """Export inventaire en CSV"""
 
@@ -41,23 +42,27 @@ class InventaireExporter:
             "Seuil",
             "Emplacement",
             "Péremption",
-            "Statut"
+            "Statut",
         ]
 
         writer = csv.DictWriter(output, fieldnames=fieldnames)
         writer.writeheader()
 
         for item in inventaire:
-            writer.writerow({
-                "Nom": item["nom"],
-                "Catégorie": item["categorie"],
-                "Quantité": f"{format_quantity(item['quantite'])}",
-                "Unité": item["unite"],
-                "Seuil": f"{format_quantity(item['seuil'])}",
-                "Emplacement": item["emplacement"],
-                "Péremption": item["date_peremption"].strftime("%d/%m/%Y") if item.get("date_peremption") else "",
-                "Statut": item["statut"]
-            })
+            writer.writerow(
+                {
+                    "Nom": item["nom"],
+                    "Catégorie": item["categorie"],
+                    "Quantité": f"{format_quantity(item['quantite'])}",
+                    "Unité": item["unite"],
+                    "Seuil": f"{format_quantity(item['seuil'])}",
+                    "Emplacement": item["emplacement"],
+                    "Péremption": item["date_peremption"].strftime("%d/%m/%Y")
+                    if item.get("date_peremption")
+                    else "",
+                    "Statut": item["statut"],
+                }
+            )
 
         logger.info(f"Export CSV: {len(inventaire)} articles")
         return output.getvalue()
@@ -73,15 +78,19 @@ class InventaireExporter:
         data = [["Nom", "Catégorie", "Quantité", "Unité", "Seuil", "Emplacement", "Péremption"]]
 
         for item in inventaire:
-            data.append([
-                item["nom"],
-                item["categorie"],
-                item["quantite"],
-                item["unite"],
-                item["seuil"],
-                item["emplacement"],
-                item["date_peremption"].strftime("%d/%m/%Y") if item.get("date_peremption") else ""
-            ])
+            data.append(
+                [
+                    item["nom"],
+                    item["categorie"],
+                    item["quantite"],
+                    item["unite"],
+                    item["seuil"],
+                    item["emplacement"],
+                    item["date_peremption"].strftime("%d/%m/%Y")
+                    if item.get("date_peremption")
+                    else "",
+                ]
+            )
 
         return data
 
@@ -89,6 +98,7 @@ class InventaireExporter:
 # ===================================
 # IMPORT
 # ===================================
+
 
 class InventaireImporter:
     """Import inventaire depuis CSV"""
@@ -142,15 +152,17 @@ class InventaireImporter:
                         except ValueError:
                             errors.append(f"Ligne {row_num}: Date péremption invalide")
 
-                articles.append({
-                    "nom": nom,
-                    "categorie": row.get("Catégorie", "Autre").strip() or "Autre",
-                    "quantite": quantite,
-                    "unite": row.get("Unité", "pcs").strip() or "pcs",
-                    "seuil": seuil,
-                    "emplacement": row.get("Emplacement", "").strip() or None,
-                    "date_peremption": date_peremption
-                })
+                articles.append(
+                    {
+                        "nom": nom,
+                        "categorie": row.get("Catégorie", "Autre").strip() or "Autre",
+                        "quantite": quantite,
+                        "unite": row.get("Unité", "pcs").strip() or "pcs",
+                        "seuil": seuil,
+                        "emplacement": row.get("Emplacement", "").strip() or None,
+                        "date_peremption": date_peremption,
+                    }
+                )
 
             except Exception as e:
                 errors.append(f"Ligne {row_num}: {str(e)}")
@@ -192,6 +204,7 @@ class InventaireImporter:
 # TEMPLATE
 # ===================================
 
+
 def get_csv_template() -> str:
     """
     Retourne un template CSV vide
@@ -210,6 +223,7 @@ Lait,Laitier,1,L,0.5,Frigo,20/12/2025
 # HELPERS STREAMLIT
 # ===================================
 
+
 def render_export_ui(inventaire: List[Dict]):
     """Widget Streamlit pour l'export"""
     import streamlit as st
@@ -224,7 +238,7 @@ def render_export_ui(inventaire: List[Dict]):
             data=csv_data,
             file_name=f"inventaire_{datetime.now().strftime('%Y%m%d')}.csv",
             mime="text/csv",
-            use_container_width=True
+            use_container_width=True,
         )
 
 
@@ -237,22 +251,13 @@ def render_import_ui(inventaire_service):
     # Template
     with st.expander("📄 Télécharger template CSV"):
         template = get_csv_template()
-        st.download_button(
-            "💾 Template.csv",
-            template,
-            "template_inventaire.csv",
-            "text/csv"
-        )
+        st.download_button("💾 Template.csv", template, "template_inventaire.csv", "text/csv")
 
         st.caption("Format attendu:")
         st.code(template, language="csv")
 
     # Upload
-    uploaded = st.file_uploader(
-        "Choisir un fichier CSV",
-        type=["csv"],
-        key="import_csv"
-    )
+    uploaded = st.file_uploader("Choisir un fichier CSV", type=["csv"], key="import_csv")
 
     if uploaded:
         try:
@@ -281,11 +286,14 @@ def render_import_ui(inventaire_service):
                 # Aperçu
                 with st.expander("👁️ Aperçu"):
                     import pandas as pd
+
                     df = pd.DataFrame(articles[:10])
                     st.dataframe(df, use_container_width=True)
 
                 # Import
-                if st.button("➕ Importer tous les articles", type="primary", use_container_width=True):
+                if st.button(
+                    "➕ Importer tous les articles", type="primary", use_container_width=True
+                ):
                     count_added = 0
                     count_errors = 0
 
@@ -298,7 +306,7 @@ def render_import_ui(inventaire_service):
                                 unite=article["unite"],
                                 seuil=article["seuil"],
                                 emplacement=article.get("emplacement"),
-                                date_peremption=article.get("date_peremption")
+                                date_peremption=article.get("date_peremption"),
                             )
                             count_added += 1
                         except Exception as e:

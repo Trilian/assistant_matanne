@@ -10,14 +10,22 @@ from typing import Dict
 
 from src.core.database import get_db_context
 from src.core.models import (
-    BatchMeal, Recipe, Project, RoutineTask, Routine,
-    InventoryItem, Ingredient, CalendarEvent, GardenItem
+    BatchMeal,
+    Recipe,
+    Project,
+    RoutineTask,
+    Routine,
+    InventoryItem,
+    Ingredient,
+    CalendarEvent,
+    GardenItem,
 )
 
 
 # ===================================
 # HELPERS
 # ===================================
+
 
 def get_dashboard_data() -> Dict:
     """Récupère toutes les données pour le dashboard"""
@@ -27,43 +35,40 @@ def get_dashboard_data() -> Dict:
 
         data = {
             # Repas
-            "repas_semaine": db.query(BatchMeal).filter(
-                BatchMeal.scheduled_date.between(today, week_end),
-                BatchMeal.status == "à faire"
-            ).count(),
-
+            "repas_semaine": db.query(BatchMeal)
+            .filter(
+                BatchMeal.scheduled_date.between(today, week_end), BatchMeal.status == "à faire"
+            )
+            .count(),
             # Projets
-            "projets_actifs": db.query(Project).filter(
-                Project.status.in_(["à faire", "en cours"])
-            ).count(),
-
-            "projets_urgents": db.query(Project).filter(
+            "projets_actifs": db.query(Project)
+            .filter(Project.status.in_(["à faire", "en cours"]))
+            .count(),
+            "projets_urgents": db.query(Project)
+            .filter(
                 Project.status.in_(["à faire", "en cours"]),
                 Project.end_date != None,
-                Project.end_date <= week_end
-            ).count(),
-
+                Project.end_date <= week_end,
+            )
+            .count(),
             # Routines
-            "taches_jour": db.query(RoutineTask).join(Routine).filter(
-                RoutineTask.status == "à faire",
-                Routine.is_active == True
-            ).count(),
-
+            "taches_jour": db.query(RoutineTask)
+            .join(Routine)
+            .filter(RoutineTask.status == "à faire", Routine.is_active == True)
+            .count(),
             # Inventaire
-            "stock_bas": db.query(InventoryItem).filter(
-                InventoryItem.quantity < InventoryItem.min_quantity
-            ).count(),
-
+            "stock_bas": db.query(InventoryItem)
+            .filter(InventoryItem.quantity < InventoryItem.min_quantity)
+            .count(),
             # Événements
-            "events_semaine": db.query(CalendarEvent).filter(
+            "events_semaine": db.query(CalendarEvent)
+            .filter(
                 CalendarEvent.start_date >= datetime.combine(today, datetime.min.time()),
-                CalendarEvent.start_date <= datetime.combine(week_end, datetime.max.time())
-            ).count(),
-
+                CalendarEvent.start_date <= datetime.combine(week_end, datetime.max.time()),
+            )
+            .count(),
             # Jardin
-            "plantes_arroser": db.query(GardenItem).filter(
-                GardenItem.last_watered != None
-            ).count()
+            "plantes_arroser": db.query(GardenItem).filter(GardenItem.last_watered != None).count(),
         }
 
         return data
@@ -77,60 +82,78 @@ def get_prochaines_actions() -> list:
         today = date.today()
 
         # Repas non planifiés
-        repas_3j = db.query(BatchMeal).filter(
-            BatchMeal.scheduled_date.between(today, today + timedelta(days=3))
-        ).count()
+        repas_3j = (
+            db.query(BatchMeal)
+            .filter(BatchMeal.scheduled_date.between(today, today + timedelta(days=3)))
+            .count()
+        )
 
         if repas_3j < 3:
-            actions.append({
-                "priorite": "haute",
-                "module": "Batch Cooking",
-                "action": "Planifier les repas des 3 prochains jours",
-                "link": "cuisine.batch_cooking"
-            })
+            actions.append(
+                {
+                    "priorite": "haute",
+                    "module": "Batch Cooking",
+                    "action": "Planifier les repas des 3 prochains jours",
+                    "link": "cuisine.batch_cooking",
+                }
+            )
 
         # Stock bas
-        stock_bas = db.query(InventoryItem).filter(
-            InventoryItem.quantity < InventoryItem.min_quantity
-        ).count()
+        stock_bas = (
+            db.query(InventoryItem)
+            .filter(InventoryItem.quantity < InventoryItem.min_quantity)
+            .count()
+        )
 
         if stock_bas > 0:
-            actions.append({
-                "priorite": "haute",
-                "module": "Courses",
-                "action": f"{stock_bas} article(s) en stock bas",
-                "link": "cuisine.courses"
-            })
+            actions.append(
+                {
+                    "priorite": "haute",
+                    "module": "Courses",
+                    "action": f"{stock_bas} article(s) en stock bas",
+                    "link": "cuisine.courses",
+                }
+            )
 
         # Projets échéance proche
-        projets_urgents = db.query(Project).filter(
-            Project.status.in_(["à faire", "en cours"]),
-            Project.end_date != None,
-            Project.end_date <= today + timedelta(days=7)
-        ).all()
+        projets_urgents = (
+            db.query(Project)
+            .filter(
+                Project.status.in_(["à faire", "en cours"]),
+                Project.end_date != None,
+                Project.end_date <= today + timedelta(days=7),
+            )
+            .all()
+        )
 
         for projet in projets_urgents[:2]:
             delta = (projet.end_date - today).days
-            actions.append({
-                "priorite": "moyenne",
-                "module": "Projets",
-                "action": f"{projet.name} - échéance dans {delta} jours",
-                "link": "maison.projets"
-            })
+            actions.append(
+                {
+                    "priorite": "moyenne",
+                    "module": "Projets",
+                    "action": f"{projet.name} - échéance dans {delta} jours",
+                    "link": "maison.projets",
+                }
+            )
 
         # Routines en attente
-        taches = db.query(RoutineTask).join(Routine).filter(
-            RoutineTask.status == "à faire",
-            Routine.is_active == True
-        ).count()
+        taches = (
+            db.query(RoutineTask)
+            .join(Routine)
+            .filter(RoutineTask.status == "à faire", Routine.is_active == True)
+            .count()
+        )
 
         if taches > 5:
-            actions.append({
-                "priorite": "basse",
-                "module": "Routines",
-                "action": f"{taches} tâches de routine en attente",
-                "link": "famille.routines"
-            })
+            actions.append(
+                {
+                    "priorite": "basse",
+                    "module": "Routines",
+                    "action": f"{taches} tâches de routine en attente",
+                    "link": "famille.routines",
+                }
+            )
 
     return actions
 
@@ -138,6 +161,7 @@ def get_prochaines_actions() -> list:
 # ===================================
 # MODULE PRINCIPAL
 # ===================================
+
 
 def app():
     """Module Vue d'ensemble"""
@@ -162,9 +186,12 @@ def app():
         st.metric("📅 Événements", data["events_semaine"])
 
     with col3:
-        st.metric("🏗️ Projets actifs", data["projets_actifs"],
-                  delta=f"{data['projets_urgents']} urgents" if data['projets_urgents'] > 0 else None,
-                  delta_color="inverse")
+        st.metric(
+            "🏗️ Projets actifs",
+            data["projets_actifs"],
+            delta=f"{data['projets_urgents']} urgents" if data["projets_urgents"] > 0 else None,
+            delta_color="inverse",
+        )
 
     with col4:
         st.metric("⏰ Tâches jour", data["taches_jour"])
@@ -183,11 +210,9 @@ def app():
         st.success("✅ Tout est sous contrôle ! Aucune action urgente.")
     else:
         for action in actions:
-            priorite_color = {
-                "haute": "🔴",
-                "moyenne": "🟡",
-                "basse": "🟢"
-            }.get(action["priorite"], "⚪")
+            priorite_color = {"haute": "🔴", "moyenne": "🟡", "basse": "🟢"}.get(
+                action["priorite"], "⚪"
+            )
 
             col_action1, col_action2 = st.columns([3, 1])
 
@@ -196,7 +221,7 @@ def app():
 
             with col_action2:
                 if st.button("Aller →", key=f"action_{action['link']}", use_container_width=True):
-                    st.session_state.current_module = action['link']
+                    st.session_state.current_module = action["link"]
                     st.rerun()
 
     st.markdown("---")
@@ -212,11 +237,14 @@ def app():
 
         with get_db_context() as db:
             # Prochains repas
-            repas = db.query(BatchMeal, Recipe).join(
-                Recipe, BatchMeal.recipe_id == Recipe.id
-            ).filter(
-                BatchMeal.scheduled_date >= date.today()
-            ).order_by(BatchMeal.scheduled_date).limit(3).all()
+            repas = (
+                db.query(BatchMeal, Recipe)
+                .join(Recipe, BatchMeal.recipe_id == Recipe.id)
+                .filter(BatchMeal.scheduled_date >= date.today())
+                .order_by(BatchMeal.scheduled_date)
+                .limit(3)
+                .all()
+            )
 
             if repas:
                 for batch, recipe in repas:
@@ -234,12 +262,13 @@ def app():
 
         with get_db_context() as db:
             # Routines du jour
-            routines = db.query(RoutineTask, Routine).join(
-                Routine, RoutineTask.routine_id == Routine.id
-            ).filter(
-                RoutineTask.status == "à faire",
-                Routine.is_active == True
-            ).limit(3).all()
+            routines = (
+                db.query(RoutineTask, Routine)
+                .join(Routine, RoutineTask.routine_id == Routine.id)
+                .filter(RoutineTask.status == "à faire", Routine.is_active == True)
+                .limit(3)
+                .all()
+            )
 
             if routines:
                 for task, routine in routines:
@@ -253,9 +282,13 @@ def app():
 
         with get_db_context() as db:
             # Projets en cours
-            projets = db.query(Project).filter(
-                Project.status == "en cours"
-            ).order_by(Project.priority.desc()).limit(3).all()
+            projets = (
+                db.query(Project)
+                .filter(Project.status == "en cours")
+                .order_by(Project.priority.desc())
+                .limit(3)
+                .all()
+            )
 
             if projets:
                 for projet in projets:
@@ -270,9 +303,7 @@ def app():
         with get_db_context() as db:
             # Plantes à arroser
             today = date.today()
-            plantes = db.query(GardenItem).filter(
-                GardenItem.last_watered != None
-            ).all()
+            plantes = db.query(GardenItem).filter(GardenItem.last_watered != None).all()
 
             a_arroser = []
             for plante in plantes:
@@ -302,21 +333,29 @@ def app():
         with get_db_context() as db:
             # Compter événements du jour
             repas = db.query(BatchMeal).filter(BatchMeal.scheduled_date == jour).count()
-            events = db.query(CalendarEvent).filter(
-                CalendarEvent.start_date >= datetime.combine(jour, datetime.min.time()),
-                CalendarEvent.start_date < datetime.combine(jour + timedelta(days=1), datetime.min.time())
-            ).count()
-            projets = db.query(Project).filter(
-                Project.end_date == jour,
-                Project.status.in_(["à faire", "en cours"])
-            ).count()
+            events = (
+                db.query(CalendarEvent)
+                .filter(
+                    CalendarEvent.start_date >= datetime.combine(jour, datetime.min.time()),
+                    CalendarEvent.start_date
+                    < datetime.combine(jour + timedelta(days=1), datetime.min.time()),
+                )
+                .count()
+            )
+            projets = (
+                db.query(Project)
+                .filter(Project.end_date == jour, Project.status.in_(["à faire", "en cours"]))
+                .count()
+            )
 
             total = repas + events + projets
 
             if total > 0:
                 is_today = jour == today
                 style = "🔵" if is_today else "•"
-                st.write(f"{style} **{jour_nom}** : {repas} repas, {events} événements, {projets} échéances")
+                st.write(
+                    f"{style} **{jour_nom}** : {repas} repas, {events} événements, {projets} échéances"
+                )
             else:
                 st.write(f"• {jour_nom} : Rien de prévu")
 

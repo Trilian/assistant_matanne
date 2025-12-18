@@ -8,13 +8,19 @@ from typing import List, Dict, Optional, Tuple
 from sqlalchemy.orm import Session
 from src.core.database import get_db_context
 from src.core.models import (
-    PlanningHebdomadaire, RepasPlanning, ConfigPlanningUtilisateur,
-    Recette, TypeRepasEnum, VersionRecette, TypeVersionRecetteEnum
+    PlanningHebdomadaire,
+    RepasPlanning,
+    ConfigPlanningUtilisateur,
+    Recette,
+    TypeRepasEnum,
+    VersionRecette,
+    TypeVersionRecetteEnum,
 )
 from src.core.ai_agent import AgentIA
 import json
 
 logger = logging.getLogger(__name__)
+
 
 class PlanningService:
     """Service métier pour le planning hebdomadaire"""
@@ -29,9 +35,11 @@ class PlanningService:
     def get_or_create_config(utilisateur_id: int = None) -> ConfigPlanningUtilisateur:
         """Récupère ou crée la config utilisateur"""
         with get_db_context() as db:
-            config = db.query(ConfigPlanningUtilisateur).filter(
-                ConfigPlanningUtilisateur.utilisateur_id == utilisateur_id
-            ).first()
+            config = (
+                db.query(ConfigPlanningUtilisateur)
+                .filter(ConfigPlanningUtilisateur.utilisateur_id == utilisateur_id)
+                .first()
+            )
 
             if not config:
                 config = ConfigPlanningUtilisateur(utilisateur_id=utilisateur_id)
@@ -71,7 +79,7 @@ class PlanningService:
             planning = PlanningHebdomadaire(
                 semaine_debut=semaine_debut,
                 nom=nom or f"Semaine du {semaine_debut.strftime('%d/%m/%Y')}",
-                statut="brouillon"
+                statut="brouillon",
             )
             db.add(planning)
             db.commit()
@@ -81,25 +89,27 @@ class PlanningService:
     def get_planning(planning_id: int) -> Optional[PlanningHebdomadaire]:
         """Récupère un planning complet"""
         with get_db_context() as db:
-            return db.query(PlanningHebdomadaire).filter(
-                PlanningHebdomadaire.id == planning_id
-            ).first()
+            return (
+                db.query(PlanningHebdomadaire)
+                .filter(PlanningHebdomadaire.id == planning_id)
+                .first()
+            )
 
     @staticmethod
     def get_planning_semaine(semaine_debut: date) -> Optional[PlanningHebdomadaire]:
         """Récupère le planning d'une semaine spécifique"""
         with get_db_context() as db:
-            return db.query(PlanningHebdomadaire).filter(
-                PlanningHebdomadaire.semaine_debut == semaine_debut
-            ).first()
+            return (
+                db.query(PlanningHebdomadaire)
+                .filter(PlanningHebdomadaire.semaine_debut == semaine_debut)
+                .first()
+            )
 
     @staticmethod
     def delete_planning(planning_id: int):
         """Supprime un planning"""
         with get_db_context() as db:
-            db.query(PlanningHebdomadaire).filter(
-                PlanningHebdomadaire.id == planning_id
-            ).delete()
+            db.query(PlanningHebdomadaire).filter(PlanningHebdomadaire.id == planning_id).delete()
             db.commit()
 
     # ===================================
@@ -108,12 +118,12 @@ class PlanningService:
 
     @staticmethod
     def add_repas(
-            planning_id: int,
-            jour_semaine: int,
-            date_repas: date,
-            type_repas: str,
-            recette_id: int = None,
-            **kwargs
+        planning_id: int,
+        jour_semaine: int,
+        date_repas: date,
+        type_repas: str,
+        recette_id: int = None,
+        **kwargs,
     ) -> int:
         """Ajoute un repas au planning"""
         with get_db_context() as db:
@@ -123,7 +133,7 @@ class PlanningService:
                 "goûter": 3,
                 "dîner": 4,
                 "bébé": 5,
-                "batch_cooking": 6
+                "batch_cooking": 6,
             }
 
             repas = RepasPlanning(
@@ -132,11 +142,11 @@ class PlanningService:
                 date=date_repas,
                 type_repas=type_repas,
                 recette_id=recette_id,
-                ordre=kwargs.get('ordre', ordre_map.get(type_repas, 0)),
-                portions=kwargs.get('portions', 4),
-                est_adapte_bebe=kwargs.get('est_adapte_bebe', False),
-                est_batch_cooking=kwargs.get('est_batch_cooking', False),
-                notes=kwargs.get('notes')
+                ordre=kwargs.get("ordre", ordre_map.get(type_repas, 0)),
+                portions=kwargs.get("portions", 4),
+                est_adapte_bebe=kwargs.get("est_adapte_bebe", False),
+                est_batch_cooking=kwargs.get("est_batch_cooking", False),
+                notes=kwargs.get("notes"),
             )
             db.add(repas)
             db.commit()
@@ -163,11 +173,7 @@ class PlanningService:
     @staticmethod
     def deplacer_repas(repas_id: int, nouveau_jour: int, nouvelle_date: date):
         """Déplace un repas vers un autre jour"""
-        PlanningService.update_repas(
-            repas_id,
-            jour_semaine=nouveau_jour,
-            date=nouvelle_date
-        )
+        PlanningService.update_repas(repas_id, jour_semaine=nouveau_jour, date=nouvelle_date)
 
     @staticmethod
     def echanger_repas(repas_id_1: int, repas_id_2: int):
@@ -189,15 +195,15 @@ class PlanningService:
 
     @staticmethod
     async def generer_planning_ia(
-            semaine_debut: date,
-            config: ConfigPlanningUtilisateur,
-            agent: AgentIA
+        semaine_debut: date, config: ConfigPlanningUtilisateur, agent: AgentIA
     ) -> int:
         """Génère un planning complet avec l'IA"""
         logger.info(f"Génération IA planning semaine du {semaine_debut}")
 
         # 1. Créer le planning
-        planning_id = PlanningService.create_planning(semaine_debut, f"Planning IA {semaine_debut.strftime('%d/%m')}")
+        planning_id = PlanningService.create_planning(
+            semaine_debut, f"Planning IA {semaine_debut.strftime('%d/%m')}"
+        )
 
         # 2. Récupérer recettes disponibles
         with get_db_context() as db:
@@ -211,8 +217,12 @@ class PlanningService:
                     "est_rapide": r.est_rapide,
                     "compatible_bebe": r.compatible_bebe,
                     "compatible_batch": r.compatible_batch,
-                    "a_version_bebe": any(v.type_version == TypeVersionRecetteEnum.BEBE for v in r.versions),
-                    "a_version_batch": any(v.type_version == TypeVersionRecetteEnum.BATCH_COOKING for v in r.versions)
+                    "a_version_bebe": any(
+                        v.type_version == TypeVersionRecetteEnum.BEBE for v in r.versions
+                    ),
+                    "a_version_batch": any(
+                        v.type_version == TypeVersionRecetteEnum.BATCH_COOKING for v in r.versions
+                    ),
                 }
                 for r in recettes
             ]
@@ -265,7 +275,7 @@ UNIQUEMENT le JSON, aucun texte avant ou après !"""
                 prompt=prompt,
                 system_prompt="Tu es un nutritionniste expert en planification de repas. Réponds UNIQUEMENT en JSON valide.",
                 temperature=0.7,
-                max_tokens=2000
+                max_tokens=2000,
             )
 
             # 5. Parser réponse
@@ -282,9 +292,9 @@ UNIQUEMENT le JSON, aucun texte avant ou après !"""
                         recette_nom = repas_data["recette_nom"]
 
                         # Trouver la recette
-                        recette = db.query(Recette).filter(
-                            Recette.nom.ilike(f"%{recette_nom}%")
-                        ).first()
+                        recette = (
+                            db.query(Recette).filter(Recette.nom.ilike(f"%{recette_nom}%")).first()
+                        )
 
                         if recette:
                             PlanningService.add_repas(
@@ -295,14 +305,16 @@ UNIQUEMENT le JSON, aucun texte avant ou après !"""
                                 recette_id=recette.id,
                                 portions=repas_data.get("portions", 4),
                                 est_adapte_bebe=repas_data.get("adapte_bebe", False),
-                                notes=f"IA : {repas_data.get('raison', '')}"
+                                notes=f"IA : {repas_data.get('raison', '')}",
                             )
 
             # Marquer comme généré par IA
             with get_db_context() as db:
-                planning = db.query(PlanningHebdomadaire).filter(
-                    PlanningHebdomadaire.id == planning_id
-                ).first()
+                planning = (
+                    db.query(PlanningHebdomadaire)
+                    .filter(PlanningHebdomadaire.id == planning_id)
+                    .first()
+                )
                 if planning:
                     planning.genere_par_ia = True
                     db.commit()
@@ -324,9 +336,11 @@ UNIQUEMENT le JSON, aucun texte avant ou après !"""
     def get_planning_structure(planning_id: int) -> Dict:
         """Retourne le planning sous forme structurée pour affichage"""
         with get_db_context() as db:
-            planning = db.query(PlanningHebdomadaire).filter(
-                PlanningHebdomadaire.id == planning_id
-            ).first()
+            planning = (
+                db.query(PlanningHebdomadaire)
+                .filter(PlanningHebdomadaire.id == planning_id)
+                .first()
+            )
 
             if not planning:
                 return None
@@ -336,7 +350,7 @@ UNIQUEMENT le JSON, aucun texte avant ou après !"""
                 "planning_id": planning.id,
                 "nom": planning.nom,
                 "semaine_debut": planning.semaine_debut,
-                "jours": []
+                "jours": [],
             }
 
             for jour_idx in range(7):
@@ -344,31 +358,37 @@ UNIQUEMENT le JSON, aucun texte avant ou après !"""
 
                 repas_jour = [r for r in planning.repas if r.jour_semaine == jour_idx]
 
-                structure["jours"].append({
-                    "jour_idx": jour_idx,
-                    "nom_jour": PlanningService.JOURS_SEMAINE[jour_idx],
-                    "date": date_jour,
-                    "repas": [
-                        {
-                            "id": r.id,
-                            "type": r.type_repas,
-                            "recette": {
-                                "id": r.recette.id,
-                                "nom": r.recette.nom,
-                                "temps_total": r.recette.temps_preparation + r.recette.temps_cuisson,
-                                "url_image": r.recette.url_image
-                            } if r.recette else None,
-                            "portions": r.portions,
-                            "est_adapte_bebe": r.est_adapte_bebe,
-                            "est_batch": r.est_batch_cooking,
-                            "notes": r.notes,
-                            "statut": r.statut
-                        }
-                        for r in sorted(repas_jour, key=lambda x: x.ordre)
-                    ]
-                })
+                structure["jours"].append(
+                    {
+                        "jour_idx": jour_idx,
+                        "nom_jour": PlanningService.JOURS_SEMAINE[jour_idx],
+                        "date": date_jour,
+                        "repas": [
+                            {
+                                "id": r.id,
+                                "type": r.type_repas,
+                                "recette": {
+                                    "id": r.recette.id,
+                                    "nom": r.recette.nom,
+                                    "temps_total": r.recette.temps_preparation
+                                    + r.recette.temps_cuisson,
+                                    "url_image": r.recette.url_image,
+                                }
+                                if r.recette
+                                else None,
+                                "portions": r.portions,
+                                "est_adapte_bebe": r.est_adapte_bebe,
+                                "est_batch": r.est_batch_cooking,
+                                "notes": r.notes,
+                                "statut": r.statut,
+                            }
+                            for r in sorted(repas_jour, key=lambda x: x.ordre)
+                        ],
+                    }
+                )
 
             return structure
+
 
 # Instance globale
 planning_service = PlanningService()

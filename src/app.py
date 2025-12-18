@@ -14,8 +14,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Configuration du logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -24,6 +23,7 @@ logger = logging.getLogger(__name__)
 # VÉRIFICATION DES SECRETS
 # ===================================
 
+
 def verify_secrets() -> bool:
     """
     Vérifie que tous les secrets nécessaires sont présents
@@ -31,10 +31,7 @@ def verify_secrets() -> bool:
     Returns:
         True si OK, False sinon
     """
-    required_secrets = {
-        'db': ['host', 'port', 'name', 'user', 'password'],
-        'mistral': ['api_key']
-    }
+    required_secrets = {"db": ["host", "port", "name", "user", "password"], "mistral": ["api_key"]}
 
     missing = []
 
@@ -49,12 +46,15 @@ def verify_secrets() -> bool:
 
     if missing:
         st.error("❌ Configuration manquante dans les secrets Streamlit")
-        st.error("Ajoute ces éléments dans `.streamlit/secrets.toml` (local) ou dans les Settings (cloud) :")
+        st.error(
+            "Ajoute ces éléments dans `.streamlit/secrets.toml` (local) ou dans les Settings (cloud) :"
+        )
         for item in missing:
             st.error(f"  - {item}")
 
         with st.expander("💡 Exemple de configuration", expanded=True):
-            st.code("""
+            st.code(
+                """
 [db]
 host = "db.xxxxx.supabase.co"
 port = "5432"
@@ -64,7 +64,9 @@ password = "ton_mot_de_passe"
 
 [mistral]
 api_key = "ta_cle_api_mistral"
-            """, language="toml")
+            """,
+                language="toml",
+            )
 
         st.stop()
         return False
@@ -98,10 +100,10 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
-        'Get Help': 'https://github.com/ton-repo',
-        'Report a bug': 'https://github.com/ton-repo/issues',
-        'About': f"{settings.APP_NAME} v{settings.APP_VERSION}"
-    }
+        "Get Help": "https://github.com/ton-repo",
+        "Report a bug": "https://github.com/ton-repo/issues",
+        "About": f"{settings.APP_NAME} v{settings.APP_VERSION}",
+    },
 )
 
 
@@ -109,9 +111,11 @@ st.set_page_config(
 # CSS PERSONNALISÉ
 # ===================================
 
+
 def load_custom_css():
     """Charge le CSS personnalisé pour une interface moderne"""
-    st.markdown("""
+    st.markdown(
+        """
     <style>
     /* Variables */
     :root {
@@ -166,7 +170,10 @@ def load_custom_css():
         font-weight: bold;
     }
     </style>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
+
 
 load_custom_css()
 
@@ -174,6 +181,7 @@ load_custom_css()
 # ===================================
 # INITIALISATION
 # ===================================
+
 
 def init_app():
     """Initialise l'application au démarrage"""
@@ -228,6 +236,7 @@ init_app()
 # HEADER
 # ===================================
 
+
 def render_header():
     """Affiche l'en-tête de l'application"""
     state = get_state()
@@ -235,14 +244,17 @@ def render_header():
     col1, col2, col3 = st.columns([3, 1, 1])
 
     with col1:
-        st.markdown(f"""
+        st.markdown(
+            f"""
             <div class="main-header">
                 <h1>🤖 {settings.APP_NAME}</h1>
                 <p style="color: var(--secondary-color); margin: 0;">
                     Ton copilote quotidien propulsé par l'IA
                 </p>
             </div>
-        """, unsafe_allow_html=True)
+        """,
+            unsafe_allow_html=True,
+        )
 
     with col2:
         # Status IA
@@ -261,6 +273,7 @@ def render_header():
 # ===================================
 # SIDEBAR - NAVIGATION
 # ===================================
+
 
 def render_sidebar():
     """Affiche la sidebar avec navigation"""
@@ -308,8 +321,7 @@ def render_sidebar():
             if isinstance(value, dict):
                 # Module avec sous-menus
                 is_expanded = any(
-                    state.current_module.startswith(sub_value)
-                    for sub_value in value.values()
+                    state.current_module.startswith(sub_value) for sub_value in value.values()
                 )
 
                 with st.expander(label, expanded=is_expanded):
@@ -319,11 +331,11 @@ def render_sidebar():
                         button_type = "primary" if is_active else "secondary"
 
                         if st.button(
-                                sub_label,
-                                key=f"btn_{sub_value}",
-                                use_container_width=True,
-                                type=button_type,
-                                disabled=is_active
+                            sub_label,
+                            key=f"btn_{sub_value}",
+                            use_container_width=True,
+                            type=button_type,
+                            disabled=is_active,
                         ):
                             StateManager.navigate_to(sub_value)
                             st.rerun()
@@ -333,11 +345,11 @@ def render_sidebar():
                 button_type = "primary" if is_active else "secondary"
 
                 if st.button(
-                        label,
-                        key=f"btn_{value}",
-                        use_container_width=True,
-                        type=button_type,
-                        disabled=is_active
+                    label,
+                    key=f"btn_{value}",
+                    use_container_width=True,
+                    type=button_type,
+                    disabled=is_active,
                 ):
                     StateManager.navigate_to(value)
                     st.rerun()
@@ -449,11 +461,15 @@ def load_module(module_name: str):
 # NOTIFICATIONS
 # ===================================
 
+
 def render_notifications():
     """Affiche les notifications non lues"""
     state = get_state()
 
-    if not hasattr(st.session_state, 'show_notifications') or not st.session_state.show_notifications:
+    if (
+        not hasattr(st.session_state, "show_notifications")
+        or not st.session_state.show_notifications
+    ):
         return
 
     notifs = StateManager.get_unread_notifications()
@@ -464,30 +480,27 @@ def render_notifications():
 
     with st.expander(f"🔔 Notifications ({len(notifs)})", expanded=True):
         for notif in notifs:
-            icon = {
-                "info": "ℹ️",
-                "success": "✅",
-                "warning": "⚠️",
-                "error": "❌"
-            }.get(notif["type"], "ℹ️")
+            icon = {"info": "ℹ️", "success": "✅", "warning": "⚠️", "error": "❌"}.get(
+                notif["type"], "ℹ️"
+            )
 
             col1, col2 = st.columns([4, 1])
 
             with col1:
                 st.markdown(f"{icon} **{notif['message']}**")
-                if notif.get('module'):
+                if notif.get("module"):
                     st.caption(f"Module: {notif['module']}")
-                st.caption(notif['timestamp'].strftime("%H:%M"))
+                st.caption(notif["timestamp"].strftime("%H:%M"))
 
             with col2:
-                if notif.get('action_link'):
+                if notif.get("action_link"):
                     if st.button("Aller", key=f"notif_action_{notif['id']}"):
-                        StateManager.navigate_to(notif['action_link'])
-                        StateManager.mark_notification_read(notif['id'])
+                        StateManager.navigate_to(notif["action_link"])
+                        StateManager.mark_notification_read(notif["id"])
                         st.rerun()
 
                 if st.button("✓", key=f"notif_read_{notif['id']}"):
-                    StateManager.mark_notification_read(notif['id'])
+                    StateManager.mark_notification_read(notif["id"])
                     st.rerun()
 
             st.markdown("---")
@@ -501,6 +514,7 @@ def render_notifications():
 # ===================================
 # FOOTER
 # ===================================
+
 
 def render_footer():
     """Affiche le footer"""
@@ -519,7 +533,8 @@ def render_footer():
     with col3:
         if st.button("ℹ️ À propos", key="about"):
             with st.expander("À propos", expanded=True):
-                st.markdown(f"""
+                st.markdown(
+                    f"""
                 ### {settings.APP_NAME}
                 
                 **Version:** {settings.APP_VERSION}
@@ -531,12 +546,14 @@ def render_footer():
                 - Hosting: Streamlit Cloud
                 
                 **Développé avec ❤️**
-                """)
+                """
+                )
 
 
 # ===================================
 # PAGE PRINCIPALE
 # ===================================
+
 
 def main():
     """Fonction principale de l'application"""

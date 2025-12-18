@@ -11,5 +11,5 @@ __all__ = [
     "EMPLACEMENTS",
     "create_inventaire_ai_service",
     "InventaireExporter",
-    "InventaireImporter"
+    "InventaireImporter",
 ]

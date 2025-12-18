@@ -10,20 +10,35 @@ from datetime import datetime
 
 from src.core.state_manager import StateManager, get_state, navigate
 from src.ui.components import (
-    render_card, render_search_bar, render_filter_panel,
-    render_stat_row, render_badge, render_tags, render_empty_state,
-    render_pagination, render_confirmation_dialog, render_toast
+    render_card,
+    render_search_bar,
+    render_filter_panel,
+    render_stat_row,
+    render_badge,
+    render_tags,
+    render_empty_state,
+    render_pagination,
+    render_confirmation_dialog,
+    render_toast,
 )
 from src.ui.recette_components import (
-    render_display_mode_toggle, render_recipe_card_grid,
-    render_ingredients_form, render_etapes_form, render_recipe_preview
+    render_display_mode_toggle,
+    render_recipe_card_grid,
+    render_ingredients_form,
+    render_etapes_form,
+    render_recipe_preview,
 )
 from src.services.recette_service import recette_service
 from src.services.recette_edition_service import recette_edition_service
 from src.services.recette_version_service import create_recette_version_service
 from src.services.ai_recette_service import ai_recette_service
 from src.services.import_export import render_import_from_web_ui
-from src.services.import_export import RecetteExporter, RecetteImporter, render_export_ui, render_import_ui
+from src.services.import_export import (
+    RecetteExporter,
+    RecetteImporter,
+    render_export_ui,
+    render_import_ui,
+)
 from src.core.validators import RecetteInput, validate_model
 from src.core.ai_cache import RateLimiter, render_cache_stats
 from src.core.models import TypeVersionRecetteEnum, SaisonEnum, TypeRepasEnum
@@ -33,39 +48,39 @@ from src.core.models import TypeVersionRecetteEnum, SaisonEnum, TypeRepasEnum
 # HELPERS - AFFICHAGE
 # ===================================
 
+
 def render_recipe_card_modern(recette: Dict, key: str):
     """Carte recette moderne avec composants réutilisables"""
 
     metadata = [
         f"⏱️ {recette['temps_total']}min",
         f"🍽️ {recette['portions']} pers.",
-        f"{'😊' if recette['difficulte'] == 'facile' else '😐' if recette['difficulte'] == 'moyen' else '😰'} {recette['difficulte'].capitalize()}"
+        f"{'😊' if recette['difficulte'] == 'facile' else '😐' if recette['difficulte'] == 'moyen' else '😰'} {recette['difficulte'].capitalize()}",
     ]
 
     tags = []
-    if recette.get('est_rapide'):
+    if recette.get("est_rapide"):
         tags.append("⚡ Rapide")
-    if recette.get('est_equilibre'):
+    if recette.get("est_equilibre"):
         tags.append("🥗 Équilibré")
-    if recette.get('compatible_bebe'):
+    if recette.get("compatible_bebe"):
         tags.append("👶 Bébé")
-    if recette.get('compatible_batch'):
+    if recette.get("compatible_batch"):
         tags.append("🍳 Batch")
-    if recette.get('genere_par_ia'):
+    if recette.get("genere_par_ia"):
         tags.append(f"🤖 IA ({recette.get('score_ia', 0):.0f}%)")
 
     def view_details():
-        StateManager.set_viewing_recipe(recette['id'])
+        StateManager.set_viewing_recipe(recette["id"])
         st.rerun()
 
     def edit_recipe():
-        StateManager.set_editing_recipe(recette['id'])
+        StateManager.set_editing_recipe(recette["id"])
         st.rerun()
 
     def duplicate_recipe():
         new_id = recette_edition_service.duplicate_recette(
-            recette['id'],
-            nouveau_nom=f"{recette['nom']} (copie)"
+            recette["id"], nouveau_nom=f"{recette['nom']} (copie)"
         )
         if new_id:
             render_toast(f"✅ Recette dupliquée", "success")
@@ -77,7 +92,7 @@ def render_recipe_card_modern(recette: Dict, key: str):
             st.session_state[confirm_key] = True
             st.rerun()
         else:
-            recette_service.delete(recette['id'])
+            recette_service.delete(recette["id"])
             del st.session_state[confirm_key]
             render_toast("Recette supprimée", "success")
             st.rerun()
@@ -87,7 +102,7 @@ def render_recipe_card_modern(recette: Dict, key: str):
         ("👁️ Détails", view_details),
         ("✏️ Éditer", edit_recipe),
         ("📋 Dupliquer", duplicate_recipe),
-        ("🗑️ Supprimer", delete_recipe)
+        ("🗑️ Supprimer", delete_recipe),
     ]
 
     # Container unique par recette
@@ -96,7 +111,7 @@ def render_recipe_card_modern(recette: Dict, key: str):
 
         with col1:
             st.markdown(f"### 🍽️ {recette['nom']}")
-            desc = recette.get('description', '')
+            desc = recette.get("description", "")
             if len(desc) > 150:
                 desc = desc[:150] + "..."
             if desc:
@@ -106,8 +121,8 @@ def render_recipe_card_modern(recette: Dict, key: str):
                 st.caption(" • ".join(tags))
 
         with col2:
-            if recette.get('url_image'):
-                st.image(recette['url_image'], use_container_width=True)
+            if recette.get("url_image"):
+                st.image(recette["url_image"], use_container_width=True)
 
         st.caption(" • ".join(metadata))
 
@@ -116,7 +131,9 @@ def render_recipe_card_modern(recette: Dict, key: str):
 
         with col_act1:
             # ✅ Clé unique : recipe_view_{id}
-            if st.button("👁️ Détails", key=f"recipe_view_{recette['id']}", use_container_width=True):
+            if st.button(
+                "👁️ Détails", key=f"recipe_view_{recette['id']}", use_container_width=True
+            ):
                 view_details()
 
         with col_act2:
@@ -126,21 +143,31 @@ def render_recipe_card_modern(recette: Dict, key: str):
 
         with col_act3:
             # ✅ Clé unique : recipe_dup_{id}
-            if st.button("📋 Dupliquer", key=f"recipe_dup_{recette['id']}", use_container_width=True):
+            if st.button(
+                "📋 Dupliquer", key=f"recipe_dup_{recette['id']}", use_container_width=True
+            ):
                 duplicate_recipe()
 
         with col_act4:
             # ✅ Clé unique : recipe_del_{id}
             confirm_key = f"confirm_delete_{recette['id']}"
             if confirm_key in st.session_state and st.session_state[confirm_key]:
-                if st.button("⚠️ Confirmer ?", key=f"recipe_del_confirm_{recette['id']}", type="primary", use_container_width=True):
+                if st.button(
+                    "⚠️ Confirmer ?",
+                    key=f"recipe_del_confirm_{recette['id']}",
+                    type="primary",
+                    use_container_width=True,
+                ):
                     delete_recipe()
             else:
-                if st.button("🗑️ Supprimer", key=f"recipe_del_{recette['id']}", use_container_width=True):
+                if st.button(
+                    "🗑️ Supprimer", key=f"recipe_del_{recette['id']}", use_container_width=True
+                ):
                     st.session_state[confirm_key] = True
                     st.rerun()
 
     st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
+
 
 def render_recipe_details_modern(recette_id: int):
     """Affiche les détails complets d'une recette"""
@@ -181,19 +208,16 @@ def render_recipe_details_modern(recette_id: int):
         {"label": "Préparation", "value": f"{recette.temps_preparation}min"},
         {"label": "Cuisson", "value": f"{recette.temps_cuisson}min"},
         {"label": "Portions", "value": str(recette.portions)},
-        {"label": "Difficulté", "value": recette.difficulte.capitalize()}
+        {"label": "Difficulté", "value": recette.difficulte.capitalize()},
     ]
 
     render_stat_row(stats, cols=4)
 
     st.markdown("---")
 
-    tab1, tab2, tab3, tab4 = st.tabs([
-        "📋 Recette Standard",
-        "👶 Version Bébé",
-        "🍳 Version Batch",
-        "🤖 Générer Versions IA"
-    ])
+    tab1, tab2, tab3, tab4 = st.tabs(
+        ["📋 Recette Standard", "👶 Version Bébé", "🍳 Version Batch", "🤖 Générer Versions IA"]
+    )
 
     with tab1:
         st.markdown("### 🥕 Ingrédients")
@@ -212,8 +236,7 @@ def render_recipe_details_modern(recette_id: int):
 
     with tab2:
         version_bebe = next(
-            (v for v in recette.versions if v.type_version == TypeVersionRecetteEnum.BEBE),
-            None
+            (v for v in recette.versions if v.type_version == TypeVersionRecetteEnum.BEBE), None
         )
 
         if version_bebe:
@@ -229,13 +252,13 @@ def render_recipe_details_modern(recette_id: int):
                 message="Aucune version bébé disponible",
                 icon="👶",
                 action_label="Générer avec l'IA →",
-                action_callback=lambda: st.session_state.update({"active_version_tab": 3})
+                action_callback=lambda: st.session_state.update({"active_version_tab": 3}),
             )
 
     with tab3:
         version_batch = next(
             (v for v in recette.versions if v.type_version == TypeVersionRecetteEnum.BATCH_COOKING),
-            None
+            None,
         )
 
         if version_batch:
@@ -251,14 +274,14 @@ def render_recipe_details_modern(recette_id: int):
                 st.metric(
                     "Temps optimisé",
                     f"{version_batch.temps_optimise_batch}min",
-                    delta=f"-{temps_normal - version_batch.temps_optimise_batch}min"
+                    delta=f"-{temps_normal - version_batch.temps_optimise_batch}min",
                 )
         else:
             render_empty_state(
                 message="Aucune optimisation batch disponible",
                 icon="🍳",
                 action_label="Générer avec l'IA →",
-                action_callback=lambda: st.session_state.update({"active_version_tab": 3})
+                action_callback=lambda: st.session_state.update({"active_version_tab": 3}),
             )
 
     with tab4:
@@ -277,8 +300,7 @@ def render_recipe_details_modern(recette_id: int):
     with col_action2:
         if st.button("📋 Dupliquer", use_container_width=True):
             new_id = recette_edition_service.duplicate_recette(
-                recette_id,
-                nouveau_nom=f"{recette.nom} (copie)"
+                recette_id, nouveau_nom=f"{recette.nom} (copie)"
             )
             if new_id:
                 render_toast("✅ Recette dupliquée", "success")
@@ -290,7 +312,7 @@ def render_recipe_details_modern(recette_id: int):
             result = render_confirmation_dialog(
                 title="Confirmer la suppression",
                 message=f"Supprimer définitivement '{recette.nom}' ?",
-                key=f"delete_confirm_{recette_id}"
+                key=f"delete_confirm_{recette_id}",
             )
 
             if result:
@@ -322,7 +344,9 @@ def render_generate_versions_ui(recette_id: int):
         st.markdown("#### 👶 Version Bébé")
         st.caption("Adapte la recette pour les 6-18 mois")
 
-        if st.button("✨ Générer Version Bébé", use_container_width=True, type="primary", key="gen_bebe"):
+        if st.button(
+            "✨ Générer Version Bébé", use_container_width=True, type="primary", key="gen_bebe"
+        ):
             with st.spinner("🤖 L'IA adapte pour bébé..."):
                 try:
                     loop = asyncio.new_event_loop()
@@ -334,9 +358,7 @@ def render_generate_versions_ui(recette_id: int):
 
                     if version:
                         version_service.sauvegarder_version(
-                            recette_id,
-                            version,
-                            TypeVersionRecetteEnum.BEBE.value
+                            recette_id, version, TypeVersionRecetteEnum.BEBE.value
                         )
 
                         render_toast("✅ Version bébé générée !", "success")
@@ -352,7 +374,9 @@ def render_generate_versions_ui(recette_id: int):
         st.markdown("#### 🍳 Version Batch")
         st.caption("Optimise pour plusieurs portions")
 
-        if st.button("✨ Générer Version Batch", use_container_width=True, type="primary", key="gen_batch"):
+        if st.button(
+            "✨ Générer Version Batch", use_container_width=True, type="primary", key="gen_batch"
+        ):
             with st.spinner("🤖 L'IA optimise..."):
                 try:
                     loop = asyncio.new_event_loop()
@@ -364,9 +388,7 @@ def render_generate_versions_ui(recette_id: int):
 
                     if version:
                         version_service.sauvegarder_version(
-                            recette_id,
-                            version,
-                            TypeVersionRecetteEnum.BATCH_COOKING.value
+                            recette_id, version, TypeVersionRecetteEnum.BATCH_COOKING.value
                         )
 
                         render_toast("✅ Version batch générée !", "success")
@@ -403,12 +425,21 @@ def render_recipe_edit_form(recette_id: int):
 
         with col2:
             portions = st.number_input("Portions", 1, 20, recette.portions)
-            difficulte = st.selectbox("Difficulté", ["facile", "moyen", "difficile"],
-                                      index=["facile", "moyen", "difficile"].index(recette.difficulte))
-            type_repas = st.selectbox("Type repas", [t.value for t in TypeRepasEnum],
-                                      index=[t.value for t in TypeRepasEnum].index(recette.type_repas))
-            saison = st.selectbox("Saison", [s.value for s in SaisonEnum],
-                                  index=[s.value for s in SaisonEnum].index(recette.saison))
+            difficulte = st.selectbox(
+                "Difficulté",
+                ["facile", "moyen", "difficile"],
+                index=["facile", "moyen", "difficile"].index(recette.difficulte),
+            )
+            type_repas = st.selectbox(
+                "Type repas",
+                [t.value for t in TypeRepasEnum],
+                index=[t.value for t in TypeRepasEnum].index(recette.type_repas),
+            )
+            saison = st.selectbox(
+                "Saison",
+                [s.value for s in SaisonEnum],
+                index=[s.value for s in SaisonEnum].index(recette.saison),
+            )
 
         st.markdown("---")
 
@@ -420,7 +451,9 @@ def render_recipe_edit_form(recette_id: int):
             compatible_batch = st.checkbox("🍳 Compatible batch", value=recette.compatible_batch)
             congelable = st.checkbox("❄️ Congelable", value=recette.congelable)
 
-        submitted = st.form_submit_button("💾 Enregistrer les modifications", type="primary", use_container_width=True)
+        submitted = st.form_submit_button(
+            "💾 Enregistrer les modifications", type="primary", use_container_width=True
+        )
 
         if submitted:
             recette_data = {
@@ -436,16 +469,25 @@ def render_recipe_edit_form(recette_id: int):
                 "compatible_bebe": compatible_bebe,
                 "compatible_batch": compatible_batch,
                 "congelable": congelable,
-                "est_rapide": (temps_prep + temps_cuisson) < 30
+                "est_rapide": (temps_prep + temps_cuisson) < 30,
             }
 
             success = recette_edition_service.update_recette_complete(
                 recette_id,
                 recette_data,
-                [{"nom": ing.ingredient.nom, "quantite": ing.quantite, "unite": ing.unite, "optionnel": ing.optionnel}
-                 for ing in recette.ingredients],
-                [{"ordre": e.ordre, "description": e.description, "duree": e.duree}
-                 for e in recette.etapes]
+                [
+                    {
+                        "nom": ing.ingredient.nom,
+                        "quantite": ing.quantite,
+                        "unite": ing.unite,
+                        "optionnel": ing.optionnel,
+                    }
+                    for ing in recette.ingredients
+                ],
+                [
+                    {"ordre": e.ordre, "description": e.description, "duree": e.duree}
+                    for e in recette.etapes
+                ],
             )
 
             if success:
@@ -463,9 +505,11 @@ def render_recipe_edit_form(recette_id: int):
         st.info("💡 Fonctionnalité d'édition inline à venir")
         # PARTIE 2/2 - À COLLER APRÈS LA PARTIE 1
 
+
 # ===================================
 # MODULE PRINCIPAL
 # ===================================
+
 
 def app():
     """Module Recettes v3 - Point d'entrée"""
@@ -486,12 +530,9 @@ def app():
     with st.sidebar:
         render_cache_stats(key_prefix="recettes")
 
-    tab1, tab2, tab3, tab4 = st.tabs([
-        "📚 Mes Recettes",
-        "✨ Générer avec l'IA",
-        "➕ Ajouter Manuellement",
-        "📤 Import / Export"
-    ])
+    tab1, tab2, tab3, tab4 = st.tabs(
+        ["📚 Mes Recettes", "✨ Générer avec l'IA", "➕ Ajouter Manuellement", "📤 Import / Export"]
+    )
 
     with tab1:
         st.subheader("Ma collection de recettes")
@@ -500,15 +541,36 @@ def app():
         search = render_search_bar(placeholder="Rechercher une recette...", key="recipe_search")
 
         filters_config = {
-            "saison": {"type": "select", "label": "Saison", "options": ["Toutes"] + [s.value for s in SaisonEnum], "default": 0},
-            "type_repas": {"type": "select", "label": "Type de repas", "options": ["Tous"] + [t.value for t in TypeRepasEnum], "default": 0},
-            "difficulte": {"type": "select", "label": "Difficulté", "options": ["Toutes", "facile", "moyen", "difficile"], "default": 0},
-            "temps_max": {"type": "slider", "label": "Temps max (min)", "min": 0, "max": 180, "default": 180},
+            "saison": {
+                "type": "select",
+                "label": "Saison",
+                "options": ["Toutes"] + [s.value for s in SaisonEnum],
+                "default": 0,
+            },
+            "type_repas": {
+                "type": "select",
+                "label": "Type de repas",
+                "options": ["Tous"] + [t.value for t in TypeRepasEnum],
+                "default": 0,
+            },
+            "difficulte": {
+                "type": "select",
+                "label": "Difficulté",
+                "options": ["Toutes", "facile", "moyen", "difficile"],
+                "default": 0,
+            },
+            "temps_max": {
+                "type": "slider",
+                "label": "Temps max (min)",
+                "min": 0,
+                "max": 180,
+                "default": 180,
+            },
             "rapide": {"type": "checkbox", "label": "⚡ Rapides uniquement", "default": False},
             "equilibre": {"type": "checkbox", "label": "🥗 Équilibrées", "default": False},
             "bebe": {"type": "checkbox", "label": "👶 Compatible bébé", "default": False},
             "batch": {"type": "checkbox", "label": "🍳 Compatible batch", "default": False},
-            "ia": {"type": "checkbox", "label": "🤖 Générées par IA", "default": False}
+            "ia": {"type": "checkbox", "label": "🤖 Générées par IA", "default": False},
         }
 
         filters = render_filter_panel(filters_config, key_prefix="recipe")
@@ -526,18 +588,23 @@ def app():
             compatible_bebe=filters["bebe"] if filters["bebe"] else None,
             compatible_batch=filters["batch"] if filters["batch"] else None,
             ia_only=filters["ia"] if filters["ia"] else None,
-            limit=100
+            limit=100,
         )
 
         if not recettes:
-            render_empty_state(message="Aucune recette trouvée", icon="🔍", action_label="➕ Ajouter une recette", action_callback=lambda: st.session_state.update({"active_tab": 2}))
+            render_empty_state(
+                message="Aucune recette trouvée",
+                icon="🔍",
+                action_label="➕ Ajouter une recette",
+                action_callback=lambda: st.session_state.update({"active_tab": 2}),
+            )
         else:
             stats = recette_service.get_stats()
             stats_data = [
                 {"label": "Total", "value": len(recettes)},
                 {"label": "Rapides", "value": sum(1 for r in recettes if r.est_rapide)},
                 {"label": "IA", "value": sum(1 for r in recettes if r.genere_par_ia)},
-                {"label": "Temps moyen", "value": f"{int(stats['temps_moyen'])}min"}
+                {"label": "Temps moyen", "value": f"{int(stats['temps_moyen'])}min"},
             ]
             render_stat_row(stats_data, cols=4)
 
@@ -546,7 +613,7 @@ def app():
             page, per_page = render_pagination(
                 total_items=len(recettes),
                 items_per_page=20 if display_mode == "liste" else 12,
-                key="recipes_pagination"
+                key="recipes_pagination",
             )
 
             start_idx = (page - 1) * per_page
@@ -558,16 +625,28 @@ def app():
 
                 for row_start in range(0, len(recettes_page), cols_per_row):
                     cols = st.columns(cols_per_row)
-                    for idx, recette in enumerate(recettes_page[row_start:row_start + cols_per_row]):
+                    for idx, recette in enumerate(
+                        recettes_page[row_start : row_start + cols_per_row]
+                    ):
                         with cols[idx]:
                             recette_dict = {
-                                "id": recette.id, "nom": recette.nom,
+                                "id": recette.id,
+                                "nom": recette.nom,
                                 "temps_total": recette.temps_preparation + recette.temps_cuisson,
-                                "difficulte": recette.difficulte, "est_rapide": recette.est_rapide,
-                                "compatible_bebe": recette.compatible_bebe, "genere_par_ia": recette.genere_par_ia,
-                                "url_image": recette.url_image
+                                "difficulte": recette.difficulte,
+                                "est_rapide": recette.est_rapide,
+                                "compatible_bebe": recette.compatible_bebe,
+                                "genere_par_ia": recette.genere_par_ia,
+                                "url_image": recette.url_image,
                             }
-                            render_recipe_card_grid(recette_dict, f"grid_recipe_{recette.id}", lambda r_id=recette.id: (StateManager.set_viewing_recipe(r_id), st.rerun()))
+                            render_recipe_card_grid(
+                                recette_dict,
+                                f"grid_recipe_{recette.id}",
+                                lambda r_id=recette.id: (
+                                    StateManager.set_viewing_recipe(r_id),
+                                    st.rerun(),
+                                ),
+                            )
 
             else:  # Mode liste
                 for recette in recettes[start_idx:end_idx]:
@@ -584,7 +663,7 @@ def app():
                         "compatible_batch": recette.compatible_batch,
                         "genere_par_ia": recette.genere_par_ia,
                         "score_ia": recette.score_ia,
-                        "url_image": recette.url_image
+                        "url_image": recette.url_image,
                     }
                     # ✅ Clé UNIQUE : utiliser l'ID de la recette
                     render_recipe_card_modern(recette_dict, f"list_recipe_{recette.id}")
@@ -617,27 +696,42 @@ def app():
                 is_balanced = st.checkbox("🥗 Équilibré", value=True)
                 is_baby_friendly = st.checkbox("👶 Compatible bébé")
                 is_batch_friendly = st.checkbox("🍳 Compatible batch cooking")
-                ingredients_input = st.text_input("Ingrédients à utiliser (optionnel)", placeholder="tomate, basilic, mozzarella")
+                ingredients_input = st.text_input(
+                    "Ingrédients à utiliser (optionnel)", placeholder="tomate, basilic, mozzarella"
+                )
 
-            submitted = st.form_submit_button("✨ Générer les recettes", type="primary", use_container_width=True)
+            submitted = st.form_submit_button(
+                "✨ Générer les recettes", type="primary", use_container_width=True
+            )
 
         if submitted:
             with st.spinner("🤖 L'IA génère les recettes..."):
                 try:
                     filters_ai = {
-                        "saison": saison, "type_repas": type_repas, "is_quick": is_quick, "is_balanced": is_balanced,
-                        "ingredients": [i.strip() for i in ingredients_input.split(",")] if ingredients_input else None
+                        "saison": saison,
+                        "type_repas": type_repas,
+                        "is_quick": is_quick,
+                        "is_balanced": is_balanced,
+                        "ingredients": [i.strip() for i in ingredients_input.split(",")]
+                        if ingredients_input
+                        else None,
                     }
 
                     loop = asyncio.new_event_loop()
                     asyncio.set_event_loop(loop)
 
                     recipes = loop.run_until_complete(
-                        ai_recette_service.generate_recipes(count=count, filters=filters_ai, version_type=TypeVersionRecetteEnum.STANDARD.value)
+                        ai_recette_service.generate_recipes(
+                            count=count,
+                            filters=filters_ai,
+                            version_type=TypeVersionRecetteEnum.STANDARD.value,
+                        )
                     )
 
                     for recipe in recipes:
-                        recipe["url_image"] = ai_recette_service.generate_image_url(recipe["nom"], recipe["description"])
+                        recipe["url_image"] = ai_recette_service.generate_image_url(
+                            recipe["nom"], recipe["description"]
+                        )
 
                     StateManager.save_generated_recipes(recipes)
                     render_toast(f"✅ {len(recipes)} recette(s) générée(s) !", "success")
@@ -665,7 +759,7 @@ def app():
                         metadata = [
                             f"⏱️ {recipe['temps_preparation'] + recipe['temps_cuisson']}min",
                             f"🍽️ {recipe['portions']} portions",
-                            f"{'😊' if recipe['difficulte'] == 'facile' else '😐'} {recipe['difficulte'].capitalize()}"
+                            f"{'😊' if recipe['difficulte'] == 'facile' else '😐'} {recipe['difficulte'].capitalize()}",
                         ]
                         st.caption(" • ".join(metadata))
 
@@ -681,17 +775,25 @@ def app():
                         selected_recipes.append(recipe)
 
             if selected_recipes:
-                if st.button(f"➕ Ajouter {len(selected_recipes)} recette(s) sélectionnée(s)", type="primary", use_container_width=True):
+                if st.button(
+                    f"➕ Ajouter {len(selected_recipes)} recette(s) sélectionnée(s)",
+                    type="primary",
+                    use_container_width=True,
+                ):
                     for recipe in selected_recipes:
-                        recette_data = {k: v for k, v in recipe.items() if k not in ['ingredients', 'etapes', 'versions']}
-                        recette_data['genere_par_ia'] = True
-                        recette_data['score_ia'] = 95.0
+                        recette_data = {
+                            k: v
+                            for k, v in recipe.items()
+                            if k not in ["ingredients", "etapes", "versions"]
+                        }
+                        recette_data["genere_par_ia"] = True
+                        recette_data["score_ia"] = 95.0
 
                         recette_service.create_full(
                             recette_data=recette_data,
-                            ingredients_data=recipe['ingredients'],
-                            etapes_data=recipe['etapes'],
-                            versions_data=recipe.get('versions')
+                            ingredients_data=recipe["ingredients"],
+                            etapes_data=recipe["etapes"],
+                            versions_data=recipe.get("versions"),
                         )
 
                     StateManager.clear_generated_recipes()
@@ -735,17 +837,21 @@ def app():
                     st.error("Ajoute au moins une étape")
                 else:
                     recette_data = {
-                        "nom": nom, "description": description, "temps_preparation": temps_prep,
-                        "temps_cuisson": temps_cuisson, "portions": portions, "difficulte": difficulte,
-                        "type_repas": type_repas, "saison": saison,
+                        "nom": nom,
+                        "description": description,
+                        "temps_preparation": temps_prep,
+                        "temps_cuisson": temps_cuisson,
+                        "portions": portions,
+                        "difficulte": difficulte,
+                        "type_repas": type_repas,
+                        "saison": saison,
                         "est_rapide": (temps_prep + temps_cuisson) < 30,
-                        "est_equilibre": True, "genere_par_ia": False
+                        "est_equilibre": True,
+                        "genere_par_ia": False,
                     }
 
                     recette_id = recette_service.create_full(
-                        recette_data=recette_data,
-                        ingredients_data=ingredients,
-                        etapes_data=etapes
+                        recette_data=recette_data, ingredients_data=ingredients, etapes_data=etapes
                     )
 
                     if "manual_ing_list" in st.session_state:
@@ -760,12 +866,9 @@ def app():
     with tab4:
         st.subheader("📤 Import / Export de Recettes")
 
-        tab_exp, tab_imp_file, tab_imp_web = st.tabs([
-            "📤 Exporter",
-            "📥 Importer Fichier",
-            "🌐 Importer depuis Web"  # ✅ NOUVEAU
-        ])
-
+        tab_exp, tab_imp_file, tab_imp_web = st.tabs(
+            ["📤 Exporter", "📥 Importer Fichier", "🌐 Importer depuis Web"]  # ✅ NOUVEAU
+        )
 
         with tab_exp:
             st.markdown("### Exporter tes recettes")
@@ -783,7 +886,7 @@ def app():
                     selected_ids = st.multiselect(
                         "Sélectionner les recettes",
                         options=[r.id for r in recettes_all],
-                        format_func=lambda x: next(r.nom for r in recettes_all if r.id == x)
+                        format_func=lambda x: next(r.nom for r in recettes_all if r.id == x),
                     )
                 else:
                     selected_ids = [r.id for r in recettes_all]

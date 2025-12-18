@@ -21,8 +21,10 @@ logger = logging.getLogger(__name__)
 # SCHÉMAS PYDANTIC
 # ===================================
 
+
 class VersionBebeGeneree(BaseModel):
     """Version bébé générée par IA"""
+
     instructions_modifiees: str = Field(..., min_length=10)
     notes_bebe: str = Field(..., min_length=10)
     ingredients_modifies: Optional[Dict] = None
@@ -31,6 +33,7 @@ class VersionBebeGeneree(BaseModel):
 
 class VersionBatchGeneree(BaseModel):
     """Version batch cooking générée"""
+
     etapes_paralleles: list[str] = Field(..., min_length=1)
     temps_optimise: int = Field(..., gt=0)
     conseils_batch: str = Field(..., min_length=10)
@@ -40,6 +43,7 @@ class VersionBatchGeneree(BaseModel):
 # ===================================
 # SERVICE
 # ===================================
+
 
 class RecetteVersionService:
     """Service de génération de versions alternatives"""
@@ -51,10 +55,7 @@ class RecetteVersionService:
     # VERSION BÉBÉ
     # ===================================
 
-    async def generer_version_bebe(
-            self,
-            recette_id: int
-    ) -> Optional[VersionBebeGeneree]:
+    async def generer_version_bebe(self, recette_id: int) -> Optional[VersionBebeGeneree]:
         """
         Génère automatiquement une version bébé
 
@@ -80,9 +81,7 @@ class RecetteVersionService:
 
             # Appel IA
             response = await self._call_with_retry(
-                prompt,
-                "Nutritionniste pédiatrique expert. Réponds UNIQUEMENT en JSON.",
-                1000
+                prompt, "Nutritionniste pédiatrique expert. Réponds UNIQUEMENT en JSON.", 1000
             )
 
             # Parser
@@ -100,15 +99,16 @@ class RecetteVersionService:
     def _build_prompt_version_bebe(self, recette: Recette) -> str:
         """Construit le prompt pour version bébé"""
 
-        ingredients_str = "\n".join([
-            f"- {ing.quantite} {ing.unite} {ing.ingredient.nom}"
-            for ing in recette.ingredients
-        ])
+        ingredients_str = "\n".join(
+            [f"- {ing.quantite} {ing.unite} {ing.ingredient.nom}" for ing in recette.ingredients]
+        )
 
-        etapes_str = "\n".join([
-            f"{etape.ordre}. {etape.description}"
-            for etape in sorted(recette.etapes, key=lambda x: x.ordre)
-        ])
+        etapes_str = "\n".join(
+            [
+                f"{etape.ordre}. {etape.description}"
+                for etape in sorted(recette.etapes, key=lambda x: x.ordre)
+            ]
+        )
 
         return f"""Adapte cette recette pour un BÉBÉ de 6-18 mois.
 
@@ -147,10 +147,7 @@ UNIQUEMENT JSON !"""
     # VERSION BATCH COOKING
     # ===================================
 
-    async def generer_version_batch(
-            self,
-            recette_id: int
-    ) -> Optional[VersionBatchGeneree]:
+    async def generer_version_batch(self, recette_id: int) -> Optional[VersionBatchGeneree]:
         """
         Génère automatiquement une version batch cooking
 
@@ -172,16 +169,16 @@ UNIQUEMENT JSON !"""
             prompt = self._build_prompt_version_batch(recette)
 
             response = await self._call_with_retry(
-                prompt,
-                "Expert batch cooking. JSON uniquement.",
-                1000
+                prompt, "Expert batch cooking. JSON uniquement.", 1000
             )
 
             try:
                 data = self._parse_json(response)
                 version = VersionBatchGeneree(**data)
 
-                logger.info(f"✅ Version batch générée (gain: {recette.temps_preparation + recette.temps_cuisson - version.temps_optimise}min)")
+                logger.info(
+                    f"✅ Version batch générée (gain: {recette.temps_preparation + recette.temps_cuisson - version.temps_optimise}min)"
+                )
                 return version
 
             except Exception as e:
@@ -191,15 +188,18 @@ UNIQUEMENT JSON !"""
     def _build_prompt_version_batch(self, recette: Recette) -> str:
         """Construit le prompt pour version batch"""
 
-        ingredients_str = "\n".join([
-            f"- {ing.quantite} {ing.unite} {ing.ingredient.nom}"
-            for ing in recette.ingredients
-        ])
+        ingredients_str = "\n".join(
+            [f"- {ing.quantite} {ing.unite} {ing.ingredient.nom}" for ing in recette.ingredients]
+        )
 
-        etapes_str = "\n".join([
-            f"{etape.ordre}. {etape.description} ({etape.duree}min)" if etape.duree else f"{etape.ordre}. {etape.description}"
-            for etape in sorted(recette.etapes, key=lambda x: x.ordre)
-        ])
+        etapes_str = "\n".join(
+            [
+                f"{etape.ordre}. {etape.description} ({etape.duree}min)"
+                if etape.duree
+                else f"{etape.ordre}. {etape.description}"
+                for etape in sorted(recette.etapes, key=lambda x: x.ordre)
+            ]
+        )
 
         temps_total = recette.temps_preparation + recette.temps_cuisson
 
@@ -238,10 +238,10 @@ JSON uniquement !"""
     # ===================================
 
     def sauvegarder_version(
-            self,
-            recette_id: int,
-            version_data: VersionBebeGeneree | VersionBatchGeneree,
-            type_version: str
+        self,
+        recette_id: int,
+        version_data: VersionBebeGeneree | VersionBatchGeneree,
+        type_version: str,
     ) -> bool:
         """
         Sauvegarde une version générée en base
@@ -253,7 +253,7 @@ JSON uniquement !"""
             # Supprimer ancienne version si existe
             db.query(VersionRecette).filter(
                 VersionRecette.recette_base_id == recette_id,
-                VersionRecette.type_version == type_version
+                VersionRecette.type_version == type_version,
             ).delete()
 
             # Créer nouvelle version
@@ -263,14 +263,14 @@ JSON uniquement !"""
                     type_version=TypeVersionRecetteEnum.BEBE.value,
                     instructions_modifiees=version_data.instructions_modifiees,
                     notes_bebe=version_data.notes_bebe,
-                    ingredients_modifies=version_data.ingredients_modifies
+                    ingredients_modifies=version_data.ingredients_modifies,
                 )
             else:  # VersionBatchGeneree
                 version = VersionRecette(
                     recette_base_id=recette_id,
                     type_version=TypeVersionRecetteEnum.BATCH_COOKING.value,
                     etapes_paralleles_batch=version_data.etapes_paralleles,
-                    temps_optimise_batch=version_data.temps_optimise
+                    temps_optimise_batch=version_data.temps_optimise,
                 )
 
             db.add(version)
@@ -284,11 +284,7 @@ JSON uniquement !"""
     # ===================================
 
     async def _call_with_retry(
-            self,
-            prompt: str,
-            system_prompt: str,
-            max_tokens: int,
-            max_retries: int = 3
+        self, prompt: str, system_prompt: str, max_tokens: int, max_retries: int = 3
     ) -> str:
         """Appel IA avec retry"""
         for attempt in range(max_retries):
@@ -297,14 +293,14 @@ JSON uniquement !"""
                     prompt=prompt,
                     system_prompt=system_prompt,
                     temperature=0.7,
-                    max_tokens=max_tokens
+                    max_tokens=max_tokens,
                 )
                 RateLimiter.record_call()
                 return response
             except Exception as e:
                 if attempt == max_retries - 1:
                     raise
-                await asyncio.sleep(2 ** attempt)
+                await asyncio.sleep(2**attempt)
 
     def _parse_json(self, response: str) -> Dict:
         """Parse JSON depuis réponse IA"""
@@ -323,6 +319,7 @@ JSON uniquement !"""
 # ===================================
 # FACTORY
 # ===================================
+
 
 def create_recette_version_service(agent: AgentIA) -> RecetteVersionService:
     """Factory"""

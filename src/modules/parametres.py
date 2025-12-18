@@ -18,12 +18,9 @@ def app():
     # TABS
     # ===================================
 
-    tab1, tab2, tab3, tab4 = st.tabs([
-        "🔧 Général",
-        "🤖 Intelligence Artificielle",
-        "🗄️ Base de données",
-        "ℹ️ À propos"
-    ])
+    tab1, tab2, tab3, tab4 = st.tabs(
+        ["🔧 Général", "🤖 Intelligence Artificielle", "🗄️ Base de données", "ℹ️ À propos"]
+    )
 
     # ===================================
     # TAB 1 : GÉNÉRAL
@@ -45,7 +42,9 @@ def app():
                 ville = st.text_input("Ville", value="Clermont-Ferrand")
 
             with col_p2:
-                fuseau = st.selectbox("Fuseau horaire", ["Europe/Paris", "Europe/London", "US/Eastern"])
+                fuseau = st.selectbox(
+                    "Fuseau horaire", ["Europe/Paris", "Europe/London", "US/Eastern"]
+                )
 
             if st.form_submit_button("💾 Enregistrer"):
                 st.success("Profil mis à jour")
@@ -55,22 +54,11 @@ def app():
         # Préférences d'affichage
         st.markdown("### 🎨 Affichage")
 
-        theme = st.selectbox(
-            "Thème",
-            ["Clair", "Sombre", "Auto"],
-            help="Le thème de l'application"
-        )
+        theme = st.selectbox("Thème", ["Clair", "Sombre", "Auto"], help="Le thème de l'application")
 
-        langue = st.selectbox(
-            "Langue",
-            ["Français", "English"],
-            help="Langue de l'interface"
-        )
+        langue = st.selectbox("Langue", ["Français", "English"], help="Langue de l'interface")
 
-        format_date = st.selectbox(
-            "Format de date",
-            ["DD/MM/YYYY", "MM/DD/YYYY", "YYYY-MM-DD"]
-        )
+        format_date = st.selectbox("Format de date", ["DD/MM/YYYY", "MM/DD/YYYY", "YYYY-MM-DD"])
 
         st.markdown("---")
 
@@ -139,21 +127,20 @@ def app():
         st.markdown("### ⚙️ Paramètres IA")
 
         temperature = st.slider(
-            "Température",
-            0.0, 2.0, 0.7, 0.1,
-            help="Créativité de l'IA (0 = précis, 2 = créatif)"
+            "Température", 0.0, 2.0, 0.7, 0.1, help="Créativité de l'IA (0 = précis, 2 = créatif)"
         )
 
         max_tokens = st.number_input(
-            "Tokens max par réponse",
-            100, 2000, 500, 50,
-            help="Longueur maximale des réponses"
+            "Tokens max par réponse", 100, 2000, 500, 50, help="Longueur maximale des réponses"
         )
 
         cache_ttl = st.number_input(
             "Durée cache (secondes)",
-            0, 3600, 300, 60,
-            help="Durée de mise en cache des réponses IA"
+            0,
+            3600,
+            300,
+            60,
+            help="Durée de mise en cache des réponses IA",
         )
 
         if st.button("💾 Sauvegarder paramètres IA"):
@@ -223,12 +210,14 @@ def app():
             if st.button("🧹 Nettoyer logs anciens (>90j)", use_container_width=True):
                 with st.spinner("Nettoyage..."):
                     from src.core.database import cleanup_old_logs
+
                     deleted = cleanup_old_logs(90)
                     st.success(f"✅ {deleted} logs supprimés")
 
             if st.button("📊 Optimiser la base", use_container_width=True):
                 with st.spinner("Optimisation..."):
                     from src.core.database import vacuum_database
+
                     vacuum_database()
                     st.success("✅ Base optimisée")
 
@@ -255,7 +244,8 @@ def app():
     with tab4:
         st.subheader("À propos")
 
-        st.markdown(f"""
+        st.markdown(
+            f"""
         ## 🤖 {settings.APP_NAME}
         
         **Version :** {settings.APP_VERSION}
@@ -294,7 +284,8 @@ def app():
         ---
         
         💚 **Merci d'utiliser Assistant MaTanne !**
-        """)
+        """
+        )
 
         st.markdown("---")
 

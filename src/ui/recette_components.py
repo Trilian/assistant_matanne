@@ -11,6 +11,7 @@ from typing import List, Dict, Optional, Callable
 # MODE D'AFFICHAGE
 # ===================================
 
+
 def render_display_mode_toggle(key: str = "display_mode") -> str:
     """
     Toggle entre mode Liste et Grille
@@ -37,6 +38,7 @@ def render_display_mode_toggle(key: str = "display_mode") -> str:
 # CARTE RECETTE GRILLE
 # ===================================
 
+
 def render_recipe_card_grid(recette: Dict, key: str, on_click: Callable):
     """
     Carte recette pour mode grille (compact)
@@ -48,28 +50,31 @@ def render_recipe_card_grid(recette: Dict, key: str, on_click: Callable):
     """
     with st.container():
         # Image
-        if recette.get('url_image'):
-            st.image(recette['url_image'], use_container_width=True)
+        if recette.get("url_image"):
+            st.image(recette["url_image"], use_container_width=True)
         else:
-            st.markdown("""
+            st.markdown(
+                """
             <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                         height: 150px; border-radius: 8px; display: flex;
                         align-items: center; justify-content: center; color: white;
                         font-size: 3rem;'>
                 🍽️
             </div>
-            """, unsafe_allow_html=True)
+            """,
+                unsafe_allow_html=True,
+            )
 
         # Nom
         st.markdown(f"**{recette['nom']}**")
 
         # Badges compacts
         badges = []
-        if recette.get('est_rapide'):
+        if recette.get("est_rapide"):
             badges.append("⚡")
-        if recette.get('compatible_bebe'):
+        if recette.get("compatible_bebe"):
             badges.append("👶")
-        if recette.get('genere_par_ia'):
+        if recette.get("genere_par_ia"):
             badges.append("🤖")
 
         if badges:
@@ -87,9 +92,9 @@ def render_recipe_card_grid(recette: Dict, key: str, on_click: Callable):
 # FORMULAIRE INGRÉDIENTS
 # ===================================
 
+
 def render_ingredients_form(
-        initial_ingredients: Optional[List[Dict]] = None,
-        key_prefix: str = "ing"
+    initial_ingredients: Optional[List[Dict]] = None, key_prefix: str = "ing"
 ) -> List[Dict]:
     """
     Formulaire interactif pour gérer les ingrédients
@@ -119,12 +124,9 @@ def render_ingredients_form(
 
         if st.button("➕ Ajouter", key=f"{key_prefix}_add"):
             if nom:
-                st.session_state[session_key].append({
-                    "nom": nom,
-                    "quantite": qty,
-                    "unite": unit,
-                    "optionnel": opt
-                })
+                st.session_state[session_key].append(
+                    {"nom": nom, "quantite": qty, "unite": unit, "optionnel": opt}
+                )
                 st.rerun()
 
     # Liste des ingrédients
@@ -154,9 +156,9 @@ def render_ingredients_form(
 # FORMULAIRE ÉTAPES
 # ===================================
 
+
 def render_etapes_form(
-        initial_etapes: Optional[List[Dict]] = None,
-        key_prefix: str = "step"
+    initial_etapes: Optional[List[Dict]] = None, key_prefix: str = "step"
 ) -> List[Dict]:
     """
     Formulaire interactif pour gérer les étapes
@@ -177,11 +179,13 @@ def render_etapes_form(
 
         if st.button("➕ Ajouter étape", key=f"{key_prefix}_add"):
             if desc:
-                st.session_state[session_key].append({
-                    "ordre": len(st.session_state[session_key]) + 1,
-                    "description": desc,
-                    "duree": duree if duree > 0 else None
-                })
+                st.session_state[session_key].append(
+                    {
+                        "ordre": len(st.session_state[session_key]) + 1,
+                        "description": desc,
+                        "duree": duree if duree > 0 else None,
+                    }
+                )
                 st.rerun()
 
     # Liste des étapes
@@ -190,26 +194,36 @@ def render_etapes_form(
             col1, col2, col3 = st.columns([5, 1, 1])
 
             with col1:
-                duree_str = f" ({etape['duree']}min)" if etape.get('duree') else ""
+                duree_str = f" ({etape['duree']}min)" if etape.get("duree") else ""
                 st.write(f"**{etape['ordre']}.** {etape['description']}{duree_str}")
 
             with col2:
                 # Monter/Descendre
                 if idx > 0:
                     if st.button("⬆️", key=f"{key_prefix}_up_{idx}"):
-                        st.session_state[session_key][idx], st.session_state[session_key][idx-1] = \
-                            st.session_state[session_key][idx-1], st.session_state[session_key][idx]
+                        (
+                            st.session_state[session_key][idx],
+                            st.session_state[session_key][idx - 1],
+                        ) = (
+                            st.session_state[session_key][idx - 1],
+                            st.session_state[session_key][idx],
+                        )
                         # Réordonner
                         for i, s in enumerate(st.session_state[session_key]):
-                            s['ordre'] = i + 1
+                            s["ordre"] = i + 1
                         st.rerun()
 
                 if idx < len(st.session_state[session_key]) - 1:
                     if st.button("⬇️", key=f"{key_prefix}_down_{idx}"):
-                        st.session_state[session_key][idx], st.session_state[session_key][idx+1] = \
-                            st.session_state[session_key][idx+1], st.session_state[session_key][idx]
+                        (
+                            st.session_state[session_key][idx],
+                            st.session_state[session_key][idx + 1],
+                        ) = (
+                            st.session_state[session_key][idx + 1],
+                            st.session_state[session_key][idx],
+                        )
                         for i, s in enumerate(st.session_state[session_key]):
-                            s['ordre'] = i + 1
+                            s["ordre"] = i + 1
                         st.rerun()
 
             with col3:
@@ -217,7 +231,7 @@ def render_etapes_form(
                     st.session_state[session_key].pop(idx)
                     # Réordonner
                     for i, s in enumerate(st.session_state[session_key]):
-                        s['ordre'] = i + 1
+                        s["ordre"] = i + 1
                     st.rerun()
     else:
         st.info("Aucune étape ajoutée")
@@ -228,6 +242,7 @@ def render_etapes_form(
 # ===================================
 # PREVIEW RECETTE
 # ===================================
+
 
 def render_recipe_preview(recette_data: Dict, ingredients: List[Dict], etapes: List[Dict]):
     """
@@ -243,15 +258,17 @@ def render_recipe_preview(recette_data: Dict, ingredients: List[Dict], etapes: L
     col1, col2 = st.columns([1, 2])
 
     with col1:
-        st.markdown(f"**⏱️ Temps total:** {recette_data.get('temps_preparation', 0) + recette_data.get('temps_cuisson', 0)}min")
+        st.markdown(
+            f"**⏱️ Temps total:** {recette_data.get('temps_preparation', 0) + recette_data.get('temps_cuisson', 0)}min"
+        )
         st.markdown(f"**🍽️ Portions:** {recette_data.get('portions', 4)}")
         st.markdown(f"**Difficulté:** {recette_data.get('difficulte', 'moyen').capitalize()}")
 
     with col2:
         tags = []
-        if recette_data.get('temps_preparation', 0) + recette_data.get('temps_cuisson', 0) < 30:
+        if recette_data.get("temps_preparation", 0) + recette_data.get("temps_cuisson", 0) < 30:
             tags.append("⚡ Rapide")
-        if recette_data.get('est_equilibre'):
+        if recette_data.get("est_equilibre"):
             tags.append("🥗 Équilibré")
         if tags:
             st.caption(" • ".join(tags))

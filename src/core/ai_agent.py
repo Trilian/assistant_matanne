@@ -33,11 +33,7 @@ class AgentIA:
             )
 
     async def _call_mistral(
-            self,
-            prompt: str,
-            system_prompt: str = "",
-            temperature: float = 0.7,
-            max_tokens: int = 500
+        self, prompt: str, system_prompt: str = "", temperature: float = 0.7, max_tokens: int = 500
     ) -> str:
         """Appel API Mistral avec gestion d'erreurs"""
         try:
@@ -45,28 +41,22 @@ class AgentIA:
                 messages = []
 
                 if system_prompt:
-                    messages.append({
-                        "role": "system",
-                        "content": system_prompt
-                    })
+                    messages.append({"role": "system", "content": system_prompt})
 
-                messages.append({
-                    "role": "user",
-                    "content": prompt
-                })
+                messages.append({"role": "user", "content": prompt})
 
                 response = await client.post(
                     f"{self.base_url}/chat/completions",
                     headers={
                         "Authorization": f"Bearer {self.api_key}",
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
                     },
                     json={
                         "model": self.model,
                         "messages": messages,
                         "temperature": temperature,
-                        "max_tokens": max_tokens
-                    }
+                        "max_tokens": max_tokens,
+                    },
                 )
 
                 response.raise_for_status()
@@ -85,16 +75,15 @@ class AgentIA:
     # ===================================
 
     async def suggerer_recettes(
-            self,
-            inventaire: List[Dict],
-            preferences: Optional[List[str]] = None,
-            nb_suggestions: int = 3
+        self,
+        inventaire: List[Dict],
+        preferences: Optional[List[str]] = None,
+        nb_suggestions: int = 3,
     ) -> List[Dict]:
         """Suggère des recettes basées sur l'inventaire"""
-        items_text = "\n".join([
-            f"- {item['nom']}: {item['quantite']} {item['unite']}"
-            for item in inventaire
-        ])
+        items_text = "\n".join(
+            [f"- {item['nom']}: {item['quantite']} {item['unite']}" for item in inventaire]
+        )
 
         pref_text = f"\nPréférences: {', '.join(preferences)}" if preferences else ""
 
@@ -127,23 +116,21 @@ class AgentIA:
 
         except json.JSONDecodeError:
             logger.error("Erreur parsing JSON suggestions")
-            return [{
-                "nom": "Erreur parsing",
-                "ingredients": [],
-                "faisabilite": 0,
-                "raison": "Impossible de parser la réponse IA"
-            }]
+            return [
+                {
+                    "nom": "Erreur parsing",
+                    "ingredients": [],
+                    "faisabilite": 0,
+                    "raison": "Impossible de parser la réponse IA",
+                }
+            ]
 
     async def detecter_gaspillage(self, inventaire: List[Dict]) -> Dict:
         """Détecte les items à risque de gaspillage"""
         items_faibles = [i for i in inventaire if i.get("quantite", 0) < 2]
 
         if not items_faibles:
-            return {
-                "statut": "OK",
-                "message": "Aucun risque détecté",
-                "suggestions": []
-            }
+            return {"statut": "OK", "message": "Aucun risque détecté", "suggestions": []}
 
         items_text = ", ".join([item["nom"] for item in items_faibles])
 
@@ -166,14 +153,10 @@ class AgentIA:
                 "statut": "ATTENTION",
                 "items": items_text,
                 "recettes_urgentes": [f"Utiliser {items_text} rapidement"],
-                "conseil": "À consommer rapidement"
+                "conseil": "À consommer rapidement",
             }
 
-    async def optimiser_courses(
-            self,
-            inventaire: List[Dict],
-            recettes_prevues: List[str]
-    ) -> Dict:
+    async def optimiser_courses(self, inventaire: List[Dict], recettes_prevues: List[str]) -> Dict:
         """Optimise la liste de courses"""
         inv_text = ", ".join([f"{i['nom']} ({i['quantite']} {i['unite']})" for i in inventaire])
         recettes_text = ", ".join(recettes_prevues)
@@ -189,22 +172,13 @@ class AgentIA:
         try:
             return json.loads(response.strip().replace("```json", "").replace("```", ""))
         except:
-            return {
-                "par_rayon": {"Courses": ["Articles nécessaires"]},
-                "budget_estime": 0
-            }
+            return {"par_rayon": {"Courses": ["Articles nécessaires"]}, "budget_estime": 0}
 
     async def chat(
-            self,
-            message: str,
-            historique: List[Dict],
-            contexte: Optional[Dict] = None
+        self, message: str, historique: List[Dict], contexte: Optional[Dict] = None
     ) -> str:
         """Interface conversationnelle"""
-        hist_text = "\n".join([
-            f"{h['role']}: {h['content']}"
-            for h in historique[-5:]
-        ])
+        hist_text = "\n".join([f"{h['role']}: {h['content']}" for h in historique[-5:]])
 
         ctx_text = f"\n\nContexte:\n{json.dumps(contexte, indent=2)}" if contexte else ""
 

@@ -9,8 +9,14 @@ from sqlalchemy import func, or_, and_
 from src.core.base_service import BaseService
 from src.core.database import get_db_context
 from src.core.models import (
-    Recette, RecetteIngredient, EtapeRecette, VersionRecette,
-    Ingredient, TypeVersionRecetteEnum, SaisonEnum, TypeRepasEnum
+    Recette,
+    RecetteIngredient,
+    EtapeRecette,
+    VersionRecette,
+    Ingredient,
+    TypeVersionRecetteEnum,
+    SaisonEnum,
+    TypeRepasEnum,
 )
 import logging
 
@@ -37,51 +43,70 @@ class RecetteService(BaseService[Recette]):
         Évite le problème N+1
         """
         if db:
-            return db.query(Recette).options(
-                joinedload(Recette.ingredients).joinedload(RecetteIngredient.ingredient),
-                joinedload(Recette.etapes),
-                joinedload(Recette.versions)
-            ).filter(Recette.id == recette_id).first()
+            return (
+                db.query(Recette)
+                .options(
+                    joinedload(Recette.ingredients).joinedload(RecetteIngredient.ingredient),
+                    joinedload(Recette.etapes),
+                    joinedload(Recette.versions),
+                )
+                .filter(Recette.id == recette_id)
+                .first()
+            )
 
         with get_db_context() as db:
-            return db.query(Recette).options(
-                joinedload(Recette.ingredients).joinedload(RecetteIngredient.ingredient),
-                joinedload(Recette.etapes),
-                joinedload(Recette.versions)
-            ).filter(Recette.id == recette_id).first()
+            return (
+                db.query(Recette)
+                .options(
+                    joinedload(Recette.ingredients).joinedload(RecetteIngredient.ingredient),
+                    joinedload(Recette.etapes),
+                    joinedload(Recette.versions),
+                )
+                .filter(Recette.id == recette_id)
+                .first()
+            )
 
     def get_all_with_relations(
-            self,
-            skip: int = 0,
-            limit: int = 20,
-            db: Session = None
+        self, skip: int = 0, limit: int = 20, db: Session = None
     ) -> List[Recette]:
         """Récupère toutes les recettes avec relations (optimisé)"""
         if db:
-            return db.query(Recette).options(
-                selectinload(Recette.ingredients).joinedload(RecetteIngredient.ingredient),
-                selectinload(Recette.etapes),
-                selectinload(Recette.versions)
-            ).offset(skip).limit(limit).all()
+            return (
+                db.query(Recette)
+                .options(
+                    selectinload(Recette.ingredients).joinedload(RecetteIngredient.ingredient),
+                    selectinload(Recette.etapes),
+                    selectinload(Recette.versions),
+                )
+                .offset(skip)
+                .limit(limit)
+                .all()
+            )
 
         with get_db_context() as db:
-            return db.query(Recette).options(
-                selectinload(Recette.ingredients).joinedload(RecetteIngredient.ingredient),
-                selectinload(Recette.etapes),
-                selectinload(Recette.versions)
-            ).offset(skip).limit(limit).all()
+            return (
+                db.query(Recette)
+                .options(
+                    selectinload(Recette.ingredients).joinedload(RecetteIngredient.ingredient),
+                    selectinload(Recette.etapes),
+                    selectinload(Recette.versions),
+                )
+                .offset(skip)
+                .limit(limit)
+                .all()
+            )
 
     # ===================================
     # CRÉATION COMPLÈTE
     # ===================================
 
     def create_full(
-            self,
-            recette_data: Dict,
-            ingredients_data: List[Dict],
-            etapes_data: List[Dict],
-            versions_data: Optional[Dict] = None,
-            db: Session = None
+        self,
+        recette_data: Dict,
+        ingredients_data: List[Dict],
+        etapes_data: List[Dict],
+        versions_data: Optional[Dict] = None,
+        db: Session = None,
     ) -> int:
         """
         Crée une recette complète avec ingrédients, étapes, versions
@@ -96,18 +121,22 @@ class RecetteService(BaseService[Recette]):
             ID de la recette créée
         """
         if db:
-            return self._do_create_full(db, recette_data, ingredients_data, etapes_data, versions_data)
+            return self._do_create_full(
+                db, recette_data, ingredients_data, etapes_data, versions_data
+            )
 
         with get_db_context() as db:
-            return self._do_create_full(db, recette_data, ingredients_data, etapes_data, versions_data)
+            return self._do_create_full(
+                db, recette_data, ingredients_data, etapes_data, versions_data
+            )
 
     def _do_create_full(
-            self,
-            db: Session,
-            recette_data: Dict,
-            ingredients_data: List[Dict],
-            etapes_data: List[Dict],
-            versions_data: Optional[Dict]
+        self,
+        db: Session,
+        recette_data: Dict,
+        ingredients_data: List[Dict],
+        etapes_data: List[Dict],
+        versions_data: Optional[Dict],
     ) -> int:
         """Implémentation interne"""
 
@@ -119,15 +148,13 @@ class RecetteService(BaseService[Recette]):
         # 2. Ajouter ingrédients
         for ing_data in ingredients_data:
             # Trouver ou créer ingrédient
-            ingredient = db.query(Ingredient).filter(
-                Ingredient.nom == ing_data["nom"]
-            ).first()
+            ingredient = db.query(Ingredient).filter(Ingredient.nom == ing_data["nom"]).first()
 
             if not ingredient:
                 ingredient = Ingredient(
                     nom=ing_data["nom"],
                     unite=ing_data["unite"],
-                    categorie=ing_data.get("categorie")
+                    categorie=ing_data.get("categorie"),
                 )
                 db.add(ingredient)
                 db.flush()
@@ -138,7 +165,7 @@ class RecetteService(BaseService[Recette]):
                 ingredient_id=ingredient.id,
                 quantite=ing_data["quantite"],
                 unite=ing_data["unite"],
-                optionnel=ing_data.get("optionnel", False)
+                optionnel=ing_data.get("optionnel", False),
             )
             db.add(recette_ing)
 
@@ -148,7 +175,7 @@ class RecetteService(BaseService[Recette]):
                 recette_id=recette.id,
                 ordre=etape_data["ordre"],
                 description=etape_data["description"],
-                duree=etape_data.get("duree")
+                duree=etape_data.get("duree"),
             )
             db.add(etape)
 
@@ -162,7 +189,7 @@ class RecetteService(BaseService[Recette]):
                     ingredients_modifies=v_data.get("ingredients_modifies"),
                     notes_bebe=v_data.get("notes_bebe"),
                     etapes_paralleles_batch=v_data.get("etapes_paralleles"),
-                    temps_optimise_batch=v_data.get("temps_optimise")
+                    temps_optimise_batch=v_data.get("temps_optimise"),
                 )
                 db.add(version)
 
@@ -176,20 +203,20 @@ class RecetteService(BaseService[Recette]):
     # ===================================
 
     def search_advanced(
-            self,
-            search_term: Optional[str] = None,
-            saison: Optional[str] = None,
-            type_repas: Optional[str] = None,
-            temps_max: Optional[int] = None,
-            difficulte: Optional[str] = None,
-            is_rapide: Optional[bool] = None,
-            is_equilibre: Optional[bool] = None,
-            compatible_bebe: Optional[bool] = None,
-            compatible_batch: Optional[bool] = None,
-            ia_only: Optional[bool] = None,
-            skip: int = 0,
-            limit: int = 20,
-            db: Session = None
+        self,
+        search_term: Optional[str] = None,
+        saison: Optional[str] = None,
+        type_repas: Optional[str] = None,
+        temps_max: Optional[int] = None,
+        difficulte: Optional[str] = None,
+        is_rapide: Optional[bool] = None,
+        is_equilibre: Optional[bool] = None,
+        compatible_bebe: Optional[bool] = None,
+        compatible_batch: Optional[bool] = None,
+        ia_only: Optional[bool] = None,
+        skip: int = 0,
+        limit: int = 20,
+        db: Session = None,
     ) -> List[Recette]:
         """
         Recherche avancée avec multiples filtres
@@ -205,9 +232,17 @@ class RecetteService(BaseService[Recette]):
 
                 # Appliquer filtres
                 query = self._apply_search_filters(
-                    query, search_term, saison, type_repas, temps_max,
-                    difficulte, is_rapide, is_equilibre, compatible_bebe,
-                    compatible_batch, ia_only
+                    query,
+                    search_term,
+                    saison,
+                    type_repas,
+                    temps_max,
+                    difficulte,
+                    is_rapide,
+                    is_equilibre,
+                    compatible_bebe,
+                    compatible_batch,
+                    ia_only,
                 )
 
                 # Eager loading
@@ -219,9 +254,17 @@ class RecetteService(BaseService[Recette]):
 
         # Appliquer filtres
         query = self._apply_search_filters(
-            query, search_term, saison, type_repas, temps_max,
-            difficulte, is_rapide, is_equilibre, compatible_bebe,
-            compatible_batch, ia_only
+            query,
+            search_term,
+            saison,
+            type_repas,
+            temps_max,
+            difficulte,
+            is_rapide,
+            is_equilibre,
+            compatible_bebe,
+            compatible_batch,
+            ia_only,
         )
 
         # Eager loading
@@ -233,15 +276,25 @@ class RecetteService(BaseService[Recette]):
 
     def _apply_search_filters(self, query, *args):
         """Applique tous les filtres de recherche"""
-        (search_term, saison, type_repas, temps_max, difficulte,
-         is_rapide, is_equilibre, compatible_bebe, compatible_batch, ia_only) = args
+        (
+            search_term,
+            saison,
+            type_repas,
+            temps_max,
+            difficulte,
+            is_rapide,
+            is_equilibre,
+            compatible_bebe,
+            compatible_batch,
+            ia_only,
+        ) = args
 
         # Recherche texte
         if search_term:
             query = query.filter(
                 or_(
                     Recette.nom.ilike(f"%{search_term}%"),
-                    Recette.description.ilike(f"%{search_term}%")
+                    Recette.description.ilike(f"%{search_term}%"),
                 )
             )
 
@@ -257,9 +310,7 @@ class RecetteService(BaseService[Recette]):
 
         # Temps max
         if temps_max:
-            query = query.filter(
-                (Recette.temps_preparation + Recette.temps_cuisson) <= temps_max
-            )
+            query = query.filter((Recette.temps_preparation + Recette.temps_cuisson) <= temps_max)
 
         # Filtres booléens
         if is_rapide is not None:
@@ -283,11 +334,7 @@ class RecetteService(BaseService[Recette]):
     # MÉTHODES MÉTIER
     # ===================================
 
-    def get_faisables_avec_stock(
-            self,
-            tolerance: float = 0.8,
-            db: Session = None
-    ) -> List[Dict]:
+    def get_faisables_avec_stock(self, tolerance: float = 0.8, db: Session = None) -> List[Dict]:
         """
         Retourne les recettes faisables avec le stock actuel
 
@@ -300,14 +347,20 @@ class RecetteService(BaseService[Recette]):
         from src.core.models import ArticleInventaire
 
         if db:
-            recettes = db.query(Recette).options(
-                joinedload(Recette.ingredients).joinedload(RecetteIngredient.ingredient)
-            ).all()
+            recettes = (
+                db.query(Recette)
+                .options(joinedload(Recette.ingredients).joinedload(RecetteIngredient.ingredient))
+                .all()
+            )
         else:
             with get_db_context() as db:
-                recettes = db.query(Recette).options(
-                    joinedload(Recette.ingredients).joinedload(RecetteIngredient.ingredient)
-                ).all()
+                recettes = (
+                    db.query(Recette)
+                    .options(
+                        joinedload(Recette.ingredients).joinedload(RecetteIngredient.ingredient)
+                    )
+                    .all()
+                )
 
                 results = []
 
@@ -320,9 +373,11 @@ class RecetteService(BaseService[Recette]):
                     manquants = []
 
                     for rec_ing in recette.ingredients:
-                        stock = db.query(ArticleInventaire).filter(
-                            ArticleInventaire.ingredient_id == rec_ing.ingredient_id
-                        ).first()
+                        stock = (
+                            db.query(ArticleInventaire)
+                            .filter(ArticleInventaire.ingredient_id == rec_ing.ingredient_id)
+                            .first()
+                        )
 
                         if stock and stock.quantite >= rec_ing.quantite:
                             nb_disponibles += 1
@@ -332,11 +387,13 @@ class RecetteService(BaseService[Recette]):
                     faisabilite = nb_disponibles / nb_ingredients
 
                     if faisabilite >= tolerance:
-                        results.append({
-                            "recette": recette,
-                            "faisabilite": round(faisabilite * 100, 1),
-                            "manquants": manquants
-                        })
+                        results.append(
+                            {
+                                "recette": recette,
+                                "faisabilite": round(faisabilite * 100, 1),
+                                "manquants": manquants,
+                            }
+                        )
 
                 # Trier par faisabilité
                 return sorted(results, key=lambda x: x["faisabilite"], reverse=True)
@@ -353,9 +410,11 @@ class RecetteService(BaseService[Recette]):
             manquants = []
 
             for rec_ing in recette.ingredients:
-                stock = db.query(ArticleInventaire).filter(
-                    ArticleInventaire.ingredient_id == rec_ing.ingredient_id
-                ).first()
+                stock = (
+                    db.query(ArticleInventaire)
+                    .filter(ArticleInventaire.ingredient_id == rec_ing.ingredient_id)
+                    .first()
+                )
 
                 if stock and stock.quantite >= rec_ing.quantite:
                     nb_disponibles += 1
@@ -365,18 +424,23 @@ class RecetteService(BaseService[Recette]):
             faisabilite = nb_disponibles / nb_ingredients
 
             if faisabilite >= tolerance:
-                results.append({
-                    "recette": recette,
-                    "faisabilite": round(faisabilite * 100, 1),
-                    "manquants": manquants
-                })
+                results.append(
+                    {
+                        "recette": recette,
+                        "faisabilite": round(faisabilite * 100, 1),
+                        "manquants": manquants,
+                    }
+                )
 
         return sorted(results, key=lambda x: x["faisabilite"], reverse=True)
 
-    def get_recettes_saison(self, saison: Optional[str] = None, db: Session = None) -> List[Recette]:
+    def get_recettes_saison(
+        self, saison: Optional[str] = None, db: Session = None
+    ) -> List[Recette]:
         """Recettes de saison (détecte auto si None)"""
         if not saison:
             from datetime import date
+
             mois = date.today().month
 
             if mois in [3, 4, 5]:
@@ -403,14 +467,22 @@ class RecetteService(BaseService[Recette]):
                 "total": db.query(func.count(Recette.id)).scalar(),
                 "par_difficulte": dict(
                     db.query(Recette.difficulte, func.count(Recette.id))
-                    .group_by(Recette.difficulte).all()
+                    .group_by(Recette.difficulte)
+                    .all()
                 ),
-                "rapides": db.query(func.count(Recette.id)).filter(Recette.est_rapide == True).scalar(),
-                "equilibrees": db.query(func.count(Recette.id)).filter(Recette.est_equilibre == True).scalar(),
-                "ia": db.query(func.count(Recette.id)).filter(Recette.genere_par_ia == True).scalar(),
+                "rapides": db.query(func.count(Recette.id))
+                .filter(Recette.est_rapide == True)
+                .scalar(),
+                "equilibrees": db.query(func.count(Recette.id))
+                .filter(Recette.est_equilibre == True)
+                .scalar(),
+                "ia": db.query(func.count(Recette.id))
+                .filter(Recette.genere_par_ia == True)
+                .scalar(),
                 "temps_moyen": db.query(
                     func.avg(Recette.temps_preparation + Recette.temps_cuisson)
-                ).scalar() or 0
+                ).scalar()
+                or 0,
             }
 
         with get_db_context() as db:
@@ -418,14 +490,22 @@ class RecetteService(BaseService[Recette]):
                 "total": db.query(func.count(Recette.id)).scalar(),
                 "par_difficulte": dict(
                     db.query(Recette.difficulte, func.count(Recette.id))
-                    .group_by(Recette.difficulte).all()
+                    .group_by(Recette.difficulte)
+                    .all()
                 ),
-                "rapides": db.query(func.count(Recette.id)).filter(Recette.est_rapide == True).scalar(),
-                "equilibrees": db.query(func.count(Recette.id)).filter(Recette.est_equilibre == True).scalar(),
-                "ia": db.query(func.count(Recette.id)).filter(Recette.genere_par_ia == True).scalar(),
+                "rapides": db.query(func.count(Recette.id))
+                .filter(Recette.est_rapide == True)
+                .scalar(),
+                "equilibrees": db.query(func.count(Recette.id))
+                .filter(Recette.est_equilibre == True)
+                .scalar(),
+                "ia": db.query(func.count(Recette.id))
+                .filter(Recette.genere_par_ia == True)
+                .scalar(),
                 "temps_moyen": db.query(
                     func.avg(Recette.temps_preparation + Recette.temps_cuisson)
-                ).scalar() or 0
+                ).scalar()
+                or 0,
             }
 
 

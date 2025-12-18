@@ -35,6 +35,7 @@ TYPES_REPAS = {
 # CONFIGURATION SIDEBAR
 # ===================================
 
+
 def render_config_sidebar() -> ConfigPlanningUtilisateur:
     """Configuration intelligente dans la sidebar"""
 
@@ -49,18 +50,20 @@ def render_config_sidebar() -> ConfigPlanningUtilisateur:
         with st.expander("👥 Composition du foyer", expanded=True):
             nb_adultes = st.number_input(
                 "Adultes",
-                1, 10,
+                1,
+                10,
                 config.nb_adultes,
                 key="cfg_adultes",
-                help="Nombre d'adultes dans le foyer"
+                help="Nombre d'adultes dans le foyer",
             )
 
             nb_enfants = st.number_input(
                 "Enfants (hors bébé)",
-                0, 10,
+                0,
+                10,
                 config.nb_enfants,
                 key="cfg_enfants",
-                help="Nombre d'enfants (3 ans et +)"
+                help="Nombre d'enfants (3 ans et +)",
             )
 
             # ✅ MODE BÉBÉ - Intuitif et friendly
@@ -71,11 +74,13 @@ def render_config_sidebar() -> ConfigPlanningUtilisateur:
                 "Oui, adapter les recettes pour bébé",
                 value=config.a_bebe,
                 key="cfg_bebe",
-                help="Active les adaptations pour bébé (6-18 mois)"
+                help="Active les adaptations pour bébé (6-18 mois)",
             )
 
             if a_bebe:
-                st.info("💡 L'IA privilégiera les recettes compatibles bébé et suggérera des adaptations")
+                st.info(
+                    "💡 L'IA privilégiera les recettes compatibles bébé et suggérera des adaptations"
+                )
 
         # ===================================
         # REPAS À PLANIFIER
@@ -85,33 +90,30 @@ def render_config_sidebar() -> ConfigPlanningUtilisateur:
 
             for type_repas, info in TYPES_REPAS.items():
                 default_value = config.repas_actifs.get(
-                    type_repas,
-                    type_repas in ["déjeuner", "dîner"]
+                    type_repas, type_repas in ["déjeuner", "dîner"]
                 )
 
                 repas_actifs[type_repas] = st.checkbox(
-                    f"{info['icone']} {info['label']}",
-                    value=default_value,
-                    key=f"cfg_{type_repas}"
+                    f"{info['icone']} {info['label']}", value=default_value, key=f"cfg_{type_repas}"
                 )
 
         # ===================================
         # BATCH COOKING
         # ===================================
         with st.expander("🍳 Batch Cooking", expanded=False):
-            st.markdown("""
+            st.markdown(
+                """
             Le **batch cooking** consiste à préparer plusieurs repas en une seule session.
             
             **Avantages :**
             - ⏱️ Gain de temps en semaine
             - 💰 Économies d'énergie
             - 🧘 Moins de stress quotidien
-            """)
+            """
+            )
 
             batch_actif = st.toggle(
-                "Activer le batch cooking",
-                value=config.batch_cooking_actif,
-                key="cfg_batch"
+                "Activer le batch cooking", value=config.batch_cooking_actif, key="cfg_batch"
             )
 
             jours_batch = []
@@ -122,20 +124,12 @@ def render_config_sidebar() -> ConfigPlanningUtilisateur:
 
                 with col_j1:
                     for i, nom in enumerate(["Lun", "Mar", "Mer", "Jeu"]):
-                        if st.checkbox(
-                                nom,
-                                value=i in config.jours_batch,
-                                key=f"batch_{i}"
-                        ):
+                        if st.checkbox(nom, value=i in config.jours_batch, key=f"batch_{i}"):
                             jours_batch.append(i)
 
                 with col_j2:
                     for i, nom in enumerate(["Ven", "Sam", "Dim"], start=4):
-                        if st.checkbox(
-                                nom,
-                                value=i in config.jours_batch,
-                                key=f"batch_{i}"
-                        ):
+                        if st.checkbox(nom, value=i in config.jours_batch, key=f"batch_{i}"):
                             jours_batch.append(i)
 
                 if not jours_batch:
@@ -147,14 +141,16 @@ def render_config_sidebar() -> ConfigPlanningUtilisateur:
         st.markdown("---")
 
         if st.button("💾 Enregistrer la configuration", type="primary", use_container_width=True):
-            planning_service.update_config({
-                "nb_adultes": nb_adultes,
-                "nb_enfants": nb_enfants,
-                "a_bebe": a_bebe,
-                "repas_actifs": repas_actifs,
-                "batch_cooking_actif": batch_actif,
-                "jours_batch": jours_batch if batch_actif else []
-            })
+            planning_service.update_config(
+                {
+                    "nb_adultes": nb_adultes,
+                    "nb_enfants": nb_enfants,
+                    "a_bebe": a_bebe,
+                    "repas_actifs": repas_actifs,
+                    "batch_cooking_actif": batch_actif,
+                    "jours_batch": jours_batch if batch_actif else [],
+                }
+            )
             render_toast("✅ Configuration sauvegardée", "success")
             st.rerun()
 
@@ -165,23 +161,31 @@ def render_config_sidebar() -> ConfigPlanningUtilisateur:
 # COMPOSANTS REPAS
 # ===================================
 
-def render_repas_card(repas: Optional[Dict], jour_idx: int, type_repas: str, planning_id: int, date_jour: date, key: str):
+
+def render_repas_card(
+    repas: Optional[Dict],
+    jour_idx: int,
+    type_repas: str,
+    planning_id: int,
+    date_jour: date,
+    key: str,
+):
     """Carte repas avec actions"""
 
     if not repas or not repas.get("recette"):
         # ✅ SLOT VIDE - Bouton d'ajout
         if st.button(
-                f"➕ Ajouter {TYPES_REPAS[type_repas]['label']}",
-                key=f"add_{key}",
-                use_container_width=True,
-                type="secondary"
+            f"➕ Ajouter {TYPES_REPAS[type_repas]['label']}",
+            key=f"add_{key}",
+            use_container_width=True,
+            type="secondary",
         ):
             # Stocker les infos pour le modal
             st.session_state.adding_repas_slot = {
                 "planning_id": planning_id,
                 "jour_idx": jour_idx,
                 "date_jour": date_jour,
-                "type_repas": type_repas
+                "type_repas": type_repas,
             }
             st.rerun()
 
@@ -198,7 +202,10 @@ def render_repas_card(repas: Optional[Dict], jour_idx: int, type_repas: str, pla
             if recette.get("url_image"):
                 st.image(recette["url_image"], use_container_width=True)
             else:
-                st.markdown(f"<div style='font-size: 3rem; text-align: center;'>{TYPES_REPAS[type_repas]['icone']}</div>", unsafe_allow_html=True)
+                st.markdown(
+                    f"<div style='font-size: 3rem; text-align: center;'>{TYPES_REPAS[type_repas]['icone']}</div>",
+                    unsafe_allow_html=True,
+                )
 
         with col2:
             st.markdown(f"**{recette['nom']}**")
@@ -248,7 +255,9 @@ def render_modal_add_repas():
     slot = st.session_state.adding_repas_slot
 
     st.markdown("---")
-    st.markdown(f"### ➕ Ajouter un repas - {JOURS_SEMAINE[slot['jour_idx']]} {TYPES_REPAS[slot['type_repas']]['label']}")
+    st.markdown(
+        f"### ➕ Ajouter un repas - {JOURS_SEMAINE[slot['jour_idx']]} {TYPES_REPAS[slot['type_repas']]['label']}"
+    )
 
     with st.form("add_repas_form"):
         # Sélection recette
@@ -263,18 +272,16 @@ def render_modal_add_repas():
             return
 
         recette_names = [r.nom for r in recettes]
-        recette_select = st.selectbox(
-            "🍽️ Recette",
-            recette_names,
-            key="select_recette"
-        )
+        recette_select = st.selectbox("🍽️ Recette", recette_names, key="select_recette")
 
         # Afficher infos recette sélectionnée
         recette_choisie = next(r for r in recettes if r.nom == recette_select)
 
         col_info1, col_info2 = st.columns(2)
         with col_info1:
-            st.caption(f"⏱️ {format_temps(recette_choisie.temps_preparation + recette_choisie.temps_cuisson)}")
+            st.caption(
+                f"⏱️ {format_temps(recette_choisie.temps_preparation + recette_choisie.temps_cuisson)}"
+            )
             st.caption(f"👥 {recette_choisie.portions} portions par défaut")
         with col_info2:
             if recette_choisie.compatible_bebe:
@@ -289,10 +296,7 @@ def render_modal_add_repas():
 
         with col_opt1:
             portions = st.number_input(
-                "Portions",
-                1, 20,
-                recette_choisie.portions,
-                key="portions_add"
+                "Portions", 1, 20, recette_choisie.portions, key="portions_add"
             )
 
         with col_opt2:
@@ -300,13 +304,13 @@ def render_modal_add_repas():
                 "👶 Adapter pour bébé",
                 value=recette_choisie.compatible_bebe,
                 disabled=not recette_choisie.compatible_bebe,
-                key="bebe_add"
+                key="bebe_add",
             )
 
         notes = st.text_input(
             "Notes (optionnel)",
             placeholder="Ex: Doubler la recette, Congeler une portion...",
-            key="notes_add"
+            key="notes_add",
         )
 
         # Boutons
@@ -328,7 +332,7 @@ def render_modal_add_repas():
                 recette_id=recette_choisie.id,
                 portions=portions,
                 est_adapte_bebe=adapte_bebe,
-                notes=notes
+                notes=notes,
             )
 
             del st.session_state.adding_repas_slot
@@ -343,6 +347,7 @@ def render_modal_add_repas():
 # ===================================
 # TAB 1 : PLANNING ACTUEL
 # ===================================
+
 
 def tab_planning():
     """Affichage du planning avec ajout manuel"""
@@ -386,14 +391,13 @@ def tab_planning():
             message="Aucun planning pour cette semaine",
             icon="📅",
             action_label="✨ Générer avec l'IA",
-            action_callback=lambda: st.session_state.update({"switch_to_tab": 1})
+            action_callback=lambda: st.session_state.update({"switch_to_tab": 1}),
         )
 
         # Créer un planning vide pour permettre l'ajout manuel
         if st.button("➕ Créer un planning vide", type="secondary", use_container_width=True):
             planning_id = planning_service.create_planning(
-                semaine_actuelle,
-                f"Planning manuel {semaine_actuelle.strftime('%d/%m')}"
+                semaine_actuelle, f"Planning manuel {semaine_actuelle.strftime('%d/%m')}"
             )
             render_toast("✅ Planning créé ! Tu peux maintenant ajouter des repas.", "success")
             st.rerun()
@@ -423,9 +427,9 @@ def tab_planning():
     # ✅ BOUTON BATCH COOKING
     if config.batch_cooking_actif and repas_batch > 0:
         if st.button(
-                f"🍳 Préparer {repas_batch} repas en Batch Cooking",
-                type="primary",
-                use_container_width=True
+            f"🍳 Préparer {repas_batch} repas en Batch Cooking",
+            type="primary",
+            use_container_width=True,
         ):
             st.session_state.show_batch_modal = True
             st.rerun()
@@ -439,8 +443,8 @@ def tab_planning():
         is_today = jour_data["date"] == date.today()
 
         with st.expander(
-                f"{'🔵 ' if is_today else ''}{jour_data['nom_jour']} {jour_data['date'].strftime('%d/%m')}",
-                expanded=is_today
+            f"{'🔵 ' if is_today else ''}{jour_data['nom_jour']} {jour_data['date'].strftime('%d/%m')}",
+            expanded=is_today,
         ):
             if not any(r["type"] in types_repas_actifs for r in jour_data["repas"]):
                 st.caption("Aucun repas planifié")
@@ -448,7 +452,9 @@ def tab_planning():
             for type_repas in types_repas_actifs:
                 repas = next((r for r in jour_data["repas"] if r["type"] == type_repas), None)
 
-                st.markdown(f"**{TYPES_REPAS[type_repas]['icone']} {TYPES_REPAS[type_repas]['label']}**")
+                st.markdown(
+                    f"**{TYPES_REPAS[type_repas]['icone']} {TYPES_REPAS[type_repas]['label']}**"
+                )
 
                 render_repas_card(
                     repas,
@@ -456,7 +462,7 @@ def tab_planning():
                     type_repas,
                     planning.id,
                     jour_data["date"],
-                    f"{jour_data['jour_idx']}_{type_repas}"
+                    f"{jour_data['jour_idx']}_{type_repas}",
                 )
 
                 st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
@@ -473,6 +479,7 @@ def tab_planning():
 # MODAL BATCH COOKING
 # ===================================
 
+
 def render_batch_cooking_modal(planning_id: int, structure: Dict):
     """Modal de préparation batch cooking"""
 
@@ -484,11 +491,7 @@ def render_batch_cooking_modal(planning_id: int, structure: Dict):
     for jour in structure["jours"]:
         for repas in jour["repas"]:
             if repas.get("est_batch"):
-                repas_batch.append({
-                    **repas,
-                    "jour_nom": jour["nom_jour"],
-                    "date": jour["date"]
-                })
+                repas_batch.append({**repas, "jour_nom": jour["nom_jour"], "date": jour["date"]})
 
     if not repas_batch:
         st.info("Aucun repas batch dans ce planning")
@@ -504,14 +507,10 @@ def render_batch_cooking_modal(planning_id: int, structure: Dict):
     for repas in repas_batch:
         recette_id = repas["recette"]["id"]
         if recette_id not in recettes_grouped:
-            recettes_grouped[recette_id] = {
-                "recette": repas["recette"],
-                "occurrences": []
-            }
-        recettes_grouped[recette_id]["occurrences"].append({
-            "jour": repas["jour_nom"],
-            "portions": repas["portions"]
-        })
+            recettes_grouped[recette_id] = {"recette": repas["recette"], "occurrences": []}
+        recettes_grouped[recette_id]["occurrences"].append(
+            {"jour": repas["jour_nom"], "portions": repas["portions"]}
+        )
 
     # Afficher par recette
     st.markdown("### 📋 Liste de préparation")
@@ -554,7 +553,7 @@ def render_batch_cooking_modal(planning_id: int, structure: Dict):
         "📦 Utilise des contenants hermétiques adaptés",
         "❄️ Les plats se conservent 3-5 jours au frigo",
         "🏷️ Étiquette chaque plat avec nom et date",
-        "🔥 Réchauffe à feu doux pour préserver les saveurs"
+        "🔥 Réchauffe à feu doux pour préserver les saveurs",
     ]
 
     for conseil in conseils:
@@ -570,6 +569,7 @@ def render_batch_cooking_modal(planning_id: int, structure: Dict):
 # ===================================
 # TAB 2 : GÉNÉRATION IA (CORRIGÉE)
 # ===================================
+
 
 def tab_generation_ia():
     """Génération automatique avec IA - VERSION CORRIGÉE"""
@@ -588,7 +588,9 @@ def tab_generation_ia():
         nb_recettes = db.query(Recette).count()
 
     if nb_recettes < 5:
-        st.warning(f"⚠️ Seulement {nb_recettes} recette(s) disponible(s). Il en faut au moins 5 pour générer un planning.")
+        st.warning(
+            f"⚠️ Seulement {nb_recettes} recette(s) disponible(s). Il en faut au moins 5 pour générer un planning."
+        )
         if st.button("➕ Ajouter des recettes"):
             StateManager.navigate_to("cuisine.recettes")
             st.rerun()
@@ -612,10 +614,11 @@ def tab_generation_ia():
     st.markdown("---")
 
     # Bouton génération
-    semaine_actuelle = st.session_state.get("semaine_actuelle", planning_service.get_semaine_debut())
+    semaine_actuelle = st.session_state.get(
+        "semaine_actuelle", planning_service.get_semaine_debut()
+    )
 
     if st.button("✨ Générer le planning de la semaine", type="primary", use_container_width=True):
-
         with st.spinner("🤖 L'IA génère ton planning..."):
             try:
                 ai_service = create_planning_generation_service(agent)
@@ -625,11 +628,7 @@ def tab_generation_ia():
 
                 # ✅ CORRECTION: Appel corrigé
                 result = loop.run_until_complete(
-                    ai_service.generer_planning_complet(
-                        semaine_actuelle,
-                        config,
-                        contraintes=None
-                    )
+                    ai_service.generer_planning_complet(semaine_actuelle, config, contraintes=None)
                 )
 
                 # Supprimer ancien planning si existe
@@ -639,8 +638,7 @@ def tab_generation_ia():
 
                 # Créer nouveau planning
                 planning_id = planning_service.create_planning(
-                    semaine_actuelle,
-                    f"Planning IA {semaine_actuelle.strftime('%d/%m')}"
+                    semaine_actuelle, f"Planning IA {semaine_actuelle.strftime('%d/%m')}"
                 )
 
                 # Ajouter les repas
@@ -650,9 +648,11 @@ def tab_generation_ia():
 
                         for repas_data in jour_planning.repas:
                             # Trouver la recette
-                            recette = db.query(Recette).filter(
-                                Recette.nom.ilike(f"%{repas_data.recette_nom}%")
-                            ).first()
+                            recette = (
+                                db.query(Recette)
+                                .filter(Recette.nom.ilike(f"%{repas_data.recette_nom}%"))
+                                .first()
+                            )
 
                             if recette:
                                 repas_service.ajouter_repas(
@@ -665,7 +665,7 @@ def tab_generation_ia():
                                     est_adapte_bebe=repas_data.adapte_bebe,
                                     est_batch=repas_data.est_batch,
                                     notes=f"IA: {repas_data.raison}" if repas_data.raison else None,
-                                    db=db
+                                    db=db,
                                 )
 
                     # Marquer comme généré par IA
@@ -684,12 +684,14 @@ def tab_generation_ia():
                 # Debug info
                 with st.expander("🔍 Détails de l'erreur (pour debug)", expanded=False):
                     import traceback
+
                     st.code(traceback.format_exc())
 
 
 # ===================================
 # MAIN APP
 # ===================================
+
 
 def app():
     """Module Planning Semaine - Point d'entrée"""
@@ -708,10 +710,7 @@ def app():
         default_tab = 0
 
     # Tabs
-    tab1, tab2 = st.tabs([
-        "📅 Mon Planning",
-        "🤖 Générer avec l'IA"
-    ])
+    tab1, tab2 = st.tabs(["📅 Mon Planning", "🤖 Générer avec l'IA"])
 
     with tab1:
         tab_planning()

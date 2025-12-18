@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 # DATACLASS ÉTAT GLOBAL
 # ===================================
 
+
 @dataclass
 class AppState:
     """
@@ -108,6 +109,7 @@ class AppState:
 # ===================================
 # GESTIONNAIRE DE STATE
 # ===================================
+
 
 class StateManager:
     """Gestionnaire centralisé du state"""
@@ -246,10 +248,10 @@ class StateManager:
 
     @staticmethod
     def add_notification(
-            message: str,
-            type: str = "info",
-            module: Optional[str] = None,
-            action_link: Optional[str] = None
+        message: str,
+        type: str = "info",
+        module: Optional[str] = None,
+        action_link: Optional[str] = None,
     ):
         """
         Ajoute une notification
@@ -269,7 +271,7 @@ class StateManager:
             "module": module,
             "action_link": action_link,
             "timestamp": datetime.now(),
-            "read": False
+            "read": False,
         }
 
         state.notifications.append(notif)
@@ -375,13 +377,14 @@ class StateManager:
             "cache_size": len(state.cache),
             "notifications": state.unread_notifications,
             "generated_recipes": len(state.generated_recipes),
-            "navigation_depth": len(state.navigation_history)
+            "navigation_depth": len(state.navigation_history),
         }
 
 
 # ===================================
 # HELPERS RACCOURCIS
 # ===================================
+
 
 def get_state() -> AppState:
     """Raccourci pour récupérer le state"""
@@ -403,6 +406,7 @@ def notify(message: str, type: str = "info", action: Optional[str] = None):
 # DÉCORATEUR POUR MODULES
 # ===================================
 
+
 def require_state(func):
     """
     Décorateur pour garantir que le state est initialisé
@@ -413,15 +417,18 @@ def require_state(func):
             state = get_state()
             ...
     """
+
     def wrapper(*args, **kwargs):
         StateManager.init()
         return func(*args, **kwargs)
+
     return wrapper
 
 
 # ===================================
 # WIDGET DEBUG (optionnel)
 # ===================================
+
 
 def render_state_debug():
     """Widget de debug pour afficher le state (dev uniquement)"""

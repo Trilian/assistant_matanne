@@ -12,11 +12,25 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from datetime import datetime, date, timedelta
 from src.core.database import get_db_context
 from src.core.models import (
-    User, UserProfile, Notification,
-    Ingredient, Recipe, RecipeIngredient, InventoryItem, BatchMeal, ShoppingList,
-    ChildProfile, WellbeingEntry, Routine, RoutineTask,
-    Project, ProjectTask, GardenItem, GardenLog,
-    CalendarEvent, WeatherLog
+    User,
+    UserProfile,
+    Notification,
+    Ingredient,
+    Recipe,
+    RecipeIngredient,
+    InventoryItem,
+    BatchMeal,
+    ShoppingList,
+    ChildProfile,
+    WellbeingEntry,
+    Routine,
+    RoutineTask,
+    Project,
+    ProjectTask,
+    GardenItem,
+    GardenLog,
+    CalendarEvent,
+    WeatherLog,
 )
 
 
@@ -60,11 +74,7 @@ def seed_users():
         anne = User(
             username="Anne",
             email="anne@matanne.app",
-            settings={
-                "theme": "light",
-                "notifications": True,
-                "language": "fr"
-            }
+            settings={"theme": "light", "notifications": True, "language": "fr"},
         )
         db.add(anne)
         db.flush()
@@ -75,7 +85,7 @@ def seed_users():
             profile_name="Anne (Maman)",
             role="parent",
             preferences={"favoris": ["cuisine", "jardin"]},
-            is_active=True
+            is_active=True,
         )
 
         profil_mathieu = UserProfile(
@@ -83,7 +93,7 @@ def seed_users():
             profile_name="Mathieu (Papa)",
             role="parent",
             preferences={"favoris": ["projets", "jardin"]},
-            is_active=True
+            is_active=True,
         )
 
         db.add_all([profil_anne, profil_mathieu])
@@ -105,31 +115,26 @@ def seed_ingredients():
         ("Pommes de terre", "kg", "Légumes"),
         ("Courgettes", "kg", "Légumes"),
         ("Poivrons", "pcs", "Légumes"),
-
         # Féculents
         ("Pâtes", "g", "Féculents"),
         ("Riz", "g", "Féculents"),
         ("Farine", "g", "Féculents"),
         ("Pain", "pcs", "Féculents"),
-
         # Protéines
         ("Poulet", "g", "Protéines"),
         ("Boeuf haché", "g", "Protéines"),
         ("Oeufs", "pcs", "Protéines"),
         ("Saumon", "g", "Protéines"),
-
         # Laitier
         ("Lait", "L", "Laitier"),
         ("Fromage râpé", "g", "Laitier"),
         ("Yaourts", "pcs", "Laitier"),
         ("Beurre", "g", "Laitier"),
         ("Crème fraîche", "mL", "Laitier"),
-
         # Fruits
         ("Pommes", "pcs", "Fruits"),
         ("Bananes", "pcs", "Fruits"),
         ("Oranges", "pcs", "Fruits"),
-
         # Épices et autres
         ("Sel", "g", "Épices"),
         ("Poivre", "g", "Épices"),
@@ -160,7 +165,7 @@ def seed_recipes():
             prep_time=10,
             cook_time=15,
             servings=4,
-            difficulty="Facile"
+            difficulty="Facile",
         )
         db.add(r1)
         db.flush()
@@ -170,11 +175,17 @@ def seed_recipes():
         ing_tomates = db.query(Ingredient).filter(Ingredient.name == "Tomates").first()
         ing_ail = db.query(Ingredient).filter(Ingredient.name == "Ail").first()
 
-        db.add_all([
-            RecipeIngredient(recipe_id=r1.id, ingredient_id=ing_pates.id, quantity=400, unit="g"),
-            RecipeIngredient(recipe_id=r1.id, ingredient_id=ing_tomates.id, quantity=0.5, unit="kg"),
-            RecipeIngredient(recipe_id=r1.id, ingredient_id=ing_ail.id, quantity=2, unit="pcs"),
-        ])
+        db.add_all(
+            [
+                RecipeIngredient(
+                    recipe_id=r1.id, ingredient_id=ing_pates.id, quantity=400, unit="g"
+                ),
+                RecipeIngredient(
+                    recipe_id=r1.id, ingredient_id=ing_tomates.id, quantity=0.5, unit="kg"
+                ),
+                RecipeIngredient(recipe_id=r1.id, ingredient_id=ing_ail.id, quantity=2, unit="pcs"),
+            ]
+        )
 
         # Recette 2 : Poulet rôti
         r2 = Recipe(
@@ -184,7 +195,7 @@ def seed_recipes():
             prep_time=15,
             cook_time=45,
             servings=4,
-            difficulty="Moyen"
+            difficulty="Moyen",
         )
         db.add(r2)
         db.flush()
@@ -193,11 +204,19 @@ def seed_recipes():
         ing_carottes = db.query(Ingredient).filter(Ingredient.name == "Carottes").first()
         ing_pdt = db.query(Ingredient).filter(Ingredient.name == "Pommes de terre").first()
 
-        db.add_all([
-            RecipeIngredient(recipe_id=r2.id, ingredient_id=ing_poulet.id, quantity=1200, unit="g"),
-            RecipeIngredient(recipe_id=r2.id, ingredient_id=ing_carottes.id, quantity=0.5, unit="kg"),
-            RecipeIngredient(recipe_id=r2.id, ingredient_id=ing_pdt.id, quantity=0.6, unit="kg"),
-        ])
+        db.add_all(
+            [
+                RecipeIngredient(
+                    recipe_id=r2.id, ingredient_id=ing_poulet.id, quantity=1200, unit="g"
+                ),
+                RecipeIngredient(
+                    recipe_id=r2.id, ingredient_id=ing_carottes.id, quantity=0.5, unit="kg"
+                ),
+                RecipeIngredient(
+                    recipe_id=r2.id, ingredient_id=ing_pdt.id, quantity=0.6, unit="kg"
+                ),
+            ]
+        )
 
         # Recette 3 : Omelette
         r3 = Recipe(
@@ -207,7 +226,7 @@ def seed_recipes():
             prep_time=5,
             cook_time=10,
             servings=2,
-            difficulty="Facile"
+            difficulty="Facile",
         )
         db.add(r3)
         db.flush()
@@ -215,10 +234,16 @@ def seed_recipes():
         ing_oeufs = db.query(Ingredient).filter(Ingredient.name == "Oeufs").first()
         ing_beurre = db.query(Ingredient).filter(Ingredient.name == "Beurre").first()
 
-        db.add_all([
-            RecipeIngredient(recipe_id=r3.id, ingredient_id=ing_oeufs.id, quantity=4, unit="pcs"),
-            RecipeIngredient(recipe_id=r3.id, ingredient_id=ing_beurre.id, quantity=20, unit="g"),
-        ])
+        db.add_all(
+            [
+                RecipeIngredient(
+                    recipe_id=r3.id, ingredient_id=ing_oeufs.id, quantity=4, unit="pcs"
+                ),
+                RecipeIngredient(
+                    recipe_id=r3.id, ingredient_id=ing_beurre.id, quantity=20, unit="g"
+                ),
+            ]
+        )
 
         # Recette 4 : Gratin dauphinois (générée par IA)
         r4 = Recipe(
@@ -230,7 +255,7 @@ def seed_recipes():
             servings=6,
             difficulty="Moyen",
             ai_generated=True,
-            ai_score=92.5
+            ai_score=92.5,
         )
         db.add(r4)
         db.flush()
@@ -238,11 +263,19 @@ def seed_recipes():
         ing_creme = db.query(Ingredient).filter(Ingredient.name == "Crème fraîche").first()
         ing_fromage = db.query(Ingredient).filter(Ingredient.name == "Fromage râpé").first()
 
-        db.add_all([
-            RecipeIngredient(recipe_id=r4.id, ingredient_id=ing_pdt.id, quantity=1.0, unit="kg"),
-            RecipeIngredient(recipe_id=r4.id, ingredient_id=ing_creme.id, quantity=300, unit="mL"),
-            RecipeIngredient(recipe_id=r4.id, ingredient_id=ing_fromage.id, quantity=150, unit="g"),
-        ])
+        db.add_all(
+            [
+                RecipeIngredient(
+                    recipe_id=r4.id, ingredient_id=ing_pdt.id, quantity=1.0, unit="kg"
+                ),
+                RecipeIngredient(
+                    recipe_id=r4.id, ingredient_id=ing_creme.id, quantity=300, unit="mL"
+                ),
+                RecipeIngredient(
+                    recipe_id=r4.id, ingredient_id=ing_fromage.id, quantity=150, unit="g"
+                ),
+            ]
+        )
 
         db.commit()
 
@@ -272,10 +305,7 @@ def seed_inventory():
             ingredient = db.query(Ingredient).filter(Ingredient.name == nom).first()
             if ingredient:
                 item = InventoryItem(
-                    ingredient_id=ingredient.id,
-                    quantity=qty,
-                    min_quantity=seuil,
-                    location=location
+                    ingredient_id=ingredient.id, quantity=qty, min_quantity=seuil, location=location
                 )
                 db.add(item)
 
@@ -300,7 +330,7 @@ def seed_batch_meals():
                 scheduled_date=today + timedelta(days=i),
                 portions=4,
                 status="TERMINE" if i < 2 else "A_FAIRE",
-                ai_planned=(i % 2 == 0)
+                ai_planned=(i % 2 == 0),
             )
             db.add(batch)
 
@@ -316,9 +346,7 @@ def seed_child_and_family():
     with get_db_context() as db:
         # Jules
         jules = ChildProfile(
-            name="Jules",
-            birth_date=date(2024, 6, 22),
-            notes="Notre petit bout de chou ❤️"
+            name="Jules", birth_date=date(2024, 6, 22), notes="Notre petit bout de chou ❤️"
         )
         db.add(jules)
         db.flush()
@@ -331,7 +359,7 @@ def seed_child_and_family():
                 mood=["😊 BIEN", "😐 MOYEN", "😊 BIEN"][i % 3],
                 sleep_hours=7.5 + (i % 3) * 0.5,
                 activity=["Crèche", "Promenade", "Jeux à la maison"][i % 3],
-                notes=f"Journée du {(date.today() - timedelta(days=i)).strftime('%d/%m')}"
+                notes=f"Journée du {(date.today() - timedelta(days=i)).strftime('%d/%m')}",
             )
             db.add(entry)
 
@@ -341,7 +369,7 @@ def seed_child_and_family():
             name="Routine du soir",
             description="Routine avant le coucher",
             frequency="quotidien",
-            is_active=True
+            is_active=True,
         )
         db.add(routine)
         db.flush()
@@ -357,10 +385,7 @@ def seed_child_and_family():
 
         for nom, heure, statut in taches:
             task = RoutineTask(
-                routine_id=routine.id,
-                task_name=nom,
-                scheduled_time=heure,
-                status=statut
+                routine_id=routine.id, task_name=nom, scheduled_time=heure, status=statut
             )
             db.add(task)
 
@@ -383,17 +408,39 @@ def seed_projects():
             end_date=date(2025, 12, 31),
             priority="HAUTE",
             status="EN_COURS",
-            progress=35
+            progress=35,
         )
         db.add(p1)
         db.flush()
 
-        db.add_all([
-            ProjectTask(project_id=p1.id, task_name="Préparer le sol", status="TERMINE", due_date=date(2025, 4, 15)),
-            ProjectTask(project_id=p1.id, task_name="Acheter graines", status="TERMINE", due_date=date(2025, 5, 1)),
-            ProjectTask(project_id=p1.id, task_name="Planter légumes", status="EN_COURS", due_date=date(2025, 5, 15)),
-            ProjectTask(project_id=p1.id, task_name="Installer arrosage", status="A_FAIRE", due_date=date(2025, 6, 1)),
-        ])
+        db.add_all(
+            [
+                ProjectTask(
+                    project_id=p1.id,
+                    task_name="Préparer le sol",
+                    status="TERMINE",
+                    due_date=date(2025, 4, 15),
+                ),
+                ProjectTask(
+                    project_id=p1.id,
+                    task_name="Acheter graines",
+                    status="TERMINE",
+                    due_date=date(2025, 5, 1),
+                ),
+                ProjectTask(
+                    project_id=p1.id,
+                    task_name="Planter légumes",
+                    status="EN_COURS",
+                    due_date=date(2025, 5, 15),
+                ),
+                ProjectTask(
+                    project_id=p1.id,
+                    task_name="Installer arrosage",
+                    status="A_FAIRE",
+                    due_date=date(2025, 6, 1),
+                ),
+            ]
+        )
 
         # Projet 2
         p2 = Project(
@@ -404,15 +451,17 @@ def seed_projects():
             end_date=date.today() + timedelta(days=30),
             priority="MOYENNE",
             status="A_FAIRE",
-            progress=0
+            progress=0,
         )
         db.add(p2)
         db.flush()
 
-        db.add_all([
-            ProjectTask(project_id=p2.id, task_name="Choisir couleurs", status="A_FAIRE"),
-            ProjectTask(project_id=p2.id, task_name="Acheter peinture", status="A_FAIRE"),
-        ])
+        db.add_all(
+            [
+                ProjectTask(project_id=p2.id, task_name="Choisir couleurs", status="A_FAIRE"),
+                ProjectTask(project_id=p2.id, task_name="Acheter peinture", status="A_FAIRE"),
+            ]
+        )
 
         db.commit()
 
@@ -439,7 +488,7 @@ def seed_garden():
                 harvest_date=harvest,
                 quantity=qty,
                 watering_frequency_days=water_freq,
-                last_watered=date.today() - timedelta(days=1)
+                last_watered=date.today() - timedelta(days=1),
             )
             db.add(item)
             db.flush()
@@ -449,7 +498,7 @@ def seed_garden():
                 item_id=item.id,
                 action="Arrosage",
                 date=date.today() - timedelta(days=1),
-                notes="Arrosage régulier"
+                notes="Arrosage régulier",
             )
             db.add(log)
 
@@ -472,11 +521,7 @@ def seed_notifications(user_id: int):
 
         for module, message, priority, read in notifs:
             notif = Notification(
-                user_id=user_id,
-                module=module,
-                message=message,
-                priority=priority,
-                read=read
+                user_id=user_id, module=module, message=message, priority=priority, read=read
             )
             db.add(notif)
 
@@ -495,7 +540,7 @@ def main():
     # Demander confirmation pour nettoyer
     response = input("⚠️  Nettoyer la base avant (supprime toutes les données) ? (o/N) : ")
 
-    if response.lower() in ['o', 'oui', 'y', 'yes']:
+    if response.lower() in ["o", "oui", "y", "yes"]:
         clear_database()
         print()
 

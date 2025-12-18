@@ -30,14 +30,16 @@ def get_supabase_url():
     except KeyError as e:
         logger.error(f"Secret manquant: {e}")
         logger.error("Configure .streamlit/secrets.toml avec:")
-        logger.error("""
+        logger.error(
+            """
 [db]
 host = "db.xxxxx.supabase.co"
 port = "5432"
 name = "postgres"
 user = "postgres"
 password = "ton_mot_de_passe"
-        """)
+        """
+        )
         sys.exit(1)
 
 
@@ -50,11 +52,15 @@ def drop_all_tables(engine):
         conn.execute(text("SET session_replication_role = 'replica';"))
 
         # Récupérer toutes les tables du schéma public
-        result = conn.execute(text("""
+        result = conn.execute(
+            text(
+                """
                                    SELECT tablename
                                    FROM pg_tables
                                    WHERE schemaname = 'public'
-                                   """))
+                                   """
+            )
+        )
 
         tables = [row[0] for row in result]
 
@@ -81,12 +87,16 @@ def create_all_tables(engine):
 
     # Lister les tables créées
     with engine.connect() as conn:
-        result = conn.execute(text("""
+        result = conn.execute(
+            text(
+                """
                                    SELECT tablename
                                    FROM pg_tables
                                    WHERE schemaname = 'public'
                                    ORDER BY tablename
-                                   """))
+                                   """
+            )
+        )
 
         tables = [row[0] for row in result]
         logger.info(f"📋 {len(tables)} tables créées:")
@@ -100,24 +110,33 @@ def seed_minimal_data(engine):
 
     with engine.connect() as conn:
         # Utilisateur de test
-        conn.execute(text("""
+        conn.execute(
+            text(
+                """
                           INSERT INTO utilisateurs (nom_utilisateur, email, parametres, cree_le, modifie_le)
                           VALUES ('Anne', 'anne@test.fr', '{}', NOW(), NOW())
-                          """))
+                          """
+            )
+        )
 
         # Quelques ingrédients de base
         ingredients = [
-            ('Tomates', 'kg', 'Légumes'),
-            ('Pâtes', 'g', 'Féculents'),
-            ('Oeufs', 'pcs', 'Protéines'),
-            ('Fromage', 'g', 'Laitier'),
+            ("Tomates", "kg", "Légumes"),
+            ("Pâtes", "g", "Féculents"),
+            ("Oeufs", "pcs", "Protéines"),
+            ("Fromage", "g", "Laitier"),
         ]
 
         for nom, unite, categorie in ingredients:
-            conn.execute(text("""
+            conn.execute(
+                text(
+                    """
                               INSERT INTO ingredients (nom, unite, categorie, cree_le)
                               VALUES (:nom, :unite, :categorie, NOW())
-                              """), {"nom": nom, "unite": unite, "categorie": categorie})
+                              """
+                ),
+                {"nom": nom, "unite": unite, "categorie": categorie},
+            )
 
         conn.commit()
 
@@ -148,12 +167,7 @@ def main():
         # Connexion
         database_url = get_supabase_url()
         engine = create_engine(
-            database_url,
-            echo=False,
-            connect_args={
-                "connect_timeout": 10,
-                "sslmode": "require"
-            }
+            database_url, echo=False, connect_args={"connect_timeout": 10, "sslmode": "require"}
         )
 
         # Test connexion

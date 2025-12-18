@@ -19,33 +19,39 @@ from src.core.config import settings
 # HELPERS
 # ===================================
 
+
 def charger_plantes() -> pd.DataFrame:
     """Charge toutes les plantes du jardin"""
     with get_db_context() as db:
         items = db.query(GardenItem).order_by(GardenItem.name).all()
 
-        return pd.DataFrame([{
-            "id": i.id,
-            "nom": i.name,
-            "categorie": i.category,
-            "plantation": i.planting_date,
-            "recolte": i.harvest_date,
-            "quantite": i.quantity,
-            "emplacement": i.location or "—",
-            "arrosage_freq": i.watering_frequency_days,
-            "dernier_arrosage": i.last_watered,
-            "notes": i.notes or ""
-        } for i in items])
+        return pd.DataFrame(
+            [
+                {
+                    "id": i.id,
+                    "nom": i.name,
+                    "categorie": i.category,
+                    "plantation": i.planting_date,
+                    "recolte": i.harvest_date,
+                    "quantite": i.quantity,
+                    "emplacement": i.location or "—",
+                    "arrosage_freq": i.watering_frequency_days,
+                    "dernier_arrosage": i.last_watered,
+                    "notes": i.notes or "",
+                }
+                for i in items
+            ]
+        )
 
 
 def ajouter_plante(
-        nom: str,
-        categorie: str,
-        plantation: date,
-        quantite: int,
-        emplacement: str,
-        freq_arrosage: int,
-        recolte: date = None
+    nom: str,
+    categorie: str,
+    plantation: date,
+    quantite: int,
+    emplacement: str,
+    freq_arrosage: int,
+    recolte: date = None,
 ):
     """Ajoute une plante au jardin"""
     with get_db_context() as db:
@@ -57,7 +63,7 @@ def ajouter_plante(
             quantity=quantite,
             location=emplacement,
             watering_frequency_days=freq_arrosage,
-            last_watered=date.today()
+            last_watered=date.today(),
         )
         db.add(plante)
         db.commit()
@@ -72,10 +78,7 @@ def arroser_plante(item_id: int):
 
             # Ajouter log
             log = GardenLog(
-                item_id=item_id,
-                action="Arrosage",
-                date=date.today(),
-                notes="Arrosage régulier"
+                item_id=item_id, action="Arrosage", date=date.today(), notes="Arrosage régulier"
             )
             db.add(log)
             db.commit()
@@ -84,12 +87,7 @@ def arroser_plante(item_id: int):
 def ajouter_log(item_id: int, action: str, notes: str = ""):
     """Ajoute une entrée au journal du jardin"""
     with get_db_context() as db:
-        log = GardenLog(
-            item_id=item_id,
-            action=action,
-            date=date.today(),
-            notes=notes
-        )
+        log = GardenLog(item_id=item_id, action=action, date=date.today(), notes=notes)
         db.add(log)
         db.commit()
 
@@ -106,12 +104,16 @@ def get_plantes_a_arroser() -> List[Dict]:
             if plante.last_watered:
                 delta = (today - plante.last_watered).days
                 if delta >= plante.watering_frequency_days:
-                    a_arroser.append({
-                        "id": plante.id,
-                        "nom": plante.name,
-                        "jours": delta,
-                        "urgence": "haute" if delta > plante.watering_frequency_days + 1 else "normale"
-                    })
+                    a_arroser.append(
+                        {
+                            "id": plante.id,
+                            "nom": plante.name,
+                            "jours": delta,
+                            "urgence": "haute"
+                            if delta > plante.watering_frequency_days + 1
+                            else "normale",
+                        }
+                    )
 
     return a_arroser
 
@@ -124,18 +126,15 @@ def get_recoltes_proches() -> List[Dict]:
         today = date.today()
         future = today + timedelta(days=14)
 
-        plantes = db.query(GardenItem).filter(
-            GardenItem.harvest_date != None,
-            GardenItem.harvest_date.between(today, future)
-        ).all()
+        plantes = (
+            db.query(GardenItem)
+            .filter(GardenItem.harvest_date != None, GardenItem.harvest_date.between(today, future))
+            .all()
+        )
 
         for plante in plantes:
             delta = (plante.harvest_date - today).days
-            recoltes.append({
-                "nom": plante.name,
-                "date": plante.harvest_date,
-                "jours": delta
-            })
+            recoltes.append({"nom": plante.name, "date": plante.harvest_date, "jours": delta})
 
     return recoltes
 
@@ -143,12 +142,7 @@ def get_recoltes_proches() -> List[Dict]:
 def get_meteo_mock() -> Dict:
     """Récupère la météo (mock pour démo)"""
     # TODO: Intégrer vraie API météo
-    return {
-        "condition": "Ensoleillé",
-        "temp": 22,
-        "humidity": 65,
-        "precipitation": 0
-    }
+    return {"condition": "Ensoleillé", "temp": 22, "humidity": 65, "precipitation": 0}
 
 
 def get_saison() -> str:
@@ -169,6 +163,7 @@ def get_saison() -> str:
 # MODULE PRINCIPAL
 # ===================================
 
+
 def app():
     """Module Jardin avec IA et Météo intégrées"""
 
@@ -188,7 +183,7 @@ def app():
     saison = get_saison()
 
     with col_m1:
-        st.metric("🌤️ Météo", meteo['condition'])
+        st.metric("🌤️ Météo", meteo["condition"])
 
     with col_m2:
         st.metric("🌡️ Température", f"{meteo['temp']}°C")
@@ -208,7 +203,7 @@ def app():
     a_arroser = get_plantes_a_arroser()
 
     if a_arroser:
-        urgentes = [p for p in a_arroser if p['urgence'] == 'haute']
+        urgentes = [p for p in a_arroser if p["urgence"] == "haute"]
 
         if urgentes:
             st.error(f"💧 **{len(urgentes)} plante(s) à arroser URGENT**")
@@ -219,12 +214,14 @@ def app():
             col_a1, col_a2 = st.columns([3, 1])
 
             with col_a1:
-                emoji = "🔴" if plante['urgence'] == 'haute' else "🟡"
-                st.write(f"{emoji} **{plante['nom']}** — Dernier arrosage il y a {plante['jours']} jours")
+                emoji = "🔴" if plante["urgence"] == "haute" else "🟡"
+                st.write(
+                    f"{emoji} **{plante['nom']}** — Dernier arrosage il y a {plante['jours']} jours"
+                )
 
             with col_a2:
                 if st.button("💧 Arrosé", key=f"water_{plante['id']}", use_container_width=True):
-                    arroser_plante(plante['id'])
+                    arroser_plante(plante["id"])
                     st.success("Arrosage noté !")
                     st.rerun()
 
@@ -236,19 +233,18 @@ def app():
     if recoltes:
         st.info(f"🌾 **{len(recoltes)} récolte(s) à venir dans les 2 semaines**")
         for recolte in recoltes:
-            st.write(f"• **{recolte['nom']}** : dans {recolte['jours']} jours ({recolte['date'].strftime('%d/%m')})")
+            st.write(
+                f"• **{recolte['nom']}** : dans {recolte['jours']} jours ({recolte['date'].strftime('%d/%m')})"
+            )
         st.markdown("---")
 
     # ===================================
     # TABS PRINCIPAUX
     # ===================================
 
-    tab1, tab2, tab3, tab4 = st.tabs([
-        "🌿 Mon Jardin",
-        "🤖 Conseils IA",
-        "➕ Ajouter Plante",
-        "📊 Journal"
-    ])
+    tab1, tab2, tab3, tab4 = st.tabs(
+        ["🌿 Mon Jardin", "🤖 Conseils IA", "➕ Ajouter Plante", "📊 Journal"]
+    )
 
     # ===================================
     # TAB 1 : MON JARDIN
@@ -272,7 +268,7 @@ def app():
             with col_f2:
                 filtre_emplacement = st.selectbox(
                     "Emplacement",
-                    ["Tous"] + sorted([e for e in df["emplacement"].unique() if e != "—"])
+                    ["Tous"] + sorted([e for e in df["emplacement"].unique() if e != "—"]),
                 )
 
             # Appliquer filtres
@@ -287,8 +283,8 @@ def app():
             # Afficher plantes
             for _, plante in df_filtre.iterrows():
                 with st.expander(
-                        f"🌱 **{plante['nom']}** ({plante['quantite']}x) — {plante['categorie']}",
-                        expanded=False
+                    f"🌱 **{plante['nom']}** ({plante['quantite']}x) — {plante['categorie']}",
+                    expanded=False,
                 ):
                     col_p1, col_p2 = st.columns([2, 1])
 
@@ -296,32 +292,44 @@ def app():
                         st.write(f"**Emplacement :** {plante['emplacement']}")
                         st.write(f"**Planté le :** {plante['plantation'].strftime('%d/%m/%Y')}")
 
-                        if plante['recolte']:
-                            st.write(f"**Récolte prévue :** {plante['recolte'].strftime('%d/%m/%Y')}")
+                        if plante["recolte"]:
+                            st.write(
+                                f"**Récolte prévue :** {plante['recolte'].strftime('%d/%m/%Y')}"
+                            )
 
                         st.write(f"**Arrosage :** tous les {plante['arrosage_freq']} jours")
 
-                        if plante['dernier_arrosage']:
-                            delta = (date.today() - plante['dernier_arrosage']).days
+                        if plante["dernier_arrosage"]:
+                            delta = (date.today() - plante["dernier_arrosage"]).days
                             st.write(f"**Dernier arrosage :** il y a {delta} jours")
 
-                        if plante['notes']:
+                        if plante["notes"]:
                             st.caption(f"Notes : {plante['notes']}")
 
                     with col_p2:
                         # Actions rapides
-                        if st.button("💧 Arroser", key=f"arroser_{plante['id']}", use_container_width=True):
-                            arroser_plante(plante['id'])
+                        if st.button(
+                            "💧 Arroser", key=f"arroser_{plante['id']}", use_container_width=True
+                        ):
+                            arroser_plante(plante["id"])
                             st.success("Arrosage noté")
                             st.rerun()
 
-                        if st.button("🌾 Récolter", key=f"harvest_{plante['id']}", use_container_width=True):
-                            ajouter_log(plante['id'], "Récolte", f"Récolte de {plante['quantite']}x {plante['nom']}")
+                        if st.button(
+                            "🌾 Récolter", key=f"harvest_{plante['id']}", use_container_width=True
+                        ):
+                            ajouter_log(
+                                plante["id"],
+                                "Récolte",
+                                f"Récolte de {plante['quantite']}x {plante['nom']}",
+                            )
                             st.success("Récolte notée")
                             st.rerun()
 
-                        if st.button("✂️ Tailler", key=f"prune_{plante['id']}", use_container_width=True):
-                            ajouter_log(plante['id'], "Taille", "Taille d'entretien")
+                        if st.button(
+                            "✂️ Tailler", key=f"prune_{plante['id']}", use_container_width=True
+                        ):
+                            ajouter_log(plante["id"], "Taille", "Taille d'entretien")
                             st.success("Taille notée")
                             st.rerun()
 
@@ -333,7 +341,14 @@ def app():
                         with st.form(f"form_log_{plante['id']}"):
                             action = st.selectbox(
                                 "Action",
-                                ["Arrosage", "Taille", "Fertilisation", "Récolte", "Observation", "Autre"]
+                                [
+                                    "Arrosage",
+                                    "Taille",
+                                    "Fertilisation",
+                                    "Récolte",
+                                    "Observation",
+                                    "Autre",
+                                ],
                             )
                             notes_log = st.text_area("Notes")
 
@@ -341,7 +356,7 @@ def app():
 
                             with col_l1:
                                 if st.form_submit_button("✅ Enregistrer"):
-                                    ajouter_log(plante['id'], action, notes_log)
+                                    ajouter_log(plante["id"], action, notes_log)
                                     st.success("Log enregistré")
                                     del st.session_state[f"logging_{plante['id']}"]
                                     st.rerun()
@@ -422,7 +437,7 @@ def app():
                 "Printemps": ["Tomates", "Courgettes", "Salades", "Radis", "Carottes"],
                 "Été": ["Haricots verts", "Concombres", "Aubergines", "Poivrons"],
                 "Automne": ["Épinards", "Mâche", "Oignons", "Ail", "Choux"],
-                "Hiver": ["Fèves", "Petits pois", "Échalotes"]
+                "Hiver": ["Fèves", "Petits pois", "Échalotes"],
             }
 
             with st.expander(f"🌸 Plantations {saison}", expanded=True):
@@ -443,31 +458,26 @@ def app():
 
             with col_a1:
                 categorie = st.selectbox(
-                    "Catégorie",
-                    ["Légume", "Fruit", "Aromatique", "Fleur", "Arbuste", "Autre"]
+                    "Catégorie", ["Légume", "Fruit", "Aromatique", "Fleur", "Arbuste", "Autre"]
                 )
 
                 quantite = st.number_input("Quantité", 1, 100, 1)
 
                 emplacement = st.selectbox(
                     "Emplacement",
-                    ["Potager", "Jardinière", "Serre", "Balcon", "Pleine terre", "Autre"]
+                    ["Potager", "Jardinière", "Serre", "Balcon", "Pleine terre", "Autre"],
                 )
 
             with col_a2:
                 plantation = st.date_input("Date de plantation", value=date.today())
 
-                recolte = st.date_input(
-                    "Date de récolte prévue (optionnel)",
-                    value=None
-                )
+                recolte = st.date_input("Date de récolte prévue (optionnel)", value=None)
 
-                freq_arrosage = st.number_input(
-                    "Fréquence d'arrosage (jours)",
-                    1, 14, 2
-                )
+                freq_arrosage = st.number_input("Fréquence d'arrosage (jours)", 1, 14, 2)
 
-            notes = st.text_area("Notes (optionnel)", placeholder="Variété, exposition, particularités...")
+            notes = st.text_area(
+                "Notes (optionnel)", placeholder="Variété, exposition, particularités..."
+            )
 
             submitted = st.form_submit_button("🌱 Ajouter au jardin", type="primary")
 
@@ -476,8 +486,7 @@ def app():
                     st.error("Le nom est obligatoire")
                 else:
                     ajouter_plante(
-                        nom, categorie, plantation, quantite,
-                        emplacement, freq_arrosage, recolte
+                        nom, categorie, plantation, quantite, emplacement, freq_arrosage, recolte
                     )
                     st.success(f"✅ {nom} ajouté au jardin !")
                     st.balloons()
@@ -492,7 +501,7 @@ def app():
             {"nom": "Tomates cerises", "cat": "Légume", "freq": 2},
             {"nom": "Basilic", "cat": "Aromatique", "freq": 1},
             {"nom": "Fraisiers", "cat": "Fruit", "freq": 2},
-            {"nom": "Courgettes", "cat": "Légume", "freq": 3}
+            {"nom": "Courgettes", "cat": "Légume", "freq": 3},
         ]
 
         col_s1, col_s2 = st.columns(2)
@@ -502,17 +511,10 @@ def app():
 
             with col:
                 if st.button(
-                        f"🌱 {sugg['nom']}",
-                        use_container_width=True,
-                        key=f"quick_{sugg['nom']}"
+                    f"🌱 {sugg['nom']}", use_container_width=True, key=f"quick_{sugg['nom']}"
                 ):
                     ajouter_plante(
-                        sugg['nom'],
-                        sugg['cat'],
-                        date.today(),
-                        1,
-                        "Potager",
-                        sugg['freq']
+                        sugg["nom"], sugg["cat"], date.today(), 1, "Potager", sugg["freq"]
                     )
                     st.success(f"{sugg['nom']} ajouté !")
                     st.rerun()
@@ -553,18 +555,22 @@ def app():
             st.markdown("### 📋 Dernières actions")
 
             with get_db_context() as db:
-                logs = db.query(GardenLog, GardenItem).join(
-                    GardenItem, GardenLog.item_id == GardenItem.id
-                ).order_by(
-                    GardenLog.date.desc()
-                ).limit(20).all()
+                logs = (
+                    db.query(GardenLog, GardenItem)
+                    .join(GardenItem, GardenLog.item_id == GardenItem.id)
+                    .order_by(GardenLog.date.desc())
+                    .limit(20)
+                    .all()
+                )
 
                 if logs:
                     for log, plante in logs:
                         col_log1, col_log2 = st.columns([3, 1])
 
                         with col_log1:
-                            st.write(f"**{log.date.strftime('%d/%m/%Y')}** — {log.action} : {plante.name}")
+                            st.write(
+                                f"**{log.date.strftime('%d/%m/%Y')}** — {log.action} : {plante.name}"
+                            )
                             if log.notes:
                                 st.caption(log.notes)
 
@@ -578,8 +584,5 @@ def app():
             if st.button("📤 Exporter le jardin (CSV)"):
                 csv = df.to_csv(index=False)
                 st.download_button(
-                    "Télécharger",
-                    csv,
-                    f"jardin_{date.today().strftime('%Y%m%d')}.csv",
-                    "text/csv"
+                    "Télécharger", csv, f"jardin_{date.today().strftime('%Y%m%d')}.csv", "text/csv"
                 )

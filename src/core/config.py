@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     def DATABASE_URL(self) -> str:
         """Construit l'URL avec fallbacks intelligents"""
         # 1. Essayer st.secrets d'abord
-        if hasattr(st, 'secrets') and 'db' in st.secrets:
+        if hasattr(st, "secrets") and "db" in st.secrets:
             try:
                 db = st.secrets["db"]
                 return (
@@ -75,7 +75,7 @@ class Settings(BaseSettings):
     def get_mistral_key(self) -> str:
         """Récupère clé Mistral avec fallbacks"""
         # 1. st.secrets
-        if hasattr(st, 'secrets') and 'mistral' in st.secrets:
+        if hasattr(st, "secrets") and "mistral" in st.secrets:
             try:
                 return st.secrets["mistral"]["api_key"]
             except KeyError:
@@ -158,7 +158,7 @@ class Settings(BaseSettings):
             "MISTRAL_MODEL": self.MISTRAL_MODEL,
             # Ne jamais logger les secrets !
             "DB_CONFIGURED": bool(self.DB_HOST or self.DATABASE_URL),
-            "MISTRAL_CONFIGURED": bool(self.MISTRAL_API_KEY)
+            "MISTRAL_CONFIGURED": bool(self.MISTRAL_API_KEY),
         }
 
     class Config:

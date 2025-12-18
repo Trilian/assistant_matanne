@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 # SERVICE
 # ===================================
 
+
 class InventaireAIService:
     """Service IA pour l'inventaire"""
 
@@ -29,10 +30,7 @@ class InventaireAIService:
     # DÉTECTION GASPILLAGE
     # ===================================
 
-    async def detecter_gaspillage(
-            self,
-            inventaire: List[Dict]
-    ) -> Dict:
+    async def detecter_gaspillage(self, inventaire: List[Dict]) -> Dict:
         """
         Analyse l'inventaire et détecte les risques de gaspillage
 
@@ -46,9 +44,9 @@ class InventaireAIService:
 
         # Filtrer items à risque
         items_risque = [
-            i for i in inventaire
-            if i.get("jours_peremption") is not None
-               and i["jours_peremption"] <= 7
+            i
+            for i in inventaire
+            if i.get("jours_peremption") is not None and i["jours_peremption"] <= 7
         ]
 
         if not items_risque:
@@ -56,14 +54,13 @@ class InventaireAIService:
                 "statut": "OK",
                 "message": "Aucun risque de gaspillage détecté",
                 "recettes_urgentes": [],
-                "conseils": []
+                "conseils": [],
             }
 
         # Construire prompt
-        items_str = ", ".join([
-            f"{i['nom']} (expire dans {i['jours_peremption']}j)"
-            for i in items_risque[:10]
-        ])
+        items_str = ", ".join(
+            [f"{i['nom']} (expire dans {i['jours_peremption']}j)" for i in items_risque[:10]]
+        )
 
         prompt = f"""Analyse ces articles proches de la péremption:
 
@@ -101,18 +98,14 @@ JSON uniquement !"""
                 "statut": "ATTENTION",
                 "items_risque": len(items_risque),
                 "recettes_urgentes": [f"Utiliser {items_str} rapidement"],
-                "conseils": ["Consommer ou congeler rapidement"]
+                "conseils": ["Consommer ou congeler rapidement"],
             }
 
     # ===================================
     # SUGGESTIONS RECETTES
     # ===================================
 
-    async def suggerer_recettes_stock(
-            self,
-            inventaire: List[Dict],
-            nb: int = 5
-    ) -> List[Dict]:
+    async def suggerer_recettes_stock(self, inventaire: List[Dict], nb: int = 5) -> List[Dict]:
         """
         Suggère des recettes faisables avec le stock actuel
 
@@ -126,7 +119,9 @@ JSON uniquement !"""
             f"{i['nom']} ({format_quantity(i['quantite'])} {i['unite']})"
             for i in inventaire
             if i["quantite"] > 0
-        ][:30]  # Limiter pour le prompt
+        ][
+            :30
+        ]  # Limiter pour le prompt
 
         if not items_dispo:
             return []
@@ -170,9 +165,7 @@ JSON uniquement !"""
     # ===================================
 
     async def predire_consommation(
-            self,
-            article: Dict,
-            historique: Optional[List[Dict]] = None
+        self, article: Dict, historique: Optional[List[Dict]] = None
     ) -> Dict:
         """
         Prédit quand un article sera épuisé
@@ -222,19 +215,18 @@ JSON uniquement !"""
             jours = int((article["quantite"] / article["seuil"]) * 7)
             return {
                 "jours_avant_epuisement": max(jours, 1),
-                "date_rachat_suggeree": (date.today() + timedelta(days=max(jours - 2, 1))).isoformat(),
+                "date_rachat_suggeree": (
+                    date.today() + timedelta(days=max(jours - 2, 1))
+                ).isoformat(),
                 "quantite_optimale": article["seuil"] * 2,
-                "conseil": f"Racheter dans ~{max(jours - 2, 1)} jours"
+                "conseil": f"Racheter dans ~{max(jours - 2, 1)} jours",
             }
 
     # ===================================
     # ANALYSE COMPLÈTE
     # ===================================
 
-    async def analyser_inventaire_complet(
-            self,
-            inventaire: List[Dict]
-    ) -> Dict:
+    async def analyser_inventaire_complet(self, inventaire: List[Dict]) -> Dict:
         """
         Analyse globale de l'inventaire
 
@@ -246,12 +238,14 @@ JSON uniquement !"""
         # Calculer métriques
         total = len(inventaire)
         stock_bas = len([i for i in inventaire if i["statut"] in ["sous_seuil", "critique"]])
-        peremption = len([i for i in inventaire if i["statut"] in ["peremption_proche", "critique"]])
+        peremption = len(
+            [i for i in inventaire if i["statut"] in ["peremption_proche", "critique"]]
+        )
 
         top_items = sorted(
             inventaire,
             key=lambda x: x["quantite"] * (1 if x["statut"] == "ok" else 0.5),
-            reverse=True
+            reverse=True,
         )[:10]
 
         prompt = f"""Analyse cet inventaire:
@@ -293,19 +287,14 @@ JSON uniquement !"""
                 "score_global": 50,
                 "statut": "attention",
                 "problemes": [],
-                "recommandations": ["Analyse IA indisponible"]
+                "recommandations": ["Analyse IA indisponible"],
             }
 
     # ===================================
     # HELPERS
     # ===================================
 
-    async def _call_with_retry(
-            self,
-            prompt: str,
-            max_tokens: int,
-            max_retries: int = 3
-    ) -> str:
+    async def _call_with_retry(self, prompt: str, max_tokens: int, max_retries: int = 3) -> str:
         """Appel IA avec retry"""
         for attempt in range(max_retries):
             try:
@@ -313,14 +302,14 @@ JSON uniquement !"""
                     prompt=prompt,
                     system_prompt="Expert gestion stocks alimentaires. JSON uniquement.",
                     temperature=0.7,
-                    max_tokens=max_tokens
+                    max_tokens=max_tokens,
                 )
                 RateLimiter.record_call()
                 return response
             except Exception as e:
                 if attempt == max_retries - 1:
                     raise
-                await asyncio.sleep(2 ** attempt)
+                await asyncio.sleep(2**attempt)
 
     def _parse_json(self, response: str) -> Dict:
         """Parse JSON depuis réponse"""
@@ -339,6 +328,7 @@ JSON uniquement !"""
 # ===================================
 # FACTORY
 # ===================================
+
 
 def create_inventaire_ai_service(agent: AgentIA) -> InventaireAIService:
     """Factory"""

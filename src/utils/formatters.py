@@ -46,15 +46,13 @@ def format_quantity(quantity: Union[int, float, None], decimals: int = 2) -> str
     formatted = f"{rounded:.{decimals}f}"
 
     # Enlever les zéros inutiles : "2.50" -> "2.5"
-    formatted = formatted.rstrip('0').rstrip('.')
+    formatted = formatted.rstrip("0").rstrip(".")
 
     return formatted
 
 
 def format_quantity_with_unit(
-        quantity: Union[int, float, None],
-        unit: str,
-        decimals: int = 2
+    quantity: Union[int, float, None], unit: str, decimals: int = 2
 ) -> str:
     """
     Formate quantité + unité ensemble
@@ -118,11 +116,7 @@ def format_price(price: Union[int, float, None], currency: str = "€") -> str:
     return f"{rounded:.2f}{currency}"
 
 
-def format_percentage(
-        value: Union[int, float, None],
-        decimals: int = 1,
-        symbol: str = "%"
-) -> str:
+def format_percentage(value: Union[int, float, None], decimals: int = 1, symbol: str = "%") -> str:
     """
     Formate un pourcentage
 
@@ -155,7 +149,7 @@ def format_percentage(
         return f"{int(rounded)}{symbol}"
 
     # Sinon, avec décimales (sans zéros trailing)
-    formatted = f"{rounded:.{decimals}f}".rstrip('0').rstrip('.')
+    formatted = f"{rounded:.{decimals}f}".rstrip("0").rstrip(".")
     return f"{formatted}{symbol}"
 
 
@@ -273,6 +267,7 @@ def format_volume(milliliters: Union[int, float, None]) -> str:
 # HELPERS AVANCÉS
 # ===================================
 
+
 def clean_number_string(text: str) -> Optional[float]:
     """
     Extrait un nombre depuis une string (même sale)
@@ -289,10 +284,10 @@ def clean_number_string(text: str) -> Optional[float]:
         return None
 
     # Remplacer virgules par points
-    text = str(text).replace(',', '.')
+    text = str(text).replace(",", ".")
 
     # Extraire le nombre
-    match = re.search(r'-?\d+\.?\d*', text)
+    match = re.search(r"-?\d+\.?\d*", text)
 
     if match:
         try:

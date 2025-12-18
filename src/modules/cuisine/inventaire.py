@@ -8,18 +8,12 @@ import pandas as pd
 from datetime import datetime, date
 from typing import List, Dict, Optional
 
-from src.services.inventaire.inventaire_service import (
+from src.services.inventaire.inventaire_service import inventaire_service, CATEGORIES, EMPLACEMENTS
 from src.utils.formatters import format_quantity, format_quantity_with_unit
-    inventaire_service, CATEGORIES, EMPLACEMENTS
-)
 from src.services.inventaire.inventaire_ai_service import create_inventaire_ai_service
-from src.services.inventaire.inventaire_io_service import (
-    render_export_ui, render_import_ui
-)
+from src.services.inventaire.inventaire_io_service import render_export_ui, render_import_ui
 from src.core.state_manager import StateManager, get_state
-from src.ui.components import (
-    render_stat_row, render_empty_state, render_toast, render_badge
-)
+from src.ui.components import render_stat_row, render_empty_state, render_toast, render_badge
 
 
 # ===================================
@@ -30,7 +24,7 @@ STATUT_COLORS = {
     "ok": "#d4edda",
     "sous_seuil": "#fff3cd",
     "peremption_proche": "#f8d7da",
-    "critique": "#dc3545"
+    "critique": "#dc3545",
 }
 
 
@@ -38,19 +32,23 @@ STATUT_COLORS = {
 # COMPOSANTS UI
 # ===================================
 
+
 def render_article_card(article: Dict, key: str):
     """Affiche une carte article"""
     couleur = STATUT_COLORS.get(article["statut"], "#f8f9fa")
 
     with st.container():
-        st.markdown(f"""
+        st.markdown(
+            f"""
         <div style="border-left: 4px solid {couleur}; 
                     padding: 1rem; 
                     background: {couleur}; 
                     border-radius: 8px; 
                     margin-bottom: 0.5rem;">
         </div>
-        """, unsafe_allow_html=True)
+        """,
+            unsafe_allow_html=True,
+        )
 
         col1, col2, col3 = st.columns([3, 2, 2])
 
@@ -75,7 +73,7 @@ def render_article_card(article: Dict, key: str):
                 "Stock",
                 f"{format_quantity(article['quantite'])} {article['unite']}",
                 delta=delta,
-                delta_color="inverse" if delta else "off"
+                delta_color="inverse" if delta else "off",
             )
 
         with col3:
@@ -131,6 +129,7 @@ def render_quick_filters():
 # TABS
 # ===================================
 
+
 def tab_mon_stock():
     """Tab 1: Mon stock"""
     st.subheader("📦 Mon Stock")
@@ -144,9 +143,9 @@ def tab_mon_stock():
     # Filtrer péremption côté client si besoin
     if getattr(get_state(), "filter_peremption", False):
         inventaire = [
-            i for i in inventaire
-            if i.get("jours_peremption") is not None
-               and i["jours_peremption"] <= 7
+            i
+            for i in inventaire
+            if i.get("jours_peremption") is not None and i["jours_peremption"] <= 7
         ]
 
     if not inventaire:
@@ -154,7 +153,7 @@ def tab_mon_stock():
             message="Inventaire vide",
             icon="📦",
             action_label="➕ Ajouter un article",
-            action_callback=lambda: st.session_state.update({"active_tab": 2})
+            action_callback=lambda: st.session_state.update({"active_tab": 2}),
         )
         return
 
@@ -164,7 +163,7 @@ def tab_mon_stock():
         {"label": "Total", "value": stats["total_articles"]},
         {"label": "Stock bas", "value": stats["total_stock_bas"], "delta_color": "inverse"},
         {"label": "Péremption", "value": stats["total_peremption"], "delta_color": "inverse"},
-        {"label": "Critiques", "value": stats["total_critiques"], "delta_color": "inverse"}
+        {"label": "Critiques", "value": stats["total_critiques"], "delta_color": "inverse"},
     ]
     render_stat_row(stats_data, cols=4)
 
@@ -181,10 +180,12 @@ def tab_mon_stock():
             "critique": "🔴 Critiques",
             "sous_seuil": "⚠️ Stock Bas",
             "peremption_proche": "⏳ Péremption Proche",
-            "ok": "✅ OK"
+            "ok": "✅ OK",
         }
 
-        with st.expander(f"{labels[statut]} ({len(articles)})", expanded=statut in ["critique", "sous_seuil"]):
+        with st.expander(
+            f"{labels[statut]} ({len(articles)})", expanded=statut in ["critique", "sous_seuil"]
+        ):
             for idx, article in enumerate(articles):
                 render_article_card(article, f"{statut}_{idx}")
 
@@ -215,9 +216,7 @@ def tab_analyse_ia():
                     loop = asyncio.new_event_loop()
                     asyncio.set_event_loop(loop)
 
-                    result = loop.run_until_complete(
-                        ai_service.detecter_gaspillage(inventaire)
-                    )
+                    result = loop.run_until_complete(ai_service.detecter_gaspillage(inventaire))
 
                     StateManager.cache_set("gaspillage_analyse", result)
                     st.rerun()
@@ -286,9 +285,7 @@ def tab_analyse_ia():
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
 
-                result = loop.run_until_complete(
-                    ai_service.analyser_inventaire_complet(inventaire)
-                )
+                result = loop.run_until_complete(ai_service.analyser_inventaire_complet(inventaire))
 
                 st.markdown("### 📊 Analyse Complète")
 
@@ -327,7 +324,9 @@ def tab_ajout():
             nom = st.text_input("Nom *", placeholder="Ex: Tomates")
             categorie = st.selectbox("Catégorie *", CATEGORIES)
             quantite = st.number_input("Quantité *", 0.0, 10000.0, 1.0, 0.1)
-            unite = st.selectbox("Unité", ["pcs", "kg", "g", "L", "mL", "sachets", "boîtes", "botte"])
+            unite = st.selectbox(
+                "Unité", ["pcs", "kg", "g", "L", "mL", "sachets", "boîtes", "botte"]
+            )
 
         with col2:
             seuil = st.number_input("Seuil d'alerte", 0.0, 1000.0, 1.0, 0.1)
@@ -345,7 +344,7 @@ def tab_ajout():
                     unite=unite,
                     seuil=seuil,
                     emplacement=emplacement,
-                    date_peremption=date_peremption
+                    date_peremption=date_peremption,
                 )
                 render_toast(f"✅ {nom} ajouté", "success")
                 st.balloons()
@@ -385,7 +384,12 @@ def tab_stats():
     stats_data = [
         {"label": "Total articles", "value": stats["total_articles"]},
         {"label": "Catégories", "value": len(stats["categories"])},
-        {"label": "Alertes totales", "value": stats["total_critiques"] + stats["total_stock_bas"] + stats["total_peremption"]}
+        {
+            "label": "Alertes totales",
+            "value": stats["total_critiques"]
+            + stats["total_stock_bas"]
+            + stats["total_peremption"],
+        },
     ]
     render_stat_row(stats_data, cols=3)
 
@@ -398,20 +402,21 @@ def tab_stats():
         st.markdown("### 📈 Par Catégorie")
 
         if stats["categories"]:
-            df_cat = pd.DataFrame([
-                {"Catégorie": k, "Nombre": v}
-                for k, v in stats["categories"].items()
-            ])
+            df_cat = pd.DataFrame(
+                [{"Catégorie": k, "Nombre": v} for k, v in stats["categories"].items()]
+            )
             st.bar_chart(df_cat.set_index("Catégorie"))
 
     with col2:
         st.markdown("### ⚠️ Alertes")
 
-        df_alertes = pd.DataFrame([
-            {"Type": "Critiques", "Nombre": stats["total_critiques"]},
-            {"Type": "Stock bas", "Nombre": stats["total_stock_bas"]},
-            {"Type": "Péremption", "Nombre": stats["total_peremption"]}
-        ])
+        df_alertes = pd.DataFrame(
+            [
+                {"Type": "Critiques", "Nombre": stats["total_critiques"]},
+                {"Type": "Stock bas", "Nombre": stats["total_stock_bas"]},
+                {"Type": "Péremption", "Nombre": stats["total_peremption"]},
+            ]
+        )
         st.bar_chart(df_alertes.set_index("Type"))
 
     st.markdown("---")
@@ -432,7 +437,9 @@ def tab_stats():
 
         if critiques:
             for item in critiques[:10]:
-                st.write(f"• {item['icone']} **{item['nom']}** : {format_quantity(item['quantite'])}/{item['seuil']}")
+                st.write(
+                    f"• {item['icone']} **{item['nom']}** : {format_quantity(item['quantite'])}/{item['seuil']}"
+                )
         else:
             st.success("✅ Aucun stock critique")
 
@@ -441,19 +448,16 @@ def tab_stats():
 # MODULE PRINCIPAL
 # ===================================
 
+
 def app():
     """Point d'entrée du module Inventaire"""
     st.title("📦 Inventaire Intelligent")
     st.caption("Gestion complète avec alertes et prédictions IA")
 
     # Tabs
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
-        "📦 Mon Stock",
-        "🤖 Analyse IA",
-        "➕ Ajouter",
-        "📤 Import/Export",
-        "📊 Statistiques"
-    ])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(
+        ["📦 Mon Stock", "🤖 Analyse IA", "➕ Ajouter", "📤 Import/Export", "📊 Statistiques"]
+    )
 
     with tab1:
         tab_mon_stock()

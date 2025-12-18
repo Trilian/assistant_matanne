@@ -18,9 +18,9 @@ class RecipeWebScraper:
     """Scraper intelligent de recettes web avec fallbacks multiples"""
 
     HEADERS = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7',
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Language": "fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7",
     }
 
     TIMEOUT = 15
@@ -39,17 +39,19 @@ class RecipeWebScraper:
             domain = urlparse(url).netloc.lower()
 
             # Router vers le bon scraper
-            if 'marmiton' in domain:
+            if "marmiton" in domain:
                 result = RecipeWebScraper._scrape_marmiton_robust(url)
-            elif '750g' in domain:
+            elif "750g" in domain:
                 result = RecipeWebScraper._scrape_750g(url)
-            elif 'cuisineaz' in domain:
+            elif "cuisineaz" in domain:
                 result = RecipeWebScraper._scrape_cuisineaz(url)
             else:
                 result = RecipeWebScraper._scrape_generic(url)
 
             if result:
-                logger.info(f"✅ Scraped: {result['nom']}, {len(result['ingredients'])} ing, {len(result['etapes'])} steps")
+                logger.info(
+                    f"✅ Scraped: {result['nom']}, {len(result['ingredients'])} ing, {len(result['etapes'])} steps"
+                )
             else:
                 logger.warning(f"⚠️ Aucune recette extraite de {url}")
 
@@ -70,12 +72,12 @@ class RecipeWebScraper:
                     url,
                     headers=RecipeWebScraper.HEADERS,
                     timeout=RecipeWebScraper.TIMEOUT,
-                    allow_redirects=True
+                    allow_redirects=True,
                 )
                 response.raise_for_status()
 
                 # Parser avec lxml (plus robuste)
-                return BeautifulSoup(response.content, 'lxml')
+                return BeautifulSoup(response.content, "lxml")
 
             except Exception as e:
                 if attempt == max_retries - 1:
@@ -109,13 +111,13 @@ class RecipeWebScraper:
             "difficulte": "moyen",
             "ingredients": [],
             "etapes": [],
-            "image_url": None
+            "image_url": None,
         }
 
         # ===================================
         # STRATÉGIE 1 : JSON-LD (Schema.org)
         # ===================================
-        json_ld_scripts = soup.find_all('script', {'type': 'application/ld+json'})
+        json_ld_scripts = soup.find_all("script", {"type": "application/ld+json"})
 
         for script in json_ld_scripts:
             try:
@@ -125,95 +127,94 @@ class RecipeWebScraper:
                 if isinstance(data, list):
                     # Chercher l'objet Recipe
                     recipe_data = next(
-                        (item for item in data if item.get('@type') == 'Recipe'),
-                        None
+                        (item for item in data if item.get("@type") == "Recipe"), None
                     )
                     if not recipe_data:
                         continue
                     data = recipe_data
 
                 # Vérifier que c'est bien une recette
-                if data.get('@type') != 'Recipe':
+                if data.get("@type") != "Recipe":
                     continue
 
                 logger.info("✅ JSON-LD Schema.org trouvé")
 
                 # Nom
-                if data.get('name'):
-                    recipe["nom"] = data['name'].strip()
+                if data.get("name"):
+                    recipe["nom"] = data["name"].strip()
 
                 # Description
-                if data.get('description'):
-                    recipe["description"] = data['description'].strip()
+                if data.get("description"):
+                    recipe["description"] = data["description"].strip()
 
                 # Image
-                if data.get('image'):
-                    img = data['image']
+                if data.get("image"):
+                    img = data["image"]
                     if isinstance(img, list):
                         recipe["image_url"] = img[0] if img else None
                     elif isinstance(img, dict):
-                        recipe["image_url"] = img.get('url')
+                        recipe["image_url"] = img.get("url")
                     else:
                         recipe["image_url"] = str(img)
 
                 # Temps (format ISO 8601: PT15M = 15 minutes)
-                if data.get('prepTime'):
-                    recipe["temps_preparation"] = RecipeWebScraper._parse_iso_duration(data['prepTime'])
+                if data.get("prepTime"):
+                    recipe["temps_preparation"] = RecipeWebScraper._parse_iso_duration(
+                        data["prepTime"]
+                    )
 
-                if data.get('cookTime'):
-                    recipe["temps_cuisson"] = RecipeWebScraper._parse_iso_duration(data['cookTime'])
+                if data.get("cookTime"):
+                    recipe["temps_cuisson"] = RecipeWebScraper._parse_iso_duration(data["cookTime"])
 
                 # Portions
-                if data.get('recipeYield'):
-                    yield_val = data['recipeYield']
+                if data.get("recipeYield"):
+                    yield_val = data["recipeYield"]
                     if isinstance(yield_val, list):
                         yield_val = yield_val[0]
 
                     # Extraire le nombre
-                    match = re.search(r'(\d+)', str(yield_val))
+                    match = re.search(r"(\d+)", str(yield_val))
                     if match:
                         recipe["portions"] = int(match.group(1))
 
                 # Ingrédients
-                if data.get('recipeIngredient'):
-                    for ing_text in data['recipeIngredient']:
+                if data.get("recipeIngredient"):
+                    for ing_text in data["recipeIngredient"]:
                         parsed = RecipeWebScraper._parse_ingredient(ing_text)
                         if parsed:
                             recipe["ingredients"].append(parsed)
 
                 # Étapes
-                if data.get('recipeInstructions'):
-                    instructions = data['recipeInstructions']
+                if data.get("recipeInstructions"):
+                    instructions = data["recipeInstructions"]
 
                     # Peut être une liste d'objets ou une liste de strings
                     if isinstance(instructions, list):
                         for idx, step in enumerate(instructions, 1):
                             if isinstance(step, dict):
-                                text = step.get('text', '') or step.get('description', '')
+                                text = step.get("text", "") or step.get("description", "")
                             else:
                                 text = str(step)
 
                             if text and len(text.strip()) > 5:
-                                recipe["etapes"].append({
-                                    "ordre": idx,
-                                    "description": text.strip(),
-                                    "duree": None
-                                })
+                                recipe["etapes"].append(
+                                    {"ordre": idx, "description": text.strip(), "duree": None}
+                                )
                     elif isinstance(instructions, str):
                         # Parfois c'est un seul string avec des sauts de ligne
-                        lines = instructions.split('\n')
+                        lines = instructions.split("\n")
                         for idx, line in enumerate(lines, 1):
                             line = line.strip()
                             if line and len(line) > 5:
-                                recipe["etapes"].append({
-                                    "ordre": idx,
-                                    "description": line,
-                                    "duree": None
-                                })
+                                recipe["etapes"].append(
+                                    {"ordre": idx, "description": line, "duree": None}
+                                )
 
                 # Si on a trouvé nom + ingrédients, c'est bon
                 if recipe["nom"] and recipe["ingredients"]:
-                    logger.info(f"✅ JSON-LD complet: {len(recipe['ingredients'])} ing, {len(recipe['etapes'])} steps")
+                    logger.info(
+                        f"✅ JSON-LD complet: {len(recipe['ingredients'])} ing, {len(recipe['etapes'])} steps"
+                    )
                     return recipe
 
             except json.JSONDecodeError as e:
@@ -230,7 +231,7 @@ class RecipeWebScraper:
             logger.info("🔄 Tentative avec microdata...")
 
             # Ingrédients avec itemprop
-            ing_elements = soup.find_all(['span', 'li', 'div'], {'itemprop': 'recipeIngredient'})
+            ing_elements = soup.find_all(["span", "li", "div"], {"itemprop": "recipeIngredient"})
             for elem in ing_elements:
                 text = elem.get_text(strip=True)
                 parsed = RecipeWebScraper._parse_ingredient(text)
@@ -242,15 +243,11 @@ class RecipeWebScraper:
 
         if not recipe["etapes"]:
             # Étapes avec itemprop
-            step_elements = soup.find_all(['li', 'p', 'div'], {'itemprop': 'recipeInstructions'})
+            step_elements = soup.find_all(["li", "p", "div"], {"itemprop": "recipeInstructions"})
             for idx, elem in enumerate(step_elements, 1):
                 text = elem.get_text(strip=True)
                 if text and len(text) > 10:
-                    recipe["etapes"].append({
-                        "ordre": idx,
-                        "description": text,
-                        "duree": None
-                    })
+                    recipe["etapes"].append({"ordre": idx, "description": text, "duree": None})
 
             if recipe["etapes"]:
                 logger.info(f"✅ Microdata: {len(recipe['etapes'])} étapes")
@@ -261,9 +258,9 @@ class RecipeWebScraper:
         if not recipe["nom"]:
             # Chercher titre avec plusieurs patterns
             title_selectors = [
-                soup.find('h1', class_=re.compile(r'recipe.*title', re.I)),
-                soup.find('h1', class_=re.compile(r'title', re.I)),
-                soup.find('h1')
+                soup.find("h1", class_=re.compile(r"recipe.*title", re.I)),
+                soup.find("h1", class_=re.compile(r"title", re.I)),
+                soup.find("h1"),
             ]
 
             for selector in title_selectors:
@@ -275,21 +272,23 @@ class RecipeWebScraper:
         if not recipe["image_url"]:
             # Chercher image avec plusieurs patterns
             img_selectors = [
-                soup.find('img', class_=re.compile(r'recipe.*image', re.I)),
-                soup.find('img', class_=re.compile(r'main.*picture', re.I)),
-                soup.find('picture', class_=re.compile(r'recipe', re.I)),
-                soup.select_one('.recipe-media img'),
-                soup.find('img', alt=re.compile(recipe["nom"] if recipe["nom"] else "recette", re.I))
+                soup.find("img", class_=re.compile(r"recipe.*image", re.I)),
+                soup.find("img", class_=re.compile(r"main.*picture", re.I)),
+                soup.find("picture", class_=re.compile(r"recipe", re.I)),
+                soup.select_one(".recipe-media img"),
+                soup.find(
+                    "img", alt=re.compile(recipe["nom"] if recipe["nom"] else "recette", re.I)
+                ),
             ]
 
             for selector in img_selectors:
                 if selector:
-                    if selector.name == 'picture':
-                        img = selector.find('img')
+                    if selector.name == "picture":
+                        img = selector.find("img")
                         if img:
-                            recipe["image_url"] = img.get('src') or img.get('data-src')
+                            recipe["image_url"] = img.get("src") or img.get("data-src")
                     else:
-                        recipe["image_url"] = selector.get('src') or selector.get('data-src')
+                        recipe["image_url"] = selector.get("src") or selector.get("data-src")
 
                     if recipe["image_url"]:
                         logger.info(f"✅ Image trouvée")
@@ -301,12 +300,12 @@ class RecipeWebScraper:
 
             # Liste des sélecteurs CSS possibles
             ing_container_selectors = [
-                '.recipe-ingredients',
-                '.card-ingredient',
-                '.ingredients-list',
+                ".recipe-ingredients",
+                ".card-ingredient",
+                ".ingredients-list",
                 '[class*="ingredient"]',
                 'ul[class*="ingredient"]',
-                'div[class*="ingredient"]'
+                'div[class*="ingredient"]',
             ]
 
             for selector in ing_container_selectors:
@@ -316,7 +315,7 @@ class RecipeWebScraper:
                     logger.info(f"✅ Container ingrédients trouvé: {selector}")
 
                     # Chercher tous les items d'ingrédients
-                    ing_items = container.find_all(['li', 'div', 'span'], recursive=True)
+                    ing_items = container.find_all(["li", "div", "span"], recursive=True)
 
                     for item in ing_items:
                         # Ignorer les conteneurs vides ou titres
@@ -326,7 +325,10 @@ class RecipeWebScraper:
                         if not text or len(text) < 3:
                             continue
 
-                        if any(word in text.lower() for word in ['pour', 'ingrédients', 'préparation', 'étapes']):
+                        if any(
+                            word in text.lower()
+                            for word in ["pour", "ingrédients", "préparation", "étapes"]
+                        ):
                             continue
 
                         parsed = RecipeWebScraper._parse_ingredient(text)
@@ -342,13 +344,13 @@ class RecipeWebScraper:
             logger.info("🔄 Recherche étapes dans le HTML...")
 
             step_container_selectors = [
-                '.recipe-preparation',
-                '.recipe-steps',
-                '.preparation-steps',
+                ".recipe-preparation",
+                ".recipe-steps",
+                ".preparation-steps",
                 '[class*="preparation"]',
                 '[class*="instruction"]',
                 'ol[class*="step"]',
-                'ol[class*="recipe"]'
+                'ol[class*="recipe"]',
             ]
 
             for selector in step_container_selectors:
@@ -358,23 +360,21 @@ class RecipeWebScraper:
                     logger.info(f"✅ Container étapes trouvé: {selector}")
 
                     # Chercher les items d'étapes
-                    step_items = container.find_all(['li', 'p', 'div'], recursive=True)
+                    step_items = container.find_all(["li", "p", "div"], recursive=True)
 
                     ordre = 1
                     for item in step_items:
                         text = item.get_text(strip=True)
 
                         # Nettoyer
-                        text = re.sub(r'^(étape|step)\s+\d+\s*:?\s*', '', text, flags=re.I)
-                        text = re.sub(r'^\d+\.\s*', '', text)
+                        text = re.sub(r"^(étape|step)\s+\d+\s*:?\s*", "", text, flags=re.I)
+                        text = re.sub(r"^\d+\.\s*", "", text)
 
                         # Valider
                         if text and len(text) > 15:  # Étapes substantielles
-                            recipe["etapes"].append({
-                                "ordre": ordre,
-                                "description": text,
-                                "duree": None
-                            })
+                            recipe["etapes"].append(
+                                {"ordre": ordre, "description": text, "duree": None}
+                            )
                             ordre += 1
 
                     if recipe["etapes"]:
@@ -388,10 +388,10 @@ class RecipeWebScraper:
             logger.warning("⚠️ Fallback: scraping générique des listes")
 
             # Chercher TOUTES les listes non ordonnées
-            all_uls = soup.find_all('ul')
+            all_uls = soup.find_all("ul")
 
             for ul in all_uls:
-                items = ul.find_all('li')
+                items = ul.find_all("li")
 
                 # Si la liste a entre 3 et 30 items, probable que ce soit des ingrédients
                 if 3 <= len(items) <= 30:
@@ -411,10 +411,10 @@ class RecipeWebScraper:
 
         if not recipe["etapes"]:
             # Chercher les listes ordonnées pour les étapes
-            all_ols = soup.find_all('ol')
+            all_ols = soup.find_all("ol")
 
             for ol in all_ols:
-                items = ol.find_all('li')
+                items = ol.find_all("li")
 
                 if 2 <= len(items) <= 20:
                     temp_steps = []
@@ -423,11 +423,7 @@ class RecipeWebScraper:
                         text = item.get_text(strip=True)
 
                         if text and len(text) > 15:
-                            temp_steps.append({
-                                "ordre": idx,
-                                "description": text,
-                                "duree": None
-                            })
+                            temp_steps.append({"ordre": idx, "description": text, "duree": None})
 
                     if len(temp_steps) >= 2:
                         recipe["etapes"] = temp_steps
@@ -441,7 +437,9 @@ class RecipeWebScraper:
             logger.info(f"✅ Recette complète extraite: {recipe['nom']}")
             return recipe
         else:
-            logger.warning(f"⚠️ Extraction incomplète - Nom: {bool(recipe['nom'])}, Ing: {len(recipe['ingredients'])}, Étapes: {len(recipe['etapes'])}")
+            logger.warning(
+                f"⚠️ Extraction incomplète - Nom: {bool(recipe['nom'])}, Ing: {len(recipe['ingredients'])}, Étapes: {len(recipe['etapes'])}"
+            )
 
             # Retourner quand même si on a au moins le nom et les ingrédients
             if recipe["nom"] and recipe["ingredients"]:
@@ -465,11 +463,11 @@ class RecipeWebScraper:
         hours = 0
         minutes = 0
 
-        hour_match = re.search(r'(\d+)H', duration)
+        hour_match = re.search(r"(\d+)H", duration)
         if hour_match:
             hours = int(hour_match.group(1))
 
-        min_match = re.search(r'(\d+)M', duration)
+        min_match = re.search(r"(\d+)M", duration)
         if min_match:
             minutes = int(min_match.group(1))
 
@@ -494,10 +492,18 @@ class RecipeWebScraper:
             return None
 
         # Ignorer les titres de sections
-        if any(word in text.lower() for word in [
-            'pour la', 'pour le', 'ingrédients', 'préparation',
-            'garniture', 'sauce', 'pâte'
-        ]):
+        if any(
+            word in text.lower()
+            for word in [
+                "pour la",
+                "pour le",
+                "ingrédients",
+                "préparation",
+                "garniture",
+                "sauce",
+                "pâte",
+            ]
+        ):
             return None
 
         # Pattern 1: "200 g de tomates" ou "200g tomates"
@@ -505,7 +511,7 @@ class RecipeWebScraper:
         match = re.match(pattern1, text, re.I)
 
         if match:
-            qty_str = match.group(1).replace(',', '.')
+            qty_str = match.group(1).replace(",", ".")
             unit = match.group(2) or "pcs"
             name = match.group(3).strip()
 
@@ -515,32 +521,46 @@ class RecipeWebScraper:
                 # Normaliser unités
                 unit = unit.lower()
                 unit_map = {
-                    'g': 'g', 'gr': 'g', 'gramme': 'g', 'grammes': 'g',
-                    'kg': 'kg', 'kilo': 'kg', 'kilogramme': 'kg',
-                    'ml': 'mL', 'millilitre': 'mL', 'millilitres': 'mL',
-                    'l': 'L', 'litre': 'L', 'litres': 'L',
-                    'cl': 'cL', 'centilitre': 'cL', 'centilitres': 'cL',
-                    'cuillère': 'c. à soupe', 'cuillères': 'c. à soupe',
-                    'cs': 'c. à soupe', 'càs': 'c. à soupe', 'cas': 'c. à soupe',
-                    'cc': 'c. à café', 'càc': 'c. à café', 'cac': 'c. à café',
-                    'pincée': 'pincée', 'pincees': 'pincée',
-                    'tranche': 'tranche', 'tranches': 'tranches',
-                    'gousse': 'gousse', 'gousses': 'gousses'
+                    "g": "g",
+                    "gr": "g",
+                    "gramme": "g",
+                    "grammes": "g",
+                    "kg": "kg",
+                    "kilo": "kg",
+                    "kilogramme": "kg",
+                    "ml": "mL",
+                    "millilitre": "mL",
+                    "millilitres": "mL",
+                    "l": "L",
+                    "litre": "L",
+                    "litres": "L",
+                    "cl": "cL",
+                    "centilitre": "cL",
+                    "centilitres": "cL",
+                    "cuillère": "c. à soupe",
+                    "cuillères": "c. à soupe",
+                    "cs": "c. à soupe",
+                    "càs": "c. à soupe",
+                    "cas": "c. à soupe",
+                    "cc": "c. à café",
+                    "càc": "c. à café",
+                    "cac": "c. à café",
+                    "pincée": "pincée",
+                    "pincees": "pincée",
+                    "tranche": "tranche",
+                    "tranches": "tranches",
+                    "gousse": "gousse",
+                    "gousses": "gousses",
                 }
 
                 unit = unit_map.get(unit, unit)
 
-                return {
-                    "nom": name,
-                    "quantite": qty,
-                    "unite": unit,
-                    "optionnel": False
-                }
+                return {"nom": name, "quantite": qty, "unite": unit, "optionnel": False}
             except ValueError:
                 pass
 
         # Pattern 2: "une pincée de sel", "deux oignons"
-        pattern2 = r'^(une?|deux|trois|quatre|cinq|six|sept|huit|neuf|dix)\s+(.+)$'
+        pattern2 = r"^(une?|deux|trois|quatre|cinq|six|sept|huit|neuf|dix)\s+(.+)$"
         match = re.match(pattern2, text, re.I)
 
         if match:
@@ -548,19 +568,23 @@ class RecipeWebScraper:
             rest = match.group(2)
 
             qty_map = {
-                'un': 1, 'une': 1, 'deux': 2, 'trois': 3,
-                'quatre': 4, 'cinq': 5, 'six': 6, 'sept': 7,
-                'huit': 8, 'neuf': 9, 'dix': 10
+                "un": 1,
+                "une": 1,
+                "deux": 2,
+                "trois": 3,
+                "quatre": 4,
+                "cinq": 5,
+                "six": 6,
+                "sept": 7,
+                "huit": 8,
+                "neuf": 9,
+                "dix": 10,
             }
 
             qty = qty_map.get(qty_word, 1)
 
             # Chercher unité dans rest
-            unit_match = re.match(
-                r"^([a-zàéèêëîïôùûüç\s]+)\s+(?:de\s+|d[''])?(.+)$",
-                rest,
-                re.I
-            )
+            unit_match = re.match(r"^([a-zàéèêëîïôùûüç\s]+)\s+(?:de\s+|d[''])?(.+)$", rest, re.I)
 
             if unit_match:
                 unit = unit_match.group(1).strip()
@@ -569,21 +593,11 @@ class RecipeWebScraper:
                 unit = "pcs"
                 name = rest
 
-            return {
-                "nom": name,
-                "quantite": float(qty),
-                "unite": unit,
-                "optionnel": False
-            }
+            return {"nom": name, "quantite": float(qty), "unite": unit, "optionnel": False}
 
         # Pattern 3: Juste un ingrédient "tomates" -> 1 pcs
         if len(text) <= 50:  # Pas trop long pour être un ingrédient simple
-            return {
-                "nom": text,
-                "quantite": 1.0,
-                "unite": "pcs",
-                "optionnel": False
-            }
+            return {"nom": text, "quantite": 1.0, "unite": "pcs", "optionnel": False}
 
         return None
 
@@ -601,37 +615,35 @@ class RecipeWebScraper:
             "difficulte": "moyen",
             "ingredients": [],
             "etapes": [],
-            "image_url": None
+            "image_url": None,
         }
 
         # Essayer JSON-LD d'abord
-        json_ld = soup.find('script', {'type': 'application/ld+json'})
+        json_ld = soup.find("script", {"type": "application/ld+json"})
         if json_ld:
             try:
                 data = json.loads(json_ld.string)
                 if isinstance(data, list):
                     data = data[0]
 
-                if data.get('@type') == 'Recipe':
-                    if data.get('name'):
-                        recipe["nom"] = data['name']
-                    if data.get('recipeIngredient'):
-                        for ing in data['recipeIngredient']:
+                if data.get("@type") == "Recipe":
+                    if data.get("name"):
+                        recipe["nom"] = data["name"]
+                    if data.get("recipeIngredient"):
+                        for ing in data["recipeIngredient"]:
                             parsed = RecipeWebScraper._parse_ingredient(ing)
                             if parsed:
                                 recipe["ingredients"].append(parsed)
-                    if data.get('recipeInstructions'):
-                        for idx, step in enumerate(data['recipeInstructions'], 1):
+                    if data.get("recipeInstructions"):
+                        for idx, step in enumerate(data["recipeInstructions"], 1):
                             if isinstance(step, dict):
-                                text = step.get('text', '')
+                                text = step.get("text", "")
                             else:
                                 text = str(step)
                             if text:
-                                recipe["etapes"].append({
-                                    "ordre": idx,
-                                    "description": text,
-                                    "duree": None
-                                })
+                                recipe["etapes"].append(
+                                    {"ordre": idx, "description": text, "duree": None}
+                                )
 
                     if recipe["nom"] and recipe["ingredients"]:
                         return recipe
@@ -639,7 +651,7 @@ class RecipeWebScraper:
                 pass
 
         # Fallback HTML
-        title = soup.find('h1', itemprop='name') or soup.find('h1')
+        title = soup.find("h1", itemprop="name") or soup.find("h1")
         if title:
             recipe["nom"] = title.get_text(strip=True)
 
@@ -665,18 +677,18 @@ class RecipeWebScraper:
             "difficulte": "moyen",
             "ingredients": [],
             "etapes": [],
-            "image_url": None
+            "image_url": None,
         }
 
         # Titre
-        h1 = soup.find('h1')
+        h1 = soup.find("h1")
         if h1:
             recipe["nom"] = h1.get_text(strip=True)
 
         # Ingrédients (listes)
-        lists = soup.find_all('ul')
+        lists = soup.find_all("ul")
         for ul in lists:
-            items = ul.find_all('li')
+            items = ul.find_all("li")
             if 3 <= len(items) <= 30:
                 for item in items:
                     parsed = RecipeWebScraper._parse_ingredient(item.get_text(strip=True))
@@ -686,16 +698,12 @@ class RecipeWebScraper:
                     break
 
         # Étapes (ordered lists)
-        ol = soup.find('ol')
+        ol = soup.find("ol")
         if ol:
-            for idx, li in enumerate(ol.find_all('li'), 1):
+            for idx, li in enumerate(ol.find_all("li"), 1):
                 text = li.get_text(strip=True)
                 if text and len(text) > 10:
-                    recipe["etapes"].append({
-                        "ordre": idx,
-                        "description": text,
-                        "duree": None
-                    })
+                    recipe["etapes"].append({"ordre": idx, "description": text, "duree": None})
 
         return recipe if recipe["nom"] and recipe["ingredients"] else None
 
@@ -706,7 +714,7 @@ class RecipeWebScraper:
             "✅ marmiton.org (structure 2024/2025 supportée)",
             "✅ 750g.com",
             "✅ cuisineaz.com",
-            "⚠️ Autres sites (via scraping générique - résultats variables)"
+            "⚠️ Autres sites (via scraping générique - résultats variables)",
         ]
 
 
@@ -717,6 +725,7 @@ class RecipeWebScraper:
 # src/services/web_scraper.py - REMPLACER RecipeImageGenerator
 
 # src/services/web_scraper.py - REMPLACER RecipeImageGenerator
+
 
 class RecipeImageGenerator:
     """Génère des images de recettes PERTINENTES avec recherche intelligente"""
@@ -773,12 +782,8 @@ class RecipeImageGenerator:
                 response = requests.get(
                     "https://api.unsplash.com/search/photos",
                     headers={"Authorization": f"Client-ID {unsplash_key}"},
-                    params={
-                        "query": search_query,
-                        "per_page": 1,
-                        "orientation": "landscape"
-                    },
-                    timeout=5
+                    params={"query": search_query, "per_page": 1, "orientation": "landscape"},
+                    timeout=5,
                 )
 
                 if response.status_code == 200:
@@ -805,12 +810,8 @@ class RecipeImageGenerator:
                 response = requests.get(
                     "https://api.pexels.com/v1/search",
                     headers={"Authorization": pexels_key},
-                    params={
-                        "query": search_query,
-                        "per_page": 1,
-                        "orientation": "landscape"
-                    },
-                    timeout=5
+                    params={"query": search_query, "per_page": 1, "orientation": "landscape"},
+                    timeout=5,
                 )
 
                 if response.status_code == 200:
@@ -835,10 +836,12 @@ class RecipeImageGenerator:
         emoji = RecipeImageGenerator._get_emoji_for_recipe(recipe_name)
 
         # Nom court pour l'URL
-        clean_name = recipe_name.replace(' ', '+')[:30]
+        clean_name = recipe_name.replace(" ", "+")[:30]
 
         # Placeholder avec emoji et couleur pertinents
-        return f"https://placehold.co/800x600/{color}/ffffff/png?text={emoji}+{clean_name}&font=roboto"
+        return (
+            f"https://placehold.co/800x600/{color}/ffffff/png?text={emoji}+{clean_name}&font=roboto"
+        )
 
     @staticmethod
     def _build_smart_query(recipe_name: str, description: str = "") -> str:
@@ -854,7 +857,7 @@ class RecipeImageGenerator:
         full_text = f"{recipe_name} {description}".lower()
 
         # Nettoyer
-        full_text = re.sub(r'[^a-zàéèêëîïôùûüçA-Z\s]', ' ', full_text)
+        full_text = re.sub(r"[^a-zàéèêëîïôùûüçA-Z\s]", " ", full_text)
 
         # ===================================
         # DICTIONNAIRE DE MOTS-CLÉS PERTINENTS
@@ -869,14 +872,12 @@ class RecipeImageGenerator:
             "agneau": "lamb",
             "veau": "veal",
             "canard": "duck",
-
             # Poissons
             "saumon": "salmon",
             "thon": "tuna",
             "cabillaud": "cod",
             "truite": "trout",
             "poisson": "fish",
-
             # Légumes
             "tomate": "tomato",
             "courgette": "zucchini",
@@ -888,14 +889,12 @@ class RecipeImageGenerator:
             "champignon": "mushroom",
             "oignon": "onion",
             "ail": "garlic",
-
             # Pâtes & Riz
             "pâte": "pasta",
             "spaghetti": "spaghetti",
             "lasagne": "lasagna",
             "riz": "rice",
             "risotto": "risotto",
-
             # Desserts
             "gâteau": "cake",
             "gateau": "cake",
@@ -905,12 +904,11 @@ class RecipeImageGenerator:
             "chocolat": "chocolate",
             "fraise": "strawberry",
             "pomme": "apple",
-
             # Autres
             "fromage": "cheese",
             "oeuf": "egg",
             "pain": "bread",
-            "salade": "salad"
+            "salade": "salad",
         }
 
         # Types de plats (contexte)
@@ -926,7 +924,7 @@ class RecipeImageGenerator:
             "burger": "burger",
             "pizza": "pizza",
             "crêpe": "crepe pancake",
-            "gaufre": "waffle"
+            "gaufre": "waffle",
         }
 
         # Styles de cuisine
@@ -938,7 +936,7 @@ class RecipeImageGenerator:
             "indien": "indian",
             "mexicain": "mexican",
             "thai": "thai",
-            "marocain": "moroccan"
+            "marocain": "moroccan",
         }
 
         # ===================================
@@ -1020,28 +1018,22 @@ class RecipeImageGenerator:
             ("tarte", "pie"): "🥧",
             ("glace", "ice"): "🍨",
             ("chocolat",): "🍫",
-
             # Viandes
             ("poulet", "chicken"): "🍗",
             ("boeuf", "steak"): "🥩",
             ("burger",): "🍔",
-
             # Poisson
             ("poisson", "fish", "saumon"): "🐟",
             ("sushi",): "🍣",
-
             # Légumes
             ("salade",): "🥗",
             ("soupe", "potage"): "🍲",
-
             # Pâtes/Pizza
             ("pâte", "pasta", "spaghetti"): "🍝",
             ("pizza",): "🍕",
-
             # Asiatique
             ("riz", "curry"): "🍛",
             ("wok",): "🥘",
-
             # Pain
             ("pain", "bread", "sandwich"): "🥖",
         }

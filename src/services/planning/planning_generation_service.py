@@ -14,8 +14,10 @@ from src.core.ai_agent import AgentIA
 from src.core.ai_cache import AICache, RateLimiter
 from src.core.database import get_db_context
 from src.core.models import (
-    Recette, ConfigPlanningUtilisateur,
-    TypeRepasEnum, TypeVersionRecetteEnum
+    Recette,
+    ConfigPlanningUtilisateur,
+    TypeRepasEnum,
+    TypeVersionRecetteEnum,
 )
 
 logger = logging.getLogger(__name__)
@@ -25,8 +27,10 @@ logger = logging.getLogger(__name__)
 # SCHÉMAS PYDANTIC
 # ===================================
 
+
 class RepasGenere(BaseModel):
     """Repas généré par IA"""
+
     type: str = Field(..., pattern="^(petit_déjeuner|déjeuner|dîner|goûter|bébé|batch_cooking)$")
     recette_nom: str = Field(..., min_length=2)
     portions: int = Field(4, gt=0, le=20)
@@ -35,7 +39,7 @@ class RepasGenere(BaseModel):
     raison: Optional[str] = None
     heure_suggeree: Optional[str] = None
 
-    @field_validator('recette_nom')
+    @field_validator("recette_nom")
     @classmethod
     def clean_nom(cls, v):
         return v.strip()
@@ -43,6 +47,7 @@ class RepasGenere(BaseModel):
 
 class JourPlanning(BaseModel):
     """Planning d'un jour"""
+
     jour: int = Field(..., ge=0, le=6)  # 0=lundi, 6=dimanche
     repas: List[RepasGenere] = Field(..., min_length=1)
     conseils_jour: Optional[List[str]] = Field(default_factory=list)
@@ -50,6 +55,7 @@ class JourPlanning(BaseModel):
 
 class PlanningGenere(BaseModel):
     """Planning complet généré"""
+
     planning: List[JourPlanning] = Field(..., min_length=7, max_length=7)
     conseils_globaux: List[str] = Field(default_factory=list)
     score_equilibre: int = Field(0, ge=0, le=100)
@@ -59,6 +65,7 @@ class PlanningGenere(BaseModel):
 # ===================================
 # SERVICE
 # ===================================
+
 
 class PlanningGenerationService:
     """Service de génération automatique de planning"""
@@ -73,10 +80,10 @@ class PlanningGenerationService:
     # ===================================
 
     async def generer_planning_complet(
-            self,
-            semaine_debut: date,
-            config: ConfigPlanningUtilisateur,
-            contraintes: Optional[Dict] = None
+        self,
+        semaine_debut: date,
+        config: ConfigPlanningUtilisateur,
+        contraintes: Optional[Dict] = None,
     ) -> PlanningGenere:
         """
         Génère un planning complet pour une semaine
@@ -103,18 +110,13 @@ class PlanningGenerationService:
             raise ValueError("Aucune recette disponible pour générer le planning")
 
         # Construire prompt
-        prompt = self._build_prompt_generation(
-            semaine_debut,
-            config,
-            recettes,
-            contraintes
-        )
+        prompt = self._build_prompt_generation(semaine_debut, config, recettes, contraintes)
 
         # Appel IA avec retry
         response = await self._call_with_retry(
             prompt,
             system_prompt="Expert nutritionniste et planification de repas. Réponds UNIQUEMENT en JSON valide.",
-            max_tokens=2500
+            max_tokens=2500,
         )
 
         # Parser et valider
@@ -131,34 +133,35 @@ class PlanningGenerationService:
         with get_db_context() as db:
             recettes = db.query(Recette).all()
 
-            return [{
-                "id": r.id,
-                "nom": r.nom,
-                "type_repas": r.type_repas,
-                "temps_total": r.temps_preparation + r.temps_cuisson,
-                "difficulte": r.difficulte,
-                "saison": r.saison,
-                "est_rapide": r.est_rapide,
-                "est_equilibre": r.est_equilibre,
-                "compatible_bebe": r.compatible_bebe,
-                "compatible_batch": r.compatible_batch,
-                "congelable": r.congelable,
-                "a_version_bebe": any(
-                    v.type_version == TypeVersionRecetteEnum.BEBE
-                    for v in r.versions
-                ),
-                "a_version_batch": any(
-                    v.type_version == TypeVersionRecetteEnum.BATCH_COOKING
-                    for v in r.versions
-                )
-            } for r in recettes]
+            return [
+                {
+                    "id": r.id,
+                    "nom": r.nom,
+                    "type_repas": r.type_repas,
+                    "temps_total": r.temps_preparation + r.temps_cuisson,
+                    "difficulte": r.difficulte,
+                    "saison": r.saison,
+                    "est_rapide": r.est_rapide,
+                    "est_equilibre": r.est_equilibre,
+                    "compatible_bebe": r.compatible_bebe,
+                    "compatible_batch": r.compatible_batch,
+                    "congelable": r.congelable,
+                    "a_version_bebe": any(
+                        v.type_version == TypeVersionRecetteEnum.BEBE for v in r.versions
+                    ),
+                    "a_version_batch": any(
+                        v.type_version == TypeVersionRecetteEnum.BATCH_COOKING for v in r.versions
+                    ),
+                }
+                for r in recettes
+            ]
 
     def _build_prompt_generation(
-            self,
-            semaine_debut: date,
-            config: ConfigPlanningUtilisateur,
-            recettes: List[Dict],
-            contraintes: Optional[Dict]
+        self,
+        semaine_debut: date,
+        config: ConfigPlanningUtilisateur,
+        recettes: List[Dict],
+        contraintes: Optional[Dict],
     ) -> str:
         """Construit le prompt de génération"""
 
@@ -254,11 +257,7 @@ IMPORTANT:
 UNIQUEMENT le JSON !"""
 
     async def _call_with_retry(
-            self,
-            prompt: str,
-            system_prompt: str,
-            max_tokens: int,
-            max_retries: int = 3
+        self, prompt: str, system_prompt: str, max_tokens: int, max_retries: int = 3
     ) -> str:
         """Appel IA avec retry"""
         for attempt in range(max_retries):
@@ -267,7 +266,7 @@ UNIQUEMENT le JSON !"""
                     prompt=prompt,
                     system_prompt=system_prompt,
                     temperature=0.7,
-                    max_tokens=max_tokens
+                    max_tokens=max_tokens,
                 )
                 RateLimiter.record_call()
                 return response
@@ -275,7 +274,7 @@ UNIQUEMENT le JSON !"""
                 if attempt == max_retries - 1:
                     logger.error(f"IA failed after {max_retries} attempts: {e}")
                     raise
-                await asyncio.sleep(2 ** attempt)
+                await asyncio.sleep(2**attempt)
 
     def _parse_json_response(self, response: str) -> Dict:
         """Parse réponse JSON"""
@@ -292,9 +291,7 @@ UNIQUEMENT le JSON !"""
         return json.loads(cleaned)
 
     def _fallback_planning(
-            self,
-            config: ConfigPlanningUtilisateur,
-            recettes: List[Dict]
+        self, config: ConfigPlanningUtilisateur, recettes: List[Dict]
     ) -> PlanningGenere:
         """Planning de fallback si IA échoue"""
         logger.warning("Utilisation du fallback planning (IA indisponible)")
@@ -324,23 +321,18 @@ UNIQUEMENT le JSON !"""
                             type=type_repas,
                             recette_nom=recette["nom"],
                             portions=4,
-                            raison="Planning automatique (IA indisponible)"
+                            raison="Planning automatique (IA indisponible)",
                         )
                     )
                     idx += 1
 
-            planning.append(
-                JourPlanning(
-                    jour=jour,
-                    repas=repas_jour
-                )
-            )
+            planning.append(JourPlanning(jour=jour, repas=repas_jour))
 
         return PlanningGenere(
             planning=planning,
             conseils_globaux=["Planning généré automatiquement - IA temporairement indisponible"],
             score_equilibre=50,
-            score_variete=50
+            score_variete=50,
         )
 
     # ===================================
@@ -348,9 +340,7 @@ UNIQUEMENT le JSON !"""
     # ===================================
 
     async def optimiser_planning_existant(
-            self,
-            planning_actuel: List[Dict],
-            config: ConfigPlanningUtilisateur
+        self, planning_actuel: List[Dict], config: ConfigPlanningUtilisateur
     ) -> Dict[str, List[str]]:
         """
         Analyse un planning existant et propose des améliorations
@@ -398,9 +388,7 @@ JSON uniquement !"""
 
         try:
             response = await self._call_with_retry(
-                prompt,
-                "Expert nutritionniste. JSON uniquement.",
-                1000
+                prompt, "Expert nutritionniste. JSON uniquement.", 1000
             )
 
             data = self._parse_json_response(response)
@@ -411,7 +399,7 @@ JSON uniquement !"""
             return {
                 "points_forts": [],
                 "ameliorations": [],
-                "conseils": ["Optimisation indisponible"]
+                "conseils": ["Optimisation indisponible"],
             }
 
     # ===================================
@@ -419,10 +407,7 @@ JSON uniquement !"""
     # ===================================
 
     async def suggerer_repas_pour_slot(
-            self,
-            jour: int,
-            type_repas: str,
-            contexte: Dict
+        self, jour: int, type_repas: str, contexte: Dict
     ) -> List[Dict]:
         """
         Suggère des recettes pour un slot vide
@@ -468,11 +453,7 @@ FORMAT JSON:
 JSON uniquement !"""
 
         try:
-            response = await self._call_with_retry(
-                prompt,
-                "Expert cuisine. JSON.",
-                600
-            )
+            response = await self._call_with_retry(prompt, "Expert cuisine. JSON.", 600)
 
             data = self._parse_json_response(response)
             return data.get("suggestions", [])
@@ -481,12 +462,9 @@ JSON uniquement !"""
             logger.error(f"Erreur suggestion: {e}")
             # Fallback: prendre 3 recettes aléatoires
             import random
+
             return [
-                {
-                    "recette_nom": r["nom"],
-                    "raison": "Suggestion automatique",
-                    "score": 50
-                }
+                {"recette_nom": r["nom"], "raison": "Suggestion automatique", "score": 50}
                 for r in random.sample(recettes_type, min(3, len(recettes_type)))
             ]
 
@@ -494,6 +472,7 @@ JSON uniquement !"""
 # ===================================
 # FACTORY
 # ===================================
+
 
 def create_planning_generation_service(agent: AgentIA) -> PlanningGenerationService:
     """Factory pour créer le service"""

@@ -11,10 +11,13 @@ from src.services.courses.courses_service import courses_service, MAGASINS_CONFI
 from src.services.courses.courses_ai_service import create_courses_ai_service
 from src.core.state_manager import StateManager, get_state
 from src.ui.components import (
-from src.utils.formatters import format_quantity, format_quantity_with_unit
-    render_stat_row, render_badge, render_empty_state,
-    render_confirmation_dialog, render_toast
+    render_stat_row,
+    render_badge,
+    render_empty_state,
+    render_confirmation_dialog,
+    render_toast,
 )
+from src.utils.formatters import format_quantity, format_quantity_with_unit
 
 
 # ===================================
@@ -28,6 +31,7 @@ PRIORITE_COLORS = {"haute": "#dc3545", "moyenne": "#ffc107", "basse": "#28a745"}
 # ===================================
 # COMPOSANTS UI
 # ===================================
+
 
 def render_article_simple(article: Dict, key: str):
     """Affiche un article en mode liste simple"""
@@ -55,7 +59,7 @@ def render_article_simple(article: Dict, key: str):
                 if st.session_state.get(f"confirm_buy_{article['id']}", False):
                     # Confirmation active → acheter
                     ajouter_stock = st.session_state.get(f"stock_{key}", True)
-                    courses_service.marquer_achete(article['id'], ajouter_stock)
+                    courses_service.marquer_achete(article["id"], ajouter_stock)
                     del st.session_state[f"confirm_buy_{article['id']}"]
                     render_toast(f"✅ {article['nom']} acheté", "success")
                     st.rerun()
@@ -66,7 +70,7 @@ def render_article_simple(article: Dict, key: str):
 
         with col_btn2:
             if st.button("🗑️", key=f"del_{key}", help="Supprimer"):
-                courses_service.delete(article['id'])
+                courses_service.delete(article["id"])
                 render_toast(f"🗑️ {article['nom']} supprimé", "success")
                 st.rerun()
 
@@ -78,9 +82,7 @@ def render_article_simple(article: Dict, key: str):
 
             with col_c1:
                 st.session_state[f"stock_{key}"] = st.checkbox(
-                    "Ajouter au stock inventaire",
-                    value=True,
-                    key=f"stock_chk_{key}"
+                    "Ajouter au stock inventaire", value=True, key=f"stock_chk_{key}"
                 )
 
             with col_c2:
@@ -99,14 +101,17 @@ def render_article_carte_ia(article: Dict, magasin: str, key: str):
     couleur = MAGASINS_CONFIG.get(magasin, {}).get("couleur", "#6c757d")
 
     with st.container():
-        st.markdown(f"""
+        st.markdown(
+            f"""
         <div style="border-left: 4px solid {couleur}; 
                     padding: 1rem; 
                     background: #f8f9fa; 
                     border-radius: 8px; 
                     margin-bottom: 0.5rem;">
         </div>
-        """, unsafe_allow_html=True)
+        """,
+            unsafe_allow_html=True,
+        )
 
         col1, col2 = st.columns([3, 1])
 
@@ -125,13 +130,13 @@ def render_article_carte_ia(article: Dict, magasin: str, key: str):
         with col2:
             if st.button("➕ Ajouter", key=f"add_{key}", use_container_width=True):
                 courses_service.ajouter(
-                    nom=article['article'],
-                    quantite=article['quantite'],
-                    unite=article['unite'],
-                    priorite=article.get('priorite', 'moyenne'),
-                    rayon=article.get('rayon'),
+                    nom=article["article"],
+                    quantite=article["quantite"],
+                    unite=article["unite"],
+                    priorite=article.get("priorite", "moyenne"),
+                    rayon=article.get("rayon"),
                     magasin=magasin,
-                    ia_suggere=True
+                    ia_suggere=True,
                 )
                 render_toast(f"✅ {article['article']} ajouté", "success")
                 st.rerun()
@@ -178,6 +183,7 @@ def render_quick_actions():
 # TABS
 # ===================================
 
+
 def tab_ma_liste():
     """Tab 1: Ma liste active"""
     st.subheader("📋 Ma Liste Active")
@@ -194,7 +200,7 @@ def tab_ma_liste():
             message="Ta liste est vide",
             icon="🛒",
             action_label="➕ Ajouter un article",
-            action_callback=lambda: st.session_state.update({"active_tab": 2})
+            action_callback=lambda: st.session_state.update({"active_tab": 2}),
         )
         return
 
@@ -271,11 +277,7 @@ def tab_generation_ia():
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
 
-                preferences = {
-                    "bio": pref_bio,
-                    "local": pref_local,
-                    "economique": pref_eco
-                }
+                preferences = {"bio": pref_bio, "local": pref_local, "economique": pref_eco}
 
                 result = loop.run_until_complete(
                     ai_service.generer_liste_optimisee(
@@ -283,7 +285,7 @@ def tab_generation_ia():
                         magasin,
                         MAGASINS_CONFIG[magasin]["rayons"],
                         budget,
-                        preferences
+                        preferences,
                     )
                 )
 
@@ -341,15 +343,17 @@ def tab_generation_ia():
                 articles_a_ajouter = []
                 for articles_rayon in result_data.get("par_rayon", {}).values():
                     for art in articles_rayon:
-                        articles_a_ajouter.append({
-                            "nom": art["article"],
-                            "quantite": art["quantite"],
-                            "unite": art["unite"],
-                            "priorite": art.get("priorite", "moyenne"),
-                            "rayon": art.get("rayon"),
-                            "magasin": magasin_actif,
-                            "ia": True
-                        })
+                        articles_a_ajouter.append(
+                            {
+                                "nom": art["article"],
+                                "quantite": art["quantite"],
+                                "unite": art["unite"],
+                                "priorite": art.get("priorite", "moyenne"),
+                                "rayon": art.get("rayon"),
+                                "magasin": magasin_actif,
+                                "ia": True,
+                            }
+                        )
 
                 count = courses_service.ajouter_batch(articles_a_ajouter)
                 StateManager.cache_clear("liste_ia")
@@ -379,7 +383,7 @@ def tab_ajout_manuel():
             priorite = st.selectbox(
                 "Priorité",
                 ["basse", "moyenne", "haute"],
-                format_func=lambda x: f"{PRIORITE_ICONS[x]} {x.capitalize()}"
+                format_func=lambda x: f"{PRIORITE_ICONS[x]} {x.capitalize()}",
             )
             magasin = st.selectbox("Magasin", list(MAGASINS_CONFIG.keys()))
 
@@ -395,7 +399,7 @@ def tab_ajout_manuel():
                     unite=unite,
                     priorite=priorite,
                     magasin=magasin,
-                    notes=notes
+                    notes=notes,
                 )
                 render_toast(f"✅ {nom} ajouté", "success")
                 st.rerun()
@@ -425,10 +429,13 @@ def tab_historique():
         st.markdown("### 🏆 Top Articles")
 
         import pandas as pd
-        df = pd.DataFrame([
-            {"Article": nom, "Achats": count}
-            for nom, count in stats["articles_frequents"].items()
-        ])
+
+        df = pd.DataFrame(
+            [
+                {"Article": nom, "Achats": count}
+                for nom, count in stats["articles_frequents"].items()
+            ]
+        )
 
         st.dataframe(df, use_container_width=True, hide_index=True)
         st.bar_chart(df.set_index("Article"))
@@ -438,18 +445,14 @@ def tab_historique():
 # MODULE PRINCIPAL
 # ===================================
 
+
 def app():
     """Point d'entrée du module Courses"""
     st.title("🛒 Courses Intelligentes")
     st.caption("Génération IA, optimisation automatique, organisation par magasins")
 
     # Tabs
-    tab1, tab2, tab3, tab4 = st.tabs([
-        "📋 Ma Liste",
-        "🤖 Génération IA",
-        "➕ Ajouter",
-        "📊 Historique"
-    ])
+    tab1, tab2, tab3, tab4 = st.tabs(["📋 Ma Liste", "🤖 Génération IA", "➕ Ajouter", "📊 Historique"])
 
     with tab1:
         tab_ma_liste()

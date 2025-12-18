@@ -10,11 +10,19 @@ import logging
 
 from src.core.database import get_db_context
 from src.core.models import (
-from src.utils.formatters import format_quantity, format_quantity_with_unit
-    ArticleInventaire, Ingredient, ArticleCourses,
-    Recette, RecetteIngredient
+    ArticleInventaire,
+    Ingredient,
+    ArticleCourses,
+    Recette,
+    RecetteIngredient,
 )
+from src.utils.formatters import format_quantity, format_quantity_with_unit
+
+
 from src.core.base_service import BaseService
+
+# Formatters (après les imports de base pour éviter import circulaire)
+from src.utils.formatters import format_quantity, format_quantity_with_unit
 
 logger = logging.getLogger(__name__)
 
@@ -24,13 +32,18 @@ logger = logging.getLogger(__name__)
 # ===================================
 
 CATEGORIES = [
-    "Légumes", "Fruits", "Féculents", "Protéines",
-    "Laitier", "Épices", "Huiles", "Conserves", "Autre"
+    "Légumes",
+    "Fruits",
+    "Féculents",
+    "Protéines",
+    "Laitier",
+    "Épices",
+    "Huiles",
+    "Conserves",
+    "Autre",
 ]
 
-EMPLACEMENTS = [
-    "Frigo", "Congélateur", "Placard", "Cave", "Autre"
-]
+EMPLACEMENTS = ["Frigo", "Congélateur", "Placard", "Cave", "Autre"]
 
 JOURS_ALERTE_PEREMPTION = 7
 
@@ -39,10 +52,9 @@ JOURS_ALERTE_PEREMPTION = 7
 # HELPERS STATUT
 # ===================================
 
+
 def calculer_statut_article(
-        quantite: float,
-        seuil: float,
-        date_peremption: Optional[date]
+    quantite: float, seuil: float, date_peremption: Optional[date]
 ) -> Tuple[str, str]:
     """
     Calcule le statut d'un article
@@ -81,6 +93,7 @@ def get_jours_avant_peremption(date_peremption: Optional[date]) -> Optional[int]
 # SERVICE PRINCIPAL
 # ===================================
 
+
 class InventaireService(BaseService[ArticleInventaire]):
     """Service complet de gestion d'inventaire"""
 
@@ -92,9 +105,7 @@ class InventaireService(BaseService[ArticleInventaire]):
     # ===================================
 
     def get_inventaire_complet(
-            self,
-            filters: Optional[Dict] = None,
-            db: Session = None
+        self, filters: Optional[Dict] = None, db: Session = None
     ) -> List[Dict]:
         """
         Récupère l'inventaire complet avec toutes les infos
@@ -108,11 +119,7 @@ class InventaireService(BaseService[ArticleInventaire]):
         with get_db_context() as db:
             return self._do_get_inventaire(db, filters)
 
-    def _do_get_inventaire(
-            self,
-            db: Session,
-            filters: Optional[Dict]
-    ) -> List[Dict]:
+    def _do_get_inventaire(self, db: Session, filters: Optional[Dict]) -> List[Dict]:
         """Implémentation"""
         query = db.query(
             ArticleInventaire.id,
@@ -123,11 +130,8 @@ class InventaireService(BaseService[ArticleInventaire]):
             ArticleInventaire.quantite_min,
             ArticleInventaire.emplacement,
             ArticleInventaire.date_peremption,
-            ArticleInventaire.derniere_maj
-        ).join(
-            Ingredient,
-            ArticleInventaire.ingredient_id == Ingredient.id
-        )
+            ArticleInventaire.derniere_maj,
+        ).join(Ingredient, ArticleInventaire.ingredient_id == Ingredient.id)
 
         # Appliquer filtres
         if filters:
@@ -144,27 +148,27 @@ class InventaireService(BaseService[ArticleInventaire]):
         result = []
         for item in items:
             statut, icone = calculer_statut_article(
-                item.quantite,
-                item.quantite_min,
-                item.date_peremption
+                item.quantite, item.quantite_min, item.date_peremption
             )
 
             jours_peremption = get_jours_avant_peremption(item.date_peremption)
 
-            result.append({
-                "id": item.id,
-                "nom": item.nom,
-                "categorie": item.categorie or "Autre",
-                "quantite": item.quantite,
-                "unite": item.unite,
-                "seuil": item.quantite_min,
-                "emplacement": item.emplacement or "—",
-                "date_peremption": item.date_peremption,
-                "jours_peremption": jours_peremption,
-                "derniere_maj": item.derniere_maj,
-                "statut": statut,
-                "icone": icone
-            })
+            result.append(
+                {
+                    "id": item.id,
+                    "nom": item.nom,
+                    "categorie": item.categorie or "Autre",
+                    "quantite": item.quantite,
+                    "unite": item.unite,
+                    "seuil": item.quantite_min,
+                    "emplacement": item.emplacement or "—",
+                    "date_peremption": item.date_peremption,
+                    "jours_peremption": jours_peremption,
+                    "derniere_maj": item.derniere_maj,
+                    "statut": statut,
+                    "icone": icone,
+                }
+            )
 
         return result
 
@@ -177,11 +181,7 @@ class InventaireService(BaseService[ArticleInventaire]):
         """
         inventaire = self.get_inventaire_complet(db=db)
 
-        alertes = {
-            "stock_bas": [],
-            "peremption_proche": [],
-            "critiques": []
-        }
+        alertes = {"stock_bas": [], "peremption_proche": [], "critiques": []}
 
         for item in inventaire:
             if item["statut"] == "critique":
@@ -198,16 +198,16 @@ class InventaireService(BaseService[ArticleInventaire]):
     # ===================================
 
     def ajouter_ou_modifier(
-            self,
-            nom: str,
-            categorie: str,
-            quantite: float,
-            unite: str,
-            seuil: float,
-            emplacement: Optional[str] = None,
-            date_peremption: Optional[date] = None,
-            article_id: Optional[int] = None,
-            db: Session = None
+        self,
+        nom: str,
+        categorie: str,
+        quantite: float,
+        unite: str,
+        seuil: float,
+        emplacement: Optional[str] = None,
+        date_peremption: Optional[date] = None,
+        article_id: Optional[int] = None,
+        db: Session = None,
     ) -> int:
         """
         Ajoute ou modifie un article
@@ -217,40 +217,32 @@ class InventaireService(BaseService[ArticleInventaire]):
         """
         if db:
             return self._do_ajouter_modifier(
-                db, nom, categorie, quantite, unite,
-                seuil, emplacement, date_peremption, article_id
+                db, nom, categorie, quantite, unite, seuil, emplacement, date_peremption, article_id
             )
 
         with get_db_context() as db:
             return self._do_ajouter_modifier(
-                db, nom, categorie, quantite, unite,
-                seuil, emplacement, date_peremption, article_id
+                db, nom, categorie, quantite, unite, seuil, emplacement, date_peremption, article_id
             )
 
     def _do_ajouter_modifier(
-            self,
-            db: Session,
-            nom: str,
-            categorie: str,
-            quantite: float,
-            unite: str,
-            seuil: float,
-            emplacement: Optional[str],
-            date_peremption: Optional[date],
-            article_id: Optional[int]
+        self,
+        db: Session,
+        nom: str,
+        categorie: str,
+        quantite: float,
+        unite: str,
+        seuil: float,
+        emplacement: Optional[str],
+        date_peremption: Optional[date],
+        article_id: Optional[int],
     ) -> int:
         """Implémentation"""
         # Trouver/créer ingrédient
-        ingredient = db.query(Ingredient).filter(
-            Ingredient.nom == nom
-        ).first()
+        ingredient = db.query(Ingredient).filter(Ingredient.nom == nom).first()
 
         if not ingredient:
-            ingredient = Ingredient(
-                nom=nom,
-                unite=unite,
-                categorie=categorie
-            )
+            ingredient = Ingredient(nom=nom, unite=unite, categorie=categorie)
             db.add(ingredient)
             db.flush()
 
@@ -268,9 +260,11 @@ class InventaireService(BaseService[ArticleInventaire]):
                 return article_id
 
         # Vérifier si existe déjà
-        existant = db.query(ArticleInventaire).filter(
-            ArticleInventaire.ingredient_id == ingredient.id
-        ).first()
+        existant = (
+            db.query(ArticleInventaire)
+            .filter(ArticleInventaire.ingredient_id == ingredient.id)
+            .first()
+        )
 
         if existant:
             # Mise à jour
@@ -287,7 +281,7 @@ class InventaireService(BaseService[ArticleInventaire]):
             quantite=quantite,
             quantite_min=seuil,
             emplacement=emplacement,
-            date_peremption=date_peremption
+            date_peremption=date_peremption,
         )
         db.add(article)
         db.commit()
@@ -301,11 +295,7 @@ class InventaireService(BaseService[ArticleInventaire]):
     # ===================================
 
     def ajuster_quantite(
-            self,
-            article_id: int,
-            delta: float,
-            raison: Optional[str] = None,
-            db: Session = None
+        self, article_id: int, delta: float, raison: Optional[str] = None, db: Session = None
     ) -> Optional[float]:
         """
         Ajuste la quantité (+ ou -)
@@ -338,10 +328,7 @@ class InventaireService(BaseService[ArticleInventaire]):
     # ===================================
 
     def ajouter_a_courses(
-            self,
-            article_id: int,
-            quantite: Optional[float] = None,
-            db: Session = None
+        self, article_id: int, quantite: Optional[float] = None, db: Session = None
     ) -> bool:
         """
         Ajoute un article à la liste de courses
@@ -359,12 +346,7 @@ class InventaireService(BaseService[ArticleInventaire]):
         with get_db_context() as db:
             return self._do_ajouter_courses(db, article_id, quantite)
 
-    def _do_ajouter_courses(
-            self,
-            db: Session,
-            article_id: int,
-            quantite: Optional[float]
-    ) -> bool:
+    def _do_ajouter_courses(self, db: Session, article_id: int, quantite: Optional[float]) -> bool:
         """Implémentation"""
         article = db.query(ArticleInventaire).get(article_id)
 
@@ -376,10 +358,14 @@ class InventaireService(BaseService[ArticleInventaire]):
             quantite = max(article.quantite_min - article.quantite, article.quantite_min)
 
         # Vérifier si déjà dans courses
-        existant = db.query(ArticleCourses).filter(
-            ArticleCourses.ingredient_id == article.ingredient_id,
-            ArticleCourses.achete == False
-        ).first()
+        existant = (
+            db.query(ArticleCourses)
+            .filter(
+                ArticleCourses.ingredient_id == article.ingredient_id,
+                ArticleCourses.achete == False,
+            )
+            .first()
+        )
 
         if existant:
             existant.quantite_necessaire = max(existant.quantite_necessaire, quantite)
@@ -388,7 +374,7 @@ class InventaireService(BaseService[ArticleInventaire]):
                 ingredient_id=article.ingredient_id,
                 quantite_necessaire=quantite,
                 priorite="haute",
-                suggere_par_ia=False
+                suggere_par_ia=False,
             )
             db.add(course)
 
@@ -401,9 +387,7 @@ class InventaireService(BaseService[ArticleInventaire]):
     # ===================================
 
     def verifier_faisabilite_recette(
-            self,
-            recette_id: int,
-            db: Session = None
+        self, recette_id: int, db: Session = None
     ) -> Tuple[bool, List[str]]:
         """
         Vérifie si une recette est faisable avec le stock
@@ -417,11 +401,7 @@ class InventaireService(BaseService[ArticleInventaire]):
         with get_db_context() as db:
             return self._do_verifier_recette(db, recette_id)
 
-    def _do_verifier_recette(
-            self,
-            db: Session,
-            recette_id: int
-    ) -> Tuple[bool, List[str]]:
+    def _do_verifier_recette(self, db: Session, recette_id: int) -> Tuple[bool, List[str]]:
         """Implémentation"""
         recette = db.query(Recette).get(recette_id)
 
@@ -431,9 +411,11 @@ class InventaireService(BaseService[ArticleInventaire]):
         manquants = []
 
         for recette_ing in recette.ingredients:
-            stock = db.query(ArticleInventaire).filter(
-                ArticleInventaire.ingredient_id == recette_ing.ingredient_id
-            ).first()
+            stock = (
+                db.query(ArticleInventaire)
+                .filter(ArticleInventaire.ingredient_id == recette_ing.ingredient_id)
+                .first()
+            )
 
             qty_dispo = stock.quantite if stock else 0
 
@@ -445,11 +427,7 @@ class InventaireService(BaseService[ArticleInventaire]):
 
         return len(manquants) == 0, manquants
 
-    def deduire_recette(
-            self,
-            recette_id: int,
-            db: Session = None
-    ) -> Tuple[bool, str]:
+    def deduire_recette(self, recette_id: int, db: Session = None) -> Tuple[bool, str]:
         """
         Déduit les ingrédients d'une recette du stock
 
@@ -462,11 +440,7 @@ class InventaireService(BaseService[ArticleInventaire]):
         with get_db_context() as db:
             return self._do_deduire_recette(db, recette_id)
 
-    def _do_deduire_recette(
-            self,
-            db: Session,
-            recette_id: int
-    ) -> Tuple[bool, str]:
+    def _do_deduire_recette(self, db: Session, recette_id: int) -> Tuple[bool, str]:
         """Implémentation"""
         faisable, manquants = self._do_verifier_recette(db, recette_id)
 
@@ -476,9 +450,11 @@ class InventaireService(BaseService[ArticleInventaire]):
         recette = db.query(Recette).get(recette_id)
 
         for recette_ing in recette.ingredients:
-            stock = db.query(ArticleInventaire).filter(
-                ArticleInventaire.ingredient_id == recette_ing.ingredient_id
-            ).first()
+            stock = (
+                db.query(ArticleInventaire)
+                .filter(ArticleInventaire.ingredient_id == recette_ing.ingredient_id)
+                .first()
+            )
 
             if stock:
                 stock.quantite = max(0, stock.quantite - recette_ing.quantite)
@@ -504,11 +480,7 @@ class InventaireService(BaseService[ArticleInventaire]):
         else:
             inventaire = self.get_inventaire_complet()
 
-        alertes = {
-            "critiques": 0,
-            "stock_bas": 0,
-            "peremption_proche": 0
-        }
+        alertes = {"critiques": 0, "stock_bas": 0, "peremption_proche": 0}
 
         categories_count = {}
 
@@ -529,7 +501,7 @@ class InventaireService(BaseService[ArticleInventaire]):
             "total_stock_bas": alertes["stock_bas"],
             "total_peremption": alertes["peremption_proche"],
             "categories": categories_count,
-            "emplacements": {}  # TODO si besoin
+            "emplacements": {},  # TODO si besoin
         }
 
 

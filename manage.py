@@ -82,7 +82,7 @@ def clean():
         ".mypy_cache",
         ".ruff_cache",
         "htmlcov",
-        ".coverage"
+        ".coverage",
     ]
 
     for pattern in patterns:
@@ -96,14 +96,17 @@ def clean():
 
     print("✅ Nettoyage terminé")
 
+
 def reset_supabase():
     """Reset complet de la base Supabase"""
     print("🔥 Lancement du reset Supabase...")
     run_cmd("python scripts/reset_supabase.py")
 
+
 def help_cmd():
     """Affiche l'aide"""
-    print("""
+    print(
+        """
 🤖 Assistant MaTanne v2 - Commandes disponibles
 
 Développement:
@@ -124,7 +127,8 @@ Déploiement:
 
 Usage:
   python manage.py <command>
-    """)
+    """
+    )
 
 
 COMMANDS = {

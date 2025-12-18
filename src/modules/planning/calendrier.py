@@ -18,90 +18,117 @@ from src.core.ai_agent import AgentIA
 # HELPERS
 # ===================================
 
+
 def charger_evenements(date_debut: date, date_fin: date) -> pd.DataFrame:
     """Charge tous les événements sur une période"""
     with get_db_context() as db:
-        events = db.query(CalendarEvent).filter(
-            CalendarEvent.start_date >= datetime.combine(date_debut, datetime.min.time()),
-            CalendarEvent.start_date <= datetime.combine(date_fin, datetime.max.time())
-        ).order_by(CalendarEvent.start_date).all()
+        events = (
+            db.query(CalendarEvent)
+            .filter(
+                CalendarEvent.start_date >= datetime.combine(date_debut, datetime.min.time()),
+                CalendarEvent.start_date <= datetime.combine(date_fin, datetime.max.time()),
+            )
+            .order_by(CalendarEvent.start_date)
+            .all()
+        )
 
-        return pd.DataFrame([{
-            "id": e.id,
-            "titre": e.title,
-            "description": e.description or "",
-            "debut": e.start_date,
-            "fin": e.end_date,
-            "lieu": e.location or "",
-            "categorie": e.category or "Autre",
-            "ia": e.ai_generated
-        } for e in events])
+        return pd.DataFrame(
+            [
+                {
+                    "id": e.id,
+                    "titre": e.title,
+                    "description": e.description or "",
+                    "debut": e.start_date,
+                    "fin": e.end_date,
+                    "lieu": e.location or "",
+                    "categorie": e.category or "Autre",
+                    "ia": e.ai_generated,
+                }
+                for e in events
+            ]
+        )
 
 
 def charger_repas_planifies(date_debut: date, date_fin: date) -> pd.DataFrame:
     """Charge les repas planifiés sur une période"""
     with get_db_context() as db:
-        meals = db.query(
-            BatchMeal, Recipe
-        ).join(
-            Recipe, BatchMeal.recipe_id == Recipe.id
-        ).filter(
-            BatchMeal.scheduled_date >= date_debut,
-            BatchMeal.scheduled_date <= date_fin
-        ).order_by(BatchMeal.scheduled_date).all()
+        meals = (
+            db.query(BatchMeal, Recipe)
+            .join(Recipe, BatchMeal.recipe_id == Recipe.id)
+            .filter(BatchMeal.scheduled_date >= date_debut, BatchMeal.scheduled_date <= date_fin)
+            .order_by(BatchMeal.scheduled_date)
+            .all()
+        )
 
-        return pd.DataFrame([{
-            "date": meal.scheduled_date,
-            "titre": f"🍽️ {recipe.name}",
-            "type": "repas",
-            "details": f"{meal.portions} portions"
-        } for meal, recipe in meals])
+        return pd.DataFrame(
+            [
+                {
+                    "date": meal.scheduled_date,
+                    "titre": f"🍽️ {recipe.name}",
+                    "type": "repas",
+                    "details": f"{meal.portions} portions",
+                }
+                for meal, recipe in meals
+            ]
+        )
 
 
 def charger_projets_echeances(date_debut: date, date_fin: date) -> pd.DataFrame:
     """Charge les échéances de projets"""
     with get_db_context() as db:
-        projects = db.query(Project).filter(
-            Project.end_date >= date_debut,
-            Project.end_date <= date_fin,
-            Project.status.in_(["à faire", "en cours"])
-        ).all()
+        projects = (
+            db.query(Project)
+            .filter(
+                Project.end_date >= date_debut,
+                Project.end_date <= date_fin,
+                Project.status.in_(["à faire", "en cours"]),
+            )
+            .all()
+        )
 
-        return pd.DataFrame([{
-            "date": p.end_date,
-            "titre": f"🏗️ {p.name}",
-            "type": "projet",
-            "details": f"Échéance ({p.progress}% complété)"
-        } for p in projects])
+        return pd.DataFrame(
+            [
+                {
+                    "date": p.end_date,
+                    "titre": f"🏗️ {p.name}",
+                    "type": "projet",
+                    "details": f"Échéance ({p.progress}% complété)",
+                }
+                for p in projects
+            ]
+        )
 
 
 def charger_routines_jour(date_jour: date) -> pd.DataFrame:
     """Charge les routines pour un jour donné"""
     with get_db_context() as db:
-        tasks = db.query(
-            RoutineTask, Routine
-        ).join(
-            Routine, RoutineTask.routine_id == Routine.id
-        ).filter(
-            Routine.is_active == True,
-            RoutineTask.status == "à faire"
-        ).all()
+        tasks = (
+            db.query(RoutineTask, Routine)
+            .join(Routine, RoutineTask.routine_id == Routine.id)
+            .filter(Routine.is_active == True, RoutineTask.status == "à faire")
+            .all()
+        )
 
-        return pd.DataFrame([{
-            "heure": task.scheduled_time or "—",
-            "titre": f"⏰ {routine.name}",
-            "type": "routine",
-            "details": task.task_name
-        } for task, routine in tasks])
+        return pd.DataFrame(
+            [
+                {
+                    "heure": task.scheduled_time or "—",
+                    "titre": f"⏰ {routine.name}",
+                    "type": "routine",
+                    "details": task.task_name,
+                }
+                for task, routine in tasks
+            ]
+        )
 
 
 def creer_evenement(
-        titre: str,
-        debut: datetime,
-        fin: datetime = None,
-        description: str = "",
-        lieu: str = "",
-        categorie: str = "Autre"
+    titre: str,
+    debut: datetime,
+    fin: datetime = None,
+    description: str = "",
+    lieu: str = "",
+    categorie: str = "Autre",
 ):
     """Crée un nouvel événement"""
     with get_db_context() as db:
@@ -112,7 +139,7 @@ def creer_evenement(
             description=description,
             location=lieu,
             category=categorie,
-            ai_generated=False
+            ai_generated=False,
         )
         db.add(event)
         db.commit()
@@ -139,27 +166,22 @@ def get_vue_semaine(date_debut: date) -> Dict:
 
     for i in range(7):
         jour = date_debut + timedelta(days=i)
-        vue[jour] = {
-            "events": [],
-            "repas": [],
-            "projets": [],
-            "routines": []
-        }
+        vue[jour] = {"events": [], "repas": [], "projets": [], "routines": []}
 
         # Événements
         if not df_events.empty:
             events_jour = df_events[df_events["debut"].dt.date == jour]
-            vue[jour]["events"] = events_jour.to_dict('records')
+            vue[jour]["events"] = events_jour.to_dict("records")
 
         # Repas
         if not df_repas.empty:
             repas_jour = df_repas[df_repas["date"] == jour]
-            vue[jour]["repas"] = repas_jour.to_dict('records')
+            vue[jour]["repas"] = repas_jour.to_dict("records")
 
         # Projets
         if not df_projets.empty:
             projets_jour = df_projets[df_projets["date"] == jour]
-            vue[jour]["projets"] = projets_jour.to_dict('records')
+            vue[jour]["projets"] = projets_jour.to_dict("records")
 
     return vue
 
@@ -167,6 +189,7 @@ def get_vue_semaine(date_debut: date) -> Dict:
 # ===================================
 # MODULE PRINCIPAL
 # ===================================
+
 
 def app():
     """Module Calendrier avec IA intégrée"""
@@ -209,11 +232,7 @@ def app():
     # TABS PRINCIPAUX
     # ===================================
 
-    tab1, tab2, tab3 = st.tabs([
-        "📅 Vue Semaine",
-        "➕ Nouvel Événement",
-        "📊 Vue Mois"
-    ])
+    tab1, tab2, tab3 = st.tabs(["📅 Vue Semaine", "➕ Nouvel Événement", "📊 Vue Mois"])
 
     # ===================================
     # TAB 1 : VUE SEMAINE
@@ -232,8 +251,7 @@ def app():
             is_today = jour == date.today()
 
             with st.expander(
-                    f"{'🔵 ' if is_today else ''}{jour_nom} {jour.strftime('%d/%m')}",
-                    expanded=is_today
+                f"{'🔵 ' if is_today else ''}{jour_nom} {jour.strftime('%d/%m')}", expanded=is_today
             ):
                 # Événements du calendrier
                 if contenu["events"]:
@@ -241,7 +259,7 @@ def app():
                     for event in contenu["events"]:
                         heure = event["debut"].strftime("%H:%M")
                         st.write(f"• {heure} — **{event['titre']}**")
-                        if event['lieu']:
+                        if event["lieu"]:
                             st.caption(f"📍 {event['lieu']}")
 
                 # Repas planifiés
@@ -249,14 +267,14 @@ def app():
                     st.markdown("**🍽️ Repas**")
                     for repas in contenu["repas"]:
                         st.write(f"• {repas['titre']}")
-                        st.caption(repas['details'])
+                        st.caption(repas["details"])
 
                 # Échéances projets
                 if contenu["projets"]:
                     st.markdown("**🏗️ Projets**")
                     for projet in contenu["projets"]:
                         st.write(f"• {projet['titre']}")
-                        st.caption(projet['details'])
+                        st.caption(projet["details"])
 
                 # Si rien
                 if not any([contenu["events"], contenu["repas"], contenu["projets"]]):
@@ -300,16 +318,14 @@ def app():
 
             with col_e2:
                 categorie = st.selectbox(
-                    "Catégorie",
-                    ["Famille", "Santé", "Travail", "Loisirs", "Social", "Autre"]
+                    "Catégorie", ["Famille", "Santé", "Travail", "Loisirs", "Social", "Autre"]
                 )
                 heure_fin = st.time_input("Heure de fin (optionnel)", value=None)
 
             lieu = st.text_input("Lieu (optionnel)", placeholder="Ex: Cabinet Dr. Dupont")
 
             description = st.text_area(
-                "Description (optionnel)",
-                placeholder="Détails, rappels, préparation..."
+                "Description (optionnel)", placeholder="Détails, rappels, préparation..."
             )
 
             submitted = st.form_submit_button("💾 Créer l'événement", type="primary")
@@ -331,7 +347,9 @@ def app():
         # Événements récurrents (suggestions)
         st.markdown("### 🔁 Créer événements récurrents")
 
-        st.info("💡 Fonctionnalité à venir : Ajouter des événements répétitifs (hebdomadaires, mensuels)")
+        st.info(
+            "💡 Fonctionnalité à venir : Ajouter des événements répétitifs (hebdomadaires, mensuels)"
+        )
 
     # ===================================
     # TAB 3 : VUE MOIS
@@ -345,11 +363,7 @@ def app():
 
         with col_m1:
             today = date.today()
-            mois_select = st.selectbox(
-                "Mois",
-                list(calendar.month_name)[1:],
-                index=today.month - 1
-            )
+            mois_select = st.selectbox("Mois", list(calendar.month_name)[1:], index=today.month - 1)
             mois_num = list(calendar.month_name).index(mois_select)
 
         with col_m2:
@@ -386,7 +400,9 @@ def app():
                     # Compter événements
                     nb_events = 0
                     if not df_events_mois.empty:
-                        nb_events += len(df_events_mois[df_events_mois["debut"].dt.date == date_jour])
+                        nb_events += len(
+                            df_events_mois[df_events_mois["debut"].dt.date == date_jour]
+                        )
                     if not df_repas_mois.empty:
                         nb_events += len(df_repas_mois[df_repas_mois["date"] == date_jour])
 

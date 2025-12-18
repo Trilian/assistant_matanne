@@ -12,15 +12,16 @@ import pandas as pd
 # CARTES & CONTAINERS
 # ===================================
 
+
 def render_card(
-        title: str,
-        content: str = "",
-        icon: str = "📦",
-        color: str = "#4CAF50",
-        actions: Optional[List[Tuple[str, Callable]]] = None,
-        footer: Optional[str] = None,
-        image_url: Optional[str] = None,
-        unique_id: Optional[str] = None  # ✅ Nouveau paramètre
+    title: str,
+    content: str = "",
+    icon: str = "📦",
+    color: str = "#4CAF50",
+    actions: Optional[List[Tuple[str, Callable]]] = None,
+    footer: Optional[str] = None,
+    image_url: Optional[str] = None,
+    unique_id: Optional[str] = None,  # ✅ Nouveau paramètre
 ):
     """
     Carte moderne avec titre, contenu, actions
@@ -38,18 +39,22 @@ def render_card(
     # Générer un ID unique si non fourni
     if unique_id is None:
         import hashlib
+
         unique_id = hashlib.md5(title.encode()).hexdigest()[:8]
 
     with st.container():
         # Bordure colorée
-        st.markdown(f"""
+        st.markdown(
+            f"""
         <div style="border-left: 4px solid {color}; 
                     padding: 1rem; 
                     background: #f8f9fa; 
                     border-radius: 8px; 
                     margin-bottom: 1rem;">
         </div>
-        """, unsafe_allow_html=True)
+        """,
+            unsafe_allow_html=True,
+        )
 
         # Header avec image
         if image_url:
@@ -77,13 +82,14 @@ def render_card(
         if footer:
             st.caption(footer)
 
+
 def render_info_card(
-        label: str,
-        value: str,
-        delta: Optional[str] = None,
-        delta_color: str = "normal",
-        icon: str = "📊",
-        help_text: Optional[str] = None
+    label: str,
+    value: str,
+    delta: Optional[str] = None,
+    delta_color: str = "normal",
+    icon: str = "📊",
+    help_text: Optional[str] = None,
 ):
     """
     Carte d'information/métrique stylisée
@@ -97,7 +103,8 @@ def render_info_card(
         help_text: Tooltip
     """
     with st.container():
-        st.markdown(f"""
+        st.markdown(
+            f"""
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                     color: white;
                     padding: 1rem;
@@ -108,7 +115,9 @@ def render_info_card(
             <div style="font-size: 2rem; font-weight: bold; margin: 0.5rem 0;">{value}</div>
             {f'<div style="font-size: 0.875rem;">{delta}</div>' if delta else ''}
         </div>
-        """, unsafe_allow_html=True)
+        """,
+            unsafe_allow_html=True,
+        )
 
         if help_text:
             st.caption(help_text)
@@ -131,7 +140,7 @@ def render_stat_row(stats: List[Dict[str, Any]], cols: int = 4):
                 value=stat.get("value", ""),
                 delta=stat.get("delta"),
                 delta_color=stat.get("delta_color", "normal"),
-                help=stat.get("help")
+                help=stat.get("help"),
             )
 
 
@@ -139,13 +148,11 @@ def render_stat_row(stats: List[Dict[str, Any]], cols: int = 4):
 # BADGES & TAGS
 # ===================================
 
-def render_badge(
-        text: str,
-        color: str = "#4CAF50",
-        icon: str = ""
-):
+
+def render_badge(text: str, color: str = "#4CAF50", icon: str = ""):
     """Badge coloré"""
-    st.markdown(f"""
+    st.markdown(
+        f"""
     <span style="background-color: {color}; 
                  color: white;
                  padding: 0.25rem 0.75rem; 
@@ -156,7 +163,9 @@ def render_badge(
                  margin: 0.25rem;">
         {icon} {text}
     </span>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 
 def render_tags(tags: List[str], colors: Optional[Dict[str, str]] = None):
@@ -177,43 +186,27 @@ def render_tags(tags: List[str], colors: Optional[Dict[str, str]] = None):
 
 def render_priority_badge(priority: str):
     """Badge de priorité avec couleurs standard"""
-    colors = {
-        "haute": "#dc3545",
-        "moyenne": "#ffc107",
-        "basse": "#28a745"
-    }
+    colors = {"haute": "#dc3545", "moyenne": "#ffc107", "basse": "#28a745"}
 
-    icons = {
-        "haute": "🔴",
-        "moyenne": "🟡",
-        "basse": "🟢"
-    }
+    icons = {"haute": "🔴", "moyenne": "🟡", "basse": "🟢"}
 
-    render_badge(
-        priority.capitalize(),
-        colors.get(priority, "#6c757d"),
-        icons.get(priority, "⚪")
-    )
+    render_badge(priority.capitalize(), colors.get(priority, "#6c757d"), icons.get(priority, "⚪"))
 
 
 # ===================================
 # FORMULAIRES
 # ===================================
 
+
 def render_search_bar(
-        placeholder: str = "Rechercher...",
-        key: str = "search",
-        on_change: Optional[Callable] = None
+    placeholder: str = "Rechercher...", key: str = "search", on_change: Optional[Callable] = None
 ) -> str:
     """Barre de recherche stylisée"""
     col1, col2 = st.columns([4, 1])
 
     with col1:
         search_term = st.text_input(
-            "🔍",
-            placeholder=placeholder,
-            key=key,
-            label_visibility="collapsed"
+            "🔍", placeholder=placeholder, key=key, label_visibility="collapsed"
         )
 
     with col2:
@@ -225,10 +218,7 @@ def render_search_bar(
     return search_term
 
 
-def render_filter_panel(
-        filters: Dict[str, Dict],
-        key_prefix: str = "filter"
-) -> Dict[str, Any]:
+def render_filter_panel(filters: Dict[str, Dict], key_prefix: str = "filter") -> Dict[str, Any]:
     """
     Panel de filtres générique
 
@@ -256,25 +246,17 @@ def render_filter_panel(
 
             if filter_type == "select":
                 results[filter_name] = st.selectbox(
-                    label,
-                    config.get("options", []),
-                    index=config.get("default", 0),
-                    key=key
+                    label, config.get("options", []), index=config.get("default", 0), key=key
                 )
 
             elif filter_type == "multiselect":
                 results[filter_name] = st.multiselect(
-                    label,
-                    config.get("options", []),
-                    default=config.get("default", []),
-                    key=key
+                    label, config.get("options", []), default=config.get("default", []), key=key
                 )
 
             elif filter_type == "checkbox":
                 results[filter_name] = st.checkbox(
-                    label,
-                    value=config.get("default", False),
-                    key=key
+                    label, value=config.get("default", False), key=key
                 )
 
             elif filter_type == "slider":
@@ -283,7 +265,7 @@ def render_filter_panel(
                     min_value=config.get("min", 0),
                     max_value=config.get("max", 100),
                     value=config.get("default", 50),
-                    key=key
+                    key=key,
                 )
 
             elif filter_type == "number":
@@ -292,21 +274,17 @@ def render_filter_panel(
                     min_value=config.get("min", 0),
                     max_value=config.get("max", 1000),
                     value=config.get("default", 0),
-                    key=key
+                    key=key,
                 )
 
             elif filter_type == "date":
                 results[filter_name] = st.date_input(
-                    label,
-                    value=config.get("default", date.today()),
-                    key=key
+                    label, value=config.get("default", date.today()), key=key
                 )
 
             else:  # text
                 results[filter_name] = st.text_input(
-                    label,
-                    value=config.get("default", ""),
-                    key=key
+                    label, value=config.get("default", ""), key=key
                 )
 
     return results
@@ -316,11 +294,12 @@ def render_filter_panel(
 # LISTES & TABLEAUX
 # ===================================
 
+
 def render_data_table(
-        df: pd.DataFrame,
-        actions: Optional[List[Tuple[str, Callable]]] = None,
-        selectable: bool = False,
-        key: str = "table"
+    df: pd.DataFrame,
+    actions: Optional[List[Tuple[str, Callable]]] = None,
+    selectable: bool = False,
+    key: str = "table",
 ) -> Optional[List[int]]:
     """
     Tableau de données avec actions
@@ -340,16 +319,10 @@ def render_data_table(
 
     # Afficher le tableau
     if selectable:
-        selected = st.multiselect(
-            "Sélectionner",
-            df.index.tolist(),
-            key=f"{key}_select"
-        )
+        selected = st.multiselect("Sélectionner", df.index.tolist(), key=f"{key}_select")
 
         st.dataframe(
-            df.loc[selected] if selected else df,
-            use_container_width=True,
-            hide_index=True
+            df.loc[selected] if selected else df, use_container_width=True, hide_index=True
         )
 
         return selected
@@ -359,14 +332,14 @@ def render_data_table(
 
 
 def render_list_item(
-        title: str,
-        subtitle: Optional[str] = None,
-        metadata: Optional[List[str]] = None,
-        actions: Optional[List[Tuple[str, Callable]]] = None,
-        icon: str = "•",
-        expandable: bool = False,
-        expanded_content: Optional[Callable] = None,
-        key: str = "item"
+    title: str,
+    subtitle: Optional[str] = None,
+    metadata: Optional[List[str]] = None,
+    actions: Optional[List[Tuple[str, Callable]]] = None,
+    icon: str = "•",
+    expandable: bool = False,
+    expanded_content: Optional[Callable] = None,
+    key: str = "item",
 ):
     """
     Item de liste avec actions
@@ -417,11 +390,8 @@ def render_list_item(
 # NOTIFICATIONS & ALERTES
 # ===================================
 
-def render_toast(
-        message: str,
-        type: str = "info",
-        duration: int = 3
-):
+
+def render_toast(message: str, type: str = "info", duration: int = 3):
     """
     Notification toast (utilise st.toast si dispo, sinon message standard)
 
@@ -431,8 +401,11 @@ def render_toast(
         duration: Durée en secondes
     """
     # Streamlit 1.30+ a st.toast
-    if hasattr(st, 'toast'):
-        st.toast(message, icon={"info": "ℹ️", "success": "✅", "warning": "⚠️", "error": "❌"}.get(type, "ℹ️"))
+    if hasattr(st, "toast"):
+        st.toast(
+            message,
+            icon={"info": "ℹ️", "success": "✅", "warning": "⚠️", "error": "❌"}.get(type, "ℹ️"),
+        )
     else:
         # Fallback
         if type == "success":
@@ -446,10 +419,7 @@ def render_toast(
 
 
 def render_alert(
-        message: str,
-        type: str = "info",
-        dismissible: bool = False,
-        icon: Optional[str] = None
+    message: str, type: str = "info", dismissible: bool = False, icon: Optional[str] = None
 ):
     """
     Alerte stylisée
@@ -460,31 +430,24 @@ def render_alert(
         dismissible: Peut être fermée
         icon: Icône custom
     """
-    icons = {
-        "info": "ℹ️",
-        "success": "✅",
-        "warning": "⚠️",
-        "error": "❌"
-    }
+    icons = {"info": "ℹ️", "success": "✅", "warning": "⚠️", "error": "❌"}
 
-    colors = {
-        "info": "#d1ecf1",
-        "success": "#d4edda",
-        "warning": "#fff3cd",
-        "error": "#f8d7da"
-    }
+    colors = {"info": "#d1ecf1", "success": "#d4edda", "warning": "#fff3cd", "error": "#f8d7da"}
 
     icon_display = icon or icons.get(type, "ℹ️")
     color = colors.get(type, "#d1ecf1")
 
     if dismissible:
         with st.expander(f"{icon_display} {message}", expanded=True):
-            st.markdown(f"""
+            st.markdown(
+                f"""
             <div style="background-color: {color}; 
                         padding: 1rem; 
                         border-radius: 8px;">
             </div>
-            """, unsafe_allow_html=True)
+            """,
+                unsafe_allow_html=True,
+            )
     else:
         if type == "success":
             st.success(f"{icon_display} {message}")
@@ -500,12 +463,13 @@ def render_alert(
 # MODALES & CONFIRMATIONS
 # ===================================
 
+
 def render_confirmation_dialog(
-        title: str,
-        message: str,
-        confirm_label: str = "Confirmer",
-        cancel_label: str = "Annuler",
-        key: str = "confirm"
+    title: str,
+    message: str,
+    confirm_label: str = "Confirmer",
+    cancel_label: str = "Annuler",
+    key: str = "confirm",
 ) -> Optional[bool]:
     """
     Dialog de confirmation
@@ -523,7 +487,9 @@ def render_confirmation_dialog(
             col1, col2 = st.columns(2)
 
             with col1:
-                if st.button(confirm_label, key=f"{key}_confirm", type="primary", use_container_width=True):
+                if st.button(
+                    confirm_label, key=f"{key}_confirm", type="primary", use_container_width=True
+                ):
                     st.session_state[f"{key}_show"] = False
                     return True
 
@@ -539,10 +505,9 @@ def render_confirmation_dialog(
 # PAGINATION
 # ===================================
 
+
 def render_pagination(
-        total_items: int,
-        items_per_page: int = 20,
-        key: str = "pagination"
+    total_items: int, items_per_page: int = 20, key: str = "pagination"
 ) -> Tuple[int, int]:
     """
     Contrôles de pagination
@@ -567,17 +532,14 @@ def render_pagination(
         st.caption(f"{total_items} élément(s)")
 
     with col3:
-        if st.button("Suiv ➡️", key=f"{key}_next", disabled=st.session_state[f"{key}_page"] >= total_pages):
+        if st.button(
+            "Suiv ➡️", key=f"{key}_next", disabled=st.session_state[f"{key}_page"] >= total_pages
+        ):
             st.session_state[f"{key}_page"] += 1
             st.rerun()
 
     with col4:
-        items_per_page = st.selectbox(
-            "Par page",
-            [10, 20, 50, 100],
-            index=1,
-            key=f"{key}_size"
-        )
+        items_per_page = st.selectbox("Par page", [10, 20, 50, 100], index=1, key=f"{key}_size")
 
     return st.session_state[f"{key}_page"], items_per_page
 
@@ -585,6 +547,7 @@ def render_pagination(
 # ===================================
 # LOADING & PROGRESS
 # ===================================
+
 
 def render_loading(message: str = "Chargement...", spinner: bool = True):
     """Indicateur de chargement"""
@@ -596,10 +559,7 @@ def render_loading(message: str = "Chargement...", spinner: bool = True):
 
 
 def render_progress_bar(
-        value: int,
-        max_value: int = 100,
-        label: Optional[str] = None,
-        color: str = "#4CAF50"
+    value: int, max_value: int = 100, label: Optional[str] = None, color: str = "#4CAF50"
 ):
     """Barre de progression stylisée"""
     percentage = (value / max_value) * 100 if max_value > 0 else 0
@@ -615,37 +575,46 @@ def render_progress_bar(
 # HELPERS DIVERS
 # ===================================
 
+
 def render_empty_state(
-        message: str = "Aucune donnée",
-        icon: str = "📭",
-        action_label: Optional[str] = None,
-        action_callback: Optional[Callable] = None
+    message: str = "Aucune donnée",
+    icon: str = "📭",
+    action_label: Optional[str] = None,
+    action_callback: Optional[Callable] = None,
 ):
     """État vide avec action optionnelle"""
-    st.markdown(f"""
+    st.markdown(
+        f"""
     <div style="text-align: center; padding: 3rem; color: #6c757d;">
         <div style="font-size: 4rem;">{icon}</div>
         <div style="font-size: 1.5rem; margin-top: 1rem;">{message}</div>
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
     if action_label and action_callback:
         col1, col2, col3 = st.columns([1, 1, 1])
         with col2:
-            if st.button(action_label, key="empty_action", use_container_width=True, type="primary"):
+            if st.button(
+                action_label, key="empty_action", use_container_width=True, type="primary"
+            ):
                 action_callback()
 
 
 def render_divider(text: Optional[str] = None, color: str = "#dee2e6"):
     """Séparateur avec texte optionnel"""
     if text:
-        st.markdown(f"""
+        st.markdown(
+            f"""
         <div style="text-align: center; margin: 2rem 0;">
             <span style="background: white; padding: 0 1rem; color: {color};">
                 {text}
             </span>
             <hr style="margin-top: -0.75rem; border-color: {color};">
         </div>
-        """, unsafe_allow_html=True)
+        """,
+            unsafe_allow_html=True,
+        )
     else:
         st.markdown("---")

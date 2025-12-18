@@ -11,9 +11,15 @@ from typing import Dict, List
 
 from src.core.database import get_db_context
 from src.core.models import (
-    Recette, RecetteIngredient, Ingredient,
-    Project, RoutineTask, ProfilEnfant, Notification,
-    BatchMeal, Routine
+    Recette,
+    RecetteIngredient,
+    Ingredient,
+    Project,
+    RoutineTask,
+    ProfilEnfant,
+    Notification,
+    BatchMeal,
+    Routine,
 )
 from src.core.ai_agent import AgentIA
 
@@ -22,27 +28,26 @@ from src.core.ai_agent import AgentIA
 # HELPERS
 # ===================================
 
+
 def get_dashboard_stats() -> Dict:
     """Récupère les statistiques pour le dashboard"""
     with get_db_context() as db:
         stats = {
             "recettes_total": db.query(Recipe).count(),
             "recettes_ia": db.query(Recipe).filter(Recipe.ai_generated == True).count(),
-            "stock_bas": db.query(InventoryItem).filter(
-                InventoryItem.quantity < InventoryItem.min_quantity
-            ).count(),
-            "repas_planifies": db.query(BatchMeal).filter(
-                BatchMeal.scheduled_date >= date.today()
-            ).count(),
-            "projets_actifs": db.query(Project).filter(
-                Project.status.in_(["à faire", "en cours"])
-            ).count(),
-            "taches_jour": db.query(RoutineTask).filter(
-                RoutineTask.status == "à faire"
-            ).count(),
-            "notifications_non_lues": db.query(Notification).filter(
-                Notification.read == False
-            ).count()
+            "stock_bas": db.query(InventoryItem)
+            .filter(InventoryItem.quantity < InventoryItem.min_quantity)
+            .count(),
+            "repas_planifies": db.query(BatchMeal)
+            .filter(BatchMeal.scheduled_date >= date.today())
+            .count(),
+            "projets_actifs": db.query(Project)
+            .filter(Project.status.in_(["à faire", "en cours"]))
+            .count(),
+            "taches_jour": db.query(RoutineTask).filter(RoutineTask.status == "à faire").count(),
+            "notifications_non_lues": db.query(Notification)
+            .filter(Notification.read == False)
+            .count(),
         }
 
         return stats
@@ -54,50 +59,52 @@ def get_actions_urgentes() -> List[Dict]:
 
     with get_db_context() as db:
         # 1. Stock critique
-        items_critiques = db.query(
-            Ingredient.name,
-            InventoryItem.quantity,
-            Ingredient.unit
-        ).join(
-            InventoryItem, Ingredient.id == InventoryItem.ingredient_id
-        ).filter(
-            InventoryItem.quantity < InventoryItem.min_quantity
-        ).all()
+        items_critiques = (
+            db.query(Ingredient.name, InventoryItem.quantity, Ingredient.unit)
+            .join(InventoryItem, Ingredient.id == InventoryItem.ingredient_id)
+            .filter(InventoryItem.quantity < InventoryItem.min_quantity)
+            .all()
+        )
 
         if items_critiques:
             noms = ", ".join([item.name for item in items_critiques[:3]])
-            actions.append({
-                "type": "URGENT",
-                "icone": "⚠️",
-                "titre": "Stock critique",
-                "message": f"{len(items_critiques)} article(s) en stock bas : {noms}",
-                "action": "Ajouter à la liste de courses",
-                "module": "cuisine.courses"
-            })
+            actions.append(
+                {
+                    "type": "URGENT",
+                    "icone": "⚠️",
+                    "titre": "Stock critique",
+                    "message": f"{len(items_critiques)} article(s) en stock bas : {noms}",
+                    "action": "Ajouter à la liste de courses",
+                    "module": "cuisine.courses",
+                }
+            )
 
         # 2. Repas non planifiés cette semaine
         today = date.today()
         week_end = today + timedelta(days=7)
 
-        repas_semaine = db.query(BatchMeal).filter(
-            BatchMeal.scheduled_date.between(today, week_end)
-        ).count()
+        repas_semaine = (
+            db.query(BatchMeal).filter(BatchMeal.scheduled_date.between(today, week_end)).count()
+        )
 
         if repas_semaine < 3:
-            actions.append({
-                "type": "ATTENTION",
-                "icone": "📅",
-                "titre": "Planning incomplet",
-                "message": f"Seulement {repas_semaine} repas planifiés cette semaine",
-                "action": "Générer un planning automatique",
-                "module": "cuisine.batch_cooking"
-            })
+            actions.append(
+                {
+                    "type": "ATTENTION",
+                    "icone": "📅",
+                    "titre": "Planning incomplet",
+                    "message": f"Seulement {repas_semaine} repas planifiés cette semaine",
+                    "action": "Générer un planning automatique",
+                    "module": "cuisine.batch_cooking",
+                }
+            )
 
         # 3. Tâches en retard
-        taches_retard = db.query(RoutineTask).filter(
-            RoutineTask.status == "à faire",
-            RoutineTask.scheduled_time != None
-        ).all()
+        taches_retard = (
+            db.query(RoutineTask)
+            .filter(RoutineTask.status == "à faire", RoutineTask.scheduled_time != None)
+            .all()
+        )
 
         retard_count = 0
         now = datetime.now().time()
@@ -111,31 +118,36 @@ def get_actions_urgentes() -> List[Dict]:
                 pass
 
         if retard_count > 0:
-            actions.append({
-                "type": "INFO",
-                "icone": "⏰",
-                "titre": "Routines en retard",
-                "message": f"{retard_count} tâche(s) de routine en attente",
-                "action": "Voir les routines",
-                "module": "famille.routines"
-            })
+            actions.append(
+                {
+                    "type": "INFO",
+                    "icone": "⏰",
+                    "titre": "Routines en retard",
+                    "message": f"{retard_count} tâche(s) de routine en attente",
+                    "action": "Voir les routines",
+                    "module": "famille.routines",
+                }
+            )
 
         # 4. Projets sans progression depuis 7 jours
         week_ago = datetime.now() - timedelta(days=7)
-        projets_stagnants = db.query(Project).filter(
-            Project.status == "en cours",
-            Project.updated_at < week_ago
-        ).count()
+        projets_stagnants = (
+            db.query(Project)
+            .filter(Project.status == "en cours", Project.updated_at < week_ago)
+            .count()
+        )
 
         if projets_stagnants > 0:
-            actions.append({
-                "type": "INFO",
-                "icone": "🏗️",
-                "titre": "Projets en pause",
-                "message": f"{projets_stagnants} projet(s) sans activité depuis 7 jours",
-                "action": "Voir les projets",
-                "module": "maison.projets"
-            })
+            actions.append(
+                {
+                    "type": "INFO",
+                    "icone": "🏗️",
+                    "titre": "Projets en pause",
+                    "message": f"{projets_stagnants} projet(s) sans activité depuis 7 jours",
+                    "action": "Voir les projets",
+                    "module": "maison.projets",
+                }
+            )
 
     return actions
 
@@ -146,15 +158,13 @@ def get_suggestions_ia_rapides() -> List[str]:
 
     with get_db_context() as db:
         # Récupérer l'inventaire
-        items = db.query(
-            Ingredient.name,
-            InventoryItem.quantity,
-            Ingredient.unit
-        ).join(
-            InventoryItem, Ingredient.id == InventoryItem.ingredient_id
-        ).filter(
-            InventoryItem.quantity > 0
-        ).limit(5).all()
+        items = (
+            db.query(Ingredient.name, InventoryItem.quantity, Ingredient.unit)
+            .join(InventoryItem, Ingredient.id == InventoryItem.ingredient_id)
+            .filter(InventoryItem.quantity > 0)
+            .limit(5)
+            .all()
+        )
 
         if items:
             items_text = ", ".join([f"{item.name}" for item in items])
@@ -176,11 +186,13 @@ def get_suggestions_ia_rapides() -> List[str]:
 # MODULE PRINCIPAL
 # ===================================
 
+
 def app():
     """Module Accueil - Dashboard intelligent"""
 
     # Header personnalisé
-    st.markdown("""
+    st.markdown(
+        """
         <div style='text-align: center; padding: 2rem 0;'>
             <h1 style='color: #2d4d36; font-size: 2.5rem; margin-bottom: 0.5rem;'>
                 👋 Bienvenue dans Assistant MaTanne
@@ -189,7 +201,9 @@ def app():
                 Ton copilote quotidien propulsé par l'IA
             </p>
         </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
     # Récupérer l'agent IA
     agent: AgentIA = st.session_state.get("agent_ia")
@@ -209,7 +223,7 @@ def app():
             "📚 Recettes",
             stats["recettes_total"],
             delta=f"{stats['recettes_ia']} IA",
-            delta_color="normal"
+            delta_color="normal",
         )
 
     with col2:
@@ -218,15 +232,12 @@ def app():
             "📦 Inventaire",
             "OK" if stats["stock_bas"] == 0 else "Alerte",
             delta=f"{stats['stock_bas']} bas" if stats["stock_bas"] > 0 else None,
-            delta_color="inverse"
+            delta_color="inverse",
         )
 
     with col3:
         st.metric(
-            "📅 Repas planifiés",
-            stats["repas_planifies"],
-            delta="Cette semaine",
-            delta_color="off"
+            "📅 Repas planifiés", stats["repas_planifies"], delta="Cette semaine", delta_color="off"
         )
 
     with col4:
@@ -234,7 +245,7 @@ def app():
             "🏗️ Projets actifs",
             stats["projets_actifs"],
             delta=f"{stats['taches_jour']} tâches aujourd'hui",
-            delta_color="off"
+            delta_color="off",
         )
 
     st.markdown("---")
@@ -260,20 +271,22 @@ def app():
                 col_icon, col_content, col_action = st.columns([0.5, 3, 1.5])
 
                 with col_icon:
-                    st.markdown(f"<div style='font-size: 2rem;'>{action['icone']}</div>",
-                                unsafe_allow_html=True)
+                    st.markdown(
+                        f"<div style='font-size: 2rem;'>{action['icone']}</div>",
+                        unsafe_allow_html=True,
+                    )
 
                 with col_content:
                     st.markdown(f"**{action['titre']}**")
-                    st.caption(action['message'])
+                    st.caption(action["message"])
 
                 with col_action:
                     if st.button(
-                            action['action'],
-                            key=f"action_{action['module']}",
-                            type="primary" if action['type'] == "URGENT" else "secondary"
+                        action["action"],
+                        key=f"action_{action['module']}",
+                        type="primary" if action["type"] == "URGENT" else "secondary",
                     ):
-                        st.session_state.current_module = action['module']
+                        st.session_state.current_module = action["module"]
                         st.rerun()
 
                 st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
@@ -332,9 +345,7 @@ def app():
 
         with get_db_context() as db:
             # Dernières recettes ajoutées
-            recettes_recentes = db.query(Recipe).order_by(
-                Recipe.created_at.desc()
-            ).limit(3).all()
+            recettes_recentes = db.query(Recipe).order_by(Recipe.created_at.desc()).limit(3).all()
 
             if recettes_recentes:
                 for recette in recettes_recentes:
@@ -345,15 +356,14 @@ def app():
 
             # Prochains repas
             st.markdown("**Prochains repas**")
-            prochains = db.query(
-                BatchMeal, Recipe
-            ).join(
-                Recipe, BatchMeal.recipe_id == Recipe.id
-            ).filter(
-                BatchMeal.scheduled_date >= date.today()
-            ).order_by(
-                BatchMeal.scheduled_date
-            ).limit(3).all()
+            prochains = (
+                db.query(BatchMeal, Recipe)
+                .join(Recipe, BatchMeal.recipe_id == Recipe.id)
+                .filter(BatchMeal.scheduled_date >= date.today())
+                .order_by(BatchMeal.scheduled_date)
+                .limit(3)
+                .all()
+            )
 
             if prochains:
                 for batch, recette in prochains:
@@ -366,9 +376,7 @@ def app():
 
         with get_db_context() as db:
             # Projets en cours
-            projets = db.query(Project).filter(
-                Project.status == "en cours"
-            ).limit(3).all()
+            projets = db.query(Project).filter(Project.status == "en cours").limit(3).all()
 
             if projets:
                 for projet in projets:
@@ -379,9 +387,7 @@ def app():
 
             # Routines du jour
             st.markdown("**Routines d'aujourd'hui**")
-            routines = db.query(RoutineTask).filter(
-                RoutineTask.status == "à faire"
-            ).limit(3).all()
+            routines = db.query(RoutineTask).filter(RoutineTask.status == "à faire").limit(3).all()
 
             if routines:
                 for routine in routines:
@@ -428,14 +434,22 @@ def app():
     if stats["notifications_non_lues"] > 0:
         with st.expander(f"🔔 Notifications ({stats['notifications_non_lues']} non lues)"):
             with get_db_context() as db:
-                notifs = db.query(Notification).filter(
-                    Notification.read == False
-                ).order_by(
-                    Notification.created_at.desc()
-                ).limit(5).all()
+                notifs = (
+                    db.query(Notification)
+                    .filter(Notification.read == False)
+                    .order_by(Notification.created_at.desc())
+                    .limit(5)
+                    .all()
+                )
 
                 for notif in notifs:
-                    priority_icon = "🔴" if notif.priority == "haute" else "🟡" if notif.priority == "moyenne" else "🔵"
+                    priority_icon = (
+                        "🔴"
+                        if notif.priority == "haute"
+                        else "🟡"
+                        if notif.priority == "moyenne"
+                        else "🔵"
+                    )
                     st.write(f"{priority_icon} **[{notif.module}]** {notif.message}")
                     st.caption(notif.created_at.strftime("%d/%m/%Y %H:%M"))
                     st.markdown("---")

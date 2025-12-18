@@ -34,6 +34,7 @@ def get_url():
     try:
         # Essayer d'abord avec Streamlit secrets (production)
         import streamlit as st
+
         db = st.secrets["db"]
         return (
             f"postgresql://{db['user']}:{db['password']}"
@@ -43,6 +44,7 @@ def get_url():
     except:
         # Fallback sur .env (développement local)
         from dotenv import load_dotenv
+
         load_dotenv()
 
         user = os.getenv("POSTGRES_USER", "postgres")
@@ -59,11 +61,7 @@ def get_url():
                 "2. Les variables d'environnement (.env)"
             )
 
-        return (
-            f"postgresql://{user}:{password}"
-            f"@{host}:{port}/{database}"
-            f"?sslmode=require"
-        )
+        return f"postgresql://{user}:{password}" f"@{host}:{port}/{database}" f"?sslmode=require"
 
 
 def run_migrations_offline() -> None:

@@ -20,36 +20,40 @@ logger = logging.getLogger(__name__)
 # SCHÉMAS PYDANTIC POUR VALIDATION
 # ===================================
 
+
 class IngredientAI(BaseModel):
     """Ingrédient validé par Pydantic"""
+
     nom: str = Field(..., min_length=2, max_length=200)
     quantite: float = Field(..., gt=0, le=10000)
     unite: str = Field(..., min_length=1, max_length=50)
     optionnel: bool = False
 
-    @validator('nom')
+    @validator("nom")
     def clean_nom(cls, v):
         # Nettoyer apostrophes
         return v.replace("'", "'").strip()
 
-    @validator('quantite')
+    @validator("quantite")
     def round_qty(cls, v):
         return round(v, 2)
 
 
 class EtapeAI(BaseModel):
     """Étape validée"""
+
     ordre: int = Field(..., ge=1, le=50)
     description: str = Field(..., min_length=10, max_length=1000)
     duree: Optional[int] = Field(None, ge=0, le=300)
 
-    @validator('description')
+    @validator("description")
     def clean_desc(cls, v):
         return v.replace("'", "'").strip()
 
 
 class VersionBebeAI(BaseModel):
     """Version bébé"""
+
     instructions_modifiees: Optional[str] = None
     notes_bebe: Optional[str] = None
     ingredients_modifies: Optional[List[IngredientAI]] = None
@@ -57,6 +61,7 @@ class VersionBebeAI(BaseModel):
 
 class VersionBatchAI(BaseModel):
     """Version batch cooking"""
+
     etapes_paralleles: Optional[List[str]] = None
     temps_optimise: Optional[int] = Field(None, gt=0, le=300)
     conseils_batch: Optional[str] = None
@@ -64,6 +69,7 @@ class VersionBatchAI(BaseModel):
 
 class RecetteAI(BaseModel):
     """Recette complète validée"""
+
     nom: str = Field(..., min_length=3, max_length=200)
     description: str = Field(..., min_length=10, max_length=2000)
     temps_preparation: int = Field(..., gt=0, le=300)
@@ -87,18 +93,18 @@ class RecetteAI(BaseModel):
     version_bebe: Optional[VersionBebeAI] = None
     version_batch: Optional[VersionBatchAI] = None
 
-    @validator('nom', 'description')
+    @validator("nom", "description")
     def clean_text(cls, v):
         return v.replace("'", "'").strip()
 
-    @validator('est_rapide', always=True)
+    @validator("est_rapide", always=True)
     def auto_rapide(cls, v, values):
         """Auto-marque rapide si <30min"""
-        prep = values.get('temps_preparation', 0)
-        cuisson = values.get('temps_cuisson', 0)
+        prep = values.get("temps_preparation", 0)
+        cuisson = values.get("temps_cuisson", 0)
         return (prep + cuisson) < 30
 
-    @validator('etapes')
+    @validator("etapes")
     def validate_etapes_ordre(cls, v):
         """Vérifie ordre séquentiel"""
         ordres = [e.ordre for e in v]
@@ -114,6 +120,7 @@ class RecetteAI(BaseModel):
 
 class RecettesResponse(BaseModel):
     """Réponse complète de l'IA"""
+
     recettes: List[RecetteAI] = Field(..., min_items=1, max_items=10)
 
     class Config:
@@ -123,6 +130,7 @@ class RecettesResponse(BaseModel):
 # ===================================
 # SERVICE IA AMÉLIORÉ
 # ===================================
+
 
 class AIRecetteService:
     """Service de génération de recettes avec Mistral AI - Version robuste"""
@@ -142,11 +150,7 @@ class AIRecetteService:
     # ===================================
 
     async def _call_mistral_cached(
-            self,
-            prompt: str,
-            system_prompt: str = "",
-            temperature: float = 0.7,
-            max_tokens: int = 2000
+        self, prompt: str, system_prompt: str = "", temperature: float = 0.7, max_tokens: int = 2000
     ) -> str:
         """Appel API avec cache et rate limiting"""
 
@@ -156,11 +160,7 @@ class AIRecetteService:
             raise ValueError(error_msg)
 
         # 2. Vérifier cache
-        cache_params = {
-            "system": system_prompt,
-            "temp": temperature,
-            "tokens": max_tokens
-        }
+        cache_params = {"system": system_prompt, "temp": temperature, "tokens": max_tokens}
 
         cached = AICache.get(prompt, cache_params)
         if cached:
@@ -181,14 +181,14 @@ class AIRecetteService:
                     f"{self.base_url}/chat/completions",
                     headers={
                         "Authorization": f"Bearer {self.api_key}",
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
                     },
                     json={
                         "model": self.model,
                         "messages": messages,
                         "temperature": temperature,
-                        "max_tokens": max_tokens
-                    }
+                        "max_tokens": max_tokens,
+                    },
                 )
 
                 response.raise_for_status()
@@ -216,10 +216,7 @@ class AIRecetteService:
     # ===================================
 
     async def generate_recipes(
-            self,
-            count: int,
-            filters: Dict,
-            version_type: str = TypeVersionRecetteEnum.STANDARD.value
+        self, count: int, filters: Dict, version_type: str = TypeVersionRecetteEnum.STANDARD.value
     ) -> List[Dict]:
         """
         Génère des recettes avec parsing Pydantic robuste
@@ -242,10 +239,7 @@ class AIRecetteService:
 
             # 2. Appeler l'IA
             response = await self._call_mistral_cached(
-                prompt=user_prompt,
-                system_prompt=system_prompt,
-                temperature=0.7,
-                max_tokens=2000
+                prompt=user_prompt, system_prompt=system_prompt, temperature=0.7, max_tokens=2000
             )
 
             # 3. Parser avec Pydantic
@@ -412,6 +406,7 @@ class AIRecetteService:
             etape["ordre"] = idx
 
         return recette_data
+
     def _clean_json(self, content: str) -> str:
         """Nettoie le JSON basique"""
         # Supprimer BOM et caractères invisibles
@@ -430,14 +425,14 @@ class AIRecetteService:
         start = None
 
         for i, ch in enumerate(content):
-            if ch == '{':
+            if ch == "{":
                 if level == 0:
                     start = i
                 level += 1
-            elif ch == '}':
+            elif ch == "}":
                 level -= 1
                 if level == 0 and start is not None:
-                    return content[start:i+1]
+                    return content[start : i + 1]
 
         raise ValueError("Aucun objet JSON complet trouvé")
 
@@ -451,12 +446,12 @@ class AIRecetteService:
         level = 0
 
         for i in range(start, len(content)):
-            if content[i] == '[':
+            if content[i] == "[":
                 level += 1
-            elif content[i] == ']':
+            elif content[i] == "]":
                 level -= 1
                 if level == 0:
-                    array = content[start:i+1]
+                    array = content[start : i + 1]
                     return f'{{"recettes": {array}}}'
 
         raise ValueError("Tableau 'recettes' incomplet")
@@ -483,13 +478,13 @@ class AIRecetteService:
                 "congelable": False,
                 "ingredients": [
                     {"nom": "Pâtes", "quantite": 400, "unite": "g", "optionnel": False},
-                    {"nom": "Beurre", "quantite": 50, "unite": "g", "optionnel": False}
+                    {"nom": "Beurre", "quantite": 50, "unite": "g", "optionnel": False},
                 ],
                 "etapes": [
                     {"ordre": 1, "description": "Faire bouillir de l'eau salée", "duree": 5},
                     {"ordre": 2, "description": "Cuire les pâtes", "duree": 8},
-                    {"ordre": 3, "description": "Égoutter et mélanger avec le beurre", "duree": 2}
-                ]
+                    {"ordre": 3, "description": "Égoutter et mélanger avec le beurre", "duree": 2},
+                ],
             },
             {
                 "nom": "Omelette nature",
@@ -508,12 +503,12 @@ class AIRecetteService:
                 "congelable": False,
                 "ingredients": [
                     {"nom": "Œufs", "quantite": 4, "unite": "pcs", "optionnel": False},
-                    {"nom": "Beurre", "quantite": 20, "unite": "g", "optionnel": False}
+                    {"nom": "Beurre", "quantite": 20, "unite": "g", "optionnel": False},
                 ],
                 "etapes": [
                     {"ordre": 1, "description": "Battre les œufs", "duree": 2},
-                    {"ordre": 2, "description": "Cuire à la poêle", "duree": 4}
-                ]
+                    {"ordre": 2, "description": "Cuire à la poêle", "duree": 4},
+                ],
             },
             {
                 "nom": "Salade composée",
@@ -533,13 +528,13 @@ class AIRecetteService:
                 "ingredients": [
                     {"nom": "Laitue", "quantite": 1, "unite": "pcs", "optionnel": False},
                     {"nom": "Tomates", "quantite": 2, "unite": "pcs", "optionnel": False},
-                    {"nom": "Concombre", "quantite": 1, "unite": "pcs", "optionnel": False}
+                    {"nom": "Concombre", "quantite": 1, "unite": "pcs", "optionnel": False},
                 ],
                 "etapes": [
                     {"ordre": 1, "description": "Laver et couper les légumes", "duree": 8},
-                    {"ordre": 2, "description": "Assaisonner", "duree": 2}
-                ]
-            }
+                    {"ordre": 2, "description": "Assaisonner", "duree": 2},
+                ],
+            },
         ]
 
         return fallback[:count]
@@ -630,7 +625,7 @@ class AIRecetteService:
       "version_bebe": {
         "instructions_modifiees": "Mixer finement après cuisson",
         "notes_bebe": "À partir de 8 mois, texture lisse"
-      }"""
+      }""",
             )
 
         return f"RÉPONDS AVEC CE FORMAT:\n{schema}"

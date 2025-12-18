@@ -11,45 +11,41 @@ from typing import List, Dict
 
 # Templates de tâches d'entretien
 TEMPLATES_ENTRETIEN = {
-    "Quotidien": [
-        "Vaisselle",
-        "Rangement cuisine",
-        "Ranger salon",
-        "Faire les lits"
-    ],
+    "Quotidien": ["Vaisselle", "Rangement cuisine", "Ranger salon", "Faire les lits"],
     "Hebdomadaire": [
         "Aspirateur",
         "Serpillère",
         "Nettoyer salle de bain",
         "Changer draps",
         "Sortir poubelles",
-        "Lessive"
+        "Lessive",
     ],
     "Mensuel": [
         "Nettoyer vitres",
         "Dépoussiérer",
         "Nettoyer frigo",
         "Nettoyer four",
-        "Entretien plantes"
+        "Entretien plantes",
     ],
     "Trimestriel": [
         "Réviser chaudière",
         "Nettoyer VMC",
         "Désencombrer placards",
-        "Entretien jardin"
+        "Entretien jardin",
     ],
     "Annuel": [
         "Ramonage",
         "Contrôle électrique",
         "Vidange chauffe-eau",
-        "Grand nettoyage printemps"
-    ]
+        "Grand nettoyage printemps",
+    ],
 }
 
 
 # ===================================
 # HELPERS (mock - à implémenter en DB plus tard)
 # ===================================
+
 
 def get_taches_today() -> List[str]:
     """Retourne les tâches du jour"""
@@ -65,13 +61,14 @@ def get_taches_semaine() -> Dict:
         "Jeudi": ["Salle de bain"],
         "Vendredi": ["Serpillère"],
         "Samedi": ["Grand ménage"],
-        "Dimanche": ["Repos"]
+        "Dimanche": ["Repos"],
     }
 
 
 # ===================================
 # MODULE PRINCIPAL
 # ===================================
+
 
 def app():
     """Module Entretien Maison"""
@@ -85,11 +82,7 @@ def app():
     # TABS
     # ===================================
 
-    tab1, tab2, tab3 = st.tabs([
-        "📋 Aujourd'hui",
-        "📅 Planning Semaine",
-        "🗂️ Templates"
-    ])
+    tab1, tab2, tab3 = st.tabs(["📋 Aujourd'hui", "📅 Planning Semaine", "🗂️ Templates"])
 
     # ===================================
     # TAB 1 : AUJOURD'HUI
@@ -145,8 +138,7 @@ def app():
             is_today = jour_date == today
 
             with st.expander(
-                    f"{'🔵 ' if is_today else ''}{jour} {jour_date.strftime('%d/%m')}",
-                    expanded=is_today
+                f"{'🔵 ' if is_today else ''}{jour} {jour_date.strftime('%d/%m')}", expanded=is_today
             ):
                 if taches:
                     for tache in taches:
@@ -180,7 +172,7 @@ def app():
             "⏰ Définir des créneaux fixes (ex: samedi matin = ménage)",
             "👥 Impliquer toute la famille dans les tâches",
             "🎯 Commencer par les tâches rapides pour garder la motivation",
-            "📱 Utiliser les rappels pour ne rien oublier"
+            "📱 Utiliser les rappels pour ne rien oublier",
         ]
 
         for conseil in conseils:

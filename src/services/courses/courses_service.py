@@ -11,11 +11,19 @@ import logging
 
 from src.core.database import get_db_context
 from src.core.models import (
-from src.utils.formatters import format_quantity, format_quantity_with_unit
-    ArticleCourses, Ingredient, ArticleInventaire,
-    Recette, RecetteIngredient, RepasPlanning, PlanningHebdomadaire
+    ArticleCourses,
+    Ingredient,
+    ArticleInventaire,
+    Recette,
+    RecetteIngredient,
+    RepasPlanning,
+    PlanningHebdomadaire,
 )
+from src.utils.formatters import format_quantity, format_quantity_with_unit
 from src.core.base_service import BaseService
+
+# Formatters (après les imports de base pour éviter import circulaire)
+from src.utils.formatters import format_quantity, format_quantity_with_unit
 
 logger = logging.getLogger(__name__)
 
@@ -26,26 +34,51 @@ logger = logging.getLogger(__name__)
 
 MAGASINS_CONFIG = {
     "Grand Frais": {
-        "rayons": ["Fruits & Légumes", "Boucherie", "Poissonnerie", "Fromage", "Traiteur", "Boulangerie", "Epicerie"],
+        "rayons": [
+            "Fruits & Légumes",
+            "Boucherie",
+            "Poissonnerie",
+            "Fromage",
+            "Traiteur",
+            "Boulangerie",
+            "Epicerie",
+        ],
         "couleur": "#4CAF50",
-        "specialite": "frais"
+        "specialite": "frais",
     },
     "Thiriet": {
-        "rayons": ["Entrées", "Poissons", "Viandes", "Plats Cuisinés", "Légumes", "Desserts", "Pain"],
+        "rayons": [
+            "Entrées",
+            "Poissons",
+            "Viandes",
+            "Plats Cuisinés",
+            "Légumes",
+            "Desserts",
+            "Pain",
+        ],
         "couleur": "#2196F3",
-        "specialite": "surgelés"
+        "specialite": "surgelés",
     },
     "Cora": {
-        "rayons": ["Fruits & Légumes", "Boucherie", "Poissonnerie", "Crèmerie", "Epicerie", "Surgelés", "Boissons"],
+        "rayons": [
+            "Fruits & Légumes",
+            "Boucherie",
+            "Poissonnerie",
+            "Crèmerie",
+            "Epicerie",
+            "Surgelés",
+            "Boissons",
+        ],
         "couleur": "#FF5722",
-        "specialite": "tout"
-    }
+        "specialite": "tout",
+    },
 }
 
 
 # ===================================
 # SERVICE PRINCIPAL
 # ===================================
+
 
 class CoursesService(BaseService[ArticleCourses]):
     """Service complet pour la gestion des courses"""
@@ -57,11 +90,7 @@ class CoursesService(BaseService[ArticleCourses]):
     # LECTURE OPTIMISÉE
     # ===================================
 
-    def get_liste_active(
-            self,
-            filters: Optional[Dict] = None,
-            db: Session = None
-    ) -> List[Dict]:
+    def get_liste_active(self, filters: Optional[Dict] = None, db: Session = None) -> List[Dict]:
         """
         Liste active avec toutes les infos
 
@@ -74,11 +103,7 @@ class CoursesService(BaseService[ArticleCourses]):
         with get_db_context() as db:
             return self._do_get_liste(db, achetes=False, filters=filters)
 
-    def get_liste_achetee(
-            self,
-            jours: int = 30,
-            db: Session = None
-    ) -> List[Dict]:
+    def get_liste_achetee(self, jours: int = 30, db: Session = None) -> List[Dict]:
         """Historique des achats"""
         if db:
             return self._do_get_liste(db, achetes=True, jours=jours)
@@ -87,31 +112,31 @@ class CoursesService(BaseService[ArticleCourses]):
             return self._do_get_liste(db, achetes=True, jours=jours)
 
     def _do_get_liste(
-            self,
-            db: Session,
-            achetes: bool,
-            filters: Optional[Dict] = None,
-            jours: Optional[int] = None
+        self,
+        db: Session,
+        achetes: bool,
+        filters: Optional[Dict] = None,
+        jours: Optional[int] = None,
     ) -> List[Dict]:
         """Implémentation interne"""
-        query = db.query(
-            ArticleCourses.id,
-            Ingredient.nom,
-            Ingredient.categorie,
-            ArticleCourses.quantite_necessaire,
-            Ingredient.unite,
-            ArticleCourses.priorite,
-            ArticleCourses.achete,
-            ArticleCourses.suggere_par_ia,
-            ArticleCourses.rayon_magasin,
-            ArticleCourses.magasin_cible,
-            ArticleCourses.notes,
-            ArticleCourses.cree_le,
-            ArticleCourses.achete_le
-        ).join(
-            Ingredient, ArticleCourses.ingredient_id == Ingredient.id
-        ).filter(
-            ArticleCourses.achete == achetes
+        query = (
+            db.query(
+                ArticleCourses.id,
+                Ingredient.nom,
+                Ingredient.categorie,
+                ArticleCourses.quantite_necessaire,
+                Ingredient.unite,
+                ArticleCourses.priorite,
+                ArticleCourses.achete,
+                ArticleCourses.suggere_par_ia,
+                ArticleCourses.rayon_magasin,
+                ArticleCourses.magasin_cible,
+                ArticleCourses.notes,
+                ArticleCourses.cree_le,
+                ArticleCourses.achete_le,
+            )
+            .join(Ingredient, ArticleCourses.ingredient_id == Ingredient.id)
+            .filter(ArticleCourses.achete == achetes)
         )
 
         # Filtre temporel pour historique
@@ -132,33 +157,31 @@ class CoursesService(BaseService[ArticleCourses]):
         if achetes:
             query = query.order_by(ArticleCourses.achete_le.desc())
         else:
-            query = query.order_by(
-                ArticleCourses.priorite.desc(),
-                Ingredient.nom
-            )
+            query = query.order_by(ArticleCourses.priorite.desc(), Ingredient.nom)
 
         items = query.all()
 
-        return [{
-            "id": i.id,
-            "nom": i.nom,
-            "categorie": i.categorie or "Autre",
-            "quantite": i.quantite_necessaire,
-            "unite": i.unite,
-            "priorite": i.priorite,
-            "achete": i.achete,
-            "ia": i.suggere_par_ia,
-            "rayon": i.rayon_magasin,
-            "magasin": i.magasin_cible,
-            "notes": i.notes,
-            "cree_le": i.cree_le,
-            "achete_le": i.achete_le
-        } for i in items]
+        return [
+            {
+                "id": i.id,
+                "nom": i.nom,
+                "categorie": i.categorie or "Autre",
+                "quantite": i.quantite_necessaire,
+                "unite": i.unite,
+                "priorite": i.priorite,
+                "achete": i.achete,
+                "ia": i.suggere_par_ia,
+                "rayon": i.rayon_magasin,
+                "magasin": i.magasin_cible,
+                "notes": i.notes,
+                "cree_le": i.cree_le,
+                "achete_le": i.achete_le,
+            }
+            for i in items
+        ]
 
     def get_organisation_par_rayons(
-            self,
-            magasin: str,
-            db: Session = None
+        self, magasin: str, db: Session = None
     ) -> Dict[str, List[Dict]]:
         """
         Organise la liste par rayons du magasin
@@ -188,16 +211,16 @@ class CoursesService(BaseService[ArticleCourses]):
     # ===================================
 
     def ajouter(
-            self,
-            nom: str,
-            quantite: float,
-            unite: str,
-            priorite: str = "moyenne",
-            rayon: Optional[str] = None,
-            magasin: Optional[str] = None,
-            ia_suggere: bool = False,
-            notes: Optional[str] = None,
-            db: Session = None
+        self,
+        nom: str,
+        quantite: float,
+        unite: str,
+        priorite: str = "moyenne",
+        rayon: Optional[str] = None,
+        magasin: Optional[str] = None,
+        ia_suggere: bool = False,
+        notes: Optional[str] = None,
+        db: Session = None,
     ) -> int:
         """
         Ajoute un article (ou fusionne si existe)
@@ -206,28 +229,30 @@ class CoursesService(BaseService[ArticleCourses]):
             ID de l'article créé/modifié
         """
         if db:
-            return self._do_ajouter(db, nom, quantite, unite, priorite, rayon, magasin, ia_suggere, notes)
+            return self._do_ajouter(
+                db, nom, quantite, unite, priorite, rayon, magasin, ia_suggere, notes
+            )
 
         with get_db_context() as db:
-            return self._do_ajouter(db, nom, quantite, unite, priorite, rayon, magasin, ia_suggere, notes)
+            return self._do_ajouter(
+                db, nom, quantite, unite, priorite, rayon, magasin, ia_suggere, notes
+            )
 
     def _do_ajouter(
-            self,
-            db: Session,
-            nom: str,
-            quantite: float,
-            unite: str,
-            priorite: str,
-            rayon: Optional[str],
-            magasin: Optional[str],
-            ia_suggere: bool,
-            notes: Optional[str]
+        self,
+        db: Session,
+        nom: str,
+        quantite: float,
+        unite: str,
+        priorite: str,
+        rayon: Optional[str],
+        magasin: Optional[str],
+        ia_suggere: bool,
+        notes: Optional[str],
     ) -> int:
         """Implémentation interne"""
         # Trouver/créer ingrédient
-        ingredient = db.query(Ingredient).filter(
-            Ingredient.nom == nom
-        ).first()
+        ingredient = db.query(Ingredient).filter(Ingredient.nom == nom).first()
 
         if not ingredient:
             ingredient = Ingredient(nom=nom, unite=unite)
@@ -235,10 +260,11 @@ class CoursesService(BaseService[ArticleCourses]):
             db.flush()
 
         # Vérifier si existe déjà (non acheté)
-        existant = db.query(ArticleCourses).filter(
-            ArticleCourses.ingredient_id == ingredient.id,
-            ArticleCourses.achete == False
-        ).first()
+        existant = (
+            db.query(ArticleCourses)
+            .filter(ArticleCourses.ingredient_id == ingredient.id, ArticleCourses.achete == False)
+            .first()
+        )
 
         if existant:
             # Fusion intelligente
@@ -265,7 +291,7 @@ class CoursesService(BaseService[ArticleCourses]):
                 suggere_par_ia=ia_suggere,
                 rayon_magasin=rayon,
                 magasin_cible=magasin,
-                notes=notes
+                notes=notes,
             )
             db.add(article)
             db.flush()
@@ -275,11 +301,7 @@ class CoursesService(BaseService[ArticleCourses]):
 
         return article_id
 
-    def ajouter_batch(
-            self,
-            articles: List[Dict],
-            db: Session = None
-    ) -> int:
+    def ajouter_batch(self, articles: List[Dict], db: Session = None) -> int:
         """
         Ajoute plusieurs articles en batch
 
@@ -301,7 +323,7 @@ class CoursesService(BaseService[ArticleCourses]):
                     art.get("rayon"),
                     art.get("magasin"),
                     art.get("ia", False),
-                    art.get("notes")
+                    art.get("notes"),
                 )
                 count += 1
             return count
@@ -318,16 +340,13 @@ class CoursesService(BaseService[ArticleCourses]):
                     art.get("rayon"),
                     art.get("magasin"),
                     art.get("ia", False),
-                    art.get("notes")
+                    art.get("notes"),
                 )
                 count += 1
             return count
 
     def modifier_quantite(
-            self,
-            article_id: int,
-            nouvelle_quantite: float,
-            db: Session = None
+        self, article_id: int, nouvelle_quantite: float, db: Session = None
     ) -> bool:
         """Modifie la quantité d'un article"""
         if db:
@@ -351,10 +370,7 @@ class CoursesService(BaseService[ArticleCourses]):
     # ===================================
 
     def marquer_achete(
-            self,
-            article_id: int,
-            ajouter_au_stock: bool = False,
-            db: Session = None
+        self, article_id: int, ajouter_au_stock: bool = False, db: Session = None
     ) -> bool:
         """
         Marque un article comme acheté
@@ -369,12 +385,7 @@ class CoursesService(BaseService[ArticleCourses]):
         with get_db_context() as db:
             return self._do_marquer_achete(db, article_id, ajouter_au_stock)
 
-    def _do_marquer_achete(
-            self,
-            db: Session,
-            article_id: int,
-            ajouter_au_stock: bool
-    ) -> bool:
+    def _do_marquer_achete(self, db: Session, article_id: int, ajouter_au_stock: bool) -> bool:
         """Implémentation interne"""
         article = db.query(ArticleCourses).get(article_id)
 
@@ -386,9 +397,11 @@ class CoursesService(BaseService[ArticleCourses]):
 
         # Ajout au stock si demandé
         if ajouter_au_stock:
-            stock = db.query(ArticleInventaire).filter(
-                ArticleInventaire.ingredient_id == article.ingredient_id
-            ).first()
+            stock = (
+                db.query(ArticleInventaire)
+                .filter(ArticleInventaire.ingredient_id == article.ingredient_id)
+                .first()
+            )
 
             if stock:
                 stock.quantite += article.quantite_necessaire
@@ -397,7 +410,7 @@ class CoursesService(BaseService[ArticleCourses]):
                 stock = ArticleInventaire(
                     ingredient_id=article.ingredient_id,
                     quantite=article.quantite_necessaire,
-                    quantite_min=1.0
+                    quantite_min=1.0,
                 )
                 db.add(stock)
 
@@ -406,10 +419,7 @@ class CoursesService(BaseService[ArticleCourses]):
         return True
 
     def marquer_tous_achetes(
-            self,
-            article_ids: List[int],
-            ajouter_au_stock: bool = False,
-            db: Session = None
+        self, article_ids: List[int], ajouter_au_stock: bool = False, db: Session = None
     ) -> int:
         """Marque plusieurs articles comme achetés"""
         if db:
@@ -430,11 +440,7 @@ class CoursesService(BaseService[ArticleCourses]):
     # NETTOYAGE
     # ===================================
 
-    def nettoyer_achetes(
-            self,
-            jours: int = 30,
-            db: Session = None
-    ) -> int:
+    def nettoyer_achetes(self, jours: int = 30, db: Session = None) -> int:
         """
         Supprime les articles achetés de plus de X jours
 
@@ -443,20 +449,22 @@ class CoursesService(BaseService[ArticleCourses]):
         """
         if db:
             date_limite = datetime.now() - timedelta(days=jours)
-            count = db.query(ArticleCourses).filter(
-                ArticleCourses.achete == True,
-                ArticleCourses.achete_le < date_limite
-            ).delete()
+            count = (
+                db.query(ArticleCourses)
+                .filter(ArticleCourses.achete == True, ArticleCourses.achete_le < date_limite)
+                .delete()
+            )
             db.commit()
             logger.info(f"{count} articles achetés nettoyés (>{jours}j)")
             return count
 
         with get_db_context() as db:
             date_limite = datetime.now() - timedelta(days=jours)
-            count = db.query(ArticleCourses).filter(
-                ArticleCourses.achete == True,
-                ArticleCourses.achete_le < date_limite
-            ).delete()
+            count = (
+                db.query(ArticleCourses)
+                .filter(ArticleCourses.achete == True, ArticleCourses.achete_le < date_limite)
+                .delete()
+            )
             db.commit()
             logger.info(f"{count} articles achetés nettoyés (>{jours}j)")
             return count
@@ -465,10 +473,7 @@ class CoursesService(BaseService[ArticleCourses]):
     # GÉNÉRATION AUTOMATIQUE
     # ===================================
 
-    def generer_depuis_stock_bas(
-            self,
-            db: Session = None
-    ) -> List[Dict]:
+    def generer_depuis_stock_bas(self, db: Session = None) -> List[Dict]:
         """
         Génère suggestions depuis stock bas
 
@@ -483,37 +488,35 @@ class CoursesService(BaseService[ArticleCourses]):
 
     def _do_generer_stock_bas(self, db: Session) -> List[Dict]:
         """Implémentation"""
-        items = db.query(
-            Ingredient.nom,
-            Ingredient.unite,
-            ArticleInventaire.quantite,
-            ArticleInventaire.quantite_min
-        ).join(
-            ArticleInventaire,
-            Ingredient.id == ArticleInventaire.ingredient_id
-        ).filter(
-            ArticleInventaire.quantite < ArticleInventaire.quantite_min
-        ).all()
+        items = (
+            db.query(
+                Ingredient.nom,
+                Ingredient.unite,
+                ArticleInventaire.quantite,
+                ArticleInventaire.quantite_min,
+            )
+            .join(ArticleInventaire, Ingredient.id == ArticleInventaire.ingredient_id)
+            .filter(ArticleInventaire.quantite < ArticleInventaire.quantite_min)
+            .all()
+        )
 
         suggestions = []
         for nom, unite, qty, seuil in items:
             manque = max(seuil - qty, seuil)
-            suggestions.append({
-                "nom": nom,
-                "quantite": manque,
-                "unite": unite,
-                "priorite": "haute",
-                "raison": f"Stock: {qty:.1f}/{format_quantity(seuil)}"
-            })
+            suggestions.append(
+                {
+                    "nom": nom,
+                    "quantite": manque,
+                    "unite": unite,
+                    "priorite": "haute",
+                    "raison": f"Stock: {qty:.1f}/{format_quantity(seuil)}",
+                }
+            )
 
         logger.info(f"{len(suggestions)} articles en stock bas détectés")
         return suggestions
 
-    def generer_depuis_repas_planifies(
-            self,
-            jours: int = 7,
-            db: Session = None
-    ) -> List[Dict]:
+    def generer_depuis_repas_planifies(self, jours: int = 7, db: Session = None) -> List[Dict]:
         """
         Génère depuis repas planifiés
 
@@ -532,39 +535,32 @@ class CoursesService(BaseService[ArticleCourses]):
         date_fin = today + timedelta(days=jours)
 
         # Récupérer recettes planifiées
-        repas = db.query(
-            Recette.id,
-            Recette.nom
-        ).join(
-            RepasPlanning,
-            Recette.id == RepasPlanning.recette_id
-        ).filter(
-            RepasPlanning.date.between(today, date_fin),
-            RepasPlanning.statut != "terminé"
-        ).all()
+        repas = (
+            db.query(Recette.id, Recette.nom)
+            .join(RepasPlanning, Recette.id == RepasPlanning.recette_id)
+            .filter(RepasPlanning.date.between(today, date_fin), RepasPlanning.statut != "terminé")
+            .all()
+        )
 
         # Consolider ingrédients
         consolidated = {}
 
         for recette_id, recette_nom in repas:
-            ingredients = db.query(
-                Ingredient.nom,
-                RecetteIngredient.quantite,
-                Ingredient.unite
-            ).join(
-                RecetteIngredient,
-                Ingredient.id == RecetteIngredient.ingredient_id
-            ).filter(
-                RecetteIngredient.recette_id == recette_id
-            ).all()
+            ingredients = (
+                db.query(Ingredient.nom, RecetteIngredient.quantite, Ingredient.unite)
+                .join(RecetteIngredient, Ingredient.id == RecetteIngredient.ingredient_id)
+                .filter(RecetteIngredient.recette_id == recette_id)
+                .all()
+            )
 
             for nom, qty, unite in ingredients:
                 # Vérifier stock
-                stock = db.query(ArticleInventaire).join(
-                    Ingredient
-                ).filter(
-                    Ingredient.nom == nom
-                ).first()
+                stock = (
+                    db.query(ArticleInventaire)
+                    .join(Ingredient)
+                    .filter(Ingredient.nom == nom)
+                    .first()
+                )
 
                 qty_dispo = stock.quantite if stock else 0
                 manque = max(qty - qty_dispo, 0)
@@ -580,7 +576,7 @@ class CoursesService(BaseService[ArticleCourses]):
                             "quantite": manque,
                             "unite": unite,
                             "priorite": "moyenne",
-                            "recettes": {recette_nom}
+                            "recettes": {recette_nom},
                         }
 
         # Formatter
@@ -591,13 +587,15 @@ class CoursesService(BaseService[ArticleCourses]):
             if len(item["recettes"]) > 2:
                 recettes_str += f" +{len(item['recettes'])-2}"
 
-            suggestions.append({
-                "nom": item["nom"],
-                "quantite": item["quantite"],
-                "unite": item["unite"],
-                "priorite": item["priorite"],
-                "raison": f"Pour: {recettes_str}"
-            })
+            suggestions.append(
+                {
+                    "nom": item["nom"],
+                    "quantite": item["quantite"],
+                    "unite": item["unite"],
+                    "priorite": item["priorite"],
+                    "raison": f"Pour: {recettes_str}",
+                }
+            )
 
         logger.info(f"{len(suggestions)} articles générés depuis repas ({jours}j)")
         return suggestions
@@ -606,11 +604,7 @@ class CoursesService(BaseService[ArticleCourses]):
     # STATISTIQUES
     # ===================================
 
-    def get_stats(
-            self,
-            jours: int = 30,
-            db: Session = None
-    ) -> Dict:
+    def get_stats(self, jours: int = 30, db: Session = None) -> Dict:
         """
         Statistiques complètes
 
@@ -628,15 +622,14 @@ class CoursesService(BaseService[ArticleCourses]):
         date_limite = datetime.now() - timedelta(days=jours)
 
         # Actifs
-        actifs = db.query(ArticleCourses).filter(
-            ArticleCourses.achete == False
-        ).all()
+        actifs = db.query(ArticleCourses).filter(ArticleCourses.achete == False).all()
 
         # Achetés
-        achetes = db.query(ArticleCourses).filter(
-            ArticleCourses.achete == True,
-            ArticleCourses.achete_le >= date_limite
-        ).all()
+        achetes = (
+            db.query(ArticleCourses)
+            .filter(ArticleCourses.achete == True, ArticleCourses.achete_le >= date_limite)
+            .all()
+        )
 
         # Articles fréquents
         articles_freq = {}
@@ -646,9 +639,7 @@ class CoursesService(BaseService[ArticleCourses]):
             articles_freq[nom] = articles_freq.get(nom, 0) + 1
 
         # Tri
-        top_articles = dict(
-            sorted(articles_freq.items(), key=lambda x: x[1], reverse=True)[:10]
-        )
+        top_articles = dict(sorted(articles_freq.items(), key=lambda x: x[1], reverse=True)[:10])
 
         return {
             "total_actifs": len(actifs),
@@ -657,7 +648,7 @@ class CoursesService(BaseService[ArticleCourses]):
             "part_ia_achetes": len([a for a in achetes if a.suggere_par_ia]),
             "moyenne_semaine": len(achetes) / max(jours // 7, 1),
             "prioritaires": len([a for a in actifs if a.priorite == "haute"]),
-            "articles_frequents": top_articles
+            "articles_frequents": top_articles,
         }
 
 

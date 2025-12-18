@@ -16,6 +16,7 @@ from src.core.models import Recette, RecetteIngredient, EtapeRecette
 # EXPORT
 # ===================================
 
+
 class RecetteExporter:
     """Export de recettes en différents formats"""
 
@@ -31,9 +32,7 @@ class RecetteExporter:
             String JSON
         """
         with get_db_context() as db:
-            recettes = db.query(Recette).filter(
-                Recette.id.in_(recette_ids)
-            ).all()
+            recettes = db.query(Recette).filter(Recette.id.in_(recette_ids)).all()
 
             data = []
 
@@ -53,7 +52,7 @@ class RecetteExporter:
                             "nom": ing.ingredient.nom,
                             "quantite": ing.quantite,
                             "unite": ing.unite,
-                            "optionnel": ing.optionnel
+                            "optionnel": ing.optionnel,
                         }
                         for ing in recette.ingredients
                     ],
@@ -61,7 +60,7 @@ class RecetteExporter:
                         {
                             "ordre": etape.ordre,
                             "description": etape.description,
-                            "duree": etape.duree
+                            "duree": etape.duree,
                         }
                         for etape in sorted(recette.etapes, key=lambda x: x.ordre)
                     ],
@@ -70,8 +69,8 @@ class RecetteExporter:
                         "equilibre": recette.est_equilibre,
                         "bebe": recette.compatible_bebe,
                         "batch": recette.compatible_batch,
-                        "congelable": recette.congelable
-                    }
+                        "congelable": recette.congelable,
+                    },
                 }
 
                 data.append(recette_dict)
@@ -148,39 +147,40 @@ class RecetteExporter:
             String CSV
         """
         with get_db_context() as db:
-            recettes = db.query(Recette).filter(
-                Recette.id.in_(recette_ids)
-            ).all()
+            recettes = db.query(Recette).filter(Recette.id.in_(recette_ids)).all()
 
             data = []
 
             for recette in recettes:
                 # Concaténer ingrédients
-                ingredients_str = "; ".join([
-                    f"{ing.quantite}{ing.unite} {ing.ingredient.nom}"
-                    for ing in recette.ingredients
-                ])
+                ingredients_str = "; ".join(
+                    [
+                        f"{ing.quantite}{ing.unite} {ing.ingredient.nom}"
+                        for ing in recette.ingredients
+                    ]
+                )
 
                 # Concaténer étapes
-                etapes_str = " | ".join([
-                    etape.description
-                    for etape in sorted(recette.etapes, key=lambda x: x.ordre)
-                ])
+                etapes_str = " | ".join(
+                    [etape.description for etape in sorted(recette.etapes, key=lambda x: x.ordre)]
+                )
 
-                data.append({
-                    "Nom": recette.nom,
-                    "Description": recette.description or "",
-                    "Temps préparation (min)": recette.temps_preparation,
-                    "Temps cuisson (min)": recette.temps_cuisson,
-                    "Portions": recette.portions,
-                    "Difficulté": recette.difficulte,
-                    "Type repas": recette.type_repas,
-                    "Saison": recette.saison,
-                    "Ingrédients": ingredients_str,
-                    "Étapes": etapes_str,
-                    "Rapide": "Oui" if recette.est_rapide else "Non",
-                    "Équilibré": "Oui" if recette.est_equilibre else "Non"
-                })
+                data.append(
+                    {
+                        "Nom": recette.nom,
+                        "Description": recette.description or "",
+                        "Temps préparation (min)": recette.temps_preparation,
+                        "Temps cuisson (min)": recette.temps_cuisson,
+                        "Portions": recette.portions,
+                        "Difficulté": recette.difficulte,
+                        "Type repas": recette.type_repas,
+                        "Saison": recette.saison,
+                        "Ingrédients": ingredients_str,
+                        "Étapes": etapes_str,
+                        "Rapide": "Oui" if recette.est_rapide else "Non",
+                        "Équilibré": "Oui" if recette.est_equilibre else "Non",
+                    }
+                )
 
             df = pd.DataFrame(data)
             return df.to_csv(index=False)
@@ -199,6 +199,7 @@ class RecetteExporter:
 # ===================================
 # IMPORT
 # ===================================
+
 
 class RecetteImporter:
     """Import de recettes depuis différents formats"""
@@ -261,7 +262,7 @@ class RecetteImporter:
             "portions": 4,
             "difficulte": "moyen",
             "ingredients": [],
-            "etapes": []
+            "etapes": [],
         }
 
         current_section = None
@@ -296,12 +297,9 @@ class RecetteImporter:
                         unit = parts[1]
                         nom = " ".join(parts[2:])
 
-                        recipe["ingredients"].append({
-                            "nom": nom,
-                            "quantite": qty,
-                            "unite": unit,
-                            "optionnel": False
-                        })
+                        recipe["ingredients"].append(
+                            {"nom": nom, "quantite": qty, "unite": unit, "optionnel": False}
+                        )
                     except ValueError:
                         pass
 
@@ -313,11 +311,9 @@ class RecetteImporter:
                     ordre = int(parts[0])
                     description = parts[1].strip()
 
-                    recipe["etapes"].append({
-                        "ordre": ordre,
-                        "description": description,
-                        "duree": None
-                    })
+                    recipe["etapes"].append(
+                        {"ordre": ordre, "description": description, "duree": None}
+                    )
 
         return recipe if recipe["nom"] else None
 
@@ -351,27 +347,21 @@ class RecetteImporter:
 
                         # Séparer quantité et unité
                         import re
-                        match = re.match(r'(\d+\.?\d*)([a-zA-Z]+)', qty_unit)
+
+                        match = re.match(r"(\d+\.?\d*)([a-zA-Z]+)", qty_unit)
                         if match:
                             qty = float(match.group(1))
                             unit = match.group(2)
 
-                            ingredients.append({
-                                "nom": nom,
-                                "quantite": qty,
-                                "unite": unit,
-                                "optionnel": False
-                            })
+                            ingredients.append(
+                                {"nom": nom, "quantite": qty, "unite": unit, "optionnel": False}
+                            )
 
             # Parser étapes
             etapes = []
             if "Étapes" in row and pd.notna(row["Étapes"]):
                 for idx, step_str in enumerate(row["Étapes"].split("|"), start=1):
-                    etapes.append({
-                        "ordre": idx,
-                        "description": step_str.strip(),
-                        "duree": None
-                    })
+                    etapes.append({"ordre": idx, "description": step_str.strip(), "duree": None})
 
             if ingredients and etapes:
                 recipe = {
@@ -384,7 +374,7 @@ class RecetteImporter:
                     "type_repas": row.get("Type repas", "dîner"),
                     "saison": row.get("Saison", "toute_année"),
                     "ingredients": ingredients,
-                    "etapes": etapes
+                    "etapes": etapes,
                 }
 
                 recipes.append(recipe)
@@ -395,6 +385,7 @@ class RecetteImporter:
 # ===================================
 # HELPERS STREAMLIT
 # ===================================
+
 
 def render_export_ui(recette_ids: List[int]):
     """
@@ -407,11 +398,7 @@ def render_export_ui(recette_ids: List[int]):
 
     st.markdown("### 📤 Exporter les recettes")
 
-    format_export = st.selectbox(
-        "Format",
-        ["JSON", "Markdown", "CSV"],
-        key="export_format"
-    )
+    format_export = st.selectbox("Format", ["JSON", "Markdown", "CSV"], key="export_format")
 
     if st.button("📥 Générer l'export", use_container_width=True):
         try:
@@ -424,9 +411,7 @@ def render_export_ui(recette_ids: List[int]):
                 # Pour markdown, exporter chaque recette
                 with get_db_context() as db:
                     recettes = db.query(Recette).filter(Recette.id.in_(recette_ids)).all()
-                    content = "\n\n---\n\n".join([
-                        RecetteExporter.to_markdown(r) for r in recettes
-                    ])
+                    content = "\n\n---\n\n".join([RecetteExporter.to_markdown(r) for r in recettes])
                 filename = f"recettes_{datetime.now().strftime('%Y%m%d')}.md"
                 mime = "text/markdown"
 
@@ -440,7 +425,7 @@ def render_export_ui(recette_ids: List[int]):
                 data=content,
                 file_name=filename,
                 mime=mime,
-                use_container_width=True
+                use_container_width=True,
             )
 
         except Exception as e:
@@ -448,6 +433,7 @@ def render_export_ui(recette_ids: List[int]):
 
 
 # Remplacer la fonction render_import_ui existante par :
+
 
 def render_import_ui(service):
     """Widget Streamlit pour l'import
@@ -459,16 +445,10 @@ def render_import_ui(service):
 
     st.markdown("### 📥 Importer des recettes")
 
-    format_import = st.selectbox(
-        "Format",
-        ["JSON", "Markdown", "CSV"],
-        key="import_format"
-    )
+    format_import = st.selectbox("Format", ["JSON", "Markdown", "CSV"], key="import_format")
 
     uploaded_file = st.file_uploader(
-        f"Choisir un fichier {format_import}",
-        type=["json", "md", "csv"],
-        key="import_file"
+        f"Choisir un fichier {format_import}", type=["json", "md", "csv"], key="import_file"
     )
 
     if uploaded_file:
@@ -490,7 +470,9 @@ def render_import_ui(service):
                 # Afficher aperçu
                 for idx, recipe in enumerate(recipes):
                     with st.expander(f"Recette {idx+1}: {recipe['nom']}", expanded=False):
-                        st.write(f"**Temps:** {recipe['temps_preparation']}min + {recipe['temps_cuisson']}min")
+                        st.write(
+                            f"**Temps:** {recipe['temps_preparation']}min + {recipe['temps_cuisson']}min"
+                        )
                         st.write(f"**Ingrédients:** {len(recipe['ingredients'])}")
                         st.write(f"**Étapes:** {len(recipe['etapes'])}")
 
@@ -501,15 +483,16 @@ def render_import_ui(service):
                         try:
                             # Extraire données
                             recette_data = {
-                                k: v for k, v in recipe.items()
-                                if k not in ['ingredients', 'etapes']
+                                k: v
+                                for k, v in recipe.items()
+                                if k not in ["ingredients", "etapes"]
                             }
 
                             # Créer avec le service passé en paramètre
                             service.create_full(
                                 recette_data=recette_data,
-                                ingredients_data=recipe['ingredients'],
-                                etapes_data=recipe['etapes']
+                                ingredients_data=recipe["ingredients"],
+                                etapes_data=recipe["etapes"],
                             )
 
                             imported_count += 1
@@ -527,9 +510,11 @@ def render_import_ui(service):
         except Exception as e:
             st.error(f"Erreur lors de l'import: {e}")
 
+
 # ===================================
 # IMPORT DEPUIS WEB
 # ===================================
+
 
 def render_import_from_web_ui(service):
     """Widget Streamlit pour import depuis URL - VERSION CORRIGÉE"""
@@ -548,7 +533,7 @@ def render_import_from_web_ui(service):
     url = st.text_input(
         "🔗 URL de la recette",
         placeholder="https://www.marmiton.org/recettes/...",
-        key="import_web_url"
+        key="import_web_url",
     )
 
     col1, col2 = st.columns([1, 1])
@@ -557,14 +542,12 @@ def render_import_from_web_ui(service):
         auto_image = st.checkbox(
             "🖼️ Générer image automatiquement",
             value=True,
-            help="Utilise Unsplash pour trouver une belle image"
+            help="Utilise Unsplash pour trouver une belle image",
         )
 
     with col2:
         image_keywords = st.text_input(
-            "Mots-clés image (optionnel)",
-            placeholder="Ex: italien, pasta",
-            key="image_keywords"
+            "Mots-clés image (optionnel)", placeholder="Ex: italien, pasta", key="image_keywords"
         )
 
     # ✅ CORRECTION : Stocker la recette dans session_state
@@ -578,15 +561,18 @@ def render_import_from_web_ui(service):
                 recipe_data = RecipeWebScraper.scrape_url(url)
 
                 if not recipe_data:
-                    st.error("❌ Impossible d'extraire la recette. Vérifie l'URL ou essaie un autre site.")
+                    st.error(
+                        "❌ Impossible d'extraire la recette. Vérifie l'URL ou essaie un autre site."
+                    )
                     return
 
                 # Générer image si demandé
                 if auto_image:
-                    keywords = [k.strip() for k in image_keywords.split(",")] if image_keywords else []
+                    keywords = (
+                        [k.strip() for k in image_keywords.split(",")] if image_keywords else []
+                    )
                     recipe_data["url_image"] = RecipeImageGenerator.generate_from_unsplash(
-                        recipe_data["nom"],
-                        keywords
+                        recipe_data["nom"], keywords
                     )
 
                 # ✅ STOCKER dans session_state
@@ -616,7 +602,9 @@ def render_import_from_web_ui(service):
                     st.image(fallback_img, use_column_width=True)
 
         with col_prev2:
-            st.write(f"**⏱️ Temps:** {recipe_data['temps_preparation']}min + {recipe_data['temps_cuisson']}min")
+            st.write(
+                f"**⏱️ Temps:** {recipe_data['temps_preparation']}min + {recipe_data['temps_cuisson']}min"
+            )
             st.write(f"**🍽️ Portions:** {recipe_data['portions']}")
             st.write(f"**🥕 Ingrédients:** {len(recipe_data['ingredients'])}")
             st.write(f"**📝 Étapes:** {len(recipe_data['etapes'])}")
@@ -641,27 +629,35 @@ def render_import_from_web_ui(service):
         col_btn1, col_btn2 = st.columns([2, 1])
 
         with col_btn1:
-            if st.button("✅ Ajouter à mes recettes", type="primary", use_container_width=True, key="add_scraped_recipe"):
+            if st.button(
+                "✅ Ajouter à mes recettes",
+                type="primary",
+                use_container_width=True,
+                key="add_scraped_recipe",
+            ):
                 try:
                     # Préparer données
                     recette_data = {
-                        k: v for k, v in recipe_data.items()
-                        if k not in ['ingredients', 'etapes', 'image_url']
+                        k: v
+                        for k, v in recipe_data.items()
+                        if k not in ["ingredients", "etapes", "image_url"]
                     }
 
                     # Valeurs par défaut
-                    recette_data['type_repas'] = 'dîner'
-                    recette_data['saison'] = 'toute_année'
-                    recette_data['genere_par_ia'] = False
-                    recette_data['url_image'] = recipe_data.get('url_image')
-                    recette_data['est_rapide'] = (recipe_data['temps_preparation'] + recipe_data['temps_cuisson']) < 30
-                    recette_data['est_equilibre'] = True
+                    recette_data["type_repas"] = "dîner"
+                    recette_data["saison"] = "toute_année"
+                    recette_data["genere_par_ia"] = False
+                    recette_data["url_image"] = recipe_data.get("url_image")
+                    recette_data["est_rapide"] = (
+                        recipe_data["temps_preparation"] + recipe_data["temps_cuisson"]
+                    ) < 30
+                    recette_data["est_equilibre"] = True
 
                     # Créer recette
                     recipe_id = service.create_full(
                         recette_data=recette_data,
-                        ingredients_data=recipe_data['ingredients'],
-                        etapes_data=recipe_data['etapes']
+                        ingredients_data=recipe_data["ingredients"],
+                        etapes_data=recipe_data["etapes"],
                     )
 
                     # Nettoyer session_state
@@ -674,6 +670,7 @@ def render_import_from_web_ui(service):
                 except Exception as e:
                     st.error(f"❌ Erreur lors de l'import: {e}")
                     import traceback
+
                     st.code(traceback.format_exc())
 
         with col_btn2:

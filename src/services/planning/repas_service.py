@@ -8,10 +8,7 @@ from datetime import date, timedelta
 from sqlalchemy.orm import Session
 
 from src.core.database import get_db_context
-from src.core.models import (
-    RepasPlanning, PlanningHebdomadaire, Recette,
-    TypeRepasEnum
-)
+from src.core.models import RepasPlanning, PlanningHebdomadaire, Recette, TypeRepasEnum
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +16,7 @@ logger = logging.getLogger(__name__)
 # ===================================
 # SERVICE
 # ===================================
+
 
 class RepasService:
     """Service de manipulation des repas dans un planning"""
@@ -29,16 +27,16 @@ class RepasService:
 
     @staticmethod
     def ajouter_repas(
-            planning_id: int,
-            jour_semaine: int,
-            date_repas: date,
-            type_repas: str,
-            recette_id: int,
-            portions: int = 4,
-            est_adapte_bebe: bool = False,
-            est_batch: bool = False,
-            notes: Optional[str] = None,
-            db: Session = None
+        planning_id: int,
+        jour_semaine: int,
+        date_repas: date,
+        type_repas: str,
+        recette_id: int,
+        portions: int = 4,
+        est_adapte_bebe: bool = False,
+        est_batch: bool = False,
+        notes: Optional[str] = None,
+        db: Session = None,
     ) -> int:
         """
         Ajoute un repas au planning
@@ -48,30 +46,44 @@ class RepasService:
         """
         if db:
             return RepasService._do_ajouter(
-                db, planning_id, jour_semaine, date_repas,
-                type_repas, recette_id, portions,
-                est_adapte_bebe, est_batch, notes
+                db,
+                planning_id,
+                jour_semaine,
+                date_repas,
+                type_repas,
+                recette_id,
+                portions,
+                est_adapte_bebe,
+                est_batch,
+                notes,
             )
 
         with get_db_context() as db:
             return RepasService._do_ajouter(
-                db, planning_id, jour_semaine, date_repas,
-                type_repas, recette_id, portions,
-                est_adapte_bebe, est_batch, notes
+                db,
+                planning_id,
+                jour_semaine,
+                date_repas,
+                type_repas,
+                recette_id,
+                portions,
+                est_adapte_bebe,
+                est_batch,
+                notes,
             )
 
     @staticmethod
     def _do_ajouter(
-            db: Session,
-            planning_id: int,
-            jour_semaine: int,
-            date_repas: date,
-            type_repas: str,
-            recette_id: int,
-            portions: int,
-            est_adapte_bebe: bool,
-            est_batch: bool,
-            notes: Optional[str]
+        db: Session,
+        planning_id: int,
+        jour_semaine: int,
+        date_repas: date,
+        type_repas: str,
+        recette_id: int,
+        portions: int,
+        est_adapte_bebe: bool,
+        est_batch: bool,
+        notes: Optional[str],
     ) -> int:
         """Implémentation"""
         # Calculer ordre
@@ -81,7 +93,7 @@ class RepasService:
             "goûter": 3,
             "dîner": 4,
             "bébé": 5,
-            "batch_cooking": 6
+            "batch_cooking": 6,
         }
         ordre = ordre_map.get(type_repas, 0)
 
@@ -95,7 +107,7 @@ class RepasService:
             est_adapte_bebe=est_adapte_bebe,
             est_batch_cooking=est_batch,
             notes=notes,
-            ordre=ordre
+            ordre=ordre,
         )
 
         db.add(repas)
@@ -111,12 +123,12 @@ class RepasService:
 
     @staticmethod
     def modifier_repas(
-            repas_id: int,
-            recette_id: Optional[int] = None,
-            portions: Optional[int] = None,
-            est_adapte_bebe: Optional[bool] = None,
-            notes: Optional[str] = None,
-            db: Session = None
+        repas_id: int,
+        recette_id: Optional[int] = None,
+        portions: Optional[int] = None,
+        est_adapte_bebe: Optional[bool] = None,
+        notes: Optional[str] = None,
+        db: Session = None,
     ) -> bool:
         """
         Modifie un repas existant
@@ -166,10 +178,7 @@ class RepasService:
 
     @staticmethod
     def deplacer_repas(
-            repas_id: int,
-            nouveau_jour: int,
-            nouvelle_date: date,
-            db: Session = None
+        repas_id: int, nouveau_jour: int, nouvelle_date: date, db: Session = None
     ) -> bool:
         """
         Déplace un repas vers un autre jour
@@ -202,11 +211,7 @@ class RepasService:
             return True
 
     @staticmethod
-    def echanger_repas(
-            repas_id_1: int,
-            repas_id_2: int,
-            db: Session = None
-    ) -> bool:
+    def echanger_repas(repas_id_1: int, repas_id_2: int, db: Session = None) -> bool:
         """
         Échange deux repas (déjeuner ↔ dîner par exemple)
 
@@ -224,7 +229,10 @@ class RepasService:
             repas1.recette_id, repas2.recette_id = repas2.recette_id, repas1.recette_id
             repas1.portions, repas2.portions = repas2.portions, repas1.portions
             repas1.notes, repas2.notes = repas2.notes, repas1.notes
-            repas1.est_adapte_bebe, repas2.est_adapte_bebe = repas2.est_adapte_bebe, repas1.est_adapte_bebe
+            repas1.est_adapte_bebe, repas2.est_adapte_bebe = (
+                repas2.est_adapte_bebe,
+                repas1.est_adapte_bebe,
+            )
 
             db.commit()
             logger.info(f"Repas {repas_id_1} ↔ {repas_id_2} échangés")
@@ -240,7 +248,10 @@ class RepasService:
             repas1.recette_id, repas2.recette_id = repas2.recette_id, repas1.recette_id
             repas1.portions, repas2.portions = repas2.portions, repas1.portions
             repas1.notes, repas2.notes = repas2.notes, repas1.notes
-            repas1.est_adapte_bebe, repas2.est_adapte_bebe = repas2.est_adapte_bebe, repas1.est_adapte_bebe
+            repas1.est_adapte_bebe, repas2.est_adapte_bebe = (
+                repas2.est_adapte_bebe,
+                repas1.est_adapte_bebe,
+            )
 
             db.commit()
             logger.info(f"Repas {repas_id_1} ↔ {repas_id_2} échangés")
@@ -251,10 +262,7 @@ class RepasService:
     # ===================================
 
     @staticmethod
-    def supprimer_repas(
-            repas_id: int,
-            db: Session = None
-    ) -> bool:
+    def supprimer_repas(repas_id: int, db: Session = None) -> bool:
         """
         Supprime un repas
 
@@ -262,18 +270,14 @@ class RepasService:
             True si supprimé
         """
         if db:
-            count = db.query(RepasPlanning).filter(
-                RepasPlanning.id == repas_id
-            ).delete()
+            count = db.query(RepasPlanning).filter(RepasPlanning.id == repas_id).delete()
             db.commit()
 
             logger.info(f"Repas {repas_id} supprimé")
             return count > 0
 
         with get_db_context() as db:
-            count = db.query(RepasPlanning).filter(
-                RepasPlanning.id == repas_id
-            ).delete()
+            count = db.query(RepasPlanning).filter(RepasPlanning.id == repas_id).delete()
             db.commit()
 
             logger.info(f"Repas {repas_id} supprimé")
@@ -285,10 +289,7 @@ class RepasService:
 
     @staticmethod
     def dupliquer_repas(
-            repas_id: int,
-            nouveau_jour: int,
-            nouvelle_date: date,
-            db: Session = None
+        repas_id: int, nouveau_jour: int, nouvelle_date: date, db: Session = None
     ) -> Optional[int]:
         """
         Duplique un repas vers un autre jour
@@ -304,10 +305,7 @@ class RepasService:
 
     @staticmethod
     def _do_dupliquer(
-            db: Session,
-            repas_id: int,
-            nouveau_jour: int,
-            nouvelle_date: date
+        db: Session, repas_id: int, nouveau_jour: int, nouvelle_date: date
     ) -> Optional[int]:
         """Implémentation"""
         repas_original = db.query(RepasPlanning).get(repas_id)
@@ -325,7 +323,7 @@ class RepasService:
             est_adapte_bebe=repas_original.est_adapte_bebe,
             est_batch_cooking=repas_original.est_batch_cooking,
             notes=repas_original.notes,
-            ordre=repas_original.ordre
+            ordre=repas_original.ordre,
         )
 
         db.add(nouveau_repas)
@@ -340,10 +338,7 @@ class RepasService:
     # ===================================
 
     @staticmethod
-    def marquer_termine(
-            repas_id: int,
-            db: Session = None
-    ) -> bool:
+    def marquer_termine(repas_id: int, db: Session = None) -> bool:
         """
         Marque un repas comme terminé
 
@@ -373,10 +368,7 @@ class RepasService:
     # ===================================
 
     @staticmethod
-    def get_repas_avec_details(
-            repas_id: int,
-            db: Session = None
-    ) -> Optional[Dict]:
+    def get_repas_avec_details(repas_id: int, db: Session = None) -> Optional[Dict]:
         """
         Récupère un repas avec toutes ses infos enrichies
 
@@ -414,8 +406,10 @@ class RepasService:
                 "nom": recette.nom,
                 "temps_total": recette.temps_preparation + recette.temps_cuisson,
                 "difficulte": recette.difficulte,
-                "url_image": recette.url_image
-            } if recette else None
+                "url_image": recette.url_image,
+            }
+            if recette
+            else None,
         }
 
 

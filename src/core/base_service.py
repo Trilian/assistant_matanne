@@ -10,7 +10,7 @@ from datetime import datetime
 
 from src.core.database import get_db_context
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class BaseService(ABC, Generic[T]):
@@ -38,12 +38,7 @@ class BaseService(ABC, Generic[T]):
         with get_db_context() as db:
             return db.query(self.model).filter(self.model.id == id).first()
 
-    def get_all(
-            self,
-            skip: int = 0,
-            limit: int = 100,
-            db: Session = None
-    ) -> List[T]:
+    def get_all(self, skip: int = 0, limit: int = 100, db: Session = None) -> List[T]:
         """Récupère tous les enregistrements avec pagination"""
         if db:
             return db.query(self.model).offset(skip).limit(limit).all()
@@ -114,12 +109,7 @@ class BaseService(ABC, Generic[T]):
     # MISE À JOUR
     # ===================================
 
-    def update(
-            self,
-            id: int,
-            data: Dict[str, Any],
-            db: Session = None
-    ) -> Optional[T]:
+    def update(self, id: int, data: Dict[str, Any], db: Session = None) -> Optional[T]:
         """Met à jour un enregistrement"""
         if db:
             obj = self.get_by_id(id, db)
@@ -131,7 +121,7 @@ class BaseService(ABC, Generic[T]):
                     setattr(obj, key, value)
 
             # Auto-update modifie_le si existe
-            if hasattr(obj, 'modifie_le'):
+            if hasattr(obj, "modifie_le"):
                 obj.modifie_le = datetime.utcnow()
 
             db.flush()
@@ -146,7 +136,7 @@ class BaseService(ABC, Generic[T]):
                 if hasattr(obj, key):
                     setattr(obj, key, value)
 
-            if hasattr(obj, 'modifie_le'):
+            if hasattr(obj, "modifie_le"):
                 obj.modifie_le = datetime.utcnow()
 
             db.commit()
@@ -154,9 +144,7 @@ class BaseService(ABC, Generic[T]):
             return obj
 
     def update_many(
-            self,
-            updates: List[Dict[str, Any]],  # [{"id": 1, "data": {...}}]
-            db: Session = None
+        self, updates: List[Dict[str, Any]], db: Session = None  # [{"id": 1, "data": {...}}]
     ) -> List[T]:
         """Met à jour plusieurs enregistrements"""
         if db:
@@ -202,16 +190,20 @@ class BaseService(ABC, Generic[T]):
     def delete_many(self, ids: List[int], db: Session = None) -> int:
         """Supprime plusieurs enregistrements"""
         if db:
-            count = db.query(self.model).filter(
-                self.model.id.in_(ids)
-            ).delete(synchronize_session=False)
+            count = (
+                db.query(self.model)
+                .filter(self.model.id.in_(ids))
+                .delete(synchronize_session=False)
+            )
             db.flush()
             return count
 
         with get_db_context() as db:
-            count = db.query(self.model).filter(
-                self.model.id.in_(ids)
-            ).delete(synchronize_session=False)
+            count = (
+                db.query(self.model)
+                .filter(self.model.id.in_(ids))
+                .delete(synchronize_session=False)
+            )
             db.commit()
             return count
 
@@ -220,13 +212,13 @@ class BaseService(ABC, Generic[T]):
     # ===================================
 
     def search(
-            self,
-            search_term: str,
-            search_fields: List[str],
-            filters: Dict[str, Any] = None,
-            skip: int = 0,
-            limit: int = 100,
-            db: Session = None
+        self,
+        search_term: str,
+        search_fields: List[str],
+        filters: Dict[str, Any] = None,
+        skip: int = 0,
+        limit: int = 100,
+        db: Session = None,
     ) -> List[T]:
         """
         Recherche full-text
@@ -313,10 +305,12 @@ class BaseService(ABC, Generic[T]):
 from pydantic import BaseModel
 from typing import Generic, TypeVar
 
-T = TypeVar('T')
+T = TypeVar("T")
+
 
 class Page(BaseModel, Generic[T]):
     """Résultat paginé"""
+
     items: List[T]
     total: int
     page: int
@@ -339,11 +333,11 @@ class Page(BaseModel, Generic[T]):
 
 
 def paginate(
-        service: BaseService,
-        page: int = 1,
-        page_size: int = 20,
-        filters: Dict[str, Any] = None,
-        db: Session = None
+    service: BaseService,
+    page: int = 1,
+    page_size: int = 20,
+    filters: Dict[str, Any] = None,
+    db: Session = None,
 ) -> Page:
     """
     Helper de pagination
@@ -355,9 +349,4 @@ def paginate(
     skip = (page - 1) * page_size
     items = service.get_all(skip=skip, limit=page_size, db=db)
 
-    return Page(
-        items=items,
-        total=total,
-        page=page,
-        page_size=page_size
-    )
+    return Page(items=items, total=total, page=page, page_size=page_size)

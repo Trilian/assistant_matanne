@@ -9,8 +9,12 @@ from sqlalchemy.orm import Session
 
 from src.core.database import get_db_context
 from src.core.models import (
-    Recette, RecetteIngredient, EtapeRecette, VersionRecette,
-    Ingredient, TypeVersionRecetteEnum
+    Recette,
+    RecetteIngredient,
+    EtapeRecette,
+    VersionRecette,
+    Ingredient,
+    TypeVersionRecetteEnum,
 )
 from src.services.recette_service import recette_service
 
@@ -22,12 +26,12 @@ class RecetteEditionService:
 
     @staticmethod
     def update_recette_complete(
-            recette_id: int,
-            recette_data: Dict,
-            ingredients_data: List[Dict],
-            etapes_data: List[Dict],
-            versions_data: Optional[Dict] = None,
-            db: Session = None
+        recette_id: int,
+        recette_data: Dict,
+        ingredients_data: List[Dict],
+        etapes_data: List[Dict],
+        versions_data: Optional[Dict] = None,
+        db: Session = None,
     ) -> bool:
         """
         Met à jour une recette complète
@@ -37,24 +41,22 @@ class RecetteEditionService:
         """
         if db:
             return RecetteEditionService._do_update_complete(
-                db, recette_id, recette_data, ingredients_data,
-                etapes_data, versions_data
+                db, recette_id, recette_data, ingredients_data, etapes_data, versions_data
             )
 
         with get_db_context() as db:
             return RecetteEditionService._do_update_complete(
-                db, recette_id, recette_data, ingredients_data,
-                etapes_data, versions_data
+                db, recette_id, recette_data, ingredients_data, etapes_data, versions_data
             )
 
     @staticmethod
     def _do_update_complete(
-            db: Session,
-            recette_id: int,
-            recette_data: Dict,
-            ingredients_data: List[Dict],
-            etapes_data: List[Dict],
-            versions_data: Optional[Dict]
+        db: Session,
+        recette_id: int,
+        recette_data: Dict,
+        ingredients_data: List[Dict],
+        etapes_data: List[Dict],
+        versions_data: Optional[Dict],
     ) -> bool:
         """Implémentation interne"""
 
@@ -69,22 +71,18 @@ class RecetteEditionService:
                 setattr(recette, key, value)
 
         # 2. Supprimer anciens ingrédients
-        db.query(RecetteIngredient).filter(
-            RecetteIngredient.recette_id == recette_id
-        ).delete()
+        db.query(RecetteIngredient).filter(RecetteIngredient.recette_id == recette_id).delete()
 
         # 3. Ajouter nouveaux ingrédients
         for ing_data in ingredients_data:
             # Trouver ou créer ingrédient
-            ingredient = db.query(Ingredient).filter(
-                Ingredient.nom == ing_data["nom"]
-            ).first()
+            ingredient = db.query(Ingredient).filter(Ingredient.nom == ing_data["nom"]).first()
 
             if not ingredient:
                 ingredient = Ingredient(
                     nom=ing_data["nom"],
                     unite=ing_data["unite"],
-                    categorie=ing_data.get("categorie")
+                    categorie=ing_data.get("categorie"),
                 )
                 db.add(ingredient)
                 db.flush()
@@ -95,14 +93,12 @@ class RecetteEditionService:
                 ingredient_id=ingredient.id,
                 quantite=ing_data["quantite"],
                 unite=ing_data["unite"],
-                optionnel=ing_data.get("optionnel", False)
+                optionnel=ing_data.get("optionnel", False),
             )
             db.add(recette_ing)
 
         # 4. Supprimer anciennes étapes
-        db.query(EtapeRecette).filter(
-            EtapeRecette.recette_id == recette_id
-        ).delete()
+        db.query(EtapeRecette).filter(EtapeRecette.recette_id == recette_id).delete()
 
         # 5. Ajouter nouvelles étapes
         for etape_data in etapes_data:
@@ -110,16 +106,14 @@ class RecetteEditionService:
                 recette_id=recette_id,
                 ordre=etape_data["ordre"],
                 description=etape_data["description"],
-                duree=etape_data.get("duree")
+                duree=etape_data.get("duree"),
             )
             db.add(etape)
 
         # 6. Mettre à jour versions si fournies
         if versions_data:
             # Supprimer anciennes versions
-            db.query(VersionRecette).filter(
-                VersionRecette.recette_base_id == recette_id
-            ).delete()
+            db.query(VersionRecette).filter(VersionRecette.recette_base_id == recette_id).delete()
 
             # Ajouter nouvelles versions
             for version_type, v_data in versions_data.items():
@@ -130,7 +124,7 @@ class RecetteEditionService:
                     ingredients_modifies=v_data.get("ingredients_modifies"),
                     notes_bebe=v_data.get("notes_bebe"),
                     etapes_paralleles_batch=v_data.get("etapes_paralleles"),
-                    temps_optimise_batch=v_data.get("temps_optimise")
+                    temps_optimise_batch=v_data.get("temps_optimise"),
                 )
                 db.add(version)
 
@@ -140,9 +134,7 @@ class RecetteEditionService:
 
     @staticmethod
     def duplicate_recette(
-            recette_id: int,
-            nouveau_nom: Optional[str] = None,
-            db: Session = None
+        recette_id: int, nouveau_nom: Optional[str] = None, db: Session = None
     ) -> Optional[int]:
         """
         Duplique une recette complète
@@ -157,11 +149,7 @@ class RecetteEditionService:
             return RecetteEditionService._do_duplicate(db, recette_id, nouveau_nom)
 
     @staticmethod
-    def _do_duplicate(
-            db: Session,
-            recette_id: int,
-            nouveau_nom: Optional[str]
-    ) -> Optional[int]:
+    def _do_duplicate(db: Session, recette_id: int, nouveau_nom: Optional[str]) -> Optional[int]:
         """Implémentation"""
 
         # Charger recette source avec eager loading
@@ -187,7 +175,7 @@ class RecetteEditionService:
             "compatible_batch": recette.compatible_batch,
             "congelable": recette.congelable,
             "url_image": recette.url_image,
-            "genere_par_ia": False  # Copie = manuel
+            "genere_par_ia": False,  # Copie = manuel
         }
 
         ingredients_data = [
@@ -195,17 +183,13 @@ class RecetteEditionService:
                 "nom": ing.ingredient.nom,
                 "quantite": ing.quantite,
                 "unite": ing.unite,
-                "optionnel": ing.optionnel
+                "optionnel": ing.optionnel,
             }
             for ing in recette.ingredients
         ]
 
         etapes_data = [
-            {
-                "ordre": etape.ordre,
-                "description": etape.description,
-                "duree": etape.duree
-            }
+            {"ordre": etape.ordre, "description": etape.description, "duree": etape.duree}
             for etape in recette.etapes
         ]
 
@@ -214,7 +198,7 @@ class RecetteEditionService:
             recette_data=recette_data,
             ingredients_data=ingredients_data,
             etapes_data=etapes_data,
-            db=db
+            db=db,
         )
 
         logger.info(f"✅ Recette {recette_id} dupliquée → {new_id}")

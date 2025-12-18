@@ -26,11 +26,7 @@ TEST_DATABASE_URL = settings.DATABASE_URL.replace("/matanne", "/matanne_test")
 @pytest.fixture(scope="session")
 def test_engine():
     """Crée un engine pour les tests"""
-    engine = create_engine(
-        TEST_DATABASE_URL,
-        echo=False,
-        pool_pre_ping=True
-    )
+    engine = create_engine(TEST_DATABASE_URL, echo=False, pool_pre_ping=True)
 
     # Créer toutes les tables
     Base.metadata.create_all(engine)
@@ -65,6 +61,7 @@ def db_session(test_engine):
 # FIXTURES AGENT IA
 # ===================================
 
+
 @pytest.fixture
 def mock_agent_ia(monkeypatch):
     """Mock de l'agent IA pour les tests sans Ollama"""
@@ -82,16 +79,13 @@ def mock_agent_ia(monkeypatch):
 # FIXTURES DONNÉES DE TEST
 # ===================================
 
+
 @pytest.fixture
 def test_user(db_session):
     """Crée un utilisateur de test"""
     from src.core.models import User
 
-    user = User(
-        username="test_user",
-        email="test@example.com",
-        settings={"theme": "light"}
-    )
+    user = User(username="test_user", email="test@example.com", settings={"theme": "light"})
     db_session.add(user)
     db_session.commit()
 
@@ -104,10 +98,7 @@ def test_child(db_session):
     from src.core.models import ChildProfile
     from datetime import date
 
-    child = ChildProfile(
-        name="Test Jules",
-        birth_date=date(2024, 6, 22)
-    )
+    child = ChildProfile(name="Test Jules", birth_date=date(2024, 6, 22))
     db_session.add(child)
     db_session.commit()
 
@@ -118,12 +109,18 @@ def test_child(db_session):
 # UTILITAIRES
 # ===================================
 
+
 @pytest.fixture
 def clean_database(db_session):
     """Nettoie complètement la base entre les tests"""
     from src.core.models import (
-        Recipe, Ingredient, InventoryItem, User,
-        Project, ChildProfile, Routine
+        Recipe,
+        Ingredient,
+        InventoryItem,
+        User,
+        Project,
+        ChildProfile,
+        Routine,
     )
 
     # Supprimer toutes les données
@@ -137,8 +134,12 @@ def clean_database(db_session):
 def sample_data(db_session):
     """Charge un jeu de données complet de test"""
     from src.core.models import (
-        User, Ingredient, Recipe, RecipeIngredient,
-        InventoryItem, ChildProfile
+        User,
+        Ingredient,
+        Recipe,
+        RecipeIngredient,
+        InventoryItem,
+        ChildProfile,
     )
     from datetime import date
 
@@ -164,22 +165,14 @@ def sample_data(db_session):
         category="Plat",
         instructions="Cuire et mélanger",
         prep_time=10,
-        cook_time=15
+        cook_time=15,
     )
     db_session.add(recipe)
     db_session.flush()
 
     # Recipe ingredients
-    rec_ing1 = RecipeIngredient(
-        recipe_id=recipe.id,
-        ingredient_id=ing1.id,
-        quantity=3
-    )
-    rec_ing2 = RecipeIngredient(
-        recipe_id=recipe.id,
-        ingredient_id=ing2.id,
-        quantity=400
-    )
+    rec_ing1 = RecipeIngredient(recipe_id=recipe.id, ingredient_id=ing1.id, quantity=3)
+    rec_ing2 = RecipeIngredient(recipe_id=recipe.id, ingredient_id=ing2.id, quantity=400)
     db_session.add_all([rec_ing1, rec_ing2])
 
     # Inventory
@@ -196,7 +189,7 @@ def sample_data(db_session):
         "child": child,
         "ingredients": [ing1, ing2, ing3],
         "recipe": recipe,
-        "inventory": [inv1, inv2, inv3]
+        "inventory": [inv1, inv2, inv3],
     }
 
 
@@ -204,25 +197,19 @@ def sample_data(db_session):
 # MARKERS
 # ===================================
 
+
 def pytest_configure(config):
     """Configuration des markers personnalisés"""
-    config.addinivalue_line(
-        "markers", "slow: marque les tests lents"
-    )
-    config.addinivalue_line(
-        "markers", "integration: tests d'intégration"
-    )
-    config.addinivalue_line(
-        "markers", "ai: tests nécessitant Ollama"
-    )
-    config.addinivalue_line(
-        "markers", "db: tests nécessitant la base de données"
-    )
+    config.addinivalue_line("markers", "slow: marque les tests lents")
+    config.addinivalue_line("markers", "integration: tests d'intégration")
+    config.addinivalue_line("markers", "ai: tests nécessitant Ollama")
+    config.addinivalue_line("markers", "db: tests nécessitant la base de données")
 
 
 # ===================================
 # SKIP CONDITIONS
 # ===================================
+
 
 @pytest.fixture
 def skip_if_no_ollama():

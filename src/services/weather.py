@@ -40,8 +40,8 @@ class WeatherService:
                         "q": f"{self.city},{self.country}",
                         "appid": self.api_key,
                         "units": self.units,
-                        "lang": "fr"
-                    }
+                        "lang": "fr",
+                    },
                 )
                 response.raise_for_status()
                 data = response.json()
@@ -66,8 +66,8 @@ class WeatherService:
                         "appid": self.api_key,
                         "units": self.units,
                         "lang": "fr",
-                        "cnt": days * 8  # 8 prévisions par jour (3h)
-                    }
+                        "cnt": days * 8,  # 8 prévisions par jour (3h)
+                    },
                 )
                 response.raise_for_status()
                 data = response.json()
@@ -93,7 +93,7 @@ class WeatherService:
             "clouds": data["clouds"]["all"],
             "sunrise": datetime.fromtimestamp(data["sys"]["sunrise"]),
             "sunset": datetime.fromtimestamp(data["sys"]["sunset"]),
-            "icon": data["weather"][0]["icon"]
+            "icon": data["weather"][0]["icon"],
         }
 
     def _format_forecast_data(self, data: Dict) -> Dict:
@@ -101,21 +101,20 @@ class WeatherService:
         forecasts = []
 
         for item in data["list"]:
-            forecasts.append({
-                "datetime": datetime.fromtimestamp(item["dt"]),
-                "temperature": round(item["main"]["temp"], 1),
-                "condition": item["weather"][0]["description"].capitalize(),
-                "condition_code": item["weather"][0]["main"],
-                "humidity": item["main"]["humidity"],
-                "wind_speed": round(item["wind"]["speed"] * 3.6, 1),
-                "precipitation": item.get("rain", {}).get("3h", 0),
-                "icon": item["weather"][0]["icon"]
-            })
+            forecasts.append(
+                {
+                    "datetime": datetime.fromtimestamp(item["dt"]),
+                    "temperature": round(item["main"]["temp"], 1),
+                    "condition": item["weather"][0]["description"].capitalize(),
+                    "condition_code": item["weather"][0]["main"],
+                    "humidity": item["main"]["humidity"],
+                    "wind_speed": round(item["wind"]["speed"] * 3.6, 1),
+                    "precipitation": item.get("rain", {}).get("3h", 0),
+                    "icon": item["weather"][0]["icon"],
+                }
+            )
 
-        return {
-            "city": data["city"]["name"],
-            "forecasts": forecasts
-        }
+        return {"city": data["city"]["name"], "forecasts": forecasts}
 
     def _get_mock_weather(self) -> Dict:
         """Retourne des données météo mockées"""
@@ -132,7 +131,7 @@ class WeatherService:
             "clouds": 40,
             "sunrise": datetime.now().replace(hour=7, minute=30),
             "sunset": datetime.now().replace(hour=20, minute=15),
-            "icon": "02d"
+            "icon": "02d",
         }
 
     def save_to_database(self, weather_data: Dict):
@@ -140,9 +139,7 @@ class WeatherService:
         try:
             with get_db_context() as db:
                 # Vérifier si déjà enregistré aujourd'hui
-                existing = db.query(WeatherLog).filter(
-                    WeatherLog.date == date.today()
-                ).first()
+                existing = db.query(WeatherLog).filter(WeatherLog.date == date.today()).first()
 
                 if existing:
                     # Mettre à jour
@@ -159,7 +156,7 @@ class WeatherService:
                         temperature=weather_data["temperature"],
                         humidity=weather_data["humidity"],
                         wind_speed=weather_data["wind_speed"],
-                        forecast_data=weather_data
+                        forecast_data=weather_data,
                     )
                     db.add(log)
 
@@ -179,7 +176,7 @@ class WeatherService:
             "Thunderstorm": "⛈️",
             "Snow": "❄️",
             "Mist": "🌫️",
-            "Fog": "🌫️"
+            "Fog": "🌫️",
         }
         return icons.get(condition_code, "🌤️")
 

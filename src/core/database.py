@@ -17,8 +17,10 @@ logger = logging.getLogger(__name__)
 # CONFIGURATION ENGINE AVEC RETRY
 # ===================================
 
+
 class DatabaseConnectionError(Exception):
     """Erreur connexion DB personnalisée"""
+
     pass
 
 
@@ -49,10 +51,10 @@ def get_engine(retry_count: int = 3, retry_delay: int = 2):
                 connect_args={
                     "connect_timeout": 10,
                     "options": "-c timezone=utc",
-                    "sslmode": "require"
+                    "sslmode": "require",
                 },
                 # Retry automatique sur erreurs réseau
-                pool_pre_ping=True
+                pool_pre_ping=True,
             )
 
             # Test connexion
@@ -64,9 +66,7 @@ def get_engine(retry_count: int = 3, retry_delay: int = 2):
 
         except (OperationalError, DatabaseError) as e:
             last_error = e
-            logger.warning(
-                f"❌ Tentative {attempt + 1}/{retry_count} échouée: {e}"
-            )
+            logger.warning(f"❌ Tentative {attempt + 1}/{retry_count} échouée: {e}")
 
             if attempt < retry_count - 1:
                 time.sleep(retry_delay)
@@ -95,15 +95,11 @@ def get_engine_safe() -> Optional[object]:
 # SESSION FACTORY
 # ===================================
 
+
 def get_session_factory():
     """Retourne une session factory"""
     engine = get_engine()
-    return sessionmaker(
-        autocommit=False,
-        autoflush=False,
-        bind=engine,
-        expire_on_commit=False
-    )
+    return sessionmaker(autocommit=False, autoflush=False, bind=engine, expire_on_commit=False)
 
 
 SessionLocal = get_session_factory()
@@ -112,6 +108,7 @@ SessionLocal = get_session_factory()
 # ===================================
 # CONTEXT MANAGER AVEC ERROR HANDLING
 # ===================================
+
 
 @contextmanager
 def get_db_context() -> Generator[Session, None, None]:
@@ -174,6 +171,7 @@ def get_db_safe() -> Generator[Optional[Session], None, None]:
 # VÉRIFICATIONS
 # ===================================
 
+
 @st.cache_data(ttl=60)
 def check_connection() -> tuple[bool, str]:
     """
@@ -212,16 +210,21 @@ def get_db_info() -> dict:
         engine = get_engine()
 
         with engine.connect() as conn:
-            result = conn.execute(text("""
+            result = conn.execute(
+                text(
+                    """
                 SELECT 
                     version() as version,
                     current_database() as database,
                     current_user as user,
                     pg_size_pretty(pg_database_size(current_database())) as size
-            """)).fetchone()
+            """
+                )
+            ).fetchone()
 
             # Extraire host depuis URL
             from src.core.config import get_settings
+
             settings = get_settings()
             db_url = settings.DATABASE_URL
 
@@ -237,23 +240,18 @@ def get_db_info() -> dict:
                 "user": result[2],
                 "size": result[3],
                 "host": host,
-                "error": None
+                "error": None,
             }
 
     except Exception as e:
         logger.error(f"get_db_info error: {e}")
-        return {
-            "status": "error",
-            "error": str(e),
-            "version": None,
-            "database": None,
-            "user": None
-        }
+        return {"status": "error", "error": str(e), "version": None, "database": None, "user": None}
 
 
 # ===================================
 # HEALTH CHECK
 # ===================================
+
 
 def health_check() -> dict:
     """
@@ -267,36 +265,41 @@ def health_check() -> dict:
 
         with engine.connect() as conn:
             # Vérifier connexions actives
-            active_conns = conn.execute(text("""
+            active_conns = conn.execute(
+                text(
+                    """
                 SELECT count(*) 
                 FROM pg_stat_activity 
                 WHERE state = 'active'
-            """)).scalar()
+            """
+                )
+            ).scalar()
 
             # Vérifier taille DB
-            db_size = conn.execute(text("""
+            db_size = conn.execute(
+                text(
+                    """
                 SELECT pg_database_size(current_database())
-            """)).scalar()
+            """
+                )
+            ).scalar()
 
             return {
                 "healthy": True,
                 "active_connections": active_conns,
                 "database_size_bytes": db_size,
-                "timestamp": time.time()
+                "timestamp": time.time(),
             }
 
     except Exception as e:
         logger.error(f"Health check failed: {e}")
-        return {
-            "healthy": False,
-            "error": str(e),
-            "timestamp": time.time()
-        }
+        return {"healthy": False, "error": str(e), "timestamp": time.time()}
 
 
 # ===================================
 # MAINTENANCE
 # ===================================
+
 
 def cleanup_old_logs(days: int = 90) -> int:
     """
@@ -320,10 +323,14 @@ def cleanup_old_logs(days: int = 90) -> int:
             total_deleted = 0
 
             for table in log_tables:
-                result = db.execute(text(f"""
+                result = db.execute(
+                    text(
+                        f"""
                     DELETE FROM {table}
                     WHERE date < CURRENT_DATE - INTERVAL '{days} days'
-                """))
+                """
+                    )
+                )
                 deleted = result.rowcount
                 total_deleted += deleted
                 logger.info(f"Supprimé {deleted} lignes de {table}")
@@ -359,6 +366,7 @@ def vacuum_database():
 # INITIALISATION (dev uniquement)
 # ===================================
 
+
 def create_all_tables():
     """
     Crée toutes les tables (dev/setup uniquement)
@@ -366,6 +374,7 @@ def create_all_tables():
     ATTENTION: Ne pas appeler en production
     """
     from src.core.config import get_settings
+
     settings = get_settings()
 
     if settings.is_production():
@@ -374,6 +383,7 @@ def create_all_tables():
 
     try:
         from src.core.models import Base
+
         engine = get_engine()
         Base.metadata.create_all(bind=engine)
         logger.info("✅ Tables créées/vérifiées")
