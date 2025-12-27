@@ -1,8 +1,6 @@
 """
-Service Inventaire
+Service Inventaire OPTIMISÉ
 Utilise EnhancedCRUDService pour éliminer duplication
-
-Version: 2.0.0
 """
 from typing import List, Dict, Optional, Tuple
 from datetime import datetime, date, timedelta
@@ -18,20 +16,13 @@ from src.utils.formatters import format_quantity
 
 logger = logging.getLogger(__name__)
 
-
-# ═══════════════════════════════════════════════════════════════
-# CONSTANTES
-# ═══════════════════════════════════════════════════════════════
-
+# Constantes
 CATEGORIES = [
     "Légumes", "Fruits", "Féculents", "Protéines",
     "Laitier", "Épices", "Huiles", "Conserves", "Autre"
 ]
-
 EMPLACEMENTS = ["Frigo", "Congélateur", "Placard", "Cave", "Autre"]
-
 JOURS_ALERTE_PEREMPTION = 7
-
 
 # ═══════════════════════════════════════════════════════════════
 # HELPERS STATUT (logique métier pure)
@@ -42,12 +33,7 @@ def calculer_statut_article(
         seuil: float,
         date_peremption: Optional[date]
 ) -> Tuple[str, str]:
-    """
-    Calcule le statut d'un article
-
-    Returns:
-        (statut, icone)
-    """
+    """Calcule le statut d'un article"""
     sous_seuil = quantite < seuil
 
     peremption_proche = False
@@ -64,26 +50,23 @@ def calculer_statut_article(
     else:
         return "ok", "✅"
 
-
 def get_jours_avant_peremption(date_peremption: Optional[date]) -> Optional[int]:
     """Calcule jours avant péremption"""
     if not date_peremption:
         return None
-
     delta = (date_peremption - date.today()).days
     return delta if delta >= 0 else 0
 
-
 # ═══════════════════════════════════════════════════════════════
-# SERVICE PRINCIPAL (REFACTORISÉ)
+# SERVICE OPTIMISÉ
 # ═══════════════════════════════════════════════════════════════
 
 class InventaireService(EnhancedCRUDService[ArticleInventaire], StatusTrackingMixin):
     """
     Service inventaire optimisé
 
-    ✅ Hérite de EnhancedCRUDService → élimine 400+ lignes
-    ✅ Mixin StatusTracking → ajoute count_by_status()
+    ✅ Hérite EnhancedCRUDService → élimine 400+ lignes
+    ✅ Mixin StatusTracking → count_by_status()
     ✅ Seulement logique métier spécifique ici
     """
 
@@ -103,51 +86,51 @@ class InventaireService(EnhancedCRUDService[ArticleInventaire], StatusTrackingMi
         """
         Inventaire complet avec statuts calculés
 
-        ✅ AVANT : 100+ lignes
-        ✅ APRÈS : Utilise advanced_search() de EnhancedCRUDService
+        ✅ Utilise advanced_search() de EnhancedCRUDService
         """
         # Récupérer items avec recherche avancée
         items = self.advanced_search(
             search_term=None,
             search_fields=[],
             filters=filters,
-            sort_by="nom",
+            sort_by="ingredient_id",
             limit=1000,
             db=db
         )
 
-        # Enrichir avec statuts
+        # Enrichir avec statuts et noms
         result = []
-        for item in items:
-            statut, icone = calculer_statut_article(
-                item.quantite,
-                item.quantite_min,
-                item.date_peremption
-            )
 
-            jours_peremption = get_jours_avant_peremption(item.date_peremption)
-
-            # Récupérer nom ingrédient
-            with get_db_context() as db_local:
+        with get_db_context() as db_local:
+            for item in items:
+                # Récupérer ingrédient
                 ingredient = db_local.query(Ingredient).get(item.ingredient_id)
-                nom = ingredient.nom if ingredient else "Inconnu"
-                unite = ingredient.unite if ingredient else "pcs"
-                categorie = ingredient.categorie if ingredient else "Autre"
 
-            result.append({
-                "id": item.id,
-                "nom": nom,
-                "categorie": categorie,
-                "quantite": item.quantite,
-                "unite": unite,
-                "seuil": item.quantite_min,
-                "emplacement": item.emplacement or "—",
-                "date_peremption": item.date_peremption,
-                "jours_peremption": jours_peremption,
-                "derniere_maj": item.derniere_maj,
-                "statut": statut,
-                "icone": icone
-            })
+                if not ingredient:
+                    continue
+
+                statut, icone = calculer_statut_article(
+                    item.quantite,
+                    item.quantite_min,
+                    item.date_peremption
+                )
+
+                jours_peremption = get_jours_avant_peremption(item.date_peremption)
+
+                result.append({
+                    "id": item.id,
+                    "nom": ingredient.nom,
+                    "categorie": ingredient.categorie or "Autre",
+                    "quantite": item.quantite,
+                    "unite": ingredient.unite,
+                    "seuil": item.quantite_min,
+                    "emplacement": item.emplacement or "—",
+                    "date_peremption": item.date_peremption,
+                    "jours_peremption": jours_peremption,
+                    "derniere_maj": item.derniere_maj,
+                    "statut": statut,
+                    "icone": icone
+                })
 
         return result
 
@@ -177,7 +160,7 @@ class InventaireService(EnhancedCRUDService[ArticleInventaire], StatusTrackingMi
         return alertes
 
     # ═══════════════════════════════════════════════════════════════
-    # AJOUT / MODIFICATION (simplifié)
+    # AJOUT / MODIFICATION
     # ═══════════════════════════════════════════════════════════════
 
     @handle_errors(show_in_ui=True)
@@ -196,8 +179,7 @@ class InventaireService(EnhancedCRUDService[ArticleInventaire], StatusTrackingMi
         """
         Ajoute ou modifie un article
 
-        ✅ AVANT : 80 lignes
-        ✅ APRÈS : Utilise create()/update() de base
+        ✅ Utilise create()/update() de base
         """
         def _execute(session: Session) -> int:
             # Trouver/créer ingrédient
@@ -260,33 +242,42 @@ class InventaireService(EnhancedCRUDService[ArticleInventaire], StatusTrackingMi
             return _execute(db)
 
     # ═══════════════════════════════════════════════════════════════
-    # STATISTIQUES (ultra-simplifié)
+    # STATISTIQUES
     # ═══════════════════════════════════════════════════════════════
 
     def get_stats(self, jours: int = 30, db: Session = None) -> Dict:
         """
         Stats inventaire
 
-        ✅ AVANT : 60+ lignes
-        ✅ APRÈS : 10 lignes avec get_generic_stats()
+        ✅ Utilise get_generic_stats() de EnhancedCRUDService
         """
-        return self.get_generic_stats(
-            group_by_fields=["categorie", "emplacement"],
-            count_filters={
-                "critiques": {"statut": "critique"},
-                "stock_bas": {"statut": "sous_seuil"},
-                "peremption": {"statut": "peremption_proche"}
-            },
-            aggregate_fields={
-                "quantite_moyenne": "quantite"
-            },
-            date_field="derniere_maj",
-            days_back=jours,
-            db=db
-        )
+        inventaire = self.get_inventaire_complet(db=db)
+
+        # Compter par statut
+        stats = {
+            "total_articles": len(inventaire),
+            "total_critiques": len([i for i in inventaire if i["statut"] == "critique"]),
+            "total_stock_bas": len([i for i in inventaire if i["statut"] == "sous_seuil"]),
+            "total_peremption": len([i for i in inventaire if i["statut"] == "peremption_proche"]),
+        }
+
+        # Par catégorie
+        from collections import defaultdict
+        categories = defaultdict(int)
+        for item in inventaire:
+            categories[item["categorie"]] += 1
+        stats["categories"] = dict(categories)
+
+        # Par emplacement
+        emplacements = defaultdict(int)
+        for item in inventaire:
+            emplacements[item["emplacement"]] += 1
+        stats["emplacements"] = dict(emplacements)
+
+        return stats
 
     # ═══════════════════════════════════════════════════════════════
-    # AJUSTEMENTS (simplifié)
+    # AJUSTEMENTS
     # ═══════════════════════════════════════════════════════════════
 
     @handle_errors(show_in_ui=True)
@@ -379,9 +370,5 @@ class InventaireService(EnhancedCRUDService[ArticleInventaire], StatusTrackingMi
         with get_db_context() as db:
             return _execute(db)
 
-
-# ═══════════════════════════════════════════════════════════════
-# INSTANCE GLOBALE
-# ═══════════════════════════════════════════════════════════════
-
+# Instance globale
 inventaire_service = InventaireService()

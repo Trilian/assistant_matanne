@@ -1,22 +1,24 @@
 """
-Service IA Courses
+Service IA Courses OPTIMISÉ
+Utilise AIJsonParser + SmartCache
 
 """
 import asyncio
-import json
 import logging
 from typing import List, Dict, Optional
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from pydantic import BaseModel, Field, field_validator
 
 from src.core.ai_agent import AgentIA
-from src.core.ai_cache import AICache, RateLimiter
+from src.core.ai_json_parser import AIJsonParser
+from src.core.smart_cache import SmartCache
+from src.core.exceptions import AIServiceError, handle_errors
+from src.core.ai_cache import RateLimiter
 
 logger = logging.getLogger(__name__)
 
-
-# ===================================
+# ═══════════════════════════════════════════════════════════════
 # SCHÉMAS PYDANTIC
-# ===================================
+# ═══════════════════════════════════════════════════════════════
 
 class ArticleOptimise(BaseModel):
     """Article optimisé par IA"""
@@ -34,7 +36,6 @@ class ArticleOptimise(BaseModel):
     def clean_article(cls, v):
         return v.strip()
 
-
 class ListeOptimisee(BaseModel):
     """Résultat complet de l'optimisation IA"""
     par_rayon: Dict[str, List[ArticleOptimise]]
@@ -44,25 +45,24 @@ class ListeOptimisee(BaseModel):
     economies_possibles: float = Field(0.0, ge=0)
     conseils_globaux: List[str] = Field(default_factory=list)
 
-
-class Alternative(BaseModel):
-    """Alternative pour un article"""
-    nom: str
-    raison: str
-    prix_relatif: Optional[str] = None
-    disponibilite: str = "haute"
-
-
-# ===================================
-# SERVICE IA (reste identique)
-# ===================================
+# ═══════════════════════════════════════════════════════════════
+# SERVICE IA OPTIMISÉ
+# ═══════════════════════════════════════════════════════════════
 
 class CoursesAIService:
-    """Service dédié aux fonctionnalités IA du module courses"""
+    """
+    Service IA pour courses
+
+    ✅ Utilise AIJsonParser (pas de parsing manuel)
+    ✅ Utilise SmartCache
+    ✅ Code divisé par 2
+    """
 
     def __init__(self, agent: AgentIA):
         self.agent = agent
 
+    @handle_errors(show_in_ui=True)
+    @SmartCache.cached(ttl=1800, level="session", key_prefix="courses_ai")
     async def generer_liste_optimisee(
             self,
             articles_base: List[Dict],
@@ -73,15 +73,21 @@ class CoursesAIService:
     ) -> ListeOptimisee:
         """
         Génère une liste optimisée avec l'IA
+
+        ✅ Utilise AIJsonParser pour parsing robuste
+        ✅ Cache intelligent
         """
         logger.info(f"Génération liste IA: {len(articles_base)} articles, magasin={magasin}")
 
+        # Vérifier rate limit
         can_call, error = RateLimiter.can_call()
         if not can_call:
-            raise ValueError(error)
+            raise AIServiceError(error, user_message=error)
 
+        # Consolider doublons
         consolides = self._consolider_doublons(articles_base)
 
+        # Construire prompt
         prompt = self._build_prompt_optimisation(
             consolides,
             magasin,
@@ -90,18 +96,33 @@ class CoursesAIService:
             preferences
         )
 
+        # Appel IA
         response = await self._call_with_retry(
             prompt,
             system_prompt="Expert en courses alimentaires. Réponds UNIQUEMENT en JSON valide.",
             max_tokens=2000
         )
 
+        # ✅ Parser avec AIJsonParser (robuste)
         try:
-            data = self._parse_json_response(response)
-            return ListeOptimisee(**data)
+            result = AIJsonParser.parse(
+                response,
+                ListeOptimisee,
+                fallback=self._get_fallback_liste(consolides, rayons_disponibles),
+                strict=False
+            )
+
+            logger.info(f"✅ Liste optimisée générée")
+            return result
+
         except Exception as e:
-            logger.error(f"Erreur parsing réponse IA: {e}")
-            return self._fallback_liste(consolides, rayons_disponibles)
+            logger.error(f"Erreur parsing: {e}")
+            # Fallback si parsing échoue
+            return self._get_fallback_liste(consolides, rayons_disponibles)
+
+    # ═══════════════════════════════════════════════════════════════
+    # HELPERS
+    # ═══════════════════════════════════════════════════════════════
 
     def _consolider_doublons(self, articles: List[Dict]) -> List[Dict]:
         """Consolide les doublons AVANT l'appel IA"""
@@ -110,10 +131,12 @@ class CoursesAIService:
         for art in articles:
             key = art["nom"].lower().strip()
             if key in consolidation:
+                # Garder la plus grosse quantité
                 consolidation[key]["quantite"] = max(
                     consolidation[key]["quantite"],
                     art["quantite"]
                 )
+                # Garder la plus haute priorité
                 priorites = {"basse": 1, "moyenne": 2, "haute": 3}
                 if priorites.get(art.get("priorite", "moyenne"), 2) > priorites.get(consolidation[key]["priorite"], 2):
                     consolidation[key]["priorite"] = art.get("priorite", "moyenne")
@@ -131,6 +154,8 @@ class CoursesAIService:
             preferences: Optional[Dict]
     ) -> str:
         """Construit le prompt d'optimisation"""
+        import json
+
         pref_text = ""
         if preferences:
             if preferences.get("bio"):
@@ -214,149 +239,38 @@ UNIQUEMENT le JSON, aucun texte !"""
                     raise
                 await asyncio.sleep(2 ** attempt)
 
-    def _parse_json_response(self, response: str) -> Dict:
-        """Parse la réponse JSON de l'IA"""
-        cleaned = response.strip()
-
-        if cleaned.startswith("```json"):
-            cleaned = cleaned[7:]
-        if cleaned.startswith("```"):
-            cleaned = cleaned[3:]
-        if cleaned.endswith("```"):
-            cleaned = cleaned[:-3]
-
-        cleaned = cleaned.strip()
-        return json.loads(cleaned)
-
-    def _fallback_liste(
+    def _get_fallback_liste(
             self,
             articles: List[Dict],
             rayons: List[str]
-    ) -> ListeOptimisee:
+    ) -> Dict:
         """Liste de fallback si IA échoue"""
         logger.warning("Utilisation du fallback (IA indisponible)")
 
         par_rayon = {rayons[0]: []}
 
         for art in articles:
-            par_rayon[rayons[0]].append(
-                ArticleOptimise(
-                    article=art["nom"],
-                    quantite=art["quantite"],
-                    unite=art["unite"],
-                    priorite=art.get("priorite", "moyenne")
-                )
-            )
+            par_rayon[rayons[0]].append({
+                "article": art["nom"],
+                "quantite": art["quantite"],
+                "unite": art["unite"],
+                "priorite": art.get("priorite", "moyenne"),
+                "prix_estime": None,
+                "rayon": rayons[0],
+                "alternatives": [],
+                "conseil": None
+            })
 
-        return ListeOptimisee(
-            par_rayon=par_rayon,
-            conseils_globaux=["Service IA temporairement indisponible"]
-        )
+        return {
+            "par_rayon": par_rayon,
+            "doublons_detectes": [],
+            "budget_estime": 0.0,
+            "depasse_budget": False,
+            "economies_possibles": 0.0,
+            "conseils_globaux": ["Service IA temporairement indisponible"]
+        }
 
-    async def proposer_alternatives(
-            self,
-            article: str,
-            magasin: str,
-            contexte: Optional[str] = None
-    ) -> List[Alternative]:
-        """Propose des alternatives pour un article"""
-        logger.info(f"Recherche alternatives: {article} @ {magasin}")
-
-        prompt = f"""Propose 3 alternatives pour cet article dans {magasin}:
-
-ARTICLE: {article}
-{f"CONTEXTE: {contexte}" if contexte else ""}
-
-CRITÈRES:
-- Prix similaire ou inférieur
-- Même utilisation culinaire
-- Disponible en {magasin}
-
-FORMAT JSON:
-{{
-  "alternatives": [
-    {{
-      "nom": "Alternative 1",
-      "raison": "Moins cher et équivalent",
-      "prix_relatif": "-20%",
-      "disponibilite": "haute"
-    }}
-  ]
-}}
-
-UNIQUEMENT JSON !"""
-
-        try:
-            response = await self._call_with_retry(
-                prompt,
-                "Expert courses. JSON uniquement.",
-                500
-            )
-
-            data = self._parse_json_response(response)
-            return [Alternative(**alt) for alt in data.get("alternatives", [])]
-
-        except Exception as e:
-            logger.error(f"Erreur alternatives: {e}")
-            return []
-
-    async def analyser_habitudes(
-            self,
-            historique: List[Dict],
-            stats: Dict
-    ) -> Dict[str, List[str]]:
-        """Analyse les habitudes d'achat"""
-        logger.info("Analyse habitudes d'achat par IA")
-
-        articles_freq = stats.get("articles_frequents", {})
-        top10 = list(articles_freq.items())[:10]
-
-        prompt = f"""Analyse ces habitudes d'achat:
-
-TOP 10 ARTICLES: {top10}
-TOTAL ACHATS: {stats.get('total_achetes', 0)}
-PART IA: {stats.get('part_ia_achetes', 0)}
-MOYENNE/SEMAINE: {stats.get('moyenne_semaine', 0):.1f}
-
-FOURNIS:
-1. 5 conseils personnalisés (optimisation, économie, planification)
-2. 3 opportunités détectées
-
-FORMAT JSON:
-{{
-  "conseils": [
-    {{
-      "type": "optimisation",
-      "conseil": "Grouper les courses hebdomadaires",
-      "impact": "moyen"
-    }}
-  ],
-  "opportunites": [
-    "Acheter en vrac pour X article",
-    "Profiter des promos sur Y"
-  ]
-}}
-
-JSON uniquement !"""
-
-        try:
-            response = await self._call_with_retry(
-                prompt,
-                "Expert gestion courses. JSON.",
-                800
-            )
-
-            data = self._parse_json_response(response)
-            return data
-
-        except Exception as e:
-            logger.error(f"Erreur analyse habitudes: {e}")
-            return {
-                "conseils": [],
-                "opportunites": ["Analyse IA indisponible"]
-            }
-
-
+# Factory
 def create_courses_ai_service(agent: AgentIA) -> CoursesAIService:
     """Factory pour créer le service IA"""
     return CoursesAIService(agent)
