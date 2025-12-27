@@ -5,58 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment=" amelioration inventaire">
+      <change afterPath="$PROJECT_DIR$/src/core/ai_json_parser.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/core/exceptions.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/core/smart_cache.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/services/base_enhanced_service.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/alembic/env.py" beforeDir="false" afterPath="$PROJECT_DIR$/alembic/env.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/alembic/versions/20251204_6880ae0ac56d_initial_schema.py" beforeDir="false" afterPath="$PROJECT_DIR$/alembic/versions/20251204_6880ae0ac56d_initial_schema.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/manage.py" beforeDir="false" afterPath="$PROJECT_DIR$/manage.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/reset_supabase.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/reset_supabase.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/seed_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/seed_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/ai_agent.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/ai_agent.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/ai_cache.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/ai_cache.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/base_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/base_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/database.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/state_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/state_manager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/validators.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/validators.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/accueil.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/accueil.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/courses.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/cuisine/courses.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/inventaire.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/cuisine/inventaire.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/planning_semaine.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/cuisine/planning_semaine.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/modules/cuisine/recettes.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/cuisine/recettes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/famille/bien_etre.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/famille/bien_etre.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/famille/routines.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/famille/routines.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/famille/suivi_jules.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/famille/suivi_jules.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/maison/entretien.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/maison/entretien.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/maison/jardin.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/maison/jardin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/maison/projets.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/maison/projets.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/parametres.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/parametres.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/planning/calendrier.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/planning/calendrier.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/planning/vue_ensemble.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/planning/vue_ensemble.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/ai_recette_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/ai_recette_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/courses/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/courses/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/courses/courses_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/courses/courses_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/import_export.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/import_export.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/inventaire/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/inventaire/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/inventaire/inventaire_ai_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/inventaire/inventaire_ai_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/inventaire/inventaire_io_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/inventaire/inventaire_io_service.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/services/inventaire/inventaire_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/inventaire/inventaire_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/planning/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/planning/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/planning/planning_generation_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/planning/planning_generation_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/planning/planning_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/planning/planning_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/planning/repas_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/planning/repas_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/recette_edition_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/recette_edition_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/recette_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/recette_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/recette_version_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/recette_version_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/weather.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/weather.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/web_scraper.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/web_scraper.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/components.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/ui/components.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/recette_components.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/ui/recette_components.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/formatters.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/formatters.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/conftest.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_modules/test_cuisine.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_modules/test_cuisine.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -197,40 +152,6 @@
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <method v="2" />
     </configuration>
-    <configuration default="true" type="tests" factoryName="Autodetect">
-      <module name="assistant_matanne" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;&quot;" />
-      <option name="_new_targetType" value="&quot;PATH&quot;" />
-      <method v="2" />
-    </configuration>
-    <configuration default="true" type="tests" factoryName="Doctests">
-      <module name="assistant_matanne" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="" />
-      <option name="CLASS_NAME" value="" />
-      <option name="METHOD_NAME" value="" />
-      <option name="FOLDER_NAME" value="" />
-      <option name="TEST_TYPE" value="TEST_SCRIPT" />
-      <option name="PATTERN" value="" />
-      <option name="USE_PATTERN" value="false" />
-      <method v="2" />
-    </configuration>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -262,14 +183,6 @@
       <workItem from="1764864455782" duration="6942000" />
       <workItem from="1764923035460" duration="23405000" />
       <workItem from="1765096794626" duration="16000" />
-    </task>
-    <task id="LOCAL-00025" summary="Recette amelioration">
-      <option name="closed" value="true" />
-      <created>1764879645693</created>
-      <option name="number" value="00025" />
-      <option name="presentableId" value="LOCAL-00025" />
-      <option name="project" value="LOCAL" />
-      <updated>1764879645693</updated>
     </task>
     <task id="LOCAL-00026" summary="Recette amelioration">
       <option name="closed" value="true" />
@@ -655,7 +568,15 @@
       <option name="project" value="LOCAL" />
       <updated>1766056290985</updated>
     </task>
-    <option name="localTasksCounter" value="74" />
+    <task id="LOCAL-00074" summary=" amelioration inventaire">
+      <option name="closed" value="true" />
+      <created>1766057055015</created>
+      <option name="number" value="00074" />
+      <option name="presentableId" value="LOCAL-00074" />
+      <option name="project" value="LOCAL" />
+      <updated>1766057055015</updated>
+    </task>
+    <option name="localTasksCounter" value="75" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
