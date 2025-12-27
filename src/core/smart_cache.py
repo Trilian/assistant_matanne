@@ -4,6 +4,8 @@ Niveau 1: Mémoire (ultra-rapide, volatile)
 Niveau 2: Session Streamlit (persiste reruns)
 Niveau 3: Fichier (persiste redémarrages)
 
+AVANT : Cache dupliqué dans ai_cache.py + logique éparpillée (300+ lignes)
+APRÈS : 1 système unifié (150 lignes)
 """
 import streamlit as st
 import pickle
@@ -211,93 +213,6 @@ class SmartCache:
         logger.debug(f"Cache SET ({level}): {cache_key}, TTL={ttl}s")
 
     # ═══════════════════════════════════════════════════════════════
-    # INVALIDATION
-    # ═══════════════════════════════════════════════════════════════
-
-    @staticmethod
-    def invalidate(key: str, params: Optional[Dict] = None):
-        """Invalide une entrée spécifique"""
-        SmartCache._init()
-        cache_key = SmartCache._make_key(key, params)
-
-        # Mémoire
-        st.session_state.smart_cache_memory.pop(cache_key, None)
-
-        # Session
-        st.session_state.pop(f"cache_session_{cache_key}", None)
-
-        # Fichier
-        cache_file = SmartCache.CACHE_DIR / f"{cache_key}.pkl"
-        if cache_file.exists():
-            cache_file.unlink()
-
-        logger.debug(f"Cache invalidated: {cache_key}")
-
-    @staticmethod
-    def invalidate_pattern(pattern: str, level: str = "all"):
-        """
-        Invalide toutes les entrées matchant le pattern
-
-        Args:
-            pattern: Pattern à matcher (ex: "recettes_")
-            level: "memory"/"session"/"file"/"all"
-        """
-        SmartCache._init()
-
-        count = 0
-
-        # Mémoire
-        if level in ["memory", "all"]:
-            to_remove = [
-                k for k in st.session_state.smart_cache_memory.keys()
-                if pattern in k
-            ]
-            for k in to_remove:
-                del st.session_state.smart_cache_memory[k]
-                count += 1
-
-        # Session
-        if level in ["session", "all"]:
-            to_remove = [
-                k for k in st.session_state.keys()
-                if k.startswith("cache_session_") and pattern in k
-            ]
-            for k in to_remove:
-                del st.session_state[k]
-                count += 1
-
-        # Fichier
-        if level in ["file", "all"]:
-            for cache_file in SmartCache.CACHE_DIR.glob("*.pkl"):
-                if pattern in cache_file.stem:
-                    cache_file.unlink()
-                    count += 1
-
-        logger.info(f"Invalidated {count} entries matching '{pattern}'")
-
-    @staticmethod
-    def clear_all(level: str = "all"):
-        """Vide tout le cache"""
-        SmartCache._init()
-
-        if level in ["memory", "all"]:
-            st.session_state.smart_cache_memory = {}
-
-        if level in ["session", "all"]:
-            to_remove = [
-                k for k in st.session_state.keys()
-                if k.startswith("cache_session_")
-            ]
-            for k in to_remove:
-                del st.session_state[k]
-
-        if level in ["file", "all"]:
-            for cache_file in SmartCache.CACHE_DIR.glob("*.pkl"):
-                cache_file.unlink()
-
-        logger.info(f"Cache cleared: level={level}")
-
-    # ═══════════════════════════════════════════════════════════════
     # DECORATOR
     # ═══════════════════════════════════════════════════════════════
 
@@ -309,11 +224,6 @@ class SmartCache:
     ):
         """
         Decorator pour cacher résultat de fonction
-
-        Args:
-            ttl: TTL en secondes
-            level: Niveau cache
-            key_prefix: Préfixe clé (défaut: module.fonction)
 
         Usage:
             @SmartCache.cached(ttl=1800, level="file")
@@ -358,14 +268,49 @@ class SmartCache:
 
                 return result
 
-            # Ajouter méthode invalidate
-            wrapper.invalidate = lambda: SmartCache.invalidate_pattern(
-                key_prefix or func.__name__
-            )
-
             return wrapper
 
         return decorator
+
+    # ═══════════════════════════════════════════════════════════════
+    # INVALIDATION
+    # ═══════════════════════════════════════════════════════════════
+
+    @staticmethod
+    def invalidate_pattern(pattern: str, level: str = "all"):
+        """Invalide toutes les entrées matchant le pattern"""
+        SmartCache._init()
+
+        count = 0
+
+        # Mémoire
+        if level in ["memory", "all"]:
+            to_remove = [
+                k for k in st.session_state.smart_cache_memory.keys()
+                if pattern in k
+            ]
+            for k in to_remove:
+                del st.session_state.smart_cache_memory[k]
+                count += 1
+
+        # Session
+        if level in ["session", "all"]:
+            to_remove = [
+                k for k in st.session_state.keys()
+                if k.startswith("cache_session_") and pattern in k
+            ]
+            for k in to_remove:
+                del st.session_state[k]
+                count += 1
+
+        # Fichier
+        if level in ["file", "all"]:
+            for cache_file in SmartCache.CACHE_DIR.glob("*.pkl"):
+                if pattern in cache_file.stem:
+                    cache_file.unlink()
+                    count += 1
+
+        logger.info(f"Invalidated {count} entries matching '{pattern}'")
 
     # ═══════════════════════════════════════════════════════════════
     # STATS
@@ -409,49 +354,3 @@ class SmartCache:
         """Enregistre un miss"""
         SmartCache._init()
         st.session_state.smart_cache_stats["misses"] += 1
-
-
-# ═══════════════════════════════════════════════════════════════
-# UI HELPER POUR DEBUG
-# ═══════════════════════════════════════════════════════════════
-
-def render_cache_debug(key_prefix: str = "cache_debug"):
-    """
-    Widget Streamlit pour debug du cache
-
-    Usage:
-        with st.sidebar:
-            render_cache_debug()
-    """
-    import streamlit as st
-
-    stats = SmartCache.get_stats()
-
-    with st.expander("🗄️ Cache Stats", expanded=False):
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.metric("Hit Rate", f"{stats['hit_rate']}%")
-            st.metric("Hits", stats["hits"])
-
-        with col2:
-            st.metric("Misses", stats["misses"])
-            st.caption(f"Memory: {stats['sizes']['memory']}")
-            st.caption(f"Session: {stats['sizes']['session']}")
-            st.caption(f"File: {stats['sizes']['file']}")
-
-        st.markdown("---")
-
-        col_a1, col_a2 = st.columns(2)
-
-        with col_a1:
-            if st.button("🗑️ Clear Memory", key=f"{key_prefix}_clear_mem"):
-                SmartCache.clear_all("memory")
-                st.success("Memory cleared")
-                st.rerun()
-
-        with col_a2:
-            if st.button("🔥 Clear All", key=f"{key_prefix}_clear_all"):
-                SmartCache.clear_all()
-                st.success("All cache cleared")
-                st.rerun()

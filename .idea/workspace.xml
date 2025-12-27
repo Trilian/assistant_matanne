@@ -4,7 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment=" amelioration inventaire" />
+    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment=" amelioration app duplication etc..">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/exceptions.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/exceptions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/smart_cache.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/smart_cache.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/base_enhanced_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/base_enhanced_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/inventaire/inventaire_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/inventaire/inventaire_service.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -175,14 +181,6 @@
       <workItem from="1764864455782" duration="6942000" />
       <workItem from="1764923035460" duration="23405000" />
       <workItem from="1765096794626" duration="16000" />
-    </task>
-    <task id="LOCAL-00027" summary="Recette amelioration">
-      <option name="closed" value="true" />
-      <created>1764926186756</created>
-      <option name="number" value="00027" />
-      <option name="presentableId" value="LOCAL-00027" />
-      <option name="project" value="LOCAL" />
-      <updated>1764926186756</updated>
     </task>
     <task id="LOCAL-00028" summary="Recette amelioration">
       <option name="closed" value="true" />
@@ -568,7 +566,15 @@
       <option name="project" value="LOCAL" />
       <updated>1766820496109</updated>
     </task>
-    <option name="localTasksCounter" value="76" />
+    <task id="LOCAL-00076" summary=" amelioration app duplication etc..">
+      <option name="closed" value="true" />
+      <created>1766821254190</created>
+      <option name="number" value="00076" />
+      <option name="presentableId" value="LOCAL-00076" />
+      <option name="project" value="LOCAL" />
+      <updated>1766821254191</updated>
+    </task>
+    <option name="localTasksCounter" value="77" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -586,7 +592,8 @@
     <MESSAGE value="Recette amelioration" />
     <MESSAGE value="Planning semaine amelioration" />
     <MESSAGE value=" amelioration inventaire" />
-    <option name="LAST_COMMIT_MESSAGE" value=" amelioration inventaire" />
+    <MESSAGE value=" amelioration app duplication etc.." />
+    <option name="LAST_COMMIT_MESSAGE" value=" amelioration app duplication etc.." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

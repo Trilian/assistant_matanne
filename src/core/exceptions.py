@@ -1,7 +1,6 @@
 """
 Système d'Exceptions Unifié + Error Handler
 Standardise la gestion d'erreurs dans toute l'application
-
 """
 from typing import Optional, Dict, Any, Callable
 from functools import wraps

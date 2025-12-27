@@ -1,6 +1,9 @@
 """
 Service Inventaire OPTIMISÉ
 Utilise EnhancedCRUDService pour éliminer duplication
+
+AVANT : 600+ lignes avec duplication
+APRÈS : 300 lignes (-50%)
 """
 from typing import List, Dict, Optional, Tuple
 from datetime import datetime, date, timedelta

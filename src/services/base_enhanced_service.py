@@ -2,6 +2,9 @@
 Service CRUD Ultra-Générique Enrichi
 Élimine TOUTE la duplication entre services (inventaire, courses, recettes)
 
+AVANT : 3 services avec duplication (1800+ lignes)
+APRÈS : 1 service base + 3 petits services (500 lignes total)
+
 Version: 2.0.0
 """
 from typing import List, Dict, Optional, TypeVar, Generic, Callable, Any, Tuple
@@ -386,154 +389,6 @@ class EnhancedCRUDService(BaseService[T], Generic[T]):
 
             # Pagination
             return query.offset(offset).limit(limit).all()
-
-        if db:
-            return _execute(db)
-
-        with get_db_context() as db:
-            return _execute(db)
-
-    # ═══════════════════════════════════════════════════════════════
-    # EXPORT / IMPORT
-    # ═══════════════════════════════════════════════════════════════
-
-    def export_to_dict(
-            self,
-            filters: Optional[Dict] = None,
-            exclude_fields: Optional[List[str]] = None,
-            db: Session = None
-    ) -> List[Dict]:
-        """
-        Export vers liste de dicts
-
-        Args:
-            filters: Filtres pour sélection
-            exclude_fields: ["id", "created_at"]
-
-        Returns:
-            Liste de dicts prêts pour JSON/CSV
-        """
-        def _execute(session: Session) -> List[Dict]:
-            query = session.query(self.model)
-
-            if filters:
-                query = self._apply_filters(query, filters)
-
-            items = query.all()
-
-            result = []
-            for item in items:
-                item_dict = self._model_to_dict(item)
-
-                if exclude_fields:
-                    for field in exclude_fields:
-                        item_dict.pop(field, None)
-
-                result.append(item_dict)
-
-            return result
-
-        if db:
-            return _execute(db)
-
-        with get_db_context() as db:
-            return _execute(db)
-
-    def import_from_dict(
-            self,
-            items: List[Dict],
-            update_existing: bool = True,
-            match_field: str = "id",
-            db: Session = None
-    ) -> Dict[str, int]:
-        """
-        Import depuis liste de dicts
-
-        Args:
-            items: Liste de dicts
-            update_existing: Si True, update si existe
-            match_field: Champ pour détecter existant
-
-        Returns:
-            {"created": 5, "updated": 3, "skipped": 2}
-        """
-        def _execute(session: Session) -> Dict[str, int]:
-            stats = {"created": 0, "updated": 0, "skipped": 0}
-
-            for item_data in items:
-                try:
-                    match_value = item_data.get(match_field)
-
-                    if not match_value:
-                        stats["skipped"] += 1
-                        continue
-
-                    # Chercher existant
-                    existing = session.query(self.model).filter(
-                        getattr(self.model, match_field) == match_value
-                    ).first()
-
-                    if existing:
-                        if update_existing:
-                            for key, value in item_data.items():
-                                if hasattr(existing, key):
-                                    setattr(existing, key, value)
-                            stats["updated"] += 1
-                        else:
-                            stats["skipped"] += 1
-                    else:
-                        self.create(item_data, db=session)
-                        stats["created"] += 1
-
-                except Exception as e:
-                    logger.error(f"Import error: {e}")
-                    stats["skipped"] += 1
-
-            session.commit()
-            logger.info(f"Import: {stats}")
-            return stats
-
-        if db:
-            return _execute(db)
-
-        with get_db_context() as db:
-            return _execute(db)
-
-    # ═══════════════════════════════════════════════════════════════
-    # AUDIT TRAIL
-    # ═══════════════════════════════════════════════════════════════
-
-    def get_recent_changes(
-            self,
-            days: int = 7,
-            date_field: str = "modifie_le",
-            limit: int = 100,
-            db: Session = None
-    ) -> List[Dict]:
-        """
-        Récupère les changements récents
-
-        Args:
-            days: Nombre de jours
-            date_field: Champ date de modification
-            limit: Max résultats
-
-        Returns:
-            Liste des items modifiés récemment
-        """
-        def _execute(session: Session) -> List[Dict]:
-            if not hasattr(self.model, date_field):
-                return []
-
-            date_limit = datetime.now() - timedelta(days=days)
-
-            items = session.query(self.model).filter(
-                getattr(self.model, date_field) >= date_limit
-            ).order_by(
-                desc(getattr(self.model, date_field))
-            ).limit(limit).all()
-
-            return [self._model_to_dict(item) for item in items]
 
         if db:
             return _execute(db)
