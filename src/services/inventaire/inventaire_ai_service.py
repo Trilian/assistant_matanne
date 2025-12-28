@@ -1,335 +1,303 @@
 """
-Service IA Inventaire - Prédictions et Analyses
-Détection gaspillage, suggestions recettes, prédictions consommation
+Service IA Inventaire ULTRA-OPTIMISÉ
 """
-import asyncio
-import json
 import logging
 from typing import List, Dict, Optional
 from datetime import date, timedelta
+from pydantic import BaseModel, Field
 
-from src.core.ai_agent import AgentIA
-from src.core.cache import RateLimit  # ✅ CORRIGÉ
-from src.utils.formatters import format_quantity, format_quantity_with_unit
+from src.core.ai import AIClient, AIParser
+from src.core.cache import Cache, RateLimit
+from src.core.errors import handle_errors, AIServiceError
+from src.utils import format_quantity_with_unit
 
 logger = logging.getLogger(__name__)
 
 
-# ===================================
-# SERVICE
-# ===================================
+# ═══════════════════════════════════════════════════════════════
+# SCHÉMAS PYDANTIC
+# ═══════════════════════════════════════════════════════════════
 
+class RecetteSuggestion(BaseModel):
+    """Recette suggérée par IA"""
+    nom: str = Field(..., min_length=2)
+    faisabilite: int = Field(..., ge=0, le=100)
+    ingredients_utilises: List[str]
+    temps_total: int = Field(..., gt=0)
+    raison: str
+
+
+class AnalyseGaspillage(BaseModel):
+    """Résultat analyse gaspillage"""
+    statut: str = Field(..., pattern="^(OK|ATTENTION|CRITIQUE)$")
+    items_risque: int = Field(0, ge=0)
+    recettes_urgentes: List[str] = Field(default_factory=list)
+    conseils: List[str] = Field(default_factory=list)
+
+
+class PredictionConsommation(BaseModel):
+    """Prédiction consommation"""
+    jours_avant_epuisement: int = Field(..., ge=0)
+    date_rachat_suggeree: str
+    quantite_optimale: float = Field(..., gt=0)
+    conseil: str
+
+
+class AnalyseComplete(BaseModel):
+    """Analyse complète inventaire"""
+    score_global: int = Field(..., ge=0, le=100)
+    statut: str
+    problemes: List[Dict] = Field(default_factory=list)
+    recommandations: List[str] = Field(default_factory=list)
+
+
+# ═══════════════════════════════════════════════════════════════
+# SERVICE OPTIMISÉ
+# ═══════════════════════════════════════════════════════════════
 
 class InventaireAIService:
-    """Service IA pour l'inventaire"""
+    """Service IA inventaire ultra-optimisé"""
 
-    def __init__(self, agent: AgentIA):
-        self.agent = agent
+    def __init__(self, client: AIClient):
+        self.client = client
 
-    # ===================================
+    # ═══════════════════════════════════════════════════════════
     # DÉTECTION GASPILLAGE
-    # ===================================
+    # ═══════════════════════════════════════════════════════════
 
-    async def detecter_gaspillage(self, inventaire: List[Dict]) -> Dict:
+    @handle_errors(show_in_ui=True)
+    @Cache.cached(ttl=1800)
+    async def detecter_gaspillage(self, inventaire: List[Dict]) -> AnalyseGaspillage:
         """
-        Analyse l'inventaire et détecte les risques de gaspillage
+        Détecte risques de gaspillage
 
-        Args:
-            inventaire: Liste articles avec dates péremption
-
-        Returns:
-            Dict avec alertes et suggestions
+        ✅ Cache 30min
+        ✅ AIJsonParser
+        ✅ Fallback automatique
         """
-        logger.info("Détection gaspillage IA")
-
         # Filtrer items à risque
         items_risque = [
-            i
-            for i in inventaire
+            i for i in inventaire
             if i.get("jours_peremption") is not None and i["jours_peremption"] <= 7
         ]
 
         if not items_risque:
-            return {
-                "statut": "OK",
-                "message": "Aucun risque de gaspillage détecté",
-                "recettes_urgentes": [],
-                "conseils": [],
-            }
+            return AnalyseGaspillage(
+                statut="OK",
+                message="Aucun risque détecté",
+                recettes_urgentes=[],
+                conseils=[]
+            )
 
-        # Construire prompt
-        items_str = ", ".join(
-            [f"{i['nom']} (expire dans {i['jours_peremption']}j)" for i in items_risque[:10]]
+        # Prompt optimisé
+        items_str = ", ".join([
+            f"{i['nom']} ({i['jours_peremption']}j)"
+            for i in items_risque[:10]
+        ])
+
+        prompt = f"""Articles périssables: {items_str}
+
+Réponds en JSON:
+{{
+  "statut": "ATTENTION|CRITIQUE",
+  "items_risque": {len(items_risque)},
+  "recettes_urgentes": ["Recette 1", "Recette 2"],
+  "conseils": ["Conseil 1", "Conseil 2"]
+}}"""
+
+        # ✅ Appel IA avec AIJsonParser
+        response = await self.client.call(
+            prompt=prompt,
+            system_prompt="Expert anti-gaspillage. JSON uniquement.",
+            temperature=0.7,
+            max_tokens=500
         )
 
-        prompt = f"""Analyse ces articles proches de la péremption:
-
-ARTICLES À RISQUE:
-{items_str}
-
-TÂCHES:
-1. Suggère 3 recettes RAPIDES utilisant ces ingrédients
-2. Donne 2 conseils anti-gaspillage
-
-FORMAT JSON:
-{{
-  "statut": "ATTENTION",
-  "recettes_urgentes": [
-    "Recette 1 avec X et Y",
-    "Recette 2 avec X"
-  ],
-  "conseils": [
-    "Conseil 1",
-    "Conseil 2"
-  ]
-}}
-
-JSON uniquement !"""
-
-        try:
-            response = await self._call_with_retry(prompt, 600)
-            data = self._parse_json(response)
-            data["items_risque"] = len(items_risque)
-            return data
-
-        except Exception as e:
-            logger.error(f"Erreur détection gaspillage: {e}")
-            return {
+        return AIParser.parse(
+            response,
+            AnalyseGaspillage,
+            fallback={
                 "statut": "ATTENTION",
                 "items_risque": len(items_risque),
-                "recettes_urgentes": [f"Utiliser {items_str} rapidement"],
-                "conseils": ["Consommer ou congeler rapidement"],
+                "recettes_urgentes": [f"Utiliser {items_str}"],
+                "conseils": ["Consommer rapidement"]
             }
+        )
 
-    # ===================================
+    # ═══════════════════════════════════════════════════════════
     # SUGGESTIONS RECETTES
-    # ===================================
+    # ═══════════════════════════════════════════════════════════
 
-    async def suggerer_recettes_stock(self, inventaire: List[Dict], nb: int = 5) -> List[Dict]:
+    @handle_errors(show_in_ui=True)
+    @Cache.cached(ttl=3600)
+    async def suggerer_recettes_stock(
+            self,
+            inventaire: List[Dict],
+            nb: int = 5
+    ) -> List[RecetteSuggestion]:
         """
-        Suggère des recettes faisables avec le stock actuel
+        Suggère recettes depuis stock
 
-        Returns:
-            Liste de suggestions avec faisabilité
+        ✅ Cache 1h
+        ✅ parse_list_response
         """
-        logger.info(f"Suggestion {nb} recettes depuis stock")
-
-        # Filtrer items disponibles
         items_dispo = [
-            f"{i['nom']} ({format_quantity(i['quantite'])} {i['unite']})"
+            f"{i['nom']} ({format_quantity_with_unit(i['quantite'], i['unite'])})"
             for i in inventaire
             if i["quantite"] > 0
-        ][
-            :30
-        ]  # Limiter pour le prompt
+        ][:20]
 
         if not items_dispo:
             return []
 
-        prompt = f"""Suggère {nb} recettes FAISABLES avec ces ingrédients:
+        prompt = f"""Stock: {", ".join(items_dispo)}
 
-STOCK DISPONIBLE:
-{chr(10).join(items_dispo)}
-
-CONTRAINTES:
-- Recettes ENTIÈREMENT faisables (sauf sel/poivre/huile)
-- Varier les types
-- Indiquer faisabilité en %
-
-FORMAT JSON:
+{nb} recettes faisables en JSON:
 {{
   "recettes": [
     {{
-      "nom": "Nom recette",
+      "nom": "Nom",
       "faisabilite": 100,
       "ingredients_utilises": ["ing1", "ing2"],
       "temps_total": 30,
-      "raison": "Pourquoi cette recette"
+      "raison": "Pourquoi"
     }}
   ]
-}}
+}}"""
 
-JSON uniquement !"""
+        response = await self.client.call(
+            prompt=prompt,
+            system_prompt="Nutritionniste expert. JSON uniquement.",
+            temperature=0.7,
+            max_tokens=1000
+        )
 
-        try:
-            response = await self._call_with_retry(prompt, 1000)
-            data = self._parse_json(response)
-            return data.get("recettes", [])[:nb]
+        # ✅ Parse liste avec helper
+        from src.core.ai import parse_list_response
 
-        except Exception as e:
-            logger.error(f"Erreur suggestions recettes: {e}")
-            return []
+        return parse_list_response(
+            response,
+            RecetteSuggestion,
+            list_key="recettes",
+            fallback_items=[]
+        )[:nb]
 
-    # ===================================
+    # ═══════════════════════════════════════════════════════════
     # PRÉDICTION CONSOMMATION
-    # ===================================
+    # ═══════════════════════════════════════════════════════════
 
+    @handle_errors(show_in_ui=False)
     async def predire_consommation(
-            self, article: Dict, historique: Optional[List[Dict]] = None
-    ) -> Dict:
+            self,
+            article: Dict,
+            historique: Optional[List[Dict]] = None
+    ) -> PredictionConsommation:
         """
-        Prédit quand un article sera épuisé
+        Prédit consommation
 
-        Args:
-            article: Article à analyser
-            historique: Historique consommation (optionnel)
-
-        Returns:
-            Dict avec prédiction et recommandations
+        ✅ Fallback intelligent si IA échoue
         """
-        logger.info(f"Prédiction consommation: {article['nom']}")
+        prompt = f"""Article: {article['nom']}
+Stock: {article['quantite']:.1f} {article['unite']}
+Seuil: {article['seuil']:.1f}
 
-        hist_str = ""
-        if historique:
-            hist_str = f"\nHISTORIQUE:\n{json.dumps(historique, indent=2, ensure_ascii=False)}"
-
-        prompt = f"""Prédit la consommation de cet article:
-
-ARTICLE: {article['nom']}
-QUANTITÉ ACTUELLE: {article['quantite']:.1f} {article['unite']}
-SEUIL: {article['seuil']:.1f}
-{hist_str}
-
-ANALYSE:
-1. Estime jours avant épuisement
-2. Recommande quand racheter
-3. Suggère quantité optimale
-
-FORMAT JSON:
+JSON:
 {{
   "jours_avant_epuisement": 10,
   "date_rachat_suggeree": "2025-01-15",
   "quantite_optimale": 2.0,
-  "conseil": "Racheter dans 7 jours"
-}}
-
-JSON uniquement !"""
+  "conseil": "Racheter dans 7j"
+}}"""
 
         try:
-            response = await self._call_with_retry(prompt, 500)
-            return self._parse_json(response)
+            response = await self.client.call(
+                prompt=prompt,
+                system_prompt="Expert gestion stocks. JSON.",
+                temperature=0.5,
+                max_tokens=300
+            )
 
-        except Exception as e:
-            logger.error(f"Erreur prédiction: {e}")
-            # Fallback simple
-            jours = int((article["quantite"] / article["seuil"]) * 7)
-            return {
-                "jours_avant_epuisement": max(jours, 1),
-                "date_rachat_suggeree": (
-                        date.today() + timedelta(days=max(jours - 2, 1))
-                ).isoformat(),
-                "quantite_optimale": article["seuil"] * 2,
-                "conseil": f"Racheter dans ~{max(jours - 2, 1)} jours",
-            }
+            return AIParser.parse(
+                response,
+                PredictionConsommation,
+                fallback=self._fallback_prediction(article)
+            )
 
-    # ===================================
+        except AIServiceError:
+            # Fallback intelligent
+            return self._fallback_prediction(article)
+
+    def _fallback_prediction(self, article: Dict) -> Dict:
+        """Prédiction de fallback (règle simple)"""
+        jours = max(int((article["quantite"] / article["seuil"]) * 7), 1)
+
+        return {
+            "jours_avant_epuisement": jours,
+            "date_rachat_suggeree": (
+                    date.today() + timedelta(days=max(jours - 2, 1))
+            ).isoformat(),
+            "quantite_optimale": article["seuil"] * 2,
+            "conseil": f"Racheter dans ~{max(jours - 2, 1)}j"
+        }
+
+    # ═══════════════════════════════════════════════════════════
     # ANALYSE COMPLÈTE
-    # ===================================
+    # ═══════════════════════════════════════════════════════════
 
-    async def analyser_inventaire_complet(self, inventaire: List[Dict]) -> Dict:
+    @handle_errors(show_in_ui=True)
+    @Cache.cached(ttl=1800)
+    async def analyser_inventaire_complet(
+            self,
+            inventaire: List[Dict]
+    ) -> AnalyseComplete:
         """
-        Analyse globale de l'inventaire
+        Analyse globale
 
-        Returns:
-            Dict avec score, problèmes, recommandations
+        ✅ Cache 30min
+        ✅ Métriques calculées côté Python
         """
-        logger.info("Analyse complète inventaire")
-
-        # Calculer métriques
+        # Calculs Python (plus rapide que IA)
         total = len(inventaire)
         stock_bas = len([i for i in inventaire if i["statut"] in ["sous_seuil", "critique"]])
-        peremption = len(
-            [i for i in inventaire if i["statut"] in ["peremption_proche", "critique"]]
-        )
+        peremption = len([i for i in inventaire if i["statut"] in ["peremption_proche", "critique"]])
 
-        top_items = sorted(
-            inventaire,
-            key=lambda x: x["quantite"] * (1 if x["statut"] == "ok" else 0.5),
-            reverse=True,
-        )[:10]
+        prompt = f"""Inventaire: {total} articles
+Stock bas: {stock_bas}
+Péremption: {peremption}
 
-        prompt = f"""Analyse cet inventaire:
-
-TOTAL ARTICLES: {total}
-STOCK BAS: {stock_bas}
-PÉREMPTION PROCHE: {peremption}
-
-TOP 10 ARTICLES:
-{chr(10).join([f"- {i['nom']}: {format_quantity(i['quantite'])} {i['unite']} ({i['statut']})" for i in top_items])}
-
-FOURNIS:
-1. Score global (0-100)
-2. 3 problèmes principaux
-3. 3 recommandations
-
-FORMAT JSON:
+Analyse JSON:
 {{
   "score_global": 75,
-  "statut": "correct",
+  "statut": "correct|attention|critique",
   "problemes": [
-    {{"type": "stock_bas", "article": "X", "conseil": "..."}},
+    {{"type": "stock_bas", "article": "X", "conseil": "..."}}
   ],
-  "recommandations": [
-    "Recommandation 1",
-    "Recommandation 2"
-  ]
-}}
+  "recommandations": ["Recommandation 1", "Recommandation 2"]
+}}"""
 
-JSON uniquement !"""
+        response = await self.client.call(
+            prompt=prompt,
+            system_prompt="Expert inventaire. JSON.",
+            temperature=0.7,
+            max_tokens=800
+        )
 
-        try:
-            response = await self._call_with_retry(prompt, 1000)
-            return self._parse_json(response)
-
-        except Exception as e:
-            logger.error(f"Erreur analyse complète: {e}")
-            return {
+        return AIParser.parse(
+            response,
+            AnalyseComplete,
+            fallback={
                 "score_global": 50,
                 "statut": "attention",
                 "problemes": [],
-                "recommandations": ["Analyse IA indisponible"],
+                "recommandations": ["Vérifier stock bas", "Surveiller péremptions"]
             }
-
-    # ===================================
-    # HELPERS
-    # ===================================
-
-    async def _call_with_retry(self, prompt: str, max_tokens: int, max_retries: int = 3) -> str:
-        """Appel IA avec retry"""
-        for attempt in range(max_retries):
-            try:
-                response = await self.agent._call_mistral(
-                    prompt=prompt,
-                    system_prompt="Expert gestion stocks alimentaires. JSON uniquement.",
-                    temperature=0.7,
-                    max_tokens=max_tokens,
-                )
-                RateLimit.record_call()  # ✅ CORRIGÉ
-                return response
-            except Exception as e:
-                if attempt == max_retries - 1:
-                    raise
-                await asyncio.sleep(2**attempt)
-
-    def _parse_json(self, response: str) -> Dict:
-        """Parse JSON depuis réponse"""
-        cleaned = response.strip()
-
-        if cleaned.startswith("```json"):
-            cleaned = cleaned[7:]
-        if cleaned.startswith("```"):
-            cleaned = cleaned[3:]
-        if cleaned.endswith("```"):
-            cleaned = cleaned[:-3]
-
-        return json.loads(cleaned.strip())
+        )
 
 
-# ===================================
+# ═══════════════════════════════════════════════════════════════
 # FACTORY
-# ===================================
+# ═══════════════════════════════════════════════════════════════
 
-
-def create_inventaire_ai_service(agent: AgentIA) -> InventaireAIService:
-    """Factory"""
-    return InventaireAIService(agent)
+def create_inventaire_ai_service(client: AIClient) -> InventaireAIService:
+    """Factory pour créer le service"""
+    return InventaireAIService(client)
