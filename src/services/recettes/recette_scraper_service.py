@@ -326,8 +326,8 @@ class RecipeWebScraper:
                             continue
 
                         if any(
-                            word in text.lower()
-                            for word in ["pour", "ingrédients", "préparation", "étapes"]
+                                word in text.lower()
+                                for word in ["pour", "ingrédients", "préparation", "étapes"]
                         ):
                             continue
 
@@ -493,16 +493,16 @@ class RecipeWebScraper:
 
         # Ignorer les titres de sections
         if any(
-            word in text.lower()
-            for word in [
-                "pour la",
-                "pour le",
-                "ingrédients",
-                "préparation",
-                "garniture",
-                "sauce",
-                "pâte",
-            ]
+                word in text.lower()
+                for word in [
+                    "pour la",
+                    "pour le",
+                    "ingrédients",
+                    "préparation",
+                    "garniture",
+                    "sauce",
+                    "pâte",
+                ]
         ):
             return None
 

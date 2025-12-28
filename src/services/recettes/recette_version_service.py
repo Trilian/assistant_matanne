@@ -238,10 +238,10 @@ JSON uniquement !"""
     # ===================================
 
     def sauvegarder_version(
-        self,
-        recette_id: int,
-        version_data: VersionBebeGeneree | VersionBatchGeneree,
-        type_version: str,
+            self,
+            recette_id: int,
+            version_data: VersionBebeGeneree | VersionBatchGeneree,
+            type_version: str,
     ) -> bool:
         """
         Sauvegarde une version générée en base
@@ -254,7 +254,7 @@ JSON uniquement !"""
             db.query(VersionRecette).filter(
                 VersionRecette.recette_base_id == recette_id,
                 VersionRecette.type_version == type_version,
-            ).delete()
+                ).delete()
 
             # Créer nouvelle version
             if isinstance(version_data, VersionBebeGeneree):
@@ -284,7 +284,7 @@ JSON uniquement !"""
     # ===================================
 
     async def _call_with_retry(
-        self, prompt: str, system_prompt: str, max_tokens: int, max_retries: int = 3
+            self, prompt: str, system_prompt: str, max_tokens: int, max_retries: int = 3
     ) -> str:
         """Appel IA avec retry"""
         for attempt in range(max_retries):

@@ -1,22 +1,22 @@
+# src/services/recettes/recette_service.py
 """
-Service Recettes OPTIMISÉ - Fusion recette_service + recette_edition_service
+Service Recettes Principal - VERSION OPTIMISÉE
+Utilise les nouveaux decorators + cache unifié
 """
 from typing import List, Dict, Optional
-from sqlalchemy.orm import Session, joinedload, selectinload
+from sqlalchemy.orm import joinedload, selectinload
 
 from src.services.base_enhanced_service import EnhancedCRUDService
 from src.services.unified_service_helpers import (
     batch_find_or_create_ingredients,
-    model_to_dict_safe,
-    validate_quantity
+    model_to_dict_safe
 )
 from src.core.database import get_db_context
-from src.core.smart_cache import SmartCache
-from src.core.exceptions import ValidationError, NotFoundError, handle_errors
+from src.core.cache import Cache  # ✅ NOUVEAU
+from src.core.error_handler import safe_execute  # ✅ NOUVEAU
 from src.core.models import (
     Recette, RecetteIngredient, EtapeRecette, VersionRecette,
-    Ingredient, ArticleInventaire, TypeVersionRecetteEnum,
-    SaisonEnum, TypeRepasEnum
+    Ingredient, ArticleInventaire
 )
 import logging
 
@@ -24,20 +24,22 @@ logger = logging.getLogger(__name__)
 
 
 class RecetteService(EnhancedCRUDService[Recette]):
-    """Service recettes unifié (CRUD + édition + versions)"""
+    """Service recettes unifié avec decorators"""
 
     def __init__(self):
         super().__init__(Recette)
 
     # ═══════════════════════════════════════════════════════════════
-    # LECTURE OPTIMISÉE (1 query avec eager loading)
+    # LECTURE OPTIMISÉE
     # ═══════════════════════════════════════════════════════════════
 
-    @SmartCache.cached(ttl=60, level="session")
+    @Cache.cached(ttl=60)
+    @safe_execute(fallback_value=None, show_error=False)
     def get_by_id_full(self, recette_id: int) -> Optional[Recette]:
         """
-        Récupère avec TOUTES relations (1 SEULE query)
+        Récupère avec TOUTES relations (1 query)
         ✅ Cache 60s
+        ✅ Error handling auto
         """
         with get_db_context() as db:
             return db.query(Recette).options(
@@ -46,13 +48,14 @@ class RecetteService(EnhancedCRUDService[Recette]):
                 joinedload(Recette.versions)
             ).filter(Recette.id == recette_id).first()
 
-    @SmartCache.cached(ttl=120, level="session")
+    @Cache.cached(ttl=120)
+    @safe_execute(fallback_value=[], show_error=False)
     def get_all_with_relations(
             self,
             skip: int = 0,
             limit: int = 20
     ) -> List[Recette]:
-        """Toutes recettes avec relations (cache 2min)"""
+        """Liste avec relations (cache 2min)"""
         with get_db_context() as db:
             return db.query(Recette).options(
                 selectinload(Recette.ingredients).joinedload(RecetteIngredient.ingredient),
@@ -60,10 +63,10 @@ class RecetteService(EnhancedCRUDService[Recette]):
             ).offset(skip).limit(limit).all()
 
     # ═══════════════════════════════════════════════════════════════
-    # RECHERCHE (utilise EnhancedCRUDService.advanced_search)
+    # RECHERCHE
     # ═══════════════════════════════════════════════════════════════
 
-    @handle_errors(show_in_ui=False)
+    @safe_execute(fallback_value=[], show_error=False)
     def search_advanced(
             self,
             search_term: Optional[str] = None,
@@ -79,7 +82,7 @@ class RecetteService(EnhancedCRUDService[Recette]):
             skip: int = 0,
             limit: int = 20
     ) -> List[Recette]:
-        """Recherche avancée optimisée"""
+        """Recherche avancée avec error handling"""
         filters = {}
 
         if saison: filters["saison"] = saison
@@ -100,7 +103,6 @@ class RecetteService(EnhancedCRUDService[Recette]):
             offset=skip
         )
 
-        # Filtre temps (computed column)
         if temps_max:
             results = [
                 r for r in results
@@ -110,10 +112,10 @@ class RecetteService(EnhancedCRUDService[Recette]):
         return results
 
     # ═══════════════════════════════════════════════════════════════
-    # CRÉATION COMPLÈTE (OPTIMISÉ - batch ingredients)
+    # CRÉATION
     # ═══════════════════════════════════════════════════════════════
 
-    @handle_errors(show_in_ui=True)
+    @safe_execute(fallback_value=None, show_error=True, error_message="❌ Erreur création recette")
     def create_full(
             self,
             recette_data: Dict,
@@ -123,13 +125,14 @@ class RecetteService(EnhancedCRUDService[Recette]):
     ) -> int:
         """
         Crée recette complète
-        ✅ Batch creation ingrédients (1 query vs N)
+        ✅ Batch ingredients
+        ✅ Error handling auto
         """
         with get_db_context() as db:
             # 1. Créer recette
             recette = self.create(recette_data, db=db)
 
-            # 2. ✅ BATCH ingrédients (OPTIMISÉ)
+            # 2. Batch ingrédients
             ing_map = batch_find_or_create_ingredients(
                 [{"nom": i["nom"], "unite": i["unite"], "categorie": None}
                  for i in ingredients_data],
@@ -159,7 +162,7 @@ class RecetteService(EnhancedCRUDService[Recette]):
                 )
                 db.add(etape)
 
-            # 5. Versions (si présentes)
+            # 5. Versions
             if versions_data:
                 for version_type, v_data in versions_data.items():
                     version = VersionRecette(
@@ -175,17 +178,17 @@ class RecetteService(EnhancedCRUDService[Recette]):
 
             db.commit()
 
-            # ✅ Invalider cache
-            SmartCache.invalidate_pattern("recette")
+            # Invalider cache
+            Cache.invalidate("recette")
 
             logger.info(f"✅ Recette '{recette.nom}' créée (ID: {recette.id})")
             return recette.id
 
     # ═══════════════════════════════════════════════════════════════
-    # ÉDITION COMPLÈTE (FUSIONNÉ depuis recette_edition_service)
+    # ÉDITION
     # ═══════════════════════════════════════════════════════════════
 
-    @handle_errors(show_in_ui=True)
+    @safe_execute(fallback_value=False, show_error=True, error_message="❌ Erreur mise à jour")
     def update_full(
             self,
             recette_id: int,
@@ -194,10 +197,7 @@ class RecetteService(EnhancedCRUDService[Recette]):
             etapes_data: List[Dict],
             versions_data: Optional[Dict] = None
     ) -> bool:
-        """
-        Met à jour recette complète
-        ✅ Batch ingredients
-        """
+        """Met à jour recette complète"""
         with get_db_context() as db:
             recette = db.query(Recette).get(recette_id)
 
@@ -214,7 +214,7 @@ class RecetteService(EnhancedCRUDService[Recette]):
                 RecetteIngredient.recette_id == recette_id
             ).delete()
 
-            # 3. ✅ BATCH nouveaux ingrédients
+            # 3. Batch nouveaux ingrédients
             ing_map = batch_find_or_create_ingredients(
                 [{"nom": i["nom"], "unite": i["unite"], "categorie": None}
                  for i in ingredients_data],
@@ -268,17 +268,16 @@ class RecetteService(EnhancedCRUDService[Recette]):
 
             db.commit()
 
-            # ✅ Invalider cache
-            SmartCache.invalidate_pattern(f"recette_{recette_id}")
+            Cache.invalidate(f"recette_{recette_id}")
 
             logger.info(f"✅ Recette {recette_id} mise à jour")
             return True
 
     # ═══════════════════════════════════════════════════════════════
-    # DUPLICATION (FUSIONNÉ)
+    # DUPLICATION
     # ═══════════════════════════════════════════════════════════════
 
-    @handle_errors(show_in_ui=True)
+    @safe_execute(fallback_value=None, show_error=True)
     def duplicate(
             self,
             recette_id: int,
@@ -290,7 +289,6 @@ class RecetteService(EnhancedCRUDService[Recette]):
         if not recette:
             return None
 
-        # Préparer données
         recette_data = model_to_dict_safe(
             recette,
             exclude=["id", "cree_le", "modifie_le"]
@@ -327,11 +325,26 @@ class RecetteService(EnhancedCRUDService[Recette]):
         return new_id
 
     # ═══════════════════════════════════════════════════════════════
-    # STATISTIQUES (utilise get_generic_stats)
+    # SUPPRESSION
     # ═══════════════════════════════════════════════════════════════
 
-    @SmartCache.cached(ttl=300, level="session")
-    @handle_errors(show_in_ui=False)
+    @safe_execute(fallback_value=False, show_error=True)
+    def delete(self, recette_id: int) -> bool:
+        """Supprime une recette"""
+        success = super().delete(recette_id)
+
+        if success:
+            Cache.invalidate(f"recette_{recette_id}")
+            Cache.invalidate("recette")
+
+        return success
+
+    # ═══════════════════════════════════════════════════════════════
+    # STATISTIQUES
+    # ═══════════════════════════════════════════════════════════════
+
+    @Cache.cached(ttl=300)
+    @safe_execute(fallback_value={}, show_error=False)
     def get_stats(self) -> Dict:
         """Stats globales (cache 5min)"""
         stats = self.get_generic_stats(
@@ -345,7 +358,6 @@ class RecetteService(EnhancedCRUDService[Recette]):
             }
         )
 
-        # Temps moyen (avec prep + cuisson)
         with get_db_context() as db:
             from sqlalchemy import func
 
@@ -363,7 +375,7 @@ class RecetteService(EnhancedCRUDService[Recette]):
     # MÉTHODES MÉTIER
     # ═══════════════════════════════════════════════════════════════
 
-    @handle_errors(show_in_ui=False)
+    @safe_execute(fallback_value=[], show_error=False)
     def get_faisables_avec_stock(
             self,
             tolerance: float = 0.8
@@ -403,31 +415,9 @@ class RecetteService(EnhancedCRUDService[Recette]):
 
             return sorted(result, key=lambda x: x["faisabilite"], reverse=True)
 
-    def get_recettes_saison(
-            self,
-            saison: Optional[str] = None
-    ) -> List[Recette]:
-        """Recettes de saison (auto-détecte)"""
-        if not saison:
-            from datetime import date
-            mois = date.today().month
 
-            if mois in [3, 4, 5]:
-                saison = SaisonEnum.PRINTEMPS.value
-            elif mois in [6, 7, 8]:
-                saison = SaisonEnum.ETE.value
-            elif mois in [9, 10, 11]:
-                saison = SaisonEnum.AUTOMNE.value
-            else:
-                saison = SaisonEnum.HIVER.value
+# ═══════════════════════════════════════════════════════════════
+# INSTANCE GLOBALE
+# ═══════════════════════════════════════════════════════════════
 
-        return self.advanced_search(
-            filters={
-                "saison": {"in": [saison, SaisonEnum.TOUTE_ANNEE.value]}
-            },
-            limit=1000
-        )
-
-
-# Instance globale
 recette_service = RecetteService()
