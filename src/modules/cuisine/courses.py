@@ -1,213 +1,196 @@
 """
-Module Courses OPTIMISÉ
-Version: 2.0 - Réduction 30% (300 → 210 lignes)
-
-Optimisations:
-- Fonction générique render_article_card
-- Quick actions en boucle
-- Utilisation massive des composants UI
+Module Courses - VERSION 3.0 REFACTORISÉE
+Intègre tous les refactoring core/ui/utils
 """
 import streamlit as st
 import asyncio
 from typing import Dict, Optional
 
-from src.services.courses.courses_service import courses_service, MAGASINS_CONFIG
-from src.services.courses.courses_ai_service import create_courses_ai_service
-from src.core.state_manager import StateManager, get_state
-from src.ui.components import (
-    render_stat_row, render_empty_state, render_toast
+# ═══════════════════════════════════════════════════════════════
+# IMPORTS REFACTORISÉS
+# ═══════════════════════════════════════════════════════════════
+
+# Core
+from src.core.state import get_state
+from src.core.cache import Cache, RateLimit
+from src.core.errors import handle_errors
+
+# UI - Namespace unifié
+from src.ui import (
+    # Base
+    empty_state, badge,
+    # Forms
+    filter_panel,
+    # Data
+    metrics_row,
+    # Feedback
+    toast, Modal,
+    # Layouts
+    item_card
 )
-from src.utils.formatters import format_quantity
 
-# ═══════════════════════════════════════════════════════════════
-# CONSTANTES
-# ═══════════════════════════════════════════════════════════════
+# Services
+from src.services.courses import courses_service, MAGASINS_CONFIG
+from src.services.courses import create_courses_ai_service
 
+# Utils
+from src.utils import format_quantity_with_unit
+
+
+# Constantes
 PRIORITE_ICONS = {"haute": "🔴", "moyenne": "🟡", "basse": "🟢"}
 PRIORITE_COLORS = {"haute": "#dc3545", "moyenne": "#ffc107", "basse": "#28a745"}
 
-# ═══════════════════════════════════════════════════════════════
-# RENDER ARTICLE GÉNÉRIQUE (FUSION DES 2 FONCTIONS PRÉCÉDENTES)
-# ═══════════════════════════════════════════════════════════════
-
-def render_article_card(article: Dict, mode: str, key: str, magasin: Optional[str] = None):
-    """
-    Card article GÉNÉRIQUE (liste ou IA)
-
-    Args:
-        article: Dict article
-        mode: "liste" ou "ia"
-        key: Clé unique
-        magasin: Magasin (pour mode IA)
-    """
-    icone = PRIORITE_ICONS.get(article.get("priorite", "moyenne"), "⚪")
-    couleur = PRIORITE_COLORS.get(article.get("priorite", "moyenne"), "#6c757d") if mode == "ia" else None
-
-    # Container avec bordure colorée si IA
-    if mode == "ia" and couleur:
-        st.markdown(f'<div style="border-left: 4px solid {couleur}; padding: 1rem; background: #f8f9fa; border-radius: 8px; margin-bottom: 0.5rem;"></div>', unsafe_allow_html=True)
-
-    # Header
-    col1, col2, col3 = st.columns([4, 2, 2])
-
-    with col1:
-        nom_display = article.get("article", article["nom"])
-        ia_icon = "🤖" if article.get("ia") or article.get("suggere_par_ia") else ""
-        st.markdown(f"{icone} {ia_icon} **{nom_display}**")
-
-        if notes := article.get("notes") or article.get("conseil"):
-            st.caption(notes)
-
-    with col2:
-        st.write(f"{format_quantity(article['quantite'])} {article['unite']}")
-
-        if rayon := article.get("rayon"):
-            st.caption(f"📍 {rayon}")
-
-        if prix := article.get("prix_estime"):
-            st.caption(f"💶 ~{format_quantity(prix)}€")
-
-    with col3:
-        if mode == "liste":
-            # Actions mode liste
-            col_a1, col_a2 = st.columns(2)
-
-            with col_a1:
-                if st.button("✅", key=f"buy_{key}", help="Acheté"):
-                    confirm_key = f"confirm_buy_{article['id']}"
-
-                    if st.session_state.get(confirm_key, False):
-                        ajouter_stock = st.session_state.get(f"stock_{key}", True)
-                        courses_service.marquer_achete(article["id"], ajouter_stock)
-                        del st.session_state[confirm_key]
-                        render_toast(f"✅ {article['nom']} acheté", "success")
-                        st.rerun()
-                    else:
-                        st.session_state[confirm_key] = True
-                        st.rerun()
-
-            with col_a2:
-                if st.button("🗑️", key=f"del_{key}", help="Supprimer"):
-                    courses_service.delete(article["id"])
-                    render_toast(f"🗑️ Supprimé", "success")
-                    st.rerun()
-
-            # Modal confirmation
-            if st.session_state.get(f"confirm_buy_{article['id']}", False):
-                with st.container():
-                    st.info(f"📦 Ajouter au stock ?")
-                    col_c1, col_c2, col_c3 = st.columns([2, 1, 1])
-
-                    with col_c1:
-                        st.session_state[f"stock_{key}"] = st.checkbox("Ajouter au stock", value=True, key=f"stock_chk_{key}")
-                    with col_c2:
-                        if st.button("✅", key=f"yes_{key}", type="primary"):
-                            pass  # Géré par bouton principal
-                    with col_c3:
-                        if st.button("❌", key=f"no_{key}"):
-                            del st.session_state[f"confirm_buy_{article['id']}"]
-                            st.rerun()
-
-        elif mode == "ia":
-            # Action mode IA
-            if st.button("➕ Ajouter", key=f"add_{key}", use_container_width=True):
-                courses_service.ajouter(
-                    nom=article["article"],
-                    quantite=article["quantite"],
-                    unite=article["unite"],
-                    priorite=article.get("priorite", "moyenne"),
-                    rayon=article.get("rayon"),
-                    magasin=magasin,
-                    ia_suggere=True
-                )
-                render_toast(f"✅ Ajouté", "success")
-                st.rerun()
-
-    # Alternatives (mode IA)
-    if mode == "ia" and article.get("alternatives"):
-        with st.expander("🔄 Alternatives"):
-            for alt in article["alternatives"]:
-                st.write(f"• {alt}")
 
 # ═══════════════════════════════════════════════════════════════
-# QUICK ACTIONS (OPTIMISÉ EN BOUCLE)
+# TAB 1 : MA LISTE
 # ═══════════════════════════════════════════════════════════════
 
-def render_quick_actions():
-    """Actions rapides en boucle"""
-    actions = [
-        ("stock_bas", "⚡ Stock bas", lambda: courses_service.generer_depuis_stock_bas()),
-        ("repas", "📅 Repas", lambda: courses_service.generer_depuis_repas_planifies()),
-        ("nettoyer", "🗑️ Nettoyer", lambda: courses_service.nettoyer_achetes(7)),
-        ("refresh", "🔄 Rafraîchir", lambda: None)
-    ]
-
-    cols = st.columns(4)
-
-    for i, (key, label, action) in enumerate(actions):
-        with cols[i]:
-            if st.button(label, key=f"qa_{key}", use_container_width=True):
-                result = action()
-
-                if key == "stock_bas" and result:
-                    count = courses_service.ajouter_batch(result)
-                    render_toast(f"✅ {count} articles ajoutés", "success")
-                    st.rerun()
-
-                elif key == "repas" and result:
-                    count = courses_service.ajouter_batch(result)
-                    render_toast(f"✅ {count} articles ajoutés", "success")
-                    st.rerun()
-
-                elif key == "nettoyer":
-                    render_toast(f"🗑️ {result} nettoyés", "success")
-                    st.rerun()
-
-                elif key == "refresh":
-                    st.rerun()
-
-# ═══════════════════════════════════════════════════════════════
-# TABS (OPTIMISÉS)
-# ═══════════════════════════════════════════════════════════════
-
+@handle_errors(show_in_ui=True)
 def tab_ma_liste():
-    """Ma liste active"""
+    """Tab Ma Liste - REFACTORISÉ"""
     st.subheader("📋 Ma Liste")
 
-    render_quick_actions()
+    # ✅ Actions rapides
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        if st.button("⚡ Stock bas", use_container_width=True):
+            with st.spinner("Génération..."):
+                items = courses_service.generer_depuis_stock_bas()
+                if items:
+                    count = courses_service.ajouter_batch(items)
+                    toast(f"✅ {count} ajouté(s)", "success")
+                    Cache.invalidate("courses")
+                    st.rerun()
+
+    with col2:
+        if st.button("📅 Repas", use_container_width=True):
+            with st.spinner("Génération..."):
+                items = courses_service.generer_depuis_repas_planifies()
+                if items:
+                    count = courses_service.ajouter_batch(items)
+                    toast(f"✅ {count} ajouté(s)", "success")
+                    Cache.invalidate("courses")
+                    st.rerun()
+
+    with col3:
+        if st.button("🗑️ Nettoyer", use_container_width=True):
+            count = courses_service.nettoyer_achetes(7)
+            toast(f"🗑️ {count} nettoyé(s)", "success")
+            Cache.invalidate("courses")
+            st.rerun()
+
+    with col4:
+        if st.button("🔄 Actualiser", use_container_width=True):
+            Cache.invalidate("courses")
+            st.rerun()
+
     st.markdown("---")
 
-    liste = courses_service.get_liste_active()
+    # ✅ Charger liste avec cache
+    @Cache.cached(ttl=30)
+    def load_liste():
+        return courses_service.get_liste_active()
+
+    liste = load_liste()
 
     if not liste:
-        render_empty_state("Liste vide", "🛒", "➕ Ajouter", lambda: st.session_state.update({"active_tab": 2}))
+        empty_state(
+            message="Liste vide",
+            icon="🛒",
+            subtext="Ajoute des articles"
+        )
         return
 
-    # Stats
+    # ✅ Stats
     stats = courses_service.get_stats()
-    render_stat_row([
+    metrics_row([
         {"label": "Total", "value": stats["total_actifs"]},
-        {"label": "Prioritaires", "value": stats["prioritaires"], "delta_color": "inverse"},
+        {"label": "Prioritaires", "value": stats["prioritaires"]},
         {"label": "IA", "value": stats["part_ia"]}
     ], cols=3)
 
     st.markdown("---")
 
-    # Affichage par priorité
+    # ✅ Affichage par priorité
     for priorite in ["haute", "moyenne", "basse"]:
         articles = [a for a in liste if a["priorite"] == priorite]
-        if articles:
-            st.markdown(f"### {PRIORITE_ICONS[priorite]} {priorite.capitalize()} ({len(articles)})")
-            for idx, article in enumerate(articles):
-                render_article_card(article, "liste", f"{priorite}_{idx}")
 
+        if not articles:
+            continue
+
+        with st.expander(
+                f"{PRIORITE_ICONS[priorite]} {priorite.capitalize()} ({len(articles)})",
+                expanded=priorite == "haute"
+        ):
+            for article in articles:
+                _render_article_card(article)
+
+
+def _render_article_card(article: Dict):
+    """Carte article avec composant unifié"""
+    # Métadonnées
+    metadata = [
+        format_quantity_with_unit(article["quantite"], article["unite"])
+    ]
+
+    if article.get("rayon"):
+        metadata.append(f"📍 {article['rayon']}")
+
+    if article.get("magasin"):
+        metadata.append(f"🏬 {article['magasin']}")
+
+    # Tags
+    tags = []
+    if article.get("suggere_par_ia"):
+        tags.append("🤖 IA")
+
+    tags.append(f"{PRIORITE_ICONS[article['priorite']]} {article['priorite'].title()}")
+
+    # Actions
+    actions = [
+        ("✅ Acheté", lambda a=article: _mark_bought(a["id"])),
+        ("🗑️ Supprimer", lambda a=article: _delete_article(a["id"]))
+    ]
+
+    # Contenu extensible
+    def expandable_content():
+        if article.get("notes"):
+            st.caption("**Notes**")
+            st.write(article["notes"])
+
+    # ✅ Composant unifié
+    item_card(
+        title=article["nom"],
+        metadata=metadata,
+        status=article.get("priorite", "moyenne").title(),
+        status_color=PRIORITE_COLORS.get(article.get("priorite", "moyenne")),
+        tags=tags,
+        actions=actions,
+        expandable_content=expandable_content if article.get("notes") else None,
+        key=f"course_{article['id']}"
+    )
+
+
+# ═══════════════════════════════════════════════════════════════
+# TAB 2 : GÉNÉRATION IA
+# ═══════════════════════════════════════════════════════════════
+
+@handle_errors(show_in_ui=True)
 def tab_generation_ia():
-    """Génération IA"""
+    """Tab Génération IA - REFACTORISÉ"""
     st.subheader("🤖 Génération IA")
 
     agent = get_state().agent_ia
     if not agent:
         st.error("❌ Agent IA indisponible")
+        return
+
+    # Vérifier rate limit
+    can_call, error_msg = RateLimit.can_call()
+    if not can_call:
+        st.warning(error_msg)
         return
 
     ai_service = create_courses_ai_service(agent)
@@ -231,92 +214,134 @@ def tab_generation_ia():
             with col_p2:
                 pref_eco = st.checkbox("💰 Économique")
 
-        if st.form_submit_button("✨ Générer", type="primary", use_container_width=True):
-            with st.spinner("🤖 Génération..."):
-                try:
-                    articles_base = []
-                    if inclure_stock: articles_base.extend(courses_service.generer_depuis_stock_bas())
-                    if inclure_repas: articles_base.extend(courses_service.generer_depuis_repas_planifies())
+        submitted = st.form_submit_button("✨ Générer", type="primary", use_container_width=True)
 
-                    if not articles_base:
-                        st.warning("Aucun article à générer")
-                        return
+    if submitted:
+        with st.spinner("🤖 Génération..."):
+            try:
+                # Préparer articles base
+                articles_base = []
+                if inclure_stock:
+                    articles_base.extend(courses_service.generer_depuis_stock_bas())
+                if inclure_repas:
+                    articles_base.extend(courses_service.generer_depuis_repas_planifies())
 
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
+                if not articles_base:
+                    st.warning("Aucun article à générer")
+                    return
 
-                    result = loop.run_until_complete(
-                        ai_service.generer_liste_optimisee(
-                            articles_base,
-                            magasin,
-                            MAGASINS_CONFIG[magasin]["rayons"],
-                            budget,
-                            {"bio": pref_bio, "local": pref_local, "economique": pref_eco}
-                        )
+                # Appel IA
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+
+                result = loop.run_until_complete(
+                    ai_service.generer_liste_optimisee(
+                        articles_base,
+                        magasin,
+                        MAGASINS_CONFIG[magasin]["rayons"],
+                        budget,
+                        {"bio": pref_bio, "local": pref_local, "economique": pref_eco}
                     )
+                )
 
-                    StateManager.cache_set("liste_ia_generee", result.dict())
-                    StateManager.cache_set("magasin_ia", magasin)
-                    render_toast("✅ Liste générée !", "success")
-                    st.rerun()
+                st.session_state.liste_ia = result
+                toast("✅ Liste générée !", "success")
+                st.rerun()
 
-                except Exception as e:
-                    st.error(f"❌ Erreur: {e}")
+            except Exception as e:
+                st.error(f"❌ {str(e)}")
 
     # Afficher résultat
-    if result_data := StateManager.cache_get("liste_ia_generee", ttl=3600):
-        st.markdown("---")
-        st.markdown("### 📋 Liste Générée")
+    if hasattr(st.session_state, "liste_ia"):
+        _render_ia_result(st.session_state.liste_ia, magasin)
 
-        # Budget
-        render_stat_row([
-            {"label": "Budget", "value": f"{format_quantity(result_data['budget_estime'])}€"},
-            {"label": "Statut", "value": "⚠️ Dépassement" if result_data["depasse_budget"] else "✅ OK"},
-            {"label": "Économies", "value": f"{format_quantity(result_data.get('economies_possibles', 0))}€"}
-        ], cols=3)
 
-        st.markdown("---")
+def _render_ia_result(result, magasin: str):
+    """Affiche résultat IA"""
+    st.markdown("---")
+    st.markdown("### 📋 Liste Générée")
 
-        # Articles par rayon
-        magasin_actif = StateManager.cache_get("magasin_ia") or "Cora"
+    # Budget
+    metrics_row([
+        {"label": "Budget", "value": f"{result.budget_estime:.2f}€"},
+        {
+            "label": "Statut",
+            "value": "⚠️ Dépassement" if result.depasse_budget else "✅ OK"
+        },
+        {"label": "Économies", "value": f"{result.economies_possibles:.2f}€"}
+    ], cols=3)
 
-        for rayon, articles in result_data.get("par_rayon", {}).items():
-            with st.expander(f"📍 {rayon} ({len(articles)})", expanded=True):
-                for idx, article in enumerate(articles):
-                    render_article_card(article, "ia", f"{rayon}_{idx}", magasin_actif)
+    st.markdown("---")
 
-        # Actions globales
-        st.markdown("---")
-        col1, col2 = st.columns(2)
+    # Articles par rayon
+    for rayon, articles in result.par_rayon.items():
+        with st.expander(f"📍 {rayon} ({len(articles)})", expanded=True):
+            for article in articles:
+                _render_ia_article(article, magasin)
 
-        with col1:
-            if st.button("✅ Tout ajouter", type="primary", use_container_width=True):
-                articles = []
-                for arts in result_data.get("par_rayon", {}).values():
-                    for art in arts:
-                        articles.append({
-                            "nom": art["article"],
-                            "quantite": art["quantite"],
-                            "unite": art["unite"],
-                            "priorite": art.get("priorite", "moyenne"),
-                            "rayon": art.get("rayon"),
-                            "magasin": magasin_actif,
-                            "ia": True
-                        })
+    # Actions globales
+    st.markdown("---")
+    col1, col2 = st.columns(2)
 
-                count = courses_service.ajouter_batch(articles)
-                StateManager.cache_clear("liste_ia")
-                render_toast(f"✅ {count} articles ajoutés !", "success")
-                st.balloons()
-                st.rerun()
+    with col1:
+        if st.button("✅ Tout ajouter", type="primary", use_container_width=True):
+            articles = []
+            for arts in result.par_rayon.values():
+                for art in arts:
+                    articles.append({
+                        "nom": art.article,
+                        "quantite": art.quantite,
+                        "unite": art.unite,
+                        "priorite": art.priorite,
+                        "rayon": art.rayon,
+                        "magasin": magasin,
+                        "ia": True
+                    })
 
-        with col2:
-            if st.button("🗑️ Annuler", use_container_width=True):
-                StateManager.cache_clear("liste_ia")
-                st.rerun()
+            count = courses_service.ajouter_batch(articles)
+            del st.session_state.liste_ia
+            toast(f"✅ {count} ajouté(s) !", "success")
+            Cache.invalidate("courses")
+            st.balloons()
+            st.rerun()
+
+    with col2:
+        if st.button("🗑️ Annuler", use_container_width=True):
+            del st.session_state.liste_ia
+            st.rerun()
+
+
+def _render_ia_article(article, magasin: str):
+    """Carte article IA"""
+    metadata = [
+        format_quantity_with_unit(article.quantite, article.unite),
+        f"📍 {article.rayon}"
+    ]
+
+    if article.prix_estime:
+        metadata.append(f"💶 ~{article.prix_estime:.2f}€")
+
+    tags = [f"{PRIORITE_ICONS[article.priorite]} {article.priorite.title()}"]
+
+    actions = [
+        ("➕ Ajouter", lambda a=article: _add_ia_article(a, magasin))
+    ]
+
+    item_card(
+        title=article.article,
+        metadata=metadata,
+        tags=tags,
+        actions=actions,
+        key=f"ia_{article.article}"
+    )
+
+
+# ═══════════════════════════════════════════════════════════════
+# TAB 3 : AJOUT MANUEL
+# ═══════════════════════════════════════════════════════════════
 
 def tab_ajout_manuel():
-    """Ajout manuel"""
+    """Tab Ajout Manuel"""
     st.subheader("➕ Ajouter")
 
     with st.form("form_ajout"):
@@ -328,7 +353,11 @@ def tab_ajout_manuel():
             unite = st.selectbox("Unité", ["pcs", "kg", "g", "L", "mL", "sachets", "boîtes"])
 
         with col2:
-            priorite = st.selectbox("Priorité", ["basse", "moyenne", "haute"], format_func=lambda x: f"{PRIORITE_ICONS[x]} {x.capitalize()}")
+            priorite = st.selectbox(
+                "Priorité",
+                ["basse", "moyenne", "haute"],
+                format_func=lambda x: f"{PRIORITE_ICONS[x]} {x.capitalize()}"
+            )
             magasin = st.selectbox("Magasin", list(MAGASINS_CONFIG.keys()))
 
         notes = st.text_area("Notes", placeholder="Format, marque...")
@@ -337,20 +366,91 @@ def tab_ajout_manuel():
             if not nom:
                 st.error("Nom obligatoire")
             else:
-                courses_service.ajouter(nom, quantite, unite, priorite, magasin=magasin, notes=notes)
-                render_toast(f"✅ {nom} ajouté", "success")
-                st.rerun()
+                try:
+                    courses_service.ajouter(
+                        nom, quantite, unite, priorite,
+                        magasin=magasin, notes=notes
+                    )
+                    toast(f"✅ {nom} ajouté", "success")
+                    Cache.invalidate("courses")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"❌ {str(e)}")
+
+
+# ═══════════════════════════════════════════════════════════════
+# HELPERS
+# ═══════════════════════════════════════════════════════════════
+
+def _mark_bought(article_id: int):
+    """Marque acheté"""
+    modal = Modal(f"buy_{article_id}")
+
+    if st.button("✅", key=f"buy_{article_id}"):
+        modal.show()
+
+    if modal.is_showing():
+        st.info("📦 Ajouter au stock ?")
+
+        add_stock = st.checkbox("Ajouter au stock", value=True, key=f"stock_{article_id}")
+
+        if modal.confirm("✅ Confirmer"):
+            try:
+                courses_service.marquer_achete(article_id, add_stock)
+                toast("✅ Acheté", "success")
+                Cache.invalidate("courses")
+                modal.close()
+            except Exception as e:
+                st.error(f"❌ {str(e)}")
+
+        modal.cancel()
+
+
+def _delete_article(article_id: int):
+    """Supprime article"""
+    try:
+        courses_service.delete(article_id)
+        toast("🗑️ Supprimé", "success")
+        Cache.invalidate("courses")
+        st.rerun()
+    except Exception as e:
+        st.error(f"❌ {str(e)}")
+
+
+def _add_ia_article(article, magasin: str):
+    """Ajoute article IA"""
+    try:
+        courses_service.ajouter(
+            article.article,
+            article.quantite,
+            article.unite,
+            article.priorite,
+            rayon=article.rayon,
+            magasin=magasin,
+            ia_suggere=True
+        )
+        toast("✅ Ajouté", "success")
+        Cache.invalidate("courses")
+        st.rerun()
+    except Exception as e:
+        st.error(f"❌ {str(e)}")
+
 
 # ═══════════════════════════════════════════════════════════════
 # MAIN APP
 # ═══════════════════════════════════════════════════════════════
 
 def app():
-    """Module Courses - Point d'entrée"""
+    """Point d'entrée - VERSION REFACTORISÉE"""
     st.title("🛒 Courses Intelligentes")
-    st.caption("IA, optimisation, organisation par magasins")
+    st.caption("IA • Optimisation • Organisation magasins")
 
-    tab1, tab2, tab3 = st.tabs(["📋 Ma Liste", "🤖 Génération IA", "➕ Ajouter"])
+    # Tabs
+    tab1, tab2, tab3 = st.tabs([
+        "📋 Ma Liste",
+        "🤖 Génération IA",
+        "➕ Ajouter"
+    ])
 
     with tab1:
         tab_ma_liste()

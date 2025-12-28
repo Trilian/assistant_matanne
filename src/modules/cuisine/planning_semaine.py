@@ -1,108 +1,104 @@
-# src/modules/cuisine/planning_semaine.py
 """
-Module Planning Semaine - VERSION OPTIMISÉE
-Utilise planning_components + DynamicList
-
+Module Planning Semaine - VERSION 3.0 REFACTORISÉE
+Intègre tous les refactoring core/ui/utils
 """
 import streamlit as st
 import asyncio
 from datetime import date, timedelta
 from typing import Dict, List, Optional
 
-from src.services.planning.planning_service import planning_service
-from src.services.planning.planning_generation_service import create_planning_generation_service
-from src.services.planning.repas_service import repas_service
-from src.core.state_manager import StateManager, get_state
+# ═══════════════════════════════════════════════════════════════
+# IMPORTS REFACTORISÉS
+# ═══════════════════════════════════════════════════════════════
+
+# Core
+from src.core.state import StateManager, get_state
+from src.core.cache import Cache
+from src.core.errors import handle_errors
 from src.core.database import get_db_context
 from src.core.models import Recette, PlanningHebdomadaire
-from src.core.exceptions import handle_errors
 
-# ✅ NOUVEAUX COMPOSANTS
-from src.ui.planning_components import (
-    render_week_calendar,
-    render_meal_timeline,
-    render_recipe_selector,
-    render_planning_stats,
-    render_empty_planning,
-    render_planning_preview
+# UI - Namespace unifié
+from src.ui import (
+    # Base
+    empty_state,
+    # Forms
+    date_selector,
+    # Data
+    metrics_row,
+    # Feedback
+    toast, Modal,
+    # Layouts
+    timeline
 )
-from src.ui.components import render_toast
+
+# Services
+from src.services.planning import (
+    planning_service,
+    create_planning_generation_service,
+    repas_service
+)
+
+# Utils
+from src.utils import format_date, get_week_bounds
+
 
 # Constantes
 JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
 
 TYPES_REPAS = {
-    "petit_déjeuner": {"icone": "🌅", "label": "Petit-déjeuner", "ordre": 1},
-    "déjeuner": {"icone": "☀️", "label": "Déjeuner", "ordre": 2},
-    "goûter": {"icone": "🍪", "label": "Goûter", "ordre": 3},
-    "dîner": {"icone": "🌙", "label": "Dîner", "ordre": 4},
+    "petit_déjeuner": {"icone": "🌅", "ordre": 1},
+    "déjeuner": {"icone": "☀️", "ordre": 2},
+    "goûter": {"icone": "🍪", "ordre": 3},
+    "dîner": {"icone": "🌙", "ordre": 4},
 }
 
 
 # ═══════════════════════════════════════════════════════════════
-# CONFIGURATION SIDEBAR (inchangé mais commenté pour gain place)
+# SIDEBAR CONFIGURATION
 # ═══════════════════════════════════════════════════════════════
 
 def render_config_sidebar() -> Dict:
-    """Configuration intelligente dans la sidebar"""
+    """Configuration dans sidebar"""
     with st.sidebar:
-        st.markdown("### ⚙️ Configuration Planning")
+        st.markdown("### ⚙️ Configuration")
 
         config = planning_service.get_or_create_config()
 
         # Foyer
-        with st.expander("👥 Composition du foyer", expanded=True):
-            nb_adultes = st.number_input("Adultes", 1, 10, config.nb_adultes, key="cfg_adultes")
-            nb_enfants = st.number_input("Enfants", 0, 10, config.nb_enfants, key="cfg_enfants")
-
-            st.markdown("---")
-            st.markdown("**👶 Bébé dans le foyer ?**")
-            a_bebe = st.toggle(
-                "Oui, adapter les recettes pour bébé",
-                value=config.a_bebe,
-                key="cfg_bebe"
-            )
-
-            if a_bebe:
-                st.info("💡 L'IA privilégiera les recettes compatibles bébé")
+        with st.expander("👥 Foyer", expanded=True):
+            nb_adultes = st.number_input("Adultes", 1, 10, config.nb_adultes)
+            nb_enfants = st.number_input("Enfants", 0, 10, config.nb_enfants)
+            a_bebe = st.toggle("👶 Bébé", value=config.a_bebe)
 
         # Repas
-        with st.expander("🍽️ Repas à planifier", expanded=True):
+        with st.expander("🍽️ Repas"):
             repas_actifs = {}
             for type_repas, info in TYPES_REPAS.items():
-                default = config.repas_actifs.get(type_repas, type_repas in ["déjeuner", "dîner"])
+                default = config.repas_actifs.get(
+                    type_repas,
+                    type_repas in ["déjeuner", "dîner"]
+                )
                 repas_actifs[type_repas] = st.checkbox(
-                    f"{info['icone']} {info['label']}",
+                    f"{info['icone']} {type_repas.replace('_', ' ').title()}",
                     value=default,
                     key=f"cfg_{type_repas}"
                 )
 
         # Batch
-        with st.expander("🍳 Batch Cooking", expanded=False):
-            batch_actif = st.toggle("Activer", value=config.batch_cooking_actif, key="cfg_batch")
-
+        with st.expander("🍳 Batch"):
+            batch_actif = st.toggle("Actif", value=config.batch_cooking_actif)
             jours_batch = []
+
             if batch_actif:
-                st.markdown("**📅 Jours de préparation :**")
-                col_j1, col_j2 = st.columns(2)
-
-                with col_j1:
-                    for i in range(4):
-                        if st.checkbox(
-                                JOURS_SEMAINE[i][:3],
-                                value=i in config.jours_batch,
-                                key=f"batch_{i}"
-                        ):
-                            jours_batch.append(i)
-
-                with col_j2:
-                    for i in range(4, 7):
-                        if st.checkbox(
-                                JOURS_SEMAINE[i][:3],
-                                value=i in config.jours_batch,
-                                key=f"batch_{i}"
-                        ):
-                            jours_batch.append(i)
+                st.caption("Jours de préparation:")
+                for i, jour in enumerate(JOURS_SEMAINE):
+                    if st.checkbox(
+                            jour[:3],
+                            value=i in config.jours_batch,
+                            key=f"batch_{i}"
+                    ):
+                        jours_batch.append(i)
 
         st.markdown("---")
 
@@ -115,63 +111,82 @@ def render_config_sidebar() -> Dict:
                 "batch_cooking_actif": batch_actif,
                 "jours_batch": jours_batch if batch_actif else [],
             })
-            render_toast("✅ Configuration sauvegardée", "success")
+            toast("✅ Sauvegardé", "success")
+            Cache.invalidate("planning")
             st.rerun()
 
         return config
 
 
 # ═══════════════════════════════════════════════════════════════
-# TAB 1 : PLANNING ACTUEL (REFACTORISÉ avec composants)
+# TAB 1 : PLANNING ACTUEL
 # ═══════════════════════════════════════════════════════════════
 
+@handle_errors(show_in_ui=True)
 def tab_planning():
-    """Affichage du planning - VERSION OPTIMISÉE"""
+    """Tab Planning - REFACTORISÉ"""
     st.subheader("📋 Mon Planning")
 
-    # ✅ Initialiser semaine
+    # ✅ Sélecteur semaine
     if "semaine_actuelle" not in st.session_state:
         st.session_state.semaine_actuelle = planning_service.get_semaine_debut()
 
-    # ✅ Calendrier avec composant
-    def on_week_change(new_week: date):
-        st.session_state.semaine_actuelle = new_week
-        st.rerun()
+    col1, col2, col3 = st.columns([1, 2, 1])
 
-    semaine = render_week_calendar(
-        st.session_state.semaine_actuelle,
-        on_week_change=on_week_change,
-        show_today=True
-    )
+    with col1:
+        if st.button("⬅️ Semaine préc.", use_container_width=True):
+            st.session_state.semaine_actuelle -= timedelta(days=7)
+            st.rerun()
+
+    with col2:
+        semaine = date_selector(
+            label="Semaine du",
+            default=st.session_state.semaine_actuelle,
+            key="week_selector"
+        )
+
+        if semaine != st.session_state.semaine_actuelle:
+            st.session_state.semaine_actuelle = planning_service.get_semaine_debut(semaine)
+            st.rerun()
+
+    with col3:
+        if st.button("Semaine suiv. ➡️", use_container_width=True):
+            st.session_state.semaine_actuelle += timedelta(days=7)
+            st.rerun()
 
     st.markdown("---")
 
     # Charger planning
-    planning = planning_service.get_planning_semaine(semaine)
+    @Cache.cached(ttl=60)
+    def load_planning(semaine_debut):
+        return planning_service.get_planning_semaine(semaine_debut)
+
+    planning = load_planning(st.session_state.semaine_actuelle)
 
     if not planning:
-        # ✅ État vide avec composant
-        render_empty_planning(
+        empty_state(
             message="Aucun planning pour cette semaine",
-            actions=[
-                {
-                    "label": "✨ Générer avec l'IA",
-                    "callback": lambda: st.session_state.update({"switch_to_tab": 1}),
-                    "type": "primary"
-                },
-                {
-                    "label": "➕ Créer un planning vide",
-                    "callback": lambda: _create_empty_planning(semaine),
-                    "type": "secondary"
-                }
-            ]
+            icon="📅",
+            subtext="Génère un planning avec l'IA"
         )
+
+        col_a, col_b = st.columns(2)
+        with col_a:
+            if st.button("✨ Générer IA", type="primary", use_container_width=True):
+                st.session_state.active_tab = 1
+                st.rerun()
+
+        with col_b:
+            if st.button("➕ Planning vide", use_container_width=True):
+                _create_empty_planning(st.session_state.semaine_actuelle)
+
         return
 
-    # ✅ Stats avec composant
+    # Structure planning
     structure = planning_service.get_planning_structure(planning.id)
     config = planning_service.get_or_create_config()
 
+    # ✅ Stats
     stats = {
         "total_repas": sum(len(j["repas"]) for j in structure["jours"]),
         "repas_bebe": sum(
@@ -186,103 +201,87 @@ def tab_planning():
         )
     }
 
-    render_planning_stats(
-        stats,
-        highlight_metrics=["total_repas", "repas_bebe", "repas_batch"]
-    )
+    metrics_row([
+        {"label": "Repas", "value": stats["total_repas"]},
+        {"label": "Bébé", "value": stats["repas_bebe"]},
+        {"label": "Batch", "value": stats["repas_batch"]}
+    ], cols=3)
 
     st.markdown("---")
 
-    # Batch cooking button
-    if config.batch_cooking_actif and stats["repas_batch"] > 0:
-        if st.button(
-                f"🍳 Préparer {stats['repas_batch']} repas en Batch",
-                type="primary",
-                use_container_width=True
-        ):
-            st.session_state.show_batch_modal = True
-            st.rerun()
-
-    st.markdown("---")
-
-    # ✅ Affichage par jour (simplifié)
+    # ✅ Timeline par jour
     types_repas_actifs = [k for k, v in config.repas_actifs.items() if v]
 
     for jour_data in structure["jours"]:
         is_today = jour_data["date"] == date.today()
 
         with st.expander(
-                f"{'🔵 ' if is_today else ''}{jour_data['nom_jour']} {jour_data['date'].strftime('%d/%m')}",
+                f"{'🔵 ' if is_today else ''}{jour_data['nom_jour']} {format_date(jour_data['date'], 'short')}",
                 expanded=is_today
         ):
-            # Préparer données pour timeline
-            meals_timeline = []
+            # Préparer events pour timeline
+            events = []
 
             for type_repas in types_repas_actifs:
                 repas = next((r for r in jour_data["repas"] if r["type"] == type_repas), None)
 
                 if repas and repas.get("recette"):
-                    badges = []
-                    if repas.get("est_adapte_bebe"):
-                        badges.append("👶 Bébé")
-                    if repas.get("est_batch"):
-                        badges.append("🍳 Batch")
+                    status = "completed" if repas.get("statut") == "terminé" else "current"
 
-                    meals_timeline.append({
-                        "id": repas["id"],
-                        "type": type_repas,
-                        "recette": {
-                            "nom": repas["recette"]["nom"],
-                            "url_image": repas["recette"].get("url_image")
-                        },
-                        "portions": repas["portions"],
-                        "badges": badges
+                    events.append({
+                        "title": f"{TYPES_REPAS[type_repas]['icone']} {repas['recette']['nom']}",
+                        "description": f"{repas['portions']}p",
+                        "icon": TYPES_REPAS[type_repas]['icone'],
+                        "status": status
                     })
 
-            # ✅ Timeline avec composant
-            if meals_timeline:
-                render_meal_timeline(
-                    meals_timeline,
-                    types_repas_actifs,
-                    on_meal_click=lambda m: _view_meal_details(m["id"])
-                )
+            # ✅ Timeline
+            if events:
+                timeline(events, key=f"timeline_{jour_data['jour_idx']}")
             else:
                 st.info("Aucun repas planifié")
 
-            # Bouton ajout
-            if st.button(
-                    "➕ Ajouter un repas",
-                    key=f"add_meal_{jour_data['jour_idx']}",
-                    use_container_width=True
-            ):
-                st.session_state.adding_repas_slot = {
-                    "planning_id": planning.id,
-                    "jour_idx": jour_data["jour_idx"],
-                    "date_jour": jour_data["date"],
-                }
-                st.rerun()
+            # Actions
+            col_a, col_b = st.columns(2)
+
+            with col_a:
+                if st.button(
+                        "➕ Ajouter repas",
+                        key=f"add_{jour_data['jour_idx']}",
+                        use_container_width=True
+                ):
+                    st.session_state.adding_repas = {
+                        "planning_id": planning.id,
+                        "jour_idx": jour_data["jour_idx"],
+                        "date": jour_data["date"]
+                    }
+                    st.rerun()
+
+            with col_b:
+                if st.button(
+                        "🗑️ Supprimer planning",
+                        key=f"del_plan_{jour_data['jour_idx']}",
+                        use_container_width=True
+                ):
+                    _delete_planning(planning.id)
 
     # Modal ajout repas
-    if "adding_repas_slot" in st.session_state:
+    if hasattr(st.session_state, "adding_repas"):
         _render_modal_add_repas()
-
-    # Modal Batch
-    if st.session_state.get("show_batch_modal"):
-        _render_batch_modal(planning.id, structure)
 
 
 # ═══════════════════════════════════════════════════════════════
-# TAB 2 : GÉNÉRATION IA (SIMPLIFIÉ)
+# TAB 2 : GÉNÉRATION IA
 # ═══════════════════════════════════════════════════════════════
 
 @handle_errors(show_in_ui=True)
 def tab_generation_ia():
-    """Génération IA - VERSION SIMPLIFIÉE"""
+    """Tab Génération IA - REFACTORISÉ"""
     st.subheader("🤖 Génération Automatique")
 
     agent = get_state().agent_ia
     if not agent:
-        st.error("❌ Agent IA non disponible")
+        st.error("❌ Agent IA indisponible")
         return
 
     config = planning_service.get_or_create_config()
@@ -292,24 +291,29 @@ def tab_generation_ia():
         nb_recettes = db.query(Recette).count()
 
     if nb_recettes < 5:
-        st.warning(f"⚠️ {nb_recettes} recette(s) seulement. Il en faut au moins 5.")
+        st.warning(f"⚠️ {nb_recettes} recette(s) - Il en faut au moins 5")
         return
 
-    st.info(f"💡 {nb_recettes} recettes disponibles pour la génération")
+    st.info(f"💡 {nb_recettes} recettes disponibles")
 
     # Résumé config
-    with st.expander("📋 Configuration", expanded=False):
+    with st.expander("📋 Configuration"):
         st.write(f"👥 {config.nb_adultes} adultes, {config.nb_enfants} enfants")
         if config.a_bebe:
-            st.write("👶 Mode bébé activé")
+            st.write("👶 Mode bébé")
+        if config.batch_cooking_actif:
+            st.write(f"🍳 Batch jours: {', '.join([JOURS_SEMAINE[j] for j in config.jours_batch])}")
 
     st.markdown("---")
 
     # Génération
-    semaine = st.session_state.get("semaine_actuelle", planning_service.get_semaine_debut())
+    semaine = st.session_state.get(
+        "semaine_actuelle",
+        planning_service.get_semaine_debut()
+    )
 
-    if st.button("✨ Générer", type="primary", use_container_width=True):
-        with st.spinner("🤖 L'IA génère..."):
+    if st.button("✨ Générer Planning", type="primary", use_container_width=True):
+        with st.spinner("🤖 Génération..."):
             try:
                 ai_service = create_planning_generation_service(agent)
 
@@ -328,7 +332,7 @@ def tab_generation_ia():
                 # Créer nouveau
                 planning_id = planning_service.create_planning(
                     semaine,
-                    f"Planning IA {semaine.strftime('%d/%m')}"
+                    f"Planning IA {format_date(semaine, 'short')}"
                 )
 
                 # Ajouter repas
@@ -360,156 +364,114 @@ def tab_generation_ia():
                         planning.genere_par_ia = True
                         db.commit()
 
-                render_toast("✅ Planning généré !", "success")
+                toast("✅ Planning généré !", "success")
+                Cache.invalidate("planning")
                 st.balloons()
                 st.rerun()
 
             except Exception as e:
-                st.error(f"❌ Erreur : {str(e)}")
+                st.error(f"❌ {str(e)}")
 
 
 # ═══════════════════════════════════════════════════════════════
-# HELPERS PRIVÉS
+# HELPERS
 # ═══════════════════════════════════════════════════════════════
 
 def _create_empty_planning(semaine: date):
-    """Crée un planning vide"""
-    planning_id = planning_service.create_planning(
-        semaine,
-        f"Planning manuel {semaine.strftime('%d/%m')}"
-    )
-    render_toast("✅ Planning créé !", "success")
-    st.rerun()
+    """Crée planning vide"""
+    try:
+        planning_service.create_planning(semaine, f"Planning {format_date(semaine, 'short')}")
+        toast("✅ Planning créé", "success")
+        Cache.invalidate("planning")
+        st.rerun()
+    except Exception as e:
+        st.error(f"❌ {str(e)}")
 
 
-def _view_meal_details(meal_id: int):
-    """Affiche détails repas"""
-    st.session_state.viewing_meal_details = meal_id
-    st.rerun()
+def _delete_planning(planning_id: int):
+    """Supprime planning avec confirmation"""
+    modal = Modal(f"del_planning_{planning_id}")
+
+    if modal.is_showing():
+        st.warning("⚠️ Supprimer ce planning ?")
+
+        if modal.confirm():
+            try:
+                planning_service.delete_planning(planning_id)
+                toast("🗑️ Planning supprimé", "success")
+                Cache.invalidate("planning")
+                modal.close()
+            except Exception as e:
+                st.error(f"❌ {str(e)}")
+
+        modal.cancel()
 
 
 def _render_modal_add_repas():
-    """Modal ajout repas - VERSION SIMPLIFIÉE"""
-    if "adding_repas_slot" not in st.session_state:
+    """Modal ajout repas"""
+    if not hasattr(st.session_state, "adding_repas"):
         return
 
-    slot = st.session_state.adding_repas_slot
+    slot = st.session_state.adding_repas
 
     st.markdown("---")
-    st.markdown(f"### ➕ Ajouter un repas")
+    st.markdown("### ➕ Ajouter un repas")
 
-    # ✅ Sélecteur de recettes avec composant
+    # Sélection recette
     with get_db_context() as db:
         recettes = db.query(Recette).order_by(Recette.nom).all()
 
     if not recettes:
-        st.error("❌ Aucune recette disponible")
+        st.error("Aucune recette")
         if st.button("Annuler"):
-            del st.session_state.adding_repas_slot
+            del st.session_state.adding_repas
             st.rerun()
         return
 
-    recettes_data = [
-        {
-            "id": r.id,
-            "nom": r.nom,
-            "temps_total": r.temps_preparation + r.temps_cuisson,
-            "portions": r.portions,
-            "tags": [
-                "⚡ Rapide" if r.est_rapide else None,
-                "👶 Bébé" if r.compatible_bebe else None
-            ]
-        }
-        for r in recettes
-    ]
-
-    selected = render_recipe_selector(
-        [r for r in recettes_data if r is not None],
-        key="modal_selector"
+    recette_id = st.selectbox(
+        "Recette",
+        options=[r.id for r in recettes],
+        format_func=lambda x: next(r.nom for r in recettes if r.id == x)
     )
 
-    if selected:
-        st.markdown("---")
+    recette = next(r for r in recettes if r.id == recette_id)
 
-        col1, col2 = st.columns(2)
+    col1, col2 = st.columns(2)
 
-        with col1:
-            portions = st.number_input("Portions", 1, 20, selected["portions"])
+    with col1:
+        type_repas = st.selectbox("Type", list(TYPES_REPAS.keys()))
+        portions = st.number_input("Portions", 1, 20, recette.portions)
 
-        with col2:
-            adapte_bebe = st.checkbox("👶 Adapter bébé", value=False)
+    with col2:
+        adapte_bebe = st.checkbox("👶 Adapter bébé")
 
-        col_btn1, col_btn2 = st.columns(2)
+    col_a, col_b = st.columns(2)
 
-        with col_btn1:
-            if st.button("✅ Ajouter", type="primary", use_container_width=True):
+    with col_a:
+        if st.button("✅ Ajouter", type="primary", use_container_width=True):
+            try:
                 repas_service.ajouter_repas(
                     planning_id=slot["planning_id"],
                     jour_semaine=slot["jour_idx"],
-                    date_repas=slot["date_jour"],
-                    type_repas="dîner",  # Par défaut
-                    recette_id=selected["id"],
+                    date_repas=slot["date"],
+                    type_repas=type_repas,
+                    recette_id=recette_id,
                     portions=portions,
                     est_adapte_bebe=adapte_bebe
                 )
 
-                del st.session_state.adding_repas_slot
-                render_toast(f"✅ {selected['nom']} ajouté !", "success")
+                del st.session_state.adding_repas
+                toast(f"✅ {recette.nom} ajouté", "success")
+                Cache.invalidate("planning")
                 st.rerun()
 
-        with col_btn2:
-            if st.button("❌ Annuler", use_container_width=True):
-                del st.session_state.adding_repas_slot
-                st.rerun()
+            except Exception as e:
+                st.error(f"❌ {str(e)}")
 
-
-def _render_batch_modal(planning_id: int, structure: Dict):
-    """Modal batch cooking - SIMPLIFIÉ"""
-    st.markdown("---")
-    st.markdown("## 🍳 Session Batch Cooking")
-
-    repas_batch = []
-    for jour in structure["jours"]:
-        for repas in jour["repas"]:
-            if repas.get("est_batch"):
-                repas_batch.append({
-                    **repas,
-                    "jour_nom": jour["nom_jour"],
-                    "date": jour["date"]
-                })
-
-    if not repas_batch:
-        st.info("Aucun repas batch")
-        if st.button("Fermer"):
-            del st.session_state.show_batch_modal
+    with col_b:
+        if st.button("❌ Annuler", use_container_width=True):
+            del st.session_state.adding_repas
             st.rerun()
-        return
-
-    st.info(f"💡 {len(repas_batch)} repas à préparer")
-
-    # Grouper par recette
-    from collections import defaultdict
-    recettes_grouped = defaultdict(list)
-
-    for repas in repas_batch:
-        recettes_grouped[repas["recette"]["id"]].append({
-            "jour": repas["jour_nom"],
-            "portions": repas["portions"]
-        })
-
-    for recette_id, occurrences in recettes_grouped.items():
-        recette = repas_batch[0]["recette"]  # Simplification
-        total_portions = sum(o["portions"] for o in occurrences)
-
-        with st.expander(f"**{recette['nom']}** ({total_portions}p total)", expanded=True):
-            for occ in occurrences:
-                st.write(f"• {occ['jour']}: {occ['portions']}p")
-
-    if st.button("✅ Terminer", type="primary", use_container_width=True):
-        del st.session_state.show_batch_modal
-        render_toast("🎉 Session terminée !", "success")
-        st.balloons()
-        st.rerun()
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -517,15 +479,15 @@ def _render_batch_modal(planning_id: int, structure: Dict):
 # ═══════════════════════════════════════════════════════════════
 
 def app():
-    """Point d'entrée - SIMPLIFIÉ"""
+    """Point d'entrée - VERSION REFACTORISÉE"""
     st.title("🗓️ Planning Hebdomadaire")
-    st.caption("Génération IA, ajout manuel, batch cooking, mode bébé")
+    st.caption("IA • Batch cooking • Mode bébé")
 
     # Config sidebar
     render_config_sidebar()
 
     # Tabs
-    tab1, tab2 = st.tabs(["📅 Mon Planning", "🤖 Générer avec l'IA"])
+    tab1, tab2 = st.tabs(["📅 Mon Planning", "🤖 Générer IA"])
 
     with tab1:
         tab_planning()
