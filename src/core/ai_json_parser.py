@@ -2,10 +2,6 @@
 Parser JSON IA Ultra-Robuste
 Gère TOUS les cas edge des réponses Mistral/GPT
 
-AVANT : 3 fichiers avec parsing dupliqué (600+ lignes)
-APRÈS : 1 fichier universel (200 lignes)
-
-Version: 2.0.0
 """
 import json
 import re

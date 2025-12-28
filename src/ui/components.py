@@ -1,7 +1,6 @@
 """
-Composants UI de Base - VERSION COMPLÈTE
+Composants UI de Base
 Composants simples et réutilisables pour toute l'application
-Les composants avancés sont dans unified_components.py
 """
 import streamlit as st
 from typing import List, Dict, Optional, Callable, Any, Union

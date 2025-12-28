@@ -1,7 +1,6 @@
 """
-Composants UI Unifiés - OPTIMISÉ
-Fusionne recette_components.py + dynamic_list.py → 1 fichier
-Réduit 200 lignes → 120 lignes (-40%)
+Composants UI Unifiés
+Composants métier (UnifiedList, item_card, Modal)
 """
 import streamlit as st
 from typing import List, Dict, Optional, Callable, Any
