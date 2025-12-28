@@ -1,6 +1,6 @@
 """
 Service IA Courses OPTIMISÉ
-Utilise AIJsonParser + SmartCache
+Utilise AIJsonParser + Cache
 
 """
 import asyncio
@@ -10,9 +10,8 @@ from pydantic import BaseModel, Field, field_validator
 
 from src.core.ai_agent import AgentIA
 from src.core.ai_json_parser import AIJsonParser
-from src.core.smart_cache import SmartCache
+from src.core.cache import Cache, RateLimit  # ✅ CORRIGÉ
 from src.core.exceptions import AIServiceError, handle_errors
-from src.core.ai_cache import RateLimiter
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +53,7 @@ class CoursesAIService:
     Service IA pour courses
 
     ✅ Utilise AIJsonParser (pas de parsing manuel)
-    ✅ Utilise SmartCache
+    ✅ Utilise Cache
     ✅ Code divisé par 2
     """
 
@@ -62,7 +61,7 @@ class CoursesAIService:
         self.agent = agent
 
     @handle_errors(show_in_ui=True)
-    @SmartCache.cached(ttl=1800, level="session", key_prefix="courses_ai")
+    @Cache.cached(ttl=1800, key="courses_ai_generation")  # ✅ CORRIGÉ
     async def generer_liste_optimisee(
             self,
             articles_base: List[Dict],
@@ -80,7 +79,7 @@ class CoursesAIService:
         logger.info(f"Génération liste IA: {len(articles_base)} articles, magasin={magasin}")
 
         # Vérifier rate limit
-        can_call, error = RateLimiter.can_call()
+        can_call, error = RateLimit.can_call()  # ✅ CORRIGÉ
         if not can_call:
             raise AIServiceError(error, user_message=error)
 
@@ -231,7 +230,7 @@ UNIQUEMENT le JSON, aucun texte !"""
                     temperature=0.7,
                     max_tokens=max_tokens
                 )
-                RateLimiter.record_call()
+                RateLimit.record_call()  # ✅ CORRIGÉ
                 return response
             except Exception as e:
                 if attempt == max_retries - 1:

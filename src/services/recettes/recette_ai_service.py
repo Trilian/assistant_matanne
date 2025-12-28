@@ -1,6 +1,6 @@
 """
 Service IA Recettes OPTIMISÉ
-Utilise AIJsonParser + SmartCache
+Utilise AIJsonParser + Cache
 
 """
 import streamlit as st
@@ -11,14 +11,13 @@ from pydantic import BaseModel, Field, validator
 
 from src.core.models import TypeVersionRecetteEnum
 from src.core.ai_json_parser import AIJsonParser, parse_list_response
-from src.core.smart_cache import SmartCache
+from src.core.cache import Cache, RateLimit  # ✅ CORRIGÉ
 from src.core.exceptions import AIServiceError, RateLimitError, handle_errors
-from src.core.ai_cache import RateLimiter
 
 logger = logging.getLogger(__name__)
 
 # ═══════════════════════════════════════════════════════════════
-# SCHÉMAS PYDANTIC
+# SCHÉMAS PYDANTIC (inchangés)
 # ═══════════════════════════════════════════════════════════════
 
 class IngredientAI(BaseModel):
@@ -79,7 +78,7 @@ class AIRecetteService:
     Service de génération de recettes
 
     ✅ Utilise AIJsonParser (pas de parsing manuel)
-    ✅ Utilise SmartCache multi-niveau
+    ✅ Utilise Cache multi-niveau
     ✅ Gestion d'erreurs avec decorators
     """
 
@@ -97,10 +96,10 @@ class AIRecetteService:
             )
 
     # ═══════════════════════════════════════════════════════════════
-    # APPEL API AVEC SMART CACHE
+    # APPEL API AVEC CACHE
     # ═══════════════════════════════════════════════════════════════
 
-    @SmartCache.cached(ttl=1800, level="file", key_prefix="mistral_api")
+    @Cache.cached(ttl=1800, key="mistral_api_call")  # ✅ CORRIGÉ
     async def _call_mistral_cached(
             self,
             prompt: str,
@@ -116,7 +115,7 @@ class AIRecetteService:
         ✅ Cache fichier (persiste redémarrages)
         """
         # Vérifier rate limit
-        can_call, error_msg = RateLimiter.can_call()
+        can_call, error_msg = RateLimit.can_call()  # ✅ CORRIGÉ
         if not can_call:
             raise RateLimitError(error_msg, user_message=error_msg)
 
@@ -148,7 +147,7 @@ class AIRecetteService:
                 content = result["choices"][0]["message"]["content"]
 
                 # Enregistrer l'appel
-                RateLimiter.record_call()
+                RateLimit.record_call()  # ✅ CORRIGÉ
 
                 logger.info(f"✅ Réponse reçue ({len(content)} chars)")
                 return content
@@ -228,7 +227,7 @@ class AIRecetteService:
             )
 
     # ═══════════════════════════════════════════════════════════════
-    # PROMPTS
+    # PROMPTS (inchangés)
     # ═══════════════════════════════════════════════════════════════
 
     def _build_system_prompt(self, version_type: str) -> str:

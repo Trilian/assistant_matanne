@@ -9,7 +9,7 @@ from typing import List, Dict, Optional
 from datetime import date, timedelta
 
 from src.core.ai_agent import AgentIA
-from src.core.ai_cache import RateLimiter
+from src.core.cache import RateLimit  # ✅ CORRIGÉ
 from src.utils.formatters import format_quantity, format_quantity_with_unit
 
 logger = logging.getLogger(__name__)
@@ -165,7 +165,7 @@ JSON uniquement !"""
     # ===================================
 
     async def predire_consommation(
-        self, article: Dict, historique: Optional[List[Dict]] = None
+            self, article: Dict, historique: Optional[List[Dict]] = None
     ) -> Dict:
         """
         Prédit quand un article sera épuisé
@@ -216,7 +216,7 @@ JSON uniquement !"""
             return {
                 "jours_avant_epuisement": max(jours, 1),
                 "date_rachat_suggeree": (
-                    date.today() + timedelta(days=max(jours - 2, 1))
+                        date.today() + timedelta(days=max(jours - 2, 1))
                 ).isoformat(),
                 "quantite_optimale": article["seuil"] * 2,
                 "conseil": f"Racheter dans ~{max(jours - 2, 1)} jours",
@@ -304,7 +304,7 @@ JSON uniquement !"""
                     temperature=0.7,
                     max_tokens=max_tokens,
                 )
-                RateLimiter.record_call()
+                RateLimit.record_call()  # ✅ CORRIGÉ
                 return response
             except Exception as e:
                 if attempt == max_retries - 1:
