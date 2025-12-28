@@ -1,7 +1,6 @@
-# src/core/cache.py
 """
-Système de Cache Unifié - Remplace SmartCache + AI Cache
-Centralise TOUT le caching de l'application
+Gestionnaire de Cache Unifié
+Remplace SmartCache + ai_cache.py + cache.py
 """
 import streamlit as st
 from datetime import datetime, timedelta
@@ -14,18 +13,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# ═══════════════════════════════════════════════════════════════
-# CACHE PRINCIPAL
-# ═══════════════════════════════════════════════════════════════
-
 class Cache:
     """
     Cache unifié multi-niveau
 
-    Remplace:
-    - SmartCache (memory/session/file)
-    - AI Cache
-    - @st.cache_data
+    Niveaux:
+    - Mémoire (session Streamlit)
+    - Stats de performance
     """
 
     @staticmethod
@@ -40,8 +34,7 @@ class Cache:
         if "cache_stats" not in st.session_state:
             st.session_state.cache_stats = {
                 "hits": 0,
-                "misses": 0,
-                "total_size": 0
+                "misses": 0
             }
 
     @staticmethod
@@ -60,7 +53,6 @@ class Cache:
 
         if key not in st.session_state.cache_data:
             st.session_state.cache_stats["misses"] += 1
-            logger.debug(f"Cache MISS: {key}")
             return None
 
         # Vérifier expiration
@@ -68,15 +60,12 @@ class Cache:
             age = (datetime.now() - st.session_state.cache_timestamps[key]).seconds
 
             if age > ttl:
-                # Expiré
                 del st.session_state.cache_data[key]
                 del st.session_state.cache_timestamps[key]
                 st.session_state.cache_stats["misses"] += 1
-                logger.debug(f"Cache EXPIRED: {key}")
                 return None
 
         st.session_state.cache_stats["hits"] += 1
-        logger.debug(f"Cache HIT: {key}")
         return st.session_state.cache_data[key]
 
     @staticmethod
@@ -86,7 +75,7 @@ class Cache:
 
         Args:
             key: Clé
-            value: Valeur à cacher
+            value: Valeur
             ttl: Time to live (secondes)
         """
         Cache._init()
@@ -140,10 +129,6 @@ class Cache:
             @Cache.cached(ttl=600)
             def expensive_function(param):
                 return compute_something(param)
-
-        Args:
-            ttl: Time to live (secondes)
-            key: Clé personnalisée (auto si None)
         """
         def decorator(func: Callable) -> Callable:
             @wraps(func)
@@ -182,13 +167,7 @@ class Cache:
         Statistiques du cache
 
         Returns:
-            {
-                "hits": int,
-                "misses": int,
-                "hit_rate": float,
-                "total_keys": int,
-                "total_size_mb": float
-            }
+            Dict avec métriques
         """
         Cache._init()
 
@@ -202,20 +181,13 @@ class Cache:
             "hits": st.session_state.cache_stats["hits"],
             "misses": st.session_state.cache_stats["misses"],
             "hit_rate": round(hit_rate, 2),
-            "total_keys": len(st.session_state.cache_data),
-            "total_size_mb": 0  # TODO: Calculer taille réelle
+            "total_keys": len(st.session_state.cache_data)
         }
 
-
-# ═══════════════════════════════════════════════════════════════
-# RATE LIMITING (fusionné)
-# ═══════════════════════════════════════════════════════════════
 
 class RateLimit:
     """
     Rate limiting pour API IA
-
-    Remplace: src/core/ai_cache.py RateLimiter
     """
 
     DAILY_LIMIT = 100
@@ -247,21 +219,18 @@ class RateLimit:
         if st.session_state.rate_limit["last_reset"] != today:
             st.session_state.rate_limit["calls_today"] = 0
             st.session_state.rate_limit["last_reset"] = today
-            logger.info("Rate limit reset: daily")
 
         # Reset horaire
         current_hour = datetime.now().replace(minute=0, second=0, microsecond=0)
         if st.session_state.rate_limit["last_hour_reset"] != current_hour:
             st.session_state.rate_limit["calls_hour"] = 0
             st.session_state.rate_limit["last_hour_reset"] = current_hour
-            logger.info("Rate limit reset: hourly")
 
-        # Vérifier limite quotidienne
+        # Vérifier limites
         calls_today = st.session_state.rate_limit["calls_today"]
         if calls_today >= RateLimit.DAILY_LIMIT:
             return False, f"⏳ Limite quotidienne atteinte ({RateLimit.DAILY_LIMIT} appels/jour)"
 
-        # Vérifier limite horaire
         calls_hour = st.session_state.rate_limit["calls_hour"]
         if calls_hour >= RateLimit.HOURLY_LIMIT:
             return False, f"⏳ Limite horaire atteinte ({RateLimit.HOURLY_LIMIT} appels/heure)"
@@ -276,25 +245,13 @@ class RateLimit:
         st.session_state.rate_limit["calls_today"] += 1
         st.session_state.rate_limit["calls_hour"] += 1
 
-        logger.debug(
-            f"Rate limit: {st.session_state.rate_limit['calls_today']}/{RateLimit.DAILY_LIMIT} today, "
-            f"{st.session_state.rate_limit['calls_hour']}/{RateLimit.HOURLY_LIMIT} this hour"
-        )
-
     @staticmethod
     def get_usage() -> dict:
         """
         Statistiques d'utilisation
 
         Returns:
-            {
-                "calls_today": int,
-                "calls_hour": int,
-                "daily_limit": int,
-                "hourly_limit": int,
-                "remaining_today": int,
-                "remaining_hour": int
-            }
+            Dict avec usage
         """
         RateLimit._init()
 
@@ -307,10 +264,6 @@ class RateLimit:
             "remaining_hour": max(0, RateLimit.HOURLY_LIMIT - st.session_state.rate_limit["calls_hour"])
         }
 
-
-# ═══════════════════════════════════════════════════════════════
-# WIDGET UI (optionnel)
-# ═══════════════════════════════════════════════════════════════
 
 def render_cache_stats(key_prefix: str = "cache"):
     """

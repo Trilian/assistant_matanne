@@ -1,165 +1,202 @@
 """
-Configuration Robuste avec Fallbacks
+Configuration Application - Version Simplifiée
+Centralise TOUTE la configuration avec fallbacks intelligents
 """
 from pydantic_settings import BaseSettings
-from pydantic import Field, validator
+from pydantic import Field
 import streamlit as st
-from typing import Optional
 import os
+from typing import Optional
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Settings(BaseSettings):
-    """Configuration avec support secrets Streamlit + .env"""
+    """Configuration centralisée avec auto-detection"""
 
-    # ===================================
+    # ═══════════════════════════════════════════════════════════
     # APPLICATION
-    # ===================================
-    APP_NAME: str = "Assistant MaTanne v2"
+    # ═══════════════════════════════════════════════════════════
+    APP_NAME: str = "Assistant MaTanne"
     APP_VERSION: str = "2.0.0"
     ENV: str = Field(default="production")
     DEBUG: bool = Field(default=False)
 
-    # ===================================
-    # DATABASE - avec fallbacks
-    # ===================================
-    DB_HOST: Optional[str] = None
-    DB_PORT: Optional[int] = None
-    DB_NAME: Optional[str] = None
-    DB_USER: Optional[str] = None
-    DB_PASSWORD: Optional[str] = None
+    # ═══════════════════════════════════════════════════════════
+    # DATABASE (Supabase)
+    # ═══════════════════════════════════════════════════════════
 
     @property
     def DATABASE_URL(self) -> str:
-        """Construit l'URL avec fallbacks intelligents"""
-        # 1. Essayer st.secrets d'abord
-        if hasattr(st, "secrets") and "db" in st.secrets:
-            try:
+        """
+        Construction URL base de données avec fallbacks
+
+        Ordre de priorité:
+        1. st.secrets["db"]
+        2. Variables d'environnement individuelles
+        3. Variable DATABASE_URL directe
+        """
+        # 1. Secrets Streamlit (prioritaire)
+        try:
+            if hasattr(st, "secrets") and "db" in st.secrets:
                 db = st.secrets["db"]
                 return (
                     f"postgresql://{db['user']}:{db['password']}"
                     f"@{db['host']}:{db['port']}/{db['name']}"
                     f"?sslmode=require"
                 )
-            except KeyError:
-                pass
+        except Exception as e:
+            logger.debug(f"st.secrets['db'] non disponible: {e}")
 
-        # 2. Fallback sur variables d'environnement
-        if all([self.DB_HOST, self.DB_USER, self.DB_PASSWORD, self.DB_NAME]):
+        # 2. Variables d'environnement
+        host = os.getenv("DB_HOST")
+        user = os.getenv("DB_USER")
+        password = os.getenv("DB_PASSWORD")
+        name = os.getenv("DB_NAME")
+        port = os.getenv("DB_PORT", "5432")
+
+        if all([host, user, password, name]):
             return (
-                f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}"
-                f"@{self.DB_HOST}:{self.DB_PORT or 5432}/{self.DB_NAME}"
+                f"postgresql://{user}:{password}"
+                f"@{host}:{port}/{name}"
                 f"?sslmode=require"
             )
 
-        # 3. Variable DATABASE_URL directe
+        # 3. DATABASE_URL complète
         db_url = os.getenv("DATABASE_URL")
         if db_url:
-            # Forcer SSL si Supabase
-            if "supabase" in db_url and "sslmode" not in db_url:
+            if "sslmode" not in db_url and "supabase" in db_url:
                 db_url += "?sslmode=require"
             return db_url
 
+        # 4. Échec
         raise ValueError(
-            "Configuration DB manquante. Configure soit:\n"
-            "1. st.secrets['db'] (Streamlit Cloud)\n"
-            "2. Variables d'env DB_HOST, DB_USER, etc.\n"
-            "3. DATABASE_URL"
+            "❌ Configuration DB manquante!\n\n"
+            "Configure l'une de ces options:\n"
+            "1. Streamlit Secrets (.streamlit/secrets.toml):\n"
+            "   [db]\n"
+            "   host = 'xxx.supabase.co'\n"
+            "   port = '5432'\n"
+            "   name = 'postgres'\n"
+            "   user = 'postgres'\n"
+            "   password = 'xxx'\n\n"
+            "2. Variables d'environnement:\n"
+            "   DB_HOST, DB_USER, DB_PASSWORD, DB_NAME\n\n"
+            "3. Variable DATABASE_URL:\n"
+            "   DATABASE_URL='postgresql://user:pass@host/db'"
         )
 
-    # ===================================
-    # MISTRAL AI - avec fallbacks
-    # ===================================
-    MISTRAL_API_KEY: Optional[str] = None
+    # ═══════════════════════════════════════════════════════════
+    # IA (Mistral)
+    # ═══════════════════════════════════════════════════════════
 
     @property
-    def get_mistral_key(self) -> str:
-        """Récupère clé Mistral avec fallbacks"""
-        # 1. st.secrets
-        if hasattr(st, "secrets") and "mistral" in st.secrets:
-            try:
+    def MISTRAL_API_KEY(self) -> str:
+        """
+        Clé API Mistral avec fallbacks
+
+        Ordre:
+        1. st.secrets["mistral"]["api_key"]
+        2. MISTRAL_API_KEY env var
+        """
+        # 1. Secrets Streamlit
+        try:
+            if hasattr(st, "secrets") and "mistral" in st.secrets:
                 return st.secrets["mistral"]["api_key"]
-            except KeyError:
-                pass
+        except Exception:
+            pass
 
-        # 2. Variable d'instance
-        if self.MISTRAL_API_KEY:
-            return self.MISTRAL_API_KEY
-
-        # 3. Variable d'env
+        # 2. Variable d'environnement
         key = os.getenv("MISTRAL_API_KEY")
         if key:
             return key
 
         raise ValueError(
-            "Clé Mistral manquante. Configure:\n"
-            "1. st.secrets['mistral']['api_key']\n"
-            "2. MISTRAL_API_KEY env var"
+            "❌ Clé API Mistral manquante!\n\n"
+            "Configure l'une de ces options:\n"
+            "1. Streamlit Secrets:\n"
+            "   [mistral]\n"
+            "   api_key = 'xxx'\n\n"
+            "2. Variable d'environnement:\n"
+            "   MISTRAL_API_KEY='xxx'"
         )
 
-    MISTRAL_MODEL: str = Field(default="mistral-small-latest")
-    MISTRAL_TIMEOUT: int = Field(default=30)
+    @property
+    def MISTRAL_MODEL(self) -> str:
+        """Modèle Mistral à utiliser"""
+        try:
+            return st.secrets.get("mistral", {}).get("model", "mistral-small-latest")
+        except:
+            return os.getenv("MISTRAL_MODEL", "mistral-small-latest")
 
-    # ===================================
-    # PARAMÈTRES IA
-    # ===================================
-    AI_DEFAULT_TEMPERATURE: float = Field(default=0.7, ge=0.0, le=2.0)
-    AI_DEFAULT_MAX_TOKENS: int = Field(default=500, ge=1, le=2000)
+    MISTRAL_TIMEOUT: int = 60
+    MISTRAL_BASE_URL: str = "https://api.mistral.ai/v1"
 
-    # ===================================
-    # FONCTIONNALITÉS
-    # ===================================
-    ENABLE_AI: bool = Field(default=True)
-    ENABLE_WEATHER: bool = Field(default=False)
-    ENABLE_CACHE: bool = Field(default=True)
-    ENABLE_RATE_LIMIT: bool = Field(default=True)
+    # ═══════════════════════════════════════════════════════════
+    # RATE LIMITING
+    # ═══════════════════════════════════════════════════════════
+    RATE_LIMIT_DAILY: int = 100
+    RATE_LIMIT_HOURLY: int = 30
 
-    # ===================================
-    # LIMITES
-    # ===================================
-    MAX_RECIPES_PER_USER: int = Field(default=1000)
-    MAX_PROJECTS_PER_USER: int = Field(default=100)
-    MAX_CACHE_SIZE: int = Field(default=100)
+    # ═══════════════════════════════════════════════════════════
+    # CACHE
+    # ═══════════════════════════════════════════════════════════
+    CACHE_ENABLED: bool = True
+    CACHE_DEFAULT_TTL: int = 300  # 5 minutes
+    CACHE_MAX_SIZE: int = 100  # Nombre max d'items en cache
 
-    # Rate Limiting
-    RATE_LIMIT_HOURLY: int = Field(default=30)
-    RATE_LIMIT_DAILY: int = Field(default=100)
-
-    # ===================================
+    # ═══════════════════════════════════════════════════════════
     # LOGGING
-    # ===================================
-    LOG_LEVEL: str = Field(default="INFO")
+    # ═══════════════════════════════════════════════════════════
+    LOG_LEVEL: str = "INFO"
 
-    @validator("LOG_LEVEL")
-    def validate_log_level(cls, v):
-        valid = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-        if v.upper() not in valid:
-            return "INFO"
-        return v.upper()
-
-    # ===================================
+    # ═══════════════════════════════════════════════════════════
     # HELPERS
-    # ===================================
+    # ═══════════════════════════════════════════════════════════
+
     def is_production(self) -> bool:
-        """Vérifie si en prod"""
+        """Check si environnement de production"""
         return self.ENV.lower() == "production"
 
     def is_development(self) -> bool:
-        """Vérifie si en dev"""
-        return self.ENV.lower() == "development"
+        """Check si environnement de développement"""
+        return self.ENV.lower() in ["development", "dev"]
 
-    def to_dict(self) -> dict:
-        """Export config pour debug"""
+    def get_safe_config(self) -> dict:
+        """
+        Export config sans secrets pour debug
+
+        Returns:
+            Dict avec config publique uniquement
+        """
         return {
-            "APP_NAME": self.APP_NAME,
-            "APP_VERSION": self.APP_VERSION,
-            "ENV": self.ENV,
-            "ENABLE_AI": self.ENABLE_AI,
-            "ENABLE_CACHE": self.ENABLE_CACHE,
-            "MISTRAL_MODEL": self.MISTRAL_MODEL,
-            # Ne jamais logger les secrets !
-            "DB_CONFIGURED": bool(self.DB_HOST or self.DATABASE_URL),
-            "MISTRAL_CONFIGURED": bool(self.MISTRAL_API_KEY),
+            "app_name": self.APP_NAME,
+            "version": self.APP_VERSION,
+            "environment": self.ENV,
+            "debug": self.DEBUG,
+            "mistral_model": self.MISTRAL_MODEL,
+            "cache_enabled": self.CACHE_ENABLED,
+            "log_level": self.LOG_LEVEL,
+            "db_configured": self._check_db_configured(),
+            "mistral_configured": self._check_mistral_configured(),
         }
+
+    def _check_db_configured(self) -> bool:
+        """Vérifie si DB est configurée"""
+        try:
+            _ = self.DATABASE_URL
+            return True
+        except:
+            return False
+
+    def _check_mistral_configured(self) -> bool:
+        """Vérifie si Mistral est configuré"""
+        try:
+            _ = self.MISTRAL_API_KEY
+            return True
+        except:
+            return False
 
     class Config:
         case_sensitive = False
@@ -167,21 +204,24 @@ class Settings(BaseSettings):
         env_file_encoding = "utf-8"
 
 
-# ===================================
-# INSTANCE GLOBALE LAZY-LOADED
-# ===================================
+# ═══════════════════════════════════════════════════════════
+# INSTANCE GLOBALE (SINGLETON)
+# ═══════════════════════════════════════════════════════════
 
 _settings: Optional[Settings] = None
 
 
 def get_settings() -> Settings:
     """
-    Récupère settings avec lazy loading
-    Évite les erreurs au démarrage
+    Récupère l'instance Settings (singleton)
+
+    Returns:
+        Instance Settings configurée
     """
     global _settings
     if _settings is None:
         _settings = Settings()
+        logger.info(f"✅ Configuration chargée: {_settings.APP_NAME} v{_settings.APP_VERSION}")
     return _settings
 
 

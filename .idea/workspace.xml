@@ -5,14 +5,41 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment=" amelioration app duplication etc..">
+      <change afterPath="$PROJECT_DIR$/src/core/ai/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/core/ai/cache.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/core/ai/client.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/core/ai/parser.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/core/cache/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/core/cache/manager.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/core/errors/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/core/errors/exceptions.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/core/errors/handlers.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/core/logging/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/core/logging/manager.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/core/state/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/core/state/manager.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/core/validation/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ui/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ui/base.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ui/data.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ui/feedback.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ui/forms.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ui/layouts.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/utils/helpers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/error_handler.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/courses/courses_ai_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/courses/courses_ai_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/inventaire/inventaire_ai_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/inventaire/inventaire_ai_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/recettes/recette_ai_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/recettes/recette_ai_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/advanced_components.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/components.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/ui/components.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/planning_components.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/ai_agent.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/ai_json_parser.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/base_service.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/cache.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/exceptions.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/state_manager.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/validators.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/validation/validators.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ui/components.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ui/unified_components.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/formatters.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/formatters.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -84,11 +111,11 @@
       <recent name="D:\Projet_streamlit\assistant_matanne\assets" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Projet_streamlit\assistant_matanne\src\core\validation" />
       <recent name="D:\Projet_streamlit\assistant_matanne\src\services" />
       <recent name="D:\Projet_streamlit\assistant_matanne\src\services\planning" />
       <recent name="D:\Projet_streamlit\assistant_matanne\src\core" />
       <recent name="D:\Projet_streamlit\assistant_matanne\modules\outils" />
-      <recent name="D:\Projet_streamlit\assistant_matanne\modules\famille" />
     </key>
   </component>
   <component name="RunManager">
@@ -184,22 +211,6 @@
       <workItem from="1764864455782" duration="6942000" />
       <workItem from="1764923035460" duration="23405000" />
       <workItem from="1765096794626" duration="16000" />
-    </task>
-    <task id="LOCAL-00033" summary="Recette amelioration">
-      <option name="closed" value="true" />
-      <created>1764933036105</created>
-      <option name="number" value="00033" />
-      <option name="presentableId" value="LOCAL-00033" />
-      <option name="project" value="LOCAL" />
-      <updated>1764933036105</updated>
-    </task>
-    <task id="LOCAL-00034" summary="Recette amelioration">
-      <option name="closed" value="true" />
-      <created>1764933053838</created>
-      <option name="number" value="00034" />
-      <option name="presentableId" value="LOCAL-00034" />
-      <option name="project" value="LOCAL" />
-      <updated>1764933053838</updated>
     </task>
     <task id="LOCAL-00035" summary="Recette amelioration">
       <option name="closed" value="true" />
@@ -577,7 +588,23 @@
       <option name="project" value="LOCAL" />
       <updated>1766908110515</updated>
     </task>
-    <option name="localTasksCounter" value="82" />
+    <task id="LOCAL-00082" summary=" amelioration app duplication etc..">
+      <option name="closed" value="true" />
+      <created>1766909281850</created>
+      <option name="number" value="00082" />
+      <option name="presentableId" value="LOCAL-00082" />
+      <option name="project" value="LOCAL" />
+      <updated>1766909281850</updated>
+    </task>
+    <task id="LOCAL-00083" summary=" amelioration app duplication etc..">
+      <option name="closed" value="true" />
+      <created>1766909576920</created>
+      <option name="number" value="00083" />
+      <option name="presentableId" value="LOCAL-00083" />
+      <option name="project" value="LOCAL" />
+      <updated>1766909576921</updated>
+    </task>
+    <option name="localTasksCounter" value="84" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
