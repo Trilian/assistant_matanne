@@ -1,13 +1,9 @@
 """
-Service Inventaire ULTRA-OPTIMISÉ
-AVANT: 300 lignes avec duplication
-APRÈS: 180 lignes (-40%)
+Service Inventaire ULTRA-OPTIMISÉ v2.0
+Utilise 100% EnhancedCRUDService + unified helpers
 """
 from typing import List, Dict, Optional, Tuple
 from datetime import datetime, date, timedelta
-from sqlalchemy.orm import Session
-from sqlalchemy import func
-import logging
 
 from src.services.base_enhanced_service import EnhancedCRUDService, StatusTrackingMixin
 from src.services.unified_service_helpers import (
@@ -15,11 +11,10 @@ from src.services.unified_service_helpers import (
     enrich_with_ingredient_info,
     validate_quantity
 )
-from src.core.database import get_db_context
-from src.core.smart_cache import SmartCache
-from src.core.exceptions import ValidationError, NotFoundError, handle_errors
-from src.core.models import ArticleInventaire, Ingredient, ArticleCourses
-from src.utils.formatters import format_quantity
+from src.core.cache import Cache
+from src.core.errors import handle_errors, ValidationError, NotFoundError
+from src.core.models import ArticleInventaire, ArticleCourses
+import logging
 
 logger = logging.getLogger(__name__)
 
@@ -30,18 +25,14 @@ JOURS_ALERTE_PEREMPTION = 7
 
 
 # ═══════════════════════════════════════════════════════════════
-# HELPERS STATUT (PURE FUNCTIONS)
+# HELPERS STATUT (Pure Functions)
 # ═══════════════════════════════════════════════════════════════
 
-def calculer_statut_article(
-        quantite: float,
-        seuil: float,
-        date_peremption: Optional[date]
-) -> Tuple[str, str]:
-    """Calcule statut article (pure function)"""
+def calculer_statut_article(quantite: float, seuil: float, date_peremption: Optional[date]) -> Tuple[str, str]:
+    """Calcule statut (pure function)"""
     sous_seuil = quantite < seuil
-
     peremption_proche = False
+
     if date_peremption:
         jours = (date_peremption - date.today()).days
         peremption_proche = 0 <= jours <= JOURS_ALERTE_PEREMPTION
@@ -60,8 +51,7 @@ def get_jours_avant_peremption(date_peremption: Optional[date]) -> Optional[int]
     """Calcule jours restants"""
     if not date_peremption:
         return None
-    delta = (date_peremption - date.today()).days
-    return max(delta, 0)
+    return max((date_peremption - date.today()).days, 0)
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -69,45 +59,36 @@ def get_jours_avant_peremption(date_peremption: Optional[date]) -> Optional[int]
 # ═══════════════════════════════════════════════════════════════
 
 class InventaireService(EnhancedCRUDService[ArticleInventaire], StatusTrackingMixin):
-    """Service inventaire ultra-optimisé"""
+    """Service inventaire optimisé - utilise 100% la base"""
 
     def __init__(self):
         super().__init__(ArticleInventaire)
 
     # ═══════════════════════════════════════════════════════════════
-    # LECTURE OPTIMISÉE (utilise helper unifié)
+    # LECTURE (Cache + advanced_search)
     # ═══════════════════════════════════════════════════════════════
 
-    @SmartCache.cached(ttl=30, level="session")
+    @Cache.cached(ttl=30)
     @handle_errors(show_in_ui=False)
-    def get_inventaire_complet(
-            self,
-            filters: Optional[Dict] = None
-    ) -> List[Dict]:
-        """
-        Inventaire avec enrichissement
-        ✅ Cache 30s
-        ✅ Utilise helper unifié
-        """
+    def get_inventaire_complet(self, filters: Optional[Dict] = None) -> List[Dict]:
+        """Inventaire avec enrichissement - Cache 30s"""
         items = self.advanced_search(
             search_term=None,
-            search_fields=[],
             filters=filters,
             sort_by="ingredient_id",
             limit=1000
         )
 
-        # ✅ Enrichissement unifié (1 query)
+        # Enrichissement (1 query)
         enriched = enrich_with_ingredient_info(items, "ingredient_id")
 
-        # Ajouter statuts calculés
+        # Ajouter statuts
         for item in enriched:
             statut, icone = calculer_statut_article(
                 item["quantite"],
                 item.get("quantite_min", 1.0),
                 item.get("date_peremption")
             )
-
             item["statut"] = statut
             item["icone"] = icone
             item["jours_peremption"] = get_jours_avant_peremption(item.get("date_peremption"))
@@ -117,42 +98,29 @@ class InventaireService(EnhancedCRUDService[ArticleInventaire], StatusTrackingMi
 
     @handle_errors(show_in_ui=False)
     def get_alertes(self) -> Dict[str, List[Dict]]:
-        """Alertes critiques (optimisé)"""
+        """Alertes critiques"""
         inventaire = self.get_inventaire_complet()
-
-        alertes = {
+        return {
             "stock_bas": [i for i in inventaire if i["statut"] == "sous_seuil"],
             "peremption_proche": [i for i in inventaire if i["statut"] == "peremption_proche"],
             "critiques": [i for i in inventaire if i["statut"] == "critique"]
         }
 
-        return alertes
-
     # ═══════════════════════════════════════════════════════════════
-    # AJOUT/MODIFICATION (utilise helper unifié)
+    # CRÉATION/MODIFICATION (find_or_create + update)
     # ═══════════════════════════════════════════════════════════════
 
     @handle_errors(show_in_ui=True)
-    def ajouter_ou_modifier(
-            self,
-            nom: str,
-            categorie: str,
-            quantite: float,
-            unite: str,
-            seuil: float,
-            emplacement: Optional[str] = None,
-            date_peremption: Optional[date] = None,
-            article_id: Optional[int] = None
-    ) -> int:
-        """
-        Ajoute/modifie article
-        ✅ Utilise helper unifié ingrédient
-        """
+    def ajouter_ou_modifier(self, nom: str, categorie: str, quantite: float,
+                            unite: str, seuil: float, emplacement: Optional[str] = None,
+                            date_peremption: Optional[date] = None,
+                            article_id: Optional[int] = None) -> int:
+        """Ajoute/modifie article"""
         validate_quantity(quantite, "quantité")
         validate_quantity(seuil, "seuil")
 
+        from src.core.database import get_db_context
         with get_db_context() as db:
-            # ✅ Helper unifié
             ingredient_id = find_or_create_ingredient(nom, unite, categorie, db)
 
             if article_id:
@@ -168,13 +136,10 @@ class InventaireService(EnhancedCRUDService[ArticleInventaire], StatusTrackingMi
                     },
                     db=db
                 )
-
-                # ✅ Invalider cache
-                SmartCache.invalidate_pattern("inventaire")
-
+                Cache.invalidate("inventaire")
                 return article_id if updated else None
 
-            # Vérifier si existe
+            # Vérifier existant
             existant = db.query(ArticleInventaire).filter(
                 ArticleInventaire.ingredient_id == ingredient_id
             ).first()
@@ -184,8 +149,7 @@ class InventaireService(EnhancedCRUDService[ArticleInventaire], StatusTrackingMi
                 existant.quantite_min = seuil
                 existant.derniere_maj = datetime.now()
                 db.commit()
-
-                SmartCache.invalidate_pattern("inventaire")
+                Cache.invalidate("inventaire")
                 return existant.id
 
             # Création
@@ -197,23 +161,44 @@ class InventaireService(EnhancedCRUDService[ArticleInventaire], StatusTrackingMi
                 "date_peremption": date_peremption
             }, db=db)
 
-            SmartCache.invalidate_pattern("inventaire")
+            Cache.invalidate("inventaire")
             return article.id
 
     # ═══════════════════════════════════════════════════════════════
-    # STATISTIQUES (cache + optimisation)
+    # AJUSTEMENTS
     # ═══════════════════════════════════════════════════════════════
 
-    @SmartCache.cached(ttl=60, level="session")
+    @handle_errors(show_in_ui=True)
+    def ajuster_quantite(self, article_id: int, delta: float,
+                         raison: Optional[str] = None) -> Optional[float]:
+        """Ajuste quantité"""
+        article = self.get_by_id(article_id)
+        if not article:
+            raise NotFoundError(
+                f"Article {article_id} non trouvé",
+                user_message="Article introuvable"
+            )
+
+        nouvelle_quantite = max(0, article.quantite + delta)
+        updated = self.update(
+            article_id,
+            {"quantite": nouvelle_quantite, "derniere_maj": datetime.now()}
+        )
+
+        if updated:
+            Cache.invalidate("inventaire")
+
+        return nouvelle_quantite if updated else None
+
+    # ═══════════════════════════════════════════════════════════════
+    # STATS (get_generic_stats)
+    # ═══════════════════════════════════════════════════════════════
+
+    @Cache.cached(ttl=60)
     def get_stats(self, jours: int = 30) -> Dict:
-        """
-        Stats inventaire
-        ✅ Cache 1min
-        ✅ 1 seule lecture inventaire
-        """
+        """Stats (cache 1min) - 1 lecture via cache"""
         inventaire = self.get_inventaire_complet()
 
-        # Compteurs (évite queries multiples)
         stats = {
             "total_articles": len(inventaire),
             "total_critiques": len([i for i in inventaire if i["statut"] == "critique"]),
@@ -221,7 +206,7 @@ class InventaireService(EnhancedCRUDService[ArticleInventaire], StatusTrackingMi
             "total_peremption": len([i for i in inventaire if i["statut"] == "peremption_proche"]),
         }
 
-        # Par catégorie
+        # Par catégorie/emplacement
         from collections import defaultdict
         categories = defaultdict(int)
         emplacements = defaultdict(int)
@@ -236,65 +221,24 @@ class InventaireService(EnhancedCRUDService[ArticleInventaire], StatusTrackingMi
         return stats
 
     # ═══════════════════════════════════════════════════════════════
-    # AJUSTEMENTS
-    # ═══════════════════════════════════════════════════════════════
-
-    @handle_errors(show_in_ui=True)
-    def ajuster_quantite(
-            self,
-            article_id: int,
-            delta: float,
-            raison: Optional[str] = None
-    ) -> Optional[float]:
-        """Ajuste quantité (+/-)"""
-        article = self.get_by_id(article_id)
-
-        if not article:
-            raise NotFoundError(
-                f"Article {article_id} non trouvé",
-                user_message="Article introuvable"
-            )
-
-        nouvelle_quantite = max(0, article.quantite + delta)
-
-        updated = self.update(
-            article_id,
-            {
-                "quantite": nouvelle_quantite,
-                "derniere_maj": datetime.now()
-            }
-        )
-
-        if updated:
-            SmartCache.invalidate_pattern("inventaire")
-
-        return nouvelle_quantite if updated else None
-
-    # ═══════════════════════════════════════════════════════════════
     # INTÉGRATION COURSES
     # ═══════════════════════════════════════════════════════════════
 
     @handle_errors(show_in_ui=True)
-    def ajouter_a_courses(
-            self,
-            article_id: int,
-            quantite: Optional[float] = None
-    ) -> bool:
-        """Ajoute à la liste de courses"""
+    def ajouter_a_courses(self, article_id: int, quantite: Optional[float] = None) -> bool:
+        """Ajoute à liste courses"""
+        from src.core.database import get_db_context
+
         with get_db_context() as db:
             article = self.get_by_id(article_id, db)
-
             if not article:
                 return False
 
             # Quantité = manque
-            if quantite is None:
-                quantite_calculee = max(
-                    article.quantite_min - article.quantite,
-                    article.quantite_min
-                )
-            else:
-                quantite_calculee = quantite
+            quantite_calculee = quantite or max(
+                article.quantite_min - article.quantite,
+                article.quantite_min
+            )
 
             # Vérifier si déjà dans courses
             existant = db.query(ArticleCourses).filter(

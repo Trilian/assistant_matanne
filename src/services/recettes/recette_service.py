@@ -1,7 +1,6 @@
-# src/services/recettes/recette_service.py
 """
-Service Recettes Principal - VERSION OPTIMISÉE
-Utilise les nouveaux decorators + cache unifié
+Service Recettes ULTRA-OPTIMISÉ v2.0
+Utilise 100% EnhancedCRUDService + unified helpers
 """
 from typing import List, Dict, Optional
 from sqlalchemy.orm import joinedload, selectinload
@@ -11,9 +10,8 @@ from src.services.unified_service_helpers import (
     batch_find_or_create_ingredients,
     model_to_dict_safe
 )
-from src.core.database import get_db_context
-from src.core.cache import Cache  # ✅ NOUVEAU
-from src.core.error_handler import safe_execute  # ✅ NOUVEAU
+from src.core.cache import Cache
+from src.core.errors import handle_errors, ValidationError, NotFoundError
 from src.core.models import (
     Recette, RecetteIngredient, EtapeRecette, VersionRecette,
     Ingredient, ArticleInventaire
@@ -24,23 +22,20 @@ logger = logging.getLogger(__name__)
 
 
 class RecetteService(EnhancedCRUDService[Recette]):
-    """Service recettes unifié avec decorators"""
+    """Service recettes optimisé - utilise 100% la base"""
 
     def __init__(self):
         super().__init__(Recette)
 
     # ═══════════════════════════════════════════════════════════════
-    # LECTURE OPTIMISÉE
+    # LECTURE OPTIMISÉE (Cache + joinedload)
     # ═══════════════════════════════════════════════════════════════
 
     @Cache.cached(ttl=60)
-    @safe_execute(fallback_value=None, show_error=False)
+    @handle_errors(show_in_ui=False, fallback_value=None)
     def get_by_id_full(self, recette_id: int) -> Optional[Recette]:
-        """
-        Récupère avec TOUTES relations (1 query)
-        ✅ Cache 60s
-        ✅ Error handling auto
-        """
+        """Récupère avec TOUTES relations (1 query) - Cache 60s"""
+        from src.core.database import get_db_context
         with get_db_context() as db:
             return db.query(Recette).options(
                 joinedload(Recette.ingredients).joinedload(RecetteIngredient.ingredient),
@@ -49,13 +44,10 @@ class RecetteService(EnhancedCRUDService[Recette]):
             ).filter(Recette.id == recette_id).first()
 
     @Cache.cached(ttl=120)
-    @safe_execute(fallback_value=[], show_error=False)
-    def get_all_with_relations(
-            self,
-            skip: int = 0,
-            limit: int = 20
-    ) -> List[Recette]:
+    @handle_errors(show_in_ui=False, fallback_value=[])
+    def get_all_with_relations(self, skip: int = 0, limit: int = 20) -> List[Recette]:
         """Liste avec relations (cache 2min)"""
+        from src.core.database import get_db_context
         with get_db_context() as db:
             return db.query(Recette).options(
                 selectinload(Recette.ingredients).joinedload(RecetteIngredient.ingredient),
@@ -63,28 +55,20 @@ class RecetteService(EnhancedCRUDService[Recette]):
             ).offset(skip).limit(limit).all()
 
     # ═══════════════════════════════════════════════════════════════
-    # RECHERCHE
+    # RECHERCHE (utilise advanced_search de la base)
     # ═══════════════════════════════════════════════════════════════
 
-    @safe_execute(fallback_value=[], show_error=False)
-    def search_advanced(
-            self,
-            search_term: Optional[str] = None,
-            saison: Optional[str] = None,
-            type_repas: Optional[str] = None,
-            temps_max: Optional[int] = None,
-            difficulte: Optional[str] = None,
-            is_rapide: Optional[bool] = None,
-            is_equilibre: Optional[bool] = None,
-            compatible_bebe: Optional[bool] = None,
-            compatible_batch: Optional[bool] = None,
-            ia_only: Optional[bool] = None,
-            skip: int = 0,
-            limit: int = 20
-    ) -> List[Recette]:
-        """Recherche avancée avec error handling"""
+    @handle_errors(show_in_ui=False, fallback_value=[])
+    def search_advanced(self, search_term: Optional[str] = None,
+                        saison: Optional[str] = None, type_repas: Optional[str] = None,
+                        temps_max: Optional[int] = None, difficulte: Optional[str] = None,
+                        is_rapide: Optional[bool] = None, is_equilibre: Optional[bool] = None,
+                        compatible_bebe: Optional[bool] = None,
+                        compatible_batch: Optional[bool] = None,
+                        ia_only: Optional[bool] = None, skip: int = 0,
+                        limit: int = 20) -> List[Recette]:
+        """Recherche avancée - utilise base"""
         filters = {}
-
         if saison: filters["saison"] = saison
         if type_repas: filters["type_repas"] = type_repas
         if difficulte: filters["difficulte"] = difficulte
@@ -103,36 +87,27 @@ class RecetteService(EnhancedCRUDService[Recette]):
             offset=skip
         )
 
+        # Filtre temps (post-query car calculé)
         if temps_max:
-            results = [
-                r for r in results
-                if (r.temps_preparation + r.temps_cuisson) <= temps_max
-            ]
+            results = [r for r in results if (r.temps_preparation + r.temps_cuisson) <= temps_max]
 
         return results
 
     # ═══════════════════════════════════════════════════════════════
-    # CRÉATION
+    # CRÉATION (batch_find_or_create_ingredients)
     # ═══════════════════════════════════════════════════════════════
 
-    @safe_execute(fallback_value=None, show_error=True, error_message="❌ Erreur création recette")
-    def create_full(
-            self,
-            recette_data: Dict,
-            ingredients_data: List[Dict],
-            etapes_data: List[Dict],
-            versions_data: Optional[Dict] = None
-    ) -> int:
-        """
-        Crée recette complète
-        ✅ Batch ingredients
-        ✅ Error handling auto
-        """
+    @handle_errors(show_in_ui=True, error_message="❌ Erreur création recette")
+    def create_full(self, recette_data: Dict, ingredients_data: List[Dict],
+                    etapes_data: List[Dict], versions_data: Optional[Dict] = None) -> int:
+        """Crée recette complète - Batch ingrédients"""
+        from src.core.database import get_db_context
+
         with get_db_context() as db:
             # 1. Créer recette
             recette = self.create(recette_data, db=db)
 
-            # 2. Batch ingrédients
+            # 2. Batch ingrédients (1 query)
             ing_map = batch_find_or_create_ingredients(
                 [{"nom": i["nom"], "unite": i["unite"], "categorie": None}
                  for i in ingredients_data],
@@ -141,11 +116,9 @@ class RecetteService(EnhancedCRUDService[Recette]):
 
             # 3. Lier ingrédients
             for ing_data in ingredients_data:
-                ingredient_id = ing_map[ing_data["nom"]]
-
                 recette_ing = RecetteIngredient(
                     recette_id=recette.id,
-                    ingredient_id=ingredient_id,
+                    ingredient_id=ing_map[ing_data["nom"]],
                     quantite=ing_data["quantite"],
                     unite=ing_data["unite"],
                     optionnel=ing_data.get("optionnel", False)
@@ -177,30 +150,23 @@ class RecetteService(EnhancedCRUDService[Recette]):
                     db.add(version)
 
             db.commit()
-
-            # Invalider cache
             Cache.invalidate("recette")
-
             logger.info(f"✅ Recette '{recette.nom}' créée (ID: {recette.id})")
             return recette.id
 
     # ═══════════════════════════════════════════════════════════════
-    # ÉDITION
+    # ÉDITION (réutilise create_full logic)
     # ═══════════════════════════════════════════════════════════════
 
-    @safe_execute(fallback_value=False, show_error=True, error_message="❌ Erreur mise à jour")
-    def update_full(
-            self,
-            recette_id: int,
-            recette_data: Dict,
-            ingredients_data: List[Dict],
-            etapes_data: List[Dict],
-            versions_data: Optional[Dict] = None
-    ) -> bool:
+    @handle_errors(show_in_ui=True, error_message="❌ Erreur mise à jour")
+    def update_full(self, recette_id: int, recette_data: Dict,
+                    ingredients_data: List[Dict], etapes_data: List[Dict],
+                    versions_data: Optional[Dict] = None) -> bool:
         """Met à jour recette complète"""
+        from src.core.database import get_db_context
+
         with get_db_context() as db:
             recette = db.query(Recette).get(recette_id)
-
             if not recette:
                 return False
 
@@ -209,9 +175,12 @@ class RecetteService(EnhancedCRUDService[Recette]):
                 if hasattr(recette, key):
                     setattr(recette, key, value)
 
-            # 2. Delete anciens ingrédients
+            # 2. Delete anciens ingrédients/étapes
             db.query(RecetteIngredient).filter(
                 RecetteIngredient.recette_id == recette_id
+            ).delete()
+            db.query(EtapeRecette).filter(
+                EtapeRecette.recette_id == recette_id
             ).delete()
 
             # 3. Batch nouveaux ingrédients
@@ -222,23 +191,16 @@ class RecetteService(EnhancedCRUDService[Recette]):
             )
 
             for ing_data in ingredients_data:
-                ingredient_id = ing_map[ing_data["nom"]]
-
                 recette_ing = RecetteIngredient(
                     recette_id=recette_id,
-                    ingredient_id=ingredient_id,
+                    ingredient_id=ing_map[ing_data["nom"]],
                     quantite=ing_data["quantite"],
                     unite=ing_data["unite"],
                     optionnel=ing_data.get("optionnel", False)
                 )
                 db.add(recette_ing)
 
-            # 4. Delete anciennes étapes
-            db.query(EtapeRecette).filter(
-                EtapeRecette.recette_id == recette_id
-            ).delete()
-
-            # 5. Nouvelles étapes
+            # 4. Nouvelles étapes
             for etape_data in etapes_data:
                 etape = EtapeRecette(
                     recette_id=recette_id,
@@ -248,7 +210,7 @@ class RecetteService(EnhancedCRUDService[Recette]):
                 )
                 db.add(etape)
 
-            # 6. Versions
+            # 5. Versions
             if versions_data:
                 db.query(VersionRecette).filter(
                     VersionRecette.recette_base_id == recette_id
@@ -267,9 +229,7 @@ class RecetteService(EnhancedCRUDService[Recette]):
                     db.add(version)
 
             db.commit()
-
             Cache.invalidate(f"recette_{recette_id}")
-
             logger.info(f"✅ Recette {recette_id} mise à jour")
             return True
 
@@ -277,22 +237,14 @@ class RecetteService(EnhancedCRUDService[Recette]):
     # DUPLICATION
     # ═══════════════════════════════════════════════════════════════
 
-    @safe_execute(fallback_value=None, show_error=True)
-    def duplicate(
-            self,
-            recette_id: int,
-            nouveau_nom: Optional[str] = None
-    ) -> Optional[int]:
-        """Duplique une recette"""
+    @handle_errors(show_in_ui=True, fallback_value=None)
+    def duplicate(self, recette_id: int, nouveau_nom: Optional[str] = None) -> Optional[int]:
+        """Duplique recette"""
         recette = self.get_by_id_full(recette_id)
-
         if not recette:
             return None
 
-        recette_data = model_to_dict_safe(
-            recette,
-            exclude=["id", "cree_le", "modifie_le"]
-        )
+        recette_data = model_to_dict_safe(recette, exclude=["id", "cree_le", "modifie_le"])
         recette_data["nom"] = nouveau_nom or f"{recette.nom} (copie)"
         recette_data["genere_par_ia"] = False
 
@@ -307,20 +259,11 @@ class RecetteService(EnhancedCRUDService[Recette]):
         ]
 
         etapes_data = [
-            {
-                "ordre": etape.ordre,
-                "description": etape.description,
-                "duree": etape.duree
-            }
-            for etape in recette.etapes
+            {"ordre": e.ordre, "description": e.description, "duree": e.duree}
+            for e in recette.etapes
         ]
 
-        new_id = self.create_full(
-            recette_data=recette_data,
-            ingredients_data=ingredients_data,
-            etapes_data=etapes_data
-        )
-
+        new_id = self.create_full(recette_data, ingredients_data, etapes_data)
         logger.info(f"✅ Recette {recette_id} dupliquée → {new_id}")
         return new_id
 
@@ -328,23 +271,21 @@ class RecetteService(EnhancedCRUDService[Recette]):
     # SUPPRESSION
     # ═══════════════════════════════════════════════════════════════
 
-    @safe_execute(fallback_value=False, show_error=True)
+    @handle_errors(show_in_ui=True, fallback_value=False)
     def delete(self, recette_id: int) -> bool:
-        """Supprime une recette"""
+        """Supprime recette"""
         success = super().delete(recette_id)
-
         if success:
             Cache.invalidate(f"recette_{recette_id}")
             Cache.invalidate("recette")
-
         return success
 
     # ═══════════════════════════════════════════════════════════════
-    # STATISTIQUES
+    # STATISTIQUES (get_generic_stats)
     # ═══════════════════════════════════════════════════════════════
 
     @Cache.cached(ttl=300)
-    @safe_execute(fallback_value={}, show_error=False)
+    @handle_errors(show_in_ui=False, fallback_value={})
     def get_stats(self) -> Dict:
         """Stats globales (cache 5min)"""
         stats = self.get_generic_stats(
@@ -358,31 +299,29 @@ class RecetteService(EnhancedCRUDService[Recette]):
             }
         )
 
-        with get_db_context() as db:
-            from sqlalchemy import func
+        # Temps moyen
+        from src.core.database import get_db_context
+        from sqlalchemy import func
 
+        with get_db_context() as db:
             temps_total = db.query(
                 func.avg(Recette.temps_preparation + Recette.temps_cuisson)
             ).scalar()
-
             stats["temps_moyen"] = round(float(temps_total or 0), 0)
 
         stats["par_difficulte"] = stats.pop("by_difficulte", {})
-
         return stats
 
     # ═══════════════════════════════════════════════════════════════
     # MÉTHODES MÉTIER
     # ═══════════════════════════════════════════════════════════════
 
-    @safe_execute(fallback_value=[], show_error=False)
-    def get_faisables_avec_stock(
-            self,
-            tolerance: float = 0.8
-    ) -> List[Dict]:
+    @handle_errors(show_in_ui=False, fallback_value=[])
+    def get_faisables_avec_stock(self, tolerance: float = 0.8) -> List[Dict]:
         """Recettes faisables avec stock actuel"""
         recettes = self.get_all_with_relations(limit=1000)
 
+        from src.core.database import get_db_context
         with get_db_context() as db:
             result = []
 
@@ -416,8 +355,5 @@ class RecetteService(EnhancedCRUDService[Recette]):
             return sorted(result, key=lambda x: x["faisabilite"], reverse=True)
 
 
-# ═══════════════════════════════════════════════════════════════
-# INSTANCE GLOBALE
-# ═══════════════════════════════════════════════════════════════
-
+# Instance globale
 recette_service = RecetteService()

@@ -1,23 +1,20 @@
 """
-Service Courses ULTRA-OPTIMISÉ
-AVANT: 200 lignes avec duplication
-APRÈS: 120 lignes (-40%)
+Service Courses ULTRA-OPTIMISÉ v2.0
+Utilise 100% EnhancedCRUDService + unified helpers
 """
 from typing import List, Dict, Optional
 from datetime import datetime, timedelta
-from sqlalchemy.orm import Session
-from sqlalchemy import func
-import logging
 
 from src.services.base_enhanced_service import EnhancedCRUDService, StatusTrackingMixin
 from src.services.unified_service_helpers import (
     find_or_create_ingredient,
-    enrich_with_ingredient_info
+    enrich_with_ingredient_info,
+    batch_find_or_create_ingredients
 )
-from src.core.database import get_db_context
-from src.core.smart_cache import SmartCache
-from src.core.exceptions import ValidationError, handle_errors
-from src.core.models import ArticleCourses, Ingredient, ArticleInventaire
+from src.core.cache import Cache
+from src.core.errors import handle_errors, ValidationError
+from src.core.models import ArticleCourses
+import logging
 
 logger = logging.getLogger(__name__)
 
@@ -39,57 +36,34 @@ MAGASINS_CONFIG = {
 
 
 class CoursesService(EnhancedCRUDService[ArticleCourses], StatusTrackingMixin):
-    """Service courses ultra-optimisé"""
+    """Service courses optimisé - utilise 100% la base"""
 
     def __init__(self):
         super().__init__(ArticleCourses)
 
     # ═══════════════════════════════════════════════════════════════
-    # LECTURE ENRICHIE (utilise helper unifié)
+    # LECTURE (Cache + EnhancedCRUD)
     # ═══════════════════════════════════════════════════════════════
 
-    @SmartCache.cached(ttl=30, level="session")
+    @Cache.cached(ttl=30)
     @handle_errors(show_in_ui=False)
     def get_liste_active(self, filters: Optional[Dict] = None) -> List[Dict]:
-        """
-        Liste active enrichie
-        ✅ Cache 30s
-        ✅ Helper unifié enrichissement
-        """
+        """Liste active avec enrichissement - Cache 30s"""
         items = self.advanced_search(
             filters={**filters, "achete": False} if filters else {"achete": False},
             sort_by="priorite",
             sort_desc=True,
             limit=1000
         )
-
-        # ✅ Enrichissement unifié
-        return enrich_with_ingredient_info(items, "ingredient_id")
-
-    @handle_errors(show_in_ui=False)
-    def get_liste_achetee(self, jours: int = 30) -> List[Dict]:
-        """Historique achats"""
-        date_limite = datetime.now() - timedelta(days=jours)
-
-        items = self.advanced_search(
-            filters={
-                "achete": True,
-                "achete_le": {"gte": date_limite}
-            },
-            sort_by="achete_le",
-            sort_desc=True,
-            limit=1000
-        )
-
         return enrich_with_ingredient_info(items, "ingredient_id")
 
     @handle_errors(show_in_ui=False)
     def get_organisation_par_rayons(self, magasin: str) -> Dict[str, List[Dict]]:
         """Organise par rayons (1 lecture)"""
         items = self.get_liste_active()
-        rayons_config = MAGASINS_CONFIG.get(magasin, {}).get("rayons", ["Autre"])
+        rayons = MAGASINS_CONFIG.get(magasin, {}).get("rayons", ["Autre"])
 
-        organisation = {rayon: [] for rayon in rayons_config}
+        organisation = {rayon: [] for rayon in rayons}
         organisation["Autre"] = []
 
         for item in items:
@@ -99,84 +73,64 @@ class CoursesService(EnhancedCRUDService[ArticleCourses], StatusTrackingMixin):
         return {k: v for k, v in organisation.items() if v}
 
     # ═══════════════════════════════════════════════════════════════
-    # CRÉATION (utilise helper + bulk_create_with_merge)
+    # CRÉATION (bulk_create_with_merge)
     # ═══════════════════════════════════════════════════════════════
 
     @handle_errors(show_in_ui=True)
-    def ajouter(
-            self,
-            nom: str,
-            quantite: float,
-            unite: str,
-            priorite: str = "moyenne",
-            rayon: Optional[str] = None,
-            magasin: Optional[str] = None,
-            ia_suggere: bool = False,
-            notes: Optional[str] = None,
-    ) -> int:
-        """
-        Ajoute article avec fusion intelligente
-        ✅ Helper unifié ingrédient
-        """
+    def ajouter(self, nom: str, quantite: float, unite: str,
+                priorite: str = "moyenne", **kwargs) -> int:
+        """Ajoute avec fusion intelligente"""
+
+        ingredient_id = find_or_create_ingredient(nom, unite)
+
+        # Stratégie fusion : max quantité + max priorité
+        def merge_strategy(existing: Dict, new: Dict) -> Dict:
+            priorites = {"basse": 1, "moyenne": 2, "haute": 3}
+            return {
+                **existing,
+                "quantite_necessaire": max(
+                    existing.get("quantite_necessaire", 0),
+                    new.get("quantite_necessaire", 0)
+                ),
+                "priorite": (
+                    new["priorite"] if priorites.get(new.get("priorite"), 2) >
+                                       priorites.get(existing.get("priorite"), 2) else existing["priorite"]
+                )
+            }
+
+        created, merged = self.bulk_create_with_merge(
+            items_data=[{
+                "ingredient_id": ingredient_id,
+                "quantite_necessaire": quantite,
+                "priorite": priorite,
+                "suggere_par_ia": kwargs.get("ia_suggere", False),
+                "rayon_magasin": kwargs.get("rayon"),
+                "magasin_cible": kwargs.get("magasin"),
+                "notes": kwargs.get("notes"),
+                "achete": False
+            }],
+            merge_key="ingredient_id",
+            merge_strategy=merge_strategy
+        )
+
+        Cache.invalidate("courses")
+
+        # Retourner ID
+        from src.core.database import get_db_context
         with get_db_context() as db:
-            # ✅ Helper unifié
-            ingredient_id = find_or_create_ingredient(nom, unite, db=db)
-
-            # ✅ Stratégie fusion
-            def merge_strategy(existing: Dict, new: Dict) -> Dict:
-                priorites = {"basse": 1, "moyenne": 2, "haute": 3}
-
-                return {
-                    **existing,
-                    "quantite_necessaire": max(
-                        existing.get("quantite_necessaire", 0),
-                        new.get("quantite_necessaire", 0)
-                    ),
-                    "priorite": (
-                        new["priorite"]
-                        if priorites.get(new.get("priorite"), 2) >
-                           priorites.get(existing.get("priorite"), 2)
-                        else existing["priorite"]
-                    )
-                }
-
-            created, merged = self.bulk_create_with_merge(
-                items_data=[{
-                    "ingredient_id": ingredient_id,
-                    "quantite_necessaire": quantite,
-                    "priorite": priorite,
-                    "suggere_par_ia": ia_suggere,
-                    "rayon_magasin": rayon,
-                    "magasin_cible": magasin,
-                    "notes": notes,
-                    "achete": False
-                }],
-                merge_key="ingredient_id",
-                merge_strategy=merge_strategy,
-                db=db
-            )
-
-            # ✅ Invalider cache
-            SmartCache.invalidate_pattern("courses")
-
-            # Retourner ID
             article = db.query(ArticleCourses).filter(
                 ArticleCourses.ingredient_id == ingredient_id,
                 ArticleCourses.achete == False
             ).first()
-
             return article.id if article else None
 
     @handle_errors(show_in_ui=True)
     def ajouter_batch(self, articles: List[Dict]) -> int:
-        """
-        Ajout batch avec helpers
-        ✅ Batch ingredients
-        """
-        with get_db_context() as db:
-            from src.services.unified_service_helpers import batch_find_or_create_ingredients
+        """Ajout batch optimisé"""
+        from src.core.database import get_db_context
 
-            # ✅ Batch ingrédients
+        with get_db_context() as db:
+            # Batch ingrédients (1 query)
             ing_map = batch_find_or_create_ingredients(
                 [{"nom": a["nom"], "unite": a["unite"]} for a in articles],
                 db=db
@@ -190,13 +144,11 @@ class CoursesService(EnhancedCRUDService[ArticleCourses], StatusTrackingMixin):
                     "suggere_par_ia": art.get("ia", False),
                     "rayon_magasin": art.get("rayon"),
                     "magasin_cible": art.get("magasin"),
-                    "notes": art.get("notes"),
                     "achete": False
                 }
                 for art in articles
             ]
 
-            # Stratégie fusion
             def merge_strategy(existing: Dict, new: Dict) -> Dict:
                 priorites = {"basse": 1, "moyenne": 2, "haute": 3}
                 return {
@@ -206,10 +158,8 @@ class CoursesService(EnhancedCRUDService[ArticleCourses], StatusTrackingMixin):
                         new.get("quantite_necessaire", 0)
                     ),
                     "priorite": (
-                        new["priorite"]
-                        if priorites.get(new.get("priorite"), 2) >
-                           priorites.get(existing.get("priorite"), 2)
-                        else existing["priorite"]
+                        new["priorite"] if priorites.get(new.get("priorite"), 2) >
+                                           priorites.get(existing.get("priorite"), 2) else existing["priorite"]
                     )
                 }
 
@@ -220,39 +170,29 @@ class CoursesService(EnhancedCRUDService[ArticleCourses], StatusTrackingMixin):
                 db=db
             )
 
-            SmartCache.invalidate_pattern("courses")
-
-            logger.info(f"Batch: {created} créés, {merged} fusionnés")
+            Cache.invalidate("courses")
             return created + merged
 
     # ═══════════════════════════════════════════════════════════════
-    # ACHAT (bulk_update)
+    # ACHAT (StatusTrackingMixin)
     # ═══════════════════════════════════════════════════════════════
 
     @handle_errors(show_in_ui=True)
-    def marquer_achete(
-            self,
-            article_id: int,
-            ajouter_au_stock: bool = False
-    ) -> bool:
-        """Marque acheté + stock (optimisé)"""
+    def marquer_achete(self, article_id: int, ajouter_au_stock: bool = False) -> bool:
+        """Marque acheté + stock"""
+        from src.core.database import get_db_context
+        from src.core.models import ArticleInventaire
+
         with get_db_context() as db:
             article = self.get_by_id(article_id, db)
-
             if not article:
                 return False
 
-            # Update article
-            self.update(
-                article_id,
-                {
-                    "achete": True,
-                    "achete_le": datetime.now()
-                },
-                db=db
-            )
+            # Update article (utilise StatusTrackingMixin)
+            self.mark_as(article_id, "achete", True, db=db)
+            self.update(article_id, {"achete_le": datetime.now()}, db=db)
 
-            # Ajout stock (1 query)
+            # Ajout stock
             if ajouter_au_stock:
                 stock = db.query(ArticleInventaire).filter(
                     ArticleInventaire.ingredient_id == article.ingredient_id
@@ -271,20 +211,17 @@ class CoursesService(EnhancedCRUDService[ArticleCourses], StatusTrackingMixin):
 
                 db.commit()
 
-            SmartCache.invalidate_pattern("courses")
+            Cache.invalidate("courses")
             return True
 
     # ═══════════════════════════════════════════════════════════════
-    # STATISTIQUES (cache)
+    # STATS (get_generic_stats)
     # ═══════════════════════════════════════════════════════════════
 
-    @SmartCache.cached(ttl=60, level="session")
+    @Cache.cached(ttl=60)
     @handle_errors(show_in_ui=False)
     def get_stats(self, jours: int = 30) -> Dict:
-        """
-        Stats complètes (cache 1min)
-        ✅ 1 lecture via cache
-        """
+        """Stats complètes (cache 1min)"""
         liste = self.get_liste_active()
 
         stats = {
@@ -293,11 +230,9 @@ class CoursesService(EnhancedCRUDService[ArticleCourses], StatusTrackingMixin):
             "part_ia": len([i for i in liste if i.get("suggere_par_ia")]),
         }
 
-        # Stats génériques pour achats
+        # Utilise get_generic_stats de la base
         generic_stats = self.get_generic_stats(
-            count_filters={
-                "achetes": {"achete": True}
-            },
+            count_filters={"achetes": {"achete": True}},
             date_field="cree_le",
             days_back=jours
         )
@@ -312,16 +247,16 @@ class CoursesService(EnhancedCRUDService[ArticleCourses], StatusTrackingMixin):
     # ═══════════════════════════════════════════════════════════════
 
     def generer_depuis_stock_bas(self) -> List[Dict]:
-        """Génère depuis stock bas (pure function)"""
+        """Génère depuis stock bas"""
+        from src.core.database import get_db_context
+        from src.core.models import Ingredient, ArticleInventaire
+
         with get_db_context() as db:
             items = db.query(
-                Ingredient.nom,
-                Ingredient.unite,
-                ArticleInventaire.quantite,
-                ArticleInventaire.quantite_min
+                Ingredient.nom, Ingredient.unite,
+                ArticleInventaire.quantite, ArticleInventaire.quantite_min
             ).join(
-                ArticleInventaire,
-                Ingredient.id == ArticleInventaire.ingredient_id
+                ArticleInventaire, Ingredient.id == ArticleInventaire.ingredient_id
             ).filter(
                 ArticleInventaire.quantite < ArticleInventaire.quantite_min
             ).all()
@@ -331,82 +266,62 @@ class CoursesService(EnhancedCRUDService[ArticleCourses], StatusTrackingMixin):
                     "nom": nom,
                     "quantite": max(seuil - qty, seuil),
                     "unite": unite,
-                    "priorite": "haute",
-                    "raison": f"Stock: {qty:.1f}/{seuil:.1f}"
+                    "priorite": "haute"
                 }
                 for nom, unite, qty, seuil in items
             ]
 
     def generer_depuis_repas_planifies(self, jours: int = 7) -> List[Dict]:
-        """Génère depuis planning (optimisé)"""
-        from src.core.models import Recette, RepasPlanning, RecetteIngredient
+        """Génère depuis planning"""
+        from src.core.models import Recette, RepasPlanning, RecetteIngredient, Ingredient, ArticleInventaire
+        from src.core.database import get_db_context
 
         with get_db_context() as db:
             today = datetime.now().date()
             date_fin = today + timedelta(days=jours)
 
-            # 1 query pour tous les repas
-            repas = db.query(
-                Recette.id,
-                Recette.nom
-            ).join(
-                RepasPlanning,
-                Recette.id == RepasPlanning.recette_id
+            repas = db.query(Recette.id).join(
+                RepasPlanning, Recette.id == RepasPlanning.recette_id
             ).filter(
                 RepasPlanning.date.between(today, date_fin),
                 RepasPlanning.statut != "terminé"
             ).all()
 
-            # Consolider
             consolidated = {}
-
-            for recette_id, recette_nom in repas:
-                # Ingrédients de la recette
+            for (recette_id,) in repas:
                 ingredients = db.query(
-                    Ingredient.nom,
-                    RecetteIngredient.quantite,
-                    Ingredient.unite
+                    Ingredient.nom, RecetteIngredient.quantite, Ingredient.unite
                 ).join(
-                    RecetteIngredient,
-                    Ingredient.id == RecetteIngredient.ingredient_id
-                ).filter(
-                    RecetteIngredient.recette_id == recette_id
-                ).all()
+                    RecetteIngredient, Ingredient.id == RecetteIngredient.ingredient_id
+                ).filter(RecetteIngredient.recette_id == recette_id).all()
 
                 for nom, qty, unite in ingredients:
-                    # Vérifier stock
-                    stock = db.query(ArticleInventaire).join(
-                        Ingredient
-                    ).filter(
+                    stock = db.query(ArticleInventaire).join(Ingredient).filter(
                         Ingredient.nom == nom
                     ).first()
 
-                    qty_dispo = stock.quantite if stock else 0
-                    manque = max(qty - qty_dispo, 0)
-
+                    manque = max(qty - (stock.quantite if stock else 0), 0)
                     if manque > 0:
                         key = f"{nom}_{unite}"
-
                         if key in consolidated:
                             consolidated[key]["quantite"] += manque
-                            consolidated[key]["recettes"].add(recette_nom)
                         else:
                             consolidated[key] = {
-                                "nom": nom,
-                                "quantite": manque,
-                                "unite": unite,
-                                "priorite": "moyenne",
-                                "recettes": {recette_nom}
+                                "nom": nom, "quantite": manque,
+                                "unite": unite, "priorite": "moyenne"
                             }
 
-            # Formater
-            return [
-                {
-                    **{k: v for k, v in item.items() if k != "recettes"},
-                    "raison": f"Pour: {', '.join(list(item['recettes'])[:2])}"
-                }
-                for item in consolidated.values()
-            ]
+            return list(consolidated.values())
+
+    def nettoyer_achetes(self, jours: int = 7) -> int:
+        """Nettoie achats anciens (auto_cleanup)"""
+        result = self.auto_cleanup(
+            date_field="achete_le",
+            days_old=jours,
+            additional_filters={"achete": True}
+        )
+        Cache.invalidate("courses")
+        return result["count"]
 
 
 # Instance globale
