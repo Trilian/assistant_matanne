@@ -5,19 +5,36 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment=" amelioration app duplication etc..">
-      <change afterPath="$PROJECT_DIR$/src/ui/components.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ui/domain.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/courses.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/cuisine/courses.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/inventaire.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/cuisine/inventaire.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/planning_semaine.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/cuisine/planning_semaine.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/recettes.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/cuisine/recettes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/base_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/base_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/courses/courses_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/courses/courses_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/inventaire/inventaire_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/inventaire/inventaire_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/planning/planning_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/planning/planning_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/recettes/recette_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/recettes/recette_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/ui/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/ai/cache.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/cache/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/cache/manager.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/errors/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/errors/exceptions.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/errors/handlers.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/logging/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/logging/manager.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/state/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/state/manager.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/validation/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/validation/validators.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/ai_services.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/base_service_optimized.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/enhanced_service.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/inventaire/inventaire_io_service.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/recettes/recette_io_service.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/service_mixins.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ui/base.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ui/base_io_service.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ui/base_module.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ui/data.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ui/domain/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ui/domain/inventory_component.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ui/domain/planning_component.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ui/domain/recipe_components.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ui/feedback.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ui/forms.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ui/layouts.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/service_helpers.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -189,14 +206,6 @@
       <workItem from="1764864455782" duration="6942000" />
       <workItem from="1764923035460" duration="23405000" />
       <workItem from="1765096794626" duration="16000" />
-    </task>
-    <task id="LOCAL-00042" summary="Recette amelioration">
-      <option name="closed" value="true" />
-      <created>1764938507198</created>
-      <option name="number" value="00042" />
-      <option name="presentableId" value="LOCAL-00042" />
-      <option name="project" value="LOCAL" />
-      <updated>1764938507198</updated>
     </task>
     <task id="LOCAL-00043" summary="Recette amelioration">
       <option name="closed" value="true" />
@@ -582,7 +591,15 @@
       <option name="project" value="LOCAL" />
       <updated>1767127570655</updated>
     </task>
-    <option name="localTasksCounter" value="91" />
+    <task id="LOCAL-00091" summary=" amelioration app duplication etc..">
+      <option name="closed" value="true" />
+      <created>1767129259594</created>
+      <option name="number" value="00091" />
+      <option name="presentableId" value="LOCAL-00091" />
+      <option name="project" value="LOCAL" />
+      <updated>1767129259594</updated>
+    </task>
+    <option name="localTasksCounter" value="92" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
