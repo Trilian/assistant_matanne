@@ -5,12 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment=" amelioration app duplication etc..">
+      <change afterPath="$PROJECT_DIR$/src/ui/components.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ui/domain.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/courses.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/cuisine/courses.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/inventaire.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/cuisine/inventaire.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/planning_semaine.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/cuisine/planning_semaine.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/recettes.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/cuisine/recettes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/base_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/base_service.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/services/courses/courses_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/courses/courses_service.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/services/inventaire/inventaire_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/inventaire/inventaire_service.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/services/planning/planning_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/planning/planning_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/planning/repas_service.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/services/recettes/recette_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/recettes/recette_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ui/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/ui/__init__.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -182,22 +189,6 @@
       <workItem from="1764864455782" duration="6942000" />
       <workItem from="1764923035460" duration="23405000" />
       <workItem from="1765096794626" duration="16000" />
-    </task>
-    <task id="LOCAL-00040" summary="Recette amelioration">
-      <option name="closed" value="true" />
-      <created>1764938360223</created>
-      <option name="number" value="00040" />
-      <option name="presentableId" value="LOCAL-00040" />
-      <option name="project" value="LOCAL" />
-      <updated>1764938360223</updated>
-    </task>
-    <task id="LOCAL-00041" summary="Recette amelioration">
-      <option name="closed" value="true" />
-      <created>1764938468345</created>
-      <option name="number" value="00041" />
-      <option name="presentableId" value="LOCAL-00041" />
-      <option name="project" value="LOCAL" />
-      <updated>1764938468345</updated>
     </task>
     <task id="LOCAL-00042" summary="Recette amelioration">
       <option name="closed" value="true" />
@@ -575,7 +566,23 @@
       <option name="project" value="LOCAL" />
       <updated>1766955707714</updated>
     </task>
-    <option name="localTasksCounter" value="89" />
+    <task id="LOCAL-00089" summary=" amelioration app duplication etc..">
+      <option name="closed" value="true" />
+      <created>1767014065174</created>
+      <option name="number" value="00089" />
+      <option name="presentableId" value="LOCAL-00089" />
+      <option name="project" value="LOCAL" />
+      <updated>1767014065175</updated>
+    </task>
+    <task id="LOCAL-00090" summary=" amelioration app duplication etc..">
+      <option name="closed" value="true" />
+      <created>1767127570655</created>
+      <option name="number" value="00090" />
+      <option name="presentableId" value="LOCAL-00090" />
+      <option name="project" value="LOCAL" />
+      <updated>1767127570655</updated>
+    </task>
+    <option name="localTasksCounter" value="91" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
