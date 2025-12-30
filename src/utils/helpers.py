@@ -1,31 +1,32 @@
 """
-Helpers Utilitaires
-Fonctions génériques réutilisables
+Helpers Unifiés - VERSION CONSOLIDÉE
+Fusionne tous les helpers en structure claire
+
+Structure:
+- src/utils/helpers.py (fonctions génériques)
+- src/utils/service_helpers.py (helpers métier services)
 """
-from typing import Any, List, Dict, Optional, Callable
+import logging
+from typing import Any, Dict, List, Optional, Tuple, Union, Callable
 from datetime import date, datetime, timedelta
+from collections import defaultdict, Counter
 import hashlib
 import json
+import re
+
+logger = logging.getLogger(__name__)
 
 
-# ═══════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════
 # MANIPULATION DONNÉES
-# ═══════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════
 
 def safe_get(data: Dict, *keys, default=None) -> Any:
     """
-    Récupère une valeur avec fallback
-
-    Args:
-        data: Dictionnaire
-        keys: Chemin vers la valeur
-        default: Valeur par défaut
-
-    Returns:
-        Valeur ou default
+    Récupère valeur avec fallback
 
     Usage:
-        safe_get(user, "address", "city", default="Unknown")
+        safe_get(user, "address", "city", default="Paris")
     """
     result = data
     for key in keys:
@@ -41,16 +42,7 @@ def safe_get(data: Dict, *keys, default=None) -> Any:
 
 
 def deep_merge(dict1: Dict, dict2: Dict) -> Dict:
-    """
-    Fusion profonde de deux dictionnaires
-
-    Args:
-        dict1: Premier dict
-        dict2: Deuxième dict (prioritaire)
-
-    Returns:
-        Dict fusionné
-    """
+    """Fusion profonde de dicts"""
     result = dict1.copy()
 
     for key, value in dict2.items():
@@ -64,19 +56,10 @@ def deep_merge(dict1: Dict, dict2: Dict) -> Dict:
 
 def flatten_dict(data: Dict, parent_key: str = '', sep: str = '.') -> Dict:
     """
-    Aplatit un dictionnaire imbriqué
-
-    Args:
-        data: Dictionnaire à aplatir
-        parent_key: Clé parente
-        sep: Séparateur
-
-    Returns:
-        Dict aplati
+    Aplatit dict imbriqué
 
     Usage:
-        flatten_dict({"a": {"b": 1}})
-        # {"a.b": 1}
+        flatten_dict({"a": {"b": 1}})  # {"a.b": 1}
     """
     items = []
 
@@ -93,21 +76,11 @@ def flatten_dict(data: Dict, parent_key: str = '', sep: str = '.') -> Dict:
 
 def group_by(items: List[Dict], key: str) -> Dict[Any, List[Dict]]:
     """
-    Regroupe des items par clé
-
-    Args:
-        items: Liste d'items
-        key: Clé de regroupement
-
-    Returns:
-        Dict groupé
+    Regroupe items par clé
 
     Usage:
-        group_by([{"type": "A", "val": 1}, {"type": "A", "val": 2}], "type")
-        # {"A": [{"type": "A", "val": 1}, {"type": "A", "val": 2}]}
+        group_by(recettes, "categorie")
     """
-    from collections import defaultdict
-
     grouped = defaultdict(list)
 
     for item in items:
@@ -117,20 +90,23 @@ def group_by(items: List[Dict], key: str) -> Dict[Any, List[Dict]]:
     return dict(grouped)
 
 
-def deduplicate(items: List[Any], key: Optional[Callable] = None) -> List[Any]:
+def count_by(items: List[Dict], key: str) -> Dict[Any, int]:
     """
-    Déduplique une liste
-
-    Args:
-        items: Liste à dédupliquer
-        key: Fonction pour extraire la clé (optionnel)
-
-    Returns:
-        Liste dédupliquée
+    Compte items par clé
 
     Usage:
-        deduplicate([1, 2, 2, 3])  # [1, 2, 3]
-        deduplicate([{"id": 1}, {"id": 1}], key=lambda x: x["id"])
+        count_by(inventaire, "categorie")
+    """
+    return dict(Counter(item.get(key) for item in items))
+
+
+def deduplicate(items: List[Any], key: Optional[Callable] = None) -> List[Any]:
+    """
+    Déduplique liste
+
+    Usage:
+        deduplicate([1, 2, 2, 3])
+        deduplicate(items, key=lambda x: x["id"])
     """
     if not key:
         return list(dict.fromkeys(items))
@@ -147,38 +123,31 @@ def deduplicate(items: List[Any], key: Optional[Callable] = None) -> List[Any]:
     return result
 
 
-# ═══════════════════════════════════════════════════════════════
+def chunk_list(items: List, size: int) -> List[List]:
+    """
+    Découpe liste en chunks
+
+    Usage:
+        chunk_list([1,2,3,4,5], 2)  # [[1,2], [3,4], [5]]
+    """
+    return [items[i:i + size] for i in range(0, len(items), size)]
+
+
+# ═══════════════════════════════════════════════════════════
 # MANIPULATION DATES
-# ═══════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════
 
-def get_week_bounds(d: date) -> tuple[date, date]:
-    """
-    Retourne lundi et dimanche de la semaine
-
-    Args:
-        d: Date de référence
-
-    Returns:
-        (lundi, dimanche)
-    """
+def get_week_bounds(d: date) -> Tuple[date, date]:
+    """Retourne (lundi, dimanche) de la semaine"""
     monday = d - timedelta(days=d.weekday())
     sunday = monday + timedelta(days=6)
     return monday, sunday
 
 
-def get_month_bounds(d: date) -> tuple[date, date]:
-    """
-    Retourne premier et dernier jour du mois
-
-    Args:
-        d: Date de référence
-
-    Returns:
-        (premier_jour, dernier_jour)
-    """
+def get_month_bounds(d: date) -> Tuple[date, date]:
+    """Retourne (premier, dernier) jour du mois"""
     first_day = d.replace(day=1)
 
-    # Dernier jour = premier jour du mois suivant - 1 jour
     if d.month == 12:
         next_month = first_day.replace(year=d.year + 1, month=1)
     else:
@@ -190,29 +159,14 @@ def get_month_bounds(d: date) -> tuple[date, date]:
 
 
 def date_range(start: date, end: date) -> List[date]:
-    """
-    Génère une liste de dates
-
-    Args:
-        start: Date de début
-        end: Date de fin
-
-    Returns:
-        Liste de dates
-    """
+    """Génère liste de dates"""
     delta = end - start
     return [start + timedelta(days=i) for i in range(delta.days + 1)]
 
 
 def relative_date(d: date) -> str:
     """
-    Formatte une date relativement (hier, aujourd'hui, demain)
-
-    Args:
-        d: Date
-
-    Returns:
-        String formaté
+    Date relative
 
     Usage:
         relative_date(date.today())  # "Aujourd'hui"
@@ -234,34 +188,28 @@ def relative_date(d: date) -> str:
         return d.strftime("%d/%m/%Y")
 
 
-# ═══════════════════════════════════════════════════════════════
+def days_between(date1: date, date2: date) -> int:
+    """Jours entre deux dates"""
+    return abs((date2 - date1).days)
+
+
+# ═══════════════════════════════════════════════════════════
 # HASH & IDENTIFIANTS
-# ═══════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════
 
 def generate_id(data: Any) -> str:
     """
-    Génère un ID unique basé sur les données
+    Génère ID unique basé sur données
 
-    Args:
-        data: Données à hasher
-
-    Returns:
-        ID unique (hash MD5)
+    Usage:
+        generate_id({"nom": "Pizza", "prix": 12})
     """
     data_str = json.dumps(data, sort_keys=True, default=str)
     return hashlib.md5(data_str.encode()).hexdigest()[:16]
 
 
 def short_id(length: int = 8) -> str:
-    """
-    Génère un ID court aléatoire
-
-    Args:
-        length: Longueur de l'ID
-
-    Returns:
-        ID aléatoire
-    """
+    """Génère ID court aléatoire"""
     import random
     import string
 
@@ -269,118 +217,94 @@ def short_id(length: int = 8) -> str:
     return ''.join(random.choice(chars) for _ in range(length))
 
 
-# ═══════════════════════════════════════════════════════════════
-# VALIDATION
-# ═══════════════════════════════════════════════════════════════
-
-def is_valid_email(email: str) -> bool:
-    """
-    Valide une adresse email
-
-    Args:
-        email: Email à valider
-
-    Returns:
-        True si valide
-    """
-    import re
-
-    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    return bool(re.match(pattern, email))
-
-
-def is_valid_url(url: str) -> bool:
-    """
-    Valide une URL
-
-    Args:
-        url: URL à valider
-
-    Returns:
-        True si valide
-    """
-    import re
-
-    pattern = r'^https?://[\w\-]+(\.[\w\-]+)+[/#?]?.*$'
-    return bool(re.match(pattern, url))
-
-
-def clamp(value: float, min_val: float, max_val: float) -> float:
-    """
-    Limite une valeur entre min et max
-
-    Args:
-        value: Valeur
-        min_val: Min
-        max_val: Max
-
-    Returns:
-        Valeur limitée
-    """
-    return max(min_val, min(value, max_val))
-
-
-# ═══════════════════════════════════════════════════════════════
-# STRINGS
-# ═══════════════════════════════════════════════════════════════
-
-def truncate(text: str, length: int = 100, suffix: str = "...") -> str:
-    """
-    Tronque un texte
-
-    Args:
-        text: Texte
-        length: Longueur max
-        suffix: Suffixe si tronqué
-
-    Returns:
-        Texte tronqué
-    """
-    if len(text) <= length:
-        return text
-
-    return text[:length - len(suffix)] + suffix
-
-
 def slugify(text: str) -> str:
     """
-    Convertit un texte en slug
-
-    Args:
-        text: Texte à slugifier
-
-    Returns:
-        Slug
+    Convertit texte en slug
 
     Usage:
         slugify("Mon Titre!")  # "mon-titre"
     """
-    import re
-
     text = text.lower()
-    text = re.sub(r'[àáâãäå]', 'a', text)
-    text = re.sub(r'[èéêë]', 'e', text)
-    text = re.sub(r'[ìíîï]', 'i', text)
-    text = re.sub(r'[òóôõö]', 'o', text)
-    text = re.sub(r'[ùúûü]', 'u', text)
-    text = re.sub(r'[ýÿ]', 'y', text)
+
+    # Remplacer accents
+    replacements = {
+        'à': 'a', 'á': 'a', 'â': 'a', 'ã': 'a', 'ä': 'a', 'å': 'a',
+        'è': 'e', 'é': 'e', 'ê': 'e', 'ë': 'e',
+        'ì': 'i', 'í': 'i', 'î': 'i', 'ï': 'i',
+        'ò': 'o', 'ó': 'o', 'ô': 'o', 'õ': 'o', 'ö': 'o',
+        'ù': 'u', 'ú': 'u', 'û': 'u', 'ü': 'u',
+        'ý': 'y', 'ÿ': 'y'
+    }
+
+    for old, new in replacements.items():
+        text = text.replace(old, new)
+
     text = re.sub(r'[^a-z0-9]+', '-', text)
     text = text.strip('-')
 
     return text
 
 
+# ═══════════════════════════════════════════════════════════
+# VALIDATION
+# ═══════════════════════════════════════════════════════════
+
+def is_valid_email(email: str) -> bool:
+    """Valide email"""
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return bool(re.match(pattern, email))
+
+
+def is_valid_url(url: str) -> bool:
+    """Valide URL"""
+    pattern = r'^https?://[\w\-]+(\.[\w\-]+)+[/#?]?.*$'
+    return bool(re.match(pattern, url))
+
+
+def clamp(value: float, min_val: float, max_val: float) -> float:
+    """Limite valeur entre min et max"""
+    return max(min_val, min(value, max_val))
+
+
+def validate_positive(value: float, field_name: str = "valeur"):
+    """Valide que valeur est positive (raise si négatif)"""
+    from src.core.errors import ValidationError
+
+    if value <= 0:
+        raise ValidationError(
+            f"{field_name} doit être positif",
+            details={"field": field_name, "value": value},
+            user_message=f"{field_name} doit être supérieur à 0"
+        )
+
+
+def validate_range(value: float, min_val: float, max_val: float, field_name: str = "valeur"):
+    """Valide que valeur est dans range"""
+    from src.core.errors import ValidationError
+
+    if not min_val <= value <= max_val:
+        raise ValidationError(
+            f"{field_name} hors limites",
+            details={"value": value, "min": min_val, "max": max_val},
+            user_message=f"{field_name} doit être entre {min_val} et {max_val}"
+        )
+
+
+# ═══════════════════════════════════════════════════════════
+# STRINGS
+# ═══════════════════════════════════════════════════════════
+
+def truncate(text: str, length: int = 100, suffix: str = "...") -> str:
+    """Tronque texte"""
+    if len(text) <= length:
+        return text
+
+    return text[:length - len(suffix)] + suffix
+
+
 def pluralize(count: int, singular: str, plural: str) -> str:
     """
-    Pluralise un mot
-
-    Args:
-        count: Nombre
-        singular: Forme singulier
-        plural: Forme pluriel
-
-    Returns:
-        Forme correcte
+    Pluralise mot
 
     Usage:
         pluralize(1, "jour", "jours")  # "jour"
@@ -389,9 +313,42 @@ def pluralize(count: int, singular: str, plural: str) -> str:
     return singular if count <= 1 else plural
 
 
-# ═══════════════════════════════════════════════════════════════
+def clean_text(text: str) -> str:
+    """Nettoie texte (évite injection)"""
+    if not text:
+        return text
+
+    text = re.sub(r"[<>{}]", "", text)
+    return text.strip()
+
+
+def extract_number(text: str) -> Optional[float]:
+    """
+    Extrait nombre depuis string
+
+    Usage:
+        extract_number("2.5 kg")  # 2.5
+        extract_number("Prix: 10,50€")  # 10.5
+    """
+    if not text:
+        return None
+
+    text = str(text).replace(",", ".")
+
+    match = re.search(r"-?\d+\.?\d*", text)
+
+    if match:
+        try:
+            return float(match.group())
+        except ValueError:
+            return None
+
+    return None
+
+
+# ═══════════════════════════════════════════════════════════
 # RETRY & ERROR HANDLING
-# ═══════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════
 
 def retry(
         func: Callable,
@@ -401,17 +358,7 @@ def retry(
         exceptions: tuple = (Exception,)
 ):
     """
-    Retry une fonction avec backoff exponentiel
-
-    Args:
-        func: Fonction à exécuter
-        max_attempts: Nombre max de tentatives
-        delay: Délai initial
-        backoff: Multiplicateur du délai
-        exceptions: Exceptions à catch
-
-    Returns:
-        Résultat de la fonction
+    Retry fonction avec backoff
 
     Usage:
         result = retry(lambda: api_call(), max_attempts=3)
@@ -433,32 +380,26 @@ def retry(
 
 def safe_execute(func: Callable, default=None, log_error: bool = True):
     """
-    Exécute une fonction avec gestion d'erreur
+    Exécute fonction avec gestion d'erreur
 
-    Args:
-        func: Fonction à exécuter
-        default: Valeur par défaut si erreur
-        log_error: Logger l'erreur
-
-    Returns:
-        Résultat ou default
+    Usage:
+        value = safe_execute(lambda: risky_operation(), default=0)
     """
     try:
         return func()
     except Exception as e:
         if log_error:
-            import logging
-            logging.error(f"Error in safe_execute: {e}")
+            logger.error(f"Error in safe_execute: {e}")
         return default
 
 
-# ═══════════════════════════════════════════════════════════════
-# CACHE & MEMOIZATION
-# ═══════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════
+# MÉMOIZATION
+# ═══════════════════════════════════════════════════════════
 
 def memoize(func: Callable) -> Callable:
     """
-    Decorator simple de mémoization
+    Decorator mémoization simple
 
     Usage:
         @memoize
@@ -476,3 +417,71 @@ def memoize(func: Callable) -> Callable:
         return cache[key]
 
     return wrapper
+
+
+# ═══════════════════════════════════════════════════════════
+# STATISTIQUES
+# ═══════════════════════════════════════════════════════════
+
+def calculate_average(values: List[float]) -> float:
+    """Moyenne"""
+    return sum(values) / len(values) if values else 0.0
+
+
+def calculate_median(values: List[float]) -> float:
+    """Médiane"""
+    if not values:
+        return 0.0
+
+    sorted_values = sorted(values)
+    n = len(sorted_values)
+
+    if n % 2 == 0:
+        return (sorted_values[n//2 - 1] + sorted_values[n//2]) / 2
+    else:
+        return sorted_values[n//2]
+
+
+def calculate_percentile(values: List[float], percentile: int) -> float:
+    """Percentile"""
+    if not values:
+        return 0.0
+
+    sorted_values = sorted(values)
+    index = int(len(sorted_values) * percentile / 100)
+    return sorted_values[min(index, len(sorted_values) - 1)]
+
+
+# ═══════════════════════════════════════════════════════════
+# CONVERSION
+# ═══════════════════════════════════════════════════════════
+
+def model_to_dict(obj: Any, exclude: Optional[List[str]] = None) -> Dict:
+    """
+    Convertit modèle SQLAlchemy en dict
+
+    Usage:
+        recipe_dict = model_to_dict(recipe, exclude=["id"])
+    """
+    if not obj:
+        return {}
+
+    exclude = exclude or []
+    result = {}
+
+    if hasattr(obj, "__table__"):
+        for col in obj.__table__.columns:
+            if col.name not in exclude:
+                value = getattr(obj, col.name)
+
+                if hasattr(value, "isoformat"):
+                    value = value.isoformat()
+
+                result[col.name] = value
+
+    return result
+
+
+def batch_to_dicts(objects: List[Any], exclude: Optional[List[str]] = None) -> List[Dict]:
+    """Conversion batch"""
+    return [model_to_dict(obj, exclude) for obj in objects]

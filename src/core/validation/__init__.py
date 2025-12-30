@@ -1,33 +1,67 @@
 """
-Module Validation - Validators Pydantic
+Module Validation - Validators Pydantic CONSOLIDÉS
 """
-# Pour l'instant, on garde les validators dans validators.py existant
-# mais on prépare la structure pour les importer proprement
 
-from ..validators import (
-    RecetteInput,
+from .validators import (
+    # Helpers
+    clean_text,
+    validate_positive,
+
+    # Recettes
     IngredientInput,
     EtapeInput,
+    RecetteInput,
+
+    # Inventaire
     ArticleInventaireInput,
+    AjustementStockInput,
+
+    # Courses
     ArticleCoursesInput,
+
+    # Planning
     RepasInput,
+
+    # Famille
     ProfilEnfantInput,
     EntreeBienEtreInput,
+
+    # Projets
     ProjetInput,
+
+    # Helpers validation
     validate_model,
     validate_and_clean
 )
 
 __all__ = [
-    "RecetteInput",
+    # Helpers
+    "clean_text",
+    "validate_positive",
+
+    # Recettes
     "IngredientInput",
     "EtapeInput",
+    "RecetteInput",
+
+    # Inventaire
     "ArticleInventaireInput",
+    "AjustementStockInput",
+
+    # Courses
     "ArticleCoursesInput",
+
+    # Planning
     "RepasInput",
+
+    # Famille
     "ProfilEnfantInput",
     "EntreeBienEtreInput",
+
+    # Projets
     "ProjetInput",
+
+    # Helpers validation
     "validate_model",
     "validate_and_clean"
 ]

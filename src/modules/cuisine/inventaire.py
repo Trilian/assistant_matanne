@@ -1,34 +1,26 @@
 """
-Module Inventaire - VERSION 3.0 REFACTORISÉE
-Intègre tous les refactoring core/ui/utils
+Module Inventaire - VERSION AGRESSIVE REFACTORISÉE
 """
 import streamlit as st
 import asyncio
-from typing import List, Dict, Optional
-
-# ═══════════════════════════════════════════════════════════════
-# IMPORTS REFACTORISÉS
-# ═══════════════════════════════════════════════════════════════
+from typing import Dict, List
 
 # Core
 from src.core.state import get_state
 from src.core.cache import Cache
 from src.core.errors import handle_errors
-from src.core.database import get_db_context
 
-# UI - Namespace unifié
-from src.ui import (
-    # Base
-    empty_state, badge, progress_bar,
-    # Forms
-    DynamicList, filter_panel,
-    # Data
-    metrics_row, export_buttons,
-    # Feedback
-    toast, Modal,
-    # Layouts
-    item_card
+# UI Composants Domaine
+from src.ui.domain import (
+    inventory_card,
+    stock_alert,
+    inventory_stats,
+    inventory_filters,
+    quick_add_form
 )
+
+# UI Composants Génériques
+from src.ui import empty_state, toast, export_buttons
 
 # Services
 from src.services.inventaire import (
@@ -40,196 +32,85 @@ from src.services.inventaire import (
     InventaireImporter
 )
 
-# Utils
-from src.utils import format_quantity_with_unit, format_date, relative_date
-
-
-# Constantes UI
-STATUT_COLORS = {
-    "ok": "#d4edda",
-    "sous_seuil": "#fff3cd",
-    "peremption_proche": "#f8d7da",
-    "critique": "#dc3545",
-}
-
 
 # ═══════════════════════════════════════════════════════════════
 # TAB 1 : MON STOCK
 # ═══════════════════════════════════════════════════════════════
 
 @handle_errors(show_in_ui=True)
-def tab_mon_stock():
-    """Tab Mon Stock - VERSION REFACTORISÉE"""
+def tab_stock():
+    """Tab Mon Stock"""
     st.subheader("📦 Mon Stock")
 
-    # ✅ Actions rapides
-    col1, col2, col3, col4 = st.columns(4)
+    # Actions rapides
+    cols = st.columns(4)
+    actions = [
+        ("⚠️ Stock bas", lambda: _set_filter("stock_bas")),
+        ("⏳ Péremption", lambda: _set_filter("peremption")),
+        ("🔄 Tout", lambda: _clear_filters()),
+        ("🔄 Actualiser", lambda: Cache.invalidate("inventaire"))
+    ]
 
-    with col1:
-        if st.button("⚠️ Stock bas", use_container_width=True):
-            st.session_state.filter_stock_bas = True
-            st.rerun()
+    for col, (label, action) in zip(cols, actions):
+        with col:
+            if st.button(label, use_container_width=True):
+                action()
+                st.rerun()
 
-    with col2:
-        if st.button("⏳ Péremption", use_container_width=True):
-            st.session_state.filter_peremption = True
-            st.rerun()
-
-    with col3:
-        if st.button("🔄 Tout afficher", use_container_width=True):
-            st.session_state.filter_stock_bas = False
-            st.session_state.filter_peremption = False
-            st.rerun()
-
-    with col4:
-        if st.button("🔄 Actualiser", use_container_width=True):
-            Cache.invalidate("inventaire")
-            st.rerun()
-
-    # ✅ Filtres unifiés
-    filters_config = {
-        "categorie": {
-            "type": "select",
-            "label": "Catégorie",
-            "options": ["Toutes"] + CATEGORIES,
-            "default": 0
-        },
-        "emplacement": {
-            "type": "select",
-            "label": "Emplacement",
-            "options": ["Tous"] + EMPLACEMENTS,
-            "default": 0
-        }
-    }
-
-    filters = filter_panel(filters_config, "inv")
-
-    # Préparer filtres pour service
-    service_filters = {}
-    if filters["categorie"] != "Toutes":
-        service_filters["categorie"] = filters["categorie"]
-    if filters["emplacement"] != "Tous":
-        service_filters["emplacement"] = filters["emplacement"]
+    # Filtres
+    filters = inventory_filters(
+        CATEGORIES,
+        EMPLACEMENTS,
+        on_filter=lambda f: _apply_filters(f),
+        key="inv_filters"
+    )
 
     st.markdown("---")
 
-    # ✅ Charger inventaire avec cache
-    @Cache.cached(ttl=30)
-    def load_inventory():
-        return inventaire_service.get_inventaire_complet(service_filters)
-
-    inventaire = load_inventory()
-
-    # Appliquer filtres session
-    if st.session_state.get("filter_stock_bas"):
-        inventaire = [i for i in inventaire if i["statut"] in ["sous_seuil", "critique"]]
-
-    if st.session_state.get("filter_peremption"):
-        inventaire = [
-            i for i in inventaire
-            if i.get("jours_peremption") is not None and i["jours_peremption"] <= 7
-        ]
+    # Charger inventaire
+    inventaire = _load_filtered_inventory(filters)
 
     if not inventaire:
-        empty_state(
-            message="Inventaire vide",
-            icon="📦",
-            subtext="Ajoute tes premiers articles"
-        )
+        empty_state("Inventaire vide", "📦", "Ajoute tes premiers articles")
         return
 
-    # ✅ Stats
+    # Stats
     stats = inventaire_service.get_stats()
-    metrics_row([
-        {"label": "Total", "value": stats["total_articles"]},
-        {"label": "Stock bas", "value": stats["total_stock_bas"]},
-        {"label": "Péremption", "value": stats["total_peremption"]},
-        {"label": "Critiques", "value": stats["total_critiques"]}
-    ], cols=4)
+    inventory_stats(stats)
 
     st.markdown("---")
 
-    # ✅ Affichage par statut
+    # Alertes critiques
+    critiques = [a for a in inventaire if a["statut"] == "critique"]
+    if critiques:
+        stock_alert(critiques, on_click=lambda aid: st.info(f"Article {aid}"))
+        st.markdown("---")
+
+    # Affichage par statut
     for statut in ["critique", "sous_seuil", "peremption_proche", "ok"]:
         articles = [a for a in inventaire if a["statut"] == statut]
-
         if not articles:
             continue
 
         labels = {
             "critique": "🔴 Critiques",
             "sous_seuil": "⚠️ Stock Bas",
-            "peremption_proche": "⏳ Péremption Proche",
+            "peremption_proche": "⏳ Péremption",
             "ok": "✅ OK"
         }
 
         with st.expander(
                 f"{labels[statut]} ({len(articles)})",
-                expanded=statut in ["critique", "sous_seuil"]
+                expanded=(statut in ["critique", "sous_seuil"])
         ):
             for article in articles:
-                _render_article_card(article)
-
-
-def _render_article_card(article: Dict):
-    """Carte article avec composant unifié"""
-    # Métadonnées
-    metadata = [
-        f"📍 {article.get('emplacement', '—')}",
-        f"📦 {article['categorie']}"
-    ]
-
-    # Alert si péremption proche
-    alert = None
-    if article.get("jours_peremption") is not None:
-        jours = article["jours_peremption"]
-        if jours <= 3:
-            alert = f"⏳ Expire dans {jours} jour(s)"
-        elif jours <= 7:
-            metadata.append(f"⏳ {jours}j")
-
-    # Tags
-    tags = []
-    if article["quantite"] < article["seuil"]:
-        tags.append("⚠️ Bas")
-
-    # Actions
-    actions = [
-        ("➕", lambda a=article: _adjust_stock(a["id"], +1)),
-        ("➖", lambda a=article: _adjust_stock(a["id"], -1)),
-        ("🛒", lambda a=article: _add_to_courses(a["id"])),
-        ("🗑️", lambda a=article: _delete_article(a["id"]))
-    ]
-
-    # Contenu extensible
-    def expandable_content():
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.caption("**Stock actuel**")
-            current = article["quantite"]
-            seuil = article["seuil"]
-            progress_bar(current, seuil, show_percentage=False)
-            st.caption(f"{format_quantity_with_unit(current, article['unite'])} / {format_quantity_with_unit(seuil, article['unite'])}")
-
-        with col2:
-            if article.get("date_peremption"):
-                st.caption("**Péremption**")
-                st.write(format_date(article["date_peremption"], "medium"))
-                st.caption(relative_date(article["date_peremption"]))
-
-    # ✅ Composant unifié
-    item_card(
-        title=article["nom"],
-        metadata=metadata,
-        status=article["statut"].replace("_", " ").title(),
-        status_color=STATUT_COLORS.get(article["statut"]),
-        tags=tags,
-        alert=alert,
-        actions=actions,
-        expandable_content=expandable_content,
-        key=f"inv_{article['id']}"
-    )
+                inventory_card(
+                    article,
+                    on_adjust=lambda aid, delta: _adjust_stock(aid, delta),
+                    on_add_to_cart=lambda aid: _add_to_courses(aid),
+                    on_delete=lambda aid: _delete_article(aid),
+                    key=f"inv_{article['id']}"
+                )
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -237,7 +118,7 @@ def _render_article_card(article: Dict):
 # ═══════════════════════════════════════════════════════════════
 
 @handle_errors(show_in_ui=True)
-def tab_analyse_ia():
+def tab_analyse():
     """Tab Analyse IA"""
     st.subheader("🤖 Analyse Intelligente")
 
@@ -257,147 +138,31 @@ def tab_analyse_ia():
     col1, col2 = st.columns(2)
 
     with col1:
-        if st.button("🚨 Détecter Gaspillage", use_container_width=True, type="primary"):
-            with st.spinner("🤖 Analyse..."):
-                try:
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-
-                    result = loop.run_until_complete(
-                        ai_service.detecter_gaspillage(inventaire)
-                    )
-
-                    st.session_state.gaspillage_result = result
-                    toast("✅ Analyse terminée", "success")
-                    st.rerun()
-
-                except Exception as e:
-                    st.error(f"❌ {str(e)}")
+        if st.button("🚨 Détecter Gaspillage", type="primary", use_container_width=True):
+            _run_gaspillage_analysis(ai_service, inventaire)
 
     with col2:
-        if st.button("🍽️ Suggérer Recettes", use_container_width=True, type="primary"):
-            with st.spinner("🤖 Recherche..."):
-                try:
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-
-                    result = loop.run_until_complete(
-                        ai_service.suggerer_recettes_stock(inventaire, nb=5)
-                    )
-
-                    st.session_state.recettes_result = result
-                    toast("✅ Suggestions prêtes", "success")
-                    st.rerun()
-
-                except Exception as e:
-                    st.error(f"❌ {str(e)}")
+        if st.button("🍽️ Suggérer Recettes", type="primary", use_container_width=True):
+            _run_recettes_suggestions(ai_service, inventaire)
 
     # Afficher résultats
-    if hasattr(st.session_state, "gaspillage_result"):
-        st.markdown("---")
-        st.markdown("### 🚨 Analyse Gaspillage")
-
-        result = st.session_state.gaspillage_result
-        st.info(f"**Statut:** {result['statut']}")
-
-        if result.get("recettes_urgentes"):
-            st.markdown("**Recettes urgentes:**")
-            for r in result["recettes_urgentes"]:
-                st.write(f"• {r}")
-
-    if hasattr(st.session_state, "recettes_result"):
-        st.markdown("---")
-        st.markdown("### 🍽️ Recettes Suggérées")
-
-        for idx, recette in enumerate(st.session_state.recettes_result):
-            with st.expander(f"{recette['nom']} - {recette['faisabilite']}%"):
-                st.write(f"**Temps:** {recette['temps_total']}min")
-                st.write(f"**Ingrédients utilisés:** {', '.join(recette['ingredients_utilises'])}")
+    _display_analysis_results()
 
 
 # ═══════════════════════════════════════════════════════════════
-# TAB 3 : AJOUT (avec DynamicList)
+# TAB 3 : AJOUT
 # ═══════════════════════════════════════════════════════════════
 
 def tab_ajout():
-    """Tab Ajout avec DynamicList refactorisé"""
+    """Tab Ajout"""
     st.subheader("➕ Ajouter Articles")
 
-    # ✅ DynamicList refactorisé
-    st.markdown("### 🚀 Ajout Rapide")
-
-    dynamic_list = DynamicList(
-        key="inventaire_quick",
-        fields=[
-            {
-                "name": "nom",
-                "type": "text",
-                "label": "Nom",
-                "required": True,
-                "placeholder": "Ex: Tomates"
-            },
-            {
-                "name": "categorie",
-                "type": "select",
-                "label": "Catégorie",
-                "options": CATEGORIES,
-                "default": 0
-            },
-            {
-                "name": "quantite",
-                "type": "number",
-                "label": "Quantité",
-                "default": 1.0,
-                "min": 0.1,
-                "step": 0.1
-            },
-            {
-                "name": "unite",
-                "type": "select",
-                "label": "Unité",
-                "options": ["pcs", "kg", "g", "L", "mL", "sachets", "boîtes"],
-                "default": 0
-            },
-            {
-                "name": "emplacement",
-                "type": "select",
-                "label": "Emplacement",
-                "options": EMPLACEMENTS,
-                "default": 0
-            }
-        ],
-        add_label="➕ Ajouter"
+    quick_add_form(
+        CATEGORIES,
+        EMPLACEMENTS,
+        on_submit=lambda data: _add_article(data),
+        key="quick_add"
     )
-
-    items = dynamic_list.render()
-
-    # Bouton validation
-    if items and st.button(
-            f"✅ Valider {len(items)} article(s)",
-            type="primary",
-            use_container_width=True
-    ):
-        count = 0
-        for item in items:
-            try:
-                inventaire_service.ajouter_ou_modifier(
-                    nom=item["nom"],
-                    categorie=item["categorie"],
-                    quantite=item["quantite"],
-                    unite=item["unite"],
-                    seuil=1.0,
-                    emplacement=item["emplacement"]
-                )
-                count += 1
-            except Exception as e:
-                st.error(f"Erreur {item['nom']}: {e}")
-
-        if count > 0:
-            st.session_state["inventaire_quick_items"] = []
-            toast(f"✅ {count} ajouté(s)", "success")
-            Cache.invalidate("inventaire")
-            st.balloons()
-            st.rerun()
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -413,111 +178,206 @@ def tab_import_export():
     with tab_exp:
         inventaire = inventaire_service.get_inventaire_complet()
 
-        if not inventaire:
-            st.info("Inventaire vide")
-        else:
+        if inventaire:
             st.info(f"💡 {len(inventaire)} article(s)")
-
-            # ✅ Export buttons refactorisé
-            export_buttons(
-                data=inventaire,
-                filename="inventaire",
-                formats=["csv", "json"],
-                key="inv_export"
-            )
+            export_buttons(inventaire, "inventaire", ["csv", "json"], "inv_export")
+        else:
+            st.info("Inventaire vide")
 
     with tab_imp:
-        st.markdown("### Importer")
         uploaded = st.file_uploader("Fichier CSV", type=["csv"])
 
         if uploaded:
-            try:
-                content = uploaded.read().decode("utf-8")
-                articles, errors = InventaireImporter.from_csv(content)
-
-                if errors:
-                    with st.expander("⚠️ Erreurs"):
-                        for error in errors:
-                            st.warning(error)
-
-                if articles:
-                    st.success(f"✅ {len(articles)} article(s)")
-
-                    if st.button("➕ Importer", type="primary"):
-                        count = 0
-                        for art in articles:
-                            try:
-                                inventaire_service.ajouter_ou_modifier(**art)
-                                count += 1
-                            except:
-                                pass
-
-                        toast(f"✅ {count} importé(s)", "success")
-                        Cache.invalidate("inventaire")
-                        st.balloons()
-                        st.rerun()
-
-            except Exception as e:
-                st.error(f"❌ {str(e)}")
+            _import_csv(uploaded)
 
 
 # ═══════════════════════════════════════════════════════════════
 # HELPERS
 # ═══════════════════════════════════════════════════════════════
 
+def _load_filtered_inventory(filters: Dict) -> List[Dict]:
+    """Charge inventaire avec filtres session"""
+    # Filtres UI
+    service_filters = {
+        k: v for k, v in filters.items()
+        if v is not None and k in ["categorie", "emplacement", "statut"]
+    }
+
+    inventaire = inventaire_service.get_inventaire_complet(service_filters)
+
+    # Filtres session
+    if st.session_state.get("filter_stock_bas"):
+        inventaire = [i for i in inventaire if i["statut"] in ["sous_seuil", "critique"]]
+
+    if st.session_state.get("filter_peremption"):
+        inventaire = [
+            i for i in inventaire
+            if i.get("jours_peremption") is not None and i["jours_peremption"] <= 7
+        ]
+
+    return inventaire
+
+
+def _set_filter(filter_name: str):
+    """Active un filtre"""
+    st.session_state[f"filter_{filter_name}"] = True
+
+
+def _clear_filters():
+    """Vide tous les filtres"""
+    st.session_state["filter_stock_bas"] = False
+    st.session_state["filter_peremption"] = False
+
+
+def _apply_filters(filters: Dict):
+    """Applique filtres (callback)"""
+    Cache.invalidate("inventaire")
+
+
 def _adjust_stock(article_id: int, delta: float):
-    """Ajuste le stock"""
-    try:
-        inventaire_service.ajuster_quantite(article_id, delta)
-        toast(f"{'➕' if delta > 0 else '➖'} Stock ajusté", "success")
-        Cache.invalidate("inventaire")
-        st.rerun()
-    except Exception as e:
-        st.error(f"❌ {str(e)}")
+    """Ajuste quantité"""
+    inventaire_service.ajuster_quantite(article_id, delta)
+    toast(f"{'➕' if delta > 0 else '➖'} Stock ajusté", "success")
+    Cache.invalidate("inventaire")
+    st.rerun()
 
 
 def _add_to_courses(article_id: int):
     """Ajoute aux courses"""
-    try:
-        inventaire_service.ajouter_a_courses(article_id)
-        toast("✅ Ajouté aux courses", "success")
+    inventaire_service.ajouter_a_courses(article_id)
+    toast("✅ Ajouté aux courses", "success")
+
+
+def _delete_article(article_id: int):
+    """Supprime article"""
+    if st.button(f"Confirmer suppression ?", key=f"confirm_del_{article_id}"):
+        inventaire_service.delete(article_id)
+        toast("🗑️ Supprimé", "success")
+        Cache.invalidate("inventaire")
         st.rerun()
+
+
+def _add_article(data: Dict):
+    """Ajoute article"""
+    inventaire_service.ajouter_ou_modifier(
+        nom=data["nom"],
+        categorie=data["categorie"],
+        quantite=data["quantite"],
+        unite=data["unite"],
+        seuil=data["seuil"],
+        emplacement=data["emplacement"],
+        date_peremption=data.get("date_peremption")
+    )
+    toast(f"✅ {data['nom']} ajouté", "success")
+    Cache.invalidate("inventaire")
+    st.rerun()
+
+
+def _run_gaspillage_analysis(ai_service, inventaire: List[Dict]):
+    """Lance analyse gaspillage"""
+    with st.spinner("🤖 Analyse..."):
+        try:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+            result = loop.run_until_complete(
+                ai_service.detecter_gaspillage(inventaire)
+            )
+
+            st.session_state.gaspillage_result = result
+            toast("✅ Analyse terminée", "success")
+            st.rerun()
+
+        except Exception as e:
+            st.error(f"❌ {str(e)}")
+
+
+def _run_recettes_suggestions(ai_service, inventaire: List[Dict]):
+    """Lance suggestions recettes"""
+    with st.spinner("🤖 Recherche..."):
+        try:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+            result = loop.run_until_complete(
+                ai_service.suggerer_recettes_stock(inventaire, nb=5)
+            )
+
+            st.session_state.recettes_result = result
+            toast("✅ Suggestions prêtes", "success")
+            st.rerun()
+
+        except Exception as e:
+            st.error(f"❌ {str(e)}")
+
+
+def _display_analysis_results():
+    """Affiche résultats analyses"""
+    # Gaspillage
+    if hasattr(st.session_state, "gaspillage_result"):
+        st.markdown("---")
+        st.markdown("### 🚨 Gaspillage")
+        result = st.session_state.gaspillage_result
+        st.info(f"**Statut:** {result.statut}")
+
+        if result.recettes_urgentes:
+            st.markdown("**Recettes urgentes:**")
+            for r in result.recettes_urgentes:
+                st.write(f"• {r}")
+
+    # Recettes
+    if hasattr(st.session_state, "recettes_result"):
+        st.markdown("---")
+        st.markdown("### 🍽️ Recettes Suggérées")
+
+        for recette in st.session_state.recettes_result:
+            with st.expander(f"{recette.nom} - {recette.faisabilite}%"):
+                st.write(f"⏱️ {recette.temps_total}min")
+                st.write(f"📦 {', '.join(recette.ingredients_utilises)}")
+                st.caption(recette.raison)
+
+
+def _import_csv(uploaded):
+    """Import CSV"""
+    try:
+        content = uploaded.read().decode("utf-8")
+        articles, errors = InventaireImporter.from_csv(content)
+
+        if errors:
+            with st.expander("⚠️ Erreurs"):
+                for error in errors:
+                    st.warning(error)
+
+        if articles:
+            st.success(f"✅ {len(articles)} article(s)")
+
+            if st.button("➕ Importer", type="primary"):
+                count = 0
+                for art in articles:
+                    try:
+                        inventaire_service.ajouter_ou_modifier(**art)
+                        count += 1
+                    except:
+                        pass
+
+                toast(f"✅ {count} importé(s)", "success")
+                Cache.invalidate("inventaire")
+                st.balloons()
+                st.rerun()
+
     except Exception as e:
         st.error(f"❌ {str(e)}")
 
 
-def _delete_article(article_id: int):
-    """Supprime un article"""
-    modal = Modal(f"delete_inv_{article_id}")
-
-    if st.button("🗑️", key=f"del_{article_id}"):
-        modal.show()
-
-    if modal.is_showing():
-        st.warning("Supprimer cet article ?")
-
-        if modal.confirm():
-            try:
-                inventaire_service.delete(article_id)
-                toast("🗑️ Supprimé", "success")
-                Cache.invalidate("inventaire")
-                modal.close()
-            except Exception as e:
-                st.error(f"❌ {str(e)}")
-
-        modal.cancel()
-
-
 # ═══════════════════════════════════════════════════════════════
-# MAIN APP
+# MAIN
 # ═══════════════════════════════════════════════════════════════
 
 def app():
-    """Point d'entrée - VERSION REFACTORISÉE"""
+    """Point d'entrée"""
     st.title("📦 Inventaire Intelligent")
     st.caption("Alertes • Prédictions IA • Gestion complète")
 
-    # Tabs
     tab1, tab2, tab3, tab4 = st.tabs([
         "📦 Mon Stock",
         "🤖 Analyse IA",
@@ -526,10 +386,10 @@ def app():
     ])
 
     with tab1:
-        tab_mon_stock()
+        tab_stock()
 
     with tab2:
-        tab_analyse_ia()
+        tab_analyse()
 
     with tab3:
         tab_ajout()

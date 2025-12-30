@@ -1,84 +1,64 @@
+
 """
-Services - Point d'Entrée Unifié
-Architecture refactorisée avec core/ui/utils
+Services - Point d'Entrée Unifié REFACTORISÉ
+Architecture avec BaseAIService
 """
 
-# ═══════════════════════════════════════════════════════════════
-# RECETTES
-# ═══════════════════════════════════════════════════════════════
-
-from .recettes import (
-    recette_service,
-    ai_recette_service,
-    RecetteExporter,
-    RecetteImporter,
-    RecipeWebScraper,
-    RecipeImageGenerator,
-    create_recette_version_service
+# BaseAIService
+from .base_ai_service import (
+    BaseAIService,
+    RecipeAIMixin,
+    PlanningAIMixin,
+    InventoryAIMixin
 )
 
-# ═══════════════════════════════════════════════════════════════
-# INVENTAIRE
-# ═══════════════════════════════════════════════════════════════
-
-from .inventaire import (
-    inventaire_service,
-    CATEGORIES,
-    EMPLACEMENTS,
+# Services IA (nouvelle version)
+from .ai_services import (
+    AIRecetteService,
+    CoursesAIService,
+    InventaireAIService,
+    PlanningGenerationService,
+    # Factories
+    create_ai_recette_service,
+    create_courses_ai_service,
     create_inventaire_ai_service,
-    InventaireExporter,
-    InventaireImporter
+    create_planning_generation_service
 )
 
-# ═══════════════════════════════════════════════════════════════
-# COURSES
-# ═══════════════════════════════════════════════════════════════
-
-from .courses import (
-    courses_service,
-    MAGASINS_CONFIG,
-    create_courses_ai_service
-)
-
-# ═══════════════════════════════════════════════════════════════
-# PLANNING
-# ═══════════════════════════════════════════════════════════════
-
-from .planning import (
-    planning_service,
-    create_planning_generation_service,
-    repas_service
-)
-
-# ═══════════════════════════════════════════════════════════════
-# EXPORTS
-# ═══════════════════════════════════════════════════════════════
+# Services métier (inchangés)
+from .recettes import recette_service, RecetteExporter, RecetteImporter
+from .inventaire import inventaire_service, CATEGORIES, EMPLACEMENTS
+from .courses import courses_service, MAGASINS_CONFIG
+from .planning import planning_service, repas_service
 
 __all__ = [
-    # Recettes
+    # BaseAIService & Mixins
+    "BaseAIService",
+    "RecipeAIMixin",
+    "PlanningAIMixin",
+    "InventoryAIMixin",
+
+    # Services IA
+    "AIRecetteService",
+    "CoursesAIService",
+    "InventaireAIService",
+    "PlanningGenerationService",
+
+    # Factories IA
+    "create_ai_recette_service",
+    "create_courses_ai_service",
+    "create_inventaire_ai_service",
+    "create_planning_generation_service",
+
+    # Services métier
     "recette_service",
-    "ai_recette_service",
     "RecetteExporter",
     "RecetteImporter",
-    "RecipeWebScraper",
-    "RecipeImageGenerator",
-    "create_recette_version_service",
-
-    # Inventaire
     "inventaire_service",
     "CATEGORIES",
     "EMPLACEMENTS",
-    "create_inventaire_ai_service",
-    "InventaireExporter",
-    "InventaireImporter",
-
-    # Courses
     "courses_service",
     "MAGASINS_CONFIG",
-    "create_courses_ai_service",
-
-    # Planning
     "planning_service",
-    "create_planning_generation_service",
     "repas_service"
 ]

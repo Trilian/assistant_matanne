@@ -1,7 +1,6 @@
 """
 Services Planning + Repas ULTRA-OPTIMISÉS v2.0
 Fusion intelligente + EnhancedCRUDService
-AVANT: 400 lignes (2 fichiers) | APRÈS: 180 lignes (-55%)
 """
 from typing import List, Dict, Optional, Tuple
 from datetime import date, timedelta
