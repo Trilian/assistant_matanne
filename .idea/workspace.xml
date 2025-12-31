@@ -5,36 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment=" amelioration app duplication etc..">
-      <change beforePath="$PROJECT_DIR$/src/core/ai/cache.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/cache/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/cache/manager.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/errors/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/errors/exceptions.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/errors/handlers.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/logging/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/logging/manager.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/state/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/state/manager.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/validation/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/validation/validators.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/ai_services.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/base_service_optimized.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/enhanced_service.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/inventaire/inventaire_io_service.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/recettes/recette_io_service.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/service_mixins.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/base.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/base_io_service.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/base_module.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/data.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/domain/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/domain/inventory_component.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/domain/planning_component.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/domain/recipe_components.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/feedback.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/forms.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/layouts.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/service_helpers.py" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/core/cache.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/core/errors.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/core/logging.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/core/state.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/core/validation.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/modules/cuisine/configs.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/services/io_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/__init__.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -106,10 +85,10 @@
       <recent name="D:\Projet_streamlit\assistant_matanne\assets" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="D:\Projet_streamlit\assistant_matanne\src\core\validation" />
       <recent name="D:\Projet_streamlit\assistant_matanne\src\services" />
-      <recent name="D:\Projet_streamlit\assistant_matanne\src\services\planning" />
       <recent name="D:\Projet_streamlit\assistant_matanne\src\core" />
+      <recent name="D:\Projet_streamlit\assistant_matanne\src\core\validation" />
+      <recent name="D:\Projet_streamlit\assistant_matanne\src\services\planning" />
       <recent name="D:\Projet_streamlit\assistant_matanne\modules\outils" />
     </key>
   </component>
@@ -206,14 +185,6 @@
       <workItem from="1764864455782" duration="6942000" />
       <workItem from="1764923035460" duration="23405000" />
       <workItem from="1765096794626" duration="16000" />
-    </task>
-    <task id="LOCAL-00043" summary="Recette amelioration">
-      <option name="closed" value="true" />
-      <created>1764938935478</created>
-      <option name="number" value="00043" />
-      <option name="presentableId" value="LOCAL-00043" />
-      <option name="project" value="LOCAL" />
-      <updated>1764938935478</updated>
     </task>
     <task id="LOCAL-00044" summary="Recette amelioration">
       <option name="closed" value="true" />
@@ -599,7 +570,15 @@
       <option name="project" value="LOCAL" />
       <updated>1767129259594</updated>
     </task>
-    <option name="localTasksCounter" value="92" />
+    <task id="LOCAL-00092" summary=" amelioration app duplication etc..">
+      <option name="closed" value="true" />
+      <created>1767130825839</created>
+      <option name="number" value="00092" />
+      <option name="presentableId" value="LOCAL-00092" />
+      <option name="project" value="LOCAL" />
+      <updated>1767130825840</updated>
+    </task>
+    <option name="localTasksCounter" value="93" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

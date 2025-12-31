@@ -1,41 +1,28 @@
 """
 Core Module - Point d'entrée unifié
-Expose les composants essentiels de manière cohérente
+Exports simplifiés
 """
 
 # Configuration
 from .config import Settings, get_settings
 
 # Database
-from .database import (
-    get_db_context,
-    get_db_safe,
-    check_connection,
-    get_db_info,
-    create_all_tables
-)
+from .database import get_db_context, check_connection, get_db_info
 
 # Modèles
 from .models import Base
 
 # IA
-from .ai import AIClient, AIParser, AICache
+from .ai import AIClient, AIParser, get_ai_client
 
 # Cache
-from .cache import Cache, RateLimit
+from .cache import Cache, AICache, RateLimit
 
 # Erreurs
 from .errors import (
-    AppException,
-    ValidationError,
-    NotFoundError,
-    DatabaseError,
-    AIServiceError,
-    RateLimitError,
-    handle_errors,
-    require_fields,
-    require_positive,
-    require_exists
+    AppException, ValidationError, NotFoundError, DatabaseError,
+    AIServiceError, RateLimitError, handle_errors, require_fields,
+    require_positive, require_exists
 )
 
 # State
@@ -43,55 +30,35 @@ from .state import StateManager, get_state
 
 # Validation
 from .validation import (
-    RecetteInput,
-    IngredientInput,
-    EtapeInput,
-    validate_model
+    RecetteInput, IngredientInput, EtapeInput,
+    ArticleInventaireInput, ArticleCoursesInput, RepasInput,
+    validate_model, clean_text
 )
+
+# Logging
+from .logging import get_logger, LogManager
 
 __all__ = [
     # Config
-    "Settings",
-    "get_settings",
-
+    "Settings", "get_settings",
     # Database
-    "get_db_context",
-    "get_db_safe",
-    "check_connection",
-    "get_db_info",
-    "create_all_tables",
-    "Base",
-
+    "get_db_context", "check_connection", "get_db_info", "Base",
     # IA
-    "AIClient",
-    "AIParser",
-    "AICache",
-
+    "AIClient", "AIParser", "get_ai_client",
     # Cache
-    "Cache",
-    "RateLimit",
-
+    "Cache", "AICache", "RateLimit",
     # Erreurs
-    "AppException",
-    "ValidationError",
-    "NotFoundError",
-    "DatabaseError",
-    "AIServiceError",
-    "RateLimitError",
-    "handle_errors",
-    "require_fields",
-    "require_positive",
-    "require_exists",
-
+    "AppException", "ValidationError", "NotFoundError", "DatabaseError",
+    "AIServiceError", "RateLimitError", "handle_errors", "require_fields",
+    "require_positive", "require_exists",
     # State
-    "StateManager",
-    "get_state",
-
+    "StateManager", "get_state",
     # Validation
-    "RecetteInput",
-    "IngredientInput",
-    "EtapeInput",
-    "validate_model",
+    "RecetteInput", "IngredientInput", "EtapeInput",
+    "ArticleInventaireInput", "ArticleCoursesInput", "RepasInput",
+    "validate_model", "clean_text",
+    # Logging
+    "get_logger", "LogManager"
 ]
 
 __version__ = "2.0.0"

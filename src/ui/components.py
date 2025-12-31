@@ -1,6 +1,5 @@
 """
-UI Components - Tout-en-un
-Fusion de 5 fichiers en 1 (~800 lignes bien organisées)
+UI Components Consolidés
 """
 import streamlit as st
 from typing import List, Dict, Optional, Callable, Any, Union
@@ -8,9 +7,9 @@ from datetime import date, time, datetime
 import pandas as pd
 
 
-# ═══════════════════════════════════════════════════════════════
-# SECTION 1 : COMPOSANTS ATOMIQUES
-# ═══════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════
+# COMPOSANTS ATOMIQUES
+# ════════════════════════════════════════════════════════════
 
 def badge(text: str, color: str = "#4CAF50"):
     """Badge coloré"""
@@ -21,10 +20,6 @@ def badge(text: str, color: str = "#4CAF50"):
         unsafe_allow_html=True
     )
 
-def metric_card(label: str, value: Any, delta: Optional[Any] = None, icon: Optional[str] = None):
-    """Carte métrique"""
-    display_label = f"{icon} {label}" if icon else label
-    st.metric(label=display_label, value=value, delta=delta)
 
 def empty_state(message: str, icon: str = "📭", subtext: Optional[str] = None):
     """État vide centré"""
@@ -38,9 +33,21 @@ def empty_state(message: str, icon: str = "📭", subtext: Optional[str] = None)
     )
 
 
-# ═══════════════════════════════════════════════════════════════
-# SECTION 2 : FORMULAIRES
-# ═══════════════════════════════════════════════════════════════
+def toast(message: str, type: str = "success"):
+    """Toast notification"""
+    if type == "success":
+        st.success(message)
+    elif type == "error":
+        st.error(message)
+    elif type == "warning":
+        st.warning(message)
+    else:
+        st.info(message)
+
+
+# ════════════════════════════════════════════════════════════
+# FORMULAIRES
+# ════════════════════════════════════════════════════════════
 
 def form_field(field_config: Dict, key_prefix: str) -> Any:
     """Champ de formulaire générique"""
@@ -66,18 +73,30 @@ def form_field(field_config: Dict, key_prefix: str) -> Any:
         )
     elif field_type == "select":
         return st.selectbox(label, field_config.get("options", []), key=key)
+    elif field_type == "multiselect":
+        return st.multiselect(label, field_config.get("options", []), key=key)
     elif field_type == "checkbox":
         return st.checkbox(label, value=field_config.get("default", False), key=key)
     elif field_type == "textarea":
         return st.text_area(label, value=field_config.get("default", ""), key=key)
     elif field_type == "date":
         return st.date_input(label, value=field_config.get("default", date.today()), key=key)
+    elif field_type == "slider":
+        return st.slider(
+            label,
+            min_value=field_config.get("min", 0),
+            max_value=field_config.get("max", 100),
+            value=field_config.get("default", 50),
+            key=key
+        )
     else:
         return st.text_input(label, key=key)
+
 
 def search_bar(placeholder: str = "Rechercher...", key: str = "search") -> str:
     """Barre de recherche"""
     return st.text_input("", placeholder=f"🔍 {placeholder}", key=key, label_visibility="collapsed")
+
 
 def filter_panel(filters_config: Dict[str, Dict], key_prefix: str) -> Dict:
     """Panneau de filtres"""
@@ -88,20 +107,9 @@ def filter_panel(filters_config: Dict[str, Dict], key_prefix: str) -> Dict:
         return results
 
 
-# ═══════════════════════════════════════════════════════════════
-# SECTION 3 : FEEDBACK
-# ═══════════════════════════════════════════════════════════════
-
-def toast(message: str, type: str = "success"):
-    """Toast notification"""
-    if type == "success":
-        st.success(message)
-    elif type == "error":
-        st.error(message)
-    elif type == "warning":
-        st.warning(message)
-    else:
-        st.info(message)
+# ════════════════════════════════════════════════════════════
+# MODALS
+# ════════════════════════════════════════════════════════════
 
 class Modal:
     """Modal simple"""
@@ -128,9 +136,9 @@ class Modal:
             self.close()
 
 
-# ═══════════════════════════════════════════════════════════════
-# SECTION 4 : DATA & TABLES
-# ═══════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════
+# DATA & PAGINATION
+# ════════════════════════════════════════════════════════════
 
 def pagination(total_items: int, items_per_page: int = 20, key: str = "pagination") -> tuple[int, int]:
     """Pagination simple"""
@@ -167,6 +175,7 @@ def pagination(total_items: int, items_per_page: int = 20, key: str = "paginatio
     st.caption(f"Page {current_page}/{total_pages} • {total_items} élément(s)")
     return current_page, items_per_page
 
+
 def metrics_row(stats: List[Dict], cols: Optional[int] = None):
     """Ligne de métriques"""
     if not stats:
@@ -185,6 +194,7 @@ def metrics_row(stats: List[Dict], cols: Optional[int] = None):
                 delta=stat.get("delta")
             )
 
+
 def export_buttons(data: Union[List[Dict], pd.DataFrame], filename: str = "export",
                    formats: List[str] = ["csv", "json"], key: str = "export"):
     """Boutons d'export"""
@@ -199,17 +209,20 @@ def export_buttons(data: Union[List[Dict], pd.DataFrame], filename: str = "expor
         with cols[idx]:
             if fmt == "csv":
                 csv = df.to_csv(index=False)
-                st.download_button("📥 CSV", csv, f"{filename}.csv", "text/csv", key=f"{key}_csv", use_container_width=True)
+                st.download_button("📥 CSV", csv, f"{filename}.csv", "text/csv",
+                                   key=f"{key}_csv", use_container_width=True)
             elif fmt == "json":
                 json_str = df.to_json(orient='records', indent=2)
-                st.download_button("📥 JSON", json_str, f"{filename}.json", "application/json", key=f"{key}_json", use_container_width=True)
+                st.download_button("📥 JSON", json_str, f"{filename}.json", "application/json",
+                                   key=f"{key}_json", use_container_width=True)
 
 
-# ═══════════════════════════════════════════════════════════════
-# SECTION 5 : LAYOUTS
-# ═══════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════
+# LAYOUTS
+# ════════════════════════════════════════════════════════════
 
-def grid_layout(items: List[Dict], cols_per_row: int = 3, card_renderer: Callable[[Dict, str], None] = None, key: str = "grid"):
+def grid_layout(items: List[Dict], cols_per_row: int = 3,
+                card_renderer: Callable[[Dict, str], None] = None, key: str = "grid"):
     """Layout en grille"""
     if not items:
         st.info("Aucun élément")
@@ -225,6 +238,7 @@ def grid_layout(items: List[Dict], cols_per_row: int = 3, card_renderer: Callabl
                         card_renderer(items[item_idx], f"{key}_{item_idx}")
                     else:
                         st.write(items[item_idx])
+
 
 def item_card(title: str, metadata: List[str], status: Optional[str] = None,
               status_color: Optional[str] = None, tags: Optional[List[str]] = None,
@@ -278,3 +292,52 @@ def item_card(title: str, metadata: List[str], status: Optional[str] = None,
                 with cols[idx]:
                     if st.button(label, key=f"{key}_action_{idx}", use_container_width=True):
                         callback()
+
+
+# ════════════════════════════════════════════════════════════
+# LISTE DYNAMIQUE
+# ════════════════════════════════════════════════════════════
+
+class DynamicList:
+    """Liste dynamique pour ajouter/supprimer des items"""
+
+    def __init__(self, key: str, fields: List[Dict], initial_items: Optional[List[Dict]] = None):
+        self.key = key
+        self.fields = fields
+        if f"{key}_items" not in st.session_state:
+            st.session_state[f"{key}_items"] = initial_items or []
+
+    def render(self) -> List[Dict]:
+        items = st.session_state[f"{self.key}_items"]
+
+        # Formulaire d'ajout
+        with st.expander("➕ Ajouter", expanded=len(items) == 0):
+            cols = st.columns(len(self.fields) + 1)
+            form_data = {}
+
+            for i, field in enumerate(self.fields):
+                with cols[i]:
+                    form_data[field["name"]] = form_field(field, f"add_{self.key}")
+
+            with cols[-1]:
+                st.write("")
+                st.write("")
+                if st.button("➕", key=f"{self.key}_add"):
+                    st.session_state[f"{self.key}_items"].append(form_data)
+                    st.rerun()
+
+        # Liste des items
+        if items:
+            for idx, item in enumerate(items):
+                col1, col2 = st.columns([5, 1])
+                with col1:
+                    display = " • ".join([f"{item.get(f['name'], '—')}" for f in self.fields[:3]])
+                    st.write(display)
+                with col2:
+                    if st.button("🗑️", key=f"{self.key}_del_{idx}"):
+                        st.session_state[f"{self.key}_items"].pop(idx)
+                        st.rerun()
+        else:
+            st.info("Aucun élément")
+
+        return items

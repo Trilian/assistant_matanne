@@ -1,5 +1,6 @@
 """
-Service de Base Unifié - Version Finale Optimisées
+Service CRUD Universel - Version Finale Optimisée
+Fusionne base_service.py + base_service_optimized.py + enhanced_service.py + service_mixins.py
 """
 from typing import TypeVar, Generic, List, Dict, Optional, Any, Callable, Tuple
 from sqlalchemy.orm import Session
@@ -9,24 +10,22 @@ import logging
 
 from src.core.database import get_db_context
 from src.core.cache import Cache
-from src.core.errors import handle_errors, NotFoundError
-from src.core.logging import get_logger
+from src.core.errors import handle_errors, NotFoundError, DatabaseError
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 T = TypeVar('T')
 
 
 class BaseService(Generic[T]):
     """
-    Service CRUD Unifié avec toutes les fonctionnalités
+    Service CRUD Universel avec toutes les fonctionnalités
 
-    Inclut :
+    Inclut:
     - CRUD complet avec cache automatique
     - Bulk operations avec stratégies de fusion
     - Statistiques génériques
     - Recherche avancée multi-critères
-    - Auto-cleanup
-    - Mixins intégrés (Status, SoftDelete, Priority...)
+    - Mixins intégrés (Status, SoftDelete, etc.)
     """
 
     def __init__(self, model: type[T], cache_ttl: int = 60):
@@ -34,9 +33,9 @@ class BaseService(Generic[T]):
         self.model_name = model.__name__
         self.cache_ttl = cache_ttl
 
-    # ═══════════════════════════════════════════════════════════
+    # ════════════════════════════════════════════════════════════
     # CRUD DE BASE
-    # ═══════════════════════════════════════════════════════════
+    # ════════════════════════════════════════════════════════════
 
     @handle_errors(show_in_ui=True)
     def create(self, data: Dict, db: Session = None) -> T:
@@ -49,7 +48,6 @@ class BaseService(Generic[T]):
             logger.info(f"{self.model_name} créé: {entity.id}")
             self._invalidate_cache()
             return entity
-
         return self._with_session(_execute, db)
 
     @handle_errors(show_in_ui=False, fallback_value=None)
@@ -65,7 +63,6 @@ class BaseService(Generic[T]):
             if entity:
                 Cache.set(cache_key, entity, ttl=self.cache_ttl)
             return entity
-
         return self._with_session(_execute, db)
 
     @handle_errors(show_in_ui=False, fallback_value=[])
@@ -74,16 +71,12 @@ class BaseService(Generic[T]):
         """Liste avec filtres et tri"""
         def _execute(session: Session) -> List[T]:
             query = session.query(self.model)
-
             if filters:
                 query = self._apply_filters(query, filters)
-
             if hasattr(self.model, order_by):
                 order_col = getattr(self.model, order_by)
                 query = query.order_by(desc(order_col) if desc_order else order_col)
-
             return query.offset(skip).limit(limit).all()
-
         return self._with_session(_execute, db)
 
     @handle_errors(show_in_ui=True, fallback_value=None)
@@ -93,17 +86,14 @@ class BaseService(Generic[T]):
             entity = session.query(self.model).get(entity_id)
             if not entity:
                 raise NotFoundError(f"{self.model_name} {entity_id} non trouvé")
-
             for key, value in data.items():
                 if hasattr(entity, key):
                     setattr(entity, key, value)
-
             session.commit()
             session.refresh(entity)
             logger.info(f"{self.model_name} {entity_id} mis à jour")
             self._invalidate_cache()
             return entity
-
         return self._with_session(_execute, db)
 
     @handle_errors(show_in_ui=True, fallback_value=False)
@@ -117,7 +107,6 @@ class BaseService(Generic[T]):
                 self._invalidate_cache()
                 return True
             return False
-
         return self._with_session(_execute, db)
 
     @handle_errors(show_in_ui=False, fallback_value=0)
@@ -128,52 +117,11 @@ class BaseService(Generic[T]):
             if filters:
                 query = self._apply_filters(query, filters)
             return query.count()
-
         return self._with_session(_execute, db)
 
-    # ═══════════════════════════════════════════════════════════
-    # BULK OPERATIONS
-    # ═══════════════════════════════════════════════════════════
-
-    @handle_errors(show_in_ui=True)
-    def bulk_create_with_merge(self, items_data: List[Dict], merge_key: str,
-                               merge_strategy: Callable[[Dict, Dict], Dict],
-                               db: Session = None) -> Tuple[int, int]:
-        """Création en masse avec fusion intelligente"""
-        def _execute(session: Session) -> Tuple[int, int]:
-            created = merged = 0
-
-            for data in items_data:
-                merge_value = data.get(merge_key)
-                if not merge_value:
-                    continue
-
-                existing = session.query(self.model).filter(
-                    getattr(self.model, merge_key) == merge_value
-                ).first()
-
-                if existing:
-                    existing_dict = self._model_to_dict(existing)
-                    merged_data = merge_strategy(existing_dict, data)
-                    for key, value in merged_data.items():
-                        if hasattr(existing, key):
-                            setattr(existing, key, value)
-                    merged += 1
-                else:
-                    entity = self.model(**data)
-                    session.add(entity)
-                    created += 1
-
-            session.commit()
-            logger.info(f"Bulk: {created} créés, {merged} fusionnés")
-            self._invalidate_cache()
-            return created, merged
-
-        return self._with_session(_execute, db)
-
-    # ═══════════════════════════════════════════════════════════
+    # ════════════════════════════════════════════════════════════
     # RECHERCHE AVANCÉE
-    # ═══════════════════════════════════════════════════════════
+    # ════════════════════════════════════════════════════════════
 
     @handle_errors(show_in_ui=False, fallback_value=[])
     def advanced_search(self, search_term: Optional[str] = None,
@@ -206,12 +154,49 @@ class BaseService(Generic[T]):
                 query = query.order_by(desc(order_col) if sort_desc else order_col)
 
             return query.offset(offset).limit(limit).all()
-
         return self._with_session(_execute, db)
 
-    # ═══════════════════════════════════════════════════════════
+    # ════════════════════════════════════════════════════════════
+    # BULK OPERATIONS
+    # ════════════════════════════════════════════════════════════
+
+    @handle_errors(show_in_ui=True)
+    def bulk_create_with_merge(self, items_data: List[Dict], merge_key: str,
+                               merge_strategy: Callable[[Dict, Dict], Dict],
+                               db: Session = None) -> Tuple[int, int]:
+        """Création en masse avec fusion intelligente"""
+        def _execute(session: Session) -> Tuple[int, int]:
+            created = merged = 0
+            for data in items_data:
+                merge_value = data.get(merge_key)
+                if not merge_value:
+                    continue
+
+                existing = session.query(self.model).filter(
+                    getattr(self.model, merge_key) == merge_value
+                ).first()
+
+                if existing:
+                    existing_dict = self._model_to_dict(existing)
+                    merged_data = merge_strategy(existing_dict, data)
+                    for key, value in merged_data.items():
+                        if hasattr(existing, key):
+                            setattr(existing, key, value)
+                    merged += 1
+                else:
+                    entity = self.model(**data)
+                    session.add(entity)
+                    created += 1
+
+            session.commit()
+            logger.info(f"Bulk: {created} créés, {merged} fusionnés")
+            self._invalidate_cache()
+            return created, merged
+        return self._with_session(_execute, db)
+
+    # ════════════════════════════════════════════════════════════
     # STATISTIQUES
-    # ═══════════════════════════════════════════════════════════
+    # ════════════════════════════════════════════════════════════
 
     @handle_errors(show_in_ui=False, fallback_value={})
     def get_stats(self, group_by_fields: Optional[List[str]] = None,
@@ -221,7 +206,6 @@ class BaseService(Generic[T]):
         """Statistiques génériques"""
         def _execute(session: Session) -> Dict:
             query = session.query(self.model)
-
             if additional_filters:
                 query = self._apply_filters(query, additional_filters)
 
@@ -247,33 +231,24 @@ class BaseService(Generic[T]):
                     stats[name] = count_query.count()
 
             return stats
-
         return self._with_session(_execute, db)
 
-    # ═══════════════════════════════════════════════════════════
+    # ════════════════════════════════════════════════════════════
     # MIXINS INTÉGRÉS
-    # ═══════════════════════════════════════════════════════════
+    # ════════════════════════════════════════════════════════════
 
     def count_by_status(self, status_field: str = "statut", db: Session = None) -> Dict[str, int]:
-        """Compte par statut (StatusTrackingMixin)"""
+        """Compte par statut"""
         stats = self.get_stats(group_by_fields=[status_field], db=db)
         return stats.get(f"by_{status_field}", {})
 
     def mark_as(self, item_id: int, status_field: str, status_value: str, db: Session = None) -> bool:
-        """Marque avec un statut (StatusTrackingMixin)"""
+        """Marque avec un statut"""
         return self.update(item_id, {status_field: status_value}, db=db) is not None
 
-    def soft_delete(self, item_id: int, deleted_field: str = "deleted", db: Session = None) -> bool:
-        """Suppression logique (SoftDeleteMixin)"""
-        return self.update(item_id, {deleted_field: True, "deleted_at": datetime.now()}, db=db) is not None
-
-    def restore(self, item_id: int, deleted_field: str = "deleted", db: Session = None) -> bool:
-        """Restaure un item (SoftDeleteMixin)"""
-        return self.update(item_id, {deleted_field: False, "deleted_at": None}, db=db) is not None
-
-    # ═══════════════════════════════════════════════════════════
+    # ════════════════════════════════════════════════════════════
     # HELPERS PRIVÉS
-    # ═══════════════════════════════════════════════════════════
+    # ════════════════════════════════════════════════════════════
 
     def _with_session(self, func: Callable, db: Optional[Session]) -> Any:
         """Exécute fonction avec session"""
@@ -287,9 +262,7 @@ class BaseService(Generic[T]):
         for field, value in filters.items():
             if not hasattr(self.model, field):
                 continue
-
             column = getattr(self.model, field)
-
             if not isinstance(value, dict):
                 query = query.filter(column == value)
             else:
@@ -302,7 +275,6 @@ class BaseService(Generic[T]):
                         query = query.filter(column.in_(val))
                     elif op == "like":
                         query = query.filter(column.ilike(f"%{val}%"))
-
         return query
 
     def _model_to_dict(self, obj: Any) -> Dict:

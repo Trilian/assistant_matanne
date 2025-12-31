@@ -1,12 +1,30 @@
 """
-Module Cuisine - Point d'Entrée
-Gestion complète de la cuisine : Recettes, Inventaire, Courses, Planning
+Module Cuisine - Point d'Entrée Unifié
+Architecture Optimisée avec BaseModuleUI
 """
 
-# Les modules sont chargés dynamiquement par app.py
-# Ce fichier sert uniquement de marqueur de package
+# Configs
+from .configs import (
+    get_recettes_config,
+    get_inventaire_config,
+    get_courses_config,
+    get_planning_config
+)
+
+# Modules (auto-expose les app() functions)
+from . import recettes
+from . import inventaire
+from . import courses
+from . import planning_semaine
 
 __all__ = [
+    # Configs
+    "get_recettes_config",
+    "get_inventaire_config",
+    "get_courses_config",
+    "get_planning_config",
+
+    # Modules
     "recettes",
     "inventaire",
     "courses",
