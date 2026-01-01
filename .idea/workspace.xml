@@ -5,20 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment=" amelioration app duplication etc..">
-      <change afterPath="$PROJECT_DIR$/src/constants.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/core/validation_unified.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/database.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/state.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/state.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/validation.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/validation_middleware.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/courses.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/cuisine/courses.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/inventaire.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/cuisine/inventaire.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/planning_semaine.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/cuisine/planning_semaine.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/recettes.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/cuisine/recettes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/ai_service.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -190,14 +177,6 @@
       <workItem from="1764864455782" duration="6942000" />
       <workItem from="1764923035460" duration="23405000" />
       <workItem from="1765096794626" duration="16000" />
-    </task>
-    <task id="LOCAL-00046" summary="Recette amelioration">
-      <option name="closed" value="true" />
-      <created>1764940706184</created>
-      <option name="number" value="00046" />
-      <option name="presentableId" value="LOCAL-00046" />
-      <option name="project" value="LOCAL" />
-      <updated>1764940706184</updated>
     </task>
     <task id="LOCAL-00047" summary="Recette amelioration">
       <option name="closed" value="true" />
@@ -583,7 +562,15 @@
       <option name="project" value="LOCAL" />
       <updated>1767255613942</updated>
     </task>
-    <option name="localTasksCounter" value="95" />
+    <task id="LOCAL-00095" summary=" amelioration app duplication etc..">
+      <option name="closed" value="true" />
+      <created>1767303027433</created>
+      <option name="number" value="00095" />
+      <option name="presentableId" value="LOCAL-00095" />
+      <option name="project" value="LOCAL" />
+      <updated>1767303027433</updated>
+    </task>
+    <option name="localTasksCounter" value="96" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
