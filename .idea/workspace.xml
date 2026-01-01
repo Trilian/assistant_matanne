@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment=" amelioration app duplication etc..">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment=" amelioration app duplication etc.." />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -77,8 +75,8 @@
       <recent name="D:\Projet_streamlit\assistant_matanne\assets" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="D:\Projet_streamlit\assistant_matanne\src\services" />
       <recent name="D:\Projet_streamlit\assistant_matanne\src\core" />
+      <recent name="D:\Projet_streamlit\assistant_matanne\src\services" />
       <recent name="D:\Projet_streamlit\assistant_matanne\src\core\validation" />
       <recent name="D:\Projet_streamlit\assistant_matanne\src\services\planning" />
       <recent name="D:\Projet_streamlit\assistant_matanne\modules\outils" />
@@ -177,14 +175,6 @@
       <workItem from="1764864455782" duration="6942000" />
       <workItem from="1764923035460" duration="23405000" />
       <workItem from="1765096794626" duration="16000" />
-    </task>
-    <task id="LOCAL-00047" summary="Recette amelioration">
-      <option name="closed" value="true" />
-      <created>1764941335934</created>
-      <option name="number" value="00047" />
-      <option name="presentableId" value="LOCAL-00047" />
-      <option name="project" value="LOCAL" />
-      <updated>1764941335934</updated>
     </task>
     <task id="LOCAL-00048" summary="Planning semaine amelioration">
       <option name="closed" value="true" />
@@ -570,7 +560,15 @@
       <option name="project" value="LOCAL" />
       <updated>1767303027433</updated>
     </task>
-    <option name="localTasksCounter" value="96" />
+    <task id="LOCAL-00096" summary=" amelioration app duplication etc..">
+      <option name="closed" value="true" />
+      <created>1767304403959</created>
+      <option name="number" value="00096" />
+      <option name="presentableId" value="LOCAL-00096" />
+      <option name="project" value="LOCAL" />
+      <updated>1767304403959</updated>
+    </task>
+    <option name="localTasksCounter" value="97" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
