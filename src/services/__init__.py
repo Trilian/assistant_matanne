@@ -1,4 +1,3 @@
-
 """
 Services - Point d'Entrée Unifié REFACTORISÉ
 Architecture avec BaseAIService
@@ -12,7 +11,7 @@ from .base_ai_service import (
     InventoryAIMixin
 )
 
-# Services IA (nouvelle version)
+# 🆕 Services IA Refactorisés (nouvelle version)
 from .ai_services import (
     AIRecetteService,
     CoursesAIService,
@@ -38,7 +37,7 @@ __all__ = [
     "PlanningAIMixin",
     "InventoryAIMixin",
 
-    # Services IA
+    # 🆕 Services IA Refactorisés
     "AIRecetteService",
     "CoursesAIService",
     "InventaireAIService",
