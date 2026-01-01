@@ -18,7 +18,7 @@ from src.ui.feedback import smart_spinner, ProgressTracker, show_success, show_e
 from src.ui.components import Modal, empty_state, badge
 
 # Validation
-from src.core.validation_middleware import (
+from src.core.validation_unified import (
     validate_and_sanitize_form,
     COURSES_SCHEMA
 )
@@ -30,6 +30,7 @@ from src.core.state import get_state
 # Config
 from .configs import get_courses_config
 
+from src.core.constants import ITEMS_PER_PAGE_COURSES, PRIORITES, MAGASINS
 
 # ═══════════════════════════════════════════════════════════
 # MODULE PRINCIPAL

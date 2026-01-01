@@ -1,31 +1,39 @@
 """
-Module Inventaire - VERSION MIGRÉE COMPLÈTE
-Intègre: BaseModuleUI, Validation, Feedback, Services IA refactorisés
+Module Inventaire - IMPORTS CORRIGÉS
 """
 import streamlit as st
 from datetime import date, timedelta
 from typing import Optional, List, Dict
 
-# Services
+# ✅ Services
 from src.services.inventaire import inventaire_service, CATEGORIES, EMPLACEMENTS
 from src.services.ai_services import create_inventaire_ai_service
 
-# UI
+# ✅ UI
 from src.ui.base_module import create_module_ui
 from src.ui.domain import inventory_card, stock_alert
 from src.ui.feedback import smart_spinner, ProgressTracker, show_success, show_error
 from src.ui.components import Modal, empty_state, badge
 
-# Validation
-from src.core.validation_middleware import (
+# ✅ Validation (CORRIGÉ - validation_unified)
+from src.core.validation_unified import (
     validate_and_sanitize_form,
     INVENTAIRE_SCHEMA,
     show_validation_errors
 )
 
-# Cache & State
+# ✅ Cache & State
 from src.core.cache import Cache
 from src.core.state import get_state
+
+# ✅ Constants (NOUVEAU)
+from src.core.constants import (
+    ITEMS_PER_PAGE_INVENTAIRE,
+    CATEGORIES_INVENTAIRE,
+    EMPLACEMENTS_INVENTAIRE,
+    INVENTAIRE_SEUIL_CRITIQUE_RATIO,
+    INVENTAIRE_JOURS_PEREMPTION_ALERTE
+)
 
 # Config
 from .configs import get_inventaire_config
@@ -36,10 +44,9 @@ from .configs import get_inventaire_config
 # ═══════════════════════════════════════════════════════════
 
 def app():
-    """Point d'entrée module inventaire - Version migrée"""
+    """Point d'entrée module inventaire"""
     st.title("📦 Inventaire Intelligent")
 
-    # Tabs
     tab1, tab2, tab3 = st.tabs([
         "📋 Inventaire",
         "🤖 Analyse IA",
@@ -62,20 +69,14 @@ def app():
 
 def render_inventaire():
     """Affichage inventaire avec alertes"""
-
-    # Charger inventaire complet
     inventaire = inventaire_service.get_inventaire_complet()
 
     if not inventaire:
-        empty_state(
-            "Inventaire vide",
-            "📦",
-            "Ajoute ton premier article pour commencer"
-        )
+        empty_state("Inventaire vide", "📦", "Ajoute ton premier article")
         render_add_form()
         return
 
-    # Afficher alertes critiques
+    # Alertes critiques
     articles_critiques = [
         art for art in inventaire
         if art.get("statut") in ["critique", "sous_seuil", "peremption_proche"]
@@ -88,7 +89,7 @@ def render_inventaire():
             key="alert_inventaire"
         )
 
-    # Stats rapides
+    # Stats
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
@@ -106,7 +107,7 @@ def render_inventaire():
         critiques = len([a for a in inventaire if a.get("statut") == "critique"])
         st.metric("Critiques", critiques, delta=None if critiques == 0 else "🔴")
 
-    # Actions rapides
+    # Actions
     col_add, col_scan = st.columns(2)
 
     with col_add:
@@ -117,7 +118,6 @@ def render_inventaire():
         if st.button("📸 Scanner (TODO)", use_container_width=True):
             st.info("Scan de tickets bientôt disponible !")
 
-    # Formulaire ajout
     if st.session_state.get("show_add_form", False):
         render_add_form()
 
@@ -127,18 +127,10 @@ def render_inventaire():
     col_cat, col_emp, col_stat = st.columns(3)
 
     with col_cat:
-        categorie_filter = st.selectbox(
-            "Catégorie",
-            ["Toutes"] + CATEGORIES,
-            key="filter_cat"
-        )
+        categorie_filter = st.selectbox("Catégorie", ["Toutes"] + CATEGORIES, key="filter_cat")
 
     with col_emp:
-        emplacement_filter = st.selectbox(
-            "Emplacement",
-            ["Tous"] + EMPLACEMENTS,
-            key="filter_emp"
-        )
+        emplacement_filter = st.selectbox("Emplacement", ["Tous"] + EMPLACEMENTS, key="filter_emp")
 
     with col_stat:
         statut_filter = st.selectbox(
@@ -147,7 +139,7 @@ def render_inventaire():
             key="filter_stat"
         )
 
-    # Filtrer inventaire
+    # Filtrer
     filtered = inventaire
 
     if categorie_filter != "Toutes":
@@ -159,7 +151,6 @@ def render_inventaire():
     if statut_filter != "Tous":
         filtered = [a for a in filtered if a.get("statut") == statut_filter]
 
-    # Afficher articles
     st.markdown(f"### 📦 Articles ({len(filtered)})")
 
     for article in filtered:
@@ -172,8 +163,7 @@ def render_inventaire():
 
 
 def render_add_form():
-    """Formulaire ajout article avec validation"""
-
+    """Formulaire ajout article"""
     with st.expander("➕ Ajouter un Article", expanded=True):
         with st.form("add_inventaire_form"):
             col1, col2 = st.columns(2)
@@ -206,7 +196,6 @@ def render_add_form():
                 st.rerun()
 
             if submitted:
-                # ✅ Validation sécurisée
                 form_data = {
                     "nom": nom,
                     "categorie": categorie,
@@ -217,21 +206,19 @@ def render_add_form():
                     "date_peremption": date_peremption if date_peremption else None
                 }
 
+                # ✅ Validation avec validation_unified
                 is_valid, sanitized = validate_and_sanitize_form("inventaire", form_data)
 
                 if is_valid:
                     try:
-                        # Créer article
                         from src.utils.helpers import find_or_create_ingredient
 
-                        # Trouver/créer ingrédient
                         ingredient_id = find_or_create_ingredient(
                             nom=sanitized["nom"],
                             unite=sanitized["unite"],
                             categorie=sanitized["categorie"]
                         )
 
-                        # Créer article inventaire
                         inventaire_service.create({
                             "ingredient_id": ingredient_id,
                             "quantite": sanitized["quantite"],
@@ -251,8 +238,7 @@ def render_add_form():
 
 
 def adjust_stock(article_id: int, delta: float):
-    """Ajuste stock avec feedback"""
-
+    """Ajuste stock"""
     try:
         article = inventaire_service.get_by_id(article_id)
 
@@ -260,10 +246,7 @@ def adjust_stock(article_id: int, delta: float):
             show_error("Article introuvable")
             return
 
-        # Nouvelle quantité
         new_qty = max(0, article.quantite + delta)
-
-        # Mettre à jour
         inventaire_service.update(article_id, {"quantite": new_qty})
 
         Cache.invalidate("inventaire")
@@ -279,7 +262,6 @@ def adjust_stock(article_id: int, delta: float):
 
 def add_to_courses(article_id: int):
     """Ajoute article aux courses"""
-
     try:
         from src.services.courses import courses_service
 
@@ -289,7 +271,6 @@ def add_to_courses(article_id: int):
             show_error("Article introuvable")
             return
 
-        # Ajouter aux courses
         courses_service.create({
             "ingredient_id": article.ingredient_id,
             "quantite_necessaire": article.quantite_min,
@@ -314,18 +295,14 @@ def view_article(article_id: int):
 
 def render_analyse_ia():
     """Analyse IA de l'inventaire"""
-
     st.markdown("### 🤖 Analyse Intelligente")
-    st.caption("Analyse ton inventaire et donne des suggestions")
 
-    # Charger inventaire
     inventaire = inventaire_service.get_inventaire_complet()
 
     if not inventaire:
         empty_state("Inventaire vide", "📦")
         return
 
-    # Stats rapides
     col1, col2, col3 = st.columns(3)
 
     with col1:
@@ -339,33 +316,23 @@ def render_analyse_ia():
         peremption = len([a for a in inventaire if a.get("statut") == "peremption_proche"])
         st.metric("Péremption proche", peremption)
 
-    # Bouton analyse
     if st.button("🚀 Analyser l'Inventaire", type="primary", use_container_width=True):
         analyze_inventory_with_ai(inventaire)
 
 
 async def analyze_inventory_with_ai(inventaire: List[Dict]):
-    """
-    Analyse inventaire avec IA
-
-    ✅ Feedback temps réel
-    ✅ Service IA refactorisé
-    """
-
+    """Analyse inventaire avec IA"""
     ai_service = create_inventaire_ai_service()
 
     try:
-        # ✅ Feedback automatique
         analyse = await ai_service.analyser_inventaire(inventaire)
 
         if not analyse:
             st.warning("Aucune analyse disponible")
             return
 
-        # Afficher résultats
         st.markdown("### 📊 Résultats de l'Analyse")
 
-        # Articles prioritaires
         if analyse.get("articles_prioritaires"):
             st.markdown("#### 🔴 Articles à Commander en Priorité")
 
@@ -379,7 +346,6 @@ async def analyze_inventory_with_ai(inventaire: List[Dict]):
 
                     with col2:
                         if st.button("🛒 Ajouter", key=f"add_{art['nom']}", use_container_width=True):
-                            # Trouver article et ajouter aux courses
                             article = next(
                                 (a for a in inventaire if a['nom'].lower() == art['nom'].lower()),
                                 None
@@ -387,7 +353,6 @@ async def analyze_inventory_with_ai(inventaire: List[Dict]):
                             if article:
                                 add_to_courses(article['id'])
 
-        # Alertes péremption
         if analyse.get("alertes_peremption"):
             st.markdown("#### ⏳ Alertes Péremption")
 
@@ -396,7 +361,6 @@ async def analyze_inventory_with_ai(inventaire: List[Dict]):
                     f"⚠️ **{alerte['nom']}** périme dans {alerte['jours_restants']} jour(s)"
                 )
 
-        # Suggestions
         if analyse.get("suggestions"):
             st.markdown("#### 💡 Suggestions d'Optimisation")
 
@@ -414,10 +378,8 @@ async def analyze_inventory_with_ai(inventaire: List[Dict]):
 
 def render_parametres():
     """Paramètres module inventaire"""
-
     st.markdown("### ⚙️ Paramètres")
 
-    # Import/Export
     st.markdown("#### 📦 Import/Export")
 
     col1, col2 = st.columns(2)
@@ -442,7 +404,6 @@ def render_parametres():
         if st.button("📥 Télécharger", use_container_width=True):
             export_inventaire(format_export)
 
-    # Maintenance
     st.markdown("---")
     st.markdown("#### 🧹 Maintenance")
 
@@ -457,7 +418,6 @@ def render_parametres():
             Cache.invalidate("inventaire")
             show_success("Cache vidé !")
 
-    # Stats
     st.markdown("---")
     st.markdown("#### 📊 Statistiques")
 
@@ -478,12 +438,10 @@ def render_parametres():
 
 
 def import_inventaire_file(file):
-    """Importe inventaire avec feedback"""
-
+    """Importe inventaire"""
     try:
         from src.services.inventaire import InventaireImporter
 
-        # Lire contenu
         if file.name.endswith('.csv'):
             content = file.read().decode('utf-8')
             importer = InventaireImporter()
@@ -503,13 +461,12 @@ def import_inventaire_file(file):
             st.error("Aucun article valide")
             return
 
-        # Import avec progress bar
         progress = ProgressTracker("Import inventaire", total=len(items))
 
         imported = 0
         for i, item in enumerate(items):
             try:
-                # ✅ Validation
+                # ✅ Validation avec validation_unified
                 is_valid, sanitized = validate_and_sanitize_form("inventaire", item)
 
                 if is_valid:
@@ -524,7 +481,7 @@ def import_inventaire_file(file):
                     inventaire_service.create({
                         "ingredient_id": ingredient_id,
                         "quantite": sanitized["quantite"],
-                        "quantite_min": sanitized.get("seuil", 1.0),
+                        "quantite_min": sanitized.get("quantite_min", 1.0),
                         "emplacement": sanitized.get("emplacement"),
                         "date_peremption": sanitized.get("date_peremption")
                     })
@@ -546,7 +503,6 @@ def import_inventaire_file(file):
 
 def export_inventaire(format: str):
     """Exporte inventaire"""
-
     try:
         from src.services.inventaire import InventaireExporter
 
@@ -560,23 +516,10 @@ def export_inventaire(format: str):
 
         if format == "csv":
             data = exporter.to_csv(inventaire)
-
-            st.download_button(
-                "📥 Télécharger CSV",
-                data,
-                "inventaire_export.csv",
-                "text/csv"
-            )
-
-        else:  # JSON
+            st.download_button("📥 Télécharger CSV", data, "inventaire_export.csv", "text/csv")
+        else:
             data = exporter.to_json(inventaire)
-
-            st.download_button(
-                "📥 Télécharger JSON",
-                data,
-                "inventaire_export.json",
-                "application/json"
-            )
+            st.download_button("📥 Télécharger JSON", data, "inventaire_export.json", "application/json")
 
         show_success(f"✅ {len(inventaire)} articles exportés")
 
@@ -586,7 +529,6 @@ def export_inventaire(format: str):
 
 def delete_expired_items():
     """Supprime articles périmés"""
-
     try:
         inventaire = inventaire_service.get_inventaire_complet()
 
@@ -599,7 +541,6 @@ def delete_expired_items():
             st.info("Aucun article périmé")
             return
 
-        # Confirmation
         st.warning(f"⚠️ {len(expired)} articles périmés à supprimer")
 
         for art in expired:

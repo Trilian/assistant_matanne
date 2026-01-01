@@ -1,32 +1,42 @@
 """
-Module Recettes - VERSION MIGRÉE COMPLÈTE
-Intègre: BaseModuleUI, Validation, Feedback, Cache Sémantique, Services IA refactorisés
+Module Recettes - VERSION MIGRÉE AVEC IMPORTS CORRIGÉS
 """
 import streamlit as st
 from datetime import date
 from typing import Optional, List, Dict
 
-# Services
+# ✅ Services (imports corrigés)
 from src.services.recettes import recette_service, RecetteExporter, RecetteImporter
 from src.services.ai_services import create_ai_recette_service
 
-# UI
+# ✅ UI
 from src.ui.base_module import create_module_ui
 from src.ui.domain import recipe_card
 from src.ui.feedback import smart_spinner, ProgressTracker, show_success, show_error
 from src.ui.components import Modal, empty_state, badge
 
-# Validation
-from src.core.validation_middleware import (
+# ✅ Validation (CORRIGÉ - validation_unified)
+from src.core.validation_unified import (
     validate_and_sanitize_form,
     RECETTE_SCHEMA,
-    show_validation_errors
+    show_validation_errors,
+    RecetteInput,
+    validate_model
 )
 
-# Cache & State
+# ✅ Cache & State
 from src.core.cache import Cache
 from src.core.state import get_state
 from src.core.ai.semantic_cache import SemanticCache
+
+# ✅ Constants (NOUVEAU)
+from src.core.constants import (
+    ITEMS_PER_PAGE_RECETTES,
+    CACHE_TTL_RECETTES,
+    DIFFICULTES,
+    SAISONS,
+    TYPES_REPAS
+)
 
 # Config
 from .configs import get_recettes_config
@@ -37,10 +47,9 @@ from .configs import get_recettes_config
 # ═══════════════════════════════════════════════════════════
 
 def app():
-    """Point d'entrée module recettes - Version migrée"""
+    """Point d'entrée module recettes"""
     st.title("🍽️ Recettes Intelligentes")
 
-    # Tabs principaux
     tab1, tab2, tab3, tab4 = st.tabs([
         "📚 Bibliothèque",
         "🤖 Génération IA",
@@ -62,17 +71,14 @@ def app():
 
 
 # ═══════════════════════════════════════════════════════════
-# TAB 1: BIBLIOTHÈQUE (BaseModuleUI)
+# TAB 1: BIBLIOTHÈQUE
 # ═══════════════════════════════════════════════════════════
 
 def render_bibliotheque():
     """Bibliothèque recettes avec BaseModuleUI"""
-
-    # Utiliser BaseModuleUI pour affichage standard
     config = get_recettes_config()
     ui = create_module_ui(config)
 
-    # Ajouter actions custom
     col1, col2 = st.columns([2, 1])
 
     with col1:
@@ -84,21 +90,17 @@ def render_bibliotheque():
             st.session_state.active_tab = "ia"
             st.rerun()
 
-    # Formulaire ajout (avec validation)
     if st.session_state.get("show_add_form", False):
         render_add_form()
 
-    # Afficher liste recettes via BaseModuleUI
     ui.render()
 
-    # Détails recette si sélectionnée
     if st.session_state.get("viewing_recipe_id"):
         render_recipe_details(st.session_state.viewing_recipe_id)
 
 
 def render_add_form():
     """Formulaire ajout recette avec validation sécurisée"""
-
     with st.expander("➕ Ajouter une Recette", expanded=True):
         with st.form("add_recipe_form"):
             col1, col2 = st.columns(2)
@@ -107,13 +109,13 @@ def render_add_form():
                 nom = st.text_input("Nom *", max_chars=200)
                 temps_prep = st.number_input("Temps préparation (min) *", min_value=0, max_value=300, value=30)
                 portions = st.number_input("Portions *", min_value=1, max_value=20, value=4)
-                type_repas = st.selectbox("Type repas *", ["petit_déjeuner", "déjeuner", "dîner", "goûter"])
+                type_repas = st.selectbox("Type repas *", TYPES_REPAS)
 
             with col2:
                 description = st.text_area("Description", max_chars=2000)
                 temps_cuisson = st.number_input("Temps cuisson (min) *", min_value=0, max_value=300, value=30)
-                difficulte = st.selectbox("Difficulté *", ["facile", "moyen", "difficile"])
-                saison = st.selectbox("Saison *", ["printemps", "été", "automne", "hiver", "toute_année"])
+                difficulte = st.selectbox("Difficulté *", DIFFICULTES)
+                saison = st.selectbox("Saison *", SAISONS)
 
             col_submit, col_cancel = st.columns(2)
 
@@ -128,7 +130,6 @@ def render_add_form():
                 st.rerun()
 
             if submitted:
-                # ✅ Validation sécurisée
                 form_data = {
                     "nom": nom,
                     "description": description,
@@ -140,29 +141,22 @@ def render_add_form():
                     "saison": saison
                 }
 
+                # ✅ Validation avec validation_unified
                 is_valid, sanitized = validate_and_sanitize_form("recettes", form_data)
 
                 if is_valid:
                     try:
-                        # Créer recette (données sécurisées)
                         recette_id = recette_service.create(sanitized)
-
-                        # Invalider cache
                         Cache.invalidate("recettes")
-
-                        # Feedback succès
                         show_success(f"✅ Recette '{sanitized['nom']}' ajoutée !")
-
                         st.session_state.show_add_form = False
                         st.rerun()
-
                     except Exception as e:
                         show_error(f"❌ Erreur: {str(e)}")
 
 
 def render_recipe_details(recette_id: int):
     """Affiche détails recette"""
-
     with st.sidebar:
         st.markdown("---")
         st.markdown("### 📖 Détails Recette")
@@ -171,7 +165,6 @@ def render_recipe_details(recette_id: int):
             st.session_state.viewing_recipe_id = None
             st.rerun()
 
-        # Charger recette complète
         recette = recette_service.get_by_id_full(recette_id)
 
         if not recette:
@@ -180,7 +173,6 @@ def render_recipe_details(recette_id: int):
 
         st.markdown(f"#### {recette.nom}")
 
-        # Métadonnées
         st.caption(f"⏱️ {recette.temps_preparation + recette.temps_cuisson}min")
         st.caption(f"🍽️ {recette.portions} portions")
         st.caption(f"📊 {recette.difficulte.capitalize()}")
@@ -188,12 +180,10 @@ def render_recipe_details(recette_id: int):
         if recette.description:
             st.markdown(f"_{recette.description}_")
 
-        # Ingrédients
         st.markdown("##### 🥕 Ingrédients")
         for ing in recette.ingredients:
             st.write(f"• {ing.quantite} {ing.unite} {ing.ingredient.nom}")
 
-        # Étapes
         st.markdown("##### 📝 Étapes")
         for etape in sorted(recette.etapes, key=lambda x: x.ordre):
             with st.expander(f"Étape {etape.ordre}"):
@@ -201,7 +191,6 @@ def render_recipe_details(recette_id: int):
                 if etape.duree:
                     st.caption(f"⏱️ {etape.duree} min")
 
-        # Actions
         st.markdown("---")
 
         if st.button("✏️ Modifier", use_container_width=True):
@@ -218,54 +207,31 @@ def render_recipe_details(recette_id: int):
 
 
 # ═══════════════════════════════════════════════════════════
-# TAB 2: GÉNÉRATION IA (Services Refactorisés)
+# TAB 2: GÉNÉRATION IA
 # ═══════════════════════════════════════════════════════════
 
 def render_generation_ia():
-    """Génération recettes avec IA - Version refactorisée"""
-
+    """Génération recettes avec IA"""
     st.markdown("### 🤖 Génération Intelligente")
     st.caption("Utilise le cache sémantique pour économiser 70% des appels API")
 
-    # Afficher stats cache
     with st.expander("📊 Statistiques Cache IA", expanded=False):
         SemanticCache.render_stats()
 
-    # Formulaire génération
     col1, col2 = st.columns(2)
 
     with col1:
         st.markdown("#### Filtres")
 
-        saison = st.selectbox(
-            "Saison",
-            ["toute_année", "printemps", "été", "automne", "hiver"],
-            index=0
-        )
-
-        type_repas = st.selectbox(
-            "Type de repas",
-            ["déjeuner", "dîner", "petit_déjeuner", "goûter"],
-            index=0
-        )
-
-        difficulte = st.selectbox(
-            "Difficulté max",
-            ["facile", "moyen", "difficile"],
-            index=1
-        )
-
+        saison = st.selectbox("Saison", SAISONS, index=0)
+        type_repas = st.selectbox("Type de repas", TYPES_REPAS, index=0)
+        difficulte = st.selectbox("Difficulté max", DIFFICULTES, index=1)
         is_quick = st.checkbox("⚡ Recettes rapides (<30min)", value=False)
 
     with col2:
         st.markdown("#### Options")
 
-        nb_recettes = st.slider(
-            "Nombre de recettes",
-            min_value=1,
-            max_value=10,
-            value=3
-        )
+        nb_recettes = st.slider("Nombre de recettes", min_value=1, max_value=10, value=3)
 
         ingredients_dispo = st.text_area(
             "Ingrédients disponibles (optionnel)",
@@ -275,7 +241,6 @@ def render_generation_ia():
 
         st.caption(f"💰 Coût estimé: ~{nb_recettes * 0.002}€")
 
-    # Bouton génération
     if st.button("🚀 Générer les Recettes", type="primary", use_container_width=True):
         generate_recipes_with_ia(
             saison=saison,
@@ -295,15 +260,7 @@ async def generate_recipes_with_ia(
         nb_recettes: int,
         ingredients_dispo: str
 ):
-    """
-    Génère recettes avec IA
-
-    ✅ Feedback temps réel
-    ✅ Cache sémantique
-    ✅ Validation automatique
-    """
-
-    # Préparer filtres
+    """Génère recettes avec IA"""
     filters = {
         "saison": saison,
         "type_repas": type_repas,
@@ -311,16 +268,13 @@ async def generate_recipes_with_ia(
         "is_quick": is_quick
     }
 
-    # Parser ingrédients
     ingredients_list = None
     if ingredients_dispo:
         ingredients_list = [i.strip() for i in ingredients_dispo.split(",") if i.strip()]
 
-    # Créer service IA
     ai_service = create_ai_recette_service()
 
     try:
-        # ✅ Feedback automatique + cache sémantique intégré
         recettes = await ai_service.generer_recettes(
             filters=filters,
             ingredients_dispo=ingredients_list,
@@ -331,49 +285,34 @@ async def generate_recipes_with_ia(
             st.warning("Aucune recette générée")
             return
 
-        # Afficher résultats
         st.markdown(f"### ✨ {len(recettes)} Recettes Générées")
 
         for idx, recette in enumerate(recettes):
             with st.expander(f"{idx+1}. {recette.nom}", expanded=(idx == 0)):
-
                 col1, col2 = st.columns([2, 1])
 
                 with col1:
                     st.markdown(f"**{recette.description}**")
-
                     st.caption(
                         f"⏱️ {recette.temps_preparation + recette.temps_cuisson}min • "
                         f"🍽️ {recette.portions}p • "
                         f"📊 {recette.difficulte.capitalize()}"
                     )
 
-                    # Ingrédients
                     st.markdown("##### Ingrédients")
                     for ing in recette.ingredients:
                         st.write(f"• {ing['quantite']} {ing['unite']} {ing['nom']}")
 
-                    # Étapes
                     st.markdown("##### Étapes")
                     for etape in recette.etapes:
                         st.write(f"{etape['ordre']}. {etape['description']}")
 
                 with col2:
-                    # Actions
-                    if st.button(
-                            "💾 Sauvegarder",
-                            key=f"save_{idx}",
-                            use_container_width=True
-                    ):
+                    if st.button("💾 Sauvegarder", key=f"save_{idx}", use_container_width=True):
                         save_generated_recipe(recette.dict())
 
-                    if st.button(
-                            "🔄 Régénérer",
-                            key=f"regen_{idx}",
-                            use_container_width=True
-                    ):
+                    if st.button("🔄 Régénérer", key=f"regen_{idx}", use_container_width=True):
                         st.info("Régénération en cours...")
-                        # TODO: Implémenter régénération
 
     except Exception as e:
         show_error(f"❌ Erreur génération: {str(e)}")
@@ -382,16 +321,14 @@ async def generate_recipes_with_ia(
 
 def save_generated_recipe(recette_data: Dict):
     """Sauvegarde une recette générée par IA"""
-
     try:
-        # ✅ Validation avant sauvegarde
+        # ✅ Validation avec validation_unified
         is_valid, sanitized = validate_and_sanitize_form("recettes", recette_data)
 
         if not is_valid:
             show_error("❌ Recette invalide")
             return
 
-        # Sauvegarder avec service
         with smart_spinner("Sauvegarde de la recette", estimated_seconds=2):
             recette_id = recette_service.create_full(
                 recette_data=sanitized,
@@ -412,7 +349,6 @@ def save_generated_recipe(recette_data: Dict):
 
 def render_recherche_avancee():
     """Recherche avancée multi-critères"""
-
     st.markdown("### 🔍 Recherche Avancée")
 
     col1, col2, col3 = st.columns(3)
@@ -421,16 +357,10 @@ def render_recherche_avancee():
         search_term = st.text_input("🔍 Rechercher", placeholder="Nom, ingrédient...")
 
     with col2:
-        saison_filter = st.multiselect(
-            "Saisons",
-            ["printemps", "été", "automne", "hiver", "toute_année"]
-        )
+        saison_filter = st.multiselect("Saisons", SAISONS)
 
     with col3:
-        difficulte_filter = st.multiselect(
-            "Difficulté",
-            ["facile", "moyen", "difficile"]
-        )
+        difficulte_filter = st.multiselect("Difficulté", DIFFICULTES)
 
     col4, col5 = st.columns(2)
 
@@ -440,13 +370,10 @@ def render_recherche_avancee():
     with col5:
         sort_by = st.selectbox(
             "Trier par",
-            ["nom", "temps_preparation", "portions", "created_at"]
+            ["nom", "temps_preparation", "portions", "cree_le"]
         )
 
-    # Rechercher
     if st.button("🔍 Rechercher", type="primary", use_container_width=True):
-
-        # Construire filtres
         filters = {}
 
         if saison_filter:
@@ -455,7 +382,6 @@ def render_recherche_avancee():
         if difficulte_filter:
             filters["difficulte"] = {"in": difficulte_filter}
 
-        # Rechercher avec service
         results = recette_service.advanced_search(
             search_term=search_term,
             search_fields=["nom", "description"],
@@ -464,7 +390,6 @@ def render_recherche_avancee():
             limit=50
         )
 
-        # Afficher résultats
         st.markdown(f"### 📊 {len(results)} Résultats")
 
         if results:
@@ -502,10 +427,8 @@ def view_recipe(recette_id: int):
 
 def render_parametres():
     """Paramètres module recettes"""
-
     st.markdown("### ⚙️ Paramètres")
 
-    # Import/Export
     st.markdown("#### 📦 Import/Export")
 
     col1, col2 = st.columns(2)
@@ -530,7 +453,6 @@ def render_parametres():
         if st.button("📥 Télécharger", use_container_width=True):
             export_recettes(format_export)
 
-    # Cache
     st.markdown("---")
     st.markdown("#### 🗑️ Cache & Maintenance")
 
@@ -546,7 +468,6 @@ def render_parametres():
             SemanticCache.clear()
             show_success("Cache IA vidé !")
 
-    # Stats
     st.markdown("---")
     st.markdown("#### 📊 Statistiques")
 
@@ -571,10 +492,8 @@ def render_parametres():
 
 
 def import_recettes_file(file):
-    """Importe recettes depuis fichier avec feedback"""
-
+    """Importe recettes depuis fichier"""
     try:
-        # Lire contenu
         if file.name.endswith('.csv'):
             content = file.read().decode('utf-8')
             importer = RecetteImporter()
@@ -594,13 +513,12 @@ def import_recettes_file(file):
             st.error("Aucune recette valide à importer")
             return
 
-        # Import avec progress bar
         progress = ProgressTracker("Import recettes", total=len(items))
 
         imported = 0
         for i, item in enumerate(items):
             try:
-                # ✅ Validation
+                # ✅ Validation avec validation_unified
                 is_valid, sanitized = validate_and_sanitize_form("recettes", item)
 
                 if is_valid:
@@ -622,16 +540,13 @@ def import_recettes_file(file):
 
 def export_recettes(format: str):
     """Exporte recettes"""
-
     try:
-        # Charger recettes
         recettes = recette_service.get_all(limit=1000)
 
         if not recettes:
             st.warning("Aucune recette à exporter")
             return
 
-        # Exporter
         exporter = RecetteExporter()
 
         if format == "csv":
@@ -650,8 +565,7 @@ def export_recettes(format: str):
                 "recettes_export.csv",
                 "text/csv"
             )
-
-        else:  # JSON
+        else:
             data = exporter.to_json([{
                 "nom": r.nom,
                 "description": r.description,

@@ -17,12 +17,13 @@ from src.ui.feedback import smart_spinner, LoadingState, show_success, show_erro
 from src.ui.components import Modal, empty_state, badge
 
 # Validation
-from src.core.validation_middleware import validate_and_sanitize_form
+from src.core.validation_unified import validate_and_sanitize_form
 
 # Cache & State
 from src.core.cache import Cache
 from src.core.state import get_state
 
+from src.core.constants import JOURS_SEMAINE, STATUTS_REPAS
 
 # ═══════════════════════════════════════════════════════════
 # MODULE PRINCIPAL

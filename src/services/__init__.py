@@ -1,43 +1,52 @@
 """
-Services - Point d'Entrée Unifié REFACTORISÉ
-Architecture avec BaseAIService
+Services - Point d'Entrée Unifié
 """
 
-# BaseAIService
-from .base_ai_service import (
-    BaseAIService,
-    RecipeAIMixin,
-    PlanningAIMixin,
-    InventoryAIMixin
-)
+# Base Service (générique CRUD)
+from .base_service import BaseService
 
-# 🆕 Services IA Refactorisés (nouvelle version)
-from .ai_services import (
-    AIRecetteService,
-    CoursesAIService,
-    InventaireAIService,
-    PlanningGenerationService,
-    # Factories
-    create_ai_recette_service,
-    create_courses_ai_service,
-    create_inventaire_ai_service,
-    create_planning_generation_service
-)
+# 🆕 Services IA Refactorisés
+try:
+    from .ai_services import (
+        AIRecetteService,
+        CoursesAIService,
+        InventaireAIService,
+        PlanningGenerationService,
+        # Factories
+        create_ai_recette_service,
+        create_courses_ai_service,
+        create_inventaire_ai_service,
+        create_planning_generation_service
+    )
+    AI_SERVICES_AVAILABLE = True
+except ImportError as e:
+    import logging
+    logging.warning(f"Services IA non disponibles: {e}")
+    AI_SERVICES_AVAILABLE = False
+    # Stubs pour éviter erreurs import
+    AIRecetteService = None
+    CoursesAIService = None
+    InventaireAIService = None
+    PlanningGenerationService = None
+    create_ai_recette_service = None
+    create_courses_ai_service = None
+    create_inventaire_ai_service = None
+    create_planning_generation_service = None
 
-# Services métier (inchangés)
+# Services métier (recettes, inventaire, courses, planning)
 from .recettes import recette_service, RecetteExporter, RecetteImporter
 from .inventaire import inventaire_service, CATEGORIES, EMPLACEMENTS
 from .courses import courses_service, MAGASINS_CONFIG
 from .planning import planning_service, repas_service
 
-__all__ = [
-    # BaseAIService & Mixins
-    "BaseAIService",
-    "RecipeAIMixin",
-    "PlanningAIMixin",
-    "InventoryAIMixin",
+# Service I/O Universel
+from .io_service import IOService
 
-    # 🆕 Services IA Refactorisés
+__all__ = [
+    # Base
+    "BaseService",
+
+    # 🆕 Services IA (si disponibles)
     "AIRecetteService",
     "CoursesAIService",
     "InventaireAIService",
@@ -49,6 +58,9 @@ __all__ = [
     "create_inventaire_ai_service",
     "create_planning_generation_service",
 
+    # Flag disponibilité
+    "AI_SERVICES_AVAILABLE",
+
     # Services métier
     "recette_service",
     "RecetteExporter",
@@ -59,5 +71,8 @@ __all__ = [
     "courses_service",
     "MAGASINS_CONFIG",
     "planning_service",
-    "repas_service"
+    "repas_service",
+
+    # I/O
+    "IOService",
 ]
