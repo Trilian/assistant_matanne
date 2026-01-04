@@ -1,462 +1,484 @@
 """
-Module Accueil - Dashboard intelligent avec Agent IA
-Vue d'ensemble de l'application avec actions rapides
+Module Accueil - Dashboard Central
+Vue d'ensemble de l'application avec stats, alertes et raccourcis
 """
-
 import streamlit as st
-import pandas as pd
-from datetime import datetime, date, timedelta
-import asyncio
-from typing import Dict, List
+from datetime import date, timedelta
+from typing import List, Dict
 
-from src.core.database import get_db_context
-from src.core.models import (
-    Recette,
-    RecetteIngredient,
-    Ingredient,
-    Project,
-    RoutineTask,
-    ProfilEnfant,
-    Notification,
-    BatchMeal,
-    Routine,
-)
-from src.core.ai_agent import AgentIA
+# Services
+from src.services.recettes import recette_service
+from src.services.inventaire import inventaire_service
+from src.services.courses import courses_service
+from src.services.planning import planning_service
 
+# UI
+from src.ui.components import badge, empty_state
+from src.ui.domain import stock_alert
 
-# ===================================
-# HELPERS
-# ===================================
+# State
+from src.core.state import StateManager, get_state
+
+# Cache
+from src.core.cache import Cache
 
 
-def get_dashboard_stats() -> Dict:
-    """Récupère les statistiques pour le dashboard"""
-    with get_db_context() as db:
-        stats = {
-            "recettes_total": db.query(Recipe).count(),
-            "recettes_ia": db.query(Recipe).filter(Recipe.ai_generated == True).count(),
-            "stock_bas": db.query(InventoryItem)
-            .filter(InventoryItem.quantity < InventoryItem.min_quantity)
-            .count(),
-            "repas_planifies": db.query(BatchMeal)
-            .filter(BatchMeal.scheduled_date >= date.today())
-            .count(),
-            "projets_actifs": db.query(Project)
-            .filter(Project.status.in_(["à faire", "en cours"]))
-            .count(),
-            "taches_jour": db.query(RoutineTask).filter(RoutineTask.status == "à faire").count(),
-            "notifications_non_lues": db.query(Notification)
-            .filter(Notification.read == False)
-            .count(),
-        }
-
-        return stats
-
-
-def get_actions_urgentes() -> List[Dict]:
-    """Détecte les actions urgentes nécessitant une attention"""
-    actions = []
-
-    with get_db_context() as db:
-        # 1. Stock critique
-        items_critiques = (
-            db.query(Ingredient.name, InventoryItem.quantity, Ingredient.unit)
-            .join(InventoryItem, Ingredient.id == InventoryItem.ingredient_id)
-            .filter(InventoryItem.quantity < InventoryItem.min_quantity)
-            .all()
-        )
-
-        if items_critiques:
-            noms = ", ".join([item.name for item in items_critiques[:3]])
-            actions.append(
-                {
-                    "type": "URGENT",
-                    "icone": "⚠️",
-                    "titre": "Stock critique",
-                    "message": f"{len(items_critiques)} article(s) en stock bas : {noms}",
-                    "action": "Ajouter à la liste de courses",
-                    "module": "cuisine.courses",
-                }
-            )
-
-        # 2. Repas non planifiés cette semaine
-        today = date.today()
-        week_end = today + timedelta(days=7)
-
-        repas_semaine = (
-            db.query(BatchMeal).filter(BatchMeal.scheduled_date.between(today, week_end)).count()
-        )
-
-        if repas_semaine < 3:
-            actions.append(
-                {
-                    "type": "ATTENTION",
-                    "icone": "📅",
-                    "titre": "Planning incomplet",
-                    "message": f"Seulement {repas_semaine} repas planifiés cette semaine",
-                    "action": "Générer un planning automatique",
-                    "module": "cuisine.batch_cooking",
-                }
-            )
-
-        # 3. Tâches en retard
-        taches_retard = (
-            db.query(RoutineTask)
-            .filter(RoutineTask.status == "à faire", RoutineTask.scheduled_time != None)
-            .all()
-        )
-
-        retard_count = 0
-        now = datetime.now().time()
-        for tache in taches_retard:
-            try:
-                if tache.scheduled_time:
-                    heure = datetime.strptime(tache.scheduled_time, "%H:%M").time()
-                    if heure < now:
-                        retard_count += 1
-            except:
-                pass
-
-        if retard_count > 0:
-            actions.append(
-                {
-                    "type": "INFO",
-                    "icone": "⏰",
-                    "titre": "Routines en retard",
-                    "message": f"{retard_count} tâche(s) de routine en attente",
-                    "action": "Voir les routines",
-                    "module": "famille.routines",
-                }
-            )
-
-        # 4. Projets sans progression depuis 7 jours
-        week_ago = datetime.now() - timedelta(days=7)
-        projets_stagnants = (
-            db.query(Project)
-            .filter(Project.status == "en cours", Project.updated_at < week_ago)
-            .count()
-        )
-
-        if projets_stagnants > 0:
-            actions.append(
-                {
-                    "type": "INFO",
-                    "icone": "🏗️",
-                    "titre": "Projets en pause",
-                    "message": f"{projets_stagnants} projet(s) sans activité depuis 7 jours",
-                    "action": "Voir les projets",
-                    "module": "maison.projets",
-                }
-            )
-
-    return actions
-
-
-def get_suggestions_ia_rapides() -> List[str]:
-    """Génère des suggestions rapides avec l'IA"""
-    suggestions = []
-
-    with get_db_context() as db:
-        # Récupérer l'inventaire
-        items = (
-            db.query(Ingredient.name, InventoryItem.quantity, Ingredient.unit)
-            .join(InventoryItem, Ingredient.id == InventoryItem.ingredient_id)
-            .filter(InventoryItem.quantity > 0)
-            .limit(5)
-            .all()
-        )
-
-        if items:
-            items_text = ", ".join([f"{item.name}" for item in items])
-            suggestions.append(f"🍽️ Recettes possibles avec : {items_text}")
-
-        # Météo (mock pour l'instant)
-        suggestions.append("🌤️ Temps ensoleillé → Idéal pour jardiner")
-
-        # Jules
-        enfant = db.query(ChildProfile).first()
-        if enfant:
-            age_mois = (date.today() - enfant.birth_date).days // 30
-            suggestions.append(f"👶 {enfant.name} ({age_mois} mois) → Conseils adaptés disponibles")
-
-    return suggestions
-
-
-# ===================================
+# ═══════════════════════════════════════════════════════════
 # MODULE PRINCIPAL
-# ===================================
-
+# ═══════════════════════════════════════════════════════════
 
 def app():
-    """Module Accueil - Dashboard intelligent"""
+    """Point d'entrée module accueil"""
 
-    # Header personnalisé
+    # Header
+    state = get_state()
+
     st.markdown(
-        """
-        <div style='text-align: center; padding: 2rem 0;'>
-            <h1 style='color: #2d4d36; font-size: 2.5rem; margin-bottom: 0.5rem;'>
-                👋 Bienvenue dans Assistant MaTanne
-            </h1>
-            <p style='color: #5e7a6a; font-size: 1.2rem;'>
-                Ton copilote quotidien propulsé par l'IA
-            </p>
-        </div>
-    """,
-        unsafe_allow_html=True,
+        f"<h1 style='text-align: center;'>🤖 Bienvenue {state.user_name} !</h1>",
+        unsafe_allow_html=True
     )
 
-    # Récupérer l'agent IA
-    agent: AgentIA = st.session_state.get("agent_ia")
+    st.markdown(
+        "<p style='text-align: center; color: #6c757d; font-size: 1.1rem;'>"
+        "Ton assistant familial intelligent"
+        "</p>",
+        unsafe_allow_html=True
+    )
 
-    # ===================================
-    # STATISTIQUES PRINCIPALES
-    # ===================================
+    st.markdown("---")
 
-    stats = get_dashboard_stats()
+    # Alertes critiques en haut
+    render_critical_alerts()
 
-    st.markdown("### 📊 Vue d'ensemble")
+    st.markdown("---")
+
+    # Stats globales
+    render_global_stats()
+
+    st.markdown("---")
+
+    # Raccourcis rapides
+    render_quick_actions()
+
+    st.markdown("---")
+
+    # Vue par module
+    col1, col2 = st.columns(2)
+
+    with col1:
+        render_cuisine_summary()
+        st.markdown("")
+        render_planning_summary()
+
+    with col2:
+        render_inventaire_summary()
+        st.markdown("")
+        render_courses_summary()
+
+
+# ═══════════════════════════════════════════════════════════
+# ALERTES CRITIQUES
+# ═══════════════════════════════════════════════════════════
+
+def render_critical_alerts():
+    """Affiche les alertes importantes"""
+
+    alerts = []
+
+    # Inventaire critique
+    inventaire = inventaire_service.get_inventaire_complet()
+    critiques = [
+        art for art in inventaire
+        if art.get("statut") in ["critique", "sous_seuil"]
+    ]
+
+    if critiques:
+        alerts.append({
+            "type": "warning",
+            "icon": "⚠️",
+            "title": f"{len(critiques)} article(s) en stock bas",
+            "action": "Voir l'inventaire",
+            "module": "cuisine.inventaire"
+        })
+
+    # Péremption proche
+    peremption = [
+        art for art in inventaire
+        if art.get("statut") == "peremption_proche"
+    ]
+
+    if peremption:
+        alerts.append({
+            "type": "warning",
+            "icon": "⏳",
+            "title": f"{len(peremption)} article(s) périment bientôt",
+            "action": "Voir l'inventaire",
+            "module": "cuisine.inventaire"
+        })
+
+    # Planning vide
+    semaine = planning_service.get_semaine_debut()
+    planning = planning_service.get_planning_semaine(semaine)
+
+    if not planning or not planning.repas:
+        alerts.append({
+            "type": "info",
+            "icon": "📅",
+            "title": "Aucun planning pour cette semaine",
+            "action": "Créer un planning",
+            "module": "cuisine.planning_semaine"
+        })
+
+    # Afficher alertes
+    if not alerts:
+        st.success("✅ Tout est en ordre !")
+        return
+
+    st.markdown("### 🔔 Alertes")
+
+    for alert in alerts:
+        with st.container():
+            col1, col2 = st.columns([4, 1])
+
+            with col1:
+                if alert["type"] == "warning":
+                    st.warning(f"{alert['icon']} **{alert['title']}**")
+                elif alert["type"] == "info":
+                    st.info(f"{alert['icon']} **{alert['title']}**")
+                else:
+                    st.error(f"{alert['icon']} **{alert['title']}**")
+
+            with col2:
+                if st.button(
+                        alert["action"],
+                        key=f"alert_{alert['module']}",
+                        use_container_width=True
+                ):
+                    StateManager.navigate_to(alert["module"])
+                    st.rerun()
+
+
+# ═══════════════════════════════════════════════════════════
+# STATS GLOBALES
+# ═══════════════════════════════════════════════════════════
+
+def render_global_stats():
+    """Stats globales de l'application"""
+
+    st.markdown("### 📊 Vue d'Ensemble")
+
+    # Charger stats
+    stats_recettes = recette_service.get_stats()
+    stats_inventaire = inventaire_service.get_stats()
+    stats_courses = courses_service.get_stats()
+
+    inventaire = inventaire_service.get_inventaire_complet()
+
+    # Afficher métriques
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        total_recettes = stats_recettes.get("total", 0)
+        st.metric(
+            "🍽️ Recettes",
+            total_recettes,
+            help="Nombre total de recettes"
+        )
+
+    with col2:
+        total_inventaire = stats_inventaire.get("total", 0)
+        stock_bas = len([a for a in inventaire if a.get("statut") in ["critique", "sous_seuil"]])
+
+        st.metric(
+            "📦 Inventaire",
+            total_inventaire,
+            delta=f"-{stock_bas} stock bas" if stock_bas > 0 else None,
+            delta_color="inverse"
+        )
+
+    with col3:
+        total_courses = stats_courses.get("total", 0)
+        st.metric(
+            "🛒 Courses",
+            total_courses,
+            help="Articles dans la liste"
+        )
+
+    with col4:
+        # Planning semaine
+        semaine = planning_service.get_semaine_debut()
+        planning = planning_service.get_planning_semaine(semaine)
+        nb_repas = len(planning.repas) if planning else 0
+
+        st.metric(
+            "📅 Repas Planifiés",
+            nb_repas,
+            help="Cette semaine"
+        )
+
+
+# ═══════════════════════════════════════════════════════════
+# RACCOURCIS RAPIDES
+# ═══════════════════════════════════════════════════════════
+
+def render_quick_actions():
+    """Raccourcis d'actions rapides"""
+
+    st.markdown("### ⚡ Actions Rapides")
 
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        st.metric(
-            "📚 Recettes",
-            stats["recettes_total"],
-            delta=f"{stats['recettes_ia']} IA",
-            delta_color="normal",
-        )
+        if st.button(
+                "➕ Ajouter Recette",
+                key="quick_add_recette",
+                use_container_width=True,
+                type="primary"
+        ):
+            StateManager.navigate_to("cuisine.recettes")
+            st.session_state.show_add_form = True
+            st.rerun()
 
     with col2:
-        delta_stock = -stats["stock_bas"] if stats["stock_bas"] > 0 else 0
-        st.metric(
-            "📦 Inventaire",
-            "OK" if stats["stock_bas"] == 0 else "Alerte",
-            delta=f"{stats['stock_bas']} bas" if stats["stock_bas"] > 0 else None,
-            delta_color="inverse",
-        )
+        if st.button(
+                "🛒 Voir Courses",
+                key="quick_view_courses",
+                use_container_width=True
+        ):
+            StateManager.navigate_to("cuisine.courses")
+            st.rerun()
 
     with col3:
-        st.metric(
-            "📅 Repas planifiés", stats["repas_planifies"], delta="Cette semaine", delta_color="off"
-        )
+        if st.button(
+                "📦 Gérer Inventaire",
+                key="quick_view_inventaire",
+                use_container_width=True
+        ):
+            StateManager.navigate_to("cuisine.inventaire")
+            st.rerun()
 
     with col4:
-        st.metric(
-            "🏗️ Projets actifs",
-            stats["projets_actifs"],
-            delta=f"{stats['taches_jour']} tâches aujourd'hui",
-            delta_color="off",
+        if st.button(
+                "📅 Planning Semaine",
+                key="quick_view_planning",
+                use_container_width=True
+        ):
+            StateManager.navigate_to("cuisine.planning_semaine")
+            st.rerun()
+
+
+# ═══════════════════════════════════════════════════════════
+# RÉSUMÉS PAR MODULE
+# ═══════════════════════════════════════════════════════════
+
+def render_cuisine_summary():
+    """Résumé module Cuisine"""
+
+    with st.container():
+        st.markdown(
+            '<div style="background: #f8f9fa; padding: 1.5rem; '
+            'border-radius: 12px; border-left: 4px solid #4CAF50;">',
+            unsafe_allow_html=True
         )
 
-    st.markdown("---")
+        st.markdown("### 🍽️ Recettes")
 
-    # ===================================
-    # ACTIONS URGENTES
-    # ===================================
+        stats = recette_service.get_stats(
+            count_filters={
+                "rapides": {"temps_preparation": {"lte": 30}},
+                "bebe": {"compatible_bebe": True}
+            }
+        )
 
-    actions = get_actions_urgentes()
+        col1, col2, col3 = st.columns(3)
 
-    if actions:
-        st.markdown("### 🚨 Actions urgentes")
+        with col1:
+            st.metric("Total", stats.get("total", 0))
 
-        for action in actions:
-            if action["type"] == "URGENT":
-                type_style = "error"
-            elif action["type"] == "ATTENTION":
-                type_style = "warning"
-            else:
-                type_style = "info"
+        with col2:
+            st.metric("⚡ Rapides", stats.get("rapides", 0))
 
-            with st.container():
-                col_icon, col_content, col_action = st.columns([0.5, 3, 1.5])
+        with col3:
+            st.metric("👶 Bébé", stats.get("bebe", 0))
 
-                with col_icon:
-                    st.markdown(
-                        f"<div style='font-size: 2rem;'>{action['icone']}</div>",
-                        unsafe_allow_html=True,
-                    )
-
-                with col_content:
-                    st.markdown(f"**{action['titre']}**")
-                    st.caption(action["message"])
-
-                with col_action:
-                    if st.button(
-                        action["action"],
-                        key=f"action_{action['module']}",
-                        type="primary" if action["type"] == "URGENT" else "secondary",
-                    ):
-                        st.session_state.current_module = action["module"]
-                        st.rerun()
-
-                st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
-    else:
-        st.success("✅ Aucune action urgente ! Tout est sous contrôle.")
-
-    st.markdown("---")
-
-    # ===================================
-    # SUGGESTIONS IA DU JOUR
-    # ===================================
-
-    st.markdown("### 🤖 Suggestions IA du jour")
-
-    col_sugg1, col_sugg2 = st.columns([2, 1])
-
-    with col_sugg1:
-        suggestions = get_suggestions_ia_rapides()
-
-        for sugg in suggestions:
-            st.info(sugg)
-
-        if agent and st.button("✨ Plus de suggestions IA", type="primary"):
-            with st.spinner("🤖 L'IA analyse ton quotidien..."):
-                # Générer des suggestions personnalisées
-                st.balloons()
-                st.success("Suggestions générées ! Voir les modules concernés.")
-
-    with col_sugg2:
-        st.markdown("**🎯 Actions rapides IA**")
-
-        if st.button("🍽️ Suggérer repas", use_container_width=True):
-            st.session_state.current_module = "cuisine.recettes"
+        if st.button(
+                "📚 Voir les recettes",
+                key="nav_recettes",
+                use_container_width=True
+        ):
+            StateManager.navigate_to("cuisine.recettes")
             st.rerun()
 
-        if st.button("📋 Planifier semaine", use_container_width=True):
-            st.session_state.current_module = "cuisine.batch_cooking"
-            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
-        if st.button("🛒 Optimiser courses", use_container_width=True):
-            st.session_state.current_module = "cuisine.courses"
-            st.rerun()
 
-    st.markdown("---")
+def render_inventaire_summary():
+    """Résumé inventaire"""
 
-    # ===================================
-    # ACTIVITÉ RÉCENTE
-    # ===================================
+    with st.container():
+        st.markdown(
+            '<div style="background: #f8f9fa; padding: 1.5rem; '
+            'border-radius: 12px; border-left: 4px solid #2196F3;">',
+            unsafe_allow_html=True
+        )
 
-    st.markdown("### 📈 Activité récente")
+        st.markdown("### 📦 Inventaire")
 
-    col_act1, col_act2 = st.columns(2)
+        inventaire = inventaire_service.get_inventaire_complet()
 
-    with col_act1:
-        st.markdown("#### 🍲 Cuisine")
+        stock_bas = len([a for a in inventaire if a.get("statut") == "sous_seuil"])
+        critiques = len([a for a in inventaire if a.get("statut") == "critique"])
+        peremption = len([a for a in inventaire if a.get("statut") == "peremption_proche"])
 
-        with get_db_context() as db:
-            # Dernières recettes ajoutées
-            recettes_recentes = db.query(Recipe).order_by(Recipe.created_at.desc()).limit(3).all()
+        col1, col2, col3 = st.columns(3)
 
-            if recettes_recentes:
-                for recette in recettes_recentes:
-                    ai_badge = "🤖" if recette.ai_generated else ""
-                    st.write(f"• {ai_badge} {recette.name}")
-            else:
-                st.caption("Aucune recette récente")
+        with col1:
+            st.metric("Articles", len(inventaire))
 
-            # Prochains repas
-            st.markdown("**Prochains repas**")
-            prochains = (
-                db.query(BatchMeal, Recipe)
-                .join(Recipe, BatchMeal.recipe_id == Recipe.id)
-                .filter(BatchMeal.scheduled_date >= date.today())
-                .order_by(BatchMeal.scheduled_date)
-                .limit(3)
-                .all()
+        with col2:
+            st.metric(
+                "⚠️ Stock Bas",
+                stock_bas,
+                delta=None if stock_bas == 0 else "À commander"
             )
 
-            if prochains:
-                for batch, recette in prochains:
-                    st.write(f"• {batch.scheduled_date.strftime('%d/%m')} - {recette.name}")
-            else:
-                st.caption("Aucun repas planifié")
+        with col3:
+            st.metric(
+                "🔴 Critiques",
+                critiques,
+                delta=None if critiques == 0 else "Urgent"
+            )
 
-    with col_act2:
-        st.markdown("#### 🏡 Maison")
+        # Alertes
+        if critiques > 0 or peremption > 0:
+            articles_alert = [
+                a for a in inventaire
+                if a.get("statut") in ["critique", "peremption_proche"]
+            ]
 
-        with get_db_context() as db:
-            # Projets en cours
-            projets = db.query(Project).filter(Project.status == "en cours").limit(3).all()
+            stock_alert(
+                articles_alert[:3],  # Max 3
+                key="home_inventory_alert"
+            )
 
-            if projets:
-                for projet in projets:
-                    progress = projet.progress or 0
-                    st.write(f"• {projet.name} ({progress}%)")
-            else:
-                st.caption("Aucun projet actif")
+        if st.button(
+                "📦 Gérer l'inventaire",
+                key="nav_inventaire",
+                use_container_width=True
+        ):
+            StateManager.navigate_to("cuisine.inventaire")
+            st.rerun()
 
-            # Routines du jour
-            st.markdown("**Routines d'aujourd'hui**")
-            routines = db.query(RoutineTask).filter(RoutineTask.status == "à faire").limit(3).all()
+        st.markdown('</div>', unsafe_allow_html=True)
 
-            if routines:
-                for routine in routines:
-                    time_str = routine.scheduled_time or "—"
-                    st.write(f"• {time_str} {routine.task_name}")
-            else:
-                st.caption("Toutes les routines complétées ✅")
 
-    st.markdown("---")
+def render_courses_summary():
+    """Résumé courses"""
 
-    # ===================================
-    # ACCÈS RAPIDES
-    # ===================================
+    with st.container():
+        st.markdown(
+            '<div style="background: #f8f9fa; padding: 1.5rem; '
+            'border-radius: 12px; border-left: 4px solid #FF9800;">',
+            unsafe_allow_html=True
+        )
 
-    st.markdown("### 🚀 Accès rapides")
+        st.markdown("### 🛒 Courses")
 
-    col_r1, col_r2, col_r3 = st.columns(3)
+        liste = courses_service.get_liste_active()
 
-    modules = [
-        ("🍲 Recettes", "cuisine.recettes"),
-        ("📦 Inventaire", "cuisine.inventaire"),
-        ("🛒 Courses", "cuisine.courses"),
-        ("🥘 Batch Cooking", "cuisine.batch_cooking"),
-        ("👶 Suivi Jules", "famille.suivi_jules"),
-        ("⏰ Routines", "famille.routines"),
-        ("🏗️ Projets", "maison.projets"),
-        ("🌱 Jardin", "maison.jardin"),
-        ("📅 Calendrier", "planning.calendrier"),
-    ]
+        haute = len([a for a in liste if a.get("priorite") == "haute"])
+        moyenne = len([a for a in liste if a.get("priorite") == "moyenne"])
 
-    for i, (label, module) in enumerate(modules):
-        col = [col_r1, col_r2, col_r3][i % 3]
-        with col:
-            if st.button(label, use_container_width=True, key=f"quick_{module}"):
-                st.session_state.current_module = module
-                st.rerun()
+        col1, col2, col3 = st.columns(3)
 
-    st.markdown("---")
+        with col1:
+            st.metric("Total", len(liste))
 
-    # ===================================
-    # NOTIFICATIONS
-    # ===================================
+        with col2:
+            st.metric("🔴 Haute", haute)
 
-    if stats["notifications_non_lues"] > 0:
-        with st.expander(f"🔔 Notifications ({stats['notifications_non_lues']} non lues)"):
-            with get_db_context() as db:
-                notifs = (
-                    db.query(Notification)
-                    .filter(Notification.read == False)
-                    .order_by(Notification.created_at.desc())
-                    .limit(5)
-                    .all()
-                )
+        with col3:
+            st.metric("🟡 Moyenne", moyenne)
 
-                for notif in notifs:
-                    priority_icon = (
-                        "🔴"
-                        if notif.priority == "haute"
-                        else "🟡"
-                        if notif.priority == "moyenne"
-                        else "🔵"
-                    )
-                    st.write(f"{priority_icon} **[{notif.module}]** {notif.message}")
-                    st.caption(notif.created_at.strftime("%d/%m/%Y %H:%M"))
-                    st.markdown("---")
+        # Top priorités
+        if haute > 0:
+            st.markdown("**À acheter en priorité:**")
+            prioritaires = [a for a in liste if a.get("priorite") == "haute"]
 
-    # ===================================
-    # FOOTER
-    # ===================================
+            for art in prioritaires[:3]:
+                st.caption(f"• {art['nom']} ({art['quantite']} {art['unite']})")
 
-    st.markdown("---")
-    st.caption("💡 **Astuce :** Utilise les suggestions IA pour automatiser ton quotidien !")
+            if len(prioritaires) > 3:
+                st.caption(f"... et {len(prioritaires) - 3} autre(s)")
+
+        if st.button(
+                "🛒 Voir la liste",
+                key="nav_courses",
+                use_container_width=True
+        ):
+            StateManager.navigate_to("cuisine.courses")
+            st.rerun()
+
+        st.markdown('</div>', unsafe_allow_html=True)
+
+
+def render_planning_summary():
+    """Résumé planning"""
+
+    with st.container():
+        st.markdown(
+            '<div style="background: #f8f9fa; padding: 1.5rem; '
+            'border-radius: 12px; border-left: 4px solid #9C27B0;">',
+            unsafe_allow_html=True
+        )
+
+        st.markdown("### 📅 Planning Semaine")
+
+        semaine = planning_service.get_semaine_debut()
+        planning = planning_service.get_planning_semaine(semaine)
+
+        if planning:
+            structure = planning_service.get_planning_structure(planning.id)
+
+            total_repas = sum(len(j["repas"]) for j in structure["jours"])
+            repas_bebe = sum(
+                1 for j in structure["jours"]
+                for r in j["repas"]
+                if r.get("est_adapte_bebe")
+            )
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                st.metric("Repas", total_repas)
+
+            with col2:
+                st.metric("👶 Bébé", repas_bebe)
+
+            # Aujourd'hui
+            aujourd_hui = date.today()
+            jour_idx = aujourd_hui.weekday()
+
+            jour_data = next(
+                (j for j in structure["jours"] if j["jour_idx"] == jour_idx),
+                None
+            )
+
+            if jour_data and jour_data["repas"]:
+                st.markdown("**Aujourd'hui:**")
+                for repas in jour_data["repas"][:2]:
+                    if repas.get("recette"):
+                        st.caption(f"• {repas['type']}: {repas['recette']['nom']}")
+
+        else:
+            st.info("Aucun planning cette semaine")
+
+        if st.button(
+                "📅 Voir le planning",
+                key="nav_planning",
+                use_container_width=True
+        ):
+            StateManager.navigate_to("cuisine.planning_semaine")
+            st.rerun()
+
+        st.markdown('</div>', unsafe_allow_html=True)

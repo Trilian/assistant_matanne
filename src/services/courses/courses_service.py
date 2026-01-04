@@ -1,12 +1,18 @@
+"""
+Service Courses - IMPORTS CORRIGÉS
+"""
+from typing import List, Dict
 from src.services.base_service import BaseService
 from src.core.models import ArticleCourses
-from typing import List, Dict
+from src.core.errors import handle_errors  # ✅ AJOUTÉ
+from src.core.database import get_db_context  # ✅ AJOUTÉ
 
 MAGASINS_CONFIG = {
     "Grand Frais": {"rayons": ["Fruits & Légumes", "Boucherie", "Fromage"], "couleur": "#4CAF50"},
     "Thiriet": {"rayons": ["Entrées", "Plats Cuisinés", "Desserts"], "couleur": "#2196F3"},
     "Cora": {"rayons": ["Fruits & Légumes", "Boucherie", "Crèmerie"], "couleur": "#FF5722"},
 }
+
 
 class CoursesService(BaseService[ArticleCourses]):
     def __init__(self):
@@ -19,7 +25,12 @@ class CoursesService(BaseService[ArticleCourses]):
         if filters:
             base_filters.update(filters)
 
-        items = self.advanced_search(filters=base_filters, sort_by="priorite", sort_desc=True, limit=1000)
+        items = self.advanced_search(
+            filters=base_filters,
+            sort_by="priorite",
+            sort_desc=True,
+            limit=1000
+        )
 
         return [
             {
@@ -35,5 +46,6 @@ class CoursesService(BaseService[ArticleCourses]):
             }
             for item in items
         ]
+
 
 courses_service = CoursesService()

@@ -1,5 +1,5 @@
 """
-Services - Point d'Entrée Unifié
+Services - Point d'Entrée Unifié (VERSION NETTOYÉE)
 """
 
 # Base Service (générique CRUD)
@@ -39,8 +39,8 @@ from .inventaire import inventaire_service, CATEGORIES, EMPLACEMENTS
 from .courses import courses_service, MAGASINS_CONFIG
 from .planning import planning_service, repas_service
 
-# Service I/O Universel
-from .io_service import IOService
+# ⚠️ IO Service maintenant dans src/ui/base_io_service
+# Ne plus importer depuis ici
 
 __all__ = [
     # Base
@@ -72,7 +72,4 @@ __all__ = [
     "MAGASINS_CONFIG",
     "planning_service",
     "repas_service",
-
-    # I/O
-    "IOService",
 ]

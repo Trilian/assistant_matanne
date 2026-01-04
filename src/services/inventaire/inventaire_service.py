@@ -1,11 +1,16 @@
-from src.services.base_service import BaseService
-from src.core.models import ArticleInventaire, Ingredient
-from src.core.errors import handle_errors
+"""
+Service Inventaire - IMPORTS CORRIGÉS
+"""
 from datetime import date
 from typing import List, Dict
+from src.services.base_service import BaseService
+from src.core.models import ArticleInventaire, Ingredient
+from src.core.errors import handle_errors  # ✅ AJOUTÉ
+from src.core.database import get_db_context  # ✅ AJOUTÉ
 
 CATEGORIES = ["Légumes", "Fruits", "Féculents", "Protéines", "Laitier"]
 EMPLACEMENTS = ["Frigo", "Congélateur", "Placard", "Cave"]
+
 
 class InventaireService(BaseService[ArticleInventaire]):
     def __init__(self):
@@ -49,5 +54,6 @@ class InventaireService(BaseService[ArticleInventaire]):
             result.append(enriched)
 
         return result
+
 
 inventaire_service = InventaireService()

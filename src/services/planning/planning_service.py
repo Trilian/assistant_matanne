@@ -1,9 +1,15 @@
-from src.services.base_service import BaseService
-from src.core.models import PlanningHebdomadaire, RepasPlanning
+"""
+Service Planning - IMPORTS CORRIGÉS
+"""
 from datetime import date, timedelta
 from typing import Optional, Dict
+from src.services.base_service import BaseService
+from src.core.models import PlanningHebdomadaire, RepasPlanning
+from src.core.errors import handle_errors  # ✅ AJOUTÉ
+from src.core.database import get_db_context  # ✅ AJOUTÉ
 
 JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
+
 
 class PlanningService(BaseService[PlanningHebdomadaire]):
     def __init__(self):
@@ -70,9 +76,11 @@ class PlanningService(BaseService[PlanningHebdomadaire]):
 
             return structure
 
+
 class RepasService(BaseService[RepasPlanning]):
     def __init__(self):
         super().__init__(RepasPlanning, cache_ttl=30)
+
 
 planning_service = PlanningService()
 repas_service = RepasService()
