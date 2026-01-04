@@ -1,11 +1,6 @@
 """
 Database - Gestion de la base de données avec migrations.
-
-Ce module gère :
-- Connexions PostgreSQL/Supabase avec retry automatique
-- Context managers sécurisés
-- Système de migrations
-- Health checks et monitoring
+Tout harmonisé en français
 """
 from contextlib import contextmanager
 from typing import Generator, Optional, Dict
@@ -16,7 +11,7 @@ from sqlalchemy.exc import OperationalError, DatabaseError
 import logging
 import time
 
-from .config import obtenir_settings
+from .config import obtenir_parametres
 from .constants import (
     DB_CONNECTION_RETRY,
     DB_CONNECTION_TIMEOUT,
@@ -33,31 +28,31 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════════════════
 
 @st.cache_resource(ttl=3600)
-def obtenir_engine(nombre_retries: int = DB_CONNECTION_RETRY, delai_retry: int = 2):
+def obtenir_moteur(nombre_tentatives: int = DB_CONNECTION_RETRY, delai_tentative: int = 2):
     """
     Crée l'engine PostgreSQL avec retry automatique.
 
     Args:
-        nombre_retries: Nombre de tentatives de reconnexion
-        delai_retry: Délai entre les retries en secondes
+        nombre_tentatives: Nombre de tentatives de reconnexion
+        delai_tentative: Délai entre les tentatives en secondes
 
     Returns:
         Engine SQLAlchemy configuré
 
     Raises:
-        ErreurBaseDeDonnees: Si connexion impossible après tous les retries
+        ErreurBaseDeDonnees: Si connexion impossible après toutes les tentatives
     """
-    settings = obtenir_settings()
+    parametres = obtenir_parametres()
     derniere_erreur = None
 
-    for tentative in range(nombre_retries):
+    for tentative in range(nombre_tentatives):
         try:
-            database_url = settings.DATABASE_URL
+            url_base = parametres.DATABASE_URL
 
-            engine = create_engine(
-                database_url,
+            moteur = create_engine(
+                url_base,
                 poolclass=pool.NullPool,
-                echo=settings.DEBUG,
+                echo=parametres.DEBUG,
                 connect_args={
                     "connect_timeout": DB_CONNECTION_TIMEOUT,
                     "options": "-c timezone=utc",
@@ -67,25 +62,25 @@ def obtenir_engine(nombre_retries: int = DB_CONNECTION_RETRY, delai_retry: int =
             )
 
             # Test de connexion
-            with engine.connect() as conn:
+            with moteur.connect() as conn:
                 conn.execute(text("SELECT 1"))
 
             logger.info(f"✅ Connexion DB établie (tentative {tentative + 1})")
-            return engine
+            return moteur
 
         except (OperationalError, DatabaseError) as e:
             derniere_erreur = e
             logger.warning(
-                f"❌ Tentative {tentative + 1}/{nombre_retries} échouée: {e}"
+                f"❌ Tentative {tentative + 1}/{nombre_tentatives} échouée: {e}"
             )
 
-            if tentative < nombre_retries - 1:
-                time.sleep(delai_retry)
+            if tentative < nombre_tentatives - 1:
+                time.sleep(delai_tentative)
                 continue
 
     # Toutes les tentatives ont échoué
     message_erreur = (
-        f"Impossible de se connecter après {nombre_retries} tentatives: "
+        f"Impossible de se connecter après {nombre_tentatives} tentatives: "
         f"{derniere_erreur}"
     )
     logger.error(message_erreur)
@@ -95,7 +90,7 @@ def obtenir_engine(nombre_retries: int = DB_CONNECTION_RETRY, delai_retry: int =
     )
 
 
-def obtenir_engine_securise() -> Optional[object]:
+def obtenir_moteur_securise() -> Optional[object]:
     """
     Version sécurisée qui retourne None au lieu de lever une exception.
 
@@ -103,7 +98,7 @@ def obtenir_engine_securise() -> Optional[object]:
         Engine ou None si erreur
     """
     try:
-        return obtenir_engine()
+        return obtenir_moteur()
     except ErreurBaseDeDonnees as e:
         logger.error(f"DB non disponible: {e}")
         return None
@@ -113,23 +108,23 @@ def obtenir_engine_securise() -> Optional[object]:
 # SESSION FACTORY
 # ═══════════════════════════════════════════════════════════
 
-def obtenir_session_factory():
+def obtenir_fabrique_session():
     """
     Retourne une session factory.
 
     Returns:
         Session factory configurée
     """
-    engine = obtenir_engine()
+    moteur = obtenir_moteur()
     return sessionmaker(
         autocommit=False,
         autoflush=False,
-        bind=engine,
+        bind=moteur,
         expire_on_commit=False
     )
 
 
-SessionLocal = obtenir_session_factory()
+SessionLocale = obtenir_fabrique_session()
 
 
 # ═══════════════════════════════════════════════════════════
@@ -151,7 +146,7 @@ def obtenir_contexte_db() -> Generator[Session, None, None]:
         >>> with obtenir_contexte_db() as db:
         >>>     recettes = db.query(Recette).all()
     """
-    db = SessionLocal()
+    db = SessionLocale()
 
     try:
         yield db
@@ -206,11 +201,6 @@ def obtenir_db_securise() -> Generator[Optional[Session], None, None]:
         yield None
 
 
-# Alias pour compatibilité
-get_db_context = obtenir_contexte_db
-get_db_safe = obtenir_db_securise
-
-
 # ═══════════════════════════════════════════════════════════
 # SYSTÈME DE MIGRATION
 # ═══════════════════════════════════════════════════════════
@@ -231,9 +221,9 @@ class GestionnaireMigrations:
         """
         Crée la table de suivi des migrations si elle n'existe pas.
         """
-        engine = obtenir_engine()
+        moteur = obtenir_moteur()
 
-        with engine.connect() as conn:
+        with moteur.connect() as conn:
             conn.execute(text(f"""
                 CREATE TABLE IF NOT EXISTS {GestionnaireMigrations.TABLE_MIGRATIONS} (
                     id SERIAL PRIMARY KEY,
@@ -255,14 +245,14 @@ class GestionnaireMigrations:
             Numéro de version (0 si aucune migration)
         """
         try:
-            engine = obtenir_engine()
+            moteur = obtenir_moteur()
 
-            with engine.connect() as conn:
-                result = conn.execute(text(f"""
+            with moteur.connect() as conn:
+                resultat = conn.execute(text(f"""
                     SELECT MAX(version) FROM {GestionnaireMigrations.TABLE_MIGRATIONS}
                 """)).scalar()
 
-                return result if result else 0
+                return resultat if resultat else 0
 
         except Exception:
             return 0
@@ -280,10 +270,10 @@ class GestionnaireMigrations:
         Raises:
             ErreurBaseDeDonnees: Si l'application échoue
         """
-        engine = obtenir_engine()
+        moteur = obtenir_moteur()
 
         try:
-            with engine.begin() as conn:
+            with moteur.begin() as conn:
                 # Exécuter SQL migration
                 conn.execute(text(sql))
 
@@ -314,7 +304,7 @@ class GestionnaireMigrations:
         version_courante = GestionnaireMigrations.obtenir_version_courante()
         logger.info(f"Version schéma actuelle: v{version_courante}")
 
-        # Migrations disponibles (à personnaliser)
+        # Migrations disponibles
         migrations = GestionnaireMigrations.obtenir_migrations_disponibles()
 
         # Filtrer migrations non appliquées
@@ -344,8 +334,6 @@ class GestionnaireMigrations:
         """
         Retourne la liste des migrations disponibles.
 
-        ⚠️ À personnaliser selon vos besoins.
-
         Returns:
             Liste de dictionnaires contenant version, name, sql
         """
@@ -365,10 +353,6 @@ class GestionnaireMigrations:
         ]
 
 
-# Alias pour compatibilité
-MigrationManager = GestionnaireMigrations
-
-
 # ═══════════════════════════════════════════════════════════
 # VÉRIFICATIONS
 # ═══════════════════════════════════════════════════════════
@@ -382,11 +366,11 @@ def verifier_connexion() -> tuple[bool, str]:
         Tuple (succès, message)
     """
     try:
-        engine = obtenir_engine_securise()
-        if not engine:
+        moteur = obtenir_moteur_securise()
+        if not moteur:
             return False, "Engine non disponible"
 
-        with engine.connect() as conn:
+        with moteur.connect() as conn:
             conn.execute(text("SELECT 1"))
 
         return True, "Connexion OK"
@@ -408,10 +392,10 @@ def obtenir_infos_db() -> dict:
         Dictionnaire avec informations DB
     """
     try:
-        engine = obtenir_engine()
+        moteur = obtenir_moteur()
 
-        with engine.connect() as conn:
-            result = conn.execute(text("""
+        with moteur.connect() as conn:
+            resultat = conn.execute(text("""
                 SELECT 
                     version() as version,
                     current_database() as database,
@@ -419,39 +403,34 @@ def obtenir_infos_db() -> dict:
                     pg_size_pretty(pg_database_size(current_database())) as size
             """)).fetchone()
 
-            settings = obtenir_settings()
-            db_url = settings.DATABASE_URL
+            parametres = obtenir_parametres()
+            db_url = parametres.DATABASE_URL
 
-            host = "unknown"
+            hote = "unknown"
             if "@" in db_url:
-                host = db_url.split("@")[1].split(":")[0]
+                hote = db_url.split("@")[1].split(":")[0]
 
             return {
-                "status": "connected",
-                "version": result[0].split(",")[0],
-                "database": result[1],
-                "user": result[2],
-                "size": result[3],
-                "host": host,
-                "schema_version": GestionnaireMigrations.obtenir_version_courante(),
-                "error": None,
+                "statut": "connected",
+                "version": resultat[0].split(",")[0],
+                "base_donnees": resultat[1],
+                "utilisateur": resultat[2],
+                "taille": resultat[3],
+                "hote": hote,
+                "version_schema": GestionnaireMigrations.obtenir_version_courante(),
+                "erreur": None,
             }
 
     except Exception as e:
-        logger.error(f"obtenir_infos_db error: {e}")
+        logger.error(f"obtenir_infos_db erreur: {e}")
         return {
-            "status": "error",
-            "error": str(e),
+            "statut": "error",
+            "erreur": str(e),
             "version": None,
-            "database": None,
-            "user": None,
-            "schema_version": 0
+            "base_donnees": None,
+            "utilisateur": None,
+            "version_schema": 0
         }
-
-
-# Alias pour compatibilité
-check_connection = verifier_connexion
-get_db_info = obtenir_infos_db
 
 
 # ═══════════════════════════════════════════════════════════
@@ -468,16 +447,16 @@ def initialiser_database(executer_migrations: bool = True):
     Returns:
         True si succès
     """
-    settings = obtenir_settings()
+    parametres = obtenir_parametres()
 
-    if settings.est_production():
+    if parametres.est_production():
         logger.info("Mode production: vérification schéma uniquement")
 
     try:
-        engine = obtenir_engine()
+        moteur = obtenir_moteur()
 
         # Vérifier connexion
-        with engine.connect() as conn:
+        with moteur.connect() as conn:
             conn.execute(text("SELECT 1"))
 
         logger.info("✅ Connexion DB OK")
@@ -494,22 +473,22 @@ def initialiser_database(executer_migrations: bool = True):
         return False
 
 
-def creer_toutes_les_tables():
+def creer_toutes_tables():
     """
     Crée toutes les tables (dev/setup uniquement).
 
     ⚠️ ATTENTION: Ne pas appeler en production.
     """
-    settings = obtenir_settings()
+    parametres = obtenir_parametres()
 
-    if settings.est_production():
-        logger.warning("creer_toutes_les_tables ignoré en production")
+    if parametres.est_production():
+        logger.warning("creer_toutes_tables ignoré en production")
         return
 
     try:
         from .models import Base
-        engine = obtenir_engine()
-        Base.metadata.create_all(bind=engine)
+        moteur = obtenir_moteur()
+        Base.metadata.create_all(bind=moteur)
         logger.info("✅ Tables créées/vérifiées")
 
     except Exception as e:
@@ -517,26 +496,21 @@ def creer_toutes_les_tables():
         raise
 
 
-# Alias pour compatibilité
-init_database = initialiser_database
-create_all_tables = creer_toutes_les_tables
-
-
 # ═══════════════════════════════════════════════════════════
 # HEALTH CHECK
 # ═══════════════════════════════════════════════════════════
 
-def health_check() -> dict:
+def verifier_sante() -> dict:
     """
     Health check complet de la DB.
 
     Returns:
-        Dictionnaire avec status et métriques
+        Dictionnaire avec statut et métriques
     """
     try:
-        engine = obtenir_engine()
+        moteur = obtenir_moteur()
 
-        with engine.connect() as conn:
+        with moteur.connect() as conn:
             connexions_actives = conn.execute(text("""
                 SELECT count(*) 
                 FROM pg_stat_activity 
@@ -548,17 +522,17 @@ def health_check() -> dict:
             ).scalar()
 
             return {
-                "healthy": True,
-                "active_connections": connexions_actives,
-                "database_size_bytes": taille_db,
-                "schema_version": GestionnaireMigrations.obtenir_version_courante(),
+                "sain": True,
+                "connexions_actives": connexions_actives,
+                "taille_base_octets": taille_db,
+                "version_schema": GestionnaireMigrations.obtenir_version_courante(),
                 "timestamp": time.time(),
             }
 
     except Exception as e:
         logger.error(f"Health check échoué: {e}")
         return {
-            "healthy": False,
-            "error": str(e),
+            "sain": False,
+            "erreur": str(e),
             "timestamp": time.time()
         }

@@ -1,6 +1,5 @@
 """
 Client IA Unifié - Mistral AI
-Remplace ai_agent.py avec meilleure architecture
 """
 import httpx
 import asyncio
@@ -8,14 +7,14 @@ import logging
 from typing import Optional, Dict, Any, List
 from datetime import datetime
 
-from ..config import get_settings
-from ..errors import AIServiceError, RateLimitError
-from .cache import AICache
+from ..config import obtenir_parametres
+from ..errors import ErreurServiceIA, ErreurLimiteDebit
+from .cache import CacheIA
 
 logger = logging.getLogger(__name__)
 
 
-class AIClient:
+class ClientIA:
     """
     Client IA unifié pour Mistral
 
@@ -28,129 +27,135 @@ class AIClient:
 
     def __init__(self):
         """Initialise le client avec la config"""
-        settings = get_settings()
+        parametres = obtenir_parametres()
 
         try:
-            self.api_key = settings.MISTRAL_API_KEY
-            self.model = settings.MISTRAL_MODEL
-            self.base_url = settings.MISTRAL_BASE_URL
-            self.timeout = settings.MISTRAL_TIMEOUT
+            self.cle_api = parametres.MISTRAL_API_KEY
+            self.modele = parametres.MISTRAL_MODEL
+            self.url_base = parametres.MISTRAL_BASE_URL
+            self.timeout = parametres.MISTRAL_TIMEOUT
 
-            logger.info(f"✅ AIClient initialisé (modèle: {self.model})")
+            logger.info(f"✅ ClientIA initialisé (modèle: {self.modele})")
 
         except ValueError as e:
             logger.error(f"❌ Configuration IA manquante: {e}")
-            raise AIServiceError(
+            raise ErreurServiceIA(
                 str(e),
-                user_message="Configuration IA manquante"
+                message_utilisateur="Configuration IA manquante"
             )
 
     # ═══════════════════════════════════════════════════════════
     # APPEL API PRINCIPAL
     # ═══════════════════════════════════════════════════════════
 
-    async def call(
+    async def appeler(
             self,
             prompt: str,
-            system_prompt: str = "",
+            prompt_systeme: str = "",
             temperature: float = 0.7,
             max_tokens: int = 1000,
-            use_cache: bool = True,
-            max_retries: int = 3
+            utiliser_cache: bool = True,
+            max_tentatives: int = 3
     ) -> str:
         """
         Appel API avec cache et retry
 
         Args:
             prompt: Prompt utilisateur
-            system_prompt: Instructions système
+            prompt_systeme: Instructions système
             temperature: Température (0-2)
             max_tokens: Tokens max
-            use_cache: Utiliser le cache
-            max_retries: Nombre de retries
+            utiliser_cache: Utiliser le cache
+            max_tentatives: Nombre de tentatives
 
         Returns:
             Réponse de l'IA
 
         Raises:
-            AIServiceError: Si erreur API
-            RateLimitError: Si rate limit dépassé
+            ErreurServiceIA: Si erreur API
+            ErreurLimiteDebit: Si rate limit dépassé
         """
         # Vérifier rate limit
-        from .cache import RateLimit
-        can_call, error_msg = RateLimit.can_call()
-        if not can_call:
-            raise RateLimitError(error_msg, user_message=error_msg)
+        from .cache import LimiteDebit
+        peut_appeler, message_erreur = LimiteDebit.peut_appeler()
+        if not peut_appeler:
+            raise ErreurLimiteDebit(message_erreur, message_utilisateur=message_erreur)
 
         # Vérifier cache
-        if use_cache:
-            cache_key = AICache.generate_key(
+        if utiliser_cache:
+            cache = CacheIA.obtenir(
                 prompt=prompt,
-                system=system_prompt,
-                temperature=temperature
+                systeme=prompt_systeme,
+                temperature=temperature,
+                modele=self.modele
             )
 
-            cached = AICache.get(cache_key)
-            if cached:
-                logger.debug(f"Cache HIT: {cache_key[:50]}")
-                return cached
+            if cache:
+                logger.debug(f"Cache HIT: {prompt[:50]}...")
+                return cache
 
         # Appel API avec retry
-        for attempt in range(max_retries):
+        for tentative in range(max_tentatives):
             try:
-                response = await self._do_call(
+                reponse = await self._effectuer_appel(
                     prompt=prompt,
-                    system_prompt=system_prompt,
+                    prompt_systeme=prompt_systeme,
                     temperature=temperature,
                     max_tokens=max_tokens
                 )
 
                 # Enregistrer appel
-                RateLimit.record_call()
+                LimiteDebit.enregistrer_appel()
 
                 # Cacher résultat
-                if use_cache:
-                    AICache.set(cache_key, response)
+                if utiliser_cache:
+                    CacheIA.definir(
+                        prompt=prompt,
+                        reponse=reponse,
+                        systeme=prompt_systeme,
+                        temperature=temperature,
+                        modele=self.modele
+                    )
 
-                return response
+                return reponse
 
             except httpx.HTTPError as e:
-                if attempt == max_retries - 1:
-                    logger.error(f"❌ API error after {max_retries} retries: {e}")
-                    raise AIServiceError(
+                if tentative == max_tentatives - 1:
+                    logger.error(f"❌ Erreur API après {max_tentatives} tentatives: {e}")
+                    raise ErreurServiceIA(
                         f"Erreur API Mistral: {str(e)}",
-                        user_message="L'IA est temporairement indisponible"
+                        message_utilisateur="L'IA est temporairement indisponible"
                     )
 
                 # Attente exponentielle
-                wait_time = 2 ** attempt
-                logger.warning(f"Retry {attempt + 1}/{max_retries} après {wait_time}s")
-                await asyncio.sleep(wait_time)
+                temps_attente = 2 ** tentative
+                logger.warning(f"Tentative {tentative + 1}/{max_tentatives} après {temps_attente}s")
+                await asyncio.sleep(temps_attente)
 
             except Exception as e:
-                logger.error(f"❌ Unexpected error: {e}")
-                raise AIServiceError(
+                logger.error(f"❌ Erreur inattendue: {e}")
+                raise ErreurServiceIA(
                     f"Erreur inattendue: {str(e)}",
-                    user_message="Erreur lors de l'appel IA"
+                    message_utilisateur="Erreur lors de l'appel IA"
                 )
 
         # Ne devrait jamais arriver ici
-        raise AIServiceError("Échec après tous les retries")
+        raise ErreurServiceIA("Échec après toutes les tentatives")
 
-    async def _do_call(
+    async def _effectuer_appel(
             self,
             prompt: str,
-            system_prompt: str,
+            prompt_systeme: str,
             temperature: float,
             max_tokens: int
     ) -> str:
         """Effectue l'appel API réel"""
         messages = []
 
-        if system_prompt:
+        if prompt_systeme:
             messages.append({
                 "role": "system",
-                "content": system_prompt
+                "content": prompt_systeme
             })
 
         messages.append({
@@ -159,33 +164,33 @@ class AIClient:
         })
 
         async with httpx.AsyncClient(timeout=self.timeout) as client:
-            response = await client.post(
-                f"{self.base_url}/chat/completions",
+            reponse = await client.post(
+                f"{self.url_base}/chat/completions",
                 headers={
-                    "Authorization": f"Bearer {self.api_key}",
+                    "Authorization": f"Bearer {self.cle_api}",
                     "Content-Type": "application/json",
                 },
                 json={
-                    "model": self.model,
+                    "model": self.modele,
                     "messages": messages,
                     "temperature": temperature,
                     "max_tokens": max_tokens,
                 }
             )
 
-            response.raise_for_status()
-            result = response.json()
+            reponse.raise_for_status()
+            resultat = reponse.json()
 
-            content = result["choices"][0]["message"]["content"]
-            logger.info(f"✅ Réponse reçue ({len(content)} chars)")
+            contenu = resultat["choices"][0]["message"]["content"]
+            logger.info(f"✅ Réponse reçue ({len(contenu)} caractères)")
 
-            return content
+            return contenu
 
     # ═══════════════════════════════════════════════════════════
     # MÉTHODES MÉTIER (LEGACY)
     # ═══════════════════════════════════════════════════════════
 
-    async def chat(
+    async def discuter(
             self,
             message: str,
             historique: List[Dict] = None,
@@ -196,29 +201,29 @@ class AIClient:
 
         Maintenu pour compatibilité avec l'ancien code
         """
-        hist_text = ""
+        texte_historique = ""
         if historique:
-            hist_text = "\n".join([
+            texte_historique = "\n".join([
                 f"{h['role']}: {h['content']}"
                 for h in historique[-5:]
             ])
 
-        ctx_text = ""
+        texte_contexte = ""
         if contexte:
             import json
-            ctx_text = f"\n\nContexte:\n{json.dumps(contexte, indent=2)}"
+            texte_contexte = f"\n\nContexte:\n{json.dumps(contexte, indent=2)}"
 
-        system_prompt = (
+        prompt_systeme = (
             "Tu es l'assistant familial MaTanne. "
             "Tu aides avec: Cuisine, Famille, Maison, Planning."
-            f"{ctx_text}"
+            f"{texte_contexte}"
         )
 
-        prompt = f"Historique:\n{hist_text}\n\nUtilisateur: {message}"
+        prompt = f"Historique:\n{texte_historique}\n\nUtilisateur: {message}"
 
-        return await self.call(
+        return await self.appeler(
             prompt=prompt,
-            system_prompt=system_prompt,
+            prompt_systeme=prompt_systeme,
             temperature=0.7,
             max_tokens=500
         )
@@ -227,11 +232,11 @@ class AIClient:
     # HELPERS
     # ═══════════════════════════════════════════════════════════
 
-    def get_model_info(self) -> Dict[str, Any]:
-        """Retourne info sur le modèle"""
+    def obtenir_infos_modele(self) -> Dict[str, Any]:
+        """Retourne infos sur le modèle"""
         return {
-            "model": self.model,
-            "base_url": self.base_url,
+            "modele": self.modele,
+            "url_base": self.url_base,
             "timeout": self.timeout
         }
 
@@ -240,17 +245,17 @@ class AIClient:
 # INSTANCE GLOBALE (LAZY)
 # ═══════════════════════════════════════════════════════════
 
-_client: Optional[AIClient] = None
+_client: Optional[ClientIA] = None
 
 
-def get_ai_client() -> AIClient:
+def obtenir_client_ia() -> ClientIA:
     """
-    Récupère l'instance AIClient (singleton lazy)
+    Récupère l'instance ClientIA (singleton lazy)
 
     Returns:
-        Instance AIClient
+        Instance ClientIA
     """
     global _client
     if _client is None:
-        _client = AIClient()
+        _client = ClientIA()
     return _client

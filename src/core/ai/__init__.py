@@ -1,20 +1,21 @@
 """
-Module IA - Client, Parser, Cache + Cache Sémantique
+Module IA - Client, Analyseur, Cache
+Tout harmonisé en français
 """
 
-from .client import AIClient, get_ai_client
-from .parser import AIParser, parse_list_response
+from .client import ClientIA, obtenir_client_ia
+from .parser import AnalyseurIA, analyser_liste_reponse
 from .cache import CacheIA
 
 __all__ = [
     # Client
-    "AIClient",
-    "get_ai_client",
+    "ClientIA",
+    "obtenir_client_ia",
 
-    # Parser
-    "AIParser",
-    "parse_list_response",
+    # Analyseur (Parser)
+    "AnalyseurIA",
+    "analyser_liste_reponse",
 
-    # Cache classique
+    # Cache IA
     "CacheIA",
 ]

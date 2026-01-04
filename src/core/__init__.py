@@ -1,20 +1,21 @@
 """
 Core - Point d'Entrée Unifié
+Tous les composants essentiels en français
 """
 
 # Config
-from .config import get_settings, Settings
+from .config import obtenir_parametres, Parametres
 
 # Database
 from .database import (
-    get_db_context,
-    get_db_safe,
-    check_connection,
-    get_db_info,
-    health_check,
-    init_database,
-    create_all_tables,
-    MigrationManager
+    obtenir_contexte_db,
+    obtenir_db_securise,
+    verifier_connexion,
+    obtenir_infos_db,
+    verifier_sante,
+    initialiser_database,
+    creer_toutes_tables,
+    GestionnaireMigrations
 )
 
 # Models
@@ -45,34 +46,31 @@ from .models import (
 
 # AI
 from .ai import (
-    AIClient,
-    get_ai_client,
-    AIParser,
-    parse_list_response,
-    AICache,
-    SemanticCache,
-    SemanticCacheConfig,
-    EmbeddingEngine
+    ClientIA,
+    obtenir_client_ia,
+    AnalyseurIA,
+    analyser_liste_reponse,
+    CacheIA
 )
 
 # Cache
-from .cache import Cache, RateLimit
+from .cache import Cache, LimiteDebit
 
 # Errors
 from .errors import (
-    AppException,
-    ValidationError,
-    NotFoundError,
-    DatabaseError,
-    AIServiceError,
-    RateLimitError,
-    handle_errors
+    ExceptionApp,
+    ErreurValidation,
+    ErreurNonTrouve,
+    ErreurBaseDeDonnees,
+    ErreurServiceIA,
+    ErreurLimiteDebit,
+    gerer_erreurs
 )
 
-# Validation (Unified)
-from .validation_unified import (
+# Validation
+from .validation import (
     # Sanitization
-    InputSanitizer,
+    NettoyeurEntrees,
 
     # Pydantic Models
     IngredientInput,
@@ -80,55 +78,51 @@ from .validation_unified import (
     RecetteInput,
     ArticleInventaireInput,
     ArticleCoursesInput,
-    RepasInput,
 
     # Schémas Dict
-    RECETTE_SCHEMA,
-    INVENTAIRE_SCHEMA,
-    COURSES_SCHEMA,
+    SCHEMA_RECETTE,
+    SCHEMA_INVENTAIRE,
+    SCHEMA_COURSES,
 
     # Helpers
-    validate_model,
-    validate_streamlit_form,
-    validate_and_sanitize_form,
-    show_validation_errors,
-    require_fields,
-    require_positive,
-    require_exists,
+    valider_modele,
+    valider_formulaire_streamlit,
+    valider_et_nettoyer_formulaire,
+    afficher_erreurs_validation,
 
     # Decorator
-    validate_input,
+    valider_entree,
 )
 
 # Logging
-from .logging import LogManager, get_logger
+from .logging import GestionnaireLog, obtenir_logger
 
 # State
 from .state import (
-    StateManager,
-    AppState,
-    get_state,
-    navigate,
-    go_back,
-    get_breadcrumb,
-    is_debug_mode,
-    clear_ui_states
+    GestionnaireEtat,
+    EtatApp,
+    obtenir_etat,
+    naviguer,
+    revenir,
+    obtenir_fil_ariane,
+    est_mode_debug,
+    nettoyer_etats_ui
 )
 
 __all__ = [
     # Config
-    "get_settings",
-    "Settings",
+    "obtenir_parametres",
+    "Parametres",
 
     # Database
-    "get_db_context",
-    "get_db_safe",
-    "check_connection",
-    "get_db_info",
-    "health_check",
-    "init_database",
-    "create_all_tables",
-    "MigrationManager",
+    "obtenir_contexte_db",
+    "obtenir_db_securise",
+    "verifier_connexion",
+    "obtenir_infos_db",
+    "verifier_sante",
+    "initialiser_database",
+    "creer_toutes_tables",
+    "GestionnaireMigrations",
 
     # Models
     "Base",
@@ -155,59 +149,52 @@ __all__ = [
     "Notification",
 
     # AI
-    "AIClient",
-    "get_ai_client",
-    "AIParser",
-    "parse_list_response",
-    "AICache",
-    "SemanticCache",
-    "SemanticCacheConfig",
-    "EmbeddingEngine",
+    "ClientIA",
+    "obtenir_client_ia",
+    "AnalyseurIA",
+    "analyser_liste_reponse",
+    "CacheIA",
 
     # Cache
     "Cache",
-    "RateLimit",
+    "LimiteDebit",
 
     # Errors
-    "AppException",
-    "ValidationError",
-    "NotFoundError",
-    "DatabaseError",
-    "AIServiceError",
-    "RateLimitError",
-    "handle_errors",
+    "ExceptionApp",
+    "ErreurValidation",
+    "ErreurNonTrouve",
+    "ErreurBaseDeDonnees",
+    "ErreurServiceIA",
+    "ErreurLimiteDebit",
+    "gerer_erreurs",
 
     # Validation
-    "InputSanitizer",
+    "NettoyeurEntrees",
     "IngredientInput",
     "EtapeInput",
     "RecetteInput",
     "ArticleInventaireInput",
     "ArticleCoursesInput",
-    "RepasInput",
-    "RECETTE_SCHEMA",
-    "INVENTAIRE_SCHEMA",
-    "COURSES_SCHEMA",
-    "validate_model",
-    "validate_streamlit_form",
-    "validate_and_sanitize_form",
-    "show_validation_errors",
-    "require_fields",
-    "require_positive",
-    "require_exists",
-    "validate_input",
+    "SCHEMA_RECETTE",
+    "SCHEMA_INVENTAIRE",
+    "SCHEMA_COURSES",
+    "valider_modele",
+    "valider_formulaire_streamlit",
+    "valider_et_nettoyer_formulaire",
+    "afficher_erreurs_validation",
+    "valider_entree",
 
     # Logging
-    "LogManager",
-    "get_logger",
+    "GestionnaireLog",
+    "obtenir_logger",
 
     # State
-    "StateManager",
-    "AppState",
-    "get_state",
-    "navigate",
-    "go_back",
-    "get_breadcrumb",
-    "is_debug_mode",
-    "clear_ui_states",
+    "GestionnaireEtat",
+    "EtatApp",
+    "obtenir_etat",
+    "naviguer",
+    "revenir",
+    "obtenir_fil_ariane",
+    "est_mode_debug",
+    "nettoyer_etats_ui",
 ]

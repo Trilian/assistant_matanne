@@ -1,5 +1,5 @@
 """
-Parser JSON IA Ultra-Robuste
+Analyseur JSON IA Ultra-Robuste
 Gère tous les cas edge des réponses Mistral/GPT
 """
 import json
@@ -13,9 +13,9 @@ logger = logging.getLogger(__name__)
 T = TypeVar('T', bound=BaseModel)
 
 
-class AIParser:
+class AnalyseurIA:
     """
-    Parser JSON universel pour réponses IA
+    Analyseur JSON universel pour réponses IA
 
     Stratégies (dans l'ordre):
     1. Parse direct (JSON propre)
@@ -26,19 +26,19 @@ class AIParser:
     """
 
     @staticmethod
-    def parse(
-            response: str,
-            model: Type[T],
-            fallback: Optional[Dict] = None,
+    def analyser(
+            reponse: str,
+            modele: Type[T],
+            valeur_secours: Optional[Dict] = None,
             strict: bool = False
     ) -> T:
         """
         Parse réponse IA en modèle Pydantic
 
         Args:
-            response: Réponse brute IA
-            model: Modèle Pydantic cible
-            fallback: Dict fallback si échec
+            reponse: Réponse brute IA
+            modele: Modèle Pydantic cible
+            valeur_secours: Dict fallback si échec
             strict: Si True, raise si échec (pas de fallback)
 
         Returns:
@@ -49,134 +49,134 @@ class AIParser:
         """
         # Stratégie 1: Parse direct
         try:
-            cleaned = AIParser._clean_basic(response)
-            return model.parse_raw(cleaned)
+            nettoye = AnalyseurIA._nettoyer_basique(reponse)
+            return modele.parse_raw(nettoye)
         except (ValidationError, json.JSONDecodeError):
             pass
 
         # Stratégie 2: Extraction JSON
         try:
-            json_str = AIParser._extract_json_object(response)
-            return model.parse_raw(json_str)
+            json_str = AnalyseurIA._extraire_objet_json(reponse)
+            return modele.parse_raw(json_str)
         except (ValidationError, json.JSONDecodeError, ValueError):
             pass
 
         # Stratégie 3: Réparation
         try:
-            repaired = AIParser._smart_repair(response)
-            data = json.loads(repaired)
-            return model(**data)
+            repare = AnalyseurIA._reparer_intelligemment(reponse)
+            donnees = json.loads(repare)
+            return modele(**donnees)
         except (ValidationError, json.JSONDecodeError, TypeError):
             pass
 
         # Stratégie 4: Parse partiel
         try:
-            partial_data = AIParser._parse_partial(response, model)
-            if partial_data:
-                return model(**partial_data)
+            donnees_partielles = AnalyseurIA._analyser_partiel(reponse, modele)
+            if donnees_partielles:
+                return modele(**donnees_partielles)
         except Exception:
             pass
 
         # Stratégie 5: Fallback
-        if not strict and fallback:
+        if not strict and valeur_secours:
             logger.warning("Toutes stratégies échouées, utilisation fallback")
-            return model(**fallback)
+            return modele(**valeur_secours)
 
         # Échec total
-        logger.error(f"Impossible de parser: {response[:500]}")
-        raise ValidationError("Impossible de parser la réponse IA")
+        logger.error(f"Impossible d'analyser: {reponse[:500]}")
+        raise ValidationError("Impossible d'analyser la réponse IA")
 
     @staticmethod
-    def _clean_basic(text: str) -> str:
+    def _nettoyer_basique(texte: str) -> str:
         """Nettoyage basique"""
         # BOM et caractères invisibles
-        text = text.replace("\ufeff", "")
-        text = re.sub(r"[\x00-\x1F\x7F]", "", text)
+        texte = texte.replace("\ufeff", "")
+        texte = re.sub(r"[\x00-\x1F\x7F]", "", texte)
 
         # Markdown
-        text = re.sub(r"```json\s*", "", text, flags=re.IGNORECASE)
-        text = re.sub(r"```\s*", "", text)
+        texte = re.sub(r"```json\s*", "", texte, flags=re.IGNORECASE)
+        texte = re.sub(r"```\s*", "", texte)
 
-        return text.strip()
+        return texte.strip()
 
     @staticmethod
-    def _extract_json_object(text: str) -> str:
+    def _extraire_objet_json(texte: str) -> str:
         """Extrait le premier objet JSON complet {...}"""
-        text = AIParser._clean_basic(text)
+        texte = AnalyseurIA._nettoyer_basique(texte)
 
-        stack = []
-        start = None
+        pile = []
+        debut = None
 
-        for i, char in enumerate(text):
+        for i, char in enumerate(texte):
             if char == '{':
-                if not stack:
-                    start = i
-                stack.append(char)
+                if not pile:
+                    debut = i
+                pile.append(char)
             elif char == '}':
-                if stack:
-                    stack.pop()
-                if not stack and start is not None:
-                    return text[start:i+1]
+                if pile:
+                    pile.pop()
+                if not pile and debut is not None:
+                    return texte[debut:i+1]
 
         raise ValueError("Aucun objet JSON complet trouvé")
 
     @staticmethod
-    def _smart_repair(text: str) -> str:
+    def _reparer_intelligemment(texte: str) -> str:
         """Répare les erreurs JSON courantes"""
-        text = AIParser._clean_basic(text)
+        texte = AnalyseurIA._nettoyer_basique(texte)
 
         # Échapper apostrophes dans strings
-        text = re.sub(
+        texte = re.sub(
             r'(["\'])([^"\']*?)\'([^"\']*?)\1',
             r'\1\2\\\'\3\1',
-            text
+            texte
         )
 
         # Supprimer virgules trailing
-        text = re.sub(r",\s*([}\]])", r"\1", text)
+        texte = re.sub(r",\s*([}\]])", r"\1", texte)
 
         # Guillemets sur clés
-        text = re.sub(r'([{\s,])(\w+)(\s*:)', r'\1"\2"\3', text)
+        texte = re.sub(r'([{\s,])(\w+)(\s*:)', r'\1"\2"\3', texte)
 
         # Python booleans -> JSON
-        text = re.sub(r'\bTrue\b', 'true', text)
-        text = re.sub(r'\bFalse\b', 'false', text)
-        text = re.sub(r'\bNone\b', 'null', text)
+        texte = re.sub(r'\bTrue\b', 'true', texte)
+        texte = re.sub(r'\bFalse\b', 'false', texte)
+        texte = re.sub(r'\bNone\b', 'null', texte)
 
         # Apostrophes simples -> doubles
-        text = re.sub(r"'([^']*)'(\s*[:, \]}])", r'"\1"\2', text)
+        texte = re.sub(r"'([^']*)'(\s*[:, \]}])", r'"\1"\2', texte)
 
-        return text
+        return texte
 
     @staticmethod
-    def _parse_partial(text: str, model: Type[BaseModel]) -> Optional[Dict]:
+    def _analyser_partiel(texte: str, modele: Type[BaseModel]) -> Optional[Dict]:
         """Parse partiel si JSON cassé"""
         try:
-            model_fields = model.__fields__.keys()
-            result = {}
+            champs_modele = modele.__fields__.keys()
+            resultat = {}
 
-            for field in model_fields:
-                pattern = rf'"{field}"\s*:\s*(.+?)(?:,|\}})'
-                match = re.search(pattern, text, re.DOTALL)
+            for champ in champs_modele:
+                pattern = rf'"{champ}"\s*:\s*(.+?)(?:,|\}})'
+                match = re.search(pattern, texte, re.DOTALL)
 
                 if match:
                     try:
-                        value_str = match.group(1).strip()
+                        chaine_valeur = match.group(1).strip()
 
-                        if value_str.startswith('"'):
-                            result[field] = json.loads(value_str)
-                        elif value_str.startswith('['):
-                            result[field] = json.loads(value_str)
-                        elif value_str.startswith('{'):
-                            result[field] = json.loads(value_str)
+                        if chaine_valeur.startswith('"'):
+                            resultat[champ] = json.loads(chaine_valeur)
+                        elif chaine_valeur.startswith('['):
+                            resultat[champ] = json.loads(chaine_valeur)
+                        elif chaine_valeur.startswith('{'):
+                            resultat[champ] = json.loads(chaine_valeur)
                         else:
-                            result[field] = json.loads(value_str)
+                            resultat[champ] = json.loads(chaine_valeur)
                     except:
                         pass
 
-            if result:
-                logger.info(f"Parse partiel: {len(result)} champs extraits")
-                return result
+            if resultat:
+                logger.info(f"Parse partiel: {len(resultat)} champs extraits")
+                return resultat
 
         except Exception as e:
             logger.debug(f"Parse partiel échoué: {e}")
@@ -184,32 +184,32 @@ class AIParser:
         return None
 
 
-def parse_list_response(
-        response: str,
-        item_model: Type[BaseModel],
-        list_key: str = "items",
-        fallback_items: Optional[List[Dict]] = None
+def analyser_liste_reponse(
+        reponse: str,
+        modele_item: Type[BaseModel],
+        cle_liste: str = "items",
+        items_secours: Optional[List[Dict]] = None
 ) -> List[BaseModel]:
     """
     Parse une réponse contenant une liste
 
     Args:
-        response: Réponse IA
-        item_model: Modèle d'un item
-        list_key: Clé contenant la liste
-        fallback_items: Liste fallback
+        reponse: Réponse IA
+        modele_item: Modèle d'un item
+        cle_liste: Clé contenant la liste
+        items_secours: Liste fallback
 
     Returns:
         Liste d'items validés
     """
-    class ListWrapper(BaseModel):
-        items: List[item_model]
+    class EnvelopeListe(BaseModel):
+        items: List[modele_item]
 
-    wrapper_data = AIParser.parse(
-        response,
-        ListWrapper,
-        fallback={list_key: fallback_items or []},
+    donnees_enveloppe = AnalyseurIA.analyser(
+        reponse,
+        EnvelopeListe,
+        valeur_secours={cle_liste: items_secours or []},
         strict=False
     )
 
-    return wrapper_data.items
+    return donnees_enveloppe.items

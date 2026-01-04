@@ -1,6 +1,6 @@
 """
-State Unifié - StateManager Complet
-Corrigé avec toutes les méthodes manquantes
+State Unifié - Gestionnaire État Complet
+Tout harmonisé en français
 """
 import streamlit as st
 from dataclasses import dataclass, field
@@ -11,134 +11,134 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class AppState:
+class EtatApp:
     """État global de l'application"""
     # Navigation
-    current_module: str = "accueil"
-    previous_module: Optional[str] = None
-    navigation_history: List[str] = field(default_factory=list)
+    module_actuel: str = "accueil"
+    module_precedent: Optional[str] = None
+    historique_navigation: List[str] = field(default_factory=list)
 
     # Utilisateur
-    user_name: str = "Anne"
-    unread_notifications: int = 0
+    nom_utilisateur: str = "Anne"
+    notifications_non_lues: int = 0
 
     # Agent IA
     agent_ia: Optional[Any] = None
 
     # Recettes
-    viewing_recipe_id: Optional[int] = None
-    editing_recipe_id: Optional[int] = None
-    adapt_baby_recipe_id: Optional[int] = None
+    id_recette_visualisation: Optional[int] = None
+    id_recette_edition: Optional[int] = None
+    id_recette_adaptation_bebe: Optional[int] = None
 
     # Inventaire
-    viewing_article_id: Optional[int] = None
-    editing_article_id: Optional[int] = None
+    id_article_visualisation: Optional[int] = None
+    id_article_edition: Optional[int] = None
 
     # Planning
-    viewing_planning_id: Optional[int] = None
+    id_planning_visualisation: Optional[int] = None
     semaine_actuelle: Optional[Any] = None
-    adding_repas_planning_id: Optional[int] = None
-    adding_repas_jour: Optional[int] = None
-    adding_repas_date: Optional[Any] = None
-    editing_repas_id: Optional[int] = None
+    id_planning_ajout_repas: Optional[int] = None
+    jour_ajout_repas: Optional[int] = None
+    date_ajout_repas: Optional[Any] = None
+    id_repas_edition: Optional[int] = None
 
-    # UI States
-    show_add_form: bool = False
-    show_ia_generation: bool = False
-    show_clear_confirm: bool = False
-    show_notifications: bool = False
-    show_add_repas_form: bool = False
-    active_tab: Optional[str] = None
+    # États UI
+    afficher_formulaire_ajout: bool = False
+    afficher_generation_ia: bool = False
+    afficher_confirmation_suppression: bool = False
+    afficher_notifications: bool = False
+    afficher_formulaire_ajout_repas: bool = False
+    onglet_actif: Optional[str] = None
 
     # Flags
-    debug_mode: bool = False
-    cache_enabled: bool = True
+    mode_debug: bool = False
+    cache_active: bool = True
 
     def __post_init__(self):
-        if not self.navigation_history:
-            self.navigation_history = [self.current_module]
+        if not self.historique_navigation:
+            self.historique_navigation = [self.module_actuel]
 
 
-class StateManager:
+class GestionnaireEtat:
     """Gestionnaire centralisé du state"""
-    STATE_KEY = "app_state"
+    CLE_ETAT = "etat_app"
 
     @staticmethod
-    def init():
+    def initialiser():
         """Initialise le state si pas déjà fait"""
-        if StateManager.STATE_KEY not in st.session_state:
-            st.session_state[StateManager.STATE_KEY] = AppState()
-            logger.info("✅ AppState initialisé")
+        if GestionnaireEtat.CLE_ETAT not in st.session_state:
+            st.session_state[GestionnaireEtat.CLE_ETAT] = EtatApp()
+            logger.info("✅ EtatApp initialisé")
 
     @staticmethod
-    def get() -> AppState:
+    def obtenir() -> EtatApp:
         """Récupère le state actuel"""
-        StateManager.init()
-        return st.session_state[StateManager.STATE_KEY]
+        GestionnaireEtat.initialiser()
+        return st.session_state[GestionnaireEtat.CLE_ETAT]
 
     @staticmethod
-    def navigate_to(module: str):
+    def naviguer_vers(module: str):
         """
         Navigue vers un module
 
         Args:
             module: Nom du module (ex: "cuisine.recettes")
         """
-        state = StateManager.get()
+        etat = GestionnaireEtat.obtenir()
 
-        if state.current_module != module:
-            state.previous_module = state.current_module
-            state.navigation_history.append(module)
+        if etat.module_actuel != module:
+            etat.module_precedent = etat.module_actuel
+            etat.historique_navigation.append(module)
 
             # Limiter taille historique
-            if len(state.navigation_history) > 50:
-                state.navigation_history = state.navigation_history[-50:]
+            if len(etat.historique_navigation) > 50:
+                etat.historique_navigation = etat.historique_navigation[-50:]
 
-        state.current_module = module
+        etat.module_actuel = module
         logger.info(f"Navigation: {module}")
 
     @staticmethod
-    def go_back():
+    def revenir():
         """Retourne au module précédent"""
-        state = StateManager.get()
+        etat = GestionnaireEtat.obtenir()
 
-        if state.previous_module:
-            StateManager.navigate_to(state.previous_module)
-        elif len(state.navigation_history) > 1:
-            state.navigation_history.pop()
-            previous = state.navigation_history[-1]
-            StateManager.navigate_to(previous)
+        if etat.module_precedent:
+            GestionnaireEtat.naviguer_vers(etat.module_precedent)
+        elif len(etat.historique_navigation) > 1:
+            etat.historique_navigation.pop()
+            precedent = etat.historique_navigation[-1]
+            GestionnaireEtat.naviguer_vers(precedent)
 
     @staticmethod
-    def get_navigation_breadcrumb() -> List[str]:
+    def obtenir_fil_ariane_navigation() -> List[str]:
         """
         Retourne le fil d'Ariane de navigation
 
         Returns:
-            Liste des modules parcourus (ex: ["Accueil", "Cuisine", "Recettes"])
+            Liste des modules parcourus
         """
-        state = StateManager.get()
+        etat = GestionnaireEtat.obtenir()
 
-        if not state.navigation_history:
+        if not etat.historique_navigation:
             return ["Accueil"]
 
         # Convertir chemins modules en labels
-        breadcrumb = []
-        for module in state.navigation_history[-5:]:  # 5 derniers
-            label = StateManager._module_to_label(module)
-            breadcrumb.append(label)
+        fil_ariane = []
+        for module in etat.historique_navigation[-5:]:  # 5 derniers
+            label = GestionnaireEtat._module_vers_label(module)
+            fil_ariane.append(label)
 
-        return breadcrumb
+        return fil_ariane
 
     @staticmethod
-    def _module_to_label(module: str) -> str:
+    def _module_vers_label(module: str) -> str:
         """
         Convertit nom module en label lisible
 
         Args:
             module: "cuisine.recettes" -> "Recettes"
         """
-        label_map = {
+        correspondances_labels = {
             "accueil": "Accueil",
             "cuisine.recettes": "Recettes",
             "cuisine.inventaire": "Inventaire",
@@ -155,177 +155,177 @@ class StateManager:
             "parametres": "Paramètres",
         }
 
-        return label_map.get(module, module.split(".")[-1].capitalize())
+        return correspondances_labels.get(module, module.split(".")[-1].capitalize())
 
     @staticmethod
-    def reset():
+    def reinitialiser():
         """Réinitialise complètement le state"""
-        if StateManager.STATE_KEY in st.session_state:
-            del st.session_state[StateManager.STATE_KEY]
+        if GestionnaireEtat.CLE_ETAT in st.session_state:
+            del st.session_state[GestionnaireEtat.CLE_ETAT]
 
-        StateManager.init()
+        GestionnaireEtat.initialiser()
         logger.info("🔄 State réinitialisé")
 
     @staticmethod
-    def get_state_summary() -> Dict:
+    def obtenir_resume_etat() -> Dict:
         """
         Retourne résumé du state pour debug
 
         Returns:
             Dict avec infos clés du state
         """
-        state = StateManager.get()
+        etat = GestionnaireEtat.obtenir()
 
         return {
-            "current_module": state.current_module,
-            "previous_module": state.previous_module,
-            "navigation_history": state.navigation_history[-10:],  # 10 derniers
-            "user_name": state.user_name,
-            "debug_mode": state.debug_mode,
-            "cache_enabled": state.cache_enabled,
-            "ai_available": state.agent_ia is not None,
-            "viewing_recipe": state.viewing_recipe_id,
-            "viewing_planning": state.viewing_planning_id,
-            "unread_notifications": state.unread_notifications,
+            "module_actuel": etat.module_actuel,
+            "module_precedent": etat.module_precedent,
+            "historique_navigation": etat.historique_navigation[-10:],
+            "nom_utilisateur": etat.nom_utilisateur,
+            "mode_debug": etat.mode_debug,
+            "cache_active": etat.cache_active,
+            "ia_disponible": etat.agent_ia is not None,
+            "recette_visualisation": etat.id_recette_visualisation,
+            "planning_visualisation": etat.id_planning_visualisation,
+            "notifications_non_lues": etat.notifications_non_lues,
         }
 
     @staticmethod
-    def clear_ui_states():
+    def nettoyer_etats_ui():
         """Nettoie les états UI temporaires"""
-        state = StateManager.get()
+        etat = GestionnaireEtat.obtenir()
 
         # Réinitialiser états UI
-        state.show_add_form = False
-        state.show_ia_generation = False
-        state.show_clear_confirm = False
-        state.show_notifications = False
-        state.show_add_repas_form = False
-        state.active_tab = None
+        etat.afficher_formulaire_ajout = False
+        etat.afficher_generation_ia = False
+        etat.afficher_confirmation_suppression = False
+        etat.afficher_notifications = False
+        etat.afficher_formulaire_ajout_repas = False
+        etat.onglet_actif = None
 
         logger.debug("🧹 États UI nettoyés")
 
     @staticmethod
-    def set_viewing_recipe(recipe_id: Optional[int]):
+    def definir_recette_visualisation(id_recette: Optional[int]):
         """Définit recette en cours de visualisation"""
-        state = StateManager.get()
-        state.viewing_recipe_id = recipe_id
+        etat = GestionnaireEtat.obtenir()
+        etat.id_recette_visualisation = id_recette
 
-        if recipe_id:
-            logger.debug(f"👁️ Visualisation recette {recipe_id}")
+        if id_recette:
+            logger.debug(f"👁️ Visualisation recette {id_recette}")
 
     @staticmethod
-    def set_editing_recipe(recipe_id: Optional[int]):
+    def definir_recette_edition(id_recette: Optional[int]):
         """Définit recette en cours d'édition"""
-        state = StateManager.get()
-        state.editing_recipe_id = recipe_id
+        etat = GestionnaireEtat.obtenir()
+        etat.id_recette_edition = id_recette
 
-        if recipe_id:
-            logger.debug(f"✏️ Édition recette {recipe_id}")
+        if id_recette:
+            logger.debug(f"✏️ Édition recette {id_recette}")
 
     @staticmethod
-    def set_viewing_planning(planning_id: Optional[int]):
+    def definir_planning_visualisation(id_planning: Optional[int]):
         """Définit planning en cours de visualisation"""
-        state = StateManager.get()
-        state.viewing_planning_id = planning_id
+        etat = GestionnaireEtat.obtenir()
+        etat.id_planning_visualisation = id_planning
 
-        if planning_id:
-            logger.debug(f"👁️ Visualisation planning {planning_id}")
+        if id_planning:
+            logger.debug(f"👁️ Visualisation planning {id_planning}")
 
     @staticmethod
-    def increment_notifications():
+    def incrementer_notifications():
         """Incrémente compteur notifications"""
-        state = StateManager.get()
-        state.unread_notifications += 1
+        etat = GestionnaireEtat.obtenir()
+        etat.notifications_non_lues += 1
 
     @staticmethod
-    def clear_notifications():
+    def effacer_notifications():
         """Réinitialise notifications"""
-        state = StateManager.get()
-        state.unread_notifications = 0
+        etat = GestionnaireEtat.obtenir()
+        etat.notifications_non_lues = 0
 
     @staticmethod
-    def toggle_debug_mode():
+    def basculer_mode_debug():
         """Active/désactive mode debug"""
-        state = StateManager.get()
-        state.debug_mode = not state.debug_mode
-        logger.info(f"🐛 Debug mode: {'ON' if state.debug_mode else 'OFF'}")
+        etat = GestionnaireEtat.obtenir()
+        etat.mode_debug = not etat.mode_debug
+        logger.info(f"🐛 Mode debug: {'ON' if etat.mode_debug else 'OFF'}")
 
     @staticmethod
-    def is_in_module(module_prefix: str) -> bool:
+    def est_dans_module(prefixe_module: str) -> bool:
         """
         Vérifie si on est dans un module spécifique
 
         Args:
-            module_prefix: Préfixe module (ex: "cuisine")
+            prefixe_module: Préfixe module (ex: "cuisine")
 
         Returns:
             True si module courant commence par préfixe
         """
-        state = StateManager.get()
-        return state.current_module.startswith(module_prefix)
+        etat = GestionnaireEtat.obtenir()
+        return etat.module_actuel.startswith(prefixe_module)
 
     @staticmethod
-    def get_module_context() -> Dict[str, Any]:
+    def obtenir_contexte_module() -> Dict[str, Any]:
         """
         Retourne contexte du module actuel
 
         Returns:
             Dict avec infos contextuelles du module
         """
-        state = StateManager.get()
+        etat = GestionnaireEtat.obtenir()
 
-        context = {
-            "module": state.current_module,
-            "breadcrumb": StateManager.get_navigation_breadcrumb(),
+        contexte = {
+            "module": etat.module_actuel,
+            "fil_ariane": GestionnaireEtat.obtenir_fil_ariane_navigation(),
         }
 
         # Ajouter contexte spécifique selon module
-        if state.current_module.startswith("cuisine.recettes"):
-            context["viewing_recipe"] = state.viewing_recipe_id
-            context["editing_recipe"] = state.editing_recipe_id
+        if etat.module_actuel.startswith("cuisine.recettes"):
+            contexte["recette_visualisation"] = etat.id_recette_visualisation
+            contexte["recette_edition"] = etat.id_recette_edition
 
-        elif state.current_module.startswith("cuisine.planning"):
-            context["viewing_planning"] = state.viewing_planning_id
-            context["semaine"] = state.semaine_actuelle
+        elif etat.module_actuel.startswith("cuisine.planning"):
+            contexte["planning_visualisation"] = etat.id_planning_visualisation
+            contexte["semaine"] = etat.semaine_actuelle
 
-        elif state.current_module.startswith("cuisine.inventaire"):
-            context["viewing_article"] = state.viewing_article_id
+        elif etat.module_actuel.startswith("cuisine.inventaire"):
+            contexte["article_visualisation"] = etat.id_article_visualisation
 
-        return context
+        return contexte
 
 
 # ═══════════════════════════════════════════════════════════
 # HELPERS RACCOURCIS
 # ═══════════════════════════════════════════════════════════
 
-def get_state() -> AppState:
+def obtenir_etat() -> EtatApp:
     """Raccourci pour récupérer le state"""
-    return StateManager.get()
+    return GestionnaireEtat.obtenir()
 
 
-def navigate(module: str):
+def naviguer(module: str):
     """Raccourci pour naviguer"""
-    StateManager.navigate_to(module)
+    GestionnaireEtat.naviguer_vers(module)
     st.rerun()
 
 
-def go_back():
+def revenir():
     """Raccourci pour revenir en arrière"""
-    StateManager.go_back()
+    GestionnaireEtat.revenir()
     st.rerun()
 
 
-def get_breadcrumb() -> List[str]:
+def obtenir_fil_ariane() -> List[str]:
     """Raccourci pour fil d'Ariane"""
-    return StateManager.get_navigation_breadcrumb()
+    return GestionnaireEtat.obtenir_fil_ariane_navigation()
 
 
-def is_debug_mode() -> bool:
+def est_mode_debug() -> bool:
     """Raccourci pour vérifier mode debug"""
-    state = get_state()
-    return state.debug_mode
+    etat = obtenir_etat()
+    return etat.mode_debug
 
 
-def clear_ui_states():
+def nettoyer_etats_ui():
     """Raccourci pour nettoyer états UI"""
-    StateManager.clear_ui_states()
+    GestionnaireEtat.nettoyer_etats_ui()

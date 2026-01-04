@@ -5,18 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment=" amelioration app duplication etc..">
-      <change afterPath="$PROJECT_DIR$/src/core/models/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/core/models/base.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/core/models/cuisine.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/core/models/legacy.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/cache.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/cache.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/constants.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/database.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/errors.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/errors.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/logging.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/logging.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/models.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/validation_unified.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/validation.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -188,14 +177,6 @@
       <workItem from="1764864455782" duration="6942000" />
       <workItem from="1764923035460" duration="23405000" />
       <workItem from="1765096794626" duration="16000" />
-    </task>
-    <task id="LOCAL-00051" summary="Planning semaine amelioration">
-      <option name="closed" value="true" />
-      <created>1764966353670</created>
-      <option name="number" value="00051" />
-      <option name="presentableId" value="LOCAL-00051" />
-      <option name="project" value="LOCAL" />
-      <updated>1764966353670</updated>
     </task>
     <task id="LOCAL-00052" summary=" amelioration inventaire">
       <option name="closed" value="true" />
@@ -581,7 +562,15 @@
       <option name="project" value="LOCAL" />
       <updated>1767511080653</updated>
     </task>
-    <option name="localTasksCounter" value="100" />
+    <task id="LOCAL-00100" summary=" amelioration app duplication etc..">
+      <option name="closed" value="true" />
+      <created>1767512805109</created>
+      <option name="number" value="00100" />
+      <option name="presentableId" value="LOCAL-00100" />
+      <option name="project" value="LOCAL" />
+      <updated>1767512805110</updated>
+    </task>
+    <option name="localTasksCounter" value="101" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

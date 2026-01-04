@@ -1,8 +1,6 @@
 """
 Configuration - Configuration centralisée de l'application.
-
-Ce module gère toute la configuration avec auto-détection des sources
-(Streamlit secrets, variables d'environnement) et fallbacks intelligents.
+Tout harmonisé en français
 """
 from pydantic_settings import BaseSettings
 from pydantic import Field
@@ -23,7 +21,7 @@ from .constants import (
 logger = logging.getLogger(__name__)
 
 
-class Settings(BaseSettings):
+class Parametres(BaseSettings):
     """
     Configuration centralisée avec auto-détection.
 
@@ -82,16 +80,16 @@ class Settings(BaseSettings):
             logger.debug(f"st.secrets['db'] non disponible: {e}")
 
         # 2. Variables d'environnement individuelles
-        host = os.getenv("DB_HOST")
-        user = os.getenv("DB_USER")
-        password = os.getenv("DB_PASSWORD")
-        name = os.getenv("DB_NAME")
+        hote = os.getenv("DB_HOST")
+        utilisateur = os.getenv("DB_USER")
+        mot_de_passe = os.getenv("DB_PASSWORD")
+        nom = os.getenv("DB_NAME")
         port = os.getenv("DB_PORT", "5432")
 
-        if all([host, user, password, name]):
+        if all([hote, utilisateur, mot_de_passe, nom]):
             return (
-                f"postgresql://{user}:{password}"
-                f"@{host}:{port}/{name}"
+                f"postgresql://{utilisateur}:{mot_de_passe}"
+                f"@{hote}:{port}/{nom}"
                 f"?sslmode=require"
             )
 
@@ -146,9 +144,9 @@ class Settings(BaseSettings):
             pass
 
         # 2. Variable d'environnement
-        key = os.getenv("MISTRAL_API_KEY")
-        if key:
-            return key
+        cle = os.getenv("MISTRAL_API_KEY")
+        if cle:
+            return cle
 
         raise ValueError(
             "❌ Clé API Mistral manquante!\n\n"
@@ -239,15 +237,15 @@ class Settings(BaseSettings):
             Dict avec configuration publique uniquement
         """
         return {
-            "app_name": self.APP_NAME,
+            "nom_app": self.APP_NAME,
             "version": self.APP_VERSION,
-            "environment": self.ENV,
+            "environnement": self.ENV,
             "debug": self.DEBUG,
-            "mistral_model": self.MISTRAL_MODEL,
-            "cache_enabled": self.CACHE_ENABLED,
-            "log_level": self.LOG_LEVEL,
-            "db_configured": self._verifier_db_configuree(),
-            "mistral_configured": self._verifier_mistral_configure(),
+            "modele_mistral": self.MISTRAL_MODEL,
+            "cache_active": self.CACHE_ENABLED,
+            "niveau_log": self.LOG_LEVEL,
+            "db_configuree": self._verifier_db_configuree(),
+            "mistral_configure": self._verifier_mistral_configure(),
         }
 
     def _verifier_db_configuree(self) -> bool:
@@ -287,22 +285,18 @@ class Settings(BaseSettings):
 # INSTANCE GLOBALE (SINGLETON)
 # ═══════════════════════════════════════════════════════════
 
-_settings: Optional[Settings] = None
+_parametres: Optional[Parametres] = None
 
 
-def obtenir_settings() -> Settings:
+def obtenir_parametres() -> Parametres:
     """
-    Récupère l'instance Settings (singleton).
+    Récupère l'instance Parametres (singleton).
 
     Returns:
-        Instance Settings configurée
+        Instance Parametres configurée
     """
-    global _settings
-    if _settings is None:
-        _settings = Settings()
-        logger.info(f"✅ Configuration chargée: {_settings.APP_NAME} v{_settings.APP_VERSION}")
-    return _settings
-
-
-# Alias pour compatibilité
-settings = obtenir_settings()
+    global _parametres
+    if _parametres is None:
+        _parametres = Parametres()
+        logger.info(f"✅ Configuration chargée: {_parametres.APP_NAME} v{_parametres.APP_VERSION}")
+    return _parametres
