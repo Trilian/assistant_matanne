@@ -1,20 +1,50 @@
-# src/services/recettes/__init__.py
 """
-Services Recettes - Point d'entrée unifié
-Remplace les anciens fichiers éparpillés
+Services Recettes - Point d'Entrée Module
+
+Regroupe tous les services liés aux recettes :
+- CRUD recettes
+- IA (génération, adaptation)
+- Versions (bébé, batch cooking)
+- Scraping web
+- Import/Export
 """
-from .recette_service import recette_service
-from .recette_ai_service import ai_recette_service
-from .recette_io_service import RecetteExporter, RecetteImporter
-from .recette_scraper_service import RecipeWebScraper, RecipeImageGenerator
-from .recette_version_service import create_recette_version_service
+
+# Service CRUD principal
+from .recette_service import RecetteService, recette_service
+
+# Service IA
+from .recette_ai_service import RecetteAIService, recette_ai_service
+
+# Service Versions (Bébé/Batch)
+from .recette_version_service import (
+    RecetteVersionService,
+    recette_version_service,
+)
+
+# Service Scraping Web
+from .recette_scraper_service import (
+    RecipeWebScraper,
+    RecipeImageGenerator,
+)
+
+# Service Import/Export
+from .recette_io_service import (
+    RecetteExporter,
+    RecetteImporter,
+)
 
 __all__ = [
-    "recette_service",
-    "ai_recette_service",
-    "RecetteExporter",
-    "RecetteImporter",
+    # Classes
+    "RecetteService",
+    "RecetteAIService",
+    "RecetteVersionService",
     "RecipeWebScraper",
     "RecipeImageGenerator",
-    "create_recette_version_service"
+    "RecetteExporter",
+    "RecetteImporter",
+
+    # Instances (singletons)
+    "recette_service",
+    "recette_ai_service",
+    "recette_version_service",
 ]

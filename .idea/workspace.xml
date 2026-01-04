@@ -5,7 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment=" amelioration app duplication etc..">
+      <change afterPath="$PROJECT_DIR$/src/services/inventaire/inventaire_ai_service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/services/recettes/recette_ai_service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/services/recettes/recette_io_service.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/inventaire/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/inventaire/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/inventaire/inventaire_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/inventaire/inventaire_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/recettes/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/recettes/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/recettes/recette_scraper_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/recettes/recette_scraper_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/recettes/recette_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/recettes/recette_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/recettes/recette_version_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/recettes/recette_version_service.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -177,14 +187,6 @@
       <workItem from="1764864455782" duration="6942000" />
       <workItem from="1764923035460" duration="23405000" />
       <workItem from="1765096794626" duration="16000" />
-    </task>
-    <task id="LOCAL-00052" summary=" amelioration inventaire">
-      <option name="closed" value="true" />
-      <created>1764968424784</created>
-      <option name="number" value="00052" />
-      <option name="presentableId" value="LOCAL-00052" />
-      <option name="project" value="LOCAL" />
-      <updated>1764968424784</updated>
     </task>
     <task id="LOCAL-00053" summary=" amelioration inventaire">
       <option name="closed" value="true" />
@@ -570,7 +572,15 @@
       <option name="project" value="LOCAL" />
       <updated>1767512805110</updated>
     </task>
-    <option name="localTasksCounter" value="101" />
+    <task id="LOCAL-00101" summary=" amelioration app duplication etc..">
+      <option name="closed" value="true" />
+      <created>1767549741795</created>
+      <option name="number" value="00101" />
+      <option name="presentableId" value="LOCAL-00101" />
+      <option name="project" value="LOCAL" />
+      <updated>1767549741795</updated>
+    </task>
+    <option name="localTasksCounter" value="102" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

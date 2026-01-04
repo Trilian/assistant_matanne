@@ -1,75 +1,134 @@
 """
-Services - Point d'Entrée Unifié (VERSION NETTOYÉE)
+Services - Point d'Entrée Unifié
+
+Exporte tous les services métier de l'application.
+Architecture refactorisée avec BaseService + BaseAIService.
 """
 
-# Base Service (générique CRUD)
+# Base Services (génériques)
 from .base_service import BaseService
+from .base_ai_service import (
+    BaseAIService,
+    RecipeAIMixin,
+    PlanningAIMixin,
+    InventoryAIMixin
+)
 
-# 🆕 Services IA Refactorisés
-try:
-    from .ai_services import (
-        AIRecetteService,
-        CoursesAIService,
-        InventaireAIService,
-        PlanningGenerationService,
-        # Factories
-        create_ai_recette_service,
-        create_courses_ai_service,
-        create_inventaire_ai_service,
-        create_planning_generation_service
-    )
-    AI_SERVICES_AVAILABLE = True
-except ImportError as e:
-    import logging
-    logging.warning(f"Services IA non disponibles: {e}")
-    AI_SERVICES_AVAILABLE = False
-    # Stubs pour éviter erreurs import
-    AIRecetteService = None
-    CoursesAIService = None
-    InventaireAIService = None
-    PlanningGenerationService = None
-    create_ai_recette_service = None
-    create_courses_ai_service = None
-    create_inventaire_ai_service = None
-    create_planning_generation_service = None
+# Service IO (Import/Export universel)
+from .io_service import IOService
 
-# Services métier (recettes, inventaire, courses, planning)
-from .recettes import recette_service, RecetteExporter, RecetteImporter
-from .inventaire import inventaire_service, CATEGORIES, EMPLACEMENTS
-from .courses import courses_service, MAGASINS_CONFIG
-from .planning import planning_service, repas_service
+# ═══════════════════════════════════════════════════════════
+# RECETTES
+# ═══════════════════════════════════════════════════════════
 
-# ⚠️ IO Service maintenant dans src/ui/base_io_service
-# Ne plus importer depuis ici
+from .recettes import (
+    # Service CRUD
+    recette_service,
+
+    # Service IA
+    recette_ai_service,
+
+    # Service Versions (Bébé/Batch)
+    recette_version_service,
+
+    # Service Scraping Web
+    RecipeWebScraper,
+    RecipeImageGenerator,
+
+    # Import/Export
+    RecetteExporter,
+    RecetteImporter,
+)
+
+# ═══════════════════════════════════════════════════════════
+# INVENTAIRE
+# ═══════════════════════════════════════════════════════════
+
+from .inventaire import (
+    # Service CRUD
+    inventaire_service,
+
+    # Service IA
+    inventaire_ai_service,
+
+    # Import/Export
+    InventaireExporter,
+    InventaireImporter,
+
+    # Constantes
+    CATEGORIES,
+    EMPLACEMENTS,
+)
+
+# ═══════════════════════════════════════════════════════════
+# COURSES
+# ═══════════════════════════════════════════════════════════
+
+from .courses import (
+    # Service CRUD
+    courses_service,
+
+    # Service IA
+    courses_ai_service,
+
+    # Constantes
+    MAGASINS_CONFIG,
+)
+
+# ═══════════════════════════════════════════════════════════
+# PLANNING
+# ═══════════════════════════════════════════════════════════
+
+from .planning import (
+    # Services CRUD
+    planning_service,
+    repas_service,
+
+    # Service IA Génération
+    planning_generation_service,
+
+    # Constantes
+    JOURS_SEMAINE,
+)
+
+# ═══════════════════════════════════════════════════════════
+# EXPORTS
+# ═══════════════════════════════════════════════════════════
 
 __all__ = [
     # Base
     "BaseService",
+    "BaseAIService",
+    "RecipeAIMixin",
+    "PlanningAIMixin",
+    "InventoryAIMixin",
+    "IOService",
 
-    # 🆕 Services IA (si disponibles)
-    "AIRecetteService",
-    "CoursesAIService",
-    "InventaireAIService",
-    "PlanningGenerationService",
-
-    # Factories IA
-    "create_ai_recette_service",
-    "create_courses_ai_service",
-    "create_inventaire_ai_service",
-    "create_planning_generation_service",
-
-    # Flag disponibilité
-    "AI_SERVICES_AVAILABLE",
-
-    # Services métier
+    # Recettes
     "recette_service",
+    "recette_ai_service",
+    "recette_version_service",
+    "RecipeWebScraper",
+    "RecipeImageGenerator",
     "RecetteExporter",
     "RecetteImporter",
+
+    # Inventaire
     "inventaire_service",
+    "inventaire_ai_service",
+    "InventaireExporter",
+    "InventaireImporter",
     "CATEGORIES",
     "EMPLACEMENTS",
+
+    # Courses
     "courses_service",
+    "courses_ai_service",
     "MAGASINS_CONFIG",
+
+    # Planning
     "planning_service",
     "repas_service",
+    "planning_generation_service",
+    "JOURS_SEMAINE",
 ]

@@ -1,5 +1,11 @@
 """
-Web Scraper Recettes OPTIMISÉ
+Service Scraping Web - Extraction Recettes
+
+Service pour extraire des recettes depuis des sites web :
+- Scraping multi-sites (Marmiton, 750g, générique)
+- Parsing JSON-LD, Microdata, CSS
+- Génération d'images placeholder
+- Gestion erreurs robuste
 """
 import re
 import logging
@@ -9,17 +15,20 @@ import requests
 from bs4 import BeautifulSoup
 import json
 
-from src.core.errors import handle_errors, ExternalServiceError
+from src.core import handle_errors, ErreurServiceExterne
 
 logger = logging.getLogger(__name__)
 
 
-# ═══════════════════════════════════════════════════════════════
-# SCRAPER PRINCIPAL
-# ═══════════════════════════════════════════════════════════════
-
 class RecipeWebScraper:
-    """Scraper intelligent avec fallbacks multiples"""
+    """
+    Scraper intelligent multi-sites pour recettes.
+
+    Stratégies d'extraction (par priorité) :
+    1. JSON-LD (Schema.org Recipe)
+    2. Microdata HTML
+    3. CSS sélecteurs génériques
+    """
 
     HEADERS = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
@@ -31,10 +40,20 @@ class RecipeWebScraper:
     @handle_errors(show_in_ui=True, fallback_value=None)
     def scrape_url(url: str) -> Optional[Dict]:
         """
-        Scrape recette avec détection automatique
+        Scrape une recette depuis une URL.
 
-        ✅ Error handling automatique
-        ✅ Fallback multi-niveaux
+        Args:
+            url: URL de la recette
+
+        Returns:
+            Dict avec données recette ou None si échec
+
+        Raises:
+            ErreurServiceExterne: Si scraping impossible
+
+        Example:
+            >>> recette = RecipeWebScraper.scrape_url("https://marmiton.org/recettes/...")
+            >>> print(recette["nom"])
         """
         logger.info(f"🔍 Scraping: {url}")
 
@@ -52,15 +71,19 @@ class RecipeWebScraper:
             logger.info(f"✅ Scraped: {result['nom']}")
             return result
 
-        raise ExternalServiceError(
+        raise ErreurServiceExterne(
             f"Extraction échouée: {url}",
-            user_message="Impossible d'extraire la recette"
+            message_utilisateur="Impossible d'extraire la recette depuis cette URL"
         )
+
+    # ═══════════════════════════════════════════════════════════
+    # FETCH HTML
+    # ═══════════════════════════════════════════════════════════
 
     @staticmethod
     @handle_errors(show_in_ui=False, fallback_value=None)
-    def _fetch_html(url: str) -> BeautifulSoup:
-        """Fetch HTML avec retry"""
+    def _fetch_html(url: str) -> Optional[BeautifulSoup]:
+        """Récupère le HTML avec retry."""
         for attempt in range(2):
             try:
                 response = requests.get(
@@ -74,30 +97,27 @@ class RecipeWebScraper:
 
             except Exception as e:
                 if attempt == 1:
-                    raise ExternalServiceError(
+                    raise ErreurServiceExterne(
                         f"Fetch failed: {e}",
-                        user_message="Site inaccessible"
+                        message_utilisateur="Site inaccessible"
                     )
 
+        return None
+
     # ═══════════════════════════════════════════════════════════
-    # SCRAPERS SPÉCIFIQUES (OPTIMISÉS)
+    # SCRAPERS SPÉCIFIQUES
     # ═══════════════════════════════════════════════════════════
 
     @staticmethod
     def _scrape_marmiton(url: str) -> Optional[Dict]:
-        """
-        Scraper Marmiton optimisé
-
-        ✅ Code réduit de 40%
-        ✅ 3 stratégies au lieu de 4
-        """
+        """Scraper optimisé Marmiton."""
         soup = RecipeWebScraper._fetch_html(url)
         if not soup:
             return None
 
         recipe = RecipeWebScraper._init_recipe()
 
-        # STRATÉGIE 1: JSON-LD (priorité)
+        # JSON-LD (priorité)
         for script in soup.find_all("script", {"type": "application/ld+json"}):
             try:
                 data = json.loads(script.string)
@@ -106,19 +126,16 @@ class RecipeWebScraper:
 
                 if data and data.get("@type") == "Recipe":
                     recipe.update(RecipeWebScraper._parse_json_ld(data))
-
                     if recipe["nom"] and recipe["ingredients"]:
-                        logger.info("✅ JSON-LD complet")
+                        logger.debug("✅ JSON-LD complet")
                         return recipe
-
-            except (json.JSONDecodeError, Exception) as e:
-                logger.debug(f"JSON-LD échec: {e}")
+            except:
                 continue
 
-        # STRATÉGIE 2: Microdata
+        # Microdata fallback
         recipe.update(RecipeWebScraper._parse_microdata(soup))
 
-        # STRATÉGIE 3: CSS générique
+        # CSS générique
         if not recipe["nom"]:
             recipe["nom"] = RecipeWebScraper._extract_title(soup)
         if not recipe["ingredients"]:
@@ -130,11 +147,14 @@ class RecipeWebScraper:
 
     @staticmethod
     def _scrape_750g(url: str) -> Optional[Dict]:
-        """Scraper 750g simplifié"""
+        """Scraper 750g."""
         soup = RecipeWebScraper._fetch_html(url)
+        if not soup:
+            return None
+
         recipe = RecipeWebScraper._init_recipe()
 
-        # JSON-LD priority
+        # JSON-LD
         for script in soup.find_all("script", {"type": "application/ld+json"}):
             try:
                 data = json.loads(script.string)
@@ -152,8 +172,11 @@ class RecipeWebScraper:
 
     @staticmethod
     def _scrape_generic(url: str) -> Optional[Dict]:
-        """Scraper générique optimisé"""
+        """Scraper générique."""
         soup = RecipeWebScraper._fetch_html(url)
+        if not soup:
+            return None
+
         recipe = RecipeWebScraper._init_recipe()
 
         recipe["nom"] = RecipeWebScraper._extract_title(soup)
@@ -163,12 +186,12 @@ class RecipeWebScraper:
         return recipe if recipe["nom"] and recipe["ingredients"] else None
 
     # ═══════════════════════════════════════════════════════════
-    # HELPERS OPTIMISÉS
+    # PARSERS
     # ═══════════════════════════════════════════════════════════
 
     @staticmethod
     def _init_recipe() -> Dict:
-        """Template recette"""
+        """Template recette vide."""
         return {
             "nom": "",
             "description": "",
@@ -183,7 +206,7 @@ class RecipeWebScraper:
 
     @staticmethod
     def _parse_json_ld(data: Dict) -> Dict:
-        """Parse JSON-LD optimisé"""
+        """Parse JSON-LD Schema.org Recipe."""
         recipe = {}
 
         if data.get("name"):
@@ -191,7 +214,7 @@ class RecipeWebScraper:
         if data.get("description"):
             recipe["description"] = data["description"].strip()
 
-        # Temps ISO
+        # Temps ISO (PT30M)
         if data.get("prepTime"):
             recipe["temps_preparation"] = RecipeWebScraper._parse_iso_duration(data["prepTime"])
         if data.get("cookTime"):
@@ -218,10 +241,9 @@ class RecipeWebScraper:
 
     @staticmethod
     def _parse_microdata(soup: BeautifulSoup) -> Dict:
-        """Parse microdata optimisé"""
+        """Parse Microdata HTML."""
         recipe = {}
 
-        # Ingrédients
         ing_elements = soup.find_all(["span", "li"], {"itemprop": "recipeIngredient"})
         if ing_elements:
             recipe["ingredients"] = [
@@ -233,7 +255,7 @@ class RecipeWebScraper:
 
     @staticmethod
     def _extract_title(soup: BeautifulSoup) -> str:
-        """Extrait titre"""
+        """Extrait titre."""
         for selector in [
             soup.find("h1", class_=re.compile(r"recipe.*title", re.I)),
             soup.find("h1"),
@@ -244,7 +266,7 @@ class RecipeWebScraper:
 
     @staticmethod
     def _extract_ingredients(soup: BeautifulSoup) -> List[Dict]:
-        """Extrait ingrédients avec fallback"""
+        """Extrait ingrédients."""
         for selector in [".recipe-ingredients", ".ingredients-list", "ul"]:
             container = soup.select_one(selector)
             if container:
@@ -259,7 +281,7 @@ class RecipeWebScraper:
 
     @staticmethod
     def _extract_steps(soup: BeautifulSoup) -> List[Dict]:
-        """Extrait étapes"""
+        """Extrait étapes."""
         for selector in [".recipe-preparation", "ol"]:
             container = soup.select_one(selector)
             if container:
@@ -275,7 +297,7 @@ class RecipeWebScraper:
 
     @staticmethod
     def _parse_iso_duration(duration: str) -> int:
-        """Parse ISO 8601 (PT15M)"""
+        """Parse ISO 8601 duration (PT15M)."""
         hours = minutes = 0
 
         if match := re.search(r"(\d+)H", duration):
@@ -287,13 +309,12 @@ class RecipeWebScraper:
 
     @staticmethod
     def _parse_ingredient(text: str) -> Optional[Dict]:
-        """Parse ingrédient optimisé"""
+        """Parse ingrédient."""
         text = text.strip()
-
         if not text or len(text) < 2:
             return None
 
-        # Pattern: "200 g de tomates"
+        # "200 g de tomates"
         if match := re.match(r"^(\d+(?:[.,]\d+)?)\s*([a-zA-Zàéèêëîïôùûüç]+)?\s*(?:de\s+|d[''])?(.+)$", text, re.I):
             try:
                 qty = float(match.group(1).replace(",", "."))
@@ -309,7 +330,7 @@ class RecipeWebScraper:
             except ValueError:
                 pass
 
-        # Pattern simple: "tomates"
+        # Simple "tomates"
         if len(text) <= 50:
             return {"nom": text, "quantite": 1.0, "unite": "pcs", "optionnel": False}
 
@@ -317,7 +338,7 @@ class RecipeWebScraper:
 
     @staticmethod
     def _normalize_unit(unit: str) -> str:
-        """Normalise unités"""
+        """Normalise unités."""
         unit = unit.lower()
         unit_map = {
             "g": "g", "gr": "g", "gramme": "g",
@@ -330,7 +351,7 @@ class RecipeWebScraper:
 
     @staticmethod
     def _parse_instructions(instructions) -> List[Dict]:
-        """Parse instructions"""
+        """Parse instructions."""
         steps = []
 
         if isinstance(instructions, list):
@@ -342,34 +363,35 @@ class RecipeWebScraper:
         return steps
 
 
-# ═══════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════
 # GÉNÉRATION IMAGES
-# ═══════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════
 
 class RecipeImageGenerator:
-    """Génère images pertinentes"""
+    """Générateur d'images pour recettes."""
 
     @staticmethod
     @handle_errors(show_in_ui=False, fallback_value=None)
     def generate_image_url(recipe_name: str, description: str = "") -> str:
         """
-        Génère URL image Unsplash
+        Génère URL image placeholder.
 
-        ✅ Recherche intelligente
-        ✅ Fallback placeholder
+        Args:
+            recipe_name: Nom de la recette
+            description: Description (optionnel)
+
+        Returns:
+            URL image (Unsplash ou placeholder)
         """
         search_query = RecipeImageGenerator._build_query(recipe_name, description)
 
-        # Unsplash Source (pas besoin de clé)
+        # Unsplash Source
         unsplash_url = f"https://source.unsplash.com/800x600/?{search_query}"
 
         try:
-            import requests
             response = requests.head(unsplash_url, timeout=3, allow_redirects=True)
-
             if response.status_code == 200:
                 return response.url
-
         except:
             pass
 
@@ -381,11 +403,10 @@ class RecipeImageGenerator:
 
     @staticmethod
     def _build_query(name: str, description: str) -> str:
-        """Construit query intelligente"""
+        """Construit query Unsplash."""
         keywords = []
         full_text = f"{name} {description}".lower()
 
-        # Ingrédients principaux
         ing_map = {
             "poulet": "chicken", "boeuf": "beef", "saumon": "salmon",
             "tomate": "tomato", "pâte": "pasta", "riz": "rice"
@@ -401,7 +422,7 @@ class RecipeImageGenerator:
 
     @staticmethod
     def _get_emoji(name: str) -> str:
-        """Emoji pertinent"""
+        """Emoji pertinent."""
         name_lower = name.lower()
 
         emoji_map = {
