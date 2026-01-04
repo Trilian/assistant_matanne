@@ -1,39 +1,56 @@
 """
-Database - Avec Système de Migration & Optimisations
+Database - Gestion de la base de données avec migrations.
+
+Ce module gère :
+- Connexions PostgreSQL/Supabase avec retry automatique
+- Context managers sécurisés
+- Système de migrations
+- Health checks et monitoring
 """
 from contextlib import contextmanager
-from typing import Generator, Optional, List
+from typing import Generator, Optional, Dict
 import streamlit as st
-from sqlalchemy import create_engine, event, text, pool, inspect
+from sqlalchemy import create_engine, text, pool
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import OperationalError, DatabaseError
 import logging
 import time
-from pathlib import Path
+
+from .config import obtenir_settings
+from .constants import (
+    DB_CONNECTION_RETRY,
+    DB_CONNECTION_TIMEOUT,
+    DB_POOL_SIZE,
+    DB_MAX_OVERFLOW
+)
+from .errors import ErreurBaseDeDonnees
 
 logger = logging.getLogger(__name__)
 
 
 # ═══════════════════════════════════════════════════════════
-# CONFIGURATION ENGINE
+# CRÉATION ENGINE
 # ═══════════════════════════════════════════════════════════
 
-class DatabaseConnectionError(Exception):
-    """Erreur connexion DB personnalisée"""
-    pass
-
-
 @st.cache_resource(ttl=3600)
-def get_engine(retry_count: int = 3, retry_delay: int = 2):
+def obtenir_engine(nombre_retries: int = DB_CONNECTION_RETRY, delai_retry: int = 2):
     """
-    Crée l'engine PostgreSQL avec retry automatique
+    Crée l'engine PostgreSQL avec retry automatique.
+
+    Args:
+        nombre_retries: Nombre de tentatives de reconnexion
+        delai_retry: Délai entre les retries en secondes
+
+    Returns:
+        Engine SQLAlchemy configuré
+
+    Raises:
+        ErreurBaseDeDonnees: Si connexion impossible après tous les retries
     """
-    from src.core.config import get_settings
+    settings = obtenir_settings()
+    derniere_erreur = None
 
-    settings = get_settings()
-    last_error = None
-
-    for attempt in range(retry_count):
+    for tentative in range(nombre_retries):
         try:
             database_url = settings.DATABASE_URL
 
@@ -42,38 +59,52 @@ def get_engine(retry_count: int = 3, retry_delay: int = 2):
                 poolclass=pool.NullPool,
                 echo=settings.DEBUG,
                 connect_args={
-                    "connect_timeout": 10,
+                    "connect_timeout": DB_CONNECTION_TIMEOUT,
                     "options": "-c timezone=utc",
                     "sslmode": "require",
                 },
                 pool_pre_ping=True,
             )
 
-            # Test connexion
+            # Test de connexion
             with engine.connect() as conn:
                 conn.execute(text("SELECT 1"))
 
-            logger.info(f"✅ Connexion DB établie (tentative {attempt + 1})")
+            logger.info(f"✅ Connexion DB établie (tentative {tentative + 1})")
             return engine
 
         except (OperationalError, DatabaseError) as e:
-            last_error = e
-            logger.warning(f"❌ Tentative {attempt + 1}/{retry_count} échouée: {e}")
+            derniere_erreur = e
+            logger.warning(
+                f"❌ Tentative {tentative + 1}/{nombre_retries} échouée: {e}"
+            )
 
-            if attempt < retry_count - 1:
-                time.sleep(retry_delay)
+            if tentative < nombre_retries - 1:
+                time.sleep(delai_retry)
                 continue
 
-    error_msg = f"Impossible de se connecter après {retry_count} tentatives: {last_error}"
-    logger.error(error_msg)
-    raise DatabaseConnectionError(error_msg)
+    # Toutes les tentatives ont échoué
+    message_erreur = (
+        f"Impossible de se connecter après {nombre_retries} tentatives: "
+        f"{derniere_erreur}"
+    )
+    logger.error(message_erreur)
+    raise ErreurBaseDeDonnees(
+        message_erreur,
+        message_utilisateur="Impossible de se connecter à la base de données"
+    )
 
 
-def get_engine_safe() -> Optional[object]:
-    """Version safe qui retourne None au lieu de crash"""
+def obtenir_engine_securise() -> Optional[object]:
+    """
+    Version sécurisée qui retourne None au lieu de lever une exception.
+
+    Returns:
+        Engine ou None si erreur
+    """
     try:
-        return get_engine()
-    except DatabaseConnectionError as e:
+        return obtenir_engine()
+    except ErreurBaseDeDonnees as e:
         logger.error(f"DB non disponible: {e}")
         return None
 
@@ -82,13 +113,23 @@ def get_engine_safe() -> Optional[object]:
 # SESSION FACTORY
 # ═══════════════════════════════════════════════════════════
 
-def get_session_factory():
-    """Retourne une session factory"""
-    engine = get_engine()
-    return sessionmaker(autocommit=False, autoflush=False, bind=engine, expire_on_commit=False)
+def obtenir_session_factory():
+    """
+    Retourne une session factory.
+
+    Returns:
+        Session factory configurée
+    """
+    engine = obtenir_engine()
+    return sessionmaker(
+        autocommit=False,
+        autoflush=False,
+        bind=engine,
+        expire_on_commit=False
+    )
 
 
-SessionLocal = get_session_factory()
+SessionLocal = obtenir_session_factory()
 
 
 # ═══════════════════════════════════════════════════════════
@@ -96,8 +137,20 @@ SessionLocal = get_session_factory()
 # ═══════════════════════════════════════════════════════════
 
 @contextmanager
-def get_db_context() -> Generator[Session, None, None]:
-    """Context manager avec gestion d'erreurs robuste"""
+def obtenir_contexte_db() -> Generator[Session, None, None]:
+    """
+    Context manager avec gestion d'erreurs robuste.
+
+    Yields:
+        Session SQLAlchemy active
+
+    Raises:
+        ErreurBaseDeDonnees: En cas d'erreur de connexion ou requête
+
+    Example:
+        >>> with obtenir_contexte_db() as db:
+        >>>     recettes = db.query(Recette).all()
+    """
     db = SessionLocal()
 
     try:
@@ -107,12 +160,18 @@ def get_db_context() -> Generator[Session, None, None]:
     except OperationalError as e:
         db.rollback()
         logger.error(f"❌ Erreur opérationnelle DB: {e}")
-        raise DatabaseConnectionError(f"Erreur réseau/connexion: {e}")
+        raise ErreurBaseDeDonnees(
+            f"Erreur réseau/connexion: {e}",
+            message_utilisateur="Problème de connexion à la base de données"
+        )
 
     except DatabaseError as e:
         db.rollback()
         logger.error(f"❌ Erreur base de données: {e}")
-        raise
+        raise ErreurBaseDeDonnees(
+            str(e),
+            message_utilisateur="Erreur lors de l'opération en base de données"
+        )
 
     except Exception as e:
         db.rollback()
@@ -124,12 +183,22 @@ def get_db_context() -> Generator[Session, None, None]:
 
 
 @contextmanager
-def get_db_safe() -> Generator[Optional[Session], None, None]:
-    """Version safe qui n'interrompt pas l'app"""
+def obtenir_db_securise() -> Generator[Optional[Session], None, None]:
+    """
+    Version sécurisée qui n'interrompt pas l'application.
+
+    Yields:
+        Session ou None si erreur
+
+    Example:
+        >>> with obtenir_db_securise() as db:
+        >>>     if db:
+        >>>         recettes = db.query(Recette).all()
+    """
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             yield db
-    except DatabaseConnectionError:
+    except ErreurBaseDeDonnees:
         logger.warning("DB non disponible, fallback")
         yield None
     except Exception as e:
@@ -137,27 +206,36 @@ def get_db_safe() -> Generator[Optional[Session], None, None]:
         yield None
 
 
+# Alias pour compatibilité
+get_db_context = obtenir_contexte_db
+get_db_safe = obtenir_db_securise
+
+
 # ═══════════════════════════════════════════════════════════
 # SYSTÈME DE MIGRATION
 # ═══════════════════════════════════════════════════════════
 
-class MigrationManager:
+class GestionnaireMigrations:
     """
-    Gestionnaire de migrations de schéma
+    Gestionnaire de migrations de schéma.
 
-    Gère versionnement et application automatique des migrations
+    Gère le versionnement et l'application automatique
+    des migrations sans Alembic.
     """
 
-    MIGRATIONS_TABLE = "schema_migrations"
+    TABLE_MIGRATIONS = "schema_migrations"
+    """Nom de la table de suivi des migrations."""
 
     @staticmethod
-    def init_migrations_table():
-        """Crée table de suivi des migrations si n'existe pas"""
-        engine = get_engine()
+    def initialiser_table_migrations():
+        """
+        Crée la table de suivi des migrations si elle n'existe pas.
+        """
+        engine = obtenir_engine()
 
         with engine.connect() as conn:
             conn.execute(text(f"""
-                CREATE TABLE IF NOT EXISTS {MigrationManager.MIGRATIONS_TABLE} (
+                CREATE TABLE IF NOT EXISTS {GestionnaireMigrations.TABLE_MIGRATIONS} (
                     id SERIAL PRIMARY KEY,
                     version INTEGER NOT NULL UNIQUE,
                     name VARCHAR(255) NOT NULL,
@@ -169,14 +247,19 @@ class MigrationManager:
         logger.info("✅ Table migrations initialisée")
 
     @staticmethod
-    def get_current_version() -> int:
-        """Retourne version actuelle du schéma"""
+    def obtenir_version_courante() -> int:
+        """
+        Retourne la version actuelle du schéma.
+
+        Returns:
+            Numéro de version (0 si aucune migration)
+        """
         try:
-            engine = get_engine()
+            engine = obtenir_engine()
 
             with engine.connect() as conn:
                 result = conn.execute(text(f"""
-                    SELECT MAX(version) FROM {MigrationManager.MIGRATIONS_TABLE}
+                    SELECT MAX(version) FROM {GestionnaireMigrations.TABLE_MIGRATIONS}
                 """)).scalar()
 
                 return result if result else 0
@@ -185,9 +268,19 @@ class MigrationManager:
             return 0
 
     @staticmethod
-    def apply_migration(version: int, name: str, sql: str):
-        """Applique une migration"""
-        engine = get_engine()
+    def appliquer_migration(version: int, nom: str, sql: str):
+        """
+        Applique une migration.
+
+        Args:
+            version: Numéro de version
+            nom: Nom descriptif de la migration
+            sql: Code SQL à exécuter
+
+        Raises:
+            ErreurBaseDeDonnees: Si l'application échoue
+        """
+        engine = obtenir_engine()
 
         try:
             with engine.begin() as conn:
@@ -196,40 +289,49 @@ class MigrationManager:
 
                 # Enregistrer migration
                 conn.execute(text(f"""
-                    INSERT INTO {MigrationManager.MIGRATIONS_TABLE} (version, name)
+                    INSERT INTO {GestionnaireMigrations.TABLE_MIGRATIONS} 
+                    (version, name)
                     VALUES (:version, :name)
-                """), {"version": version, "name": name})
+                """), {"version": version, "name": nom})
 
-            logger.info(f"✅ Migration v{version} appliquée: {name}")
+            logger.info(f"✅ Migration v{version} appliquée: {nom}")
             return True
 
         except Exception as e:
             logger.error(f"❌ Échec migration v{version}: {e}")
-            raise
+            raise ErreurBaseDeDonnees(
+                f"Échec migration v{version}: {e}",
+                message_utilisateur="Erreur lors de la mise à jour du schéma"
+            )
 
     @staticmethod
-    def run_migrations():
-        """Exécute toutes les migrations en attente"""
-        MigrationManager.init_migrations_table()
+    def executer_migrations():
+        """
+        Exécute toutes les migrations en attente.
+        """
+        GestionnaireMigrations.initialiser_table_migrations()
 
-        current_version = MigrationManager.get_current_version()
-        logger.info(f"Version schéma actuelle: v{current_version}")
+        version_courante = GestionnaireMigrations.obtenir_version_courante()
+        logger.info(f"Version schéma actuelle: v{version_courante}")
 
-        # Migrations disponibles
-        migrations = MigrationManager.get_available_migrations()
+        # Migrations disponibles (à personnaliser)
+        migrations = GestionnaireMigrations.obtenir_migrations_disponibles()
 
         # Filtrer migrations non appliquées
-        pending = [m for m in migrations if m["version"] > current_version]
+        en_attente = [m for m in migrations if m["version"] > version_courante]
 
-        if not pending:
+        if not en_attente:
             logger.info("✅ Aucune migration en attente")
             return
 
-        logger.info(f"🔄 {len(pending)} migration(s) en attente")
+        logger.info(f"🔄 {len(en_attente)} migration(s) en attente")
 
-        for migration in sorted(pending, key=lambda x: x["version"]):
-            logger.info(f"Application migration v{migration['version']}: {migration['name']}")
-            MigrationManager.apply_migration(
+        for migration in sorted(en_attente, key=lambda x: x["version"]):
+            logger.info(
+                f"Application migration v{migration['version']}: "
+                f"{migration['name']}"
+            )
+            GestionnaireMigrations.appliquer_migration(
                 migration["version"],
                 migration["name"],
                 migration["sql"]
@@ -238,233 +340,33 @@ class MigrationManager:
         logger.info("✅ Toutes les migrations appliquées")
 
     @staticmethod
-    def get_available_migrations() -> List[dict]:
+    def obtenir_migrations_disponibles() -> list[dict]:
         """
-        Retourne liste des migrations disponibles
+        Retourne la liste des migrations disponibles.
 
-        À personnaliser selon vos besoins (fichiers SQL, etc.)
+        ⚠️ À personnaliser selon vos besoins.
+
+        Returns:
+            Liste de dictionnaires contenant version, name, sql
         """
         return [
             {
                 "version": 1,
-                "name": "add_indexes_performance",
-                "sql": MIGRATION_V1_ADD_INDEXES
+                "name": "ajout_index_performance",
+                "sql": """
+                    -- Index pour améliorer les performances
+                    CREATE INDEX IF NOT EXISTS idx_recette_nom ON recettes(nom);
+                    CREATE INDEX IF NOT EXISTS idx_recette_saison_type ON recettes(saison, type_repas);
+                    CREATE INDEX IF NOT EXISTS idx_ingredient_nom ON ingredients(nom);
+                    CREATE INDEX IF NOT EXISTS idx_inventaire_stock_bas ON inventaire(quantite, quantite_min);
+                """
             },
-            {
-                "version": 2,
-                "name": "add_constraints_integrity",
-                "sql": MIGRATION_V2_ADD_CONSTRAINTS
-            },
-            {
-                "version": 3,
-                "name": "add_unique_constraints",
-                "sql": MIGRATION_V3_ADD_UNIQUE_CONSTRAINTS
-            }
+            # Ajoutez vos migrations ici
         ]
 
 
-# ═══════════════════════════════════════════════════════════
-# MIGRATIONS SQL
-# ═══════════════════════════════════════════════════════════
-
-MIGRATION_V1_ADD_INDEXES = """
--- Migration v1: Ajout index de performance
-
--- Recettes
-CREATE INDEX IF NOT EXISTS idx_recette_saison_type ON recettes(saison, type_repas);
-CREATE INDEX IF NOT EXISTS idx_recette_rapide ON recettes(est_rapide, temps_preparation);
-CREATE INDEX IF NOT EXISTS idx_recette_bebe ON recettes(compatible_bebe);
-CREATE INDEX IF NOT EXISTS idx_recette_created ON recettes(cree_le);
-CREATE INDEX IF NOT EXISTS idx_recette_nom ON recettes(nom);
-CREATE INDEX IF NOT EXISTS idx_recette_difficulte ON recettes(difficulte);
-
--- Ingrédients
-CREATE INDEX IF NOT EXISTS idx_ingredient_nom_categorie ON ingredients(nom, categorie);
-CREATE INDEX IF NOT EXISTS idx_ingredient_categorie ON ingredients(categorie);
-
--- Inventaire
-CREATE INDEX IF NOT EXISTS idx_inventaire_stock_bas ON inventaire(quantite, quantite_min);
-CREATE INDEX IF NOT EXISTS idx_inventaire_peremption ON inventaire(date_peremption);
-CREATE INDEX IF NOT EXISTS idx_inventaire_emplacement ON inventaire(emplacement);
-CREATE INDEX IF NOT EXISTS idx_inventaire_maj ON inventaire(derniere_maj);
-
--- Courses
-CREATE INDEX IF NOT EXISTS idx_courses_actifs ON liste_courses(achete, priorite);
-CREATE INDEX IF NOT EXISTS idx_courses_magasin ON liste_courses(magasin_cible, rayon_magasin);
-CREATE INDEX IF NOT EXISTS idx_courses_priorite ON liste_courses(priorite);
-CREATE INDEX IF NOT EXISTS idx_courses_created ON liste_courses(cree_le);
-
--- Planning
-CREATE INDEX IF NOT EXISTS idx_planning_semaine_statut ON plannings_hebdomadaires(semaine_debut, statut);
-CREATE INDEX IF NOT EXISTS idx_repas_planning_jour ON repas_planning(planning_id, jour_semaine);
-CREATE INDEX IF NOT EXISTS idx_repas_date ON repas_planning(date);
-CREATE INDEX IF NOT EXISTS idx_repas_statut ON repas_planning(statut);
-CREATE INDEX IF NOT EXISTS idx_repas_type ON repas_planning(type_repas);
-
--- Relations
-CREATE INDEX IF NOT EXISTS idx_recette_ingredient_recette ON recette_ingredients(recette_id);
-CREATE INDEX IF NOT EXISTS idx_recette_ingredient_ingredient ON recette_ingredients(ingredient_id);
-CREATE INDEX IF NOT EXISTS idx_etape_recette ON etapes_recette(recette_id);
-CREATE INDEX IF NOT EXISTS idx_version_recette ON versions_recette(recette_base_id);
-CREATE INDEX IF NOT EXISTS idx_version_type ON versions_recette(type_version);
-
--- Famille
-CREATE INDEX IF NOT EXISTS idx_bien_etre_enfant_date ON entrees_bien_etre(enfant_id, date);
-CREATE INDEX IF NOT EXISTS idx_routine_enfant ON routines(enfant_id);
-CREATE INDEX IF NOT EXISTS idx_routine_active ON routines(est_active);
-CREATE INDEX IF NOT EXISTS idx_tache_routine ON taches_routine(routine_id);
-CREATE INDEX IF NOT EXISTS idx_tache_statut ON taches_routine(statut);
-
--- Maison
-CREATE INDEX IF NOT EXISTS idx_projet_statut_priorite ON projets(statut, priorite);
-CREATE INDEX IF NOT EXISTS idx_projet_categorie ON projets(categorie);
-CREATE INDEX IF NOT EXISTS idx_tache_projet ON taches_projet(projet_id);
-CREATE INDEX IF NOT EXISTS idx_jardin_arrosage ON elements_jardin(dernier_arrosage, frequence_arrosage_jours);
-CREATE INDEX IF NOT EXISTS idx_jardin_categorie ON elements_jardin(categorie);
-CREATE INDEX IF NOT EXISTS idx_log_jardin ON logs_jardin(element_id, date);
-
--- Calendrier
-CREATE INDEX IF NOT EXISTS idx_evenement_date ON evenements_calendrier(date_debut);
-CREATE INDEX IF NOT EXISTS idx_evenement_categorie ON evenements_calendrier(categorie);
-
--- Utilisateurs
-CREATE INDEX IF NOT EXISTS idx_utilisateur_nom ON utilisateurs(nom_utilisateur);
-CREATE INDEX IF NOT EXISTS idx_utilisateur_email ON utilisateurs(email);
-"""
-
-MIGRATION_V2_ADD_CONSTRAINTS = """
--- Migration v2: Ajout contraintes d'intégrité
-
--- Recettes
-ALTER TABLE recettes 
-  ADD CONSTRAINT IF NOT EXISTS check_temps_prep_positif 
-  CHECK (temps_preparation >= 0);
-
-ALTER TABLE recettes 
-  ADD CONSTRAINT IF NOT EXISTS check_temps_cuisson_positif 
-  CHECK (temps_cuisson >= 0);
-
-ALTER TABLE recettes 
-  ADD CONSTRAINT IF NOT EXISTS check_portions_valides 
-  CHECK (portions > 0 AND portions <= 20);
-
--- Recette Ingrédients
-ALTER TABLE recette_ingredients 
-  ADD CONSTRAINT IF NOT EXISTS check_quantite_positive 
-  CHECK (quantite > 0);
-
--- Étapes
-ALTER TABLE etapes_recette 
-  ADD CONSTRAINT IF NOT EXISTS check_ordre_positif 
-  CHECK (ordre > 0);
-
-ALTER TABLE etapes_recette 
-  ADD CONSTRAINT IF NOT EXISTS check_duree_positive 
-  CHECK (duree IS NULL OR duree >= 0);
-
--- Inventaire
-ALTER TABLE inventaire 
-  ADD CONSTRAINT IF NOT EXISTS check_quantite_inventaire_positive 
-  CHECK (quantite >= 0);
-
-ALTER TABLE inventaire 
-  ADD CONSTRAINT IF NOT EXISTS check_seuil_positif 
-  CHECK (quantite_min >= 0);
-
--- Courses
-ALTER TABLE liste_courses 
-  ADD CONSTRAINT IF NOT EXISTS check_quantite_courses_positive 
-  CHECK (quantite_necessaire > 0);
-
--- Planning
-ALTER TABLE repas_planning 
-  ADD CONSTRAINT IF NOT EXISTS check_jour_valide 
-  CHECK (jour_semaine >= 0 AND jour_semaine <= 6);
-
-ALTER TABLE repas_planning 
-  ADD CONSTRAINT IF NOT EXISTS check_portions_repas_valides 
-  CHECK (portions > 0 AND portions <= 20);
-
-ALTER TABLE repas_planning 
-  ADD CONSTRAINT IF NOT EXISTS check_ordre_repas_positif 
-  CHECK (ordre >= 0);
-
--- Config Planning
-ALTER TABLE config_planning_utilisateur 
-  ADD CONSTRAINT IF NOT EXISTS check_nb_adultes_valide 
-  CHECK (nb_adultes > 0 AND nb_adultes <= 10);
-
-ALTER TABLE config_planning_utilisateur 
-  ADD CONSTRAINT IF NOT EXISTS check_nb_enfants_valide 
-  CHECK (nb_enfants >= 0 AND nb_enfants <= 10);
-
--- Bien-être
-ALTER TABLE entrees_bien_etre 
-  ADD CONSTRAINT IF NOT EXISTS check_sommeil_valide 
-  CHECK (heures_sommeil IS NULL OR (heures_sommeil >= 0 AND heures_sommeil <= 24));
-
--- Projets
-ALTER TABLE projets 
-  ADD CONSTRAINT IF NOT EXISTS check_progression_valide 
-  CHECK (progression >= 0 AND progression <= 100);
-
-ALTER TABLE projets 
-  ADD CONSTRAINT IF NOT EXISTS check_dates_coherentes 
-  CHECK (date_fin IS NULL OR date_debut IS NULL OR date_fin >= date_debut);
-
--- Jardin
-ALTER TABLE elements_jardin 
-  ADD CONSTRAINT IF NOT EXISTS check_quantite_jardin_positive 
-  CHECK (quantite > 0);
-
-ALTER TABLE elements_jardin 
-  ADD CONSTRAINT IF NOT EXISTS check_frequence_arrosage_positive 
-  CHECK (frequence_arrosage_jours > 0);
-
--- Événements
-ALTER TABLE evenements_calendrier 
-  ADD CONSTRAINT IF NOT EXISTS check_dates_evenement_coherentes 
-  CHECK (date_fin IS NULL OR date_fin >= date_debut);
-"""
-
-MIGRATION_V3_ADD_UNIQUE_CONSTRAINTS = """
--- Migration v3: Ajout contraintes d'unicité
-
--- Éviter doublons ingrédient dans recette
-ALTER TABLE recette_ingredients 
-  ADD CONSTRAINT IF NOT EXISTS uq_recette_ingredient 
-  UNIQUE (recette_id, ingredient_id);
-
--- Éviter doublons ordre dans recette
-ALTER TABLE etapes_recette 
-  ADD CONSTRAINT IF NOT EXISTS uq_recette_ordre 
-  UNIQUE (recette_id, ordre);
-
--- Une seule version de chaque type par recette
-ALTER TABLE versions_recette 
-  ADD CONSTRAINT IF NOT EXISTS uq_recette_version_type 
-  UNIQUE (recette_base_id, type_version);
-
--- Un seul article inventaire par ingrédient
-ALTER TABLE inventaire 
-  ADD CONSTRAINT IF NOT EXISTS uq_inventaire_ingredient 
-  UNIQUE (ingredient_id);
-
--- Une seule semaine par planning
-ALTER TABLE plannings_hebdomadaires 
-  ADD CONSTRAINT IF NOT EXISTS uq_planning_semaine 
-  UNIQUE (semaine_debut);
-
--- Éviter doublons repas dans planning
-ALTER TABLE repas_planning 
-  ADD CONSTRAINT IF NOT EXISTS uq_planning_jour_type_ordre 
-  UNIQUE (planning_id, jour_semaine, type_repas, ordre);
-
--- Une seule config par utilisateur
-ALTER TABLE config_planning_utilisateur 
-  ADD CONSTRAINT IF NOT EXISTS uq_config_utilisateur 
-  UNIQUE (utilisateur_id);
-"""
+# Alias pour compatibilité
+MigrationManager = GestionnaireMigrations
 
 
 # ═══════════════════════════════════════════════════════════
@@ -472,10 +374,15 @@ ALTER TABLE config_planning_utilisateur
 # ═══════════════════════════════════════════════════════════
 
 @st.cache_data(ttl=60)
-def check_connection() -> tuple[bool, str]:
-    """Vérifie connexion avec message d'erreur"""
+def verifier_connexion() -> tuple[bool, str]:
+    """
+    Vérifie la connexion à la base de données.
+
+    Returns:
+        Tuple (succès, message)
+    """
     try:
-        engine = get_engine_safe()
+        engine = obtenir_engine_securise()
         if not engine:
             return False, "Engine non disponible"
 
@@ -484,8 +391,8 @@ def check_connection() -> tuple[bool, str]:
 
         return True, "Connexion OK"
 
-    except DatabaseConnectionError as e:
-        return False, f"Erreur connexion: {str(e)}"
+    except ErreurBaseDeDonnees as e:
+        return False, f"Erreur connexion: {e.message}"
 
     except Exception as e:
         logger.error(f"❌ Test connexion échoué: {e}")
@@ -493,24 +400,26 @@ def check_connection() -> tuple[bool, str]:
 
 
 @st.cache_data(ttl=300)
-def get_db_info() -> dict:
-    """Retourne infos DB"""
+def obtenir_infos_db() -> dict:
+    """
+    Retourne les informations sur la base de données.
+
+    Returns:
+        Dictionnaire avec informations DB
+    """
     try:
-        engine = get_engine()
+        engine = obtenir_engine()
 
         with engine.connect() as conn:
-            result = conn.execute(
-                text("""
+            result = conn.execute(text("""
                 SELECT 
                     version() as version,
                     current_database() as database,
                     current_user as user,
                     pg_size_pretty(pg_database_size(current_database())) as size
-            """)
-            ).fetchone()
+            """)).fetchone()
 
-            from src.core.config import get_settings
-            settings = get_settings()
+            settings = obtenir_settings()
             db_url = settings.DATABASE_URL
 
             host = "unknown"
@@ -524,12 +433,12 @@ def get_db_info() -> dict:
                 "user": result[2],
                 "size": result[3],
                 "host": host,
-                "schema_version": MigrationManager.get_current_version(),
+                "schema_version": GestionnaireMigrations.obtenir_version_courante(),
                 "error": None,
             }
 
     except Exception as e:
-        logger.error(f"get_db_info error: {e}")
+        logger.error(f"obtenir_infos_db error: {e}")
         return {
             "status": "error",
             "error": str(e),
@@ -540,25 +449,32 @@ def get_db_info() -> dict:
         }
 
 
+# Alias pour compatibilité
+check_connection = verifier_connexion
+get_db_info = obtenir_infos_db
+
+
 # ═══════════════════════════════════════════════════════════
 # INITIALISATION
 # ═══════════════════════════════════════════════════════════
 
-def init_database(run_migrations: bool = True):
+def initialiser_database(executer_migrations: bool = True):
     """
-    Initialise la base de données
+    Initialise la base de données.
 
     Args:
-        run_migrations: Si True, exécute les migrations automatiquement
-    """
-    from src.core.config import get_settings
-    settings = get_settings()
+        executer_migrations: Si True, exécute les migrations automatiquement
 
-    if settings.is_production():
+    Returns:
+        True si succès
+    """
+    settings = obtenir_settings()
+
+    if settings.est_production():
         logger.info("Mode production: vérification schéma uniquement")
 
     try:
-        engine = get_engine()
+        engine = obtenir_engine()
 
         # Vérifier connexion
         with engine.connect() as conn:
@@ -567,9 +483,9 @@ def init_database(run_migrations: bool = True):
         logger.info("✅ Connexion DB OK")
 
         # Exécuter migrations si demandé
-        if run_migrations:
+        if executer_migrations:
             logger.info("🔄 Exécution migrations...")
-            MigrationManager.run_migrations()
+            GestionnaireMigrations.executer_migrations()
 
         return True
 
@@ -578,22 +494,21 @@ def init_database(run_migrations: bool = True):
         return False
 
 
-def create_all_tables():
+def creer_toutes_les_tables():
     """
-    Crée toutes les tables (dev/setup uniquement)
+    Crée toutes les tables (dev/setup uniquement).
 
-    ATTENTION: Ne pas appeler en production
+    ⚠️ ATTENTION: Ne pas appeler en production.
     """
-    from src.core.config import get_settings
-    settings = get_settings()
+    settings = obtenir_settings()
 
-    if settings.is_production():
-        logger.warning("create_all_tables ignoré en production")
+    if settings.est_production():
+        logger.warning("creer_toutes_les_tables ignoré en production")
         return
 
     try:
-        from src.core.models import Base
-        engine = get_engine()
+        from .models import Base
+        engine = obtenir_engine()
         Base.metadata.create_all(bind=engine)
         logger.info("✅ Tables créées/vérifiées")
 
@@ -602,55 +517,48 @@ def create_all_tables():
         raise
 
 
+# Alias pour compatibilité
+init_database = initialiser_database
+create_all_tables = creer_toutes_les_tables
+
+
 # ═══════════════════════════════════════════════════════════
-# MAINTENANCE
+# HEALTH CHECK
 # ═══════════════════════════════════════════════════════════
 
 def health_check() -> dict:
-    """Health check complet de la DB"""
+    """
+    Health check complet de la DB.
+
+    Returns:
+        Dictionnaire avec status et métriques
+    """
     try:
-        engine = get_engine()
+        engine = obtenir_engine()
 
         with engine.connect() as conn:
-            active_conns = conn.execute(
-                text("""
+            connexions_actives = conn.execute(text("""
                 SELECT count(*) 
                 FROM pg_stat_activity 
                 WHERE state = 'active'
-            """)
-            ).scalar()
+            """)).scalar()
 
-            db_size = conn.execute(
+            taille_db = conn.execute(
                 text("SELECT pg_database_size(current_database())")
             ).scalar()
 
             return {
                 "healthy": True,
-                "active_connections": active_conns,
-                "database_size_bytes": db_size,
-                "schema_version": MigrationManager.get_current_version(),
+                "active_connections": connexions_actives,
+                "database_size_bytes": taille_db,
+                "schema_version": GestionnaireMigrations.obtenir_version_courante(),
                 "timestamp": time.time(),
             }
 
     except Exception as e:
-        logger.error(f"Health check failed: {e}")
+        logger.error(f"Health check échoué: {e}")
         return {
             "healthy": False,
             "error": str(e),
             "timestamp": time.time()
         }
-
-
-def vacuum_database():
-    """Optimise la base (VACUUM)"""
-    try:
-        engine = get_engine()
-
-        with engine.connect() as conn:
-            conn.execution_options(isolation_level="AUTOCOMMIT")
-            conn.execute(text("VACUUM ANALYZE"))
-
-        logger.info("✅ VACUUM ANALYZE exécuté")
-
-    except Exception as e:
-        logger.error(f"Erreur VACUUM: {e}")

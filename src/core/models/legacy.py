@@ -1,6 +1,10 @@
 """
-Modèles SQLAlchemy - Version française
-Tous les noms de tables et colonnes en français
+Models Legacy - Modèles Famille, Maison, Planning (non refactorisés).
+
+Ces modèles ne sont pas encore refactorisés et sont importés tels quels
+depuis l'ancien fichier models.py pour maintenir la compatibilité.
+
+⚠️ À refactoriser dans une prochaine phase.
 """
 from datetime import datetime, date
 from typing import Optional, List, Dict
@@ -15,263 +19,34 @@ from sqlalchemy import (
     ForeignKey,
     Text,
     JSON,
-    Enum as SQLEnum,
     CheckConstraint,
 )
-from sqlalchemy.orm import relationship, Mapped, mapped_column, declarative_base
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import JSONB, ARRAY
-import enum
 
-Base = declarative_base()
-
-
-# ===================================
-# ENUMS EN FRANÇAIS
-# ===================================
-class PrioriteEnum(str, enum.Enum):
-    BASSE = "basse"
-    MOYENNE = "moyenne"
-    HAUTE = "haute"
+from .base import Base
 
 
-class StatutEnum(str, enum.Enum):
-    A_FAIRE = "à faire"
-    EN_COURS = "en cours"
-    TERMINE = "terminé"
-    ANNULE = "annulé"
-
-
-class HumeurEnum(str, enum.Enum):
-    BIEN = "😊 Bien"
-    MOYEN = "😐 Moyen"
-    MAL = "😞 Mal"
-
-
-class TypeVersionRecetteEnum(str, enum.Enum):
-    STANDARD = "standard"
-    BEBE = "bébé"
-    BATCH_COOKING = "batch_cooking"
-
-
-class SaisonEnum(str, enum.Enum):
-    PRINTEMPS = "printemps"
-    ETE = "été"
-    AUTOMNE = "automne"
-    HIVER = "hiver"
-    TOUTE_ANNEE = "toute_année"
-
-
-class TypeRepasEnum(str, enum.Enum):
-    PETIT_DEJEUNER = "petit_déjeuner"
-    DEJEUNER = "déjeuner"
-    DINER = "dîner"
-    GOUTER = "goûter"
-
-
-# ===================================
-# 🍲 RECETTES
-# ===================================
-
-
-class Ingredient(Base):
-    """Ingrédient de base"""
-
-    __tablename__ = "ingredients"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    nom: Mapped[str] = mapped_column(String(200), nullable=False, unique=True)
-    categorie: Mapped[Optional[str]] = mapped_column(String(100))
-    unite: Mapped[str] = mapped_column(String(50))
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-
-    # Relations
-    recette_ingredients: Mapped[List["RecetteIngredient"]] = relationship(
-        back_populates="ingredient", cascade="all, delete-orphan"
-    )
-    inventaire: Mapped[List["ArticleInventaire"]] = relationship(
-        back_populates="ingredient", cascade="all, delete-orphan"
-    )
-
-
-class Recette(Base):
-    """Recette de base"""
-
-    __tablename__ = "recettes"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    nom: Mapped[str] = mapped_column(String(200), nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(Text)
-
-    # Temps & Difficulté
-    temps_preparation: Mapped[int] = mapped_column(Integer)  # minutes
-    temps_cuisson: Mapped[int] = mapped_column(Integer)  # minutes
-    portions: Mapped[int] = mapped_column(Integer, default=4)
-    difficulte: Mapped[str] = mapped_column(String(50), default="moyen")
-
-    # Catégories & Tags
-    type_repas: Mapped[str] = mapped_column(String(50), default=TypeRepasEnum.DINER.value)
-    saison: Mapped[str] = mapped_column(String(50), default=SaisonEnum.TOUTE_ANNEE.value)
-    categorie: Mapped[Optional[str]] = mapped_column(String(100))
-
-    # Tags booléens
-    est_rapide: Mapped[bool] = mapped_column(Boolean, default=False)
-    est_equilibre: Mapped[bool] = mapped_column(Boolean, default=False)
-    compatible_bebe: Mapped[bool] = mapped_column(Boolean, default=False)
-    compatible_batch: Mapped[bool] = mapped_column(Boolean, default=False)
-    congelable: Mapped[bool] = mapped_column(Boolean, default=False)
-
-    # IA
-    genere_par_ia: Mapped[bool] = mapped_column(Boolean, default=False)
-    score_ia: Mapped[Optional[float]] = mapped_column(Float)
-
-    # Image
-    url_image: Mapped[Optional[str]] = mapped_column(String(500))
-
-    # Dates
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    modifie_le: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
-    )
-
-    # Relations
-    ingredients: Mapped[List["RecetteIngredient"]] = relationship(
-        back_populates="recette", cascade="all, delete-orphan"
-    )
-    etapes: Mapped[List["EtapeRecette"]] = relationship(
-        back_populates="recette", cascade="all, delete-orphan", order_by="EtapeRecette.ordre"
-    )
-    versions: Mapped[List["VersionRecette"]] = relationship(
-        back_populates="recette_base", cascade="all, delete-orphan"
-    )
-    repas_planning: Mapped[List["RepasPlanning"]] = relationship(
-        back_populates="recette",
-        cascade="all, delete-orphan",
-        foreign_keys="[RepasPlanning.recette_id]",  # Explicite la clé étrangère
-    )
-
-
-class RecetteIngredient(Base):
-    """Ingrédient dans une recette"""
-
-    __tablename__ = "recette_ingredients"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    recette_id: Mapped[int] = mapped_column(ForeignKey("recettes.id", ondelete="CASCADE"))
-    ingredient_id: Mapped[int] = mapped_column(ForeignKey("ingredients.id", ondelete="CASCADE"))
-    quantite: Mapped[float] = mapped_column(Float, nullable=False)
-    unite: Mapped[str] = mapped_column(String(50))
-    optionnel: Mapped[bool] = mapped_column(Boolean, default=False)
-
-    # Relations
-    recette: Mapped["Recette"] = relationship(back_populates="ingredients")
-    ingredient: Mapped["Ingredient"] = relationship(back_populates="recette_ingredients")
-
-
-class EtapeRecette(Base):
-    """Étape xxxd'une recette"""
-
-    __tablename__ = "etapes_recette"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    recette_id: Mapped[int] = mapped_column(ForeignKey("recettes.id", ondelete="CASCADE"))
-    ordre: Mapped[int] = mapped_column(Integer, nullable=False)
-    description: Mapped[str] = mapped_column(Text, nullable=False)
-    duree: Mapped[Optional[int]] = mapped_column(Integer)
-
-    # Relations
-    recette: Mapped["Recette"] = relationship(back_populates="etapes")
-
-
-class VersionRecette(Base):
-    """Versions adaptées d'une recette"""
-
-    __tablename__ = "versions_recette"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    recette_base_id: Mapped[int] = mapped_column(ForeignKey("recettes.id", ondelete="CASCADE"))
-    type_version: Mapped[str] = mapped_column(String(50), nullable=False)
-
-    # Instructions modifiées
-    instructions_modifiees: Mapped[Optional[str]] = mapped_column(Text)
-    ingredients_modifies: Mapped[Optional[dict]] = mapped_column(JSONB)
-
-    # Infos spécifiques
-    notes_bebe: Mapped[Optional[str]] = mapped_column(Text)
-    etapes_paralleles_batch: Mapped[Optional[List[str]]] = mapped_column(JSONB)
-    temps_optimise_batch: Mapped[Optional[int]] = mapped_column(Integer)
-
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-
-    # Relations
-    recette_base: Mapped["Recette"] = relationship(back_populates="versions")
-
-
-# ===================================
-# 📦 INVENTAIRE & COURSES
-# ===================================
-
-
-class ArticleInventaire(Base):
-    """Article en stock"""
-
-    __tablename__ = "inventaire"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    ingredient_id: Mapped[int] = mapped_column(ForeignKey("ingredients.id", ondelete="CASCADE"))
-    quantite: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
-    quantite_min: Mapped[float] = mapped_column(Float, default=1.0)
-    emplacement: Mapped[Optional[str]] = mapped_column(String(100))
-    date_peremption: Mapped[Optional[date]] = mapped_column(Date)
-    derniere_maj: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
-    )
-
-    # Relations
-    ingredient: Mapped["Ingredient"] = relationship(back_populates="inventaire")
-
-
-class ArticleCourses(Base):
-    """Liste de courses"""
-
-    __tablename__ = "liste_courses"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    ingredient_id: Mapped[int] = mapped_column(ForeignKey("ingredients.id", ondelete="CASCADE"))
-    quantite_necessaire: Mapped[float] = mapped_column(Float, nullable=False)
-    priorite: Mapped[str] = mapped_column(String(50), default="moyenne")
-    achete: Mapped[bool] = mapped_column(Boolean, default=False)
-    suggere_par_ia: Mapped[bool] = mapped_column(Boolean, default=False)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    achete_le: Mapped[Optional[datetime]] = mapped_column(DateTime)
-    rayon_magasin: Mapped[Optional[str]] = mapped_column(String(100))
-    magasin_cible: Mapped[Optional[str]] = mapped_column(String(50))
-    notes: Mapped[Optional[str]] = mapped_column(Text)
-
-
-# ===================================
+# ═══════════════════════════════════════════════════════════
 # PLANNING HEBDOMADAIRE
-# ===================================
-
+# ═══════════════════════════════════════════════════════════
 
 class PlanningHebdomadaire(Base):
-    """Planning d'une semaine"""
+    """Planning d'une semaine (non refactorisé)."""
 
     __tablename__ = "plannings_hebdomadaires"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    semaine_debut: Mapped[date] = mapped_column(Date, nullable=False)  # Lundi
+    semaine_debut: Mapped[date] = mapped_column(Date, nullable=False)
     nom: Mapped[Optional[str]] = mapped_column(String(200))
     genere_par_ia: Mapped[bool] = mapped_column(Boolean, default=False)
-    statut: Mapped[str] = mapped_column(
-        String(50), default="brouillon"
-    )  # brouillon, actif, archive
+    statut: Mapped[str] = mapped_column(String(50), default="brouillon")
     notes: Mapped[Optional[str]] = mapped_column(Text)
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     modifie_le: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
 
-    # Relations
     repas: Mapped[List["RepasPlanning"]] = relationship(
         "RepasPlanning",
         back_populates="planning",
@@ -281,7 +56,7 @@ class PlanningHebdomadaire(Base):
 
 
 class RepasPlanning(Base):
-    """Repas individuel dans un planning"""
+    """Repas individuel dans un planning (non refactorisé)."""
 
     __tablename__ = "repas_planning"
 
@@ -289,7 +64,7 @@ class RepasPlanning(Base):
     planning_id: Mapped[int] = mapped_column(
         ForeignKey("plannings_hebdomadaires.id", ondelete="CASCADE")
     )
-    jour_semaine: Mapped[int] = mapped_column(Integer, nullable=False)  # 0=lundi, 6=dimanche
+    jour_semaine: Mapped[int] = mapped_column(Integer, nullable=False)
     date: Mapped[date] = mapped_column(Date, nullable=False)
     type_repas: Mapped[str] = mapped_column(String(50), nullable=False)
     recette_id: Mapped[Optional[int]] = mapped_column(
@@ -298,21 +73,27 @@ class RepasPlanning(Base):
     portions: Mapped[int] = mapped_column(Integer, default=4)
     est_adapte_bebe: Mapped[bool] = mapped_column(Boolean, default=False)
     est_batch_cooking: Mapped[bool] = mapped_column(Boolean, default=False)
-    recettes_batch: Mapped[Optional[List[int]]] = mapped_column(
-        ARRAY(Integer)
-    )  # IDs recettes produites
+    recettes_batch: Mapped[Optional[List[int]]] = mapped_column(ARRAY(Integer))
     notes: Mapped[Optional[str]] = mapped_column(Text)
-    ordre: Mapped[int] = mapped_column(Integer, default=0)  # Ordre dans la journée
+    ordre: Mapped[int] = mapped_column(Integer, default=0)
     statut: Mapped[str] = mapped_column(String(50), default="planifié")
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    # Relations
     planning: Mapped["PlanningHebdomadaire"] = relationship(back_populates="repas")
-    recette: Mapped[Optional["Recette"]] = relationship(back_populates="repas_planning")
+
+    # Import dynamique pour éviter circular import
+    @property
+    def recette(self):
+        from .cuisine import Recette
+        if self.recette_id:
+            from src.core.database import get_db_context
+            with get_db_context() as db:
+                return db.query(Recette).get(self.recette_id)
+        return None
 
 
 class ConfigPlanningUtilisateur(Base):
-    """Configuration utilisateur pour le planning"""
+    """Configuration utilisateur pour le planning (non refactorisé)."""
 
     __tablename__ = "config_planning_utilisateur"
 
@@ -335,19 +116,18 @@ class ConfigPlanningUtilisateur(Base):
     nb_enfants: Mapped[int] = mapped_column(Integer, default=0)
     a_bebe: Mapped[bool] = mapped_column(Boolean, default=False)
     batch_cooking_actif: Mapped[bool] = mapped_column(Boolean, default=False)
-    jours_batch: Mapped[List[int]] = mapped_column(
-        ARRAY(Integer), default=[]
-    )  # [0, 6] = lundi/dimanche
+    jours_batch: Mapped[List[int]] = mapped_column(ARRAY(Integer), default=[])
     preferences: Mapped[Dict] = mapped_column(JSONB, default={})
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 
-# ===================================
-# 👶 FAMILLE
-# ===================================
-
+# ═══════════════════════════════════════════════════════════
+# FAMILLE
+# ═══════════════════════════════════════════════════════════
 
 class ProfilEnfant(Base):
+    """Profil d'un enfant (non refactorisé)."""
+
     __tablename__ = "profils_enfants"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -357,7 +137,6 @@ class ProfilEnfant(Base):
     notes: Mapped[Optional[str]] = mapped_column(Text)
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    # Relations
     entrees_bien_etre: Mapped[List["EntreeBienEtre"]] = relationship(
         back_populates="enfant", cascade="all, delete-orphan"
     )
@@ -365,6 +144,8 @@ class ProfilEnfant(Base):
 
 
 class EntreeBienEtre(Base):
+    """Entrée de suivi bien-être (non refactorisé)."""
+
     __tablename__ = "entrees_bien_etre"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -379,11 +160,12 @@ class EntreeBienEtre(Base):
     nom_utilisateur: Mapped[Optional[str]] = mapped_column(String(100))
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    # Relations
     enfant: Mapped[Optional["ProfilEnfant"]] = relationship(back_populates="entrees_bien_etre")
 
 
 class Routine(Base):
+    """Routine pour un enfant (non refactorisé)."""
+
     __tablename__ = "routines"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -396,7 +178,6 @@ class Routine(Base):
     est_active: Mapped[bool] = mapped_column(Boolean, default=True)
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    # Relations
     enfant: Mapped[Optional["ProfilEnfant"]] = relationship(back_populates="routines")
     taches: Mapped[List["TacheRoutine"]] = relationship(
         back_populates="routine", cascade="all, delete-orphan"
@@ -404,6 +185,8 @@ class Routine(Base):
 
 
 class TacheRoutine(Base):
+    """Tâche d'une routine (non refactorisé)."""
+
     __tablename__ = "taches_routine"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -413,16 +196,16 @@ class TacheRoutine(Base):
     statut: Mapped[str] = mapped_column(String(50), default="à faire")
     termine_le: Mapped[Optional[datetime]] = mapped_column(DateTime)
 
-    # Relations
     routine: Mapped["Routine"] = relationship(back_populates="taches")
 
 
-# ===================================
-# 🏡 MAISON
-# ===================================
-
+# ═══════════════════════════════════════════════════════════
+# MAISON
+# ═══════════════════════════════════════════════════════════
 
 class Projet(Base):
+    """Projet maison (non refactorisé)."""
+
     __tablename__ = "projets"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -439,13 +222,14 @@ class Projet(Base):
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
 
-    # Relations
     taches: Mapped[List["TacheProjet"]] = relationship(
         back_populates="projet", cascade="all, delete-orphan"
     )
 
 
 class TacheProjet(Base):
+    """Tâche d'un projet (non refactorisé)."""
+
     __tablename__ = "taches_projet"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -456,11 +240,12 @@ class TacheProjet(Base):
     date_echeance: Mapped[Optional[date]] = mapped_column(Date)
     termine_le: Mapped[Optional[datetime]] = mapped_column(DateTime)
 
-    # Relations
     projet: Mapped["Projet"] = relationship(back_populates="taches")
 
 
 class ElementJardin(Base):
+    """Élément du jardin (non refactorisé)."""
+
     __tablename__ = "elements_jardin"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -475,13 +260,14 @@ class ElementJardin(Base):
     notes: Mapped[Optional[str]] = mapped_column(Text)
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    # Relations
     logs: Mapped[List["LogJardin"]] = relationship(
         back_populates="element", cascade="all, delete-orphan"
     )
 
 
 class LogJardin(Base):
+    """Log d'activité jardin (non refactorisé)."""
+
     __tablename__ = "logs_jardin"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -490,16 +276,16 @@ class LogJardin(Base):
     date: Mapped[date] = mapped_column(Date, nullable=False, default=date.today)
     notes: Mapped[Optional[str]] = mapped_column(Text)
 
-    # Relations
     element: Mapped["ElementJardin"] = relationship(back_populates="logs")
 
 
-# ===================================
-# 📅 PLANNING
-# ===================================
-
+# ═══════════════════════════════════════════════════════════
+# CALENDRIER
+# ═══════════════════════════════════════════════════════════
 
 class EvenementCalendrier(Base):
+    """Événement dans le calendrier (non refactorisé)."""
+
     __tablename__ = "evenements_calendrier"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -512,12 +298,13 @@ class EvenementCalendrier(Base):
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 
-# ===================================
-# 👤 UTILISATEURS
-# ===================================
-
+# ═══════════════════════════════════════════════════════════
+# UTILISATEURS
+# ═══════════════════════════════════════════════════════════
 
 class Utilisateur(Base):
+    """Utilisateur de l'application (non refactorisé)."""
+
     __tablename__ = "utilisateurs"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -529,7 +316,6 @@ class Utilisateur(Base):
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
 
-    # Relations
     profils: Mapped[List["ProfilUtilisateur"]] = relationship(
         back_populates="utilisateur", cascade="all, delete-orphan"
     )
@@ -539,6 +325,8 @@ class Utilisateur(Base):
 
 
 class ProfilUtilisateur(Base):
+    """Profil d'un utilisateur (non refactorisé)."""
+
     __tablename__ = "profils_utilisateur"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -549,11 +337,12 @@ class ProfilUtilisateur(Base):
     est_actif: Mapped[bool] = mapped_column(Boolean, default=True)
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    # Relations
     utilisateur: Mapped["Utilisateur"] = relationship(back_populates="profils")
 
 
 class Notification(Base):
+    """Notification utilisateur (non refactorisé)."""
+
     __tablename__ = "notifications"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -564,5 +353,4 @@ class Notification(Base):
     lu: Mapped[bool] = mapped_column(Boolean, default=False)
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    # Relations
     utilisateur: Mapped["Utilisateur"] = relationship(back_populates="notifications")

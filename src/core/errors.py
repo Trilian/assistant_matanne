@@ -1,6 +1,10 @@
 """
-Errors Unifié - Exceptions + Handlers
-Fusionne core/errors/exceptions.py + core/errors/handlers.py
+Errors - Exceptions personnalisées et gestionnaires d'erreurs.
+
+Ce module centralise :
+- Les exceptions métier
+- Les décorateurs de gestion d'erreurs
+- Les helpers de validation
 """
 import streamlit as st
 from functools import wraps
@@ -11,128 +15,456 @@ import traceback
 logger = logging.getLogger(__name__)
 
 
-# ════════════════════════════════════════════════════════════
-# EXCEPTIONS
-# ════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════
+# EXCEPTIONS PERSONNALISÉES
+# ═══════════════════════════════════════════════════════════
 
-class AppException(Exception):
-    """Exception de base de l'application"""
-    def __init__(self, message: str, details: Optional[Dict] = None, user_message: Optional[str] = None):
+class ExceptionApp(Exception):
+    """
+    Exception de base pour l'application.
+
+    Toutes les exceptions métier héritent de cette classe.
+
+    Attributes:
+        message: Message technique pour les logs
+        details: Détails supplémentaires (dict)
+        message_utilisateur: Message friendly pour l'UI
+    """
+
+    def __init__(
+            self,
+            message: str,
+            details: Optional[Dict] = None,
+            message_utilisateur: Optional[str] = None
+    ):
+        """
+        Initialise l'exception.
+
+        Args:
+            message: Message d'erreur technique
+            details: Dictionnaire avec détails supplémentaires
+            message_utilisateur: Message à afficher à l'utilisateur
+        """
         self.message = message
         self.details = details or {}
-        self.user_message = user_message or message
+        self.message_utilisateur = message_utilisateur or message
         super().__init__(message)
 
 
-class ValidationError(AppException):
+class ErreurValidation(ExceptionApp):
+    """
+    Exception levée lors d'une erreur de validation.
+
+    Utilisée pour les erreurs de validation de formulaires,
+    données invalides, contraintes métier non respectées.
+    """
     pass
 
 
-class NotFoundError(AppException):
+class ErreurNonTrouve(ExceptionApp):
+    """
+    Exception levée quand une ressource n'est pas trouvée.
+
+    Équivalent d'un 404 pour les ressources en base de données.
+    """
     pass
 
 
-class DatabaseError(AppException):
+class ErreurBaseDeDonnees(ExceptionApp):
+    """
+    Exception levée lors d'erreurs de base de données.
+
+    Inclut les erreurs de connexion, requêtes, transactions.
+    """
     pass
 
 
-class AIServiceError(AppException):
+class ErreurServiceIA(ExceptionApp):
+    """
+    Exception levée lors d'erreurs avec le service IA.
+
+    Inclut les erreurs d'API, timeouts, parsing, etc.
+    """
     pass
 
 
-class RateLimitError(AppException):
+class ErreurLimiteDebit(ExceptionApp):
+    """
+    Exception levée quand la limite d'appels est atteinte.
+
+    Utilisée pour le rate limiting des API externes.
+    """
     pass
 
 
-# ════════════════════════════════════════════════════════════
-# HANDLERS
-# ════════════════════════════════════════════════════════════
+class ErreurServiceExterne(ExceptionApp):
+    """
+    Exception levée lors d'erreurs avec services externes.
 
-def handle_errors(show_in_ui: bool = True, log_level: str = "ERROR",
-                  reraise: bool = False, fallback_value: Any = None):
-    """Decorator pour gérer automatiquement les erreurs"""
-    def decorator(func: Callable) -> Callable:
+    Ex: scraping web, APIs tierces (hors IA).
+    """
+    pass
+
+
+# ═══════════════════════════════════════════════════════════
+# DÉCORATEUR DE GESTION D'ERREURS
+# ═══════════════════════════════════════════════════════════
+
+def gerer_erreurs(
+        afficher_dans_ui: bool = True,
+        niveau_log: str = "ERROR",
+        relancer: bool = False,
+        valeur_fallback: Any = None
+):
+    """
+    Décorateur pour gérer automatiquement les erreurs.
+
+    Capture les exceptions, les log, et optionnellement :
+    - Affiche un message à l'utilisateur (Streamlit)
+    - Retourne une valeur de fallback
+    - Relance l'exception
+
+    Args:
+        afficher_dans_ui: Afficher l'erreur dans Streamlit
+        niveau_log: Niveau de log (ERROR, WARNING, INFO)
+        relancer: Relancer l'exception après traitement
+        valeur_fallback: Valeur à retourner en cas d'erreur
+
+    Returns:
+        Décorateur de fonction
+
+    Example:
+        >>> @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=[])
+        >>> def obtenir_recettes():
+        >>>     return recette_service.get_all()
+    """
+    def decorateur(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs):
             try:
                 return func(*args, **kwargs)
-            except ValidationError as e:
-                logger.warning(f"ValidationError in {func.__name__}: {e.message}")
-                if show_in_ui:
-                    st.error(f"❌ {e.user_message}")
-                if reraise:
+
+            except ErreurValidation as e:
+                logger.warning(f"ErreurValidation dans {func.__name__}: {e.message}")
+                if afficher_dans_ui:
+                    st.error(f"❌ {e.message_utilisateur}")
+                if relancer:
                     raise
-                return fallback_value
-            except NotFoundError as e:
-                logger.info(f"NotFoundError in {func.__name__}: {e.message}")
-                if show_in_ui:
-                    st.warning(f"⚠️ {e.user_message}")
-                if reraise:
+                return valeur_fallback
+
+            except ErreurNonTrouve as e:
+                logger.info(f"ErreurNonTrouve dans {func.__name__}: {e.message}")
+                if afficher_dans_ui:
+                    st.warning(f"⚠️ {e.message_utilisateur}")
+                if relancer:
                     raise
-                return fallback_value
-            except DatabaseError as e:
-                logger.error(f"DatabaseError in {func.__name__}: {e.message}")
-                if show_in_ui:
+                return valeur_fallback
+
+            except ErreurBaseDeDonnees as e:
+                logger.error(f"ErreurBaseDeDonnees dans {func.__name__}: {e.message}")
+                if afficher_dans_ui:
                     st.error("💾 Erreur de base de données")
-                if reraise:
+                if relancer:
                     raise
-                return fallback_value
-            except AIServiceError as e:
-                logger.warning(f"AIServiceError in {func.__name__}: {e.message}")
-                if show_in_ui:
-                    st.error(f"🤖 {e.user_message}")
-                if reraise:
+                return valeur_fallback
+
+            except ErreurServiceIA as e:
+                logger.warning(f"ErreurServiceIA dans {func.__name__}: {e.message}")
+                if afficher_dans_ui:
+                    st.error(f"🤖 {e.message_utilisateur}")
+                if relancer:
                     raise
-                return fallback_value
-            except RateLimitError as e:
-                logger.warning(f"RateLimitError in {func.__name__}: {e.message}")
-                if show_in_ui:
-                    st.warning(f"⏳ {e.user_message}")
-                if reraise:
+                return valeur_fallback
+
+            except ErreurLimiteDebit as e:
+                logger.warning(f"ErreurLimiteDebit dans {func.__name__}: {e.message}")
+                if afficher_dans_ui:
+                    st.warning(f"⏳ {e.message_utilisateur}")
+                if relancer:
                     raise
-                return fallback_value
+                return valeur_fallback
+
+            except ErreurServiceExterne as e:
+                logger.warning(f"ErreurServiceExterne dans {func.__name__}: {e.message}")
+                if afficher_dans_ui:
+                    st.error(f"🌐 {e.message_utilisateur}")
+                if relancer:
+                    raise
+                return valeur_fallback
+
             except Exception as e:
-                logger.critical(f"Unexpected error in {func.__name__}: {e}", exc_info=True)
-                if show_in_ui:
+                logger.critical(
+                    f"Erreur inattendue dans {func.__name__}: {e}",
+                    exc_info=True
+                )
+                if afficher_dans_ui:
                     st.error("❌ Une erreur inattendue s'est produite")
+
+                    # Afficher stack trace en mode debug
                     if st.session_state.get("debug_mode", False):
                         with st.expander("🐛 Stack trace"):
                             st.code(traceback.format_exc())
-                if reraise:
+
+                if relancer:
                     raise
-                return fallback_value
+                return valeur_fallback
+
         return wrapper
-    return decorator
+    return decorateur
 
 
-# ════════════════════════════════════════════════════════════
-# VALIDATION HELPERS
-# ════════════════════════════════════════════════════════════
+# Alias pour compatibilité
+handle_errors = gerer_erreurs
 
-def require_fields(data: Dict, fields: List[str], object_name: str = "objet"):
-    """Vérifie que les champs requis sont présents"""
-    missing = [f for f in fields if not data.get(f)]
-    if missing:
-        raise ValidationError(
-            f"Champs manquants: {missing}",
-            details={"missing_fields": missing},
-            user_message=f"Champs obligatoires : {', '.join(missing)}"
+
+# ═══════════════════════════════════════════════════════════
+# HELPERS DE VALIDATION
+# ═══════════════════════════════════════════════════════════
+
+def exiger_champs(data: Dict, champs: List[str], nom_objet: str = "objet"):
+    """
+    Vérifie que les champs requis sont présents et non vides.
+
+    Args:
+        data: Dictionnaire de données
+        champs: Liste des champs obligatoires
+        nom_objet: Nom de l'objet pour le message d'erreur
+
+    Raises:
+        ErreurValidation: Si des champs sont manquants
+
+    Example:
+        >>> exiger_champs(
+        >>>     {"nom": "Tarte", "temps": 30},
+        >>>     ["nom", "temps", "portions"],
+        >>>     "recette"
+        >>> )
+    """
+    manquants = [champ for champ in champs if not data.get(champ)]
+
+    if manquants:
+        raise ErreurValidation(
+            f"Champs manquants dans {nom_objet}: {manquants}",
+            details={"champs_manquants": manquants},
+            message_utilisateur=f"Champs obligatoires manquants : {', '.join(manquants)}"
         )
 
 
-def require_positive(value: float, field_name: str):
-    """Vérifie qu'une valeur est positive"""
-    if value <= 0:
-        raise ValidationError(
-            f"{field_name} doit être positif",
-            user_message=f"{field_name} doit être supérieur à 0"
+def exiger_positif(valeur: float, nom_champ: str):
+    """
+    Vérifie qu'une valeur numérique est positive.
+
+    Args:
+        valeur: Valeur à vérifier
+        nom_champ: Nom du champ pour le message d'erreur
+
+    Raises:
+        ErreurValidation: Si la valeur n'est pas positive
+
+    Example:
+        >>> exiger_positif(quantite, "quantité")
+    """
+    if valeur <= 0:
+        raise ErreurValidation(
+            f"{nom_champ} doit être positif: {valeur}",
+            message_utilisateur=f"{nom_champ} doit être supérieur à 0"
         )
 
 
-def require_exists(obj: Any, object_type: str, object_id: Any):
-    """Vérifie qu'un objet existe"""
+def exiger_existence(obj: Any, type_objet: str, id_objet: Any):
+    """
+    Vérifie qu'un objet existe (n'est pas None).
+
+    Args:
+        obj: Objet à vérifier
+        type_objet: Type d'objet (pour le message)
+        id_objet: ID de l'objet (pour le message)
+
+    Raises:
+        ErreurNonTrouve: Si l'objet est None
+
+    Example:
+        >>> recette = recette_service.get_by_id(42)
+        >>> exiger_existence(recette, "Recette", 42)
+    """
     if obj is None:
-        raise NotFoundError(
-            f"{object_type} {object_id} not found",
-            user_message=f"{object_type} introuvable"
+        raise ErreurNonTrouve(
+            f"{type_objet} {id_objet} non trouvé",
+            details={"type": type_objet, "id": id_objet},
+            message_utilisateur=f"{type_objet} introuvable"
         )
+
+
+def exiger_plage(
+        valeur: float,
+        minimum: Optional[float] = None,
+        maximum: Optional[float] = None,
+        nom_champ: str = "valeur"
+):
+    """
+    Vérifie qu'une valeur est dans une plage donnée.
+
+    Args:
+        valeur: Valeur à vérifier
+        minimum: Valeur minimale (optionnelle)
+        maximum: Valeur maximale (optionnelle)
+        nom_champ: Nom du champ pour le message d'erreur
+
+    Raises:
+        ErreurValidation: Si la valeur est hors plage
+
+    Example:
+        >>> exiger_plage(portions, minimum=1, maximum=20, nom_champ="portions")
+    """
+    if minimum is not None and valeur < minimum:
+        raise ErreurValidation(
+            f"{nom_champ} trop petit: {valeur} < {minimum}",
+            message_utilisateur=f"{nom_champ} doit être au minimum {minimum}"
+        )
+
+    if maximum is not None and valeur > maximum:
+        raise ErreurValidation(
+            f"{nom_champ} trop grand: {valeur} > {maximum}",
+            message_utilisateur=f"{nom_champ} doit être au maximum {maximum}"
+        )
+
+
+def exiger_longueur(
+        texte: str,
+        minimum: Optional[int] = None,
+        maximum: Optional[int] = None,
+        nom_champ: str = "texte"
+):
+    """
+    Vérifie la longueur d'une chaîne de caractères.
+
+    Args:
+        texte: Chaîne à vérifier
+        minimum: Longueur minimale (optionnelle)
+        maximum: Longueur maximale (optionnelle)
+        nom_champ: Nom du champ pour le message d'erreur
+
+    Raises:
+        ErreurValidation: Si la longueur est invalide
+
+    Example:
+        >>> exiger_longueur(nom_recette, minimum=3, maximum=200, nom_champ="nom")
+    """
+    longueur = len(texte)
+
+    if minimum is not None and longueur < minimum:
+        raise ErreurValidation(
+            f"{nom_champ} trop court: {longueur} < {minimum}",
+            message_utilisateur=f"{nom_champ} doit faire au moins {minimum} caractères"
+        )
+
+    if maximum is not None and longueur > maximum:
+        raise ErreurValidation(
+            f"{nom_champ} trop long: {longueur} > {maximum}",
+            message_utilisateur=f"{nom_champ} doit faire au maximum {maximum} caractères"
+        )
+
+
+# ═══════════════════════════════════════════════════════════
+# GESTIONNAIRE D'ERREURS STREAMLIT
+# ═══════════════════════════════════════════════════════════
+
+def afficher_erreur_streamlit(erreur: Exception, contexte: str = ""):
+    """
+    Affiche une erreur formatée dans Streamlit.
+
+    Gère l'affichage selon le type d'erreur et le mode debug.
+
+    Args:
+        erreur: Exception à afficher
+        contexte: Contexte additionnel (optionnel)
+    """
+    if isinstance(erreur, ExceptionApp):
+        # Erreurs métier connues
+        if isinstance(erreur, ErreurValidation):
+            st.error(f"❌ {erreur.message_utilisateur}")
+        elif isinstance(erreur, ErreurNonTrouve):
+            st.warning(f"⚠️ {erreur.message_utilisateur}")
+        elif isinstance(erreur, ErreurBaseDeDonnees):
+            st.error(f"💾 {erreur.message_utilisateur}")
+        elif isinstance(erreur, ErreurServiceIA):
+            st.error(f"🤖 {erreur.message_utilisateur}")
+        elif isinstance(erreur, ErreurLimiteDebit):
+            st.warning(f"⏳ {erreur.message_utilisateur}")
+        else:
+            st.error(f"❌ {erreur.message_utilisateur}")
+
+        # Afficher détails en mode debug
+        if st.session_state.get("debug_mode", False) and erreur.details:
+            with st.expander("🔍 Détails"):
+                st.json(erreur.details)
+    else:
+        # Erreurs inconnues
+        st.error("❌ Une erreur inattendue s'est produite")
+
+        if contexte:
+            st.caption(f"Contexte : {contexte}")
+
+        # Stack trace en mode debug
+        if st.session_state.get("debug_mode", False):
+            with st.expander("🐛 Stack trace"):
+                st.code(traceback.format_exc())
+
+
+# ═══════════════════════════════════════════════════════════
+# CONTEXT MANAGER POUR GESTION D'ERREURS
+# ═══════════════════════════════════════════════════════════
+
+class GestionnaireErreurs:
+    """
+    Context manager pour gérer les erreurs dans un bloc de code.
+
+    Example:
+        >>> with GestionnaireErreurs("Création recette"):
+        >>>     recette = recette_service.create(data)
+    """
+
+    def __init__(
+            self,
+            contexte: str,
+            afficher_dans_ui: bool = True,
+            logger_instance: Optional[logging.Logger] = None
+    ):
+        """
+        Initialise le gestionnaire.
+
+        Args:
+            contexte: Description du contexte pour les logs
+            afficher_dans_ui: Afficher erreur dans Streamlit
+            logger_instance: Logger à utiliser (optionnel)
+        """
+        self.contexte = contexte
+        self.afficher_dans_ui = afficher_dans_ui
+        self.logger = logger_instance or logger
+
+    def __enter__(self):
+        """Entre dans le contexte."""
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        Sort du contexte et gère les erreurs.
+
+        Returns:
+            True si l'exception est gérée, False sinon
+        """
+        if exc_type is None:
+            return True
+
+        # Logger l'erreur
+        self.logger.error(
+            f"Erreur dans {self.contexte}: {exc_val}",
+            exc_info=(exc_type, exc_val, exc_tb)
+        )
+
+        # Afficher dans UI si demandé
+        if self.afficher_dans_ui:
+            afficher_erreur_streamlit(exc_val, self.contexte)
+
+        # Ne pas supprimer l'exception (elle sera relancée)
+        return False

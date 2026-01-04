@@ -1,6 +1,8 @@
 """
-Configuration Application - Version Simplifiée
-Centralise TOUTE la configuration avec fallbacks intelligents
+Configuration - Configuration centralisée de l'application.
+
+Ce module gère toute la configuration avec auto-détection des sources
+(Streamlit secrets, variables d'environnement) et fallbacks intelligents.
 """
 from pydantic_settings import BaseSettings
 from pydantic import Field
@@ -9,35 +11,65 @@ import os
 from typing import Optional
 import logging
 
+from .constants import (
+    LOG_LEVEL_PRODUCTION,
+    LOG_LEVEL_DEVELOPMENT,
+    AI_RATE_LIMIT_DAILY,
+    AI_RATE_LIMIT_HOURLY,
+    CACHE_TTL_RECETTES,
+    CACHE_MAX_SIZE
+)
+
 logger = logging.getLogger(__name__)
 
 
 class Settings(BaseSettings):
-    """Configuration centralisée avec auto-detection"""
+    """
+    Configuration centralisée avec auto-détection.
+
+    Ordre de priorité pour chaque paramètre :
+    1. st.secrets (Streamlit Cloud)
+    2. Variables d'environnement
+    3. Valeur par défaut
+    """
 
     # ═══════════════════════════════════════════════════════════
     # APPLICATION
     # ═══════════════════════════════════════════════════════════
+
     APP_NAME: str = "Assistant MaTanne"
+    """Nom de l'application."""
+
     APP_VERSION: str = "2.0.0"
+    """Version de l'application."""
+
     ENV: str = Field(default="production")
+    """Environnement (production, development, test)."""
+
     DEBUG: bool = Field(default=False)
+    """Mode debug activé."""
 
     # ═══════════════════════════════════════════════════════════
-    # DATABASE (Supabase)
+    # BASE DE DONNÉES (Supabase PostgreSQL)
     # ═══════════════════════════════════════════════════════════
 
     @property
     def DATABASE_URL(self) -> str:
         """
-        Construction URL base de données avec fallbacks
+        Construction URL base de données avec fallbacks.
 
         Ordre de priorité:
         1. st.secrets["db"]
         2. Variables d'environnement individuelles
-        3. Variable DATABASE_URL directe
+        3. Variable DATABASE_URL complète
+
+        Returns:
+            URL de connexion PostgreSQL
+
+        Raises:
+            ValueError: Si aucune configuration trouvée
         """
-        # 1. Secrets Streamlit (prioritaire)
+        # 1. Secrets Streamlit (prioritaire en production)
         try:
             if hasattr(st, "secrets") and "db" in st.secrets:
                 db = st.secrets["db"]
@@ -49,7 +81,7 @@ class Settings(BaseSettings):
         except Exception as e:
             logger.debug(f"st.secrets['db'] non disponible: {e}")
 
-        # 2. Variables d'environnement
+        # 2. Variables d'environnement individuelles
         host = os.getenv("DB_HOST")
         user = os.getenv("DB_USER")
         password = os.getenv("DB_PASSWORD")
@@ -70,7 +102,7 @@ class Settings(BaseSettings):
                 db_url += "?sslmode=require"
             return db_url
 
-        # 4. Échec
+        # 4. Échec - guide utilisateur
         raise ValueError(
             "❌ Configuration DB manquante!\n\n"
             "Configure l'une de ces options:\n"
@@ -94,11 +126,17 @@ class Settings(BaseSettings):
     @property
     def MISTRAL_API_KEY(self) -> str:
         """
-        Clé API Mistral avec fallbacks
+        Clé API Mistral avec fallbacks.
 
-        Ordre:
+        Ordre de priorité:
         1. st.secrets["mistral"]["api_key"]
         2. MISTRAL_API_KEY env var
+
+        Returns:
+            Clé API Mistral
+
+        Raises:
+            ValueError: Si clé introuvable
         """
         # 1. Secrets Streamlit
         try:
@@ -124,51 +162,81 @@ class Settings(BaseSettings):
 
     @property
     def MISTRAL_MODEL(self) -> str:
-        """Modèle Mistral à utiliser"""
+        """
+        Modèle Mistral à utiliser.
+
+        Returns:
+            Nom du modèle
+        """
         try:
             return st.secrets.get("mistral", {}).get("model", "mistral-small-latest")
         except:
             return os.getenv("MISTRAL_MODEL", "mistral-small-latest")
 
     MISTRAL_TIMEOUT: int = 60
+    """Timeout API Mistral en secondes."""
+
     MISTRAL_BASE_URL: str = "https://api.mistral.ai/v1"
+    """URL de base API Mistral."""
 
     # ═══════════════════════════════════════════════════════════
     # RATE LIMITING
     # ═══════════════════════════════════════════════════════════
-    RATE_LIMIT_DAILY: int = 100
-    RATE_LIMIT_HOURLY: int = 30
+
+    RATE_LIMIT_DAILY: int = AI_RATE_LIMIT_DAILY
+    """Limite d'appels IA par jour."""
+
+    RATE_LIMIT_HOURLY: int = AI_RATE_LIMIT_HOURLY
+    """Limite d'appels IA par heure."""
 
     # ═══════════════════════════════════════════════════════════
     # CACHE
     # ═══════════════════════════════════════════════════════════
+
     CACHE_ENABLED: bool = True
-    CACHE_DEFAULT_TTL: int = 300  # 5 minutes
-    CACHE_MAX_SIZE: int = 100  # Nombre max d'items en cache
+    """Cache activé."""
+
+    CACHE_DEFAULT_TTL: int = CACHE_TTL_RECETTES
+    """TTL cache par défaut (secondes)."""
+
+    CACHE_MAX_SIZE: int = CACHE_MAX_SIZE
+    """Taille maximale du cache."""
 
     # ═══════════════════════════════════════════════════════════
     # LOGGING
     # ═══════════════════════════════════════════════════════════
-    LOG_LEVEL: str = "INFO"
+
+    LOG_LEVEL: str = LOG_LEVEL_PRODUCTION
+    """Niveau de log."""
 
     # ═══════════════════════════════════════════════════════════
-    # HELPERS
+    # MÉTHODES HELPERS
     # ═══════════════════════════════════════════════════════════
 
-    def is_production(self) -> bool:
-        """Check si environnement de production"""
-        return self.ENV.lower() == "production"
-
-    def is_development(self) -> bool:
-        """Check si environnement de développement"""
-        return self.ENV.lower() in ["development", "dev"]
-
-    def get_safe_config(self) -> dict:
+    def est_production(self) -> bool:
         """
-        Export config sans secrets pour debug
+        Vérifie si l'environnement est production.
 
         Returns:
-            Dict avec config publique uniquement
+            True si production
+        """
+        return self.ENV.lower() == "production"
+
+    def est_developpement(self) -> bool:
+        """
+        Vérifie si l'environnement est développement.
+
+        Returns:
+            True si développement
+        """
+        return self.ENV.lower() in ["development", "dev"]
+
+    def obtenir_config_publique(self) -> dict:
+        """
+        Exporte la configuration sans les secrets (pour debug).
+
+        Returns:
+            Dict avec configuration publique uniquement
         """
         return {
             "app_name": self.APP_NAME,
@@ -178,20 +246,30 @@ class Settings(BaseSettings):
             "mistral_model": self.MISTRAL_MODEL,
             "cache_enabled": self.CACHE_ENABLED,
             "log_level": self.LOG_LEVEL,
-            "db_configured": self._check_db_configured(),
-            "mistral_configured": self._check_mistral_configured(),
+            "db_configured": self._verifier_db_configuree(),
+            "mistral_configured": self._verifier_mistral_configure(),
         }
 
-    def _check_db_configured(self) -> bool:
-        """Vérifie si DB est configurée"""
+    def _verifier_db_configuree(self) -> bool:
+        """
+        Vérifie si la base de données est configurée.
+
+        Returns:
+            True si configurée
+        """
         try:
             _ = self.DATABASE_URL
             return True
         except:
             return False
 
-    def _check_mistral_configured(self) -> bool:
-        """Vérifie si Mistral est configuré"""
+    def _verifier_mistral_configure(self) -> bool:
+        """
+        Vérifie si Mistral est configuré.
+
+        Returns:
+            True si configuré
+        """
         try:
             _ = self.MISTRAL_API_KEY
             return True
@@ -199,6 +277,7 @@ class Settings(BaseSettings):
             return False
 
     class Config:
+        """Configuration Pydantic."""
         case_sensitive = False
         env_file = ".env"
         env_file_encoding = "utf-8"
@@ -211,9 +290,9 @@ class Settings(BaseSettings):
 _settings: Optional[Settings] = None
 
 
-def get_settings() -> Settings:
+def obtenir_settings() -> Settings:
     """
-    Récupère l'instance Settings (singleton)
+    Récupère l'instance Settings (singleton).
 
     Returns:
         Instance Settings configurée
@@ -226,4 +305,4 @@ def get_settings() -> Settings:
 
 
 # Alias pour compatibilité
-settings = get_settings()
+settings = obtenir_settings()
