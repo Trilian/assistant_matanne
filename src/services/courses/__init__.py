@@ -1,7 +1,43 @@
 """
-Services Courses - Exports
-"""
-from .courses_service import courses_service, MAGASINS_CONFIG
-from .courses_ai_service import create_courses_ai_service
+Services Courses - Point d'Entrée Module
 
-__all__ = ["courses_service", "MAGASINS_CONFIG", "create_courses_ai_service"]
+Regroupe tous les services liés aux courses :
+- CRUD courses
+- IA (suggestions intelligentes)
+- Import/Export
+- Constantes métier (magasins)
+"""
+
+# Service CRUD principal
+from .courses_service import (
+    CoursesService,
+    courses_service,
+    MAGASINS_CONFIG,
+)
+
+# Service IA
+from .courses_ai_service import (
+    CoursesAIService,
+    create_courses_ai_service,
+)
+
+# Service Import/Export
+from .courses_io_service import (
+    CoursesExporter,
+    CoursesImporter,
+)
+
+__all__ = [
+    # Classes
+    "CoursesService",
+    "CoursesAIService",
+    "CoursesExporter",
+    "CoursesImporter",
+
+    # Instances (singletons)
+    "courses_service",
+    "create_courses_ai_service",
+
+    # Constantes métier
+    "MAGASINS_CONFIG",
+]

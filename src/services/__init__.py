@@ -1,11 +1,20 @@
 """
-Services - Point d'Entrée Unifié
+Services - Point d'Entrée Unifié COMPLET
 
 Exporte tous les services métier de l'application.
 Architecture refactorisée avec BaseService + BaseAIService.
+
+✅ MODULES COMPLETS:
+- Recettes (6 fichiers)
+- Inventaire (3 fichiers)
+- Courses (3 fichiers)
+- Planning (3 fichiers)
 """
 
-# Base Services (génériques)
+# ═══════════════════════════════════════════════════════════
+# BASE SERVICES (génériques)
+# ═══════════════════════════════════════════════════════════
+
 from .base_service import BaseService
 from .base_ai_service import (
     BaseAIService,
@@ -18,17 +27,20 @@ from .base_ai_service import (
 from .io_service import IOService
 
 # ═══════════════════════════════════════════════════════════
-# RECETTES
+# 📚 RECETTES (6 fichiers)
 # ═══════════════════════════════════════════════════════════
 
 from .recettes import (
     # Service CRUD
+    RecetteService,
     recette_service,
 
     # Service IA
+    RecetteAIService,
     recette_ai_service,
 
     # Service Versions (Bébé/Batch)
+    RecetteVersionService,
     recette_version_service,
 
     # Service Scraping Web
@@ -41,62 +53,75 @@ from .recettes import (
 )
 
 # ═══════════════════════════════════════════════════════════
-# INVENTAIRE
+# 📦 INVENTAIRE (3 fichiers)
 # ═══════════════════════════════════════════════════════════
 
 from .inventaire import (
     # Service CRUD
+    InventaireService,
     inventaire_service,
 
     # Service IA
+    InventaireAIService,
     inventaire_ai_service,
 
     # Import/Export
     InventaireExporter,
     InventaireImporter,
 
-    # Constantes
+    # Constantes métier
     CATEGORIES,
     EMPLACEMENTS,
 )
 
 # ═══════════════════════════════════════════════════════════
-# COURSES
+# 🛒 COURSES (3 fichiers)
 # ═══════════════════════════════════════════════════════════
 
 from .courses import (
     # Service CRUD
+    CoursesService,
     courses_service,
 
     # Service IA
-    courses_ai_service,
+    CoursesAIService,
+    create_courses_ai_service,
 
-    # Constantes
+    # Import/Export
+    CoursesExporter,
+    CoursesImporter,
+
+    # Constantes métier
     MAGASINS_CONFIG,
 )
 
 # ═══════════════════════════════════════════════════════════
-# PLANNING
+# 📅 PLANNING (3 fichiers)
 # ═══════════════════════════════════════════════════════════
 
 from .planning import (
     # Services CRUD
+    PlanningService,
     planning_service,
+    RepasService,
     repas_service,
 
     # Service IA Génération
-    planning_generation_service,
+    PlanningGenerationService,
+    create_planning_generation_service,
 
-    # Constantes
+    # Constantes métier
     JOURS_SEMAINE,
 )
 
 # ═══════════════════════════════════════════════════════════
-# EXPORTS
+# 📤 EXPORTS GLOBAUX
 # ═══════════════════════════════════════════════════════════
 
 __all__ = [
-    # Base
+    # ═══════════════════════════════════════════════════════════
+    # BASE
+    # ═══════════════════════════════════════════════════════════
     "BaseService",
     "BaseAIService",
     "RecipeAIMixin",
@@ -104,31 +129,115 @@ __all__ = [
     "InventoryAIMixin",
     "IOService",
 
-    # Recettes
-    "recette_service",
-    "recette_ai_service",
-    "recette_version_service",
+    # ═══════════════════════════════════════════════════════════
+    # RECETTES
+    # ═══════════════════════════════════════════════════════════
+    # Classes
+    "RecetteService",
+    "RecetteAIService",
+    "RecetteVersionService",
     "RecipeWebScraper",
     "RecipeImageGenerator",
     "RecetteExporter",
     "RecetteImporter",
 
-    # Inventaire
-    "inventaire_service",
-    "inventaire_ai_service",
+    # Instances
+    "recette_service",
+    "recette_ai_service",
+    "recette_version_service",
+
+    # ═══════════════════════════════════════════════════════════
+    # INVENTAIRE
+    # ═══════════════════════════════════════════════════════════
+    # Classes
+    "InventaireService",
+    "InventaireAIService",
     "InventaireExporter",
     "InventaireImporter",
+
+    # Instances
+    "inventaire_service",
+    "inventaire_ai_service",
+
+    # Constantes
     "CATEGORIES",
     "EMPLACEMENTS",
 
-    # Courses
+    # ═══════════════════════════════════════════════════════════
+    # COURSES
+    # ═══════════════════════════════════════════════════════════
+    # Classes
+    "CoursesService",
+    "CoursesAIService",
+    "CoursesExporter",
+    "CoursesImporter",
+
+    # Instances
     "courses_service",
-    "courses_ai_service",
+    "create_courses_ai_service",
+
+    # Constantes
     "MAGASINS_CONFIG",
 
-    # Planning
+    # ═══════════════════════════════════════════════════════════
+    # PLANNING
+    # ═══════════════════════════════════════════════════════════
+    # Classes
+    "PlanningService",
+    "RepasService",
+    "PlanningGenerationService",
+
+    # Instances
     "planning_service",
     "repas_service",
-    "planning_generation_service",
+    "create_planning_generation_service",
+
+    # Constantes
     "JOURS_SEMAINE",
 ]
+
+
+# ═══════════════════════════════════════════════════════════
+# 📊 MÉTA-INFORMATIONS
+# ═══════════════════════════════════════════════════════════
+
+def get_services_info() -> dict:
+    """
+    Retourne informations sur tous les services disponibles.
+
+    Returns:
+        Dict avec stats et métadonnées
+
+    Example:
+        >>> from src.services import get_services_info
+        >>> info = get_services_info()
+        >>> print(f"{info['total_services']} services disponibles")
+    """
+    return {
+        "total_services": len(__all__),
+        "modules": {
+            "recettes": 7,
+            "inventaire": 6,
+            "courses": 6,
+            "planning": 6,
+            "base": 6
+        },
+        "services_ia": [
+            "recette_ai_service",
+            "inventaire_ai_service",
+            "create_courses_ai_service",
+            "create_planning_generation_service"
+        ],
+        "services_crud": [
+            "recette_service",
+            "inventaire_service",
+            "courses_service",
+            "planning_service",
+            "repas_service"
+        ],
+        "services_io": [
+            "RecetteExporter", "RecetteImporter",
+            "InventaireExporter", "InventaireImporter",
+            "CoursesExporter", "CoursesImporter"
+        ]
+    }
