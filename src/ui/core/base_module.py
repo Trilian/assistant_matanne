@@ -1,16 +1,14 @@
 """
-Base Module UI - Système Universel pour tous les Modules
-Génère automatiquement l'UI CRUD complète depuis une config
+Base Module UI - Module CRUD universel générique
+100% réutilisable, agnostique du domaine métier
 """
 import streamlit as st
 from typing import Dict, List, Optional, Callable, Any
 from dataclasses import dataclass, field
-from datetime import date
 
 from src.services.base_service import BaseService
 from src.ui.components import (
-    badge, empty_state, search_bar, filter_panel,
-    pagination, metrics_row, export_buttons, item_card
+    empty_state, search_bar, pagination, export_buttons
 )
 from src.ui.feedback import show_success, show_error
 from src.core.cache import Cache
@@ -22,7 +20,11 @@ from src.core.cache import Cache
 
 @dataclass
 class ModuleConfig:
-    """Configuration complète d'un module"""
+    """
+    Configuration complète d'un module CRUD
+
+    Permet de générer automatiquement l'UI complète
+    """
 
     # Identité
     name: str
@@ -49,21 +51,20 @@ class ModuleConfig:
     status_field: Optional[str] = None
     status_colors: Dict[str, str] = field(default_factory=dict)
 
-    # Métadonnées carte
+    # Métadonnées
     metadata_fields: List[str] = field(default_factory=list)
     image_field: Optional[str] = None
 
-    # Formulaire ajout
+    # Formulaire
     form_fields: List[Dict] = field(default_factory=list)
 
     # Import/Export
-    io_service: Optional[Any] = None
     export_formats: List[str] = field(default_factory=lambda: ["csv", "json"])
 
     # Pagination
     items_per_page: int = 20
 
-    # Callbacks custom
+    # Callbacks
     on_view: Optional[Callable] = None
     on_edit: Optional[Callable] = None
     on_delete: Optional[Callable] = None
@@ -76,15 +77,26 @@ class ModuleConfig:
 
 class BaseModuleUI:
     """
-    UI CRUD universel généré depuis config
+    Module CRUD universel
 
-    Features:
+    Génère automatiquement UI complète depuis config :
     - Liste avec recherche/filtres
-    - Pagination automatique
+    - Pagination
     - Stats dynamiques
-    - Actions bulk
+    - Actions
     - Import/Export
-    - Formulaires auto-générés
+    - Formulaires
+
+    Usage:
+        config = ModuleConfig(
+            name="recettes",
+            title="Recettes",
+            icon="🍽️",
+            service=recette_service,
+            ...
+        )
+        module = BaseModuleUI(config)
+        module.render()
     """
 
     def __init__(self, config: ModuleConfig):
@@ -100,24 +112,28 @@ class BaseModuleUI:
                 "search_term": "",
                 "filters": {},
                 "selected_items": [],
-                "view_mode": "grid"  # grid ou list
+                "view_mode": "grid"
             }
+
+    # ═══════════════════════════════════════════════════════
+    # RENDER PRINCIPAL
+    # ═══════════════════════════════════════════════════════
 
     def render(self):
         """Render complet du module"""
 
-        # Header avec stats
+        # Header
         self._render_header()
 
-        # Barre recherche + filtres
+        # Search & Filters
         self._render_search_filters()
 
         st.markdown("---")
 
-        # Actions bulk
-        self._render_bulk_actions()
+        # Actions
+        self._render_actions()
 
-        # Liste des items
+        # Liste items
         items = self._load_items()
 
         if not items:
@@ -128,30 +144,26 @@ class BaseModuleUI:
             return
 
         # Pagination
-        total_items = len(items)
-        current_page = st.session_state[self.session_key]["current_page"]
-        items_per_page = self.config.items_per_page
+        total = len(items)
+        page = st.session_state[self.session_key]["current_page"]
+        per_page = self.config.items_per_page
 
-        start_idx = (current_page - 1) * items_per_page
-        end_idx = start_idx + items_per_page
-        page_items = items[start_idx:end_idx]
+        start = (page - 1) * per_page
+        end = start + per_page
+        page_items = items[start:end]
 
         # Affichage
-        view_mode = st.session_state[self.session_key]["view_mode"]
+        mode = st.session_state[self.session_key]["view_mode"]
 
-        if view_mode == "grid":
+        if mode == "grid":
             self._render_grid(page_items)
         else:
             self._render_list(page_items)
 
         # Pagination controls
-        if total_items > items_per_page:
-            current_page, _ = pagination(
-                total_items,
-                items_per_page,
-                key=f"{self.session_key}_pagination"
-            )
-            st.session_state[self.session_key]["current_page"] = current_page
+        if total > per_page:
+            current, _ = pagination(total, per_page, key=f"{self.session_key}_pag")
+            st.session_state[self.session_key]["current_page"] = current
 
     # ═══════════════════════════════════════════════════════
     # HEADER & STATS
@@ -165,39 +177,38 @@ class BaseModuleUI:
             st.title(f"{self.config.icon} {self.config.title}")
 
         with col2:
-            # Bouton switch vue
-            if st.button("🔄 Vue", key=f"{self.session_key}_view_switch"):
+            if st.button("🔄 Vue", key=f"{self.session_key}_view"):
                 current = st.session_state[self.session_key]["view_mode"]
-                st.session_state[self.session_key]["view_mode"] = "list" if current == "grid" else "grid"
+                st.session_state[self.session_key]["view_mode"] = (
+                    "list" if current == "grid" else "grid"
+                )
                 st.rerun()
 
         # Stats
         if self.config.stats_config:
-            stats = self._calculate_stats()
-            metrics_row(stats)
+            self._render_stats()
 
-    def _calculate_stats(self) -> List[Dict]:
-        """Calcule stats depuis config"""
+    def _render_stats(self):
+        """Affiche stats"""
         stats = []
 
         for stat_config in self.config.stats_config:
             if "value_key" in stat_config:
-                # Stat simple (total)
                 value = self.config.service.count()
                 stats.append({
                     "label": stat_config["label"],
                     "value": value
                 })
-
             elif "filter" in stat_config:
-                # Stat avec filtre
                 value = self.config.service.count(filters=stat_config["filter"])
                 stats.append({
                     "label": stat_config["label"],
                     "value": value
                 })
 
-        return stats
+        if stats:
+            from src.ui.components import metrics_row
+            metrics_row(stats)
 
     # ═══════════════════════════════════════════════════════
     # RECHERCHE & FILTRES
@@ -208,20 +219,58 @@ class BaseModuleUI:
         col1, col2 = st.columns([2, 1])
 
         with col1:
-            search_term = search_bar(
+            search = search_bar(
                 placeholder=f"Rechercher {self.config.name}...",
                 key=f"{self.session_key}_search"
             )
-            st.session_state[self.session_key]["search_term"] = search_term
+            st.session_state[self.session_key]["search_term"] = search
 
         with col2:
             if self.config.filters_config:
                 with st.popover("🔍 Filtres"):
+                    from src.ui.components import filter_panel
                     filters = filter_panel(
                         self.config.filters_config,
                         key_prefix=self.session_key
                     )
                     st.session_state[self.session_key]["filters"] = filters
+
+    # ═══════════════════════════════════════════════════════
+    # ACTIONS
+    # ═══════════════════════════════════════════════════════
+
+    def _render_actions(self):
+        """Actions rapides"""
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            if st.button(
+                    "➕ Ajouter",
+                    type="primary",
+                    use_container_width=True,
+                    key=f"{self.session_key}_add"
+            ):
+                if self.config.on_create:
+                    self.config.on_create()
+                else:
+                    st.session_state[f"{self.session_key}_show_form"] = True
+
+        with col2:
+            if st.button(
+                    "📥 Exporter",
+                    use_container_width=True,
+                    key=f"{self.session_key}_export"
+            ):
+                self._export_data()
+
+        with col3:
+            if st.button(
+                    "🗑️ Cache",
+                    use_container_width=True,
+                    key=f"{self.session_key}_cache"
+            ):
+                Cache.invalidate(self.config.name)
+                show_success("Cache vidé")
 
     # ═══════════════════════════════════════════════════════
     # CHARGEMENT DONNÉES
@@ -231,22 +280,22 @@ class BaseModuleUI:
         """Charge items avec recherche/filtres"""
         session = st.session_state[self.session_key]
 
-        search_term = session.get("search_term", "")
+        search = session.get("search_term", "")
         filters = session.get("filters", {})
 
-        # Convertir filtres UI en filtres DB
+        # Convertir filtres UI → DB
         db_filters = {}
         for key, value in filters.items():
-            if value and value != "Tous" and value != "Toutes":
+            if value and value not in ["Tous", "Toutes"]:
                 if isinstance(value, list) and len(value) > 0:
                     db_filters[key] = {"in": value}
                 else:
                     db_filters[key] = value
 
-        # Recherche avancée
-        if search_term and self.config.search_fields:
+        # Recherche
+        if search and self.config.search_fields:
             items = self.config.service.advanced_search(
-                search_term=search_term,
+                search_term=search,
                 search_fields=self.config.search_fields,
                 filters=db_filters,
                 limit=1000
@@ -264,7 +313,7 @@ class BaseModuleUI:
     # ═══════════════════════════════════════════════════════
 
     def _render_grid(self, items: List[Any]):
-        """Affichage grille (cartes)"""
+        """Affichage grille"""
         cols_per_row = 3
 
         for row_idx in range(0, len(items), cols_per_row):
@@ -279,19 +328,22 @@ class BaseModuleUI:
 
     def _render_item_card(self, item: Any):
         """Render carte item"""
-        # Extraire données
+        from src.ui.components import item_card
+
         item_dict = self._item_to_dict(item)
 
         # Titre
-        title = item_dict.get(self.config.display_fields[0]["key"], "Sans titre")
+        title = item_dict.get(
+            self.config.display_fields[0]["key"],
+            "Sans titre"
+        )
 
         # Métadonnées
-        metadata = []
-        for field_name in self.config.metadata_fields:
-            if field_name in item_dict:
-                value = item_dict[field_name]
-                if value is not None:
-                    metadata.append(str(value))
+        metadata = [
+            str(item_dict[f])
+            for f in self.config.metadata_fields
+            if f in item_dict and item_dict[f] is not None
+        ]
 
         # Statut
         status = None
@@ -306,17 +358,11 @@ class BaseModuleUI:
             image_url = item_dict.get(self.config.image_field)
 
         # Actions
-        actions = []
-        for action_config in self.config.actions:
-            label = action_config["label"]
-            callback = action_config["callback"]
+        actions = [
+            (action["label"], lambda i=item: action["callback"](i))
+            for action in self.config.actions
+        ]
 
-            actions.append((
-                label,
-                lambda i=item: callback(i)
-            ))
-
-        # Render avec item_card
         item_card(
             title=title,
             metadata=metadata,
@@ -332,32 +378,36 @@ class BaseModuleUI:
     # ═══════════════════════════════════════════════════════
 
     def _render_list(self, items: List[Any]):
-        """Affichage liste (lignes)"""
+        """Affichage liste"""
         for item in items:
             self._render_item_row(item)
 
     def _render_item_row(self, item: Any):
         """Render ligne item"""
+        from src.ui.components import badge
+
         item_dict = self._item_to_dict(item)
 
         with st.container():
             col1, col2 = st.columns([4, 1])
 
             with col1:
-                # Titre
-                title = item_dict.get(self.config.display_fields[0]["key"], "Sans titre")
+                title = item_dict.get(
+                    self.config.display_fields[0]["key"],
+                    "Sans titre"
+                )
                 st.markdown(f"### {title}")
 
                 # Métadonnées
-                meta_parts = []
-                for field_name in self.config.metadata_fields[:3]:
-                    if field_name in item_dict and item_dict[field_name]:
-                        meta_parts.append(str(item_dict[field_name]))
+                meta = [
+                    str(item_dict[f])
+                    for f in self.config.metadata_fields[:3]
+                    if f in item_dict and item_dict[f]
+                ]
+                if meta:
+                    st.caption(" • ".join(meta))
 
-                if meta_parts:
-                    st.caption(" • ".join(meta_parts))
-
-                # Statut badge
+                # Statut
                 if self.config.status_field:
                     status = item_dict.get(self.config.status_field)
                     if status:
@@ -365,69 +415,52 @@ class BaseModuleUI:
                         badge(status.capitalize(), color)
 
             with col2:
-                # Actions
-                for action_config in self.config.actions:
-                    icon = action_config.get("icon", "")
-                    label = action_config["label"]
-                    callback = action_config["callback"]
+                for action in self.config.actions:
+                    icon = action.get("icon", "")
+                    label = action["label"]
 
                     if st.button(
                             f"{icon} {label}",
-                            key=f"{self.session_key}_action_{item.id}_{label}",
+                            key=f"{self.session_key}_act_{item.id}_{label}",
                             use_container_width=True
                     ):
-                        callback(item)
+                        action["callback"](item)
 
             st.markdown("---")
 
     # ═══════════════════════════════════════════════════════
-    # BULK ACTIONS
+    # EXPORT
     # ═══════════════════════════════════════════════════════
 
-    def _render_bulk_actions(self):
-        """Actions groupées"""
-        col1, col2, col3 = st.columns(3)
+    def _export_data(self):
+        """Export données"""
+        items = self._load_items()
 
-        with col1:
-            if st.button(
-                    "➕ Ajouter",
-                    type="primary",
-                    use_container_width=True,
-                    key=f"{self.session_key}_add"
-            ):
-                st.session_state[f"{self.session_key}_show_add_form"] = True
+        if not items:
+            st.warning("Aucune donnée")
+            return
 
-        with col2:
-            if self.config.io_service and self.config.export_formats:
-                if st.button(
-                        "📥 Exporter",
-                        use_container_width=True,
-                        key=f"{self.session_key}_export"
-                ):
-                    self._export_data()
+        items_dict = [self._item_to_dict(i) for i in items]
 
-        with col3:
-            if st.button(
-                    "🗑️ Vider Cache",
-                    use_container_width=True,
-                    key=f"{self.session_key}_clear_cache"
-            ):
-                Cache.invalidate(self.config.name)
-                show_success("Cache vidé !")
+        export_buttons(
+            items_dict,
+            filename=f"{self.config.name}_export",
+            formats=self.config.export_formats,
+            key=f"{self.session_key}_export_btn"
+        )
 
     # ═══════════════════════════════════════════════════════
     # HELPERS
     # ═══════════════════════════════════════════════════════
 
     def _item_to_dict(self, item: Any) -> Dict:
-        """Convertit item ORM en dict"""
+        """Convertit ORM → dict"""
         if isinstance(item, dict):
             return item
 
         result = {}
         for column in item.__table__.columns:
-            value = getattr(item, column.name)
-            result[column.name] = value
+            result[column.name] = getattr(item, column.name)
 
         # Relations
         for field in self.config.display_fields + self.config.metadata_fields:
@@ -436,29 +469,6 @@ class BaseModuleUI:
                 result[field_key] = getattr(item, field_key)
 
         return result
-
-    def _export_data(self):
-        """Export données"""
-        if not self.config.io_service:
-            st.warning("Export non configuré")
-            return
-
-        items = self._load_items()
-
-        if not items:
-            st.warning("Aucune donnée à exporter")
-            return
-
-        # Convertir en dicts
-        items_dict = [self._item_to_dict(item) for item in items]
-
-        # Export selon format
-        export_buttons(
-            items_dict,
-            filename=f"{self.config.name}_export",
-            formats=self.config.export_formats,
-            key=f"{self.session_key}_export_btn"
-        )
 
 
 # ═══════════════════════════════════════════════════════════

@@ -1,38 +1,70 @@
 """
-UI Components - Point d'Entrée Unifié avec Feedback
+UI - Point d'entrée unifié optimisé
+Architecture claire : core/ components/ feedback/
 """
 
-# Composants de base
+# Core (modules, forms, io)
+from .core import (
+    BaseModuleUI,
+    ModuleConfig,
+    create_module_ui,
+    FormBuilder,
+    BaseIOService,
+    IOConfig,
+    create_io_service
+)
+
+# Components - Atoms
 from .components import (
-    # Atomiques
-    badge, metric_card, empty_state,
-    # Formulaires
-    form_field, search_bar, filter_panel,
-    # Feedback
-    toast, Modal,
-    # Data
-    pagination, metrics_row, export_buttons,
-    # Layouts
-    grid_layout, item_card,
-    # Dynamique
-    DynamicList
+    badge,
+    empty_state,
+    metric_card,
+    toast,
+    divider,
+    info_box
 )
 
-# Composants métier
-from .domain import (
-    recipe_card,
-    inventory_card,
-    stock_alert,
-    meal_card,
-    week_calendar
+# Components - Forms
+from .components import (
+    form_field,
+    search_bar,
+    filter_panel,
+    quick_filters
 )
 
-# 🆕 Feedback Temps Réel
+# Components - Data
+from .components import (
+    pagination,
+    metrics_row,
+    export_buttons,
+    data_table,
+    progress_bar,
+    status_indicator
+)
+
+# Components - Layouts
+from .components import (
+    grid_layout,
+    item_card,
+    collapsible_section,
+    tabs_layout,
+    card_container
+)
+
+# Components - Dynamic
+from .components import (
+    Modal,
+    DynamicList,
+    Stepper
+)
+
+# Feedback
 from .feedback import (
     smart_spinner,
+    loading_indicator,
+    skeleton_loader,
     ProgressTracker,
     LoadingState,
-    run_with_feedback,
     ToastManager,
     show_success,
     show_error,
@@ -41,34 +73,58 @@ from .feedback import (
 )
 
 __all__ = [
-    # Base
-    "badge", "metric_card", "empty_state",
+    # Core
+    "BaseModuleUI",
+    "ModuleConfig",
+    "create_module_ui",
+    "FormBuilder",
+    "BaseIOService",
+    "IOConfig",
+    "create_io_service",
 
-    # Forms
-    "form_field", "search_bar", "filter_panel",
+    # Components - Atoms
+    "badge",
+    "empty_state",
+    "metric_card",
+    "toast",
+    "divider",
+    "info_box",
 
-    # Feedback classique
-    "toast", "Modal",
+    # Components - Forms
+    "form_field",
+    "search_bar",
+    "filter_panel",
+    "quick_filters",
 
-    # Data
-    "pagination", "metrics_row", "export_buttons",
+    # Components - Data
+    "pagination",
+    "metrics_row",
+    "export_buttons",
+    "data_table",
+    "progress_bar",
+    "status_indicator",
 
-    # Layouts
-    "grid_layout", "item_card", "DynamicList",
+    # Components - Layouts
+    "grid_layout",
+    "item_card",
+    "collapsible_section",
+    "tabs_layout",
+    "card_container",
 
-    # Domain
-    "recipe_card", "inventory_card", "stock_alert",
-    "meal_card", "week_calendar",
+    # Components - Dynamic
+    "Modal",
+    "DynamicList",
+    "Stepper",
 
-    # 🆕 Feedback Temps Réel
+    # Feedback
     "smart_spinner",
+    "loading_indicator",
+    "skeleton_loader",
     "ProgressTracker",
     "LoadingState",
-    "run_with_feedback",
     "ToastManager",
     "show_success",
     "show_error",
     "show_warning",
     "show_info"
 ]
-

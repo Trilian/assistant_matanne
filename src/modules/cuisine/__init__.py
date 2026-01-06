@@ -1,32 +1,36 @@
 """
-Module Cuisine - Point d'Entrée Unifié
-Architecture Optimisée avec BaseModuleUI
+Module Cuisine - Point d'entrée unifié optimisé
+Architecture avec BaseModuleCuisine + Mixins
 """
 
-# Configs
-from .configs import (
-    get_recettes_config,
-    get_inventaire_config,
-    get_courses_config,
-    get_planning_config
+# Core
+from .core import (
+    BaseModuleCuisine,
+    AIGenerationMixin,
+    ExportMixin,
+    SearchMixin,
+    StatsMixin,
+    ValidationMixin
 )
 
-# Modules (auto-expose les app() functions)
+# Modules
 from . import recettes
 from . import inventaire
 from . import courses
-from . import planning_semaine
+from . import planning
 
 __all__ = [
-    # Configs
-    "get_recettes_config",
-    "get_inventaire_config",
-    "get_courses_config",
-    "get_planning_config",
+    # Core
+    "BaseModuleCuisine",
+    "AIGenerationMixin",
+    "ExportMixin",
+    "SearchMixin",
+    "StatsMixin",
+    "ValidationMixin",
 
     # Modules
     "recettes",
     "inventaire",
     "courses",
-    "planning_semaine"
+    "planning"
 ]

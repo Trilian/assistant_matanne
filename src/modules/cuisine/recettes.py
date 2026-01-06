@@ -1,21 +1,18 @@
 """
-Module Recettes - REFACTORISÉ avec BaseModuleCuisine
-✅ -70% de code
-✅ Même fonctionnalités
+Module Recettes - Refactorisé avec BaseModuleCuisine
+✅ -70% de code grâce aux mixins
 """
 import streamlit as st
 from typing import Dict, List
 
-from src.modules.cuisine.base_module import BaseModuleCuisine
+from .core import BaseModuleCuisine
 from src.services.recettes import recette_service
 from src.services.ai_services import create_ai_recette_service
-from src.ui.domain import recipe_card
-from src.core.constants import DIFFICULTES, SAISONS, TYPES_REPAS
-from src.utils.helpers import find_or_create_ingredient
+from src.utils.constants import DIFFICULTES, SAISONS, TYPES_REPAS
 
 
 class RecettesModule(BaseModuleCuisine):
-    """Module Recettes refactorisé"""
+    """Module Recettes optimisé"""
 
     def __init__(self):
         super().__init__(
@@ -27,13 +24,12 @@ class RecettesModule(BaseModuleCuisine):
         )
         self.ai_service = create_ai_recette_service()
 
-    # ═══════════════════════════════════════════════════════════
+    # ═══════════════════════════════════════════════════════
     # IMPLÉMENTATION MÉTHODES ABSTRAITES
-    # ═══════════════════════════════════════════════════════════
+    # ═══════════════════════════════════════════════════════
 
     def load_items(self) -> List[Dict]:
         """Charge recettes"""
-        recettes = self.service.get_all(limit=100)
         return [
             {
                 "id": r.id,
@@ -45,9 +41,9 @@ class RecettesModule(BaseModuleCuisine):
                 "difficulte": r.difficulte,
                 "type_repas": r.type_repas,
                 "saison": r.saison,
-                "url_image": r.url_image,
+                "url_image": r.url_image
             }
-            for r in recettes
+            for r in self.service.get_all(limit=100)
         ]
 
     def render_stats(self, items: List[Dict]):
@@ -66,8 +62,8 @@ class RecettesModule(BaseModuleCuisine):
             st.metric("✅ Faciles", faciles)
 
         with col4:
-            saison_items = len([r for r in items if r['saison'] != 'toute_année'])
-            st.metric("🍂 Saison", saison_items)
+            saison = len([r for r in items if r['saison'] != 'toute_année'])
+            st.metric("🍂 Saison", saison)
 
     def render_filters(self, items: List[Dict]) -> List[Dict]:
         """Filtres recettes"""
@@ -98,9 +94,24 @@ class RecettesModule(BaseModuleCuisine):
 
     def render_item_card(self, item: Dict):
         """Carte recette"""
-        recipe_card(
-            recipe=item,
-            on_view=lambda: self.view_recipe(item['id']),
+        from src.ui.components import item_card
+
+        metadata = [
+            f"{item['temps_preparation'] + item['temps_cuisson']}min",
+            f"{item['portions']}p",
+            item['difficulte'].capitalize()
+        ]
+
+        item_card(
+            title=item['nom'],
+            metadata=metadata,
+            status=item['difficulte'],
+            status_color={"facile": "#4CAF50", "moyen": "#FF9800", "difficile": "#f44336"}.get(item['difficulte']),
+            image_url=item.get('url_image'),
+            actions=[
+                ("👁️ Voir", lambda: self.view_recipe(item['id'])),
+                ("✏️ Éditer", lambda: self.edit_recipe(item['id']))
+            ],
             key=f"recipe_{item['id']}"
         )
 
@@ -109,14 +120,14 @@ class RecettesModule(BaseModuleCuisine):
         col1, col2 = st.columns(2)
 
         with col1:
-            nom = st.text_input("Nom *", max_chars=200)
-            temps_prep = st.number_input("Temps prépa (min) *", min_value=0, max_value=300, value=30)
-            portions = st.number_input("Portions *", min_value=1, max_value=20, value=4)
+            nom = st.text_input("Nom *")
+            temps_prep = st.number_input("Temps prépa (min) *", 0, 300, 30)
+            portions = st.number_input("Portions *", 1, 20, 4)
             type_repas = st.selectbox("Type *", TYPES_REPAS)
 
         with col2:
-            description = st.text_area("Description", max_chars=2000)
-            temps_cuisson = st.number_input("Temps cuisson (min) *", min_value=0, max_value=300, value=30)
+            description = st.text_area("Description")
+            temps_cuisson = st.number_input("Temps cuisson (min) *", 0, 300, 30)
             difficulte = st.selectbox("Difficulté *", DIFFICULTES)
             saison = st.selectbox("Saison *", SAISONS)
 
@@ -136,12 +147,12 @@ class RecettesModule(BaseModuleCuisine):
         col1, col2 = st.columns(2)
 
         with col1:
-            saison = st.selectbox("Saison", SAISONS)
-            type_repas = st.selectbox("Type", TYPES_REPAS)
+            saison = st.selectbox("Saison", SAISONS, key="ia_saison")
+            type_repas = st.selectbox("Type", TYPES_REPAS, key="ia_type")
             rapide = st.checkbox("⚡ Rapide (<30min)")
 
         with col2:
-            difficulte = st.selectbox("Difficulté max", DIFFICULTES, index=1)
+            difficulte = st.selectbox("Difficulté max", DIFFICULTES, index=1, key="ia_diff")
             nb_recettes = st.slider("Nombre", 1, 10, 3)
 
         ingredients = st.text_area(
@@ -185,13 +196,18 @@ class RecettesModule(BaseModuleCuisine):
         except Exception as e:
             st.error(f"❌ Erreur: {str(e)}")
 
-    # ═══════════════════════════════════════════════════════════
+    # ═══════════════════════════════════════════════════════
     # MÉTHODES CUSTOM
-    # ═══════════════════════════════════════════════════════════
+    # ═══════════════════════════════════════════════════════
 
     def view_recipe(self, recipe_id: int):
-        """Affiche détails recette"""
+        """Affiche détails"""
         st.session_state.viewing_recipe_id = recipe_id
+        st.rerun()
+
+    def edit_recipe(self, recipe_id: int):
+        """Édite recette"""
+        st.session_state.editing_recipe_id = recipe_id
         st.rerun()
 
 

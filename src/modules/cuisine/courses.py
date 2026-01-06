@@ -1,22 +1,22 @@
 """
-Module Courses - REFACTORISÉ avec BaseModuleCuisine
-✅ -70% de code (650 → 195 lignes)
-✅ Même fonctionnalités
+Module Courses - Refactorisé avec BaseModuleCuisine
+✅ -70% de code grâce aux mixins
 """
 import streamlit as st
 from datetime import date
 from typing import Dict, List
 
-from src.modules.cuisine.base_module import BaseModuleCuisine
+from .core import BaseModuleCuisine
 from src.services.courses import courses_service, MAGASINS_CONFIG
 from src.services.ai_services import create_courses_ai_service
 from src.services.planning import planning_service
 from src.services.inventaire import inventaire_service
 from src.utils.helpers import find_or_create_ingredient
+from src.utils.constants import PRIORITES_COURSES
 
 
 class CoursesModule(BaseModuleCuisine):
-    """Module Courses refactorisé"""
+    """Module Courses optimisé"""
 
     def __init__(self):
         super().__init__(
@@ -28,9 +28,9 @@ class CoursesModule(BaseModuleCuisine):
         )
         self.ai_service = create_courses_ai_service()
 
-    # ═══════════════════════════════════════════════════════════
-    # OVERRIDE : Structure différente (groupement par magasin)
-    # ═══════════════════════════════════════════════════════════
+    # ═══════════════════════════════════════════════════════
+    # OVERRIDE : Structure différente (groupement magasins)
+    # ═══════════════════════════════════════════════════════
 
     def render_bibliotheque(self):
         """Override : courses avec groupement par magasin"""
@@ -43,8 +43,8 @@ class CoursesModule(BaseModuleCuisine):
                 st.session_state.show_add_form = True
 
         with col2:
-            if st.button("🤖 Générer IA", use_container_width=True):
-                st.session_state.show_ia_generation = True
+            if st.button("🤖 IA", use_container_width=True):
+                st.session_state.active_tab = 1
                 st.rerun()
 
         # Formulaire
@@ -87,9 +87,9 @@ class CoursesModule(BaseModuleCuisine):
 
                 st.markdown('</div>', unsafe_allow_html=True)
 
-    # ═══════════════════════════════════════════════════════════
+    # ═══════════════════════════════════════════════════════
     # IMPLÉMENTATION MÉTHODES ABSTRAITES
-    # ═══════════════════════════════════════════════════════════
+    # ═══════════════════════════════════════════════════════
 
     def load_items(self) -> List[Dict]:
         """Charge liste active"""
@@ -115,7 +115,7 @@ class CoursesModule(BaseModuleCuisine):
             st.metric("🟢 Basse", basse)
 
     def render_filters(self, items: List[Dict]) -> List[Dict]:
-        """Filtres courses (non utilisé ici, géré dans render_bibliotheque)"""
+        """Filtres (non utilisé, géré dans render_bibliotheque)"""
         return items
 
     def render_item_card(self, item: Dict):
@@ -146,11 +146,8 @@ class CoursesModule(BaseModuleCuisine):
 
         with col3:
             # Actions
-            col_del = st.columns(1)[0]
-
-            with col_del:
-                if st.button("🗑️", key=f"del_{item['id']}", help="Supprimer"):
-                    self.delete_article(item["id"])
+            if st.button("🗑️", key=f"del_{item['id']}", help="Supprimer"):
+                self.delete_article(item["id"])
 
     def render_form_fields(self) -> Dict:
         """Champs formulaire courses"""
@@ -162,7 +159,7 @@ class CoursesModule(BaseModuleCuisine):
 
         with col2:
             unite = st.selectbox("Unité *", ["pcs", "kg", "g", "L", "mL"])
-            priorite = st.selectbox("Priorité", ["haute", "moyenne", "basse"], index=1)
+            priorite = st.selectbox("Priorité", PRIORITES_COURSES, index=1)
 
         with col3:
             magasin = st.selectbox("Magasin", [""] + list(MAGASINS_CONFIG.keys()))
@@ -270,14 +267,14 @@ class CoursesModule(BaseModuleCuisine):
 
                 with col3:
                     if st.button("💾", key=f"save_{idx}", use_container_width=True):
-                        self.save_generated_article(article.dict())
+                        self._save_generated_article(article.dict())
 
         except Exception as e:
             st.error(f"❌ Erreur: {str(e)}")
 
-    # ═══════════════════════════════════════════════════════════
+    # ═══════════════════════════════════════════════════════
     # MÉTHODES CUSTOM
-    # ═══════════════════════════════════════════════════════════
+    # ═══════════════════════════════════════════════════════
 
     def mark_as_bought(self, article_id: int):
         """Marque article acheté"""
@@ -289,7 +286,8 @@ class CoursesModule(BaseModuleCuisine):
         from src.core.cache import Cache
         Cache.invalidate(dependencies=[f"courses_{article_id}"])
 
-        st.success("✅ Acheté")
+        from src.ui.feedback import show_success
+        show_success("✅ Acheté")
         st.rerun()
 
     def delete_article(self, article_id: int):
@@ -299,10 +297,11 @@ class CoursesModule(BaseModuleCuisine):
         from src.core.cache import Cache
         Cache.invalidate(dependencies=[f"courses_{article_id}"])
 
-        st.success("🗑️ Supprimé")
+        from src.ui.feedback import show_success
+        show_success("🗑️ Supprimé")
         st.rerun()
 
-    def save_generated_article(self, article_data: Dict):
+    def _save_generated_article(self, article_data: Dict):
         """Sauvegarde article généré"""
         ingredient_id = find_or_create_ingredient(
             nom=article_data["nom"],
@@ -315,14 +314,15 @@ class CoursesModule(BaseModuleCuisine):
             "priorite": article_data["priorite"]
         })
 
-        st.success(f"✅ {article_data['nom']} ajouté")
+        from src.ui.feedback import show_success
+        show_success(f"✅ {article_data['nom']} ajouté")
 
     def render_custom_actions(self):
         """Actions custom courses"""
         if st.button("🗑️ Supprimer Achetés", use_container_width=True):
-            self.delete_bought_items()
+            self._delete_bought_items()
 
-    def delete_bought_items(self):
+    def _delete_bought_items(self):
         """Supprime articles achetés"""
         liste = self.service.get_liste_active(filters={"achete": True})
 
@@ -336,7 +336,8 @@ class CoursesModule(BaseModuleCuisine):
             for article in liste:
                 self.service.delete(article["id"])
 
-            st.success(f"✅ {len(liste)} supprimés")
+            from src.ui.feedback import show_success
+            show_success(f"✅ {len(liste)} supprimés")
             st.rerun()
 
 

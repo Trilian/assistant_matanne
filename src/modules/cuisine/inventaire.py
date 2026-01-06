@@ -1,21 +1,21 @@
 """
-Module Inventaire - REFACTORISÉ avec BaseModuleCuisine
-✅ -75% de code (700 → 175 lignes)
-✅ Même fonctionnalités
+Module Inventaire - Refactorisé avec BaseModuleCuisine
+✅ -75% de code grâce aux mixins
 """
 import streamlit as st
 from datetime import date
 from typing import Dict, List
 
-from src.modules.cuisine.base_module import BaseModuleCuisine
+from .core import BaseModuleCuisine
 from src.services.inventaire import inventaire_service, CATEGORIES, EMPLACEMENTS
 from src.services.ai_services import create_inventaire_ai_service
-from src.ui.domain import inventory_card, stock_alert
 from src.utils.helpers import find_or_create_ingredient
+from src.ui.components import badge
+from src.utils.constants import STATUT_COLORS
 
 
 class InventaireModule(BaseModuleCuisine):
-    """Module Inventaire refactorisé"""
+    """Module Inventaire optimisé"""
 
     def __init__(self):
         super().__init__(
@@ -27,9 +27,9 @@ class InventaireModule(BaseModuleCuisine):
         )
         self.ai_service = create_inventaire_ai_service()
 
-    # ═══════════════════════════════════════════════════════════
+    # ═══════════════════════════════════════════════════════
     # IMPLÉMENTATION MÉTHODES ABSTRAITES
-    # ═══════════════════════════════════════════════════════════
+    # ═══════════════════════════════════════════════════════
 
     def load_items(self) -> List[Dict]:
         """Charge inventaire avec statuts"""
@@ -61,11 +61,7 @@ class InventaireModule(BaseModuleCuisine):
         ]
 
         if articles_critiques:
-            stock_alert(
-                articles_critiques[:5],
-                on_click=lambda art_id: self.view_article(art_id),
-                key="alert_inventaire"
-            )
+            self._render_stock_alert(articles_critiques[:5])
 
     def render_filters(self, items: List[Dict]) -> List[Dict]:
         """Filtres inventaire"""
@@ -99,12 +95,50 @@ class InventaireModule(BaseModuleCuisine):
 
     def render_item_card(self, item: Dict):
         """Carte article inventaire"""
-        inventory_card(
-            article=item,
-            on_adjust=lambda art_id, delta: self.adjust_stock(art_id, delta),
-            on_add_to_cart=lambda art_id: self.add_to_courses(art_id),
-            key=f"inv_{item['id']}"
-        )
+        statut = item.get("statut", "ok")
+        couleur = STATUT_COLORS.get(statut, "#f8f9fa")
+
+        with st.container():
+            st.markdown(
+                f'<div style="border-left: 4px solid {couleur}; padding: 1rem; '
+                f'background: {couleur}20; border-radius: 8px; margin-bottom: 0.5rem;"></div>',
+                unsafe_allow_html=True
+            )
+
+            col1, col2, col3 = st.columns([3, 2, 2])
+
+            with col1:
+                st.markdown(f"### {item['nom']}")
+                st.caption(f"{item['categorie']} • {item.get('emplacement', '—')}")
+
+                # Alerte péremption
+                jours = item.get("jours_peremption")
+                if jours is not None:
+                    if jours <= 3:
+                        st.error(f"⏳ Périme dans {jours} jour(s)")
+                    elif jours <= 7:
+                        st.warning(f"⏳ Dans {jours} jours")
+
+            with col2:
+                qty = item['quantite']
+                seuil = item.get('seuil', item.get('quantite_min', 1.0))
+                delta_text = None
+                if qty < seuil:
+                    delta_text = f"Seuil: {seuil}"
+                st.metric("Stock", f"{qty:.1f} {item['unite']}", delta=delta_text, delta_color="inverse")
+
+            with col3:
+                # Actions rapides
+                col_a1, col_a2 = st.columns(2)
+                with col_a1:
+                    if st.button("➕", key=f"inv_plus_{item['id']}", help="Ajouter 1"):
+                        self.adjust_stock(item["id"], 1.0)
+                with col_a2:
+                    if st.button("➖", key=f"inv_minus_{item['id']}", help="Retirer 1"):
+                        self.adjust_stock(item["id"], -1.0)
+
+                if st.button("🛒", key=f"inv_cart_{item['id']}", use_container_width=True):
+                    self.add_to_courses(item["id"])
 
     def render_form_fields(self) -> Dict:
         """Champs formulaire inventaire"""
@@ -198,8 +232,7 @@ class InventaireModule(BaseModuleCuisine):
 
                     with col2:
                         if st.button("🛒", key=f"add_{art['nom']}", use_container_width=True):
-                            # Ajouter aux courses
-                            self.add_item_to_courses(art['nom'])
+                            self._add_item_to_courses(art['nom'])
 
             # Alertes péremption
             if config["alertes"] and analyse.get("alertes_peremption"):
@@ -220,9 +253,9 @@ class InventaireModule(BaseModuleCuisine):
         except Exception as e:
             st.error(f"❌ Erreur: {str(e)}")
 
-    # ═══════════════════════════════════════════════════════════
+    # ═══════════════════════════════════════════════════════
     # MÉTHODES CUSTOM
-    # ═══════════════════════════════════════════════════════════
+    # ═══════════════════════════════════════════════════════
 
     def adjust_stock(self, article_id: int, delta: float):
         """Ajuste stock"""
@@ -235,7 +268,8 @@ class InventaireModule(BaseModuleCuisine):
             from src.core.cache import Cache
             Cache.invalidate(dependencies=[f"inventaire_{article_id}"])
 
-            st.success(f"{'➕' if delta > 0 else '➖'} Stock ajusté")
+            from src.ui.feedback import show_success
+            show_success(f"{'➕' if delta > 0 else '➖'} Stock ajusté")
             st.rerun()
 
     def add_to_courses(self, article_id: int):
@@ -251,9 +285,11 @@ class InventaireModule(BaseModuleCuisine):
                 "priorite": "haute"
             })
 
-            st.success(f"🛒 Ajouté aux courses")
+            from src.ui.feedback import show_success
+            show_success(f"🛒 {article.nom} ajouté aux courses")
+            st.rerun()
 
-    def add_item_to_courses(self, nom: str):
+    def _add_item_to_courses(self, nom: str):
         """Ajoute item par nom aux courses"""
         from src.services.courses import courses_service
 
@@ -265,9 +301,27 @@ class InventaireModule(BaseModuleCuisine):
             "priorite": "haute"
         })
 
-        st.success(f"🛒 {nom} ajouté aux courses")
+        from src.ui.feedback import show_success
+        show_success(f"🛒 {nom} ajouté aux courses")
 
-    def view_article(self, article_id: int):
+    def _render_stock_alert(self, articles_critiques: List[Dict]):
+        """Widget alertes stock"""
+        st.warning(f"⚠️ **{len(articles_critiques)} article(s) en alerte**")
+
+        with st.expander("Voir les alertes", expanded=False):
+            for idx, article in enumerate(articles_critiques):
+                col1, col2 = st.columns([3, 1])
+
+                with col1:
+                    statut_icons = {"ok": "✅", "sous_seuil": "⚠️", "peremption_proche": "⏳", "critique": "🔴"}
+                    icon = statut_icons.get(article.get("statut"), "⚠️")
+                    st.write(f"{icon} **{article['nom']}** - {article['quantite']:.1f} {article['unite']}")
+
+                with col2:
+                    if st.button("Voir", key=f"alert_{idx}", use_container_width=True):
+                        self._view_article(article["id"])
+
+    def _view_article(self, article_id: int):
         """Affiche détails article"""
         st.session_state.viewing_article_id = article_id
         st.rerun()
@@ -275,9 +329,9 @@ class InventaireModule(BaseModuleCuisine):
     def render_custom_actions(self):
         """Actions custom inventaire"""
         if st.button("🗑️ Supprimer Périmés", use_container_width=True):
-            self.delete_expired_items()
+            self._delete_expired_items()
 
-    def delete_expired_items(self):
+    def _delete_expired_items(self):
         """Supprime articles périmés"""
         items = self.load_items()
 
@@ -296,7 +350,8 @@ class InventaireModule(BaseModuleCuisine):
             for art in expired:
                 self.service.delete(art["id"])
 
-            st.success(f"✅ {len(expired)} articles supprimés")
+            from src.ui.feedback import show_success
+            show_success(f"✅ {len(expired)} articles supprimés")
             st.rerun()
 
 
