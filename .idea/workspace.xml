@@ -5,61 +5,41 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment=" amelioration app duplication etc..">
-      <change afterPath="$PROJECT_DIR$/src/modules/cuisine/components/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/modules/cuisine/components/inventory.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/modules/cuisine/components/planning.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/modules/cuisine/components/recipe.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/modules/cuisine/core/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/modules/cuisine/core/base_module.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/modules/cuisine/core/mixins.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/services/planning/repas_service.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ui/components/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ui/components/atoms.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ui/components/data.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ui/components/dynamic.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ui/components/forms.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ui/components/layouts.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ui/core/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ui/core/base_form.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ui/core/base_io.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ui/core/base_module.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ui/feedback/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ui/feedback/progress.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ui/feedback/spinners.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ui/feedback/toasts.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/constants.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/formatters/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/formatters/dates.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/formatters/numbers.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/formatters/text.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/formatters/units.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/helpers/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/helpers/data.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/helpers/dates.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/helpers/helpers.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/helpers/stats.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/helpers/strings.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/validators/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/validators/common.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/validators/dates.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils/validators/food.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/cuisine/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/base_module.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/courses.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/cuisine/courses.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/inventaire.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/cuisine/inventaire.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/planning_semaine.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/cuisine/planning.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/recettes.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/modules/cuisine/recettes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/ui/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/base_io_service.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/base_module.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/components.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/domain.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ui/feedback.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/formatters.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/helpers.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/image_optimizer.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MIGRATION_GUIDE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/models/base.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/models/cuisine.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/components/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/components/inventory.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/components/planning.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/components/recipe.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/configs.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/core/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/core/base_module.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/core/mixins.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/courses.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/inventaire.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/planning.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/recettes.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/courses/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/courses/courses_ai_service.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/courses/courses_io_service.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/courses/courses_service.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/inventaire/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/inventaire/inventaire_ai_service.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/inventaire/inventaire_io_service.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/inventaire/inventaire_service.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/planning/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/planning/planning_generation_service.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/planning/planning_service.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/planning/repas_service.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/recettes/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/recettes/recette_ai_service.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/recettes/recette_io_service.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/recettes/recette_scraper_service.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/recettes/recette_service.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/recettes/recette_version_service.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -231,14 +211,6 @@
       <workItem from="1764864455782" duration="6942000" />
       <workItem from="1764923035460" duration="23405000" />
       <workItem from="1765096794626" duration="16000" />
-    </task>
-    <task id="LOCAL-00055" summary=" amelioration inventaire">
-      <option name="closed" value="true" />
-      <created>1765469358033</created>
-      <option name="number" value="00055" />
-      <option name="presentableId" value="LOCAL-00055" />
-      <option name="project" value="LOCAL" />
-      <updated>1765469358034</updated>
     </task>
     <task id="LOCAL-00056" summary=" amelioration inventaire">
       <option name="closed" value="true" />
@@ -624,7 +596,15 @@
       <option name="project" value="LOCAL" />
       <updated>1767613390232</updated>
     </task>
-    <option name="localTasksCounter" value="104" />
+    <task id="LOCAL-00104" summary=" amelioration app duplication etc..">
+      <option name="closed" value="true" />
+      <created>1767728365494</created>
+      <option name="number" value="00104" />
+      <option name="presentableId" value="LOCAL-00104" />
+      <option name="project" value="LOCAL" />
+      <updated>1767728365494</updated>
+    </task>
+    <option name="localTasksCounter" value="105" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
