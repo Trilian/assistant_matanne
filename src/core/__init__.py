@@ -1,200 +1,122 @@
 """
-Core - Point d'Entrée Unifié
-Tous les composants essentiels en français
+Module Core - Exports centralisés.
+
+Ce module exporte toutes les fonctions principales du core
+avec des alias pour la compatibilité avec le code existant.
 """
 
-# Config
-from .config import obtenir_parametres, Parametres
+# ═══════════════════════════════════════════════════════════
+# LOGGING
+# ═══════════════════════════════════════════════════════════
 
-# Database
+from .logging import (
+    GestionnaireLog,
+    obtenir_logger,
+    LogManager,
+    get_logger,
+)
+
+# ═══════════════════════════════════════════════════════════
+# CONFIGURATION
+# ═══════════════════════════════════════════════════════════
+
+from .config import (
+    Parametres,
+    obtenir_parametres,
+)
+
+# Alias pour compatibilité
+get_settings = obtenir_parametres
+
+# ═══════════════════════════════════════════════════════════
+# DATABASE
+# ═══════════════════════════════════════════════════════════
+
 from .database import (
+    obtenir_moteur,
     obtenir_contexte_db,
-    obtenir_db_securise,
+    obtenir_session,
     verifier_connexion,
     obtenir_infos_db,
-    verifier_sante,
     initialiser_database,
-    creer_toutes_tables,
-    GestionnaireMigrations
 )
 
-# Models
-from .models import (
-    Base,
-    Ingredient,
-    Recette,
-    RecetteIngredient,
-    EtapeRecette,
-    ArticleInventaire,
-    ArticleCourses,
-    PlanningHebdomadaire,
-    RepasPlanning,
-    VersionRecette,
-    ProfilEnfant,
-    EntreeBienEtre,
-    Routine,
-    TacheRoutine,
-    Projet,
-    TacheProjet,
-    ElementJardin,
-    LogJardin,
-    EvenementCalendrier,
-    Utilisateur,
-    ProfilUtilisateur,
-    Notification
-)
+# Alias pour compatibilité
+get_engine = obtenir_moteur
+get_db_context = obtenir_contexte_db
+get_session = obtenir_session
+check_connection = verifier_connexion
+get_db_info = obtenir_infos_db
 
-# AI
-from .ai import (
-    ClientIA,
-    obtenir_client_ia,
-    AnalyseurIA,
-    analyser_liste_reponse,
-    CacheIA
-)
+# ═══════════════════════════════════════════════════════════
+# MODELS
+# ═══════════════════════════════════════════════════════════
 
-# Cache
-from .cache import Cache, LimiteDebit
+from .models import Base, metadata
 
-# Errors
+# ═══════════════════════════════════════════════════════════
+# ERRORS
+# ═══════════════════════════════════════════════════════════
+
 from .errors import (
-    ExceptionApp,
-    ErreurValidation,
-    ErreurNonTrouve,
+    ErreurBase,
     ErreurBaseDeDonnees,
-    ErreurServiceIA,
-    ErreurLimiteDebit,
-    gerer_erreurs
+    ErreurValidation,
+    ErreurIA,
+    ErreurConfiguration,
 )
 
-# Validation
-from .validation import (
-    # Sanitization
-    NettoyeurEntrees,
+# ═══════════════════════════════════════════════════════════
+# CACHE
+# ═══════════════════════════════════════════════════════════
 
-    # Pydantic Models
-    IngredientInput,
-    EtapeInput,
-    RecetteInput,
-    ArticleInventaireInput,
-    ArticleCoursesInput,
+from .cache import Cache
 
-    # Schémas Dict
-    SCHEMA_RECETTE,
-    SCHEMA_INVENTAIRE,
-    SCHEMA_COURSES,
+# ═══════════════════════════════════════════════════════════
+# STATE
+# ═══════════════════════════════════════════════════════════
 
-    # Helpers
-    valider_modele,
-    valider_formulaire_streamlit,
-    valider_et_nettoyer_formulaire,
-    afficher_erreurs_validation,
+from .state import StateManager, get_state
 
-    # Decorator
-    valider_entree,
-)
-
-# Logging
-from .logging import GestionnaireLog, obtenir_logger
-
-# State
-from .state import (
-    GestionnaireEtat,
-    EtatApp,
-    obtenir_etat,
-    naviguer,
-    revenir,
-    obtenir_fil_ariane,
-    est_mode_debug,
-    nettoyer_etats_ui
-)
+# ═══════════════════════════════════════════════════════════
+# EXPORTS
+# ═══════════════════════════════════════════════════════════
 
 __all__ = [
-    # Config
-    "obtenir_parametres",
-    "Parametres",
-
-    # Database
-    "obtenir_contexte_db",
-    "obtenir_db_securise",
-    "verifier_connexion",
-    "obtenir_infos_db",
-    "verifier_sante",
-    "initialiser_database",
-    "creer_toutes_tables",
-    "GestionnaireMigrations",
-
-    # Models
-    "Base",
-    "Ingredient",
-    "Recette",
-    "RecetteIngredient",
-    "EtapeRecette",
-    "ArticleInventaire",
-    "ArticleCourses",
-    "PlanningHebdomadaire",
-    "RepasPlanning",
-    "VersionRecette",
-    "ProfilEnfant",
-    "EntreeBienEtre",
-    "Routine",
-    "TacheRoutine",
-    "Projet",
-    "TacheProjet",
-    "ElementJardin",
-    "LogJardin",
-    "EvenementCalendrier",
-    "Utilisateur",
-    "ProfilUtilisateur",
-    "Notification",
-
-    # AI
-    "ClientIA",
-    "obtenir_client_ia",
-    "AnalyseurIA",
-    "analyser_liste_reponse",
-    "CacheIA",
-
-    # Cache
-    "Cache",
-    "LimiteDebit",
-
-    # Errors
-    "ExceptionApp",
-    "ErreurValidation",
-    "ErreurNonTrouve",
-    "ErreurBaseDeDonnees",
-    "ErreurServiceIA",
-    "ErreurLimiteDebit",
-    "gerer_erreurs",
-
-    # Validation
-    "NettoyeurEntrees",
-    "IngredientInput",
-    "EtapeInput",
-    "RecetteInput",
-    "ArticleInventaireInput",
-    "ArticleCoursesInput",
-    "SCHEMA_RECETTE",
-    "SCHEMA_INVENTAIRE",
-    "SCHEMA_COURSES",
-    "valider_modele",
-    "valider_formulaire_streamlit",
-    "valider_et_nettoyer_formulaire",
-    "afficher_erreurs_validation",
-    "valider_entree",
-
     # Logging
     "GestionnaireLog",
     "obtenir_logger",
-
+    "LogManager",
+    "get_logger",
+    # Config
+    "Parametres",
+    "obtenir_parametres",
+    "get_settings",
+    # Database
+    "obtenir_moteur",
+    "obtenir_contexte_db",
+    "obtenir_session",
+    "verifier_connexion",
+    "obtenir_infos_db",
+    "initialiser_database",
+    "get_engine",
+    "get_db_context",
+    "get_session",
+    "check_connection",
+    "get_db_info",
+    # Models
+    "Base",
+    "metadata",
+    # Errors
+    "ErreurBase",
+    "ErreurBaseDeDonnees",
+    "ErreurValidation",
+    "ErreurIA",
+    "ErreurConfiguration",
+    # Cache
+    "Cache",
     # State
-    "GestionnaireEtat",
-    "EtatApp",
-    "obtenir_etat",
-    "naviguer",
-    "revenir",
-    "obtenir_fil_ariane",
-    "est_mode_debug",
-    "nettoyer_etats_ui",
+    "StateManager",
+    "get_state",
 ]
+

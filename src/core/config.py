@@ -2,7 +2,7 @@
 Configuration - Configuration centralisée de l'application.
 Tout harmonisé en français
 """
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
 import streamlit as st
 import os
@@ -274,11 +274,13 @@ class Parametres(BaseSettings):
         except:
             return False
 
-    class Config:
-        """Configuration Pydantic."""
-        case_sensitive = False
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    # Configuration Pydantic v2
+    model_config = SettingsConfigDict(
+        case_sensitive=False,
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore"  # Ignore les champs supplémentaires (évite l'erreur "Extra inputs are not permitted")
+    )
 
 
 # ═══════════════════════════════════════════════════════════

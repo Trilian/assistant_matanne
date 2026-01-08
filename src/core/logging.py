@@ -148,6 +148,16 @@ class GestionnaireLog:
         """Active le mode production (INFO uniquement)."""
         GestionnaireLog.definir_niveau("INFO")
 
+    @staticmethod
+    def init(log_level: str = "INFO"):
+        """
+        Alias pour initialiser (compatibilité).
+
+        Args:
+            log_level: Niveau de log
+        """
+        GestionnaireLog.initialiser(niveau_log=log_level)
+
 
 def obtenir_logger(nom: str) -> logging.Logger:
     """
@@ -164,6 +174,15 @@ def obtenir_logger(nom: str) -> logging.Logger:
         >>> logger = obtenir_logger(__name__)
     """
     return GestionnaireLog.obtenir_logger(nom)
+
+
+# ═══════════════════════════════════════════════════════════
+# ALIASES POUR COMPATIBILITÉ
+# ═══════════════════════════════════════════════════════════
+
+# Alias anglais pour le code existant
+LogManager = GestionnaireLog
+get_logger = obtenir_logger
 
 
 # Initialisation automatique au chargement du module
