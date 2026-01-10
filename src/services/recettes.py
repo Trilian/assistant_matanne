@@ -18,12 +18,9 @@ import csv
 import json
 from io import StringIO
 
-from src.core import (
-    BaseService,
-    get_db_context as obtenir_contexte_db,
-    handle_errors,
-    Cache,
-)
+from src.core.database import obtenir_contexte_db
+from src.core.cache import Cache
+from src.core.errors import gerer_erreurs
 from src.core.models import (
     Recette,
     RecetteIngredient,
@@ -31,7 +28,8 @@ from src.core.models import (
     VersionRecette,
     Ingredient,
 )
-from src.core.ai import get_ai_client
+from src.core.ai import obtenir_client_ia
+from src.services.base_service import BaseService
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +74,7 @@ class VersionBatchGeneree(BaseModel):
 class RecetteService(BaseService[Recette]):
     """
     Service complet pour les recettes.
-    
+
     Fonctionnalités :
     - CRUD optimisé avec cache
     - Génération IA (recettes, versions bébé/batch)
@@ -94,14 +92,14 @@ class RecetteService(BaseService[Recette]):
     # SECTION 1 : CRUD OPTIMISÉ
     # ═══════════════════════════════════════════════════════════
 
-    @handle_errors(show_in_ui=False, fallback_value=None)
+    @gerer_erreurs(afficher_dans_ui=False, valeur_fallback=None)
     def get_by_id_full(self, recette_id: int) -> Optional[Recette]:
         """
         Récupère une recette avec toutes ses relations (optimisé).
-        
+
         Args:
             recette_id: ID de la recette
-            
+
         Returns:
             Recette complète avec ingrédients et étapes
         """
@@ -129,11 +127,11 @@ class RecetteService(BaseService[Recette]):
                 )
             return recette
 
-    @handle_errors(show_in_ui=True)
+    @gerer_erreurs(afficher_dans_ui=True)
     def create_complete(self, data: Dict) -> Recette:
         """
         Crée une recette complète (recette + ingrédients + étapes).
-        
+
         Args:
             data: {
                 "nom": str,
@@ -142,7 +140,7 @@ class RecetteService(BaseService[Recette]):
                 "ingredients": [{"nom": str, "quantite": float, "unite": str}, ...],
                 "etapes": [{"ordre": int, "description": str}, ...]
             }
-            
+
         Returns:
             Recette créée avec toutes ses relations
         """
@@ -183,24 +181,24 @@ class RecetteService(BaseService[Recette]):
 
             # Invalider cache
             Cache.invalider(pattern="recettes")
-            
+
             logger.info(f"✅ Recette créée : {recette.nom} (ID: {recette.id})")
             return recette
 
-    @handle_errors(show_in_ui=False, fallback_value=[])
+    @gerer_erreurs(afficher_dans_ui=False, valeur_fallback=[])
     def search_advanced(
-        self,
-        term: Optional[str] = None,
-        type_repas: Optional[str] = None,
-        saison: Optional[str] = None,
-        difficulte: Optional[str] = None,
-        temps_max: Optional[int] = None,
-        compatible_bebe: Optional[bool] = None,
-        limit: int = 100
+            self,
+            term: Optional[str] = None,
+            type_repas: Optional[str] = None,
+            saison: Optional[str] = None,
+            difficulte: Optional[str] = None,
+            temps_max: Optional[int] = None,
+            compatible_bebe: Optional[bool] = None,
+            limit: int = 100
     ) -> List[Recette]:
         """
         Recherche avancée multi-critères.
-        
+
         Args:
             term: Terme de recherche (nom, description)
             type_repas: Type de repas
@@ -209,7 +207,7 @@ class RecetteService(BaseService[Recette]):
             temps_max: Temps total maximum (minutes)
             compatible_bebe: Compatible bébé
             limit: Limite résultats
-            
+
         Returns:
             Liste de recettes filtrées
         """
@@ -240,34 +238,35 @@ class RecetteService(BaseService[Recette]):
     def _ensure_ai_client(self):
         """Initialise le client IA si nécessaire (lazy loading)"""
         if self.ai_client is None:
-            self.ai_client = get_ai_client()
+            self.ai_client = obtenir_client_ia()
 
-    @handle_errors(show_in_ui=True, fallback_value=[])
+    @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=[])
     def generer_recettes_ia(
-        self,
-        type_repas: str,
-        saison: str,
-        difficulte: str = "moyen",
-        ingredients_dispo: Optional[List[str]] = None,
-        nb_recettes: int = 3
+            self,
+            type_repas: str,
+            saison: str,
+            difficulte: str = "moyen",
+            ingredients_dispo: Optional[List[str]] = None,
+            nb_recettes: int = 3
     ) -> List[Dict]:
         """
         Génère des recettes avec l'IA.
-        
+
         Args:
             type_repas: Type de repas souhaité
             saison: Saison
             difficulte: Difficulté
             ingredients_dispo: Ingrédients disponibles (optionnel)
             nb_recettes: Nombre de recettes à générer
-            
+
         Returns:
             Liste de recettes générées
         """
         self._ensure_ai_client()
 
         # Vérifier rate limit
-        autorise, msg = Cache.peut_appeler_ia()
+        from src.core.cache import LimiteDebit
+        autorise, msg = LimiteDebit.peut_appeler()
         if not autorise:
             logger.warning(msg)
             return []
@@ -278,25 +277,28 @@ class RecetteService(BaseService[Recette]):
         )
 
         # Vérifier cache IA
-        cached = Cache.obtenir_ia(prompt)
+        from src.core.ai.cache import CacheIA
+        cached = CacheIA.obtenir(prompt=prompt)
         if cached:
             logger.info("✅ Recettes IA depuis cache")
-            return cached
+            return self._parse_ai_response(cached)
 
-        # Appeler IA
+        # Appeler IA (version synchrone pour compatibilité)
         try:
-            response = self.ai_client.chat.complete(
-                model="mistral-small-latest",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.8
-            )
+            import asyncio
+            response = asyncio.run(self.ai_client.appeler(
+                prompt=prompt,
+                prompt_systeme="Tu es un chef cuisinier expert.",
+                temperature=0.8,
+                max_tokens=2000
+            ))
 
             # Parser réponse
-            recettes = self._parse_ai_response(response.choices[0].message.content)
+            recettes = self._parse_ai_response(response)
 
             # Cacher + enregistrer appel
-            Cache.definir_ia(prompt, recettes)
-            Cache.enregistrer_appel_ia()
+            CacheIA.definir(prompt=prompt, reponse=response)
+            LimiteDebit.enregistrer_appel()
 
             logger.info(f"✅ {len(recettes)} recettes générées par IA")
             return recettes
@@ -305,14 +307,14 @@ class RecetteService(BaseService[Recette]):
             logger.error(f"❌ Erreur génération IA : {e}")
             return []
 
-    @handle_errors(show_in_ui=True, fallback_value=None)
+    @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=None)
     def generer_version_bebe(self, recette_id: int) -> Optional[VersionRecette]:
         """
         Génère une version bébé d'une recette avec l'IA.
-        
+
         Args:
             recette_id: ID de la recette
-            
+
         Returns:
             VersionRecette créée ou None
         """
@@ -336,7 +338,8 @@ class RecetteService(BaseService[Recette]):
                 return existing
 
         # Vérifier rate limit
-        autorise, msg = Cache.peut_appeler_ia()
+        from src.core.cache import LimiteDebit
+        autorise, msg = LimiteDebit.peut_appeler()
         if not autorise:
             logger.warning(msg)
             return None
@@ -354,15 +357,16 @@ Génère une adaptation en JSON avec :
 - age_minimum_mois (6-36)"""
 
         try:
-            response = self.ai_client.chat.complete(
-                model="mistral-small-latest",
-                messages=[{"role": "user", "content": prompt}],
+            import asyncio
+            response = asyncio.run(self.ai_client.appeler(
+                prompt=prompt,
+                prompt_systeme="Tu es un pédiatre nutritionniste.",
                 temperature=0.7
-            )
+            ))
 
             # Parser et créer version
-            data = self._parse_version_bebe(response.choices[0].message.content)
-            
+            data = self._parse_version_bebe(response)
+
             with obtenir_contexte_db() as db:
                 version = VersionRecette(
                     recette_base_id=recette_id,
@@ -374,7 +378,7 @@ Génère une adaptation en JSON avec :
                 db.commit()
                 db.refresh(version)
 
-            Cache.enregistrer_appel_ia()
+            LimiteDebit.enregistrer_appel()
             logger.info(f"✅ Version bébé créée pour recette {recette_id}")
             return version
 
@@ -389,10 +393,10 @@ Génère une adaptation en JSON avec :
     def export_to_csv(self, recettes: List[Recette]) -> str:
         """
         Exporte des recettes en CSV.
-        
+
         Args:
             recettes: Liste de recettes
-            
+
         Returns:
             Contenu CSV
         """
@@ -400,9 +404,9 @@ Génère une adaptation en JSON avec :
         writer = csv.DictWriter(
             output,
             fieldnames=["nom", "description", "temps_preparation", "temps_cuisson",
-                       "portions", "difficulte", "type_repas", "saison"]
+                        "portions", "difficulte", "type_repas", "saison"]
         )
-        
+
         writer.writeheader()
         for r in recettes:
             writer.writerow({
@@ -415,17 +419,17 @@ Génère une adaptation en JSON avec :
                 "type_repas": r.type_repas,
                 "saison": r.saison
             })
-        
+
         return output.getvalue()
 
     def export_to_json(self, recettes: List[Recette], indent: int = 2) -> str:
         """
         Exporte des recettes en JSON.
-        
+
         Args:
             recettes: Liste de recettes
             indent: Indentation JSON
-            
+
         Returns:
             Contenu JSON
         """
@@ -456,7 +460,7 @@ Génère une adaptation en JSON avec :
                     for e in r.etapes
                 ]
             })
-        
+
         return json.dumps(data, indent=indent, ensure_ascii=False)
 
     # ═══════════════════════════════════════════════════════════
@@ -473,20 +477,20 @@ Génère une adaptation en JSON avec :
         return ingredient
 
     def _build_recipe_prompt(
-        self,
-        type_repas: str,
-        saison: str,
-        difficulte: str,
-        ingredients: Optional[List[str]],
-        nb: int
+            self,
+            type_repas: str,
+            saison: str,
+            difficulte: str,
+            ingredients: Optional[List[str]],
+            nb: int
     ) -> str:
         """Construit le prompt pour génération recettes"""
         base = f"""Génère {nb} recettes pour {type_repas} de saison {saison}, 
 difficulté {difficulte}."""
-        
+
         if ingredients:
             base += f"\nUtilise ces ingrédients : {', '.join(ingredients)}"
-        
+
         base += "\n\nRéponds en JSON avec : nom, description, temps_preparation, temps_cuisson, portions, ingredients[], etapes[]"
         return base
 
@@ -498,7 +502,7 @@ difficulté {difficulte}."""
             end = content.rfind("]") + 1
             if start == -1 or end == 0:
                 return []
-            
+
             json_str = content[start:end]
             return json.loads(json_str)
         except Exception as e:
@@ -537,4 +541,3 @@ __all__ = [
     "VersionBebeGeneree",
     "VersionBatchGeneree",
 ]
-

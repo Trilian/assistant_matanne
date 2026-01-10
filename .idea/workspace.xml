@@ -5,8 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment="Merge branch 'main' of https://github.com/Trilian/assistant_matanne&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;REFACTORING_FINAL.md&#10;#&#9;src/core/__init__.py&#10;#&#9;src/core/models.py&#10;#&#9;src/modules/cuisine.py&#10;#&#9;src/services/courses.py&#10;#&#9;src/services/inventaire.py&#10;#&#9;src/services/planning.py&#10;#&#9;src/services/recettes.py">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/base_ai_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/base_ai_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/recettes.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/recettes.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -210,14 +209,6 @@
       <workItem from="1764923035460" duration="23405000" />
       <workItem from="1765096794626" duration="16000" />
       <workItem from="1767876030760" duration="1532000" />
-    </task>
-    <task id="LOCAL-00062" summary=" amelioration inventaire">
-      <option name="closed" value="true" />
-      <created>1765568869030</created>
-      <option name="number" value="00062" />
-      <option name="presentableId" value="LOCAL-00062" />
-      <option name="project" value="LOCAL" />
-      <updated>1765568869030</updated>
     </task>
     <task id="LOCAL-00063" summary=" amelioration inventaire">
       <option name="closed" value="true" />
@@ -603,7 +594,15 @@
       <option name="project" value="LOCAL" />
       <updated>1768038500480</updated>
     </task>
-    <option name="localTasksCounter" value="111" />
+    <task id="LOCAL-00111" summary="Merge branch 'main' of https://github.com/Trilian/assistant_matanne&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;REFACTORING_FINAL.md&#10;#&#9;src/core/__init__.py&#10;#&#9;src/core/models.py&#10;#&#9;src/modules/cuisine.py&#10;#&#9;src/services/courses.py&#10;#&#9;src/services/inventaire.py&#10;#&#9;src/services/planning.py&#10;#&#9;src/services/recettes.py">
+      <option name="closed" value="true" />
+      <created>1768077864764</created>
+      <option name="number" value="00111" />
+      <option name="presentableId" value="LOCAL-00111" />
+      <option name="project" value="LOCAL" />
+      <updated>1768077864764</updated>
+    </task>
+    <option name="localTasksCounter" value="112" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
