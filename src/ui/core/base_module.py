@@ -1,12 +1,16 @@
 """
 Base Module UI - Module CRUD universel générique
 100% réutilisable, agnostique du domaine métier
+
+✅ Import depuis types.py pour éviter cycle avec services/__init__.py
 """
 import streamlit as st
 from typing import Dict, List, Optional, Callable, Any
 from dataclasses import dataclass, field
 
-from src.services.base_service import BaseService
+# ✅ Import depuis types.py au lieu de base_service.py
+from src.services.types import BaseService
+
 from src.ui.components import (
     empty_state, search_bar, pagination, export_buttons
 )
@@ -269,7 +273,7 @@ class BaseModuleUI:
                     use_container_width=True,
                     key=f"{self.session_key}_cache"
             ):
-                Cache.invalidate(self.config.name)
+                Cache.invalider(self.config.name)
                 show_success("Cache vidé")
 
     # ═══════════════════════════════════════════════════════
@@ -334,7 +338,7 @@ class BaseModuleUI:
 
         # Titre
         title = item_dict.get(
-            self.config.display_fields[0]["key"],
+            self.config.display_fields[0]["key"] if self.config.display_fields else "nom",
             "Sans titre"
         )
 
@@ -393,7 +397,7 @@ class BaseModuleUI:
 
             with col1:
                 title = item_dict.get(
-                    self.config.display_fields[0]["key"],
+                    self.config.display_fields[0]["key"] if self.config.display_fields else "nom",
                     "Sans titre"
                 )
                 st.markdown(f"### {title}")

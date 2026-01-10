@@ -4,8 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment="Merge branch 'main' of https://github.com/Trilian/assistant_matanne&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;REFACTORING_FINAL.md&#10;#&#9;src/core/__init__.py&#10;#&#9;src/core/models.py&#10;#&#9;src/modules/cuisine.py&#10;#&#9;src/services/courses.py&#10;#&#9;src/services/inventaire.py&#10;#&#9;src/services/planning.py&#10;#&#9;src/services/recettes.py">
-      <change beforePath="$PROJECT_DIR$/src/services/recettes.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/recettes.py" afterDir="false" />
+    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment="Dev">
+      <change afterPath="$PROJECT_DIR$/src/services/types.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -209,14 +209,6 @@
       <workItem from="1764923035460" duration="23405000" />
       <workItem from="1765096794626" duration="16000" />
       <workItem from="1767876030760" duration="1532000" />
-    </task>
-    <task id="LOCAL-00063" summary=" amelioration inventaire">
-      <option name="closed" value="true" />
-      <created>1765701991834</created>
-      <option name="number" value="00063" />
-      <option name="presentableId" value="LOCAL-00063" />
-      <option name="project" value="LOCAL" />
-      <updated>1765701991834</updated>
     </task>
     <task id="LOCAL-00064" summary=" amelioration inventaire">
       <option name="closed" value="true" />
@@ -602,7 +594,15 @@
       <option name="project" value="LOCAL" />
       <updated>1768077864764</updated>
     </task>
-    <option name="localTasksCounter" value="112" />
+    <task id="LOCAL-00112" summary="Dev">
+      <option name="closed" value="true" />
+      <created>1768078275195</created>
+      <option name="number" value="00112" />
+      <option name="presentableId" value="LOCAL-00112" />
+      <option name="project" value="LOCAL" />
+      <updated>1768078275195</updated>
+    </task>
+    <option name="localTasksCounter" value="113" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -633,7 +633,8 @@
     <MESSAGE value=" amelioration inventaire" />
     <MESSAGE value=" amelioration app duplication etc.." />
     <MESSAGE value="Merge branch 'main' of https://github.com/Trilian/assistant_matanne&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;REFACTORING_FINAL.md&#10;#&#9;src/core/__init__.py&#10;#&#9;src/core/models.py&#10;#&#9;src/modules/cuisine.py&#10;#&#9;src/services/courses.py&#10;#&#9;src/services/inventaire.py&#10;#&#9;src/services/planning.py&#10;#&#9;src/services/recettes.py" />
-    <option name="LAST_COMMIT_MESSAGE" value="Merge branch 'main' of https://github.com/Trilian/assistant_matanne&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;REFACTORING_FINAL.md&#10;#&#9;src/core/__init__.py&#10;#&#9;src/core/models.py&#10;#&#9;src/modules/cuisine.py&#10;#&#9;src/services/courses.py&#10;#&#9;src/services/inventaire.py&#10;#&#9;src/services/planning.py&#10;#&#9;src/services/recettes.py" />
+    <MESSAGE value="Dev" />
+    <option name="LAST_COMMIT_MESSAGE" value="Dev" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
