@@ -8,9 +8,9 @@ from sqlalchemy import func, or_, desc
 from datetime import datetime, timedelta
 import logging
 
-from src.core.database import get_db_context
+from src.core.database import obtenir_contexte_db
 from src.core.cache import Cache
-from src.core.errors import handle_errors, NotFoundError, DatabaseError
+from src.core.errors import gerer_erreurs, ErreurNonTrouve, ErreurBaseDeDonnees
 
 logger = logging.getLogger(__name__)
 T = TypeVar('T')
@@ -37,7 +37,7 @@ class BaseService(Generic[T]):
     # CRUD DE BASE
     # ════════════════════════════════════════════════════════════
 
-    @handle_errors(show_in_ui=True)
+    @gerer_erreurs(afficher_dans_ui=True)
     def create(self, data: Dict, db: Session = None) -> T:
         """Crée une entité"""
         def _execute(session: Session) -> T:
@@ -46,26 +46,26 @@ class BaseService(Generic[T]):
             session.commit()
             session.refresh(entity)
             logger.info(f"{self.model_name} créé: {entity.id}")
-            self._invalidate_cache()
+            self._invalider_cache()
             return entity
         return self._with_session(_execute, db)
 
-    @handle_errors(show_in_ui=False, fallback_value=None)
+    @gerer_erreurs(afficher_dans_ui=False, valeur_fallback=None)
     def get_by_id(self, entity_id: int, db: Session = None) -> Optional[T]:
         """Récupère par ID avec cache"""
         cache_key = f"{self.model_name.lower()}_{entity_id}"
-        cached = Cache.get(cache_key, ttl=self.cache_ttl)
+        cached = Cache.obtenir(cache_key, ttl=self.cache_ttl)
         if cached:
             return cached
 
         def _execute(session: Session) -> Optional[T]:
             entity = session.query(self.model).get(entity_id)
             if entity:
-                Cache.set(cache_key, entity, ttl=self.cache_ttl)
+                Cache.definir(cache_key, entity, ttl=self.cache_ttl)
             return entity
         return self._with_session(_execute, db)
 
-    @handle_errors(show_in_ui=False, fallback_value=[])
+    @gerer_erreurs(afficher_dans_ui=False, valeur_fallback=[])
     def get_all(self, skip: int = 0, limit: int = 100, filters: Optional[Dict] = None,
                 order_by: str = "id", desc_order: bool = False, db: Session = None) -> List[T]:
         """Liste avec filtres et tri"""
@@ -79,24 +79,24 @@ class BaseService(Generic[T]):
             return query.offset(skip).limit(limit).all()
         return self._with_session(_execute, db)
 
-    @handle_errors(show_in_ui=True, fallback_value=None)
+    @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=None)
     def update(self, entity_id: int, data: Dict, db: Session = None) -> Optional[T]:
         """Met à jour une entité"""
         def _execute(session: Session) -> Optional[T]:
             entity = session.query(self.model).get(entity_id)
             if not entity:
-                raise NotFoundError(f"{self.model_name} {entity_id} non trouvé")
+                raise ErreurNonTrouve(f"{self.model_name} {entity_id} non trouvé")
             for key, value in data.items():
                 if hasattr(entity, key):
                     setattr(entity, key, value)
             session.commit()
             session.refresh(entity)
             logger.info(f"{self.model_name} {entity_id} mis à jour")
-            self._invalidate_cache()
+            self._invalider_cache()
             return entity
         return self._with_session(_execute, db)
 
-    @handle_errors(show_in_ui=True, fallback_value=False)
+    @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=False)
     def delete(self, entity_id: int, db: Session = None) -> bool:
         """Supprime une entité"""
         def _execute(session: Session) -> bool:
@@ -104,12 +104,12 @@ class BaseService(Generic[T]):
             session.commit()
             if count > 0:
                 logger.info(f"{self.model_name} {entity_id} supprimé")
-                self._invalidate_cache()
+                self._invalider_cache()
                 return True
             return False
         return self._with_session(_execute, db)
 
-    @handle_errors(show_in_ui=False, fallback_value=0)
+    @gerer_erreurs(afficher_dans_ui=False, valeur_fallback=0)
     def count(self, filters: Optional[Dict] = None, db: Session = None) -> int:
         """Compte les entités"""
         def _execute(session: Session) -> int:
@@ -123,7 +123,7 @@ class BaseService(Generic[T]):
     # RECHERCHE AVANCÉE
     # ════════════════════════════════════════════════════════════
 
-    @handle_errors(show_in_ui=False, fallback_value=[])
+    @gerer_erreurs(afficher_dans_ui=False, valeur_fallback=[])
     def advanced_search(self, search_term: Optional[str] = None,
                         search_fields: Optional[List[str]] = None,
                         filters: Optional[Dict] = None,
@@ -160,7 +160,7 @@ class BaseService(Generic[T]):
     # BULK OPERATIONS
     # ════════════════════════════════════════════════════════════
 
-    @handle_errors(show_in_ui=True)
+    @gerer_erreurs(afficher_dans_ui=True)
     def bulk_create_with_merge(self, items_data: List[Dict], merge_key: str,
                                merge_strategy: Callable[[Dict, Dict], Dict],
                                db: Session = None) -> Tuple[int, int]:
@@ -190,7 +190,7 @@ class BaseService(Generic[T]):
 
             session.commit()
             logger.info(f"Bulk: {created} créés, {merged} fusionnés")
-            self._invalidate_cache()
+            self._invalider_cache()
             return created, merged
         return self._with_session(_execute, db)
 
@@ -198,7 +198,7 @@ class BaseService(Generic[T]):
     # STATISTIQUES
     # ════════════════════════════════════════════════════════════
 
-    @handle_errors(show_in_ui=False, fallback_value={})
+    @gerer_erreurs(afficher_dans_ui=False, valeur_fallback={})
     def get_stats(self, group_by_fields: Optional[List[str]] = None,
                   count_filters: Optional[Dict[str, Dict]] = None,
                   additional_filters: Optional[Dict] = None,
@@ -254,7 +254,7 @@ class BaseService(Generic[T]):
         """Exécute fonction avec session"""
         if db:
             return func(db)
-        with get_db_context() as session:
+        with obtenir_contexte_db() as session:
             return func(session)
 
     def _apply_filters(self, query, filters: Dict):
@@ -287,6 +287,6 @@ class BaseService(Generic[T]):
             result[column.name] = value
         return result
 
-    def _invalidate_cache(self):
+    def _invalider_cache(self):
         """Invalide le cache"""
-        Cache.invalidate(self.model_name.lower())
+        Cache.invalider(pattern=self.model_name.lower())

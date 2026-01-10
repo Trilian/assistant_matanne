@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment="Merge branch 'main' of https://github.com/Trilian/assistant_matanne&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;REFACTORING_FINAL.md&#10;#&#9;src/core/__init__.py&#10;#&#9;src/core/models.py&#10;#&#9;src/modules/cuisine.py&#10;#&#9;src/services/courses.py&#10;#&#9;src/services/inventaire.py&#10;#&#9;src/services/planning.py&#10;#&#9;src/services/recettes.py">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/logging.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/logging.py" afterDir="false" />
-    </list>
+    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment="Merge branch 'main' of https://github.com/Trilian/assistant_matanne&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;REFACTORING_FINAL.md&#10;#&#9;src/core/__init__.py&#10;#&#9;src/core/models.py&#10;#&#9;src/modules/cuisine.py&#10;#&#9;src/services/courses.py&#10;#&#9;src/services/inventaire.py&#10;#&#9;src/services/planning.py&#10;#&#9;src/services/recettes.py" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -210,14 +207,6 @@
       <workItem from="1764923035460" duration="23405000" />
       <workItem from="1765096794626" duration="16000" />
       <workItem from="1767876030760" duration="1532000" />
-    </task>
-    <task id="LOCAL-00060" summary=" amelioration inventaire">
-      <option name="closed" value="true" />
-      <created>1765552774962</created>
-      <option name="number" value="00060" />
-      <option name="presentableId" value="LOCAL-00060" />
-      <option name="project" value="LOCAL" />
-      <updated>1765552774962</updated>
     </task>
     <task id="LOCAL-00061" summary=" amelioration inventaire">
       <option name="closed" value="true" />
@@ -603,7 +592,15 @@
       <option name="project" value="LOCAL" />
       <updated>1768033963796</updated>
     </task>
-    <option name="localTasksCounter" value="109" />
+    <task id="LOCAL-00109" summary="Merge branch 'main' of https://github.com/Trilian/assistant_matanne&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;REFACTORING_FINAL.md&#10;#&#9;src/core/__init__.py&#10;#&#9;src/core/models.py&#10;#&#9;src/modules/cuisine.py&#10;#&#9;src/services/courses.py&#10;#&#9;src/services/inventaire.py&#10;#&#9;src/services/planning.py&#10;#&#9;src/services/recettes.py">
+      <option name="closed" value="true" />
+      <created>1768036857708</created>
+      <option name="number" value="00109" />
+      <option name="presentableId" value="LOCAL-00109" />
+      <option name="project" value="LOCAL" />
+      <updated>1768036857708</updated>
+    </task>
+    <option name="localTasksCounter" value="110" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -633,7 +630,8 @@
     <MESSAGE value="Planning semaine amelioration" />
     <MESSAGE value=" amelioration inventaire" />
     <MESSAGE value=" amelioration app duplication etc.." />
-    <option name="LAST_COMMIT_MESSAGE" value=" amelioration app duplication etc.." />
+    <MESSAGE value="Merge branch 'main' of https://github.com/Trilian/assistant_matanne&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;REFACTORING_FINAL.md&#10;#&#9;src/core/__init__.py&#10;#&#9;src/core/models.py&#10;#&#9;src/modules/cuisine.py&#10;#&#9;src/services/courses.py&#10;#&#9;src/services/inventaire.py&#10;#&#9;src/services/planning.py&#10;#&#9;src/services/recettes.py" />
+    <option name="LAST_COMMIT_MESSAGE" value="Merge branch 'main' of https://github.com/Trilian/assistant_matanne&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;REFACTORING_FINAL.md&#10;#&#9;src/core/__init__.py&#10;#&#9;src/core/models.py&#10;#&#9;src/modules/cuisine.py&#10;#&#9;src/services/courses.py&#10;#&#9;src/services/inventaire.py&#10;#&#9;src/services/planning.py&#10;#&#9;src/services/recettes.py" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

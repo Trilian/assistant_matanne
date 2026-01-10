@@ -536,3 +536,16 @@ def verifier_sante() -> dict:
             "erreur": str(e),
             "timestamp": time.time()
         }
+
+
+# ═══════════════════════════════════════════════════════════
+# ALIAS ANGLAIS (compatibilité)
+# ═══════════════════════════════════════════════════════════
+
+get_engine = obtenir_moteur
+get_db_context = obtenir_contexte_db
+get_safe_db = obtenir_db_securise
+check_connection = verifier_connexion
+get_db_info = obtenir_infos_db
+init_database = initialiser_database
+MigrationManager = GestionnaireMigrations
