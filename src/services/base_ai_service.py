@@ -7,9 +7,9 @@ from typing import Optional, Dict, List, Any, Type
 from datetime import datetime
 from pydantic import BaseModel, ValidationError
 
-from src.core.ai import AIClient, AIParser
-from src.core.ai.semantic_cache import SemanticCache
-from src.core.errors import AIServiceError, handle_errors
+from src.core.ai import ClientIA, AnalyseurIA
+from src.core.ai.cache import CacheIA
+from src.core.errors import ErreurServiceIA, gerer_erreurs
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ class BaseAIService:
 
     def __init__(
             self,
-            client: AIClient,
+            client: ClientIA,
             cache_prefix: str = "ai",
             default_ttl: int = 3600,
             default_temperature: float = 0.7
@@ -42,7 +42,7 @@ class BaseAIService:
         Initialise le service IA
 
         Args:
-            client: Client IA (AIClient)
+            client: Client IA (ClientIA)
             cache_prefix: Préfixe pour clés cache
             default_ttl: TTL cache par défaut (secondes)
             default_temperature: Température par défaut
@@ -56,7 +56,7 @@ class BaseAIService:
     # APPELS IA AVEC CACHE
     # ═══════════════════════════════════════════════════════════
 
-    @handle_errors(show_in_ui=True, fallback_value=None)
+    @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=None)
     async def call_with_cache(
             self,
             prompt: str,
@@ -85,11 +85,10 @@ class BaseAIService:
 
         # Vérifier cache sémantique
         if use_cache:
-            cached = SemanticCache.get(
+            cached = CacheIA.obtenir(
                 prompt=prompt,
-                system=system_prompt,
+                systeme=system_prompt,
                 temperature=temp,
-                category=cache_category
             )
 
             if cached:
@@ -97,22 +96,21 @@ class BaseAIService:
                 return cached
 
         # Appel IA
-        response = await self.client.call(
+        response = await self.client.appeler(
             prompt=prompt,
-            system_prompt=system_prompt,
+            prompt_systeme=system_prompt,
             temperature=temp,
             max_tokens=max_tokens,
-            use_cache=False  # On gère le cache nous-mêmes
+            utiliser_cache=False  # On gère le cache nous-mêmes
         )
 
         # Sauvegarder dans cache
         if use_cache and response:
-            SemanticCache.set(
+            CacheIA.definir(
                 prompt=prompt,
-                response=response,
-                system=system_prompt,
+                reponse=response,
+                systeme=system_prompt,
                 temperature=temp,
-                category=cache_category
             )
 
         return response
@@ -121,7 +119,7 @@ class BaseAIService:
     # PARSING AVEC VALIDATION
     # ═══════════════════════════════════════════════════════════
 
-    @handle_errors(show_in_ui=True, fallback_value=None)
+    @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=None)
     async def call_with_parsing(
             self,
             prompt: str,
@@ -159,12 +157,12 @@ class BaseAIService:
         if not response:
             return None
 
-        # Parser avec AIParser
+        # Parser avec AnalyseurIA
         try:
-            parsed = AIParser.parse(
-                response=response,
-                model=response_model,
-                fallback=fallback,
+            parsed = AnalyseurIA.analyser(
+                reponse=response,
+                modele=response_model,
+                valeur_secours=fallback,
                 strict=False
             )
 
@@ -180,7 +178,7 @@ class BaseAIService:
 
             return None
 
-    @handle_errors(show_in_ui=True, fallback_value=[])
+    @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=[])
     async def call_with_list_parsing(
             self,
             prompt: str,
@@ -222,13 +220,13 @@ class BaseAIService:
 
         # Parser liste
         try:
-            from src.core.ai.parser import parse_list_response
+            from src.core.ai.parser import analyser_liste_reponse
 
-            items = parse_list_response(
-                response=response,
-                item_model=item_model,
-                list_key=list_key,
-                fallback_items=[]
+            items = analyser_liste_reponse(
+                reponse=response,
+                modele_item=item_model,
+                cle_liste=list_key,
+                items_secours=[]
             )
 
             # Limiter nombre d'items
@@ -321,11 +319,11 @@ class BaseAIService:
 
     def get_cache_stats(self) -> Dict:
         """Retourne statistiques cache"""
-        return SemanticCache.get_stats()
+        return CacheIA.obtenir_statistiques()
 
     def clear_cache(self):
         """Vide le cache"""
-        SemanticCache.clear()
+        CacheIA.invalider_tout()
         logger.info(f"🗑️ Cache {self.cache_prefix} vidé")
 
 
@@ -503,9 +501,9 @@ def create_base_ai_service(
     Returns:
         Instance BaseAIService
     """
-    from src.core.ai import get_ai_client
+    from src.core.ai import obtenir_client_ia
 
-    client = get_ai_client()
+    client = obtenir_client_ia()
 
     return BaseAIService(
         client=client,
