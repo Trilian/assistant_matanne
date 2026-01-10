@@ -23,9 +23,14 @@ logger = get_logger(__name__)
 # IMPORTS OPTIMISÉS (MINIMAL au démarrage)
 # ═══════════════════════════════════════════════════════════
 
-from src.core import get_settings, check_connection, get_db_info
-from src.core.state import StateManager, get_state
-from src.core.cache import Cache
+from src.core import (
+    get_settings,
+    check_connection,
+    get_db_info,
+    StateManager,
+    get_state,
+    Cache
+)
 from src.ui import badge
 
 # ✅ LAZY LOADING (au lieu de AppRouter classique)
@@ -153,8 +158,8 @@ def render_header():
             badge("🤖 IA Indispo", "#FFC107")
 
     with col3:
-        if state.unread_notifications > 0:
-            if st.button(f"🔔 {state.unread_notifications}"):
+        if state.notifications_non_lues > 0:
+            if st.button(f"🔔 {state.notifications_non_lues}"):
                 st.session_state.show_notifications = True
 
 
@@ -211,13 +216,13 @@ def render_sidebar():
             if isinstance(value, dict):
                 # Module avec sous-menus
                 is_expanded = any(
-                    state.current_module.startswith(sub)
+                    state.module_actuel.startswith(sub)
                     for sub in value.values()
                 )
 
                 with st.expander(label, expanded=is_expanded):
                     for sub_label, sub_value in value.items():
-                        is_active = state.current_module == sub_value
+                        is_active = state.module_actuel == sub_value
 
                         if st.button(
                                 sub_label,
@@ -230,7 +235,7 @@ def render_sidebar():
                             st.rerun()
             else:
                 # Module simple
-                is_active = state.current_module == value
+                is_active = state.module_actuel == value
 
                 if st.button(
                         label,
@@ -250,9 +255,9 @@ def render_sidebar():
         st.markdown("---")
 
         # Debug
-        state.debug_mode = st.checkbox("🐛 Debug", value=state.debug_mode)
+        state.mode_debug = st.checkbox("🐛 Debug", value=state.mode_debug)
 
-        if state.debug_mode:
+        if state.mode_debug:
             with st.expander("État App"):
                 st.json(StateManager.get_state_summary())
 
@@ -313,7 +318,7 @@ def main():
 
         # ✅ LAZY LOADER : Charger module actuel à la demande
         state = get_state()
-        OptimizedRouter.load_module(state.current_module)
+        OptimizedRouter.load_module(state.module_actuel)
 
         # Footer
         render_footer()
@@ -322,7 +327,7 @@ def main():
         logger.exception("❌ Erreur critique dans main()")
         st.error(f"❌ Erreur critique: {str(e)}")
 
-        if get_state().debug_mode:
+        if get_state().mode_debug:
             st.exception(e)
 
         if st.button("🔄 Redémarrer"):

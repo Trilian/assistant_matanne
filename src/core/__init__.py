@@ -1,9 +1,17 @@
 """
-Module Core - Exports centralisés.
+Core - Module central de l'application.
 
-Ce module exporte toutes les fonctions principales du core
-avec des alias pour la compatibilité avec le code existant.
+Expose les composants essentiels pour l'ensemble de l'application.
 """
+
+# ═══════════════════════════════════════════════════════════
+# CONFIGURATION
+# ═══════════════════════════════════════════════════════════
+
+from .config import Parametres, obtenir_parametres
+
+# Alias anglais
+get_settings = obtenir_parametres
 
 # ═══════════════════════════════════════════════════════════
 # LOGGING
@@ -11,22 +19,10 @@ avec des alias pour la compatibilité avec le code existant.
 
 from .logging import (
     GestionnaireLog,
-    obtenir_logger,
     LogManager,
-    get_logger,
+    obtenir_logger,
+    get_logger
 )
-
-# ═══════════════════════════════════════════════════════════
-# CONFIGURATION
-# ═══════════════════════════════════════════════════════════
-
-from .config import (
-    Parametres,
-    obtenir_parametres,
-)
-
-# Alias pour compatibilité
-get_settings = obtenir_parametres
 
 # ═══════════════════════════════════════════════════════════
 # DATABASE
@@ -35,88 +31,174 @@ get_settings = obtenir_parametres
 from .database import (
     obtenir_moteur,
     obtenir_contexte_db,
-    obtenir_session,
+    obtenir_db_securise,
     verifier_connexion,
     obtenir_infos_db,
     initialiser_database,
+    GestionnaireMigrations
 )
 
-# Alias pour compatibilité
+# Alias anglais
 get_engine = obtenir_moteur
 get_db_context = obtenir_contexte_db
-get_session = obtenir_session
+get_safe_db = obtenir_db_securise
 check_connection = verifier_connexion
 get_db_info = obtenir_infos_db
+init_database = initialiser_database
+MigrationManager = GestionnaireMigrations
 
 # ═══════════════════════════════════════════════════════════
-# MODELS
+# STATE
 # ═══════════════════════════════════════════════════════════
 
-from .models import Base, metadata
+from .state import (
+    EtatApp,
+    GestionnaireEtat,
+    obtenir_etat,
+    naviguer,
+    revenir
+)
+
+# Alias anglais
+AppState = EtatApp
+StateManager = GestionnaireEtat
+get_state = obtenir_etat
+navigate = naviguer
+go_back = revenir
+
+# ═══════════════════════════════════════════════════════════
+# CACHE
+# ═══════════════════════════════════════════════════════════
+
+from .cache import (
+    Cache,
+    cached,
+    LimiteDebit,
+    RateLimit
+)
 
 # ═══════════════════════════════════════════════════════════
 # ERRORS
 # ═══════════════════════════════════════════════════════════
 
 from .errors import (
-    ErreurBase,
-    ErreurBaseDeDonnees,
+    ExceptionApp,
     ErreurValidation,
-    ErreurIA,
-    ErreurConfiguration,
+    ErreurNonTrouve,
+    ErreurBaseDeDonnees,
+    ErreurServiceIA,
+    ErreurLimiteDebit,
+    gerer_erreurs,
+    handle_errors
 )
 
 # ═══════════════════════════════════════════════════════════
-# CACHE
+# VALIDATION
 # ═══════════════════════════════════════════════════════════
 
-from .cache import Cache
+from .validation import (
+    NettoyeurEntrees,
+    InputSanitizer,
+    valider_modele,
+    validate_model
+)
 
 # ═══════════════════════════════════════════════════════════
-# STATE
+# AI
 # ═══════════════════════════════════════════════════════════
 
-from .state import StateManager, get_state
+from .ai import (
+    ClientIA,
+    obtenir_client_ia,
+    AnalyseurIA,
+    CacheIA
+)
+
+# Alias anglais
+AIClient = ClientIA
+get_ai_client = obtenir_client_ia
+AIParser = AnalyseurIA
+AICache = CacheIA
+
+# ═══════════════════════════════════════════════════════════
+# CONSTANTS
+# ═══════════════════════════════════════════════════════════
+
+from .constants import *
 
 # ═══════════════════════════════════════════════════════════
 # EXPORTS
 # ═══════════════════════════════════════════════════════════
 
 __all__ = [
-    # Logging
-    "GestionnaireLog",
-    "obtenir_logger",
-    "LogManager",
-    "get_logger",
     # Config
     "Parametres",
     "obtenir_parametres",
     "get_settings",
+
+    # Logging
+    "GestionnaireLog",
+    "LogManager",
+    "obtenir_logger",
+    "get_logger",
+
     # Database
     "obtenir_moteur",
     "obtenir_contexte_db",
-    "obtenir_session",
+    "obtenir_db_securise",
     "verifier_connexion",
     "obtenir_infos_db",
     "initialiser_database",
+    "GestionnaireMigrations",
     "get_engine",
     "get_db_context",
-    "get_session",
+    "get_safe_db",
     "check_connection",
     "get_db_info",
-    # Models
-    "Base",
-    "metadata",
-    # Errors
-    "ErreurBase",
-    "ErreurBaseDeDonnees",
-    "ErreurValidation",
-    "ErreurIA",
-    "ErreurConfiguration",
-    # Cache
-    "Cache",
+    "init_database",
+    "MigrationManager",
+
     # State
+    "EtatApp",
+    "GestionnaireEtat",
+    "obtenir_etat",
+    "naviguer",
+    "revenir",
+    "AppState",
     "StateManager",
     "get_state",
-]
+    "navigate",
+    "go_back",
 
+    # Cache
+    "Cache",
+    "cached",
+    "LimiteDebit",
+    "RateLimit",
+
+    # Errors
+    "ExceptionApp",
+    "ErreurValidation",
+    "ErreurNonTrouve",
+    "ErreurBaseDeDonnees",
+    "ErreurServiceIA",
+    "ErreurLimiteDebit",
+    "gerer_erreurs",
+    "handle_errors",
+
+    # Validation
+    "NettoyeurEntrees",
+    "InputSanitizer",
+    "valider_modele",
+    "validate_model",
+
+    # AI
+    "ClientIA",
+    "obtenir_client_ia",
+    "AnalyseurIA",
+    "CacheIA",
+    "AIClient",
+    "get_ai_client",
+    "AIParser",
+    "AICache",
+]

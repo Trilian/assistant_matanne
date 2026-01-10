@@ -1,6 +1,6 @@
 """
 State Unifié - Gestionnaire État Complet
-Tout harmonisé en français
+Tout harmonisé en français avec alias anglais
 """
 import streamlit as st
 from dataclasses import dataclass, field
@@ -232,6 +232,20 @@ class GestionnaireEtat:
             logger.debug(f"👁️ Visualisation planning {id_planning}")
 
     @staticmethod
+    def definir_contexte(id_item: int, type_item: str):
+        """
+        Définit le contexte actuel (recette, planning, etc.)
+
+        Args:
+            id_item: ID de l'item
+            type_item: Type ('recette', 'planning', 'article')
+        """
+        if type_item == 'recette':
+            GestionnaireEtat.definir_recette_visualisation(id_item)
+        elif type_item == 'planning':
+            GestionnaireEtat.definir_planning_visualisation(id_item)
+
+    @staticmethod
     def incrementer_notifications():
         """Incrémente compteur notifications"""
         etat = GestionnaireEtat.obtenir()
@@ -295,6 +309,23 @@ class GestionnaireEtat:
 
 
 # ═══════════════════════════════════════════════════════════
+# ALIAS ANGLAIS
+# ═══════════════════════════════════════════════════════════
+
+AppState = EtatApp
+StateManager = GestionnaireEtat
+
+# Méthodes principales avec alias
+StateManager.init = GestionnaireEtat.initialiser
+StateManager.get = GestionnaireEtat.obtenir
+StateManager.navigate_to = GestionnaireEtat.naviguer_vers
+StateManager.go_back = GestionnaireEtat.revenir
+StateManager.get_navigation_breadcrumb = GestionnaireEtat.obtenir_fil_ariane_navigation
+StateManager.reset = GestionnaireEtat.reinitialiser
+StateManager.get_state_summary = GestionnaireEtat.obtenir_resume_etat
+
+
+# ═══════════════════════════════════════════════════════════
 # HELPERS RACCOURCIS
 # ═══════════════════════════════════════════════════════════
 
@@ -302,30 +333,49 @@ def obtenir_etat() -> EtatApp:
     """Raccourci pour récupérer le state"""
     return GestionnaireEtat.obtenir()
 
+def get_state() -> EtatApp:
+    """Alias anglais pour obtenir_etat"""
+    return GestionnaireEtat.obtenir()
 
 def naviguer(module: str):
     """Raccourci pour naviguer"""
     GestionnaireEtat.naviguer_vers(module)
     st.rerun()
 
+def navigate(module: str):
+    """Alias anglais pour naviguer"""
+    naviguer(module)
 
 def revenir():
     """Raccourci pour revenir en arrière"""
     GestionnaireEtat.revenir()
     st.rerun()
 
+def go_back():
+    """Alias anglais pour revenir"""
+    revenir()
 
 def obtenir_fil_ariane() -> List[str]:
     """Raccourci pour fil d'Ariane"""
     return GestionnaireEtat.obtenir_fil_ariane_navigation()
 
+def get_breadcrumb() -> List[str]:
+    """Alias anglais pour obtenir_fil_ariane"""
+    return obtenir_fil_ariane()
 
 def est_mode_debug() -> bool:
     """Raccourci pour vérifier mode debug"""
     etat = obtenir_etat()
     return etat.mode_debug
 
+def is_debug_mode() -> bool:
+    """Alias anglais pour est_mode_debug"""
+    return est_mode_debug()
 
 def nettoyer_etats_ui():
     """Raccourci pour nettoyer états UI"""
     GestionnaireEtat.nettoyer_etats_ui()
+
+def clean_ui_states():
+    """Alias anglais pour nettoyer_etats_ui"""
+    nettoyer_etats_ui()

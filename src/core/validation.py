@@ -17,19 +17,37 @@ from datetime import date, datetime
 from pydantic import BaseModel, Field, field_validator, model_validator, ValidationError
 
 from .errors import ErreurValidation
-from .constants import (
-    MAX_LENGTH_SHORT,
-    MAX_LENGTH_MEDIUM,
-    MAX_LENGTH_LONG,
-    MAX_PORTIONS,
-    MAX_TEMPS_PREPARATION,
-    MAX_TEMPS_CUISSON,
-    MAX_QUANTITE,
-    MIN_INGREDIENTS,
-    MAX_INGREDIENTS,
-    MIN_ETAPES,
-    MAX_ETAPES
-)
+
+# Import des constantes avec gestion d'erreur
+try:
+    from .constants import (
+        MAX_LENGTH_SHORT,
+        MAX_LENGTH_MEDIUM,
+        MAX_LENGTH_LONG,
+        MAX_LENGTH_TEXT,
+        MAX_PORTIONS,
+        MAX_TEMPS_PREPARATION,
+        MAX_TEMPS_CUISSON,
+        MAX_QUANTITE,
+        MIN_INGREDIENTS,
+        MAX_INGREDIENTS,
+        MIN_ETAPES,
+        MAX_ETAPES
+    )
+except ImportError:
+    # Valeurs par défaut si constants.py n'est pas disponible
+    MAX_LENGTH_SHORT = 100
+    MAX_LENGTH_MEDIUM = 200
+    MAX_LENGTH_LONG = 1000
+    MAX_LENGTH_TEXT = 2000
+    MAX_PORTIONS = 20
+    MAX_TEMPS_PREPARATION = 300
+    MAX_TEMPS_CUISSON = 300
+    MAX_QUANTITE = 10000
+    MIN_INGREDIENTS = 1
+    MAX_INGREDIENTS = 50
+    MIN_ETAPES = 1
+    MAX_ETAPES = 50
 
 logger = logging.getLogger(__name__)
 

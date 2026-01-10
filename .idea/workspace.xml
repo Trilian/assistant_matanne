@@ -6,43 +6,15 @@
   <component name="ChangeListManager">
     <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment=" amelioration app duplication etc..">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MIGRATION_GUIDE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/alembic/versions/20251204_6880ae0ac56d_initial_schema.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/app.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/core/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/core/logging.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/logging.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/models/base.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/models/cuisine.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/components/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/components/inventory.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/components/planning.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/components/recipe.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/configs.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/core/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/core/base_module.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/core/mixins.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/courses.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/inventaire.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/planning.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/modules/cuisine/recettes.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/courses/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/courses/courses_ai_service.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/courses/courses_io_service.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/courses/courses_service.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/inventaire/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/inventaire/inventaire_ai_service.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/inventaire/inventaire_io_service.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/inventaire/inventaire_service.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/planning/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/planning/planning_generation_service.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/planning/planning_service.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/planning/repas_service.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/recettes/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/recettes/recette_ai_service.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/recettes/recette_io_service.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/recettes/recette_scraper_service.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/recettes/recette_service.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/recettes/recette_version_service.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/models/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/models/legacy.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/state.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/state.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/validation.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/validation.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -217,8 +189,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.28539.13" />
-        <option value="bundled-js-predefined-d6986cc7102b-a71380e98a7c-JavaScript-IU-252.28539.13" />
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.27397.103" />
       </set>
     </attachedChunks>
   </component>
@@ -246,22 +217,6 @@
       <workItem from="1764923035460" duration="23405000" />
       <workItem from="1765096794626" duration="16000" />
       <workItem from="1767876030760" duration="1532000" />
-    </task>
-    <task id="LOCAL-00056" summary=" amelioration inventaire">
-      <option name="closed" value="true" />
-      <created>1765550511789</created>
-      <option name="number" value="00056" />
-      <option name="presentableId" value="LOCAL-00056" />
-      <option name="project" value="LOCAL" />
-      <updated>1765550511789</updated>
-    </task>
-    <task id="LOCAL-00057" summary=" amelioration inventaire">
-      <option name="closed" value="true" />
-      <created>1765550882652</created>
-      <option name="number" value="00057" />
-      <option name="presentableId" value="LOCAL-00057" />
-      <option name="project" value="LOCAL" />
-      <updated>1765550882652</updated>
     </task>
     <task id="LOCAL-00058" summary=" amelioration inventaire">
       <option name="closed" value="true" />
@@ -639,7 +594,23 @@
       <option name="project" value="LOCAL" />
       <updated>1767728365494</updated>
     </task>
-    <option name="localTasksCounter" value="105" />
+    <task id="LOCAL-00105" summary=" amelioration app duplication etc..">
+      <option name="closed" value="true" />
+      <created>1767877894640</created>
+      <option name="number" value="00105" />
+      <option name="presentableId" value="LOCAL-00105" />
+      <option name="project" value="LOCAL" />
+      <updated>1767877894640</updated>
+    </task>
+    <task id="LOCAL-00106" summary=" amelioration app duplication etc..">
+      <option name="closed" value="true" />
+      <created>1767877931911</created>
+      <option name="number" value="00106" />
+      <option name="presentableId" value="LOCAL-00106" />
+      <option name="project" value="LOCAL" />
+      <updated>1767877931911</updated>
+    </task>
+    <option name="localTasksCounter" value="107" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

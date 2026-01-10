@@ -389,4 +389,3 @@ class Repas(Base):
 def obtenir_valeurs_enum(enum_class: type[enum.Enum]) -> list[str]:
     """Récupère toutes les valeurs d'un enum"""
     return [e.value for e in enum_class]
-

@@ -148,17 +148,25 @@ class GestionnaireLog:
         """Active le mode production (INFO uniquement)."""
         GestionnaireLog.definir_niveau("INFO")
 
-    @staticmethod
-    def init(log_level: str = "INFO"):
-        """
-        Alias pour initialiser (compatibilité).
 
-        Args:
-            log_level: Niveau de log
-        """
-        GestionnaireLog.initialiser(niveau_log=log_level)
+# ═══════════════════════════════════════════════════════════
+# ALIAS POUR COMPATIBILITÉ
+# ═══════════════════════════════════════════════════════════
 
+# Alias anglais de la classe
+LogManager = GestionnaireLog
 
+# Alias pour init
+def init(log_level: str = "INFO"):
+    """Alias anglais pour initialiser"""
+    return GestionnaireLog.initialiser(log_level)
+
+# Alias pour get_logger
+def get_logger(name: str) -> logging.Logger:
+    """Alias anglais pour obtenir_logger"""
+    return GestionnaireLog.obtenir_logger(name)
+
+# Fonction raccourci française
 def obtenir_logger(nom: str) -> logging.Logger:
     """
     Raccourci pour récupérer un logger.
@@ -174,15 +182,6 @@ def obtenir_logger(nom: str) -> logging.Logger:
         >>> logger = obtenir_logger(__name__)
     """
     return GestionnaireLog.obtenir_logger(nom)
-
-
-# ═══════════════════════════════════════════════════════════
-# ALIASES POUR COMPATIBILITÉ
-# ═══════════════════════════════════════════════════════════
-
-# Alias anglais pour le code existant
-LogManager = GestionnaireLog
-get_logger = obtenir_logger
 
 
 # Initialisation automatique au chargement du module
