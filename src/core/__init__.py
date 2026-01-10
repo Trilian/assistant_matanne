@@ -2,6 +2,7 @@
 Core - Module central de l'application.
 
 Expose les composants essentiels pour l'ensemble de l'application.
+Convention : Noms français en priorité, alias anglais disponibles.
 """
 
 # ═══════════════════════════════════════════════════════════
@@ -11,6 +12,7 @@ Expose les composants essentiels pour l'ensemble de l'application.
 from .config import Parametres, obtenir_parametres
 
 # Alias anglais
+Settings = Parametres
 get_settings = obtenir_parametres
 
 # ═══════════════════════════════════════════════════════════
@@ -19,10 +21,12 @@ get_settings = obtenir_parametres
 
 from .logging import (
     GestionnaireLog,
-    LogManager,
     obtenir_logger,
-    get_logger
 )
+
+# Alias anglais
+LogManager = GestionnaireLog
+get_logger = obtenir_logger
 
 # ═══════════════════════════════════════════════════════════
 # DATABASE
@@ -74,8 +78,10 @@ from .cache import (
     Cache,
     cached,
     LimiteDebit,
-    RateLimit
 )
+
+# Alias anglais
+RateLimit = LimiteDebit
 
 # ═══════════════════════════════════════════════════════════
 # ERRORS
@@ -89,8 +95,16 @@ from .errors import (
     ErreurServiceIA,
     ErreurLimiteDebit,
     gerer_erreurs,
-    handle_errors
 )
+
+# Alias anglais
+AppException = ExceptionApp
+ValidationError = ErreurValidation
+NotFoundError = ErreurNonTrouve
+DatabaseError = ErreurBaseDeDonnees
+AIServiceError = ErreurServiceIA
+RateLimitError = ErreurLimiteDebit
+handle_errors = gerer_erreurs
 
 # ═══════════════════════════════════════════════════════════
 # VALIDATION
@@ -98,10 +112,12 @@ from .errors import (
 
 from .validation import (
     NettoyeurEntrees,
-    InputSanitizer,
     valider_modele,
-    validate_model
 )
+
+# Alias anglais
+InputSanitizer = NettoyeurEntrees
+validate_model = valider_modele
 
 # ═══════════════════════════════════════════════════════════
 # AI
@@ -134,12 +150,13 @@ __all__ = [
     # Config
     "Parametres",
     "obtenir_parametres",
+    "Settings",
     "get_settings",
 
     # Logging
     "GestionnaireLog",
-    "LogManager",
     "obtenir_logger",
+    "LogManager",
     "get_logger",
 
     # Database
@@ -184,12 +201,18 @@ __all__ = [
     "ErreurServiceIA",
     "ErreurLimiteDebit",
     "gerer_erreurs",
+    "AppException",
+    "ValidationError",
+    "NotFoundError",
+    "DatabaseError",
+    "AIServiceError",
+    "RateLimitError",
     "handle_errors",
 
     # Validation
     "NettoyeurEntrees",
-    "InputSanitizer",
     "valider_modele",
+    "InputSanitizer",
     "validate_model",
 
     # AI

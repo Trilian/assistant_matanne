@@ -66,6 +66,9 @@ class LazyModuleLoader:
 
             return module
 
+        except ModuleNotFoundError as e:
+            logger.error(f"❌ Module introuvable: {module_path}")
+            raise
         except Exception as e:
             logger.error(f"❌ Erreur chargement {module_path}: {e}")
             raise
@@ -84,7 +87,10 @@ class LazyModuleLoader:
             pass
         else:
             for path in module_paths:
-                LazyModuleLoader.load(path)
+                try:
+                    LazyModuleLoader.load(path)
+                except:
+                    pass
 
     @staticmethod
     def get_stats() -> Dict:
@@ -185,6 +191,7 @@ class OptimizedRouter:
         """
         if module_name not in OptimizedRouter.MODULE_REGISTRY:
             st.error(f"❌ Module '{module_name}' introuvable")
+            logger.error(f"Module non enregistré: {module_name}")
             return
 
         module_path = OptimizedRouter.MODULE_REGISTRY[module_name]
@@ -198,12 +205,20 @@ class OptimizedRouter:
                 # Render
                 if hasattr(module, "app"):
                     module.app()
+                elif hasattr(module, "afficher"):
+                    module.afficher()
                 else:
-                    st.error(f"Module '{module_name}' sans fonction app()")
+                    st.error(f"❌ Module '{module_name}' sans fonction app() ou afficher()")
+                    logger.error(f"Module sans point d'entrée: {module_name}")
+
+            except ModuleNotFoundError:
+                st.warning(f"⚠️ Module '{module_name}' pas encore implémenté")
+                st.info("Ce module sera disponible prochainement.")
+                logger.warning(f"Module non implémenté: {module_path}")
 
             except Exception as e:
                 logger.exception(f"Erreur render {module_name}")
-                st.error(f"❌ Erreur: {str(e)}")
+                st.error(f"❌ Erreur lors du chargement du module")
 
                 if st.session_state.get("debug_mode", False):
                     st.exception(e)
@@ -212,8 +227,7 @@ class OptimizedRouter:
     def preload_common_modules():
         """Précharge modules fréquents en arrière-plan"""
         common = [
-            "src.modules.cuisine.recettes",
-            "src.modules.cuisine.planning_semaine"
+            "src.modules.accueil",
         ]
         LazyModuleLoader.preload(common, background=True)
 

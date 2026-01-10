@@ -4,14 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment=" amelioration app duplication etc..">
-      <change afterPath="$PROJECT_DIR$/REFACTORING_FINAL.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/poetry.lock" afterDir="false" />
+    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment="Merge branch 'main' of https://github.com/Trilian/assistant_matanne&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;REFACTORING_FINAL.md&#10;#&#9;src/core/__init__.py&#10;#&#9;src/core/models.py&#10;#&#9;src/modules/cuisine.py&#10;#&#9;src/services/courses.py&#10;#&#9;src/services/inventaire.py&#10;#&#9;src/services/planning.py&#10;#&#9;src/services/recettes.py">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/conftest.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_modules/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_modules/test_cuisine.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/logging.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/logging.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

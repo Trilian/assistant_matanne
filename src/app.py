@@ -14,21 +14,21 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.core.logging import LogManager, get_logger
+from src.core.logging import GestionnaireLog, obtenir_logger
 
-LogManager.init(log_level="INFO")
-logger = get_logger(__name__)
+GestionnaireLog.initialiser(niveau_log="INFO")
+logger = obtenir_logger(__name__)
 
 # ═══════════════════════════════════════════════════════════
 # IMPORTS OPTIMISÉS (MINIMAL au démarrage)
 # ═══════════════════════════════════════════════════════════
 
 from src.core import (
-    get_settings,
-    check_connection,
-    get_db_info,
-    StateManager,
-    get_state,
+    obtenir_parametres,
+    verifier_connexion,
+    obtenir_infos_db,
+    GestionnaireEtat,
+    obtenir_etat,
     Cache
 )
 from src.ui import badge
@@ -36,7 +36,7 @@ from src.ui import badge
 # ✅ LAZY LOADING (au lieu de AppRouter classique)
 from src.core.lazy_loader import OptimizedRouter, render_lazy_loading_stats
 
-settings = get_settings()
+parametres = obtenir_parametres()
 
 
 # ═══════════════════════════════════════════════════════════
@@ -44,14 +44,14 @@ settings = get_settings()
 # ═══════════════════════════════════════════════════════════
 
 st.set_page_config(
-    page_title=settings.APP_NAME,
+    page_title=parametres.APP_NAME,
     page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
         "Get Help": "https://github.com/ton-repo",
         "Report a bug": "https://github.com/ton-repo/issues",
-        "About": f"{settings.APP_NAME} v{settings.APP_VERSION}",
+        "About": f"{parametres.APP_NAME} v{parametres.APP_VERSION}",
     },
 )
 
@@ -96,16 +96,16 @@ footer {visibility: hidden;}
 # INITIALISATION
 # ═══════════════════════════════════════════════════════════
 
-def init_app() -> bool:
+def initialiser_app() -> bool:
     """Initialise l'application"""
     logger.info("🚀 Initialisation app (lazy)...")
 
     # State Manager
-    StateManager.init()
+    GestionnaireEtat.initialiser()
     logger.info("✅ StateManager OK")
 
     # Database
-    if not check_connection():
+    if not verifier_connexion():
         st.error("❌ Connexion DB impossible")
         st.stop()
         return False
@@ -113,11 +113,11 @@ def init_app() -> bool:
     logger.info("✅ Database OK")
 
     # Client IA (lazy - chargé si besoin)
-    state = get_state()
-    if not state.agent_ia:
+    etat = obtenir_etat()
+    if not etat.agent_ia:
         try:
-            from src.core.ai import get_ai_client
-            state.agent_ia = get_ai_client()
+            from src.core.ai import obtenir_client_ia
+            etat.agent_ia = obtenir_client_ia()
             logger.info("✅ Client IA OK")
         except Exception as e:
             logger.warning(f"⚠️ Client IA indispo: {e}")
@@ -127,7 +127,7 @@ def init_app() -> bool:
 
 
 # Initialiser
-if not init_app():
+if not initialiser_app():
     st.stop()
 
 
@@ -135,16 +135,16 @@ if not init_app():
 # HEADER
 # ═══════════════════════════════════════════════════════════
 
-def render_header():
+def afficher_header():
     """Header avec badges"""
-    state = get_state()
+    etat = obtenir_etat()
 
     col1, col2, col3 = st.columns([3, 1, 1])
 
     with col1:
         st.markdown(
             f"<div class='main-header'>"
-            f"<h1>🤖 {settings.APP_NAME}</h1>"
+            f"<h1>🤖 {parametres.APP_NAME}</h1>"
             f"<p style='color: var(--secondary); margin: 0;'>"
             f"Assistant familial intelligent"
             f"</p></div>",
@@ -152,14 +152,14 @@ def render_header():
         )
 
     with col2:
-        if state.agent_ia:
+        if etat.agent_ia:
             badge("🤖 IA Active", "#4CAF50")
         else:
             badge("🤖 IA Indispo", "#FFC107")
 
     with col3:
-        if state.notifications_non_lues > 0:
-            if st.button(f"🔔 {state.notifications_non_lues}"):
+        if etat.notifications_non_lues > 0:
+            if st.button(f"🔔 {etat.notifications_non_lues}"):
                 st.session_state.show_notifications = True
 
 
@@ -167,19 +167,19 @@ def render_header():
 # SIDEBAR
 # ═══════════════════════════════════════════════════════════
 
-def render_sidebar():
+def afficher_sidebar():
     """Sidebar avec navigation"""
-    state = get_state()
+    etat = obtenir_etat()
 
     with st.sidebar:
         st.title("Navigation")
 
         # Fil d'Ariane
-        breadcrumb = StateManager.get_navigation_breadcrumb()
-        if len(breadcrumb) > 1:
-            st.caption(" → ".join(breadcrumb[-3:]))
+        fil_ariane = GestionnaireEtat.obtenir_fil_ariane_navigation()
+        if len(fil_ariane) > 1:
+            st.caption(" → ".join(fil_ariane[-3:]))
             if st.button("⬅️ Retour"):
-                StateManager.go_back()
+                GestionnaireEtat.revenir()
                 st.rerun()
             st.markdown("---")
 
@@ -215,36 +215,36 @@ def render_sidebar():
         for label, value in MODULES_MENU.items():
             if isinstance(value, dict):
                 # Module avec sous-menus
-                is_expanded = any(
-                    state.module_actuel.startswith(sub)
+                est_actif = any(
+                    etat.module_actuel.startswith(sub)
                     for sub in value.values()
                 )
 
-                with st.expander(label, expanded=is_expanded):
+                with st.expander(label, expanded=est_actif):
                     for sub_label, sub_value in value.items():
-                        is_active = state.module_actuel == sub_value
+                        est_sous_menu_actif = etat.module_actuel == sub_value
 
                         if st.button(
                                 sub_label,
                                 key=f"btn_{sub_value}",
                                 use_container_width=True,
-                                type="primary" if is_active else "secondary",
-                                disabled=is_active
+                                type="primary" if est_sous_menu_actif else "secondary",
+                                disabled=est_sous_menu_actif
                         ):
-                            StateManager.navigate_to(sub_value)
+                            GestionnaireEtat.naviguer_vers(sub_value)
                             st.rerun()
             else:
                 # Module simple
-                is_active = state.module_actuel == value
+                est_actif = etat.module_actuel == value
 
                 if st.button(
                         label,
                         key=f"btn_{value}",
                         use_container_width=True,
-                        type="primary" if is_active else "secondary",
-                        disabled=is_active
+                        type="primary" if est_actif else "secondary",
+                        disabled=est_actif
                 ):
-                    StateManager.navigate_to(value)
+                    GestionnaireEtat.naviguer_vers(value)
                     st.rerun()
 
         st.markdown("---")
@@ -255,15 +255,15 @@ def render_sidebar():
         st.markdown("---")
 
         # Debug
-        state.mode_debug = st.checkbox("🐛 Debug", value=state.mode_debug)
+        etat.mode_debug = st.checkbox("🐛 Debug", value=etat.mode_debug)
 
-        if state.mode_debug:
+        if etat.mode_debug:
             with st.expander("État App"):
-                st.json(StateManager.get_state_summary())
+                st.json(GestionnaireEtat.obtenir_resume_etat())
 
                 if st.button("🔄 Reset"):
-                    StateManager.reset()
-                    Cache.clear_all()
+                    GestionnaireEtat.reinitialiser()
+                    Cache.vider()
                     # ✅ Vider cache lazy loader
                     from src.core.lazy_loader import LazyModuleLoader
                     LazyModuleLoader.clear_cache()
@@ -275,14 +275,14 @@ def render_sidebar():
 # FOOTER
 # ═══════════════════════════════════════════════════════════
 
-def render_footer():
+def afficher_footer():
     """Footer simplifié"""
     st.markdown("---")
 
     col1, col2, col3 = st.columns([2, 1, 1])
 
     with col1:
-        st.caption(f"💚 {settings.APP_NAME} v{settings.APP_VERSION} | Lazy Loading Active")
+        st.caption(f"💚 {parametres.APP_NAME} v{parametres.APP_VERSION} | Lazy Loading Active")
 
     with col2:
         if st.button("🐛 Bug"):
@@ -292,8 +292,8 @@ def render_footer():
         if st.button("ℹ️ À propos"):
             with st.expander("À propos", expanded=True):
                 st.markdown(f"""
-                ### {settings.APP_NAME}
-                **Version:** {settings.APP_VERSION}
+                ### {parametres.APP_NAME}
+                **Version:** {parametres.APP_VERSION}
                 
                 **Stack:**
                 - Frontend: Streamlit
@@ -311,28 +311,28 @@ def main():
     """Fonction principale"""
     try:
         # Header
-        render_header()
+        afficher_header()
 
         # Sidebar
-        render_sidebar()
+        afficher_sidebar()
 
         # ✅ LAZY LOADER : Charger module actuel à la demande
-        state = get_state()
-        OptimizedRouter.load_module(state.module_actuel)
+        etat = obtenir_etat()
+        OptimizedRouter.load_module(etat.module_actuel)
 
         # Footer
-        render_footer()
+        afficher_footer()
 
     except Exception as e:
         logger.exception("❌ Erreur critique dans main()")
         st.error(f"❌ Erreur critique: {str(e)}")
 
-        if get_state().mode_debug:
+        if obtenir_etat().mode_debug:
             st.exception(e)
 
         if st.button("🔄 Redémarrer"):
-            StateManager.reset()
-            Cache.clear_all()
+            GestionnaireEtat.reinitialiser()
+            Cache.vider()
             st.rerun()
 
 
@@ -341,5 +341,5 @@ def main():
 # ═══════════════════════════════════════════════════════════
 
 if __name__ == "__main__":
-    logger.info(f"🚀 Démarrage {settings.APP_NAME} v{settings.APP_VERSION} (LAZY MODE)")
+    logger.info(f"🚀 Démarrage {parametres.APP_NAME} v{parametres.APP_VERSION} (LAZY MODE)")
     main()

@@ -150,21 +150,24 @@ class GestionnaireLog:
 
 
 # ═══════════════════════════════════════════════════════════
-# ALIAS POUR COMPATIBILITÉ
+# ALIAS ANGLAIS (pour compatibilité)
 # ═══════════════════════════════════════════════════════════
 
-# Alias anglais de la classe
+# Alias de classe
 LogManager = GestionnaireLog
 
-# Alias pour init
+# Alias de méthodes au niveau module
 def init(log_level: str = "INFO"):
-    """Alias anglais pour initialiser"""
+    """Alias anglais pour initialiser()"""
     return GestionnaireLog.initialiser(log_level)
 
-# Alias pour get_logger
 def get_logger(name: str) -> logging.Logger:
-    """Alias anglais pour obtenir_logger"""
+    """Alias anglais pour obtenir_logger()"""
     return GestionnaireLog.obtenir_logger(name)
+
+# Ajouter les alias directement sur la classe
+LogManager.init = staticmethod(init)
+LogManager.get_logger = staticmethod(get_logger)
 
 # Fonction raccourci française
 def obtenir_logger(nom: str) -> logging.Logger:
