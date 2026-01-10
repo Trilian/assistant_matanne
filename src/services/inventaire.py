@@ -16,12 +16,12 @@ import csv
 import json
 from io import StringIO
 
-from src.core import (
-    BaseService,
-    get_db_context as obtenir_contexte_db,
-    handle_errors,
-    Cache,
-)
+# ✅ Import BaseService depuis types.py pour éviter le cycle
+from src.services.types import BaseService
+
+from src.core.database import obtenir_contexte_db
+from src.core.errors import gerer_erreurs
+from src.core.cache import Cache
 from src.core.models import ArticleInventaire, Ingredient
 from src.core.ai import get_ai_client
 
@@ -62,12 +62,12 @@ class InventaireService(BaseService[ArticleInventaire]):
     # SECTION 1 : CRUD AVEC STATUTS
     # ═══════════════════════════════════════════════════════════
 
-    @handle_errors(show_in_ui=False, fallback_value=[])
+    @gerer_erreurs(afficher_dans_ui=False, valeur_fallback=[])
     def get_inventaire_complet(
-        self,
-        emplacement: Optional[str] = None,
-        categorie: Optional[str] = None,
-        include_ok: bool = True
+            self,
+            emplacement: Optional[str] = None,
+            categorie: Optional[str] = None,
+            include_ok: bool = True
     ) -> List[Dict]:
         """
         Récupère l'inventaire complet avec statuts calculés.
@@ -128,7 +128,7 @@ class InventaireService(BaseService[ArticleInventaire]):
             Cache.definir(cache_key, result, ttl=self.cache_ttl, dependencies=["inventaire"])
             return result
 
-    @handle_errors(show_in_ui=False, fallback_value=[])
+    @gerer_erreurs(afficher_dans_ui=False, valeur_fallback=[])
     def get_alertes(self) -> Dict[str, List[Dict]]:
         """
         Récupère toutes les alertes (stock bas + péremption proche).
@@ -154,12 +154,12 @@ class InventaireService(BaseService[ArticleInventaire]):
 
         return alertes
 
-    @handle_errors(show_in_ui=True)
+    @gerer_erreurs(afficher_dans_ui=True)
     def ajuster_quantite(
-        self,
-        article_id: int,
-        delta: float,
-        action: str = "ajout"
+            self,
+            article_id: int,
+            delta: float,
+            action: str = "ajout"
     ) -> Optional[ArticleInventaire]:
         """
         Ajuste la quantité d'un article.
@@ -200,7 +200,7 @@ class InventaireService(BaseService[ArticleInventaire]):
         if self.ai_client is None:
             self.ai_client = get_ai_client()
 
-    @handle_errors(show_in_ui=True, fallback_value=[])
+    @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=[])
     def suggerer_courses_ia(self) -> List[Dict]:
         """
         Suggère des articles à ajouter aux courses via IA.
@@ -241,7 +241,7 @@ Réponds en JSON : [{"nom": str, "quantite": float, "unite": str, "priorite": "h
         if cached:
             return cached
 
-        # Appeler IA
+        # Appel IA
         try:
             response = self.ai_client.chat.complete(
                 model="mistral-small-latest",
@@ -281,7 +281,7 @@ Réponds en JSON : [{"nom": str, "quantite": float, "unite": str, "priorite": "h
         writer = csv.DictWriter(
             output,
             fieldnames=["ingredient_nom", "quantite", "unite", "quantite_min",
-                       "emplacement", "date_peremption", "statut"]
+                        "emplacement", "date_peremption", "statut"]
         )
 
         writer.writeheader()
@@ -315,7 +315,7 @@ Réponds en JSON : [{"nom": str, "quantite": float, "unite": str, "priorite": "h
     # SECTION 4 : STATISTIQUES
     # ═══════════════════════════════════════════════════════════
 
-    @handle_errors(show_in_ui=False, fallback_value={})
+    @gerer_erreurs(afficher_dans_ui=False, valeur_fallback={})
     def get_statistiques(self) -> Dict:
         """
         Calcule des statistiques sur l'inventaire.
@@ -353,7 +353,7 @@ Réponds en JSON : [{"nom": str, "quantite": float, "unite": str, "priorite": "h
 
     # ═══════════════════════════════════════════════════════════
     # HELPERS PRIVÉS
-    # ═════════════════════════════��═════════════════════════════
+    # ═══════════════════════════════════════════════════════════
 
     def _calculer_statut(self, article: ArticleInventaire, today: date) -> str:
         """Calcule le statut d'un article"""
@@ -407,4 +407,3 @@ __all__ = [
     "CATEGORIES",
     "EMPLACEMENTS",
 ]
-

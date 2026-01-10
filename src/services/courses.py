@@ -15,12 +15,11 @@ import csv
 import json
 from io import StringIO
 
-from src.core import (
-    BaseService,
-    get_db_context as obtenir_contexte_db,
-    handle_errors,
-    Cache,
-)
+from src.services.types import BaseService
+
+from src.core.database import obtenir_contexte_db
+from src.core.errors import gerer_erreurs as handle_errors
+from src.core.cache import Cache
 from src.core.models import ArticleCourses, Ingredient
 from src.core.ai import get_ai_client
 

@@ -18,6 +18,9 @@ import csv
 import json
 from io import StringIO
 
+# ✅ Import BaseService depuis types.py pour éviter le cycle
+from src.services.types import BaseService
+
 from src.core.database import obtenir_contexte_db
 from src.core.cache import Cache
 from src.core.errors import gerer_erreurs
@@ -29,7 +32,6 @@ from src.core.models import (
     Ingredient,
 )
 from src.core.ai import obtenir_client_ia
-from src.services.base_service import BaseService
 
 logger = logging.getLogger(__name__)
 
