@@ -15,6 +15,20 @@ import traceback
 logger = logging.getLogger(__name__)
 
 
+def _is_debug_mode() -> bool:
+    """
+    Retourne l'état du mode debug de l'application.
+
+    Essaie d'utiliser le `EtatApp.mode_debug` via `obtenir_etat()` si disponible,
+    sinon fallback sur `st.session_state['debug_mode']` pour compatibilité.
+    """
+    try:
+        from .state import obtenir_etat
+        return obtenir_etat().mode_debug
+    except Exception:
+        return st.session_state.get("debug_mode", False)
+
+
 # ═══════════════════════════════════════════════════════════
 # EXCEPTIONS PERSONNALISÉES
 # ═══════════════════════════════════════════════════════════
@@ -201,9 +215,9 @@ def gerer_erreurs(
                     st.error("❌ Une erreur inattendue s'est produite")
 
                     # Afficher stack trace en mode debug
-                    if st.session_state.get("debug_mode", False):
-                        with st.expander("🐛 Stack trace"):
-                            st.code(traceback.format_exc())
+                    if _is_debug_mode():
+                            with st.expander("🐛 Stack trace"):
+                                st.code(traceback.format_exc())
 
                 if relancer:
                     raise
@@ -395,7 +409,7 @@ def afficher_erreur_streamlit(erreur: Exception, contexte: str = ""):
             st.error(f"❌ {erreur.message_utilisateur}")
 
         # Afficher détails en mode debug
-        if st.session_state.get("debug_mode", False) and erreur.details:
+        if _is_debug_mode() and erreur.details:
             with st.expander("🔍 Détails"):
                 st.json(erreur.details)
     else:
@@ -406,7 +420,7 @@ def afficher_erreur_streamlit(erreur: Exception, contexte: str = ""):
             st.caption(f"Contexte : {contexte}")
 
         # Stack trace en mode debug
-        if st.session_state.get("debug_mode", False):
+        if _is_debug_mode():
             with st.expander("🐛 Stack trace"):
                 st.code(traceback.format_exc())
 

@@ -98,7 +98,7 @@ class Cache:
 
         # Vérifier TTL
         if cle in st.session_state[Cache.CLE_TIMESTAMPS]:
-            age = (datetime.now() - st.session_state[Cache.CLE_TIMESTAMPS][cle]).seconds
+            age = (datetime.now() - st.session_state[Cache.CLE_TIMESTAMPS][cle]).total_seconds()
             if age > ttl:
                 Cache._supprimer(cle)
                 st.session_state[Cache.CLE_STATS]["misses"] += 1
@@ -202,7 +202,7 @@ class Cache:
         expirees = []
 
         for cle, timestamp in st.session_state[Cache.CLE_TIMESTAMPS].items():
-            age = (maintenant - timestamp).seconds
+            age = (maintenant - timestamp).total_seconds()
             if age > age_max_secondes:
                 expirees.append(cle)
 

@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from src.core.database import get_db_context
 from src.core.models import Ingredient
-from src.core.cache import Cache
+from src.core.cache import Cache, cached
 
 logger = logging.getLogger(__name__)
 
@@ -106,7 +106,7 @@ def batch_find_or_create_ingredients(
         return _execute(db)
 
 
-@Cache.cached(ttl=300, key="ingredients_all")
+@cached(ttl=300, cle="ingredients_all")
 def get_all_ingredients_cached() -> List[Dict]:
     """
     Cache des ingrédients

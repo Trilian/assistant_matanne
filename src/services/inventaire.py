@@ -21,9 +21,10 @@ from src.services.types import BaseService
 
 from src.core.database import obtenir_contexte_db
 from src.core.errors import gerer_erreurs
-from src.core.cache import Cache
+from src.core.cache import Cache, LimiteDebit
 from src.core.models import ArticleInventaire, Ingredient
-from src.core.ai import get_ai_client
+from src.core.ai import obtenir_client_ia
+from src.core.ai.cache import CacheIA
 
 logger = logging.getLogger(__name__)
 
@@ -198,7 +199,7 @@ class InventaireService(BaseService[ArticleInventaire]):
     def _ensure_ai_client(self):
         """Initialise le client IA si nécessaire"""
         if self.ai_client is None:
-            self.ai_client = get_ai_client()
+            self.ai_client = obtenir_client_ia()
 
     @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=[])
     def suggerer_courses_ia(self) -> List[Dict]:
@@ -216,7 +217,7 @@ class InventaireService(BaseService[ArticleInventaire]):
         self._ensure_ai_client()
 
         # Vérifier rate limit
-        autorise, msg = Cache.peut_appeler_ia()
+        autorise, msg = LimiteDebit.peut_appeler()
         if not autorise:
             logger.warning(msg)
             return []
@@ -236,25 +237,28 @@ Stock critique ({len(alertes['critique'])} articles):
 Suggère 10 articles prioritaires à acheter avec quantités recommandées.
 Réponds en JSON : [{"nom": str, "quantite": float, "unite": str, "priorite": "haute|moyenne|basse"}]"""
 
-        # Vérifier cache
-        cached = Cache.obtenir_ia(prompt)
+        # Vérifier cache (cache sémantique IA)
+        cached = CacheIA.obtenir(prompt=prompt)
         if cached:
             return cached
 
-        # Appel IA
+        # Appel IA (uniformisé, utilise le client wrapper)
         try:
-            response = self.ai_client.chat.complete(
-                model="mistral-small-latest",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.7
-            )
+            import asyncio
 
-            # Parser réponse
-            suggestions = self._parse_ai_suggestions(response.choices[0].message.content)
+            response = asyncio.run(self.ai_client.appeler(
+                prompt=prompt,
+                prompt_systeme="Tu es un chef cuisinier expert.",
+                temperature=0.7,
+                max_tokens=1000
+            ))
 
-            # Cacher
-            Cache.definir_ia(prompt, suggestions)
-            Cache.enregistrer_appel_ia()
+            # Parser réponse (attend une chaîne)
+            suggestions = self._parse_ai_suggestions(response)
+
+            # Cacher et enregistrer l'appel
+            CacheIA.definir(prompt=prompt, reponse=suggestions)
+            LimiteDebit.enregistrer_appel()
 
             logger.info(f"✅ {len(suggestions)} suggestions IA générées")
             return suggestions

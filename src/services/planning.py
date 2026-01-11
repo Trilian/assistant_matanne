@@ -19,7 +19,9 @@ from src.core.database import obtenir_contexte_db
 from src.core.errors import gerer_erreurs
 from src.core.cache import Cache
 from src.core.models import Planning, Repas, Recette
-from src.core.ai import get_ai_client
+from src.core.cache import LimiteDebit
+from src.core.ai import obtenir_client_ia
+from src.core.ai.cache import CacheIA
 
 logger = logging.getLogger(__name__)
 
@@ -212,7 +214,7 @@ class PlanningService(BaseService[Planning]):
     def _ensure_ai_client(self):
         """Initialise le client IA si nécessaire"""
         if self.ai_client is None:
-            self.ai_client = get_ai_client()
+            self.ai_client = obtenir_client_ia()
 
     @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=None)
     def generer_planning_ia(
@@ -233,7 +235,7 @@ class PlanningService(BaseService[Planning]):
         self._ensure_ai_client()
 
         # Vérifier rate limit
-        autorise, msg = Cache.peut_appeler_ia()
+        autorise, msg = LimiteDebit.peut_appeler()
         if not autorise:
             logger.warning(msg)
             return None
@@ -241,25 +243,27 @@ class PlanningService(BaseService[Planning]):
         # Construire prompt
         prompt = self._build_planning_prompt(semaine_debut, preferences)
 
-        # Vérifier cache
-        cached = Cache.obtenir_ia(prompt)
+        # Vérifier cache (cache IA)
+        cached = CacheIA.obtenir(prompt=prompt)
         if cached:
             return self._create_planning_from_data(semaine_debut, cached)
 
-        # Appeler IA
+        # Appel IA via wrapper
         try:
-            response = self.ai_client.chat.complete(
-                model="mistral-small-latest",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.7
-            )
+            import asyncio
 
-            # Parser réponse
-            planning_data = self._parse_planning_ia(response.choices[0].message.content)
+            response = asyncio.run(self.ai_client.appeler(
+                prompt=prompt,
+                prompt_systeme="Tu es un planificateur de repas expert.",
+                temperature=0.7,
+                max_tokens=1500
+            ))
 
-            # Cacher
-            Cache.definir_ia(prompt, planning_data)
-            Cache.enregistrer_appel_ia()
+            planning_data = self._parse_planning_ia(response)
+
+            # Cacher et enregistrer appel
+            CacheIA.definir(prompt=prompt, reponse=planning_data)
+            LimiteDebit.enregistrer_appel()
 
             # Créer planning
             planning = self._create_planning_from_data(semaine_debut, planning_data)

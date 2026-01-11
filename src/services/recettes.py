@@ -32,6 +32,8 @@ from src.core.models import (
     Ingredient,
 )
 from src.core.ai import obtenir_client_ia
+from src.core.cache import LimiteDebit
+from src.core.ai.cache import CacheIA
 
 logger = logging.getLogger(__name__)
 
@@ -267,7 +269,6 @@ class RecetteService(BaseService[Recette]):
         self._ensure_ai_client()
 
         # Vérifier rate limit
-        from src.core.cache import LimiteDebit
         autorise, msg = LimiteDebit.peut_appeler()
         if not autorise:
             logger.warning(msg)
@@ -279,7 +280,6 @@ class RecetteService(BaseService[Recette]):
         )
 
         # Vérifier cache IA
-        from src.core.ai.cache import CacheIA
         cached = CacheIA.obtenir(prompt=prompt)
         if cached:
             logger.info("✅ Recettes IA depuis cache")
@@ -298,8 +298,8 @@ class RecetteService(BaseService[Recette]):
             # Parser réponse
             recettes = self._parse_ai_response(response)
 
-            # Cacher + enregistrer appel
-            CacheIA.definir(prompt=prompt, reponse=response)
+            # Cacher + enregistrer appel (on stocke la valeur parsée)
+            CacheIA.definir(prompt=prompt, reponse=recettes)
             LimiteDebit.enregistrer_appel()
 
             logger.info(f"✅ {len(recettes)} recettes générées par IA")

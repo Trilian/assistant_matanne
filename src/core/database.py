@@ -115,6 +115,7 @@ def obtenir_fabrique_session():
     Returns:
         Session factory configurée
     """
+    # Création différée de la factory pour éviter les erreurs à l'import
     moteur = obtenir_moteur()
     return sessionmaker(
         autocommit=False,
@@ -124,7 +125,8 @@ def obtenir_fabrique_session():
     )
 
 
-SessionLocale = obtenir_fabrique_session()
+# Session factory initialisée à la demande (evite side-effects à l'import)
+SessionLocale = None
 
 
 # ═══════════════════════════════════════════════════════════
@@ -146,7 +148,9 @@ def obtenir_contexte_db() -> Generator[Session, None, None]:
         >>> with obtenir_contexte_db() as db:
         >>>     recettes = db.query(Recette).all()
     """
-    db = SessionLocale()
+    # Obtenir une factory de session à la demande (création différée)
+    fabrique = obtenir_fabrique_session()
+    db = fabrique()
 
     try:
         yield db

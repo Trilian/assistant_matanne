@@ -34,7 +34,7 @@ def app():
     state = get_state()
 
     st.markdown(
-        f"<h1 style='text-align: center;'>🤖 Bienvenue {state.user_name} !</h1>",
+        f"<h1 style='text-align: center;'>🤖 Bienvenue {state.nom_utilisateur} !</h1>",
         unsafe_allow_html=True
     )
 

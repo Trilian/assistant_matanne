@@ -7,15 +7,15 @@ from datetime import datetime
 from typing import Dict, Optional
 
 # Core
-from src.core.config import get_settings
+from src.core.config import obtenir_parametres as get_settings
 from src.core.database import (
-    get_db_info,
-    health_check,
-    MigrationManager,
-    vacuum_database
+    obtenir_infos_db as get_db_info,
+    verifier_sante as health_check,
+    GestionnaireMigrations as MigrationManager,
+    get_engine
 )
 from src.core.cache import Cache
-from src.core.ai.semantic_cache import SemanticCache
+from src.core.ai.cache import CacheIA as SemanticCache
 
 # State
 from src.core.state import get_state, StateManager
@@ -74,7 +74,7 @@ def render_foyer_config():
 
     # Récupérer config existante
     config = st.session_state.get("foyer_config", {
-        "nom_utilisateur": state.user_name,
+        "nom_utilisateur": state.nom_utilisateur,
         "nb_adultes": 2,
         "nb_enfants": 1,
         "age_enfants": [2],
@@ -162,7 +162,7 @@ def render_foyer_config():
             st.session_state.foyer_config = new_config
 
             # Mettre à jour state
-            state.user_name = nom_utilisateur
+            state.nom_utilisateur = nom_utilisateur
 
             show_success("✅ Configuration sauvegardée !")
             st.rerun()
@@ -245,33 +245,32 @@ def render_ia_config():
     # Cache Sémantique
     st.markdown("#### 🧠 Cache Sémantique")
 
-    cache_stats = SemanticCache.get_stats()
+    cache_stats = SemanticCache.obtenir_statistiques()
 
     col7, col8, col9 = st.columns(3)
 
     with col7:
         st.metric(
             "Taux de Hit",
-            f"{cache_stats['hit_rate']:.1f}%",
+                f"{cache_stats.get('taux_hit', 0):.1f}%",
             help="Pourcentage de réponses servies depuis le cache"
         )
 
     with col8:
         st.metric(
             "Entrées Cachées",
-            cache_stats['total_entries']
+                cache_stats.get('entrees_ia', 0)
         )
 
     with col9:
         st.metric(
             "Appels Économisés",
-            cache_stats['saved_api_calls']
+                cache_stats.get('saved_api_calls', 0)
         )
 
-    mode = "🧠 Sémantique" if cache_stats['embeddings_available'] else "🔤 MD5"
+    mode = "🧠 Sémantique" if cache_stats.get('embeddings_available', False) else "🔤 MD5"
     st.info(f"**Mode:** {mode}")
-
-    if cache_stats['embeddings_available']:
+    if cache_stats.get('embeddings_available', False):
         st.success("✅ Embeddings actifs (similarité sémantique)")
     else:
         st.warning("⚠️ Embeddings indisponibles (fallback MD5)")
@@ -281,7 +280,7 @@ def render_ia_config():
 
     with col10:
         if st.button("🗑️ Vider Cache IA", use_container_width=True):
-            SemanticCache.clear()
+            SemanticCache.invalider_tout()
             show_success("Cache IA vidé !")
             st.rerun()
 
@@ -304,23 +303,23 @@ def render_database_config():
     # Infos DB
     db_info = get_db_info()
 
-    if db_info.get("status") == "connected":
+    if db_info.get("statut") == "connected":
         st.success("✅ Connexion active")
 
         col1, col2 = st.columns(2)
 
         with col1:
-            st.info(f"**Host:** {db_info.get('host', '—')}")
-            st.info(f"**Database:** {db_info.get('database', '—')}")
-            st.info(f"**User:** {db_info.get('user', '—')}")
+            st.info(f"**Host:** {db_info.get('hote', '—')}")
+            st.info(f"**Database:** {db_info.get('base_donnees', '—')}")
+            st.info(f"**User:** {db_info.get('utilisateur', '—')}")
 
         with col2:
             st.info(f"**Version:** {db_info.get('version', '—')}")
-            st.info(f"**Taille:** {db_info.get('size', '—')}")
-            st.info(f"**Schéma:** v{db_info.get('schema_version', 0)}")
+            st.info(f"**Taille:** {db_info.get('taille', '—')}")
+            st.info(f"**Schéma:** v{db_info.get('version_schema', 0)}")
 
     else:
-        st.error(f"❌ Erreur: {db_info.get('error', 'Inconnue')}")
+        st.error(f"❌ Erreur: {db_info.get('erreur', 'Inconnue')}")
 
     st.markdown("---")
 
@@ -331,7 +330,7 @@ def render_database_config():
         with smart_spinner("Vérification en cours...", estimated_seconds=2):
             health = health_check()
 
-        if health.get("healthy"):
+        if health.get("sain"):
             st.success("✅ Base de données en bonne santé")
 
             col3, col4 = st.columns(2)
@@ -339,24 +338,24 @@ def render_database_config():
             with col3:
                 st.metric(
                     "Connexions Actives",
-                    health.get("active_connections", 0)
+                    health.get("connexions_actives", 0)
                 )
 
             with col4:
-                db_size_mb = health.get("database_size_bytes", 0) / 1024 / 1024
+                db_size_mb = health.get("taille_base_octets", 0) / 1024 / 1024
                 st.metric(
                     "Taille DB",
                     f"{db_size_mb:.2f} MB"
                 )
         else:
-            st.error(f"❌ Problème détecté: {health.get('error')}")
+            st.error(f"❌ Problème détecté: {health.get('erreur')}")
 
     st.markdown("---")
 
     # Migrations
     st.markdown("#### 🔄 Migrations")
 
-    current_version = MigrationManager.get_current_version()
+    current_version = MigrationManager.obtenir_version_courante()
     st.info(f"**Version du schéma:** v{current_version}")
 
     col5, col6 = st.columns(2)
@@ -365,7 +364,7 @@ def render_database_config():
         if st.button("🔄 Exécuter Migrations", use_container_width=True):
             with smart_spinner("Exécution des migrations...", estimated_seconds=5):
                 try:
-                    MigrationManager.run_migrations()
+                    MigrationManager.executer_migrations()
                     show_success("✅ Migrations exécutées !")
                     st.rerun()
                 except Exception as e:
@@ -451,21 +450,21 @@ def render_cache_config():
     # Cache IA
     st.markdown("#### 🤖 Cache IA")
 
-    cache_stats = SemanticCache.get_stats()
+    cache_stats = SemanticCache.obtenir_statistiques()
 
     col3, col4, col5 = st.columns(3)
 
     with col3:
-        st.metric("Entrées", cache_stats['total_entries'])
+        st.metric("Entrées", cache_stats.get('entrees_ia', 0))
 
     with col4:
-        st.metric("Hits", cache_stats['hits'])
+        st.metric("Hits", cache_stats.get('entrees_ia', 0))
 
     with col5:
-        st.metric("Misses", cache_stats['misses'])
+        st.metric("Misses", 0)
 
     if st.button("🗑️ Vider Cache IA", use_container_width=True):
-        SemanticCache.clear()
+        SemanticCache.invalider_tout()
         show_success("Cache IA vidé !")
         st.rerun()
 
@@ -480,7 +479,7 @@ def render_cache_config():
             use_container_width=True
     ):
         Cache.clear_all()
-        SemanticCache.clear()
+        SemanticCache.invalider_tout()
         show_success("✅ Tous les caches vidés !")
         st.rerun()
 
@@ -528,8 +527,8 @@ def render_about():
         st.info(f"**Debug:** {'Activé' if settings.DEBUG else 'Désactivé'}")
 
     with col2:
-        db_configured = "✅ Configurée" if settings._check_db_configured() else "❌ Non configurée"
-        ai_configured = "✅ Configurée" if settings._check_mistral_configured() else "❌ Non configurée"
+        db_configured = "✅ Configurée" if settings._verifier_db_configuree() else "❌ Non configurée"
+        ai_configured = "✅ Configurée" if settings._verifier_mistral_configure() else "❌ Non configurée"
 
         st.info(f"**Base de données:** {db_configured}")
         st.info(f"**IA:** {ai_configured}")
@@ -540,7 +539,7 @@ def render_about():
     st.markdown("#### ⚙️ Configuration")
 
     with st.expander("Voir la configuration (sans secrets)"):
-        safe_config = settings.get_safe_config()
+        safe_config = settings.obtenir_config_publique()
         st.json(safe_config)
 
     st.markdown("---")

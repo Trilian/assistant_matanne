@@ -19,9 +19,10 @@ from src.services.types import BaseService
 
 from src.core.database import obtenir_contexte_db
 from src.core.errors import gerer_erreurs
-from src.core.cache import Cache
+from src.core.cache import Cache, LimiteDebit
 from src.core.models import ArticleCourses, Ingredient
-from src.core.ai import get_ai_client
+from src.core.ai import obtenir_client_ia
+from src.core.ai.cache import CacheIA
 
 logger = logging.getLogger(__name__)
 
@@ -195,7 +196,7 @@ class CoursesService(BaseService[ArticleCourses]):
     def _ensure_ai_client(self):
         """Initialise le client IA si nécessaire"""
         if self.ai_client is None:
-            self.ai_client = get_ai_client()
+            self.ai_client = obtenir_client_ia()
 
     @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=[])
     def generer_suggestions_ia_depuis_inventaire(self) -> List[Dict]:
@@ -211,7 +212,7 @@ class CoursesService(BaseService[ArticleCourses]):
         self._ensure_ai_client()
 
         # Vérifier rate limit
-        autorise, msg = Cache.peut_appeler_ia()
+        autorise, msg = LimiteDebit.peut_appeler()
         if not autorise:
             logger.warning(msg)
             return []
@@ -231,25 +232,28 @@ Articles critiques ({len(alertes['critique'])}):
 Suggère 15 articles prioritaires avec quantités et rayons magasin.
 Réponds en JSON : [{"nom": str, "quantite": float, "unite": str, "priorite": str, "rayon": str}]"""
 
-        # Vérifier cache
-        cached = Cache.obtenir_ia(prompt)
+        # Vérifier cache (cache IA sémantique)
+        cached = CacheIA.obtenir(prompt=prompt)
         if cached:
             return cached
 
-        # Appeler IA
+        # Appel IA via wrapper
         try:
-            response = self.ai_client.chat.complete(
-                model="mistral-small-latest",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.7
-            )
+            import asyncio
+
+            response = asyncio.run(self.ai_client.appeler(
+                prompt=prompt,
+                prompt_systeme="Tu es un assistant culinaire expert.",
+                temperature=0.7,
+                max_tokens=1000
+            ))
 
             # Parser réponse
-            suggestions = self._parse_ai_suggestions(response.choices[0].message.content)
+            suggestions = self._parse_ai_suggestions(response)
 
-            # Cacher
-            Cache.definir_ia(prompt, suggestions)
-            Cache.enregistrer_appel_ia()
+            # Cacher et enregistrer appel
+            CacheIA.definir(prompt=prompt, reponse=suggestions)
+            LimiteDebit.enregistrer_appel()
 
             logger.info(f"✅ {len(suggestions)} suggestions courses IA générées")
             return suggestions
