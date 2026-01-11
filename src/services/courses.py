@@ -18,7 +18,7 @@ from io import StringIO
 from src.services.types import BaseService
 
 from src.core.database import obtenir_contexte_db
-from src.core.errors import gerer_erreurs as handle_errors
+from src.core.errors import gerer_erreurs
 from src.core.cache import Cache
 from src.core.models import ArticleCourses, Ingredient
 from src.core.ai import get_ai_client
@@ -50,11 +50,11 @@ class CoursesService(BaseService[ArticleCourses]):
     # SECTION 1 : CRUD LISTE
     # ═══════════════════════════════════════════════════════════
 
-    @handle_errors(show_in_ui=False, fallback_value=[])
+    @gerer_erreurs(afficher_dans_ui=False, valeur_fallback=[])
     def get_liste_courses(
-        self,
-        achetes: bool = False,
-        priorite: Optional[str] = None
+            self,
+            achetes: bool = False,
+            priorite: Optional[str] = None
     ) -> List[Dict]:
         """
         Récupère la liste de courses.
@@ -104,7 +104,7 @@ class CoursesService(BaseService[ArticleCourses]):
             Cache.definir(cache_key, result, ttl=self.cache_ttl, dependencies=["courses"])
             return result
 
-    @handle_errors(show_in_ui=True, fallback_value=False)
+    @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=False)
     def marquer_achete(self, article_id: int, achete: bool = True) -> bool:
         """
         Marque un article comme acheté.
@@ -136,14 +136,14 @@ class CoursesService(BaseService[ArticleCourses]):
 
             return True
 
-    @handle_errors(show_in_ui=True)
+    @gerer_erreurs(afficher_dans_ui=True)
     def ajouter_article(
-        self,
-        ingredient_nom: str,
-        quantite: float,
-        unite: str = "pcs",
-        priorite: str = "moyenne",
-        rayon: Optional[str] = None
+            self,
+            ingredient_nom: str,
+            quantite: float,
+            unite: str = "pcs",
+            priorite: str = "moyenne",
+            rayon: Optional[str] = None
     ) -> Optional[ArticleCourses]:
         """
         Ajoute un article à la liste de courses.
@@ -197,7 +197,7 @@ class CoursesService(BaseService[ArticleCourses]):
         if self.ai_client is None:
             self.ai_client = get_ai_client()
 
-    @handle_errors(show_in_ui=True, fallback_value=[])
+    @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=[])
     def generer_suggestions_ia_depuis_inventaire(self) -> List[Dict]:
         """
         Génère des suggestions de courses depuis l'inventaire via IA.
@@ -276,7 +276,7 @@ Réponds en JSON : [{"nom": str, "quantite": float, "unite": str, "priorite": st
         writer = csv.DictWriter(
             output,
             fieldnames=["ingredient_nom", "quantite_necessaire", "unite", "priorite",
-                       "achete", "rayon_magasin"]
+                        "achete", "rayon_magasin"]
         )
 
         writer.writeheader()
@@ -337,4 +337,3 @@ __all__ = [
     "CoursesService",
     "courses_service",
 ]
-
