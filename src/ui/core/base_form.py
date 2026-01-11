@@ -1,14 +1,16 @@
 """
 Base Form - Générateur de formulaires universel
 """
-import streamlit as st
-from typing import Dict, List, Any, Callable
+
+from collections.abc import Callable
 from datetime import date
 
+import streamlit as st
 
 # ═══════════════════════════════════════════════════════════
 # FORM BUILDER
 # ═══════════════════════════════════════════════════════════
+
 
 class FormBuilder:
     """
@@ -34,173 +36,183 @@ class FormBuilder:
     # ═══════════════════════════════════════════════════════
 
     def add_text(
-            self,
-            name: str,
-            label: str,
-            required: bool = False,
-            default: str = "",
-            max_length: int = None,
-            help_text: str = None
+        self,
+        name: str,
+        label: str,
+        required: bool = False,
+        default: str = "",
+        max_length: int = None,
+        help_text: str = None,
     ):
         """Ajoute champ texte"""
-        self.fields.append({
-            "type": "text",
-            "name": name,
-            "label": label + (" *" if required else ""),
-            "required": required,
-            "default": default,
-            "max_length": max_length,
-            "help": help_text
-        })
+        self.fields.append(
+            {
+                "type": "text",
+                "name": name,
+                "label": label + (" *" if required else ""),
+                "required": required,
+                "default": default,
+                "max_length": max_length,
+                "help": help_text,
+            }
+        )
         return self
 
     def add_textarea(
-            self,
-            name: str,
-            label: str,
-            required: bool = False,
-            default: str = "",
-            height: int = 100,
-            help_text: str = None
+        self,
+        name: str,
+        label: str,
+        required: bool = False,
+        default: str = "",
+        height: int = 100,
+        help_text: str = None,
     ):
         """Ajoute textarea"""
-        self.fields.append({
-            "type": "textarea",
-            "name": name,
-            "label": label + (" *" if required else ""),
-            "required": required,
-            "default": default,
-            "height": height,
-            "help": help_text
-        })
+        self.fields.append(
+            {
+                "type": "textarea",
+                "name": name,
+                "label": label + (" *" if required else ""),
+                "required": required,
+                "default": default,
+                "height": height,
+                "help": help_text,
+            }
+        )
         return self
 
     def add_number(
-            self,
-            name: str,
-            label: str,
-            required: bool = False,
-            default: float = 0.0,
-            min_value: float = None,
-            max_value: float = None,
-            step: float = 1.0,
-            help_text: str = None
+        self,
+        name: str,
+        label: str,
+        required: bool = False,
+        default: float = 0.0,
+        min_value: float = None,
+        max_value: float = None,
+        step: float = 1.0,
+        help_text: str = None,
     ):
         """Ajoute champ nombre"""
-        self.fields.append({
-            "type": "number",
-            "name": name,
-            "label": label + (" *" if required else ""),
-            "required": required,
-            "default": default,
-            "min_value": min_value,
-            "max_value": max_value,
-            "step": step,
-            "help": help_text
-        })
+        self.fields.append(
+            {
+                "type": "number",
+                "name": name,
+                "label": label + (" *" if required else ""),
+                "required": required,
+                "default": default,
+                "min_value": min_value,
+                "max_value": max_value,
+                "step": step,
+                "help": help_text,
+            }
+        )
         return self
 
     def add_select(
-            self,
-            name: str,
-            label: str,
-            options: List[str],
-            required: bool = False,
-            default: str = None,
-            help_text: str = None
+        self,
+        name: str,
+        label: str,
+        options: list[str],
+        required: bool = False,
+        default: str = None,
+        help_text: str = None,
     ):
         """Ajoute select"""
-        self.fields.append({
-            "type": "select",
-            "name": name,
-            "label": label + (" *" if required else ""),
-            "required": required,
-            "options": options,
-            "default": default or options[0],
-            "help": help_text
-        })
+        self.fields.append(
+            {
+                "type": "select",
+                "name": name,
+                "label": label + (" *" if required else ""),
+                "required": required,
+                "options": options,
+                "default": default or options[0],
+                "help": help_text,
+            }
+        )
         return self
 
     def add_multiselect(
-            self,
-            name: str,
-            label: str,
-            options: List[str],
-            required: bool = False,
-            default: List[str] = None,
-            help_text: str = None
+        self,
+        name: str,
+        label: str,
+        options: list[str],
+        required: bool = False,
+        default: list[str] = None,
+        help_text: str = None,
     ):
         """Ajoute multiselect"""
-        self.fields.append({
-            "type": "multiselect",
-            "name": name,
-            "label": label + (" *" if required else ""),
-            "required": required,
-            "options": options,
-            "default": default or [],
-            "help": help_text
-        })
+        self.fields.append(
+            {
+                "type": "multiselect",
+                "name": name,
+                "label": label + (" *" if required else ""),
+                "required": required,
+                "options": options,
+                "default": default or [],
+                "help": help_text,
+            }
+        )
         return self
 
-    def add_checkbox(
-            self,
-            name: str,
-            label: str,
-            default: bool = False,
-            help_text: str = None
-    ):
+    def add_checkbox(self, name: str, label: str, default: bool = False, help_text: str = None):
         """Ajoute checkbox"""
-        self.fields.append({
-            "type": "checkbox",
-            "name": name,
-            "label": label,
-            "default": default,
-            "help": help_text
-        })
+        self.fields.append(
+            {
+                "type": "checkbox",
+                "name": name,
+                "label": label,
+                "default": default,
+                "help": help_text,
+            }
+        )
         return self
 
     def add_date(
-            self,
-            name: str,
-            label: str,
-            required: bool = False,
-            default: date = None,
-            min_value: date = None,
-            max_value: date = None,
-            help_text: str = None
+        self,
+        name: str,
+        label: str,
+        required: bool = False,
+        default: date = None,
+        min_value: date = None,
+        max_value: date = None,
+        help_text: str = None,
     ):
         """Ajoute date"""
-        self.fields.append({
-            "type": "date",
-            "name": name,
-            "label": label + (" *" if required else ""),
-            "required": required,
-            "default": default or date.today(),
-            "min_value": min_value,
-            "max_value": max_value,
-            "help": help_text
-        })
+        self.fields.append(
+            {
+                "type": "date",
+                "name": name,
+                "label": label + (" *" if required else ""),
+                "required": required,
+                "default": default or date.today(),
+                "min_value": min_value,
+                "max_value": max_value,
+                "help": help_text,
+            }
+        )
         return self
 
     def add_slider(
-            self,
-            name: str,
-            label: str,
-            min_value: int = 0,
-            max_value: int = 100,
-            default: int = 50,
-            help_text: str = None
+        self,
+        name: str,
+        label: str,
+        min_value: int = 0,
+        max_value: int = 100,
+        default: int = 50,
+        help_text: str = None,
     ):
         """Ajoute slider"""
-        self.fields.append({
-            "type": "slider",
-            "name": name,
-            "label": label,
-            "min_value": min_value,
-            "max_value": max_value,
-            "default": default,
-            "help": help_text
-        })
+        self.fields.append(
+            {
+                "type": "slider",
+                "name": name,
+                "label": label,
+                "min_value": min_value,
+                "max_value": max_value,
+                "default": default,
+                "help": help_text,
+            }
+        )
         return self
 
     def add_divider(self):
@@ -237,16 +249,11 @@ class FormBuilder:
 
             with col1:
                 submitted = st.form_submit_button(
-                    "✅ Valider",
-                    type="primary",
-                    use_container_width=True
+                    "✅ Valider", type="primary", use_container_width=True
                 )
 
             with col2:
-                cancelled = st.form_submit_button(
-                    "❌ Annuler",
-                    use_container_width=True
-                )
+                cancelled = st.form_submit_button("❌ Annuler", use_container_width=True)
 
             if cancelled and on_cancel:
                 on_cancel()
@@ -264,7 +271,7 @@ class FormBuilder:
 
         return False
 
-    def _render_field(self, field: Dict):
+    def _render_field(self, field: dict):
         """Render un champ"""
         field_type = field["type"]
 
@@ -280,7 +287,7 @@ class FormBuilder:
                 value=field["default"],
                 max_chars=field.get("max_length"),
                 help=field.get("help"),
-                key=f"{self.form_id}_{field['name']}"
+                key=f"{self.form_id}_{field['name']}",
             )
             self.data[field["name"]] = value
 
@@ -290,7 +297,7 @@ class FormBuilder:
                 value=field["default"],
                 height=field.get("height", 100),
                 help=field.get("help"),
-                key=f"{self.form_id}_{field['name']}"
+                key=f"{self.form_id}_{field['name']}",
             )
             self.data[field["name"]] = value
 
@@ -302,7 +309,7 @@ class FormBuilder:
                 max_value=field.get("max_value"),
                 step=field.get("step", 1.0),
                 help=field.get("help"),
-                key=f"{self.form_id}_{field['name']}"
+                key=f"{self.form_id}_{field['name']}",
             )
             self.data[field["name"]] = value
 
@@ -312,7 +319,7 @@ class FormBuilder:
                 options=field["options"],
                 index=field["options"].index(field["default"]),
                 help=field.get("help"),
-                key=f"{self.form_id}_{field['name']}"
+                key=f"{self.form_id}_{field['name']}",
             )
             self.data[field["name"]] = value
 
@@ -322,7 +329,7 @@ class FormBuilder:
                 options=field["options"],
                 default=field["default"],
                 help=field.get("help"),
-                key=f"{self.form_id}_{field['name']}"
+                key=f"{self.form_id}_{field['name']}",
             )
             self.data[field["name"]] = value
 
@@ -331,7 +338,7 @@ class FormBuilder:
                 field["label"],
                 value=field["default"],
                 help=field.get("help"),
-                key=f"{self.form_id}_{field['name']}"
+                key=f"{self.form_id}_{field['name']}",
             )
             self.data[field["name"]] = value
 
@@ -342,7 +349,7 @@ class FormBuilder:
                 min_value=field.get("min_value"),
                 max_value=field.get("max_value"),
                 help=field.get("help"),
-                key=f"{self.form_id}_{field['name']}"
+                key=f"{self.form_id}_{field['name']}",
             )
             self.data[field["name"]] = value
 
@@ -353,7 +360,7 @@ class FormBuilder:
                 max_value=field["max_value"],
                 value=field["default"],
                 help=field.get("help"),
-                key=f"{self.form_id}_{field['name']}"
+                key=f"{self.form_id}_{field['name']}",
             )
             self.data[field["name"]] = value
 
@@ -369,6 +376,6 @@ class FormBuilder:
 
         return True
 
-    def get_data(self) -> Dict:
+    def get_data(self) -> dict:
         """Récupère données formulaire"""
         return self.data

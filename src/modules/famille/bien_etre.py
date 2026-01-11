@@ -3,17 +3,16 @@ Module Bien-être avec Agent IA intégré
 Suivi du bien-être familial avec analyses intelligentes
 """
 
-import streamlit as st
-import pandas as pd
-from datetime import datetime, date, timedelta
 import asyncio
-from typing import Dict, List
+from datetime import date, timedelta
 
-from src.core.database import get_db_context
-from src.core.models import WellbeingEntry, ChildProfile
+import pandas as pd
+import streamlit as st
+
 from src.core.ai_agent import AgentIA
-from src.utils.formatters import format_quantity, format_quantity_with_unit
-
+from src.core.database import get_db_context
+from src.core.models import ChildProfile, WellbeingEntry
+from src.utils.formatters import format_quantity
 
 # ===================================
 # HELPERS
@@ -30,9 +29,9 @@ def charger_entrees_famille(limit: int = 30) -> pd.DataFrame:
                 {
                     "id": e.id,
                     "date": e.date,
-                    "personne": db.query(ChildProfile).get(e.child_id).name
-                    if e.child_id
-                    else e.username,
+                    "personne": (
+                        db.query(ChildProfile).get(e.child_id).name if e.child_id else e.username
+                    ),
                     "humeur": e.mood,
                     "sommeil": e.sleep_hours,
                     "activite": e.activity,
@@ -60,7 +59,7 @@ def ajouter_entree_adulte(username: str, humeur: str, sommeil: float, activite: 
         db.commit()
 
 
-def get_statistiques_globales() -> Dict:
+def get_statistiques_globales() -> dict:
     """Calcule les statistiques globales du bien-être familial"""
     with get_db_context() as db:
         # 7 derniers jours
@@ -87,7 +86,7 @@ def get_statistiques_globales() -> Dict:
         }
 
 
-def detecter_alertes() -> List[Dict]:
+def detecter_alertes() -> list[dict]:
     """Détecte les alertes de bien-être"""
     alertes = []
 
@@ -288,7 +287,7 @@ def app():
                 sommeil = st.number_input("Heures de sommeil", 0.0, 24.0, 7.5, 0.5)
 
             with col_a2:
-                date_entry = st.date_input("Date", value=date.today())
+                _date_entry = st.date_input("Date", value=date.today())
 
                 activite = st.text_input(
                     "Activité principale", placeholder="Ex: Travail, Sport, Repos..."
@@ -296,7 +295,7 @@ def app():
 
                 stress_level = st.slider("Niveau de stress", 0, 10, 5)
 
-            notes = st.text_area(
+                notes = st.text_area(
                 "Notes / Ressenti",
                 height=150,
                 placeholder="Comment s'est passée ta journée ? Des préoccupations ? Des moments positifs ?",
@@ -406,15 +405,15 @@ def app():
                             score = analyse["score_bien_etre"]
 
                             if score >= 80:
-                                color = "green"
+                                _color = "green"
                                 emoji = "😊"
                                 msg = "Excellent"
                             elif score >= 60:
-                                color = "orange"
+                                _color = "orange"
                                 emoji = "😐"
                                 msg = "Correct"
                             else:
-                                color = "red"
+                                _color = "red"
                                 emoji = "😞"
                                 msg = "À améliorer"
 

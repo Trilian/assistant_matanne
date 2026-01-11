@@ -1,6 +1,7 @@
 """
 Helpers - Manipulation de strings
 """
+
 import hashlib
 import json
 from typing import Any
@@ -38,12 +39,30 @@ def remove_accents(text: str) -> str:
         "cafe creme"
     """
     replacements = {
-        'à': 'a', 'á': 'a', 'â': 'a', 'ä': 'a', 'ã': 'a',
-        'è': 'e', 'é': 'e', 'ê': 'e', 'ë': 'e',
-        'ì': 'i', 'í': 'i', 'î': 'i', 'ï': 'i',
-        'ò': 'o', 'ó': 'o', 'ô': 'o', 'ö': 'o', 'õ': 'o',
-        'ù': 'u', 'ú': 'u', 'û': 'u', 'ü': 'u',
-        'ç': 'c', 'ñ': 'n'
+        "à": "a",
+        "á": "a",
+        "â": "a",
+        "ä": "a",
+        "ã": "a",
+        "è": "e",
+        "é": "e",
+        "ê": "e",
+        "ë": "e",
+        "ì": "i",
+        "í": "i",
+        "î": "i",
+        "ï": "i",
+        "ò": "o",
+        "ó": "o",
+        "ô": "o",
+        "ö": "o",
+        "õ": "o",
+        "ù": "u",
+        "ú": "u",
+        "û": "u",
+        "ü": "u",
+        "ç": "c",
+        "ñ": "n",
     }
 
     result = text
@@ -63,7 +82,8 @@ def camel_to_snake(text: str) -> str:
         "my_variable_name"
     """
     import re
-    return re.sub(r'(?<!^)(?=[A-Z])', '_', text).lower()
+
+    return re.sub(r"(?<!^)(?=[A-Z])", "_", text).lower()
 
 
 def snake_to_camel(text: str) -> str:
@@ -74,8 +94,8 @@ def snake_to_camel(text: str) -> str:
         >>> snake_to_camel("my_variable_name")
         "myVariableName"
     """
-    components = text.split('_')
-    return components[0] + ''.join(x.title() for x in components[1:])
+    components = text.split("_")
+    return components[0] + "".join(x.title() for x in components[1:])
 
 
 def pluralize(word: str, count: int, plural_form: str = None) -> str:
@@ -97,9 +117,9 @@ def pluralize(word: str, count: int, plural_form: str = None) -> str:
         return f"{count} {plural_form}"
 
     # Règle simple anglaise
-    if word.endswith('y'):
+    if word.endswith("y"):
         return f"{count} {word[:-1]}ies"
-    elif word.endswith('s'):
+    elif word.endswith("s"):
         return f"{count} {word}es"
     else:
         return f"{count} {word}s"

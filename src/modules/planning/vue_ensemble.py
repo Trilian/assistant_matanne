@@ -3,31 +3,28 @@ Module Vue d'ensemble Planning
 Dashboard global avec toutes les informations importantes
 """
 
+from datetime import date, datetime, timedelta
+
 import streamlit as st
-import pandas as pd
-from datetime import datetime, date, timedelta
-from typing import Dict
 
 from src.core.database import get_db_context
 from src.core.models import (
     BatchMeal,
-    Recipe,
-    Project,
-    RoutineTask,
-    Routine,
-    InventoryItem,
-    Ingredient,
     CalendarEvent,
     GardenItem,
+    InventoryItem,
+    Project,
+    Recipe,
+    Routine,
+    RoutineTask,
 )
-
 
 # ===================================
 # HELPERS
 # ===================================
 
 
-def get_dashboard_data() -> Dict:
+def get_dashboard_data() -> dict:
     """Récupère toutes les données pour le dashboard"""
     with get_db_context() as db:
         today = date.today()

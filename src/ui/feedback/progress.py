@@ -1,9 +1,11 @@
 """
 UI Feedback - Progress tracking
 """
-import streamlit as st
+
 import time
 from datetime import datetime
+
+import streamlit as st
 
 
 class ProgressTracker:
@@ -132,12 +134,14 @@ class LoadingState:
 
     def add_step(self, step_name: str):
         """Ajoute une étape"""
-        self.steps.append({
-            "name": step_name,
-            "status": "⏳ En cours...",
-            "started_at": datetime.now(),
-            "completed": False
-        })
+        self.steps.append(
+            {
+                "name": step_name,
+                "status": "⏳ En cours...",
+                "started_at": datetime.now(),
+                "completed": False,
+            }
+        )
         self.current_step = len(self.steps) - 1
         self._update_display()
 
@@ -145,10 +149,7 @@ class LoadingState:
         """Marque une étape comme terminée"""
         # Trouver l'étape
         if step_name:
-            step_idx = next(
-                (i for i, s in enumerate(self.steps) if s["name"] == step_name),
-                None
-            )
+            step_idx = next((i for i, s in enumerate(self.steps) if s["name"] == step_name), None)
         else:
             step_idx = self.current_step
 
@@ -160,7 +161,7 @@ class LoadingState:
             if success:
                 step["status"] = f"✅ OK ({elapsed:.1f}s)"
             else:
-                step["status"] = f"❌ Erreur"
+                step["status"] = "❌ Erreur"
 
             step["completed"] = True
             self._update_display()
@@ -168,10 +169,7 @@ class LoadingState:
     def error_step(self, step_name: str = None, error_msg: str = ""):
         """Marque une étape en erreur"""
         if step_name:
-            step_idx = next(
-                (i for i, s in enumerate(self.steps) if s["name"] == step_name),
-                None
-            )
+            step_idx = next((i for i, s in enumerate(self.steps) if s["name"] == step_name), None)
         else:
             step_idx = self.current_step
 
@@ -207,7 +205,7 @@ class LoadingState:
         steps_html = "<div style='padding: 1rem; background: #f8f9fa; border-radius: 8px;'>"
 
         for step in self.steps:
-            steps_html += f"<div style='margin: 0.5rem 0;'>"
+            steps_html += "<div style='margin: 0.5rem 0;'>"
             steps_html += f"<strong>{step['name']}</strong> • {step['status']}"
             steps_html += "</div>"
 

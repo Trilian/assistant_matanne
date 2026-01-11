@@ -1,11 +1,13 @@
 """
 Helpers - Manipulation de données
 """
-from typing import Any, Dict, List, Optional, Callable
-from collections import defaultdict, Counter
+
+from collections import Counter, defaultdict
+from collections.abc import Callable
+from typing import Any
 
 
-def safe_get(data: Dict, *keys, default=None) -> Any:
+def safe_get(data: dict, *keys, default=None) -> Any:
     """
     Récupère valeur nested avec fallback
 
@@ -26,7 +28,7 @@ def safe_get(data: Dict, *keys, default=None) -> Any:
     return result
 
 
-def group_by(items: List[Dict], key: str) -> Dict[Any, List[Dict]]:
+def group_by(items: list[dict], key: str) -> dict[Any, list[dict]]:
     """
     Regroupe items par clé
 
@@ -42,7 +44,7 @@ def group_by(items: List[Dict], key: str) -> Dict[Any, List[Dict]]:
     return dict(grouped)
 
 
-def count_by(items: List[Dict], key: str) -> Dict[Any, int]:
+def count_by(items: list[dict], key: str) -> dict[Any, int]:
     """
     Compte items par clé
 
@@ -54,7 +56,7 @@ def count_by(items: List[Dict], key: str) -> Dict[Any, int]:
     return dict(Counter(item.get(key) for item in items))
 
 
-def deduplicate(items: List[Any], key: Optional[Callable] = None) -> List[Any]:
+def deduplicate(items: list[Any], key: Callable | None = None) -> list[Any]:
     """
     Déduplique une liste
 
@@ -77,7 +79,7 @@ def deduplicate(items: List[Any], key: Optional[Callable] = None) -> List[Any]:
     return result
 
 
-def flatten(nested_list: List[List[Any]]) -> List[Any]:
+def flatten(nested_list: list[list[Any]]) -> list[Any]:
     """
     Aplatit une liste de listes
 
@@ -88,7 +90,7 @@ def flatten(nested_list: List[List[Any]]) -> List[Any]:
     return [item for sublist in nested_list for item in sublist]
 
 
-def partition(items: List[Any], predicate: Callable) -> tuple[List[Any], List[Any]]:
+def partition(items: list[Any], predicate: Callable) -> tuple[list[Any], list[Any]]:
     """
     Partitionne liste selon prédicat
 
@@ -111,7 +113,7 @@ def partition(items: List[Any], predicate: Callable) -> tuple[List[Any], List[An
     return matching, not_matching
 
 
-def merge_dicts(*dicts: Dict) -> Dict:
+def merge_dicts(*dicts: dict) -> dict:
     """
     Fusionne plusieurs dicts (dernier gagne)
 
@@ -125,7 +127,7 @@ def merge_dicts(*dicts: Dict) -> Dict:
     return result
 
 
-def pick(data: Dict, keys: List[str]) -> Dict:
+def pick(data: dict, keys: list[str]) -> dict:
     """
     Extrait uniquement les clés spécifiées
 
@@ -136,7 +138,7 @@ def pick(data: Dict, keys: List[str]) -> Dict:
     return {k: v for k, v in data.items() if k in keys}
 
 
-def omit(data: Dict, keys: List[str]) -> Dict:
+def omit(data: dict, keys: list[str]) -> dict:
     """
     Exclut les clés spécifiées
 

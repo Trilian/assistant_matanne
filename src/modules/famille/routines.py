@@ -3,16 +3,15 @@ Module Routines avec Agent IA intégré
 Gestion des routines quotidiennes avec rappels intelligents
 """
 
-import streamlit as st
-import pandas as pd
-from datetime import datetime, date, time
 import asyncio
-from typing import List, Dict
+from datetime import datetime
 
-from src.core.database import get_db_context
-from src.core.models import Routine, RoutineTask, ChildProfile
+import pandas as pd
+import streamlit as st
+
 from src.core.ai_agent import AgentIA
-
+from src.core.database import get_db_context
+from src.core.models import ChildProfile, Routine, RoutineTask
 
 # ===================================
 # HELPERS
@@ -35,9 +34,9 @@ def charger_routines(actives_uniquement: bool = True) -> pd.DataFrame:
                     "id": r.id,
                     "nom": r.name,
                     "description": r.description or "",
-                    "pour": db.query(ChildProfile).get(r.child_id).name
-                    if r.child_id
-                    else "Famille",
+                    "pour": (
+                        db.query(ChildProfile).get(r.child_id).name if r.child_id else "Famille"
+                    ),
                     "frequence": r.frequency,
                     "active": r.is_active,
                     "ia": "🤖" if r.ai_suggested else "",
@@ -134,7 +133,7 @@ def supprimer_routine(routine_id: int):
         db.commit()
 
 
-def get_taches_en_retard() -> List[Dict]:
+def get_taches_en_retard() -> list[dict]:
     """Détecte les tâches en retard"""
     taches_retard = []
     now = datetime.now().time()
@@ -163,8 +162,9 @@ def get_taches_en_retard() -> List[Dict]:
                             "id": task.id,
                         }
                     )
-            except:
-                pass
+            except Exception:
+                # Ignorer tâches mal formées
+                continue
 
     return taches_retard
 
@@ -442,9 +442,9 @@ def app():
                     for tache in sugg["taches"]:
                         st.write(f"• {tache}")
 
-                    if st.button(f"➕ Créer cette routine", key=f"create_{sugg['nom']}"):
+                    if st.button("➕ Créer cette routine", key=f"create_{sugg['nom']}"):
                         routine_id = creer_routine(
-                            sugg["nom"], f"Routine suggérée par l'IA", "Famille", "quotidien"
+                            sugg["nom"], "Routine suggérée par l'IA", "Famille", "quotidien"
                         )
 
                         for tache in sugg["taches"]:
@@ -493,7 +493,7 @@ def app():
 
                 with col_t1:
                     tache_nom = st.text_input(
-                        f"Tâche {i+1}", placeholder=f"Ex: Brossage de dents", key=f"task_name_{i}"
+                        f"Tâche {i+1}", placeholder="Ex: Brossage de dents", key=f"task_name_{i}"
                     )
 
                 with col_t2:

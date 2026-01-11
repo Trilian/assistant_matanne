@@ -1,11 +1,11 @@
 """
 Helpers - Calculs statistiques
 """
-from typing import List
+
 import statistics
 
 
-def calculate_average(values: List[float]) -> float:
+def calculate_average(values: list[float]) -> float:
     """
     Calcule moyenne
 
@@ -16,7 +16,7 @@ def calculate_average(values: List[float]) -> float:
     return sum(values) / len(values) if values else 0.0
 
 
-def calculate_median(values: List[float]) -> float:
+def calculate_median(values: list[float]) -> float:
     """
     Calcule médiane
 
@@ -31,12 +31,12 @@ def calculate_median(values: List[float]) -> float:
     n = len(sorted_values)
 
     if n % 2 == 0:
-        return (sorted_values[n//2 - 1] + sorted_values[n//2]) / 2
+        return (sorted_values[n // 2 - 1] + sorted_values[n // 2]) / 2
     else:
-        return sorted_values[n//2]
+        return sorted_values[n // 2]
 
 
-def calculate_variance(values: List[float]) -> float:
+def calculate_variance(values: list[float]) -> float:
     """
     Calcule variance
 
@@ -50,7 +50,7 @@ def calculate_variance(values: List[float]) -> float:
     return statistics.variance(values)
 
 
-def calculate_std_dev(values: List[float]) -> float:
+def calculate_std_dev(values: list[float]) -> float:
     """
     Calcule écart-type
 
@@ -64,7 +64,7 @@ def calculate_std_dev(values: List[float]) -> float:
     return statistics.stdev(values)
 
 
-def calculate_percentile(values: List[float], percentile: int) -> float:
+def calculate_percentile(values: list[float], percentile: int) -> float:
     """
     Calcule un percentile
 
@@ -90,7 +90,7 @@ def calculate_percentile(values: List[float], percentile: int) -> float:
     return sorted_values[lower] * (1 - weight) + sorted_values[upper] * weight
 
 
-def calculate_mode(values: List) -> any:
+def calculate_mode(values: list) -> any:
     """
     Calcule le mode (valeur la plus fréquente)
 
@@ -108,7 +108,7 @@ def calculate_mode(values: List) -> any:
         return None
 
 
-def calculate_range(values: List[float]) -> float:
+def calculate_range(values: list[float]) -> float:
     """
     Calcule l'étendue (max - min)
 
@@ -122,7 +122,7 @@ def calculate_range(values: List[float]) -> float:
     return max(values) - min(values)
 
 
-def moving_average(values: List[float], window: int) -> List[float]:
+def moving_average(values: list[float], window: int) -> list[float]:
     """
     Calcule moyenne mobile
 
@@ -135,7 +135,7 @@ def moving_average(values: List[float], window: int) -> List[float]:
 
     result = []
     for i in range(len(values) - window + 1):
-        window_values = values[i:i+window]
+        window_values = values[i : i + window]
         result.append(sum(window_values) / window)
 
     return result

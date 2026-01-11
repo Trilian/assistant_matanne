@@ -2,12 +2,14 @@
 UI Components - Data
 Pagination, métriques, export
 """
-import streamlit as st
-from typing import List, Dict, Union, Optional
+
 import pandas as pd
+import streamlit as st
 
 
-def pagination(total_items: int, items_per_page: int = 20, key: str = "pagination") -> tuple[int, int]:
+def pagination(
+    total_items: int, items_per_page: int = 20, key: str = "pagination"
+) -> tuple[int, int]:
     """
     Pagination simple
 
@@ -43,7 +45,7 @@ def pagination(total_items: int, items_per_page: int = 20, key: str = "paginatio
             options=list(range(1, total_pages + 1)),
             index=st.session_state[f"{key}_page"] - 1,
             key=f"{key}_select",
-            label_visibility="collapsed"
+            label_visibility="collapsed",
         )
 
     with col3:
@@ -57,7 +59,7 @@ def pagination(total_items: int, items_per_page: int = 20, key: str = "paginatio
     return current_page, items_per_page
 
 
-def metrics_row(stats: List[Dict], cols: Optional[int] = None):
+def metrics_row(stats: list[dict], cols: int | None = None):
     """
     Ligne de métriques
 
@@ -83,17 +85,15 @@ def metrics_row(stats: List[Dict], cols: Optional[int] = None):
 
         with columns[idx]:
             st.metric(
-                label=stat.get("label", ""),
-                value=stat.get("value", ""),
-                delta=stat.get("delta")
+                label=stat.get("label", ""), value=stat.get("value", ""), delta=stat.get("delta")
             )
 
 
 def export_buttons(
-        data: Union[List[Dict], pd.DataFrame],
-        filename: str = "export",
-        formats: List[str] = ["csv", "json"],
-        key: str = "export"
+    data: list[dict] | pd.DataFrame,
+    filename: str = "export",
+    formats: list[str] = ["csv", "json"],
+    key: str = "export",
 ):
     """
     Boutons d'export
@@ -124,22 +124,22 @@ def export_buttons(
                     f"{filename}.csv",
                     "text/csv",
                     key=f"{key}_csv",
-                    use_container_width=True
+                    use_container_width=True,
                 )
 
             elif fmt == "json":
-                json_str = df.to_json(orient='records', indent=2)
+                json_str = df.to_json(orient="records", indent=2)
                 st.download_button(
                     "📥 JSON",
                     json_str,
                     f"{filename}.json",
                     "application/json",
                     key=f"{key}_json",
-                    use_container_width=True
+                    use_container_width=True,
                 )
 
 
-def data_table(data: Union[List[Dict], pd.DataFrame], key: str = "table"):
+def data_table(data: list[dict] | pd.DataFrame, key: str = "table"):
     """
     Tableau de données interactif
 
@@ -155,11 +155,7 @@ def data_table(data: Union[List[Dict], pd.DataFrame], key: str = "table"):
     else:
         df = data
 
-    st.dataframe(
-        df,
-        use_container_width=True,
-        key=key
-    )
+    st.dataframe(df, use_container_width=True, key=key)
 
 
 def progress_bar(value: float, label: str = "", key: str = "progress"):
@@ -191,12 +187,7 @@ def status_indicator(status: str, label: str = ""):
     Example:
         status_indicator("success", "Connecté")
     """
-    colors = {
-        "success": "#4CAF50",
-        "warning": "#FFC107",
-        "error": "#f44336",
-        "info": "#2196F3"
-    }
+    colors = {"success": "#4CAF50", "warning": "#FFC107", "error": "#f44336", "info": "#2196F3"}
 
     color = colors.get(status, "#gray")
 
@@ -204,7 +195,7 @@ def status_indicator(status: str, label: str = ""):
         f'<div style="display: flex; align-items: center; gap: 0.5rem;">'
         f'<div style="width: 12px; height: 12px; background: {color}; '
         f'border-radius: 50%; box-shadow: 0 0 8px {color};"></div>'
-        f'<span>{label}</span>'
-        f'</div>',
-        unsafe_allow_html=True
+        f"<span>{label}</span>"
+        f"</div>",
+        unsafe_allow_html=True,
     )

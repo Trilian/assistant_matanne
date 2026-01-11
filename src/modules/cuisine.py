@@ -12,31 +12,23 @@ Module complet pour la cuisine fusionnant :
 
 Architecture simplifiée : Tout en 1 module avec tabs dynamiques.
 """
-import streamlit as st
+
 from datetime import date, timedelta
-from typing import Dict, List, Optional
 
-# Services unifiés
-from src.services import (
-    recette_service,
-    inventaire_service,
-    planning_service,
-    courses_service
-)
-
-# UI Components
-from src.ui.components import (
-    badge, empty_state, metric_card, search_bar,
-    item_card, export_buttons, tabs_layout
-)
+import streamlit as st
 
 # State
-from src.core.state import get_state, StateManager
+from src.core.state import StateManager
 
+# Services unifiés
+from src.services import courses_service, inventaire_service, planning_service, recette_service
+
+# UI Components
 
 # ═══════════════════════════════════════════════════════════
 # MODULE PRINCIPAL
 # ═══════════════════════════════════════════════════════════
+
 
 def app():
     """Point d'entrée module cuisine unifié avec navigation dynamique"""
@@ -51,12 +43,7 @@ def app():
     active_tab = st.session_state.get("cuisine_active_tab", 0)
 
     # Labels des onglets
-    tab_labels = [
-        "🍽️ Recettes",
-        "📦 Inventaire",
-        "📅 Planning",
-        "🛒 Courses"
-    ]
+    tab_labels = ["🍽️ Recettes", "📦 Inventaire", "📅 Planning", "🛒 Courses"]
 
     # ═══════════════════════════════════════════════════════
     # TABS STREAMLIT (avec sélection automatique)
@@ -70,10 +57,10 @@ def app():
     for idx, label in enumerate(tab_labels):
         with cols[idx]:
             if st.button(
-                    label,
-                    key=f"tab_btn_{idx}",
-                    use_container_width=True,
-                    type="primary" if idx == active_tab else "secondary"
+                label,
+                key=f"tab_btn_{idx}",
+                use_container_width=True,
+                type="primary" if idx == active_tab else "secondary",
             ):
                 st.session_state.cuisine_active_tab = idx
                 st.rerun()
@@ -98,16 +85,13 @@ def app():
 # SECTION 1 : RECETTES
 # ═══════════════════════════════════════════════════════════
 
+
 def render_recettes():
     """Section recettes"""
     st.markdown("### 🍽️ Mes Recettes")
 
     # Sous-tabs
-    tab_liste, tab_ajout, tab_ia = st.tabs([
-        "📋 Liste",
-        "➕ Ajouter",
-        "✨ Générer IA"
-    ])
+    tab_liste, tab_ajout, tab_ia = st.tabs(["📋 Liste", "➕ Ajouter", "✨ Générer IA"])
 
     with tab_liste:
         render_recettes_liste()
@@ -126,7 +110,7 @@ def render_recettes_liste():
     with col1:
         search = st.text_input("🔍 Rechercher", placeholder="Nom de recette...")
     with col2:
-        export = st.button("📥 Export", use_container_width=True)
+        _export = st.button("📥 Export", use_container_width=True)
 
     # Filtres rapides
     col1, col2, col3 = st.columns(3)
@@ -146,11 +130,7 @@ def render_recettes_liste():
     if difficulte != "Toutes":
         filters["difficulte"] = difficulte
 
-    recettes = recette_service.search_advanced(
-        term=search if search else None,
-        **filters,
-        limit=50
-    )
+    recettes = recette_service.search_advanced(term=search if search else None, **filters, limit=50)
 
     # Stats
     if recettes:
@@ -174,7 +154,9 @@ def render_recettes_liste():
             with cols[idx % 3]:
                 with st.container():
                     st.markdown(f"**{recette.nom}**")
-                    st.caption(f"{recette.temps_total}min • {recette.portions}p • {recette.difficulte}")
+                    st.caption(
+                        f"{recette.temps_total}min • {recette.portions}p • {recette.difficulte}"
+                    )
 
                     col_a, col_b = st.columns(2)
                     with col_a:
@@ -182,7 +164,9 @@ def render_recettes_liste():
                             StateManager.definir_contexte(recette.id, "recette")
                             st.rerun()
                     with col_b:
-                        if st.button("✏️ Éditer", key=f"edit_{recette.id}", use_container_width=True):
+                        if st.button(
+                            "✏️ Éditer", key=f"edit_{recette.id}", use_container_width=True
+                        ):
                             pass  # À implémenter
 
                     st.markdown("---")
@@ -201,7 +185,9 @@ def render_recettes_ajout():
             nom = st.text_input("Nom *", placeholder="Ex: Tarte aux pommes")
             temps_prep = st.number_input("Temps préparation (min) *", min_value=1, value=15)
             portions = st.number_input("Portions *", min_value=1, value=4)
-            type_repas = st.selectbox("Type repas *", ["déjeuner", "dîner", "goûter", "petit_déjeuner"])
+            type_repas = st.selectbox(
+                "Type repas *", ["déjeuner", "dîner", "goûter", "petit_déjeuner"]
+            )
 
         with col2:
             description = st.text_area("Description", height=100)
@@ -211,16 +197,14 @@ def render_recettes_ajout():
 
         st.markdown("#### Ingrédients")
         ingredients_text = st.text_area(
-            "Ingrédients (un par ligne)",
-            placeholder="200g farine\n3 oeufs\n100ml lait",
-            height=150
+            "Ingrédients (un par ligne)", placeholder="200g farine\n3 oeufs\n100ml lait", height=150
         )
 
         st.markdown("#### Étapes")
         etapes_text = st.text_area(
             "Étapes (une par ligne)",
             placeholder="1. Préchauffer le four\n2. Mélanger les ingrédients\n3. Cuire 30min",
-            height=150
+            height=150,
         )
 
         submitted = st.form_submit_button("💾 Sauvegarder", use_container_width=True)
@@ -235,20 +219,13 @@ def render_recettes_ajout():
                     if line.strip():
                         parts = line.strip().split(" ", 1)
                         if len(parts) == 2:
-                            ingredients.append({
-                                "nom": parts[1],
-                                "quantite": 1.0,
-                                "unite": "pcs"
-                            })
+                            ingredients.append({"nom": parts[1], "quantite": 1.0, "unite": "pcs"})
 
                 # Parser étapes
                 etapes = []
                 for idx, line in enumerate(etapes_text.split("\n"), 1):
                     if line.strip():
-                        etapes.append({
-                            "ordre": idx,
-                            "description": line.strip()
-                        })
+                        etapes.append({"ordre": idx, "description": line.strip()})
 
                 # Créer recette
                 data = {
@@ -261,7 +238,7 @@ def render_recettes_ajout():
                     "type_repas": type_repas,
                     "saison": saison,
                     "ingredients": ingredients,
-                    "etapes": etapes
+                    "etapes": etapes,
                 }
 
                 recette = recette_service.create_complete(data)
@@ -287,20 +264,21 @@ def render_recettes_ia():
         nb_recettes = st.slider("Nombre de recettes", 1, 5, 3)
 
     ingredients_dispo = st.text_input(
-        "Ingrédients disponibles (optionnel)",
-        placeholder="Ex: poulet, tomates, pâtes"
+        "Ingrédients disponibles (optionnel)", placeholder="Ex: poulet, tomates, pâtes"
     )
 
     if st.button("🎲 Générer des recettes", use_container_width=True, type="primary"):
         with st.spinner("Génération en cours..."):
-            ingredients_list = [i.strip() for i in ingredients_dispo.split(",")] if ingredients_dispo else None
+            ingredients_list = (
+                [i.strip() for i in ingredients_dispo.split(",")] if ingredients_dispo else None
+            )
 
             recettes = recette_service.generer_recettes_ia(
                 type_repas=type_repas,
                 saison=saison,
                 difficulte=difficulte,
                 ingredients_dispo=ingredients_list,
-                nb_recettes=nb_recettes
+                nb_recettes=nb_recettes,
             )
 
             if recettes:
@@ -308,10 +286,12 @@ def render_recettes_ia():
 
                 for idx, recette_data in enumerate(recettes, 1):
                     with st.expander(f"📖 {idx}. {recette_data.get('nom', 'Sans nom')}"):
-                        st.write(recette_data.get('description', ''))
-                        st.caption(f"⏱️ {recette_data.get('temps_preparation', 0)}min prep + {recette_data.get('temps_cuisson', 0)}min cuisson")
+                        st.write(recette_data.get("description", ""))
+                        st.caption(
+                            f"⏱️ {recette_data.get('temps_preparation', 0)}min prep + {recette_data.get('temps_cuisson', 0)}min cuisson"
+                        )
 
-                        if st.button(f"➕ Ajouter cette recette", key=f"add_ia_{idx}"):
+                        if st.button("➕ Ajouter cette recette", key=f"add_ia_{idx}"):
                             recette = recette_service.create_complete(recette_data)
                             if recette:
                                 st.success("Recette ajoutée !")
@@ -323,6 +303,7 @@ def render_recettes_ia():
 # ═══════════════════════════════════════════════════════════
 # SECTION 2 : INVENTAIRE
 # ═══════════════════════════════════════════════════════════
+
 
 def render_inventaire():
     """Section inventaire"""
@@ -342,7 +323,9 @@ def render_inventaire():
     if any(alertes.values()):
         with st.expander("⚠️ Voir les alertes", expanded=True):
             for article in alertes.get("critique", [])[:5]:
-                st.error(f"🔴 **{article['ingredient_nom']}** : {article['quantite']}{article['unite']} (seuil: {article['quantite_min']})")
+                st.error(
+                    f"🔴 **{article['ingredient_nom']}** : {article['quantite']}{article['unite']} (seuil: {article['quantite_min']})"
+                )
 
     st.markdown("---")
 
@@ -353,7 +336,9 @@ def render_inventaire():
         # Filtres
         col1, col2 = st.columns(2)
         with col1:
-            emplacement_filter = st.selectbox("Emplacement", ["Tous", "Frigo", "Congélateur", "Placard"])
+            emplacement_filter = st.selectbox(
+                "Emplacement", ["Tous", "Frigo", "Congélateur", "Placard"]
+            )
         with col2:
             search = st.text_input("🔍 Rechercher")
 
@@ -369,20 +354,27 @@ def render_inventaire():
             col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
 
             with col1:
-                statut_emoji = {"ok": "🟢", "stock_bas": "🟡", "critique": "🔴", "peremption_proche": "⏳"}
-                st.write(f"{statut_emoji.get(article['statut'], '⚪')} **{article['ingredient_nom']}**")
+                statut_emoji = {
+                    "ok": "🟢",
+                    "stock_bas": "🟡",
+                    "critique": "🔴",
+                    "peremption_proche": "⏳",
+                }
+                st.write(
+                    f"{statut_emoji.get(article['statut'], '⚪')} **{article['ingredient_nom']}**"
+                )
 
             with col2:
                 st.write(f"{article['quantite']}{article['unite']}")
 
             with col3:
                 if st.button("➕", key=f"add_{article['id']}"):
-                    inventaire_service.ajuster_quantite(article['id'], 1, "ajout")
+                    inventaire_service.ajuster_quantite(article["id"], 1, "ajout")
                     st.rerun()
 
             with col4:
                 if st.button("➖", key=f"sub_{article['id']}"):
-                    inventaire_service.ajuster_quantite(article['id'], 1, "retrait")
+                    inventaire_service.ajuster_quantite(article["id"], 1, "retrait")
                     st.rerun()
     else:
         st.info("Inventaire vide")
@@ -391,6 +383,7 @@ def render_inventaire():
 # ═══════════════════════════════════════════════════════════
 # SECTION 3 : PLANNING
 # ═══════════════════════════════════════════════════════════
+
 
 def render_planning():
     """Section planning"""
@@ -432,11 +425,15 @@ def render_planning():
                     for repas in repas_jour:
                         col1, col2, col3 = st.columns([3, 1, 1])
                         with col1:
-                            st.write(f"**{repas['type_repas']}** : {repas['recette_nom'] or 'Non défini'}")
+                            st.write(
+                                f"**{repas['type_repas']}** : {repas['recette_nom'] or 'Non défini'}"
+                            )
                         with col2:
-                            checked = st.checkbox("✅", value=repas['prepare'], key=f"prep_{repas['id']}")
-                            if checked != repas['prepare']:
-                                planning_service.marquer_repas_prepare(repas['id'], checked)
+                            checked = st.checkbox(
+                                "✅", value=repas["prepare"], key=f"prep_{repas['id']}"
+                            )
+                            if checked != repas["prepare"]:
+                                planning_service.marquer_repas_prepare(repas["id"], checked)
                         with col3:
                             if st.button("✏️", key=f"edit_repas_{repas['id']}"):
                                 pass  # À implémenter
@@ -457,6 +454,7 @@ def render_planning():
 # SECTION 4 : COURSES
 # ═══════════════════════════════════════════════════════════
 
+
 def render_courses():
     """Section liste de courses"""
     st.markdown("### 🛒 Liste de Courses")
@@ -473,17 +471,24 @@ def render_courses():
 
             with col1:
                 priorite_emoji = {"haute": "🔴", "moyenne": "🟡", "basse": "🟢"}
-                st.write(f"{priorite_emoji.get(article['priorite'], '⚪')} **{article['ingredient_nom']}** ({article['quantite_necessaire']}{article['unite']})")
+                st.write(
+                    f"{priorite_emoji.get(article['priorite'], '⚪')} **{article['ingredient_nom']}** ({article['quantite_necessaire']}{article['unite']})"
+                )
 
             with col2:
-                checked = st.checkbox("✅", value=article['achete'], key=f"achete_{article['id']}", label_visibility="collapsed")
-                if checked != article['achete']:
-                    courses_service.marquer_achete(article['id'], checked)
+                checked = st.checkbox(
+                    "✅",
+                    value=article["achete"],
+                    key=f"achete_{article['id']}",
+                    label_visibility="collapsed",
+                )
+                if checked != article["achete"]:
+                    courses_service.marquer_achete(article["id"], checked)
                     st.rerun()
 
             with col3:
                 if st.button("🗑️", key=f"del_{article['id']}"):
-                    courses_service.delete(article['id'])
+                    courses_service.delete(article["id"])
                     st.rerun()
 
         # Actions
@@ -491,7 +496,7 @@ def render_courses():
         with col1:
             if st.button("✅ Tout marquer acheté", use_container_width=True):
                 for article in courses:
-                    courses_service.marquer_achete(article['id'], True)
+                    courses_service.marquer_achete(article["id"], True)
                 st.rerun()
         with col2:
             if st.button("📥 Export CSV", use_container_width=True):
@@ -508,10 +513,10 @@ def render_courses():
                     for sugg in suggestions:
                         if st.button(f"➕ {sugg['nom']}", key=f"add_sugg_{sugg['nom']}"):
                             courses_service.ajouter_article(
-                                sugg['nom'],
-                                sugg['quantite'],
-                                sugg.get('unite', 'pcs'),
-                                sugg.get('priorite', 'moyenne')
+                                sugg["nom"],
+                                sugg["quantite"],
+                                sugg.get("unite", "pcs"),
+                                sugg.get("priorite", "moyenne"),
                             )
                             st.rerun()
 

@@ -1,10 +1,9 @@
 """
 Formatters - Nombres, quantités, prix, pourcentages
 """
-from typing import Union, Optional
 
 
-def format_quantity(quantity: Union[int, float, None], decimals: int = 2) -> str:
+def format_quantity(quantity: int | float | None, decimals: int = 2) -> str:
     """
     Formate une quantité en enlevant les décimales inutiles
 
@@ -35,11 +34,7 @@ def format_quantity(quantity: Union[int, float, None], decimals: int = 2) -> str
     return formatted
 
 
-def format_quantity_with_unit(
-        quantity: Union[int, float, None],
-        unit: str,
-        decimals: int = 2
-) -> str:
+def format_quantity_with_unit(quantity: int | float | None, unit: str, decimals: int = 2) -> str:
     """
     Formate quantité + unité
 
@@ -53,7 +48,7 @@ def format_quantity_with_unit(
     return f"{qty_formatted} {unit_clean}" if unit_clean else qty_formatted
 
 
-def format_price(price: Union[int, float, None], currency: str = "€") -> str:
+def format_price(price: int | float | None, currency: str = "€") -> str:
     """
     Formate un prix
 
@@ -80,9 +75,7 @@ def format_price(price: Union[int, float, None], currency: str = "€") -> str:
 
 
 def format_currency(
-        amount: Union[int, float, None],
-        currency: str = "EUR",
-        locale: str = "fr_FR"
+    amount: int | float | None, currency: str = "EUR", locale: str = "fr_FR"
 ) -> str:
     """
     Formate montant avec séparateurs de milliers
@@ -114,11 +107,7 @@ def format_currency(
         return f"{symbol}{formatted}"
 
 
-def format_percentage(
-        value: Union[int, float, None],
-        decimals: int = 1,
-        symbol: str = "%"
-) -> str:
+def format_percentage(value: int | float | None, decimals: int = 1, symbol: str = "%") -> str:
     """
     Formate un pourcentage
 
@@ -145,11 +134,7 @@ def format_percentage(
     return f"{formatted}{symbol}"
 
 
-def format_number(
-        number: Union[int, float, None],
-        decimals: int = 0,
-        thousands_sep: str = " "
-) -> str:
+def format_number(number: int | float | None, decimals: int = 0, thousands_sep: str = " ") -> str:
     """
     Formate un nombre avec séparateurs
 
@@ -175,7 +160,7 @@ def format_number(
     return formatted
 
 
-def format_file_size(bytes: Union[int, float, None]) -> str:
+def format_file_size(bytes: int | float | None) -> str:
     """
     Formate une taille de fichier
 
@@ -219,7 +204,7 @@ def format_range(min_val: float, max_val: float, unit: str = "") -> str:
     return f"{min_str}-{max_str}"
 
 
-def smart_round(value: Union[int, float], precision: int = 2) -> float:
+def smart_round(value: int | float, precision: int = 2) -> float:
     """
     Arrondi intelligent (évite erreurs de float)
 

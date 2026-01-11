@@ -2,15 +2,17 @@
 Analyseur JSON IA Ultra-Robuste
 Gère tous les cas edge des réponses Mistral/GPT
 """
+
 import json
-import re
-from typing import Dict, List, Optional, Type, TypeVar, Any
-from pydantic import BaseModel, ValidationError
 import logging
+import re
+from typing import TypeVar
+
+from pydantic import BaseModel, ValidationError
 
 logger = logging.getLogger(__name__)
 
-T = TypeVar('T', bound=BaseModel)
+T = TypeVar("T", bound=BaseModel)
 
 
 class AnalyseurIA:
@@ -27,10 +29,7 @@ class AnalyseurIA:
 
     @staticmethod
     def analyser(
-            reponse: str,
-            modele: Type[T],
-            valeur_secours: Optional[Dict] = None,
-            strict: bool = False
+        reponse: str, modele: type[T], valeur_secours: dict | None = None, strict: bool = False
     ) -> T:
         """
         Parse réponse IA en modèle Pydantic
@@ -108,15 +107,15 @@ class AnalyseurIA:
         debut = None
 
         for i, char in enumerate(texte):
-            if char == '{':
+            if char == "{":
                 if not pile:
                     debut = i
                 pile.append(char)
-            elif char == '}':
+            elif char == "}":
                 if pile:
                     pile.pop()
                 if not pile and debut is not None:
-                    return texte[debut:i+1]
+                    return texte[debut : i + 1]
 
         raise ValueError("Aucun objet JSON complet trouvé")
 
@@ -126,22 +125,18 @@ class AnalyseurIA:
         texte = AnalyseurIA._nettoyer_basique(texte)
 
         # Échapper apostrophes dans strings
-        texte = re.sub(
-            r'(["\'])([^"\']*?)\'([^"\']*?)\1',
-            r'\1\2\\\'\3\1',
-            texte
-        )
+        texte = re.sub(r'(["\'])([^"\']*?)\'([^"\']*?)\1', r"\1\2\\\'\3\1", texte)
 
         # Supprimer virgules trailing
         texte = re.sub(r",\s*([}\]])", r"\1", texte)
 
         # Guillemets sur clés
-        texte = re.sub(r'([{\s,])(\w+)(\s*:)', r'\1"\2"\3', texte)
+        texte = re.sub(r"([{\s,])(\w+)(\s*:)", r'\1"\2"\3', texte)
 
         # Python booleans -> JSON
-        texte = re.sub(r'\bTrue\b', 'true', texte)
-        texte = re.sub(r'\bFalse\b', 'false', texte)
-        texte = re.sub(r'\bNone\b', 'null', texte)
+        texte = re.sub(r"\bTrue\b", "true", texte)
+        texte = re.sub(r"\bFalse\b", "false", texte)
+        texte = re.sub(r"\bNone\b", "null", texte)
 
         # Apostrophes simples -> doubles
         texte = re.sub(r"'([^']*)'(\s*[:, \]}])", r'"\1"\2', texte)
@@ -149,7 +144,7 @@ class AnalyseurIA:
         return texte
 
     @staticmethod
-    def _analyser_partiel(texte: str, modele: Type[BaseModel]) -> Optional[Dict]:
+    def _analyser_partiel(texte: str, modele: type[BaseModel]) -> dict | None:
         """Parse partiel si JSON cassé"""
         try:
             champs_modele = modele.__fields__.keys()
@@ -165,13 +160,13 @@ class AnalyseurIA:
 
                         if chaine_valeur.startswith('"'):
                             resultat[champ] = json.loads(chaine_valeur)
-                        elif chaine_valeur.startswith('['):
+                        elif chaine_valeur.startswith("["):
                             resultat[champ] = json.loads(chaine_valeur)
-                        elif chaine_valeur.startswith('{'):
+                        elif chaine_valeur.startswith("{"):
                             resultat[champ] = json.loads(chaine_valeur)
                         else:
                             resultat[champ] = json.loads(chaine_valeur)
-                    except:
+                    except Exception:
                         pass
 
             if resultat:
@@ -185,11 +180,11 @@ class AnalyseurIA:
 
 
 def analyser_liste_reponse(
-        reponse: str,
-        modele_item: Type[BaseModel],
-        cle_liste: str = "items",
-        items_secours: Optional[List[Dict]] = None
-) -> List[BaseModel]:
+    reponse: str,
+    modele_item: type[BaseModel],
+    cle_liste: str = "items",
+    items_secours: list[dict] | None = None,
+) -> list[BaseModel]:
     """
     Parse une réponse contenant une liste
 
@@ -202,14 +197,12 @@ def analyser_liste_reponse(
     Returns:
         Liste d'items validés
     """
+
     class EnvelopeListe(BaseModel):
-        items: List[modele_item]
+        items: list[modele_item]
 
     donnees_enveloppe = AnalyseurIA.analyser(
-        reponse,
-        EnvelopeListe,
-        valeur_secours={cle_liste: items_secours or []},
-        strict=False
+        reponse, EnvelopeListe, valeur_secours={cle_liste: items_secours or []}, strict=False
     )
 
     return donnees_enveloppe.items

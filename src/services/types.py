@@ -2,19 +2,23 @@
 Service Types - Types et classes de base partagés
 Point d'entrée sans dépendances circulaires
 """
-from typing import TypeVar, Generic, List, Dict, Optional, Any, Callable, Tuple
-from sqlalchemy.orm import Session
-from sqlalchemy import func, or_, desc
-from datetime import datetime
+
 import logging
+from collections.abc import Callable
+from datetime import datetime
+from typing import Any, Generic, TypeVar
+
+from sqlalchemy import desc, func, or_
+from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 # ═══════════════════════════════════════════════════════════
 # BASE SERVICE (Sans dépendances UI)
 # ═══════════════════════════════════════════════════════════
+
 
 class BaseService(Generic[T]):
     """
@@ -39,10 +43,8 @@ class BaseService(Generic[T]):
     # CRUD DE BASE
     # ════════════════════════════════════════════════════════════
 
-    def create(self, data: Dict, db: Session = None) -> T:
+    def create(self, data: dict, db: Session = None) -> T:
         """Crée une entité"""
-        from src.core.database import obtenir_contexte_db
-        from src.core.cache import Cache
         from src.core.errors import gerer_erreurs
 
         @gerer_erreurs(afficher_dans_ui=True)
@@ -57,14 +59,13 @@ class BaseService(Generic[T]):
 
         return self._with_session(_execute, db)
 
-    def get_by_id(self, entity_id: int, db: Session = None) -> Optional[T]:
+    def get_by_id(self, entity_id: int, db: Session = None) -> T | None:
         """Récupère par ID avec cache"""
-        from src.core.database import obtenir_contexte_db
         from src.core.cache import Cache
         from src.core.errors import gerer_erreurs
 
         @gerer_erreurs(afficher_dans_ui=False, valeur_fallback=None)
-        def _execute(session: Session) -> Optional[T]:
+        def _execute(session: Session) -> T | None:
             cache_key = f"{self.model_name.lower()}_{entity_id}"
             cached = Cache.obtenir(cache_key, ttl=self.cache_ttl)
             if cached:
@@ -77,14 +78,20 @@ class BaseService(Generic[T]):
 
         return self._with_session(_execute, db)
 
-    def get_all(self, skip: int = 0, limit: int = 100, filters: Optional[Dict] = None,
-                order_by: str = "id", desc_order: bool = False, db: Session = None) -> List[T]:
+    def get_all(
+        self,
+        skip: int = 0,
+        limit: int = 100,
+        filters: dict | None = None,
+        order_by: str = "id",
+        desc_order: bool = False,
+        db: Session = None,
+    ) -> list[T]:
         """Liste avec filtres et tri"""
-        from src.core.database import obtenir_contexte_db
         from src.core.errors import gerer_erreurs
 
         @gerer_erreurs(afficher_dans_ui=False, valeur_fallback=[])
-        def _execute(session: Session) -> List[T]:
+        def _execute(session: Session) -> list[T]:
             query = session.query(self.model)
             if filters:
                 query = self._apply_filters(query, filters)
@@ -95,14 +102,12 @@ class BaseService(Generic[T]):
 
         return self._with_session(_execute, db)
 
-    def update(self, entity_id: int, data: Dict, db: Session = None) -> Optional[T]:
+    def update(self, entity_id: int, data: dict, db: Session = None) -> T | None:
         """Met à jour une entité"""
-        from src.core.database import obtenir_contexte_db
-        from src.core.cache import Cache
-        from src.core.errors import gerer_erreurs, ErreurNonTrouve
+        from src.core.errors import ErreurNonTrouve, gerer_erreurs
 
         @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=None)
-        def _execute(session: Session) -> Optional[T]:
+        def _execute(session: Session) -> T | None:
             entity = session.query(self.model).get(entity_id)
             if not entity:
                 raise ErreurNonTrouve(f"{self.model_name} {entity_id} non trouvé")
@@ -119,8 +124,6 @@ class BaseService(Generic[T]):
 
     def delete(self, entity_id: int, db: Session = None) -> bool:
         """Supprime une entité"""
-        from src.core.database import obtenir_contexte_db
-        from src.core.cache import Cache
         from src.core.errors import gerer_erreurs
 
         @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=False)
@@ -135,9 +138,8 @@ class BaseService(Generic[T]):
 
         return self._with_session(_execute, db)
 
-    def count(self, filters: Optional[Dict] = None, db: Session = None) -> int:
+    def count(self, filters: dict | None = None, db: Session = None) -> int:
         """Compte les entités"""
-        from src.core.database import obtenir_contexte_db
         from src.core.errors import gerer_erreurs
 
         @gerer_erreurs(afficher_dans_ui=False, valeur_fallback=0)
@@ -153,26 +155,30 @@ class BaseService(Generic[T]):
     # RECHERCHE AVANCÉE
     # ════════════════════════════════════════════════════════════
 
-    def advanced_search(self, search_term: Optional[str] = None,
-                        search_fields: Optional[List[str]] = None,
-                        filters: Optional[Dict] = None,
-                        sort_by: Optional[str] = None,
-                        sort_desc: bool = False,
-                        limit: int = 100, offset: int = 0,
-                        db: Session = None) -> List[T]:
+    def advanced_search(
+        self,
+        search_term: str | None = None,
+        search_fields: list[str] | None = None,
+        filters: dict | None = None,
+        sort_by: str | None = None,
+        sort_desc: bool = False,
+        limit: int = 100,
+        offset: int = 0,
+        db: Session = None,
+    ) -> list[T]:
         """Recherche multi-critères"""
-        from src.core.database import obtenir_contexte_db
         from src.core.errors import gerer_erreurs
 
         @gerer_erreurs(afficher_dans_ui=False, valeur_fallback=[])
-        def _execute(session: Session) -> List[T]:
+        def _execute(session: Session) -> list[T]:
             query = session.query(self.model)
 
             # Recherche textuelle
             if search_term and search_fields:
                 conditions = [
                     getattr(self.model, field).ilike(f"%{search_term}%")
-                    for field in search_fields if hasattr(self.model, field)
+                    for field in search_fields
+                    if hasattr(self.model, field)
                 ]
                 if conditions:
                     query = query.filter(or_(*conditions))
@@ -194,25 +200,29 @@ class BaseService(Generic[T]):
     # BULK OPERATIONS
     # ════════════════════════════════════════════════════════════
 
-    def bulk_create_with_merge(self, items_data: List[Dict], merge_key: str,
-                               merge_strategy: Callable[[Dict, Dict], Dict],
-                               db: Session = None) -> Tuple[int, int]:
+    def bulk_create_with_merge(
+        self,
+        items_data: list[dict],
+        merge_key: str,
+        merge_strategy: Callable[[dict, dict], dict],
+        db: Session = None,
+    ) -> tuple[int, int]:
         """Création en masse avec fusion intelligente"""
-        from src.core.database import obtenir_contexte_db
-        from src.core.cache import Cache
         from src.core.errors import gerer_erreurs
 
         @gerer_erreurs(afficher_dans_ui=True)
-        def _execute(session: Session) -> Tuple[int, int]:
+        def _execute(session: Session) -> tuple[int, int]:
             created = merged = 0
             for data in items_data:
                 merge_value = data.get(merge_key)
                 if not merge_value:
                     continue
 
-                existing = session.query(self.model).filter(
-                    getattr(self.model, merge_key) == merge_value
-                ).first()
+                existing = (
+                    session.query(self.model)
+                    .filter(getattr(self.model, merge_key) == merge_value)
+                    .first()
+                )
 
                 if existing:
                     existing_dict = self._model_to_dict(existing)
@@ -237,16 +247,18 @@ class BaseService(Generic[T]):
     # STATISTIQUES
     # ════════════════════════════════════════════════════════════
 
-    def get_stats(self, group_by_fields: Optional[List[str]] = None,
-                  count_filters: Optional[Dict[str, Dict]] = None,
-                  additional_filters: Optional[Dict] = None,
-                  db: Session = None) -> Dict:
+    def get_stats(
+        self,
+        group_by_fields: list[str] | None = None,
+        count_filters: dict[str, dict] | None = None,
+        additional_filters: dict | None = None,
+        db: Session = None,
+    ) -> dict:
         """Statistiques génériques"""
-        from src.core.database import obtenir_contexte_db
         from src.core.errors import gerer_erreurs
 
         @gerer_erreurs(afficher_dans_ui=False, valeur_fallback={})
-        def _execute(session: Session) -> Dict:
+        def _execute(session: Session) -> dict:
             query = session.query(self.model)
             if additional_filters:
                 query = self._apply_filters(query, additional_filters)
@@ -257,10 +269,11 @@ class BaseService(Generic[T]):
             if group_by_fields:
                 for field in group_by_fields:
                     if hasattr(self.model, field):
-                        grouped = session.query(
-                            getattr(self.model, field),
-                            func.count(self.model.id)
-                        ).group_by(getattr(self.model, field)).all()
+                        grouped = (
+                            session.query(getattr(self.model, field), func.count(self.model.id))
+                            .group_by(getattr(self.model, field))
+                            .all()
+                        )
                         stats[f"by_{field}"] = dict(grouped)
 
             # Compteurs conditionnels
@@ -280,12 +293,14 @@ class BaseService(Generic[T]):
     # MIXINS INTÉGRÉS
     # ════════════════════════════════════════════════════════════
 
-    def count_by_status(self, status_field: str = "statut", db: Session = None) -> Dict[str, int]:
+    def count_by_status(self, status_field: str = "statut", db: Session = None) -> dict[str, int]:
         """Compte par statut"""
         stats = self.get_stats(group_by_fields=[status_field], db=db)
         return stats.get(f"by_{status_field}", {})
 
-    def mark_as(self, item_id: int, status_field: str, status_value: str, db: Session = None) -> bool:
+    def mark_as(
+        self, item_id: int, status_field: str, status_value: str, db: Session = None
+    ) -> bool:
         """Marque avec un statut"""
         return self.update(item_id, {status_field: status_value}, db=db) is not None
 
@@ -293,7 +308,7 @@ class BaseService(Generic[T]):
     # HELPERS PRIVÉS
     # ════════════════════════════════════════════════════════════
 
-    def _with_session(self, func: Callable, db: Optional[Session]) -> Any:
+    def _with_session(self, func: Callable, db: Session | None) -> Any:
         """Exécute fonction avec session"""
         from src.core.database import obtenir_contexte_db
 
@@ -302,7 +317,7 @@ class BaseService(Generic[T]):
         with obtenir_contexte_db() as session:
             return func(session)
 
-    def _apply_filters(self, query, filters: Dict):
+    def _apply_filters(self, query, filters: dict):
         """Applique filtres génériques"""
         for field, value in filters.items():
             if not hasattr(self.model, field):
@@ -322,7 +337,7 @@ class BaseService(Generic[T]):
                         query = query.filter(column.ilike(f"%{val}%"))
         return query
 
-    def _model_to_dict(self, obj: Any) -> Dict:
+    def _model_to_dict(self, obj: Any) -> dict:
         """Convertit modèle en dict"""
         result = {}
         for column in obj.__table__.columns:
@@ -335,6 +350,7 @@ class BaseService(Generic[T]):
     def _invalider_cache(self):
         """Invalide le cache"""
         from src.core.cache import Cache
+
         Cache.invalider(pattern=self.model_name.lower())
 
 

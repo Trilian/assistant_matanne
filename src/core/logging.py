@@ -4,6 +4,7 @@ Central logging configuration for the application.
 Provides a small helper to configure Python logging consistently
 across Streamlit and normal execution environments.
 """
+
 import logging
 import os
 
@@ -50,9 +51,7 @@ Ce module fournit un gestionnaire de logs avec :
 - Configuration automatique
 - Niveaux de log adaptatifs
 """
-import logging
 import sys
-from typing import Optional
 
 
 class FormatteurColore(logging.Formatter):
@@ -64,12 +63,12 @@ class FormatteurColore(logging.Formatter):
     """
 
     COULEURS = {
-        'DEBUG': '\033[36m',     # Cyan
-        'INFO': '\033[32m',      # Vert
-        'WARNING': '\033[33m',   # Jaune
-        'ERROR': '\033[31m',     # Rouge
-        'CRITICAL': '\033[35m',  # Magenta
-        'RESET': '\033[0m'       # Reset
+        "DEBUG": "\033[36m",  # Cyan
+        "INFO": "\033[32m",  # Vert
+        "WARNING": "\033[33m",  # Jaune
+        "ERROR": "\033[31m",  # Rouge
+        "CRITICAL": "\033[35m",  # Magenta
+        "RESET": "\033[0m",  # Reset
     }
 
     def format(self, record: logging.LogRecord) -> str:
@@ -84,9 +83,7 @@ class FormatteurColore(logging.Formatter):
         """
         levelname = record.levelname
         if levelname in self.COULEURS:
-            record.levelname = (
-                f"{self.COULEURS[levelname]}{levelname}{self.COULEURS['RESET']}"
-            )
+            record.levelname = f"{self.COULEURS[levelname]}{levelname}{self.COULEURS['RESET']}"
         return super().format(record)
 
 
@@ -128,8 +125,7 @@ class GestionnaireLog:
 
         # Format avec couleurs
         format_console = FormatteurColore(
-            '%(levelname)-8s | %(name)-25s | %(message)s',
-            datefmt='%H:%M:%S'
+            "%(levelname)-8s | %(name)-25s | %(message)s", datefmt="%H:%M:%S"
         )
         console_handler.setFormatter(format_console)
         root_logger.addHandler(console_handler)
@@ -200,18 +196,22 @@ class GestionnaireLog:
 # Alias de classe
 LogManager = GestionnaireLog
 
+
 # Alias de méthodes au niveau module
 def init(log_level: str = "INFO"):
     """Alias anglais pour initialiser()"""
     return GestionnaireLog.initialiser(log_level)
 
+
 def get_logger(name: str) -> logging.Logger:
     """Alias anglais pour obtenir_logger()"""
     return GestionnaireLog.obtenir_logger(name)
 
+
 # Ajouter les alias directement sur la classe
 LogManager.init = staticmethod(init)
 LogManager.get_logger = staticmethod(get_logger)
+
 
 # Fonction raccourci française
 def obtenir_logger(nom: str) -> logging.Logger:

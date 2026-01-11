@@ -3,17 +3,16 @@ Module Suivi Jules avec Agent IA intégré
 Suivi du développement avec conseils adaptés à l'âge
 """
 
-import streamlit as st
-import pandas as pd
-from datetime import datetime, date, timedelta
 import asyncio
-from typing import Dict, List
+from datetime import date, timedelta
 
+import pandas as pd
+import streamlit as st
+
+from src.core.ai_agent import AgentIA
 from src.core.database import get_db_context
 from src.core.models import ChildProfile, WellbeingEntry
-from src.core.ai_agent import AgentIA
-from src.utils.formatters import format_quantity, format_quantity_with_unit
-
+from src.utils.formatters import format_quantity
 
 # ===================================
 # HELPERS
@@ -37,7 +36,7 @@ def get_child_profile() -> ChildProfile:
         return child
 
 
-def calculer_age(birth_date: date) -> Dict:
+def calculer_age(birth_date: date) -> dict:
     """Calcule l'âge en jours, semaines, mois"""
     today = date.today()
     delta = today - birth_date
@@ -53,7 +52,7 @@ def calculer_age(birth_date: date) -> Dict:
     return {"jours": jours, "semaines": semaines, "mois": mois, "annees": mois // 12}
 
 
-def get_etapes_developpement(age_mois: int) -> List[Dict]:
+def get_etapes_developpement(age_mois: int) -> list[dict]:
     """Retourne les étapes clés du développement selon l'âge"""
     etapes = {
         0: [
@@ -309,9 +308,9 @@ def app():
                         contexte = {
                             "age_mois": age["mois"],
                             "domaine": domaine,
-                            "observations_recentes": df_recent.to_dict("records")
-                            if not df_recent.empty
-                            else [],
+                            "observations_recentes": (
+                                df_recent.to_dict("records") if not df_recent.empty else []
+                            ),
                         }
 
                         # Appel IA
@@ -404,7 +403,7 @@ def app():
             col_j1, col_j2 = st.columns(2)
 
             with col_j1:
-                date_entry = st.date_input("Date", value=date.today())
+                _date_entry = st.date_input("Date", value=date.today())
                 humeur = st.selectbox("Humeur", ["😊 Bien", "😐 Moyen", "😞 Mal"])
                 sommeil = st.number_input("Heures de sommeil", 0.0, 24.0, 10.0, 0.5)
 
@@ -454,7 +453,9 @@ def app():
             col_f1, col_f2 = st.columns(2)
 
             with col_f1:
-                filtre_humeur = st.multiselect("Filtrer par humeur", ["😊 Bien", "😐 Moyen", "😞 Mal"])
+                filtre_humeur = st.multiselect(
+                    "Filtrer par humeur", ["😊 Bien", "😐 Moyen", "😞 Mal"]
+                )
 
             with col_f2:
                 periode = st.selectbox("Période", ["7 derniers jours", "30 derniers jours", "Tout"])

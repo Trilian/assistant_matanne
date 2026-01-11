@@ -4,23 +4,24 @@ Base Module UI - Module CRUD universel générique
 
 ✅ Import depuis types.py pour éviter cycle avec services/__init__.py
 """
-import streamlit as st
-from typing import Dict, List, Optional, Callable, Any
+
+from collections.abc import Callable
 from dataclasses import dataclass, field
+from typing import Any
+
+import streamlit as st
+
+from src.core.cache import Cache
 
 # ✅ Import depuis types.py au lieu de base_service.py
 from src.services.types import BaseService
-
-from src.ui.components import (
-    empty_state, search_bar, pagination, export_buttons
-)
-from src.ui.feedback import show_success, show_error
-from src.core.cache import Cache
-
+from src.ui.components import empty_state, export_buttons, pagination, search_bar
+from src.ui.feedback import show_success
 
 # ═══════════════════════════════════════════════════════════
 # CONFIG MODULE
 # ═══════════════════════════════════════════════════════════
+
 
 @dataclass
 class ModuleConfig:
@@ -39,45 +40,46 @@ class ModuleConfig:
     service: BaseService
 
     # Affichage
-    display_fields: List[Dict] = field(default_factory=list)
-    search_fields: List[str] = field(default_factory=list)
+    display_fields: list[dict] = field(default_factory=list)
+    search_fields: list[str] = field(default_factory=list)
 
     # Filtres
-    filters_config: Dict = field(default_factory=dict)
+    filters_config: dict = field(default_factory=dict)
 
     # Stats
-    stats_config: List[Dict] = field(default_factory=list)
+    stats_config: list[dict] = field(default_factory=list)
 
     # Actions
-    actions: List[Dict] = field(default_factory=list)
+    actions: list[dict] = field(default_factory=list)
 
     # Statut
-    status_field: Optional[str] = None
-    status_colors: Dict[str, str] = field(default_factory=dict)
+    status_field: str | None = None
+    status_colors: dict[str, str] = field(default_factory=dict)
 
     # Métadonnées
-    metadata_fields: List[str] = field(default_factory=list)
-    image_field: Optional[str] = None
+    metadata_fields: list[str] = field(default_factory=list)
+    image_field: str | None = None
 
     # Formulaire
-    form_fields: List[Dict] = field(default_factory=list)
+    form_fields: list[dict] = field(default_factory=list)
 
     # Import/Export
-    export_formats: List[str] = field(default_factory=lambda: ["csv", "json"])
+    export_formats: list[str] = field(default_factory=lambda: ["csv", "json"])
 
     # Pagination
     items_per_page: int = 20
 
     # Callbacks
-    on_view: Optional[Callable] = None
-    on_edit: Optional[Callable] = None
-    on_delete: Optional[Callable] = None
-    on_create: Optional[Callable] = None
+    on_view: Callable | None = None
+    on_edit: Callable | None = None
+    on_delete: Callable | None = None
+    on_create: Callable | None = None
 
 
 # ═══════════════════════════════════════════════════════════
 # BASE MODULE UI
 # ═══════════════════════════════════════════════════════════
+
 
 class BaseModuleUI:
     """
@@ -116,7 +118,7 @@ class BaseModuleUI:
                 "search_term": "",
                 "filters": {},
                 "selected_items": [],
-                "view_mode": "grid"
+                "view_mode": "grid",
             }
 
     # ═══════════════════════════════════════════════════════
@@ -141,10 +143,7 @@ class BaseModuleUI:
         items = self._load_items()
 
         if not items:
-            empty_state(
-                f"Aucun {self.config.name}",
-                self.config.icon
-            )
+            empty_state(f"Aucun {self.config.name}", self.config.icon)
             return
 
         # Pagination
@@ -199,19 +198,14 @@ class BaseModuleUI:
         for stat_config in self.config.stats_config:
             if "value_key" in stat_config:
                 value = self.config.service.count()
-                stats.append({
-                    "label": stat_config["label"],
-                    "value": value
-                })
+                stats.append({"label": stat_config["label"], "value": value})
             elif "filter" in stat_config:
                 value = self.config.service.count(filters=stat_config["filter"])
-                stats.append({
-                    "label": stat_config["label"],
-                    "value": value
-                })
+                stats.append({"label": stat_config["label"], "value": value})
 
         if stats:
             from src.ui.components import metrics_row
+
             metrics_row(stats)
 
     # ═══════════════════════════════════════════════════════
@@ -224,8 +218,7 @@ class BaseModuleUI:
 
         with col1:
             search = search_bar(
-                placeholder=f"Rechercher {self.config.name}...",
-                key=f"{self.session_key}_search"
+                placeholder=f"Rechercher {self.config.name}...", key=f"{self.session_key}_search"
             )
             st.session_state[self.session_key]["search_term"] = search
 
@@ -233,10 +226,8 @@ class BaseModuleUI:
             if self.config.filters_config:
                 with st.popover("🔍 Filtres"):
                     from src.ui.components import filter_panel
-                    filters = filter_panel(
-                        self.config.filters_config,
-                        key_prefix=self.session_key
-                    )
+
+                    filters = filter_panel(self.config.filters_config, key_prefix=self.session_key)
                     st.session_state[self.session_key]["filters"] = filters
 
     # ═══════════════════════════════════════════════════════
@@ -249,10 +240,10 @@ class BaseModuleUI:
 
         with col1:
             if st.button(
-                    "➕ Ajouter",
-                    type="primary",
-                    use_container_width=True,
-                    key=f"{self.session_key}_add"
+                "➕ Ajouter",
+                type="primary",
+                use_container_width=True,
+                key=f"{self.session_key}_add",
             ):
                 if self.config.on_create:
                     self.config.on_create()
@@ -260,19 +251,11 @@ class BaseModuleUI:
                     st.session_state[f"{self.session_key}_show_form"] = True
 
         with col2:
-            if st.button(
-                    "📥 Exporter",
-                    use_container_width=True,
-                    key=f"{self.session_key}_export"
-            ):
+            if st.button("📥 Exporter", use_container_width=True, key=f"{self.session_key}_export"):
                 self._export_data()
 
         with col3:
-            if st.button(
-                    "🗑️ Cache",
-                    use_container_width=True,
-                    key=f"{self.session_key}_cache"
-            ):
+            if st.button("🗑️ Cache", use_container_width=True, key=f"{self.session_key}_cache"):
                 Cache.invalider(self.config.name)
                 show_success("Cache vidé")
 
@@ -280,7 +263,7 @@ class BaseModuleUI:
     # CHARGEMENT DONNÉES
     # ═══════════════════════════════════════════════════════
 
-    def _load_items(self) -> List[Any]:
+    def _load_items(self) -> list[Any]:
         """Charge items avec recherche/filtres"""
         session = st.session_state[self.session_key]
 
@@ -302,13 +285,10 @@ class BaseModuleUI:
                 search_term=search,
                 search_fields=self.config.search_fields,
                 filters=db_filters,
-                limit=1000
+                limit=1000,
             )
         else:
-            items = self.config.service.get_all(
-                filters=db_filters,
-                limit=1000
-            )
+            items = self.config.service.get_all(filters=db_filters, limit=1000)
 
         return items
 
@@ -316,7 +296,7 @@ class BaseModuleUI:
     # AFFICHAGE GRID
     # ═══════════════════════════════════════════════════════
 
-    def _render_grid(self, items: List[Any]):
+    def _render_grid(self, items: list[Any]):
         """Affichage grille"""
         cols_per_row = 3
 
@@ -339,7 +319,7 @@ class BaseModuleUI:
         # Titre
         title = item_dict.get(
             self.config.display_fields[0]["key"] if self.config.display_fields else "nom",
-            "Sans titre"
+            "Sans titre",
         )
 
         # Métadonnées
@@ -374,14 +354,14 @@ class BaseModuleUI:
             status_color=status_color,
             image_url=image_url,
             actions=actions,
-            key=f"{self.session_key}_card_{item.id}"
+            key=f"{self.session_key}_card_{item.id}",
         )
 
     # ═══════════════════════════════════════════════════════
     # AFFICHAGE LISTE
     # ═══════════════════════════════════════════════════════
 
-    def _render_list(self, items: List[Any]):
+    def _render_list(self, items: list[Any]):
         """Affichage liste"""
         for item in items:
             self._render_item_row(item)
@@ -398,7 +378,7 @@ class BaseModuleUI:
             with col1:
                 title = item_dict.get(
                     self.config.display_fields[0]["key"] if self.config.display_fields else "nom",
-                    "Sans titre"
+                    "Sans titre",
                 )
                 st.markdown(f"### {title}")
 
@@ -424,9 +404,9 @@ class BaseModuleUI:
                     label = action["label"]
 
                     if st.button(
-                            f"{icon} {label}",
-                            key=f"{self.session_key}_act_{item.id}_{label}",
-                            use_container_width=True
+                        f"{icon} {label}",
+                        key=f"{self.session_key}_act_{item.id}_{label}",
+                        use_container_width=True,
                     ):
                         action["callback"](item)
 
@@ -450,14 +430,14 @@ class BaseModuleUI:
             items_dict,
             filename=f"{self.config.name}_export",
             formats=self.config.export_formats,
-            key=f"{self.session_key}_export_btn"
+            key=f"{self.session_key}_export_btn",
         )
 
     # ═══════════════════════════════════════════════════════
     # HELPERS
     # ═══════════════════════════════════════════════════════
 
-    def _item_to_dict(self, item: Any) -> Dict:
+    def _item_to_dict(self, item: Any) -> dict:
         """Convertit ORM → dict"""
         if isinstance(item, dict):
             return item
@@ -478,6 +458,7 @@ class BaseModuleUI:
 # ═══════════════════════════════════════════════════════════
 # FACTORY
 # ═══════════════════════════════════════════════════════════
+
 
 def create_module_ui(config: ModuleConfig) -> BaseModuleUI:
     """Factory pour créer module UI"""

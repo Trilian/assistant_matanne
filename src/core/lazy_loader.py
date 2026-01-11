@@ -4,12 +4,14 @@ Réduit temps chargement initial de 60%
 
 ✅ FIX: Support pour modules unifiés avec navigation interne
 """
-import streamlit as st
+
 import importlib
 import logging
-from typing import Optional, Any, Dict
-from functools import wraps
 import time
+from functools import wraps
+from typing import Any
+
+import streamlit as st
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +19,7 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════════════════
 # LAZY LOADER PRINCIPAL
 # ═══════════════════════════════════════════════════════════
+
 
 class LazyModuleLoader:
     """
@@ -28,8 +31,8 @@ class LazyModuleLoader:
     - Navigation instantanée
     """
 
-    _cache: Dict[str, Any] = {}
-    _load_times: Dict[str, float] = {}
+    _cache: dict[str, Any] = {}
+    _load_times: dict[str, float] = {}
 
     @staticmethod
     def load(module_path: str, reload: bool = False) -> Any:
@@ -68,7 +71,7 @@ class LazyModuleLoader:
 
             return module
 
-        except ModuleNotFoundError as e:
+        except ModuleNotFoundError:
             logger.error(f"❌ Module introuvable: {module_path}")
             raise
         except Exception as e:
@@ -102,20 +105,22 @@ class LazyModuleLoader:
             for path in module_paths:
                 try:
                     LazyModuleLoader.load(path)
-                except:
-                    pass
+                except Exception:
+                    # Ignorer les erreurs lors du préchargement synchrone
+                    logger.debug(f"Précharge synchrone échouée pour {path}")
 
     @staticmethod
-    def get_stats() -> Dict:
+    def get_stats() -> dict:
         """Retourne stats lazy loading"""
         return {
             "cached_modules": len(LazyModuleLoader._cache),
             "total_load_time": sum(LazyModuleLoader._load_times.values()),
             "average_load_time": (
                 sum(LazyModuleLoader._load_times.values()) / len(LazyModuleLoader._load_times)
-                if LazyModuleLoader._load_times else 0
+                if LazyModuleLoader._load_times
+                else 0
             ),
-            "load_times": LazyModuleLoader._load_times
+            "load_times": LazyModuleLoader._load_times,
         }
 
     @staticmethod
@@ -130,6 +135,7 @@ class LazyModuleLoader:
 # DECORATOR LAZY LOAD
 # ═══════════════════════════════════════════════════════════
 
+
 def lazy_import(module_path: str, attr_name: str = None):
     """
     Decorator pour import lazy
@@ -140,6 +146,7 @@ def lazy_import(module_path: str, attr_name: str = None):
             # recette_service sera chargé uniquement ici
             return recette_service.get_all()
     """
+
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -153,12 +160,14 @@ def lazy_import(module_path: str, attr_name: str = None):
             return func(*args, **kwargs)
 
         return wrapper
+
     return decorator
 
 
 # ═══════════════════════════════════════════════════════════
 # ROUTER OPTIMISÉ AVEC LAZY LOADING
 # ═══════════════════════════════════════════════════════════
+
 
 class OptimizedRouter:
     """
@@ -172,76 +181,41 @@ class OptimizedRouter:
     # ═══════════════════════════════════════════════════════
 
     MODULE_REGISTRY = {
-        "accueil": {
-            "path": "src.modules.accueil",
-            "type": "simple"
-        },
-
+        "accueil": {"path": "src.modules.accueil", "type": "simple"},
         # ✅ MODULE CUISINE UNIFIÉ (1 fichier, navigation interne)
         "cuisine.recettes": {
             "path": "src.modules.cuisine",
             "type": "unified",
-            "tab": 0  # Index du tab "Recettes"
+            "tab": 0,  # Index du tab "Recettes"
         },
         "cuisine.inventaire": {
             "path": "src.modules.cuisine",
             "type": "unified",
-            "tab": 1  # Index du tab "Inventaire"
+            "tab": 1,  # Index du tab "Inventaire"
         },
         "cuisine.planning_semaine": {
             "path": "src.modules.cuisine",
             "type": "unified",
-            "tab": 2  # Index du tab "Planning"
+            "tab": 2,  # Index du tab "Planning"
         },
         "cuisine.courses": {
             "path": "src.modules.cuisine",
             "type": "unified",
-            "tab": 3  # Index du tab "Courses"
+            "tab": 3,  # Index du tab "Courses"
         },
-
         # Famille (à implémenter plus tard)
-        "famille.suivi_jules": {
-            "path": "src.modules.famille.suivi_jules",
-            "type": "simple"
-        },
-        "famille.bien_etre": {
-            "path": "src.modules.famille.bien_etre",
-            "type": "simple"
-        },
-        "famille.routines": {
-            "path": "src.modules.famille.routines",
-            "type": "simple"
-        },
-
+        "famille.suivi_jules": {"path": "src.modules.famille.suivi_jules", "type": "simple"},
+        "famille.bien_etre": {"path": "src.modules.famille.bien_etre", "type": "simple"},
+        "famille.routines": {"path": "src.modules.famille.routines", "type": "simple"},
         # Maison
-        "maison.projets": {
-            "path": "src.modules.maison.projets",
-            "type": "simple"
-        },
-        "maison.jardin": {
-            "path": "src.modules.maison.jardin",
-            "type": "simple"
-        },
-        "maison.entretien": {
-            "path": "src.modules.maison.entretien",
-            "type": "simple"
-        },
-
+        "maison.projets": {"path": "src.modules.maison.projets", "type": "simple"},
+        "maison.jardin": {"path": "src.modules.maison.jardin", "type": "simple"},
+        "maison.entretien": {"path": "src.modules.maison.entretien", "type": "simple"},
         # Planning
-        "planning.calendrier": {
-            "path": "src.modules.planning.calendrier",
-            "type": "simple"
-        },
-        "planning.vue_ensemble": {
-            "path": "src.modules.planning.vue_ensemble",
-            "type": "simple"
-        },
-
+        "planning.calendrier": {"path": "src.modules.planning.calendrier", "type": "simple"},
+        "planning.vue_ensemble": {"path": "src.modules.planning.vue_ensemble", "type": "simple"},
         # Paramètres
-        "parametres": {
-            "path": "src.modules.parametres",
-            "type": "simple"
-        },
+        "parametres": {"path": "src.modules.parametres", "type": "simple"},
     }
 
     @staticmethod
@@ -307,7 +281,7 @@ class OptimizedRouter:
 
             except Exception as e:
                 logger.exception(f"Erreur render {module_name}")
-                st.error(f"❌ Erreur lors du chargement du module")
+                st.error("❌ Erreur lors du chargement du module")
 
                 if st.session_state.get("debug_mode", False):
                     st.exception(e)
@@ -326,6 +300,7 @@ class OptimizedRouter:
 # MÉTRIQUES LAZY LOADING
 # ═══════════════════════════════════════════════════════════
 
+
 def render_lazy_loading_stats():
     """Affiche stats lazy loading dans sidebar"""
     import streamlit as st
@@ -336,17 +311,13 @@ def render_lazy_loading_stats():
         col1, col2 = st.columns(2)
 
         with col1:
-            st.metric(
-                "Modules Chargés",
-                stats["cached_modules"],
-                help="Nombre de modules en cache"
-            )
+            st.metric("Modules Chargés", stats["cached_modules"], help="Nombre de modules en cache")
 
         with col2:
             st.metric(
                 "Temps Moyen",
                 f"{stats['average_load_time']*1000:.0f}ms",
-                help="Temps moyen de chargement"
+                help="Temps moyen de chargement",
             )
 
         # Détails par module
@@ -354,10 +325,10 @@ def render_lazy_loading_stats():
             st.caption("Temps de chargement par module:")
 
             for module, load_time in sorted(
-                    stats["load_times"].items(),
-                    key=lambda x: x[1],
-                    reverse=True
-            )[:5]:  # Top 5 plus lents
+                stats["load_times"].items(), key=lambda x: x[1], reverse=True
+            )[
+                :5
+            ]:  # Top 5 plus lents
                 module_name = module.split(".")[-1]
                 st.caption(f"• {module_name}: {load_time*1000:.0f}ms")
 

@@ -1,11 +1,11 @@
 """
 Helpers - Manipulation de dates
 """
-from datetime import date, datetime, timedelta
-from typing import List, Tuple
+
+from datetime import date, timedelta
 
 
-def get_week_bounds(d: date) -> Tuple[date, date]:
+def get_week_bounds(d: date) -> tuple[date, date]:
     """
     Retourne (lundi, dimanche) de la semaine
 
@@ -18,7 +18,7 @@ def get_week_bounds(d: date) -> Tuple[date, date]:
     return monday, sunday
 
 
-def date_range(start: date, end: date) -> List[date]:
+def date_range(start: date, end: date) -> list[date]:
     """
     Génère liste de dates
 
@@ -30,7 +30,7 @@ def date_range(start: date, end: date) -> List[date]:
     return [start + timedelta(days=i) for i in range(delta.days + 1)]
 
 
-def get_month_bounds(d: date) -> Tuple[date, date]:
+def get_month_bounds(d: date) -> tuple[date, date]:
     """
     Retourne premier et dernier jour du mois
 

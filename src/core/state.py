@@ -2,10 +2,12 @@
 State Unifié - Gestionnaire État Complet
 Tout harmonisé en français avec alias anglais
 """
-import streamlit as st
-from dataclasses import dataclass, field
-from typing import Optional, List, Any, Dict
+
 import logging
+from dataclasses import dataclass, field
+from typing import Any
+
+import streamlit as st
 
 logger = logging.getLogger(__name__)
 
@@ -13,34 +15,35 @@ logger = logging.getLogger(__name__)
 @dataclass
 class EtatApp:
     """État global de l'application"""
+
     # Navigation
     module_actuel: str = "accueil"
-    module_precedent: Optional[str] = None
-    historique_navigation: List[str] = field(default_factory=list)
+    module_precedent: str | None = None
+    historique_navigation: list[str] = field(default_factory=list)
 
     # Utilisateur
     nom_utilisateur: str = "Anne"
     notifications_non_lues: int = 0
 
     # Agent IA
-    agent_ia: Optional[Any] = None
+    agent_ia: Any | None = None
 
     # Recettes
-    id_recette_visualisation: Optional[int] = None
-    id_recette_edition: Optional[int] = None
-    id_recette_adaptation_bebe: Optional[int] = None
+    id_recette_visualisation: int | None = None
+    id_recette_edition: int | None = None
+    id_recette_adaptation_bebe: int | None = None
 
     # Inventaire
-    id_article_visualisation: Optional[int] = None
-    id_article_edition: Optional[int] = None
+    id_article_visualisation: int | None = None
+    id_article_edition: int | None = None
 
     # Planning
-    id_planning_visualisation: Optional[int] = None
-    semaine_actuelle: Optional[Any] = None
-    id_planning_ajout_repas: Optional[int] = None
-    jour_ajout_repas: Optional[int] = None
-    date_ajout_repas: Optional[Any] = None
-    id_repas_edition: Optional[int] = None
+    id_planning_visualisation: int | None = None
+    semaine_actuelle: Any | None = None
+    id_planning_ajout_repas: int | None = None
+    jour_ajout_repas: int | None = None
+    date_ajout_repas: Any | None = None
+    id_repas_edition: int | None = None
 
     # États UI
     afficher_formulaire_ajout: bool = False
@@ -48,7 +51,7 @@ class EtatApp:
     afficher_confirmation_suppression: bool = False
     afficher_notifications: bool = False
     afficher_formulaire_ajout_repas: bool = False
-    onglet_actif: Optional[str] = None
+    onglet_actif: str | None = None
 
     # Flags
     mode_debug: bool = False
@@ -61,6 +64,7 @@ class EtatApp:
 
 class GestionnaireEtat:
     """Gestionnaire centralisé du state"""
+
     CLE_ETAT = "etat_app"
 
     @staticmethod
@@ -110,7 +114,7 @@ class GestionnaireEtat:
             GestionnaireEtat.naviguer_vers(precedent)
 
     @staticmethod
-    def obtenir_fil_ariane_navigation() -> List[str]:
+    def obtenir_fil_ariane_navigation() -> list[str]:
         """
         Retourne le fil d'Ariane de navigation
 
@@ -167,7 +171,7 @@ class GestionnaireEtat:
         logger.info("🔄 State réinitialisé")
 
     @staticmethod
-    def obtenir_resume_etat() -> Dict:
+    def obtenir_resume_etat() -> dict:
         """
         Retourne résumé du state pour debug
 
@@ -205,7 +209,7 @@ class GestionnaireEtat:
         logger.debug("🧹 États UI nettoyés")
 
     @staticmethod
-    def definir_recette_visualisation(id_recette: Optional[int]):
+    def definir_recette_visualisation(id_recette: int | None):
         """Définit recette en cours de visualisation"""
         etat = GestionnaireEtat.obtenir()
         etat.id_recette_visualisation = id_recette
@@ -214,7 +218,7 @@ class GestionnaireEtat:
             logger.debug(f"👁️ Visualisation recette {id_recette}")
 
     @staticmethod
-    def definir_recette_edition(id_recette: Optional[int]):
+    def definir_recette_edition(id_recette: int | None):
         """Définit recette en cours d'édition"""
         etat = GestionnaireEtat.obtenir()
         etat.id_recette_edition = id_recette
@@ -223,7 +227,7 @@ class GestionnaireEtat:
             logger.debug(f"✏️ Édition recette {id_recette}")
 
     @staticmethod
-    def definir_planning_visualisation(id_planning: Optional[int]):
+    def definir_planning_visualisation(id_planning: int | None):
         """Définit planning en cours de visualisation"""
         etat = GestionnaireEtat.obtenir()
         etat.id_planning_visualisation = id_planning
@@ -240,9 +244,9 @@ class GestionnaireEtat:
             id_item: ID de l'item
             type_item: Type ('recette', 'planning', 'article')
         """
-        if type_item == 'recette':
+        if type_item == "recette":
             GestionnaireEtat.definir_recette_visualisation(id_item)
-        elif type_item == 'planning':
+        elif type_item == "planning":
             GestionnaireEtat.definir_planning_visualisation(id_item)
 
     @staticmethod
@@ -279,7 +283,7 @@ class GestionnaireEtat:
         return etat.module_actuel.startswith(prefixe_module)
 
     @staticmethod
-    def obtenir_contexte_module() -> Dict[str, Any]:
+    def obtenir_contexte_module() -> dict[str, Any]:
         """
         Retourne contexte du module actuel
 
@@ -329,52 +333,64 @@ StateManager.get_state_summary = GestionnaireEtat.obtenir_resume_etat
 # HELPERS RACCOURCIS
 # ═══════════════════════════════════════════════════════════
 
+
 def obtenir_etat() -> EtatApp:
     """Raccourci pour récupérer le state"""
     return GestionnaireEtat.obtenir()
 
+
 def get_state() -> EtatApp:
     """Alias anglais pour obtenir_etat"""
     return GestionnaireEtat.obtenir()
+
 
 def naviguer(module: str):
     """Raccourci pour naviguer"""
     GestionnaireEtat.naviguer_vers(module)
     st.rerun()
 
+
 def navigate(module: str):
     """Alias anglais pour naviguer"""
     naviguer(module)
+
 
 def revenir():
     """Raccourci pour revenir en arrière"""
     GestionnaireEtat.revenir()
     st.rerun()
 
+
 def go_back():
     """Alias anglais pour revenir"""
     revenir()
 
-def obtenir_fil_ariane() -> List[str]:
+
+def obtenir_fil_ariane() -> list[str]:
     """Raccourci pour fil d'Ariane"""
     return GestionnaireEtat.obtenir_fil_ariane_navigation()
 
-def get_breadcrumb() -> List[str]:
+
+def get_breadcrumb() -> list[str]:
     """Alias anglais pour obtenir_fil_ariane"""
     return obtenir_fil_ariane()
+
 
 def est_mode_debug() -> bool:
     """Raccourci pour vérifier mode debug"""
     etat = obtenir_etat()
     return etat.mode_debug
 
+
 def is_debug_mode() -> bool:
     """Alias anglais pour est_mode_debug"""
     return est_mode_debug()
 
+
 def nettoyer_etats_ui():
     """Raccourci pour nettoyer états UI"""
     GestionnaireEtat.nettoyer_etats_ui()
+
 
 def clean_ui_states():
     """Alias anglais pour nettoyer_etats_ui"""

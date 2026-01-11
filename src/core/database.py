@@ -2,22 +2,19 @@
 Database - Gestion de la base de données avec migrations.
 Tout harmonisé en français
 """
-from contextlib import contextmanager
-from typing import Generator, Optional, Dict
-import streamlit as st
-from sqlalchemy import create_engine, text, pool
-from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.exc import OperationalError, DatabaseError
+
 import logging
 import time
+from collections.abc import Generator
+from contextlib import contextmanager
+
+import streamlit as st
+from sqlalchemy import create_engine, pool, text
+from sqlalchemy.exc import DatabaseError, OperationalError
+from sqlalchemy.orm import Session, sessionmaker
 
 from .config import obtenir_parametres
-from .constants import (
-    DB_CONNECTION_RETRY,
-    DB_CONNECTION_TIMEOUT,
-    DB_POOL_SIZE,
-    DB_MAX_OVERFLOW
-)
+from .constants import DB_CONNECTION_RETRY, DB_CONNECTION_TIMEOUT
 from .errors import ErreurBaseDeDonnees
 
 logger = logging.getLogger(__name__)
@@ -26,6 +23,7 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════════════════
 # CRÉATION ENGINE
 # ═══════════════════════════════════════════════════════════
+
 
 @st.cache_resource(ttl=3600)
 def obtenir_moteur(nombre_tentatives: int = DB_CONNECTION_RETRY, delai_tentative: int = 2):
@@ -70,9 +68,7 @@ def obtenir_moteur(nombre_tentatives: int = DB_CONNECTION_RETRY, delai_tentative
 
         except (OperationalError, DatabaseError) as e:
             derniere_erreur = e
-            logger.warning(
-                f"❌ Tentative {tentative + 1}/{nombre_tentatives} échouée: {e}"
-            )
+            logger.warning(f"❌ Tentative {tentative + 1}/{nombre_tentatives} échouée: {e}")
 
             if tentative < nombre_tentatives - 1:
                 time.sleep(delai_tentative)
@@ -80,17 +76,15 @@ def obtenir_moteur(nombre_tentatives: int = DB_CONNECTION_RETRY, delai_tentative
 
     # Toutes les tentatives ont échoué
     message_erreur = (
-        f"Impossible de se connecter après {nombre_tentatives} tentatives: "
-        f"{derniere_erreur}"
+        f"Impossible de se connecter après {nombre_tentatives} tentatives: " f"{derniere_erreur}"
     )
     logger.error(message_erreur)
     raise ErreurBaseDeDonnees(
-        message_erreur,
-        message_utilisateur="Impossible de se connecter à la base de données"
+        message_erreur, message_utilisateur="Impossible de se connecter à la base de données"
     )
 
 
-def obtenir_moteur_securise() -> Optional[object]:
+def obtenir_moteur_securise() -> object | None:
     """
     Version sécurisée qui retourne None au lieu de lever une exception.
 
@@ -108,6 +102,7 @@ def obtenir_moteur_securise() -> Optional[object]:
 # SESSION FACTORY
 # ═══════════════════════════════════════════════════════════
 
+
 def obtenir_fabrique_session():
     """
     Retourne une session factory.
@@ -117,12 +112,7 @@ def obtenir_fabrique_session():
     """
     # Création différée de la factory pour éviter les erreurs à l'import
     moteur = obtenir_moteur()
-    return sessionmaker(
-        autocommit=False,
-        autoflush=False,
-        bind=moteur,
-        expire_on_commit=False
-    )
+    return sessionmaker(autocommit=False, autoflush=False, bind=moteur, expire_on_commit=False)
 
 
 # Session factory initialisée à la demande (evite side-effects à l'import)
@@ -132,6 +122,7 @@ SessionLocale = None
 # ═══════════════════════════════════════════════════════════
 # CONTEXT MANAGERS
 # ═══════════════════════════════════════════════════════════
+
 
 @contextmanager
 def obtenir_contexte_db() -> Generator[Session, None, None]:
@@ -161,15 +152,14 @@ def obtenir_contexte_db() -> Generator[Session, None, None]:
         logger.error(f"❌ Erreur opérationnelle DB: {e}")
         raise ErreurBaseDeDonnees(
             f"Erreur réseau/connexion: {e}",
-            message_utilisateur="Problème de connexion à la base de données"
+            message_utilisateur="Problème de connexion à la base de données",
         )
 
     except DatabaseError as e:
         db.rollback()
         logger.error(f"❌ Erreur base de données: {e}")
         raise ErreurBaseDeDonnees(
-            str(e),
-            message_utilisateur="Erreur lors de l'opération en base de données"
+            str(e), message_utilisateur="Erreur lors de l'opération en base de données"
         )
 
     except Exception as e:
@@ -182,7 +172,7 @@ def obtenir_contexte_db() -> Generator[Session, None, None]:
 
 
 @contextmanager
-def obtenir_db_securise() -> Generator[Optional[Session], None, None]:
+def obtenir_db_securise() -> Generator[Session | None, None, None]:
     """
     Version sécurisée qui n'interrompt pas l'application.
 
@@ -209,6 +199,7 @@ def obtenir_db_securise() -> Generator[Optional[Session], None, None]:
 # SYSTÈME DE MIGRATION
 # ═══════════════════════════════════════════════════════════
 
+
 class GestionnaireMigrations:
     """
     Gestionnaire de migrations de schéma.
@@ -228,14 +219,18 @@ class GestionnaireMigrations:
         moteur = obtenir_moteur()
 
         with moteur.connect() as conn:
-            conn.execute(text(f"""
+            conn.execute(
+                text(
+                    f"""
                 CREATE TABLE IF NOT EXISTS {GestionnaireMigrations.TABLE_MIGRATIONS} (
                     id SERIAL PRIMARY KEY,
                     version INTEGER NOT NULL UNIQUE,
                     name VARCHAR(255) NOT NULL,
                     applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
-            """))
+            """
+                )
+            )
             conn.commit()
 
         logger.info("✅ Table migrations initialisée")
@@ -252,9 +247,13 @@ class GestionnaireMigrations:
             moteur = obtenir_moteur()
 
             with moteur.connect() as conn:
-                resultat = conn.execute(text(f"""
+                resultat = conn.execute(
+                    text(
+                        f"""
                     SELECT MAX(version) FROM {GestionnaireMigrations.TABLE_MIGRATIONS}
-                """)).scalar()
+                """
+                    )
+                ).scalar()
 
                 return resultat if resultat else 0
 
@@ -282,11 +281,16 @@ class GestionnaireMigrations:
                 conn.execute(text(sql))
 
                 # Enregistrer migration
-                conn.execute(text(f"""
+                conn.execute(
+                    text(
+                        f"""
                     INSERT INTO {GestionnaireMigrations.TABLE_MIGRATIONS} 
                     (version, name)
                     VALUES (:version, :name)
-                """), {"version": version, "name": nom})
+                """
+                    ),
+                    {"version": version, "name": nom},
+                )
 
             logger.info(f"✅ Migration v{version} appliquée: {nom}")
             return True
@@ -295,7 +299,7 @@ class GestionnaireMigrations:
             logger.error(f"❌ Échec migration v{version}: {e}")
             raise ErreurBaseDeDonnees(
                 f"Échec migration v{version}: {e}",
-                message_utilisateur="Erreur lors de la mise à jour du schéma"
+                message_utilisateur="Erreur lors de la mise à jour du schéma",
             )
 
     @staticmethod
@@ -321,14 +325,9 @@ class GestionnaireMigrations:
         logger.info(f"🔄 {len(en_attente)} migration(s) en attente")
 
         for migration in sorted(en_attente, key=lambda x: x["version"]):
-            logger.info(
-                f"Application migration v{migration['version']}: "
-                f"{migration['name']}"
-            )
+            logger.info(f"Application migration v{migration['version']}: " f"{migration['name']}")
             GestionnaireMigrations.appliquer_migration(
-                migration["version"],
-                migration["name"],
-                migration["sql"]
+                migration["version"], migration["name"], migration["sql"]
             )
 
         logger.info("✅ Toutes les migrations appliquées")
@@ -351,7 +350,7 @@ class GestionnaireMigrations:
                     CREATE INDEX IF NOT EXISTS idx_recette_saison_type ON recettes(saison, type_repas);
                     CREATE INDEX IF NOT EXISTS idx_ingredient_nom ON ingredients(nom);
                     CREATE INDEX IF NOT EXISTS idx_inventaire_stock_bas ON inventaire(quantite, quantite_min);
-                """
+                """,
             },
             # Ajoutez vos migrations ici
         ]
@@ -360,6 +359,7 @@ class GestionnaireMigrations:
 # ═══════════════════════════════════════════════════════════
 # VÉRIFICATIONS
 # ═══════════════════════════════════════════════════════════
+
 
 @st.cache_data(ttl=60)
 def verifier_connexion() -> tuple[bool, str]:
@@ -399,13 +399,17 @@ def obtenir_infos_db() -> dict:
         moteur = obtenir_moteur()
 
         with moteur.connect() as conn:
-            resultat = conn.execute(text("""
+            resultat = conn.execute(
+                text(
+                    """
                 SELECT 
                     version() as version,
                     current_database() as database,
                     current_user as user,
                     pg_size_pretty(pg_database_size(current_database())) as size
-            """)).fetchone()
+            """
+                )
+            ).fetchone()
 
             parametres = obtenir_parametres()
             db_url = parametres.DATABASE_URL
@@ -433,13 +437,14 @@ def obtenir_infos_db() -> dict:
             "version": None,
             "base_donnees": None,
             "utilisateur": None,
-            "version_schema": 0
+            "version_schema": 0,
         }
 
 
 # ═══════════════════════════════════════════════════════════
 # INITIALISATION
 # ═══════════════════════════════════════════════════════════
+
 
 def initialiser_database(executer_migrations: bool = True):
     """
@@ -491,6 +496,7 @@ def creer_toutes_tables():
 
     try:
         from .models import Base
+
         moteur = obtenir_moteur()
         Base.metadata.create_all(bind=moteur)
         logger.info("✅ Tables créées/vérifiées")
@@ -504,6 +510,7 @@ def creer_toutes_tables():
 # HEALTH CHECK
 # ═══════════════════════════════════════════════════════════
 
+
 def verifier_sante() -> dict:
     """
     Health check complet de la DB.
@@ -515,15 +522,17 @@ def verifier_sante() -> dict:
         moteur = obtenir_moteur()
 
         with moteur.connect() as conn:
-            connexions_actives = conn.execute(text("""
+            connexions_actives = conn.execute(
+                text(
+                    """
                 SELECT count(*) 
                 FROM pg_stat_activity 
                 WHERE state = 'active'
-            """)).scalar()
-
-            taille_db = conn.execute(
-                text("SELECT pg_database_size(current_database())")
+            """
+                )
             ).scalar()
+
+            taille_db = conn.execute(text("SELECT pg_database_size(current_database())")).scalar()
 
             return {
                 "sain": True,
@@ -535,11 +544,7 @@ def verifier_sante() -> dict:
 
     except Exception as e:
         logger.error(f"Health check échoué: {e}")
-        return {
-            "sain": False,
-            "erreur": str(e),
-            "timestamp": time.time()
-        }
+        return {"sain": False, "erreur": str(e), "timestamp": time.time()}
 
 
 # ═══════════════════════════════════════════════════════════

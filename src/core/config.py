@@ -2,20 +2,20 @@
 Configuration - Configuration centralisée de l'application.
 Tout harmonisé en français
 """
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import Field
-import streamlit as st
-import os
-from typing import Optional
+
 import logging
+import os
+
+import streamlit as st
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .constants import (
-    LOG_LEVEL_PRODUCTION,
-    LOG_LEVEL_DEVELOPMENT,
     AI_RATE_LIMIT_DAILY,
     AI_RATE_LIMIT_HOURLY,
+    CACHE_MAX_SIZE,
     CACHE_TTL_RECETTES,
-    CACHE_MAX_SIZE
+    LOG_LEVEL_PRODUCTION,
 )
 
 # Configure logging early when config is imported
@@ -186,7 +186,7 @@ class Parametres(BaseSettings):
         """
         try:
             return st.secrets.get("mistral", {}).get("model", "mistral-small-latest")
-        except:
+        except Exception:
             return os.getenv("MISTRAL_MODEL", "mistral-small-latest")
 
     MISTRAL_TIMEOUT: int = 60
@@ -276,7 +276,7 @@ class Parametres(BaseSettings):
         try:
             _ = self.DATABASE_URL
             return True
-        except:
+        except Exception:
             return False
 
     def _verifier_mistral_configure(self) -> bool:
@@ -289,7 +289,7 @@ class Parametres(BaseSettings):
         try:
             _ = self.MISTRAL_API_KEY
             return True
-        except:
+        except Exception:
             return False
 
     # Configuration Pydantic v2
@@ -297,7 +297,7 @@ class Parametres(BaseSettings):
         case_sensitive=False,
         env_file=".env",
         env_file_encoding="utf-8",
-        extra="ignore"  # Ignore les champs supplémentaires (évite l'erreur "Extra inputs are not permitted")
+        extra="ignore",  # Ignore les champs supplémentaires (évite l'erreur "Extra inputs are not permitted")
     )
 
 
@@ -305,7 +305,7 @@ class Parametres(BaseSettings):
 # INSTANCE GLOBALE (SINGLETON)
 # ═══════════════════════════════════════════════════════════
 
-_parametres: Optional[Parametres] = None
+_parametres: Parametres | None = None
 
 
 def obtenir_parametres() -> Parametres:

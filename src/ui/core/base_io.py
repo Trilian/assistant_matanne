@@ -2,8 +2,8 @@
 Base IO - Import/Export universel
 Gestion automatique CSV/JSON depuis config
 """
+
 import logging
-from typing import List, Dict, Tuple
 from dataclasses import dataclass
 
 from src.services.io_service import IOService
@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 # CONFIG I/O
 # ═══════════════════════════════════════════════════════════
 
+
 @dataclass
 class IOConfig:
     """
@@ -24,18 +25,19 @@ class IOConfig:
     """
 
     # Mapping DB field → Export label
-    field_mapping: Dict[str, str]
+    field_mapping: dict[str, str]
 
     # Champs requis pour import
-    required_fields: List[str]
+    required_fields: list[str]
 
     # Transformations custom
-    transformers: Dict[str, callable] = None
+    transformers: dict[str, callable] = None
 
 
 # ═══════════════════════════════════════════════════════════
 # BASE I/O SERVICE
 # ═══════════════════════════════════════════════════════════
+
 
 class BaseIOService:
     """
@@ -69,7 +71,7 @@ class BaseIOService:
     # EXPORT
     # ═══════════════════════════════════════════════════════
 
-    def to_csv(self, items: List[Dict]) -> str:
+    def to_csv(self, items: list[dict]) -> str:
         """
         Export CSV
 
@@ -79,12 +81,9 @@ class BaseIOService:
         Returns:
             CSV string
         """
-        return self.io_service.to_csv(
-            items=items,
-            field_mapping=self.config.field_mapping
-        )
+        return self.io_service.to_csv(items=items, field_mapping=self.config.field_mapping)
 
-    def to_json(self, items: List[Dict], indent: int = 2) -> str:
+    def to_json(self, items: list[dict], indent: int = 2) -> str:
         """
         Export JSON
 
@@ -101,7 +100,7 @@ class BaseIOService:
     # IMPORT
     # ═══════════════════════════════════════════════════════
 
-    def from_csv(self, csv_str: str) -> Tuple[List[Dict], List[str]]:
+    def from_csv(self, csv_str: str) -> tuple[list[dict], list[str]]:
         """
         Import CSV
 
@@ -114,7 +113,7 @@ class BaseIOService:
         items, errors = self.io_service.from_csv(
             csv_str=csv_str,
             field_mapping=self.config.field_mapping,
-            required_fields=self.config.required_fields
+            required_fields=self.config.required_fields,
         )
 
         # Appliquer transformations
@@ -123,7 +122,7 @@ class BaseIOService:
 
         return items, errors
 
-    def from_json(self, json_str: str) -> Tuple[List[Dict], List[str]]:
+    def from_json(self, json_str: str) -> tuple[list[dict], list[str]]:
         """
         Import JSON
 
@@ -134,8 +133,7 @@ class BaseIOService:
             (items_valides, erreurs)
         """
         items, errors = self.io_service.from_json(
-            json_str=json_str,
-            required_fields=self.config.required_fields
+            json_str=json_str, required_fields=self.config.required_fields
         )
 
         # Appliquer transformations
@@ -148,7 +146,7 @@ class BaseIOService:
     # TRANSFORMATIONS
     # ═══════════════════════════════════════════════════════
 
-    def _apply_transformers(self, items: List[Dict]) -> List[Dict]:
+    def _apply_transformers(self, items: list[dict]) -> list[dict]:
         """Applique transformations custom"""
         if not self.config.transformers:
             return items
@@ -161,13 +159,9 @@ class BaseIOService:
             for field, transformer in self.config.transformers.items():
                 if field in transformed_item:
                     try:
-                        transformed_item[field] = transformer(
-                            transformed_item[field]
-                        )
+                        transformed_item[field] = transformer(transformed_item[field])
                     except Exception as e:
-                        logger.warning(
-                            f"Erreur transformation {field}: {e}"
-                        )
+                        logger.warning(f"Erreur transformation {field}: {e}")
 
             transformed.append(transformed_item)
 
@@ -177,6 +171,7 @@ class BaseIOService:
 # ═══════════════════════════════════════════════════════════
 # FACTORY
 # ═══════════════════════════════════════════════════════════
+
 
 def create_io_service(config: IOConfig) -> BaseIOService:
     """Factory pour créer service I/O"""

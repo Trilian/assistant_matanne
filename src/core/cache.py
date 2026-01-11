@@ -8,19 +8,18 @@ Ce module fournit un cache en mémoire avec :
 - Auto-cleanup des entrées expirées
 - Rate limiting pour API IA
 """
-import streamlit as st
-from datetime import datetime, timedelta
-from functools import wraps
-from typing import Any, Optional, Callable, Dict, List
+
 import hashlib
 import json
 import logging
+from collections.abc import Callable
+from datetime import datetime
+from functools import wraps
+from typing import Any
 
-from .constants import (
-    CACHE_MAX_SIZE,
-    AI_RATE_LIMIT_DAILY,
-    AI_RATE_LIMIT_HOURLY
-)
+import streamlit as st
+
+from .constants import AI_RATE_LIMIT_DAILY, AI_RATE_LIMIT_HOURLY
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +27,7 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════════════════
 # CACHE PRINCIPAL
 # ═══════════════════════════════════════════════════════════
+
 
 class Cache:
     """
@@ -72,11 +72,11 @@ class Cache:
                 "hits": 0,
                 "misses": 0,
                 "invalidations": 0,
-                "taille_octets": 0
+                "taille_octets": 0,
             }
 
     @staticmethod
-    def obtenir(cle: str, ttl: int = 300) -> Optional[Any]:
+    def obtenir(cle: str, ttl: int = 300) -> Any | None:
         """
         Récupère une valeur du cache.
 
@@ -108,12 +108,7 @@ class Cache:
         return st.session_state[Cache.CLE_DONNEES][cle]
 
     @staticmethod
-    def definir(
-            cle: str,
-            valeur: Any,
-            ttl: int = 300,
-            dependencies: Optional[List[str]] = None
-    ):
+    def definir(cle: str, valeur: Any, ttl: int = 300, dependencies: list[str] | None = None):
         """
         Sauvegarde une valeur dans le cache.
 
@@ -147,7 +142,7 @@ class Cache:
         Cache._mettre_a_jour_taille()
 
     @staticmethod
-    def invalider(pattern: Optional[str] = None, dependencies: Optional[List[str]] = None):
+    def invalider(pattern: str | None = None, dependencies: list[str] | None = None):
         """
         Invalide le cache selon pattern ou dépendances.
 
@@ -168,10 +163,9 @@ class Cache:
 
         # Par pattern
         if pattern:
-            cles_a_supprimer.update([
-                k for k in st.session_state[Cache.CLE_DONNEES].keys()
-                if pattern in k
-            ])
+            cles_a_supprimer.update(
+                [k for k in st.session_state[Cache.CLE_DONNEES].keys() if pattern in k]
+            )
 
         # Par dépendances
         if dependencies:
@@ -225,7 +219,7 @@ class Cache:
         logger.info("Cache complètement vidé")
 
     @staticmethod
-    def obtenir_statistiques() -> Dict:
+    def obtenir_statistiques() -> dict:
         """
         Retourne les statistiques du cache.
 
@@ -236,11 +230,13 @@ class Cache:
         Cache._mettre_a_jour_taille()
 
         stats = st.session_state[Cache.CLE_STATS].copy()
-        stats.update({
-            "entrees": len(st.session_state[Cache.CLE_DONNEES]),
-            "dependances": len(st.session_state[Cache.CLE_DEPENDANCES]),
-            "taille_mo": stats["taille_octets"] / (1024 * 1024),
-        })
+        stats.update(
+            {
+                "entrees": len(st.session_state[Cache.CLE_DONNEES]),
+                "dependances": len(st.session_state[Cache.CLE_DEPENDANCES]),
+                "taille_mo": stats["taille_octets"] / (1024 * 1024),
+            }
+        )
 
         # Taux de hit
         total = stats["hits"] + stats["misses"]
@@ -268,13 +264,11 @@ class Cache:
         """
         try:
             import sys
-            taille = sum(
-                sys.getsizeof(v)
-                for v in st.session_state[Cache.CLE_DONNEES].values()
-            )
+
+            taille = sum(sys.getsizeof(v) for v in st.session_state[Cache.CLE_DONNEES].values())
             st.session_state[Cache.CLE_STATS]["taille_octets"] = taille
-        except:
-            pass
+        except Exception:
+            logger.debug("Impossible de calculer la taille du cache (sys.getsizeof échoué)")
 
 
 # Alias pour compatibilité
@@ -285,7 +279,8 @@ clear_all = Cache.vider
 # DÉCORATEUR CACHE
 # ═══════════════════════════════════════════════════════════
 
-def cached(ttl: int = 300, cle: Optional[str] = None, dependencies: Optional[List[str]] = None):
+
+def cached(ttl: int = 300, cle: str | None = None, dependencies: list[str] | None = None):
     """
     Décorateur pour cacher les résultats d'une fonction.
 
@@ -302,6 +297,7 @@ def cached(ttl: int = 300, cle: Optional[str] = None, dependencies: Optional[Lis
         >>> def obtenir_recettes():
         >>>     return recette_service.get_all()
     """
+
     def decorateur(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -309,14 +305,8 @@ def cached(ttl: int = 300, cle: Optional[str] = None, dependencies: Optional[Lis
             if cle:
                 cle_cache = cle
             else:
-                cle_data = {
-                    "fonction": func.__name__,
-                    "args": str(args),
-                    "kwargs": str(kwargs)
-                }
-                cle_cache = hashlib.md5(
-                    json.dumps(cle_data, sort_keys=True).encode()
-                ).hexdigest()
+                cle_data = {"fonction": func.__name__, "args": str(args), "kwargs": str(kwargs)}
+                cle_cache = hashlib.md5(json.dumps(cle_data, sort_keys=True).encode()).hexdigest()
 
             # Vérifier cache
             resultat = Cache.obtenir(cle_cache, ttl)
@@ -334,12 +324,14 @@ def cached(ttl: int = 300, cle: Optional[str] = None, dependencies: Optional[Lis
             return resultat
 
         return wrapper
+
     return decorateur
 
 
 # ═══════════════════════════════════════════════════════════
 # RATE LIMITING
 # ═══════════════════════════════════════════════════════════
+
 
 class LimiteDebit:
     """
@@ -362,9 +354,7 @@ class LimiteDebit:
                 "appels_jour": 0,
                 "appels_heure": 0,
                 "dernier_reset": datetime.now().date(),
-                "dernier_reset_heure": datetime.now().replace(
-                    minute=0, second=0, microsecond=0
-                )
+                "dernier_reset_heure": datetime.now().replace(minute=0, second=0, microsecond=0),
             }
 
     @staticmethod
@@ -413,7 +403,7 @@ class LimiteDebit:
         st.session_state[LimiteDebit.CLE_RATE_LIMIT]["appels_heure"] += 1
 
     @staticmethod
-    def obtenir_statistiques() -> Dict:
+    def obtenir_statistiques() -> dict:
         """
         Retourne les statistiques de rate limiting.
 
@@ -426,8 +416,10 @@ class LimiteDebit:
             "limite_jour": AI_RATE_LIMIT_DAILY,
             "appels_heure": st.session_state[LimiteDebit.CLE_RATE_LIMIT]["appels_heure"],
             "limite_heure": AI_RATE_LIMIT_HOURLY,
-            "restant_jour": AI_RATE_LIMIT_DAILY - st.session_state[LimiteDebit.CLE_RATE_LIMIT]["appels_jour"],
-            "restant_heure": AI_RATE_LIMIT_HOURLY - st.session_state[LimiteDebit.CLE_RATE_LIMIT]["appels_heure"],
+            "restant_jour": AI_RATE_LIMIT_DAILY
+            - st.session_state[LimiteDebit.CLE_RATE_LIMIT]["appels_jour"],
+            "restant_heure": AI_RATE_LIMIT_HOURLY
+            - st.session_state[LimiteDebit.CLE_RATE_LIMIT]["appels_heure"],
         }
 
 
@@ -438,6 +430,7 @@ RateLimit = LimiteDebit
 # ═══════════════════════════════════════════════════════════
 # UI COMPONENTS (Affichage stats)
 # ═══════════════════════════════════════════════════════════
+
 
 def afficher_statistiques_cache(prefixe_cle: str = "cache"):
     """
@@ -458,48 +451,24 @@ def afficher_statistiques_cache(prefixe_cle: str = "cache"):
         col1, col2 = st.columns(2)
 
         with col1:
-            st.metric(
-                "Entrées",
-                stats["entrees"],
-                help="Nombre d'entrées en cache"
-            )
-            st.metric(
-                "Taux Hit",
-                f"{stats['taux_hit']:.1f}%",
-                help="Taux de succès du cache"
-            )
+            st.metric("Entrées", stats["entrees"], help="Nombre d'entrées en cache")
+            st.metric("Taux Hit", f"{stats['taux_hit']:.1f}%", help="Taux de succès du cache")
 
         with col2:
-            st.metric(
-                "Taille",
-                f"{stats['taille_mo']:.2f} MB",
-                help="Taille totale du cache"
-            )
-            st.metric(
-                "Invalidations",
-                stats["invalidations"],
-                help="Nombre d'invalidations"
-            )
+            st.metric("Taille", f"{stats['taille_mo']:.2f} MB", help="Taille totale du cache")
+            st.metric("Invalidations", stats["invalidations"], help="Nombre d'invalidations")
 
         # Actions
         col3, col4 = st.columns(2)
 
         with col3:
-            if st.button(
-                    "🧹 Nettoyer",
-                    key=f"{prefixe_cle}_nettoyer",
-                    use_container_width=True
-            ):
+            if st.button("🧹 Nettoyer", key=f"{prefixe_cle}_nettoyer", use_container_width=True):
                 Cache.nettoyer_expires()
                 st.success("Nettoyage effectué !")
                 st.rerun()
 
         with col4:
-            if st.button(
-                    "🗑️ Vider",
-                    key=f"{prefixe_cle}_vider",
-                    use_container_width=True
-            ):
+            if st.button("🗑️ Vider", key=f"{prefixe_cle}_vider", use_container_width=True):
                 Cache.vider()
                 st.success("Cache vidé !")
                 st.rerun()
@@ -521,15 +490,15 @@ def afficher_statistiques_rate_limit():
         st.metric(
             "Appels aujourd'hui",
             f"{stats['appels_jour']} / {stats['limite_jour']}",
-            delta=f"{stats['restant_jour']} restants"
+            delta=f"{stats['restant_jour']} restants",
         )
 
         st.metric(
             "Appels cette heure",
             f"{stats['appels_heure']} / {stats['limite_heure']}",
-            delta=f"{stats['restant_heure']} restants"
+            delta=f"{stats['restant_heure']} restants",
         )
 
         # Progress bars
-        st.progress(stats['appels_jour'] / stats['limite_jour'])
+        st.progress(stats["appels_jour"] / stats["limite_jour"])
         st.caption("Quota journalier")

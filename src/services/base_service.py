@@ -2,18 +2,21 @@
 Service CRUD Universel - Version Finale Optimisée
 Fusionne base_service.py + base_service_optimized.py + enhanced_service.py + service_mixins.py
 """
-from typing import TypeVar, Generic, List, Dict, Optional, Any, Callable, Tuple
-from sqlalchemy.orm import Session
-from sqlalchemy import func, or_, desc
-from datetime import datetime, timedelta
-import logging
 
-from src.core.database import obtenir_contexte_db
+import logging
+from collections.abc import Callable
+from datetime import datetime
+from typing import Any, Generic, TypeVar
+
+from sqlalchemy import desc, func, or_
+from sqlalchemy.orm import Session
+
 from src.core.cache import Cache
-from src.core.errors import gerer_erreurs, ErreurNonTrouve, ErreurBaseDeDonnees
+from src.core.database import obtenir_contexte_db
+from src.core.errors import ErreurNonTrouve, gerer_erreurs
 
 logger = logging.getLogger(__name__)
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class BaseService(Generic[T]):
@@ -38,8 +41,9 @@ class BaseService(Generic[T]):
     # ════════════════════════════════════════════════════════════
 
     @gerer_erreurs(afficher_dans_ui=True)
-    def create(self, data: Dict, db: Session = None) -> T:
+    def create(self, data: dict, db: Session = None) -> T:
         """Crée une entité"""
+
         def _execute(session: Session) -> T:
             entity = self.model(**data)
             session.add(entity)
@@ -48,28 +52,38 @@ class BaseService(Generic[T]):
             logger.info(f"{self.model_name} créé: {entity.id}")
             self._invalider_cache()
             return entity
+
         return self._with_session(_execute, db)
 
     @gerer_erreurs(afficher_dans_ui=False, valeur_fallback=None)
-    def get_by_id(self, entity_id: int, db: Session = None) -> Optional[T]:
+    def get_by_id(self, entity_id: int, db: Session = None) -> T | None:
         """Récupère par ID avec cache"""
         cache_key = f"{self.model_name.lower()}_{entity_id}"
         cached = Cache.obtenir(cache_key, ttl=self.cache_ttl)
         if cached:
             return cached
 
-        def _execute(session: Session) -> Optional[T]:
+        def _execute(session: Session) -> T | None:
             entity = session.query(self.model).get(entity_id)
             if entity:
                 Cache.definir(cache_key, entity, ttl=self.cache_ttl)
             return entity
+
         return self._with_session(_execute, db)
 
     @gerer_erreurs(afficher_dans_ui=False, valeur_fallback=[])
-    def get_all(self, skip: int = 0, limit: int = 100, filters: Optional[Dict] = None,
-                order_by: str = "id", desc_order: bool = False, db: Session = None) -> List[T]:
+    def get_all(
+        self,
+        skip: int = 0,
+        limit: int = 100,
+        filters: dict | None = None,
+        order_by: str = "id",
+        desc_order: bool = False,
+        db: Session = None,
+    ) -> list[T]:
         """Liste avec filtres et tri"""
-        def _execute(session: Session) -> List[T]:
+
+        def _execute(session: Session) -> list[T]:
             query = session.query(self.model)
             if filters:
                 query = self._apply_filters(query, filters)
@@ -77,12 +91,14 @@ class BaseService(Generic[T]):
                 order_col = getattr(self.model, order_by)
                 query = query.order_by(desc(order_col) if desc_order else order_col)
             return query.offset(skip).limit(limit).all()
+
         return self._with_session(_execute, db)
 
     @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=None)
-    def update(self, entity_id: int, data: Dict, db: Session = None) -> Optional[T]:
+    def update(self, entity_id: int, data: dict, db: Session = None) -> T | None:
         """Met à jour une entité"""
-        def _execute(session: Session) -> Optional[T]:
+
+        def _execute(session: Session) -> T | None:
             entity = session.query(self.model).get(entity_id)
             if not entity:
                 raise ErreurNonTrouve(f"{self.model_name} {entity_id} non trouvé")
@@ -94,11 +110,13 @@ class BaseService(Generic[T]):
             logger.info(f"{self.model_name} {entity_id} mis à jour")
             self._invalider_cache()
             return entity
+
         return self._with_session(_execute, db)
 
     @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=False)
     def delete(self, entity_id: int, db: Session = None) -> bool:
         """Supprime une entité"""
+
         def _execute(session: Session) -> bool:
             count = session.query(self.model).filter(self.model.id == entity_id).delete()
             session.commit()
@@ -107,16 +125,19 @@ class BaseService(Generic[T]):
                 self._invalider_cache()
                 return True
             return False
+
         return self._with_session(_execute, db)
 
     @gerer_erreurs(afficher_dans_ui=False, valeur_fallback=0)
-    def count(self, filters: Optional[Dict] = None, db: Session = None) -> int:
+    def count(self, filters: dict | None = None, db: Session = None) -> int:
         """Compte les entités"""
+
         def _execute(session: Session) -> int:
             query = session.query(self.model)
             if filters:
                 query = self._apply_filters(query, filters)
             return query.count()
+
         return self._with_session(_execute, db)
 
     # ════════════════════════════════════════════════════════════
@@ -124,22 +145,28 @@ class BaseService(Generic[T]):
     # ════════════════════════════════════════════════════════════
 
     @gerer_erreurs(afficher_dans_ui=False, valeur_fallback=[])
-    def advanced_search(self, search_term: Optional[str] = None,
-                        search_fields: Optional[List[str]] = None,
-                        filters: Optional[Dict] = None,
-                        sort_by: Optional[str] = None,
-                        sort_desc: bool = False,
-                        limit: int = 100, offset: int = 0,
-                        db: Session = None) -> List[T]:
+    def advanced_search(
+        self,
+        search_term: str | None = None,
+        search_fields: list[str] | None = None,
+        filters: dict | None = None,
+        sort_by: str | None = None,
+        sort_desc: bool = False,
+        limit: int = 100,
+        offset: int = 0,
+        db: Session = None,
+    ) -> list[T]:
         """Recherche multi-critères"""
-        def _execute(session: Session) -> List[T]:
+
+        def _execute(session: Session) -> list[T]:
             query = session.query(self.model)
 
             # Recherche textuelle
             if search_term and search_fields:
                 conditions = [
                     getattr(self.model, field).ilike(f"%{search_term}%")
-                    for field in search_fields if hasattr(self.model, field)
+                    for field in search_fields
+                    if hasattr(self.model, field)
                 ]
                 if conditions:
                     query = query.filter(or_(*conditions))
@@ -154,6 +181,7 @@ class BaseService(Generic[T]):
                 query = query.order_by(desc(order_col) if sort_desc else order_col)
 
             return query.offset(offset).limit(limit).all()
+
         return self._with_session(_execute, db)
 
     # ════════════════════════════════════════════════════════════
@@ -161,20 +189,27 @@ class BaseService(Generic[T]):
     # ════════════════════════════════════════════════════════════
 
     @gerer_erreurs(afficher_dans_ui=True)
-    def bulk_create_with_merge(self, items_data: List[Dict], merge_key: str,
-                               merge_strategy: Callable[[Dict, Dict], Dict],
-                               db: Session = None) -> Tuple[int, int]:
+    def bulk_create_with_merge(
+        self,
+        items_data: list[dict],
+        merge_key: str,
+        merge_strategy: Callable[[dict, dict], dict],
+        db: Session = None,
+    ) -> tuple[int, int]:
         """Création en masse avec fusion intelligente"""
-        def _execute(session: Session) -> Tuple[int, int]:
+
+        def _execute(session: Session) -> tuple[int, int]:
             created = merged = 0
             for data in items_data:
                 merge_value = data.get(merge_key)
                 if not merge_value:
                     continue
 
-                existing = session.query(self.model).filter(
-                    getattr(self.model, merge_key) == merge_value
-                ).first()
+                existing = (
+                    session.query(self.model)
+                    .filter(getattr(self.model, merge_key) == merge_value)
+                    .first()
+                )
 
                 if existing:
                     existing_dict = self._model_to_dict(existing)
@@ -192,6 +227,7 @@ class BaseService(Generic[T]):
             logger.info(f"Bulk: {created} créés, {merged} fusionnés")
             self._invalider_cache()
             return created, merged
+
         return self._with_session(_execute, db)
 
     # ════════════════════════════════════════════════════════════
@@ -199,12 +235,16 @@ class BaseService(Generic[T]):
     # ════════════════════════════════════════════════════════════
 
     @gerer_erreurs(afficher_dans_ui=False, valeur_fallback={})
-    def get_stats(self, group_by_fields: Optional[List[str]] = None,
-                  count_filters: Optional[Dict[str, Dict]] = None,
-                  additional_filters: Optional[Dict] = None,
-                  db: Session = None) -> Dict:
+    def get_stats(
+        self,
+        group_by_fields: list[str] | None = None,
+        count_filters: dict[str, dict] | None = None,
+        additional_filters: dict | None = None,
+        db: Session = None,
+    ) -> dict:
         """Statistiques génériques"""
-        def _execute(session: Session) -> Dict:
+
+        def _execute(session: Session) -> dict:
             query = session.query(self.model)
             if additional_filters:
                 query = self._apply_filters(query, additional_filters)
@@ -215,10 +255,11 @@ class BaseService(Generic[T]):
             if group_by_fields:
                 for field in group_by_fields:
                     if hasattr(self.model, field):
-                        grouped = session.query(
-                            getattr(self.model, field),
-                            func.count(self.model.id)
-                        ).group_by(getattr(self.model, field)).all()
+                        grouped = (
+                            session.query(getattr(self.model, field), func.count(self.model.id))
+                            .group_by(getattr(self.model, field))
+                            .all()
+                        )
                         stats[f"by_{field}"] = dict(grouped)
 
             # Compteurs conditionnels
@@ -231,18 +272,21 @@ class BaseService(Generic[T]):
                     stats[name] = count_query.count()
 
             return stats
+
         return self._with_session(_execute, db)
 
     # ════════════════════════════════════════════════════════════
     # MIXINS INTÉGRÉS
     # ════════════════════════════════════════════════════════════
 
-    def count_by_status(self, status_field: str = "statut", db: Session = None) -> Dict[str, int]:
+    def count_by_status(self, status_field: str = "statut", db: Session = None) -> dict[str, int]:
         """Compte par statut"""
         stats = self.get_stats(group_by_fields=[status_field], db=db)
         return stats.get(f"by_{status_field}", {})
 
-    def mark_as(self, item_id: int, status_field: str, status_value: str, db: Session = None) -> bool:
+    def mark_as(
+        self, item_id: int, status_field: str, status_value: str, db: Session = None
+    ) -> bool:
         """Marque avec un statut"""
         return self.update(item_id, {status_field: status_value}, db=db) is not None
 
@@ -250,14 +294,14 @@ class BaseService(Generic[T]):
     # HELPERS PRIVÉS
     # ════════════════════════════════════════════════════════════
 
-    def _with_session(self, func: Callable, db: Optional[Session]) -> Any:
+    def _with_session(self, func: Callable, db: Session | None) -> Any:
         """Exécute fonction avec session"""
         if db:
             return func(db)
         with obtenir_contexte_db() as session:
             return func(session)
 
-    def _apply_filters(self, query, filters: Dict):
+    def _apply_filters(self, query, filters: dict):
         """Applique filtres génériques"""
         for field, value in filters.items():
             if not hasattr(self.model, field):
@@ -277,7 +321,7 @@ class BaseService(Generic[T]):
                         query = query.filter(column.ilike(f"%{val}%"))
         return query
 
-    def _model_to_dict(self, obj: Any) -> Dict:
+    def _model_to_dict(self, obj: Any) -> dict:
         """Convertit modèle en dict"""
         result = {}
         for column in obj.__table__.columns:

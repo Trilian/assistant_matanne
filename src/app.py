@@ -5,9 +5,11 @@ Application principale - VERSION OPTIMISÉE LAZY LOADING
 ✅ Navigation instantanée
 ✅ Modules chargés à la demande
 """
-import streamlit as st
+
 import sys
 from pathlib import Path
+
+import streamlit as st
 
 # ═══════════════════════════════════════════════════════════
 # PATH & LOGGING
@@ -24,18 +26,11 @@ logger = obtenir_logger(__name__)
 # IMPORTS OPTIMISÉS (MINIMAL au démarrage)
 # ═══════════════════════════════════════════════════════════
 
-from src.core import (
-    obtenir_parametres,
-    verifier_connexion,
-    obtenir_infos_db,
-    GestionnaireEtat,
-    obtenir_etat,
-    Cache
-)
-from src.ui import badge
+from src.core import Cache, GestionnaireEtat, obtenir_etat, obtenir_parametres, verifier_connexion
 
 # ✅ FIX: Import OptimizedRouter au lieu de l'ancien AppRouter
 from src.core.lazy_loader import OptimizedRouter, render_lazy_loading_stats
+from src.ui import badge
 
 parametres = obtenir_parametres()
 
@@ -61,7 +56,8 @@ st.set_page_config(
 # CSS MODERNE
 # ═══════════════════════════════════════════════════════════
 
-st.markdown("""
+st.markdown(
+    """
 <style>
 :root {
     --primary: #2d4d36;
@@ -90,12 +86,15 @@ st.markdown("""
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 
 # ═══════════════════════════════════════════════════════════
 # INITIALISATION
 # ═══════════════════════════════════════════════════════════
+
 
 def initialiser_app() -> bool:
     """Initialise l'application"""
@@ -118,6 +117,7 @@ def initialiser_app() -> bool:
     if not etat.agent_ia:
         try:
             from src.core.ai import obtenir_client_ia
+
             etat.agent_ia = obtenir_client_ia()
             logger.info("✅ Client IA OK")
         except Exception as e:
@@ -136,6 +136,7 @@ if not initialiser_app():
 # HEADER
 # ═══════════════════════════════════════════════════════════
 
+
 def afficher_header():
     """Header avec badges"""
     etat = obtenir_etat()
@@ -149,7 +150,7 @@ def afficher_header():
             f"<p style='color: var(--secondary); margin: 0;'>"
             f"Assistant familial intelligent"
             f"</p></div>",
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
         )
 
     with col2:
@@ -167,6 +168,7 @@ def afficher_header():
 # ═══════════════════════════════════════════════════════════
 # SIDEBAR
 # ═══════════════════════════════════════════════════════════
+
 
 def afficher_sidebar():
     """Sidebar avec navigation"""
@@ -216,21 +218,18 @@ def afficher_sidebar():
         for label, value in MODULES_MENU.items():
             if isinstance(value, dict):
                 # Module avec sous-menus
-                est_actif = any(
-                    etat.module_actuel.startswith(sub)
-                    for sub in value.values()
-                )
+                est_actif = any(etat.module_actuel.startswith(sub) for sub in value.values())
 
                 with st.expander(label, expanded=est_actif):
                     for sub_label, sub_value in value.items():
                         est_sous_menu_actif = etat.module_actuel == sub_value
 
                         if st.button(
-                                sub_label,
-                                key=f"btn_{sub_value}",
-                                use_container_width=True,
-                                type="primary" if est_sous_menu_actif else "secondary",
-                                disabled=est_sous_menu_actif
+                            sub_label,
+                            key=f"btn_{sub_value}",
+                            use_container_width=True,
+                            type="primary" if est_sous_menu_actif else "secondary",
+                            disabled=est_sous_menu_actif,
                         ):
                             GestionnaireEtat.naviguer_vers(sub_value)
                             st.rerun()
@@ -239,11 +238,11 @@ def afficher_sidebar():
                 est_actif = etat.module_actuel == value
 
                 if st.button(
-                        label,
-                        key=f"btn_{value}",
-                        use_container_width=True,
-                        type="primary" if est_actif else "secondary",
-                        disabled=est_actif
+                    label,
+                    key=f"btn_{value}",
+                    use_container_width=True,
+                    type="primary" if est_actif else "secondary",
+                    disabled=est_actif,
                 ):
                     GestionnaireEtat.naviguer_vers(value)
                     st.rerun()
@@ -267,6 +266,7 @@ def afficher_sidebar():
                     Cache.vider()
                     # ✅ Vider cache lazy loader
                     from src.core.lazy_loader import LazyModuleLoader
+
                     LazyModuleLoader.clear_cache()
                     st.success("Reset OK")
                     st.rerun()
@@ -275,6 +275,7 @@ def afficher_sidebar():
 # ═══════════════════════════════════════════════════════════
 # FOOTER
 # ═══════════════════════════════════════════════════════════
+
 
 def afficher_footer():
     """Footer simplifié"""
@@ -292,7 +293,8 @@ def afficher_footer():
     with col3:
         if st.button("ℹ️ À propos"):
             with st.expander("À propos", expanded=True):
-                st.markdown(f"""
+                st.markdown(
+                    f"""
                 ### {parametres.APP_NAME}
                 **Version:** {parametres.APP_VERSION}
                 
@@ -301,12 +303,14 @@ def afficher_footer():
                 - Database: Supabase PostgreSQL
                 - IA: Mistral AI
                 - ⚡ Lazy Loading: Active
-                """)
+                """
+                )
 
 
 # ═══════════════════════════════════════════════════════════
 # MAIN
 # ═══════════════════════════════════════════════════════════
+
 
 def main():
     """Fonction principale"""

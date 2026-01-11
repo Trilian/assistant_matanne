@@ -2,8 +2,9 @@
 UI Components - Dynamic
 Listes dynamiques, modals
 """
+
 import streamlit as st
-from typing import List, Dict, Optional
+
 from src.ui.components.forms import form_field
 
 
@@ -42,12 +43,7 @@ class Modal:
 
     def confirm(self, label: str = "✅ Confirmer") -> bool:
         """Bouton confirmer"""
-        return st.button(
-            label,
-            key=f"{self.key}_yes",
-            type="primary",
-            use_container_width=True
-        )
+        return st.button(label, key=f"{self.key}_yes", type="primary", use_container_width=True)
 
     def cancel(self, label: str = "❌ Annuler"):
         """Bouton annuler"""
@@ -71,19 +67,14 @@ class DynamicList:
         items = dynamic_list.render()
     """
 
-    def __init__(
-            self,
-            key: str,
-            fields: List[Dict],
-            initial_items: Optional[List[Dict]] = None
-    ):
+    def __init__(self, key: str, fields: list[dict], initial_items: list[dict] | None = None):
         self.key = key
         self.fields = fields
 
         if f"{key}_items" not in st.session_state:
             st.session_state[f"{key}_items"] = initial_items or []
 
-    def render(self) -> List[Dict]:
+    def render(self) -> list[dict]:
         """
         Render liste dynamique
 
@@ -114,10 +105,7 @@ class DynamicList:
                 col1, col2 = st.columns([5, 1])
 
                 with col1:
-                    display = " • ".join([
-                        f"{item.get(f['name'], '—')}"
-                        for f in self.fields[:3]
-                    ])
+                    display = " • ".join([f"{item.get(f['name'], '—')}" for f in self.fields[:3]])
                     st.write(display)
 
                 with col2:
@@ -129,7 +117,7 @@ class DynamicList:
 
         return items
 
-    def get_items(self) -> List[Dict]:
+    def get_items(self) -> list[dict]:
         """Récupère items"""
         return st.session_state[f"{self.key}_items"]
 
@@ -137,7 +125,7 @@ class DynamicList:
         """Vide liste"""
         st.session_state[f"{self.key}_items"] = []
 
-    def add_item(self, item: Dict):
+    def add_item(self, item: dict):
         """Ajoute item programmatiquement"""
         st.session_state[f"{self.key}_items"].append(item)
 
@@ -157,7 +145,7 @@ class Stepper:
                 stepper.next()
     """
 
-    def __init__(self, key: str, steps: List[str]):
+    def __init__(self, key: str, steps: list[str]):
         self.key = key
         self.steps = steps
 

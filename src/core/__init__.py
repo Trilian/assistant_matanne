@@ -33,13 +33,13 @@ get_logger = obtenir_logger
 # ═══════════════════════════════════════════════════════════
 
 from .database import (
-    obtenir_moteur,
+    GestionnaireMigrations,
+    initialiser_database,
     obtenir_contexte_db,
     obtenir_db_securise,
-    verifier_connexion,
     obtenir_infos_db,
-    initialiser_database,
-    GestionnaireMigrations
+    obtenir_moteur,
+    verifier_connexion,
 )
 
 # Alias anglais
@@ -55,13 +55,7 @@ MigrationManager = GestionnaireMigrations
 # STATE
 # ═══════════════════════════════════════════════════════════
 
-from .state import (
-    EtatApp,
-    GestionnaireEtat,
-    obtenir_etat,
-    naviguer,
-    revenir
-)
+from .state import EtatApp, GestionnaireEtat, naviguer, obtenir_etat, revenir
 
 # Alias anglais
 AppState = EtatApp
@@ -76,8 +70,8 @@ go_back = revenir
 
 from .cache import (
     Cache,
-    cached,
     LimiteDebit,
+    cached,
 )
 
 # Alias anglais
@@ -88,12 +82,12 @@ RateLimit = LimiteDebit
 # ═══════════════════════════════════════════════════════════
 
 from .errors import (
-    ExceptionApp,
-    ErreurValidation,
-    ErreurNonTrouve,
     ErreurBaseDeDonnees,
-    ErreurServiceIA,
     ErreurLimiteDebit,
+    ErreurNonTrouve,
+    ErreurServiceIA,
+    ErreurValidation,
+    ExceptionApp,
     gerer_erreurs,
 )
 
@@ -123,12 +117,7 @@ validate_model = valider_modele
 # AI
 # ═══════════════════════════════════════════════════════════
 
-from .ai import (
-    ClientIA,
-    obtenir_client_ia,
-    AnalyseurIA,
-    CacheIA
-)
+from .ai import AnalyseurIA, CacheIA, ClientIA, obtenir_client_ia
 
 # Alias anglais
 AIClient = ClientIA
@@ -152,13 +141,11 @@ __all__ = [
     "obtenir_parametres",
     "Settings",
     "get_settings",
-
     # Logging
     "GestionnaireLog",
     "obtenir_logger",
     "LogManager",
     "get_logger",
-
     # Database
     "obtenir_moteur",
     "obtenir_contexte_db",
@@ -174,7 +161,6 @@ __all__ = [
     "get_db_info",
     "init_database",
     "MigrationManager",
-
     # State
     "EtatApp",
     "GestionnaireEtat",
@@ -186,13 +172,11 @@ __all__ = [
     "get_state",
     "navigate",
     "go_back",
-
     # Cache
     "Cache",
     "cached",
     "LimiteDebit",
     "RateLimit",
-
     # Errors
     "ExceptionApp",
     "ErreurValidation",
@@ -208,13 +192,11 @@ __all__ = [
     "AIServiceError",
     "RateLimitError",
     "handle_errors",
-
     # Validation
     "NettoyeurEntrees",
     "valider_modele",
     "InputSanitizer",
     "validate_model",
-
     # AI
     "ClientIA",
     "obtenir_client_ia",

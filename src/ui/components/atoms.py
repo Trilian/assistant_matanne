@@ -2,8 +2,8 @@
 UI Components - Atoms (composants de base)
 Badge, empty_state, metric_card
 """
+
 import streamlit as st
-from typing import Optional
 
 
 def badge(text: str, color: str = "#4CAF50"):
@@ -19,13 +19,13 @@ def badge(text: str, color: str = "#4CAF50"):
     """
     st.markdown(
         f'<span style="background: {color}; color: white; '
-        f'padding: 0.25rem 0.75rem; border-radius: 12px; '
+        f"padding: 0.25rem 0.75rem; border-radius: 12px; "
         f'font-size: 0.875rem; font-weight: 600;">{text}</span>',
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
 
 
-def empty_state(message: str, icon: str = "📭", subtext: Optional[str] = None):
+def empty_state(message: str, icon: str = "📭", subtext: str | None = None):
     """
     État vide centré
 
@@ -37,24 +37,21 @@ def empty_state(message: str, icon: str = "📭", subtext: Optional[str] = None)
     Example:
         empty_state("Aucune recette", "🍽️", "Ajoutez-en une")
     """
-    sub_html = f'<div style="font-size: 1rem; margin-top: 0.5rem;">{subtext}</div>' if subtext else ""
+    sub_html = (
+        f'<div style="font-size: 1rem; margin-top: 0.5rem;">{subtext}</div>' if subtext else ""
+    )
 
     st.markdown(
         f'<div style="text-align: center; padding: 3rem; color: #6c757d;">'
         f'<div style="font-size: 4rem;">{icon}</div>'
         f'<div style="font-size: 1.5rem; margin-top: 1rem; font-weight: 500;">{message}</div>'
-        f'{sub_html}'
-        f'</div>',
-        unsafe_allow_html=True
+        f"{sub_html}"
+        f"</div>",
+        unsafe_allow_html=True,
     )
 
 
-def metric_card(
-        label: str,
-        value: str,
-        delta: Optional[str] = None,
-        color: str = "#ffffff"
-):
+def metric_card(label: str, value: str, delta: str | None = None, color: str = "#ffffff"):
     """
     Carte métrique stylée
 
@@ -67,16 +64,20 @@ def metric_card(
     Example:
         metric_card("Total", "42", "+5", "#f0f0f0")
     """
-    delta_html = f'<div style="font-size: 0.875rem; color: #4CAF50; margin-top: 0.25rem;">{delta}</div>' if delta else ""
+    delta_html = (
+        f'<div style="font-size: 0.875rem; color: #4CAF50; margin-top: 0.25rem;">{delta}</div>'
+        if delta
+        else ""
+    )
 
     st.markdown(
         f'<div style="background: {color}; padding: 1.5rem; '
         f'border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">'
         f'<div style="font-size: 0.875rem; color: #666; font-weight: 500;">{label}</div>'
         f'<div style="font-size: 2rem; font-weight: 700; margin-top: 0.5rem;">{value}</div>'
-        f'{delta_html}'
-        f'</div>',
-        unsafe_allow_html=True
+        f"{delta_html}"
+        f"</div>",
+        unsafe_allow_html=True,
     )
 
 
@@ -101,7 +102,7 @@ def toast(message: str, type: str = "success"):
         st.info(message)
 
 
-def divider(text: Optional[str] = None):
+def divider(text: str | None = None):
     """
     Séparateur avec texte optionnel
 
@@ -114,8 +115,8 @@ def divider(text: Optional[str] = None):
             f'<span style="padding: 0 1rem; background: white; '
             f'position: relative; top: -0.75rem;">{text}</span>'
             f'<hr style="margin-top: -1.5rem; border: 1px solid #e0e0e0;">'
-            f'</div>',
-            unsafe_allow_html=True
+            f"</div>",
+            unsafe_allow_html=True,
         )
     else:
         st.markdown("---")
@@ -132,8 +133,8 @@ def info_box(title: str, content: str, icon: str = "ℹ️"):
         f'<div style="background: #e7f3ff; border-left: 4px solid #2196F3; '
         f'padding: 1rem; border-radius: 4px; margin: 1rem 0;">'
         f'<div style="font-weight: 600; margin-bottom: 0.5rem;">'
-        f'{icon} {title}</div>'
-        f'<div>{content}</div>'
-        f'</div>',
-        unsafe_allow_html=True
+        f"{icon} {title}</div>"
+        f"<div>{content}</div>"
+        f"</div>",
+        unsafe_allow_html=True,
     )

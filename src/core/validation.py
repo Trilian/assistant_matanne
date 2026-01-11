@@ -8,31 +8,32 @@ Ce module fournit :
 - Helpers de validation
 - Décorateurs de validation
 """
-import re
+
 import html
 import logging
-from typing import Any, Dict, List, Optional, Tuple, Callable
-from functools import wraps
+import re
+from collections.abc import Callable
 from datetime import date, datetime
-from pydantic import BaseModel, Field, field_validator, model_validator, ValidationError
+from functools import wraps
+from typing import Any
 
-from .errors import ErreurValidation
+from pydantic import BaseModel, Field, ValidationError, field_validator, model_validator
 
 # Import des constantes avec gestion d'erreur
 try:
     from .constants import (
-        MAX_LENGTH_SHORT,
-        MAX_LENGTH_MEDIUM,
+        MAX_ETAPES,
+        MAX_INGREDIENTS,
         MAX_LENGTH_LONG,
+        MAX_LENGTH_MEDIUM,
+        MAX_LENGTH_SHORT,
         MAX_LENGTH_TEXT,
         MAX_PORTIONS,
-        MAX_TEMPS_PREPARATION,
-        MAX_TEMPS_CUISSON,
         MAX_QUANTITE,
-        MIN_INGREDIENTS,
-        MAX_INGREDIENTS,
+        MAX_TEMPS_CUISSON,
+        MAX_TEMPS_PREPARATION,
         MIN_ETAPES,
-        MAX_ETAPES
+        MIN_INGREDIENTS,
     )
 except ImportError:
     # Valeurs par défaut si constants.py n'est pas disponible
@@ -56,6 +57,7 @@ logger = logging.getLogger(__name__)
 # SANITIZATION (XSS, SQL INJECTION)
 # ═══════════════════════════════════════════════════════════
 
+
 class NettoyeurEntrees:
     """
     Nettoyeur universel d'entrées utilisateur.
@@ -64,21 +66,21 @@ class NettoyeurEntrees:
     """
 
     PATTERNS_XSS = [
-        r'<script[^>]*>.*?</script>',
-        r'javascript:',
-        r'on\w+\s*=',
-        r'<iframe',
-        r'<object',
-        r'<embed',
+        r"<script[^>]*>.*?</script>",
+        r"javascript:",
+        r"on\w+\s*=",
+        r"<iframe",
+        r"<object",
+        r"<embed",
     ]
     """Patterns de détection XSS."""
 
     PATTERNS_SQL = [
         r"('\s*(OR|AND)\s*'?\d)",
         r'("\s*(OR|AND)\s*"?\d)',
-        r'(;\s*DROP\s+TABLE)',
-        r'(;\s*DELETE\s+FROM)',
-        r'(UNION\s+SELECT)',
+        r"(;\s*DROP\s+TABLE)",
+        r"(;\s*DELETE\s+FROM)",
+        r"(UNION\s+SELECT)",
     ]
     """Patterns de détection injection SQL."""
 
@@ -109,7 +111,7 @@ class NettoyeurEntrees:
 
         # Supprimer patterns XSS
         for pattern in NettoyeurEntrees.PATTERNS_XSS:
-            valeur = re.sub(pattern, '', valeur, flags=re.IGNORECASE)
+            valeur = re.sub(pattern, "", valeur, flags=re.IGNORECASE)
 
         # Détecter patterns SQL
         for pattern in NettoyeurEntrees.PATTERNS_SQL:
@@ -118,16 +120,14 @@ class NettoyeurEntrees:
                 # On laisse passer mais on log (pour ne pas bloquer faux positifs)
 
         # Supprimer caractères de contrôle
-        valeur = re.sub(r'[\x00-\x1F\x7F]', '', valeur)
+        valeur = re.sub(r"[\x00-\x1F\x7F]", "", valeur)
 
         return valeur.strip()
 
     @staticmethod
     def nettoyer_nombre(
-            valeur: Any,
-            minimum: Optional[float] = None,
-            maximum: Optional[float] = None
-    ) -> Optional[float]:
+        valeur: Any, minimum: float | None = None, maximum: float | None = None
+    ) -> float | None:
         """
         Valide et nettoie un nombre.
 
@@ -145,7 +145,7 @@ class NettoyeurEntrees:
         """
         try:
             if isinstance(valeur, str):
-                valeur = valeur.replace(',', '.')
+                valeur = valeur.replace(",", ".")
             num = float(valeur)
 
             if minimum is not None and num < minimum:
@@ -158,7 +158,7 @@ class NettoyeurEntrees:
             return None
 
     @staticmethod
-    def nettoyer_date(valeur: Any) -> Optional[date]:
+    def nettoyer_date(valeur: Any) -> date | None:
         """
         Valide et nettoie une date.
 
@@ -178,7 +178,7 @@ class NettoyeurEntrees:
             return valeur.date()
 
         if isinstance(valeur, str):
-            for fmt in ['%Y-%m-%d', '%d/%m/%Y', '%d-%m-%Y']:
+            for fmt in ["%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y"]:
                 try:
                     return datetime.strptime(valeur, fmt).date()
                 except ValueError:
@@ -186,7 +186,7 @@ class NettoyeurEntrees:
         return None
 
     @staticmethod
-    def nettoyer_email(valeur: str) -> Optional[str]:
+    def nettoyer_email(valeur: str) -> str | None:
         """
         Valide un email.
 
@@ -199,7 +199,7 @@ class NettoyeurEntrees:
         if not valeur or not isinstance(valeur, str):
             return None
 
-        pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         valeur = valeur.strip().lower()
 
         if re.match(pattern, valeur):
@@ -207,7 +207,7 @@ class NettoyeurEntrees:
         return None
 
     @staticmethod
-    def nettoyer_dictionnaire(data: Dict, schema: Dict) -> Dict:
+    def nettoyer_dictionnaire(data: dict, schema: dict) -> dict:
         """
         Nettoie un dictionnaire selon un schéma.
 
@@ -240,14 +240,11 @@ class NettoyeurEntrees:
 
             if type_champ == "string":
                 nettoye[champ] = NettoyeurEntrees.nettoyer_chaine(
-                    valeur,
-                    longueur_max=regles.get("max_length", 1000)
+                    valeur, longueur_max=regles.get("max_length", 1000)
                 )
             elif type_champ == "number":
                 nettoye[champ] = NettoyeurEntrees.nettoyer_nombre(
-                    valeur,
-                    minimum=regles.get("min"),
-                    maximum=regles.get("max")
+                    valeur, minimum=regles.get("min"), maximum=regles.get("max")
                 )
             elif type_champ == "date":
                 nettoye[champ] = NettoyeurEntrees.nettoyer_date(valeur)
@@ -256,8 +253,7 @@ class NettoyeurEntrees:
             elif type_champ == "list":
                 if isinstance(valeur, list):
                     nettoye[champ] = [
-                        NettoyeurEntrees.nettoyer_chaine(str(item))
-                        for item in valeur
+                        NettoyeurEntrees.nettoyer_chaine(str(item)) for item in valeur
                     ]
             else:
                 nettoye[champ] = valeur
@@ -272,6 +268,7 @@ InputSanitizer = NettoyeurEntrees
 # ═══════════════════════════════════════════════════════════
 # MODÈLES PYDANTIC (VALIDATION MÉTIER)
 # ═══════════════════════════════════════════════════════════
+
 
 def nettoyer_texte(v: str) -> str:
     """
@@ -289,6 +286,7 @@ def nettoyer_texte(v: str) -> str:
 
 
 # --- RECETTES ---
+
 
 class IngredientInput(BaseModel):
     """
@@ -324,7 +322,7 @@ class EtapeInput(BaseModel):
 
     ordre: int = Field(..., ge=1, le=MAX_ETAPES)
     description: str = Field(..., min_length=10, max_length=MAX_LENGTH_LONG)
-    duree: Optional[int] = Field(None, ge=0, le=MAX_TEMPS_CUISSON)
+    duree: int | None = Field(None, ge=0, le=MAX_TEMPS_CUISSON)
 
     @field_validator("description")
     @classmethod
@@ -350,15 +348,17 @@ class RecetteInput(BaseModel):
     """
 
     nom: str = Field(..., min_length=3, max_length=MAX_LENGTH_MEDIUM)
-    description: Optional[str] = Field(None, max_length=MAX_LENGTH_TEXT)
+    description: str | None = Field(None, max_length=MAX_LENGTH_TEXT)
     temps_preparation: int = Field(..., gt=0, le=MAX_TEMPS_PREPARATION)
     temps_cuisson: int = Field(..., ge=0, le=MAX_TEMPS_CUISSON)
     portions: int = Field(..., gt=0, le=MAX_PORTIONS)
     difficulte: str = Field(..., pattern="^(facile|moyen|difficile)$")
     type_repas: str = Field(..., pattern="^(petit_déjeuner|déjeuner|dîner|goûter)$")
     saison: str = Field(..., pattern="^(printemps|été|automne|hiver|toute_année)$")
-    ingredients: List[IngredientInput] = Field(..., min_length=MIN_INGREDIENTS, max_length=MAX_INGREDIENTS)
-    etapes: List[EtapeInput] = Field(..., min_length=MIN_ETAPES, max_length=MAX_ETAPES)
+    ingredients: list[IngredientInput] = Field(
+        ..., min_length=MIN_INGREDIENTS, max_length=MAX_INGREDIENTS
+    )
+    etapes: list[EtapeInput] = Field(..., min_length=MIN_ETAPES, max_length=MAX_ETAPES)
 
     @field_validator("nom", "description")
     @classmethod
@@ -375,6 +375,7 @@ class RecetteInput(BaseModel):
 
 
 # --- INVENTAIRE ---
+
 
 class ArticleInventaireInput(BaseModel):
     """
@@ -395,8 +396,8 @@ class ArticleInventaireInput(BaseModel):
     quantite: float = Field(..., ge=0, le=MAX_QUANTITE)
     unite: str = Field(..., min_length=1, max_length=50)
     quantite_min: float = Field(..., ge=0, le=1000)
-    emplacement: Optional[str] = None
-    date_peremption: Optional[date] = None
+    emplacement: str | None = None
+    date_peremption: date | None = None
 
     @field_validator("nom", "categorie")
     @classmethod
@@ -405,6 +406,7 @@ class ArticleInventaireInput(BaseModel):
 
 
 # --- COURSES ---
+
 
 class ArticleCoursesInput(BaseModel):
     """
@@ -422,7 +424,7 @@ class ArticleCoursesInput(BaseModel):
     quantite: float = Field(..., gt=0, le=MAX_QUANTITE)
     unite: str = Field(..., min_length=1, max_length=50)
     priorite: str = Field("moyenne", pattern="^(haute|moyenne|basse)$")
-    magasin: Optional[str] = None
+    magasin: str | None = None
 
     @field_validator("nom")
     @classmethod
@@ -435,81 +437,50 @@ class ArticleCoursesInput(BaseModel):
 # ═══════════════════════════════════════════════════════════
 
 SCHEMA_RECETTE = {
-    "nom": {
-        "type": "string",
-        "max_length": MAX_LENGTH_MEDIUM,
-        "required": True,
-        "label": "Nom"
-    },
-    "description": {
-        "type": "string",
-        "max_length": MAX_LENGTH_TEXT,
-        "label": "Description"
-    },
+    "nom": {"type": "string", "max_length": MAX_LENGTH_MEDIUM, "required": True, "label": "Nom"},
+    "description": {"type": "string", "max_length": MAX_LENGTH_TEXT, "label": "Description"},
     "temps_preparation": {
         "type": "number",
         "min": 0,
         "max": MAX_TEMPS_PREPARATION,
         "required": True,
-        "label": "Temps préparation"
+        "label": "Temps préparation",
     },
     "temps_cuisson": {
         "type": "number",
         "min": 0,
         "max": MAX_TEMPS_CUISSON,
         "required": True,
-        "label": "Temps cuisson"
+        "label": "Temps cuisson",
     },
     "portions": {
         "type": "number",
         "min": 1,
         "max": MAX_PORTIONS,
         "required": True,
-        "label": "Portions"
+        "label": "Portions",
     },
 }
 
 SCHEMA_INVENTAIRE = {
-    "nom": {
-        "type": "string",
-        "max_length": MAX_LENGTH_MEDIUM,
-        "required": True,
-        "label": "Nom"
-    },
+    "nom": {"type": "string", "max_length": MAX_LENGTH_MEDIUM, "required": True, "label": "Nom"},
     "categorie": {
         "type": "string",
         "max_length": MAX_LENGTH_SHORT,
         "required": True,
-        "label": "Catégorie"
+        "label": "Catégorie",
     },
     "quantite": {
         "type": "number",
         "min": 0,
         "max": MAX_QUANTITE,
         "required": True,
-        "label": "Quantité"
+        "label": "Quantité",
     },
-    "unite": {
-        "type": "string",
-        "max_length": 50,
-        "required": True,
-        "label": "Unité"
-    },
-    "quantite_min": {
-        "type": "number",
-        "min": 0,
-        "max": 1000,
-        "label": "Seuil"
-    },
-    "emplacement": {
-        "type": "string",
-        "max_length": MAX_LENGTH_SHORT,
-        "label": "Emplacement"
-    },
-    "date_peremption": {
-        "type": "date",
-        "label": "Date péremption"
-    },
+    "unite": {"type": "string", "max_length": 50, "required": True, "label": "Unité"},
+    "quantite_min": {"type": "number", "min": 0, "max": 1000, "label": "Seuil"},
+    "emplacement": {"type": "string", "max_length": MAX_LENGTH_SHORT, "label": "Emplacement"},
+    "date_peremption": {"type": "date", "label": "Date péremption"},
 }
 
 SCHEMA_COURSES = {
@@ -517,31 +488,18 @@ SCHEMA_COURSES = {
         "type": "string",
         "max_length": MAX_LENGTH_MEDIUM,
         "required": True,
-        "label": "Article"
+        "label": "Article",
     },
     "quantite": {
         "type": "number",
         "min": 0.1,
         "max": MAX_QUANTITE,
         "required": True,
-        "label": "Quantité"
+        "label": "Quantité",
     },
-    "unite": {
-        "type": "string",
-        "max_length": 50,
-        "required": True,
-        "label": "Unité"
-    },
-    "priorite": {
-        "type": "string",
-        "max_length": 20,
-        "label": "Priorité"
-    },
-    "magasin": {
-        "type": "string",
-        "max_length": MAX_LENGTH_SHORT,
-        "label": "Magasin"
-    },
+    "unite": {"type": "string", "max_length": 50, "required": True, "label": "Unité"},
+    "priorite": {"type": "string", "max_length": 20, "label": "Priorité"},
+    "magasin": {"type": "string", "max_length": MAX_LENGTH_SHORT, "label": "Magasin"},
 }
 
 
@@ -549,10 +507,10 @@ SCHEMA_COURSES = {
 # HELPERS DE VALIDATION
 # ═══════════════════════════════════════════════════════════
 
+
 def valider_modele(
-        classe_modele: type[BaseModel],
-        data: dict
-) -> Tuple[bool, str, Optional[BaseModel]]:
+    classe_modele: type[BaseModel], data: dict
+) -> tuple[bool, str, BaseModel | None]:
     """
     Valide des données avec un modèle Pydantic.
 
@@ -581,9 +539,8 @@ def valider_modele(
 
 
 def valider_formulaire_streamlit(
-        donnees_formulaire: Dict,
-        schema: Dict
-) -> Tuple[bool, List[str], Dict]:
+    donnees_formulaire: dict, schema: dict
+) -> tuple[bool, list[str], dict]:
     """
     Valide un formulaire Streamlit.
 
@@ -609,30 +566,22 @@ def valider_formulaire_streamlit(
 
         if regles.get("type") == "number" and valeur is not None:
             if regles.get("min") is not None and valeur < regles["min"]:
-                erreurs.append(
-                    f"⚠️ {regles.get('label', champ)} doit être ≥ {regles['min']}"
-                )
+                erreurs.append(f"⚠️ {regles.get('label', champ)} doit être ≥ {regles['min']}")
             if regles.get("max") is not None and valeur > regles["max"]:
-                erreurs.append(
-                    f"⚠️ {regles.get('label', champ)} doit être ≤ {regles['max']}"
-                )
+                erreurs.append(f"⚠️ {regles.get('label', champ)} doit être ≤ {regles['max']}")
 
         if regles.get("type") == "string" and valeur:
             longueur_max = regles.get("max_length", 1000)
             if len(valeur) > longueur_max:
                 erreurs.append(
-                    f"⚠️ {regles.get('label', champ)} trop long "
-                    f"(max {longueur_max} caractères)"
+                    f"⚠️ {regles.get('label', champ)} trop long " f"(max {longueur_max} caractères)"
                 )
 
     est_valide = len(erreurs) == 0
     return est_valide, erreurs, nettoye
 
 
-def valider_et_nettoyer_formulaire(
-        nom_module: str,
-        donnees_formulaire: Dict
-) -> Tuple[bool, Dict]:
+def valider_et_nettoyer_formulaire(nom_module: str, donnees_formulaire: dict) -> tuple[bool, dict]:
     """
     Helper pour valider un formulaire selon le module.
 
@@ -646,7 +595,6 @@ def valider_et_nettoyer_formulaire(
     Example:
         >>> valide, donnees = valider_et_nettoyer_formulaire("recettes", form_data)
     """
-    import streamlit as st
 
     schemas = {
         "recettes": SCHEMA_RECETTE,
@@ -667,10 +615,7 @@ def valider_et_nettoyer_formulaire(
                 nettoye[cle] = valeur
         return True, nettoye
 
-    est_valide, erreurs, nettoye = valider_formulaire_streamlit(
-        donnees_formulaire,
-        schema
-    )
+    est_valide, erreurs, nettoye = valider_formulaire_streamlit(donnees_formulaire, schema)
 
     if not est_valide:
         afficher_erreurs_validation(erreurs)
@@ -678,7 +623,7 @@ def valider_et_nettoyer_formulaire(
     return est_valide, nettoye
 
 
-def afficher_erreurs_validation(erreurs: List[str]):
+def afficher_erreurs_validation(erreurs: list[str]):
     """
     Affiche les erreurs de validation dans Streamlit.
 
@@ -697,7 +642,8 @@ def afficher_erreurs_validation(erreurs: List[str]):
 # DÉCORATEUR DE VALIDATION
 # ═══════════════════════════════════════════════════════════
 
-def valider_entree(schema: Optional[Dict] = None, nettoyer_tout: bool = True):
+
+def valider_entree(schema: dict | None = None, nettoyer_tout: bool = True):
     """
     Décorateur pour valider automatiquement les entrées.
 
@@ -713,6 +659,7 @@ def valider_entree(schema: Optional[Dict] = None, nettoyer_tout: bool = True):
         >>> def creer_recette(data: dict):
         >>>     return recette_service.create(data)
     """
+
     def decorateur(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -725,7 +672,7 @@ def valider_entree(schema: Optional[Dict] = None, nettoyer_tout: bool = True):
                     break
 
             if not data_arg:
-                for cle in ['data', 'donnees', 'donnees_formulaire']:
+                for cle in ["data", "donnees", "donnees_formulaire"]:
                     if cle in kwargs and isinstance(kwargs[cle], dict):
                         data_arg = kwargs[cle]
                         break
@@ -736,12 +683,9 @@ def valider_entree(schema: Optional[Dict] = None, nettoyer_tout: bool = True):
 
                 # Remplacer dans args/kwargs
                 if isinstance(args, tuple) and data_arg in args:
-                    args = tuple(
-                        nettoye if arg is data_arg else arg
-                        for arg in args
-                    )
+                    args = tuple(nettoye if arg is data_arg else arg for arg in args)
 
-                for cle in ['data', 'donnees', 'donnees_formulaire']:
+                for cle in ["data", "donnees", "donnees_formulaire"]:
                     if cle in kwargs and kwargs[cle] is data_arg:
                         kwargs[cle] = nettoye
 
@@ -754,6 +698,7 @@ def valider_entree(schema: Optional[Dict] = None, nettoyer_tout: bool = True):
             return func(*args, **kwargs)
 
         return wrapper
+
     return decorateur
 
 

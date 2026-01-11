@@ -1,8 +1,9 @@
 """
 Validators - Validation commune
 """
+
 import re
-from typing import Any, Tuple
+from typing import Any
 
 
 def is_valid_email(email: str) -> bool:
@@ -15,7 +16,7 @@ def is_valid_email(email: str) -> bool:
         >>> is_valid_email("invalid")
         False
     """
-    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
     return bool(re.match(pattern, email))
 
 
@@ -28,7 +29,7 @@ def is_valid_phone(phone: str, country: str = "FR") -> bool:
         True
     """
     if country == "FR":
-        pattern = r'^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$'
+        pattern = r"^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$"
         return bool(re.match(pattern, phone))
     return False
 
@@ -47,11 +48,8 @@ def clamp(value: float, min_val: float, max_val: float) -> float:
 
 
 def validate_range(
-        value: Any,
-        min_val: Any = None,
-        max_val: Any = None,
-        field_name: str = "valeur"
-) -> Tuple[bool, str]:
+    value: Any, min_val: Any = None, max_val: Any = None, field_name: str = "valeur"
+) -> tuple[bool, str]:
     """
     Valide qu'une valeur est dans une plage
 
@@ -79,11 +77,8 @@ def validate_range(
 
 
 def validate_string_length(
-        text: str,
-        min_length: int = 0,
-        max_length: int = None,
-        field_name: str = "texte"
-) -> Tuple[bool, str]:
+    text: str, min_length: int = 0, max_length: int = None, field_name: str = "texte"
+) -> tuple[bool, str]:
     """
     Valide longueur d'une string
 
@@ -104,7 +99,7 @@ def validate_string_length(
     return True, ""
 
 
-def validate_required_fields(data: dict, required_fields: list) -> Tuple[bool, list]:
+def validate_required_fields(data: dict, required_fields: list) -> tuple[bool, list]:
     """
     Valide présence de champs requis
 
@@ -125,10 +120,8 @@ def validate_required_fields(data: dict, required_fields: list) -> Tuple[bool, l
 
 
 def validate_choice(
-        value: Any,
-        allowed_values: list,
-        field_name: str = "valeur"
-) -> Tuple[bool, str]:
+    value: Any, allowed_values: list, field_name: str = "valeur"
+) -> tuple[bool, str]:
     """
     Valide qu'une valeur est dans une liste
 

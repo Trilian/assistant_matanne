@@ -1,11 +1,11 @@
 """
 Formatters - Unités (poids, volume)
 """
-from typing import Union
+
 from .numbers import format_quantity_with_unit
 
 
-def format_weight(grams: Union[int, float, None]) -> str:
+def format_weight(grams: int | float | None) -> str:
     """
     Formate un poids en grammes vers kg/g automatique
 
@@ -33,7 +33,7 @@ def format_weight(grams: Union[int, float, None]) -> str:
     return format_quantity_with_unit(g, "g")
 
 
-def format_volume(milliliters: Union[int, float, None]) -> str:
+def format_volume(milliliters: int | float | None) -> str:
     """
     Formate un volume en mL vers L/mL automatique
 

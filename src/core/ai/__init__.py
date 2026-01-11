@@ -3,10 +3,10 @@ Module IA - Client, Analyseur, Cache, Rate Limiting
 Tout harmonisé en français avec exports propres
 """
 
+from .cache import CacheIA
 from .client import ClientIA, obtenir_client_ia
 from .parser import AnalyseurIA, analyser_liste_reponse
-from .cache import CacheIA
-from .rate_limit import RateLimitIA, LimiteDebit
+from .rate_limit import LimiteDebit, RateLimitIA
 
 # Alias anglais pour compatibilité
 AIClient = ClientIA
@@ -25,7 +25,6 @@ __all__ = [
     "CacheIA",
     "RateLimitIA",
     "LimiteDebit",
-
     # Alias anglais (compatibilité)
     "AIClient",
     "get_ai_client",

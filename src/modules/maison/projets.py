@@ -3,17 +3,16 @@ Module Projets avec Agent IA intégré
 Gestion et priorisation intelligente des projets maison
 """
 
-import streamlit as st
-import pandas as pd
-from datetime import datetime, date, timedelta
 import asyncio
-from typing import List, Dict
+from datetime import date, datetime
 
+import pandas as pd
+import streamlit as st
+
+from src.core.ai_agent import AgentIA
 from src.core.database import get_db_context
 from src.core.models import Project, ProjectTask
-from src.core.ai_agent import AgentIA
-from src.utils.formatters import format_quantity, format_quantity_with_unit
-
+from src.utils.formatters import format_quantity
 
 # ===================================
 # HELPERS
@@ -149,7 +148,7 @@ def supprimer_projet(project_id: int):
         db.commit()
 
 
-def get_projets_urgents() -> List[Dict]:
+def get_projets_urgents() -> list[dict]:
     """Détecte les projets urgents ou en retard"""
     urgents = []
 
@@ -275,7 +274,7 @@ def app():
             filtre_priorite = st.selectbox("Priorité", ["Toutes", "haute", "moyenne", "basse"])
 
         with col_f3:
-            tri = st.selectbox(
+            _tri = st.selectbox(
                 "Trier par", ["Priorité", "Progression", "Date mise à jour", "Échéance"]
             )
 
@@ -341,7 +340,9 @@ def app():
                             with col_t3:
                                 if tache["statut"] != "terminé":
                                     if st.button(
-                                        "✅", key=f"complete_{tache['id']}", use_container_width=True
+                                        "✅",
+                                        key=f"complete_{tache['id']}",
+                                        use_container_width=True,
                                     ):
                                         marquer_tache_complete(tache["id"])
                                         st.success("Tâche terminée !")
@@ -474,7 +475,9 @@ def app():
                     st.markdown("### 🎯 Ordre de priorité suggéré")
 
                     for i, item in enumerate(priorisation, 1):
-                        priorite_color = {1: "🔴", 2: "🟡", 3: "🟢"}.get(item.get("priorite", 3), "⚪")
+                        priorite_color = {1: "🔴", 2: "🟡", 3: "🟢"}.get(
+                            item.get("priorite", 3), "⚪"
+                        )
 
                         st.markdown(f"{priorite_color} **{i}. {item['projet']}**")
                         st.caption(f"💡 {item.get('raison', 'Priorisation IA')}")
@@ -571,10 +574,10 @@ def app():
                 for tache in template["taches"]:
                     st.write(f"• {tache}")
 
-                if st.button(f"➕ Créer depuis ce template", key=f"template_{template['nom']}"):
+                if st.button("➕ Créer depuis ce template", key=f"template_{template['nom']}"):
                     project_id = creer_projet(
                         template["nom"],
-                        f"Projet créé depuis template",
+                        "Projet créé depuis template",
                         template["categorie"],
                         "moyenne",
                     )

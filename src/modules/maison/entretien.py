@@ -3,11 +3,9 @@ Module Entretien Maison
 Gestion des tâches d'entretien récurrentes
 """
 
-import streamlit as st
-import pandas as pd
 from datetime import date, timedelta
-from typing import List, Dict
 
+import streamlit as st
 
 # Templates de tâches d'entretien
 TEMPLATES_ENTRETIEN = {
@@ -47,12 +45,12 @@ TEMPLATES_ENTRETIEN = {
 # ===================================
 
 
-def get_taches_today() -> List[str]:
+def get_taches_today() -> list[str]:
     """Retourne les tâches du jour"""
     return TEMPLATES_ENTRETIEN["Quotidien"] + TEMPLATES_ENTRETIEN["Hebdomadaire"][:2]
 
 
-def get_taches_semaine() -> Dict:
+def get_taches_semaine() -> dict:
     """Retourne les tâches de la semaine"""
     return {
         "Lundi": ["Lessive", "Aspirateur"],
@@ -138,7 +136,8 @@ def app():
             is_today = jour_date == today
 
             with st.expander(
-                f"{'🔵 ' if is_today else ''}{jour} {jour_date.strftime('%d/%m')}", expanded=is_today
+                f"{'🔵 ' if is_today else ''}{jour} {jour_date.strftime('%d/%m')}",
+                expanded=is_today,
             ):
                 if taches:
                     for tache in taches:
@@ -160,7 +159,7 @@ def app():
                 for tache in taches:
                     st.write(f"• {tache}")
 
-                if st.button(f"➕ Utiliser ce template", key=f"template_{frequence}"):
+                if st.button("➕ Utiliser ce template", key=f"template_{frequence}"):
                     st.success(f"Template '{frequence}' activé !")
 
         st.markdown("---")

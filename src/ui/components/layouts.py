@@ -2,15 +2,17 @@
 UI Components - Layouts
 Grilles, cartes, containers
 """
+
+from collections.abc import Callable
+
 import streamlit as st
-from typing import List, Dict, Optional, Callable
 
 
 def grid_layout(
-        items: List[Dict],
-        cols_per_row: int = 3,
-        card_renderer: Optional[Callable[[Dict, str], None]] = None,
-        key: str = "grid"
+    items: list[dict],
+    cols_per_row: int = 3,
+    card_renderer: Callable[[dict, str], None] | None = None,
+    key: str = "grid",
 ):
     """
     Layout en grille
@@ -48,14 +50,14 @@ def grid_layout(
 
 
 def item_card(
-        title: str,
-        metadata: List[str],
-        status: Optional[str] = None,
-        status_color: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-        image_url: Optional[str] = None,
-        actions: Optional[List[tuple]] = None,
-        key: str = "item"
+    title: str,
+    metadata: list[str],
+    status: str | None = None,
+    status_color: str | None = None,
+    tags: list[str] | None = None,
+    image_url: str | None = None,
+    actions: list[tuple] | None = None,
+    key: str = "item",
 ):
     """
     Carte item universelle
@@ -86,7 +88,7 @@ def item_card(
         st.markdown(
             f'<div style="border-left: 4px solid {border_color}; padding: 1rem; '
             f'background: #f8f9fa; border-radius: 8px; margin-bottom: 0.5rem;"></div>',
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
         )
 
         if image_url:
@@ -106,7 +108,7 @@ def item_card(
                     st.markdown(
                         f'<div style="text-align: right; color: {status_color or "#6c757d"}; '
                         f'font-weight: 600;">{status}</div>',
-                        unsafe_allow_html=True
+                        unsafe_allow_html=True,
                     )
             else:
                 st.markdown(f"### {title}")
@@ -115,11 +117,13 @@ def item_card(
                 st.caption(" • ".join(metadata))
 
             if tags:
-                tag_html = " ".join([
-                    f'<span style="background: #e7f3ff; padding: 0.25rem 0.5rem; '
-                    f'border-radius: 12px; font-size: 0.875rem;">{tag}</span>'
-                    for tag in tags
-                ])
+                tag_html = " ".join(
+                    [
+                        f'<span style="background: #e7f3ff; padding: 0.25rem 0.5rem; '
+                        f'border-radius: 12px; font-size: 0.875rem;">{tag}</span>'
+                        for tag in tags
+                    ]
+                )
                 st.markdown(tag_html, unsafe_allow_html=True)
 
         if actions:
@@ -130,7 +134,9 @@ def item_card(
                         callback()
 
 
-def collapsible_section(title: str, content_fn: Callable, expanded: bool = False, key: str = "section"):
+def collapsible_section(
+    title: str, content_fn: Callable, expanded: bool = False, key: str = "section"
+):
     """
     Section pliable
 
@@ -152,7 +158,7 @@ def collapsible_section(title: str, content_fn: Callable, expanded: bool = False
         content_fn()
 
 
-def tabs_layout(tabs: Dict[str, Callable], key: str = "tabs"):
+def tabs_layout(tabs: dict[str, Callable], key: str = "tabs"):
     """
     Layout tabs
 
@@ -190,7 +196,7 @@ def card_container(content_fn: Callable, color: str = "#ffffff"):
     st.markdown(
         f'<div style="background: {color}; padding: 1.5rem; '
         f'border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">',
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
     content_fn()
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)

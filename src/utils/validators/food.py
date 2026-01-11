@@ -1,17 +1,11 @@
 """
 Validators - Validation données cuisine
 """
-from typing import Dict, Tuple, List
-from ..constants import (
-    DIFFICULTES,
-    TYPES_REPAS,
-    SAISONS,
-    UNITES_MESURE,
-    PRIORITES_COURSES
-)
+
+from ..constants import DIFFICULTES, PRIORITES_COURSES, SAISONS, TYPES_REPAS, UNITES_MESURE
 
 
-def validate_recipe(data: Dict) -> Tuple[bool, List[str]]:
+def validate_recipe(data: dict) -> tuple[bool, list[str]]:
     """
     Valide données recette
 
@@ -67,7 +61,7 @@ def validate_recipe(data: Dict) -> Tuple[bool, List[str]]:
     return len(errors) == 0, errors
 
 
-def validate_ingredient(data: Dict) -> Tuple[bool, List[str]]:
+def validate_ingredient(data: dict) -> tuple[bool, list[str]]:
     """
     Valide données ingrédient
 
@@ -94,7 +88,7 @@ def validate_ingredient(data: Dict) -> Tuple[bool, List[str]]:
     return len(errors) == 0, errors
 
 
-def validate_inventory_item(data: Dict) -> Tuple[bool, List[str]]:
+def validate_inventory_item(data: dict) -> tuple[bool, list[str]]:
     """
     Valide article inventaire
 
@@ -130,7 +124,7 @@ def validate_inventory_item(data: Dict) -> Tuple[bool, List[str]]:
     return len(errors) == 0, errors
 
 
-def validate_shopping_item(data: Dict) -> Tuple[bool, List[str]]:
+def validate_shopping_item(data: dict) -> tuple[bool, list[str]]:
     """
     Valide article courses
 
@@ -161,7 +155,7 @@ def validate_shopping_item(data: Dict) -> Tuple[bool, List[str]]:
     return len(errors) == 0, errors
 
 
-def validate_meal(data: Dict) -> Tuple[bool, List[str]]:
+def validate_meal(data: dict) -> tuple[bool, list[str]]:
     """
     Valide données repas
 

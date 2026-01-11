@@ -2,12 +2,14 @@
 UI Components - Forms
 Champs formulaire, recherche, filtres
 """
-import streamlit as st
-from typing import Dict, Any
+
 from datetime import date
+from typing import Any
+
+import streamlit as st
 
 
-def form_field(field_config: Dict, key_prefix: str) -> Any:
+def form_field(field_config: dict, key_prefix: str) -> Any:
     """
     Champ de formulaire générique
 
@@ -36,11 +38,7 @@ def form_field(field_config: Dict, key_prefix: str) -> Any:
         label = f"{label} *"
 
     if field_type == "text":
-        return st.text_input(
-            label,
-            value=field_config.get("default", ""),
-            key=key
-        )
+        return st.text_input(label, value=field_config.get("default", ""), key=key)
 
     elif field_type == "number":
         return st.number_input(
@@ -49,43 +47,23 @@ def form_field(field_config: Dict, key_prefix: str) -> Any:
             min_value=field_config.get("min"),
             max_value=field_config.get("max"),
             step=field_config.get("step", 1),
-            key=key
+            key=key,
         )
 
     elif field_type == "select":
-        return st.selectbox(
-            label,
-            field_config.get("options", []),
-            key=key
-        )
+        return st.selectbox(label, field_config.get("options", []), key=key)
 
     elif field_type == "multiselect":
-        return st.multiselect(
-            label,
-            field_config.get("options", []),
-            key=key
-        )
+        return st.multiselect(label, field_config.get("options", []), key=key)
 
     elif field_type == "checkbox":
-        return st.checkbox(
-            label,
-            value=field_config.get("default", False),
-            key=key
-        )
+        return st.checkbox(label, value=field_config.get("default", False), key=key)
 
     elif field_type == "textarea":
-        return st.text_area(
-            label,
-            value=field_config.get("default", ""),
-            key=key
-        )
+        return st.text_area(label, value=field_config.get("default", ""), key=key)
 
     elif field_type == "date":
-        return st.date_input(
-            label,
-            value=field_config.get("default", date.today()),
-            key=key
-        )
+        return st.date_input(label, value=field_config.get("default", date.today()), key=key)
 
     elif field_type == "slider":
         return st.slider(
@@ -93,7 +71,7 @@ def form_field(field_config: Dict, key_prefix: str) -> Any:
             min_value=field_config.get("min", 0),
             max_value=field_config.get("max", 100),
             value=field_config.get("default", 50),
-            key=key
+            key=key,
         )
 
     else:
@@ -114,15 +92,10 @@ def search_bar(placeholder: str = "Rechercher...", key: str = "search") -> str:
     Example:
         term = search_bar("Rechercher recettes...", "recipe_search")
     """
-    return st.text_input(
-        "",
-        placeholder=f"🔍 {placeholder}",
-        key=key,
-        label_visibility="collapsed"
-    )
+    return st.text_input("", placeholder=f"🔍 {placeholder}", key=key, label_visibility="collapsed")
 
 
-def filter_panel(filters_config: Dict[str, Dict], key_prefix: str) -> Dict:
+def filter_panel(filters_config: dict[str, dict], key_prefix: str) -> dict:
     """
     Panneau de filtres
 
@@ -145,18 +118,12 @@ def filter_panel(filters_config: Dict[str, Dict], key_prefix: str) -> Dict:
     results = {}
 
     for filter_name, config in filters_config.items():
-        results[filter_name] = form_field(
-            {**config, "name": filter_name},
-            key_prefix
-        )
+        results[filter_name] = form_field({**config, "name": filter_name}, key_prefix)
 
     return results
 
 
-def quick_filters(
-        filters: Dict[str, list],
-        key_prefix: str = "filter"
-) -> Dict[str, str]:
+def quick_filters(filters: dict[str, list], key_prefix: str = "filter") -> dict[str, str]:
     """
     Filtres rapides (boutons horizontaux)
 
@@ -180,9 +147,7 @@ def quick_filters(
         for idx, option in enumerate(options):
             with cols[idx]:
                 if st.button(
-                        option,
-                        key=f"{key_prefix}_{label}_{option}",
-                        use_container_width=True
+                    option, key=f"{key_prefix}_{label}_{option}", use_container_width=True
                 ):
                     results[label] = option
 

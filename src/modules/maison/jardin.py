@@ -3,15 +3,16 @@ Module Jardin avec Agent IA et Météo intégrés
 Gestion du jardin avec suggestions selon saison et météo
 """
 
-import streamlit as st
-import pandas as pd
-from datetime import datetime, date, timedelta
 import asyncio
-from typing import List, Dict
+from datetime import date, timedelta
 
+import pandas as pd
+import streamlit as st
+
+from src.core.ai_agent import AgentIA
 from src.core.database import get_db_context
 from src.core.models import GardenItem, GardenLog
-from src.core.ai_agent import AgentIA
+
 ## NOTE: évite l'import direct de `settings` (ancienne API). Pas utilisé ici.
 
 
@@ -97,7 +98,7 @@ def ajouter_log(item_id: int, action: str, notes: str = ""):
         db.commit()
 
 
-def get_plantes_a_arroser() -> List[Dict]:
+def get_plantes_a_arroser() -> list[dict]:
     """Détecte les plantes qui ont besoin d'eau"""
     a_arroser = []
 
@@ -114,16 +115,16 @@ def get_plantes_a_arroser() -> List[Dict]:
                             "id": plante.id,
                             "nom": plante.name,
                             "jours": delta,
-                            "urgence": "haute"
-                            if delta > plante.watering_frequency_days + 1
-                            else "normale",
+                            "urgence": (
+                                "haute" if delta > plante.watering_frequency_days + 1 else "normale"
+                            ),
                         }
                     )
 
     return a_arroser
 
 
-def get_recoltes_proches() -> List[Dict]:
+def get_recoltes_proches() -> list[dict]:
     """Détecte les récoltes à venir"""
     recoltes = []
 
@@ -144,7 +145,7 @@ def get_recoltes_proches() -> List[Dict]:
     return recoltes
 
 
-def get_meteo_mock() -> Dict:
+def get_meteo_mock() -> dict:
     """Récupère la météo (mock pour démo)"""
     # TODO: Intégrer vraie API météo
     return {"condition": "Ensoleillé", "temp": 22, "humidity": 65, "precipitation": 0}
@@ -480,7 +481,7 @@ def app():
 
                 freq_arrosage = st.number_input("Fréquence d'arrosage (jours)", 1, 14, 2)
 
-            notes = st.text_area(
+            _notes = st.text_area(
                 "Notes (optionnel)", placeholder="Variété, exposition, particularités..."
             )
 

@@ -1,8 +1,10 @@
 """
 UI Feedback - Toast notifications
 """
-import streamlit as st
+
 from datetime import datetime, timedelta
+
+import streamlit as st
 
 
 class ToastManager:
@@ -39,7 +41,7 @@ class ToastManager:
             "message": message,
             "type": type,
             "created_at": datetime.now(),
-            "expires_at": datetime.now() + timedelta(seconds=duration)
+            "expires_at": datetime.now() + timedelta(seconds=duration),
         }
 
         st.session_state[ToastManager.TOAST_KEY].append(toast)
@@ -53,10 +55,7 @@ class ToastManager:
         now = datetime.now()
 
         # Filtrer expirés
-        active_toasts = [
-            toast for toast in toasts
-            if toast["expires_at"] > now
-        ]
+        active_toasts = [toast for toast in toasts if toast["expires_at"] > now]
 
         st.session_state[ToastManager.TOAST_KEY] = active_toasts
 
@@ -70,7 +69,7 @@ class ToastManager:
                         "success": st.success,
                         "error": st.error,
                         "warning": st.warning,
-                        "info": st.info
+                        "info": st.info,
                     }
 
                     display_func = type_map.get(toast["type"], st.info)
@@ -80,6 +79,7 @@ class ToastManager:
 # ═══════════════════════════════════════════════════════════
 # HELPERS RACCOURCIS
 # ═══════════════════════════════════════════════════════════
+
 
 def show_success(message: str, duration: int = 3):
     """Raccourci pour toast success"""

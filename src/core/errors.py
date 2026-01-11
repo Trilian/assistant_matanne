@@ -6,11 +6,14 @@ Ce module centralise :
 - Les décorateurs de gestion d'erreurs
 - Les helpers de validation
 """
-import streamlit as st
-from functools import wraps
-from typing import Callable, Any, Dict, List, Optional
+
 import logging
 import traceback
+from collections.abc import Callable
+from functools import wraps
+from typing import Any
+
+import streamlit as st
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +27,7 @@ def _is_debug_mode() -> bool:
     """
     try:
         from .state import obtenir_etat
+
         etat = obtenir_etat()
         return bool(getattr(etat, "mode_debug", False))
     except Exception:
@@ -37,6 +41,7 @@ def _is_debug_mode() -> bool:
 # ═══════════════════════════════════════════════════════════
 # EXCEPTIONS PERSONNALISÉES
 # ═══════════════════════════════════════════════════════════
+
 
 class ExceptionApp(Exception):
     """
@@ -53,8 +58,8 @@ class ExceptionApp(Exception):
     def __init__(
         self,
         message: str,
-        details: Optional[Dict[str, Any]] = None,
-        message_utilisateur: Optional[str] = None,
+        details: dict[str, Any] | None = None,
+        message_utilisateur: str | None = None,
     ) -> None:
         """
         Initialise l'exception.
@@ -65,7 +70,7 @@ class ExceptionApp(Exception):
             message_utilisateur: Message à afficher à l'utilisateur
         """
         self.message: str = message
-        self.details: Dict[str, Any] = details or {}
+        self.details: dict[str, Any] = details or {}
         self.message_utilisateur: str = message_utilisateur or message
         super().__init__(message)
 
@@ -80,6 +85,7 @@ class ErreurValidation(ExceptionApp):
     Utilisée pour les erreurs de validation de formulaires,
     données invalides, contraintes métier non respectées.
     """
+
     pass
 
 
@@ -89,6 +95,7 @@ class ErreurNonTrouve(ExceptionApp):
 
     Équivalent d'un 404 pour les ressources en base de données.
     """
+
     pass
 
 
@@ -98,6 +105,7 @@ class ErreurBaseDeDonnees(ExceptionApp):
 
     Inclut les erreurs de connexion, requêtes, transactions.
     """
+
     pass
 
 
@@ -107,6 +115,7 @@ class ErreurServiceIA(ExceptionApp):
 
     Inclut les erreurs d'API, timeouts, parsing, etc.
     """
+
     pass
 
 
@@ -116,6 +125,7 @@ class ErreurLimiteDebit(ExceptionApp):
 
     Utilisée pour le rate limiting des API externes.
     """
+
     pass
 
 
@@ -125,12 +135,14 @@ class ErreurServiceExterne(ExceptionApp):
 
     Ex: scraping web, APIs tierces (hors IA).
     """
+
     pass
 
 
 # ═══════════════════════════════════════════════════════════
 # DÉCORATEUR DE GESTION D'ERREURS
 # ═══════════════════════════════════════════════════════════
+
 
 def gerer_erreurs(
     afficher_dans_ui: bool = True,
@@ -160,6 +172,7 @@ def gerer_erreurs(
         >>> def obtenir_recettes():
         >>>     return recette_service.get_all()
     """
+
     def decorateur(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -221,14 +234,15 @@ def gerer_erreurs(
 
                     # Afficher stack trace en mode debug
                     if _is_debug_mode():
-                            with st.expander("🐛 Stack trace"):
-                                st.code(traceback.format_exc())
+                        with st.expander("🐛 Stack trace"):
+                            st.code(traceback.format_exc())
 
                 if relancer:
                     raise
                 return valeur_fallback
 
         return wrapper
+
     return decorateur
 
 
@@ -240,7 +254,8 @@ handle_errors = gerer_erreurs
 # HELPERS DE VALIDATION
 # ═══════════════════════════════════════════════════════════
 
-def exiger_champs(data: Dict, champs: List[str], nom_objet: str = "objet"):
+
+def exiger_champs(data: dict, champs: list[str], nom_objet: str = "objet"):
     """
     Vérifie que les champs requis sont présents et non vides.
 
@@ -265,7 +280,7 @@ def exiger_champs(data: Dict, champs: List[str], nom_objet: str = "objet"):
         raise ErreurValidation(
             f"Champs manquants dans {nom_objet}: {manquants}",
             details={"champs_manquants": manquants},
-            message_utilisateur=f"Champs obligatoires manquants : {', '.join(manquants)}"
+            message_utilisateur=f"Champs obligatoires manquants : {', '.join(manquants)}",
         )
 
 
@@ -286,7 +301,7 @@ def exiger_positif(valeur: float, nom_champ: str):
     if valeur <= 0:
         raise ErreurValidation(
             f"{nom_champ} doit être positif: {valeur}",
-            message_utilisateur=f"{nom_champ} doit être supérieur à 0"
+            message_utilisateur=f"{nom_champ} doit être supérieur à 0",
         )
 
 
@@ -310,15 +325,15 @@ def exiger_existence(obj: Any, type_objet: str, id_objet: Any):
         raise ErreurNonTrouve(
             f"{type_objet} {id_objet} non trouvé",
             details={"type": type_objet, "id": id_objet},
-            message_utilisateur=f"{type_objet} introuvable"
+            message_utilisateur=f"{type_objet} introuvable",
         )
 
 
 def exiger_plage(
-        valeur: float,
-        minimum: Optional[float] = None,
-        maximum: Optional[float] = None,
-        nom_champ: str = "valeur"
+    valeur: float,
+    minimum: float | None = None,
+    maximum: float | None = None,
+    nom_champ: str = "valeur",
 ):
     """
     Vérifie qu'une valeur est dans une plage donnée.
@@ -338,21 +353,18 @@ def exiger_plage(
     if minimum is not None and valeur < minimum:
         raise ErreurValidation(
             f"{nom_champ} trop petit: {valeur} < {minimum}",
-            message_utilisateur=f"{nom_champ} doit être au minimum {minimum}"
+            message_utilisateur=f"{nom_champ} doit être au minimum {minimum}",
         )
 
     if maximum is not None and valeur > maximum:
         raise ErreurValidation(
             f"{nom_champ} trop grand: {valeur} > {maximum}",
-            message_utilisateur=f"{nom_champ} doit être au maximum {maximum}"
+            message_utilisateur=f"{nom_champ} doit être au maximum {maximum}",
         )
 
 
 def exiger_longueur(
-        texte: str,
-        minimum: Optional[int] = None,
-        maximum: Optional[int] = None,
-        nom_champ: str = "texte"
+    texte: str, minimum: int | None = None, maximum: int | None = None, nom_champ: str = "texte"
 ):
     """
     Vérifie la longueur d'une chaîne de caractères.
@@ -374,19 +386,20 @@ def exiger_longueur(
     if minimum is not None and longueur < minimum:
         raise ErreurValidation(
             f"{nom_champ} trop court: {longueur} < {minimum}",
-            message_utilisateur=f"{nom_champ} doit faire au moins {minimum} caractères"
+            message_utilisateur=f"{nom_champ} doit faire au moins {minimum} caractères",
         )
 
     if maximum is not None and longueur > maximum:
         raise ErreurValidation(
             f"{nom_champ} trop long: {longueur} > {maximum}",
-            message_utilisateur=f"{nom_champ} doit faire au maximum {maximum} caractères"
+            message_utilisateur=f"{nom_champ} doit faire au maximum {maximum} caractères",
         )
 
 
 # ═══════════════════════════════════════════════════════════
 # GESTIONNAIRE D'ERREURS STREAMLIT
 # ═══════════════════════════════════════════════════════════
+
 
 def afficher_erreur_streamlit(erreur: Exception, contexte: str = "") -> None:
     """
@@ -436,6 +449,7 @@ def afficher_erreur_streamlit(erreur: Exception, contexte: str = "") -> None:
 # CONTEXT MANAGER POUR GESTION D'ERREURS
 # ═══════════════════════════════════════════════════════════
 
+
 class GestionnaireErreurs:
     """
     Context manager pour gérer les erreurs dans un bloc de code.
@@ -446,10 +460,10 @@ class GestionnaireErreurs:
     """
 
     def __init__(
-            self,
-            contexte: str,
-            afficher_dans_ui: bool = True,
-            logger_instance: Optional[logging.Logger] = None
+        self,
+        contexte: str,
+        afficher_dans_ui: bool = True,
+        logger_instance: logging.Logger | None = None,
     ):
         """
         Initialise le gestionnaire.
@@ -479,8 +493,7 @@ class GestionnaireErreurs:
 
         # Logger l'erreur
         self.logger.error(
-            f"Erreur dans {self.contexte}: {exc_val}",
-            exc_info=(exc_type, exc_val, exc_tb)
+            f"Erreur dans {self.contexte}: {exc_val}", exc_info=(exc_type, exc_val, exc_tb)
         )
 
         # Afficher dans UI si demandé

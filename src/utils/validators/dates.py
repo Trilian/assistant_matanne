@@ -1,15 +1,11 @@
 """
 Validators - Validation dates
 """
-from datetime import date, datetime, timedelta
-from typing import Tuple, Optional
+
+from datetime import date
 
 
-def validate_date_range(
-        start: date,
-        end: date,
-        max_days: Optional[int] = None
-) -> Tuple[bool, str]:
+def validate_date_range(start: date, end: date, max_days: int | None = None) -> tuple[bool, str]:
     """
     Valide une plage de dates
 
@@ -53,10 +49,7 @@ def is_past_date(d: date) -> bool:
     return d < date.today()
 
 
-def validate_expiry_date(
-        expiry: date,
-        min_days_ahead: int = 1
-) -> Tuple[bool, str]:
+def validate_expiry_date(expiry: date, min_days_ahead: int = 1) -> tuple[bool, str]:
     """
     Valide une date de péremption
 
@@ -75,7 +68,10 @@ def validate_expiry_date(
     delta = (expiry - today).days
 
     if delta < min_days_ahead:
-        return False, f"Date de péremption doit être au moins {min_days_ahead} jour(s) dans le futur"
+        return (
+            False,
+            f"Date de péremption doit être au moins {min_days_ahead} jour(s) dans le futur",
+        )
 
     return True, ""
 

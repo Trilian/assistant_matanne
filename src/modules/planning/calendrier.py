@@ -3,16 +3,15 @@ Module Calendrier avec Agent IA intégré
 Vue d'ensemble du planning familial
 """
 
-import streamlit as st
-import pandas as pd
-from datetime import datetime, date, timedelta
 import calendar
-from typing import List, Dict
+from datetime import date, datetime, timedelta
 
-from src.core.database import get_db_context
-from src.core.models import CalendarEvent, BatchMeal, Recipe, Project, RoutineTask, Routine
+import pandas as pd
+import streamlit as st
+
 from src.core.ai_agent import AgentIA
-
+from src.core.database import get_db_context
+from src.core.models import BatchMeal, CalendarEvent, Project, Recipe, Routine, RoutineTask
 
 # ===================================
 # HELPERS
@@ -152,7 +151,7 @@ def supprimer_evenement(event_id: int):
         db.commit()
 
 
-def get_vue_semaine(date_debut: date) -> Dict:
+def get_vue_semaine(date_debut: date) -> dict:
     """Génère une vue semaine avec tous les événements"""
     date_fin = date_debut + timedelta(days=6)
 
@@ -198,7 +197,7 @@ def app():
     st.caption("Vue d'ensemble du planning avec suggestions IA")
 
     # Récupérer l'agent IA
-    agent: AgentIA = st.session_state.get("agent_ia")
+    _agent: AgentIA = st.session_state.get("agent_ia")
 
     # ===================================
     # NAVIGATION DATE

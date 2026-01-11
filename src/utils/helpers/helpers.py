@@ -2,13 +2,15 @@
 Helpers - Gestion ingrédients et métier cuisine
 Fonctions spécifiques au domaine alimentaire
 """
+
 import logging
-from typing import List, Dict, Optional, Tuple, Any
+from typing import Any
+
 from sqlalchemy.orm import Session
 
+from src.core.cache import cached
 from src.core.database import get_db_context
 from src.core.models import Ingredient
-from src.core.cache import Cache, cached
 
 logger = logging.getLogger(__name__)
 
@@ -17,11 +19,9 @@ logger = logging.getLogger(__name__)
 # GESTION INGRÉDIENTS
 # ═══════════════════════════════════════════════════════════
 
+
 def find_or_create_ingredient(
-        nom: str,
-        unite: str,
-        categorie: Optional[str] = None,
-        db: Session = None
+    nom: str, unite: str, categorie: str | None = None, db: Session = None
 ) -> int:
     """
     Trouve ou crée un ingrédient
@@ -38,6 +38,7 @@ def find_or_create_ingredient(
     Example:
         ingredient_id = find_or_create_ingredient("Tomate", "kg", "Fruits & Légumes")
     """
+
     def _execute(session: Session) -> int:
         ingredient = session.query(Ingredient).filter(Ingredient.nom == nom).first()
         if not ingredient:
@@ -54,10 +55,7 @@ def find_or_create_ingredient(
         return _execute(db)
 
 
-def batch_find_or_create_ingredients(
-        items: List[Dict],
-        db: Session = None
-) -> Dict[str, int]:
+def batch_find_or_create_ingredients(items: list[dict], db: Session = None) -> dict[str, int]:
     """
     Batch création ingrédients (optimisé)
 
@@ -75,7 +73,8 @@ def batch_find_or_create_ingredients(
         ]
         mapping = batch_find_or_create_ingredients(items)
     """
-    def _execute(session: Session) -> Dict[str, int]:
+
+    def _execute(session: Session) -> dict[str, int]:
         result = {}
         noms = [item["nom"] for item in items]
 
@@ -89,9 +88,7 @@ def batch_find_or_create_ingredients(
         for item in items:
             if item["nom"] not in result:
                 ingredient = Ingredient(
-                    nom=item["nom"],
-                    unite=item["unite"],
-                    categorie=item.get("categorie")
+                    nom=item["nom"], unite=item["unite"], categorie=item.get("categorie")
                 )
                 session.add(ingredient)
                 session.flush()
@@ -107,7 +104,7 @@ def batch_find_or_create_ingredients(
 
 
 @cached(ttl=300, cle="ingredients_all")
-def get_all_ingredients_cached() -> List[Dict]:
+def get_all_ingredients_cached() -> list[dict]:
     """
     Cache des ingrédients
 
@@ -120,21 +117,14 @@ def get_all_ingredients_cached() -> List[Dict]:
     with get_db_context() as db:
         ingredients = db.query(Ingredient).all()
         return [
-            {
-                "id": ing.id,
-                "nom": ing.nom,
-                "unite": ing.unite,
-                "categorie": ing.categorie
-            }
+            {"id": ing.id, "nom": ing.nom, "unite": ing.unite, "categorie": ing.categorie}
             for ing in ingredients
         ]
 
 
 def enrich_with_ingredient_info(
-        items: List[Any],
-        ingredient_id_field: str = "ingredient_id",
-        db: Session = None
-) -> List[Dict]:
+    items: list[Any], ingredient_id_field: str = "ingredient_id", db: Session = None
+) -> list[dict]:
     """
     Enrichit items avec infos ingrédient (évite N+1 queries)
 
@@ -150,14 +140,13 @@ def enrich_with_ingredient_info(
         articles = session.query(ArticleInventaire).all()
         enriched = enrich_with_ingredient_info(articles)
     """
-    def _execute(session: Session) -> List[Dict]:
+
+    def _execute(session: Session) -> list[dict]:
         result = []
         ingredient_ids = [getattr(item, ingredient_id_field) for item in items]
 
         # Charger tous les ingrédients en 1 query
-        ingredients = session.query(Ingredient).filter(
-            Ingredient.id.in_(ingredient_ids)
-        ).all()
+        ingredients = session.query(Ingredient).filter(Ingredient.id.in_(ingredient_ids)).all()
         ing_map = {ing.id: ing for ing in ingredients}
 
         for item in items:
@@ -174,8 +163,15 @@ def enrich_with_ingredient_info(
             }
 
             # Copier autres attributs
-            for attr in ["quantite", "priorite", "achete", "notes", "seuil",
-                         "emplacement", "date_peremption"]:
+            for attr in [
+                "quantite",
+                "priorite",
+                "achete",
+                "notes",
+                "seuil",
+                "emplacement",
+                "date_peremption",
+            ]:
                 if hasattr(item, attr):
                     enriched[attr] = getattr(item, attr)
 
@@ -194,11 +190,8 @@ def enrich_with_ingredient_info(
 # VALIDATION MÉTIER
 # ═══════════════════════════════════════════════════════════
 
-def validate_stock_level(
-        quantite: float,
-        seuil: float,
-        nom: str
-) -> Tuple[str, str]:
+
+def validate_stock_level(quantite: float, seuil: float, nom: str) -> tuple[str, str]:
     """
     Valide niveau de stock
 
@@ -225,10 +218,8 @@ def validate_stock_level(
 
 
 def consolidate_duplicates(
-        items: List[Dict],
-        key_field: str,
-        merge_strategy: Optional[callable] = None
-) -> List[Dict]:
+    items: list[dict], key_field: str, merge_strategy: callable | None = None
+) -> list[dict]:
     """
     Consolide doublons dans liste
 
@@ -268,7 +259,8 @@ def consolidate_duplicates(
 # FORMATAGE MÉTIER
 # ═══════════════════════════════════════════════════════════
 
-def format_recipe_summary(recette: Dict) -> str:
+
+def format_recipe_summary(recette: dict) -> str:
     """
     Formatte résumé recette
 
@@ -293,12 +285,12 @@ def format_recipe_summary(recette: Dict) -> str:
         recette.get("nom", "Sans nom"),
         f"{temps}min",
         f"{recette.get('portions', 4)} portions",
-        recette.get("difficulte", "moyen").capitalize()
+        recette.get("difficulte", "moyen").capitalize(),
     ]
     return " - ".join(parts)
 
 
-def format_inventory_summary(inventaire: List[Dict]) -> str:
+def format_inventory_summary(inventaire: list[dict]) -> str:
     """
     Formatte résumé inventaire
 
@@ -319,7 +311,7 @@ def format_inventory_summary(inventaire: List[Dict]) -> str:
     return f"{total} articles | {stock_bas} stock bas | {peremption} péremption proche"
 
 
-def calculate_recipe_cost(recette: Dict, prix_ingredients: Dict[str, float]) -> float:
+def calculate_recipe_cost(recette: dict, prix_ingredients: dict[str, float]) -> float:
     """
     Calcule coût recette
 
@@ -351,7 +343,7 @@ def calculate_recipe_cost(recette: Dict, prix_ingredients: Dict[str, float]) -> 
     return total
 
 
-def suggest_ingredient_substitutes(ingredient: str) -> List[str]:
+def suggest_ingredient_substitutes(ingredient: str) -> list[str]:
     """
     Suggère substituts pour un ingrédient
 
@@ -371,7 +363,7 @@ def suggest_ingredient_substitutes(ingredient: str) -> List[str]:
         "lait": ["lait d'amande", "lait de soja", "crème"],
         "oeuf": ["compote de pommes", "graines de chia", "banane écrasée"],
         "sucre": ["miel", "sirop d'érable", "stévia"],
-        "farine": ["farine de riz", "farine d'amande", "fécule de maïs"]
+        "farine": ["farine de riz", "farine d'amande", "fécule de maïs"],
     }
 
     return substitutes_map.get(ingredient.lower(), [])

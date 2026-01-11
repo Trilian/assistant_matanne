@@ -2,32 +2,31 @@
 Module Paramètres - Configuration Application
 Gestion configuration foyer, IA, base de données, cache
 """
-import streamlit as st
+
 from datetime import datetime
-from typing import Dict, Optional
+
+import streamlit as st
+
+from src.core.ai.cache import CacheIA as SemanticCache
+from src.core.cache import Cache
 
 # Core
 from src.core.config import obtenir_parametres as get_settings
-from src.core.database import (
-    obtenir_infos_db as get_db_info,
-    verifier_sante as health_check,
-    GestionnaireMigrations as MigrationManager,
-    get_engine
-)
-from src.core.cache import Cache
-from src.core.ai.cache import CacheIA as SemanticCache
+from src.core.database import GestionnaireMigrations as MigrationManager
+from src.core.database import obtenir_infos_db as get_db_info
+from src.core.database import verifier_sante as health_check
 
 # State
-from src.core.state import get_state, StateManager
-
-# UI
-from src.ui.feedback import show_success, show_error, smart_spinner
+from src.core.state import StateManager, get_state
 from src.ui.components import Modal
 
+# UI
+from src.ui.feedback import show_error, show_success, smart_spinner
 
 # ═══════════════════════════════════════════════════════════
 # MODULE PRINCIPAL
 # ═══════════════════════════════════════════════════════════
+
 
 def app():
     """Point d'entrée module paramètres"""
@@ -35,13 +34,9 @@ def app():
     st.title("⚙️ Paramètres")
 
     # Tabs
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
-        "👨‍👩‍👧‍👦 Foyer",
-        "🤖 IA",
-        "💾 Base de Données",
-        "🗄️ Cache",
-        "ℹ️ À Propos"
-    ])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(
+        ["👨‍👩‍👧‍👦 Foyer", "🤖 IA", "💾 Base de Données", "🗄️ Cache", "ℹ️ À Propos"]
+    )
 
     with tab1:
         render_foyer_config()
@@ -63,6 +58,7 @@ def app():
 # TAB 1: CONFIGURATION FOYER
 # ═══════════════════════════════════════════════════════════
 
+
 def render_foyer_config():
     """Configuration du foyer"""
 
@@ -73,14 +69,17 @@ def render_foyer_config():
     state = get_state()
 
     # Récupérer config existante
-    config = st.session_state.get("foyer_config", {
-        "nom_utilisateur": state.nom_utilisateur,
-        "nb_adultes": 2,
-        "nb_enfants": 1,
-        "age_enfants": [2],
-        "a_bebe": True,
-        "preferences_alimentaires": []
-    })
+    config = st.session_state.get(
+        "foyer_config",
+        {
+            "nom_utilisateur": state.nom_utilisateur,
+            "nb_adultes": 2,
+            "nb_enfants": 1,
+            "age_enfants": [2],
+            "a_bebe": True,
+            "preferences_alimentaires": [],
+        },
+    )
 
     # Formulaire
     with st.form("foyer_form"):
@@ -90,29 +89,20 @@ def render_foyer_config():
 
         with col1:
             nom_utilisateur = st.text_input(
-                "Nom d'utilisateur",
-                value=config.get("nom_utilisateur", "Anne"),
-                max_chars=50
+                "Nom d'utilisateur", value=config.get("nom_utilisateur", "Anne"), max_chars=50
             )
 
             nb_adultes = st.number_input(
-                "Nombre d'adultes",
-                min_value=1,
-                max_value=10,
-                value=config.get("nb_adultes", 2)
+                "Nombre d'adultes", min_value=1, max_value=10, value=config.get("nb_adultes", 2)
             )
 
         with col2:
             nb_enfants = st.number_input(
-                "Nombre d'enfants",
-                min_value=0,
-                max_value=10,
-                value=config.get("nb_enfants", 1)
+                "Nombre d'enfants", min_value=0, max_value=10, value=config.get("nb_enfants", 1)
             )
 
             a_bebe = st.checkbox(
-                "👶 Présence d'un bébé (< 18 mois)",
-                value=config.get("a_bebe", False)
+                "👶 Présence d'un bébé (< 18 mois)", value=config.get("a_bebe", False)
             )
 
         st.markdown("#### Préférences Alimentaires")
@@ -127,24 +117,22 @@ def render_foyer_config():
                 "Halal",
                 "Casher",
                 "Paléo",
-                "Sans porc"
+                "Sans porc",
             ],
-            default=config.get("preferences_alimentaires", [])
+            default=config.get("preferences_alimentaires", []),
         )
 
         allergies = st.text_area(
             "Allergies alimentaires",
             value=config.get("allergies", ""),
             placeholder="Ex: Arachides, fruits de mer...",
-            help="Liste des allergies à prendre en compte"
+            help="Liste des allergies à prendre en compte",
         )
 
         st.markdown("---")
 
         submitted = st.form_submit_button(
-            "💾 Sauvegarder",
-            type="primary",
-            use_container_width=True
+            "💾 Sauvegarder", type="primary", use_container_width=True
         )
 
         if submitted:
@@ -156,7 +144,7 @@ def render_foyer_config():
                 "a_bebe": a_bebe,
                 "preferences_alimentaires": preferences,
                 "allergies": allergies,
-                "updated_at": datetime.now().isoformat()
+                "updated_at": datetime.now().isoformat(),
             }
 
             st.session_state.foyer_config = new_config
@@ -176,6 +164,7 @@ def render_foyer_config():
 # TAB 2: CONFIGURATION IA
 # ═══════════════════════════════════════════════════════════
 
+
 def render_ia_config():
     """Configuration IA"""
 
@@ -191,11 +180,11 @@ def render_ia_config():
 
     with col1:
         st.info(f"**Modèle:** {settings.MISTRAL_MODEL}")
-        st.info(f"**Provider:** Mistral AI")
+        st.info("**Provider:** Mistral AI")
 
     with col2:
-        st.info(f"**Température:** 0.7 (défaut)")
-        st.info(f"**Max Tokens:** 1000 (défaut)")
+        st.info("**Température:** 0.7 (défaut)")
+        st.info("**Max Tokens:** 1000 (défaut)")
 
     st.markdown("---")
 
@@ -205,19 +194,13 @@ def render_ia_config():
     col3, col4 = st.columns(2)
 
     with col3:
-        st.metric(
-            "Limite Quotidienne",
-            f"{settings.RATE_LIMIT_DAILY} appels/jour"
-        )
+        st.metric("Limite Quotidienne", f"{settings.RATE_LIMIT_DAILY} appels/jour")
 
     with col4:
-        st.metric(
-            "Limite Horaire",
-            f"{settings.RATE_LIMIT_HOURLY} appels/heure"
-        )
+        st.metric("Limite Horaire", f"{settings.RATE_LIMIT_HOURLY} appels/heure")
 
     # Utilisation actuelle
-    state = get_state()
+    _state = get_state()
 
     if "rate_limit" in st.session_state:
         rate_info = st.session_state.rate_limit
@@ -252,25 +235,19 @@ def render_ia_config():
     with col7:
         st.metric(
             "Taux de Hit",
-                f"{cache_stats.get('taux_hit', 0):.1f}%",
-            help="Pourcentage de réponses servies depuis le cache"
+            f"{cache_stats.get('taux_hit', 0):.1f}%",
+            help="Pourcentage de réponses servies depuis le cache",
         )
 
     with col8:
-        st.metric(
-            "Entrées Cachées",
-                cache_stats.get('entrees_ia', 0)
-        )
+        st.metric("Entrées Cachées", cache_stats.get("entrees_ia", 0))
 
     with col9:
-        st.metric(
-            "Appels Économisés",
-                cache_stats.get('saved_api_calls', 0)
-        )
+        st.metric("Appels Économisés", cache_stats.get("saved_api_calls", 0))
 
-    mode = "🧠 Sémantique" if cache_stats.get('embeddings_available', False) else "🔤 MD5"
+    mode = "🧠 Sémantique" if cache_stats.get("embeddings_available", False) else "🔤 MD5"
     st.info(f"**Mode:** {mode}")
-    if cache_stats.get('embeddings_available', False):
+    if cache_stats.get("embeddings_available", False):
         st.success("✅ Embeddings actifs (similarité sémantique)")
     else:
         st.warning("⚠️ Embeddings indisponibles (fallback MD5)")
@@ -293,6 +270,7 @@ def render_ia_config():
 # ═══════════════════════════════════════════════════════════
 # TAB 3: BASE DE DONNÉES
 # ═══════════════════════════════════════════════════════════
+
 
 def render_database_config():
     """Configuration base de données"""
@@ -336,17 +314,11 @@ def render_database_config():
             col3, col4 = st.columns(2)
 
             with col3:
-                st.metric(
-                    "Connexions Actives",
-                    health.get("connexions_actives", 0)
-                )
+                st.metric("Connexions Actives", health.get("connexions_actives", 0))
 
             with col4:
                 db_size_mb = health.get("taille_base_octets", 0) / 1024 / 1024
-                st.metric(
-                    "Taille DB",
-                    f"{db_size_mb:.2f} MB"
-                )
+                st.metric("Taille DB", f"{db_size_mb:.2f} MB")
         else:
             st.error(f"❌ Problème détecté: {health.get('erreur')}")
 
@@ -412,6 +384,7 @@ def render_database_config():
 # TAB 4: CACHE
 # ═══════════════════════════════════════════════════════════
 
+
 def render_cache_config():
     """Configuration cache"""
 
@@ -455,10 +428,10 @@ def render_cache_config():
     col3, col4, col5 = st.columns(3)
 
     with col3:
-        st.metric("Entrées", cache_stats.get('entrees_ia', 0))
+        st.metric("Entrées", cache_stats.get("entrees_ia", 0))
 
     with col4:
-        st.metric("Hits", cache_stats.get('entrees_ia', 0))
+        st.metric("Hits", cache_stats.get("entrees_ia", 0))
 
     with col5:
         st.metric("Misses", 0)
@@ -473,11 +446,7 @@ def render_cache_config():
     # Actions groupées
     st.markdown("#### 🧹 Actions Groupées")
 
-    if st.button(
-            "🗑️ TOUT Vider (Cache App + IA)",
-            type="primary",
-            use_container_width=True
-    ):
+    if st.button("🗑️ TOUT Vider (Cache App + IA)", type="primary", use_container_width=True):
         Cache.clear_all()
         SemanticCache.invalider_tout()
         show_success("✅ Tous les caches vidés !")
@@ -488,6 +457,7 @@ def render_cache_config():
 # TAB 5: À PROPOS
 # ═══════════════════════════════════════════════════════════
 
+
 def render_about():
     """Informations sur l'application"""
 
@@ -496,7 +466,8 @@ def render_about():
     st.markdown("### ℹ️ À Propos")
 
     # Infos app
-    st.markdown(f"""
+    st.markdown(
+        f"""
     ## 🤖 {settings.APP_NAME}
     
     **Version:** {settings.APP_VERSION}
@@ -513,7 +484,8 @@ def render_about():
     - Backend: Python
     - Database: PostgreSQL (Supabase)
     - IA: Mistral AI
-    """)
+    """
+    )
 
     st.markdown("---")
 
@@ -527,8 +499,12 @@ def render_about():
         st.info(f"**Debug:** {'Activé' if settings.DEBUG else 'Désactivé'}")
 
     with col2:
-        db_configured = "✅ Configurée" if settings._verifier_db_configuree() else "❌ Non configurée"
-        ai_configured = "✅ Configurée" if settings._verifier_mistral_configure() else "❌ Non configurée"
+        db_configured = (
+            "✅ Configurée" if settings._verifier_db_configuree() else "❌ Non configurée"
+        )
+        ai_configured = (
+            "✅ Configurée" if settings._verifier_mistral_configure() else "❌ Non configurée"
+        )
 
         st.info(f"**Base de données:** {db_configured}")
         st.info(f"**IA:** {ai_configured}")
@@ -547,12 +523,14 @@ def render_about():
     # Support
     st.markdown("#### 💬 Support")
 
-    st.info("""
+    st.info(
+        """
     **Besoin d'aide ?**
     - 📧 Contact: support@example.com
     - 🐛 Bugs: GitHub Issues
     - 📚 Documentation: /docs
-    """)
+    """
+    )
 
     st.markdown("---")
 

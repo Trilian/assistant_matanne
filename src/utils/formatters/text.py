@@ -1,8 +1,8 @@
 """
 Formatters - Texte
 """
+
 import re
-from typing import Optional
 
 
 def truncate(text: str, length: int = 100, suffix: str = "...") -> str:
@@ -15,7 +15,7 @@ def truncate(text: str, length: int = 100, suffix: str = "...") -> str:
     """
     if len(text) <= length:
         return text
-    return text[:length - len(suffix)] + suffix
+    return text[: length - len(suffix)] + suffix
 
 
 def clean_text(text: str) -> str:
@@ -43,20 +43,29 @@ def slugify(text: str) -> str:
 
     # Remplacer accents
     replacements = {
-        'à': 'a', 'á': 'a', 'â': 'a', 'ä': 'a',
-        'è': 'e', 'é': 'e', 'ê': 'e', 'ë': 'e',
-        'ù': 'u', 'ú': 'u', 'û': 'u', 'ü': 'u',
-        'ç': 'c'
+        "à": "a",
+        "á": "a",
+        "â": "a",
+        "ä": "a",
+        "è": "e",
+        "é": "e",
+        "ê": "e",
+        "ë": "e",
+        "ù": "u",
+        "ú": "u",
+        "û": "u",
+        "ü": "u",
+        "ç": "c",
     }
     for old, new in replacements.items():
         text = text.replace(old, new)
 
     # Garder alphanumériques
-    text = re.sub(r'[^a-z0-9]+', '-', text)
-    return text.strip('-')
+    text = re.sub(r"[^a-z0-9]+", "-", text)
+    return text.strip("-")
 
 
-def extract_number(text: str) -> Optional[float]:
+def extract_number(text: str) -> float | None:
     """
     Extrait un nombre depuis une string
 

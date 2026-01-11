@@ -306,31 +306,17 @@ CATEGORIES_INVENTAIRE = [
     "Épices & Condiments",
     "Conserves",
     "Surgelés",
-    "Autre"
+    "Autre",
 ]
 """Catégories d'articles inventaire."""
 
-EMPLACEMENTS_INVENTAIRE = [
-    "Frigo",
-    "Congélateur",
-    "Placard",
-    "Cave",
-    "Garde-manger"
-]
+EMPLACEMENTS_INVENTAIRE = ["Frigo", "Congélateur", "Placard", "Cave", "Garde-manger"]
 """Emplacements de stockage."""
 
 PRIORITES = ["haute", "moyenne", "basse"]
 """Niveaux de priorité."""
 
-MAGASINS = [
-    "Grand Frais",
-    "Thiriet",
-    "Cora",
-    "Carrefour",
-    "Auchan",
-    "Lidl",
-    "Autre"
-]
+MAGASINS = ["Grand Frais", "Thiriet", "Cora", "Carrefour", "Auchan", "Lidl", "Autre"]
 """Liste des magasins."""
 
 STATUTS_REPAS = ["planifié", "en_cours", "terminé", "annulé"]
@@ -345,14 +331,7 @@ STATUTS_PROJET = ["à faire", "en cours", "terminé", "annulé"]
 PRIORITES_PROJET = ["basse", "moyenne", "haute", "urgente"]
 """Priorités possibles pour un projet."""
 
-CATEGORIES_JARDIN = [
-    "Légumes",
-    "Fruits",
-    "Herbes aromatiques",
-    "Fleurs",
-    "Arbres",
-    "Autre"
-]
+CATEGORIES_JARDIN = ["Légumes", "Fruits", "Herbes aromatiques", "Fleurs", "Arbres", "Autre"]
 """Catégories d'éléments de jardin."""
 
 # ═══════════════════════════════════════════════════════════
@@ -401,6 +380,7 @@ MSG_INFO_LOADING = "⏳ Chargement en cours..."
 # ═══════════════════════════════════════════════════════════
 # FONCTIONS HELPERS
 # ═══════════════════════════════════════════════════════════
+
 
 def obtenir_cache_ttl(module: str) -> int:
     """

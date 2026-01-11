@@ -15,51 +15,11 @@ Architecture refactorisée avec BaseService depuis types.py (pas de cycle).
 # BASE SERVICES (génériques) - Import depuis types.py
 # ═══════════════════════════════════════════════════════════
 
-from .types import BaseService  # ✅ Plus de cycle ici
-
-from .base_ai_service import (
-    BaseAIService,
-    RecipeAIMixin,
-    PlanningAIMixin,
-    InventoryAIMixin
-)
-
-# Service IO (Import/Export universel)
-from .io_service import IOService
-
-# ═══════════════════════════════════════════════════════════
-# 📚 RECETTES (6 fichiers)
-# ═══════════════════════════════════════════════════════════
-
-from .recettes import (
-    # Service CRUD
-    RecetteService,
-    recette_service,
-
-    # Schémas
-    RecetteSuggestion,
-    VersionBebeGeneree,
-    VersionBatchGeneree,
-)
-
-# ═══════════════════════════════════════════════════════════
-# 📦 INVENTAIRE (3 fichiers)
-# ═══════════════════════════════════════════════════════════
-
-from .inventaire import (
-    # Service CRUD
-    InventaireService,
-    inventaire_service,
-
-    # Constantes métier
-    CATEGORIES,
-    EMPLACEMENTS,
-)
+from .base_ai_service import BaseAIService, InventoryAIMixin, PlanningAIMixin, RecipeAIMixin
 
 # ═══════════════════════════════════════════════════════════
 # 🛒 COURSES (3 fichiers)
 # ═══════════════════════════════════════════════════════════
-
 from .courses import (
     # Service CRUD
     CoursesService,
@@ -67,14 +27,42 @@ from .courses import (
 )
 
 # ═══════════════════════════════════════════════════════════
+# 📦 INVENTAIRE (3 fichiers)
+# ═══════════════════════════════════════════════════════════
+from .inventaire import (
+    # Constantes métier
+    CATEGORIES,
+    EMPLACEMENTS,
+    # Service CRUD
+    InventaireService,
+    inventaire_service,
+)
+
+# Service IO (Import/Export universel)
+from .io_service import IOService
+
+# ═══════════════════════════════════════════════════════════
 # 📅 PLANNING (3 fichiers)
 # ═══════════════════════════════════════════════════════════
-
 from .planning import (
     # Services CRUD
     PlanningService,
     planning_service,
 )
+
+# ═══════════════════════════════════════════════════════════
+# 📚 RECETTES (6 fichiers)
+# ═══════════════════════════════════════════════════════════
+from .recettes import (
+    # Service CRUD
+    RecetteService,
+    # Schémas
+    RecetteSuggestion,
+    VersionBatchGeneree,
+    VersionBebeGeneree,
+    recette_service,
+)
+from .types import BaseService  # ✅ Plus de cycle ici
 
 # ═══════════════════════════════════════════════════════════
 # 📤 EXPORTS GLOBAUX
@@ -90,7 +78,6 @@ __all__ = [
     "PlanningAIMixin",
     "InventoryAIMixin",
     "IOService",
-
     # ═══════════════════════════════════════════════════════════
     # RECETTES
     # ═══════════════════════════════════════════════════════════
@@ -99,38 +86,30 @@ __all__ = [
     "RecetteSuggestion",
     "VersionBebeGeneree",
     "VersionBatchGeneree",
-
     # Instances
     "recette_service",
-
     # ═══════════════════════════════════════════════════════════
     # INVENTAIRE
     # ═══════════════════════════════════════════════════════════
     # Classes
     "InventaireService",
-
     # Instances
     "inventaire_service",
-
     # Constantes
     "CATEGORIES",
     "EMPLACEMENTS",
-
     # ═══════════════════════════════════════════════════════════
     # COURSES
     # ═══════════════════════════════════════════════════════════
     # Classes
     "CoursesService",
-
     # Instances
     "courses_service",
-
     # ═══════════════════════════════════════════════════════════
     # PLANNING
     # ═══════════════════════════════════════════════════════════
     # Classes
     "PlanningService",
-
     # Instances
     "planning_service",
 ]
@@ -139,6 +118,7 @@ __all__ = [
 # ═══════════════════════════════════════════════════════════
 # 📊 MÉTA-INFORMATIONS
 # ═══════════════════════════════════════════════════════════
+
 
 def get_services_info() -> dict:
     """
@@ -154,17 +134,11 @@ def get_services_info() -> dict:
     """
     return {
         "total_services": len(__all__),
-        "modules": {
-            "recettes": 4,
-            "inventaire": 3,
-            "courses": 2,
-            "planning": 2,
-            "base": 6
-        },
+        "modules": {"recettes": 4, "inventaire": 3, "courses": 2, "planning": 2, "base": 6},
         "services_crud": [
             "recette_service",
             "inventaire_service",
             "courses_service",
             "planning_service",
-        ]
+        ],
     }

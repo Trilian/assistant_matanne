@@ -1,15 +1,11 @@
 """
 Formatters - Dates et durées
 """
-from typing import Union, Optional
-from datetime import date, datetime, timedelta
+
+from datetime import date, datetime
 
 
-def format_date(
-        d: Union[date, datetime, None],
-        format: str = "short",
-        locale: str = "fr"
-) -> str:
+def format_date(d: date | datetime | None, format: str = "short", locale: str = "fr") -> str:
     """
     Formate une date
 
@@ -37,8 +33,18 @@ def format_date(
     elif format == "long":
         if locale == "fr":
             months = [
-                "janvier", "février", "mars", "avril", "mai", "juin",
-                "juillet", "août", "septembre", "octobre", "novembre", "décembre"
+                "janvier",
+                "février",
+                "mars",
+                "avril",
+                "mai",
+                "juin",
+                "juillet",
+                "août",
+                "septembre",
+                "octobre",
+                "novembre",
+                "décembre",
             ]
             return f"{d.day} {months[d.month - 1]} {d.year}"
         else:
@@ -47,11 +53,7 @@ def format_date(
         return d.strftime("%d/%m/%Y")
 
 
-def format_datetime(
-        dt: Union[datetime, None],
-        format: str = "medium",
-        locale: str = "fr"
-) -> str:
+def format_datetime(dt: datetime | None, format: str = "medium", locale: str = "fr") -> str:
     """
     Formate une date/heure
 
@@ -79,7 +81,7 @@ def format_datetime(
         return dt.strftime("%d/%m/%Y %H:%M")
 
 
-def format_relative_date(d: Union[date, datetime]) -> str:
+def format_relative_date(d: date | datetime) -> str:
     """
     Formate une date relativement (hier, aujourd'hui, demain)
 
@@ -109,7 +111,7 @@ def format_relative_date(d: Union[date, datetime]) -> str:
         return format_date(d, "medium")
 
 
-def format_time(minutes: Union[int, float, None]) -> str:
+def format_time(minutes: int | float | None) -> str:
     """
     Formate une durée en minutes vers format lisible
 
@@ -139,7 +141,7 @@ def format_time(minutes: Union[int, float, None]) -> str:
     return f"{hours}h{remaining_minutes:02d}"
 
 
-def format_duration(seconds: Union[int, float, None], short: bool = False) -> str:
+def format_duration(seconds: int | float | None, short: bool = False) -> str:
     """
     Formate une durée en secondes
 

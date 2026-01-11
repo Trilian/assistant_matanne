@@ -1,14 +1,15 @@
 """
 Client IA Unifié - Mistral AI
 """
-import httpx
+
 import asyncio
 import logging
-from typing import Optional, Dict, Any, List
-from datetime import datetime
+from typing import Any
+
+import httpx
 
 from ..config import obtenir_parametres
-from ..errors import ErreurServiceIA, ErreurLimiteDebit
+from ..errors import ErreurLimiteDebit, ErreurServiceIA
 from .cache import CacheIA
 
 logger = logging.getLogger(__name__)
@@ -39,23 +40,20 @@ class ClientIA:
 
         except ValueError as e:
             logger.error(f"❌ Configuration IA manquante: {e}")
-            raise ErreurServiceIA(
-                str(e),
-                message_utilisateur="Configuration IA manquante"
-            )
+            raise ErreurServiceIA(str(e), message_utilisateur="Configuration IA manquante")
 
     # ═══════════════════════════════════════════════════════════
     # APPEL API PRINCIPAL
     # ═══════════════════════════════════════════════════════════
 
     async def appeler(
-            self,
-            prompt: str,
-            prompt_systeme: str = "",
-            temperature: float = 0.7,
-            max_tokens: int = 1000,
-            utiliser_cache: bool = True,
-            max_tentatives: int = 3
+        self,
+        prompt: str,
+        prompt_systeme: str = "",
+        temperature: float = 0.7,
+        max_tokens: int = 1000,
+        utiliser_cache: bool = True,
+        max_tentatives: int = 3,
     ) -> str:
         """
         Appel API avec cache et retry
@@ -77,6 +75,7 @@ class ClientIA:
         """
         # Vérifier rate limit
         from .cache import LimiteDebit
+
         peut_appeler, message_erreur = LimiteDebit.peut_appeler()
         if not peut_appeler:
             raise ErreurLimiteDebit(message_erreur, message_utilisateur=message_erreur)
@@ -84,10 +83,7 @@ class ClientIA:
         # Vérifier cache
         if utiliser_cache:
             cache = CacheIA.obtenir(
-                prompt=prompt,
-                systeme=prompt_systeme,
-                temperature=temperature,
-                modele=self.modele
+                prompt=prompt, systeme=prompt_systeme, temperature=temperature, modele=self.modele
             )
 
             if cache:
@@ -101,7 +97,7 @@ class ClientIA:
                     prompt=prompt,
                     prompt_systeme=prompt_systeme,
                     temperature=temperature,
-                    max_tokens=max_tokens
+                    max_tokens=max_tokens,
                 )
 
                 # Enregistrer appel
@@ -114,7 +110,7 @@ class ClientIA:
                         reponse=reponse,
                         systeme=prompt_systeme,
                         temperature=temperature,
-                        modele=self.modele
+                        modele=self.modele,
                     )
 
                 return reponse
@@ -124,44 +120,33 @@ class ClientIA:
                     logger.error(f"❌ Erreur API après {max_tentatives} tentatives: {e}")
                     raise ErreurServiceIA(
                         f"Erreur API Mistral: {str(e)}",
-                        message_utilisateur="L'IA est temporairement indisponible"
+                        message_utilisateur="L'IA est temporairement indisponible",
                     )
 
                 # Attente exponentielle
-                temps_attente = 2 ** tentative
+                temps_attente = 2**tentative
                 logger.warning(f"Tentative {tentative + 1}/{max_tentatives} après {temps_attente}s")
                 await asyncio.sleep(temps_attente)
 
             except Exception as e:
                 logger.error(f"❌ Erreur inattendue: {e}")
                 raise ErreurServiceIA(
-                    f"Erreur inattendue: {str(e)}",
-                    message_utilisateur="Erreur lors de l'appel IA"
+                    f"Erreur inattendue: {str(e)}", message_utilisateur="Erreur lors de l'appel IA"
                 )
 
         # Ne devrait jamais arriver ici
         raise ErreurServiceIA("Échec après toutes les tentatives")
 
     async def _effectuer_appel(
-            self,
-            prompt: str,
-            prompt_systeme: str,
-            temperature: float,
-            max_tokens: int
+        self, prompt: str, prompt_systeme: str, temperature: float, max_tokens: int
     ) -> str:
         """Effectue l'appel API réel"""
         messages = []
 
         if prompt_systeme:
-            messages.append({
-                "role": "system",
-                "content": prompt_systeme
-            })
+            messages.append({"role": "system", "content": prompt_systeme})
 
-        messages.append({
-            "role": "user",
-            "content": prompt
-        })
+        messages.append({"role": "user", "content": prompt})
 
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             reponse = await client.post(
@@ -175,7 +160,7 @@ class ClientIA:
                     "messages": messages,
                     "temperature": temperature,
                     "max_tokens": max_tokens,
-                }
+                },
             )
 
             reponse.raise_for_status()
@@ -191,10 +176,7 @@ class ClientIA:
     # ═══════════════════════════════════════════════════════════
 
     async def discuter(
-            self,
-            message: str,
-            historique: List[Dict] = None,
-            contexte: Optional[Dict] = None
+        self, message: str, historique: list[dict] = None, contexte: dict | None = None
     ) -> str:
         """
         Interface conversationnelle (legacy)
@@ -203,14 +185,12 @@ class ClientIA:
         """
         texte_historique = ""
         if historique:
-            texte_historique = "\n".join([
-                f"{h['role']}: {h['content']}"
-                for h in historique[-5:]
-            ])
+            texte_historique = "\n".join([f"{h['role']}: {h['content']}" for h in historique[-5:]])
 
         texte_contexte = ""
         if contexte:
             import json
+
             texte_contexte = f"\n\nContexte:\n{json.dumps(contexte, indent=2)}"
 
         prompt_systeme = (
@@ -222,30 +202,23 @@ class ClientIA:
         prompt = f"Historique:\n{texte_historique}\n\nUtilisateur: {message}"
 
         return await self.appeler(
-            prompt=prompt,
-            prompt_systeme=prompt_systeme,
-            temperature=0.7,
-            max_tokens=500
+            prompt=prompt, prompt_systeme=prompt_systeme, temperature=0.7, max_tokens=500
         )
 
     # ═══════════════════════════════════════════════════════════
     # HELPERS
     # ═══════════════════════════════════════════════════════════
 
-    def obtenir_infos_modele(self) -> Dict[str, Any]:
+    def obtenir_infos_modele(self) -> dict[str, Any]:
         """Retourne infos sur le modèle"""
-        return {
-            "modele": self.modele,
-            "url_base": self.url_base,
-            "timeout": self.timeout
-        }
+        return {"modele": self.modele, "url_base": self.url_base, "timeout": self.timeout}
 
 
 # ═══════════════════════════════════════════════════════════
 # INSTANCE GLOBALE (LAZY)
 # ═══════════════════════════════════════════════════════════
 
-_client: Optional[ClientIA] = None
+_client: ClientIA | None = None
 
 
 def obtenir_client_ia() -> ClientIA:

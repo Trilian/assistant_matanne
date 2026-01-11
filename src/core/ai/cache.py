@@ -7,11 +7,11 @@ Ce module fournit un cache dédié aux réponses IA avec :
 - Invalidations ciblées
 - Statistiques de performance
 """
+
 import hashlib
 import json
 import logging
-from typing import Optional, Dict, Any
-from datetime import datetime
+from typing import Any
 
 from ..cache import Cache
 from ..constants import CACHE_TTL_IA
@@ -35,10 +35,7 @@ class CacheIA:
 
     @staticmethod
     def generer_cle(
-            prompt: str,
-            systeme: str = "",
-            temperature: float = 0.7,
-            modele: str = ""
+        prompt: str, systeme: str = "", temperature: float = 0.7, modele: str = ""
     ) -> str:
         """
         Génère une clé de cache unique basée sur les paramètres.
@@ -60,7 +57,7 @@ class CacheIA:
             "prompt": prompt,
             "systeme": systeme,
             "temperature": temperature,
-            "modele": modele
+            "modele": modele,
         }
 
         chaine = json.dumps(donnees, sort_keys=True)
@@ -70,12 +67,12 @@ class CacheIA:
 
     @staticmethod
     def obtenir(
-            prompt: str,
-            systeme: str = "",
-            temperature: float = 0.7,
-            modele: str = "",
-            ttl: Optional[int] = None
-    ) -> Optional[str]:
+        prompt: str,
+        systeme: str = "",
+        temperature: float = 0.7,
+        modele: str = "",
+        ttl: int | None = None,
+    ) -> str | None:
         """
         Récupère une réponse du cache.
 
@@ -106,12 +103,12 @@ class CacheIA:
 
     @staticmethod
     def definir(
-            prompt: str,
-            reponse: str,
-            systeme: str = "",
-            temperature: float = 0.7,
-            modele: str = "",
-            ttl: Optional[int] = None
+        prompt: str,
+        reponse: str,
+        systeme: str = "",
+        temperature: float = 0.7,
+        modele: str = "",
+        ttl: int | None = None,
     ):
         """
         Sauvegarde une réponse dans le cache.
@@ -134,12 +131,7 @@ class CacheIA:
         cle = CacheIA.generer_cle(prompt, systeme, temperature, modele)
         ttl_final = ttl or CacheIA.TTL_PAR_DEFAUT
 
-        Cache.definir(
-            cle,
-            reponse,
-            ttl=ttl_final,
-            dependencies=["ia", "mistral"]
-        )
+        Cache.definir(cle, reponse, ttl=ttl_final, dependencies=["ia", "mistral"])
 
         logger.debug(f"Cache IA SET: {cle[:16]}...")
 
@@ -159,7 +151,7 @@ class CacheIA:
         logger.info("Cache IA complètement invalidé")
 
     @staticmethod
-    def obtenir_statistiques() -> Dict[str, Any]:
+    def obtenir_statistiques() -> dict[str, Any]:
         """
         Retourne les statistiques du cache IA.
 
@@ -174,12 +166,10 @@ class CacheIA:
 
         # Compter uniquement les entrées IA
         import streamlit as st
+
         donnees_cache = st.session_state.get(Cache.CLE_DONNEES, {})
 
-        entrees_ia = sum(
-            1 for cle in donnees_cache.keys()
-            if cle.startswith(CacheIA.PREFIXE)
-        )
+        entrees_ia = sum(1 for cle in donnees_cache.keys() if cle.startswith(CacheIA.PREFIXE))
 
         return {
             "entrees_ia": entrees_ia,
@@ -209,6 +199,7 @@ class CacheIA:
 # HELPERS POUR STREAMLIT
 # ═══════════════════════════════════════════════════════════
 
+
 def afficher_statistiques_cache_ia():
     """
     Widget Streamlit pour afficher les stats cache IA.
@@ -226,17 +217,11 @@ def afficher_statistiques_cache_ia():
 
         with col1:
             st.metric(
-                "Réponses cachées",
-                stats["entrees_ia"],
-                help="Nombre de réponses IA en cache"
+                "Réponses cachées", stats["entrees_ia"], help="Nombre de réponses IA en cache"
             )
 
         with col2:
-            st.metric(
-                "TTL défaut",
-                f"{stats['ttl_defaut']}s",
-                help="Durée de vie par défaut"
-            )
+            st.metric("TTL défaut", f"{stats['ttl_defaut']}s", help="Durée de vie par défaut")
 
         # Actions
         col3, col4 = st.columns(2)

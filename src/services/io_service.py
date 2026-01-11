@@ -2,12 +2,13 @@
 Service I/O Universel - Import/Export CSV/JSON
 Remplace inventaire_io_service.py + recette_io_service.py + base_io_service.py
 """
+
 import csv
-import json
 import io
+import json
 import logging
-from typing import List, Dict, Optional, Any
-from datetime import datetime, date
+from datetime import date, datetime
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +17,7 @@ class IOService:
     """Service Import/Export universel"""
 
     @staticmethod
-    def to_csv(items: List[Dict], field_mapping: Dict[str, str]) -> str:
+    def to_csv(items: list[dict], field_mapping: dict[str, str]) -> str:
         """
         Exporte en CSV
 
@@ -46,8 +47,9 @@ class IOService:
         return output.getvalue()
 
     @staticmethod
-    def from_csv(csv_str: str, field_mapping: Dict[str, str],
-                 required_fields: List[str]) -> tuple[List[Dict], List[str]]:
+    def from_csv(
+        csv_str: str, field_mapping: dict[str, str], required_fields: list[str]
+    ) -> tuple[list[dict], list[str]]:
         """
         Importe depuis CSV
 
@@ -86,7 +88,7 @@ class IOService:
         return items, errors
 
     @staticmethod
-    def to_json(items: List[Dict], indent: int = 2) -> str:
+    def to_json(items: list[dict], indent: int = 2) -> str:
         """Exporte en JSON"""
         if not items:
             return "[]"
@@ -94,7 +96,7 @@ class IOService:
         return json.dumps(items, indent=indent, ensure_ascii=False, default=str)
 
     @staticmethod
-    def from_json(json_str: str, required_fields: List[str]) -> tuple[List[Dict], List[str]]:
+    def from_json(json_str: str, required_fields: list[str]) -> tuple[list[dict], list[str]]:
         """Importe depuis JSON"""
         try:
             data = json.loads(json_str)
@@ -178,7 +180,7 @@ RECETTE_FIELD_MAPPING = {
     "temps_preparation": "Temps préparation (min)",
     "temps_cuisson": "Temps cuisson (min)",
     "portions": "Portions",
-    "difficulte": "Difficulté"
+    "difficulte": "Difficulté",
 }
 
 # Inventaire
@@ -189,7 +191,7 @@ INVENTAIRE_FIELD_MAPPING = {
     "unite": "Unité",
     "seuil": "Seuil",
     "emplacement": "Emplacement",
-    "date_peremption": "Péremption"
+    "date_peremption": "Péremption",
 }
 
 # Courses
@@ -198,5 +200,5 @@ COURSES_FIELD_MAPPING = {
     "quantite": "Quantité",
     "unite": "Unité",
     "priorite": "Priorité",
-    "magasin": "Magasin"
+    "magasin": "Magasin",
 }

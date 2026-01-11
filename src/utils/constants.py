@@ -8,21 +8,9 @@ Constantes globales - Valeurs réutilisées dans toute l'app
 
 DIFFICULTES = ["facile", "moyen", "difficile"]
 
-TYPES_REPAS = [
-    "petit_déjeuner",
-    "déjeuner",
-    "goûter",
-    "dîner",
-    "bébé"
-]
+TYPES_REPAS = ["petit_déjeuner", "déjeuner", "goûter", "dîner", "bébé"]
 
-SAISONS = [
-    "printemps",
-    "été",
-    "automne",
-    "hiver",
-    "toute_année"
-]
+SAISONS = ["printemps", "été", "automne", "hiver", "toute_année"]
 
 # ═══════════════════════════════════════════════════════════
 # CUISINE - INVENTAIRE
@@ -39,17 +27,10 @@ CATEGORIES_INGREDIENTS = [
     "Boulangerie",
     "Boissons",
     "Bébé",
-    "Autre"
+    "Autre",
 ]
 
-EMPLACEMENTS = [
-    "Frigo",
-    "Congélateur",
-    "Placard",
-    "Cave",
-    "Garde-manger",
-    "Plan de travail"
-]
+EMPLACEMENTS = ["Frigo", "Congélateur", "Placard", "Cave", "Garde-manger", "Plan de travail"]
 
 UNITES_MESURE = ["pcs", "kg", "g", "L", "mL", "cl"]
 
@@ -68,22 +49,14 @@ MAGASINS = {
     "Lidl": "#0050AA",
     "Aldi": "#0077CC",
     "Biocoop": "#88CC00",
-    "Marché": "#44AA44"
+    "Marché": "#44AA44",
 }
 
 # ═══════════════════════════════════════════════════════════
 # CUISINE - PLANNING
 # ═══════════════════════════════════════════════════════════
 
-JOURS_SEMAINE = [
-    "Lundi",
-    "Mardi",
-    "Mercredi",
-    "Jeudi",
-    "Vendredi",
-    "Samedi",
-    "Dimanche"
-]
+JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
 
 STATUTS_REPAS = ["planifié", "préparé", "terminé", "annulé"]
 
@@ -98,14 +71,14 @@ COLORS = {
     "info": "#2196F3",
     "primary": "#2d4d36",
     "secondary": "#5e7a6a",
-    "accent": "#4caf50"
+    "accent": "#4caf50",
 }
 
 STATUT_COLORS = {
     "ok": "#4CAF50",
     "sous_seuil": "#FFC107",
     "peremption_proche": "#FF9800",
-    "critique": "#f44336"
+    "critique": "#f44336",
 }
 
 # ═══════════════════════════════════════════════════════════
@@ -124,5 +97,5 @@ MAX_UPLOAD_SIZE_MB = 10
 # REGEX PATTERNS
 # ═══════════════════════════════════════════════════════════
 
-EMAIL_PATTERN = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-PHONE_PATTERN = r'^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$'
+EMAIL_PATTERN = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+PHONE_PATTERN = r"^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$"
