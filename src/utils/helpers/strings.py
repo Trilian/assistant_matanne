@@ -98,7 +98,7 @@ def snake_to_camel(text: str) -> str:
     return components[0] + "".join(x.title() for x in components[1:])
 
 
-def pluralize(word: str, count: int, plural_form: str = None) -> str:
+def pluralize(word: str, count: int, plural_form: str | None = None) -> str:
     """
     Pluralise un mot selon le nombre
 

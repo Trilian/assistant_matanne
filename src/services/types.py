@@ -4,9 +4,8 @@ Point d'entrée sans dépendances circulaires
 """
 
 import logging
-from collections.abc import Callable
 from datetime import datetime
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, TypeVar, Callable, Optional
 
 from sqlalchemy import desc, func, or_
 from sqlalchemy.orm import Session
@@ -43,7 +42,7 @@ class BaseService(Generic[T]):
     # CRUD DE BASE
     # ════════════════════════════════════════════════════════════
 
-    def create(self, data: dict, db: Session = None) -> T:
+    def create(self, data: dict, db: Session | None = None) -> T:
         """Crée une entité"""
         from src.core.errors import gerer_erreurs
 
@@ -59,7 +58,7 @@ class BaseService(Generic[T]):
 
         return self._with_session(_execute, db)
 
-    def get_by_id(self, entity_id: int, db: Session = None) -> T | None:
+    def get_by_id(self, entity_id: int, db: Session | None = None) -> T | None:
         """Récupère par ID avec cache"""
         from src.core.cache import Cache
         from src.core.errors import gerer_erreurs
@@ -85,7 +84,7 @@ class BaseService(Generic[T]):
         filters: dict | None = None,
         order_by: str = "id",
         desc_order: bool = False,
-        db: Session = None,
+        db: Session | None = None,
     ) -> list[T]:
         """Liste avec filtres et tri"""
         from src.core.errors import gerer_erreurs
@@ -102,7 +101,7 @@ class BaseService(Generic[T]):
 
         return self._with_session(_execute, db)
 
-    def update(self, entity_id: int, data: dict, db: Session = None) -> T | None:
+    def update(self, entity_id: int, data: dict, db: Session | None = None) -> T | None:
         """Met à jour une entité"""
         from src.core.errors import ErreurNonTrouve, gerer_erreurs
 
@@ -122,7 +121,7 @@ class BaseService(Generic[T]):
 
         return self._with_session(_execute, db)
 
-    def delete(self, entity_id: int, db: Session = None) -> bool:
+    def delete(self, entity_id: int, db: Session | None = None) -> bool:
         """Supprime une entité"""
         from src.core.errors import gerer_erreurs
 
@@ -138,7 +137,7 @@ class BaseService(Generic[T]):
 
         return self._with_session(_execute, db)
 
-    def count(self, filters: dict | None = None, db: Session = None) -> int:
+    def count(self, filters: dict | None = None, db: Session | None = None) -> int:
         """Compte les entités"""
         from src.core.errors import gerer_erreurs
 
@@ -164,7 +163,7 @@ class BaseService(Generic[T]):
         sort_desc: bool = False,
         limit: int = 100,
         offset: int = 0,
-        db: Session = None,
+        db: Session | None = None,
     ) -> list[T]:
         """Recherche multi-critères"""
         from src.core.errors import gerer_erreurs
@@ -205,7 +204,7 @@ class BaseService(Generic[T]):
         items_data: list[dict],
         merge_key: str,
         merge_strategy: Callable[[dict, dict], dict],
-        db: Session = None,
+        db: Session | None = None,
     ) -> tuple[int, int]:
         """Création en masse avec fusion intelligente"""
         from src.core.errors import gerer_erreurs
@@ -252,7 +251,7 @@ class BaseService(Generic[T]):
         group_by_fields: list[str] | None = None,
         count_filters: dict[str, dict] | None = None,
         additional_filters: dict | None = None,
-        db: Session = None,
+        db: Session | None = None,
     ) -> dict:
         """Statistiques génériques"""
         from src.core.errors import gerer_erreurs
@@ -293,13 +292,13 @@ class BaseService(Generic[T]):
     # MIXINS INTÉGRÉS
     # ════════════════════════════════════════════════════════════
 
-    def count_by_status(self, status_field: str = "statut", db: Session = None) -> dict[str, int]:
+    def count_by_status(self, status_field: str = "statut", db: Session | None = None) -> dict[str, int]:
         """Compte par statut"""
         stats = self.get_stats(group_by_fields=[status_field], db=db)
         return stats.get(f"by_{status_field}", {})
 
     def mark_as(
-        self, item_id: int, status_field: str, status_value: str, db: Session = None
+        self, item_id: int, status_field: str, status_value: str, db: Session | None = None
     ) -> bool:
         """Marque avec un statut"""
         return self.update(item_id, {status_field: status_value}, db=db) is not None
@@ -308,7 +307,7 @@ class BaseService(Generic[T]):
     # HELPERS PRIVÉS
     # ════════════════════════════════════════════════════════════
 
-    def _with_session(self, func: Callable, db: Session | None) -> Any:
+    def _with_session(self, func: Callable, db: Session | None = None) -> Any:
         """Exécute fonction avec session"""
         from src.core.database import obtenir_contexte_db
 

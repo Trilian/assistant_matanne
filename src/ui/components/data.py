@@ -92,7 +92,7 @@ def metrics_row(stats: list[dict], cols: int | None = None):
 def export_buttons(
     data: list[dict] | pd.DataFrame,
     filename: str = "export",
-    formats: list[str] = ["csv", "json"],
+    formats: list[str] | None = None,
     key: str = "export",
 ):
     """
@@ -111,6 +111,8 @@ def export_buttons(
         df = pd.DataFrame(data)
     else:
         df = data
+
+    formats = formats or ["csv", "json"]
 
     cols = st.columns(len(formats))
 

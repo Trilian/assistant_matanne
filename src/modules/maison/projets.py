@@ -79,8 +79,8 @@ def creer_projet(
     description: str,
     categorie: str,
     priorite: str,
-    date_debut: date = None,
-    date_fin: date = None,
+    date_debut: date | None = None,
+    date_fin: date | None = None,
 ) -> int:
     """Crée un nouveau projet"""
     with get_db_context() as db:
@@ -100,7 +100,7 @@ def creer_projet(
 
 
 def ajouter_tache_projet(
-    project_id: int, nom: str, description: str = None, echeance: date = None, duree: int = None
+    project_id: int, nom: str, description: str | None = None, echeance: date | None = None, duree: int | None = None
 ):
     """Ajoute une tâche à un projet"""
     with get_db_context() as db:
@@ -158,7 +158,7 @@ def get_projets_urgents() -> list[dict]:
         # Projets avec échéance proche
         projets = (
             db.query(Project)
-            .filter(Project.status.in_(["à faire", "en cours"]), Project.end_date != None)
+            .filter(Project.status.in_(["à faire", "en cours"]), Project.end_date.isnot(None))
             .all()
         )
 

@@ -134,7 +134,7 @@ def get_recoltes_proches() -> list[dict]:
 
         plantes = (
             db.query(GardenItem)
-            .filter(GardenItem.harvest_date != None, GardenItem.harvest_date.between(today, future))
+            .filter(GardenItem.harvest_date.isnot(None), GardenItem.harvest_date.between(today, future))
             .all()
         )
 

@@ -4,7 +4,9 @@ Gestion automatique CSV/JSON depuis config
 """
 
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Any
 
 from src.services.io_service import IOService
 
@@ -31,7 +33,7 @@ class IOConfig:
     required_fields: list[str]
 
     # Transformations custom
-    transformers: dict[str, callable] = None
+    transformers: dict[str, Callable[[Any], Any]] | None = None
 
 
 # ═══════════════════════════════════════════════════════════

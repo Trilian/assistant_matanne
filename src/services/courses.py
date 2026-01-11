@@ -50,7 +50,7 @@ class CoursesService(BaseService[ArticleCourses], BaseAIService):
             query = db.query(ArticleCourses).options(joinedload(ArticleCourses.ingredient))
 
             if not achetes:
-                query = query.filter(ArticleCourses.achete == False)
+                query = query.filter(ArticleCourses.achete.is_(False))
 
             if priorite:
                 query = query.filter(ArticleCourses.priorite == priorite)
@@ -90,7 +90,6 @@ class CoursesService(BaseService[ArticleCourses], BaseAIService):
 
         from .inventaire import inventaire_service
 
-        alertes = inventaire_service.get_alertes()
         inventaire = inventaire_service.get_inventaire_complet()
 
         # Utiliser le Mixin d'inventaire

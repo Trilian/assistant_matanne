@@ -22,7 +22,7 @@ from sqlalchemy import (
     Text,
 )
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import Mapped, declarative_base, mapped_column, relationship
+from sqlalchemy.orm import Mapped, DeclarativeBase, mapped_column, relationship
 
 # ═══════════════════════════════════════════════════════════
 # BASE SQLALCHEMY
@@ -36,11 +36,14 @@ convention = {
     "pk": "pk_%(table_name)s",
 }
 
-metadata = MetaData(naming_convention=convention)
-Base = declarative_base(metadata=metadata)
 
-# Export pour accès externe
-__all__ = ["Base", "metadata"]
+metadata = MetaData(naming_convention=convention)
+
+
+class Base(DeclarativeBase):
+    metadata = metadata
+
+# Expose tous les modèles et symboles du module (laisser Python gérer l'export)
 
 
 # ═══════════════════════════════════════════════════════════

@@ -4,6 +4,7 @@ UI Feedback - Progress tracking
 
 import time
 from datetime import datetime
+from typing import Optional
 
 import streamlit as st
 
@@ -122,7 +123,7 @@ class LoadingState:
 
     def __init__(self, title: str):
         self.title = title
-        self.steps = []
+        self.steps: list[dict] = []
         self.current_step = None
         self.start_time = datetime.now()
 
@@ -145,7 +146,7 @@ class LoadingState:
         self.current_step = len(self.steps) - 1
         self._update_display()
 
-    def complete_step(self, step_name: str = None, success: bool = True):
+    def complete_step(self, step_name: Optional[str] = None, success: bool = True):
         """Marque une étape comme terminée"""
         # Trouver l'étape
         if step_name:
@@ -166,7 +167,7 @@ class LoadingState:
             step["completed"] = True
             self._update_display()
 
-    def error_step(self, step_name: str = None, error_msg: str = ""):
+    def error_step(self, step_name: Optional[str] = None, error_msg: str = ""):
         """Marque une étape en erreur"""
         if step_name:
             step_idx = next((i for i, s in enumerate(self.steps) if s["name"] == step_name), None)

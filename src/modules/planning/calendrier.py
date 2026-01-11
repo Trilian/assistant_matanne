@@ -104,7 +104,7 @@ def charger_routines_jour(date_jour: date) -> pd.DataFrame:
         tasks = (
             db.query(RoutineTask, Routine)
             .join(Routine, RoutineTask.routine_id == Routine.id)
-            .filter(Routine.is_active == True, RoutineTask.status == "à faire")
+            .filter(Routine.is_active, RoutineTask.status == "à faire")
             .all()
         )
 
@@ -124,7 +124,7 @@ def charger_routines_jour(date_jour: date) -> pd.DataFrame:
 def creer_evenement(
     titre: str,
     debut: datetime,
-    fin: datetime = None,
+    fin: datetime | None = None,
     description: str = "",
     lieu: str = "",
     categorie: str = "Autre",

@@ -4,7 +4,7 @@ Client IA Unifié - Mistral AI
 
 import asyncio
 import logging
-from typing import Any
+from typing import Any, Optional
 
 import httpx
 
@@ -40,7 +40,7 @@ class ClientIA:
 
         except ValueError as e:
             logger.error(f"❌ Configuration IA manquante: {e}")
-            raise ErreurServiceIA(str(e), message_utilisateur="Configuration IA manquante")
+            raise ErreurServiceIA(str(e), message_utilisateur="Configuration IA manquante") from e
 
     # ═══════════════════════════════════════════════════════════
     # APPEL API PRINCIPAL
@@ -121,7 +121,7 @@ class ClientIA:
                     raise ErreurServiceIA(
                         f"Erreur API Mistral: {str(e)}",
                         message_utilisateur="L'IA est temporairement indisponible",
-                    )
+                    ) from e
 
                 # Attente exponentielle
                 temps_attente = 2**tentative
@@ -132,7 +132,7 @@ class ClientIA:
                 logger.error(f"❌ Erreur inattendue: {e}")
                 raise ErreurServiceIA(
                     f"Erreur inattendue: {str(e)}", message_utilisateur="Erreur lors de l'appel IA"
-                )
+                ) from e
 
         # Ne devrait jamais arriver ici
         raise ErreurServiceIA("Échec après toutes les tentatives")
@@ -176,7 +176,7 @@ class ClientIA:
     # ═══════════════════════════════════════════════════════════
 
     async def discuter(
-        self, message: str, historique: list[dict] = None, contexte: dict | None = None
+        self, message: str, historique: Optional[list[dict]] = None, contexte: dict | None = None
     ) -> str:
         """
         Interface conversationnelle (legacy)

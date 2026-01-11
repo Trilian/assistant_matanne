@@ -4,9 +4,8 @@ Fusionne base_service.py + base_service_optimized.py + enhanced_service.py + ser
 """
 
 import logging
-from collections.abc import Callable
 from datetime import datetime
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, TypeVar, Callable
 
 from sqlalchemy import desc, func, or_
 from sqlalchemy.orm import Session
@@ -41,7 +40,7 @@ class BaseService(Generic[T]):
     # ════════════════════════════════════════════════════════════
 
     @gerer_erreurs(afficher_dans_ui=True)
-    def create(self, data: dict, db: Session = None) -> T:
+    def create(self, data: dict, db: Session | None = None) -> T:
         """Crée une entité"""
 
         def _execute(session: Session) -> T:
@@ -56,7 +55,7 @@ class BaseService(Generic[T]):
         return self._with_session(_execute, db)
 
     @gerer_erreurs(afficher_dans_ui=False, valeur_fallback=None)
-    def get_by_id(self, entity_id: int, db: Session = None) -> T | None:
+    def get_by_id(self, entity_id: int, db: Session | None = None) -> T | None:
         """Récupère par ID avec cache"""
         cache_key = f"{self.model_name.lower()}_{entity_id}"
         cached = Cache.obtenir(cache_key, ttl=self.cache_ttl)
@@ -79,7 +78,7 @@ class BaseService(Generic[T]):
         filters: dict | None = None,
         order_by: str = "id",
         desc_order: bool = False,
-        db: Session = None,
+        db: Session | None = None,
     ) -> list[T]:
         """Liste avec filtres et tri"""
 
@@ -95,7 +94,7 @@ class BaseService(Generic[T]):
         return self._with_session(_execute, db)
 
     @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=None)
-    def update(self, entity_id: int, data: dict, db: Session = None) -> T | None:
+    def update(self, entity_id: int, data: dict, db: Session | None = None) -> T | None:
         """Met à jour une entité"""
 
         def _execute(session: Session) -> T | None:
@@ -114,7 +113,7 @@ class BaseService(Generic[T]):
         return self._with_session(_execute, db)
 
     @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=False)
-    def delete(self, entity_id: int, db: Session = None) -> bool:
+    def delete(self, entity_id: int, db: Session | None = None) -> bool:
         """Supprime une entité"""
 
         def _execute(session: Session) -> bool:
@@ -129,7 +128,7 @@ class BaseService(Generic[T]):
         return self._with_session(_execute, db)
 
     @gerer_erreurs(afficher_dans_ui=False, valeur_fallback=0)
-    def count(self, filters: dict | None = None, db: Session = None) -> int:
+    def count(self, filters: dict | None = None, db: Session | None = None) -> int:
         """Compte les entités"""
 
         def _execute(session: Session) -> int:
@@ -154,7 +153,7 @@ class BaseService(Generic[T]):
         sort_desc: bool = False,
         limit: int = 100,
         offset: int = 0,
-        db: Session = None,
+        db: Session | None = None,
     ) -> list[T]:
         """Recherche multi-critères"""
 
@@ -194,7 +193,7 @@ class BaseService(Generic[T]):
         items_data: list[dict],
         merge_key: str,
         merge_strategy: Callable[[dict, dict], dict],
-        db: Session = None,
+        db: Session | None = None,
     ) -> tuple[int, int]:
         """Création en masse avec fusion intelligente"""
 
@@ -240,7 +239,7 @@ class BaseService(Generic[T]):
         group_by_fields: list[str] | None = None,
         count_filters: dict[str, dict] | None = None,
         additional_filters: dict | None = None,
-        db: Session = None,
+        db: Session | None = None,
     ) -> dict:
         """Statistiques génériques"""
 
@@ -279,13 +278,13 @@ class BaseService(Generic[T]):
     # MIXINS INTÉGRÉS
     # ════════════════════════════════════════════════════════════
 
-    def count_by_status(self, status_field: str = "statut", db: Session = None) -> dict[str, int]:
+    def count_by_status(self, status_field: str = "statut", db: Session | None = None) -> dict[str, int]:
         """Compte par statut"""
         stats = self.get_stats(group_by_fields=[status_field], db=db)
         return stats.get(f"by_{status_field}", {})
 
     def mark_as(
-        self, item_id: int, status_field: str, status_value: str, db: Session = None
+        self, item_id: int, status_field: str, status_value: str, db: Session | None = None
     ) -> bool:
         """Marque avec un statut"""
         return self.update(item_id, {status_field: status_value}, db=db) is not None
@@ -294,7 +293,7 @@ class BaseService(Generic[T]):
     # HELPERS PRIVÉS
     # ════════════════════════════════════════════════════════════
 
-    def _with_session(self, func: Callable, db: Session | None) -> Any:
+    def _with_session(self, func: Callable, db: Session | None = None) -> Any:
         """Exécute fonction avec session"""
         if db:
             return func(db)

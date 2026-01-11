@@ -4,7 +4,7 @@ Fonctions spécifiques au domaine alimentaire
 """
 
 import logging
-from typing import Any
+from typing import Any, Callable, Optional
 
 from sqlalchemy.orm import Session
 
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 def find_or_create_ingredient(
-    nom: str, unite: str, categorie: str | None = None, db: Session = None
+    nom: str, unite: str, categorie: str | None = None, db: Session | None = None
 ) -> int:
     """
     Trouve ou crée un ingrédient
@@ -55,7 +55,7 @@ def find_or_create_ingredient(
         return _execute(db)
 
 
-def batch_find_or_create_ingredients(items: list[dict], db: Session = None) -> dict[str, int]:
+def batch_find_or_create_ingredients(items: list[dict], db: Session | None = None) -> dict[str, int]:
     """
     Batch création ingrédients (optimisé)
 
@@ -123,7 +123,7 @@ def get_all_ingredients_cached() -> list[dict]:
 
 
 def enrich_with_ingredient_info(
-    items: list[Any], ingredient_id_field: str = "ingredient_id", db: Session = None
+    items: list[Any], ingredient_id_field: str = "ingredient_id", db: Session | None = None
 ) -> list[dict]:
     """
     Enrichit items avec infos ingrédient (évite N+1 queries)
@@ -218,7 +218,7 @@ def validate_stock_level(quantite: float, seuil: float, nom: str) -> tuple[str, 
 
 
 def consolidate_duplicates(
-    items: list[dict], key_field: str, merge_strategy: callable | None = None
+    items: list[dict], key_field: str, merge_strategy: Optional[Callable[[dict, dict], dict]] = None
 ) -> list[dict]:
     """
     Consolide doublons dans liste

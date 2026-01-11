@@ -2,8 +2,8 @@
 Base Form - Générateur de formulaires universel
 """
 
-from collections.abc import Callable
 from datetime import date
+from typing import Callable, Any, Optional
 
 import streamlit as st
 
@@ -25,7 +25,7 @@ class FormBuilder:
             data = form.get_data()
     """
 
-    def __init__(self, form_id: str, title: str = None):
+    def __init__(self, form_id: str, title: Optional[str] = None):
         self.form_id = form_id
         self.title = title
         self.fields = []
@@ -41,8 +41,8 @@ class FormBuilder:
         label: str,
         required: bool = False,
         default: str = "",
-        max_length: int = None,
-        help_text: str = None,
+        max_length: Optional[int] = None,
+        help_text: Optional[str] = None,
     ):
         """Ajoute champ texte"""
         self.fields.append(
@@ -65,7 +65,7 @@ class FormBuilder:
         required: bool = False,
         default: str = "",
         height: int = 100,
-        help_text: str = None,
+        help_text: Optional[str] = None,
     ):
         """Ajoute textarea"""
         self.fields.append(
@@ -87,10 +87,10 @@ class FormBuilder:
         label: str,
         required: bool = False,
         default: float = 0.0,
-        min_value: float = None,
-        max_value: float = None,
+        min_value: Optional[float] = None,
+        max_value: Optional[float] = None,
         step: float = 1.0,
-        help_text: str = None,
+        help_text: Optional[str] = None,
     ):
         """Ajoute champ nombre"""
         self.fields.append(
@@ -114,8 +114,8 @@ class FormBuilder:
         label: str,
         options: list[str],
         required: bool = False,
-        default: str = None,
-        help_text: str = None,
+        default: Optional[str] = None,
+        help_text: Optional[str] = None,
     ):
         """Ajoute select"""
         self.fields.append(
@@ -137,8 +137,8 @@ class FormBuilder:
         label: str,
         options: list[str],
         required: bool = False,
-        default: list[str] = None,
-        help_text: str = None,
+        default: Optional[list[str]] = None,
+        help_text: Optional[str] = None,
     ):
         """Ajoute multiselect"""
         self.fields.append(
@@ -154,7 +154,7 @@ class FormBuilder:
         )
         return self
 
-    def add_checkbox(self, name: str, label: str, default: bool = False, help_text: str = None):
+    def add_checkbox(self, name: str, label: str, default: bool = False, help_text: Optional[str] = None):
         """Ajoute checkbox"""
         self.fields.append(
             {
@@ -172,10 +172,10 @@ class FormBuilder:
         name: str,
         label: str,
         required: bool = False,
-        default: date = None,
-        min_value: date = None,
-        max_value: date = None,
-        help_text: str = None,
+        default: Optional[date] = None,
+        min_value: Optional[date] = None,
+        max_value: Optional[date] = None,
+        help_text: Optional[str] = None,
     ):
         """Ajoute date"""
         self.fields.append(
@@ -199,7 +199,7 @@ class FormBuilder:
         min_value: int = 0,
         max_value: int = 100,
         default: int = 50,
-        help_text: str = None,
+        help_text: Optional[str] = None,
     ):
         """Ajoute slider"""
         self.fields.append(
@@ -229,7 +229,7 @@ class FormBuilder:
     # RENDER
     # ═══════════════════════════════════════════════════════
 
-    def render(self, on_submit: Callable = None, on_cancel: Callable = None) -> bool:
+    def render(self, on_submit: Optional[Callable[[dict], Any]] = None, on_cancel: Optional[Callable[[], Any]] = None) -> bool:
         """
         Render formulaire
 

@@ -3,6 +3,7 @@ Helpers - Calculs statistiques
 """
 
 import statistics
+from typing import Any
 
 
 def calculate_average(values: list[float]) -> float:
@@ -90,7 +91,7 @@ def calculate_percentile(values: list[float], percentile: int) -> float:
     return sorted_values[lower] * (1 - weight) + sorted_values[upper] * weight
 
 
-def calculate_mode(values: list) -> any:
+def calculate_mode(values: list) -> Any:
     """
     Calcule le mode (valeur la plus fréquente)
 

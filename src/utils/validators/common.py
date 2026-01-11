@@ -77,7 +77,7 @@ def validate_range(
 
 
 def validate_string_length(
-    text: str, min_length: int = 0, max_length: int = None, field_name: str = "texte"
+    text: str, min_length: int = 0, max_length: int | None = None, field_name: str = "texte"
 ) -> tuple[bool, str]:
     """
     Valide longueur d'une string

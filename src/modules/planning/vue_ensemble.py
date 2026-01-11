@@ -44,14 +44,14 @@ def get_dashboard_data() -> dict:
             "projets_urgents": db.query(Project)
             .filter(
                 Project.status.in_(["à faire", "en cours"]),
-                Project.end_date != None,
+                Project.end_date.isnot(None),
                 Project.end_date <= week_end,
             )
             .count(),
             # Routines
             "taches_jour": db.query(RoutineTask)
             .join(Routine)
-            .filter(RoutineTask.status == "à faire", Routine.is_active == True)
+            .filter(RoutineTask.status == "à faire", Routine.is_active)
             .count(),
             # Inventaire
             "stock_bas": db.query(InventoryItem)
@@ -65,7 +65,7 @@ def get_dashboard_data() -> dict:
             )
             .count(),
             # Jardin
-            "plantes_arroser": db.query(GardenItem).filter(GardenItem.last_watered != None).count(),
+            "plantes_arroser": db.query(GardenItem).filter(GardenItem.last_watered.isnot(None)).count(),
         }
 
         return data

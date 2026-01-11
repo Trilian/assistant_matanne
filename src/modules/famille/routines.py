@@ -24,7 +24,7 @@ def charger_routines(actives_uniquement: bool = True) -> pd.DataFrame:
         query = db.query(Routine)
 
         if actives_uniquement:
-            query = query.filter(Routine.is_active == True)
+            query = query.filter(Routine.is_active)
 
         routines = query.order_by(Routine.created_at.desc()).all()
 
@@ -142,11 +142,11 @@ def get_taches_en_retard() -> list[dict]:
         tasks = (
             db.query(RoutineTask, Routine)
             .join(Routine, RoutineTask.routine_id == Routine.id)
-            .filter(
-                RoutineTask.status == "à faire",
-                RoutineTask.scheduled_time != None,
-                Routine.is_active == True,
-            )
+                .filter(
+                    RoutineTask.status == "à faire",
+                    RoutineTask.scheduled_time.isnot(None),
+                    Routine.is_active,
+                )
             .all()
         )
 

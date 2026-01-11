@@ -9,7 +9,7 @@ import importlib
 import logging
 import time
 from functools import wraps
-from typing import Any
+from typing import Any, Optional
 
 import streamlit as st
 
@@ -136,7 +136,7 @@ class LazyModuleLoader:
 # ═══════════════════════════════════════════════════════════
 
 
-def lazy_import(module_path: str, attr_name: str = None):
+def lazy_import(module_path: str, attr_name: Optional[str] = None):
     """
     Decorator pour import lazy
 
