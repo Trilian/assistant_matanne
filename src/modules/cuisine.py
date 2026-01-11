@@ -1,5 +1,8 @@
 """
-Module Cuisine Unifié (REFACTORING v2.1)
+Module Cuisine Unifié (REFACTORING v2.2)
+
+✅ FIX: Support navigation dynamique depuis lazy loader
+✅ Les onglets s'activent automatiquement selon la route
 
 Module complet pour la cuisine fusionnant :
 - recettes.py (Gestion recettes)
@@ -7,7 +10,7 @@ Module complet pour la cuisine fusionnant :
 - planning.py (Planning hebdo)
 - courses.py (Liste courses)
 
-Architecture simplifiée : Tout en 1 module avec tabs.
+Architecture simplifiée : Tout en 1 module avec tabs dynamiques.
 """
 import streamlit as st
 from datetime import date, timedelta
@@ -36,28 +39,58 @@ from src.core.state import get_state, StateManager
 # ═══════════════════════════════════════════════════════════
 
 def app():
-    """Point d'entrée module cuisine unifié"""
+    """Point d'entrée module cuisine unifié avec navigation dynamique"""
     st.title("🍳 Cuisine")
     st.caption("Gestion complète : Recettes, Inventaire, Planning, Courses")
 
-    # Tabs principales
-    tab1, tab2, tab3, tab4 = st.tabs([
+    # ═══════════════════════════════════════════════════════
+    # ✅ RÉCUPÉRER L'ONGLET ACTIF DEPUIS SESSION_STATE
+    # ═══════════════════════════════════════════════════════
+
+    # Clé définie par le lazy loader
+    active_tab = st.session_state.get("cuisine_active_tab", 0)
+
+    # Labels des onglets
+    tab_labels = [
         "🍽️ Recettes",
         "📦 Inventaire",
         "📅 Planning",
         "🛒 Courses"
-    ])
+    ]
 
-    with tab1:
+    # ═══════════════════════════════════════════════════════
+    # TABS STREAMLIT (avec sélection automatique)
+    # ═══════════════════════════════════════════════════════
+
+    # Note: st.tabs ne permet pas de sélectionner programmatiquement
+    # Workaround: utiliser des containers conditionnels
+
+    # Afficher les boutons de navigation
+    cols = st.columns(4)
+    for idx, label in enumerate(tab_labels):
+        with cols[idx]:
+            if st.button(
+                    label,
+                    key=f"tab_btn_{idx}",
+                    use_container_width=True,
+                    type="primary" if idx == active_tab else "secondary"
+            ):
+                st.session_state.cuisine_active_tab = idx
+                st.rerun()
+
+    st.markdown("---")
+
+    # ═══════════════════════════════════════════════════════
+    # RENDER SECTION ACTIVE
+    # ═══════════════════════════════════════════════════════
+
+    if active_tab == 0:
         render_recettes()
-
-    with tab2:
+    elif active_tab == 1:
         render_inventaire()
-
-    with tab3:
+    elif active_tab == 2:
         render_planning()
-
-    with tab4:
+    elif active_tab == 3:
         render_courses()
 
 
@@ -200,7 +233,6 @@ def render_recettes_ajout():
                 ingredients = []
                 for line in ingredients_text.split("\n"):
                     if line.strip():
-                        # Parse simple (quantité + nom)
                         parts = line.strip().split(" ", 1)
                         if len(parts) == 2:
                             ingredients.append({
@@ -489,4 +521,3 @@ def render_courses():
 # ═══════════════════════════════════════════════════════════
 
 __all__ = ["app"]
-

@@ -1,6 +1,8 @@
 """
 Lazy Loading System - Charge modules à la demande
 Réduit temps chargement initial de 60%
+
+✅ FIX: Support pour modules unifiés avec navigation interne
 """
 import streamlit as st
 import importlib
@@ -151,40 +153,92 @@ class OptimizedRouter:
     """
     Router avec lazy loading intégré
 
-    Remplace AppRouter dans src/app.py
+    ✅ Support pour modules unifiés avec navigation interne
     """
 
+    # ═══════════════════════════════════════════════════════
+    # REGISTRY AVEC MAPPING MODULE UNIFIÉ → SOUS-SECTIONS
+    # ═══════════════════════════════════════════════════════
+
     MODULE_REGISTRY = {
-        "accueil": "src.modules.accueil",
+        "accueil": {
+            "path": "src.modules.accueil",
+            "type": "simple"
+        },
 
-        # ✅ Cuisine - UN SEUL FICHIER cuisine.py
-        "cuisine.recettes": "src.modules.cuisine",
-        "cuisine.inventaire": "src.modules.cuisine",
-        "cuisine.planning_semaine": "src.modules.cuisine",
-        "cuisine.courses": "src.modules.cuisine",
+        # ✅ MODULE CUISINE UNIFIÉ (1 fichier, navigation interne)
+        "cuisine.recettes": {
+            "path": "src.modules.cuisine",
+            "type": "unified",
+            "tab": 0  # Index du tab "Recettes"
+        },
+        "cuisine.inventaire": {
+            "path": "src.modules.cuisine",
+            "type": "unified",
+            "tab": 1  # Index du tab "Inventaire"
+        },
+        "cuisine.planning_semaine": {
+            "path": "src.modules.cuisine",
+            "type": "unified",
+            "tab": 2  # Index du tab "Planning"
+        },
+        "cuisine.courses": {
+            "path": "src.modules.cuisine",
+            "type": "unified",
+            "tab": 3  # Index du tab "Courses"
+        },
 
-        # Famille (lazy loaded)
-        "famille.suivi_jules": "src.modules.famille.suivi_jules",
-        "famille.bien_etre": "src.modules.famille.bien_etre",
-        "famille.routines": "src.modules.famille.routines",
+        # Famille (à implémenter plus tard)
+        "famille.suivi_jules": {
+            "path": "src.modules.famille.suivi_jules",
+            "type": "simple"
+        },
+        "famille.bien_etre": {
+            "path": "src.modules.famille.bien_etre",
+            "type": "simple"
+        },
+        "famille.routines": {
+            "path": "src.modules.famille.routines",
+            "type": "simple"
+        },
 
-        # Maison (lazy loaded)
-        "maison.projets": "src.modules.maison.projets",
-        "maison.jardin": "src.modules.maison.jardin",
-        "maison.entretien": "src.modules.maison.entretien",
+        # Maison
+        "maison.projets": {
+            "path": "src.modules.maison.projets",
+            "type": "simple"
+        },
+        "maison.jardin": {
+            "path": "src.modules.maison.jardin",
+            "type": "simple"
+        },
+        "maison.entretien": {
+            "path": "src.modules.maison.entretien",
+            "type": "simple"
+        },
 
-        # Planning (lazy loaded)
-        "planning.calendrier": "src.modules.planning.calendrier",
-        "planning.vue_ensemble": "src.modules.planning.vue_ensemble",
+        # Planning
+        "planning.calendrier": {
+            "path": "src.modules.planning.calendrier",
+            "type": "simple"
+        },
+        "planning.vue_ensemble": {
+            "path": "src.modules.planning.vue_ensemble",
+            "type": "simple"
+        },
 
         # Paramètres
-        "parametres": "src.modules.parametres",
+        "parametres": {
+            "path": "src.modules.parametres",
+            "type": "simple"
+        },
     }
 
     @staticmethod
     def load_module(module_name: str):
         """
         Charge et render module avec lazy loading
+
+        ✅ Gère modules unifiés avec navigation interne
 
         Args:
             module_name: Nom du module (ex: "cuisine.recettes")
@@ -194,15 +248,35 @@ class OptimizedRouter:
             logger.error(f"Module non enregistré: {module_name}")
             return
 
-        module_path = OptimizedRouter.MODULE_REGISTRY[module_name]
+        config = OptimizedRouter.MODULE_REGISTRY[module_name]
+        module_path = config["path"]
+        module_type = config.get("type", "simple")
 
         # Afficher spinner pendant chargement
         with st.spinner(f"⏳ Chargement {module_name}..."):
             try:
-                # Lazy load
+                # Lazy load du module
                 module = LazyModuleLoader.load(module_path)
 
-                # Render
+                # ═══════════════════════════════════════════════════════
+                # GESTION MODULE UNIFIÉ (ex: cuisine)
+                # ═══════════════════════════════════════════════════════
+                if module_type == "unified":
+                    # Stocker l'onglet actif dans session_state
+                    tab_index = config.get("tab", 0)
+
+                    # Clé session pour ce module unifié
+                    base_module = module_path.split(".")[-1]  # "cuisine"
+                    session_key = f"{base_module}_active_tab"
+
+                    # Sauvegarder l'onglet actif
+                    st.session_state[session_key] = tab_index
+
+                    logger.info(f"📑 Module unifié '{base_module}' → Tab {tab_index}")
+
+                # ═══════════════════════════════════════════════════════
+                # RENDER DU MODULE
+                # ═══════════════════════════════════════════════════════
                 if hasattr(module, "app"):
                     module.app()
                 elif hasattr(module, "afficher"):
@@ -228,6 +302,7 @@ class OptimizedRouter:
         """Précharge modules fréquents en arrière-plan"""
         common = [
             "src.modules.accueil",
+            "src.modules.cuisine",  # ✅ Précharger module unifié
         ]
         LazyModuleLoader.preload(common, background=True)
 
