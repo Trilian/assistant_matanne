@@ -1,5 +1,6 @@
 """
 Application principale - VERSION OPTIMISÉE LAZY LOADING
+✅ FIX: Import OptimizedRouter au lieu de AppRouter
 ✅ -60% temps chargement initial
 ✅ Navigation instantanée
 ✅ Modules chargés à la demande
@@ -33,7 +34,7 @@ from src.core import (
 )
 from src.ui import badge
 
-# ✅ LAZY LOADING (au lieu de AppRouter classique)
+# ✅ FIX: Import OptimizedRouter au lieu de l'ancien AppRouter
 from src.core.lazy_loader import OptimizedRouter, render_lazy_loading_stats
 
 parametres = obtenir_parametres()
@@ -316,7 +317,7 @@ def main():
         # Sidebar
         afficher_sidebar()
 
-        # ✅ LAZY LOADER : Charger module actuel à la demande
+        # ✅ FIX: Utiliser OptimizedRouter au lieu de AppRouter
         etat = obtenir_etat()
         OptimizedRouter.load_module(etat.module_actuel)
 

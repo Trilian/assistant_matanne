@@ -243,6 +243,7 @@ class OptimizedRouter:
         Args:
             module_name: Nom du module (ex: "cuisine.recettes")
         """
+        # ✅ VÉRIFIER LE REGISTRY EN PREMIER
         if module_name not in OptimizedRouter.MODULE_REGISTRY:
             st.error(f"❌ Module '{module_name}' introuvable")
             logger.error(f"Module non enregistré: {module_name}")
@@ -251,6 +252,8 @@ class OptimizedRouter:
         config = OptimizedRouter.MODULE_REGISTRY[module_name]
         module_path = config["path"]
         module_type = config.get("type", "simple")
+
+        logger.info(f"🎯 Route: {module_name} → {module_path} (type: {module_type})")
 
         # Afficher spinner pendant chargement
         with st.spinner(f"⏳ Chargement {module_name}..."):
@@ -266,6 +269,7 @@ class OptimizedRouter:
                     tab_index = config.get("tab", 0)
 
                     # Clé session pour ce module unifié
+                    # Extraire le nom du module depuis le path (ex: "cuisine" depuis "src.modules.cuisine")
                     base_module = module_path.split(".")[-1]  # "cuisine"
                     session_key = f"{base_module}_active_tab"
 
