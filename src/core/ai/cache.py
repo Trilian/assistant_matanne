@@ -92,7 +92,7 @@ class CacheIA:
         Example:
             >>> reponse = CacheIA.obtenir("Génère une recette")
             >>> if reponse:
-            >>>     print("Cache HIT!")
+            >>>     logger.debug("Cache HIT!")
         """
         cle = CacheIA.generer_cle(prompt, systeme, temperature, modele)
         ttl_final = ttl or CacheIA.TTL_PAR_DEFAUT
@@ -168,7 +168,7 @@ class CacheIA:
 
         Example:
             >>> stats = CacheIA.obtenir_statistiques()
-            >>> print(f"Entrées IA: {stats['entrees_ia']}")
+            >>> logger.debug(f"Entrées IA: {stats['entrees_ia']}")
         """
         stats_globales = Cache.obtenir_statistiques()
 

@@ -24,6 +24,21 @@ from .logging import configure_logging  # type: ignore
 logger = logging.getLogger(__name__)
 
 
+def _read_st_secret(section: str):
+    """Lit de façon sûre une section de `st.secrets` si disponible.
+
+    Retourne `None` si `st.secrets` n'est pas présent ou si la section manque.
+    """
+    try:
+        if hasattr(st, "secrets"):
+            return st.secrets.get(section)
+    except Exception:
+        # Ne pas propager les erreurs d'accès à Streamlit secrets
+        return None
+
+    return None
+
+
 class Parametres(BaseSettings):
     """
     Configuration centralisée avec auto-détection.
@@ -71,16 +86,17 @@ class Parametres(BaseSettings):
             ValueError: Si aucune configuration trouvée
         """
         # 1. Secrets Streamlit (prioritaire en production)
-        try:
-            if hasattr(st, "secrets") and "db" in st.secrets:
-                db = st.secrets["db"]
+        # 1. Streamlit Secrets (prioritaire en production)
+        db = _read_st_secret("db")
+        if db:
+            try:
                 return (
                     f"postgresql://{db['user']}:{db['password']}"
                     f"@{db['host']}:{db['port']}/{db['name']}"
                     f"?sslmode=require"
                 )
-        except Exception as e:
-            logger.debug(f"st.secrets['db'] non disponible: {e}")
+            except Exception:
+                logger.debug("st.secrets['db'] présente mais format inattendu")
 
         # 2. Variables d'environnement individuelles
         hote = os.getenv("DB_HOST")
@@ -140,11 +156,10 @@ class Parametres(BaseSettings):
             ValueError: Si clé introuvable
         """
         # 1. Secrets Streamlit
-        try:
-            if hasattr(st, "secrets") and "mistral" in st.secrets:
-                return st.secrets["mistral"]["api_key"]
-        except Exception:
-            pass
+        # 1. Streamlit Secrets
+        mistral = _read_st_secret("mistral")
+        if mistral and isinstance(mistral, dict) and "api_key" in mistral:
+            return mistral["api_key"]
 
         # 2. Variable d'environnement
         cle = os.getenv("MISTRAL_API_KEY")

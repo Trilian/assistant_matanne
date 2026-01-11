@@ -150,7 +150,7 @@ def get_services_info() -> dict:
     Example:
         >>> from src.services import get_services_info
         >>> info = get_services_info()
-        >>> print(f"{info['total_services']} services disponibles")
+        >>> logger.info(f"{info['total_services']} services disponibles")
     """
     return {
         "total_services": len(__all__),
