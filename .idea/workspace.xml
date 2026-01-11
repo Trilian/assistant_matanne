@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment="Dev" />
+    <list default="true" id="ea074492-cf11-478a-bc23-1336b4876658" name="Changes" comment="Dev">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/lazy_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/lazy_loader.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -27,12 +30,12 @@
     &quot;assignee&quot;: &quot;Trilian&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/Trilian/assistant_matanne&quot;,
-    &quot;accountId&quot;: &quot;43185446-3cd5-4901-9509-b728f45bf84d&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/Trilian/assistant_matanne.git",
+    "accountId": "43185446-3cd5-4901-9509-b728f45bf84d"
   }
-}</component>
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 8
 }</component>
@@ -196,14 +199,6 @@
       <workItem from="1764923035460" duration="23405000" />
       <workItem from="1765096794626" duration="16000" />
       <workItem from="1767876030760" duration="1532000" />
-    </task>
-    <task id="LOCAL-00066" summary=" amelioration inventaire">
-      <option name="closed" value="true" />
-      <created>1765723338326</created>
-      <option name="number" value="00066" />
-      <option name="presentableId" value="LOCAL-00066" />
-      <option name="project" value="LOCAL" />
-      <updated>1765723338326</updated>
     </task>
     <task id="LOCAL-00067" summary=" amelioration inventaire">
       <option name="closed" value="true" />
@@ -589,7 +584,15 @@
       <option name="project" value="LOCAL" />
       <updated>1768079407882</updated>
     </task>
-    <option name="localTasksCounter" value="115" />
+    <task id="LOCAL-00115" summary="Dev">
+      <option name="closed" value="true" />
+      <created>1768117475179</created>
+      <option name="number" value="00115" />
+      <option name="presentableId" value="LOCAL-00115" />
+      <option name="project" value="LOCAL" />
+      <updated>1768117475179</updated>
+    </task>
+    <option name="localTasksCounter" value="116" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

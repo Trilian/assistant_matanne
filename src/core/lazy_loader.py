@@ -35,7 +35,7 @@ class LazyModuleLoader:
         Charge un module à la demande
 
         Args:
-            module_path: Chemin du module (ex: "src.modules.cuisine.recettes")
+            module_path: Chemin du module (ex: "src.modules.cuisine")
             reload: Forcer rechargement (dev mode)
 
         Returns:
@@ -157,11 +157,11 @@ class OptimizedRouter:
     MODULE_REGISTRY = {
         "accueil": "src.modules.accueil",
 
-        # Cuisine (lazy loaded)
-        "cuisine.recettes": "src.modules.cuisine.recettes",
-        "cuisine.inventaire": "src.modules.cuisine.inventaire",
-        "cuisine.planning_semaine": "src.modules.cuisine.planning_semaine",
-        "cuisine.courses": "src.modules.cuisine.courses",
+        # ✅ Cuisine - UN SEUL FICHIER cuisine.py
+        "cuisine.recettes": "src.modules.cuisine",
+        "cuisine.inventaire": "src.modules.cuisine",
+        "cuisine.planning_semaine": "src.modules.cuisine",
+        "cuisine.courses": "src.modules.cuisine",
 
         # Famille (lazy loaded)
         "famille.suivi_jules": "src.modules.famille.suivi_jules",
