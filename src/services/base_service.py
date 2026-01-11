@@ -12,7 +12,8 @@ from sqlalchemy.orm import Session
 
 from src.core.cache import Cache
 from src.core.database import obtenir_contexte_db
-from src.core.errors import ErreurNonTrouve, gerer_erreurs
+from src.core.errors_base import ErreurNonTrouve
+from src.core.decorators import with_db_session
 
 logger = logging.getLogger(__name__)
 T = TypeVar("T")
@@ -39,38 +40,31 @@ class BaseService(Generic[T]):
     # CRUD DE BASE
     # ════════════════════════════════════════════════════════════
 
-    @gerer_erreurs(afficher_dans_ui=True)
-    def create(self, data: dict, db: Session | None = None) -> T:
+    @with_db_session
+    def create(self, data: dict, db: Session) -> T:
         """Crée une entité"""
+        entity = self.model(**data)
+        db.add(entity)
+        db.commit()
+        db.refresh(entity)
+        logger.info(f"{self.model_name} créé: {entity.id}")
+        self._invalider_cache()
+        return entity
 
-        def _execute(session: Session) -> T:
-            entity = self.model(**data)
-            session.add(entity)
-            session.commit()
-            session.refresh(entity)
-            logger.info(f"{self.model_name} créé: {entity.id}")
-            self._invalider_cache()
-            return entity
-
-        return self._with_session(_execute, db)
-
-    @gerer_erreurs(afficher_dans_ui=False, valeur_fallback=None)
-    def get_by_id(self, entity_id: int, db: Session | None = None) -> T | None:
+    @with_db_session
+    def get_by_id(self, entity_id: int, db: Session) -> T | None:
         """Récupère par ID avec cache"""
         cache_key = f"{self.model_name.lower()}_{entity_id}"
         cached = Cache.obtenir(cache_key, ttl=self.cache_ttl)
         if cached:
             return cached
 
-        def _execute(session: Session) -> T | None:
-            entity = session.query(self.model).get(entity_id)
-            if entity:
-                Cache.definir(cache_key, entity, ttl=self.cache_ttl)
-            return entity
+        entity = db.query(self.model).get(entity_id)
+        if entity:
+            Cache.definir(cache_key, entity, ttl=self.cache_ttl)
+        return entity
 
-        return self._with_session(_execute, db)
-
-    @gerer_erreurs(afficher_dans_ui=False, valeur_fallback=[])
+    @with_db_session
     def get_all(
         self,
         skip: int = 0,
@@ -81,69 +75,53 @@ class BaseService(Generic[T]):
         db: Session | None = None,
     ) -> list[T]:
         """Liste avec filtres et tri"""
+        query = db.query(self.model)
+        if filters:
+            query = self._apply_filters(query, filters)
+        if hasattr(self.model, order_by):
+            order_col = getattr(self.model, order_by)
+            query = query.order_by(desc(order_col) if desc_order else order_col)
+        return query.offset(skip).limit(limit).all()
 
-        def _execute(session: Session) -> list[T]:
-            query = session.query(self.model)
-            if filters:
-                query = self._apply_filters(query, filters)
-            if hasattr(self.model, order_by):
-                order_col = getattr(self.model, order_by)
-                query = query.order_by(desc(order_col) if desc_order else order_col)
-            return query.offset(skip).limit(limit).all()
-
-        return self._with_session(_execute, db)
-
-    @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=None)
+    @with_db_session
     def update(self, entity_id: int, data: dict, db: Session | None = None) -> T | None:
         """Met à jour une entité"""
+        entity = db.query(self.model).get(entity_id)
+        if not entity:
+            raise ErreurNonTrouve(f"{self.model_name} {entity_id} non trouvé")
+        for key, value in data.items():
+            if hasattr(entity, key):
+                setattr(entity, key, value)
+        db.commit()
+        db.refresh(entity)
+        logger.info(f"{self.model_name} {entity_id} mis à jour")
+        self._invalider_cache()
+        return entity
 
-        def _execute(session: Session) -> T | None:
-            entity = session.query(self.model).get(entity_id)
-            if not entity:
-                raise ErreurNonTrouve(f"{self.model_name} {entity_id} non trouvé")
-            for key, value in data.items():
-                if hasattr(entity, key):
-                    setattr(entity, key, value)
-            session.commit()
-            session.refresh(entity)
-            logger.info(f"{self.model_name} {entity_id} mis à jour")
-            self._invalider_cache()
-            return entity
-
-        return self._with_session(_execute, db)
-
-    @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=False)
+    @with_db_session
     def delete(self, entity_id: int, db: Session | None = None) -> bool:
         """Supprime une entité"""
+        count = db.query(self.model).filter(self.model.id == entity_id).delete()
+        db.commit()
+        if count > 0:
+            logger.info(f"{self.model_name} {entity_id} supprimé")
+            self._invalider_cache()
+            return True
+        return False
 
-        def _execute(session: Session) -> bool:
-            count = session.query(self.model).filter(self.model.id == entity_id).delete()
-            session.commit()
-            if count > 0:
-                logger.info(f"{self.model_name} {entity_id} supprimé")
-                self._invalider_cache()
-                return True
-            return False
-
-        return self._with_session(_execute, db)
-
-    @gerer_erreurs(afficher_dans_ui=False, valeur_fallback=0)
+    @with_db_session
     def count(self, filters: dict | None = None, db: Session | None = None) -> int:
         """Compte les entités"""
-
-        def _execute(session: Session) -> int:
-            query = session.query(self.model)
-            if filters:
-                query = self._apply_filters(query, filters)
-            return query.count()
-
-        return self._with_session(_execute, db)
+        query = db.query(self.model)
+        if filters:
+            query = self._apply_filters(query, filters)
+        return query.count()
 
     # ════════════════════════════════════════════════════════════
     # RECHERCHE AVANCÉE
     # ════════════════════════════════════════════════════════════
 
-    @gerer_erreurs(afficher_dans_ui=False, valeur_fallback=[])
+    @with_db_session
     def advanced_search(
         self,
         search_term: str | None = None,
@@ -156,32 +134,28 @@ class BaseService(Generic[T]):
         db: Session | None = None,
     ) -> list[T]:
         """Recherche multi-critères"""
+        query = db.query(self.model)
 
-        def _execute(session: Session) -> list[T]:
-            query = session.query(self.model)
+        # Recherche textuelle
+        if search_term and search_fields:
+            conditions = [
+                getattr(self.model, field).ilike(f"%{search_term}%")
+                for field in search_fields
+                if hasattr(self.model, field)
+            ]
+            if conditions:
+                query = query.filter(or_(*conditions))
 
-            # Recherche textuelle
-            if search_term and search_fields:
-                conditions = [
-                    getattr(self.model, field).ilike(f"%{search_term}%")
-                    for field in search_fields
-                    if hasattr(self.model, field)
-                ]
-                if conditions:
-                    query = query.filter(or_(*conditions))
+        # Filtres
+        if filters:
+            query = self._apply_filters(query, filters)
 
-            # Filtres
-            if filters:
-                query = self._apply_filters(query, filters)
+        # Tri
+        if sort_by and hasattr(self.model, sort_by):
+            order_col = getattr(self.model, sort_by)
+            query = query.order_by(desc(order_col) if sort_desc else order_col)
 
-            # Tri
-            if sort_by and hasattr(self.model, sort_by):
-                order_col = getattr(self.model, sort_by)
-                query = query.order_by(desc(order_col) if sort_desc else order_col)
-
-            return query.offset(offset).limit(limit).all()
-
-        return self._with_session(_execute, db)
+        return query.offset(offset).limit(limit).all()
 
     # ════════════════════════════════════════════════════════════
     # BULK OPERATIONS

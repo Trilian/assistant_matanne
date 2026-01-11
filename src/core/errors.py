@@ -1,10 +1,12 @@
 """
-Errors - Exceptions personnalisées et gestionnaires d'erreurs.
+Errors - Gestion des erreurs avec intégration UI (Streamlit).
 
-Ce module centralise :
-- Les exceptions métier
-- Les décorateurs de gestion d'erreurs
-- Les helpers de validation
+Ce module :
+- Ré-exporte les exceptions pures depuis errors_base.py
+- Ajoute les fonctions d'affichage UI
+- Fournit des décorateurs de gestion d'erreurs avec UI
+
+⚠️ IMPORTANT: Les exceptions pures sont dans errors_base.py (sans dépendances UI)
 """
 
 import logging
@@ -14,6 +16,21 @@ from functools import wraps
 from typing import Any
 
 import streamlit as st
+
+# Ré-exporter les exceptions pures
+from .errors_base import (
+    ErreurBaseDeDonnees,
+    ErreurConfiguration,
+    ErreurLimiteDebit,
+    ErreurNonTrouve,
+    ErreurServiceExterne,
+    ErreurServiceIA,
+    ErreurValidation,
+    ExceptionApp,
+    exiger_champs,
+    valider_plage,
+    valider_type,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -36,107 +53,6 @@ def _is_debug_mode() -> bool:
             return bool(st.session_state.get("debug_mode", False))
         except Exception:
             return False
-
-
-# ═══════════════════════════════════════════════════════════
-# EXCEPTIONS PERSONNALISÉES
-# ═══════════════════════════════════════════════════════════
-
-
-class ExceptionApp(Exception):
-    """
-    Exception de base pour l'application.
-
-    Toutes les exceptions métier héritent de cette classe.
-
-    Attributes:
-        message: Message technique pour les logs
-        details: Détails supplémentaires (dict)
-        message_utilisateur: Message friendly pour l'UI
-    """
-
-    def __init__(
-        self,
-        message: str,
-        details: dict[str, Any] | None = None,
-        message_utilisateur: str | None = None,
-    ) -> None:
-        """
-        Initialise l'exception.
-
-        Args:
-            message: Message d'erreur technique
-            details: Dictionnaire avec détails supplémentaires
-            message_utilisateur: Message à afficher à l'utilisateur
-        """
-        self.message: str = message
-        self.details: dict[str, Any] = details or {}
-        self.message_utilisateur: str = message_utilisateur or message
-        super().__init__(message)
-
-    def __str__(self) -> str:  # pragma: no cover - convenience
-        return self.message
-
-
-class ErreurValidation(ExceptionApp):
-    """
-    Exception levée lors d'une erreur de validation.
-
-    Utilisée pour les erreurs de validation de formulaires,
-    données invalides, contraintes métier non respectées.
-    """
-
-    pass
-
-
-class ErreurNonTrouve(ExceptionApp):
-    """
-    Exception levée quand une ressource n'est pas trouvée.
-
-    Équivalent d'un 404 pour les ressources en base de données.
-    """
-
-    pass
-
-
-class ErreurBaseDeDonnees(ExceptionApp):
-    """
-    Exception levée lors d'erreurs de base de données.
-
-    Inclut les erreurs de connexion, requêtes, transactions.
-    """
-
-    pass
-
-
-class ErreurServiceIA(ExceptionApp):
-    """
-    Exception levée lors d'erreurs avec le service IA.
-
-    Inclut les erreurs d'API, timeouts, parsing, etc.
-    """
-
-    pass
-
-
-class ErreurLimiteDebit(ExceptionApp):
-    """
-    Exception levée quand la limite d'appels est atteinte.
-
-    Utilisée pour le rate limiting des API externes.
-    """
-
-    pass
-
-
-class ErreurServiceExterne(ExceptionApp):
-    """
-    Exception levée lors d'erreurs avec services externes.
-
-    Ex: scraping web, APIs tierces (hors IA).
-    """
-
-    pass
 
 
 # ═══════════════════════════════════════════════════════════

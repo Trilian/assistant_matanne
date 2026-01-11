@@ -1,9 +1,10 @@
 """
-Service Recettes Unifié (REFACTORING v2.2 - PRO)
+Service Recettes Unifié (REFACTORING PHASE 2)
 
-✅ Héritage de BaseAIService (rate limiting + cache auto)
-✅ Utilisation de RecipeAIMixin (contextes métier)
-✅ Code simplifié de 62% (moins de duplication)
+✅ Utilise @with_db_session et @with_cache (Phase 1)
+✅ Validation Pydantic centralisée (RecetteInput, etc.)
+✅ Type hints complets pour meilleur IDE support
+✅ Services testables sans Streamlit
 
 Service complet pour les recettes fusionnant :
 - recette_service.py (CRUD + recherche)
@@ -23,7 +24,8 @@ from sqlalchemy.orm import Session, joinedload
 from src.core.ai import obtenir_client_ia
 from src.core.cache import Cache
 from src.core.database import obtenir_contexte_db
-from src.core.errors import gerer_erreurs
+from src.core.decorators import with_db_session, with_cache, with_error_handling
+from src.core.errors_base import ErreurNonTrouve, ErreurValidation
 from src.core.models import (
     EtapeRecette,
     Ingredient,
@@ -31,6 +33,7 @@ from src.core.models import (
     RecetteIngredient,
     VersionRecette,
 )
+from src.core.validators_pydantic import RecetteInput, IngredientInput, EtapeInput
 from src.services.base_ai_service import BaseAIService, RecipeAIMixin
 from src.services.types import BaseService
 
@@ -102,18 +105,14 @@ class RecetteService(BaseService[Recette], BaseAIService, RecipeAIMixin):
         )
 
     # ═══════════════════════════════════════════════════════════
-    # SECTION 1 : CRUD OPTIMISÉ (INCHANGÉ)
+    # SECTION 1 : CRUD OPTIMISÉ
     # ═══════════════════════════════════════════════════════════
 
-    @gerer_erreurs(afficher_dans_ui=False, valeur_fallback=None)
-    def get_by_id_full(self, recette_id: int) -> Recette | None:
-        """Récupère une recette avec toutes ses relations (optimisé)."""
-        cache_key = f"recette_full_{recette_id}"
-        cached = Cache.obtenir(cache_key, ttl=self.cache_ttl)
-        if cached:
-            return cached
-
-        with obtenir_contexte_db() as db:
+    @with_cache(ttl=3600, key_func=lambda self, rid: f"recette_full_{rid}")
+    @with_db_session
+    def get_by_id_full(self, recette_id: int, db: Session) -> Recette | None:
+        """Récupère une recette avec toutes ses relations (avec cache)."""
+        try:
             recette = (
                 db.query(Recette)
                 .options(
@@ -124,60 +123,71 @@ class RecetteService(BaseService[Recette], BaseAIService, RecipeAIMixin):
                 .filter(Recette.id == recette_id)
                 .first()
             )
-
-            if recette:
-                Cache.definir(
-                    cache_key,
-                    recette,
-                    ttl=self.cache_ttl,
-                    dependencies=[f"recette_{recette_id}", "recettes"],
-                )
+            
+            if not recette:
+                return None
+                
             return recette
+        except Exception as e:
+            logger.error(f"Erreur récupération recette {recette_id}: {e}")
+            return None
 
-    @gerer_erreurs(afficher_dans_ui=True)
-    def create_complete(self, data: dict) -> Recette:
-        """Crée une recette complète (recette + ingrédients + étapes)."""
-        with obtenir_contexte_db() as db:
-            # Extraire relations
-            ingredients_data = data.pop("ingredients", [])
-            etapes_data = data.pop("etapes", [])
+    @with_error_handling(default_return=None, afficher_erreur=True)
+    @with_db_session
+    def create_complete(self, data: dict, db: Session) -> Recette:
+        """
+        Crée une recette complète (recette + ingrédients + étapes).
+        
+        Args:
+            data: Dict avec clés: nom, description, temps_prep, temps_cuisson, 
+                  portions, ingredients[], etapes[]
+            db: Session DB injectée
+            
+        Returns:
+            Recette créée avec relations
+        """
+        # Validation avec Pydantic
+        try:
+            validated = RecetteInput(**data)
+        except Exception as e:
+            raise ErreurValidation(f"Données invalides: {str(e)}")
+        
+        # Créer recette
+        recette = Recette(**validated.model_dump(exclude={"ingredients", "etapes"}))
+        db.add(recette)
+        db.flush()
 
-            # Créer recette
-            recette = Recette(**data)
-            db.add(recette)
-            db.flush()
+        # Créer ingrédients
+        for ing_data in validated.ingredients or []:
+            ingredient = self._find_or_create_ingredient(db, ing_data.nom)
+            recette_ing = RecetteIngredient(
+                recette_id=recette.id,
+                ingredient_id=ingredient.id,
+                quantite=ing_data.quantite,
+                unite=ing_data.unite,
+            )
+            db.add(recette_ing)
 
-            # Créer ingrédients
-            for ing_data in ingredients_data:
-                ingredient = self._find_or_create_ingredient(db, ing_data["nom"])
-                recette_ing = RecetteIngredient(
-                    recette_id=recette.id,
-                    ingredient_id=ingredient.id,
-                    quantite=ing_data.get("quantite", 1.0),
-                    unite=ing_data.get("unite", "pcs"),
-                    optionnel=ing_data.get("optionnel", False),
-                )
-                db.add(recette_ing)
+        # Créer étapes
+        for idx, etape_data in enumerate(validated.etapes or []):
+            etape = EtapeRecette(
+                recette_id=recette.id,
+                ordre=idx + 1,
+                description=etape_data.description,
+                duree=etape_data.duree,
+            )
+            db.add(etape)
 
-            # Créer étapes
-            for etape_data in etapes_data:
-                etape = EtapeRecette(
-                    recette_id=recette.id,
-                    ordre=etape_data["ordre"],
-                    description=etape_data["description"],
-                    duree=etape_data.get("duree"),
-                )
-                db.add(etape)
+        db.commit()
+        db.refresh(recette)
 
-            db.commit()
-            db.refresh(recette)
+        # Invalider cache
+        Cache.invalider(pattern="recettes")
 
-            Cache.invalider(pattern="recettes")
+        logger.info(f"✅ Recette créée : {recette.nom} (ID: {recette.id})")
+        return recette
 
-            logger.info(f"✅ Recette créée : {recette.nom} (ID: {recette.id})")
-            return recette
-
-    @gerer_erreurs(afficher_dans_ui=False, valeur_fallback=[])
+    @with_db_session
     def search_advanced(
         self,
         term: str | None = None,
@@ -187,9 +197,25 @@ class RecetteService(BaseService[Recette], BaseAIService, RecipeAIMixin):
         temps_max: int | None = None,
         compatible_bebe: bool | None = None,
         limit: int = 100,
+        db: Session | None = None,
     ) -> list[Recette]:
-        """Recherche avancée multi-critères."""
-        filters = {}
+        """
+        Recherche avancée multi-critères.
+        
+        Args:
+            term: Terme de recherche (nom/description)
+            type_repas: Type de repas (petit_déjeuner, déjeuner, dîner, goûter)
+            saison: Saison (printemps, été, automne, hiver)
+            difficulte: Niveau (facile, moyen, difficile)
+            temps_max: Temps préparation max en minutes
+            compatible_bebe: Compatible pour bébé
+            limit: Nombre de résultats max
+            db: Session DB injectée
+            
+        Returns:
+            Liste des recettes trouvées
+        """
+        filters: dict = {}
         if type_repas:
             filters["type_repas"] = type_repas
         if saison:
@@ -198,6 +224,8 @@ class RecetteService(BaseService[Recette], BaseAIService, RecipeAIMixin):
             filters["difficulte"] = difficulte
         if compatible_bebe is not None:
             filters["compatible_bebe"] = compatible_bebe
+        if temps_max:
+            filters["temps_preparation"] = {"lte": temps_max}
 
         search_fields = ["nom", "description"] if term else None
 
@@ -207,32 +235,45 @@ class RecetteService(BaseService[Recette], BaseAIService, RecipeAIMixin):
             filters=filters,
             sort_by="nom",
             limit=limit,
+            db=db,
         )
 
     # ═══════════════════════════════════════════════════════════
-    # SECTION 2 : GÉNÉRATION IA (SIMPLIFIÉ 62% !)
+    # SECTION 2 : GÉNÉRATION IA (AVEC CACHE ET VALIDATION)
     # ═══════════════════════════════════════════════════════════
 
-    @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=[])
-    async def generer_recettes_ia(
+    @with_cache(
+        ttl=21600,
+        key_func=lambda self, type_repas, saison, difficulte, ingredients_dispo: (
+            f"recettes_ia_{type_repas}_{saison}_{difficulte}_"
+            f"{hash(tuple(ingredients_dispo or []))}"
+        ),
+    )
+    @with_error_handling(default_return=[])
+    def generer_recettes_ia(
         self,
         type_repas: str,
         saison: str,
         difficulte: str = "moyen",
         ingredients_dispo: list[str] | None = None,
         nb_recettes: int = 3,
-    ) -> list[dict]:
-        """
-        Génère des recettes avec l'IA.
+    ) -> list[RecetteSuggestion]:
+        """Génère des suggestions de recettes avec l'IA.
 
-        ✅ Rate limiting AUTO (via BaseAIService)
-        ✅ Cache AUTO (via BaseAIService)
-        ✅ Retry AUTO (via BaseAIService)
-        ✅ Métriques AUTO (via BaseAIService)
+        Uses Mistral AI to suggest recipes based on meal type, season,
+        difficulty, and available ingredients. Results cached for 6 hours.
 
-        Code réduit de 80 lignes → 15 lignes ! 🚀
+        Args:
+            type_repas: Type de repas (petit_déjeuner, déjeuner, dîner, goûter)
+            saison: Season (printemps, été, automne, hiver)
+            difficulte: Difficulty level (facile, moyen, difficile)
+            ingredients_dispo: List of available ingredient names
+            nb_recettes: Number of suggestions to generate
+
+        Returns:
+            List of RecetteSuggestion objects, empty list on error
         """
-        # 🎯 Utilisation du Mixin pour construire le contexte métier
+        # Construire contexte métier
         context = self.build_recipe_context(
             filters={
                 "type_repas": type_repas,
@@ -244,129 +285,170 @@ class RecetteService(BaseService[Recette], BaseAIService, RecipeAIMixin):
             nb_recettes=nb_recettes,
         )
 
-        # Enrichir avec instructions JSON
+        # Prompt avec instructions JSON
         prompt = self.build_json_prompt(
             context=context,
-            task=f"Génère {nb_recettes} recettes complètes",
+            task=f"Generate {nb_recettes} complete recipes",
             json_schema='[{"nom": str, "description": str, "temps_preparation": int, ...}]',
             constraints=[
-                "Chaque recette doit être complète",
-                "Inclure ingrédients avec quantités précises",
-                "Détailler toutes les étapes de préparation",
+                "Each recipe must be complete with all ingredients",
+                "Include precise quantities and units",
+                "Detail all preparation steps",
+                "Respect season constraints",
             ],
         )
 
-        # 🚀 Tout est automatique : rate limit, cache, parsing, retry !
-        recettes = await self.call_with_list_parsing(
+        logger.info(f"🤖 Generating {nb_recettes} recipe suggestions")
+
+        # IA call with auto rate limiting & parsing
+        recettes = self.call_with_list_parsing(
             prompt=prompt,
             item_model=RecetteSuggestion,
             system_prompt=self.build_system_prompt(
-                role="Chef cuisinier expert et nutritionniste",
+                role="Expert chef and nutritionist",
                 expertise=[
-                    "Cuisine française et internationale",
-                    "Équilibre nutritionnel",
-                    "Adaptation aux saisons",
-                    "Créativité culinaire",
+                    "French and international cuisine",
+                    "Nutritional balance",
+                    "Seasonal adaptation",
+                    "Culinary creativity",
                 ],
                 rules=[
-                    "Privilégier les ingrédients de saison",
-                    "Respecter les temps de préparation",
-                    "Proposer des recettes réalisables",
+                    "Prioritize seasonal ingredients",
+                    "Respect preparation times",
+                    "Propose achievable recipes",
                 ],
             ),
             max_items=nb_recettes,
         )
 
-        # Convertir en dict pour compatibilité
-        return [r.dict() for r in recettes]
+        logger.info(f"✅ Generated {len(recettes)} recipe suggestions")
+        return recettes
 
-    @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=None)
-    async def generer_version_bebe(self, recette_id: int) -> VersionRecette | None:
-        """
-        Génère une version bébé d'une recette avec l'IA.
+    @with_cache(ttl=3600, key_func=lambda self, rid: f"version_bebe_{rid}")
+    @with_error_handling(default_return=None)
+    @with_db_session
+    def generer_version_bebe(self, recette_id: int, db: Session) -> VersionRecette | None:
+        """Génère une version bébé sécurisée de la recette avec l'IA.
 
-        ✅ Rate limiting AUTO
-        ✅ Cache AUTO
+        Adapts recipe for babies (12+ months). Creates version in DB.
+        Includes safety notes and age recommendations.
+
+        Args:
+            recette_id: ID of recipe to adapt
+            db: Database session (injected by @with_db_session)
+
+        Returns:
+            VersionRecette object or None if generation fails
         """
-        recette = self.get_by_id_full(recette_id)
+        # Récupérer la recette
+        recette = (
+            db.query(Recette)
+            .options(
+                joinedload(Recette.ingredients).joinedload(RecetteIngredient.ingredient),
+                joinedload(Recette.etapes),
+            )
+            .filter(Recette.id == recette_id)
+            .first()
+        )
         if not recette:
-            return None
+            raise ErreurNonTrouve(f"Recipe {recette_id} not found")
 
         # Vérifier si version existe déjà
-        with obtenir_contexte_db() as db:
-            existing = (
-                db.query(VersionRecette)
-                .filter(
-                    VersionRecette.recette_base_id == recette_id,
-                    VersionRecette.type_version == "bébé",
-                )
-                .first()
+        existing = (
+            db.query(VersionRecette)
+            .filter(
+                VersionRecette.recette_base_id == recette_id,
+                VersionRecette.type_version == "bébé",
             )
-            if existing:
-                return existing
+            .first()
+        )
+        if existing:
+            logger.info(f"📦 Baby version already exists for recipe {recette_id}")
+            return existing
+
+        logger.info(f"🤖 Generating baby-safe version for recipe {recette_id}")
 
         # Construire contexte avec recette complète
-        context = f"""Recette : {recette.nom}
+        ingredients_str = "\n".join(
+            [f"- {ri.quantite} {ri.unite} {ri.ingredient.nom}" for ri in recette.ingredients]
+        )
+        etapes_str = "\n".join(
+            [f"{e.ordre}. {e.description}" for e in sorted(recette.etapes, key=lambda x: x.ordre)]
+        )
 
-Ingrédients :
-{chr(10).join([f"- {ri.quantite} {ri.unite} {ri.ingredient.nom}" for ri in recette.ingredients])}
+        context = f"""Recipe: {recette.nom}
 
-Étapes :
-{chr(10).join([f"{e.ordre}. {e.description}" for e in sorted(recette.etapes, key=lambda x: x.ordre)])}
-"""
+Ingredients:
+{ingredients_str}
+
+Steps:
+{etapes_str}"""
 
         # Prompt pour adaptation bébé
         prompt = self.build_json_prompt(
             context=context,
-            task="Adapte cette recette pour un bébé de 12 mois",
+            task="Adapt this recipe for a 12-month-old baby",
             json_schema='{"instructions_modifiees": str, "notes_bebe": str, "age_minimum_mois": int}',
             constraints=[
-                "Texture adaptée (pas de morceaux durs)",
-                "Pas d'allergènes majeurs avant 12 mois",
-                "Quantités réduites",
-                "Instructions de sécurité",
+                "Appropriate texture (no hard chunks)",
+                "No major allergens",
+                "Reduced quantities",
+                "Food safety instructions",
             ],
         )
 
         # Appel IA avec parsing auto
-        version_data = await self.call_with_parsing(
+        version_data = self.call_with_parsing(
             prompt=prompt,
             response_model=VersionBebeGeneree,
             system_prompt=self.build_system_prompt(
-                role="Pédiatre nutritionniste spécialisé en alimentation infantile",
+                role="Pediatric nutritionist specialist in infant feeding",
                 expertise=[
-                    "Diversification alimentaire",
-                    "Allergies alimentaires",
-                    "Besoins nutritionnels bébé",
-                    "Sécurité alimentaire",
+                    "Food diversification",
+                    "Food allergies",
+                    "Baby nutritional needs",
+                    "Food safety",
+                ],
+                rules=[
+                    "Ensure age-appropriate safety",
+                    "No salt, sugar, or honey",
+                    "Soft, easy-to-chew texture",
                 ],
             ),
         )
 
         if not version_data:
-            return None
+            logger.warning(f"⚠️ Failed to generate baby version for recipe {recette_id}")
+            raise ErreurValidation("Invalid IA response format for baby version")
 
         # Créer version en DB
-        with obtenir_contexte_db() as db:
-            version = VersionRecette(
-                recette_base_id=recette_id,
-                type_version="bébé",
-                instructions_modifiees=version_data.instructions_modifiees,
-                notes_bebe=version_data.notes_bebe,
-            )
-            db.add(version)
-            db.commit()
-            db.refresh(version)
+        version = VersionRecette(
+            recette_base_id=recette_id,
+            type_version="bébé",
+            instructions_modifiees=version_data.instructions_modifiees,
+            notes_bebe=version_data.notes_bebe,
+        )
+        db.add(version)
+        db.commit()
+        db.refresh(version)
 
-        logger.info(f"✅ Version bébé créée pour recette {recette_id}")
+        logger.info(f"✅ Baby version created for recipe {recette_id}")
         return version
 
     # ═══════════════════════════════════════════════════════════
-    # SECTION 3 : IMPORT/EXPORT (INCHANGÉ)
+    # SECTION 3 : IMPORT/EXPORT (REFACTORED)
     # ═══════════════════════════════════════════════════════════
 
-    def export_to_csv(self, recettes: list[Recette]) -> str:
-        """Exporte des recettes en CSV."""
+    def export_to_csv(self, recettes: list[Recette], separator: str = ",") -> str:
+        """Exporte des recettes en CSV.
+        
+        Args:
+            recettes: List of Recette objects to export
+            separator: CSV separator character
+            
+        Returns:
+            CSV string with recipe data
+        """
         output = StringIO()
         writer = csv.DictWriter(
             output,
@@ -380,6 +462,7 @@ Ingrédients :
                 "type_repas",
                 "saison",
             ],
+            delimiter=separator,
         )
 
         writer.writeheader()
@@ -397,10 +480,19 @@ Ingrédients :
                 }
             )
 
+        logger.info(f"✅ Exported {len(recettes)} recipes to CSV")
         return output.getvalue()
 
     def export_to_json(self, recettes: list[Recette], indent: int = 2) -> str:
-        """Exporte des recettes en JSON."""
+        """Exporte des recettes en JSON.
+        
+        Args:
+            recettes: List of Recette objects to export
+            indent: JSON indentation level
+            
+        Returns:
+            JSON string with recipe data
+        """
         data = []
         for r in recettes:
             data.append(
@@ -421,27 +513,46 @@ Ingrédients :
                 }
             )
 
+        logger.info(f"✅ Exported {len(recettes)} recipes to JSON")
         return json.dumps(data, indent=indent, ensure_ascii=False)
 
     # ═══════════════════════════════════════════════════════════
-    # HELPERS PRIVÉS
+    # SECTION 4 : HELPERS PRIVÉS (REFACTORED)
     # ═══════════════════════════════════════════════════════════
 
     def _find_or_create_ingredient(self, db: Session, nom: str) -> Ingredient:
-        """Trouve ou crée un ingrédient"""
+        """Finds or creates an ingredient.
+        
+        Args:
+            db: Database session
+            nom: Ingredient name
+            
+        Returns:
+            Ingredient object (existing or newly created)
+        """
         ingredient = db.query(Ingredient).filter(Ingredient.nom == nom).first()
         if not ingredient:
             ingredient = Ingredient(nom=nom, unite="pcs")
             db.add(ingredient)
             db.flush()
+            logger.debug(f"Created ingredient: {nom}")
         return ingredient
 
 
 # ═══════════════════════════════════════════════════════════
-# INSTANCE SINGLETON
+# INSTANCE SINGLETON - LAZY LOADING
 # ═══════════════════════════════════════════════════════════
 
-recette_service = RecetteService()
+_recette_service = None
+
+def get_recette_service() -> RecetteService:
+    """Get or create the global RecetteService instance."""
+    global _recette_service
+    if _recette_service is None:
+        _recette_service = RecetteService()
+    return _recette_service
+
+recette_service = None
 
 
 # ═══════════════════════════════════════════════════════════
@@ -453,4 +564,5 @@ __all__ = [
     "recette_service",
     "RecetteSuggestion",
     "VersionBebeGeneree",
+    "get_recette_service",
 ]

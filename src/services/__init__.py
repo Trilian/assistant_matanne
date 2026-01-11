@@ -58,7 +58,7 @@ from .recettes import (
     RecetteService,
     # Schémas
     RecetteSuggestion,
-    VersionBatchGeneree,
+    VersionBebeGeneree,
     VersionBebeGeneree,
     recette_service,
 )
@@ -85,7 +85,7 @@ __all__ = [
     "RecetteService",
     "RecetteSuggestion",
     "VersionBebeGeneree",
-    "VersionBatchGeneree",
+    "VersionBebeGeneree",
     # Instances
     "recette_service",
     # ═══════════════════════════════════════════════════════════

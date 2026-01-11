@@ -43,4 +43,54 @@ ignore = ["E501", "B008"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = ["--strict-markers", "--cov=src"]
+addopts = [
+    "--strict-markers",
+    "--cov=src",
+    "--cov-report=html",
+    "--cov-report=term-missing",
+    "--cov-branch",
+    "-v"
+]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "slow: Slow tests",
+]
+minversion = "7.0"
+console_output_style = "progress"
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__pycache__/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if __name__ == .__main__.:",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "@abstractmethod",
+]
+precision = 2
+skip_covered = false
+skip_empty = true
+sort = "Name"
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+[tool.pyright]
+include = ["src"]
+exclude = ["**/node_modules", "**/__pycache__", "**/.*"]
+typeCheckingMode = "strict"
+reportGeneralTypeIssues = "error"
+reportPrivateUsage = "warning"
+reportOptionalMemberAccess = "warning"
+reportOptionalSubscript = "warning"

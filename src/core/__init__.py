@@ -78,17 +78,31 @@ from .cache import (
 RateLimit = LimiteDebit
 
 # ═══════════════════════════════════════════════════════════
-# ERRORS
+# ERRORS BASE (pures, sans UI)
+# ═══════════════════════════════════════════════════════════
+
+from .errors_base import (
+    ExceptionApp,
+    ErreurValidation,
+    ErreurNonTrouve,
+    ErreurBaseDeDonnees,
+    ErreurServiceIA,
+    ErreurLimiteDebit,
+    ErreurServiceExterne,
+    ErreurConfiguration,
+    exiger_champs,
+    valider_type,
+    valider_plage,
+)
+
+# ═══════════════════════════════════════════════════════════
+# ERRORS (avec UI Streamlit)
 # ═══════════════════════════════════════════════════════════
 
 from .errors import (
-    ErreurBaseDeDonnees,
-    ErreurLimiteDebit,
-    ErreurNonTrouve,
-    ErreurServiceIA,
-    ErreurValidation,
-    ExceptionApp,
     gerer_erreurs,
+    afficher_erreur_streamlit,
+    GestionnaireErreurs,
 )
 
 # Alias anglais
@@ -99,6 +113,33 @@ DatabaseError = ErreurBaseDeDonnees
 AIServiceError = ErreurServiceIA
 RateLimitError = ErreurLimiteDebit
 handle_errors = gerer_erreurs
+
+# ═══════════════════════════════════════════════════════════
+# DECORATORS
+# ═══════════════════════════════════════════════════════════
+
+from .decorators import (
+    with_db_session,
+    with_cache,
+    with_error_handling,
+    with_validation,
+)
+
+# ═══════════════════════════════════════════════════════════
+# VALIDATORS PYDANTIC
+# ═══════════════════════════════════════════════════════════
+
+from .validators_pydantic import (
+    RecetteInput,
+    IngredientInput,
+    EtapeInput,
+    IngredientStockInput,
+    RepasInput,
+    RoutineInput,
+    TacheRoutineInput,
+    EntreeJournalInput,
+    ProjetInput,
+)
 
 # ═══════════════════════════════════════════════════════════
 # VALIDATION
@@ -177,14 +218,23 @@ __all__ = [
     "cached",
     "LimiteDebit",
     "RateLimit",
-    # Errors
+    # Errors Base (pures)
     "ExceptionApp",
     "ErreurValidation",
     "ErreurNonTrouve",
     "ErreurBaseDeDonnees",
     "ErreurServiceIA",
     "ErreurLimiteDebit",
+    "ErreurServiceExterne",
+    "ErreurConfiguration",
+    "exiger_champs",
+    "valider_type",
+    "valider_plage",
+    # Errors (avec UI)
     "gerer_erreurs",
+    "afficher_erreur_streamlit",
+    "GestionnaireErreurs",
+    # Alias anglais (errors)
     "AppException",
     "ValidationError",
     "NotFoundError",
@@ -192,6 +242,21 @@ __all__ = [
     "AIServiceError",
     "RateLimitError",
     "handle_errors",
+    # Decorators
+    "with_db_session",
+    "with_cache",
+    "with_error_handling",
+    "with_validation",
+    # Validators Pydantic
+    "RecetteInput",
+    "IngredientInput",
+    "EtapeInput",
+    "IngredientStockInput",
+    "RepasInput",
+    "RoutineInput",
+    "TacheRoutineInput",
+    "EntreeJournalInput",
+    "ProjetInput",
     # Validation
     "NettoyeurEntrees",
     "valider_modele",
