@@ -24,9 +24,14 @@ def _is_debug_mode() -> bool:
     """
     try:
         from .state import obtenir_etat
-        return obtenir_etat().mode_debug
+        etat = obtenir_etat()
+        return bool(getattr(etat, "mode_debug", False))
     except Exception:
-        return st.session_state.get("debug_mode", False)
+        # Fallback safe: st may not be initialisé
+        try:
+            return bool(st.session_state.get("debug_mode", False))
+        except Exception:
+            return False
 
 
 # ═══════════════════════════════════════════════════════════
@@ -46,11 +51,11 @@ class ExceptionApp(Exception):
     """
 
     def __init__(
-            self,
-            message: str,
-            details: Optional[Dict] = None,
-            message_utilisateur: Optional[str] = None
-    ):
+        self,
+        message: str,
+        details: Optional[Dict[str, Any]] = None,
+        message_utilisateur: Optional[str] = None,
+    ) -> None:
         """
         Initialise l'exception.
 
@@ -59,10 +64,13 @@ class ExceptionApp(Exception):
             details: Dictionnaire avec détails supplémentaires
             message_utilisateur: Message à afficher à l'utilisateur
         """
-        self.message = message
-        self.details = details or {}
-        self.message_utilisateur = message_utilisateur or message
+        self.message: str = message
+        self.details: Dict[str, Any] = details or {}
+        self.message_utilisateur: str = message_utilisateur or message
         super().__init__(message)
+
+    def __str__(self) -> str:  # pragma: no cover - convenience
+        return self.message
 
 
 class ErreurValidation(ExceptionApp):
@@ -125,11 +133,11 @@ class ErreurServiceExterne(ExceptionApp):
 # ═══════════════════════════════════════════════════════════
 
 def gerer_erreurs(
-        afficher_dans_ui: bool = True,
-        niveau_log: str = "ERROR",
-        relancer: bool = False,
-        valeur_fallback: Any = None
-):
+    afficher_dans_ui: bool = True,
+    niveau_log: str = "ERROR",
+    relancer: bool = False,
+    valeur_fallback: Any = None,
+) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """
     Décorateur pour gérer automatiquement les erreurs.
 
@@ -154,7 +162,7 @@ def gerer_erreurs(
     """
     def decorateur(func: Callable) -> Callable:
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             try:
                 return func(*args, **kwargs)
 
@@ -207,10 +215,7 @@ def gerer_erreurs(
                 return valeur_fallback
 
             except Exception as e:
-                logger.critical(
-                    f"Erreur inattendue dans {func.__name__}: {e}",
-                    exc_info=True
-                )
+                logger.critical(f"Erreur inattendue dans {func.__name__}: {e}", exc_info=True)
                 if afficher_dans_ui:
                     st.error("❌ Une erreur inattendue s'est produite")
 
@@ -383,7 +388,7 @@ def exiger_longueur(
 # GESTIONNAIRE D'ERREURS STREAMLIT
 # ═══════════════════════════════════════════════════════════
 
-def afficher_erreur_streamlit(erreur: Exception, contexte: str = ""):
+def afficher_erreur_streamlit(erreur: Exception, contexte: str = "") -> None:
     """
     Affiche une erreur formatée dans Streamlit.
 
@@ -394,22 +399,24 @@ def afficher_erreur_streamlit(erreur: Exception, contexte: str = ""):
         contexte: Contexte additionnel (optionnel)
     """
     if isinstance(erreur, ExceptionApp):
-        # Erreurs métier connues
-        if isinstance(erreur, ErreurValidation):
-            st.error(f"❌ {erreur.message_utilisateur}")
-        elif isinstance(erreur, ErreurNonTrouve):
-            st.warning(f"⚠️ {erreur.message_utilisateur}")
-        elif isinstance(erreur, ErreurBaseDeDonnees):
-            st.error(f"💾 {erreur.message_utilisateur}")
-        elif isinstance(erreur, ErreurServiceIA):
-            st.error(f"🤖 {erreur.message_utilisateur}")
-        elif isinstance(erreur, ErreurLimiteDebit):
-            st.warning(f"⏳ {erreur.message_utilisateur}")
+        mapping = {
+            ErreurValidation: (st.error, "❌"),
+            ErreurNonTrouve: (st.warning, "⚠️"),
+            ErreurBaseDeDonnees: (st.error, "💾"),
+            ErreurServiceIA: (st.error, "🤖"),
+            ErreurLimiteDebit: (st.warning, "⏳"),
+            ErreurServiceExterne: (st.error, "🌐"),
+        }
+
+        for exc_type, (render_fn, prefix) in mapping.items():
+            if isinstance(erreur, exc_type):
+                render_fn(f"{prefix} {erreur.message_utilisateur}")
+                break
         else:
             st.error(f"❌ {erreur.message_utilisateur}")
 
         # Afficher détails en mode debug
-        if _is_debug_mode() and erreur.details:
+        if _is_debug_mode() and getattr(erreur, "details", None):
             with st.expander("🔍 Détails"):
                 st.json(erreur.details)
     else:
