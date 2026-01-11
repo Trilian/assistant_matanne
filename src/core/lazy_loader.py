@@ -85,8 +85,19 @@ class LazyModuleLoader:
             background: Charger en arrière-plan (async)
         """
         if background:
-            # TODO: Threading/asyncio pour préchargement
-            pass
+            # Lancer un thread léger pour précharger sans bloquer l'UI
+            import threading
+
+            def _worker(paths: list[str]):
+                for path in paths:
+                    try:
+                        LazyModuleLoader.load(path)
+                    except Exception:
+                        # Ne pas propager les erreurs de préchargement
+                        logger.debug(f"Précharge échouée pour {path}")
+
+            thread = threading.Thread(target=_worker, args=(module_paths,), daemon=True)
+            thread.start()
         else:
             for path in module_paths:
                 try:

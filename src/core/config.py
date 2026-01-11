@@ -18,6 +18,9 @@ from .constants import (
     CACHE_MAX_SIZE
 )
 
+# Configure logging early when config is imported
+from .logging import configure_logging  # type: ignore
+
 logger = logging.getLogger(__name__)
 
 
@@ -300,5 +303,12 @@ def obtenir_parametres() -> Parametres:
     global _parametres
     if _parametres is None:
         _parametres = Parametres()
+        # Configure logging according to loaded settings
+        try:
+            configure_logging(_parametres.LOG_LEVEL)
+        except Exception:
+            # Fallback: continue if logging config échoue
+            pass
+
         logger.info(f"✅ Configuration chargée: {_parametres.APP_NAME} v{_parametres.APP_VERSION}")
     return _parametres

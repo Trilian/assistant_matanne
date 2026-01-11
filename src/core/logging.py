@@ -1,4 +1,48 @@
 """
+Central logging configuration for the application.
+
+Provides a small helper to configure Python logging consistently
+across Streamlit and normal execution environments.
+"""
+import logging
+import os
+
+
+def configure_logging(level: str | None = None):
+    """Configure le logging global.
+
+    Args:
+        level: Niveau de log en string (DEBUG, INFO, WARNING, ERROR).
+               If None, will read from `LOG_LEVEL` env var or default to INFO.
+    """
+    if level is None:
+        level = os.getenv("LOG_LEVEL", "INFO")
+
+    numeric_level = getattr(logging, level.upper(), logging.INFO)
+
+    root = logging.getLogger()
+    if root.handlers:
+        # update level on existing handlers
+        root.setLevel(numeric_level)
+        for h in root.handlers:
+            h.setLevel(numeric_level)
+        return
+
+    formatter = logging.Formatter(
+        "%(asctime)s %(levelname)-8s [%(name)s] %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+    handler.setLevel(numeric_level)
+
+    root.setLevel(numeric_level)
+    root.addHandler(handler)
+
+
+__all__ = ["configure_logging"]
+"""
 Logging - Système de logging centralisé.
 
 Ce module fournit un gestionnaire de logs avec :

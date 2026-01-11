@@ -12,7 +12,7 @@ from typing import List, Dict
 from src.core.database import get_db_context
 from src.core.models import GardenItem, GardenLog
 from src.core.ai_agent import AgentIA
-from src.core.config import settings
+## NOTE: évite l'import direct de `settings` (ancienne API). Pas utilisé ici.
 
 
 # ===================================
@@ -72,7 +72,12 @@ def ajouter_plante(
 def arroser_plante(item_id: int):
     """Marque une plante comme arrosée"""
     with get_db_context() as db:
-        plante = db.query(GardenItem).get(item_id)
+        # Utiliser `db.get` si disponible (SQLAlchemy 2.0), sinon fallback
+        try:
+            plante = db.get(GardenItem, item_id)
+        except AttributeError:
+            plante = db.query(GardenItem).filter_by(id=item_id).first()
+
         if plante:
             plante.last_watered = date.today()
 
