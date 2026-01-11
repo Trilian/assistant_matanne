@@ -37,11 +37,13 @@ def empty_state(message: str, icon: str = "📭", subtext: Optional[str] = None)
     Example:
         empty_state("Aucune recette", "🍽️", "Ajoutez-en une")
     """
+    sub_html = f'<div style="font-size: 1rem; margin-top: 0.5rem;">{subtext}</div>' if subtext else ""
+
     st.markdown(
         f'<div style="text-align: center; padding: 3rem; color: #6c757d;">'
         f'<div style="font-size: 4rem;">{icon}</div>'
         f'<div style="font-size: 1.5rem; margin-top: 1rem; font-weight: 500;">{message}</div>'
-        f'{f"<div style=\"font-size: 1rem; margin-top: 0.5rem;\">{subtext}</div>" if subtext else ""}'
+        f'{sub_html}'
         f'</div>',
         unsafe_allow_html=True
     )
@@ -65,12 +67,14 @@ def metric_card(
     Example:
         metric_card("Total", "42", "+5", "#f0f0f0")
     """
+    delta_html = f'<div style="font-size: 0.875rem; color: #4CAF50; margin-top: 0.25rem;">{delta}</div>' if delta else ""
+
     st.markdown(
         f'<div style="background: {color}; padding: 1.5rem; '
         f'border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">'
         f'<div style="font-size: 0.875rem; color: #666; font-weight: 500;">{label}</div>'
         f'<div style="font-size: 2rem; font-weight: 700; margin-top: 0.5rem;">{value}</div>'
-        f'{f"<div style=\"font-size: 0.875rem; color: #4CAF50; margin-top: 0.25rem;\">{delta}</div>" if delta else ""}'
+        f'{delta_html}'
         f'</div>',
         unsafe_allow_html=True
     )
