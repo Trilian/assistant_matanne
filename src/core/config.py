@@ -64,6 +64,53 @@ def _read_st_secret(section: str):
     return None
 
 
+def _get_mistral_api_key_from_secrets():
+    """Récupère la clé API Mistral des secrets Streamlit.
+    
+    Essaie plusieurs chemins:
+    1. st.secrets['mistral']['api_key']
+    2. st.secrets['mistral_api_key']
+    3. st.secrets.get('mistral', {}).get('api_key')
+    """
+    try:
+        if not hasattr(st, "secrets") or st.secrets is None:
+            return None
+        
+        # Chemin 1: st.secrets['mistral']['api_key']
+        try:
+            mistral = st.secrets.get("mistral")
+            if mistral and isinstance(mistral, dict):
+                api_key = mistral.get("api_key")
+                if api_key:
+                    return api_key
+        except (KeyError, TypeError, AttributeError):
+            pass
+        
+        # Chemin 2: st.secrets['mistral_api_key'] (alternative)
+        try:
+            api_key = st.secrets.get("mistral_api_key")
+            if api_key:
+                return api_key
+        except (KeyError, TypeError, AttributeError):
+            pass
+        
+        # Chemin 3: Itérer sur tous les secrets (fallback)
+        try:
+            for key in st.secrets:
+                if "mistral" in key.lower() and "key" in key.lower():
+                    value = st.secrets[key]
+                    if value:
+                        return value
+        except (TypeError, AttributeError):
+            pass
+            
+    except Exception:
+        pass
+    
+    return None
+
+
+
 class Parametres(BaseSettings):
     """
     Configuration centralisée avec auto-détection.
@@ -171,8 +218,8 @@ class Parametres(BaseSettings):
         Clé API Mistral avec fallbacks.
 
         Ordre de priorité:
-        1. st.secrets["mistral"]["api_key"]
-        2. MISTRAL_API_KEY env var
+        1. st.secrets["mistral"]["api_key"] (Streamlit Cloud)
+        2. MISTRAL_API_KEY env var (dev local)
 
         Returns:
             Clé API Mistral
@@ -180,25 +227,28 @@ class Parametres(BaseSettings):
         Raises:
             ValueError: Si clé introuvable
         """
-        # 1. Secrets Streamlit
-        # 1. Streamlit Secrets
-        mistral = _read_st_secret("mistral")
-        if mistral and isinstance(mistral, dict) and "api_key" in mistral:
-            return mistral["api_key"]
+        # 1. Secrets Streamlit - Essayer plusieurs chemins
+        api_key = _get_mistral_api_key_from_secrets()
+        if api_key:
+            logger.debug("✅ Clé API Mistral chargée depuis st.secrets")
+            return api_key
 
         # 2. Variable d'environnement
         cle = os.getenv("MISTRAL_API_KEY")
         if cle:
+            logger.debug("✅ Clé API Mistral chargée depuis variable d'environnement")
             return cle
 
         raise ValueError(
             "❌ Clé API Mistral manquante!\n\n"
             "Configure l'une de ces options:\n"
-            "1. Streamlit Secrets:\n"
+            "1. Streamlit Secrets (Cloud):\n"
             "   [mistral]\n"
-            "   api_key = 'xxx'\n\n"
-            "2. Variable d'environnement:\n"
-            "   MISTRAL_API_KEY='xxx'"
+            "   api_key = 'sk-xxx'\n\n"
+            "2. Variable d'environnement (Dev):\n"
+            "   MISTRAL_API_KEY='sk-xxx'\n\n"
+            "3. Fichier .env.local:\n"
+            "   MISTRAL_API_KEY='sk-xxx'"
         )
 
     @property
