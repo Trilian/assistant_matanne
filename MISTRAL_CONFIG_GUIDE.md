@@ -55,8 +55,9 @@ password = "postgres"
 1. Allez sur https://console.mistral.ai/
 2. Créez un compte (gratuit)
 3. Cliquez sur "API Keys"
-4. Générez une nouvelle clé (`sk-...`)
-5. Copiez-la - **ne la partagez jamais**
+4. Générez une nouvelle clé
+   - Peut commencer par `sk-`, `msk-`, ou autre préfixe (c'est normal)
+5. Copiez-la intégralement - **ne la partagez jamais**
 
 ## 🧪 Vérifier la configuration
 

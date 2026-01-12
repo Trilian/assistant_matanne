@@ -27,7 +27,20 @@ class ClientIA:
     """
 
     def __init__(self):
-        """Initialise le client avec la config"""
+        """Initialise le client - lazy loading de la config"""
+        # Ne pas charger la config ici - elle sera chargée lors du premier appel
+        # Cela permet à Streamlit Cloud de charger st.secrets correctement
+        self._config_loaded = False
+        self.cle_api = None
+        self.modele = None
+        self.url_base = None
+        self.timeout = None
+
+    def _ensure_config_loaded(self):
+        """Charge la config au moment du premier accès (lazy loading)"""
+        if self._config_loaded:
+            return
+
         parametres = obtenir_parametres()
 
         try:
@@ -35,12 +48,13 @@ class ClientIA:
             self.modele = parametres.MISTRAL_MODEL
             self.url_base = parametres.MISTRAL_BASE_URL
             self.timeout = parametres.MISTRAL_TIMEOUT
+            self._config_loaded = True
 
             logger.info(f"✅ ClientIA initialisé (modèle: {self.modele})")
 
         except ValueError as e:
             logger.error(f"❌ Configuration IA manquante: {e}")
-            # Initialiser avec valeurs None - le client sera inutilisable mais ne lèvera pas d'exception
+            self._config_loaded = True  # Marquer comme essayé même si ça échoue
             self.cle_api = None
             self.modele = None
             self.url_base = None
@@ -77,6 +91,9 @@ class ClientIA:
             ErreurServiceIA: Si erreur API
             ErreurLimiteDebit: Si rate limit dépassé
         """
+        # Charger la config au moment du premier appel (lazy loading)
+        self._ensure_config_loaded()
+
         # Vérifier rate limit
         from .cache import LimiteDebit
 
@@ -145,6 +162,9 @@ class ClientIA:
         self, prompt: str, prompt_systeme: str, temperature: float, max_tokens: int
     ) -> str:
         """Effectue l'appel API réel"""
+        # S'assurer que la config est chargée
+        self._ensure_config_loaded()
+
         messages = []
 
         if prompt_systeme:
@@ -222,6 +242,8 @@ class ClientIA:
 
     def obtenir_infos_modele(self) -> dict[str, Any]:
         """Retourne infos sur le modèle"""
+        # S'assurer que la config est chargée
+        self._ensure_config_loaded()
         return {"modele": self.modele, "url_base": self.url_base, "timeout": self.timeout}
 
 

@@ -34,15 +34,18 @@ synced to your app with every deploy.
 
 ```toml
 [mistral]
-api_key = "sk-votre_clé_api_ici"
+api_key = "votre_clé_api_mistral_complète"
 ```
+
+Note: La clé peut commencer par `sk-`, `msk-`, ou autre format - c'est normal!
 
 ### 4️⃣ Valeurs importantes:
 
 - **N'utilisez PAS** `[mistral_api_key]` (ancien format)
-- **N'utilisez PAS** `mistral = "sk-xxx"` (mauvais format)
-- **REMPLACEZ** `sk-votre_clé_api_ici` par votre **VRAIE clé API**
-- **N'ajoutez PAS** de guillemets supplémentaires: `api_key = 'sk-xxx'` ❌
+- **N'utilisez PAS** `mistral = "votre_clé"` (mauvais format)
+- **REMPLACEZ** `votre_clé_api_mistral_complète` par votre **VRAIE clé API** (du copy-paste depuis console.mistral.ai)
+- **La clé peut commencer par n'importe quel préfixe** (sk-, msk-, ou autre - c'est normal)
+- **N'ajoutez PAS** de guillemets supplémentaires: `api_key = 'votre_clé'` ❌
 
 ### 5️⃣ Cliquez sur "Save"
 
