@@ -380,9 +380,12 @@ def app():
                             loop = asyncio.new_event_loop()
                             asyncio.set_event_loop(loop)
 
-                            analyse = loop.run_until_complete(
-                                agent.analyser_bien_etre(donnees_sommeil, donnees_humeur)
-                            )
+                            try:
+                                analyse = loop.run_until_complete(
+                                    agent.analyser_bien_etre(donnees_sommeil, donnees_humeur)
+                                )
+                            finally:
+                                loop.close()
 
                             st.session_state["analyse_bien_etre"] = analyse
                             st.success("✅ Analyse terminée")

@@ -322,13 +322,15 @@ def pytest_configure(config):
 # HELPER FIXTURES
 # ═══════════════════════════════════════════════════════════
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def clear_cache():
     """Clear cache before/after each test."""
     from src.core.cache import Cache
-    # Cache doesn't expose a clear method, so we just yield
-    # The tests use in-memory SQLite which is ephemeral anyway
+    # Clear before test
+    Cache.clear()
     yield
+    # Clear after test
+    Cache.clear()
 
 
 @pytest.fixture(autouse=True)

@@ -113,11 +113,10 @@ class TestEtapeInput:
         step = EtapeInput(
             numero=1,
             description="Faire bouillir l'eau",
-            duree=10,
         )
         
         assert step.numero == 1
-        assert step.duree == 10
+        assert step.description == "Faire bouillir l'eau"
 
 
 # ═══════════════════════════════════════════════════════════

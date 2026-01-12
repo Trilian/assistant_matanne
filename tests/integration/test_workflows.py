@@ -5,6 +5,7 @@ These tests verify that services work together correctly in realistic scenarios.
 """
 
 import pytest
+from datetime import date
 
 from src.services.recettes import RecetteService
 from src.services.inventaire import InventaireService
@@ -25,8 +26,15 @@ class TestCompleteWorkflow:
         db,
         recette_service: RecetteService,
         planning_service: PlanningService,
+        planning_factory,
     ):
         """Test creating recipe and adding to planning."""
+        # Create a planning first
+        planning = planning_factory.create(
+            nom="Test Planning",
+            semaine_debut=date.today(),
+        )
+        
         # Step 1: Create recipe
         recipe_input = {
             'nom': 'Pâtes Bolognaise',
@@ -34,6 +42,9 @@ class TestCompleteWorkflow:
             'temps_preparation': 10,
             'temps_cuisson': 30,
             'portions': 4,
+            'difficulte': 'facile',
+            'type_repas': 'dîner',
+            'saison': 'toute_année',
             'ingredients': [
                 {'nom': 'Pâtes', 'quantite': 400, 'unite': 'g'},
                 {'nom': 'Tomate', 'quantite': 500, 'unite': 'g'},
@@ -49,9 +60,9 @@ class TestCompleteWorkflow:
         assert recipe.nom == 'Pâtes Bolognaise'
         
         # Step 2: Get planning
-        planning = planning_service.get_planning(db=db)
+        planning_result = planning_service.get_planning(planning.id, db=db)
         # Planning should be accessible for scheduling the recipe
-        assert planning is not None
+        assert planning_result is not None
     
     def test_inventory_to_shopping_workflow(
         self,
@@ -78,7 +89,7 @@ class TestCompleteWorkflow:
         """Test recipe search with filters."""
         # Should be able to search recipes with various filters
         recipes = recette_service.search_advanced(
-            search_term="",
+            term="",
             difficulte="facile",
             type_repas="dîner",
             saison="toute_année",
@@ -106,8 +117,18 @@ class TestCrossServiceConsistency:
         recipe_input = {
             'nom': 'Test Recipe',
             'description': 'For consistency testing',
-            'ingredients': [],
-            'etapes': [],
+            'temps_preparation': 30,
+            'temps_cuisson': 20,
+            'difficulte': 'moyen',
+            'type_repas': 'dîner',
+            'saison': 'toute_année',
+            'portions': 4,
+            'ingredients': [
+                {'nom': 'Test Ingredient', 'quantite': 100, 'unite': 'g'}
+            ],
+            'etapes': [
+                {'ordre': 1, 'description': 'Test step', 'duree': 10}
+            ],
         }
         
         recipe = recette_service.create_complete(recipe_input, db=db)
@@ -178,8 +199,18 @@ class TestCacheBehavior:
         recipe_input = {
             'nom': 'Cache Test Recipe',
             'description': 'For cache testing',
-            'ingredients': [],
-            'etapes': [],
+            'temps_preparation': 30,
+            'temps_cuisson': 20,
+            'difficulte': 'moyen',
+            'type_repas': 'dîner',
+            'saison': 'toute_année',
+            'portions': 4,
+            'ingredients': [
+                {'nom': 'Test Ingredient', 'quantite': 100, 'unite': 'g'}
+            ],
+            'etapes': [
+                {'ordre': 1, 'description': 'Test step', 'duree': 10}
+            ],
         }
         
         recipe = recette_service.create_complete(recipe_input, db=db)
@@ -218,7 +249,7 @@ class TestErrorHandling:
         """Test handling of invalid filters."""
         # Should handle invalid filters gracefully
         recipes = recette_service.search_advanced(
-            search_term="test",
+            term="test",
             difficulte="invalid",  # Invalid difficulty
             db=db,
         )

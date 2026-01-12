@@ -166,6 +166,13 @@ class ClientIA:
             reponse.raise_for_status()
             resultat = reponse.json()
 
+            # Vérifier que la réponse contient au moins un choix
+            if not resultat.get("choices") or len(resultat["choices"]) == 0:
+                raise ErreurServiceIA(
+                    "Réponse IA invalide: pas de contenu", 
+                    message_utilisateur="Service IA retourné une réponse vide"
+                )
+
             contenu = resultat["choices"][0]["message"]["content"]
             logger.info(f"✅ Réponse reçue ({len(contenu)} caractères)")
 

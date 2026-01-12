@@ -10,6 +10,7 @@ Contient :
 import logging
 from functools import wraps
 from typing import Any, Callable, Generic, TypeVar
+import inspect
 
 from sqlalchemy.orm import Session
 
@@ -95,22 +96,63 @@ def with_cache(ttl: int = 300, key_prefix: str | None = None, key_func: None = N
     Returns:
         Valeur en cache ou résultat du calcul
     """
+    # Sentinelle pour distinguer "pas en cache" de "valeur None en cache"
+    _CACHE_MISS = object()
 
     def decorator(func: F) -> F:
+        # Pré-calculer la signature pour optimisation
+        sig = inspect.signature(func)
+        param_names = list(sig.parameters.keys())
+        
         @wraps(func)
         def wrapper(*args, **kwargs) -> Any:
             from src.core.cache import Cache
 
             # Générer clé de cache
             if key_func is not None:
-                cache_key = key_func(*args, **kwargs)
+                # Filtrer db des kwargs d'abord
+                filtered_kwargs = {k: v for k, v in kwargs.items() if k != 'db'}
+                
+                # Essayer d'abord de passer les arguments par position
+                # (compatible avec les lambdas utilisant des noms de paramètres personnalisés)
+                try:
+                    cache_key = key_func(*args, **filtered_kwargs)
+                except TypeError:
+                    # Si ça échoue, reconstruire les kwargs en utilisant les noms de la fonction
+                    # Reconstructer les kwargs en incluant les arguments positionnels
+                    # par leur nom de paramètre (en excluant 'self' et 'db')
+                    full_kwargs = {}
+                    for i, arg in enumerate(args):
+                        if i < len(param_names):
+                            param_name = param_names[i]
+                            if param_name not in ('self', 'db'):
+                                full_kwargs[param_name] = arg
+                    
+                    # Ajouter les kwargs nommés (sauf db)
+                    for k, v in filtered_kwargs.items():
+                        full_kwargs[k] = v
+                    
+                    # Remplir les valeurs par défaut manquantes
+                    for param_name, param in sig.parameters.items():
+                        if param_name in ('self', 'db'):
+                            continue
+                        if param_name not in full_kwargs and param.default != inspect.Parameter.empty:
+                            full_kwargs[param_name] = param.default
+                    
+                    # Appeler key_func avec self + tous les kwargs nécessaires
+                    if args:
+                        cache_key = key_func(args[0], **full_kwargs)
+                    else:
+                        cache_key = key_func(**full_kwargs)
             else:
                 prefix = key_prefix or func.__name__
-                cache_key = f"{prefix}_{str(args)}_{str(kwargs)}"
+                # Exclure 'db' des kwargs dans le cache key
+                filtered_kwargs = {k: v for k, v in kwargs.items() if k != 'db'}
+                cache_key = f"{prefix}_{str(args)}_{str(filtered_kwargs)}"
 
-            # Chercher en cache
-            cached_value = Cache.obtenir(cache_key, ttl=ttl)
-            if cached_value is not None:
+            # Chercher en cache avec sentinelle
+            cached_value = Cache.obtenir(cache_key, sentinelle=_CACHE_MISS, ttl=ttl)
+            if cached_value is not _CACHE_MISS:
                 logger.debug(f"Cache HIT: {cache_key}")
                 return cached_value
 
@@ -161,6 +203,11 @@ def with_error_handling(
                 return func(*args, **kwargs)
 
             except Exception as e:
+                # Relever les exceptions métier (héritant de ExceptionApp)
+                from src.core.errors_base import ExceptionApp
+                if isinstance(e, ExceptionApp):
+                    raise  # Relever les exceptions métier
+
                 # Logger l'erreur
                 log_msg = f"Erreur dans {func.__name__}: {e}"
                 getattr(logger, log_level.lower())(log_msg)

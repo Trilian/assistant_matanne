@@ -125,7 +125,7 @@ class FormBuilder:
                 "label": label + (" *" if required else ""),
                 "required": required,
                 "options": options,
-                "default": default or options[0],
+                "default": default or (options[0] if options else None),
                 "help": help_text,
             }
         )

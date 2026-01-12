@@ -318,7 +318,7 @@ class BaseModuleUI:
 
         # Titre
         title = item_dict.get(
-            self.config.display_fields[0]["key"] if self.config.display_fields else "nom",
+            self.config.display_fields[0]["key"] if (self.config.display_fields and len(self.config.display_fields) > 0) else "nom",
             "Sans titre",
         )
 
@@ -377,7 +377,7 @@ class BaseModuleUI:
 
             with col1:
                 title = item_dict.get(
-                    self.config.display_fields[0]["key"] if self.config.display_fields else "nom",
+                    self.config.display_fields[0]["key"] if (self.config.display_fields and len(self.config.display_fields) > 0) else "nom",
                     "Sans titre",
                 )
                 st.markdown(f"### {title}")

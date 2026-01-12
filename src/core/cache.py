@@ -76,16 +76,17 @@ class Cache:
             }
 
     @staticmethod
-    def obtenir(cle: str, ttl: int = 300) -> Any | None:
+    def obtenir(cle: str, ttl: int = 300, sentinelle: Any = None) -> Any | None:
         """
         Récupère une valeur du cache.
 
         Args:
             cle: Clé de cache
             ttl: Durée de vie en secondes
+            sentinelle: Valeur retournée si clé non trouvée (défaut: None)
 
         Returns:
-            Valeur ou None si expiré/absent
+            Valeur ou sentinelle si expiré/absent
 
         Example:
             >>> valeur = Cache.obtenir("recettes_liste", ttl=600)
@@ -94,7 +95,7 @@ class Cache:
 
         if cle not in st.session_state[Cache.CLE_DONNEES]:
             st.session_state[Cache.CLE_STATS]["misses"] += 1
-            return None
+            return sentinelle
 
         # Vérifier TTL
         if cle in st.session_state[Cache.CLE_TIMESTAMPS]:
@@ -102,7 +103,7 @@ class Cache:
             if age > ttl:
                 Cache._supprimer(cle)
                 st.session_state[Cache.CLE_STATS]["misses"] += 1
-                return None
+                return sentinelle
 
         st.session_state[Cache.CLE_STATS]["hits"] += 1
         return st.session_state[Cache.CLE_DONNEES][cle]
@@ -140,6 +141,25 @@ class Cache:
                     st.session_state[Cache.CLE_DEPENDANCES][dep].append(cle)
 
         Cache._mettre_a_jour_taille()
+
+    @staticmethod
+    def clear():
+        """
+        Clear tous le cache.
+
+        Useful for testing to ensure clean state between tests.
+        """
+        Cache._initialiser()
+        st.session_state[Cache.CLE_DONNEES] = {}
+        st.session_state[Cache.CLE_TIMESTAMPS] = {}
+        st.session_state[Cache.CLE_DEPENDANCES] = {}
+        st.session_state[Cache.CLE_STATS] = {
+            "hits": 0,
+            "misses": 0,
+            "invalidations": 0,
+            "taille_octets": 0,
+        }
+        logger.info("Cache cleared")
 
     @staticmethod
     def invalider(pattern: str | None = None, dependencies: list[str] | None = None):

@@ -71,6 +71,30 @@ class PlanningService(BaseService[Planning], BaseAIService, PlanningAIMixin):
     # SECTION 1: CRUD & PLANNING (REFACTORED)
     # ═══════════════════════════════════════════════════════════
 
+    @with_cache(ttl=1800, key_func=lambda self, pid=None: f"planning_active")
+    @with_error_handling(default_return=None)
+    @with_db_session
+    def get_planning(self, planning_id: int | None = None, db: Session | None = None) -> Planning | None:
+        """Get the active or specified planning.
+
+        Args:
+            planning_id: Specific planning ID, or None to get active planning
+            db: Database session (injected by @with_db_session)
+
+        Returns:
+            Planning object or None if not found
+        """
+        if planning_id:
+            planning = db.query(Planning).filter(Planning.id == planning_id).first()
+        else:
+            planning = db.query(Planning).filter(Planning.actif == True).first()
+        
+        if not planning:
+            logger.warning(f"⚠️ Planning not found")
+            return None
+        
+        return planning
+
     @with_cache(ttl=1800, key_func=lambda self, pid: f"planning_full_{pid}")
     @with_error_handling(default_return=None)
     @with_db_session

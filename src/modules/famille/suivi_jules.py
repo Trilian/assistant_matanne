@@ -317,9 +317,12 @@ def app():
                         loop = asyncio.new_event_loop()
                         asyncio.set_event_loop(loop)
 
-                        conseils = loop.run_until_complete(
-                            agent.conseiller_developpement(age["mois"], contexte)
-                        )
+                        try:
+                            conseils = loop.run_until_complete(
+                                agent.conseiller_developpement(age["mois"], contexte)
+                            )
+                        finally:
+                            loop.close()
 
                         st.session_state["conseils_jules"] = conseils
                         st.success("✅ Conseils générés !")
@@ -575,9 +578,12 @@ def app():
                         loop = asyncio.new_event_loop()
                         asyncio.set_event_loop(loop)
 
-                        analyse = loop.run_until_complete(
-                            agent.analyser_bien_etre(donnees_sommeil, donnees_humeur)
-                        )
+                        try:
+                            analyse = loop.run_until_complete(
+                                agent.analyser_bien_etre(donnees_sommeil, donnees_humeur)
+                            )
+                        finally:
+                            loop.close()
 
                         # Afficher résultats
                         st.success("✅ Analyse terminée")

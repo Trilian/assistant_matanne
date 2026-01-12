@@ -108,7 +108,7 @@ class RecetteService(BaseService[Recette], BaseAIService, RecipeAIMixin):
     # SECTION 1 : CRUD OPTIMISÉ
     # ═══════════════════════════════════════════════════════════
 
-    @with_cache(ttl=3600, key_func=lambda self, rid: f"recette_full_{rid}")
+    @with_cache(ttl=3600, key_func=lambda self, recette_id: f"recette_full_{recette_id}")
     @with_db_session
     def get_by_id_full(self, recette_id: int, db: Session) -> Recette | None:
         """Récupère une recette avec toutes ses relations (avec cache)."""
@@ -131,6 +131,19 @@ class RecetteService(BaseService[Recette], BaseAIService, RecipeAIMixin):
         except Exception as e:
             logger.error(f"Erreur récupération recette {recette_id}: {e}")
             return None
+
+    @with_db_session
+    def get_by_type(self, type_repas: str, db: Session) -> list[Recette]:
+        """Récupère les recettes d'un type donné."""
+        try:
+            return (
+                db.query(Recette)
+                .filter(Recette.type_repas == type_repas)
+                .all()
+            )
+        except Exception as e:
+            logger.error(f"Erreur récupération recettes par type {type_repas}: {e}")
+            return []
 
     @with_error_handling(default_return=None, afficher_erreur=True)
     @with_db_session

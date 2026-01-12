@@ -52,22 +52,35 @@ class EtapeInput(BaseModel):
     Input pour ajouter/modifier une étape de recette.
     """
 
-    numero: int = Field(..., ge=1, description="Numéro de l'étape")
+    numero: Optional[int] = Field(None, ge=1, description="Numéro de l'étape")
+    ordre: Optional[int] = Field(None, ge=1, description="Ordre de l'étape (alias de numero)")
     description: str = Field(
         ...,
         min_length=5,
         max_length=1000,
         description="Description de l'étape",
     )
-    temps_minutes: Optional[int] = Field(
+    duree: Optional[int] = Field(
         None, ge=1, le=1440, description="Durée en minutes"
     )
+
+    model_config = {"populate_by_name": True}
 
     @field_validator("description")
     @classmethod
     def nettoyer_description(cls, v: str) -> str:
         """Nettoie la description"""
         return v.strip()
+
+    @model_validator(mode="after")
+    def valider_numero_ou_ordre(self) -> "EtapeInput":
+        """Assure qu'au moins un de numero ou ordre est fourni"""
+        if self.numero is None and self.ordre is None:
+            raise ValueError("Soit 'numero' soit 'ordre' doit être fourni")
+        # Utiliser ordre si numero n'est pas fourni
+        if self.numero is None and self.ordre is not None:
+            self.numero = self.ordre
+        return self
 
 
 class RecetteInput(BaseModel):
@@ -104,15 +117,15 @@ class RecetteInput(BaseModel):
     saison: Optional[str] = Field(
         None, description="Saison (printemps, été, automne, hiver)"
     )
-    cout_estimee: Optional[float] = Field(
-        None, ge=0, description="Coût estimé en euros"
-    )
 
     @field_validator("nom")
     @classmethod
     def valider_nom(cls, v: str) -> str:
         """Nettoie et valide le nom"""
-        cleaned = v.strip().capitalize()
+        # Utiliser capitalize() pour garder la casse originale sauf le premier caractère
+        cleaned = v.strip()
+        if cleaned:
+            cleaned = cleaned[0].upper() + cleaned[1:] if len(cleaned) > 1 else cleaned.upper()
         if len(cleaned) < 2:
             raise ValueError("Le nom doit contenir au moins 2 caractères")
         return cleaned
@@ -122,7 +135,7 @@ class RecetteInput(BaseModel):
     def valider_saison(cls, v: Optional[str]) -> Optional[str]:
         """Valide la saison"""
         if v:
-            saisons_valides = {"printemps", "été", "automne", "hiver"}
+            saisons_valides = {"printemps", "été", "automne", "hiver", "toute_année"}
             if v.lower() not in saisons_valides:
                 raise ValueError(
                     f"Saison invalide. Doit être parmi: {', '.join(saisons_valides)}"
