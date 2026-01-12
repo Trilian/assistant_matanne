@@ -40,7 +40,11 @@ class ClientIA:
 
         except ValueError as e:
             logger.error(f"❌ Configuration IA manquante: {e}")
-            raise ErreurServiceIA(str(e), message_utilisateur="Configuration IA manquante") from e
+            # Initialiser avec valeurs None - le client sera inutilisable mais ne lèvera pas d'exception
+            self.cle_api = None
+            self.modele = None
+            self.url_base = None
+            self.timeout = None
 
     # ═══════════════════════════════════════════════════════════
     # APPEL API PRINCIPAL
@@ -228,14 +232,18 @@ class ClientIA:
 _client: ClientIA | None = None
 
 
-def obtenir_client_ia() -> ClientIA:
+def obtenir_client_ia() -> ClientIA | None:
     """
     Récupère l'instance ClientIA (singleton lazy)
 
     Returns:
-        Instance ClientIA
+        Instance ClientIA ou None si non disponible
     """
     global _client
     if _client is None:
         _client = ClientIA()
+        # Vérifier si le client est valide
+        if _client.cle_api is None:
+            logger.warning("⚠️ Client IA non disponible (clé API manquante)")
+            _client = None
     return _client

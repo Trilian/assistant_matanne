@@ -87,6 +87,11 @@ class BaseAIService:
         Raises:
             ErreurLimiteDebit: Si quota atteint
         """
+        # ✅ Vérifier que le client IA est disponible
+        if self.client is None:
+            logger.warning(f"⚠️ Client IA indispo ({self.service_name})")
+            return None
+
         temp = temperature if temperature is not None else self.default_temperature
         cache_category = category or self.cache_prefix
 
