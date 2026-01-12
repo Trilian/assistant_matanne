@@ -182,26 +182,22 @@ class OptimizedRouter:
 
     MODULE_REGISTRY = {
         "accueil": {"path": "src.modules.accueil", "type": "simple"},
-        # ✅ MODULE CUISINE UNIFIÉ (1 fichier, navigation interne)
+        # ✅ MODULE CUISINE - MODULES SÉPARÉS
         "cuisine.recettes": {
-            "path": "src.modules.cuisine",
-            "type": "unified",
-            "tab": 0,  # Index du tab "Recettes"
+            "path": "src.modules.cuisine.recettes",
+            "type": "simple",
         },
         "cuisine.inventaire": {
-            "path": "src.modules.cuisine",
-            "type": "unified",
-            "tab": 1,  # Index du tab "Inventaire"
+            "path": "src.modules.cuisine.inventaire",
+            "type": "simple",
         },
         "cuisine.planning_semaine": {
-            "path": "src.modules.cuisine",
-            "type": "unified",
-            "tab": 2,  # Index du tab "Planning"
+            "path": "src.modules.cuisine.planning",
+            "type": "simple",
         },
         "cuisine.courses": {
-            "path": "src.modules.cuisine",
-            "type": "unified",
-            "tab": 3,  # Index du tab "Courses"
+            "path": "src.modules.cuisine.courses",
+            "type": "simple",
         },
         # Famille (à implémenter plus tard)
         "famille.suivi_jules": {"path": "src.modules.famille.suivi_jules", "type": "simple"},
@@ -236,32 +232,14 @@ class OptimizedRouter:
 
         config = OptimizedRouter.MODULE_REGISTRY[module_name]
         module_path = config["path"]
-        module_type = config.get("type", "simple")
 
-        logger.info(f"🎯 Route: {module_name} → {module_path} (type: {module_type})")
+        logger.info(f"🎯 Route: {module_name} → {module_path}")
 
         # Afficher spinner pendant chargement
         with st.spinner(f"⏳ Chargement {module_name}..."):
             try:
                 # Lazy load du module
                 module = LazyModuleLoader.load(module_path)
-
-                # ═══════════════════════════════════════════════════════
-                # GESTION MODULE UNIFIÉ (ex: cuisine)
-                # ═══════════════════════════════════════════════════════
-                if module_type == "unified":
-                    # Stocker l'onglet actif dans session_state
-                    tab_index = config.get("tab", 0)
-
-                    # Clé session pour ce module unifié
-                    # Extraire le nom du module depuis le path (ex: "cuisine" depuis "src.modules.cuisine")
-                    base_module = module_path.split(".")[-1]  # "cuisine"
-                    session_key = f"{base_module}_active_tab"
-
-                    # Sauvegarder l'onglet actif
-                    st.session_state[session_key] = tab_index
-
-                    logger.info(f"📑 Module unifié '{base_module}' → Tab {tab_index}")
 
                 # ═══════════════════════════════════════════════════════
                 # RENDER DU MODULE
