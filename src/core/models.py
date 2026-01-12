@@ -339,6 +339,9 @@ class ArticleCourses(Base):
     magasin_cible: Mapped[str | None] = mapped_column(String(50), index=True)
     notes: Mapped[str | None] = mapped_column(Text)
 
+    # Relationships
+    ingredient: Mapped["Ingredient"] = relationship("Ingredient", foreign_keys=[ingredient_id])
+
     __table_args__ = (
         CheckConstraint("quantite_necessaire > 0", name="ck_quantite_courses_positive"),
     )

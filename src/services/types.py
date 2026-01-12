@@ -281,7 +281,26 @@ class BaseService(Generic[T]):
                     count_query = query
                     for k, v in filters.items():
                         if hasattr(self.model, k):
-                            count_query = count_query.filter(getattr(self.model, k) == v)
+                            attr = getattr(self.model, k)
+                            # Support pour opérateurs avancés
+                            if isinstance(v, dict):
+                                # Opérateurs: lte, gte, lt, gt, eq, ne
+                                for op, val in v.items():
+                                    if op == "lte":
+                                        count_query = count_query.filter(attr <= val)
+                                    elif op == "gte":
+                                        count_query = count_query.filter(attr >= val)
+                                    elif op == "lt":
+                                        count_query = count_query.filter(attr < val)
+                                    elif op == "gt":
+                                        count_query = count_query.filter(attr > val)
+                                    elif op == "ne":
+                                        count_query = count_query.filter(attr != val)
+                                    else:  # eq ou défaut
+                                        count_query = count_query.filter(attr == val)
+                            else:
+                                # Comparaison simple
+                                count_query = count_query.filter(attr == v)
                     stats[name] = count_query.count()
 
             return stats
