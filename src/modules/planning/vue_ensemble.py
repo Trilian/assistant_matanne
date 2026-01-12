@@ -9,10 +9,10 @@ import streamlit as st
 
 from src.core.database import get_db_context
 from src.core.models import (
+    ArticleInventaire,
     BatchMeal,
     CalendarEvent,
     GardenItem,
-    InventoryItem,
     Project,
     Recipe,
     Routine,
