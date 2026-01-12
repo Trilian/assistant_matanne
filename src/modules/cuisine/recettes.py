@@ -32,7 +32,8 @@ def render_liste():
         st.error("❌ Service recettes indisponible")
         return
     
-    recettes = service.list()
+    # Chercher les recettes
+    recettes = service.search_advanced(limit=12)
     
     if not recettes:
         st.info("Aucune recette trouvée. Créez-en une!")
@@ -40,10 +41,10 @@ def render_liste():
     
     # Afficher en grid
     cols = st.columns(3)
-    for idx, recette in enumerate(recettes[:12]):
+    for idx, recette in enumerate(recettes):
         with cols[idx % 3]:
-            st.card(
-                title=recette.nom,
-                text=f"⏱️ {recette.temps_preparation}min | 👥 {recette.portions} portions",
-                use_container_width=True
+            st.info(
+                f"**{recette.nom}**\n\n"
+                f"⏱️ {recette.temps_preparation}min | "
+                f"👥 {recette.portions} portions"
             )
