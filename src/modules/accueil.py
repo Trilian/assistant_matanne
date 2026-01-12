@@ -10,12 +10,12 @@ import streamlit as st
 # Cache
 # State
 from src.core.state import StateManager, get_state
-from src.services.courses import courses_service
-from src.services.inventaire import inventaire_service
-from src.services.planning import planning_service
+from src.services.courses import get_courses_service
+from src.services.inventaire import get_inventaire_service
+from src.services.planning import get_planning_service
 
 # Services
-from src.services.recettes import recette_service
+from src.services.recettes import get_recette_service
 
 # UI
 from src.ui.domain import stock_alert
@@ -85,7 +85,7 @@ def render_critical_alerts():
     alerts = []
 
     # Inventaire critique
-    inventaire = inventaire_service.get_inventaire_complet()
+    inventaire = get_inventaire_service().get_inventaire_complet()
     critiques = [art for art in inventaire if art.get("statut") in ["critique", "sous_seuil"]]
 
     if critiques:
@@ -114,8 +114,8 @@ def render_critical_alerts():
         )
 
     # Planning vide
-    semaine = planning_service.get_semaine_debut()
-    planning = planning_service.get_planning_semaine(semaine)
+    semaine = get_planning_service().get_semaine_debut()
+    planning = get_planning_service().get_planning_semaine(semaine)
 
     if not planning or not planning.repas:
         alerts.append(
@@ -166,11 +166,11 @@ def render_global_stats():
     st.markdown("### 📊 Vue d'Ensemble")
 
     # Charger stats
-    stats_recettes = recette_service.get_stats()
-    stats_inventaire = inventaire_service.get_stats()
-    stats_courses = courses_service.get_stats()
+    stats_recettes = get_recette_service().get_stats()
+    stats_inventaire = get_inventaire_service().get_stats()
+    stats_courses = get_courses_service().get_stats()
 
-    inventaire = inventaire_service.get_inventaire_complet()
+    inventaire = get_inventaire_service().get_inventaire_complet()
 
     # Afficher métriques
     col1, col2, col3, col4 = st.columns(4)
@@ -196,8 +196,8 @@ def render_global_stats():
 
     with col4:
         # Planning semaine
-        semaine = planning_service.get_semaine_debut()
-        planning = planning_service.get_planning_semaine(semaine)
+        semaine = get_planning_service().get_semaine_debut()
+        planning = get_planning_service().get_planning_semaine(semaine)
         nb_repas = len(planning.repas) if planning else 0
 
         st.metric("📅 Repas Planifiés", nb_repas, help="Cette semaine")
@@ -256,7 +256,7 @@ def render_cuisine_summary():
 
         st.markdown("### 🍽️ Recettes")
 
-        stats = recette_service.get_stats(
+        stats = get_recette_service().get_stats(
             count_filters={
                 "rapides": {"temps_preparation": {"lte": 30}},
                 "bebe": {"compatible_bebe": True},
@@ -293,7 +293,7 @@ def render_inventaire_summary():
 
         st.markdown("### 📦 Inventaire")
 
-        inventaire = inventaire_service.get_inventaire_complet()
+        inventaire = get_inventaire_service().get_inventaire_complet()
 
         stock_bas = len([a for a in inventaire if a.get("statut") == "sous_seuil"])
         critiques = len([a for a in inventaire if a.get("statut") == "critique"])
@@ -337,7 +337,7 @@ def render_courses_summary():
 
         st.markdown("### 🛒 Courses")
 
-        liste = courses_service.get_liste_active()
+        liste = get_courses_service().get_liste_active()
 
         haute = len([a for a in liste if a.get("priorite") == "haute"])
         moyenne = len([a for a in liste if a.get("priorite") == "moyenne"])
@@ -383,11 +383,11 @@ def render_planning_summary():
 
         st.markdown("### 📅 Planning Semaine")
 
-        semaine = planning_service.get_semaine_debut()
-        planning = planning_service.get_planning_semaine(semaine)
+        semaine = get_planning_service().get_semaine_debut()
+        planning = get_planning_service().get_planning_semaine(semaine)
 
         if planning:
-            structure = planning_service.get_planning_structure(planning.id)
+            structure = get_planning_service().get_planning_structure(planning.id)
 
             total_repas = sum(len(j["repas"]) for j in structure["jours"])
             repas_bebe = sum(

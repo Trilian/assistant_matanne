@@ -20,8 +20,11 @@ import streamlit as st
 # State
 from src.core.state import StateManager
 
-# Services unifiés
-from src.services import courses_service, inventaire_service, planning_service, recette_service
+# Services unifiés (getters)
+from src.services.courses import get_courses_service
+from src.services.inventaire import get_inventaire_service
+from src.services.planning import get_planning_service
+from src.services.recettes import get_recette_service
 
 # UI Components
 
@@ -130,7 +133,7 @@ def render_recettes_liste():
     if difficulte != "Toutes":
         filters["difficulte"] = difficulte
 
-    recettes = recette_service.search_advanced(term=search if search else None, **filters, limit=50)
+    recettes = get_recette_service().search_advanced(term=search if search else None, **filters, limit=50)
 
     # Stats
     if recettes:
@@ -241,7 +244,7 @@ def render_recettes_ajout():
                     "etapes": etapes,
                 }
 
-                recette = recette_service.create_complete(data)
+                recette = get_recette_service().create_complete(data)
                 if recette:
                     st.success(f"✅ Recette '{nom}' créée !")
                     st.balloons()
@@ -273,7 +276,7 @@ def render_recettes_ia():
                 [i.strip() for i in ingredients_dispo.split(",")] if ingredients_dispo else None
             )
 
-            recettes = recette_service.generer_recettes_ia(
+            recettes = get_recette_service().generer_recettes_ia(
                 type_repas=type_repas,
                 saison=saison,
                 difficulte=difficulte,
@@ -292,7 +295,7 @@ def render_recettes_ia():
                         )
 
                         if st.button("➕ Ajouter cette recette", key=f"add_ia_{idx}"):
-                            recette = recette_service.create_complete(recette_data)
+                            recette = get_recette_service().create_complete(recette_data)
                             if recette:
                                 st.success("Recette ajoutée !")
                                 st.rerun()
@@ -310,7 +313,7 @@ def render_inventaire():
     st.markdown("### 📦 Mon Inventaire")
 
     # Stats alertes
-    alertes = inventaire_service.get_alertes()
+    alertes = get_inventaire_service().get_alertes()
 
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -330,7 +333,7 @@ def render_inventaire():
     st.markdown("---")
 
     # Liste inventaire
-    inventaire = inventaire_service.get_inventaire_complet()
+    inventaire = get_inventaire_service().get_inventaire_complet()
 
     if inventaire:
         # Filtres
@@ -369,12 +372,12 @@ def render_inventaire():
 
             with col3:
                 if st.button("➕", key=f"add_{article['id']}"):
-                    inventaire_service.ajuster_quantite(article["id"], 1, "ajout")
+                    get_inventaire_service().ajuster_quantite(article["id"], 1, "ajout")
                     st.rerun()
 
             with col4:
                 if st.button("➖", key=f"sub_{article['id']}"):
-                    inventaire_service.ajuster_quantite(article["id"], 1, "retrait")
+                    get_inventaire_service().ajuster_quantite(article["id"], 1, "retrait")
                     st.rerun()
     else:
         st.info("Inventaire vide")
@@ -408,7 +411,7 @@ def render_planning():
             st.rerun()
 
     # Charger planning
-    planning = planning_service.get_planning_semaine(st.session_state.semaine_actuelle)
+    planning = get_planning_service().get_planning_semaine(st.session_state.semaine_actuelle)
 
     if planning:
         st.success(f"✅ Planning : {planning['nom']}")
@@ -433,7 +436,7 @@ def render_planning():
                                 "✅", value=repas["prepare"], key=f"prep_{repas['id']}"
                             )
                             if checked != repas["prepare"]:
-                                planning_service.marquer_repas_prepare(repas["id"], checked)
+                                get_planning_service().marquer_repas_prepare(repas["id"], checked)
                         with col3:
                             if st.button("✏️", key=f"edit_repas_{repas['id']}"):
                                 pass  # À implémenter
@@ -444,7 +447,7 @@ def render_planning():
 
         if st.button("🎲 Générer un planning IA", type="primary"):
             with st.spinner("Génération..."):
-                planning = planning_service.generer_planning_ia(st.session_state.semaine_actuelle)
+                planning = get_planning_service().generer_planning_ia(st.session_state.semaine_actuelle)
                 if planning:
                     st.success("Planning généré !")
                     st.rerun()
@@ -460,7 +463,7 @@ def render_courses():
     st.markdown("### 🛒 Liste de Courses")
 
     # Charger liste
-    courses = courses_service.get_liste_courses(achetes=False)
+    courses = get_courses_service().get_liste_courses(achetes=False)
 
     if courses:
         st.metric("Articles", len(courses))
@@ -483,12 +486,12 @@ def render_courses():
                     label_visibility="collapsed",
                 )
                 if checked != article["achete"]:
-                    courses_service.marquer_achete(article["id"], checked)
+                    get_courses_service().marquer_achete(article["id"], checked)
                     st.rerun()
 
             with col3:
                 if st.button("🗑️", key=f"del_{article['id']}"):
-                    courses_service.delete(article["id"])
+                    get_courses_service().delete(article["id"])
                     st.rerun()
 
         # Actions
@@ -496,23 +499,23 @@ def render_courses():
         with col1:
             if st.button("✅ Tout marquer acheté", use_container_width=True):
                 for article in courses:
-                    courses_service.marquer_achete(article["id"], True)
+                    get_courses_service().marquer_achete(article["id"], True)
                 st.rerun()
         with col2:
             if st.button("📥 Export CSV", use_container_width=True):
-                csv = courses_service.export_to_csv(courses)
+                csv = get_courses_service().export_to_csv(courses)
                 st.download_button("⬇️ Télécharger", csv, "courses.csv", "text/csv")
     else:
         st.info("Liste de courses vide")
 
         if st.button("🎲 Suggérer avec l'IA", type="primary"):
             with st.spinner("Analyse inventaire..."):
-                suggestions = courses_service.generer_suggestions_ia_depuis_inventaire()
+                suggestions = get_courses_service().generer_suggestions_ia_depuis_inventaire()
                 if suggestions:
                     st.success(f"{len(suggestions)} suggestions !")
                     for sugg in suggestions:
                         if st.button(f"➕ {sugg['nom']}", key=f"add_sugg_{sugg['nom']}"):
-                            courses_service.ajouter_article(
+                            get_courses_service().ajouter_article(
                                 sugg["nom"],
                                 sugg["quantite"],
                                 sugg.get("unite", "pcs"),
