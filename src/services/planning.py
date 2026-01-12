@@ -90,7 +90,7 @@ class PlanningService(BaseService[Planning], BaseAIService, PlanningAIMixin):
             planning = db.query(Planning).filter(Planning.actif == True).first()
         
         if not planning:
-            logger.warning(f"⚠️ Planning not found")
+            logger.debug(f"ℹ️ Planning not found")
             return None
         
         return planning

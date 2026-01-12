@@ -141,12 +141,30 @@ class Recette(Base):
     )
     categorie: Mapped[str | None] = mapped_column(String(100))
 
-    # Flags
+    # Flags - Tags système
     est_rapide: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     est_equilibre: Mapped[bool] = mapped_column(Boolean, default=False)
     compatible_bebe: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     compatible_batch: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     congelable: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    # ✨ NOUVEAU - Bio & Local
+    est_bio: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    est_local: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    score_bio: Mapped[int] = mapped_column(Integer, default=0)  # 0-100
+    score_local: Mapped[int] = mapped_column(Integer, default=0)  # 0-100
+
+    # ✨ NOUVEAU - Robots compatibles
+    compatible_cookeo: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    compatible_monsieur_cuisine: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    compatible_airfryer: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    compatible_multicooker: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    # ✨ NOUVEAU - Nutrition (optionnel)
+    calories: Mapped[int | None] = mapped_column(Integer)
+    proteines: Mapped[float | None] = mapped_column(Float)  # grammes
+    lipides: Mapped[float | None] = mapped_column(Float)  # grammes
+    glucides: Mapped[float | None] = mapped_column(Float)  # grammes
 
     # IA
     genere_par_ia: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -177,12 +195,48 @@ class Recette(Base):
         CheckConstraint("temps_preparation >= 0", name="ck_temps_prep_positif"),
         CheckConstraint("temps_cuisson >= 0", name="ck_temps_cuisson_positif"),
         CheckConstraint("portions > 0 AND portions <= 20", name="ck_portions_valides"),
+        CheckConstraint("score_bio >= 0 AND score_bio <= 100", name="ck_score_bio"),
+        CheckConstraint("score_local >= 0 AND score_local <= 100", name="ck_score_local"),
     )
 
     @property
     def temps_total(self) -> int:
         """Temps total de préparation"""
         return self.temps_preparation + self.temps_cuisson
+
+    @property
+    def robots_compatibles(self) -> list[str]:
+        """Retourne la liste des robots compatibles"""
+        robots = []
+        if self.compatible_cookeo:
+            robots.append("Cookeo")
+        if self.compatible_monsieur_cuisine:
+            robots.append("Monsieur Cuisine")
+        if self.compatible_airfryer:
+            robots.append("Airfryer")
+        if self.compatible_multicooker:
+            robots.append("Multicooker")
+        return robots
+
+    @property
+    def tags(self) -> list[str]:
+        """Retourne tous les tags de la recette"""
+        tags_list = []
+        if self.est_rapide:
+            tags_list.append("rapide")
+        if self.est_equilibre:
+            tags_list.append("équilibré")
+        if self.compatible_bebe:
+            tags_list.append("bébé")
+        if self.compatible_batch:
+            tags_list.append("batch")
+        if self.congelable:
+            tags_list.append("congélation")
+        if self.est_bio:
+            tags_list.append("bio")
+        if self.est_local:
+            tags_list.append("local")
+        return tags_list
 
     def __repr__(self) -> str:
         return f"<Recette(id={self.id}, nom='{self.nom}')>"
