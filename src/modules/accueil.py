@@ -332,10 +332,9 @@ def render_courses_summary():
             'border-radius: 12px; border-left: 4px solid #FF9800;">',
             unsafe_allow_html=True,
         )
-
         st.markdown("### 🛒 Courses")
 
-        liste = get_courses_service().get_liste_active()
+        liste = get_courses_service().get_liste_courses()
 
         haute = len([a for a in liste if a.get("priorite") == "haute"])
         moyenne = len([a for a in liste if a.get("priorite") == "moyenne"])
