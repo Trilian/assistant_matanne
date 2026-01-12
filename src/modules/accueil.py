@@ -114,8 +114,7 @@ def render_critical_alerts():
         )
 
     # Planning vide
-    semaine = get_planning_service().get_semaine_debut()
-    planning = get_planning_service().get_planning_semaine(semaine)
+    planning = get_planning_service().get_planning()
 
     if not planning or not planning.repas:
         alerts.append(
@@ -196,8 +195,7 @@ def render_global_stats():
 
     with col4:
         # Planning semaine
-        semaine = get_planning_service().get_semaine_debut()
-        planning = get_planning_service().get_planning_semaine(semaine)
+        planning = get_planning_service().get_planning()
         nb_repas = len(planning.repas) if planning else 0
 
         st.metric("📅 Repas Planifiés", nb_repas, help="Cette semaine")
@@ -383,16 +381,11 @@ def render_planning_summary():
 
         st.markdown("### 📅 Planning Semaine")
 
-        semaine = get_planning_service().get_semaine_debut()
-        planning = get_planning_service().get_planning_semaine(semaine)
+        planning = get_planning_service().get_planning()
 
-        if planning:
-            structure = get_planning_service().get_planning_structure(planning.id)
-
-            total_repas = sum(len(j["repas"]) for j in structure["jours"])
-            repas_bebe = sum(
-                1 for j in structure["jours"] for r in j["repas"] if r.get("est_adapte_bebe")
-            )
+        if planning and planning.repas:
+            total_repas = len(planning.repas)
+            repas_bebe = 0  # À implémenter selon le modèle
 
             col1, col2 = st.columns(2)
 

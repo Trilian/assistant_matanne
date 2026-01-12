@@ -411,7 +411,7 @@ def render_planning():
             st.rerun()
 
     # Charger planning
-    planning = get_planning_service().get_planning_semaine(st.session_state.semaine_actuelle)
+    planning = get_planning_service().get_planning()
 
     if planning:
         st.success(f"✅ Planning : {planning['nom']}")
