@@ -21,7 +21,7 @@ def importer_recettes_standard() -> int:
     Returns:
         Nombre de recettes importées
     """
-    fichier_recettes = Path(__file__).parent.parent.parent / "data" / "recettes_standard.json"
+    fichier_recettes = Path(__file__).parent.parent / "data" / "recettes_standard.json"
     
     if not fichier_recettes.exists():
         logger.warning(f"❌ Fichier non trouvé: {fichier_recettes}")
