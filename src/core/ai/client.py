@@ -264,8 +264,7 @@ def obtenir_client_ia() -> ClientIA | None:
     global _client
     if _client is None:
         _client = ClientIA()
-        # Vérifier si le client est valide
-        if _client.cle_api is None:
-            logger.warning("⚠️ Client IA non disponible (clé API manquante)")
-            _client = None
+        # NE PAS vérifier cle_api ici - la config est chargée en lazy
+        # Elle sera validée au moment du premier appel
+        logger.debug("✅ ClientIA créé (config chargée en lazy)")
     return _client
