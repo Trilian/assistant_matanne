@@ -113,12 +113,14 @@ class RecetteService(BaseService[Recette], BaseAIService, RecipeAIMixin):
     def get_by_id_full(self, recette_id: int, db: Session) -> Recette | None:
         """Récupère une recette avec toutes ses relations (avec cache)."""
         try:
+            from sqlalchemy.orm import selectinload
+            
             recette = (
                 db.query(Recette)
                 .options(
-                    joinedload(Recette.ingredients).joinedload(RecetteIngredient.ingredient),
-                    joinedload(Recette.etapes),
-                    joinedload(Recette.versions),
+                    selectinload(Recette.ingredients).selectinload(RecetteIngredient.ingredient),
+                    selectinload(Recette.etapes),
+                    selectinload(Recette.versions),
                 )
                 .filter(Recette.id == recette_id)
                 .first()
@@ -126,7 +128,12 @@ class RecetteService(BaseService[Recette], BaseAIService, RecipeAIMixin):
             
             if not recette:
                 return None
-                
+            
+            # Force l'initialisation des collections lazy-loaded avant la fermeture de la session
+            _ = recette.ingredients
+            _ = recette.etapes
+            _ = recette.versions
+            
             return recette
         except Exception as e:
             logger.error(f"Erreur récupération recette {recette_id}: {e}")
@@ -257,8 +264,8 @@ class RecetteService(BaseService[Recette], BaseAIService, RecipeAIMixin):
 
     @with_cache(
         ttl=21600,
-        key_func=lambda self, type_repas, saison, difficulte, ingredients_dispo: (
-            f"recettes_ia_{type_repas}_{saison}_{difficulte}_"
+        key_func=lambda self, type_repas, saison, difficulte, ingredients_dispo, nb_recettes: (
+            f"recettes_ia_{type_repas}_{saison}_{difficulte}_{nb_recettes}_"
             f"{hash(tuple(ingredients_dispo or []))}"
         ),
     )
