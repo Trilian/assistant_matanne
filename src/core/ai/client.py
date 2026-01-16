@@ -165,11 +165,11 @@ class ClientIA:
         # S'assurer que la config est chargée
         self._ensure_config_loaded()
 
-        # Vérifier que la configuration est valide
-        if not self.cle_api or self.cle_api.startswith("sk-test"):
+        # Vérifier que la configuration minimale est présente
+        if not self.cle_api:
             raise ErreurServiceIA(
-                "Configuration API Mistral invalide ou manquante",
-                message_utilisateur="La clé API Mistral n'est pas configurée. Veuillez ajouter MISTRAL_API_KEY à votre configuration.",
+                "Clé API Mistral non configurée",
+                message_utilisateur="La clé API Mistral n'est pas configurée. Veuillez ajouter MISTRAL_API_KEY.",
             )
 
         if not self.url_base:

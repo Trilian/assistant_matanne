@@ -15,7 +15,15 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv('.env.local')  # Load local environment variables first
+# Load .env.local from project root
+project_root = Path(__file__).parent.parent
+env_file = project_root / '.env.local'
+if env_file.exists():
+    load_dotenv(env_file)
+    print(f"📄 Loaded environment from {env_file}")
+else:
+    # Fallback: try current directory
+    load_dotenv('.env.local')
 
 import streamlit as st
 
