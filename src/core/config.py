@@ -250,11 +250,20 @@ class Parametres(BaseSettings):
         Raises:
             ValueError: Si clé introuvable
         """
+        # DEBUG: Afficher toutes les variables d'environ avec "MISTRAL"
+        mistral_vars = {k: v[:10] + '...' if len(v) > 10 else v for k, v in os.environ.items() if 'MISTRAL' in k.upper()}
+        if mistral_vars:
+            logger.debug(f"🔍 Variables MISTRAL trouvées: {mistral_vars}")
+        else:
+            logger.debug(f"🔍 AUCUNE variable MISTRAL dans os.environ!")
+        
         # 1. Variable d'environnement (PREMIÈRE PRIORITÉ - dev local)
         cle = os.getenv("MISTRAL_API_KEY")
         if cle:
             logger.debug("✅ Clé API Mistral chargée depuis variable d'environnement (.env.local)")
             return cle
+
+        logger.debug(f"❌ os.getenv('MISTRAL_API_KEY') = {cle}")
 
         # 2. Secrets Streamlit - Essayer plusieurs chemins (Streamlit Cloud)
         api_key = _get_mistral_api_key_from_secrets()
