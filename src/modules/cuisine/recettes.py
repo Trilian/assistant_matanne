@@ -454,19 +454,28 @@ def render_detail_recette(recette):
         with tab_versions[0]:
             if versions:
                 for version in versions:
-                    icon = "👶" if version.type_version == "bébé" else "⏲️"
+                    if version.type_version == "bébé":
+                        icon = "👶"
+                    elif version.type_version == "batch cooking":
+                        icon = "⏲️"
+                    else:
+                        icon = "📋"
+                    
                     with st.expander(f"{icon} Version {version.type_version}"):
                         if version.instructions_modifiees:
                             st.markdown("**Instructions adaptées:**")
                             st.write(version.instructions_modifiees)
                         
-                        if version.type_version == "bébé" and version.notes_bebe:
-                            st.info(f"👶 {version.notes_bebe}")
+                        if version.notes_bebe:
+                            st.info(version.notes_bebe)
                         
-                        if version.type_version == "batch_cooking" and version.etapes_paralleles_batch:
+                        if version.type_version == "batch cooking" and version.etapes_paralleles_batch:
                             st.markdown("**Étapes parallèles:**")
                             for etape in version.etapes_paralleles_batch:
                                 st.caption(f"• {etape}")
+                        
+                        if version.temps_optimise_batch:
+                            st.caption(f"⏱️ Temps optimisé: {version.temps_optimise_batch} minutes")
             else:
                 st.info("Aucune version adaptée générée.")
         
@@ -487,7 +496,16 @@ def render_detail_recette(recette):
             
             with col2:
                 if st.button("⏲️ Générer version batch cooking", use_container_width=True):
-                    st.info("⏳ Fonctionnalité en développement")
+                    with st.spinner("🤖 L'IA optimise la recette pour le batch cooking..."):
+                        try:
+                            version = service.generer_version_batch_cooking(recette.id)
+                            if version:
+                                st.success("✅ Version batch cooking créée!")
+                                st.rerun()
+                            else:
+                                st.error("❌ Erreur lors de la génération")
+                        except Exception as e:
+                            st.error(f"❌ Erreur: {str(e)}")
 
 
 def render_ajouter_manuel():

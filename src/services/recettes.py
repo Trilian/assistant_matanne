@@ -69,6 +69,17 @@ class VersionBebeGeneree(BaseModel):
     age_minimum_mois: int = Field(6, ge=6, le=36)
 
 
+class VersionBatchCookingGeneree(BaseModel):
+    """Version batch cooking générée"""
+
+    instructions_modifiees: str
+    nombre_portions_recommande: int = Field(12, ge=4, le=100)
+    temps_preparation_total_heures: float = Field(2.0, ge=0.5, le=12)
+    conseils_conservation: str
+    conseils_congelation: str
+    calendrier_preparation: str
+
+
 # ═══════════════════════════════════════════════════════════
 # SERVICE RECETTES UNIFIÉ (AVEC HÉRITAGE MULTIPLE)
 # ═══════════════════════════════════════════════════════════
@@ -454,6 +465,138 @@ Steps:
         db.refresh(version)
 
         logger.info(f"✅ Baby version created for recipe {recette_id}")
+        return version
+
+    @with_db_session
+    def generer_version_batch_cooking(self, recette_id: int, db: Session) -> VersionRecette | None:
+        """Génère une version batch cooking optimisée de la recette avec l'IA.
+
+        Adapts recipe for batch cooking preparation. Creates version in DB.
+        Includes storage, freezing, and preparation timeline advice.
+
+        Args:
+            recette_id: ID of recipe to adapt
+            db: Database session (injected by @with_db_session)
+
+        Returns:
+            VersionRecette object or None if generation fails
+        """
+        # Récupérer la recette
+        recette = (
+            db.query(Recette)
+            .options(
+                joinedload(Recette.ingredients).joinedload(RecetteIngredient.ingredient),
+                joinedload(Recette.etapes),
+            )
+            .filter(Recette.id == recette_id)
+            .first()
+        )
+        if not recette:
+            raise ErreurNonTrouve(f"Recipe {recette_id} not found")
+
+        # Vérifier si version existe déjà
+        existing = (
+            db.query(VersionRecette)
+            .filter(
+                VersionRecette.recette_base_id == recette_id,
+                VersionRecette.type_version == "batch cooking",
+            )
+            .first()
+        )
+        if existing:
+            logger.info(f"📦 Batch cooking version already exists for recipe {recette_id}")
+            return existing
+
+        logger.info(f"🤖 Generating batch cooking version for recipe {recette_id}")
+
+        # Construire contexte avec recette complète
+        ingredients_str = "\n".join(
+            [f"- {ri.quantite} {ri.unite} {ri.ingredient.nom}" for ri in recette.ingredients]
+        )
+        etapes_str = "\n".join(
+            [f"{e.ordre}. {e.description}" for e in sorted(recette.etapes, key=lambda x: x.ordre)]
+        )
+
+        context = f"""Recipe: {recette.nom}
+
+Ingredients:
+{ingredients_str}
+
+Steps:
+{etapes_str}
+
+Preparation time: {recette.temps_preparation} minutes
+Cooking time: {recette.temps_cuisson} minutes
+Difficulty: {recette.niveau_difficulte}"""
+
+        # Prompt pour adaptation batch cooking
+        prompt = self.build_json_prompt(
+            context=context,
+            task="Adapt this recipe for batch cooking preparation",
+            json_schema='''{
+                "instructions_modifiees": str,
+                "nombre_portions_recommande": int,
+                "temps_preparation_total_heures": float,
+                "conseils_conservation": str,
+                "conseils_congelation": str,
+                "calendrier_preparation": str
+            }''',
+            constraints=[
+                "Increase quantities for 12+ portions",
+                "Simplify steps for batch preparation",
+                "Include storage duration (days/weeks)",
+                "Provide freezing instructions",
+                "Detail preparation timeline for the week",
+                "Consider food safety guidelines",
+            ],
+        )
+
+        # Appel IA avec parsing auto
+        version_data = self.call_with_parsing_sync(
+            prompt=prompt,
+            response_model=VersionBatchCookingGeneree,
+            system_prompt=self.build_system_prompt(
+                role="Expert batch cooking coach",
+                expertise=[
+                    "Meal prep strategies",
+                    "Food preservation",
+                    "Freezing techniques",
+                    "Time-efficient cooking",
+                    "Food safety",
+                ],
+                rules=[
+                    "Optimize for minimum active cooking time",
+                    "Maximize freezer storage efficiency",
+                    "Ensure food safety at every step",
+                    "Suggest portion-friendly containers",
+                    "Include reheating instructions",
+                ],
+            ),
+        )
+
+        if not version_data:
+            logger.warning(f"⚠️ Failed to generate batch cooking version for recipe {recette_id}")
+            raise ErreurValidation("Invalid IA response format for batch cooking version")
+
+        # Créer version en DB
+        version = VersionRecette(
+            recette_base_id=recette_id,
+            type_version="batch cooking",
+            instructions_modifiees=version_data.instructions_modifiees,
+            notes_bebe=f"""**Portions: {version_data.nombre_portions_recommande}**
+⏱️ Temps total: {version_data.temps_preparation_total_heures}h
+
+🧊 Conservation: {version_data.conseils_conservation}
+
+❄️ Congélation: {version_data.conseils_congelation}
+
+📅 Calendrier: {version_data.calendrier_preparation}""",
+        )
+        db.add(version)
+        db.commit()
+        db.refresh(version)
+
+        logger.info(f"✅ Batch cooking version created for recipe {recette_id}")
         return version
 
     # ═══════════════════════════════════════════════════════════

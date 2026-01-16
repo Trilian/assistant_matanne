@@ -95,7 +95,7 @@ class ClientIA:
         self._ensure_config_loaded()
 
         # Vérifier rate limit
-        from .cache import LimiteDebit
+        from ..cache import LimiteDebit
 
         peut_appeler, message_erreur = LimiteDebit.peut_appeler()
         if not peut_appeler:
