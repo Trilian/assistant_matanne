@@ -232,8 +232,8 @@ class Parametres(BaseSettings):
         Clé API Mistral avec fallbacks.
 
         Ordre de priorité:
-        1. st.secrets["mistral"]["api_key"] (Streamlit Cloud)
-        2. MISTRAL_API_KEY env var (dev local)
+        1. MISTRAL_API_KEY env var (dev local depuis .env.local)
+        2. st.secrets["mistral"]["api_key"] (Streamlit Cloud)
 
         Returns:
             Clé API Mistral
@@ -241,28 +241,26 @@ class Parametres(BaseSettings):
         Raises:
             ValueError: Si clé introuvable
         """
-        # 1. Secrets Streamlit - Essayer plusieurs chemins
-        api_key = _get_mistral_api_key_from_secrets()
-        if api_key:
-            logger.debug("✅ Clé API Mistral chargée depuis st.secrets")
-            return api_key
-
-        # 2. Variable d'environnement
+        # 1. Variable d'environnement (PREMIÈRE PRIORITÉ - dev local)
         cle = os.getenv("MISTRAL_API_KEY")
         if cle:
-            logger.debug("✅ Clé API Mistral chargée depuis variable d'environnement")
+            logger.debug("✅ Clé API Mistral chargée depuis variable d'environnement (.env.local)")
             return cle
+
+        # 2. Secrets Streamlit - Essayer plusieurs chemins (Streamlit Cloud)
+        api_key = _get_mistral_api_key_from_secrets()
+        if api_key:
+            logger.debug("✅ Clé API Mistral chargée depuis st.secrets (Streamlit Cloud)")
+            return api_key
 
         raise ValueError(
             "❌ Clé API Mistral manquante!\n\n"
             "Configure l'une de ces options:\n"
-            "1. Streamlit Secrets (Cloud):\n"
+            "1. Fichier .env.local (Dev local):\n"
+            "   MISTRAL_API_KEY='sk-xxx' ou autre format\n\n"
+            "2. Streamlit Secrets (Cloud):\n"
             "   [mistral]\n"
-            "   api_key = 'sk-xxx'\n\n"
-            "2. Variable d'environnement (Dev):\n"
-            "   MISTRAL_API_KEY='sk-xxx'\n\n"
-            "3. Fichier .env.local:\n"
-            "   MISTRAL_API_KEY='sk-xxx'"
+            "   api_key = 'sk-xxx' ou autre format"
         )
 
     @property
