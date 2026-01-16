@@ -428,7 +428,7 @@ def obtenir_parametres() -> Parametres:
         configure_logging(_parametres.LOG_LEVEL)
     except Exception:
         # Fallback: continue if logging config échoue
-            pass
+        pass
 
-        logger.info(f"✅ Configuration chargée: {_parametres.APP_NAME} v{_parametres.APP_VERSION}")
+    logger.info(f"✅ Configuration chargée: {_parametres.APP_NAME} v{_parametres.APP_VERSION}")
     return _parametres
