@@ -406,7 +406,10 @@ _parametres: Parametres | None = None
 
 def obtenir_parametres() -> Parametres:
     """
-    Récupère l'instance Parametres (singleton).
+    Récupère l'instance Parametres.
+    
+    Important: Avec Streamlit qui redémarre, on recrée l'instance
+    à chaque appel pour recharger les variables d'environnement.
 
     Returns:
         Instance Parametres configurée
@@ -416,13 +419,15 @@ def obtenir_parametres() -> Parametres:
     # Recharger .env files à chaque appel (important pour Streamlit qui redémarre)
     _reload_env_files()
     
-    if _parametres is None:
-        _parametres = Parametres()
-        # Configure logging according to loaded settings
-        try:
-            configure_logging(_parametres.LOG_LEVEL)
-        except Exception:
-            # Fallback: continue if logging config échoue
+    # Toujours recréer l'instance pour Streamlit (pas de cache singleton)
+    # Cela garantit que os.environ est relu
+    _parametres = Parametres()
+    
+    # Configure logging according to loaded settings
+    try:
+        configure_logging(_parametres.LOG_LEVEL)
+    except Exception:
+        # Fallback: continue if logging config échoue
             pass
 
         logger.info(f"✅ Configuration chargée: {_parametres.APP_NAME} v{_parametres.APP_VERSION}")
