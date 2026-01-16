@@ -9,6 +9,14 @@ Application principale - VERSION OPTIMISÉE LAZY LOADING
 import sys
 from pathlib import Path
 
+# ═══════════════════════════════════════════════════════════
+# LOAD ENV VARIABLES (MUST BE FIRST)
+# ═══════════════════════════════════════════════════════════
+
+from dotenv import load_dotenv
+
+load_dotenv('.env.local')  # Load local environment variables first
+
 import streamlit as st
 
 # ═══════════════════════════════════════════════════════════

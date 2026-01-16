@@ -25,13 +25,11 @@ def app():
         if service is not None:
             recette = service.get_by_id_full(st.session_state.detail_recette_id)
             if recette:
-                col1, col2 = st.columns([20, 1])
-                with col2:
-                    if st.button("← Retour", use_container_width=True):
-                        st.session_state.detail_recette_id = None
-                        st.rerun()
-                with col1:
-                    render_detail_recette(recette)
+                if st.button("← Retour à la liste"):
+                    st.session_state.detail_recette_id = None
+                    st.rerun()
+                st.divider()
+                render_detail_recette(recette)
                 return
         st.error("❌ Recette non trouvée")
         st.session_state.detail_recette_id = None
