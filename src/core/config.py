@@ -73,39 +73,53 @@ def _get_mistral_api_key_from_secrets():
     3. st.secrets.get('mistral', {}).get('api_key')
     """
     try:
-        if not hasattr(st, "secrets") or st.secrets is None:
+        # Vérifier que streamlit est importé et initialisé
+        import streamlit as st
+        
+        if not hasattr(st, "secrets"):
+            return None
+            
+        secrets = st.secrets
+        if secrets is None:
             return None
         
         # Chemin 1: st.secrets['mistral']['api_key']
         try:
-            mistral = st.secrets.get("mistral")
-            if mistral and isinstance(mistral, dict):
-                api_key = mistral.get("api_key")
-                if api_key:
-                    return api_key
-        except (KeyError, TypeError, AttributeError):
-            pass
+            if "mistral" in secrets:
+                mistral = secrets["mistral"]
+                if isinstance(mistral, dict) and "api_key" in mistral:
+                    api_key = mistral["api_key"]
+                    if api_key:
+                        logger.debug(f"✅ API key found in st.secrets['mistral']['api_key']")
+                        return api_key
+        except (KeyError, TypeError, AttributeError) as e:
+            logger.debug(f"Chemin 1 échoué: {e}")
         
         # Chemin 2: st.secrets['mistral_api_key'] (alternative)
         try:
-            api_key = st.secrets.get("mistral_api_key")
-            if api_key:
-                return api_key
-        except (KeyError, TypeError, AttributeError):
-            pass
+            if "mistral_api_key" in secrets:
+                api_key = secrets["mistral_api_key"]
+                if api_key:
+                    logger.debug(f"✅ API key found in st.secrets['mistral_api_key']")
+                    return api_key
+        except (KeyError, TypeError, AttributeError) as e:
+            logger.debug(f"Chemin 2 échoué: {e}")
         
         # Chemin 3: Itérer sur tous les secrets (fallback)
         try:
-            for key in st.secrets:
+            for key in secrets:
                 if "mistral" in key.lower() and "key" in key.lower():
-                    value = st.secrets[key]
+                    value = secrets[key]
                     if value:
+                        logger.debug(f"✅ API key found in st.secrets['{key}']")
                         return value
-        except (TypeError, AttributeError):
-            pass
+        except (TypeError, AttributeError) as e:
+            logger.debug(f"Chemin 3 échoué: {e}")
+        
+        logger.debug("❌ Aucune clé Mistral trouvée dans st.secrets")
             
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug(f"Erreur accès secrets: {e}")
     
     return None
 
