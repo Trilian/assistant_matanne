@@ -13,6 +13,7 @@ Service complet pour les recettes fusionnant :
 - recette_version_service.py (Versions bébé/batch)
 """
 
+import asyncio
 import csv
 import json
 import logging
@@ -321,7 +322,7 @@ class RecetteService(BaseService[Recette], BaseAIService, RecipeAIMixin):
         logger.info(f"🤖 Generating {nb_recettes} recipe suggestions")
 
         # IA call with auto rate limiting & parsing
-        recettes = self.call_with_list_parsing(
+        recettes = self.call_with_list_parsing_sync(
             prompt=prompt,
             item_model=RecetteSuggestion,
             system_prompt=self.build_system_prompt(
@@ -418,7 +419,7 @@ Steps:
         )
 
         # Appel IA avec parsing auto
-        version_data = self.call_with_parsing(
+        version_data = self.call_with_parsing_sync(
             prompt=prompt,
             response_model=VersionBebeGeneree,
             system_prompt=self.build_system_prompt(

@@ -170,7 +170,7 @@ class CoursesService(BaseService[ArticleCourses], BaseAIService):
         )
 
         # Appel IA avec auto rate limiting & parsing
-        suggestions = self.call_with_list_parsing(
+        suggestions = self.call_with_list_parsing_sync(
             prompt=prompt,
             item_model=SuggestionCourses,
             system_prompt=self.build_system_prompt(

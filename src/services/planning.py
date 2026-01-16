@@ -208,7 +208,7 @@ class PlanningService(BaseService[Planning], BaseAIService, PlanningAIMixin):
         logger.info(f"🤖 Generating AI weekly plan starting {semaine_debut}")
 
         # Appel IA avec auto rate limiting & parsing
-        planning_data = self.call_with_list_parsing(
+        planning_data = self.call_with_list_parsing_sync(
             prompt=prompt,
             item_model=JourPlanning,
             system_prompt=self.build_system_prompt(
