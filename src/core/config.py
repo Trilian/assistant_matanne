@@ -7,28 +7,37 @@ import logging
 import os
 from pathlib import Path
 
-# Charger le fichier .env.local AVANT tout import
-_env_files = [".env.local", ".env"]
-for env_file in _env_files:
-    env_path = Path(env_file)
-    if env_path.exists():
-        # Charger manuellement le fichier .env
-        with open(env_path) as f:
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith("#"):
-                    if "=" in line:
-                        key, value = line.split("=", 1)
-                        key = key.strip()
-                        value = value.strip()
-                        # Retirer les guillemets
-                        if value.startswith('"') and value.endswith('"'):
-                            value = value[1:-1]
-                        elif value.startswith("'") and value.endswith("'"):
-                            value = value[1:-1]
-                        # Ne pas écraser les variables d'environnement existantes
-                        if not os.getenv(key):
-                            os.environ[key] = value
+def _reload_env_files():
+    """Recharge les fichiers .env (appelé à chaque accès config pour Streamlit)"""
+    try:
+        # Trouver le répertoire racine du projet (parent du dossier src)
+        _config_dir = Path(__file__).parent.parent.parent
+        _env_files = [_config_dir / ".env.local", _config_dir / ".env"]
+        
+        for env_path in _env_files:
+            if env_path.exists():
+                # Charger manuellement le fichier .env
+                with open(env_path) as f:
+                    for line in f:
+                        line = line.strip()
+                        if line and not line.startswith("#"):
+                            if "=" in line:
+                                key, value = line.split("=", 1)
+                                key = key.strip()
+                                value = value.strip()
+                                # Retirer les guillemets
+                                if value.startswith('"') and value.endswith('"'):
+                                    value = value[1:-1]
+                                elif value.startswith("'") and value.endswith("'"):
+                                    value = value[1:-1]
+                                # Pour Streamlit : forcer le rechargement
+                                os.environ[key] = value
+    except Exception as e:
+        # Ignorer les erreurs si le chargement échoue
+        pass
+
+# Charger une première fois au démarrage du module
+_reload_env_files()
 
 import streamlit as st
 from pydantic import Field
@@ -403,6 +412,10 @@ def obtenir_parametres() -> Parametres:
         Instance Parametres configurée
     """
     global _parametres
+    
+    # Recharger .env files à chaque appel (important pour Streamlit qui redémarre)
+    _reload_env_files()
+    
     if _parametres is None:
         _parametres = Parametres()
         # Configure logging according to loaded settings
