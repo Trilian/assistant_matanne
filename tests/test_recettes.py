@@ -249,7 +249,86 @@ class TestRecetteExport:
 
 
 # ═══════════════════════════════════════════════════════════
-# SECTION 5: HELPER TESTS
+# SECTION 6: HISTORIQUE & VERSIONS TESTS
+# ═══════════════════════════════════════════════════════════
+
+@pytest.mark.unit
+class TestHistoriqueRecette:
+    """Test historique (usage tracking) functionality."""
+    
+    def test_enregistrer_cuisson_creates_entry(
+        self, recette_service, sample_recipe, db
+    ):
+        """Test recording a recipe being cooked."""
+        from datetime import date
+        
+        result = recette_service.enregistrer_cuisson(
+            recette_id=sample_recipe.id,
+            portions=4,
+            note=4,
+            avis="Délicieux!",
+            db=db
+        )
+        
+        assert result is True
+    
+    def test_get_historique_returns_entries(
+        self, recette_service, sample_recipe, db
+    ):
+        """Test retrieving cooking history."""
+        # Record some cookings
+        recette_service.enregistrer_cuisson(sample_recipe.id, 4, 5, "Parfait!", db=db)
+        recette_service.enregistrer_cuisson(sample_recipe.id, 6, 4, "Bon", db=db)
+        
+        # Get historique
+        historique = recette_service.get_historique(sample_recipe.id, nb_dernieres=10, db=db)
+        
+        assert len(historique) >= 2
+        assert historique[0].note in [4, 5]  # Most recent first
+    
+    def test_get_stats_recette_calculates_correctly(
+        self, recette_service, sample_recipe, db
+    ):
+        """Test recipe statistics calculation."""
+        # Record cookings
+        recette_service.enregistrer_cuisson(sample_recipe.id, 4, 5, db=db)
+        recette_service.enregistrer_cuisson(sample_recipe.id, 6, 3, db=db)
+        
+        # Get stats
+        stats = recette_service.get_stats_recette(sample_recipe.id, db=db)
+        
+        assert stats["nb_cuissons"] == 2
+        assert stats["total_portions"] == 10
+        assert stats["note_moyenne"] == 4.0
+        assert stats["jours_depuis_derniere"] == 0
+    
+    def test_get_stats_empty_historique(
+        self, recette_service, sample_recipe, db
+    ):
+        """Test stats for recipe with no history."""
+        stats = recette_service.get_stats_recette(sample_recipe.id, db=db)
+        
+        assert stats["nb_cuissons"] == 0
+        assert stats["derniere_cuisson"] is None
+        assert stats["note_moyenne"] is None
+
+
+@pytest.mark.unit
+class TestVersionRecette:
+    """Test recipe versions (baby, batch cooking)."""
+    
+    def test_get_versions_returns_list(
+        self, recette_service, sample_recipe, db
+    ):
+        """Test retrieving recipe versions."""
+        versions = recette_service.get_versions(sample_recipe.id, db=db)
+        
+        # Should be empty or list
+        assert isinstance(versions, list)
+
+
+# ═══════════════════════════════════════════════════════════
+# SECTION 7: HELPER TESTS
 # ═══════════════════════════════════════════════════════════
 
 @pytest.mark.unit
@@ -281,8 +360,7 @@ class TestRecetteHelpers:
 
 
 # ═══════════════════════════════════════════════════════════
-# SECTION 6: INTEGRATION TESTS
-# ═══════════════════════════════════════════════════════════
+# SECTION 8: INTEGRATION TESTS
 
 @pytest.mark.integration
 class TestRecetteIntegration:

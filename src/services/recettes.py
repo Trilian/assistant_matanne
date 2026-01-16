@@ -449,7 +449,147 @@ Steps:
         return version
 
     # ═══════════════════════════════════════════════════════════
-    # SECTION 3 : IMPORT/EXPORT (REFACTORED)
+    # SECTION 3 : HISTORIQUE & VERSIONS
+    # ═══════════════════════════════════════════════════════════
+
+    @with_db_session
+    def enregistrer_cuisson(
+        self,
+        recette_id: int,
+        portions: int = 1,
+        note: int | None = None,
+        avis: str | None = None,
+        db: Session | None = None,
+    ) -> bool:
+        """Enregistre qu'une recette a été cuisinée.
+        
+        Args:
+            recette_id: ID de la recette
+            portions: Nombre de portions cuisinées
+            note: Note de 0-5 (optionnel)
+            avis: Avis personnel (optionnel)
+            db: Session DB injectée
+            
+        Returns:
+            True si succès, False sinon
+        """
+        try:
+            from datetime import date
+            from src.core.models import HistoriqueRecette
+            
+            historique = HistoriqueRecette(
+                recette_id=recette_id,
+                date_cuisson=date.today(),
+                portions_cuisinees=portions,
+                note=note,
+                avis=avis,
+            )
+            db.add(historique)
+            db.commit()
+            logger.info(f"✅ Cuisson enregistrée pour recette {recette_id}")
+            return True
+        except Exception as e:
+            logger.error(f"Erreur enregistrement cuisson: {e}")
+            return False
+
+    @with_db_session
+    def get_historique(
+        self,
+        recette_id: int,
+        nb_dernieres: int = 10,
+        db: Session | None = None,
+    ) -> list:
+        """Récupère l'historique d'utilisation d'une recette.
+        
+        Args:
+            recette_id: ID de la recette
+            nb_dernieres: Nombre d'entrées à retourner
+            db: Session DB injectée
+            
+        Returns:
+            Liste des entrées d'historique
+        """
+        try:
+            from src.core.models import HistoriqueRecette
+            
+            return (
+                db.query(HistoriqueRecette)
+                .filter(HistoriqueRecette.recette_id == recette_id)
+                .order_by(HistoriqueRecette.date_cuisson.desc())
+                .limit(nb_dernieres)
+                .all()
+            )
+        except Exception as e:
+            logger.error(f"Erreur récupération historique: {e}")
+            return []
+
+    @with_db_session
+    def get_stats_recette(self, recette_id: int, db: Session | None = None) -> dict:
+        """Récupère les statistiques d'utilisation d'une recette.
+        
+        Args:
+            recette_id: ID de la recette
+            db: Session DB injectée
+            
+        Returns:
+            Dict avec nb_cuissons, derniere_cuisson, note_moyenne, etc.
+        """
+        try:
+            from datetime import date
+            from src.core.models import HistoriqueRecette
+            
+            historique = (
+                db.query(HistoriqueRecette)
+                .filter(HistoriqueRecette.recette_id == recette_id)
+                .all()
+            )
+            
+            if not historique:
+                return {
+                    "nb_cuissons": 0,
+                    "derniere_cuisson": None,
+                    "note_moyenne": None,
+                    "total_portions": 0,
+                    "jours_depuis_derniere": None,
+                }
+            
+            notes = [h.note for h in historique if h.note is not None]
+            derniere = historique[0]
+            
+            return {
+                "nb_cuissons": len(historique),
+                "derniere_cuisson": derniere.date_cuisson,
+                "note_moyenne": sum(notes) / len(notes) if notes else None,
+                "total_portions": sum(h.portions_cuisinees for h in historique),
+                "jours_depuis_derniere": (date.today() - derniere.date_cuisson).days,
+            }
+        except Exception as e:
+            logger.error(f"Erreur stats recette: {e}")
+            return {}
+
+    @with_db_session
+    def get_versions(self, recette_id: int, db: Session | None = None) -> list:
+        """Récupère toutes les versions d'une recette.
+        
+        Args:
+            recette_id: ID de la recette
+            db: Session DB injectée
+            
+        Returns:
+            Liste des VersionRecette
+        """
+        try:
+            return (
+                db.query(VersionRecette)
+                .filter(VersionRecette.recette_base_id == recette_id)
+                .all()
+            )
+        except Exception as e:
+            logger.error(f"Erreur récupération versions: {e}")
+            return []
+
+    # ═══════════════════════════════════════════════════════════
+    # SECTION 4 : IMPORT/EXPORT (REFACTORED)
     # ═══════════════════════════════════════════════════════════
 
     def export_to_csv(self, recettes: list[Recette], separator: str = ",") -> str:
@@ -530,7 +670,7 @@ Steps:
         return json.dumps(data, indent=indent, ensure_ascii=False)
 
     # ═══════════════════════════════════════════════════════════
-    # SECTION 4 : HELPERS PRIVÉS (REFACTORED)
+    # SECTION 5 : HELPERS PRIVÉS (REFACTORED)
     # ═══════════════════════════════════════════════════════════
 
     def _find_or_create_ingredient(self, db: Session, nom: str) -> Ingredient:

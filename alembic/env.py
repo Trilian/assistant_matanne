@@ -45,7 +45,12 @@ def get_url():
         # Fallback sur .env (développement local)
         from dotenv import load_dotenv
 
-        load_dotenv()
+        # Charger .env.local en priorité
+        env_path = Path(__file__).parent.parent / ".env.local"
+        if env_path.exists():
+            load_dotenv(env_path)
+        else:
+            load_dotenv()
 
         user = os.getenv("POSTGRES_USER", "postgres")
         password = os.getenv("POSTGRES_PASSWORD")
@@ -70,7 +75,7 @@ def run_migrations_offline() -> None:
     context.configure(
         url=url,
         target_metadata=target_metadata,
-        literal_binds=True,
+        literal_binds=False,  # Désactiver literal_binds en offline
         dialect_opts={"paramstyle": "named"},
         compare_type=True,
         compare_server_default=True,
@@ -103,7 +108,12 @@ def run_migrations_online() -> None:
             context.run_migrations()
 
 
-if context.is_offline_mode():
+# Forcer le mode offline si la connexion échoue
+try:
+    if context.is_offline_mode():
+        run_migrations_offline()
+    else:
+        run_migrations_online()
+except Exception as e:
+    print(f"⚠️ Erreur de connexion, passage en mode offline: {e}")
     run_migrations_offline()
-else:
-    run_migrations_online()

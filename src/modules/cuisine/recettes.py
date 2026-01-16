@@ -15,6 +15,27 @@ def app():
     st.title("🍽️ Mes Recettes")
     st.caption("Gestion complète de votre base de recettes")
 
+    # Gérer l'état de la vue détails
+    if "detail_recette_id" not in st.session_state:
+        st.session_state.detail_recette_id = None
+
+    # Si une recette est sélectionnée, afficher son détail
+    if st.session_state.detail_recette_id is not None:
+        service = get_recette_service()
+        if service is not None:
+            recette = service.get_by_id_full(st.session_state.detail_recette_id)
+            if recette:
+                col1, col2 = st.columns([20, 1])
+                with col2:
+                    if st.button("← Retour", use_container_width=True):
+                        st.session_state.detail_recette_id = None
+                        st.rerun()
+                with col1:
+                    render_detail_recette(recette)
+                return
+        st.error("❌ Recette non trouvée")
+        st.session_state.detail_recette_id = None
+
     # Sous-tabs
     tab_liste, tab_ajout, tab_ia = st.tabs(["📋 Liste", "➕ Ajouter Manuel", "✨ Générer IA"])
 
@@ -29,12 +50,18 @@ def app():
 
 
 def render_liste():
-    """Affiche la liste des recettes"""
+    """Affiche la liste des recettes avec pagination"""
     service = get_recette_service()
     
     if service is None:
         st.error("❌ Service recettes indisponible")
         return
+    
+    # Initialiser pagination
+    if "recettes_page" not in st.session_state:
+        st.session_state.recettes_page = 0
+    
+    PAGE_SIZE = 9  # 3 colonnes x 3 lignes
     
     # Filtres
     col1, col2, col3 = st.columns(3)
@@ -42,11 +69,13 @@ def render_liste():
         type_repas = st.selectbox(
             "Type de repas",
             ["Tous", "petit_déjeuner", "déjeuner", "dîner", "goûter"],
+            key="filter_type_repas"
         )
     with col2:
         difficulte = st.selectbox(
             "Difficulté",
             ["Tous", "facile", "moyen", "difficile"],
+            key="filter_difficulte"
         )
     with col3:
         temps_max = st.number_input(
@@ -54,6 +83,7 @@ def render_liste():
             min_value=0,
             max_value=300,
             value=60,
+            key="filter_temps"
         )
     
     # Filtres supplémentaires avancés
@@ -95,7 +125,7 @@ def render_liste():
         type_repas=type_repas_filter,
         difficulte=difficulte_filter,
         temps_max=temps_max,
-        limit=20,
+        limit=200,
     )
     
     # Appliquer les filtres avancés
@@ -130,13 +160,28 @@ def render_liste():
         st.info("Aucune recette ne correspond à vos critères. Créez-en une!")
         return
     
-    st.success(f"✅ {len(recettes)} recette(s) trouvée(s)")
+    # Pagination
+    total_pages = (len(recettes) + PAGE_SIZE - 1) // PAGE_SIZE
+    st.session_state.recettes_page = min(st.session_state.recettes_page, total_pages - 1)
+    
+    start_idx = st.session_state.recettes_page * PAGE_SIZE
+    end_idx = start_idx + PAGE_SIZE
+    page_recettes = recettes[start_idx:end_idx]
+    
+    st.success(f"✅ {len(recettes)} recette(s) trouvée(s) | Page {st.session_state.recettes_page + 1}/{total_pages}")
     
     # Afficher en grid avec badges
     cols = st.columns(3)
-    for idx, recette in enumerate(recettes):
+    for idx, recette in enumerate(page_recettes):
         with cols[idx % 3]:
             with st.container(border=True):
+                # Image si disponible
+                if recette.url_image:
+                    try:
+                        st.image(recette.url_image, use_column_width=True)
+                    except Exception as e:
+                        st.caption(f"🖼️ Image indisponible")
+                
                 # En-tête avec nom et badge difficulté
                 title_col, difficulty_col = st.columns([3, 1])
                 with title_col:
@@ -179,10 +224,10 @@ def render_liste():
                 # Robots compatibles
                 if recette.robots_compatibles:
                     robots_icons = {
-                        'cookeo': '🤖',
-                        'monsieur_cuisine': '👨‍🍳',
-                        'airfryer': '🌪️',
-                        'multicooker': '⏲️'
+                        'Cookeo': '🤖',
+                        'Monsieur Cuisine': '👨‍🍳',
+                        'Airfryer': '🌪️',
+                        'Multicooker': '⏲️'
                     }
                     robot_badges = []
                     for robot in recette.robots_compatibles:
@@ -214,11 +259,34 @@ def render_liste():
                             nutrition_cols[3].metric("Gluc", f"{recette.glucides}g")
                 
                 if st.button("Voir détails", key=f"recette_{recette.id}"):
-                    render_detail_recette(recette)
+                    st.session_state.detail_recette_id = recette.id
+                    st.rerun()
+    
+    # Pagination controls
+    st.divider()
+    col1, col2, col3, col4, col5 = st.columns(5)
+    
+    with col1:
+        if st.session_state.recettes_page > 0:
+            if st.button("⬅️ Précédent"):
+                st.session_state.recettes_page -= 1
+                st.rerun()
+    
+    with col3:
+        st.write(f"Page {st.session_state.recettes_page + 1}/{total_pages}")
+    
+    with col5:
+        if st.session_state.recettes_page < total_pages - 1:
+            if st.button("Suivant ➡️"):
+                st.session_state.recettes_page += 1
+                st.rerun()
 
 
 def render_detail_recette(recette):
-    """Affiche les détails d'une recette avec badges et scores"""
+    """Affiche les détails d'une recette avec badges, historique et versions"""
+    service = get_recette_service()
+    
+    # En-tête
     col1, col2 = st.columns([3, 1])
     with col1:
         st.header(recette.nom)
@@ -229,6 +297,13 @@ def render_detail_recette(recette):
             st.markdown("# 🟡")
         elif recette.difficulte == "difficile":
             st.markdown("# 🔴")
+    
+    # Image si disponible
+    if recette.url_image:
+        try:
+            st.image(recette.url_image, use_column_width=True, caption=recette.nom)
+        except Exception:
+            st.caption("🖼️ Image indisponible")
     
     # Badges et caractéristiques
     badges = []
@@ -258,10 +333,10 @@ def render_detail_recette(recette):
     # Robots compatibles
     if recette.robots_compatibles:
         robots_icons = {
-            'cookeo': ('🤖', 'Cookeo'),
-            'monsieur_cuisine': ('👨‍🍳', 'Monsieur Cuisine'),
-            'airfryer': ('🌪️', 'Airfryer'),
-            'multicooker': ('⏲️', 'Multicooker')
+            'Cookeo': ('🤖', 'Cookeo'),
+            'Monsieur Cuisine': ('👨‍🍳', 'Monsieur Cuisine'),
+            'Airfryer': ('🌪️', 'Airfryer'),
+            'Multicooker': ('⏲️', 'Multicooker')
         }
         st.markdown("**🤖 Compatible avec:**")
         robot_cols = st.columns(len(recette.robots_compatibles))
@@ -294,10 +369,12 @@ def render_detail_recette(recette):
             if recette.glucides:
                 nutrition_cols[3].metric("Glucides", f"{recette.glucides}g")
     
+    # Description
     if recette.description:
         st.markdown("### 📝 Description")
         st.write(recette.description)
     
+    # Ingrédients
     if recette.ingredients:
         st.markdown("### 🛒 Ingrédients")
         ingredient_cols = st.columns([2, 1, 1])
@@ -311,10 +388,106 @@ def render_detail_recette(recette):
             ingredient_cols[1].write(f"{ri.quantite}")
             ingredient_cols[2].write(f"{ri.unite}")
     
+    # Étapes de préparation
     if recette.etapes:
         st.markdown("### 👨‍🍳 Étapes de préparation")
         for etape in sorted(recette.etapes, key=lambda e: e.ordre or 0):
             st.markdown(f"**Étape {etape.ordre}:** {etape.description}")
+    
+    # Historique d'utilisation
+    st.divider()
+    st.markdown("### 📊 Historique d'utilisation")
+    
+    if service:
+        stats = service.get_stats_recette(recette.id)
+        
+        stat_cols = st.columns(5)
+        stat_cols[0].metric("🍽️ Cuissons", stats.get("nb_cuissons", 0))
+        if stats.get("derniere_cuisson"):
+            stat_cols[1].metric("📅 Dernière", stats.get("jours_depuis_derniere", "?"), "jours")
+        if stats.get("note_moyenne"):
+            stat_cols[2].metric("⭐ Note moyenne", f"{stats.get('note_moyenne', 0):.1f}/5")
+        stat_cols[3].metric("👥 Total portions", stats.get("total_portions", 0))
+        
+        # Bouton pour enregistrer une cuisson
+        col_a, col_b, col_c = st.columns([2, 1, 2])
+        with col_b:
+            if st.button("✅ Cuisinée aujourd'hui!", use_container_width=True):
+                with st.form("form_enregistrer_cuisson"):
+                    portions = st.number_input("Portions cuisinées", min_value=1, max_value=20, value=recette.portions)
+                    note = st.slider("Note (0-5 étoiles)", 0, 5, 0)
+                    avis = st.text_area("Avis personnel (optionnel)")
+                    
+                    if st.form_submit_button("Enregistrer"):
+                        if service.enregistrer_cuisson(recette.id, portions, note if note > 0 else None, avis if avis else None):
+                            st.success("✅ Cuisson enregistrée!")
+                            st.rerun()
+                        else:
+                            st.error("❌ Erreur lors de l'enregistrement")
+        
+        # Historique des 5 dernières cuissons
+        historique = service.get_historique(recette.id, nb_dernieres=5)
+        if historique:
+            with st.expander("📜 5 dernières utilisations", expanded=True):
+                for h in historique:
+                    col_date, col_portions, col_note = st.columns([1, 1, 1])
+                    with col_date:
+                        st.caption(f"📅 {h.date_cuisson.strftime('%d/%m/%Y')}")
+                    with col_portions:
+                        st.caption(f"👥 {h.portions_cuisinees} portions")
+                    with col_note:
+                        if h.note:
+                            st.caption(f"⭐ {h.note}/5")
+                    if h.avis:
+                        st.caption(f"💭 {h.avis}")
+                    st.divider()
+    
+    # Versions (bébé, batch cooking)
+    st.divider()
+    st.markdown("### 👶 Versions adaptées")
+    
+    if service:
+        versions = service.get_versions(recette.id)
+        
+        tab_versions = st.tabs(["📋 Versions existantes", "✨ Générer avec IA"])
+        
+        with tab_versions[0]:
+            if versions:
+                for version in versions:
+                    icon = "👶" if version.type_version == "bébé" else "⏲️"
+                    with st.expander(f"{icon} Version {version.type_version}"):
+                        if version.instructions_modifiees:
+                            st.markdown("**Instructions adaptées:**")
+                            st.write(version.instructions_modifiees)
+                        
+                        if version.type_version == "bébé" and version.notes_bebe:
+                            st.info(f"👶 {version.notes_bebe}")
+                        
+                        if version.type_version == "batch_cooking" and version.etapes_paralleles_batch:
+                            st.markdown("**Étapes parallèles:**")
+                            for etape in version.etapes_paralleles_batch:
+                                st.caption(f"• {etape}")
+            else:
+                st.info("Aucune version adaptée générée.")
+        
+        with tab_versions[1]:
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("👶 Générer version bébé", use_container_width=True):
+                    with st.spinner("🤖 L'IA adapte la recette..."):
+                        try:
+                            version = service.generer_version_bebe(recette.id)
+                            if version:
+                                st.success("✅ Version bébé créée!")
+                                st.rerun()
+                            else:
+                                st.error("❌ Erreur lors de la génération")
+                        except Exception as e:
+                            st.error(f"❌ Erreur: {str(e)}")
+            
+            with col2:
+                if st.button("⏲️ Générer version batch cooking", use_container_width=True):
+                    st.info("⏳ Fonctionnalité en développement")
 
 
 def render_ajouter_manuel():

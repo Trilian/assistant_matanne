@@ -189,6 +189,9 @@ class Recette(Base):
     versions: Mapped[list["VersionRecette"]] = relationship(
         back_populates="recette_base", cascade="all, delete-orphan"
     )
+    historique: Mapped[list["HistoriqueRecette"]] = relationship(
+        back_populates="recette", cascade="all, delete-orphan"
+    )
 
     # Contraintes
     __table_args__ = (
@@ -723,6 +726,44 @@ class BatchMeal(Base):
 
     def __repr__(self) -> str:
         return f"<BatchMeal(id={self.id}, nom='{self.nom}', portions={self.portions_restantes})>"
+
+
+# ═══════════════════════════════════════════════════════════
+# HISTORIQUE RECETTES
+# ═══════════════════════════════════════════════════════════
+
+
+class HistoriqueRecette(Base):
+    """Historique d'utilisation d'une recette"""
+
+    __tablename__ = "historique_recettes"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    recette_id: Mapped[int] = mapped_column(
+        ForeignKey("recettes.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    date_cuisson: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    portions_cuisinees: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    note: Mapped[int | None] = mapped_column(Integer)  # 0-5 stars
+    avis: Mapped[str | None] = mapped_column(Text)  # Commentaire personnel
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    # Relations
+    recette: Mapped["Recette"] = relationship("Recette")
+
+    __table_args__ = (
+        CheckConstraint("note IS NULL OR (note >= 0 AND note <= 5)", name="ck_note_valide"),
+        CheckConstraint("portions_cuisinees > 0", name="ck_portions_cuisinees_positive"),
+    )
+
+    @property
+    def nb_jours_depuis(self) -> int:
+        """Nombre de jours depuis la dernière cuisson"""
+        from datetime import date as dt_date
+        return (dt_date.today() - self.date_cuisson).days
+
+    def __repr__(self) -> str:
+        return f"<HistoriqueRecette(recette={self.recette_id}, date={self.date_cuisson}, note={self.note})>"
 
 
 # ═══════════════════════════════════════════════════════════
