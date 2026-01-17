@@ -8,6 +8,7 @@ import requests
 import logging
 from typing import Optional
 import base64
+from urllib.parse import quote
 
 logger = logging.getLogger(__name__)
 
@@ -61,8 +62,11 @@ def _generer_via_pollinations(nom_recette: str, description: str) -> Optional[st
         prompt += f": {description}"
     prompt += ". Appetizing, well-lit, high quality, professional"
     
+    # URL encode le prompt pour éviter les problèmes avec accents
+    prompt_encoded = quote(prompt, safe='')
+    
     # URL Pollinations (pas de clé requise)
-    url = f"https://image.pollinations.ai/prompt/{prompt}"
+    url = f"https://image.pollinations.ai/prompt/{prompt_encoded}"
     
     try:
         response = requests.get(url, timeout=30)

@@ -185,21 +185,23 @@ def render_liste():
                     except Exception as e:
                         st.caption(f"🖼️ Image indisponible")
                 
-                # En-tête avec nom et badge difficulté
+                # En-tête compact avec nom et badge difficulté
                 title_col, difficulty_col = st.columns([3, 1])
                 with title_col:
-                    st.subheader(recette.nom)
+                    st.markdown(f"**{recette.nom}**", help=recette.description or "")
                 with difficulty_col:
                     if recette.difficulte == "facile":
-                        st.markdown("🟢")
+                        st.markdown("🟢", help="Facile")
                     elif recette.difficulte == "moyen":
-                        st.markdown("🟡")
+                        st.markdown("🟡", help="Moyen")
                     elif recette.difficulte == "difficile":
-                        st.markdown("🔴")
+                        st.markdown("🔴", help="Difficile")
                 
-                st.markdown(f"*{recette.description[:100]}...*" if recette.description else "")
+                # Description courte
+                if recette.description:
+                    st.caption(recette.description[:80] + ("..." if len(recette.description) > 80 else ""))
                 
-                # Badges bio/local/rapide/équilibré - alignement amélioré
+                # Badges bio/local/rapide/équilibré - sur une ligne
                 badges = []
                 if recette.est_bio:
                     badges.append("🌱 Bio")
@@ -213,21 +215,10 @@ def render_liste():
                     badges.append("❄️ Congélable")
                 
                 if badges:
-                    # Afficher badges en wrapping multi-ligne
                     badge_text = " ".join(badges)
                     st.caption(badge_text)
                 
-                # Scores bio/local si présents
-                if (recette.score_bio or 0) > 0 or (recette.score_local or 0) > 0:
-                    score_cols = st.columns(2)
-                    with score_cols[0]:
-                        if (recette.score_bio or 0) > 0:
-                            st.metric("🌱 Bio", f"{recette.score_bio}%")
-                    with score_cols[1]:
-                        if (recette.score_local or 0) > 0:
-                            st.metric("📍 Local", f"{recette.score_local}%")
-                
-                # Robots compatibles
+                # Robots compatibles - icônes seulement
                 if recette.robots_compatibles:
                     robots_icons = {
                         'Cookeo': '🤖',
@@ -239,15 +230,15 @@ def render_liste():
                     for robot in recette.robots_compatibles:
                         icon = robots_icons.get(robot, '🤖')
                         robot_badges.append(icon)
-                    st.caption("Compatible: " + " ".join(robot_badges))
+                    st.caption(" ".join(robot_badges))
                 
-                # Infos principales
-                col_a, col_b, col_c = st.columns(3)
-                with col_a:
-                    st.caption(f"⏱️ {recette.temps_preparation}min")
-                with col_b:
+                # Infos principales en petite police
+                info_col1, info_col2, info_col3 = st.columns(3)
+                with info_col1:
+                    st.caption(f"⏱️ {recette.temps_preparation}m")
+                with info_col2:
                     st.caption(f"👥 {recette.portions}")
-                with col_c:
+                with info_col3:
                     if recette.calories:
                         st.caption(f"🔥 {recette.calories}kcal")
                 
@@ -363,16 +354,18 @@ def render_detail_recette(recette):
             robot_cols[idx].metric(icon, label)
     
     # Infos principales
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
+    metric_cols = st.columns(4)
+    with metric_cols[0]:
         st.metric("⏱️ Préparation", f"{recette.temps_preparation} min")
-    with col2:
+    with metric_cols[1]:
         st.metric("🍳 Cuisson", f"{recette.temps_cuisson} min")
-    with col3:
+    with metric_cols[2]:
         st.metric("👥 Portions", recette.portions)
-    with col4:
+    with metric_cols[3]:
         if recette.calories:
             st.metric("🔥 Calories", f"{recette.calories} kcal")
+        else:
+            st.metric("🔥 Calories", "—")
     
     # Nutrition complète
     if any([recette.calories, recette.proteines, recette.lipides, recette.glucides]):
