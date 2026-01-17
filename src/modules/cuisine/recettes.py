@@ -50,7 +50,9 @@ def app():
         render_ajouter_manuel()
     
     with tab_import:
-        render_importer()    with tab_ia:
+        render_importer()
+    
+    with tab_ia:
         render_generer_ia()
 
 
