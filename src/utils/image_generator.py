@@ -13,7 +13,7 @@ from urllib.parse import quote
 logger = logging.getLogger(__name__)
 
 
-def generer_image_recette(nom_recette: str, description: str = "") -> Optional[str]:
+def generer_image_recette(nom_recette: str, description: str = "", ingredients_list: list = None, type_plat: str = "") -> Optional[str]:
     """
     Génère une image pour une recette.
     
@@ -25,26 +25,28 @@ def generer_image_recette(nom_recette: str, description: str = "") -> Optional[s
     Args:
         nom_recette: Nom de la recette
         description: Description courte
+        ingredients_list: Liste des ingrédients pour améliorer le contexte
+        type_plat: Type de plat (entrée, plat, dessert, etc.)
         
     Returns:
         URL de l'image générée ou None
     """
     
-    # Essayer Pollinations.ai d'abord (gratuit, rapide)
+    # Essayer Hugging Face d'abord (meilleure qualité)
     try:
-        return _generer_via_pollinations(nom_recette, description)
-    except Exception as e:
-        logger.debug(f"Pollinations API échouée: {e}")
-    
-    # Essayer Hugging Face API
-    try:
-        return _generer_via_huggingface(nom_recette, description)
+        return _generer_via_huggingface(nom_recette, description, ingredients_list, type_plat)
     except Exception as e:
         logger.debug(f"Hugging Face API échouée: {e}")
     
+    # Essayer Pollinations.ai (rapide, gratuit)
+    try:
+        return _generer_via_pollinations(nom_recette, description, ingredients_list, type_plat)
+    except Exception as e:
+        logger.debug(f"Pollinations API échouée: {e}")
+    
     # Essayer Replicate API
     try:
-        return _generer_via_replicate(nom_recette, description)
+        return _generer_via_replicate(nom_recette, description, ingredients_list, type_plat)
     except Exception as e:
         logger.debug(f"Replicate API échouée: {e}")
     
@@ -52,15 +54,50 @@ def generer_image_recette(nom_recette: str, description: str = "") -> Optional[s
     return None
 
 
-def _generer_via_pollinations(nom_recette: str, description: str) -> Optional[str]:
+def _construire_prompt_detaille(nom_recette: str, description: str, ingredients_list: list = None, type_plat: str = "") -> str:
+    """Construit un prompt plus détaillé pour la génération d'images"""
+    
+    # Ingrédients clés à mentionner
+    ingredients_mentions = ""
+    if ingredients_list and isinstance(ingredients_list, list):
+        # Extraire les noms des ingrédients principaux (max 3-4)
+        ingredient_names = []
+        for ing in ingredients_list[:4]:
+            if isinstance(ing, dict) and 'nom' in ing:
+                ingredient_names.append(ing['nom'].lower())
+            elif isinstance(ing, str):
+                ingredient_names.append(ing.lower())
+        
+        if ingredient_names:
+            ingredients_mentions = f"with {', '.join(ingredient_names)}"
+    
+    # Type de plat en français
+    type_map = {
+        "petit_déjeuner": "breakfast, morning meal",
+        "déjeuner": "lunch, main course",
+        "dîner": "dinner, evening meal",
+        "goûter": "snack, afternoon treat",
+        "apéritif": "appetizer, starter",
+        "dessert": "dessert, sweet dish"
+    }
+    
+    type_phrase = type_map.get(type_plat, "cuisine")
+    
+    # Construire le prompt final - très descriptif pour une meilleure génération
+    if description:
+        prompt = f"Professional food photography of {nom_recette} {ingredients_mentions}. {description}. {type_phrase}. Appetizing, vibrant colors, well-plated, restaurant quality, high quality, 4K, professional lighting, mouth-watering"
+    else:
+        prompt = f"Professional food photography of {nom_recette} {ingredients_mentions}. {type_phrase}. Beautiful presentation, appetizing, vibrant colors, well-plated, restaurant quality, high quality, 4K, professional lighting, mouth-watering"
+    
+    return prompt
+
+
+def _generer_via_pollinations(nom_recette: str, description: str, ingredients_list: list = None, type_plat: str = "") -> Optional[str]:
     """
     Génère une image via Pollinations.ai (gratuit, pas de clé requise)
     Retourne une image encodée en base64 pour Streamlit
     """
-    prompt = f"Professional food photography of {nom_recette}"
-    if description:
-        prompt += f": {description}"
-    prompt += ". Appetizing, well-lit, high quality, professional"
+    prompt = _construire_prompt_detaille(nom_recette, description, ingredients_list, type_plat)
     
     # URL encode le prompt pour éviter les problèmes avec accents
     prompt_encoded = quote(prompt, safe='')
@@ -82,7 +119,7 @@ def _generer_via_pollinations(nom_recette: str, description: str) -> Optional[st
     return None
 
 
-def _generer_via_huggingface(nom_recette: str, description: str) -> Optional[str]:
+def _generer_via_huggingface(nom_recette: str, description: str, ingredients_list: list = None, type_plat: str = "") -> Optional[str]:
     """
     Génère une image via Hugging Face Inference API (gratuit avec clé)
     """
@@ -91,10 +128,7 @@ def _generer_via_huggingface(nom_recette: str, description: str) -> Optional[str
         logger.debug("HUGGINGFACE_API_KEY not configured")
         return None
     
-    prompt = f"Beautiful dish of {nom_recette}"
-    if description:
-        prompt += f": {description}"
-    prompt += ". Food photography, professional lighting, appetizing"
+    prompt = _construire_prompt_detaille(nom_recette, description, ingredients_list, type_plat)
     
     api_url = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2"
     headers = {"Authorization": f"Bearer {api_key}"}
@@ -114,7 +148,7 @@ def _generer_via_huggingface(nom_recette: str, description: str) -> Optional[str
     return None
 
 
-def _generer_via_replicate(nom_recette: str, description: str) -> Optional[str]:
+def _generer_via_replicate(nom_recette: str, description: str, ingredients_list: list = None, type_plat: str = "") -> Optional[str]:
     """
     Génère une image via Replicate API (nécessite une clé API)
     """
@@ -122,10 +156,7 @@ def _generer_via_replicate(nom_recette: str, description: str) -> Optional[str]:
     if not api_key:
         return None
     
-    prompt = f"Beautiful dish of {nom_recette}"
-    if description:
-        prompt += f": {description}"
-    prompt += ". Food photography, professional lighting, appetizing, high quality"
+    prompt = _construire_prompt_detaille(nom_recette, description, ingredients_list, type_plat)
     
     try:
         import replicate

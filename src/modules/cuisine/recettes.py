@@ -181,41 +181,37 @@ def render_liste():
     cols = st.columns(3, gap="small")
     for idx, recette in enumerate(page_recettes):
         with cols[idx % 3]:
-            # Container avec hauteur fixe pour alignement parfait
+            # Container avec flexbox minimal
             with st.container(border=True):
-                st.markdown(f'''
-                <div style="display: flex; flex-direction: column; height: 550px; justify-content: space-between;">
-                ''', unsafe_allow_html=True)
-                
-                # Image si disponible (hauteur fixe)
+                # Image (hauteur fixe de 140px)
                 if recette.url_image:
                     try:
                         st.image(recette.url_image, use_column_width=True, width=250)
                     except Exception:
-                        st.markdown('<div style="height: 180px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; border-radius: 8px;">🖼️</div>', unsafe_allow_html=True)
+                        st.markdown('<div style="height: 140px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; border-radius: 8px;">🖼️</div>', unsafe_allow_html=True)
                 else:
                     import random
                     food_emojis = ["🍽️", "🍳", "🥘", "🍲", "🥗", "🍜"]
                     emoji = random.choice(food_emojis)
-                    st.markdown(f'<div style="height: 180px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 80px; opacity: 0.3;">{emoji}</div>', unsafe_allow_html=True)
+                    st.markdown(f'<div style="height: 140px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 60px; opacity: 0.3;">{emoji}</div>', unsafe_allow_html=True)
                 
-                # Contenu (Difficulté + Nom + Description)
+                # Titre et infos compactes
                 difficulty_emoji = {"facile": "🟢", "moyen": "🟡", "difficile": "🔴"}.get(recette.difficulte, "⚪")
-                st.markdown(f"<h4 style='margin: 8px 0; line-height: 1.2;'>{difficulty_emoji} {recette.nom}</h4>", unsafe_allow_html=True)
+                st.markdown(f"<h4 style='margin: 6px 0; line-height: 1.2; font-size: 15px;'>{difficulty_emoji} {recette.nom}</h4>", unsafe_allow_html=True)
                 
                 if recette.description:
-                    desc = recette.description[:65]
-                    if len(recette.description) > 65:
+                    desc = recette.description[:60]
+                    if len(recette.description) > 60:
                         desc += "..."
-                    st.markdown(f"<p style='margin: 4px 0; font-size: 12px; opacity: 0.7;'>{desc}</p>", unsafe_allow_html=True)
+                    st.markdown(f"<p style='margin: 2px 0; font-size: 11px; opacity: 0.7;'>{desc}</p>", unsafe_allow_html=True)
                 
-                # Tags badges avec tooltips
+                # Badges
                 badge_definitions = {
-                    "🌱": "Bio - Produit biologique",
-                    "📍": "Local - Produit local",
-                    "⚡": "Rapide - Recette rapide",
-                    "💪": "Équilibré - Recette équilibrée",
-                    "❄️": "Congélable - Peut être congelé"
+                    "🌱": "Bio",
+                    "📍": "Local",
+                    "⚡": "Rapide",
+                    "💪": "Équilibré",
+                    "❄️": "Congélable"
                 }
                 
                 tags = []
@@ -232,36 +228,37 @@ def render_liste():
                 
                 if tags:
                     tags_html = " ".join([f'<span title="{badge_definitions.get(tag, tag)}" style="cursor: help;">{tag}</span>' for tag in tags])
-                    st.markdown(f"<p style='margin: 4px 0;'>{tags_html}</p>", unsafe_allow_html=True)
+                    st.markdown(f"<p style='margin: 2px 0;'>{tags_html}</p>", unsafe_allow_html=True)
                 
-                # Robots avec tooltips
+                # Robots
                 if recette.robots_compatibles:
                     robots_icons = {
-                        'Cookeo': ('🤖', 'Compatible Cookeo'),
-                        'Monsieur Cuisine': ('👨‍🍳', 'Compatible Monsieur Cuisine'),
-                        'Airfryer': ('🌪️', 'Compatible Airfryer'),
-                        'Multicooker': ('⏲️', 'Compatible Multicooker')
+                        'Cookeo': ('🤖', 'Cookeo'),
+                        'Monsieur Cuisine': ('👨‍🍳', 'MC'),
+                        'Airfryer': ('🌪️', 'Airfryer'),
+                        'Multicooker': ('⏲️', 'MC')
                     }
                     robot_html_list = []
                     for robot in recette.robots_compatibles:
-                        icon, tooltip = robots_icons.get(robot, ('🤖', 'Robot compatible'))
+                        icon, tooltip = robots_icons.get(robot, ('🤖', robot))
                         robot_html_list.append(f'<span title="{tooltip}" style="cursor: help;">{icon}</span>')
                     robot_text = " ".join(robot_html_list)
-                    st.markdown(f"<p style='margin: 4px 0; font-size: 12px;'>{robot_text}</p>", unsafe_allow_html=True)
+                    st.markdown(f"<p style='margin: 2px 0; font-size: 11px;'>{robot_text}</p>", unsafe_allow_html=True)
                 
-                # Infos principales (3 colonnes)
-                st.markdown("<div style='margin: 8px 0; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; padding: 8px 0;'>", unsafe_allow_html=True)
+                # Divider
+                st.divider()
+                
+                # Infos principales (3 colonnes compactes)
                 info_cols = st.columns(3, gap="small")
                 with info_cols[0]:
-                    st.markdown(f"<div style='text-align: center;'><div style='font-size: 14px;'>⏱️</div><div style='font-size: 13px; font-weight: bold;'>{recette.temps_preparation}m</div></div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='text-align: center; font-size: 13px;'><div>⏱️</div><div style='font-weight: bold;'>{recette.temps_preparation}m</div></div>", unsafe_allow_html=True)
                 with info_cols[1]:
-                    st.markdown(f"<div style='text-align: center;'><div style='font-size: 14px;'>👥</div><div style='font-size: 13px; font-weight: bold;'>{recette.portions}</div></div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='text-align: center; font-size: 13px;'><div>👥</div><div style='font-weight: bold;'>{recette.portions}</div></div>", unsafe_allow_html=True)
                 with info_cols[2]:
                     cal = recette.calories if recette.calories else "—"
-                    st.markdown(f"<div style='text-align: center;'><div style='font-size: 14px;'>🔥</div><div style='font-size: 13px; font-weight: bold;'>{cal}</div></div>", unsafe_allow_html=True)
-                st.markdown("</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='text-align: center; font-size: 13px;'><div>🔥</div><div style='font-weight: bold;'>{cal}</div></div>", unsafe_allow_html=True)
                 
-                # Bouton voir détails (fixé en bas)
+                # Bouton voir détails
                 if st.button(
                     "👁️ Voir détails",
                     use_container_width=True,
@@ -269,8 +266,6 @@ def render_liste():
                 ):
                     st.session_state.detail_recette_id = recette.id
                     st.rerun()
-                
-                st.markdown("</div>", unsafe_allow_html=True)
     
     # Pagination controls
     st.divider()
@@ -654,109 +649,141 @@ def render_ajouter_manuel():
     """Formulaire pour ajouter une recette manuellement"""
     st.subheader("➕ Ajouter une recette manuellement")
     
-    with st.form("form_recette_manuel", border=True):
-        # Info basique
-        col1, col2 = st.columns(2)
+    # Initialiser session_state si nécessaire
+    if 'form_num_ingredients' not in st.session_state:
+        st.session_state.form_num_ingredients = 3
+    if 'form_num_etapes' not in st.session_state:
+        st.session_state.form_num_etapes = 3
+    
+    # Infos basiques (sans form pour réactivité)
+    col1, col2 = st.columns(2)
+    with col1:
+        nom = st.text_input("Nom de la recette *", max_chars=200, key="form_nom")
+    with col2:
+        type_repas = st.selectbox(
+            "Type de repas *",
+            ["petit_déjeuner", "déjeuner", "dîner", "goûter", "apéritif", "dessert"],
+            key="form_type_repas"
+        )
+    
+    description = st.text_area("Description", height=100, key="form_description")
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        temps_prep = st.number_input("Temps préparation (min)", min_value=0, max_value=300, value=15, key="form_temps_prep")
+    with col2:
+        temps_cuisson = st.number_input("Temps cuisson (min)", min_value=0, max_value=300, value=20, key="form_temps_cuisson")
+    with col3:
+        portions = st.number_input("Portions", min_value=1, max_value=20, value=4, key="form_portions")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        difficulte = st.selectbox("Difficulté", ["facile", "moyen", "difficile"], key="form_difficulte")
+    with col2:
+        saison = st.selectbox(
+            "Saison",
+            ["toute_année", "printemps", "été", "automne", "hiver"],
+            key="form_saison"
+        )
+    
+    # Ingrédients
+    st.markdown("### Ingrédients")
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        num_ingredients = st.number_input(
+            "Nombre d'ingrédients",
+            min_value=1,
+            max_value=20,
+            value=st.session_state.form_num_ingredients,
+            key="form_num_ing_selector"
+        )
+        st.session_state.form_num_ingredients = num_ingredients
+    
+    ingredients = []
+    for i in range(int(num_ingredients)):
+        col1, col2, col3 = st.columns([2, 1, 1])
         with col1:
-            nom = st.text_input("Nom de la recette *", max_chars=200)
+            ing_nom = st.text_input(f"Ingrédient {i+1}", key=f"form_ing_nom_{i}")
         with col2:
-            type_repas = st.selectbox(
-                "Type de repas *",
-                ["petit_déjeuner", "déjeuner", "dîner", "goûter", "apéritif", "dessert"]
-            )
-        
-        description = st.text_area("Description", height=100)
-        
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            temps_prep = st.number_input("Temps préparation (min)", min_value=0, max_value=300, value=15)
-        with col2:
-            temps_cuisson = st.number_input("Temps cuisson (min)", min_value=0, max_value=300, value=20)
+            ing_qty = st.number_input(f"Qté", value=1.0, key=f"form_ing_qty_{i}", step=0.25)
         with col3:
-            portions = st.number_input("Portions", min_value=1, max_value=20, value=4)
+            ing_unit = st.text_input(f"Unité", value="g", key=f"form_ing_unit_{i}", max_chars=20)
         
-        col1, col2 = st.columns(2)
-        with col1:
-            difficulte = st.selectbox("Difficulté", ["facile", "moyen", "difficile"])
-        with col2:
-            saison = st.selectbox(
-                "Saison",
-                ["toute_année", "printemps", "été", "automne", "hiver"]
-            )
-        
-        # Ingrédients
-        st.markdown("### Ingrédients")
-        ingredients = []
-        num_ingredients = st.number_input("Nombre d'ingrédients", min_value=1, max_value=20, value=3)
-        
-        for i in range(num_ingredients):
-            col1, col2, col3 = st.columns([2, 1, 1])
-            with col1:
-                ing_nom = st.text_input(f"Ingrédient {i+1}", key=f"ing_nom_{i}")
-            with col2:
-                ing_qty = st.number_input(f"Qté", value=1.0, key=f"ing_qty_{i}", step=0.25)
-            with col3:
-                ing_unit = st.text_input(f"Unité", value="g", key=f"ing_unit_{i}", max_chars=20)
-            
-            if ing_nom:
-                ingredients.append({
-                    "nom": ing_nom,
-                    "quantite": ing_qty,
-                    "unite": ing_unit
-                })
-        
-        # Étapes
-        st.markdown("### Étapes de préparation")
-        etapes = []
-        num_etapes = st.number_input("Nombre d'étapes", min_value=1, max_value=15, value=3)
-        
-        for i in range(num_etapes):
-            etape_desc = st.text_area(f"Étape {i+1}", height=80, key=f"etape_{i}")
-            if etape_desc:
-                etapes.append({
-                    "description": etape_desc,
-                    "duree": None
-                })
-        
-        submitted = st.form_submit_button("✅ Créer la recette", use_container_width=True)
-        
-        if submitted:
-            if not nom or not type_repas:
-                st.error("❌ Nom et type de repas sont obligatoires")
-            elif not ingredients:
-                st.error("❌ Ajoutez au moins un ingrédient")
-            elif not etapes:
-                st.error("❌ Ajoutez au moins une étape")
+        if ing_nom:
+            ingredients.append({
+                "nom": ing_nom,
+                "quantite": ing_qty,
+                "unite": ing_unit
+            })
+    
+    # Étapes
+    st.markdown("### Étapes de préparation")
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        num_etapes = st.number_input(
+            "Nombre d'étapes",
+            min_value=1,
+            max_value=15,
+            value=st.session_state.form_num_etapes,
+            key="form_num_etapes_selector"
+        )
+        st.session_state.form_num_etapes = num_etapes
+    
+    etapes = []
+    for i in range(int(num_etapes)):
+        etape_desc = st.text_area(f"Étape {i+1}", height=80, key=f"form_etape_{i}")
+        if etape_desc:
+            etapes.append({
+                "description": etape_desc,
+                "duree": None
+            })
+    
+    # Bouton créer
+    if st.button("✅ Créer la recette", use_container_width=True, type="primary"):
+        if not nom or not type_repas:
+            st.error("❌ Nom et type de repas sont obligatoires")
+        elif not ingredients:
+            st.error("❌ Ajoutez au moins un ingrédient")
+        elif not etapes:
+            st.error("❌ Ajoutez au moins une étape")
+        else:
+            # Créer la recette
+            service = get_recette_service()
+            if service is None:
+                st.error("❌ Service indisponible")
             else:
-                # Créer la recette
-                service = get_recette_service()
-                if service is None:
-                    st.error("❌ Service indisponible")
-                else:
-                    try:
-                        data = {
-                            "nom": nom,
-                            "description": description,
-                            "type_repas": type_repas,
-                            "temps_preparation": temps_prep,
-                            "temps_cuisson": temps_cuisson,
-                            "portions": portions,
-                            "difficulte": difficulte,
-                            "saison": saison,
-                            "ingredients": ingredients,
-                            "etapes": etapes,
-                        }
-                        
-                        recette = service.create_complete(data)
-                        
-                        st.success(f"✅ Recette '{recette.nom}' créée avec succès!")
-                        st.balloons()
-                        
-                    except ErreurValidation as e:
-                        st.error(f"❌ Erreur validation: {e}")
-                    except Exception as e:
-                        st.error(f"❌ Erreur: {str(e)}")
-                        logger.error(f"Erreur création recette: {e}")
+                try:
+                    data = {
+                        "nom": nom,
+                        "description": description,
+                        "type_repas": type_repas,
+                        "temps_preparation": int(temps_prep),
+                        "temps_cuisson": int(temps_cuisson),
+                        "portions": int(portions),
+                        "difficulte": difficulte,
+                        "saison": saison,
+                        "ingredients": ingredients,
+                        "etapes": etapes,
+                    }
+                    
+                    recette = service.create_complete(data)
+                    
+                    # Réinitialiser le formulaire
+                    st.session_state.form_num_ingredients = 3
+                    st.session_state.form_num_etapes = 3
+                    for key in list(st.session_state.keys()):
+                        if key.startswith('form_'):
+                            del st.session_state[key]
+                    
+                    st.success(f"✅ Recette '{recette.nom}' créée avec succès!")
+                    st.balloons()
+                    st.rerun()
+                    
+                except ErreurValidation as e:
+                    st.error(f"❌ Erreur validation: {e}")
+                except Exception as e:
+                    st.error(f"❌ Erreur: {str(e)}")
+                    logger.error(f"Erreur création recette: {e}")
 
 
 def render_generer_ia():
@@ -906,7 +933,22 @@ def render_generer_image(recette):
             try:
                 from src.utils.image_generator import generer_image_recette
                 
-                url_image = generer_image_recette(recette.nom, recette.description or "")
+                # Préparer la liste des ingrédients pour le contexte
+                ingredients_list = []
+                for ing in recette.ingredients:
+                    ingredients_list.append({
+                        'nom': ing.ingredient.nom,
+                        'quantite': ing.quantite,
+                        'unite': ing.unite
+                    })
+                
+                # Générer l'image avec plus de contexte
+                url_image = generer_image_recette(
+                    recette.nom,
+                    recette.description or "",
+                    ingredients_list=ingredients_list,
+                    type_plat=recette.type_repas
+                )
                 
                 if url_image:
                     # Stocker dans session state pour persister après le spinner
