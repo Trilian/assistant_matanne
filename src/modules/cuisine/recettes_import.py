@@ -5,8 +5,8 @@ Module pour l'import de recettes
 import streamlit as st
 from src.utils.recipe_importer import RecipeImporter
 from src.services.recettes import get_recette_service
-from src.core.models import Recette, RecetteIngredient
-from src.core.database import get_db_session
+from src.core.models import Recette, RecetteIngredient, Ingredient, EtapeRecette
+from src.core.database import obtenir_contexte_db
 
 
 def render_importer():
@@ -271,58 +271,54 @@ def _save_imported_recipe(
                 source="import"  # Marquer comme importée
             )
             
-            db = get_db_session()
-            
-            # Sauvegarder la recette
-            db.add(recette)
-            db.flush()  # Pour avoir l'ID
-            
-            # Ajouter les ingrédients
-            for idx, ing_text in enumerate(ingredients, 1):
-                # Parser "quantité unité nom"
-                parts = ing_text.split(maxsplit=2)
+            with obtenir_contexte_db() as db:
+                # Sauvegarder la recette
+                db.add(recette)
+                db.flush()  # Pour avoir l'ID
                 
-                if len(parts) >= 3:
-                    quantite_str, unite, nom_ing = parts[0], parts[1], ' '.join(parts[2:])
-                    quantite = float(quantite_str.replace(',', '.'))
-                elif len(parts) >= 2:
-                    quantite_str, nom_ing = parts[0], parts[1]
-                    quantite = float(quantite_str.replace(',', '.'))
-                    unite = "g"
-                else:
-                    quantite = 1
-                    unite = ""
-                    nom_ing = ing_text
+                # Ajouter les ingrédients
+                for idx, ing_text in enumerate(ingredients, 1):
+                    # Parser "quantité unité nom"
+                    parts = ing_text.split(maxsplit=2)
+                    
+                    if len(parts) >= 3:
+                        quantite_str, unite, nom_ing = parts[0], parts[1], ' '.join(parts[2:])
+                        quantite = float(quantite_str.replace(',', '.'))
+                    elif len(parts) >= 2:
+                        quantite_str, nom_ing = parts[0], parts[1]
+                        quantite = float(quantite_str.replace(',', '.'))
+                        unite = "g"
+                    else:
+                        quantite = 1
+                        unite = ""
+                        nom_ing = ing_text
+                    
+                    # Chercher ou créer l'ingrédient
+                    ingredient = db.query(Ingredient).filter_by(nom=nom_ing).first()
+                    if not ingredient:
+                        ingredient = Ingredient(nom=nom_ing)
+                        db.add(ingredient)
+                        db.flush()
+                    
+                    ri = RecetteIngredient(
+                        recette_id=recette.id,
+                        ingredient_id=ingredient.id,
+                        quantite=quantite,
+                        unite=unite,
+                        ordre=idx
+                    )
+                    db.add(ri)
                 
-                # Chercher ou créer l'ingrédient
-                from src.core.models import Ingredient
-                ingredient = db.query(Ingredient).filter_by(nom=nom_ing).first()
-                if not ingredient:
-                    ingredient = Ingredient(nom=nom_ing)
-                    db.add(ingredient)
-                    db.flush()
+                # Ajouter les étapes
+                for idx, etape_text in enumerate(etapes, 1):
+                    etape = EtapeRecette(
+                        recette_id=recette.id,
+                        description=etape_text,
+                        ordre=idx
+                    )
+                    db.add(etape)
                 
-                ri = RecetteIngredient(
-                    recette_id=recette.id,
-                    ingredient_id=ingredient.id,
-                    quantite=quantite,
-                    unite=unite,
-                    ordre=idx
-                )
-                db.add(ri)
-            
-            # Ajouter les étapes
-            from src.core.models import EtapeRecette
-            for idx, etape_text in enumerate(etapes, 1):
-                etape = EtapeRecette(
-                    recette_id=recette.id,
-                    description=etape_text,
-                    ordre=idx
-                )
-                db.add(etape)
-            
-            db.commit()
-            db.close()
+                db.commit()
             
             st.success(f"✅ Recette '{nom}' importée avec succès!")
             st.balloons()
