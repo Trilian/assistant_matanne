@@ -25,9 +25,14 @@ def app():
         if service is not None:
             recette = service.get_by_id_full(st.session_state.detail_recette_id)
             if recette:
-                if st.button("← Retour à la liste"):
-                    st.session_state.detail_recette_id = None
-                    st.rerun()
+                # Bouton retour en haut avec icône visible
+                col_retour, col_titre = st.columns([1, 10])
+                with col_retour:
+                    if st.button("⬅️", help="Retour à la liste", use_container_width=True):
+                        st.session_state.detail_recette_id = None
+                        st.rerun()
+                with col_titre:
+                    st.write(f"**{recette.nom}**")
                 st.divider()
                 render_detail_recette(recette)
                 return
@@ -194,7 +199,7 @@ def render_liste():
                 
                 st.markdown(f"*{recette.description[:100]}...*" if recette.description else "")
                 
-                # Badges bio/local/rapide/équilibré
+                # Badges bio/local/rapide/équilibré - alignement amélioré
                 badges = []
                 if recette.est_bio:
                     badges.append("🌱 Bio")
@@ -206,8 +211,11 @@ def render_liste():
                     badges.append("💪 Équilibré")
                 if recette.congelable:
                     badges.append("❄️ Congélable")
+                
                 if badges:
-                    st.caption(" • ".join(badges))
+                    # Afficher badges en wrapping multi-ligne
+                    badge_text = " ".join(badges)
+                    st.caption(badge_text)
                 
                 # Scores bio/local si présents
                 if (recette.score_bio or 0) > 0 or (recette.score_local or 0) > 0:
@@ -302,6 +310,12 @@ def render_detail_recette(recette):
             st.image(recette.url_image, use_column_width=True, caption=recette.nom)
         except Exception:
             st.caption("🖼️ Image indisponible")
+    else:
+        st.info("📸 Pas d'image pour cette recette")
+    
+    # Bouton pour générer une image
+    if st.button("✨ Générer une image avec l'IA", use_container_width=True):
+        render_generer_image(recette)
     
     # Badges et caractéristiques
     badges = []
@@ -440,14 +454,31 @@ def render_detail_recette(recette):
                         st.caption(f"💭 {h.avis}")
                     st.divider()
     
-    # Versions (bébé, batch cooking)
+    # Versions (bébé, batch cooking, robots)
     st.divider()
-    st.markdown("### 👶 Versions adaptées")
+    st.markdown("### 🎯 Versions adaptées")
     
     if service:
         versions = service.get_versions(recette.id)
         
-        tab_versions = st.tabs(["📋 Versions existantes", "✨ Générer avec IA"])
+        # Créer tabs pour les différents types
+        tab_list = ["📋 Versions existantes", "✨ Générer avec IA"]
+        
+        # Ajouter tab robots si compatibles
+        robots_compatibles = []
+        if recette.compatible_cookeo:
+            robots_compatibles.append("Cookeo")
+        if recette.compatible_monsieur_cuisine:
+            robots_compatibles.append("Monsieur Cuisine")
+        if recette.compatible_airfryer:
+            robots_compatibles.append("Airfryer")
+        if recette.compatible_multicooker:
+            robots_compatibles.append("Multicooker")
+        
+        if robots_compatibles:
+            tab_list.insert(1, "🤖 Robots compatibles")
+        
+        tab_versions = st.tabs(tab_list)
         
         with tab_versions[0]:
             if versions:
@@ -477,7 +508,71 @@ def render_detail_recette(recette):
             else:
                 st.info("Aucune version adaptée générée.")
         
-        with tab_versions[1]:
+        # Afficher onglet robots si compatible
+        if robots_compatibles:
+            with tab_versions[1]:
+                st.markdown("### 🤖 Robots de cuisine compatibles")
+                
+                robot_info = {
+                    "Cookeo": {
+                        "icon": "🍲",
+                        "desc": "Fait-tout multicuiseur sous pression",
+                        "temps": "Généralement réduit de 30-40%",
+                        "conseils": [
+                            "Utilise le mode haute pression pour cuisson plus rapide",
+                            "Réduis légèrement les liquides",
+                            "Ajoute les ingrédients sensibles à la fin"
+                        ]
+                    },
+                    "Monsieur Cuisine": {
+                        "icon": "👨‍🍳",
+                        "desc": "Robot cuiseur multifonction",
+                        "temps": "Généralement similaire ou réduit",
+                        "conseils": [
+                            "Utilise les programmes automatiques si disponibles",
+                            "Réduis les portions pour éviter le débordement",
+                            "Contrôle régulièrement la cuisson"
+                        ]
+                    },
+                    "Airfryer": {
+                        "icon": "🌪️",
+                        "desc": "Friteuse à air chaud",
+                        "temps": "Généralement réduit de 20-30%",
+                        "conseils": [
+                            "Coupe les aliments en tailles uniformes",
+                            "Secoue le panier à mi-cuisson",
+                            "N'empile pas trop les aliments"
+                        ]
+                    },
+                    "Multicooker": {
+                        "icon": "⏲️",
+                        "desc": "Cuiseur multifonctions programmable",
+                        "temps": "Généralement similaire",
+                        "conseils": [
+                            "Choisissez le programme approprié à la recette",
+                            "Suivez les instructions du fabricant",
+                            "Testez pour ajuster les temps"
+                        ]
+                    }
+                }
+                
+                for robot in robots_compatibles:
+                    info = robot_info.get(robot, {})
+                    with st.expander(f"{info.get('icon', '🤖')} {robot}", expanded=False):
+                        st.write(f"**Description:** {info.get('desc', '')}")
+                        st.write(f"**Temps de cuisson:** {info.get('temps', '')}")
+                        
+                        if info.get('conseils'):
+                            st.markdown("**Conseils d'adaptation:**")
+                            for conseil in info.get('conseils', []):
+                                st.caption(f"• {conseil}")
+        
+        # Onglet génération
+        generation_tab_idx = 2 if robots_compatibles else 1
+        with tab_versions[generation_tab_idx]:
+            st.markdown("### ✨ Générer des versions adaptées")
+            
+            # Versions standards
             col1, col2 = st.columns(2)
             with col1:
                 if st.button("👶 Générer version bébé", use_container_width=True):
@@ -504,6 +599,43 @@ def render_detail_recette(recette):
                                 st.error("❌ Erreur lors de la génération")
                         except Exception as e:
                             st.error(f"❌ Erreur: {str(e)}")
+            
+            # Versions robots si compatibles
+            if robots_compatibles:
+                st.markdown("---")
+                st.markdown("### 🤖 Générer pour robots de cuisine")
+                
+                robot_buttons = {
+                    "Cookeo": ("🍲", "cookeo"),
+                    "Monsieur Cuisine": ("👨‍🍳", "monsieur_cuisine"),
+                    "Airfryer": ("🌪️", "airfryer"),
+                    "Multicooker": ("⏲️", "multicooker"),
+                }
+                
+                # Créer colonnes pour les boutons disponibles
+                available_robots = [r for r in robots_compatibles]
+                if available_robots:
+                    cols = st.columns(len(available_robots))
+                    for idx, robot_name in enumerate(available_robots):
+                        icon, robot_key = robot_buttons.get(robot_name, ("🤖", robot_name.lower()))
+                        with cols[idx]:
+                            if st.button(
+                                f"{icon} {robot_name}", 
+                                use_container_width=True,
+                                key=f"gen_robot_{robot_key}"
+                            ):
+                                with st.spinner(f"🤖 L'IA adapte pour {robot_name}..."):
+                                    try:
+                                        version = service.generer_version_robot(
+                                            recette.id, robot_key
+                                        )
+                                        if version:
+                                            st.success(f"✅ Version {robot_name} créée!")
+                                            st.rerun()
+                                        else:
+                                            st.error("❌ Erreur lors de la génération")
+                                    except Exception as e:
+                                        st.error(f"❌ Erreur: {str(e)}")
 
 
 def render_ajouter_manuel():
@@ -743,3 +875,68 @@ def render_generer_ia():
                     except Exception as e:
                         st.error(f"❌ Erreur génération: {str(e)}")
                         logger.error(f"Erreur IA recettes: {e}")
+
+
+def render_generer_image(recette):
+    """Affiche l'interface pour générer une image pour la recette"""
+    st.subheader("✨ Générer une image avec l'IA")
+    
+    # Description du prompt
+    prompt = f"{recette.nom}"
+    if recette.description:
+        prompt += f": {recette.description}"
+    
+    st.info(f"📝 Prompt: {prompt}")
+    
+    # Afficher les options
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        option = st.radio(
+            "Quelle API utiliser?",
+            ["Hugging Face (Gratuit)", "Replicate (Payant)"],
+            key="image_gen_option"
+        )
+    
+    with col2:
+        if st.button("🎨 Générer l'image", use_container_width=True):
+            with st.spinner("⏳ Génération de l'image en cours..."):
+                try:
+                    from src.utils.image_generator import generer_image_recette
+                    
+                    url_image = generer_image_recette(recette.nom, recette.description or "")
+                    
+                    if url_image:
+                        st.success("✅ Image générée!")
+                        st.image(url_image, caption=recette.nom, use_column_width=True)
+                        
+                        # Proposer de sauvegarder
+                        if st.button("💾 Sauvegarder cette image", use_container_width=True):
+                            service = get_recette_service()
+                            if service:
+                                try:
+                                    # Mettre à jour l'URL de l'image
+                                    recette.url_image = url_image
+                                    service.update(recette)
+                                    st.success("✅ Image sauvegardée!")
+                                    st.rerun()
+                                except Exception as e:
+                                    st.error(f"❌ Erreur sauvegarde: {str(e)}")
+                    else:
+                        st.error("❌ Impossible de générer l'image. Vérifie que tu as configuré une clé API.")
+                        st.info("""
+                        **Pour utiliser la génération d'images:**
+                        
+                        1. **Hugging Face** (Gratuit, limité):
+                           - Crée un compte sur https://huggingface.co/
+                           - Ajoute ta clé dans Streamlit Secrets: `HUGGINGFACE_API_KEY`
+                        
+                        2. **Replicate** (Payant, meilleure qualité):
+                           - Crée un compte sur https://replicate.com/
+                           - Ajoute ta clé dans Streamlit Secrets: `REPLICATE_API_TOKEN`
+                        """)
+                        
+                except Exception as e:
+                    st.error(f"❌ Erreur génération: {str(e)}")
+                    import logging
+                    logging.error(f"Erreur génération image: {e}")

@@ -80,6 +80,16 @@ class VersionBatchCookingGeneree(BaseModel):
     calendrier_preparation: str
 
 
+class VersionRobotGeneree(BaseModel):
+    """Version adaptée pour robot de cuisine"""
+
+    instructions_modifiees: str
+    reglages_robot: str
+    temps_cuisson_adapte_minutes: int = Field(30, ge=5, le=300)
+    conseils_preparation: str
+    etapes_specifiques: list[str] = Field(default_factory=list)
+
+
 # ═══════════════════════════════════════════════════════════
 # SERVICE RECETTES UNIFIÉ (AVEC HÉRITAGE MULTIPLE)
 # ═══════════════════════════════════════════════════════════
@@ -599,6 +609,205 @@ Difficulty: {recette.difficulte}"""
         logger.info(f"✅ Batch cooking version created for recipe {recette_id}")
         return version
 
+    @with_db_session
+    def generer_version_robot(
+        self, recette_id: int, robot_type: str, db: Session
+    ) -> VersionRecette | None:
+        """Génère une version adaptée pour un robot de cuisine.
+
+        Adapts recipe for specific cooking robots (Cookeo, Monsieur Cuisine, Airfryer, Multicooker).
+
+        Args:
+            recette_id: ID of recipe to adapt
+            robot_type: Type of robot (cookeo, monsieur_cuisine, airfryer, multicooker)
+            db: Database session (injected by @with_db_session)
+
+        Returns:
+            VersionRecette object or None if generation fails
+        """
+        # Récupérer la recette
+        recette = (
+            db.query(Recette)
+            .options(
+                joinedload(Recette.ingredients).joinedload(RecetteIngredient.ingredient),
+                joinedload(Recette.etapes),
+            )
+            .filter(Recette.id == recette_id)
+            .first()
+        )
+        if not recette:
+            raise ErreurNonTrouve(f"Recipe {recette_id} not found")
+
+        # Vérifier si version existe déjà
+        existing = (
+            db.query(VersionRecette)
+            .filter(
+                VersionRecette.recette_base_id == recette_id,
+                VersionRecette.type_version == f"robot_{robot_type}",
+            )
+            .first()
+        )
+        if existing:
+            logger.info(
+                f"🤖 Robot version ({robot_type}) already exists for recipe {recette_id}"
+            )
+            return existing
+
+        logger.info(f"🤖 Generating {robot_type} version for recipe {recette_id}")
+
+        # Construire contexte avec recette complète
+        ingredients_str = "\n".join(
+            [f"- {ri.quantite} {ri.unite} {ri.ingredient.nom}" for ri in recette.ingredients]
+        )
+        etapes_str = "\n".join(
+            [f"{e.ordre}. {e.description}" for e in sorted(recette.etapes, key=lambda x: x.ordre)]
+        )
+
+        context = f"""Recipe: {recette.nom}
+
+Ingredients:
+{ingredients_str}
+
+Steps:
+{etapes_str}
+
+Preparation time: {recette.temps_preparation} minutes
+Cooking time: {recette.temps_cuisson} minutes
+Difficulty: {recette.difficulte}"""
+
+        # Robot-specific prompts
+        robot_prompts = {
+            "cookeo": {
+                "role": "Cookeo expert",
+                "task": "Adapt this recipe specifically for a Cookeo pressure cooker",
+                "constraints": [
+                    "Reduce cooking times by 30-40% due to pressure cooking",
+                    "Specify Cookeo mode (high pressure, low pressure, browning, steaming)",
+                    "Account for liquid reduction in pressure cooking",
+                    "Ensure ingredients are cut appropriately for fast cooking",
+                    "Include release pressure method instructions",
+                ],
+                "rules": [
+                    "Specify which Cookeo program or mode to use",
+                    "Calculate time reductions for pressure cooking",
+                    "Include natural or quick pressure release advice",
+                    "Note ingredient preparation requirements",
+                ],
+            },
+            "monsieur_cuisine": {
+                "role": "Monsieur Cuisine expert",
+                "task": "Adapt this recipe specifically for a Monsieur Cuisine kitchen robot",
+                "constraints": [
+                    "Use Monsieur Cuisine program structure (mix, chop, steam, slow cook)",
+                    "Optimize ingredient sizes for robot processing",
+                    "Respect robot capacity limits",
+                    "Account for robot-specific cooking times",
+                    "Include timing for each phase",
+                ],
+                "rules": [
+                    "Specify program sequence for automatic cooking",
+                    "Suggest portion sizes for robot capacity",
+                    "Include manual stirring points if needed",
+                    "Note ingredient additions timing",
+                ],
+            },
+            "airfryer": {
+                "role": "Air fryer expert",
+                "task": "Adapt this recipe specifically for an air fryer (deep fryer alternative)",
+                "constraints": [
+                    "Reduce cooking times by 20-30% compared to oven",
+                    "Lower temperature by 20°C typically",
+                    "Specify basket arrangement and stirring frequency",
+                    "Account for reduced oil requirements",
+                    "Include portion/batch information",
+                ],
+                "rules": [
+                    "Specify temperature and exact cooking time",
+                    "Note required preheating duration",
+                    "Include shaking/stirring instructions",
+                    "Suggest batch cooking if needed",
+                    "Mention if food needs to be arranged in basket",
+                ],
+            },
+            "multicooker": {
+                "role": "Multicooker expert",
+                "task": "Adapt this recipe specifically for a programmable multicooker",
+                "constraints": [
+                    "Optimize for available multicooker modes (slow cook, pressure, steam, sauté)",
+                    "Calculate appropriate cooking times per mode",
+                    "Plan ingredient sequence for cooking mode",
+                    "Ensure proper heat distribution",
+                ],
+                "rules": [
+                    "Specify cooking mode sequence",
+                    "Include exact temperature and time settings",
+                    "Note ingredient addition timing between modes",
+                    "Include delay start programming tips if applicable",
+                ],
+            },
+        }
+
+        if robot_type not in robot_prompts:
+            raise ValueError(f"Unknown robot type: {robot_type}")
+
+        robot_config = robot_prompts[robot_type]
+
+        # Prompt pour adaptation robot
+        prompt = self.build_json_prompt(
+            context=context,
+            task=robot_config["task"],
+            json_schema='''{
+                "instructions_modifiees": str,
+                "reglages_robot": str,
+                "temps_cuisson_adapte_minutes": int,
+                "conseils_preparation": str,
+                "etapes_specifiques": list[str]
+            }''',
+            constraints=robot_config["constraints"],
+        )
+
+        # Appel IA avec parsing auto
+        version_data = self.call_with_parsing_sync(
+            prompt=prompt,
+            response_model=VersionRobotGeneree,
+            system_prompt=self.build_system_prompt(
+                role=robot_config["role"],
+                expertise=[
+                    f"Cooking with {robot_type}",
+                    "Recipe adaptation",
+                    "Cooking time optimization",
+                    "Food quality maintenance",
+                ],
+                rules=robot_config["rules"],
+            ),
+        )
+
+        if not version_data:
+            logger.warning(f"⚠️ Failed to generate {robot_type} version for recipe {recette_id}")
+            raise ErreurValidation(f"Invalid IA response format for {robot_type} version")
+
+        # Créer version en DB
+        version = VersionRecette(
+            recette_base_id=recette_id,
+            type_version=f"robot_{robot_type}",
+            instructions_modifiees=version_data.instructions_modifiees,
+            notes_bebe=f"""**Réglages {robot_type.capitalize()}:**
+{version_data.reglages_robot}
+
+⏱️ Temps de cuisson: {version_data.temps_cuisson_adapte_minutes} minutes
+
+📋 Préparation: {version_data.conseils_preparation}
+
+🔧 Étapes spécifiques:
+{chr(10).join(f"• {etape}" for etape in version_data.etapes_specifiques)}""",
+        )
+        db.add(version)
+        db.commit()
+        db.refresh(version)
+
+        logger.info(f"✅ {robot_type} version created for recipe {recette_id}")
+        return version
+
     # ═══════════════════════════════════════════════════════════
     # SECTION 3 : HISTORIQUE & VERSIONS
     # ═══════════════════════════════════════════════════════════
@@ -868,5 +1077,7 @@ __all__ = [
     "recette_service",
     "RecetteSuggestion",
     "VersionBebeGeneree",
+    "VersionBatchCookingGeneree",
+    "VersionRobotGeneree",
     "get_recette_service",
 ]
