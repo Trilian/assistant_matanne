@@ -73,89 +73,106 @@ def _read_st_secret(section: str):
     return None
 
 
-def _get_mistral_api_key_from_secrets():
+def _get_mistral_api_key_from_secrets() -> str | None:
     """Récupère la clé API Mistral des secrets Streamlit.
     
-    Essaie plusieurs chemins avec logging détaillé:
+    Essaie plusieurs chemins avec logging TRÈS détaillé:
     1. st.secrets.get('mistral', {}).get('api_key') 
     2. st.secrets['mistral']['api_key']
-    3. st.secrets['mistral_api_key']
-    4. Itérer sur tous les secrets avec fallback
+    3. st.secrets.get('api_key') - fallback direct
+    4. Itérer sur toutes les clés avec fallback
     """
     try:
         # Vérifier que streamlit est importé et initialisé
         import streamlit as st
         
         if not hasattr(st, "secrets"):
-            logger.warning("❌ st.secrets n'existe pas")
+            logger.warning("❌ st.secrets n'existe pas (pas de fichier secrets.toml)")
             return None
             
         secrets = st.secrets
-        if secrets is None:
-            logger.warning("❌ st.secrets est None")
+        if not secrets:
+            logger.warning("❌ st.secrets est vide ou None")
             return None
+        
+        logger.warning(f"🔍 st.secrets type: {type(secrets)}")
+        logger.warning(f"🔍 st.secrets has {len(secrets)} items")
         
         # Debug: afficher les clés présentes dans st.secrets
         try:
-            # Convertir en dict pour accès robuste
-            secrets_dict = dict(secrets)
-            logger.warning(f"🔍 st.secrets contient {len(secrets_dict)} clés: {list(secrets_dict.keys())}")
+            clés = []
+            try:
+                clés = list(secrets.keys()) if hasattr(secrets, 'keys') else list(secrets)
+            except:
+                clés = []
+            logger.warning(f"🔍 st.secrets clés: {clés}")
         except Exception as e:
-            logger.warning(f"⚠️ Impossible de convertir st.secrets en dict: {e}")
+            logger.warning(f"⚠️ Impossible de lister les clés: {e}")
         
         # Chemin 1: st.secrets.get('mistral', {}).get('api_key') - PLUS ROBUSTE
         try:
-            api_key = secrets.get("mistral", {}).get("api_key")
-            if api_key:
-                logger.warning(f"✅ API key trouvée via st.secrets.get('mistral', {{}}).get('api_key')")
-                return api_key
-            else:
-                logger.warning("❌ Chemin 1: st.secrets['mistral']['api_key'] = None ou vide")
-        except Exception as e:
-            logger.warning(f"❌ Chemin 1 échoué (st.secrets.get): {e}")
-        
-        # Chemin 2: Accès direct st.secrets['mistral']['api_key']
-        try:
-            if "mistral" in secrets:
-                mistral = secrets["mistral"]
-                logger.warning(f"🔍 st.secrets['mistral'] trouvé, type: {type(mistral)}")
-                if isinstance(mistral, dict):
-                    api_key = mistral.get("api_key")
-                    if api_key:
-                        logger.warning(f"✅ API key trouvée via st.secrets['mistral']['api_key']")
-                        return api_key
+            mistral_section = secrets.get("mistral") if hasattr(secrets, 'get') else secrets["mistral"] if "mistral" in secrets else None
+            if mistral_section:
+                logger.warning(f"✅ 'mistral' section trouvée, type: {type(mistral_section)}")
+                api_key = None
+                if hasattr(mistral_section, 'get'):
+                    api_key = mistral_section.get("api_key")
+                elif isinstance(mistral_section, dict):
+                    api_key = mistral_section.get("api_key")
+                if api_key:
+                    logger.warning(f"✅ API key trouvée via mistral.api_key: {str(api_key)[:20]}...")
+                    return api_key
                 else:
-                    logger.warning(f"❌ st.secrets['mistral'] n'est pas un dict: {type(mistral)}")
+                    logger.warning(f"❌ st.secrets['mistral'] existe mais pas 'api_key' dedans")
             else:
                 logger.warning("❌ 'mistral' pas trouvé dans st.secrets")
         except Exception as e:
-            logger.warning(f"❌ Chemin 2 échoué: {e}")
+            logger.warning(f"❌ Chemin 1 échoué: {type(e).__name__}: {e}")
         
-        # Chemin 3: st.secrets['mistral_api_key'] (alternative)
+        # Chemin 2: Accès direct via __getitem__
         try:
-            if "mistral_api_key" in secrets:
-                api_key = secrets["mistral_api_key"]
-                if api_key:
-                    logger.warning(f"✅ API key trouvée via st.secrets['mistral_api_key']")
-                    return api_key
+            api_key = secrets["mistral"]["api_key"]
+            if api_key:
+                logger.warning(f"✅ API key trouvée via secrets['mistral']['api_key']: {str(api_key)[:20]}...")
+                return api_key
+        except (KeyError, TypeError) as e:
+            logger.warning(f"❌ Chemin 2 (direct access) échoué: {e}")
+        except Exception:
+            pass
+        
+        # Chemin 3: API key directement
+        try:
+            api_key = secrets.get("api_key") if hasattr(secrets, 'get') else secrets["api_key"] if "api_key" in secrets else None
+            if api_key:
+                logger.warning(f"✅ API key trouvée directement: {str(api_key)[:20]}...")
+                return api_key
         except Exception as e:
             logger.warning(f"❌ Chemin 3 échoué: {e}")
         
-        # Chemin 4: Itérer sur tous les secrets (fallback)
+        # Chemin 4: Recherche "mistral_api_key"
+        try:
+            api_key = secrets.get("mistral_api_key") if hasattr(secrets, 'get') else secrets["mistral_api_key"] if "mistral_api_key" in secrets else None
+            if api_key:
+                logger.warning(f"✅ API key trouvée via mistral_api_key: {str(api_key)[:20]}...")
+                return api_key
+        except Exception as e:
+            logger.warning(f"❌ Chemin 4 échoué: {e}")
+        
+        # Chemin 5: Itération brute sur les clés
         try:
             for key in secrets:
-                if isinstance(key, str) and "mistral" in key.lower() and "key" in key.lower():
-                    value = secrets[key]
+                if "mistral" in str(key).lower() and "key" in str(key).lower():
+                    value = secrets[key] if isinstance(secrets, dict) else getattr(secrets, key, None)
                     if value:
-                        logger.warning(f"✅ API key trouvée via st.secrets['{key}']")
+                        logger.warning(f"✅ API key trouvée via iteration: {str(value)[:20]}...")
                         return value
         except Exception as e:
-            logger.warning(f"❌ Chemin 4 échoué (iteration): {e}")
+            logger.warning(f"❌ Chemin 5 (iteration) échoué: {type(e).__name__}: {e}")
         
-        logger.warning("❌ AUCUNE clé Mistral trouvée dans st.secrets après 4 chemins")
+        logger.warning("❌ AUCUNE clé Mistral trouvée dans st.secrets après 5 chemins")
             
     except Exception as e:
-        logger.warning(f"❌ Erreur critique accès secrets: {e}")
+        logger.warning(f"❌ Erreur critique accès secrets: {type(e).__name__}: {e}")
     
     return None
 
@@ -275,22 +292,26 @@ class Parametres(BaseSettings):
             Clé API Mistral
 
         Raises:
-            ValueError: Si clé introuvable
+            ValueError: Si clé introuvable (sauf en Streamlit Cloud)
         """
         # 1. Variable d'environnement (PREMIÈRE PRIORITÉ - dev local)
         cle = os.getenv("MISTRAL_API_KEY")
-        if cle:
+        if cle and cle.strip():
             logger.info("✅ Clé API Mistral chargée depuis variable d'environnement")
             return cle
 
         # 2. Secrets Streamlit - Essayer plusieurs chemins (Streamlit Cloud)
         api_key = _get_mistral_api_key_from_secrets()
-        if api_key:
+        if api_key and api_key.strip():
             logger.info("✅ Clé API Mistral chargée depuis st.secrets (Streamlit Cloud)")
             return api_key
 
         # Erreur: aucune clé trouvée
-        env_info = "Streamlit Cloud" if _is_streamlit_cloud() else "Dev Local"
+        is_cloud = _is_streamlit_cloud()
+        env_info = "Streamlit Cloud" if is_cloud else "Dev Local"
+        
+        # En Streamlit Cloud, on lance une erreur MAIS on la laisse remonter
+        # Le ClientIA.appeler() attendra le prochain appel quand st.secrets sera disponible
         raise ValueError(
             f"❌ Clé API Mistral manquante ({env_info})!\n\n"
             "Configure l'une de ces options:\n"
