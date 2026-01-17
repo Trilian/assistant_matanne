@@ -174,7 +174,7 @@ def render_liste():
     st.success(f"✅ {len(recettes)} recette(s) trouvée(s) | Page {st.session_state.recettes_page + 1}/{total_pages}")
     
     # Afficher en grid avec badges
-    cols = st.columns(3)
+    cols = st.columns(3, gap="medium")
     for idx, recette in enumerate(page_recettes):
         with cols[idx % 3]:
             with st.container(border=True):
@@ -182,43 +182,39 @@ def render_liste():
                 if recette.url_image:
                     try:
                         st.image(recette.url_image, use_column_width=True)
-                    except Exception as e:
-                        st.caption(f"🖼️ Image indisponible")
+                    except Exception:
+                        st.caption("🖼️ Image indisponible")
+                else:
+                    st.caption("📸 Pas d'image")
                 
-                # En-tête compact avec nom et badge difficulté
-                title_col, difficulty_col = st.columns([3, 1])
-                with title_col:
-                    st.markdown(f"**{recette.nom}**", help=recette.description or "")
-                with difficulty_col:
-                    if recette.difficulte == "facile":
-                        st.markdown("🟢", help="Facile")
-                    elif recette.difficulte == "moyen":
-                        st.markdown("🟡", help="Moyen")
-                    elif recette.difficulte == "difficile":
-                        st.markdown("🔴", help="Difficile")
+                # Nom avec emoji difficulté (une ligne)
+                difficulty_emoji = {"facile": "🟢", "moyen": "🟡", "difficile": "🔴"}.get(recette.difficulte, "⚪")
+                st.markdown(f"{difficulty_emoji} **{recette.nom}**")
                 
-                # Description courte
+                # Description courte (une ligne max)
                 if recette.description:
-                    st.caption(recette.description[:80] + ("..." if len(recette.description) > 80 else ""))
+                    desc = recette.description[:70]
+                    if len(recette.description) > 70:
+                        desc += "..."
+                    st.caption(desc)
                 
-                # Badges bio/local/rapide/équilibré - sur une ligne
+                # Badges sur une ligne (wrapping)
                 badges = []
                 if recette.est_bio:
-                    badges.append("🌱 Bio")
+                    badges.append("🌱")
                 if recette.est_local:
-                    badges.append("📍 Local")
+                    badges.append("📍")
                 if recette.est_rapide:
-                    badges.append("⚡ Rapide")
+                    badges.append("⚡")
                 if recette.est_equilibre:
-                    badges.append("💪 Équilibré")
+                    badges.append("💪")
                 if recette.congelable:
-                    badges.append("❄️ Congélable")
+                    badges.append("❄️")
                 
                 if badges:
-                    badge_text = " ".join(badges)
-                    st.caption(badge_text)
+                    st.caption(" ".join(badges))
                 
-                # Robots compatibles - icônes seulement
+                # Robots compatibles - une seule ligne
                 if recette.robots_compatibles:
                     robots_icons = {
                         'Cookeo': '🤖',
@@ -226,36 +222,27 @@ def render_liste():
                         'Airfryer': '🌪️',
                         'Multicooker': '⏲️'
                     }
-                    robot_badges = []
-                    for robot in recette.robots_compatibles:
-                        icon = robots_icons.get(robot, '🤖')
-                        robot_badges.append(icon)
-                    st.caption(" ".join(robot_badges))
+                    robot_list = " ".join([robots_icons.get(r, '🤖') for r in recette.robots_compatibles])
+                    st.caption(robot_list)
                 
-                # Infos principales en petite police
-                info_col1, info_col2, info_col3 = st.columns(3)
-                with info_col1:
-                    st.caption(f"⏱️ {recette.temps_preparation}m")
-                with info_col2:
-                    st.caption(f"👥 {recette.portions}")
-                with info_col3:
-                    if recette.calories:
-                        st.caption(f"🔥 {recette.calories}kcal")
+                # Infos principales alignées (3 colonnes)
+                st.divider()
+                info_c1, info_c2, info_c3 = st.columns(3)
+                with info_c1:
+                    st.caption(f"⏱️\n{recette.temps_preparation}m")
+                with info_c2:
+                    st.caption(f"👥\n{recette.portions}")
+                with info_c3:
+                    cal_text = f"{recette.calories}kcal" if recette.calories else "—"
+                    st.caption(f"🔥\n{cal_text}")
                 
-                # Nutrition si disponible
-                if any([recette.calories, recette.proteines, recette.lipides, recette.glucides]):
-                    with st.expander("📊 Nutrition"):
-                        nutrition_cols = st.columns(4)
-                        if recette.calories:
-                            nutrition_cols[0].metric("Cal", f"{recette.calories}")
-                        if recette.proteines:
-                            nutrition_cols[1].metric("Prot", f"{recette.proteines}g")
-                        if recette.lipides:
-                            nutrition_cols[2].metric("Lip", f"{recette.lipides}g")
-                        if recette.glucides:
-                            nutrition_cols[3].metric("Gluc", f"{recette.glucides}g")
-                
-                if st.button("Voir détails", key=f"recette_{recette.id}"):
+                # Bouton voir détails
+                st.divider()
+                if st.button(
+                    "👁️ Voir détails",
+                    use_container_width=True,
+                    key=f"detail_{recette.id}"
+                ):
                     st.session_state.detail_recette_id = recette.id
                     st.rerun()
     
@@ -885,57 +872,40 @@ def render_generer_image(recette):
     if recette.description:
         prompt += f": {recette.description}"
     
-    st.info(f"📝 Prompt: {prompt}")
+    st.caption(f"📝 {prompt}")
     
-    # Afficher les options
-    col1, col2 = st.columns([2, 1])
+    # Bouton génération
+    if st.button("🎨 Générer l'image", use_container_width=True, key=f"gen_img_{recette.id}"):
+        with st.spinner("⏳ Génération de l'image en cours..."):
+            try:
+                from src.utils.image_generator import generer_image_recette
+                
+                url_image = generer_image_recette(recette.nom, recette.description or "")
+                
+                if url_image:
+                    # Stocker dans session state pour persister après le spinner
+                    st.session_state[f"generated_image_{recette.id}"] = url_image
+                    st.success("✅ Image générée!")
+                else:
+                    st.error("❌ Impossible de générer l'image")
+                    
+            except Exception as e:
+                st.error(f"❌ Erreur: {str(e)}")
     
-    with col1:
-        option = st.radio(
-            "Quelle API utiliser?",
-            ["Hugging Face (Gratuit)", "Replicate (Payant)"],
-            key="image_gen_option"
-        )
-    
-    with col2:
-        if st.button("🎨 Générer l'image", use_container_width=True):
-            with st.spinner("⏳ Génération de l'image en cours..."):
+    # Afficher l'image si elle existe en session state
+    if f"generated_image_{recette.id}" in st.session_state:
+        url_image = st.session_state[f"generated_image_{recette.id}"]
+        st.image(url_image, caption=recette.nom, use_column_width=True)
+        
+        # Proposer de sauvegarder
+        if st.button("💾 Sauvegarder cette image", use_container_width=True, key=f"save_img_{recette.id}"):
+            service = get_recette_service()
+            if service:
                 try:
-                    from src.utils.image_generator import generer_image_recette
-                    
-                    url_image = generer_image_recette(recette.nom, recette.description or "")
-                    
-                    if url_image:
-                        st.success("✅ Image générée!")
-                        st.image(url_image, caption=recette.nom, use_column_width=True)
-                        
-                        # Proposer de sauvegarder
-                        if st.button("💾 Sauvegarder cette image", use_container_width=True):
-                            service = get_recette_service()
-                            if service:
-                                try:
-                                    # Mettre à jour l'URL de l'image
-                                    recette.url_image = url_image
-                                    service.update(recette)
-                                    st.success("✅ Image sauvegardée!")
-                                    st.rerun()
-                                except Exception as e:
-                                    st.error(f"❌ Erreur sauvegarde: {str(e)}")
-                    else:
-                        st.error("❌ Impossible de générer l'image. Vérifie que tu as configuré une clé API.")
-                        st.info("""
-                        **Pour utiliser la génération d'images:**
-                        
-                        1. **Hugging Face** (Gratuit, limité):
-                           - Crée un compte sur https://huggingface.co/
-                           - Ajoute ta clé dans Streamlit Secrets: `HUGGINGFACE_API_KEY`
-                        
-                        2. **Replicate** (Payant, meilleure qualité):
-                           - Crée un compte sur https://replicate.com/
-                           - Ajoute ta clé dans Streamlit Secrets: `REPLICATE_API_TOKEN`
-                        """)
-                        
+                    recette.url_image = url_image
+                    service.update(recette)
+                    st.success("✅ Image sauvegardée dans la recette!")
+                    st.session_state[f"generated_image_{recette.id}"] = None
+                    st.rerun()
                 except Exception as e:
-                    st.error(f"❌ Erreur génération: {str(e)}")
-                    import logging
-                    logging.error(f"Erreur génération image: {e}")
+                    st.error(f"❌ Erreur sauvegarde: {str(e)}")
