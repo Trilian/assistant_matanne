@@ -49,41 +49,53 @@ class AnalyseurIA:
         # Stratégie 1: Parse direct
         try:
             nettoye = AnalyseurIA._nettoyer_basique(reponse)
-            return modele.parse_raw(nettoye)
-        except (ValidationError, json.JSONDecodeError):
+            result = modele.parse_raw(nettoye)
+            logger.info(f"✅ Stratégie 1 (parse direct) réussie pour {modele.__name__}")
+            return result
+        except (ValidationError, json.JSONDecodeError) as e:
+            logger.debug(f"Stratégie 1 échouée: {str(e)[:100]}")
             pass
 
         # Stratégie 2: Extraction JSON
         try:
             json_str = AnalyseurIA._extraire_objet_json(reponse)
-            return modele.parse_raw(json_str)
-        except (ValidationError, json.JSONDecodeError, ValueError):
+            result = modele.parse_raw(json_str)
+            logger.info(f"✅ Stratégie 2 (extraction JSON) réussie pour {modele.__name__}")
+            return result
+        except (ValidationError, json.JSONDecodeError, ValueError) as e:
+            logger.debug(f"Stratégie 2 échouée: {str(e)[:100]}")
             pass
 
         # Stratégie 3: Réparation
         try:
             repare = AnalyseurIA._reparer_intelligemment(reponse)
             donnees = json.loads(repare)
-            return modele(**donnees)
-        except (ValidationError, json.JSONDecodeError, TypeError):
+            result = modele(**donnees)
+            logger.info(f"✅ Stratégie 3 (réparation) réussie pour {modele.__name__}")
+            return result
+        except (ValidationError, json.JSONDecodeError, TypeError) as e:
+            logger.debug(f"Stratégie 3 échouée: {str(e)[:100]}")
             pass
 
         # Stratégie 4: Parse partiel
         try:
             donnees_partielles = AnalyseurIA._analyser_partiel(reponse, modele)
             if donnees_partielles:
-                return modele(**donnees_partielles)
-        except Exception:
+                result = modele(**donnees_partielles)
+                logger.info(f"✅ Stratégie 4 (parse partiel) réussie pour {modele.__name__}")
+                return result
+        except Exception as e:
+            logger.debug(f"Stratégie 4 échouée: {str(e)[:100]}")
             pass
 
         # Stratégie 5: Fallback
         if not strict and valeur_secours:
-            logger.warning("Toutes stratégies échouées, utilisation fallback")
+            logger.warning(f"Toutes stratégies échouées, utilisation fallback pour {modele.__name__}")
             return modele(**valeur_secours)
 
         # Échec total
-        logger.error(f"Impossible d'analyser: {reponse[:500]}")
-        raise ValidationError("Impossible d'analyser la réponse IA")
+        logger.error(f"Impossible d'analyser réponse pour {modele.__name__}: {reponse[:200]}")
+        raise ValueError(f"Impossible d'analyser la réponse IA pour {modele.__name__}")
 
     @staticmethod
     def _nettoyer_basique(texte: str) -> str:
@@ -100,24 +112,36 @@ class AnalyseurIA:
 
     @staticmethod
     def _extraire_objet_json(texte: str) -> str:
-        """Extrait le premier objet JSON complet {...}"""
+        """Extrait le premier objet JSON complet {...} ou liste [...]"""
         texte = AnalyseurIA._nettoyer_basique(texte)
 
         pile = []
         debut = None
+        is_array = False
 
         for i, char in enumerate(texte):
             if char == "{":
                 if not pile:
                     debut = i
+                    is_array = False
+                pile.append(char)
+            elif char == "[":
+                if not pile:
+                    debut = i
+                    is_array = True
                 pile.append(char)
             elif char == "}":
-                if pile:
+                if pile and (pile[-1] == "{"):
+                    pile.pop()
+                if not pile and debut is not None:
+                    return texte[debut : i + 1]
+            elif char == "]":
+                if pile and (pile[-1] == "["):
                     pile.pop()
                 if not pile and debut is not None:
                     return texte[debut : i + 1]
 
-        raise ValueError("Aucun objet JSON complet trouvé")
+        raise ValueError("Aucun objet/liste JSON complet trouvé")
 
     @staticmethod
     def _reparer_intelligemment(texte: str) -> str:
@@ -201,8 +225,9 @@ def analyser_liste_reponse(
     class EnvelopeListe(BaseModel):
         items: list[modele_item]
 
+    # ✅ Utiliser 'items' (clé réelle) pas cle_liste (qui est ignorée)
     donnees_enveloppe = AnalyseurIA.analyser(
-        reponse, EnvelopeListe, valeur_secours={cle_liste: items_secours or []}, strict=False
+        reponse, EnvelopeListe, valeur_secours={"items": items_secours or []}, strict=False
     )
 
     return donnees_enveloppe.items

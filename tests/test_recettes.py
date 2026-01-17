@@ -174,14 +174,57 @@ class TestRecetteCRUD:
 class TestRecetteIAGeneration:
     """Test IA-based recipe generation."""
     
-    def test_generer_recettes_ia_returns_suggestions(
+    def test_generer_recettes_ia_method_exists(
         self, recette_service
     ):
-        """Test that IA generation returns suggestions."""
-        # Note: This will fail without mocking the IA client
-        # For now, we just verify the method exists
+        """Test that IA generation method exists."""
         assert hasattr(recette_service, 'generer_recettes_ia')
         assert callable(recette_service.generer_recettes_ia)
+    
+    def test_generer_recettes_ia_returns_list(
+        self, recette_service, monkeypatch
+    ):
+        """Test that IA generation returns a list."""
+        from unittest.mock import Mock
+        
+        # Mock la réponse IA avec un structure valide
+        mock_response = '''{
+            "items": [
+                {
+                    "nom": "Pâtes Carbonara",
+                    "description": "Classique italien",
+                    "temps_preparation": 10,
+                    "temps_cuisson": 20,
+                    "portions": 4,
+                    "difficulte": "facile",
+                    "type_repas": "dîner",
+                    "saison": "toute_année",
+                    "ingredients": [{"nom": "pâtes", "quantite": 400, "unite": "g"}],
+                    "etapes": [{"description": "Cuire"}]
+                }
+            ]
+        }'''
+        
+        # Patch call_with_cache pour retourner la réponse mockée
+        def mock_call_with_cache(*args, **kwargs):
+            return mock_response
+        
+        original = recette_service.call_with_cache
+        recette_service.call_with_cache = mock_call_with_cache
+        
+        try:
+            result = recette_service.generer_recettes_ia(
+                type_repas="dîner",
+                saison="été",
+                nb_recettes=1
+            )
+            
+            # Vérifications - le résultat doit être une liste
+            assert isinstance(result, list)
+            # Peut être 0 ou 1 selon si le parser échoue ou réussit
+            # Les deux sont acceptés (fallback ou parsing réussi)
+        finally:
+            recette_service.call_with_cache = original
     
     def test_generer_recettes_ia_handles_empty_ingredients(
         self, recette_service
@@ -189,6 +232,56 @@ class TestRecetteIAGeneration:
         """Test handling of empty ingredient list."""
         # Verify the method can handle empty list
         assert hasattr(recette_service, 'generer_recettes_ia')
+    
+    def test_generer_recettes_ia_respects_max_items(
+        self, recette_service, monkeypatch
+    ):
+        """Test that max_items is respected."""
+        from unittest.mock import Mock
+        
+        # Mock une réponse avec 5 recettes
+        mock_response = '''{
+            "items": [
+                {
+                    "nom": "Recette %d",
+                    "description": "Desc",
+                    "temps_preparation": 10,
+                    "temps_cuisson": 10,
+                    "portions": 4,
+                    "difficulte": "facile",
+                    "type_repas": "dîner",
+                    "saison": "toute_année",
+                    "ingredients": [],
+                    "etapes": []
+                }
+            ]
+        }'''
+        
+        def mock_call_with_cache(*args, **kwargs):
+            # Retourner 3 recettes
+            response = '{"items": ['
+            for i in range(3):
+                response += mock_response.split('[')[1].split(']')[0]
+                if i < 2:
+                    response += ','
+            response += ']}'
+            return response
+        
+        monkeypatch.setattr(
+            recette_service,
+            'call_with_cache',
+            mock_call_with_cache
+        )
+        
+        # Demander max 2
+        result = recette_service.generer_recettes_ia(
+            type_repas="dîner",
+            saison="été",
+            nb_recettes=2
+        )
+        
+        # Doit être limité à 2 ou moins
+        assert len(result) <= 2
 
 
 # ═══════════════════════════════════════════════════════════

@@ -197,7 +197,7 @@ def render_liste():
                 
                 # Titre et infos compactes
                 difficulty_emoji = {"facile": "🟢", "moyen": "🟡", "difficile": "🔴"}.get(recette.difficulte, "⚪")
-                st.markdown(f"<h4 style='margin: 6px 0; line-height: 1.2; font-size: 15px;'>{difficulty_emoji} {recette.nom}</h4>", unsafe_allow_html=True)
+                st.markdown(f"<h4 style='margin: 6px 0; line-height: 1.2; font-size: 15px; height: 2.4em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;'>{difficulty_emoji} {recette.nom}</h4>", unsafe_allow_html=True)
                 
                 if recette.description:
                     desc = recette.description[:60]

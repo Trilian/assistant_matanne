@@ -331,12 +331,28 @@ class RecetteService(BaseService[Recette], BaseAIService, RecipeAIMixin):
         prompt = self.build_json_prompt(
             context=context,
             task=f"Generate {nb_recettes} complete recipes",
-            json_schema='[{"nom": str, "description": str, "temps_preparation": int, ...}]',
+            json_schema='''{
+    "items": [
+        {
+            "nom": "string (recipe name)",
+            "description": "string (short description)",
+            "temps_preparation": "integer (minutes)",
+            "temps_cuisson": "integer (minutes)",
+            "portions": "integer",
+            "difficulte": "string (facile|moyen|difficile)",
+            "type_repas": "string (meal type)",
+            "saison": "string (season)",
+            "ingredients": [{"nom": "string", "quantite": "number", "unite": "string"}],
+            "etapes": [{"description": "string"}]
+        }
+    ]
+}''',
             constraints=[
                 "Each recipe must be complete with all ingredients",
                 "Include precise quantities and units",
                 "Detail all preparation steps",
                 "Respect season constraints",
+                "Return EXACTLY this JSON structure with 'items' key containing the recipes array",
             ],
         )
 
