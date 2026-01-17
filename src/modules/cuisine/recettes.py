@@ -311,7 +311,13 @@ def render_detail_recette(recette):
         except Exception:
             st.caption("🖼️ Image indisponible")
     else:
-        st.info("📸 Pas d'image pour cette recette")
+        # Placeholder visuel
+        import random
+        food_emojis = ["🍽️", "🍳", "🥘", "🍲", "🥗", "🍜", "🍱", "🥙", "🍛", "🥟", "🍚", "🥘"]
+        emoji = random.choice(food_emojis)
+        col = st.columns(1)[0]
+        with col:
+            st.markdown(f"<div style='text-align: center; font-size: 80px; opacity: 0.3;'>{emoji}</div>", unsafe_allow_html=True)
     
     # Bouton pour générer une image
     if st.button("✨ Générer une image avec l'IA", use_container_width=True):

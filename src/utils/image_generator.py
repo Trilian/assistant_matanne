@@ -7,6 +7,7 @@ import os
 import requests
 import logging
 from typing import Optional
+import base64
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,8 @@ def generer_image_recette(nom_recette: str, description: str = "") -> Optional[s
     
     Essaie plusieurs APIs de génération d'images:
     1. Hugging Face Inference API (gratuit)
-    2. Fallback: description textuelle
+    2. Pollinations.ai (gratuit, pas de clé)
+    3. Fallback: description textuelle
     
     Args:
         nom_recette: Nom de la recette
@@ -26,6 +28,12 @@ def generer_image_recette(nom_recette: str, description: str = "") -> Optional[s
     Returns:
         URL de l'image générée ou None
     """
+    
+    # Essayer Pollinations.ai d'abord (gratuit, rapide)
+    try:
+        return _generer_via_pollinations(nom_recette, description)
+    except Exception as e:
+        logger.debug(f"Pollinations API échouée: {e}")
     
     # Essayer Hugging Face API
     try:
@@ -43,29 +51,59 @@ def generer_image_recette(nom_recette: str, description: str = "") -> Optional[s
     return None
 
 
+def _generer_via_pollinations(nom_recette: str, description: str) -> Optional[str]:
+    """
+    Génère une image via Pollinations.ai (gratuit, pas de clé requise)
+    Cette API est très rapide et fiable
+    """
+    prompt = f"Professional food photography of {nom_recette}"
+    if description:
+        prompt += f": {description}"
+    prompt += ". Appetizing, well-lit, high quality, professional"
+    
+    # URL Pollinations (pas de clé requise)
+    url = f"https://image.pollinations.ai/prompt/{prompt}"
+    
+    try:
+        response = requests.get(url, timeout=30)
+        if response.status_code == 200:
+            logger.info(f"✅ Image générée via Pollinations pour '{nom_recette}'")
+            # Retourner l'URL directement
+            return url
+    except Exception as e:
+        logger.debug(f"Pollinations error: {e}")
+    
+    return None
+
+
 def _generer_via_huggingface(nom_recette: str, description: str) -> Optional[str]:
     """
-    Génère une image via Hugging Face Inference API (gratuit, pas de clé requise)
+    Génère une image via Hugging Face Inference API (gratuit avec clé)
     """
+    api_key = os.getenv('HUGGINGFACE_API_KEY')
+    if not api_key:
+        logger.debug("HUGGINGFACE_API_KEY not configured")
+        return None
+    
     prompt = f"Beautiful dish of {nom_recette}"
     if description:
         prompt += f": {description}"
     prompt += ". Food photography, professional lighting, appetizing"
     
     api_url = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2"
-    headers = {"Authorization": f"Bearer {os.getenv('HUGGINGFACE_API_KEY', '')}"}
+    headers = {"Authorization": f"Bearer {api_key}"}
     
-    # Si pas de clé, utiliser un model public
-    if not headers["Authorization"].endswith("''"):
+    try:
         response = requests.post(api_url, headers=headers, json={"inputs": prompt}, timeout=30)
         if response.status_code == 200:
-            # La réponse est une image binaire
-            # Sauvegarder temporairement et retourner l'URL
             logger.info(f"✅ Image générée via Hugging Face pour '{nom_recette}'")
-            # Retourner base64 encodée pour Streamlit
-            import base64
+            # La réponse est une image binaire - encoder en base64
             img_base64 = base64.b64encode(response.content).decode()
             return f"data:image/png;base64,{img_base64}"
+        else:
+            logger.debug(f"HF API error: {response.status_code}")
+    except Exception as e:
+        logger.debug(f"HF error: {e}")
     
     return None
 
