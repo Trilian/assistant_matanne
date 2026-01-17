@@ -6,6 +6,7 @@ import logging
 import streamlit as st
 from src.services.recettes import get_recette_service
 from src.core.errors_base import ErreurValidation
+from src.modules.cuisine.recettes_import import render_importer
 
 logger = logging.getLogger(__name__)
 
@@ -40,15 +41,16 @@ def app():
         st.session_state.detail_recette_id = None
 
     # Sous-tabs
-    tab_liste, tab_ajout, tab_ia = st.tabs(["📋 Liste", "➕ Ajouter Manuel", "✨ Générer IA"])
+    tab_liste, tab_ajout, tab_import, tab_ia = st.tabs(["📋 Liste", "➕ Ajouter Manuel", "📥 Importer", "✨ Générer IA"])
 
     with tab_liste:
         render_liste()
 
     with tab_ajout:
         render_ajouter_manuel()
-
-    with tab_ia:
+    
+    with tab_import:
+        render_importer()    with tab_ia:
         render_generer_ia()
 
 
