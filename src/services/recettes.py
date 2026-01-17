@@ -527,7 +527,7 @@ Steps:
 
 Preparation time: {recette.temps_preparation} minutes
 Cooking time: {recette.temps_cuisson} minutes
-Difficulty: {recette.niveau_difficulte}"""
+Difficulty: {recette.difficulte}"""
 
         # Prompt pour adaptation batch cooking
         prompt = self.build_json_prompt(
