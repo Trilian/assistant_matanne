@@ -1,6 +1,6 @@
 """
 Générateur d'images pour les recettes
-Utilise une API de génération d'images gratuite ou une alternative
+Utilise plusieurs APIs gratuites pour générer des images réelles de haute qualité
 """
 
 import os
@@ -8,19 +8,24 @@ import requests
 import logging
 from typing import Optional
 import base64
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
+import random
 
 logger = logging.getLogger(__name__)
+
+# APIs configurables
+PEXELS_API_KEY = os.getenv('PEXELS_API_KEY')  # Gratuit: https://www.pexels.com/api/
+PIXABAY_API_KEY = os.getenv('PIXABAY_API_KEY')  # Gratuit: https://pixabay.com/api/
+UNSPLASH_API_KEY = os.getenv('UNSPLASH_API_KEY')  # Gratuit: https://unsplash.com/oauth/applications
 
 
 def generer_image_recette(nom_recette: str, description: str = "", ingredients_list: list = None, type_plat: str = "") -> Optional[str]:
     """
     Génère une image pour une recette.
     
-    Essaie plusieurs APIs de génération d'images:
-    1. Hugging Face Inference API (gratuit)
-    2. Pollinations.ai (gratuit, pas de clé)
-    3. Fallback: description textuelle
+    Essaie plusieurs sources dans cet ordre:
+    1. Recherche dans des banques d'images réelles (Unsplash, Pexels, Pixabay)
+    2. Génération avec API IA (Pollinations.ai, Replicate)
     
     Args:
         nom_recette: Nom de la recette
@@ -29,22 +34,44 @@ def generer_image_recette(nom_recette: str, description: str = "", ingredients_l
         type_plat: Type de plat (entrée, plat, dessert, etc.)
         
     Returns:
-        URL de l'image générée ou None
+        URL de l'image ou None
     """
     
-    # Essayer Hugging Face d'abord (meilleure qualité)
-    try:
-        return _generer_via_huggingface(nom_recette, description, ingredients_list, type_plat)
-    except Exception as e:
-        logger.debug(f"Hugging Face API échouée: {e}")
+    # Chercher d'abord dans les vraies photos (meilleur résultat)
+    if PEXELS_API_KEY:
+        try:
+            url = _rechercher_image_pexels(nom_recette)
+            if url:
+                logger.info(f"✅ Image trouvée via Pexels pour '{nom_recette}'")
+                return url
+        except Exception as e:
+            logger.debug(f"Pexels API échouée: {e}")
     
-    # Essayer Pollinations.ai (rapide, gratuit)
+    if PIXABAY_API_KEY:
+        try:
+            url = _rechercher_image_pixabay(nom_recette)
+            if url:
+                logger.info(f"✅ Image trouvée via Pixabay pour '{nom_recette}'")
+                return url
+        except Exception as e:
+            logger.debug(f"Pixabay API échouée: {e}")
+    
+    if UNSPLASH_API_KEY:
+        try:
+            url = _rechercher_image_unsplash(nom_recette)
+            if url:
+                logger.info(f"✅ Image trouvée via Unsplash pour '{nom_recette}'")
+                return url
+        except Exception as e:
+            logger.debug(f"Unsplash API échouée: {e}")
+    
+    # Fallback: Essayer Pollinations.ai (génération IA rapide, pas de clé requise)
     try:
         return _generer_via_pollinations(nom_recette, description, ingredients_list, type_plat)
     except Exception as e:
         logger.debug(f"Pollinations API échouée: {e}")
     
-    # Essayer Replicate API
+    # Essayer Replicate API (meilleure qualité IA)
     try:
         return _generer_via_replicate(nom_recette, description, ingredients_list, type_plat)
     except Exception as e:
@@ -54,7 +81,111 @@ def generer_image_recette(nom_recette: str, description: str = "", ingredients_l
     return None
 
 
-def _construire_prompt_detaille(nom_recette: str, description: str, ingredients_list: list = None, type_plat: str = "") -> str:
+def _rechercher_image_pexels(nom_recette: str) -> Optional[str]:
+    """
+    Recherche une image dans la banque Pexels (API gratuite)
+    https://www.pexels.com/api/
+    
+    Important: Obtenir une clé API gratuite sur https://www.pexels.com/api/
+    """
+    if not PEXELS_API_KEY:
+        return None
+    
+    try:
+        # Améliorer la requête de recherche
+        query = f"{nom_recette} food cuisine"
+        url = "https://api.pexels.com/v1/search"
+        headers = {"Authorization": PEXELS_API_KEY}
+        params = {
+            "query": query,
+            "per_page": 5,
+            "page": 1
+        }
+        
+        response = requests.get(url, headers=headers, params=params, timeout=10)
+        response.raise_for_status()
+        
+        data = response.json()
+        if data.get("photos") and len(data["photos"]) > 0:
+            # Prendre une image aléatoire parmi les résultats
+            photo = random.choice(data["photos"])
+            return photo["src"]["large"]
+    except Exception as e:
+        logger.debug(f"Pexels error: {e}")
+    
+    return None
+
+
+def _rechercher_image_pixabay(nom_recette: str) -> Optional[str]:
+    """
+    Recherche une image dans Pixabay (API gratuite)
+    https://pixabay.com/api/
+    
+    Important: Obtenir une clé API gratuite sur https://pixabay.com/api/
+    """
+    if not PIXABAY_API_KEY:
+        return None
+    
+    try:
+        query = f"{nom_recette} food cuisine"
+        url = "https://pixabay.com/api/"
+        params = {
+            "q": query,
+            "key": PIXABAY_API_KEY,
+            "image_type": "photo",
+            "category": "food",
+            "per_page": 5,
+            "order": "popular"
+        }
+        
+        response = requests.get(url, params=params, timeout=10)
+        response.raise_for_status()
+        
+        data = response.json()
+        if data.get("hits") and len(data["hits"]) > 0:
+            # Prendre une image aléatoire parmi les résultats
+            image = random.choice(data["hits"])
+            return image["webformatURL"]
+    except Exception as e:
+        logger.debug(f"Pixabay error: {e}")
+    
+    return None
+
+
+def _rechercher_image_unsplash(nom_recette: str) -> Optional[str]:
+    """
+    Recherche une image dans Unsplash (API gratuite)
+    https://unsplash.com/oauth/applications
+    
+    Important: Obtenir une clé API gratuite sur https://unsplash.com/oauth/applications
+    """
+    if not UNSPLASH_API_KEY:
+        return None
+    
+    try:
+        query = f"{nom_recette} food"
+        url = "https://api.unsplash.com/search/photos"
+        params = {
+            "query": query,
+            "client_id": UNSPLASH_API_KEY,
+            "per_page": 5,
+            "order_by": "relevant"
+        }
+        
+        response = requests.get(url, params=params, timeout=10)
+        response.raise_for_status()
+        
+        data = response.json()
+        if data.get("results") and len(data["results"]) > 0:
+            # Prendre une image aléatoire parmi les résultats
+            result = random.choice(data["results"])
+            return result["urls"]["regular"]
+    except Exception as e:
+        logger.debug(f"Unsplash error: {e}")
+    
+    return None
+
+
     """Construit un prompt plus détaillé pour la génération d'images"""
     
     # Ingrédients clés à mentionner
@@ -95,24 +226,22 @@ def _construire_prompt_detaille(nom_recette: str, description: str, ingredients_
 def _generer_via_pollinations(nom_recette: str, description: str, ingredients_list: list = None, type_plat: str = "") -> Optional[str]:
     """
     Génère une image via Pollinations.ai (gratuit, pas de clé requise)
-    Retourne une image encodée en base64 pour Streamlit
+    Retourne une URL directe
     """
     prompt = _construire_prompt_detaille(nom_recette, description, ingredients_list, type_plat)
     
     # URL encode le prompt pour éviter les problèmes avec accents
     prompt_encoded = quote(prompt, safe='')
     
-    # URL Pollinations (pas de clé requise)
+    # URL Pollinations (pas de clé requise) - retourner directement l'URL
     url = f"https://image.pollinations.ai/prompt/{prompt_encoded}"
     
     try:
-        # Télécharger l'image et l'encoder en base64
-        response = requests.get(url, timeout=30)
+        # Vérifier que l'URL est accessible
+        response = requests.head(url, timeout=5)
         if response.status_code == 200:
             logger.info(f"✅ Image générée via Pollinations pour '{nom_recette}'")
-            # Encoder en base64 pour que Streamlit l'affiche correctement
-            img_base64 = base64.b64encode(response.content).decode()
-            return f"data:image/png;base64,{img_base64}"
+            return url
     except Exception as e:
         logger.debug(f"Pollinations error: {e}")
     

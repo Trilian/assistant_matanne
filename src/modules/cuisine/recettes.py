@@ -856,61 +856,94 @@ def render_generer_ia():
                         return
                     
                     st.success(f"✅ {len(recettes_suggestions)} recette(s) générée(s)!")
+                    st.divider()
                     
-                    # Afficher les suggestions
+                    # Afficher les suggestions en cartes
                     for idx, suggestion in enumerate(recettes_suggestions, 1):
-                        with st.expander(f"🍳 Recette {idx}: {suggestion.nom}", expanded=(idx == 1)):
-                            st.markdown(f"**{suggestion.description}**")
+                        # Conteneur pour chaque recette
+                        with st.container(border=True):
+                            # Titre + Métrique difficulté en ligne
+                            col_titre, col_diff = st.columns([4, 1])
+                            with col_titre:
+                                st.subheader(f"🍳 {suggestion.nom}", anchor=False)
+                            with col_diff:
+                                difficulte_emoji = {"facile": "🟢", "moyen": "🟡", "difficile": "🔴"}.get(suggestion.difficulte, "")
+                                st.caption(f"{difficulte_emoji} {suggestion.difficulte}")
                             
+                            # Description
+                            if suggestion.description:
+                                st.markdown(suggestion.description)
+                            
+                            # Métriques en ligne
                             col1, col2, col3, col4 = st.columns(4)
                             with col1:
-                                st.metric("Préparation", f"{suggestion.temps_preparation} min")
+                                st.metric("⏱️ Préparation", f"{suggestion.temps_preparation} min", label_visibility="collapsed")
                             with col2:
-                                st.metric("Cuisson", f"{suggestion.temps_cuisson} min")
+                                st.metric("🔥 Cuisson", f"{suggestion.temps_cuisson} min", label_visibility="collapsed")
                             with col3:
-                                st.metric("Portions", suggestion.portions)
+                                st.metric("🍽️ Portions", suggestion.portions, label_visibility="collapsed")
                             with col4:
-                                st.metric("Difficulté", suggestion.difficulte)
+                                st.metric("⏰ Total", f"{suggestion.temps_preparation + suggestion.temps_cuisson} min", label_visibility="collapsed")
                             
+                            st.divider()
+                            
+                            # Ingrédients en deux colonnes
                             if suggestion.ingredients:
-                                st.markdown("#### Ingrédients")
-                                for ing in suggestion.ingredients:
-                                    if isinstance(ing, dict):
-                                        st.write(f"- {ing.get('nom', 'N/A')}: {ing.get('quantite', '')} {ing.get('unite', '')}")
-                                    else:
-                                        st.write(f"- {ing}")
+                                st.markdown("**Ingrédients:**")
+                                col_ing1, col_ing2 = st.columns(2)
+                                with col_ing1:
+                                    ing_list = suggestion.ingredients[:len(suggestion.ingredients)//2 + 1]
+                                    for ing in ing_list:
+                                        if isinstance(ing, dict):
+                                            st.write(f"• {ing.get('nom', 'N/A')}: {ing.get('quantite', '')} {ing.get('unite', '')}")
+                                        else:
+                                            st.write(f"• {ing}")
+                                with col_ing2:
+                                    ing_list = suggestion.ingredients[len(suggestion.ingredients)//2 + 1:]
+                                    for ing in ing_list:
+                                        if isinstance(ing, dict):
+                                            st.write(f"• {ing.get('nom', 'N/A')}: {ing.get('quantite', '')} {ing.get('unite', '')}")
+                                        else:
+                                            st.write(f"• {ing}")
                             
+                            # Étapes dans un expander
                             if suggestion.etapes:
-                                st.markdown("#### Étapes")
-                                for i, etape in enumerate(suggestion.etapes, 1):
-                                    if isinstance(etape, dict):
-                                        st.write(f"{i}. {etape.get('description', etape)}")
-                                    else:
-                                        st.write(f"{i}. {etape}")
+                                with st.expander("📋 Étapes de préparation"):
+                                    for i, etape in enumerate(suggestion.etapes, 1):
+                                        if isinstance(etape, dict):
+                                            st.write(f"**{i}.** {etape.get('description', etape)}")
+                                        else:
+                                            st.write(f"**{i}.** {etape}")
                             
-                            # Bouton pour ajouter à la base
-                            if st.button(f"➕ Ajouter à mes recettes", key=f"add_suggestion_{idx}"):
-                                try:
-                                    # Préparer les données pour la création
-                                    data = {
-                                        "nom": suggestion.nom,
-                                        "description": suggestion.description,
-                                        "type_repas": type_repas,
-                                        "temps_preparation": suggestion.temps_preparation,
-                                        "temps_cuisson": suggestion.temps_cuisson,
-                                        "portions": suggestion.portions,
-                                        "difficulte": suggestion.difficulte,
-                                        "saison": suggestion.saison or saison,
-                                        "ingredients": suggestion.ingredients or [],
-                                        "etapes": suggestion.etapes or [],
-                                    }
-                                    
-                                    recette = service.create_complete(data)
-                                    st.success(f"✅ '{recette.nom}' ajoutée à vos recettes!")
-                                    
-                                except Exception as e:
-                                    st.error(f"❌ Erreur: {str(e)}")
-                                    logger.error(f"Erreur ajout suggestion: {e}")
+                            # Bouton d'ajout
+                            st.divider()
+                            col_btn_add, col_btn_space = st.columns([2, 1])
+                            with col_btn_add:
+                                if st.button(f"✅ Ajouter à mes recettes", key=f"add_suggestion_{idx}", use_container_width=True, type="primary"):
+                                    try:
+                                        # Préparer les données pour la création
+                                        data = {
+                                            "nom": suggestion.nom,
+                                            "description": suggestion.description,
+                                            "type_repas": type_repas,
+                                            "temps_preparation": suggestion.temps_preparation,
+                                            "temps_cuisson": suggestion.temps_cuisson,
+                                            "portions": suggestion.portions,
+                                            "difficulte": suggestion.difficulte,
+                                            "saison": suggestion.saison or saison,
+                                            "ingredients": suggestion.ingredients or [],
+                                            "etapes": suggestion.etapes or [],
+                                        }
+                                        
+                                        recette = service.create_complete(data)
+                                        st.success(f"✅ '{recette.nom}' ajoutée à vos recettes!")
+                                        st.toast(f"🎉 {recette.nom} sauvegardée!", icon="✅")
+                                        
+                                    except Exception as e:
+                                        st.error(f"❌ Erreur: {str(e)}")
+                                        logger.error(f"Erreur ajout suggestion: {e}")
+                            
+                            st.write("")  # Espacement
                 
                 except Exception as e:
                     st.error(f"❌ Erreur génération: {str(e)}")
