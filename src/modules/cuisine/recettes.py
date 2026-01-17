@@ -174,47 +174,50 @@ def render_liste():
     st.success(f"✅ {len(recettes)} recette(s) trouvée(s) | Page {st.session_state.recettes_page + 1}/{total_pages}")
     
     # Afficher en grid avec badges
-    cols = st.columns(3, gap="medium")
+    cols = st.columns(3, gap="small")
     for idx, recette in enumerate(page_recettes):
         with cols[idx % 3]:
             with st.container(border=True):
-                # Image si disponible
+                # Image si disponible (hauteur fixe)
                 if recette.url_image:
                     try:
-                        st.image(recette.url_image, use_column_width=True)
+                        st.image(recette.url_image, use_column_width=True, width=250)
                     except Exception:
-                        st.caption("🖼️ Image indisponible")
+                        st.markdown('<div style="height: 180px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; border-radius: 8px;">🖼️</div>', unsafe_allow_html=True)
                 else:
-                    st.caption("📸 Pas d'image")
+                    import random
+                    food_emojis = ["🍽️", "🍳", "🥘", "🍲", "🥗", "🍜"]
+                    emoji = random.choice(food_emojis)
+                    st.markdown(f'<div style="height: 180px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 80px;">{emoji}</div>', unsafe_allow_html=True)
                 
-                # Nom avec emoji difficulté (une ligne)
+                # Difficulté + Nom
                 difficulty_emoji = {"facile": "🟢", "moyen": "🟡", "difficile": "🔴"}.get(recette.difficulte, "⚪")
-                st.markdown(f"{difficulty_emoji} **{recette.nom}**")
+                st.markdown(f"<h4 style='margin: 8px 0;'>{difficulty_emoji} {recette.nom}</h4>", unsafe_allow_html=True)
                 
-                # Description courte (une ligne max)
+                # Description
                 if recette.description:
-                    desc = recette.description[:70]
-                    if len(recette.description) > 70:
+                    desc = recette.description[:65]
+                    if len(recette.description) > 65:
                         desc += "..."
-                    st.caption(desc)
+                    st.markdown(f"<p style='margin: 4px 0; font-size: 12px; opacity: 0.7;'>{desc}</p>", unsafe_allow_html=True)
                 
-                # Badges sur une ligne (wrapping)
-                badges = []
+                # Tags badges (emojis only)
+                tags = []
                 if recette.est_bio:
-                    badges.append("🌱")
+                    tags.append("🌱")
                 if recette.est_local:
-                    badges.append("📍")
+                    tags.append("📍")
                 if recette.est_rapide:
-                    badges.append("⚡")
+                    tags.append("⚡")
                 if recette.est_equilibre:
-                    badges.append("💪")
+                    tags.append("💪")
                 if recette.congelable:
-                    badges.append("❄️")
+                    tags.append("❄️")
                 
-                if badges:
-                    st.caption(" ".join(badges))
+                if tags:
+                    st.markdown(f"<p style='margin: 4px 0;'>{' '.join(tags)}</p>", unsafe_allow_html=True)
                 
-                # Robots compatibles - une seule ligne
+                # Robots
                 if recette.robots_compatibles:
                     robots_icons = {
                         'Cookeo': '🤖',
@@ -222,19 +225,19 @@ def render_liste():
                         'Airfryer': '🌪️',
                         'Multicooker': '⏲️'
                     }
-                    robot_list = " ".join([robots_icons.get(r, '🤖') for r in recette.robots_compatibles])
-                    st.caption(robot_list)
+                    robot_text = " ".join([robots_icons.get(r, '🤖') for r in recette.robots_compatibles])
+                    st.markdown(f"<p style='margin: 4px 0; font-size: 12px;'>{robot_text}</p>", unsafe_allow_html=True)
                 
-                # Infos principales alignées (3 colonnes)
+                # Infos principales (3 colonnes)
                 st.divider()
-                info_c1, info_c2, info_c3 = st.columns(3)
-                with info_c1:
-                    st.caption(f"⏱️\n{recette.temps_preparation}m")
-                with info_c2:
-                    st.caption(f"👥\n{recette.portions}")
-                with info_c3:
-                    cal_text = f"{recette.calories}kcal" if recette.calories else "—"
-                    st.caption(f"🔥\n{cal_text}")
+                info_cols = st.columns(3, gap="small")
+                with info_cols[0]:
+                    st.markdown(f"<div style='text-align: center;'><div style='font-size: 14px;'>⏱️</div><div style='font-size: 13px; font-weight: bold;'>{recette.temps_preparation}m</div></div>", unsafe_allow_html=True)
+                with info_cols[1]:
+                    st.markdown(f"<div style='text-align: center;'><div style='font-size: 14px;'>👥</div><div style='font-size: 13px; font-weight: bold;'>{recette.portions}</div></div>", unsafe_allow_html=True)
+                with info_cols[2]:
+                    cal = recette.calories if recette.calories else "—"
+                    st.markdown(f"<div style='text-align: center;'><div style='font-size: 14px;'>🔥</div><div style='font-size: 13px; font-weight: bold;'>{cal}</div></div>", unsafe_allow_html=True)
                 
                 # Bouton voir détails
                 st.divider()

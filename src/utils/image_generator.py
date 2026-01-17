@@ -55,7 +55,7 @@ def generer_image_recette(nom_recette: str, description: str = "") -> Optional[s
 def _generer_via_pollinations(nom_recette: str, description: str) -> Optional[str]:
     """
     Génère une image via Pollinations.ai (gratuit, pas de clé requise)
-    Cette API est très rapide et fiable
+    Retourne une image encodée en base64 pour Streamlit
     """
     prompt = f"Professional food photography of {nom_recette}"
     if description:
@@ -69,11 +69,13 @@ def _generer_via_pollinations(nom_recette: str, description: str) -> Optional[st
     url = f"https://image.pollinations.ai/prompt/{prompt_encoded}"
     
     try:
+        # Télécharger l'image et l'encoder en base64
         response = requests.get(url, timeout=30)
         if response.status_code == 200:
             logger.info(f"✅ Image générée via Pollinations pour '{nom_recette}'")
-            # Retourner l'URL directement
-            return url
+            # Encoder en base64 pour que Streamlit l'affiche correctement
+            img_base64 = base64.b64encode(response.content).decode()
+            return f"data:image/png;base64,{img_base64}"
     except Exception as e:
         logger.debug(f"Pollinations error: {e}")
     
