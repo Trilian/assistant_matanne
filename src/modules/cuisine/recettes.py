@@ -205,7 +205,7 @@ def render_liste():
                         desc += "..."
                     st.markdown(f"<p style='margin: 2px 0; font-size: 11px; opacity: 0.7;'>{desc}</p>", unsafe_allow_html=True)
                 
-                # Badges
+                # Badges et robots sur la même ligne
                 badge_definitions = {
                     "🌱": "Bio",
                     "📍": "Local",
@@ -214,23 +214,22 @@ def render_liste():
                     "❄️": "Congélable"
                 }
                 
-                tags = []
+                # Construire tous les badges
+                all_badges = []
+                
+                # Ajouter badges classiques
                 if recette.est_bio:
-                    tags.append("🌱")
+                    all_badges.append(f'<span title="{badge_definitions["🌱"]}" style="cursor: help;">🌱</span>')
                 if recette.est_local:
-                    tags.append("📍")
+                    all_badges.append(f'<span title="{badge_definitions["📍"]}" style="cursor: help;">📍</span>')
                 if recette.est_rapide:
-                    tags.append("⚡")
+                    all_badges.append(f'<span title="{badge_definitions["⚡"]}" style="cursor: help;">⚡</span>')
                 if recette.est_equilibre:
-                    tags.append("💪")
+                    all_badges.append(f'<span title="{badge_definitions["💪"]}" style="cursor: help;">💪</span>')
                 if recette.congelable:
-                    tags.append("❄️")
+                    all_badges.append(f'<span title="{badge_definitions["❄️"]}" style="cursor: help;">❄️</span>')
                 
-                if tags:
-                    tags_html = " ".join([f'<span title="{badge_definitions.get(tag, tag)}" style="cursor: help;">{tag}</span>' for tag in tags])
-                    st.markdown(f"<p style='margin: 2px 0;'>{tags_html}</p>", unsafe_allow_html=True)
-                
-                # Robots
+                # Ajouter robots
                 if recette.robots_compatibles:
                     robots_icons = {
                         'Cookeo': ('🤖', 'Cookeo'),
@@ -238,12 +237,14 @@ def render_liste():
                         'Airfryer': ('🌪️', 'Airfryer'),
                         'Multicooker': ('⏲️', 'MC')
                     }
-                    robot_html_list = []
                     for robot in recette.robots_compatibles:
                         icon, tooltip = robots_icons.get(robot, ('🤖', robot))
-                        robot_html_list.append(f'<span title="{tooltip}" style="cursor: help;">{icon}</span>')
-                    robot_text = " ".join(robot_html_list)
-                    st.markdown(f"<p style='margin: 2px 0; font-size: 11px;'>{robot_text}</p>", unsafe_allow_html=True)
+                        all_badges.append(f'<span title="{tooltip}" style="cursor: help;">{icon}</span>')
+                
+                # Afficher tous les badges sur une ligne
+                if all_badges:
+                    all_badges_html = " ".join(all_badges)
+                    st.markdown(f"<p style='margin: 2px 0; font-size: 13px;'>{all_badges_html}</p>", unsafe_allow_html=True)
                 
                 # Divider
                 st.divider()
