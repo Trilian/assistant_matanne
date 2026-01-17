@@ -57,6 +57,14 @@ from .logging import configure_logging  # type: ignore
 logger = logging.getLogger(__name__)
 
 
+def _is_streamlit_cloud() -> bool:
+    """Détecte si on est en Streamlit Cloud.
+    
+    Returns:
+        True si en Streamlit Cloud, False sinon
+    """
+    return os.getenv("SF_PARTNER") == "streamlit"
+
 
 def _read_st_secret(section: str):
     """Lit de façon sûre une section de `st.secrets` si disponible.
@@ -238,7 +246,7 @@ class Parametres(BaseSettings):
     @property
     def MISTRAL_API_KEY(self) -> str:
         """
-        Clé API Mistral avec fallbacks.
+        Clé API Mistral avec fallbacks optimisés pour Streamlit Cloud.
 
         Ordre de priorité:
         1. MISTRAL_API_KEY env var (dev local depuis .env.local)
@@ -250,30 +258,22 @@ class Parametres(BaseSettings):
         Raises:
             ValueError: Si clé introuvable
         """
-        # DEBUG: Afficher toutes les variables d'environ avec "MISTRAL"
-        mistral_vars = {k: v[:10] + '...' if len(v) > 10 else v for k, v in os.environ.items() if 'MISTRAL' in k.upper()}
-        if mistral_vars:
-            logger.warning(f"🔍 Variables MISTRAL trouvées: {mistral_vars}")
-        else:
-            logger.warning(f"🔍 AUCUNE variable MISTRAL dans os.environ!")
-            logger.warning(f"🔍 Contenu de os.environ (premiers 10 items): {dict(list(os.environ.items())[:10])}")
-        
         # 1. Variable d'environnement (PREMIÈRE PRIORITÉ - dev local)
         cle = os.getenv("MISTRAL_API_KEY")
         if cle:
-            logger.warning("✅ Clé API Mistral chargée depuis variable d'environnement (.env.local)")
+            logger.info("✅ Clé API Mistral chargée depuis variable d'environnement")
             return cle
-
-        logger.warning(f"❌ os.getenv('MISTRAL_API_KEY') = {cle}")
 
         # 2. Secrets Streamlit - Essayer plusieurs chemins (Streamlit Cloud)
         api_key = _get_mistral_api_key_from_secrets()
         if api_key:
-            logger.warning("✅ Clé API Mistral chargée depuis st.secrets (Streamlit Cloud)")
+            logger.info("✅ Clé API Mistral chargée depuis st.secrets (Streamlit Cloud)")
             return api_key
 
+        # Erreur: aucune clé trouvée
+        env_info = "Streamlit Cloud" if _is_streamlit_cloud() else "Dev Local"
         raise ValueError(
-            "❌ Clé API Mistral manquante!\n\n"
+            f"❌ Clé API Mistral manquante ({env_info})!\n\n"
             "Configure l'une de ces options:\n"
             "1. Fichier .env.local (Dev local):\n"
             "   MISTRAL_API_KEY='sk-xxx' ou autre format\n\n"
@@ -290,10 +290,16 @@ class Parametres(BaseSettings):
         Returns:
             Nom du modèle
         """
+        # 1. Variable d'environnement (priorité)
+        model = os.getenv("MISTRAL_MODEL")
+        if model:
+            return model
+        
+        # 2. Secrets Streamlit
         try:
             return st.secrets.get("mistral", {}).get("model", "mistral-small-latest")
         except Exception:
-            return os.getenv("MISTRAL_MODEL", "mistral-small-latest")
+            return "mistral-small-latest"
 
     MISTRAL_TIMEOUT: int = 60
     """Timeout API Mistral en secondes."""

@@ -37,13 +37,26 @@ class ClientIA:
         self.timeout = None
 
     def _ensure_config_loaded(self):
-        """Charge la config au moment du premier accès (lazy loading)"""
-        if self._config_loaded:
+        """Charge la config au moment du premier accès (lazy loading)
+        
+        En Streamlit Cloud, on retente à chaque appel car st.secrets n'est
+        disponible que lors des interactions utilisateur.
+        """
+        # Déterminer si on est en Streamlit Cloud
+        import os
+        is_cloud = os.getenv("SF_PARTNER") == "streamlit"
+        
+        # En Cloud, toujours retenter. Localement, charger une fois
+        if self._config_loaded and not is_cloud:
+            return
+        
+        # Si on a déjà une config valide et pas en cloud, la conserver
+        if self._config_loaded and self.cle_api:
             return
 
-        parametres = obtenir_parametres()
-
         try:
+            # Force reload de la config pour Streamlit Cloud
+            parametres = obtenir_parametres()
             self.cle_api = parametres.MISTRAL_API_KEY
             self.modele = parametres.MISTRAL_MODEL
             self.url_base = parametres.MISTRAL_BASE_URL
@@ -53,12 +66,14 @@ class ClientIA:
             logger.info(f"✅ ClientIA initialisé (modèle: {self.modele})")
 
         except ValueError as e:
-            logger.error(f"❌ Configuration IA manquante: {e}")
-            self._config_loaded = True  # Marquer comme essayé même si ça échoue
+            logger.error(f"❌ Configuration IA manquante: Clé API Mistral non configurée")
+            # NE PAS marquer comme loaded en cas d'erreur
+            # Cela permet une tentative lors du prochain appel (quand st.secrets sera prêt)
             self.cle_api = None
             self.modele = None
             self.url_base = None
             self.timeout = None
+            raise  # Re-raise pour que l'erreur remonte
 
     # ═══════════════════════════════════════════════════════════
     # APPEL API PRINCIPAL
