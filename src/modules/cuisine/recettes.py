@@ -963,36 +963,56 @@ def render_generer_image(recette):
     
     # Bouton génération
     if st.button("🎨 Générer l'image", use_container_width=True, key=f"gen_img_{recette.id}"):
-        with st.spinner("⏳ Génération de l'image en cours..."):
-            try:
-                from src.utils.image_generator import generer_image_recette
-                
-                # Préparer la liste des ingrédients pour le contexte
-                ingredients_list = []
-                for ing in recette.ingredients:
-                    ingredients_list.append({
-                        'nom': ing.ingredient.nom,
-                        'quantite': ing.quantite,
-                        'unite': ing.unite
-                    })
-                
-                # Générer l'image avec plus de contexte
-                url_image = generer_image_recette(
-                    recette.nom,
-                    recette.description or "",
-                    ingredients_list=ingredients_list,
-                    type_plat=recette.type_repas
-                )
-                
-                if url_image:
-                    # Stocker dans session state pour persister après le spinner
-                    st.session_state[f"generated_image_{recette.id}"] = url_image
-                    st.success("✅ Image générée!")
-                else:
-                    st.error("❌ Impossible de générer l'image")
+        # Afficher progress
+        progress_container = st.container()
+        status_container = st.container()
+        
+        with progress_container:
+            st.info(f"⏳ Génération de l'image pour: {recette.nom}")
+        
+        try:
+            # DEBUG: vérifier que la fonction est bien importée
+            from src.utils.image_generator import generer_image_recette, UNSPLASH_API_KEY, PEXELS_API_KEY, PIXABAY_API_KEY
+            
+            status_container.write(f"🔑 Clés configurées - Unsplash: {'✅' if UNSPLASH_API_KEY else '❌'}, Pexels: {'✅' if PEXELS_API_KEY else '❌'}, Pixabay: {'✅' if PIXABAY_API_KEY else '❌'}")
+            
+            # Préparer la liste des ingrédients pour le contexte
+            ingredients_list = []
+            for ing in recette.ingredients:
+                ingredients_list.append({
+                    'nom': ing.ingredient.nom,
+                    'quantite': ing.quantite,
+                    'unite': ing.unite
+                })
+            
+            status_container.write(f"📋 {len(ingredients_list)} ingrédients trouvés")
+            
+            # Générer l'image avec plus de contexte
+            status_container.write(f"🔍 Recherche d'image pour: {recette.nom}")
+            
+            url_image = generer_image_recette(
+                recette.nom,
+                recette.description or "",
+                ingredients_list=ingredients_list,
+                type_plat=recette.type_repas
+            )
+            
+            if url_image:
+                # Stocker dans session state pour persister après le spinner
+                st.session_state[f"generated_image_{recette.id}"] = url_image
+                progress_container.success("✅ Image générée avec succès!")
+                status_container.empty()
+            else:
+                progress_container.error("❌ Impossible de générer l'image - aucune source retournée")
+                status_container.info("💡 Assurez-vous qu'une clé API est configurée (Unsplash, Pexels ou Pixabay)")
                     
-            except Exception as e:
-                st.error(f"❌ Erreur: {str(e)}")
+        except ImportError as e:
+            progress_container.error(f"❌ Erreur d'import: {str(e)}")
+            status_container.write(f"🔍 Détail: Impossible d'importer image_generator")
+        except Exception as e:
+            progress_container.error(f"❌ Erreur: {str(e)}")
+            import traceback
+            status_container.write(f"📋 Traceback: {traceback.format_exc()}")
     
     # Afficher l'image si elle existe en session state
     if f"generated_image_{recette.id}" in st.session_state:
