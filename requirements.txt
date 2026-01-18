@@ -59,3 +59,4 @@ sentence-transformers==2.2.2
 beautifulsoup4==4.12.2
 PyPDF2>=3.0.0
 replicate>=0.30.0
+reportlab>=3.6.0

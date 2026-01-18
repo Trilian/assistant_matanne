@@ -345,6 +345,15 @@ class ArticleInventaire(Base):
     derniere_maj: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, index=True
     )
+    
+    # Photos (Nouveau!)
+    photo_url: Mapped[str | None] = mapped_column(String(500))  # URL vers la photo stockée
+    photo_filename: Mapped[str | None] = mapped_column(String(200))  # Nom du fichier
+    photo_uploaded_at: Mapped[datetime | None] = mapped_column(DateTime)  # Quand uploadée
+    
+    # Code-barres (Nouveau!)
+    code_barres: Mapped[str | None] = mapped_column(String(50), unique=True, index=True, nullable=True)  # EAN-13, QR, etc.
+    prix_unitaire: Mapped[float | None] = mapped_column(Float, nullable=True)  # Prix unitaire pour rapports
 
     # Relations
     ingredient: Mapped["Ingredient"] = relationship(back_populates="inventaire")
@@ -764,6 +773,62 @@ class HistoriqueRecette(Base):
 
     def __repr__(self) -> str:
         return f"<HistoriqueRecette(recette={self.recette_id}, date={self.date_cuisson}, note={self.note})>"
+
+
+# ═══════════════════════════════════════════════════════════
+# HISTORIQUE INVENTAIRE (Nouveau!)
+# ═══════════════════════════════════════════════════════════
+
+
+class HistoriqueInventaire(Base):
+    """Trace chaque modification de l'inventaire"""
+
+    __tablename__ = "historique_inventaire"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    article_id: Mapped[int] = mapped_column(
+        ForeignKey("inventaire.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    ingredient_id: Mapped[int] = mapped_column(
+        ForeignKey("ingredients.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    
+    # Type de modification
+    type_modification: Mapped[str] = mapped_column(
+        String(50), nullable=False, index=True
+    )  # "ajout", "modification", "suppression"
+    
+    # Avant/Après
+    quantite_avant: Mapped[float | None] = mapped_column(Float)
+    quantite_apres: Mapped[float | None] = mapped_column(Float)
+    quantite_min_avant: Mapped[float | None] = mapped_column(Float)
+    quantite_min_apres: Mapped[float | None] = mapped_column(Float)
+    date_peremption_avant: Mapped[date | None] = mapped_column(Date)
+    date_peremption_apres: Mapped[date | None] = mapped_column(Date)
+    emplacement_avant: Mapped[str | None] = mapped_column(String(100))
+    emplacement_apres: Mapped[str | None] = mapped_column(String(100))
+    
+    # Métadonnées
+    date_modification: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, index=True
+    )
+    utilisateur: Mapped[str | None] = mapped_column(String(100))  # Pour future feature multi-user
+    notes: Mapped[str | None] = mapped_column(Text)
+    
+    # Relations
+    article: Mapped["ArticleInventaire"] = relationship(back_populates="historique")
+    ingredient: Mapped["Ingredient"] = relationship()
+
+    def __repr__(self) -> str:
+        return f"<HistoriqueInventaire(article={self.article_id}, type={self.type_modification}, date={self.date_modification})>"
+
+
+# Ajouter relation inverse dans ArticleInventaire
+ArticleInventaire.historique = relationship(
+    "HistoriqueInventaire", 
+    back_populates="article",
+    cascade="all, delete-orphan"
+)
 
 
 # ═══════════════════════════════════════════════════════════
