@@ -13,10 +13,39 @@ import random
 
 logger = logging.getLogger(__name__)
 
+# Fonction helper pour charger les clés depuis st.secrets (Streamlit Cloud) ou os.getenv (local)
+def _get_api_key(key_name: str) -> Optional[str]:
+    """Charge une clé API depuis st.secrets (Streamlit Cloud) ou os.getenv (local)"""
+    try:
+        import streamlit as st
+        if hasattr(st, 'secrets') and st.secrets:
+            try:
+                # Essayer section spécifique d'abord (ex: st.secrets["unsplash"]["api_key"])
+                if key_name == "UNSPLASH_API_KEY":
+                    return st.secrets.get("unsplash", {}).get("api_key")
+                elif key_name == "PEXELS_API_KEY":
+                    return st.secrets.get("pexels", {}).get("api_key")
+                elif key_name == "PIXABAY_API_KEY":
+                    return st.secrets.get("pixabay", {}).get("api_key")
+            except:
+                pass
+    except:
+        pass
+    
+    # Fallback à os.getenv (pour dev local avec .env)
+    return os.getenv(key_name)
+
 # APIs configurables
-PEXELS_API_KEY = os.getenv('PEXELS_API_KEY')  # Gratuit: https://www.pexels.com/api/
-PIXABAY_API_KEY = os.getenv('PIXABAY_API_KEY')  # Gratuit: https://pixabay.com/api/
-UNSPLASH_API_KEY = os.getenv('UNSPLASH_API_KEY')  # Gratuit: https://unsplash.com/oauth/applications
+PEXELS_API_KEY = _get_api_key('PEXELS_API_KEY')  # Gratuit: https://www.pexels.com/api/
+PIXABAY_API_KEY = _get_api_key('PIXABAY_API_KEY')  # Gratuit: https://pixabay.com/api/
+UNSPLASH_API_KEY = _get_api_key('UNSPLASH_API_KEY')  # Gratuit: https://unsplash.com/oauth/applications
+
+# Debug logging pour Streamlit Cloud
+if UNSPLASH_API_KEY:
+    logger.info(f"✅ Clé Unsplash chargée (premiers caractères: {UNSPLASH_API_KEY[:10]}...)")
+else:
+    logger.warning("⚠️ Clé Unsplash non trouvée - vérifiez st.secrets['unsplash']['api_key'] ou UNSPLASH_API_KEY")
+
 
 
 def generer_image_recette(nom_recette: str, description: str = "", ingredients_list: list = None, type_plat: str = "") -> Optional[str]:
@@ -160,6 +189,7 @@ def _rechercher_image_unsplash(nom_recette: str) -> Optional[str]:
     Important: Obtenir une clé API gratuite sur https://unsplash.com/oauth/applications
     """
     if not UNSPLASH_API_KEY:
+        logger.debug("Clé Unsplash non configurée")
         return None
     
     try:
@@ -172,16 +202,18 @@ def _rechercher_image_unsplash(nom_recette: str) -> Optional[str]:
             "order_by": "relevant"
         }
         
+        logger.debug(f"Recherche Unsplash pour: {query}")
         response = requests.get(url, params=params, timeout=10)
         response.raise_for_status()
         
         data = response.json()
+        logger.debug(f"Réponse Unsplash: {len(data.get('results', []))} résultats trouvés")
         if data.get("results") and len(data["results"]) > 0:
             # Prendre une image aléatoire parmi les résultats
             result = random.choice(data["results"])
             return result["urls"]["regular"]
     except Exception as e:
-        logger.debug(f"Unsplash error: {e}")
+        logger.error(f"Unsplash error: {e}", exc_info=True)
     
     return None
 
