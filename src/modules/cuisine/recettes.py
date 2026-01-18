@@ -319,9 +319,8 @@ def render_detail_recette(recette):
         with col:
             st.markdown(f"<div style='text-align: center; font-size: 80px; opacity: 0.3;'>{emoji}</div>", unsafe_allow_html=True)
     
-    # Bouton pour générer une image
-    if st.button("✨ Générer une image avec l'IA", use_container_width=True):
-        render_generer_image(recette)
+    # Section génération d'image (fusionnée en une seule)
+    render_generer_image(recette)
     
     # Badges et caractéristiques
     badges = []
@@ -952,31 +951,28 @@ def render_generer_ia():
 
 def render_generer_image(recette):
     """Affiche l'interface pour générer une image pour la recette"""
-    st.subheader("✨ Générer une image avec l'IA")
+    st.subheader("✨ Générer une image")
     
-    # Description du prompt
+    # Description du prompt - affichée complètement
     prompt = f"{recette.nom}"
     if recette.description:
         prompt += f": {recette.description}"
-    
     st.caption(f"📝 {prompt}")
     
     # Bouton génération
-    if st.button("🎨 Générer l'image", use_container_width=True, key=f"gen_img_{recette.id}"):
-        # Afficher progress
-        progress_container = st.container()
-        status_container = st.container()
-        
-        with progress_container:
-            st.info(f"⏳ Génération de l'image pour: {recette.nom}")
-        
+    if st.button("🎨 Générer", use_container_width=True, key=f"gen_img_{recette.id}"):
         try:
-            # DEBUG: vérifier que la fonction est bien importée
+            # Import et vérification des clés
             from src.utils.image_generator import generer_image_recette, UNSPLASH_API_KEY, PEXELS_API_KEY, PIXABAY_API_KEY
             
-            status_container.write(f"🔑 Clés configurées - Unsplash: {'✅' if UNSPLASH_API_KEY else '❌'}, Pexels: {'✅' if PEXELS_API_KEY else '❌'}, Pixabay: {'✅' if PIXABAY_API_KEY else '❌'}")
+            # Afficher le status
+            status_placeholder = st.empty()
             
-            # Préparer la liste des ingrédients pour le contexte
+            with status_placeholder.container():
+                st.info(f"⏳ Génération de l'image pour: **{recette.nom}**")
+                st.caption(f"🔑 Clés configurées: Unsplash={'✅' if UNSPLASH_API_KEY else '❌'} | Pexels={'✅' if PEXELS_API_KEY else '❌'} | Pixabay={'✅' if PIXABAY_API_KEY else '❌'}")
+            
+            # Préparer la liste des ingrédients
             ingredients_list = []
             for ing in recette.ingredients:
                 ingredients_list.append({
@@ -985,11 +981,7 @@ def render_generer_image(recette):
                     'unite': ing.unite
                 })
             
-            status_container.write(f"📋 {len(ingredients_list)} ingrédients trouvés")
-            
-            # Générer l'image avec plus de contexte
-            status_container.write(f"🔍 Recherche d'image pour: {recette.nom}")
-            
+            # Générer l'image
             url_image = generer_image_recette(
                 recette.nom,
                 recette.description or "",
@@ -997,22 +989,35 @@ def render_generer_image(recette):
                 type_plat=recette.type_repas
             )
             
+            # Mettre à jour le status
             if url_image:
-                # Stocker dans session state pour persister après le spinner
+                status_placeholder.empty()
+                st.success(f"✅ Image générée pour: **{recette.nom}**")
+                # Stocker dans session state
                 st.session_state[f"generated_image_{recette.id}"] = url_image
-                progress_container.success("✅ Image générée avec succès!")
-                status_container.empty()
+                st.image(url_image, caption=recette.nom, use_column_width=True)
             else:
-                progress_container.error("❌ Impossible de générer l'image - aucune source retournée")
-                status_container.info("💡 Assurez-vous qu'une clé API est configurée (Unsplash, Pexels ou Pixabay)")
+                status_placeholder.empty()
+                st.error("❌ Impossible de générer l'image - aucune source ne retourne d'image")
+                st.info("💡 Assurez-vous qu'une clé API est configurée dans Settings > Secrets")
                     
         except ImportError as e:
-            progress_container.error(f"❌ Erreur d'import: {str(e)}")
-            status_container.write(f"🔍 Détail: Impossible d'importer image_generator")
+            st.error(f"❌ Erreur d'import: {str(e)}")
         except Exception as e:
-            progress_container.error(f"❌ Erreur: {str(e)}")
             import traceback
-            status_container.write(f"📋 Traceback: {traceback.format_exc()}")
+            st.error(f"❌ Erreur: {str(e)}")
+            with st.expander("📋 Détails erreur"):
+                st.code(traceback.format_exc(), language="python")
+    
+    # Afficher l'image si elle existe déjà en session state
+    elif f"generated_image_{recette.id}" in st.session_state:
+        url_image = st.session_state[f"generated_image_{recette.id}"]
+        st.image(url_image, caption=recette.nom, use_column_width=True)
+    
+    # Afficher l'image si elle existe
+    if f"generated_image_{recette.id}" in st.session_state:
+        url_image = st.session_state[f"generated_image_{recette.id}"]
+        st.image(url_image, caption=recette.nom, use_column_width=True)
     
     # Afficher l'image si elle existe en session state
     if f"generated_image_{recette.id}" in st.session_state:

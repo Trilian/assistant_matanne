@@ -75,89 +75,58 @@ def generer_image_recette(nom_recette: str, description: str = "", ingredients_l
         URL de l'image ou None
     """
     
-    print(f"\n🎨 APPEL generer_image_recette: {nom_recette}")
     logger.info(f"🎨 Génération image pour: {nom_recette}")
     
     # Priorité 1: Unsplash (meilleur pour les recettes)
     if UNSPLASH_API_KEY:
-        print(f"  → Essai Unsplash...")
         try:
             url = _rechercher_image_unsplash(nom_recette)
             if url:
-                print(f"  ✅ SUCCESS Unsplash!")
                 logger.info(f"✅ Image trouvée via Unsplash pour '{nom_recette}'")
                 return url
-            else:
-                print(f"  ❌ Unsplash returned None")
         except Exception as e:
-            print(f"  ❌ Unsplash error: {e}")
             logger.warning(f"Unsplash API échouée: {e}")
-    else:
-        print(f"  ⚠️ Unsplash key not configured")
     
     # Priorité 2: Pexels
     if PEXELS_API_KEY:
-        print(f"  → Essai Pexels...")
         try:
             url = _rechercher_image_pexels(nom_recette)
             if url:
-                print(f"  ✅ SUCCESS Pexels!")
                 logger.info(f"✅ Image trouvée via Pexels pour '{nom_recette}'")
                 return url
-            else:
-                print(f"  ❌ Pexels returned None")
         except Exception as e:
-            print(f"  ❌ Pexels error: {e}")
             logger.warning(f"Pexels API échouée: {e}")
-    else:
-        print(f"  ⚠️ Pexels key not configured")
     
     # Priorité 3: Pixabay
     if PIXABAY_API_KEY:
-        print(f"  → Essai Pixabay...")
         try:
             url = _rechercher_image_pixabay(nom_recette)
             if url:
-                print(f"  ✅ SUCCESS Pixabay!")
                 logger.info(f"✅ Image trouvée via Pixabay pour '{nom_recette}'")
                 return url
-            else:
-                print(f"  ❌ Pixabay returned None")
         except Exception as e:
-            print(f"  ❌ Pixabay error: {e}")
             logger.warning(f"Pixabay API échouée: {e}")
-    else:
-        print(f"  ⚠️ Pixabay key not configured")
     
     # Fallback: Essayer Pollinations.ai (génération IA rapide, pas de clé requise)
-    print(f"  → Essai Pollinations.ai...")
     logger.info(f"Tentative génération IA via Pollinations pour: {nom_recette}")
     try:
         result = _generer_via_pollinations(nom_recette, description, ingredients_list, type_plat)
         if result:
-            print(f"  ✅ SUCCESS Pollinations!")
             return result
-        else:
+    except Exception as e:
             print(f"  ❌ Pollinations returned None")
     except Exception as e:
-        print(f"  ❌ Pollinations error: {e}")
         logger.warning(f"Pollinations API échouée: {e}")
     
     # Essayer Replicate API (meilleure qualité IA)
-    print(f"  → Essai Replicate...")
     logger.info(f"Tentative génération IA via Replicate pour: {nom_recette}")
     try:
         result = _generer_via_replicate(nom_recette, description, ingredients_list, type_plat)
         if result:
-            print(f"  ✅ SUCCESS Replicate!")
             return result
-        else:
-            print(f"  ❌ Replicate returned None")
     except Exception as e:
-        print(f"  ❌ Replicate error: {e}")
         logger.warning(f"Replicate API échouée: {e}")
     
-    print(f"❌ ECHEC TOTAL: Impossible de générer une image pour '{nom_recette}'")
     logger.error(f"❌ Impossible de générer une image pour '{nom_recette}'")
     return None
 
