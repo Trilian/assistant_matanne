@@ -53,8 +53,9 @@ def generer_image_recette(nom_recette: str, description: str = "", ingredients_l
     Génère une image pour une recette.
     
     Essaie plusieurs sources dans cet ordre:
-    1. Recherche dans des banques d'images réelles (Unsplash, Pexels, Pixabay)
-    2. Génération avec API IA (Pollinations.ai, Replicate)
+    1. Unsplash (meilleure qualité, bonne spécificité)
+    2. Recherche dans des banques d'images réelles (Pexels, Pixabay)
+    3. Génération avec API IA (Pollinations.ai, Replicate)
     
     Args:
         nom_recette: Nom de la recette
@@ -66,25 +67,9 @@ def generer_image_recette(nom_recette: str, description: str = "", ingredients_l
         URL de l'image ou None
     """
     
-    # Chercher d'abord dans les vraies photos (meilleur résultat)
-    if PEXELS_API_KEY:
-        try:
-            url = _rechercher_image_pexels(nom_recette)
-            if url:
-                logger.info(f"✅ Image trouvée via Pexels pour '{nom_recette}'")
-                return url
-        except Exception as e:
-            logger.debug(f"Pexels API échouée: {e}")
+    logger.info(f"🎨 Génération image pour: {nom_recette}")
     
-    if PIXABAY_API_KEY:
-        try:
-            url = _rechercher_image_pixabay(nom_recette)
-            if url:
-                logger.info(f"✅ Image trouvée via Pixabay pour '{nom_recette}'")
-                return url
-        except Exception as e:
-            logger.debug(f"Pixabay API échouée: {e}")
-    
+    # Priorité 1: Unsplash (meilleur pour les recettes)
     if UNSPLASH_API_KEY:
         try:
             url = _rechercher_image_unsplash(nom_recette)
@@ -92,21 +77,43 @@ def generer_image_recette(nom_recette: str, description: str = "", ingredients_l
                 logger.info(f"✅ Image trouvée via Unsplash pour '{nom_recette}'")
                 return url
         except Exception as e:
-            logger.debug(f"Unsplash API échouée: {e}")
+            logger.warning(f"Unsplash API échouée: {e}")
+    
+    # Priorité 2: Pexels
+    if PEXELS_API_KEY:
+        try:
+            url = _rechercher_image_pexels(nom_recette)
+            if url:
+                logger.info(f"✅ Image trouvée via Pexels pour '{nom_recette}'")
+                return url
+        except Exception as e:
+            logger.warning(f"Pexels API échouée: {e}")
+    
+    # Priorité 3: Pixabay
+    if PIXABAY_API_KEY:
+        try:
+            url = _rechercher_image_pixabay(nom_recette)
+            if url:
+                logger.info(f"✅ Image trouvée via Pixabay pour '{nom_recette}'")
+                return url
+        except Exception as e:
+            logger.warning(f"Pixabay API échouée: {e}")
     
     # Fallback: Essayer Pollinations.ai (génération IA rapide, pas de clé requise)
+    logger.info(f"Tentative génération IA via Pollinations pour: {nom_recette}")
     try:
         return _generer_via_pollinations(nom_recette, description, ingredients_list, type_plat)
     except Exception as e:
-        logger.debug(f"Pollinations API échouée: {e}")
+        logger.warning(f"Pollinations API échouée: {e}")
     
     # Essayer Replicate API (meilleure qualité IA)
+    logger.info(f"Tentative génération IA via Replicate pour: {nom_recette}")
     try:
         return _generer_via_replicate(nom_recette, description, ingredients_list, type_plat)
     except Exception as e:
-        logger.debug(f"Replicate API échouée: {e}")
+        logger.warning(f"Replicate API échouée: {e}")
     
-    logger.warning(f"Impossible de générer une image pour '{nom_recette}'")
+    logger.error(f"❌ Impossible de générer une image pour '{nom_recette}'")
     return None
 
 
@@ -193,27 +200,53 @@ def _rechercher_image_unsplash(nom_recette: str) -> Optional[str]:
         return None
     
     try:
-        query = f"{nom_recette} food"
+        # Requête plus spécifique pour éviter les fausses matches
+        query = f"{nom_recette} recipe dish food"
         url = "https://api.unsplash.com/search/photos"
         params = {
             "query": query,
             "client_id": UNSPLASH_API_KEY,
-            "per_page": 5,
+            "per_page": 10,
             "order_by": "relevant"
         }
         
-        logger.debug(f"Recherche Unsplash pour: {query}")
+        logger.info(f"🔍 Recherche Unsplash: '{query}'")
         response = requests.get(url, params=params, timeout=10)
         response.raise_for_status()
         
         data = response.json()
-        logger.debug(f"Réponse Unsplash: {len(data.get('results', []))} résultats trouvés")
-        if data.get("results") and len(data["results"]) > 0:
-            # Prendre une image aléatoire parmi les résultats
-            result = random.choice(data["results"])
-            return result["urls"]["regular"]
+        results = data.get("results", [])
+        logger.info(f"📊 Unsplash trouvé {len(results)} résultats")
+        
+        if results and len(results) > 0:
+            # Prendre l'image avec le meilleur ratio (pas trop carré ni ultra-wide)
+            # Pour éviter les images abstraites ou mal cadrées
+            best_result = None
+            best_score = 0
+            
+            for result in results:
+                width = result.get("width", 0)
+                height = result.get("height", 0)
+                
+                if width > 0 and height > 0:
+                    ratio = min(width, height) / max(width, height)
+                    # Préférer les images avec un bon ratio (0.5 à 0.9 = pas trop carré, pas ultra-wide)
+                    if 0.5 <= ratio <= 0.9:
+                        best_result = result
+                        break
+            
+            # Fallback: prendre simplement la première si aucune ne correspond
+            if not best_result:
+                best_result = results[0]
+            
+            image_url = best_result["urls"]["regular"]
+            logger.info(f"✅ Image sélectionnée: {best_result.get('description', 'N/A')[:50]}")
+            return image_url
+        else:
+            logger.warning(f"⚠️ Aucun résultat Unsplash pour: {nom_recette}")
+            
     except Exception as e:
-        logger.error(f"Unsplash error: {e}", exc_info=True)
+        logger.error(f"❌ Unsplash error: {e}", exc_info=True)
     
     return None
 
