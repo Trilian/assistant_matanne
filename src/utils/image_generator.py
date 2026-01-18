@@ -253,9 +253,17 @@ def _rechercher_image_unsplash(nom_recette: str) -> Optional[str]:
             if not best_result:
                 best_result = results[0]
             
-            image_url = best_result["urls"]["regular"]
-            logger.info(f"✅ Image sélectionnée: {best_result.get('description', 'N/A')[:50]}")
-            return image_url
+            if best_result and "urls" in best_result and "regular" in best_result["urls"]:
+                image_url = best_result["urls"]["regular"]
+                # Extraire la description de manière safe
+                description = best_result.get('description') or best_result.get('alt_description') or 'Image'
+                if description:
+                    description = description[:50]
+                logger.info(f"✅ Image sélectionnée: {description}")
+                return image_url
+            else:
+                logger.warning(f"⚠️ Format d'image inattendu pour: {nom_recette}")
+                return None
         else:
             logger.warning(f"⚠️ Aucun résultat Unsplash pour: {nom_recette}")
             
