@@ -291,6 +291,244 @@ class InventaireService(BaseService[ArticleInventaire], BaseAIService, Inventory
             return None
         return (article.date_peremption - today).days
 
+    # ═══════════════════════════════════════════════════════════
+    # SECTION 4: GESTION ARTICLES (CREATE/UPDATE/DELETE)
+    # ═══════════════════════════════════════════════════════════
+
+    @with_error_handling(default_return=None)
+    @with_db_session
+    def ajouter_article(
+        self,
+        ingredient_nom: str,
+        quantite: float,
+        quantite_min: float = 1.0,
+        emplacement: str | None = None,
+        date_peremption: date | None = None,
+        db: Session | None = None,
+    ) -> dict[str, Any] | None:
+        """Ajoute un article à l'inventaire.
+
+        Args:
+            ingredient_nom: Nom de l'ingrédient
+            quantite: Quantité en stock
+            quantite_min: Quantité minimum
+            emplacement: Lieu de stockage
+            date_peremption: Date de péremption
+            db: Database session (injected)
+
+        Returns:
+            Dict with new article data or None on error
+        """
+        from src.core.models import Ingredient
+
+        # Trouver ou créer l'ingrédient
+        ingredient = db.query(Ingredient).filter(
+            Ingredient.nom.ilike(ingredient_nom)
+        ).first()
+
+        if not ingredient:
+            logger.warning(f"⚠️ Ingrédient '{ingredient_nom}' non trouvé")
+            return None
+
+        # Vérifier si existe déjà
+        existing = db.query(ArticleInventaire).filter(
+            ArticleInventaire.ingredient_id == ingredient.id
+        ).first()
+
+        if existing:
+            logger.warning(f"⚠️ Article '{ingredient_nom}' existe déjà")
+            return None
+
+        # Créer l'article
+        article = ArticleInventaire(
+            ingredient_id=ingredient.id,
+            quantite=quantite,
+            quantite_min=quantite_min,
+            emplacement=emplacement,
+            date_peremption=date_peremption,
+        )
+
+        db.add(article)
+        db.commit()
+
+        logger.info(f"✅ Article '{ingredient_nom}' ajouté à l'inventaire")
+        self.invalidate_cache()
+
+        return {
+            "id": article.id,
+            "ingredient_nom": ingredient.nom,
+            "quantite": quantite,
+            "quantite_min": quantite_min,
+            "emplacement": emplacement,
+            "date_peremption": date_peremption,
+        }
+
+    @with_error_handling(default_return=False)
+    @with_db_session
+    def mettre_a_jour_article(
+        self,
+        article_id: int,
+        quantite: float | None = None,
+        quantite_min: float | None = None,
+        emplacement: str | None = None,
+        date_peremption: date | None = None,
+        db: Session | None = None,
+    ) -> bool:
+        """Met à jour un article de l'inventaire.
+
+        Args:
+            article_id: ID de l'article
+            quantite: Nouvelle quantité (optionnel)
+            quantite_min: Nouveau seuil minimum (optionnel)
+            emplacement: Nouvel emplacement (optionnel)
+            date_peremption: Nouvelle date de péremption (optionnel)
+            db: Database session (injected)
+
+        Returns:
+            True if updated, False otherwise
+        """
+        article = db.query(ArticleInventaire).filter(
+            ArticleInventaire.id == article_id
+        ).first()
+
+        if not article:
+            logger.warning(f"⚠️ Article #{article_id} non trouvé")
+            return False
+
+        if quantite is not None:
+            article.quantite = quantite
+        if quantite_min is not None:
+            article.quantite_min = quantite_min
+        if emplacement is not None:
+            article.emplacement = emplacement
+        if date_peremption is not None:
+            article.date_peremption = date_peremption
+
+        db.commit()
+        logger.info(f"✅ Article #{article_id} mis à jour")
+        self.invalidate_cache()
+
+        return True
+
+    @with_error_handling(default_return=False)
+    @with_db_session
+    def supprimer_article(self, article_id: int, db: Session | None = None) -> bool:
+        """Supprime un article de l'inventaire.
+
+        Args:
+            article_id: ID de l'article
+            db: Database session (injected)
+
+        Returns:
+            True if deleted, False otherwise
+        """
+        article = db.query(ArticleInventaire).filter(
+            ArticleInventaire.id == article_id
+        ).first()
+
+        if not article:
+            logger.warning(f"⚠️ Article #{article_id} non trouvé")
+            return False
+
+        db.delete(article)
+        db.commit()
+
+        logger.info(f"✅ Article #{article_id} supprimé")
+        self.invalidate_cache()
+
+        return True
+
+    # ═══════════════════════════════════════════════════════════
+    # SECTION 5: STATISTIQUES & RAPPORTS
+    # ═══════════════════════════════════════════════════════════
+
+    @with_error_handling(default_return={})
+    def get_statistiques(self) -> dict[str, Any]:
+        """Récupère statistiques complètes de l'inventaire.
+
+        Returns:
+            Dict with statistics and insights
+        """
+        inventaire = self.get_inventaire_complet()
+        alertes = self.get_alertes()
+
+        if not inventaire:
+            return {"total_articles": 0}
+
+        return {
+            "total_articles": len(inventaire),
+            "total_quantite": sum(a["quantite"] for a in inventaire),
+            "emplacements": len(set(a["emplacement"] for a in inventaire if a["emplacement"])),
+            "categories": len(set(a["ingredient_categorie"] for a in inventaire)),
+            "alertes_totales": sum(len(v) for v in alertes.values()),
+            "articles_critiques": len(alertes.get("critique", [])),
+            "articles_stock_bas": len(alertes.get("stock_bas", [])),
+            "articles_peremption": len(alertes.get("peremption_proche", [])),
+            "derniere_maj": max((a.get("derniere_maj") for a in inventaire), default=None),
+        }
+
+    @with_error_handling(default_return={})
+    def get_stats_par_categorie(self) -> dict[str, dict[str, Any]]:
+        """Récupère statistiques par catégorie.
+
+        Returns:
+            Dict with per-category statistics
+        """
+        inventaire = self.get_inventaire_complet()
+
+        categories = {}
+        for article in inventaire:
+            cat = article["ingredient_categorie"]
+            if cat not in categories:
+                categories[cat] = {
+                    "articles": 0,
+                    "quantite_totale": 0,
+                    "seuil_moyen": 0,
+                    "critiques": 0,
+                }
+
+            categories[cat]["articles"] += 1
+            categories[cat]["quantite_totale"] += article["quantite"]
+            categories[cat]["seuil_moyen"] += article["quantite_min"]
+            if article["statut"] == "critique":
+                categories[cat]["critiques"] += 1
+
+        # Calculer moyenne des seuils
+        for cat in categories:
+            if categories[cat]["articles"] > 0:
+                categories[cat]["seuil_moyen"] /= categories[cat]["articles"]
+
+        logger.info(f"📊 Statistics for {len(categories)} categories")
+        return categories
+
+    @with_error_handling(default_return=[])
+    def get_articles_a_prelever(self, date_limite: date | None = None) -> list[dict[str, Any]]:
+        """Récupère articles à utiliser en priorité.
+
+        Args:
+            date_limite: Date limite de péremption (par défaut aujourd'hui + 3 jours)
+
+        Returns:
+            List of articles to use first (FIFO)
+        """
+        from datetime import timedelta
+
+        if date_limite is None:
+            date_limite = date.today() + timedelta(days=3)
+
+        inventaire = self.get_inventaire_complet()
+
+        a_prelever = [
+            a for a in inventaire
+            if a["date_peremption"] and a["date_peremption"] <= date_limite
+        ]
+
+        # Trier par date de péremption (plus ancien d'abord)
+        a_prelever.sort(key=lambda x: x["date_peremption"])
+
+        logger.info(f"🔄 {len(a_prelever)} articles to use first")
+        return a_prelever
+
 
 # ═══════════════════════════════════════════════════════════
 # INSTANCE SINGLETON - LAZY LOADING

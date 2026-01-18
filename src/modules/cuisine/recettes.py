@@ -186,7 +186,7 @@ def render_liste():
                 # Image (hauteur fixe de 140px)
                 if recette.url_image:
                     try:
-                        st.image(recette.url_image, use_column_width=True, width=250)
+                        st.image(recette.url_image, width=250)
                     except Exception:
                         st.markdown('<div style="height: 140px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; border-radius: 8px;">🖼️</div>', unsafe_allow_html=True)
                 else:
@@ -307,7 +307,7 @@ def render_detail_recette(recette):
     # Image si disponible
     if recette.url_image:
         try:
-            st.image(recette.url_image, use_column_width=True, caption=recette.nom)
+            st.image(recette.url_image, caption=recette.nom, width=400)
         except Exception:
             st.caption("🖼️ Image indisponible")
     else:
@@ -585,13 +585,20 @@ def render_detail_recette(recette):
                 if st.button("👶 Générer version bébé", use_container_width=True):
                     with st.spinner("🤖 L'IA adapte la recette..."):
                         try:
+                            print(f"DEBUG: Appel generer_version_bebe({recette.id})")
                             version = service.generer_version_bebe(recette.id)
+                            print(f"DEBUG: Résultat version = {version}")
                             if version:
                                 st.success("✅ Version bébé créée!")
+                                print(f"DEBUG: Version créée avec succès: {version.id}")
                                 st.rerun()
                             else:
-                                st.error("❌ Erreur lors de la génération")
+                                st.error("❌ Erreur lors de la génération (version=None)")
+                                print(f"DEBUG: version est None!")
                         except Exception as e:
+                            print(f"DEBUG: Exception = {type(e).__name__}: {str(e)}")
+                            import traceback
+                            print(traceback.format_exc())
                             st.error(f"❌ Erreur: {str(e)}")
             
             with col2:
@@ -995,7 +1002,7 @@ def render_generer_image(recette):
                 st.success(f"✅ Image générée pour: **{recette.nom}**")
                 # Stocker dans session state
                 st.session_state[f"generated_image_{recette.id}"] = url_image
-                st.image(url_image, caption=recette.nom, use_column_width=True)
+                st.image(url_image, caption=recette.nom, width=400)
             else:
                 status_placeholder.empty()
                 st.error("❌ Impossible de générer l'image - aucune source ne retourne d'image")
@@ -1009,20 +1016,10 @@ def render_generer_image(recette):
             with st.expander("📋 Détails erreur"):
                 st.code(traceback.format_exc(), language="python")
     
-    # Afficher l'image si elle existe déjà en session state
-    elif f"generated_image_{recette.id}" in st.session_state:
-        url_image = st.session_state[f"generated_image_{recette.id}"]
-        st.image(url_image, caption=recette.nom, use_column_width=True)
-    
-    # Afficher l'image si elle existe
-    if f"generated_image_{recette.id}" in st.session_state:
-        url_image = st.session_state[f"generated_image_{recette.id}"]
-        st.image(url_image, caption=recette.nom, use_column_width=True)
-    
     # Afficher l'image si elle existe en session state
     if f"generated_image_{recette.id}" in st.session_state:
         url_image = st.session_state[f"generated_image_{recette.id}"]
-        st.image(url_image, caption=recette.nom, use_column_width=True)
+        st.image(url_image, caption=recette.nom, width=400)
         
         # Proposer de sauvegarder
         if st.button("💾 Sauvegarder cette image", use_container_width=True, key=f"save_img_{recette.id}"):
@@ -1032,7 +1029,6 @@ def render_generer_image(recette):
                     recette.url_image = url_image
                     service.update(recette)
                     st.success("✅ Image sauvegardée dans la recette!")
-                    st.session_state[f"generated_image_{recette.id}"] = None
                     st.rerun()
                 except Exception as e:
                     st.error(f"❌ Erreur sauvegarde: {str(e)}")

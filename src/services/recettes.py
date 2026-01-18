@@ -398,6 +398,8 @@ class RecetteService(BaseService[Recette], BaseAIService, RecipeAIMixin):
         Returns:
             VersionRecette object or None if generation fails
         """
+        print(f"[generer_version_bebe] START: recette_id={recette_id}, db={type(db)}")
+        
         # Récupérer la recette
         recette = (
             db.query(Recette)
@@ -408,7 +410,9 @@ class RecetteService(BaseService[Recette], BaseAIService, RecipeAIMixin):
             .filter(Recette.id == recette_id)
             .first()
         )
+        print(f"[generer_version_bebe] recette found: {recette is not None}")
         if not recette:
+            print(f"[generer_version_bebe] Recipe {recette_id} not found")
             raise ErreurNonTrouve(f"Recipe {recette_id} not found")
 
         # Vérifier si version existe déjà
@@ -421,10 +425,12 @@ class RecetteService(BaseService[Recette], BaseAIService, RecipeAIMixin):
             .first()
         )
         if existing:
+            print(f"[generer_version_bebe] Baby version already exists for recipe {recette_id}")
             logger.info(f"📦 Baby version already exists for recipe {recette_id}")
             return existing
 
         logger.info(f"🤖 Generating baby-safe version for recipe {recette_id}")
+        print(f"[generer_version_bebe] Generating new baby version")
 
         # Construire contexte avec recette complète
         ingredients_str = "\n".join(
@@ -454,6 +460,7 @@ Steps:
                 "Food safety instructions",
             ],
         )
+        print(f"[generer_version_bebe] Prompt built, calling IA...")
 
         # Appel IA avec parsing auto
         version_data = self.call_with_parsing_sync(
@@ -476,8 +483,11 @@ Steps:
         )
 
         if not version_data:
+            print(f"[generer_version_bebe] version_data is None after IA call")
             logger.warning(f"⚠️ Failed to generate baby version for recipe {recette_id}")
             raise ErreurValidation("Invalid IA response format for baby version")
+
+        print(f"[generer_version_bebe] version_data parsed successfully: {version_data}")
 
         # Créer version en DB
         version = VersionRecette(
@@ -486,11 +496,16 @@ Steps:
             instructions_modifiees=version_data.instructions_modifiees,
             notes_bebe=version_data.notes_bebe,
         )
+        print(f"[generer_version_bebe] VersionRecette object created")
         db.add(version)
+        print(f"[generer_version_bebe] Version added to db session")
         db.commit()
+        print(f"[generer_version_bebe] Version committed to db")
         db.refresh(version)
+        print(f"[generer_version_bebe] Version refreshed, id={version.id}")
 
         logger.info(f"✅ Baby version created for recipe {recette_id}")
+        print(f"[generer_version_bebe] END: Returning version {version.id}")
         return version
 
     @with_db_session
