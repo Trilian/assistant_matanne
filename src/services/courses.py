@@ -199,11 +199,11 @@ class CoursesService(BaseService[ArticleCourses], BaseAIService):
     # ═══════════════════════════════════════════════════════════
 
     @with_db_session
-    def get_modeles(self, utilisateur_id: str | None = None, session: Session | None = None) -> list[dict]:
+    def get_modeles(self, utilisateur_id: str | None = None, db: Session | None = None) -> list[dict]:
         """Récupérer tous les modèles sauvegardés"""
         from src.core.models import ModeleCourses
         
-        query = session.query(ModeleCourses).filter(ModeleCourses.actif == True)
+        query = db.query(ModeleCourses).filter(ModeleCourses.actif == True)
         
         # Phase 2: Filter by user_id if provided
         if utilisateur_id:
@@ -234,7 +234,7 @@ class CoursesService(BaseService[ArticleCourses], BaseAIService):
 
     @with_db_session
     def create_modele(self, nom: str, articles: list[dict], description: str | None = None, 
-                     utilisateur_id: str | None = None, session: Session | None = None) -> int:
+                     utilisateur_id: str | None = None, db: Session | None = None) -> int:
         """Créer un nouveau modèle de courses"""
         from src.core.models import ModeleCourses, ArticleModele
         from src.core.models import Ingredient
@@ -244,14 +244,14 @@ class CoursesService(BaseService[ArticleCourses], BaseAIService):
             description=description,
             utilisateur_id=utilisateur_id,
         )
-        session.add(modele)
-        session.flush()  # Get ID
+        db.add(modele)
+        db.flush()  # Get ID
         
         for ordre, article_data in enumerate(articles):
             # Chercher l'ingrédient
             ingredient = None
             if "ingredient_id" in article_data:
-                ingredient = session.query(Ingredient).filter_by(id=article_data["ingredient_id"]).first()
+                ingredient = db.query(Ingredient).filter_by(id=article_data["ingredient_id"]).first()
             
             article_modele = ArticleModele(
                 modele_id=modele.id,
@@ -264,33 +264,33 @@ class CoursesService(BaseService[ArticleCourses], BaseAIService):
                 notes=article_data.get("notes"),
                 ordre=ordre,
             )
-            session.add(article_modele)
+            db.add(article_modele)
         
-        session.commit()
+        db.commit()
         logger.info(f"✅ Modèle '{nom}' créé avec {len(articles)} articles")
         return modele.id
 
     @with_db_session
-    def delete_modele(self, modele_id: int, session: Session | None = None) -> bool:
+    def delete_modele(self, modele_id: int, db: Session | None = None) -> bool:
         """Supprimer un modèle"""
         from src.core.models import ModeleCourses
         
-        modele = session.query(ModeleCourses).filter_by(id=modele_id).first()
+        modele = db.query(ModeleCourses).filter_by(id=modele_id).first()
         if not modele:
             return False
         
-        session.delete(modele)
-        session.commit()
+        db.delete(modele)
+        db.commit()
         logger.info(f"✅ Modèle {modele_id} supprimé")
         return True
 
     @with_db_session
     def appliquer_modele(self, modele_id: int, utilisateur_id: str | None = None, 
-                        session: Session | None = None) -> list[int]:
+                        db: Session | None = None) -> list[int]:
         """Appliquer un modèle à la liste active (crée articles cours)"""
         from src.core.models import ModeleCourses, Ingredient
         
-        modele = session.query(ModeleCourses).filter_by(id=modele_id).first()
+        modele = db.query(ModeleCourses).filter_by(id=modele_id).first()
         if not modele:
             logger.error(f"Modèle {modele_id} non trouvé")
             return []
@@ -300,7 +300,7 @@ class CoursesService(BaseService[ArticleCourses], BaseAIService):
             # Récupérer ou créer l'ingrédient
             ingredient = article_modele.ingredient
             if not ingredient:
-                ingredient = session.query(Ingredient).filter_by(
+                ingredient = db.query(Ingredient).filter_by(
                     nom=article_modele.nom_article
                 ).first()
                 if not ingredient:
@@ -308,8 +308,8 @@ class CoursesService(BaseService[ArticleCourses], BaseAIService):
                         nom=article_modele.nom_article,
                         unite=article_modele.unite,
                     )
-                    session.add(ingredient)
-                    session.flush()
+                    db.add(ingredient)
+                    db.flush()
             
             # Créer article courses
             data = {
@@ -321,7 +321,7 @@ class CoursesService(BaseService[ArticleCourses], BaseAIService):
                 "achete": False,
             }
             
-            article_id = self.create(data, session=session)
+            article_id = self.create(data, db=db)
             article_ids.append(article_id)
         
         logger.info(f"✅ Modèle {modele_id} appliqué ({len(article_ids)} articles)")

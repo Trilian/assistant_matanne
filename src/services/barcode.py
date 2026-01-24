@@ -84,7 +84,8 @@ class BarcodeService(BaseService[ArticleInventaire]):
 
     def __init__(self):
         super().__init__(ArticleInventaire, cache_ttl=3600)
-        self.cache = Cache(ttl=3600)
+        # Cache est statique, pas besoin d'instancier
+        self.cache_ttl = 3600
         self.barcode_mappings = {}  # Cache local {barcode → article_id}
 
     # ═══════════════════════════════════════════════════════════

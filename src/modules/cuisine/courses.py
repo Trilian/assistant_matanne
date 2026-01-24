@@ -517,14 +517,14 @@ def render_historique():
     
     try:
         # Récupérer les articles achetés dans la période
-        db = next(obtenir_contexte_db())
         from src.core.models import ArticleCourses
         
-        articles_achetes = db.query(ArticleCourses).filter(
-            ArticleCourses.achete == True,
-            ArticleCourses.achete_le >= datetime.combine(date_debut, datetime.min.time()),
-            ArticleCourses.achete_le <= datetime.combine(date_fin, datetime.max.time())
-        ).all()
+        with obtenir_contexte_db() as db:
+            articles_achetes = db.query(ArticleCourses).filter(
+                ArticleCourses.achete == True,
+                ArticleCourses.achete_le >= datetime.combine(date_debut, datetime.min.time()),
+                ArticleCourses.achete_le <= datetime.combine(date_fin, datetime.max.time())
+            ).all()
         
         if not articles_achetes:
             st.info("Aucun achat pendant cette période")
