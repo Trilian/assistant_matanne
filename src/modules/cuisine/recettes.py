@@ -1027,7 +1027,7 @@ def render_generer_image(recette):
             if service:
                 try:
                     recette.url_image = url_image
-                    service.update(recette)
+                    service.update(recette.id, {"url_image": url_image})
                     st.success("✅ Image sauvegardée dans la recette!")
                     st.rerun()
                 except Exception as e:

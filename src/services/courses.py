@@ -328,6 +328,13 @@ class CoursesService(BaseService[ArticleCourses], BaseAIService):
         return article_ids
 
 
+# ═══════════════════════════════════════════════════════════
+# SINGLETON SERVICE INSTANCE
+# ═══════════════════════════════════════════════════════════
+
+_courses_service: CoursesService | None = None
+
+
 def get_courses_service() -> CoursesService:
     """Get or create the global CoursesService instance."""
     global _courses_service

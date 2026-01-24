@@ -428,17 +428,17 @@ def render_historique():
         st.divider()
         
         # Récupérer tous plannings
-        db = next(obtenir_contexte_db())
-        from src.core.models import Planning as PlanningModel
-        
-        query = db.query(PlanningModel)
-        query = query.filter(PlanningModel.semaine_debut >= date_debut)
-        query = query.filter(PlanningModel.semaine_debut <= date_fin)
-        
-        if filter_ia:
-            query = query.filter(PlanningModel.genere_par_ia == True)
-        
-        plannings = query.order_by(PlanningModel.semaine_debut.desc()).all()
+        with obtenir_contexte_db() as db:
+            from src.core.models import Planning as PlanningModel
+            
+            query = db.query(PlanningModel)
+            query = query.filter(PlanningModel.semaine_debut >= date_debut)
+            query = query.filter(PlanningModel.semaine_debut <= date_fin)
+            
+            if filter_ia:
+                query = query.filter(PlanningModel.genere_par_ia == True)
+            
+            plannings = query.order_by(PlanningModel.semaine_debut.desc()).all()
         
         if not plannings:
             st.info("Aucun planning trouvé")

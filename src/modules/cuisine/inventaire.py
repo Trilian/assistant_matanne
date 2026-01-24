@@ -855,11 +855,11 @@ def render_import_export():
         st.divider()
         
         # Info export
-        inventaire = service.get_inventaire_complet()
+        articles = service.get_inventaire_complet()
         st.info(
             f"📊 **Statistiques export:**\n"
-            f"• **Articles:** {len(inventaire['articles'])}\n"
-            f"• **Stock total:** {sum(a['quantite'] for a in inventaire['articles'])}\n"
+            f"• **Articles:** {len(articles)}\n"
+            f"• **Stock total:** {sum(a['quantite'] for a in articles)}\n"
             f"• **Date export:** Automatique"
         )
 
@@ -877,8 +877,7 @@ def render_predictions():
             return
         
         # Récupère les données
-        inventaire_data = service.get_inventaire_complet()
-        articles = inventaire_data.get("articles", [])
+        articles = service.get_inventaire_complet()
         
         if not articles:
             st.info("Aucun article dans l'inventaire pour générer les prédictions")
