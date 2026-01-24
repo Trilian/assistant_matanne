@@ -415,16 +415,16 @@ def render_photos():
     service = get_inventaire_service()
     articles_data = service.get_inventaire_complet()
     
-    if not articles_data["articles"]:
+    if not articles_data:
         st.info("Aucun article dans l'inventaire")
         return
     
     # Sélectionne un article
     col1, col2 = st.columns([3, 1])
     with col1:
-        article_names = [f"{a['nom']} ({a['quantite']} {a['unite']})" for a in articles_data["articles"]]
+        article_names = [f"{a['nom']} ({a['quantite']} {a['unite']})" for a in articles_data]
         selected_idx = st.selectbox("Sélectionne un article", range(len(article_names)), format_func=lambda i: article_names[i], key="select_photo_article")
-        selected_article = articles_data["articles"][selected_idx]
+        selected_article = articles_data[selected_idx]
         article_id = selected_article["id"]
     
     # Affiche la photo actuelle
