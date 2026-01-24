@@ -679,6 +679,192 @@ class GardenLog(Base):
     # Relations
     garden_item: Mapped[Optional["GardenItem"]] = relationship(back_populates="logs")
 
+
+# ═══════════════════════════════════════════════════════════
+# FAMILLE - JALONS & DÉVELOPPEMENT JULES
+# ═══════════════════════════════════════════════════════════
+
+
+class Milestone(Base):
+    """Jalons & apprentissages de Jules"""
+
+    __tablename__ = "milestones"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    child_id: Mapped[int] = mapped_column(
+        ForeignKey("child_profiles.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    titre: Mapped[str] = mapped_column(String(200), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    categorie: Mapped[str] = mapped_column(String(100), nullable=False, index=True)  # "langage", "motricité", "social", "cognitif", etc
+    date_atteint: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    photo_url: Mapped[str | None] = mapped_column(String(500))
+    notes: Mapped[str | None] = mapped_column(Text)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    # Relations
+    child: Mapped["ChildProfile"] = relationship()
+
+    def __repr__(self) -> str:
+        return f"<Milestone(id={self.id}, titre='{self.titre}', date={self.date_atteint})>"
+
+
+# ═══════════════════════════════════════════════════════════
+# FAMILLE - ACTIVITÉS & SORTIES
+# ═══════════════════════════════════════════════════════════
+
+
+class FamilyActivity(Base):
+    """Activités et sorties familiales"""
+
+    __tablename__ = "family_activities"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    titre: Mapped[str] = mapped_column(String(200), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    type_activite: Mapped[str] = mapped_column(String(100), nullable=False, index=True)  # "parc", "musée", "piscine", "jeu_maison", "sport", etc
+    date_prevue: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    duree_heures: Mapped[float | None] = mapped_column(Float)  # durée en heures
+    lieu: Mapped[str | None] = mapped_column(String(200))
+    qui_participe: Mapped[list[str] | None] = mapped_column(JSONB)  # ["Jules", "Papa", "Maman"]
+    age_minimal_recommande: Mapped[int | None] = mapped_column(Integer)  # en mois
+    cout_estime: Mapped[float | None] = mapped_column(Float)
+    cout_reel: Mapped[float | None] = mapped_column(Float)
+    statut: Mapped[str] = mapped_column(String(50), nullable=False, default="planifié", index=True)  # planifié, terminé, annulé
+    notes: Mapped[str | None] = mapped_column(Text)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        CheckConstraint("duree_heures > 0", name="ck_activite_duree_positive"),
+        CheckConstraint("age_minimal_recommande >= 0", name="ck_activite_age_positif"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<FamilyActivity(id={self.id}, titre='{self.titre}', date={self.date_prevue})>"
+
+
+# ═══════════════════════════════════════════════════════════
+# SANTÉ & BIEN-ÊTRE - ROUTINES & OBJECTIFS SANTÉ
+# ═══════════════════════════════════════════════════════════
+
+
+class HealthRoutine(Base):
+    """Routine de santé/sport"""
+
+    __tablename__ = "health_routines"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    nom: Mapped[str] = mapped_column(String(200), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    type_routine: Mapped[str] = mapped_column(String(100), nullable=False, index=True)  # "yoga", "course", "gym", "marche", "sport", etc
+    frequence: Mapped[str] = mapped_column(String(50), nullable=False)  # "3x/semaine", "quotidien", etc
+    duree_minutes: Mapped[int] = mapped_column(Integer, nullable=False)
+    intensite: Mapped[str] = mapped_column(String(50), nullable=False, default="modérée")  # "basse", "modérée", "haute"
+    jours_semaine: Mapped[list[str] | None] = mapped_column(JSONB)  # ["lundi", "mercredi", "vendredi"]
+    calories_brulees_estimees: Mapped[int | None] = mapped_column(Integer)
+    actif: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
+    notes: Mapped[str | None] = mapped_column(Text)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    # Relations
+    entries: Mapped[list["HealthEntry"]] = relationship(
+        back_populates="routine", cascade="all, delete-orphan"
+    )
+
+    __table_args__ = (
+        CheckConstraint("duree_minutes > 0", name="ck_routine_duree_positive"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<HealthRoutine(id={self.id}, nom='{self.nom}', type='{self.type_routine}')>"
+
+
+class HealthObjective(Base):
+    """Objectifs de santé/bien-être"""
+
+    __tablename__ = "health_objectives"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    titre: Mapped[str] = mapped_column(String(200), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    categorie: Mapped[str] = mapped_column(String(100), nullable=False, index=True)  # "poids", "endurance", "force", "flexibilité", "alimentation", etc
+    valeur_cible: Mapped[float] = mapped_column(Float, nullable=False)
+    unite: Mapped[str] = mapped_column(String(50))  # "kg", "km", "reps", "days", etc
+    valeur_actuelle: Mapped[float | None] = mapped_column(Float)
+    date_debut: Mapped[date] = mapped_column(Date, nullable=False, default=date.today)
+    date_cible: Mapped[date] = mapped_column(Date, nullable=False)
+    priorite: Mapped[str] = mapped_column(String(50), nullable=False, default="moyenne")  # "haute", "moyenne", "basse"
+    statut: Mapped[str] = mapped_column(String(50), nullable=False, default="en_cours", index=True)  # "en_cours", "atteint", "abandonné"
+    notes: Mapped[str | None] = mapped_column(Text)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        CheckConstraint("valeur_cible > 0", name="ck_objective_valeur_positive"),
+        CheckConstraint("date_debut <= date_cible", name="ck_objective_dates"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<HealthObjective(id={self.id}, titre='{self.titre}', statut='{self.statut}')>"
+
+
+class HealthEntry(Base):
+    """Entrée quotidienne de suivi santé"""
+
+    __tablename__ = "health_entries"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    routine_id: Mapped[int | None] = mapped_column(
+        ForeignKey("health_routines.id", ondelete="CASCADE"), index=True
+    )
+    date: Mapped[date] = mapped_column(Date, nullable=False, index=True, default=date.today)
+    type_activite: Mapped[str] = mapped_column(String(100), nullable=False)  # "course", "yoga", "gym", etc
+    duree_minutes: Mapped[int] = mapped_column(Integer, nullable=False)
+    intensite: Mapped[str] = mapped_column(String(50))  # "basse", "modérée", "haute"
+    calories_brulees: Mapped[int | None] = mapped_column(Integer)
+    note_energie: Mapped[int | None] = mapped_column(Integer)  # 1-10
+    note_moral: Mapped[int | None] = mapped_column(Integer)  # 1-10
+    ressenti: Mapped[str | None] = mapped_column(Text)
+    notes: Mapped[str | None] = mapped_column(Text)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    # Relations
+    routine: Mapped[Optional["HealthRoutine"]] = relationship(back_populates="entries")
+
+    __table_args__ = (
+        CheckConstraint("duree_minutes > 0", name="ck_entry_duree_positive"),
+        CheckConstraint("note_energie >= 1 AND note_energie <= 10", name="ck_entry_energie"),
+        CheckConstraint("note_moral >= 1 AND note_moral <= 10", name="ck_entry_moral"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<HealthEntry(id={self.id}, date={self.date}, type='{self.type_activite}')>"
+
+
+# ═══════════════════════════════════════════════════════════
+# FAMILLE - BUDGET FAMILLE
+# ═══════════════════════════════════════════════════════════
+
+
+class FamilyBudget(Base):
+    """Dépenses familiales par catégorie"""
+
+    __tablename__ = "family_budgets"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    date: Mapped[date] = mapped_column(Date, nullable=False, index=True, default=date.today)
+    categorie: Mapped[str] = mapped_column(String(100), nullable=False, index=True)  # "Jules_jouets", "Jules_vetements", "Jules_couches", "Nous_sport", "Nous_nutrition", "Activités", "Autre"
+    description: Mapped[str | None] = mapped_column(String(200))
+    montant: Mapped[float] = mapped_column(Float, nullable=False)
+    notes: Mapped[str | None] = mapped_column(Text)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        CheckConstraint("montant > 0", name="ck_budget_montant_positive"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<FamilyBudget(id={self.id}, categorie='{self.categorie}', montant={self.montant})>"
+
     def __repr__(self) -> str:
         return f"<GardenLog(id={self.id}, action='{self.action}', date={self.date})>"
 

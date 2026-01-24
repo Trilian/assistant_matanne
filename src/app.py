@@ -220,9 +220,15 @@ def afficher_sidebar():
                 "🛒 Courses": "cuisine.courses",
             },
             "👨‍👩‍👧‍👦 Famille": {
-                "📊 Suivi Jules": "famille.suivi_jules",
-                "💖 Bien-être": "famille.bien_etre",
-                "🔄 Routines": "famille.routines",
+                "🏠 Hub Famille": "famille.accueil",
+                "👶 Jules (19m)": "famille.jules",
+                "💪 Santé & Sport": "famille.sante",
+                "🎨 Activités": "famille.activites",
+                "🛍️ Shopping": "famille.shopping",
+                "—": None,
+                "📊 Suivi Jules (legacy)": "famille.suivi_jules",
+                "💖 Bien-être (legacy)": "famille.bien_etre",
+                "🔄 Routines (legacy)": "famille.routines",
             },
             "🏠 Maison": {
                 "📋 Projets": "maison.projets",
@@ -243,10 +249,19 @@ def afficher_sidebar():
         for label, value in MODULES_MENU.items():
             if isinstance(value, dict):
                 # Module avec sous-menus
-                est_actif = any(etat.module_actuel.startswith(sub) for sub in value.values())
+                est_actif = any(
+                    etat.module_actuel.startswith(sub) 
+                    for sub in value.values() 
+                    if sub  # Skip None values
+                )
 
                 with st.expander(label, expanded=est_actif):
                     for sub_label, sub_value in value.items():
+                        # Skip séparateurs
+                        if sub_value is None:
+                            st.divider()
+                            continue
+
                         est_sous_menu_actif = etat.module_actuel == sub_value
 
                         if st.button(
