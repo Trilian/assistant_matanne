@@ -256,13 +256,13 @@ def render_ia_config():
     col10, col11 = st.columns(2)
 
     with col10:
-        if st.button("🗑️ Vider Cache IA", use_container_width=True):
+        if st.button("🗑️ Vider Cache IA", key="btn_clear_semantic_cache", use_container_width=True):
             SemanticCache.invalider_tout()
             show_success("Cache IA vidé !")
             st.rerun()
 
     with col11:
-        if st.button("📊 Détails Cache", use_container_width=True):
+        if st.button("📊 Détails Cache", key="btn_cache_details", use_container_width=True):
             with st.expander("📊 Statistiques Détaillées", expanded=True):
                 st.json(cache_stats)
 
@@ -304,7 +304,7 @@ def render_database_config():
     # Health Check
     st.markdown("#### 🏥 Health Check")
 
-    if st.button("🔍 Vérifier l'état", use_container_width=True):
+    if st.button("🔍 Vérifier l'état", key="btn_check_db_status", use_container_width=True):
         with smart_spinner("Vérification en cours...", estimated_seconds=2):
             health = health_check()
 
@@ -333,7 +333,7 @@ def render_database_config():
     col5, col6 = st.columns(2)
 
     with col5:
-        if st.button("🔄 Exécuter Migrations", use_container_width=True):
+        if st.button("🔄 Exécuter Migrations", key="btn_run_migrations", use_container_width=True):
             with smart_spinner("Exécution des migrations...", estimated_seconds=5):
                 try:
                     MigrationManager.executer_migrations()
@@ -343,7 +343,7 @@ def render_database_config():
                     show_error(f"❌ Erreur: {str(e)}")
 
     with col6:
-        if st.button("ℹ️ Voir Historique", use_container_width=True):
+        if st.button("ℹ️ Voir Historique", key="btn_show_migration_history", use_container_width=True):
             st.session_state.show_migrations_history = True
 
     st.markdown("---")
@@ -356,7 +356,7 @@ def render_database_config():
     col7, col8 = st.columns(2)
 
     with col7:
-        if st.button("🧹 Optimiser (VACUUM)", use_container_width=True):
+        if st.button("🧹 Optimiser (VACUUM)", key="btn_optimize_db", use_container_width=True):
             modal = Modal("vacuum_db")
 
             if not modal.is_showing():
@@ -376,7 +376,7 @@ def render_database_config():
                 modal.cancel("❌ Annuler")
 
     with col8:
-        if st.button("💾 Backup (TODO)", use_container_width=True):
+        if st.button("💾 Backup (TODO)", key="btn_backup_db", use_container_width=True):
             st.info("Fonctionnalité à implémenter")
 
 
@@ -410,7 +410,7 @@ def render_cache_config():
 
                 st.metric("Taux de Hit", f"{hit_rate:.1f}%")
 
-        if st.button("🗑️ Vider Cache Applicatif", use_container_width=True):
+        if st.button("🗑️ Vider Cache Applicatif", key="btn_clear_cache_app", use_container_width=True):
             Cache.clear_all()
             show_success("Cache applicatif vidé !")
             st.rerun()
@@ -436,7 +436,7 @@ def render_cache_config():
     with col5:
         st.metric("Misses", 0)
 
-    if st.button("🗑️ Vider Cache IA", use_container_width=True):
+    if st.button("🗑️ Vider Cache IA", key="btn_clear_cache_ia", use_container_width=True):
         SemanticCache.invalider_tout()
         show_success("Cache IA vidé !")
         st.rerun()
@@ -446,7 +446,7 @@ def render_cache_config():
     # Actions groupées
     st.markdown("#### 🧹 Actions Groupées")
 
-    if st.button("🗑️ TOUT Vider (Cache App + IA)", type="primary", use_container_width=True):
+    if st.button("🗑️ TOUT Vider (Cache App + IA)", key="btn_clear_all", type="primary", use_container_width=True):
         Cache.clear_all()
         SemanticCache.invalider_tout()
         show_success("✅ Tous les caches vidés !")
