@@ -183,22 +183,26 @@ def render_liste():
         with cols[idx % 3]:
             # Container avec flexbox minimal
             with st.container(border=True):
-                # Image avec hauteur FIXE (140px) pour éviter décalages
-                st.markdown(f'<div style="height: 140px; overflow: hidden; border-radius: 8px; margin-bottom: 8px; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">', unsafe_allow_html=True)
-                
+                # Image avec hauteur FIXE (120px) et conteneur strictement dimensionné
                 if recette.url_image:
                     try:
-                        # Utiliser st.image SANS border (conteneur style personnalisé gère ça)
-                        st.image(recette.url_image, use_column_width=True)
+                        st.markdown(
+                            f'<div style="height: 120px; width: 100%; overflow: hidden; border-radius: 6px; margin-bottom: 8px; background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%); display: flex; align-items: center; justify-content: center;"><img src="{recette.url_image}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;" /></div>',
+                            unsafe_allow_html=True
+                        )
                     except Exception:
-                        st.markdown('<div style="text-align: center; font-size: 60px; opacity: 0.3;">🖼️</div>', unsafe_allow_html=True)
+                        st.markdown(
+                            '<div style="height: 120px; width: 100%; border-radius: 6px; margin-bottom: 8px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 48px; opacity: 0.3;">🖼️</div>',
+                            unsafe_allow_html=True
+                        )
                 else:
                     import random
                     food_emojis = ["🍽️", "🍳", "🥘", "🍲", "🥗", "🍜"]
                     emoji = random.choice(food_emojis)
-                    st.markdown(f'<div style="text-align: center; font-size: 60px; opacity: 0.3;">{emoji}</div>', unsafe_allow_html=True)
-                
-                st.markdown('</div>', unsafe_allow_html=True)
+                    st.markdown(
+                        f'<div style="height: 120px; width: 100%; border-radius: 6px; margin-bottom: 8px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 48px; opacity: 0.3;">{emoji}</div>',
+                        unsafe_allow_html=True
+                    )
                 
                 # Titre et infos compactes
                 difficulty_emoji = {"facile": "🟢", "moyen": "🟡", "difficile": "🔴"}.get(recette.difficulte, "⚪")

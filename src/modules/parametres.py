@@ -102,7 +102,7 @@ def render_foyer_config():
             )
 
             a_bebe = st.checkbox(
-                "👶 Présence d'un bébé (< 18 mois)", value=config.get("a_bebe", False)
+                "👶 Présence d'un jeune enfant (< 24 mois)", value=config.get("a_bebe", False)
             )
 
         st.markdown("#### Préférences Alimentaires")

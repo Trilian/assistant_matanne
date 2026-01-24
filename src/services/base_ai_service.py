@@ -464,7 +464,7 @@ class PlanningAIMixin:
         context += f"- {config.get('nb_enfants', 0)} enfants\n"
 
         if config.get("a_bebe"):
-            context += "- Présence d'un bébé (adapter certaines recettes)\n"
+            context += "- Présence d'un jeune enfant (adapter certaines recettes pour texture/allergènes)\n"
 
         if config.get("batch_cooking_actif"):
             context += "- Batch cooking activé (optimiser temps)\n"
