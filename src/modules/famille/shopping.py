@@ -31,14 +31,14 @@ from src.modules.famille.helpers import (
 def get_shopping_items(categorie=None):
     """Récupère les articles du shopping"""
     try:
-        db = get_db()
-        query = db.query(ShoppingItem).filter(ShoppingItem.actif == True)
-        
-        if categorie:
-            query = query.filter(ShoppingItem.categorie == categorie)
-        
-        items = query.all()
-        return items
+        with get_db() as db:
+            query = db.query(ShoppingItem).filter(ShoppingItem.actif == True)
+            
+            if categorie:
+                query = query.filter(ShoppingItem.categorie == categorie)
+            
+            items = query.all()
+            return items
     except Exception as e:
         st.error(f"❌ Erreur récupération shopping: {e}")
         return []
@@ -76,20 +76,19 @@ def get_shopping_suggestions():
 def ajouter_article(titre, categorie, qty=1, prix_estime=0.0, liste="Nous"):
     """Ajoute un article au shopping"""
     try:
-        db = get_db()
-        
-        item = ShoppingItem(
-            titre=titre,
-            categorie=categorie,
-            quantite=qty,
-            prix_estime=prix_estime,
-            liste=liste,
-            date_ajout=date.today(),
-            actif=True
-        )
-        
-        db.add(item)
-        db.commit()
+        with get_db() as db:
+            item = ShoppingItem(
+                titre=titre,
+                categorie=categorie,
+                quantite=qty,
+                prix_estime=prix_estime,
+                liste=liste,
+                date_ajout=date.today(),
+                actif=True
+            )
+            
+            db.add(item)
+            db.commit()
         
         clear_famille_cache()
         st.success(f"✅ {titre} ajouté à {liste}")
@@ -102,18 +101,18 @@ def ajouter_article(titre, categorie, qty=1, prix_estime=0.0, liste="Nous"):
 def marquer_achete(item_id):
     """Marque un article comme acheté"""
     try:
-        db = get_db()
-        item = db.query(ShoppingItem).get(item_id)
-        
-        if item:
-            item.actif = False
-            item.date_achat = date.today()
-            if item.prix_reel is None:
-                item.prix_reel = item.prix_estime
+        with get_db() as db:
+            item = db.query(ShoppingItem).get(item_id)
             
-            db.commit()
-            clear_famille_cache()
-            return True
+            if item:
+                item.actif = False
+                item.date_achat = date.today()
+                if item.prix_reel is None:
+                    item.prix_reel = item.prix_estime
+                
+                db.commit()
+                clear_famille_cache()
+                return True
         return False
     except Exception as e:
         st.error(f"❌ Erreur marquer acheté: {e}")
@@ -376,24 +375,24 @@ def app():
         
         try:
             # Récupérer tous les articles achetés ce mois
-            db = get_db()
-            items_achetes = db.query(ShoppingItem).filter(
-                ShoppingItem.date_achat >= date.today() - timedelta(days=30),
-                ShoppingItem.actif == False
-            ).all()
-            
-            if items_achetes:
-                df_achetes = pd.DataFrame([
-                    {
-                        "Article": i.titre,
-                        "Catégorie": i.categorie,
-                        "Quantité": i.quantite,
-                        "Estimé": i.prix_estime * i.quantite,
-                        "Réel": (i.prix_reel or i.prix_estime) * i.quantite,
-                        "Date": i.date_achat
-                    }
-                    for i in items_achetes
-                ])
+            with get_db() as db:
+                items_achetes = db.query(ShoppingItem).filter(
+                    ShoppingItem.date_achat >= date.today() - timedelta(days=30),
+                    ShoppingItem.actif == False
+                ).all()
+                
+                if items_achetes:
+                    df_achetes = pd.DataFrame([
+                        {
+                            "Article": i.titre,
+                            "Catégorie": i.categorie,
+                            "Quantité": i.quantite,
+                            "Estimé": i.prix_estime * i.quantite,
+                            "Réel": (i.prix_reel or i.prix_estime) * i.quantite,
+                            "Date": i.date_achat
+                        }
+                        for i in items_achetes
+                    ])
                 
                 # Plotly: Différence Estimé vs Réel
                 df_cat = df_achetes.groupby("Catégorie").agg({

@@ -298,21 +298,20 @@ def get_shopping_from_activities(activites: List) -> List[Dict]:
 def add_shopping_items_from_integration(items_list: List[Dict], liste_type="Nous"):
     """Ajoute des items au shopping depuis l'intégration"""
     try:
-        db = get_db()
-        
-        for item_data in items_list:
-            existing = db.query(ShoppingItem).filter(
-                ShoppingItem.titre == item_data.get("item") or item_data.get("ingredient"),
-                ShoppingItem.date_ajout == date.today(),
-                ShoppingItem.actif == True
-            ).first()
-            
-            if not existing:
-                shopping_item = ShoppingItem(
-                    titre=item_data.get("item") or item_data.get("ingredient"),
-                    categorie=item_data.get("categorie"),
-                    quantite=item_data.get("quantite", 1),
-                    liste=liste_type,
+        with get_db() as db:
+            for item_data in items_list:
+                existing = db.query(ShoppingItem).filter(
+                    ShoppingItem.titre == item_data.get("item") or item_data.get("ingredient"),
+                    ShoppingItem.date_ajout == date.today(),
+                    ShoppingItem.actif == True
+                ).first()
+                
+                if not existing:
+                    shopping_item = ShoppingItem(
+                        titre=item_data.get("item") or item_data.get("ingredient"),
+                        categorie=item_data.get("categorie"),
+                        quantite=item_data.get("quantite", 1),
+                        liste=liste_type,
                     date_ajout=date.today(),
                     actif=True
                 )
@@ -342,19 +341,18 @@ def get_nutrition_from_recipe(recipe: Dict) -> Dict:
 def log_meal_to_health_tracker(recipe_name: str, calories: int, timestamp=None):
     """Enregistre un repas dans le tracker santé"""
     try:
-        db = get_db()
-        
-        entry = HealthEntry(
-            type_activite="repas",
-            duree_minutes=0,
-            calories_brulees=-calories,  # Négatif = apport calorique
-            note_type="nutrition",
-            description=recipe_name
-        )
-        
-        db.add(entry)
-        db.commit()
-        return True
+        with get_db() as db:
+            entry = HealthEntry(
+                type_activite="repas",
+                duree_minutes=0,
+                calories_brulees=-calories,  # Négatif = apport calorique
+                note_type="nutrition",
+                description=recipe_name
+            )
+            
+            db.add(entry)
+            db.commit()
+            return True
     except Exception as e:
         st.error(f"❌ Erreur enregistrement santé: {e}")
         return False

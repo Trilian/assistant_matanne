@@ -66,44 +66,53 @@ def get_notifications():
     notifications = []
     
     try:
+        # Obtenir le child_id
+        child_id = get_or_create_jules()
+        
         # Notification 1: Prochain jalon
-        milestones = get_milestones_by_category()
-        if milestones:
-            recent = milestones[0]  # Le plus récent
-            days_since = (date.today() - recent.date_atteint).days
-            if days_since < 7:
-                notifications.append({
-                    "type": "success",
-                    "emoji": "🎉",
-                    "titre": "Nouveau jalon!",
-                    "message": f"{recent.titre} ({days_since}j ago)"
-                })
+        milestones_dict = get_milestones_by_category(child_id)
+        if milestones_dict:
+            # Trouver le jalon le plus récent
+            all_milestones = []
+            for cat, milestones in milestones_dict.items():
+                all_milestones.extend(milestones)
+            
+            if all_milestones:
+                recent = max(all_milestones, key=lambda x: x['date'])
+                days_since = (date.today() - recent['date']).days
+                if days_since < 7:
+                    notifications.append({
+                        "type": "success",
+                        "emoji": "🎉",
+                        "titre": "Nouveau jalon!",
+                        "message": f"{recent['titre']} ({days_since}j ago)"
+                    })
         
         # Notification 2: Objectifs en retard
         objectives = get_objectives_actifs()
         for obj in objectives:
-            progress = (obj.valeur_actuelle or 0) / (obj.valeur_cible or 1) * 100
+            progress = obj.get('progression', 0)
             
-            days_remaining = (obj.date_cible - date.today()).days if obj.date_cible else None
+            days_remaining = obj.get('jours_restants')
             
             if days_remaining and days_remaining < 7 and progress < 80:
                 notifications.append({
                     "type": "warning",
                     "emoji": "⚠️",
                     "titre": "Objectif en retard",
-                    "message": f"{obj.titre} - {progress:.0f}% ({days_remaining}j restants)"
+                    "message": f"{obj['titre']} - {progress:.0f}% ({days_remaining}j restants)"
                 })
         
         # Notification 3: Budget
-        budget_data = get_budget_par_period(7)
+        budget_data = get_budget_par_period("week")
         if budget_data:
-            total = sum(b.montant for b in budget_data)
+            total = budget_data.get("TOTAL", 0)
             if total > 500:
                 notifications.append({
                     "type": "info",
                     "emoji": "💰",
                     "titre": "Budget élevé cette semaine",
-                    "message": f"{total:.2f}€ dépensés (7 derniers jours)"
+                    "message": f"{total:.2f}€ dépensés (cette semaine)"
                 })
         
         # Notification 4: Activités
@@ -222,16 +231,11 @@ def app():
         try:
             stats = get_stats_santé_semaine()
             
-            if stats:
-                total_seances = len(stats)
-                total_minutes = sum(e.duree_minutes or 0 for e in stats)
-                avg_energie = sum(e.note_energie or 0 for e in stats) / max(total_seances, 1)
-                avg_moral = sum(e.note_moral or 0 for e in stats) / max(total_seances, 1)
-                
-                st.metric("💪 Séances", total_seances)
-                st.metric("⏱️ Minutes totales", int(total_minutes))
-                st.metric("⚡ Énergie moyenne", f"{avg_energie:.1f}/10")
-                st.metric("😊 Moral moyen", f"{avg_moral:.1f}/10")
+            if stats and stats.get("nb_seances", 0) > 0:
+                st.metric("💪 Séances", stats.get("nb_seances", 0))
+                st.metric("⏱️ Minutes totales", int(stats.get("total_minutes", 0)))
+                st.metric("⚡ Énergie moyenne", f"{stats.get('energie_moyenne', 0):.1f}/10")
+                st.metric("😊 Moral moyen", f"{stats.get('moral_moyen', 0):.1f}/10")
             
             else:
                 st.info("ℹ️ Aucune activité cette semaine")
