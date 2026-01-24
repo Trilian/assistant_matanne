@@ -199,6 +199,9 @@ class OptimizedRouter:
             "path": "src.modules.cuisine.courses",
             "type": "simple",
         },
+        # Outils transversaux
+        "barcode": {"path": "src.modules.barcode", "type": "simple"},
+        "rapports": {"path": "src.modules.rapports", "type": "simple"},
         # Famille (à implémenter plus tard)
         "famille.suivi_jules": {"path": "src.modules.famille.suivi_jules", "type": "simple"},
         "famille.bien_etre": {"path": "src.modules.famille.bien_etre", "type": "simple"},

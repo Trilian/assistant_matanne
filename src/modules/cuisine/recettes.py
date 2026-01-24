@@ -183,17 +183,22 @@ def render_liste():
         with cols[idx % 3]:
             # Container avec flexbox minimal
             with st.container(border=True):
-                # Image (hauteur fixe de 140px)
+                # Image avec hauteur FIXE (140px) pour éviter décalages
+                st.markdown(f'<div style="height: 140px; overflow: hidden; border-radius: 8px; margin-bottom: 8px; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">', unsafe_allow_html=True)
+                
                 if recette.url_image:
                     try:
-                        st.image(recette.url_image, width=250)
+                        # Utiliser st.image SANS border (conteneur style personnalisé gère ça)
+                        st.image(recette.url_image, use_column_width=True)
                     except Exception:
-                        st.markdown('<div style="height: 140px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; border-radius: 8px;">🖼️</div>', unsafe_allow_html=True)
+                        st.markdown('<div style="text-align: center; font-size: 60px; opacity: 0.3;">🖼️</div>', unsafe_allow_html=True)
                 else:
                     import random
                     food_emojis = ["🍽️", "🍳", "🥘", "🍲", "🥗", "🍜"]
                     emoji = random.choice(food_emojis)
-                    st.markdown(f'<div style="height: 140px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 60px; opacity: 0.3;">{emoji}</div>', unsafe_allow_html=True)
+                    st.markdown(f'<div style="text-align: center; font-size: 60px; opacity: 0.3;">{emoji}</div>', unsafe_allow_html=True)
+                
+                st.markdown('</div>', unsafe_allow_html=True)
                 
                 # Titre et infos compactes
                 difficulty_emoji = {"facile": "🟢", "moyen": "🟡", "difficile": "🔴"}.get(recette.difficulte, "⚪")
@@ -958,7 +963,7 @@ def render_generer_ia():
 
 def render_generer_image(recette):
     """Affiche l'interface pour générer une image pour la recette"""
-    st.subheader("✨ Générer une image")
+    st.subheader("✨ Générer une image pertinente")
     
     # Description du prompt - affichée complètement
     prompt = f"{recette.nom}"
@@ -967,7 +972,7 @@ def render_generer_image(recette):
     st.caption(f"📝 {prompt}")
     
     # Bouton génération
-    if st.button("🎨 Générer", use_container_width=True, key=f"gen_img_{recette.id}"):
+    if st.button("🎨 Générer Image", use_container_width=True, key=f"gen_img_{recette.id}"):
         try:
             # Import et vérification des clés
             from src.utils.image_generator import generer_image_recette, UNSPLASH_API_KEY, PEXELS_API_KEY, PIXABAY_API_KEY
@@ -977,7 +982,7 @@ def render_generer_image(recette):
             
             with status_placeholder.container():
                 st.info(f"⏳ Génération de l'image pour: **{recette.nom}**")
-                st.caption(f"🔑 Clés configurées: Unsplash={'✅' if UNSPLASH_API_KEY else '❌'} | Pexels={'✅' if PEXELS_API_KEY else '❌'} | Pixabay={'✅' if PIXABAY_API_KEY else '❌'}")
+                st.caption(f"🔑 Sources: Unsplash={'✅' if UNSPLASH_API_KEY else '❌'} | Pexels={'✅' if PEXELS_API_KEY else '❌'} | Pixabay={'✅' if PIXABAY_API_KEY else '❌'}")
             
             # Préparer la liste des ingrédients
             ingredients_list = []
@@ -1002,7 +1007,9 @@ def render_generer_image(recette):
                 st.success(f"✅ Image générée pour: **{recette.nom}**")
                 # Stocker dans session state
                 st.session_state[f"generated_image_{recette.id}"] = url_image
-                st.image(url_image, caption=recette.nom, width=400)
+                
+                # Afficher l'image en grande avec ratio maintenu
+                st.image(url_image, caption=f"🍽️ {recette.nom}", use_column_width=True)
             else:
                 status_placeholder.empty()
                 st.error("❌ Impossible de générer l'image - aucune source ne retourne d'image")
@@ -1019,7 +1026,7 @@ def render_generer_image(recette):
     # Afficher l'image si elle existe en session state
     if f"generated_image_{recette.id}" in st.session_state:
         url_image = st.session_state[f"generated_image_{recette.id}"]
-        st.image(url_image, caption=recette.nom, width=400)
+        st.image(url_image, caption=f"🍽️ {recette.nom}", use_column_width=True)
         
         # Proposer de sauvegarder
         if st.button("💾 Sauvegarder cette image", use_container_width=True, key=f"save_img_{recette.id}"):

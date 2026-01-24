@@ -58,7 +58,7 @@ else:
 
 def generer_image_recette(nom_recette: str, description: str = "", ingredients_list: list = None, type_plat: str = "") -> Optional[str]:
     """
-    Génère une image pour une recette.
+    Génère une image pour une recette avec meilleure pertinence.
     
     Essaie plusieurs sources dans cet ordre:
     1. Unsplash (meilleure qualité, bonne spécificité)
@@ -77,10 +77,13 @@ def generer_image_recette(nom_recette: str, description: str = "", ingredients_l
     
     logger.info(f"🎨 Génération image pour: {nom_recette}")
     
+    # Construire une requête optimisée basée sur la recette
+    search_query = _construire_query_optimisee(nom_recette, ingredients_list, type_plat)
+    
     # Priorité 1: Unsplash (meilleur pour les recettes)
     if UNSPLASH_API_KEY:
         try:
-            url = _rechercher_image_unsplash(nom_recette)
+            url = _rechercher_image_unsplash(nom_recette, search_query)
             if url:
                 logger.info(f"✅ Image trouvée via Unsplash pour '{nom_recette}'")
                 return url
@@ -90,7 +93,7 @@ def generer_image_recette(nom_recette: str, description: str = "", ingredients_l
     # Priorité 2: Pexels
     if PEXELS_API_KEY:
         try:
-            url = _rechercher_image_pexels(nom_recette)
+            url = _rechercher_image_pexels(nom_recette, search_query)
             if url:
                 logger.info(f"✅ Image trouvée via Pexels pour '{nom_recette}'")
                 return url
@@ -100,7 +103,7 @@ def generer_image_recette(nom_recette: str, description: str = "", ingredients_l
     # Priorité 3: Pixabay
     if PIXABAY_API_KEY:
         try:
-            url = _rechercher_image_pixabay(nom_recette)
+            url = _rechercher_image_pixabay(nom_recette, search_query)
             if url:
                 logger.info(f"✅ Image trouvée via Pixabay pour '{nom_recette}'")
                 return url
@@ -131,7 +134,54 @@ def generer_image_recette(nom_recette: str, description: str = "", ingredients_l
     return None
 
 
-def _rechercher_image_pexels(nom_recette: str) -> Optional[str]:
+def _construire_query_optimisee(nom_recette: str, ingredients_list: list = None, type_plat: str = "") -> str:
+    """
+    Construit une requête de recherche optimisée pour trouver les meilleures images.
+    
+    Exemples:
+    - "Compote de pommes" → "apple compote cooked fresh"
+    - "Pâtes carbonara" → "spaghetti carbonara pasta cooked"
+    - "Salade" → "salad fresh vegetables"
+    """
+    
+    # Ingrédient principal (premier ingrédient si disponible)
+    main_ingredient = ""
+    if ingredients_list and len(ingredients_list) > 0:
+        main_ingredient = ingredients_list[0].get("nom", "").lower()
+    
+    # Construire la query avec priorité sur:
+    # 1. Le nom de la recette
+    # 2. L'ingrédient principal (pour des images plus pertinentes)
+    # 3. "cooked" ou "prepared" pour montrer le résultat final
+    # 4. "fresh" pour meilleure qualité
+    
+    parts = []
+    
+    # Ajouter le nom principal
+    parts.append(nom_recette)
+    
+    # Ajouter l'ingrédient principal si différent du nom
+    if main_ingredient and main_ingredient not in nom_recette.lower():
+        parts.append(main_ingredient)
+    
+    # Ajouter un descripteur du résultat final
+    if type_plat.lower() in ["dessert", "pâtisserie"]:
+        parts.append("dessert fresh")
+    elif type_plat.lower() in ["soupe", "potage"]:
+        parts.append("soup cooked")
+    else:
+        parts.append("cooked prepared")
+    
+    # Ajouter "fresh" pour qualité
+    parts.append("fresh")
+    
+    query = " ".join(parts)
+    logger.debug(f"Query optimisée pour '{nom_recette}': '{query}'")
+    
+    return query
+
+
+def _rechercher_image_pexels(nom_recette: str, search_query: str = "") -> Optional[str]:
     """
     Recherche une image dans la banque Pexels (API gratuite)
     https://www.pexels.com/api/
@@ -142,13 +192,14 @@ def _rechercher_image_pexels(nom_recette: str) -> Optional[str]:
         return None
     
     try:
-        # Améliorer la requête de recherche
-        query = f"{nom_recette} food cuisine"
+        # Utiliser la query optimisée si fournie, sinon construire basique
+        query = search_query if search_query else f"{nom_recette} food cuisine"
+        
         url = "https://api.pexels.com/v1/search"
         headers = {"Authorization": PEXELS_API_KEY}
         params = {
             "query": query,
-            "per_page": 5,
+            "per_page": 15,  # Augmenter pour plus de choix
             "page": 1
         }
         
@@ -157,16 +208,20 @@ def _rechercher_image_pexels(nom_recette: str) -> Optional[str]:
         
         data = response.json()
         if data.get("photos") and len(data["photos"]) > 0:
-            # Prendre une image aléatoire parmi les résultats
-            photo = random.choice(data["photos"])
-            return photo["src"]["large"]
+            # Prendre une image aléatoire parmi les résultats (priorisé vers le début)
+            # Les premiers résultats sont généralement plus pertinents
+            photos = data["photos"][:min(8, len(data["photos"]))]
+            photo = random.choice(photos)
+            image_url = photo["src"]["large"]
+            logger.info(f"Pexels: Trouvé '{nom_recette}' avec query '{query}'")
+            return image_url
     except Exception as e:
         logger.debug(f"Pexels error: {e}")
     
     return None
 
 
-def _rechercher_image_pixabay(nom_recette: str) -> Optional[str]:
+def _rechercher_image_pixabay(nom_recette: str, search_query: str = "") -> Optional[str]:
     """
     Recherche une image dans Pixabay (API gratuite)
     https://pixabay.com/api/
@@ -177,15 +232,17 @@ def _rechercher_image_pixabay(nom_recette: str) -> Optional[str]:
         return None
     
     try:
-        query = f"{nom_recette} food cuisine"
+        query = search_query if search_query else f"{nom_recette} food cuisine"
+        
         url = "https://pixabay.com/api/"
         params = {
             "q": query,
             "key": PIXABAY_API_KEY,
             "image_type": "photo",
             "category": "food",
-            "per_page": 5,
-            "order": "popular"
+            "per_page": 15,  # Augmenter pour plus de choix
+            "order": "popular",
+            "min_width": 400,  # Priorité sur les images de bonne résolution
         }
         
         response = requests.get(url, params=params, timeout=10)
@@ -193,16 +250,19 @@ def _rechercher_image_pixabay(nom_recette: str) -> Optional[str]:
         
         data = response.json()
         if data.get("hits") and len(data["hits"]) > 0:
-            # Prendre une image aléatoire parmi les résultats
-            image = random.choice(data["hits"])
-            return image["webformatURL"]
+            # Prendre une image aléatoire parmi les meilleurs résultats
+            images = data["hits"][:min(8, len(data["hits"]))]
+            image = random.choice(images)
+            image_url = image["webformatURL"]
+            logger.info(f"Pixabay: Trouvé '{nom_recette}' avec query '{query}'")
+            return image_url
     except Exception as e:
         logger.debug(f"Pixabay error: {e}")
     
     return None
 
 
-def _rechercher_image_unsplash(nom_recette: str) -> Optional[str]:
+def _rechercher_image_unsplash(nom_recette: str, search_query: str = "") -> Optional[str]:
     """
     Recherche une image dans Unsplash (API gratuite)
     https://unsplash.com/oauth/applications
@@ -214,13 +274,14 @@ def _rechercher_image_unsplash(nom_recette: str) -> Optional[str]:
         return None
     
     try:
-        # Requête plus spécifique pour éviter les fausses matches
-        query = f"{nom_recette} recipe dish food"
+        # Utiliser la query optimisée si fournie
+        query = search_query if search_query else f"{nom_recette} recipe dish food"
+        
         url = "https://api.unsplash.com/search/photos"
         params = {
             "query": query,
             "client_id": UNSPLASH_API_KEY,
-            "per_page": 10,
+            "per_page": 20,  # Augmenter pour plus de choix
             "order_by": "relevant"
         }
         
@@ -230,13 +291,12 @@ def _rechercher_image_unsplash(nom_recette: str) -> Optional[str]:
         
         data = response.json()
         results = data.get("results", [])
-        logger.info(f"📊 Unsplash trouvé {len(results)} résultats")
+        logger.info(f"📊 Unsplash trouvé {len(results)} résultats pour '{nom_recette}'")
         
         if results and len(results) > 0:
-            # Prendre l'image avec le meilleur ratio (pas trop carré ni ultra-wide)
+            # Prendre une image avec bon ratio (priorité sur les meilleures)
             # Pour éviter les images abstraites ou mal cadrées
-            best_result = None
-            best_score = 0
+            good_results = []
             
             for result in results:
                 width = result.get("width", 0)
@@ -244,10 +304,20 @@ def _rechercher_image_unsplash(nom_recette: str) -> Optional[str]:
                 
                 if width > 0 and height > 0:
                     ratio = min(width, height) / max(width, height)
-                    # Préférer les images avec un bon ratio (0.5 à 0.9 = pas trop carré, pas ultra-wide)
+                    # Préférer les images avec un bon ratio (0.5 à 0.9 = bon cadrage)
                     if 0.5 <= ratio <= 0.9:
-                        best_result = result
-                        break
+                        good_results.append(result)
+            
+            # Si on n'a pas assez de bons résultats, prendre les premiers
+            if not good_results:
+                good_results = results[:min(8, len(results))]
+            
+            # Prendre une image aléatoire parmi les meilleures
+            if good_results:
+                selected = random.choice(good_results)
+                image_url = selected["urls"]["regular"]
+                logger.info(f"✅ Unsplash: Image sélectionnée pour '{nom_recette}'")
+                return image_url
             
             # Fallback: prendre simplement la première si aucune ne correspond
             if not best_result:

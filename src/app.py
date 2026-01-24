@@ -233,6 +233,10 @@ def afficher_sidebar():
                 "🗓️ Calendrier": "planning.calendrier",
                 "🌐 Vue Ensemble": "planning.vue_ensemble",
             },
+            "🔧 Outils": {
+                "📱 Code-barres": "barcode",
+                "📊 Rapports": "rapports",
+            },
             "⚙️ Paramètres": "parametres",
         }
 
