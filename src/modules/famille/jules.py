@@ -117,7 +117,7 @@ SHOPPING_JULES = {
 }
 
 
-def main():
+def app():
     """Interface principale du module Jules"""
     st.title("👶 Jules (19 mois)")
     
@@ -285,4 +285,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    app()

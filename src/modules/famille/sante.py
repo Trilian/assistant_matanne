@@ -159,7 +159,7 @@ def update_objectif_progression(objective_id: int, nouvelle_valeur: float):
         return False
 
 
-def main():
+def app():
     """Interface principale du module Santé"""
     st.title("💪 Santé & Sport")
     

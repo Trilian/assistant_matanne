@@ -364,7 +364,7 @@ def log_meal_to_health_tracker(recipe_name: str, calories: int, timestamp=None):
 # STREAMLIT: TAB INTÉGRATION
 # ════════════════════════════════════════════════════════════════════════════
 
-def show_integration_tab():
+def app():
     """Affiche l'onglet intégration Cuisine/Courses/Santé"""
     
     st.subheader("🔗 Intégrations Cuisine & Courses")

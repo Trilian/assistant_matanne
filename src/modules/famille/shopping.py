@@ -124,7 +124,7 @@ def marquer_achete(item_id):
 # STREAMLIT APP
 # ════════════════════════════════════════════════════════════════════════════
 
-def main():
+def app():
     st.set_page_config(page_title="Shopping", page_icon="🛒", layout="wide")
     st.title("🛒 Listes de Courses")
     

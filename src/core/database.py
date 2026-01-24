@@ -553,6 +553,8 @@ def verifier_sante() -> dict:
 
 get_engine = obtenir_moteur
 get_db_context = obtenir_contexte_db
+get_session = obtenir_contexte_db  # Alias pour compatibilité
+get_db = obtenir_contexte_db  # Alias pour compatibilité
 get_safe_db = obtenir_db_securise
 check_connection = verifier_connexion
 get_db_info = obtenir_infos_db

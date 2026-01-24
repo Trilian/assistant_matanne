@@ -202,10 +202,13 @@ class OptimizedRouter:
         # Outils transversaux
         "barcode": {"path": "src.modules.barcode", "type": "simple"},
         "rapports": {"path": "src.modules.rapports", "type": "simple"},
-        # Famille (à implémenter plus tard)
-        "famille.suivi_jules": {"path": "src.modules.famille.suivi_jules", "type": "simple"},
-        "famille.bien_etre": {"path": "src.modules.famille.bien_etre", "type": "simple"},
-        "famille.routines": {"path": "src.modules.famille.routines", "type": "simple"},
+        # ✅ MODULE FAMILLE - MODULES REFONDUS
+        "famille.accueil": {"path": "src.modules.famille.accueil", "type": "simple"},
+        "famille.jules": {"path": "src.modules.famille.jules", "type": "simple"},
+        "famille.sante": {"path": "src.modules.famille.sante", "type": "simple"},
+        "famille.activites": {"path": "src.modules.famille.activites", "type": "simple"},
+        "famille.shopping": {"path": "src.modules.famille.shopping", "type": "simple"},
+        "famille.integration_cuisine_courses": {"path": "src.modules.famille.integration_cuisine_courses", "type": "simple"},
         # Maison
         "maison.projets": {"path": "src.modules.maison.projets", "type": "simple"},
         "maison.jardin": {"path": "src.modules.maison.jardin", "type": "simple"},

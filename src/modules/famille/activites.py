@@ -74,7 +74,7 @@ SUGGESTIONS_ACTIVITES = {
 }
 
 
-def main():
+def app():
     """Interface principale du module Activités"""
     st.title("🎨 Activités Familiales")
     

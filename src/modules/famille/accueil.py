@@ -131,7 +131,7 @@ def get_notifications():
 # STREAMLIT: DASHBOARD
 # ════════════════════════════════════════════════════════════════════════════
 
-def main():
+def app():
     st.set_page_config(page_title="Accueil Famille", page_icon="🏠", layout="wide")
     
     # Header

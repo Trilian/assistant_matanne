@@ -1108,6 +1108,32 @@ class ArticleModele(Base):
 
 
 # ═══════════════════════════════════════════════════════════
+# SHOPPING FAMILIAL
+# ═══════════════════════════════════════════════════════════
+
+
+class ShoppingItem(Base):
+    """Article dans une liste de shopping familial"""
+
+    __tablename__ = "shopping_items_famille"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    titre: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
+    categorie: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
+    quantite: Mapped[float] = mapped_column(Float, default=1.0)
+    prix_estime: Mapped[float] = mapped_column(Float, default=0.0)
+    liste: Mapped[str] = mapped_column(String(50), default="Nous", index=True)
+    actif: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
+    
+    # Timestamps
+    date_ajout: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+    date_achat: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    
+    def __repr__(self) -> str:
+        return f"<ShoppingItem(titre={self.titre}, categorie={self.categorie}, actif={self.actif})>"
+
+
+# ═══════════════════════════════════════════════════════════
 # HELPERS
 # ═══════════════════════════════════════════════════════════
 
