@@ -194,9 +194,139 @@ class CoursesService(BaseService[ArticleCourses], BaseAIService):
         logger.info(f"✅ Generated {len(suggestions)} shopping suggestions")
         return suggestions
 
+    # ═══════════════════════════════════════════════════════════
+    # PHASE 2: MODÈLES PERSISTANTS
+    # ═══════════════════════════════════════════════════════════
 
-# Lazy loading of singleton instance for tests
-_courses_service = None
+    @with_db_session
+    def get_modeles(self, utilisateur_id: str | None = None, session: Session | None = None) -> list[dict]:
+        """Récupérer tous les modèles sauvegardés"""
+        from src.core.models import ModeleCourses
+        
+        query = session.query(ModeleCourses).filter(ModeleCourses.actif == True)
+        
+        # Phase 2: Filter by user_id if provided
+        if utilisateur_id:
+            query = query.filter(ModeleCourses.utilisateur_id == utilisateur_id)
+        
+        modeles = query.order_by(ModeleCourses.nom).all()
+        
+        return [
+            {
+                "id": m.id,
+                "nom": m.nom,
+                "description": m.description,
+                "articles": [
+                    {
+                        "nom": a.nom_article,
+                        "quantite": a.quantite,
+                        "unite": a.unite,
+                        "rayon": a.rayon_magasin,
+                        "priorite": a.priorite,
+                        "notes": a.notes,
+                    }
+                    for a in sorted(m.articles, key=lambda x: x.ordre)
+                ],
+                "cree_le": m.cree_le.isoformat() if m.cree_le else None,
+            }
+            for m in modeles
+        ]
+
+    @with_db_session
+    def create_modele(self, nom: str, articles: list[dict], description: str | None = None, 
+                     utilisateur_id: str | None = None, session: Session | None = None) -> int:
+        """Créer un nouveau modèle de courses"""
+        from src.core.models import ModeleCourses, ArticleModele
+        from src.core.models import Ingredient
+        
+        modele = ModeleCourses(
+            nom=nom,
+            description=description,
+            utilisateur_id=utilisateur_id,
+        )
+        session.add(modele)
+        session.flush()  # Get ID
+        
+        for ordre, article_data in enumerate(articles):
+            # Chercher l'ingrédient
+            ingredient = None
+            if "ingredient_id" in article_data:
+                ingredient = session.query(Ingredient).filter_by(id=article_data["ingredient_id"]).first()
+            
+            article_modele = ArticleModele(
+                modele_id=modele.id,
+                ingredient_id=ingredient.id if ingredient else None,
+                nom_article=article_data.get("nom", "Article"),
+                quantite=float(article_data.get("quantite", 1.0)),
+                unite=article_data.get("unite", "pièce"),
+                rayon_magasin=article_data.get("rayon", "Autre"),
+                priorite=article_data.get("priorite", "moyenne"),
+                notes=article_data.get("notes"),
+                ordre=ordre,
+            )
+            session.add(article_modele)
+        
+        session.commit()
+        logger.info(f"✅ Modèle '{nom}' créé avec {len(articles)} articles")
+        return modele.id
+
+    @with_db_session
+    def delete_modele(self, modele_id: int, session: Session | None = None) -> bool:
+        """Supprimer un modèle"""
+        from src.core.models import ModeleCourses
+        
+        modele = session.query(ModeleCourses).filter_by(id=modele_id).first()
+        if not modele:
+            return False
+        
+        session.delete(modele)
+        session.commit()
+        logger.info(f"✅ Modèle {modele_id} supprimé")
+        return True
+
+    @with_db_session
+    def appliquer_modele(self, modele_id: int, utilisateur_id: str | None = None, 
+                        session: Session | None = None) -> list[int]:
+        """Appliquer un modèle à la liste active (crée articles cours)"""
+        from src.core.models import ModeleCourses, Ingredient
+        
+        modele = session.query(ModeleCourses).filter_by(id=modele_id).first()
+        if not modele:
+            logger.error(f"Modèle {modele_id} non trouvé")
+            return []
+        
+        article_ids = []
+        for article_modele in modele.articles:
+            # Récupérer ou créer l'ingrédient
+            ingredient = article_modele.ingredient
+            if not ingredient:
+                ingredient = session.query(Ingredient).filter_by(
+                    nom=article_modele.nom_article
+                ).first()
+                if not ingredient:
+                    ingredient = Ingredient(
+                        nom=article_modele.nom_article,
+                        unite=article_modele.unite,
+                    )
+                    session.add(ingredient)
+                    session.flush()
+            
+            # Créer article courses
+            data = {
+                "ingredient_id": ingredient.id,
+                "quantite_necessaire": article_modele.quantite,
+                "priorite": article_modele.priorite,
+                "rayon_magasin": article_modele.rayon_magasin,
+                "notes": article_modele.notes,
+                "achete": False,
+            }
+            
+            article_id = self.create(data, session=session)
+            article_ids.append(article_id)
+        
+        logger.info(f"✅ Modèle {modele_id} appliqué ({len(article_ids)} articles)")
+        return article_ids
+
 
 def get_courses_service() -> CoursesService:
     """Get or create the global CoursesService instance."""

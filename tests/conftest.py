@@ -302,6 +302,60 @@ def sample_planning(planning_factory):
 
 
 # ═══════════════════════════════════════════════════════════
+# COURSES FIXTURES
+# ═══════════════════════════════════════════════════════════
+
+@pytest.fixture
+def sample_articles():
+    """Sample articles for courses tests"""
+    return [
+        {
+            'id': 1,
+            'ingredient_id': 1,
+            'ingredient_nom': 'Tomates',
+            'quantite_necessaire': 2.0,
+            'unite': 'kg',
+            'priorite': 'haute',
+            'achete': False,
+            'rayon_magasin': 'Fruits & Légumes',
+            'notes': None,
+            'suggere_par_ia': False
+        },
+        {
+            'id': 2,
+            'ingredient_id': 2,
+            'ingredient_nom': 'Oeufs',
+            'quantite_necessaire': 6.0,
+            'unite': 'pièce',
+            'priorite': 'moyenne',
+            'achete': False,
+            'rayon_magasin': 'Laitier',
+            'notes': 'Bio si possible',
+            'suggere_par_ia': False
+        },
+    ]
+
+
+@pytest.fixture
+def sample_suggestions():
+    """Sample IA suggestions for courses"""
+    from unittest.mock import Mock
+    
+    mock_suggestions = [
+        Mock(nom='Tomates', quantite=2.0, unite='kg', priorite='haute', rayon='Fruits & Légumes'),
+        Mock(nom='Oeufs', quantite=6.0, unite='pièce', priorite='moyenne', rayon='Laitier'),
+        Mock(nom='Pain', quantite=1.0, unite='pièce', priorite='moyenne', rayon='Boulangerie')
+    ]
+    return mock_suggestions
+
+
+@pytest.fixture
+def courses_service_instance(db_session):
+    """Get or create CoursesService instance for tests"""
+    return CoursesService()
+
+
+# ═══════════════════════════════════════════════════════════
 # PYTEST CONFIGURATION
 # ═══════════════════════════════════════════════════════════
 
@@ -315,6 +369,9 @@ def pytest_configure(config):
     )
     config.addinivalue_line(
         "markers", "slow: mark test as slow running"
+    )
+    config.addinivalue_line(
+        "markers", "courses: mark test as courses module test"
     )
 
 

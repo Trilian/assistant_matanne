@@ -832,6 +832,93 @@ ArticleInventaire.historique = relationship(
 
 
 # ═══════════════════════════════════════════════════════════
+# MODÈLES COURSES - PHASE 2 (PERSISTANCE MULTI-USER)
+# ═══════════════════════════════════════════════════════════
+
+
+class ModeleCourses(Base):
+    """Template persistant pour listes de courses réutilisables - PHASE 2"""
+
+    __tablename__ = "modeles_courses"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    nom: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    description: Mapped[str | None] = mapped_column(Text)
+    
+    # Phase 2: Support multi-user
+    utilisateur_id: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
+    
+    # Métadonnées
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    actif: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
+    
+    # Données articles (JSON pour flexibilité Phase 2)
+    articles_data: Mapped[dict | None] = mapped_column(JSONB, nullable=True)  # Liste articles du modèle
+    
+    # Relations
+    articles: Mapped[list["ArticleModele"]] = relationship(
+        "ArticleModele",
+        back_populates="modele",
+        cascade="all, delete-orphan"
+    )
+
+    def __repr__(self) -> str:
+        return f"<ModeleCourses(nom={self.nom}, articles={len(self.articles)}, user={self.utilisateur_id})>"
+
+
+class ArticleModele(Base):
+    """Article d'un modèle de courses - PHASE 2"""
+
+    __tablename__ = "articles_modeles"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    modele_id: Mapped[int] = mapped_column(
+        ForeignKey("modeles_courses.id", ondelete="CASCADE"), 
+        nullable=False, 
+        index=True
+    )
+    ingredient_id: Mapped[int | None] = mapped_column(
+        ForeignKey("ingredients.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True
+    )
+    
+    # Propriétés de l'article
+    nom_article: Mapped[str] = mapped_column(String(100), nullable=False)
+    quantite: Mapped[float] = mapped_column(Float, nullable=False, default=1.0)
+    unite: Mapped[str] = mapped_column(String(20), nullable=False, default="pièce")
+    rayon_magasin: Mapped[str] = mapped_column(String(100), nullable=False, default="Autre")
+    priorite: Mapped[str] = mapped_column(
+        String(20), 
+        nullable=False, 
+        default="moyenne"
+    )  # haute, moyenne, basse
+    notes: Mapped[str | None] = mapped_column(Text)
+    
+    # Tri/Ordre
+    ordre: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    
+    # Métadonnées
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    
+    __table_args__ = (
+        CheckConstraint("quantite > 0", name="ck_article_modele_quantite_positive"),
+        CheckConstraint(
+            "priorite IN ('haute', 'moyenne', 'basse')", 
+            name="ck_article_modele_priorite_valide"
+        ),
+    )
+
+    # Relations
+    modele: Mapped["ModeleCourses"] = relationship(back_populates="articles")
+    ingredient: Mapped["Ingredient | None"] = relationship()
+
+    def __repr__(self) -> str:
+        return f"<ArticleModele(modele={self.modele_id}, article={self.nom_article}, qty={self.quantite})>"
+
+
+# ═══════════════════════════════════════════════════════════
 # HELPERS
 # ═══════════════════════════════════════════════════════════
 
