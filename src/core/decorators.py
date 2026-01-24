@@ -54,15 +54,21 @@ def with_db_session(func: F) -> F:
 
     @wraps(func)
     def wrapper(*args, **kwargs) -> Any:
-        # Si 'db' est déjà fourni, utiliser directement
-        if "db" in kwargs and kwargs["db"] is not None:
+        # Si 'db' ou 'session' est déjà fourni(e), utiliser directement
+        if ("db" in kwargs and kwargs["db"] is not None) or \
+           ("session" in kwargs and kwargs["session"] is not None):
             return func(*args, **kwargs)
 
         # Sinon, créer une nouvelle session
         from src.core.database import get_db_context
 
         with get_db_context() as session:
-            kwargs["db"] = session
+            # Ajouter 'db' ou 'session' selon le paramètre attendu
+            sig = inspect.signature(func)
+            if "session" in sig.parameters:
+                kwargs["session"] = session
+            else:
+                kwargs["db"] = session
             return func(*args, **kwargs)
 
     return wrapper  # type: ignore

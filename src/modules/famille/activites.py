@@ -1,467 +1,278 @@
 """
-Module Activités Familiales - Planning sorties, jeux, moments ensemble
+Module Activités - Planning et budget des activités familiales
+Version améliorée avec helpers, caching, graphiques et Plotly
 """
 
-from datetime import date, timedelta
-
-import pandas as pd
 import streamlit as st
+from datetime import date, timedelta
+import pandas as pd
+import plotly.graph_objects as go
+import plotly.express as px
 
-from src.core.database import get_db_context
+from src.core.database import get_session
 from src.core.models import FamilyActivity
+from src.modules.famille.helpers import (
+    get_activites_semaine,
+    get_budget_activites_mois,
+    get_budget_par_period,
+    clear_famille_cache
+)
 
 
-# ===================================
-# HELPERS
-# ===================================
+def ajouter_activite(titre: str, type_activite: str, date_prevue: date, 
+                     duree: float, lieu: str, participants: list, 
+                     cout_estime: float, notes: str = ""):
+    """Ajoute une nouvelle activité familiale"""
+    try:
+        with get_session() as session:
+            activity = FamilyActivity(
+                titre=titre,
+                type_activite=type_activite,
+                date_prevue=date_prevue,
+                duree_heures=duree,
+                lieu=lieu,
+                qui_participe=participants,
+                cout_estime=cout_estime,
+                statut="planifié",
+                notes=notes
+            )
+            session.add(activity)
+            session.commit()
+            st.success(f"✅ Activité '{titre}' créée!")
+            clear_famille_cache()
+            return True
+    except Exception as e:
+        st.error(f"❌ Erreur ajout activité: {str(e)}")
+        return False
 
 
-def charger_activites(statut_filtre: str = None, limit: int = 50) -> pd.DataFrame:
-    """Charge les activités familiales"""
-    with get_db_context() as db:
-        query = db.query(FamilyActivity).order_by(FamilyActivity.date_prevue.desc())
-
-        if statut_filtre:
-            query = query.filter(FamilyActivity.statut == statut_filtre)
-
-        activites = query.limit(limit).all()
-
-        return pd.DataFrame(
-            [
-                {
-                    "id": a.id,
-                    "titre": a.titre,
-                    "description": a.description or "",
-                    "type": a.type_activite,
-                    "date": a.date_prevue,
-                    "duree": a.duree_heures or 0,
-                    "lieu": a.lieu or "",
-                    "participants": a.qui_participe or [],
-                    "cout_estime": a.cout_estime or 0,
-                    "cout_reel": a.cout_reel or 0,
-                    "statut": a.statut,
-                    "notes": a.notes or "",
-                }
-                for a in activites
-            ]
-        )
-
-
-def ajouter_activite(
-    titre: str,
-    description: str,
-    type_activite: str,
-    date_prevue: date,
-    duree_heures: float = None,
-    lieu: str = None,
-    qui_participe: list = None,
-    cout_estime: float = None,
-    notes: str = None,
-):
-    """Ajoute une nouvelle activité"""
-    with get_db_context() as db:
-        activite = FamilyActivity(
-            titre=titre,
-            description=description,
-            type_activite=type_activite,
-            date_prevue=date_prevue,
-            duree_heures=duree_heures,
-            lieu=lieu,
-            qui_participe=qui_participe,
-            cout_estime=cout_estime,
-            notes=notes,
-        )
-        db.add(activite)
-        db.commit()
-
-
-def marquer_terminee(activite_id: int, cout_reel: float = None):
+def marquer_terminee(activity_id: int, cout_reel: float = None, notes: str = ""):
     """Marque une activité comme terminée"""
-    with get_db_context() as db:
-        activite = db.query(FamilyActivity).filter(FamilyActivity.id == activite_id).first()
-        if activite:
-            activite.statut = "terminé"
-            if cout_reel is not None:
-                activite.cout_reel = cout_reel
-            db.commit()
+    try:
+        with get_session() as session:
+            activity = session.query(FamilyActivity).get(activity_id)
+            if activity:
+                activity.statut = "terminé"
+                if cout_reel is not None:
+                    activity.cout_reel = cout_reel
+                session.commit()
+                st.success("✅ Activité marquée comme terminée!")
+                clear_famille_cache()
+                return True
+    except Exception as e:
+        st.error(f"❌ Erreur mise à jour: {str(e)}")
+        return False
 
 
-def supprimer_activite(activite_id: int):
-    """Supprime une activité"""
-    with get_db_context() as db:
-        activite = db.query(FamilyActivity).filter(FamilyActivity.id == activite_id).first()
-        if activite:
-            db.delete(activite)
-            db.commit()
-
-
-def get_activites_semaine() -> pd.DataFrame:
-    """Retourne les activités de la semaine"""
-    today = date.today()
-    semaine_fin = today + timedelta(days=7)
-
-    return charger_activites().query(f"date >= @today and date <= @semaine_fin")
-
-
-def get_budget_activites(mois: int = 1, annee: int = None) -> dict:
-    """Calcule le budget activités du mois/année"""
-    if annee is None:
-        annee = date.today().year
-
-    with get_db_context() as db:
-        cutoff_debut = date(annee, mois, 1)
-        if mois == 12:
-            cutoff_fin = date(annee + 1, 1, 1) - timedelta(days=1)
-        else:
-            cutoff_fin = date(annee, mois + 1, 1) - timedelta(days=1)
-
-        activites = (
-            db.query(FamilyActivity)
-            .filter(FamilyActivity.date_prevue >= cutoff_debut)
-            .filter(FamilyActivity.date_prevue <= cutoff_fin)
-            .all()
-        )
-
-        total_estime = sum([a.cout_estime or 0 for a in activites])
-        total_reel = sum([a.cout_reel or 0 for a in activites])
-
-        return {
-            "total_estime": total_estime,
-            "total_reel": total_reel,
-            "nb_activites": len(activites),
-        }
-
-
-# Suggestions d'activités par type
 SUGGESTIONS_ACTIVITES = {
-    "Parc": [
-        {
-            "titre": "Jeux au parc",
-            "description": "Toboggan, balançoire, bac à sable",
-            "duree": 1.5,
-            "cout": 0,
-        },
-        {
-            "titre": "Pique-nique au parc",
-            "description": "Repas en plein air, picnic en famille",
-            "duree": 2,
-            "cout": 10,
-        },
-    ],
-    "Musée/Culture": [
-        {
-            "titre": "Musée enfants",
-            "description": "Musée adapté aux enfants, découverte",
-            "duree": 2,
-            "cout": 15,
-        },
-        {
-            "titre": "Zoo/Parc animalier",
-            "description": "Découverte animaux, apprentissage",
-            "duree": 3,
-            "cout": 20,
-        },
-    ],
-    "Piscine/Eau": [
-        {
-            "titre": "Piscine",
-            "description": "Nage, apprentissage aquatique",
-            "duree": 1.5,
-            "cout": 5,
-        },
-        {
-            "titre": "Plage",
-            "description": "Jeux de sable, mer, détente",
-            "duree": 4,
-            "cout": 0,
-        },
-    ],
-    "Jeu Maison": [
-        {
-            "titre": "Soirée jeux de société",
-            "description": "Jeux en famille, divertissement",
-            "duree": 2,
-            "cout": 0,
-        },
-        {
-            "titre": "Pyjama party",
-            "description": "Film + gâteaux + dodo ensemble",
-            "duree": 3,
-            "cout": 0,
-        },
-    ],
-    "Sport": [
-        {
-            "titre": "Foot au parc",
-            "description": "Ballon, jeu libre, dépense énergie",
-            "duree": 1,
-            "cout": 0,
-        },
-        {
-            "titre": "Vélo famille",
-            "description": "Balade à vélo, détente active",
-            "duree": 1.5,
-            "cout": 0,
-        },
-    ],
-    "Autre": [
-        {
-            "titre": "Sortie shopping",
-            "description": "Achats vêtements, jouets, courses",
-            "duree": 2,
-            "cout": 0,
-        },
-        {
-            "titre": "Restaurant",
-            "description": "Manger en famille au restaurant",
-            "duree": 1.5,
-            "cout": 30,
-        },
-    ],
+    "parc": ["Parc local", "Parc d'attractions (mini)", "Terrain de jeu"],
+    "musée": ["Musée enfants", "Exposition interactive", "Aquarium"],
+    "eau": ["Piscine", "Plage", "Parc aquatique bébé"],
+    "jeu_maison": ["Jeux intérieurs", "Chasse au trésor", "Soirée jeux de société"],
+    "sport": ["Cours de gym douce", "Équitation enfant", "Skating"],
+    "sortie": ["Restaurant enfant-friendly", "Cinéma familial", "Zoo"]
 }
 
 
-# ===================================
-# MODULE PRINCIPAL
-# ===================================
-
-
-def app():
-    """Module Activités Familiales"""
-
+def main():
+    """Interface principale du module Activités"""
     st.title("🎨 Activités Familiales")
-    st.caption("Planning sorties, jeux et moments ensemble")
-
-    st.markdown("---")
-
-    # ===================================
-    # TABS
-    # ===================================
-
-    tab1, tab2, tab3 = st.tabs(
-        ["📅 Planning semaine", "💡 Idées d'activités", "💰 Budget"]
-    )
-
-    # ===================================
-    # TAB 1 : PLANNING SEMAINE
-    # ===================================
-
-    with tab1:
-        st.subheader("📅 Cette semaine")
-
-        # Ajouter activité
-        with st.expander("➕ Planifier une activité", expanded=False):
+    
+    tabs = st.tabs(["📅 Planning Semaine", "💡 Idées Activités", "💰 Budget"])
+    
+    # ════════════════════════════════════════════════════════
+    # TAB 1: PLANNING SEMAINE
+    # ════════════════════════════════════════════════════════
+    with tabs[0]:
+        st.header("📅 Planning de la Semaine")
+        
+        col1, col2 = st.columns([2, 1])
+        
+        with col1:
+            st.subheader("Activités Prévues")
+            
+            try:
+                activites = get_activites_semaine()
+                
+                if activites:
+                    # Trier par date
+                    activites_sorted = sorted(activites, key=lambda x: x['date'])
+                    
+                    for act in activites_sorted:
+                        with st.container(border=True):
+                            col_date, col_info = st.columns([1, 3])
+                            
+                            with col_date:
+                                jour = act['date'].strftime('%a')
+                                jour_num = act['date'].strftime('%d')
+                                st.write(f"**{jour}**")
+                                st.write(f"*{jour_num}*")
+                            
+                            with col_info:
+                                st.write(f"**{act['titre']}**")
+                                st.caption(f"{act['type']} • {act.get('lieu', 'TBD')}")
+                                if act.get('participants'):
+                                    st.caption(f"👥 {', '.join(act['participants'])}")
+                                st.caption(f"💰 {act.get('cout_estime', 0):.2f}€")
+                else:
+                    st.info("Aucune activité cette semaine. Planifiez une activité!")
+            
+            except Exception as e:
+                st.error(f"❌ Erreur chargement: {str(e)}")
+        
+        with col2:
+            st.subheader("➕ Ajouter Activité")
+            
             with st.form("form_activite"):
-                titre = st.text_input("Nom de l'activité *", placeholder="Ex: Parc dimanche")
-
-                col_a1, col_a2 = st.columns(2)
-
-                with col_a1:
-                    type_activite = st.selectbox(
-                        "Type d'activité *",
-                        ["Parc", "Musée/Culture", "Piscine/Eau", "Jeu Maison", "Sport", "Autre"],
+                titre = st.text_input("Nom")
+                type_act = st.selectbox("Type", 
+                    ["parc", "musée", "eau", "jeu_maison", "sport", "sortie"])
+                date_act = st.date_input("Date")
+                duree = st.number_input("Durée (h)", 0.5, 8.0, 2.0)
+                lieu = st.text_input("Lieu")
+                cout = st.number_input("Coût estimé (€)", 0.0, 500.0, 0.0)
+                
+                if st.form_submit_button("✅ Ajouter", use_container_width=True):
+                    if titre and type_act:
+                        ajouter_activite(titre, type_act, date_act, duree, lieu, 
+                                       ["Famille"], cout)
+    
+    # ════════════════════════════════════════════════════════
+    # TAB 2: IDÉES ACTIVITÉS
+    # ════════════════════════════════════════════════════════
+    with tabs[1]:
+        st.header("💡 Idées d'Activités")
+        
+        st.subheader("Suggestions par type")
+        
+        col1, col2, col3 = st.columns(3)
+        
+        cols = [col1, col2, col3]
+        type_keys = list(SUGGESTIONS_ACTIVITES.keys())
+        
+        for i, type_key in enumerate(type_keys[:3]):
+            with cols[i]:
+                emoji = "🎪" if type_key == "parc" else "🏛️" if type_key == "musée" else "💧" if type_key == "eau" else "🎮" if type_key == "jeu_maison" else "⚽" if type_key == "sport" else "🍽️"
+                title = type_key.replace("_", " ").title()
+                
+                st.subheader(f"{emoji} {title}")
+                for suggestion in SUGGESTIONS_ACTIVITES[type_key]:
+                    if st.button(suggestion, key=f"suggest_{type_key}_{suggestion}", 
+                               use_container_width=True):
+                        st.session_state.suggestion = suggestion
+        
+        col4, col5, col6 = st.columns(3)
+        cols2 = [col4, col5, col6]
+        
+        for i, type_key in enumerate(type_keys[3:]):
+            with cols2[i]:
+                emoji = "🎪" if type_key == "parc" else "🏛️" if type_key == "musée" else "💧" if type_key == "eau" else "🎮" if type_key == "jeu_maison" else "⚽" if type_key == "sport" else "🍽️"
+                title = type_key.replace("_", " ").title()
+                
+                st.subheader(f"{emoji} {title}")
+                for suggestion in SUGGESTIONS_ACTIVITES[type_key]:
+                    if st.button(suggestion, key=f"suggest_{type_key}_{suggestion}", 
+                               use_container_width=True):
+                        st.session_state.suggestion = suggestion
+    
+    # ════════════════════════════════════════════════════════
+    # TAB 3: BUDGET
+    # ════════════════════════════════════════════════════════
+    with tabs[2]:
+        st.header("💰 Budget Activités")
+        
+        # Stats
+        col1, col2, col3 = st.columns(3)
+        
+        try:
+            budget_mois = get_budget_activites_mois()
+            budget_semaine = get_budget_par_period("week").get("Activités", 0)
+            
+            with col1:
+                st.metric("💰 Ce mois", f"{budget_mois:.2f}€")
+            with col2:
+                st.metric("📊 Cette semaine", f"{budget_semaine:.2f}€")
+            with col3:
+                st.metric("📈 Budget moyen", f"{budget_mois / 4:.2f}€ par semaine")
+        
+        except Exception as e:
+            st.error(f"❌ Erreur budget: {str(e)}")
+        
+        st.divider()
+        
+        # Graphique timeline
+        st.subheader("📈 Graphique Dépenses")
+        
+        try:
+            with get_session() as session:
+                # Récupérer les 30 derniers jours
+                debut = date.today() - timedelta(days=30)
+                activites = session.query(FamilyActivity).filter(
+                    FamilyActivity.date_prevue >= debut
+                ).all()
+                
+                if activites:
+                    # Créer DataFrame
+                    data = []
+                    for act in activites:
+                        data.append({
+                            "date": act.date_prevue,
+                            "titre": act.titre,
+                            "cout_estime": act.cout_estime or 0,
+                            "cout_reel": act.cout_reel or 0,
+                            "type": act.type_activite
+                        })
+                    
+                    df = pd.DataFrame(data)
+                    df["date"] = pd.to_datetime(df["date"])
+                    
+                    # Graphique 1: Timeline
+                    fig1 = go.Figure()
+                    fig1.add_trace(go.Scatter(
+                        x=df["date"],
+                        y=df["cout_estime"],
+                        mode="lines+markers",
+                        name="Coût estimé",
+                        line_color="blue"
+                    ))
+                    fig1.add_trace(go.Scatter(
+                        x=df["date"],
+                        y=df["cout_reel"],
+                        mode="lines+markers",
+                        name="Coût réel",
+                        line_color="red"
+                    ))
+                    
+                    fig1.update_layout(
+                        title="Dépenses par Date",
+                        xaxis_title="Date",
+                        yaxis_title="Montant (€)",
+                        height=400,
+                        hovermode="x unified"
                     )
-
-                    date_activite = st.date_input("Date *", value=date.today())
-
-                    duree = st.number_input("Durée (heures)", 0.5, 12.0, 1.5, 0.5)
-
-                with col_a2:
-                    lieu = st.text_input("Lieu", placeholder="Ex: Parc de la ville")
-
-                    qui = st.multiselect(
-                        "Qui participe?",
-                        ["Jules", "Maman", "Papa", "Famille"],
-                        default=["Jules", "Maman", "Papa"],
+                    st.plotly_chart(fig1, use_container_width=True)
+                    
+                    # Graphique 2: Par type d'activité
+                    type_budget = df.groupby("type")["cout_estime"].sum().reset_index()
+                    type_budget.columns = ["Type", "Budget"]
+                    
+                    fig2 = go.Figure(data=[
+                        go.Bar(x=type_budget["Type"], y=type_budget["Budget"],
+                               marker_color="lightblue")
+                    ])
+                    fig2.update_layout(
+                        title="Budget par Type d'Activité",
+                        xaxis_title="Type",
+                        yaxis_title="Budget (€)",
+                        height=400
                     )
-
-                    cout_estime = st.number_input("Coût estimé (€)", 0.0, 1000.0, 0.0)
-
-                description = st.text_area(
-                    "Description / Notes",
-                    placeholder="Détails, ce qu'on va faire, etc.",
-                )
-
-                submitted = st.form_submit_button("📅 Ajouter", type="primary")
-
-                if submitted:
-                    if not titre or not type_activite:
-                        st.error("Nom et type sont obligatoires")
-                    else:
-                        ajouter_activite(
-                            titre,
-                            description or None,
-                            type_activite.lower(),
-                            date_activite,
-                            duree_heures=duree,
-                            lieu=lieu or None,
-                            qui_participe=qui if qui else None,
-                            cout_estime=cout_estime if cout_estime > 0 else None,
-                        )
-                        st.success(f"✅ Activité '{titre}' planifiée!")
-                        st.balloons()
-                        st.rerun()
-
-        st.markdown("---")
-
-        # Activités semaine
-        df_semaine = get_activites_semaine()
-
-        if df_semaine.empty:
-            st.info("Aucune activité planifiée cette semaine. Ajoute-en une! 🎯")
-        else:
-            st.write(f"**{len(df_semaine)} activités cette semaine**")
-
-            # Grouper par jour
-            for jour_unique in sorted(df_semaine["date"].unique()):
-                df_jour = df_semaine[df_semaine["date"] == jour_unique]
-
-                jour_str = jour_unique.strftime("%A %d/%m/%Y")
-                with st.expander(f"📅 {jour_str} ({len(df_jour)} activité(s))", expanded=True):
-                    for _, row in df_jour.iterrows():
-                        col_act1, col_act2, col_act3 = st.columns([2, 2, 1])
-
-                        with col_act1:
-                            st.markdown(f"**{row['titre']}**")
-                            st.caption(f"📍 {row['lieu']}" if row['lieu'] else "")
-                            if row["description"]:
-                                st.write(row["description"])
-
-                        with col_act2:
-                            st.caption(f"⏱️ {row['duree']:.1f}h")
-                            if row["cout_estime"] > 0:
-                                st.caption(f"💰 {row['cout_estime']:.0f}€")
-                            if row["participants"]:
-                                st.caption(f"👥 {', '.join(row['participants'])}")
-
-                        with col_act3:
-                            if row["statut"] == "planifié":
-                                if st.button(
-                                    "✅ Terminé", key=f"complete_{row['id']}", use_container_width=True
-                                ):
-                                    cout = st.number_input(
-                                        f"Coût réel ({row['titre']})?",
-                                        0.0,
-                                        1000.0,
-                                        float(row["cout_estime"] or 0),
-                                    )
-                                    marquer_terminee(row["id"], cout)
-                                    st.success("Activité terminée! 🎉")
-                                    st.rerun()
-                            else:
-                                st.caption("✅ Terminé")
-
-    # ===================================
-    # TAB 2 : IDÉES D'ACTIVITÉS
-    # ===================================
-
-    with tab2:
-        st.subheader("💡 Idées d'activités par type")
-
-        st.info("💡 Clique sur une activité pour la planifier")
-
-        # Afficher suggestions par type
-        for type_activite, suggestions in SUGGESTIONS_ACTIVITES.items():
-            st.markdown(f"### {type_activite}")
-
-            col_sugg1, col_sugg2 = st.columns(2)
-
-            for idx, suggestion in enumerate(suggestions):
-                with (col_sugg1 if idx % 2 == 0 else col_sugg2):
-                    with st.container(border=True):
-                        st.markdown(f"**{suggestion['titre']}**")
-                        st.write(suggestion["description"])
-
-                        col_info1, col_info2 = st.columns(2)
-
-                        with col_info1:
-                            st.caption(f"⏱️ {suggestion['duree']:.1f}h")
-
-                        with col_info2:
-                            if suggestion["cout"] > 0:
-                                st.caption(f"💰 ~{suggestion['cout']}€")
-                            else:
-                                st.caption("💰 Gratuit")
-
-                        if st.button(
-                            "📅 Planifier",
-                            key=f"plan_{type_activite}_{suggestion['titre']}",
-                            use_container_width=True,
-                        ):
-                            ajouter_activite(
-                                suggestion["titre"],
-                                suggestion["description"],
-                                type_activite.lower(),
-                                date.today() + timedelta(days=1),
-                                duree_heures=suggestion["duree"],
-                                cout_estime=suggestion["cout"] if suggestion["cout"] > 0 else None,
-                                qui_participe=["Jules", "Maman", "Papa"],
-                            )
-                            st.success(f"✅ Activité planifiée!")
-                            st.rerun()
-
-    # ===================================
-    # TAB 3 : BUDGET
-    # ===================================
-
-    with tab3:
-        st.subheader("💰 Budget activités")
-
-        # Mois/année
-        col_budget1, col_budget2 = st.columns(2)
-
-        with col_budget1:
-            mois = st.number_input("Mois", 1, 12, date.today().month)
-
-        with col_budget2:
-            annee = st.number_input("Année", 2020, 2100, date.today().year)
-
-        # Calculer budget
-        budget = get_budget_activites(mois, annee)
-
-        # Afficher stats
-        col_b1, col_b2, col_b3 = st.columns(3)
-
-        with col_b1:
-            st.metric("Activités", budget["nb_activites"])
-
-        with col_b2:
-            st.metric("Budget estimé", f"{budget['total_estime']:.0f}€")
-
-        with col_b3:
-            st.metric("Dépensé réel", f"{budget['total_reel']:.0f}€")
-
-        st.markdown("---")
-
-        # Détail activités du mois
-        st.write(f"**Activités {mois}/{annee}**")
-
-        df_mois = charger_activites()
-
-        if not df_mois.empty:
-            # Filtrer par mois/année
-            df_mois["date"] = pd.to_datetime(df_mois["date"])
-            df_mois = df_mois[
-                (df_mois["date"].dt.month == mois) & (df_mois["date"].dt.year == annee)
-            ]
-
-            if df_mois.empty:
-                st.info("Aucune activité ce mois")
-            else:
-                # Tableau
-                df_display = df_mois[["date", "titre", "type", "cout_estime", "cout_reel"]].copy()
-                df_display["date"] = pd.to_datetime(df_display["date"]).dt.strftime("%d/%m/%Y")
-                df_display.columns = ["Date", "Activité", "Type", "Estimé (€)", "Réel (€)"]
-
-                st.dataframe(df_display, use_container_width=True, hide_index=True)
-
-                # Graphique (simple)
-                st.write("**Dépenses par type**")
-
-                df_par_type = df_mois.groupby("type")[["cout_estime", "cout_reel"]].sum()
-
-                st.bar_chart(df_par_type)
+                    st.plotly_chart(fig2, use_container_width=True)
+                else:
+                    st.info("Aucune activité sur 30 jours")
+        
+        except Exception as e:
+            st.error(f"❌ Erreur graphiques: {str(e)}")
 
 
 if __name__ == "__main__":
-    app()
+    main()

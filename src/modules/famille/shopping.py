@@ -1,363 +1,438 @@
 """
-Module Shopping Famille - Achats centralisés (Jules, Nous, Maison)
+Module Shopping - Listes de courses intelligentes avec budget tracking
+
+Features:
+- Listes de courses (Jules, Nous, Autres)
+- Suggestions intelligentes (basées sur activités & milestones)
+- Budget par catégorie (Plotly bonus graphique)
+- Intégration avec Courses module
 """
 
-from datetime import date
-
-import pandas as pd
 import streamlit as st
+from datetime import date, timedelta
+import pandas as pd
+import plotly.graph_objects as go
+import plotly.express as px
 
-from src.core.database import get_db_context
-from src.core.models import ArticleCourses
+from src.core.database import get_db
+from src.core.models import FamilyActivity, FamilyBudget, ShoppingItem
+from src.modules.famille.helpers import (
+    get_activites_semaine,
+    get_budget_par_period,
+    clear_famille_cache
+)
 
 
-# ===================================
-# HELPERS
-# ===================================
+# ════════════════════════════════════════════════════════════════════════════
+# HELPER FUNCTIONS
+# ════════════════════════════════════════════════════════════════════════════
 
-
-def charger_articles_shopping(categorie: str = None) -> pd.DataFrame:
-    """Charge les articles du shopping"""
-    with get_db_context() as db:
-        query = db.query(ArticleCourses).filter(ArticleCourses.priorite == "shopping")
-
+@st.cache_data(ttl=1800)
+def get_shopping_items(categorie=None):
+    """Récupère les articles du shopping"""
+    try:
+        db = get_db()
+        query = db.query(ShoppingItem).filter(ShoppingItem.actif == True)
+        
         if categorie:
-            query = query.filter(ArticleCourses.categorie == categorie)
-
-        articles = query.order_by(ArticleCourses.cree_le.desc()).all()
-
-        return pd.DataFrame(
-            [
-                {
-                    "id": a.id,
-                    "article": a.nom,
-                    "categorie": a.categorie or "Autre",
-                    "quantite": a.quantite,
-                    "unite": a.unite or "",
-                    "notes": a.notes or "",
-                    "prix_estime": a.prix or 0,
-                }
-                for a in articles
-            ]
-        )
+            query = query.filter(ShoppingItem.categorie == categorie)
+        
+        items = query.all()
+        return items
+    except Exception as e:
+        st.error(f"❌ Erreur récupération shopping: {e}")
+        return []
 
 
-def ajouter_au_shopping(article: str, categorie: str, quantite: int = 1, notes: str = None, prix_estime: float = None):
+@st.cache_data(ttl=1800)
+def get_shopping_suggestions():
+    """Suggestions intelligentes basées sur activités & milestones"""
+    try:
+        suggestions = {
+            "Jules": {
+                "jouets": ["Blocs de construction", "Livre bébé", "Jouet musical", "Poupée", "Voiture bois"],
+                "vêtements": ["T-shirt 18-24m", "Legging", "Chaussettes", "Pull", "Bonnet"],
+                "hygiène": ["Couches Taille 5", "Lingettes", "Savon bébé", "Crème change", "Brosse dent"]
+            },
+            "Nous": {
+                "épicerie": ["Riz", "Pâtes", "Oeuf", "Pain", "Lait", "Fromage"],
+                "fruits_légumes": ["Pommes", "Carottes", "Tomates", "Oignons", "Bananes"],
+                "hygiène": ["Savon mains", "Dentifrice", "Shampoing", "Gel douche"],
+                "autre": ["Café", "Thé", "Huile olive", "Sel", "Sucre"]
+            },
+            "Activités": {
+                "picnic": ["Serviettes", "Gobelets réutilisables", "Sacs glacés", "Nappe"],
+                "parc": ["Ballon", "Bubbles", "Frisbee", "Sacs poubelle"],
+                "sport": ["Bouteille eau", "Gourde", "Brassard sport", "Chaussettes sport"]
+            }
+        }
+        
+        return suggestions
+    except Exception as e:
+        st.error(f"❌ Erreur suggestions: {e}")
+        return {}
+
+
+def ajouter_article(titre, categorie, qty=1, prix_estime=0.0, liste="Nous"):
     """Ajoute un article au shopping"""
-    with get_db_context() as db:
-        existing = db.query(ArticleCourses).filter(
-            ArticleCourses.nom == article,
-            ArticleCourses.categorie == categorie,
-            ArticleCourses.priorite == "shopping"
-        ).first()
-
-        if existing:
-            existing.quantite += quantite
-        else:
-            article_obj = ArticleCourses(
-                nom=article,
-                categorie=categorie,
-                quantite=quantite,
-                unite="",
-                notes=notes,
-                prix=prix_estime,
-                priorite="shopping",
-                achete=False,
-            )
-            db.add(article_obj)
-
+    try:
+        db = get_db()
+        
+        item = ShoppingItem(
+            titre=titre,
+            categorie=categorie,
+            quantite=qty,
+            prix_estime=prix_estime,
+            liste=liste,
+            date_ajout=date.today(),
+            actif=True
+        )
+        
+        db.add(item)
         db.commit()
+        
+        clear_famille_cache()
+        st.success(f"✅ {titre} ajouté à {liste}")
+        return True
+    except Exception as e:
+        st.error(f"❌ Erreur ajout article: {e}")
+        return False
 
 
-def marquer_achet(article_id: int):
+def marquer_achete(item_id):
     """Marque un article comme acheté"""
-    with get_db_context() as db:
-        article = db.query(ArticleCourses).filter(ArticleCourses.id == article_id).first()
-        if article:
-            article.achete = True
+    try:
+        db = get_db()
+        item = db.query(ShoppingItem).get(item_id)
+        
+        if item:
+            item.actif = False
+            item.date_achat = date.today()
+            if item.prix_reel is None:
+                item.prix_reel = item.prix_estime
+            
             db.commit()
+            clear_famille_cache()
+            return True
+        return False
+    except Exception as e:
+        st.error(f"❌ Erreur marquer acheté: {e}")
+        return False
 
 
-def supprimer_article(article_id: int):
-    """Supprime un article"""
-    with get_db_context() as db:
-        article = db.query(ArticleCourses).filter(ArticleCourses.id == article_id).first()
-        if article:
-            db.delete(article)
-            db.commit()
+# ════════════════════════════════════════════════════════════════════════════
+# STREAMLIT APP
+# ════════════════════════════════════════════════════════════════════════════
 
-
-# Suggestions d'achats par catégorie
-SUGGESTIONS_SHOPPING = {
-    "Jules - Jouets": [
-        {"article": "Blocs/Duplo", "prix": 30},
-        {"article": "Balles molles", "prix": 15},
-        {"article": "Livres tactiles", "prix": 12},
-        {"article": "Instruments musique", "prix": 20},
-        {"article": "Jeux d'eau", "prix": 10},
-        {"article": "Téléphone jouet", "prix": 15},
-    ],
-    "Jules - Vêtements": [
-        {"article": "T-shirts (taille 86-92)", "prix": 25},
-        {"article": "Pantalons (taille 86-92)", "prix": 35},
-        {"article": "Chaussures (pointure 24-26)", "prix": 45},
-        {"article": "Pulls/cardigans", "prix": 30},
-        {"article": "Pyjamas", "prix": 25},
-        {"article": "Chaussettes", "prix": 10},
-    ],
-    "Jules - Couches/Hygiène": [
-        {"article": "Couches (taille 4)", "prix": 40},
-        {"article": "Lingettes bébé", "prix": 8},
-        {"article": "Savon bébé", "prix": 6},
-        {"article": "Crème change", "prix": 8},
-    ],
-    "Nous - Sport": [
-        {"article": "Tapis de yoga", "prix": 30},
-        {"article": "Bandes élastiques", "prix": 15},
-        {"article": "Gourde réutilisable", "prix": 20},
-        {"article": "Chaussures de sport", "prix": 80},
-        {"article": "Vêtements sport", "prix": 50},
-    ],
-    "Nous - Nutrition": [
-        {"article": "Blender/mixer", "prix": 50},
-        {"article": "Pèse-aliments", "prix": 15},
-        {"article": "Bouteilles eau", "prix": 25},
-        {"article": "Boîtes conservation", "prix": 20},
-    ],
-    "Maison": [
-        {"article": "Produits nettoyage", "prix": 20},
-        {"article": "Sacs poubelle", "prix": 10},
-        {"article": "Papier toilette", "prix": 15},
-        {"article": "Savon mains", "prix": 8},
-        {"article": "Ampoules LED", "prix": 15},
-    ],
-}
-
-
-# ===================================
-# MODULE PRINCIPAL
-# ===================================
-
-
-def app():
-    """Module Shopping - Achats centralisés"""
-
-    st.title("🛍️ Shopping Famille")
-    st.caption("Achats centralisés pour Jules, Nous et la Maison")
-
-    st.markdown("---")
-
-    # ===================================
-    # TABS
-    # ===================================
-
-    tab1, tab2, tab3 = st.tabs(
-        ["📋 Liste de shopping", "💡 Idées d'achats", "📊 Suivi budget"]
-    )
-
-    # ===================================
-    # TAB 1 : LISTE
-    # ===================================
-
+def main():
+    st.set_page_config(page_title="Shopping", page_icon="🛒", layout="wide")
+    st.title("🛒 Listes de Courses")
+    
+    # Tabs
+    tab1, tab2, tab3, tab4 = st.tabs([
+        "📋 Ma Liste",
+        "💡 Suggestions",
+        "💰 Budget",
+        "📊 Analytics"
+    ])
+    
+    # ════════════════════════════════════════════════════════════════════════
+    # TAB 1: MA LISTE
+    # ════════════════════════════════════════════════════════════════════════
+    
     with tab1:
-        st.subheader("📋 Votre liste de shopping")
-
-        st.info("💡 Ajoute des articles et cochez-les quand tu les as achetés")
-
-        # Ajouter article manuel
-        with st.expander("➕ Ajouter un article", expanded=False):
-            col_add1, col_add2 = st.columns(2)
-
-            with col_add1:
-                article = st.text_input("Article *", placeholder="Ex: Blocs Duplo")
-
-                categorie = st.selectbox(
-                    "Catégorie *",
-                    [
-                        "Jules - Jouets",
-                        "Jules - Vêtements",
-                        "Jules - Couches/Hygiène",
-                        "Nous - Sport",
-                        "Nous - Nutrition",
-                        "Maison",
-                        "Autre",
-                    ],
-                )
-
-            with col_add2:
-                quantite = st.number_input("Quantité", 1, 100, 1)
-
-                prix_estime = st.number_input("Prix estimé (€)", 0.0, 1000.0, 0.0)
-
-            notes = st.text_area("Notes (optionnel)", placeholder="Marque, couleur, etc.", height=50)
-
-            if st.button("➕ Ajouter à la liste", type="primary", use_container_width=True):
-                if not article or not categorie:
-                    st.error("Article et catégorie obligatoires")
-                else:
-                    ajouter_au_shopping(
-                        article,
-                        categorie,
-                        quantite,
-                        notes or None,
-                        prix_estime if prix_estime > 0 else None,
-                    )
-                    st.success(f"✅ '{article}' ajouté!")
-                    st.rerun()
-
-        st.markdown("---")
-
-        # Afficher liste par catégorie
-        df_shopping = charger_articles_shopping()
-
-        if df_shopping.empty:
-            st.info("Aucun article. Ajoute-en un! 🛒")
-        else:
-            # Statistiques
-            col_stat1, col_stat2, col_stat3 = st.columns(3)
-
-            with col_stat1:
-                st.metric("Articles", len(df_shopping))
-
-            with col_stat2:
-                total_prix = df_shopping["prix_estime"].sum()
-                st.metric("Budget estimé", f"{total_prix:.0f}€")
-
-            with col_stat3:
-                achetes = len(df_shopping[df_shopping["achet"] == True]) if "achet" in df_shopping.columns else 0
-                st.metric("Achetés", achetes)
-
-            st.markdown("---")
-
-            # Par catégorie
-            for categorie in sorted(df_shopping["categorie"].unique()):
-                df_cat = df_shopping[df_shopping["categorie"] == categorie]
-
-                with st.expander(f"**{categorie}** ({len(df_cat)} articles)", expanded=True):
-                    for _, row in df_cat.iterrows():
-                        col_shop1, col_shop2, col_shop3 = st.columns([2, 1, 1])
-
-                        with col_shop1:
-                            st.write(f"• {row['article']}")
-                            if row["notes"]:
-                                st.caption(f"📝 {row['notes']}")
-
-                        with col_shop2:
-                            info_prix = ""
-                            if row["prix_estime"] > 0:
-                                info_prix = f"~{row['prix_estime']:.0f}€"
-
-                            if row["quantite"] > 1:
-                                st.caption(f"x{row['quantite']} {info_prix}")
-                            else:
-                                st.caption(info_prix if info_prix else "")
-
-                        with col_shop3:
-                            if st.button(
-                                "✅ Acheté",
-                                key=f"done_{row['id']}",
-                                use_container_width=True,
-                            ):
-                                marquer_achet(row["id"])
-                                st.success("Marqué comme acheté! ✨")
+        st.subheader("Mes articles à acheter")
+        
+        col1, col2 = st.columns([2, 1])
+        
+        with col1:
+            listes = ["Nous", "Jules", "Activités"]
+            liste_selectionnee = st.selectbox("Sélectionner liste:", listes)
+        
+        with col2:
+            if st.button("🔄 Rafraîchir", use_container_width=True):
+                clear_famille_cache()
+                st.rerun()
+        
+        # Ajouter article
+        st.markdown("### ➕ Ajouter article")
+        
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            titre = st.text_input("Article:", key="add_titre")
+        with col2:
+            categorie = st.selectbox(
+                "Catégorie:",
+                ["épicerie", "fruits_légumes", "hygiène", "jouets", "vêtements", "autre"],
+                key="add_cat"
+            )
+        with col3:
+            qty = st.number_input("Quantité:", min_value=1, value=1)
+        with col4:
+            prix = st.number_input("Prix (€):", min_value=0.0, value=0.0, step=0.50)
+        
+        if st.button("✅ Ajouter", use_container_width=True):
+            if titre:
+                ajouter_article(titre, categorie, qty, prix, liste_selectionnee)
+            else:
+                st.error("❌ Entrez un article")
+        
+        st.divider()
+        
+        # Afficher articles
+        st.markdown("### 📋 Articles à acheter")
+        
+        articles = get_shopping_items(categorie=None)
+        articles_liste = [a for a in articles if a.liste == liste_selectionnee and a.actif]
+        
+        if articles_liste:
+            # Grouper par catégorie
+            categories_dict = {}
+            for article in articles_liste:
+                if article.categorie not in categories_dict:
+                    categories_dict[article.categorie] = []
+                categories_dict[article.categorie].append(article)
+            
+            for categorie, items in sorted(categories_dict.items()):
+                with st.expander(f"**{categorie.upper()}** ({len(items)} articles)", expanded=True):
+                    cols = st.columns([3, 1, 1, 1])
+                    
+                    for item in items:
+                        col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
+                        
+                        with col1:
+                            st.write(f"• **{item.titre}** × {item.quantite}")
+                            if item.prix_estime > 0:
+                                st.caption(f"~{item.prix_estime:.2f}€")
+                        
+                        with col2:
+                            st.write("")
+                        
+                        with col3:
+                            st.write("")
+                        
+                        with col4:
+                            if st.button("✓", key=f"buy_{item.id}", use_container_width=True):
+                                marquer_achete(item.id)
                                 st.rerun()
-
-    # ===================================
-    # TAB 2 : IDÉES
-    # ===================================
-
-    with tab2:
-        st.subheader("💡 Idées d'achats suggérées")
-
-        st.info("💡 Clique sur une idée pour l'ajouter à ta liste")
-
-        # Afficher suggestions par catégorie
-        for categorie, articles in SUGGESTIONS_SHOPPING.items():
-            with st.expander(f"📦 {categorie}", expanded=False):
-                col_idea1, col_idea2 = st.columns(2)
-
-                for idx, suggestion in enumerate(articles):
-                    with (col_idea1 if idx % 2 == 0 else col_idea2):
-                        col_sug1, col_sug2 = st.columns([2, 1])
-
-                        with col_sug1:
-                            st.write(f"• {suggestion['article']}")
-
-                        with col_sug2:
-                            st.caption(f"~{suggestion['prix']}€")
-
-                        if st.button(
-                            "➕ Ajouter",
-                            key=f"add_idea_{categorie}_{suggestion['article']}",
-                            use_container_width=True,
-                        ):
-                            ajouter_au_shopping(
-                                suggestion["article"],
-                                categorie,
-                                1,
-                                None,
-                                suggestion["prix"],
-                            )
-                            st.success(f"✅ Ajouté!")
-                            st.rerun()
-
-    # ===================================
-    # TAB 3 : BUDGET
-    # ===================================
-
-    with tab3:
-        st.subheader("📊 Suivi budget shopping")
-
-        st.info("💡 Analyse des dépenses par catégorie")
-
-        df_shopping = charger_articles_shopping()
-
-        if df_shopping.empty:
-            st.info("Aucun article pour analyser")
+            
+            # Total estimé
+            total_estime = sum(a.prix_estime * a.quantite for a in articles_liste)
+            st.markdown(f"### 💰 Total estimé: **{total_estime:.2f}€**")
+        
         else:
-            # Par catégorie
-            budget_par_cat = df_shopping.groupby("categorie")["prix_estime"].sum().sort_values(
-                ascending=False
-            )
-
-            # Graphique
-            st.bar_chart(budget_par_cat)
-
-            st.markdown("---")
-
-            # Tableau résumé
-            st.write("**Détail par catégorie**")
-
-            resumé = (
-                df_shopping.groupby("categorie")
-                .agg(
-                    Articles=("article", "count"),
-                    Budget=("prix_estime", "sum"),
+            st.info("✨ Aucun article à acheter!")
+    
+    # ════════════════════════════════════════════════════════════════════════
+    # TAB 2: SUGGESTIONS
+    # ════════════════════════════════════════════════════════════════════════
+    
+    with tab2:
+        st.subheader("💡 Suggestions intelligentes")
+        
+        suggestions = get_shopping_suggestions()
+        
+        # Afficher suggestions par catégorie
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.markdown("### 👶 Pour Jules (19m)")
+            for cat, items in suggestions.get("Jules", {}).items():
+                with st.expander(f"**{cat.title()}**"):
+                    for item in items:
+                        if st.button(f"➕ {item}", key=f"suggest_jules_{item}"):
+                            ajouter_article(item, cat, 1, 0, "Jules")
+                            st.rerun()
+        
+        with col2:
+            st.markdown("### 👨‍👩‍👦 Pour Nous")
+            for cat, items in suggestions.get("Nous", {}).items():
+                with st.expander(f"**{cat.title()}**"):
+                    for item in items:
+                        if st.button(f"➕ {item}", key=f"suggest_nous_{item}"):
+                            ajouter_article(item, cat, 1, 0, "Nous")
+                            st.rerun()
+        
+        with col3:
+            st.markdown("### 🎪 Pour Activités")
+            for cat, items in suggestions.get("Activités", {}).items():
+                with st.expander(f"**{cat.title()}**"):
+                    for item in items:
+                        if st.button(f"➕ {item}", key=f"suggest_act_{item}"):
+                            ajouter_article(item, cat, 1, 0, "Activités")
+                            st.rerun()
+        
+        # Suggestions basées sur activités cette semaine
+        st.divider()
+        st.markdown("### 📅 Basé sur activités cette semaine")
+        
+        try:
+            activites = get_activites_semaine()
+            if activites:
+                activites_texte = ", ".join([f"**{a.titre}**" for a in activites[:3]])
+                st.info(f"🎯 Vous avez prévu: {activites_texte}")
+                
+                # Suggestions contextées
+                for activity in activites[:2]:
+                    if activity.type_activite == "picnic":
+                        st.write("🧺 **Pour pique-nique**: Serviettes, gobelets, sacs glacés")
+                    elif activity.type_activite == "parc":
+                        st.write("⚽ **Pour parc**: Ballon, bubbles, frisbee")
+                    elif activity.type_activite == "sport":
+                        st.write("🏃 **Pour sport**: Bouteille eau, gourde, vêtements")
+            else:
+                st.info("ℹ️ Aucune activité prévue cette semaine")
+        except Exception as e:
+            st.warning(f"⚠️ {e}")
+    
+    # ════════════════════════════════════════════════════════════════════════
+    # TAB 3: BUDGET
+    # ════════════════════════════════════════════════════════════════════════
+    
+    with tab3:
+        st.subheader("💰 Budget Shopping")
+        
+        # Sélectionner période
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            periode = st.selectbox("Période:", ["Cette semaine", "Ce mois", "Ce trimestre"])
+            if periode == "Cette semaine":
+                days = 7
+            elif periode == "Ce mois":
+                days = 30
+            else:
+                days = 90
+        
+        with col2:
+            refresh = st.checkbox("Mise à jour en temps réel")
+        
+        st.divider()
+        
+        # Récupérer budget par période
+        try:
+            budget_data = get_budget_par_period(days)
+            
+            if budget_data:
+                df = pd.DataFrame([
+                    {
+                        "Catégorie": b.categorie,
+                        "Montant": b.montant,
+                        "Date": b.date
+                    }
+                    for b in budget_data
+                ])
+                
+                # Agrégation par catégorie
+                df_categorie = df.groupby("Catégorie")["Montant"].sum().reset_index()
+                df_categorie = df_categorie.sort_values("Montant", ascending=False)
+                
+                # Plotly: Budget par catégorie
+                fig_cat = px.bar(
+                    df_categorie,
+                    x="Catégorie",
+                    y="Montant",
+                    color="Montant",
+                    color_continuous_scale="Viridis",
+                    title=f"Budget Shopping par Catégorie ({periode})"
                 )
-                .sort_values("Budget", ascending=False)
-            )
-
-            st.dataframe(
-                resumé,
-                use_container_width=True,
-            )
-
-            st.markdown("---")
-
-            # Stats globales
-            col_global1, col_global2, col_global3 = st.columns(3)
-
-            with col_global1:
-                st.metric("Articles total", len(df_shopping))
-
-            with col_global2:
-                st.metric("Budget total", f"{df_shopping['prix_estime'].sum():.0f}€")
-
-            with col_global3:
-                # Moyenne par article
-                avg_prix = df_shopping[df_shopping["prix_estime"] > 0]["prix_estime"].mean()
-                st.metric("Prix moyen", f"{avg_prix:.0f}€" if avg_prix > 0 else "—")
+                fig_cat.update_layout(
+                    hovermode="x unified",
+                    height=400,
+                    showlegend=False
+                )
+                st.plotly_chart(fig_cat, use_container_width=True)
+                
+                # Métriques
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    total = df["Montant"].sum()
+                    st.metric("💰 Total dépensé", f"{total:.2f}€")
+                
+                with col2:
+                    avg = df_categorie["Montant"].mean()
+                    st.metric("📊 Moyenne/catégorie", f"{avg:.2f}€")
+                
+                with col3:
+                    top_cat = df_categorie.iloc[0]["Catégorie"]
+                    st.metric("🔝 Top catégorie", top_cat)
+                
+                # Tableau détail
+                st.markdown("### 📋 Détail par catégorie")
+                st.dataframe(df_categorie, use_container_width=True)
+            
+            else:
+                st.info("ℹ️ Aucune dépense enregistrée")
+        
+        except Exception as e:
+            st.error(f"❌ Erreur budget: {e}")
+    
+    # ════════════════════════════════════════════════════════════════════════
+    # TAB 4: ANALYTICS
+    # ════════════════════════════════════════════════════════════════════════
+    
+    with tab4:
+        st.subheader("📊 Analytics Shopping")
+        
+        try:
+            # Récupérer tous les articles achetés ce mois
+            db = get_db()
+            items_achetes = db.query(ShoppingItem).filter(
+                ShoppingItem.date_achat >= date.today() - timedelta(days=30),
+                ShoppingItem.actif == False
+            ).all()
+            
+            if items_achetes:
+                df_achetes = pd.DataFrame([
+                    {
+                        "Article": i.titre,
+                        "Catégorie": i.categorie,
+                        "Quantité": i.quantite,
+                        "Estimé": i.prix_estime * i.quantite,
+                        "Réel": (i.prix_reel or i.prix_estime) * i.quantite,
+                        "Date": i.date_achat
+                    }
+                    for i in items_achetes
+                ])
+                
+                # Plotly: Différence Estimé vs Réel
+                df_cat = df_achetes.groupby("Catégorie").agg({
+                    "Estimé": "sum",
+                    "Réel": "sum"
+                }).reset_index()
+                
+                fig = go.Figure(data=[
+                    go.Bar(name="Estimé", x=df_cat["Catégorie"], y=df_cat["Estimé"], marker_color="lightblue"),
+                    go.Bar(name="Réel", x=df_cat["Catégorie"], y=df_cat["Réel"], marker_color="lightcoral")
+                ])
+                
+                fig.update_layout(
+                    barmode="group",
+                    title="Estimé vs Réel (30 jours)",
+                    height=400,
+                    hovermode="x unified"
+                )
+                st.plotly_chart(fig, use_container_width=True)
+                
+                # Stats
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    diff = (df_achetes["Réel"].sum() - df_achetes["Estimé"].sum())
+                    st.metric("💨 Différence", f"{diff:+.2f}€", delta=f"{diff/df_achetes['Estimé'].sum()*100:.1f}%")
+                
+                with col2:
+                    st.metric("📦 Articles achetés", len(items_achetes))
+                
+                with col3:
+                    precision = ((df_achetes["Estimé"].sum() - abs(diff)) / df_achetes["Estimé"].sum() * 100)
+                    st.metric("🎯 Précision estimé", f"{precision:.1f}%")
+            
+            else:
+                st.info("ℹ️ Aucun article acheté ce mois")
+        
+        except Exception as e:
+            st.error(f"❌ Erreur analytics: {e}")
 
 
 if __name__ == "__main__":
-    app()
+    main()
