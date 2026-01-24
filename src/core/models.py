@@ -438,6 +438,9 @@ class ChildProfile(Base):
     wellbeing_entries: Mapped[list["WellbeingEntry"]] = relationship(
         back_populates="child", cascade="all, delete-orphan"
     )
+    milestones: Mapped[list["Milestone"]] = relationship(
+        back_populates="child", cascade="all, delete-orphan"
+    )
 
     def __repr__(self) -> str:
         return f"<ChildProfile(name='{self.name}', id={self.id})>"
@@ -703,7 +706,7 @@ class Milestone(Base):
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     # Relations
-    child: Mapped["ChildProfile"] = relationship()
+    child: Mapped["ChildProfile"] = relationship(back_populates="milestones")
 
     def __repr__(self) -> str:
         return f"<Milestone(id={self.id}, titre='{self.titre}', date={self.date_atteint})>"
