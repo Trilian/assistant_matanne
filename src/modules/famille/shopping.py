@@ -313,18 +313,14 @@ def app():
         try:
             budget_data = get_budget_par_period(days)
             
-            if budget_data:
-                df = pd.DataFrame([
-                    {
-                        "Catégorie": b.categorie,
-                        "Montant": b.montant,
-                        "Date": b.date
-                    }
-                    for b in budget_data
-                ])
+            if budget_data and budget_data.get("TOTAL", 0) > 0:
+                # Exclure TOTAL du dataframe
+                budget_dict = {k: v for k, v in budget_data.items() if k != "TOTAL"}
                 
-                # Agrégation par catégorie
-                df_categorie = df.groupby("Catégorie")["Montant"].sum().reset_index()
+                df_categorie = pd.DataFrame([
+                    {"Catégorie": cat, "Montant": montant}
+                    for cat, montant in budget_dict.items()
+                ])
                 df_categorie = df_categorie.sort_values("Montant", ascending=False)
                 
                 # Plotly: Budget par catégorie
@@ -346,7 +342,7 @@ def app():
                 # Métriques
                 col1, col2, col3 = st.columns(3)
                 with col1:
-                    total = df["Montant"].sum()
+                    total = budget_data.get("TOTAL", 0)
                     st.metric("💰 Total dépensé", f"{total:.2f}€")
                 
                 with col2:
@@ -354,8 +350,9 @@ def app():
                     st.metric("📊 Moyenne/catégorie", f"{avg:.2f}€")
                 
                 with col3:
-                    top_cat = df_categorie.iloc[0]["Catégorie"]
-                    st.metric("🔝 Top catégorie", top_cat)
+                    if len(df_categorie) > 0:
+                        top_cat = df_categorie.iloc[0]["Catégorie"]
+                        st.metric("🔝 Top catégorie", top_cat)
                 
                 # Tableau détail
                 st.markdown("### 📋 Détail par catégorie")

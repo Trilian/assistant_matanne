@@ -334,17 +334,14 @@ def app():
         try:
             budget_semaine = get_budget_par_period(7)
             
-            if budget_semaine:
-                df_budget = pd.DataFrame([
-                    {
-                        "Catégorie": b.categorie,
-                        "Montant": b.montant,
-                        "Date": b.date
-                    }
-                    for b in budget_semaine
-                ])
+            if budget_semaine and budget_semaine.get("TOTAL", 0) > 0:
+                # Exclure TOTAL du dataframe
+                budget_data = {k: v for k, v in budget_semaine.items() if k != "TOTAL"}
                 
-                df_budget_cat = df_budget.groupby("Catégorie")["Montant"].sum().reset_index()
+                df_budget_cat = pd.DataFrame([
+                    {"Catégorie": cat, "Montant": montant}
+                    for cat, montant in budget_data.items()
+                ])
                 
                 fig = px.pie(
                     df_budget_cat,
@@ -355,7 +352,7 @@ def app():
                 
                 st.plotly_chart(fig, use_container_width=True)
                 
-                total = df_budget["Montant"].sum()
+                total = budget_semaine.get("TOTAL", 0)
                 st.metric("💸 Total", f"{total:.2f}€")
             
             else:
@@ -370,43 +367,22 @@ def app():
         try:
             budget_mois = get_budget_par_period(30)
             
-            if budget_mois:
-                df_mois = pd.DataFrame([
-                    {
-                        "Catégorie": b.categorie,
-                        "Montant": b.montant,
-                        "Date": b.date
-                    }
-                    for b in budget_mois
+            if budget_mois and budget_mois.get("TOTAL", 0) > 0:
+                # Exclure TOTAL du dataframe
+                budget_data = {k: v for k, v in budget_mois.items() if k != "TOTAL"}
+                
+                df_mois_cat = pd.DataFrame([
+                    {"Catégorie": cat, "Montant": montant}
+                    for cat, montant in budget_data.items()
                 ])
                 
-                total_mois = df_mois["Montant"].sum()
-                
-                # Projeter pour 30 jours
-                df_daily = df_mois.groupby("Date")["Montant"].sum().reset_index()
-                jours_ecules = len(df_daily)
-                projection = (total_mois / max(jours_ecules, 1)) * 30
+                total_mois = budget_mois.get("TOTAL", 0)
                 
                 col_a, col_b = st.columns(2)
                 with col_a:
-                    st.metric("Réel (30j)", f"{total_mois:.2f}€")
+                    st.metric("Réel (mois)", f"{total_mois:.2f}€")
                 with col_b:
-                    st.metric("Projection mois", f"{projection:.2f}€")
-                
-                # Courbe cumulative
-                df_mois = df_mois.sort_values("Date")
-                df_mois["Cumul"] = df_mois["Montant"].cumsum()
-                
-                fig = px.line(
-                    df_mois,
-                    x="Date",
-                    y="Cumul",
-                    title="Cumul dépenses",
-                    markers=True
-                )
-                
-                fig.update_layout(height=300, hovermode="x unified")
-                st.plotly_chart(fig, use_container_width=True)
+                    st.metric("Montant moyen par catégorie", f"{total_mois / max(len(budget_data), 1):.2f}€")
             
             else:
                 st.info("ℹ️ Aucune dépense ce mois")
