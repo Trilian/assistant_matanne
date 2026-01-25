@@ -391,41 +391,41 @@ def app():
                         }
                         for i in items_achetes
                     ])
+                    
+                    # Plotly: Différence Estimé vs Réel
+                    df_cat = df_achetes.groupby("Catégorie").agg({
+                        "Estimé": "sum",
+                        "Réel": "sum"
+                    }).reset_index()
+                    
+                    fig = go.Figure(data=[
+                        go.Bar(name="Estimé", x=df_cat["Catégorie"], y=df_cat["Estimé"], marker_color="lightblue"),
+                        go.Bar(name="Réel", x=df_cat["Catégorie"], y=df_cat["Réel"], marker_color="lightcoral")
+                    ])
+                    
+                    fig.update_layout(
+                        barmode="group",
+                        title="Estimé vs Réel (30 jours)",
+                        height=400,
+                        hovermode="x unified"
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
+                    
+                    # Stats
+                    col1, col2, col3 = st.columns(3)
+                    with col1:
+                        diff = (df_achetes["Réel"].sum() - df_achetes["Estimé"].sum())
+                        st.metric("💨 Différence", f"{diff:+.2f}€", delta=f"{diff/df_achetes['Estimé'].sum()*100:.1f}%")
+                    
+                    with col2:
+                        st.metric("📦 Articles achetés", len(items_achetes))
+                    
+                    with col3:
+                        precision = ((df_achetes["Estimé"].sum() - abs(diff)) / df_achetes["Estimé"].sum() * 100)
+                        st.metric("🎯 Précision estimé", f"{precision:.1f}%")
                 
-                # Plotly: Différence Estimé vs Réel
-                df_cat = df_achetes.groupby("Catégorie").agg({
-                    "Estimé": "sum",
-                    "Réel": "sum"
-                }).reset_index()
-                
-                fig = go.Figure(data=[
-                    go.Bar(name="Estimé", x=df_cat["Catégorie"], y=df_cat["Estimé"], marker_color="lightblue"),
-                    go.Bar(name="Réel", x=df_cat["Catégorie"], y=df_cat["Réel"], marker_color="lightcoral")
-                ])
-                
-                fig.update_layout(
-                    barmode="group",
-                    title="Estimé vs Réel (30 jours)",
-                    height=400,
-                    hovermode="x unified"
-                )
-                st.plotly_chart(fig, use_container_width=True)
-                
-                # Stats
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    diff = (df_achetes["Réel"].sum() - df_achetes["Estimé"].sum())
-                    st.metric("💨 Différence", f"{diff:+.2f}€", delta=f"{diff/df_achetes['Estimé'].sum()*100:.1f}%")
-                
-                with col2:
-                    st.metric("📦 Articles achetés", len(items_achetes))
-                
-                with col3:
-                    precision = ((df_achetes["Estimé"].sum() - abs(diff)) / df_achetes["Estimé"].sum() * 100)
-                    st.metric("🎯 Précision estimé", f"{precision:.1f}%")
-            
-            else:
-                st.info("ℹ️ Aucun article acheté ce mois")
+                else:
+                    st.info("ℹ️ Aucun article acheté ce mois")
         
         except Exception as e:
             st.error(f"❌ Erreur analytics: {e}")

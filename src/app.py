@@ -226,8 +226,7 @@ def afficher_sidebar():
                 "🎨 Activités": "famille.activites",
                 "🛍️ Shopping": "famille.shopping",
                 "—": None,
-                "📊 Suivi Jules (legacy)": "famille.suivi_jules",
-                "💖 Bien-être (legacy)": "famille.bien_etre",
+                " Bien-être (legacy)": "famille.bien_etre",
                 "🔄 Routines (legacy)": "famille.routines",
             },
             "🏠 Maison": {
