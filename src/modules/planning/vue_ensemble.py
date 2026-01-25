@@ -1,368 +1,392 @@
 """
-Module Vue d'ensemble Planning
-Dashboard global avec toutes les informations importantes
+Module Vue d'Ensemble Planning - Dashboard d'actions prioritaires
+
+Affiche les actions critiques et suggère automatiquement ce qui doit être fait
+Utilise PlanningAIService pour détection intelligente des alertes
 """
 
 from datetime import date, datetime, timedelta
 
 import streamlit as st
 
-from src.core.database import get_db_context
-from src.core.models import (
-    ArticleInventaire,
-    BatchMeal,
-    CalendarEvent,
-    GardenItem,
-    Project,
-    Recipe,
-    Routine,
-    RoutineTask,
-)
+from src.services.planning_unified import get_planning_service
+from src.core.state import get_state
 
-# ===================================
-# HELPERS
-# ===================================
+logger = __import__("logging").getLogger(__name__)
 
 
-def get_dashboard_data() -> dict:
-    """Récupère toutes les données pour le dashboard"""
-    with get_db_context() as db:
-        today = date.today()
-        week_end = today + timedelta(days=7)
+# ═══════════════════════════════════════════════════════════
+# HELPERS UI
+# ═══════════════════════════════════════════════════════════
 
-        data = {
-            # Repas
-            "repas_semaine": db.query(BatchMeal)
-            .filter(
-                BatchMeal.scheduled_date.between(today, week_end), BatchMeal.status == "à faire"
+
+def afficher_actions_prioritaires(alertes_semaine: list) -> None:
+    """Affiche les actions prioritaires en tableau"""
+    if not alertes_semaine:
+        st.success("✅ Semaine bien équilibrée - Aucune action urgente")
+        return
+
+    st.markdown("### 🎯 Actions à Prendre")
+
+    for alerte in alertes_semaine:
+        # Parser l'alerte pour extraire emoji et message
+        parts = alerte.split(" - ") if " - " in alerte else [alerte]
+        emoji = parts[0] if len(parts) > 1 else "⚠️"
+        message = parts[-1]
+
+        col_msg, col_action = st.columns([3, 1])
+
+        with col_msg:
+            st.warning(message, icon=emoji)
+
+        with col_action:
+            if "👶" in emoji:
+                if st.button("→ Activités", key=f"alerte_{alerte[:20]}", use_container_width=True):
+                    st.session_state.planning_view = "activites"
+
+            elif "💰" in emoji:
+                if st.button("→ Budget", key=f"alerte_{alerte[:20]}", use_container_width=True):
+                    st.session_state.planning_view = "budget"
+
+            elif "⚠️" in emoji:
+                if st.button("→ Voir", key=f"alerte_{alerte[:20]}", use_container_width=True):
+                    pass
+
+
+def afficher_metriques_cles(stats: dict, charge_globale: str) -> None:
+    """Affiche les KPIs principaux"""
+    st.markdown("### 📊 Métriques Clés")
+
+    col_m1, col_m2, col_m3, col_m4, col_m5 = st.columns(5)
+
+    with col_m1:
+        st.metric("🍽️ Repas", stats.get("total_repas", 0))
+
+    with col_m2:
+        st.metric("🎨 Activités", stats.get("total_activites", 0))
+
+    with col_m3:
+        st.metric("👶 Pour Jules", stats.get("activites_jules", 0))
+
+    with col_m4:
+        st.metric("🏗️ Projets", stats.get("total_projets", 0))
+
+    with col_m5:
+        budget = stats.get("budget_total", 0)
+        st.metric("💰 Budget", f"{budget:.0f}€")
+
+    st.markdown("---")
+
+    # Charge globale
+    charge_emoji = {
+        "faible": "🟢",
+        "normal": "🟡",
+        "intense": "🔴",
+    }.get(charge_globale, "⚪")
+
+    st.markdown(f"### {charge_emoji} Charge Globale: **{charge_globale.upper()}**")
+
+    charge_score = stats.get("charge_moyenne", 50)
+    st.progress(min(charge_score / 100, 1.0))
+
+    if charge_score >= 80:
+        st.warning("⚠️ Charge familiale très élevée - À prendre en compte pour le bien-être")
+    elif charge_score >= 70:
+        st.info("ℹ️ Charge normale - Veiller au repos et temps de qualité")
+    else:
+        st.success("✅ Charge faible - Bonne semaine équilibrée")
+
+
+def afficher_synthese_jours(jours: dict) -> None:
+    """Affiche synthèse visuelle des jours"""
+    st.markdown("### 📅 Synthèse par jour")
+
+    jours_noms = ["lun", "mar", "mer", "jeu", "ven", "sam", "dim"]
+    jours_list = list(jours.values())
+
+    cols = st.columns(7)
+
+    for i, col in enumerate(cols):
+        with col:
+            jour = jours_list[i]
+            jour_nom = jours_noms[i]
+
+            # Badge avec charge
+            charge_emoji = {
+                "faible": "🟢",
+                "normal": "🟡",
+                "intense": "🔴",
+            }.get(jour.charge, "⚪")
+
+            st.markdown(
+                f"""
+                <div style="text-align: center; padding: 10px; border-radius: 8px; background: #f0f2f6;">
+                    <h4>{charge_emoji}</h4>
+                    <p style="margin: 5px 0; font-size: 12px;"><strong>{jour_nom.upper()}</strong></p>
+                    <p style="margin: 5px 0; font-size: 11px;">{jour.charge_score}/100</p>
+                    <p style="margin: 5px 0; font-size: 11px;">
+                        🍽️{len(jour.repas)} 🎨{len(jour.activites)}
+                    </p>
+                </div>
+                """,
+                unsafe_allow_html=True,
             )
-            .count(),
-            # Projets
-            "projets_actifs": db.query(Project)
-            .filter(Project.status.in_(["à faire", "en cours"]))
-            .count(),
-            "projets_urgents": db.query(Project)
-            .filter(
-                Project.status.in_(["à faire", "en cours"]),
-                Project.end_date.isnot(None),
-                Project.end_date <= week_end,
-            )
-            .count(),
-            # Routines
-            "taches_jour": db.query(RoutineTask)
-            .join(Routine)
-            .filter(RoutineTask.status == "à faire", Routine.is_active)
-            .count(),
-            # Inventaire
-            "stock_bas": db.query(ArticleInventaire)
-            .filter(ArticleInventaire.quantite < ArticleInventaire.quantite_minimum)
-            .count(),
-            # Événements
-            "events_semaine": db.query(CalendarEvent)
-            .filter(
-                CalendarEvent.start_date >= datetime.combine(today, datetime.min.time()),
-                CalendarEvent.start_date <= datetime.combine(week_end, datetime.max.time()),
-            )
-            .count(),
-            # Jardin
-            "plantes_arroser": db.query(GardenItem).filter(GardenItem.last_watered.isnot(None)).count(),
-        }
-
-        return data
 
 
-def get_prochaines_actions() -> list:
-    """Liste les prochaines actions importantes"""
-    actions = []
+def afficher_opportunities(semaine_data: dict) -> None:
+    """Suggère automatiquement des améliorations"""
+    st.markdown("### 💡 Suggestions d'Amélioration")
 
-    with get_db_context() as db:
-        today = date.today()
+    suggestions = []
 
-        # Repas non planifiés
-        repas_3j = (
-            db.query(BatchMeal)
-            .filter(BatchMeal.scheduled_date.between(today, today + timedelta(days=3)))
-            .count()
+    # Jules: activités
+    activites_jules = semaine_data.get("activites_jules", 0)
+    if activites_jules == 0:
+        suggestions.append(
+            ("👶 Aucune activité pour Jules", 
+             "Planifier au moins 2-3 activités adaptées à 19m par semaine")
+        )
+    elif activites_jules < 2:
+        suggestions.append(
+            ("👶 Peu d'activités pour Jules",
+             f"Actuellement {activites_jules} - Recommandé: 3+")
         )
 
-        if repas_3j < 3:
-            actions.append(
-                {
-                    "priorite": "haute",
-                    "module": "Batch Cooking",
-                    "action": "Planifier les repas des 3 prochains jours",
-                    "link": "cuisine.batch_cooking",
-                }
-            )
-
-        # Stock bas
-        stock_bas = (
-            db.query(ArticleInventaire)
-            .filter(ArticleInventaire.quantite < ArticleInventaire.quantite_minimum)
-            .count()
+    # Budget
+    budget_total = semaine_data.get("budget_total", 0)
+    budget_limite = 500  # À adapter à votre budget
+    if budget_total > budget_limite:
+        suggestions.append(
+            ("💰 Budget elevé",
+             f"{budget_total:.0f}€ > {budget_limite}€ - Revoir les dépenses")
         )
 
-        if stock_bas > 0:
-            actions.append(
-                {
-                    "priorite": "haute",
-                    "module": "Courses",
-                    "action": f"{stock_bas} article(s) en stock bas",
-                    "link": "cuisine.courses",
-                }
-            )
-
-        # Projets échéance proche
-        projets_urgents = (
-            db.query(Project)
-            .filter(
-                Project.status.in_(["à faire", "en cours"]),
-                Project.end_date != None,
-                Project.end_date <= today + timedelta(days=7),
-            )
-            .all()
+    # Pas de repas
+    if semaine_data.get("total_repas", 0) == 0:
+        suggestions.append(
+            ("🍽️ Aucun repas planifié",
+             "Prévoir le planning culinaire de la semaine")
         )
 
-        for projet in projets_urgents[:2]:
-            delta = (projet.end_date - today).days
-            actions.append(
-                {
-                    "priorite": "moyenne",
-                    "module": "Projets",
-                    "action": f"{projet.name} - échéance dans {delta} jours",
-                    "link": "maison.projets",
-                }
-            )
-
-        # Note: Routines legacy module removed (now integrated in famille module)
-
-    return actions
+    if suggestions:
+        for emoji_title, description in suggestions:
+            with st.container():
+                col1, col2 = st.columns([1, 4])
+                with col1:
+                    st.write("💡")
+                with col2:
+                    st.write(f"**{emoji_title}**: {description}")
+    else:
+        st.success("✅ Semaine bien équilibrée - Aucune suggestion")
 
 
-# ===================================
+# ═══════════════════════════════════════════════════════════
 # MODULE PRINCIPAL
-# ===================================
+# ═══════════════════════════════════════════════════════════
 
 
 def app():
-    """Module Vue d'ensemble"""
+    """Module Vue d'Ensemble - Actions prioritaires"""
 
-    st.title("🎯 Vue d'Ensemble")
-    st.caption("Toutes les informations importantes en un coup d'œil")
+    st.title("🎯 Vue d'Ensemble Planning")
+    st.caption("Actions prioritaires et suggestions intelligentes pour la semaine")
 
-    # ===================================
-    # STATISTIQUES GLOBALES
-    # ===================================
+    # ═══════════════════════════════════════════════════════════
+    # NAVIGATION SEMAINE
+    # ═══════════════════════════════════════════════════════════
 
-    data = get_dashboard_data()
+    if "ensemble_week_start" not in st.session_state:
+        today = date.today()
+        st.session_state.ensemble_week_start = today - timedelta(days=today.weekday())
 
-    st.markdown("### 📊 Cette semaine")
+    col_nav1, col_nav2, col_nav3 = st.columns([1, 2, 1])
 
-    col1, col2, col3, col4 = st.columns(4)
+    with col_nav1:
+        if st.button("⬅️ Semaine précédente", key="prev_ensemble"):
+            st.session_state.ensemble_week_start -= timedelta(days=7)
+            st.rerun()
 
-    with col1:
-        st.metric("🍽️ Repas planifiés", data["repas_semaine"])
-
-    with col2:
-        st.metric("📅 Événements", data["events_semaine"])
-
-    with col3:
-        st.metric(
-            "🏗️ Projets actifs",
-            data["projets_actifs"],
-            delta=f"{data['projets_urgents']} urgents" if data["projets_urgents"] > 0 else None,
-            delta_color="inverse",
+    with col_nav2:
+        week_start = st.session_state.ensemble_week_start
+        week_end = week_start + timedelta(days=6)
+        st.markdown(
+            f"<h3 style='text-align: center;'>{week_start.strftime('%d/%m')} — {week_end.strftime('%d/%m/%Y')}</h3>",
+            unsafe_allow_html=True,
         )
 
-    with col4:
-        st.metric("⏰ Tâches jour", data["taches_jour"])
+    with col_nav3:
+        if st.button("Semaine suivante ➡️", key="next_ensemble"):
+            st.session_state.ensemble_week_start += timedelta(days=7)
+            st.rerun()
 
     st.markdown("---")
 
-    # ===================================
-    # ACTIONS PRIORITAIRES
-    # ===================================
+    # ═══════════════════════════════════════════════════════════
+    # CHARGEMENT DONNÉES
+    # ═══════════════════════════════════════════════════════════
 
-    st.markdown("### 🎯 Actions prioritaires")
+    service = get_planning_service()
+    semaine = service.get_semaine_complete(st.session_state.ensemble_week_start)
 
-    actions = get_prochaines_actions()
+    if not semaine:
+        st.error("❌ Erreur lors du chargement de la semaine")
+        return
 
-    if not actions:
-        st.success("✅ Tout est sous contrôle ! Aucune action urgente.")
-    else:
-        for action in actions:
-            priorite_color = {"haute": "🔴", "moyenne": "🟡", "basse": "🟢"}.get(
-                action["priorite"], "⚪"
-            )
+    # ═══════════════════════════════════════════════════════════
+    # ACTIONS PRIORITAIRES (TOP)
+    # ═══════════════════════════════════════════════════════════
 
-            col_action1, col_action2 = st.columns([3, 1])
-
-            with col_action1:
-                st.markdown(f"{priorite_color} **{action['module']}** : {action['action']}")
-
-            with col_action2:
-                if st.button("Aller →", key=f"action_{action['link']}", use_container_width=True):
-                    st.session_state.current_module = action["link"]
-                    st.rerun()
-
-    st.markdown("---")
-
-    # ===================================
-    # VUE RAPIDE MODULES
-    # ===================================
-
-    col_mod1, col_mod2 = st.columns(2)
-
-    with col_mod1:
-        st.markdown("### 🍲 Cuisine")
-
-        with get_db_context() as db:
-            # Prochains repas
-            repas = (
-                db.query(BatchMeal, Recipe)
-                .join(Recipe, BatchMeal.recipe_id == Recipe.id)
-                .filter(BatchMeal.scheduled_date >= date.today())
-                .order_by(BatchMeal.scheduled_date)
-                .limit(3)
-                .all()
-            )
-
-            if repas:
-                for batch, recipe in repas:
-                    st.write(f"• {batch.scheduled_date.strftime('%d/%m')} : {recipe.name}")
-            else:
-                st.caption("Aucun repas planifié")
-
-            # Stock bas
-            if data["stock_bas"] > 0:
-                st.warning(f"⚠️ {data['stock_bas']} article(s) en stock bas")
-
+    if semaine.alertes_semaine:
+        st.markdown("### 🚨 Actions Critiques")
+        afficher_actions_prioritaires(semaine.alertes_semaine)
         st.markdown("---")
 
-        st.markdown("### 👶 Famille")
+    # ═══════════════════════════════════════════════════════════
+    # MÉTRIQUES CLÉS
+    # ═══════════════════════════════════════════════════════════
 
-        with get_db_context() as db:
-            # Routines du jour
-            routines = (
-                db.query(RoutineTask, Routine)
-                .join(Routine, RoutineTask.routine_id == Routine.id)
-                .filter(RoutineTask.status == "à faire", Routine.is_active == True)
-                .limit(3)
-                .all()
-            )
+    afficher_metriques_cles(semaine.stats_semaine, semaine.charge_globale)
 
-            if routines:
-                for task, routine in routines:
-                    heure = task.scheduled_time or "—"
-                    st.write(f"• {heure} : {task.task_name}")
-            else:
-                st.caption("Toutes les routines complétées ✅")
+    # ═══════════════════════════════════════════════════════════
+    # SYNTHÈSE JOURS
+    # ═══════════════════════════════════════════════════════════
 
-    with col_mod2:
-        st.markdown("### 🏡 Maison")
-
-        with get_db_context() as db:
-            # Projets en cours
-            projets = (
-                db.query(Project)
-                .filter(Project.status == "en cours")
-                .order_by(Project.priority.desc())
-                .limit(3)
-                .all()
-            )
-
-            if projets:
-                for projet in projets:
-                    st.write(f"• {projet.name} ({projet.progress}%)")
-            else:
-                st.caption("Aucun projet en cours")
-
-        st.markdown("---")
-
-        st.markdown("### 🌱 Jardin")
-
-        with get_db_context() as db:
-            # Plantes à arroser
-            today = date.today()
-            plantes = db.query(GardenItem).filter(GardenItem.last_watered != None).all()
-
-            a_arroser = []
-            for plante in plantes:
-                delta = (today - plante.last_watered).days
-                if delta >= plante.watering_frequency_days:
-                    a_arroser.append(plante.name)
-
-            if a_arroser:
-                st.write(f"💧 À arroser : {', '.join(a_arroser[:3])}")
-            else:
-                st.caption("Arrosage OK ✅")
+    afficher_synthese_jours(semaine.jours)
 
     st.markdown("---")
 
-    # ===================================
-    # TIMELINE SEMAINE
-    # ===================================
+    # ═══════════════════════════════════════════════════════════
+    # SUGGESTIONS & OPPORTUNITIES
+    # ═══════════════════════════════════════════════════════════
 
-    st.markdown("### 📅 Timeline de la semaine")
-
-    today = date.today()
-
-    for i in range(7):
-        jour = today + timedelta(days=i)
-        jour_nom = jour.strftime("%A %d/%m")
-
-        with get_db_context() as db:
-            # Compter événements du jour
-            repas = db.query(BatchMeal).filter(BatchMeal.scheduled_date == jour).count()
-            events = (
-                db.query(CalendarEvent)
-                .filter(
-                    CalendarEvent.start_date >= datetime.combine(jour, datetime.min.time()),
-                    CalendarEvent.start_date
-                    < datetime.combine(jour + timedelta(days=1), datetime.min.time()),
-                )
-                .count()
-            )
-            projets = (
-                db.query(Project)
-                .filter(Project.end_date == jour, Project.status.in_(["à faire", "en cours"]))
-                .count()
-            )
-
-            total = repas + events + projets
-
-            if total > 0:
-                is_today = jour == today
-                style = "🔵" if is_today else "•"
-                st.write(
-                    f"{style} **{jour_nom}** : {repas} repas, {events} événements, {projets} échéances"
-                )
-            else:
-                st.write(f"• {jour_nom} : Rien de prévu")
+    afficher_opportunities(semaine.stats_semaine)
 
     st.markdown("---")
 
-    # ===================================
-    # ACCÈS RAPIDES
-    # ===================================
+    # ═══════════════════════════════════════════════════════════
+    # ONGLETS DÉTAILS
+    # ═══════════════════════════════════════════════════════════
 
-    st.markdown("### 🚀 Accès rapides")
+    tab1, tab2, tab3 = st.tabs(["🔄 Rééquilibrer", "🤖 Optimiser avec IA", "📋 Détails"])
 
-    col_r1, col_r2, col_r3 = st.columns(3)
+    with tab1:
+        st.subheader("🔄 Rééquilibrer la semaine")
 
-    raccourcis = [
-        ("🍲 Recettes", "cuisine.recettes"),
-        ("📦 Inventaire", "cuisine.inventaire"),
-        ("🛒 Courses", "cuisine.courses"),
-        ("🥘 Batch Cooking", "cuisine.batch_cooking"),
+        st.info(
+            "💡 Les jours très chargés peuvent être rééquilibrés en déplaçant certaines activités"
+        )
 
-        ("🏗️ Projets", "maison.projets"),
-        ("🌱 Jardin", "maison.jardin"),
-    ]
+        # Identifier jours chargés
+        jours_list = list(semaine.jours.values())
+        jours_charges = [
+            (i, j) for i, j in enumerate(jours_list) if j.charge_score >= 75
+        ]
 
-    for i, (label, module) in enumerate(raccourcis):
-        col = [col_r1, col_r2, col_r3][i % 3]
-        with col:
-            if st.button(label, use_container_width=True, key=f"quick_{module}"):
-                st.session_state.current_module = module
-                st.rerun()
+        if jours_charges:
+            for idx, jour_charge in jours_charges[:2]:
+                jour_names = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
+                jour_nom = jour_names[idx]
+
+                with st.expander(f"🔴 {jour_nom} - Surchargé ({jour_charge.charge_score}/100)"):
+                    st.write(f"Activités: {len(jour_charge.activites)} | Repas: {len(jour_charge.repas)}")
+
+                    if st.button(f"Proposer répartition", key=f"reequilibrer_{idx}"):
+                        st.info("💡 Suggestion: Déplacer 1-2 activités vers jour plus calme")
+
+        else:
+            st.success("✅ Semaine bien équilibrée - Aucun rééquilibrage nécessaire")
+
+    with tab2:
+        st.subheader("🤖 Optimiser avec IA")
+
+        st.info("L'IA peut générer une semaine optimale basée sur vos contraintes")
+
+        with st.form("form_optimize"):
+            col_o1, col_o2 = st.columns(2)
+
+            with col_o1:
+                budget = st.number_input("Budget semaine (€)", 100, 1000, 400)
+                energie = st.selectbox("Énergie famille", ["faible", "normal", "élevée"])
+
+            with col_o2:
+                objectifs = st.multiselect(
+                    "Objectifs santé",
+                    ["Cardio", "Yoga", "Détente", "Temps famille", "Sommeil"],
+                )
+                priorites = st.multiselect(
+                    "Priorités",
+                    ["Activités Jules", "Repos", "Projets", "Social"],
+                    default=["Activités Jules"],
+                )
+
+            submitted = st.form_submit_button("🚀 Générer optimisation", type="primary")
+
+            if submitted:
+                with st.spinner("🤖 L'IA analyse..."):
+                    result = service.generer_semaine_ia(
+                        date_debut=st.session_state.ensemble_week_start,
+                        contraintes={
+                            "budget": budget,
+                            "energie": energie,
+                        },
+                        contexte={
+                            "objectifs_sante": objectifs,
+                            "priorites": priorites,
+                            "jules_age_mois": 19,
+                        },
+                    )
+
+                    if result:
+                        st.success("✅ Optimisation générée!")
+                        st.markdown(f"**Philosophie**: {result.harmonie_description}")
+
+                        with st.expander("Pourquoi cette approche?"):
+                            for raison in result.raisons:
+                                st.write(f"• {raison}")
+
+                        st.info("💡 Vous pouvez créer ces éléments dans votre planning")
+                    else:
+                        st.error("❌ Erreur génération")
+
+    with tab3:
+        st.subheader("📋 Détails Semaine")
+
+        jours_semaine = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
+
+        selected_jour = st.selectbox("Sélectionner un jour", jours_semaine, key="ensemble_jour_select")
+
+        jour_idx = jours_semaine.index(selected_jour)
+        jour_date = st.session_state.ensemble_week_start + timedelta(days=jour_idx)
+        jour_str = jour_date.isoformat()
+
+        jour_data = semaine.jours.get(jour_str)
+
+        if jour_data:
+            jour_data_dict = jour_data.dict()
+
+            st.markdown(f"### {selected_jour.capitalize()} {jour_date.strftime('%d/%m')}")
+
+            col_d1, col_d2, col_d3 = st.columns(3)
+
+            with col_d1:
+                charge_emoji = {
+                    "faible": "🟢",
+                    "normal": "🟡",
+                    "intense": "🔴",
+                }.get(jour_data_dict["charge"], "⚪")
+                st.metric("Charge", f"{charge_emoji} {jour_data_dict['charge_score']}/100")
+
+            with col_d2:
+                st.metric("Événements", len(jour_data_dict["repas"]) + len(jour_data_dict["activites"]))
+
+            with col_d3:
+                st.metric("Budget", f"{jour_data_dict['budget_jour']:.0f}€")
+
+            st.write(f"**Repas**: {len(jour_data_dict['repas'])}")
+            st.write(f"**Activités**: {len(jour_data_dict['activites'])}")
+            st.write(f"**Projets**: {len(jour_data_dict['projets'])}")
+
+            if jour_data_dict.get("alertes"):
+                st.warning("**Alertes du jour**:")
+                for alerte in jour_data_dict["alertes"]:
+                    st.write(f"• {alerte}")

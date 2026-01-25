@@ -16,6 +16,7 @@ from sqlalchemy import (
     DateTime,
     Float,
     ForeignKey,
+    Index,
     Integer,
     MetaData,
     String,
@@ -892,6 +893,11 @@ class CalendarEvent(Base):
     couleur: Mapped[str | None] = mapped_column(String(20))  # rouge, bleu, vert, etc
     rappel_avant_minutes: Mapped[int | None] = mapped_column(Integer)
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        Index("idx_date_type", "date_debut", "type_event"),  # Recherche rapide par plage date + type
+        Index("idx_date_range", "date_debut", "date_fin"),  # Recherche par plage
+    )
 
     def __repr__(self) -> str:
         return f"<CalendarEvent(id={self.id}, titre='{self.titre}', date={self.date_debut})>"

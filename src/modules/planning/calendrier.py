@@ -1,331 +1,264 @@
 """
-Module Calendrier avec Agent IA intégré
-Vue d'ensemble du planning familial
+Module Calendrier Unifié - Vue détaillée du calendrier familial
+
+Affiche tous les événements calendrier avec interface interactive
+Utilise PlanningAIService pour agrégation optimisée
 """
 
 import calendar
 from datetime import date, datetime, timedelta
 
-import pandas as pd
 import streamlit as st
 
-from src.core.ai_agent import AgentIA
-from src.core.database import get_db_context
-from src.core.models import BatchMeal, CalendarEvent, Project, Recipe, Routine, RoutineTask
+from src.services.planning_unified import get_planning_service
 
-# ===================================
-# HELPERS
-# ===================================
+logger = __import__("logging").getLogger(__name__)
 
 
-def charger_evenements(date_debut: date, date_fin: date) -> pd.DataFrame:
-    """Charge tous les événements sur une période"""
-    with get_db_context() as db:
-        events = (
-            db.query(CalendarEvent)
-            .filter(
-                CalendarEvent.start_date >= datetime.combine(date_debut, datetime.min.time()),
-                CalendarEvent.start_date <= datetime.combine(date_fin, datetime.max.time()),
-            )
-            .order_by(CalendarEvent.start_date)
-            .all()
-        )
+# ═══════════════════════════════════════════════════════════
+# HELPERS UI
+# ═══════════════════════════════════════════════════════════
 
-        return pd.DataFrame(
+
+def afficher_jour_expandable(jour: date, jour_complet: dict, jour_nom: str) -> None:
+    """Affiche un jour avec tous ses événements en expandable"""
+    is_today = jour == date.today()
+
+    # Header avec badge charge
+    charge_emoji = {
+        "faible": "🟢",
+        "normal": "🟡",
+        "intense": "🔴",
+    }.get(jour_complet.get("charge", "normal"), "⚪")
+
+    header = f"{charge_emoji} {jour_nom} {jour.strftime('%d/%m')}"
+    if is_today:
+        header = f"🔵 {header}"
+
+    with st.expander(header, expanded=is_today):
+        # Colonnes pour meilleure organisation
+        if jour_complet.get("repas"):
+            st.markdown("##### 🍽️ Repas")
+            for repas in jour_complet["repas"]:
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    st.write(f"**{repas['type'].capitalize()}**: {repas['recette']}")
+                with col2:
+                    st.caption(f"{repas['portions']} portions")
+
+        if jour_complet.get("activites"):
+            st.markdown("##### 🎨 Activités")
+            for act in jour_complet["activites"]:
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    label = "👶" if act.get("pour_jules") else "👨‍👩‍👧"
+                    st.write(f"{label} **{act['titre']}** ({act['type']})")
+                with col2:
+                    if act.get("budget"):
+                        st.caption(f"{act['budget']:.0f}€")
+
+        if jour_complet.get("projets"):
+            st.markdown("##### 🏗️ Projets")
+            for proj in jour_complet["projets"]:
+                priorite_color = {
+                    "basse": "🟢",
+                    "moyenne": "🟡",
+                    "haute": "🔴",
+                }.get(proj.get("priorite", "moyenne"), "⚪")
+                st.write(f"{priorite_color} **{proj['nom']}** - {proj['statut']}")
+
+        if jour_complet.get("events"):
+            st.markdown("##### 📅 Événements")
+            for event in jour_complet["events"]:
+                debut = event["debut"].strftime("%H:%M") if isinstance(event["debut"], datetime) else "—"
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    st.write(f"⏰ **{event['titre']}**")
+                    if event.get("lieu"):
+                        st.caption(f"📍 {event['lieu']}")
+                with col2:
+                    st.caption(debut)
+
+        if jour_complet.get("routines"):
+            st.markdown("##### ⏰ Routines")
+            for routine in jour_complet["routines"]:
+                heure = routine.get("heure", "—")
+                status = "✅" if routine.get("fait") else "⭕"
+                st.write(f"{status} **{routine['nom']}** ({heure})")
+
+        # Alertes du jour
+        if jour_complet.get("alertes"):
+            st.markdown("##### ⚠️ Alertes")
+            for alerte in jour_complet["alertes"]:
+                st.warning(alerte, icon="⚠️")
+
+        # Si vide
+        if not any(
             [
-                {
-                    "id": e.id,
-                    "titre": e.title,
-                    "description": e.description or "",
-                    "debut": e.start_date,
-                    "fin": e.end_date,
-                    "lieu": e.location or "",
-                    "categorie": e.category or "Autre",
-                    "ia": e.ai_generated,
-                }
-                for e in events
+                jour_complet.get("repas"),
+                jour_complet.get("activites"),
+                jour_complet.get("projets"),
+                jour_complet.get("events"),
+                jour_complet.get("routines"),
             ]
-        )
+        ):
+            st.caption("Aucun événement prévu ce jour")
+
+        # Charge visuelle
+        charge = jour_complet.get("charge_score", 0)
+        st.markdown(f"**Charge du jour**: {charge}/100")
+        st.progress(min(charge / 100, 1.0))
 
 
-def charger_repas_planifies(date_debut: date, date_fin: date) -> pd.DataFrame:
-    """Charge les repas planifiés sur une période"""
-    with get_db_context() as db:
-        meals = (
-            db.query(BatchMeal, Recipe)
-            .join(Recipe, BatchMeal.recipe_id == Recipe.id)
-            .filter(BatchMeal.scheduled_date >= date_debut, BatchMeal.scheduled_date <= date_fin)
-            .order_by(BatchMeal.scheduled_date)
-            .all()
-        )
-
-        return pd.DataFrame(
-            [
-                {
-                    "date": meal.scheduled_date,
-                    "titre": f"🍽️ {recipe.name}",
-                    "type": "repas",
-                    "details": f"{meal.portions} portions",
-                }
-                for meal, recipe in meals
-            ]
-        )
-
-
-def charger_projets_echeances(date_debut: date, date_fin: date) -> pd.DataFrame:
-    """Charge les échéances de projets"""
-    with get_db_context() as db:
-        projects = (
-            db.query(Project)
-            .filter(
-                Project.end_date >= date_debut,
-                Project.end_date <= date_fin,
-                Project.status.in_(["à faire", "en cours"]),
-            )
-            .all()
-        )
-
-        return pd.DataFrame(
-            [
-                {
-                    "date": p.end_date,
-                    "titre": f"🏗️ {p.name}",
-                    "type": "projet",
-                    "details": f"Échéance ({p.progress}% complété)",
-                }
-                for p in projects
-            ]
-        )
-
-
-def charger_routines_jour(date_jour: date) -> pd.DataFrame:
-    """Charge les routines pour un jour donné"""
-    with get_db_context() as db:
-        tasks = (
-            db.query(RoutineTask, Routine)
-            .join(Routine, RoutineTask.routine_id == Routine.id)
-            .filter(Routine.is_active, RoutineTask.status == "à faire")
-            .all()
-        )
-
-        return pd.DataFrame(
-            [
-                {
-                    "heure": task.scheduled_time or "—",
-                    "titre": f"⏰ {routine.name}",
-                    "type": "routine",
-                    "details": task.task_name,
-                }
-                for task, routine in tasks
-            ]
-        )
-
-
-def creer_evenement(
-    titre: str,
-    debut: datetime,
-    fin: datetime | None = None,
-    description: str = "",
-    lieu: str = "",
-    categorie: str = "Autre",
-):
-    """Crée un nouvel événement"""
-    with get_db_context() as db:
-        event = CalendarEvent(
-            title=titre,
-            start_date=debut,
-            end_date=fin,
-            description=description,
-            location=lieu,
-            category=categorie,
-            ai_generated=False,
-        )
-        db.add(event)
-        db.commit()
-
-
-def supprimer_evenement(event_id: int):
-    """Supprime un événement"""
-    with get_db_context() as db:
-        db.query(CalendarEvent).filter(CalendarEvent.id == event_id).delete()
-        db.commit()
-
-
-def get_vue_semaine(date_debut: date) -> dict:
-    """Génère une vue semaine avec tous les événements"""
-    date_fin = date_debut + timedelta(days=6)
-
-    # Charger tous les types d'événements
-    df_events = charger_evenements(date_debut, date_fin)
-    df_repas = charger_repas_planifies(date_debut, date_fin)
-    df_projets = charger_projets_echeances(date_debut, date_fin)
-
-    # Combiner
-    vue = {}
-
-    for i in range(7):
-        jour = date_debut + timedelta(days=i)
-        vue[jour] = {"events": [], "repas": [], "projets": [], "routines": []}
-
-        # Événements
-        if not df_events.empty:
-            events_jour = df_events[df_events["debut"].dt.date == jour]
-            vue[jour]["events"] = events_jour.to_dict("records")
-
-        # Repas
-        if not df_repas.empty:
-            repas_jour = df_repas[df_repas["date"] == jour]
-            vue[jour]["repas"] = repas_jour.to_dict("records")
-
-        # Projets
-        if not df_projets.empty:
-            projets_jour = df_projets[df_projets["date"] == jour]
-            vue[jour]["projets"] = projets_jour.to_dict("records")
-
-    return vue
-
-
-# ===================================
+# ═══════════════════════════════════════════════════════════
 # MODULE PRINCIPAL
-# ===================================
+# ═══════════════════════════════════════════════════════════
 
 
 def app():
-    """Module Calendrier avec IA intégrée"""
+    """Module Calendrier unifié"""
 
     st.title("📅 Calendrier Familial")
-    st.caption("Vue d'ensemble du planning avec suggestions IA")
+    st.caption("Vue intégrée de tous les événements familiaux")
 
-    # Récupérer l'agent IA
-    _agent: AgentIA = st.session_state.get("agent_ia")
+    # ═══════════════════════════════════════════════════════════
+    # NAVIGATION SEMAINE
+    # ═══════════════════════════════════════════════════════════
 
-    # ===================================
-    # NAVIGATION DATE
-    # ===================================
-
-    if "current_week_start" not in st.session_state:
-        # Début de semaine (lundi)
+    if "planning_week_start" not in st.session_state:
         today = date.today()
-        st.session_state.current_week_start = today - timedelta(days=today.weekday())
+        st.session_state.planning_week_start = today - timedelta(days=today.weekday())
 
     col_nav1, col_nav2, col_nav3 = st.columns([1, 2, 1])
 
     with col_nav1:
         if st.button("⬅️ Semaine précédente", use_container_width=True):
-            st.session_state.current_week_start -= timedelta(days=7)
+            st.session_state.planning_week_start -= timedelta(days=7)
             st.rerun()
 
     with col_nav2:
-        week_start = st.session_state.current_week_start
+        week_start = st.session_state.planning_week_start
         week_end = week_start + timedelta(days=6)
-        st.markdown(f"### {week_start.strftime('%d/%m')} — {week_end.strftime('%d/%m/%Y')}")
+        st.markdown(
+            f"<h3 style='text-align: center;'>{week_start.strftime('%d/%m')} — {week_end.strftime('%d/%m/%Y')}</h3>",
+            unsafe_allow_html=True,
+        )
 
     with col_nav3:
         if st.button("Semaine suivante ➡️", use_container_width=True):
-            st.session_state.current_week_start += timedelta(days=7)
+            st.session_state.planning_week_start += timedelta(days=7)
             st.rerun()
 
     st.markdown("---")
 
-    # ===================================
-    # TABS PRINCIPAUX
-    # ===================================
+    # ═══════════════════════════════════════════════════════════
+    # CHARGEMENT DONNÉES
+    # ═══════════════════════════════════════════════════════════
 
-    tab1, tab2, tab3 = st.tabs(["📅 Vue Semaine", "➕ Nouvel Événement", "📊 Vue Mois"])
+    service = get_planning_service()
+    semaine = service.get_semaine_complete(st.session_state.planning_week_start)
 
-    # ===================================
-    # TAB 1 : VUE SEMAINE
-    # ===================================
+    if not semaine:
+        st.error("❌ Erreur lors du chargement de la semaine")
+        return
 
-    with tab1:
-        st.subheader("Planning de la semaine")
+    # ═══════════════════════════════════════════════════════════
+    # STATS SEMAINE
+    # ═══════════════════════════════════════════════════════════
 
-        vue = get_vue_semaine(st.session_state.current_week_start)
+    st.markdown("### 📊 Résumé de la semaine")
 
-        # Afficher par jour
-        for jour, contenu in vue.items():
-            jour_nom = calendar.day_name[jour.weekday()]
+    cols_stats = st.columns(5)
 
-            # Highlight aujourd'hui
-            is_today = jour == date.today()
+    stats = semaine.stats_semaine
+    with cols_stats[0]:
+        st.metric("🍽️ Repas", stats.get("total_repas", 0))
 
-            with st.expander(
-                f"{'🔵 ' if is_today else ''}{jour_nom} {jour.strftime('%d/%m')}", expanded=is_today
-            ):
-                # Événements du calendrier
-                if contenu["events"]:
-                    st.markdown("**📅 Événements**")
-                    for event in contenu["events"]:
-                        heure = event["debut"].strftime("%H:%M")
-                        st.write(f"• {heure} — **{event['titre']}**")
-                        if event["lieu"]:
-                            st.caption(f"📍 {event['lieu']}")
+    with cols_stats[1]:
+        st.metric("🎨 Activités", stats.get("total_activites", 0))
 
-                # Repas planifiés
-                if contenu["repas"]:
-                    st.markdown("**🍽️ Repas**")
-                    for repas in contenu["repas"]:
-                        st.write(f"• {repas['titre']}")
-                        st.caption(repas["details"])
+    with cols_stats[2]:
+        st.metric("👶 Pour Jules", stats.get("activites_jules", 0))
 
-                # Échéances projets
-                if contenu["projets"]:
-                    st.markdown("**🏗️ Projets**")
-                    for projet in contenu["projets"]:
-                        st.write(f"• {projet['titre']}")
-                        st.caption(projet["details"])
+    with cols_stats[3]:
+        st.metric("🏗️ Projets", stats.get("total_projets", 0))
 
-                # Si rien
-                if not any([contenu["events"], contenu["repas"], contenu["projets"]]):
-                    st.caption("Aucun événement prévu")
+    with cols_stats[4]:
+        budget = stats.get("budget_total", 0)
+        st.metric(f"💰 Budget", f"{budget:.0f}€")
 
+    st.markdown("---")
+
+    # ═══════════════════════════════════════════════════════════
+    # ALERTES SEMAINE
+    # ═══════════════════════════════════════════════════════════
+
+    if semaine.alertes_semaine:
+        st.markdown("### ⚠️ Alertes Semaine")
+        for alerte in semaine.alertes_semaine:
+            st.warning(alerte, icon="⚠️")
         st.markdown("---")
 
-        # Statistiques semaine
-        st.markdown("### 📊 Résumé de la semaine")
+    # ═══════════════════════════════════════════════════════════
+    # CHARGE GLOBALE SEMAINE
+    # ═══════════════════════════════════════════════════════════
 
-        total_events = sum([len(c["events"]) for c in vue.values()])
-        total_repas = sum([len(c["repas"]) for c in vue.values()])
-        total_projets = sum([len(c["projets"]) for c in vue.values()])
+    charge_color = {
+        "faible": "🟢",
+        "normal": "🟡",
+        "intense": "🔴",
+    }
+    charge_emoji = charge_color.get(semaine.charge_globale, "⚪")
 
-        col_s1, col_s2, col_s3 = st.columns(3)
+    st.markdown(f"### {charge_emoji} Charge semaine globale: **{semaine.charge_globale.upper()}**")
+    st.progress(min(stats.get("charge_moyenne", 50) / 100, 1.0))
 
-        with col_s1:
-            st.metric("Événements", total_events)
+    st.markdown("---")
 
-        with col_s2:
-            st.metric("Repas planifiés", total_repas)
+    # ═══════════════════════════════════════════════════════════
+    # VUE JOURS DÉTAILLÉE
+    # ═══════════════════════════════════════════════════════════
 
-        with col_s3:
-            st.metric("Échéances projets", total_projets)
+    st.markdown("### 📅 Détail par jour")
 
-    # ===================================
-    # TAB 2 : NOUVEL ÉVÉNEMENT
-    # ===================================
+    jours_semaine = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
 
-    with tab2:
-        st.subheader("➕ Créer un événement")
+    for i in range(7):
+        jour = st.session_state.planning_week_start + timedelta(days=i)
+        jour_str = jour.isoformat()
+        jour_complet = semaine.jours.get(jour_str)
 
-        with st.form("form_event"):
-            titre = st.text_input("Titre *", placeholder="Ex: RDV médecin")
+        if jour_complet:
+            afficher_jour_expandable(jour, jour_complet.dict(), jours_semaine[i].capitalize())
+
+    st.markdown("---")
+
+    # ═══════════════════════════════════════════════════════════
+    # ONGLETS ACTIONS
+    # ═══════════════════════════════════════════════════════════
+
+    tab1, tab2, tab3 = st.tabs(["➕ Nouvel événement", "🤖 Générer avec IA", "📅 Vue mois"])
+
+    with tab1:
+        st.subheader("➕ Ajouter un événement")
+
+        with st.form("form_event_planning"):
+            titre = st.text_input("Titre *", placeholder="Ex: RDV médecin, Sortie parc...")
+            type_event = st.selectbox(
+                "Type d'événement",
+                ["famille", "santé", "loisirs", "social", "travail", "autre"],
+            )
 
             col_e1, col_e2 = st.columns(2)
-
             with col_e1:
                 date_event = st.date_input("Date *", value=date.today())
-                heure_debut = st.time_input("Heure de début", value=datetime.now().time())
+                heure = st.time_input("Heure", value=datetime.now().time())
 
             with col_e2:
-                categorie = st.selectbox(
-                    "Catégorie", ["Famille", "Santé", "Travail", "Loisirs", "Social", "Autre"]
-                )
-                heure_fin = st.time_input("Heure de fin (optionnel)", value=None)
+                lieu = st.text_input("Lieu", placeholder="Ex: Parc du château")
+                couleur = st.selectbox("Couleur", ["bleu", "rouge", "vert", "jaune", "violet"])
 
-            lieu = st.text_input("Lieu (optionnel)", placeholder="Ex: Cabinet Dr. Dupont")
-
-            description = st.text_area(
-                "Description (optionnel)", placeholder="Détails, rappels, préparation..."
-            )
+            description = st.text_area("Description (optionnel)")
 
             submitted = st.form_submit_button("💾 Créer l'événement", type="primary")
 
@@ -333,31 +266,56 @@ def app():
                 if not titre:
                     st.error("Le titre est obligatoire")
                 else:
-                    debut = datetime.combine(date_event, heure_debut)
-                    fin = datetime.combine(date_event, heure_fin) if heure_fin else None
-
-                    creer_evenement(titre, debut, fin, description, lieu, categorie)
-                    st.success(f"✅ Événement '{titre}' créé")
+                    debut = datetime.combine(date_event, heure)
+                    service.creer_event(
+                        titre=titre,
+                        date_debut=debut,
+                        type_event=type_event,
+                        description=description,
+                        lieu=lieu,
+                        couleur=couleur,
+                    )
+                    st.success(f"✅ Événement '{titre}' créé!")
                     st.balloons()
                     st.rerun()
 
-        st.markdown("---")
-
-        # Événements récurrents (suggestions)
-        st.markdown("### 🔁 Créer événements récurrents")
+    with tab2:
+        st.subheader("🤖 Générer semaine avec IA")
 
         st.info(
-            "💡 Fonctionnalité à venir : Ajouter des événements répétitifs (hebdomadaires, mensuels)"
+            "💡 L'IA peut générer une semaine complète équilibrée basée sur vos contraintes et objectifs familiaux"
         )
 
-    # ===================================
-    # TAB 3 : VUE MOIS
-    # ===================================
+        with st.form("form_gen_ia"):
+            budget = st.slider("Budget semaine (€)", 100, 1000, 400)
+            energie = st.selectbox("Niveau d'énergie famille", ["faible", "normal", "élevé"])
+            objectifs = st.multiselect(
+                "Objectifs santé",
+                ["Cardio", "Yoga", "Detente", "Temps en famille", "Sommeil"],
+            )
+
+            gen_submitted = st.form_submit_button("🚀 Générer une semaine équilibrée", type="primary")
+
+            if gen_submitted:
+                with st.spinner("🤖 L'IA réfléchit..."):
+                    result = service.generer_semaine_ia(
+                        date_debut=st.session_state.planning_week_start,
+                        contraintes={"budget": budget, "energie": energie},
+                        contexte={"objectifs_sante": objectifs, "jules_age_mois": 19},
+                    )
+
+                    if result:
+                        st.success("✅ Semaine générée!")
+                        st.markdown(f"**Harmonie**: {result.harmonie_description}")
+                        with st.expander("Raisons de cette proposition"):
+                            for raison in result.raisons:
+                                st.write(f"• {raison}")
+                    else:
+                        st.error("❌ Erreur lors de la génération")
 
     with tab3:
         st.subheader("📅 Vue mensuelle")
 
-        # Sélection mois
         col_m1, col_m2 = st.columns([2, 1])
 
         with col_m1:
@@ -368,52 +326,27 @@ def app():
         with col_m2:
             annee = st.number_input("Année", 2020, 2030, today.year)
 
-        # Générer calendrier
-        cal = calendar.monthcalendar(annee, mois_num)
-
         st.markdown(f"### {mois_select} {annee}")
 
-        # Charger événements du mois
-        premier_jour = date(annee, mois_num, 1)
-        dernier_jour = date(annee, mois_num, calendar.monthrange(annee, mois_num)[1])
+        # Calendrier minimal
+        cal = calendar.monthcalendar(annee, mois_num)
 
-        df_events_mois = charger_evenements(premier_jour, dernier_jour)
-        df_repas_mois = charger_repas_planifies(premier_jour, dernier_jour)
-
-        # Afficher calendrier
         cols_jours = st.columns(7)
-        jours_semaine = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
+        jours_semaine_abbr = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
 
         for i, col in enumerate(cols_jours):
-            col.markdown(f"**{jours_semaine[i]}**")
+            col.markdown(f"**{jours_semaine_abbr[i]}**")
 
-        for semaine in cal:
+        for semaine_cal in cal:
             cols = st.columns(7)
-
-            for i, jour in enumerate(semaine):
+            for i, jour in enumerate(semaine_cal):
                 if jour == 0:
                     cols[i].write("")
                 else:
                     date_jour = date(annee, mois_num, jour)
+                    is_today = date_jour == date.today()
 
-                    # Compter événements
-                    nb_events = 0
-                    if not df_events_mois.empty:
-                        nb_events += len(
-                            df_events_mois[df_events_mois["debut"].dt.date == date_jour]
-                        )
-                    if not df_repas_mois.empty:
-                        nb_events += len(df_repas_mois[df_repas_mois["date"] == date_jour])
+                    style = "🔵" if is_today else ""
+                    cols[i].write(f"{style} **{jour}**")
 
-                    # Highlight aujourd'hui
-                    style = "🔵" if date_jour == date.today() else ""
-
-                    if nb_events > 0:
-                        cols[i].markdown(f"{style} **{jour}** ({nb_events})")
-                    else:
-                        cols[i].write(f"{style} {jour}")
-
-        st.markdown("---")
-
-        # Légende
-        st.caption("🔵 = Aujourd'hui | (nombre) = Événements du jour")
+        st.caption("🔵 = Aujourd'hui")
