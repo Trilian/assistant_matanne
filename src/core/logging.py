@@ -42,7 +42,15 @@ def configure_logging(level: str | None = None):
     root.addHandler(handler)
 
 
-__all__ = ["configure_logging"]
+__all__ = [
+    "configure_logging",
+    "FiltreSecrets",
+    "FormatteurColore",
+    "GestionnaireLog",
+    "LogManager",
+    "obtenir_logger",
+    "get_logger",
+]
 """
 Logging - Système de logging centralisé.
 
@@ -50,8 +58,66 @@ Ce module fournit un gestionnaire de logs avec :
 - Formatage coloré pour la console
 - Configuration automatique
 - Niveaux de log adaptatifs
+- Filtrage automatique des secrets
 """
+import re
 import sys
+
+
+class FiltreSecrets(logging.Filter):
+    """
+    Filtre qui masque les informations sensibles dans les logs.
+    
+    Patterns masqués :
+    - URLs de base de données (postgresql://, mysql://, etc.)
+    - Clés API (API_KEY, SECRET_KEY, etc.)
+    - Tokens d'authentification
+    """
+    
+    PATTERNS_SECRETS = [
+        # URLs de base de données avec credentials
+        (r'(postgresql|mysql|mongodb|redis):\/\/[^:]+:[^@]+@', r'\1://***:***@'),
+        # DATABASE_URL complète
+        (r'DATABASE_URL[=:]\s*["\']?[^"\'\s]+["\']?', 'DATABASE_URL=***MASKED***'),
+        # Clés API génériques
+        (r'(api[_-]?key|secret[_-]?key|access[_-]?token|auth[_-]?token)[=:]\s*["\']?[\w\-]+["\']?', r'\1=***MASKED***'),
+        # Tokens Bearer
+        (r'Bearer\s+[\w\-\.]+', 'Bearer ***MASKED***'),
+        # Mots de passe dans les chaînes
+        (r'(password|pwd|pass)[=:]\s*["\']?[^"\'\s]+["\']?', r'\1=***MASKED***'),
+        # Clés Mistral
+        (r'(mistral[_-]?api[_-]?key)[=:]\s*["\']?[\w\-]+["\']?', r'\1=***MASKED***'),
+    ]
+    """Patterns de détection des secrets avec leur remplacement."""
+    
+    def filter(self, record: logging.LogRecord) -> bool:
+        """
+        Filtre un enregistrement de log pour masquer les secrets.
+        
+        Args:
+            record: Enregistrement de log
+            
+        Returns:
+            True (on garde toujours l'enregistrement, on le modifie juste)
+        """
+        if record.msg:
+            message = str(record.msg)
+            for pattern, replacement in self.PATTERNS_SECRETS:
+                message = re.sub(pattern, replacement, message, flags=re.IGNORECASE)
+            record.msg = message
+            
+        # Aussi filtrer les arguments
+        if record.args:
+            args_list = list(record.args) if isinstance(record.args, tuple) else [record.args]
+            filtered_args = []
+            for arg in args_list:
+                if isinstance(arg, str):
+                    for pattern, replacement in self.PATTERNS_SECRETS:
+                        arg = re.sub(pattern, replacement, arg, flags=re.IGNORECASE)
+                filtered_args.append(arg)
+            record.args = tuple(filtered_args)
+            
+        return True
 
 
 class FormatteurColore(logging.Formatter):
@@ -103,7 +169,8 @@ class GestionnaireLog:
         """
         Initialise le système de logging.
 
-        Configure le logger root avec un handler console coloré.
+        Configure le logger root avec un handler console coloré
+        et un filtre pour masquer les secrets.
         Cette méthode est idempotente (peut être appelée plusieurs fois).
 
         Args:
@@ -128,6 +195,10 @@ class GestionnaireLog:
             "%(levelname)-8s | %(name)-25s | %(message)s", datefmt="%H:%M:%S"
         )
         console_handler.setFormatter(format_console)
+        
+        # Ajouter le filtre de secrets
+        console_handler.addFilter(FiltreSecrets())
+        
         root_logger.addHandler(console_handler)
 
         GestionnaireLog._initialise = True

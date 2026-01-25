@@ -206,7 +206,26 @@ class BaseService(Generic[T]):
         merge_strategy: Callable[[dict, dict], dict],
         db: Session | None = None,
     ) -> tuple[int, int]:
-        """Création en masse avec fusion intelligente"""
+        """Création en masse avec fusion intelligente.
+        
+        Crée ou met à jour des entités en fonction d'une clé de fusion.
+        Utile pour l'import de données avec déduplication.
+        
+        Args:
+            items_data: Liste de dictionnaires de données
+            merge_key: Champ utilisé pour identifier les doublons
+            merge_strategy: Fonction (existant, nouveau) -> données fusionnées
+            db: Session DB (optionnelle)
+            
+        Returns:
+            Tuple (nombre créés, nombre fusionnés)
+            
+        Example:
+            >>> def merge(old, new):
+            ...     return {**old, **new}
+            >>> service.bulk_create_with_merge(data, 'nom', merge)
+            (5, 3)  # 5 créés, 3 mis à jour
+        """
         from src.core.errors import gerer_erreurs
 
         @gerer_erreurs(afficher_dans_ui=True)
@@ -253,7 +272,24 @@ class BaseService(Generic[T]):
         additional_filters: dict | None = None,
         db: Session | None = None,
     ) -> dict:
-        """Statistiques génériques"""
+        """Calcule des statistiques génériques sur les entités.
+        
+        Args:
+            group_by_fields: Champs pour grouper les comptages
+            count_filters: Filtres conditionnels {'nom': {'champ': valeur}}
+            additional_filters: Filtres globaux
+            db: Session DB (optionnelle)
+            
+        Returns:
+            Dict avec 'total' et statistiques groupées
+            
+        Example:
+            >>> service.get_stats(
+            ...     group_by_fields=['statut'],
+            ...     count_filters={'actifs': {'actif': True}}
+            ... )
+            {'total': 100, 'by_statut': {'en_cours': 50, 'termine': 50}, 'actifs': 80}
+        """
         from src.core.errors import gerer_erreurs
 
         @gerer_erreurs(afficher_dans_ui=False, valeur_fallback={})
@@ -312,14 +348,40 @@ class BaseService(Generic[T]):
     # ════════════════════════════════════════════════════════════
 
     def count_by_status(self, status_field: str = "statut", db: Session | None = None) -> dict[str, int]:
-        """Compte par statut"""
+        """Compte les entités groupées par statut.
+        
+        Args:
+            status_field: Nom du champ de statut (défaut: 'statut')
+            db: Session DB (optionnelle)
+            
+        Returns:
+            Dict {statut: nombre}
+            
+        Example:
+            >>> service.count_by_status()
+            {'en_cours': 10, 'termine': 5, 'annule': 2}
+        """
         stats = self.get_stats(group_by_fields=[status_field], db=db)
         return stats.get(f"by_{status_field}", {})
 
     def mark_as(
         self, item_id: int, status_field: str, status_value: str, db: Session | None = None
     ) -> bool:
-        """Marque avec un statut"""
+        """Marque une entité avec un statut spécifique.
+        
+        Args:
+            item_id: ID de l'entité
+            status_field: Nom du champ de statut
+            status_value: Nouvelle valeur du statut
+            db: Session DB (optionnelle)
+            
+        Returns:
+            True si mis à jour, False sinon
+            
+        Example:
+            >>> service.mark_as(42, 'statut', 'termine')
+            True
+        """
         return self.update(item_id, {status_field: status_value}, db=db) is not None
 
     # ════════════════════════════════════════════════════════════
@@ -327,7 +389,18 @@ class BaseService(Generic[T]):
     # ════════════════════════════════════════════════════════════
 
     def _with_session(self, func: Callable, db: Session | None = None) -> Any:
-        """Exécute fonction avec session"""
+        """Exécute une fonction avec une session DB.
+        
+        Si une session est fournie, l'utilise directement.
+        Sinon, crée une nouvelle session via le context manager.
+        
+        Args:
+            func: Fonction à exécuter (prend Session en paramètre)
+            db: Session DB existante (optionnelle)
+            
+        Returns:
+            Résultat de la fonction
+        """
         from src.core.database import obtenir_contexte_db
 
         if db:
@@ -336,7 +409,20 @@ class BaseService(Generic[T]):
             return func(session)
 
     def _apply_filters(self, query, filters: dict):
-        """Applique filtres génériques"""
+        """Applique des filtres génériques à une requête SQLAlchemy.
+        
+        Supporte les opérateurs: gte, lte, in, like.
+        
+        Args:
+            query: Requête SQLAlchemy
+            filters: Dict {champ: valeur} ou {champ: {'op': valeur}}
+            
+        Returns:
+            Requête filtrée
+            
+        Example:
+            >>> _apply_filters(query, {'prix': {'lte': 100}, 'actif': True})
+        """
         for field, value in filters.items():
             if not hasattr(self.model, field):
                 continue
@@ -356,7 +442,16 @@ class BaseService(Generic[T]):
         return query
 
     def _model_to_dict(self, obj: Any) -> dict:
-        """Convertit modèle en dict"""
+        """Convertit un objet modèle SQLAlchemy en dictionnaire.
+        
+        Gère la sérialisation des dates en ISO format.
+        
+        Args:
+            obj: Instance de modèle SQLAlchemy
+            
+        Returns:
+            Dict avec les valeurs des colonnes
+        """
         result = {}
         for column in obj.__table__.columns:
             value = getattr(obj, column.name)
@@ -366,7 +461,11 @@ class BaseService(Generic[T]):
         return result
 
     def _invalider_cache(self):
-        """Invalide le cache"""
+        """Invalide le cache associé à ce modèle.
+        
+        Utilise le nom du modèle en minuscules comme pattern de recherche.
+        Appelé automatiquement après create, update, delete.
+        """
         from src.core.cache import Cache
 
         Cache.invalider(pattern=self.model_name.lower())

@@ -1,0 +1,139 @@
+"""
+Models - Point d'entrée unifié pour tous les modèles SQLAlchemy.
+
+Architecture modulaire :
+- base.py      : Base, MetaData, Enums
+- recettes.py  : Recette, Ingredient, EtapeRecette, etc.
+- inventaire.py: ArticleInventaire, HistoriqueInventaire
+- courses.py   : ArticleCourses, ModeleCourses
+- planning.py  : Planning, Repas, CalendarEvent
+- famille.py   : ChildProfile, Milestone, FamilyActivity, etc.
+- sante.py     : HealthRoutine, HealthObjective, HealthEntry
+- maison.py    : Project, Routine, GardenItem, etc.
+
+Usage:
+    from src.core.models import Recette, Ingredient, Planning
+    # ou
+    from src.core.models import Base, metadata
+"""
+
+# Base et énumérations
+from .base import (
+    Base,
+    metadata,
+    PrioriteEnum,
+    SaisonEnum,
+    TypeRepasEnum,
+    TypeVersionRecetteEnum,
+    obtenir_valeurs_enum,
+)
+
+# Recettes et cuisine
+from .recettes import (
+    Ingredient,
+    Recette,
+    Recipe,  # Alias
+    RecetteIngredient,
+    EtapeRecette,
+    VersionRecette,
+    HistoriqueRecette,
+    BatchMeal,
+)
+
+# Inventaire
+from .inventaire import (
+    ArticleInventaire,
+    HistoriqueInventaire,
+)
+
+# Courses
+from .courses import (
+    ArticleCourses,
+    ModeleCourses,
+    ArticleModele,
+)
+
+# Planning et calendrier
+from .planning import (
+    Planning,
+    Repas,
+    CalendarEvent,
+)
+
+# Famille et bien-être
+from .famille import (
+    ChildProfile,
+    WellbeingEntry,
+    Milestone,
+    FamilyActivity,
+    FamilyBudget,
+    ShoppingItem,
+)
+
+# Santé
+from .sante import (
+    HealthRoutine,
+    HealthObjective,
+    HealthEntry,
+)
+
+# Maison (projets, routines, jardin)
+from .maison import (
+    Project,
+    ProjectTask,
+    Routine,
+    RoutineTask,
+    GardenItem,
+    GardenLog,
+)
+
+
+# Export explicite de tous les symboles
+__all__ = [
+    # Base
+    "Base",
+    "metadata",
+    "PrioriteEnum",
+    "SaisonEnum",
+    "TypeRepasEnum",
+    "TypeVersionRecetteEnum",
+    "obtenir_valeurs_enum",
+    # Recettes
+    "Ingredient",
+    "Recette",
+    "Recipe",
+    "RecetteIngredient",
+    "EtapeRecette",
+    "VersionRecette",
+    "HistoriqueRecette",
+    "BatchMeal",
+    # Inventaire
+    "ArticleInventaire",
+    "HistoriqueInventaire",
+    # Courses
+    "ArticleCourses",
+    "ModeleCourses",
+    "ArticleModele",
+    # Planning
+    "Planning",
+    "Repas",
+    "CalendarEvent",
+    # Famille
+    "ChildProfile",
+    "WellbeingEntry",
+    "Milestone",
+    "FamilyActivity",
+    "FamilyBudget",
+    "ShoppingItem",
+    # Santé
+    "HealthRoutine",
+    "HealthObjective",
+    "HealthEntry",
+    # Maison
+    "Project",
+    "ProjectTask",
+    "Routine",
+    "RoutineTask",
+    "GardenItem",
+    "GardenLog",
+]

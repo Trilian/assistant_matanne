@@ -18,7 +18,7 @@ from unittest.mock import MagicMock, patch
 from src.modules.planning.components import (
     afficher_badge_charge,
     afficher_badge_priorite,
-    afficher_badge_jules_adapte,
+    afficher_badge_activite_jules,  # Nom corrigé
     carte_repas,
     carte_activite,
     carte_projet,
@@ -27,6 +27,8 @@ from src.modules.planning.components import (
     afficher_liste_alertes,
     afficher_stats_semaine,
 )
+# Alias pour compatibilité avec les tests
+afficher_badge_jules_adapte = afficher_badge_activite_jules
 
 
 # ═══════════════════════════════════════════════════════════
