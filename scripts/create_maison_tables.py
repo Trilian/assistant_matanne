@@ -5,8 +5,13 @@ Exécute la création de tables depuis les modèles SQLAlchemy
 """
 
 import sys
+import os
 import logging
 from pathlib import Path
+
+# Ajouter le répertoire parent au path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+os.chdir(Path(__file__).parent.parent)
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s | %(message)s")
 logger = logging.getLogger(__name__)

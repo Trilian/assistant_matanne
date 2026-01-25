@@ -125,6 +125,7 @@ def creer_routine(
 
 
 @with_db_session
+@with_db_session
 def ajouter_tache_routine(
     routine_id: int,
     nom: str,
