@@ -371,8 +371,7 @@ def app():
         ("📦 Inventaire", "cuisine.inventaire"),
         ("🛒 Courses", "cuisine.courses"),
         ("🥘 Batch Cooking", "cuisine.batch_cooking"),
-        (" Bien-être", "famille.bien_etre"),
-        ("⏰ Routines", "famille.routines"),
+
         ("🏗️ Projets", "maison.projets"),
         ("🌱 Jardin", "maison.jardin"),
     ]

@@ -153,8 +153,6 @@ class GestionnaireEtat:
             "famille.sante": "Santé & Sport",
             "famille.activites": "Activités",
             "famille.shopping": "Shopping",
-            "famille.bien_etre": "Bien-être",
-            "famille.routines": "Routines",
             "maison.projets": "Projets",
             "maison.jardin": "Jardin",
             "maison.entretien": "Entretien",

@@ -225,9 +225,7 @@ def afficher_sidebar():
                 "💪 Santé & Sport": "famille.sante",
                 "🎨 Activités": "famille.activites",
                 "🛍️ Shopping": "famille.shopping",
-                "—": None,
-                " Bien-être (legacy)": "famille.bien_etre",
-                "🔄 Routines (legacy)": "famille.routines",
+
             },
             "🏠 Maison": {
                 "📋 Projets": "maison.projets",
