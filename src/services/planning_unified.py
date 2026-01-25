@@ -244,14 +244,14 @@ class PlanningAIService(BaseService[CalendarEvent], BaseAIService, PlanningAIMix
         activites = (
             db.query(FamilyActivity)
             .filter(
-                FamilyActivity.date_debut >= datetime.combine(date_debut, datetime.min.time()),
-                FamilyActivity.date_debut <= datetime.combine(date_fin, datetime.max.time()),
+                FamilyActivity.date_prevue >= datetime.combine(date_debut, datetime.min.time()).date(),
+                FamilyActivity.date_prevue <= datetime.combine(date_fin, datetime.max.time()).date(),
             )
             .all()
         )
 
         for act in activites:
-            jour_str = act.date_debut.date().isoformat()
+            jour_str = act.date_prevue.isoformat()
             if jour_str not in activites_dict:
                 activites_dict[jour_str] = []
 
@@ -259,11 +259,11 @@ class PlanningAIService(BaseService[CalendarEvent], BaseAIService, PlanningAIMix
                 "id": act.id,
                 "titre": act.titre,
                 "type": act.type_activite,
-                "debut": act.date_debut,
-                "fin": act.date_fin,
+                "debut": act.date_prevue,
+                "fin": act.date_prevue,  # FamilyActivity n'a pas de date_fin séparée
                 "lieu": act.lieu,
-                "budget": act.budget_estime or 0,
-                "pour_jules": act.adapte_pour_jules,
+                "budget": act.cout_estime or 0,
+                "duree": act.duree_heures or 0,
             })
 
         return activites_dict

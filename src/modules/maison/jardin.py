@@ -1,594 +1,449 @@
 """
-Module Jardin avec Agent IA et Météo intégrés
-Gestion du jardin avec suggestions selon saison et météo
+Module Jardin - Gestion du jardin avec IA intégrée
+Conseils saisonniers, arrosage intelligent, récoltes planifiées
 """
 
-import asyncio
 from datetime import date, timedelta
-
-import pandas as pd
 import streamlit as st
+import pandas as pd
+import plotly.graph_objects as go
 
-from src.core.ai_agent import AgentIA
 from src.core.database import get_db_context
 from src.core.models import GardenItem, GardenLog
+from src.core.decorators import with_db_session
+from src.services.base_ai_service import BaseAIService
+from src.core.ai import ClientIA
+from src.modules.maison.helpers import (
+    charger_plantes,
+    get_plantes_a_arroser,
+    get_recoltes_proches,
+    get_stats_jardin,
+    get_saison,
+    clear_maison_cache
+)
 
-## NOTE: évite l'import direct de `settings` (ancienne API). Pas utilisé ici.
+
+# ════════════════════════════════════════════════════════════════════════════
+# SERVICE IA JARDIN
+# ════════════════════════════════════════════════════════════════════════════
 
 
-# ===================================
-# HELPERS
-# ===================================
-
-
-def charger_plantes() -> pd.DataFrame:
-    """Charge toutes les plantes du jardin"""
-    with get_db_context() as db:
-        items = db.query(GardenItem).order_by(GardenItem.name).all()
-
-        return pd.DataFrame(
-            [
-                {
-                    "id": i.id,
-                    "nom": i.name,
-                    "categorie": i.category,
-                    "plantation": i.planting_date,
-                    "recolte": i.harvest_date,
-                    "quantite": i.quantity,
-                    "emplacement": i.location or "—",
-                    "arrosage_freq": i.watering_frequency_days,
-                    "dernier_arrosage": i.last_watered,
-                    "notes": i.notes or "",
-                }
-                for i in items
-            ]
+class JardinService(BaseAIService):
+    """Service IA pour les conseils et suggestions de jardin"""
+    
+    def __init__(self, client: ClientIA = None):
+        if client is None:
+            client = ClientIA()
+        super().__init__(
+            client=client,
+            cache_prefix="jardin",
+            default_ttl=3600,
+            service_name="jardin"
+        )
+    
+    async def generer_conseils_saison(self, saison: str) -> str:
+        """Génère des conseils spécifiques à la saison"""
+        prompt = f"""Tu es un expert jardinier. Donne 3-4 conseils pratiques 
+pour les travaux de jardinage en {saison} (maintenant). Sois concis et actionnable."""
+        
+        return await self.call_with_cache(
+            prompt=prompt,
+            system_prompt="Tu es un expert en jardinage et agriculture biologique",
+            max_tokens=500
+        )
+    
+    async def suggerer_plantes_saison(self, saison: str, climat: str = "tempéré") -> str:
+        """Suggère des plantes à planter cette saison"""
+        prompt = f"""Suggère 5 plantes/légumes parfaits à planter en {saison} 
+sous climat {climat}. Format: "- Nom (type) : description courte"."""
+        
+        return await self.call_with_cache(
+            prompt=prompt,
+            system_prompt="Tu es expert en jardinage et sélection de plantes",
+            max_tokens=600
+        )
+    
+    async def conseil_arrosage(self, nom_plante: str, saison: str) -> str:
+        """Conseil d'arrosage pour une plante spécifique"""
+        prompt = f"""Donne un conseil d'arrosage pour {nom_plante} en {saison}. 
+Inclus: fréquence, quantité, moment de la journée."""
+        
+        return await self.call_with_cache(
+            prompt=prompt,
+            system_prompt="Tu es expert en arrosage et soins des plantes",
+            max_tokens=300
         )
 
 
+def get_jardin_service() -> JardinService:
+    """Factory pour obtenir le service jardin"""
+    return JardinService()
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# HELPERS MÉTIER
+# ════════════════════════════════════════════════════════════════════════════
+
+
+@with_db_session
 def ajouter_plante(
     nom: str,
-    categorie: str,
-    plantation: date,
-    quantite: int,
+    type_plante: str,
     emplacement: str,
-    freq_arrosage: int,
-    recolte: date = None,
-):
-    """Ajoute une plante au jardin"""
-    with get_db_context() as db:
-        plante = GardenItem(
-            name=nom,
-            category=categorie,
-            planting_date=plantation,
-            harvest_date=recolte,
-            quantity=quantite,
+    date_plantation: date = None,
+    date_recolte: date = None,
+    notes: str = "",
+    db=None
+) -> bool:
+    """Ajoute une nouvelle plante au jardin"""
+    try:
+        item = GardenItem(
+            nom=nom,
+            type=type_plante,
             location=emplacement,
-            watering_frequency_days=freq_arrosage,
-            last_watered=date.today(),
+            date_plantation=date_plantation or date.today(),
+            date_recolte_prevue=date_recolte,
+            notes=notes,
+            statut="actif"
         )
-        db.add(plante)
+        db.add(item)
         db.commit()
+        clear_maison_cache()
+        return True
+    except Exception as e:
+        st.error(f"❌ Erreur ajout plante: {e}")
+        return False
 
 
-def arroser_plante(item_id: int):
-    """Marque une plante comme arrosée"""
-    with get_db_context() as db:
-        # Utiliser `db.get` si disponible (SQLAlchemy 2.0), sinon fallback
-        try:
-            plante = db.get(GardenItem, item_id)
-        except AttributeError:
-            plante = db.query(GardenItem).filter_by(id=item_id).first()
-
-        if plante:
-            plante.last_watered = date.today()
-
-            # Ajouter log
-            log = GardenLog(
-                item_id=item_id, action="Arrosage", date=date.today(), notes="Arrosage régulier"
-            )
-            db.add(log)
-            db.commit()
-
-
-def ajouter_log(item_id: int, action: str, notes: str = ""):
-    """Ajoute une entrée au journal du jardin"""
-    with get_db_context() as db:
-        log = GardenLog(item_id=item_id, action=action, date=date.today(), notes=notes)
+@with_db_session
+def arroser_plante(item_id: int, notes: str = "", db=None) -> bool:
+    """Enregistre un arrosage"""
+    try:
+        log = GardenLog(
+            garden_item_id=item_id,
+            date=date.today(),
+            action="arrosage",
+            notes=notes
+        )
         db.add(log)
         db.commit()
+        clear_maison_cache()
+        return True
+    except Exception as e:
+        st.error(f"❌ Erreur enregistrement: {e}")
+        return False
 
 
-def get_plantes_a_arroser() -> list[dict]:
-    """Détecte les plantes qui ont besoin d'eau"""
-    a_arroser = []
-
-    with get_db_context() as db:
-        today = date.today()
-        plantes = db.query(GardenItem).all()
-
-        for plante in plantes:
-            if plante.last_watered:
-                delta = (today - plante.last_watered).days
-                if delta >= plante.watering_frequency_days:
-                    a_arroser.append(
-                        {
-                            "id": plante.id,
-                            "nom": plante.name,
-                            "jours": delta,
-                            "urgence": (
-                                "haute" if delta > plante.watering_frequency_days + 1 else "normale"
-                            ),
-                        }
-                    )
-
-    return a_arroser
-
-
-def get_recoltes_proches() -> list[dict]:
-    """Détecte les récoltes à venir"""
-    recoltes = []
-
-    with get_db_context() as db:
-        today = date.today()
-        future = today + timedelta(days=14)
-
-        plantes = (
-            db.query(GardenItem)
-            .filter(GardenItem.harvest_date.isnot(None), GardenItem.harvest_date.between(today, future))
-            .all()
+@with_db_session
+def ajouter_log(item_id: int, action: str, notes: str = "", db=None) -> bool:
+    """Ajoute une entrée au journal du jardin"""
+    try:
+        log = GardenLog(
+            garden_item_id=item_id,
+            date=date.today(),
+            action=action,
+            notes=notes
         )
-
-        for plante in plantes:
-            delta = (plante.harvest_date - today).days
-            recoltes.append({"nom": plante.name, "date": plante.harvest_date, "jours": delta})
-
-    return recoltes
-
-
-def get_meteo_mock() -> dict:
-    """Récupère la météo (mock pour démo)"""
-    # TODO: Intégrer vraie API météo
-    return {"condition": "Ensoleillé", "temp": 22, "humidity": 65, "precipitation": 0}
+        db.add(log)
+        db.commit()
+        clear_maison_cache()
+        return True
+    except Exception as e:
+        st.error(f"❌ Erreur ajout log: {e}")
+        return False
 
 
-def get_saison() -> str:
-    """Détermine la saison actuelle"""
-    month = date.today().month
-
-    if month in [3, 4, 5]:
-        return "Printemps"
-    elif month in [6, 7, 8]:
-        return "Été"
-    elif month in [9, 10, 11]:
-        return "Automne"
-    else:
-        return "Hiver"
-
-
-# ===================================
+# ════════════════════════════════════════════════════════════════════════════
 # MODULE PRINCIPAL
-# ===================================
+# ════════════════════════════════════════════════════════════════════════════
 
 
 def app():
-    """Module Jardin avec IA et Météo intégrées"""
-
-    st.title("🌱 Jardin Intelligent")
-    st.caption("Gestion du jardin avec météo et conseils IA")
-
-    # Récupérer l'agent IA
-    agent: AgentIA = st.session_state.get("agent_ia")
-
-    # ===================================
-    # MÉTÉO & SAISON
-    # ===================================
-
-    col_m1, col_m2, col_m3, col_m4 = st.columns(4)
-
-    meteo = get_meteo_mock()
+    """Point d'entrée module Jardin"""
+    st.title("🌿 Mon Jardin")
+    st.caption("Gestion intelligente du jardin avec conseils IA et météo")
+    
     saison = get_saison()
-
-    with col_m1:
-        st.metric("🌤️ Météo", meteo["condition"])
-
-    with col_m2:
-        st.metric("🌡️ Température", f"{meteo['temp']}°C")
-
-    with col_m3:
-        st.metric("💧 Humidité", f"{meteo['humidity']}%")
-
-    with col_m4:
-        st.metric("🌸 Saison", saison)
-
-    st.markdown("---")
-
-    # ===================================
-    # ALERTES ARROSAGE
-    # ===================================
-
-    a_arroser = get_plantes_a_arroser()
-
-    if a_arroser:
-        urgentes = [p for p in a_arroser if p["urgence"] == "haute"]
-
-        if urgentes:
-            st.error(f"💧 **{len(urgentes)} plante(s) à arroser URGENT**")
-        else:
-            st.warning(f"💧 **{len(a_arroser)} plante(s) à arroser aujourd'hui**")
-
-        for plante in a_arroser[:3]:
-            col_a1, col_a2 = st.columns([3, 1])
-
-            with col_a1:
-                emoji = "🔴" if plante["urgence"] == "haute" else "🟡"
-                st.write(
-                    f"{emoji} **{plante['nom']}** — Dernier arrosage il y a {plante['jours']} jours"
-                )
-
-            with col_a2:
-                if st.button("💧 Arrosé", key=f"water_{plante['id']}", use_container_width=True):
-                    arroser_plante(plante["id"])
-                    st.success("Arrosage noté !")
-                    st.rerun()
-
-        st.markdown("---")
-
-    # Récoltes proches
+    st.info(f"🌍 Saison actuelle : **{saison}**")
+    
+    # ════════════════════════════════════════════════════════════════════════
+    # ALERTES URGENTES
+    # ════════════════════════════════════════════════════════════════════════
+    
+    plantes_arroser = get_plantes_a_arroser()
     recoltes = get_recoltes_proches()
-
+    
+    if plantes_arroser:
+        st.warning(f"💧 **{len(plantes_arroser)} plante(s) à arroser aujourd'hui!**")
+        for plante in plantes_arroser[:3]:
+            st.caption(f"• {plante['nom']} ({plante['type']})")
+    
     if recoltes:
-        st.info(f"🌾 **{len(recoltes)} récolte(s) à venir dans les 2 semaines**")
-        for recolte in recoltes:
-            st.write(
-                f"• **{recolte['nom']}** : dans {recolte['jours']} jours ({recolte['date'].strftime('%d/%m')})"
-            )
-        st.markdown("---")
-
-    # ===================================
-    # TABS PRINCIPAUX
-    # ===================================
-
-    tab1, tab2, tab3, tab4 = st.tabs(
-        ["🌿 Mon Jardin", "🤖 Conseils IA", "➕ Ajouter Plante", "📊 Journal"]
+        st.success(f"🌽 **{len(recoltes)} récolte(s) prévue(s) cette semaine!**")
+        for r in recoltes[:3]:
+            jours = (r["recolte"] - date.today()).days
+            st.caption(f"• {r['nom']} dans {jours} jour(s)")
+    
+    st.markdown("---")
+    
+    # ════════════════════════════════════════════════════════════════════════
+    # TABS
+    # ════════════════════════════════════════════════════════════════════════
+    
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(
+        ["🌱 Mes Plantes", "🤖 Conseils IA", "➕ Ajouter", "📊 Stats", "📅 Journal"]
     )
-
-    # ===================================
-    # TAB 1 : MON JARDIN
-    # ===================================
-
+    
+    # ════════════════════════════════════════════════════════════════════════
+    # TAB 1: MES PLANTES
+    # ════════════════════════════════════════════════════════════════════════
+    
     with tab1:
-        st.subheader("Mes plantes")
-
+        st.subheader("Inventaire du jardin")
+        
         df = charger_plantes()
-
+        
         if df.empty:
-            st.info("Ton jardin est vide. Commence par ajouter des plantes !")
+            st.info("🌱 Aucune plante pour le moment. Ajoutes-en une!")
         else:
-            # Filtres
+            # Filtre par type
             col_f1, col_f2 = st.columns(2)
-
+            
             with col_f1:
-                categories = ["Toutes"] + sorted(df["categorie"].unique().tolist())
-                filtre_cat = st.selectbox("Catégorie", categories)
-
+                types = ["Tous"] + sorted(df["type"].unique().tolist())
+                filtre_type = st.selectbox("Type", types)
+                if filtre_type != "Tous":
+                    df = df[df["type"] == filtre_type]
+            
             with col_f2:
-                filtre_emplacement = st.selectbox(
-                    "Emplacement",
-                    ["Tous"] + sorted([e for e in df["emplacement"].unique() if e != "—"]),
-                )
-
-            # Appliquer filtres
-            df_filtre = df.copy()
-
-            if filtre_cat != "Toutes":
-                df_filtre = df_filtre[df_filtre["categorie"] == filtre_cat]
-
-            if filtre_emplacement != "Tous":
-                df_filtre = df_filtre[df_filtre["emplacement"] == filtre_emplacement]
-
-            # Afficher plantes
-            for _, plante in df_filtre.iterrows():
-                with st.expander(
-                    f"🌱 **{plante['nom']}** ({plante['quantite']}x) — {plante['categorie']}",
-                    expanded=False,
-                ):
-                    col_p1, col_p2 = st.columns([2, 1])
-
-                    with col_p1:
-                        st.write(f"**Emplacement :** {plante['emplacement']}")
-                        st.write(f"**Planté le :** {plante['plantation'].strftime('%d/%m/%Y')}")
-
-                        if plante["recolte"]:
-                            st.write(
-                                f"**Récolte prévue :** {plante['recolte'].strftime('%d/%m/%Y')}"
-                            )
-
-                        st.write(f"**Arrosage :** tous les {plante['arrosage_freq']} jours")
-
-                        if plante["dernier_arrosage"]:
-                            delta = (date.today() - plante["dernier_arrosage"]).days
-                            st.write(f"**Dernier arrosage :** il y a {delta} jours")
-
-                        if plante["notes"]:
-                            st.caption(f"Notes : {plante['notes']}")
-
-                    with col_p2:
-                        # Actions rapides
-                        if st.button(
-                            "💧 Arroser", key=f"arroser_{plante['id']}", use_container_width=True
-                        ):
-                            arroser_plante(plante["id"])
-                            st.success("Arrosage noté")
-                            st.rerun()
-
-                        if st.button(
-                            "🌾 Récolter", key=f"harvest_{plante['id']}", use_container_width=True
-                        ):
-                            ajouter_log(
-                                plante["id"],
-                                "Récolte",
-                                f"Récolte de {plante['quantite']}x {plante['nom']}",
-                            )
-                            st.success("Récolte notée")
-                            st.rerun()
-
-                        if st.button(
-                            "✂️ Tailler", key=f"prune_{plante['id']}", use_container_width=True
-                        ):
-                            ajouter_log(plante["id"], "Taille", "Taille d'entretien")
-                            st.success("Taille notée")
-                            st.rerun()
-
-                        if st.button("📝 Log", key=f"log_{plante['id']}", use_container_width=True):
-                            st.session_state[f"logging_{plante['id']}"] = True
-
-                    # Formulaire log personnalisé
-                    if st.session_state.get(f"logging_{plante['id']}", False):
-                        with st.form(f"form_log_{plante['id']}"):
-                            action = st.selectbox(
-                                "Action",
-                                [
-                                    "Arrosage",
-                                    "Taille",
-                                    "Fertilisation",
-                                    "Récolte",
-                                    "Observation",
-                                    "Autre",
-                                ],
-                            )
-                            notes_log = st.text_area("Notes")
-
-                            col_l1, col_l2 = st.columns(2)
-
-                            with col_l1:
-                                if st.form_submit_button("✅ Enregistrer"):
-                                    ajouter_log(plante["id"], action, notes_log)
-                                    st.success("Log enregistré")
-                                    del st.session_state[f"logging_{plante['id']}"]
-                                    st.rerun()
-
-                            with col_l2:
-                                if st.form_submit_button("❌ Annuler"):
-                                    del st.session_state[f"logging_{plante['id']}"]
-                                    st.rerun()
-
-    # ===================================
-    # TAB 2 : CONSEILS IA
-    # ===================================
-
-    with tab2:
-        st.subheader("🤖 Conseils jardinage intelligents")
-
-        if not agent:
-            st.error("Agent IA non disponible")
-        else:
-            st.info(f"💡 Conseils adaptés à la saison ({saison}) et à la météo actuelle")
-
-            if st.button("🤖 Demander conseils IA", type="primary", use_container_width=True):
-                with st.spinner("🤖 L'IA analyse ton jardin..."):
-                    try:
-                        # Préparer données
-                        df_jardin = charger_plantes()
-                        plantes_actuelles = df_jardin["nom"].tolist() if not df_jardin.empty else []
-
-                        # Appel IA
-                        loop = asyncio.new_event_loop()
-                        asyncio.set_event_loop(loop)
-
-                        conseils = loop.run_until_complete(
-                            agent.suggerer_jardin(saison, meteo, plantes_actuelles)
+                filtre_arrosage = st.checkbox("Montrer seulement à arroser")
+                if filtre_arrosage:
+                    df = df[df["a_arroser"]]
+            
+            # Affichage en grille
+            for idx, row in df.iterrows():
+                col1, col2, col3 = st.columns([2, 1, 1])
+                
+                with col1:
+                    emoji = "💧" if row["a_arroser"] else "✅"
+                    st.markdown(f"### {emoji} {row['nom']}")
+                    st.caption(f"📍 {row['location']} • {row['type']}")
+                    if row["notes"]:
+                        st.caption(f"📝 {row['notes']}")
+                
+                with col2:
+                    if row["jours_depuis_arrosage"] is not None:
+                        st.metric(
+                            "Arrosé il y a",
+                            f"{row['jours_depuis_arrosage']} j",
+                            delta=None
                         )
-
-                        st.session_state["conseils_jardin"] = conseils
-                        st.success("✅ Conseils générés")
-
+                    
+                    if row["recolte"]:
+                        jours = (row["recolte"] - date.today()).days
+                        if jours > 0:
+                            st.metric("Récolte dans", f"{jours} j")
+                
+                with col3:
+                    if st.button("💧 Arroser", key=f"arroser_{row['id']}"):
+                        if arroser_plante(row["id"]):
+                            st.rerun()
+                
+                st.divider()
+    
+    # ════════════════════════════════════════════════════════════════════════
+    # TAB 2: CONSEILS IA
+    # ════════════════════════════════════════════════════════════════════════
+    
+    with tab2:
+        st.subheader("🤖 Conseils Jardin avec IA")
+        
+        service = get_jardin_service()
+        
+        col_c1, col_c2 = st.columns(2)
+        
+        with col_c1:
+            if st.button("💡 Conseils pour cette saison", use_container_width=True):
+                with st.spinner("Génération des conseils IA..."):
+                    try:
+                        import asyncio
+                        conseils = asyncio.run(service.generer_conseils_saison(saison))
+                        if conseils:
+                            st.success(conseils)
                     except Exception as e:
-                        st.error(f"Erreur IA : {e}")
-
-            # Afficher conseils
-            if "conseils_jardin" in st.session_state:
-                conseils = st.session_state["conseils_jardin"]
-
-                st.markdown("---")
-
-                # Actions du jour
-                if "actions_jour" in conseils and conseils["actions_jour"]:
-                    st.markdown("### 🎯 Actions recommandées aujourd'hui")
-                    for action in conseils["actions_jour"]:
-                        st.success(f"✅ {action}")
-
-                # Plantations suggérées
-                if "plantations" in conseils and conseils["plantations"]:
-                    st.markdown("### 🌱 Plantations de saison")
-                    for plante in conseils["plantations"]:
-                        st.info(f"🌿 {plante}")
-
-                # Entretien
-                if "entretien" in conseils and conseils["entretien"]:
-                    st.markdown("### 🔧 Entretien recommandé")
-                    for task in conseils["entretien"]:
-                        st.info(f"🔨 {task}")
-
-                # Alertes
-                if "alertes" in conseils and conseils["alertes"]:
-                    st.markdown("### ⚠️ Alertes météo")
-                    for alerte in conseils["alertes"]:
-                        st.warning(f"⚠️ {alerte}")
-
-            # Calendrier des plantations
-            st.markdown("---")
-            st.markdown("### 📅 Calendrier des plantations par saison")
-
-            calendrier = {
-                "Printemps": ["Tomates", "Courgettes", "Salades", "Radis", "Carottes"],
-                "Été": ["Haricots verts", "Concombres", "Aubergines", "Poivrons"],
-                "Automne": ["Épinards", "Mâche", "Oignons", "Ail", "Choux"],
-                "Hiver": ["Fèves", "Petits pois", "Échalotes"],
-            }
-
-            with st.expander(f"🌸 Plantations {saison}", expanded=True):
-                for plante in calendrier.get(saison, []):
-                    st.write(f"• {plante}")
-
-    # ===================================
-    # TAB 3 : AJOUTER PLANTE
-    # ===================================
-
-    with tab3:
-        st.subheader("➕ Ajouter une plante au jardin")
-
-        with st.form("form_add_plante"):
-            nom = st.text_input("Nom de la plante *", placeholder="Ex: Tomates cerises")
-
-            col_a1, col_a2 = st.columns(2)
-
-            with col_a1:
-                categorie = st.selectbox(
-                    "Catégorie", ["Légume", "Fruit", "Aromatique", "Fleur", "Arbuste", "Autre"]
-                )
-
-                quantite = st.number_input("Quantité", 1, 100, 1)
-
-                emplacement = st.selectbox(
-                    "Emplacement",
-                    ["Potager", "Jardinière", "Serre", "Balcon", "Pleine terre", "Autre"],
-                )
-
-            with col_a2:
-                plantation = st.date_input("Date de plantation", value=date.today())
-
-                recolte = st.date_input("Date de récolte prévue (optionnel)", value=None)
-
-                freq_arrosage = st.number_input("Fréquence d'arrosage (jours)", 1, 14, 2)
-
-            _notes = st.text_area(
-                "Notes (optionnel)", placeholder="Variété, exposition, particularités..."
-            )
-
-            submitted = st.form_submit_button("🌱 Ajouter au jardin", type="primary")
-
-            if submitted:
-                if not nom:
-                    st.error("Le nom est obligatoire")
-                else:
-                    ajouter_plante(
-                        nom, categorie, plantation, quantite, emplacement, freq_arrosage, recolte
-                    )
-                    st.success(f"✅ {nom} ajouté au jardin !")
-                    st.balloons()
-                    st.rerun()
-
+                        st.warning(f"⚠️ IA temporairement indisponible: {e}")
+        
+        with col_c2:
+            if st.button("🌿 Plantes à planter maintenant", use_container_width=True):
+                with st.spinner("Recherche des meilleures plantes..."):
+                    try:
+                        import asyncio
+                        suggestions = asyncio.run(service.suggerer_plantes_saison(saison))
+                        if suggestions:
+                            st.success(suggestions)
+                    except Exception as e:
+                        st.warning(f"⚠️ IA temporairement indisponible: {e}")
+        
         st.markdown("---")
-
+        
+        # Conseil personnalisé pour une plante
+        st.subheader("Conseil spécifique")
+        plante_conseil = st.text_input("Nom de la plante (ex: Tomate)")
+        
+        if st.button("Obtenir conseil d'arrosage", use_container_width=True):
+            if plante_conseil:
+                with st.spinner("Analyse IA en cours..."):
+                    try:
+                        import asyncio
+                        conseil = asyncio.run(service.conseil_arrosage(plante_conseil, saison))
+                        if conseil:
+                            st.info(conseil)
+                    except Exception as e:
+                        st.warning(f"⚠️ IA temporairement indisponible: {e}")
+    
+    # ════════════════════════════════════════════════════════════════════════
+    # TAB 3: AJOUTER PLANTE
+    # ════════════════════════════════════════════════════════════════════════
+    
+    with tab3:
+        st.subheader("Ajouter une plante")
+        
+        with st.form("form_plante"):
+            nom = st.text_input("Nom *", placeholder="Ex: Tomate cerise")
+            
+            col_1, col_2 = st.columns(2)
+            
+            with col_1:
+                type_plante = st.selectbox(
+                    "Type *",
+                    ["Légume", "Fruit", "Herbe aromatique", "Fleur", "Arbre", "Autre"]
+                )
+                emplacement = st.text_input(
+                    "Emplacement",
+                    placeholder="Ex: Potager nord"
+                )
+            
+            with col_2:
+                date_plantation = st.date_input("Date de plantation", value=date.today())
+                date_recolte = st.date_input("Date récolte (optionnel)", value=None)
+            
+            notes = st.text_area(
+                "Notes",
+                placeholder="Variété, exposition, particularités...",
+                height=80
+            )
+            
+            submitted = st.form_submit_button("🌱 Ajouter au jardin", type="primary")
+            
+            if submitted:
+                if not nom or not type_plante:
+                    st.error("Nom et type obligatoires")
+                else:
+                    if ajouter_plante(nom, type_plante, emplacement, date_plantation, date_recolte, notes):
+                        st.balloons()
+                        st.rerun()
+        
+        st.markdown("---")
+        
         # Suggestions rapides
         st.markdown("### ⚡ Ajouts rapides")
-
+        
         suggestions = [
-            {"nom": "Tomates cerises", "cat": "Légume", "freq": 2},
-            {"nom": "Basilic", "cat": "Aromatique", "freq": 1},
-            {"nom": "Fraisiers", "cat": "Fruit", "freq": 2},
-            {"nom": "Courgettes", "cat": "Légume", "freq": 3},
+            {"nom": "Tomates cerises", "type": "Fruit", "emoji": "🍅"},
+            {"nom": "Basilic", "type": "Herbe aromatique", "emoji": "🌿"},
+            {"nom": "Fraises", "type": "Fruit", "emoji": "🍓"},
+            {"nom": "Courgettes", "type": "Légume", "emoji": "🥒"},
         ]
-
-        col_s1, col_s2 = st.columns(2)
-
+        
+        cols = st.columns(2)
         for i, sugg in enumerate(suggestions):
-            col = col_s1 if i % 2 == 0 else col_s2
-
+            col = cols[i % 2]
             with col:
-                if st.button(
-                    f"🌱 {sugg['nom']}", use_container_width=True, key=f"quick_{sugg['nom']}"
-                ):
-                    ajouter_plante(
-                        sugg["nom"], sugg["cat"], date.today(), 1, "Potager", sugg["freq"]
-                    )
-                    st.success(f"{sugg['nom']} ajouté !")
-                    st.rerun()
-
-    # ===================================
-    # TAB 4 : JOURNAL
-    # ===================================
-
+                if st.button(f"{sugg['emoji']} {sugg['nom']}", use_container_width=True):
+                    if ajouter_plante(sugg["nom"], sugg["type"], "Potager"):
+                        st.success(f"✅ {sugg['nom']} ajouté!")
+                        st.rerun()
+    
+    # ════════════════════════════════════════════════════════════════════════
+    # TAB 4: STATS
+    # ════════════════════════════════════════════════════════════════════════
+    
     with tab4:
-        st.subheader("📊 Journal du jardin")
-
-        df = charger_plantes()
-
-        if df.empty:
-            st.info("Aucune plante dans le jardin")
+        st.subheader("📊 Statistiques")
+        
+        stats = get_stats_jardin()
+        
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.metric("Plantes totales", stats["total_plantes"])
+        
+        with col2:
+            st.metric("À arroser", stats["a_arroser"])
+        
+        with col3:
+            st.metric("Récoltes proches", stats["recoltes_proches"])
+        
+        with col4:
+            st.metric("Catégories", stats["categories"])
+        
+        st.markdown("---")
+        
+        # Graphique d'arrosage
+        if not charger_plantes().empty:
+            df_stats = charger_plantes()
+            type_counts = df_stats["type"].value_counts()
+            
+            fig = go.Figure(
+                data=[go.Bar(x=type_counts.index, y=type_counts.values, marker_color="green")]
+            )
+            fig.update_layout(
+                title="Plantes par catégorie",
+                xaxis_title="Type",
+                yaxis_title="Nombre",
+                height=400
+            )
+            st.plotly_chart(fig, use_container_width=True)
+    
+    # ════════════════════════════════════════════════════════════════════════
+    # TAB 5: JOURNAL
+    # ════════════════════════════════════════════════════════════════════════
+    
+    with tab5:
+        st.subheader("📅 Journal d'entretien")
+        
+        df_plantes = charger_plantes()
+        
+        if df_plantes.empty:
+            st.info("Aucune plante pour le moment")
         else:
-            # Statistiques
-            col_stat1, col_stat2, col_stat3, col_stat4 = st.columns(4)
-
-            with col_stat1:
-                st.metric("Plantes totales", len(df))
-
-            with col_stat2:
-                categories = df["categorie"].nunique()
-                st.metric("Catégories", categories)
-
-            with col_stat3:
-                a_arroser_count = len(get_plantes_a_arroser())
-                st.metric("À arroser", a_arroser_count, delta_color="inverse")
-
-            with col_stat4:
-                recoltes_count = len(get_recoltes_proches())
-                st.metric("Récoltes à venir", recoltes_count)
-
-            st.markdown("---")
-
-            # Historique des actions
-            st.markdown("### 📋 Dernières actions")
-
-            with get_db_context() as db:
-                logs = (
-                    db.query(GardenLog, GardenItem)
-                    .join(GardenItem, GardenLog.item_id == GardenItem.id)
-                    .order_by(GardenLog.date.desc())
-                    .limit(20)
-                    .all()
+            plante_selected = st.selectbox(
+                "Sélectionner une plante",
+                df_plantes["nom"].tolist(),
+                key="journal_plante"
+            )
+            
+            selected_id = df_plantes[df_plantes["nom"] == plante_selected].iloc[0]["id"]
+            
+            col_a1, col_a2 = st.columns(2)
+            
+            with col_a1:
+                action = st.selectbox(
+                    "Action",
+                    ["arrosage", "désherbage", "taille", "traitement", "fertilisation", "récolte"]
                 )
-
-                if logs:
-                    for log, plante in logs:
-                        col_log1, col_log2 = st.columns([3, 1])
-
-                        with col_log1:
-                            st.write(
-                                f"**{log.date.strftime('%d/%m/%Y')}** — {log.action} : {plante.name}"
-                            )
-                            if log.notes:
-                                st.caption(log.notes)
-
-                        with col_log2:
-                            st.caption(f"🌱 {plante.name}")
-                else:
-                    st.info("Aucune action enregistrée encore")
-
-            # Export
+            
+            with col_a2:
+                notes_log = st.text_input("Notes", placeholder="Observations...")
+            
+            if st.button("📝 Enregistrer", use_container_width=True):
+                if ajouter_log(selected_id, action, notes_log):
+                    st.success("✅ Enregistré!")
+                    st.rerun()
+            
             st.markdown("---")
-            if st.button("📤 Exporter le jardin (CSV)"):
-                csv = df.to_csv(index=False)
-                st.download_button(
-                    "Télécharger", csv, f"jardin_{date.today().strftime('%Y%m%d')}.csv", "text/csv"
-                )
+            st.caption(f"📍 Dernier enregistrement pour {plante_selected}")
+
+
+if __name__ == "__main__":
+    app()

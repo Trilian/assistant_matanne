@@ -1,631 +1,497 @@
 """
-Module Projets avec Agent IA intégré
-Gestion et priorisation intelligente des projets maison
+Module Projets - Gestion des projets maison avec IA intégrée
+Priorisation intelligente, estimation de durée, suivi de progression
 """
 
-import asyncio
 from datetime import date, datetime
-
-import pandas as pd
 import streamlit as st
+import pandas as pd
+import plotly.graph_objects as go
 
-from src.core.ai_agent import AgentIA
 from src.core.database import get_db_context
 from src.core.models import Project, ProjectTask
-from src.utils.formatters import format_quantity
+from src.core.decorators import with_db_session
+from src.services.base_ai_service import BaseAIService
+from src.core.ai import ClientIA
+from src.modules.maison.helpers import (
+    charger_projets,
+    get_projets_urgents,
+    get_stats_projets,
+    clear_maison_cache
+)
 
-# ===================================
-# HELPERS
-# ===================================
+
+# ════════════════════════════════════════════════════════════════════════════
+# SERVICE IA PROJETS
+# ════════════════════════════════════════════════════════════════════════════
 
 
-def charger_projets(statut: str = None) -> pd.DataFrame:
-    """Charge les projets"""
-    with get_db_context() as db:
-        query = db.query(Project)
+class ProjetsService(BaseAIService):
+    """Service IA pour gestion intelligente des projets"""
+    
+    def __init__(self, client: ClientIA = None):
+        if client is None:
+            client = ClientIA()
+        super().__init__(
+            client=client,
+            cache_prefix="projets",
+            default_ttl=3600,
+            service_name="projets"
+        )
+    
+    async def suggerer_taches(self, nom_projet: str, description: str) -> str:
+        """Suggère des tâches pour un projet"""
+        prompt = f"""Pour le projet "{nom_projet}" : {description}
+Suggère 5-7 tâches concrètes et numérotées. Ordonne par ordre logique."""
+        
+        return await self.call_with_cache(
+            prompt=prompt,
+            system_prompt="Tu es expert en gestion de projets domestiques",
+            max_tokens=700
+        )
+    
+    async def estimer_duree(self, nom_projet: str, complexite: str = "moyen") -> str:
+        """Estime la durée totale d'un projet"""
+        prompt = f"""Pour un projet "{nom_projet}" de complexité {complexite},
+estime la durée totale et le temps par phase (préparation, exécution, finition)."""
+        
+        return await self.call_with_cache(
+            prompt=prompt,
+            system_prompt="Tu es expert en estimation de projets domestiques",
+            max_tokens=400
+        )
+    
+    async def prioriser_taches(self, nom_projet: str, taches_texte: str) -> str:
+        """Priorise les tâches pour un projet"""
+        prompt = f"""Pour le projet "{nom_projet}", réordonne ces tâches par priorité:
+{taches_texte}
 
-        if statut:
-            query = query.filter(Project.status == statut)
-
-        projets = query.order_by(Project.priority.desc(), Project.updated_at.desc()).all()
-
-        return pd.DataFrame(
-            [
-                {
-                    "id": p.id,
-                    "nom": p.name,
-                    "categorie": p.category or "—",
-                    "priorite": p.priority,
-                    "statut": p.status,
-                    "progres": p.progress,
-                    "debut": p.start_date,
-                    "fin": p.end_date,
-                    "ia_score": p.ai_priority_score or 0,
-                    "updated": p.updated_at,
-                }
-                for p in projets
-            ]
+Explique brièvement l'ordre."""
+        
+        return await self.call_with_cache(
+            prompt=prompt,
+            system_prompt="Tu es expert en priorisation et planification",
+            max_tokens=500
+        )
+    
+    async def conseil_blocages(self, nom_projet: str, description: str) -> str:
+        """Suggère comment éviter les blocages"""
+        prompt = f"""Pour "{nom_projet}" : {description}
+Quels sont les 3 risques/blocages principaux et comment les éviter?"""
+        
+        return await self.call_with_cache(
+            prompt=prompt,
+            system_prompt="Tu es expert en gestion de risques de projets",
+            max_tokens=500
         )
 
 
-def charger_taches_projet(project_id: int) -> pd.DataFrame:
-    """Charge les tâches d'un projet"""
-    with get_db_context() as db:
-        tasks = (
-            db.query(ProjectTask)
-            .filter(ProjectTask.project_id == project_id)
-            .order_by(ProjectTask.due_date)
-            .all()
-        )
-
-        return pd.DataFrame(
-            [
-                {
-                    "id": t.id,
-                    "nom": t.task_name,
-                    "description": t.description or "",
-                    "statut": t.status,
-                    "echeance": t.due_date,
-                    "duree": t.estimated_duration,
-                    "completed": t.completed_at,
-                }
-                for t in tasks
-            ]
-        )
+def get_projets_service() -> ProjetsService:
+    """Factory pour obtenir le service projets"""
+    return ProjetsService()
 
 
+# ════════════════════════════════════════════════════════════════════════════
+# HELPERS MÉTIER
+# ════════════════════════════════════════════════════════════════════════════
+
+
+@with_db_session
 def creer_projet(
     nom: str,
     description: str,
     categorie: str,
     priorite: str,
-    date_debut: date | None = None,
-    date_fin: date | None = None,
+    date_fin: date = None,
+    db=None
 ) -> int:
     """Crée un nouveau projet"""
-    with get_db_context() as db:
+    try:
         projet = Project(
-            name=nom,
+            nom=nom,
             description=description,
-            category=categorie,
-            priority=priorite,
-            start_date=date_debut,
-            end_date=date_fin,
-            status="à faire",
-            progress=0,
+            statut="en_cours",
+            priorite=priorite,
+            date_fin_prevue=date_fin
         )
         db.add(projet)
         db.commit()
+        db.refresh(projet)
+        clear_maison_cache()
         return projet.id
+    except Exception as e:
+        st.error(f"❌ Erreur création projet: {e}")
+        return None
 
 
-def ajouter_tache_projet(
-    project_id: int, nom: str, description: str | None = None, echeance: date | None = None, duree: int | None = None
-):
+@with_db_session
+def ajouter_tache(
+    project_id: int,
+    nom: str,
+    description: str = "",
+    priorite: str = "moyenne",
+    date_echéance: date = None,
+    db=None
+) -> bool:
     """Ajoute une tâche à un projet"""
-    with get_db_context() as db:
-        task = ProjectTask(
+    try:
+        tache = ProjectTask(
             project_id=project_id,
-            task_name=nom,
+            nom=nom,
             description=description,
-            due_date=echeance,
-            estimated_duration=duree,
-            status="à faire",
+            priorite=priorite,
+            date_echéance=date_echéance,
+            statut="à_faire"
         )
-        db.add(task)
+        db.add(tache)
         db.commit()
+        clear_maison_cache()
+        return True
+    except Exception as e:
+        st.error(f"❌ Erreur ajout tâche: {e}")
+        return False
 
 
-def marquer_tache_complete(task_id: int):
+@with_db_session
+def marquer_tache_done(task_id: int, db=None) -> bool:
     """Marque une tâche comme terminée"""
-    with get_db_context() as db:
-        task = db.query(ProjectTask).get(task_id)
-        if task:
-            task.status = "terminé"
-            task.completed_at = datetime.now()
-
-            # Mettre à jour le progrès du projet
-            project = db.query(Project).get(task.project_id)
-            tasks = db.query(ProjectTask).filter(ProjectTask.project_id == project.id).all()
-
-            completed = len([t for t in tasks if t.status == "terminé"])
-            total = len(tasks)
-            project.progress = int((completed / total) * 100) if total > 0 else 0
-
-            # Mettre à jour le statut du projet
-            if project.progress == 100:
-                project.status = "terminé"
-            elif project.progress > 0:
-                project.status = "en cours"
-
+    try:
+        tache = db.query(ProjectTask).get(task_id)
+        if tache:
+            tache.statut = "terminé"
             db.commit()
+            clear_maison_cache()
+            return True
+    except Exception as e:
+        st.error(f"❌ Erreur mise à jour: {e}")
+    return False
 
 
-def supprimer_projet(project_id: int):
-    """Supprime un projet"""
-    with get_db_context() as db:
-        db.query(Project).filter(Project.id == project_id).delete()
-        db.commit()
+@with_db_session
+def marquer_projet_done(project_id: int, db=None) -> bool:
+    """Marque un projet comme terminé"""
+    try:
+        projet = db.query(Project).get(project_id)
+        if projet:
+            projet.statut = "terminé"
+            projet.date_fin_reelle = date.today()
+            db.commit()
+            clear_maison_cache()
+            return True
+    except Exception as e:
+        st.error(f"❌ Erreur: {e}")
+    return False
 
 
-def get_projets_urgents() -> list[dict]:
-    """Détecte les projets urgents ou en retard"""
-    urgents = []
-
-    with get_db_context() as db:
-        today = date.today()
-
-        # Projets avec échéance proche
-        projets = (
-            db.query(Project)
-            .filter(Project.status.in_(["à faire", "en cours"]), Project.end_date.isnot(None))
-            .all()
-        )
-
-        for projet in projets:
-            if projet.end_date:
-                delta = (projet.end_date - today).days
-
-                if delta < 0:
-                    urgents.append(
-                        {
-                            "type": "RETARD",
-                            "projet": projet.name,
-                            "message": f"En retard de {abs(delta)} jours",
-                            "id": projet.id,
-                        }
-                    )
-                elif delta <= 7:
-                    urgents.append(
-                        {
-                            "type": "URGENT",
-                            "projet": projet.name,
-                            "message": f"Échéance dans {delta} jours",
-                            "id": projet.id,
-                        }
-                    )
-
-    return urgents
-
-
-# ===================================
+# ════════════════════════════════════════════════════════════════════════════
 # MODULE PRINCIPAL
-# ===================================
+# ════════════════════════════════════════════════════════════════════════════
 
 
 def app():
-    """Module Projets avec IA intégrée"""
-
+    """Point d'entrée module Projets"""
     st.title("🏗️ Projets Maison")
     st.caption("Gestion et priorisation intelligente des projets")
-
-    # Récupérer l'agent IA
-    agent: AgentIA = st.session_state.get("agent_ia")
-
-    # ===================================
+    
+    service = get_projets_service()
+    
+    # ════════════════════════════════════════════════════════════════════════
     # ALERTES URGENTES
-    # ===================================
-
+    # ════════════════════════════════════════════════════════════════════════
+    
     urgents = get_projets_urgents()
-
+    
     if urgents:
         st.warning(f"⚠️ **{len(urgents)} projet(s) nécessitent attention**")
-
         for urgent in urgents[:3]:
             if urgent["type"] == "RETARD":
                 st.error(f"🔴 **{urgent['projet']}** : {urgent['message']}")
             else:
                 st.warning(f"🟡 **{urgent['projet']}** : {urgent['message']}")
-
         st.markdown("---")
-
-    # ===================================
-    # STATISTIQUES RAPIDES
-    # ===================================
-
-    df_all = charger_projets()
-
-    col_s1, col_s2, col_s3, col_s4 = st.columns(4)
-
-    with col_s1:
-        st.metric("Projets totaux", len(df_all))
-
-    with col_s2:
-        en_cours = len(df_all[df_all["statut"] == "en cours"])
-        st.metric("En cours", en_cours)
-
-    with col_s3:
-        termines = len(df_all[df_all["statut"] == "terminé"])
-        st.metric("Terminés", termines)
-
-    with col_s4:
-        if not df_all.empty:
-            avg_progress = df_all["progres"].mean()
-            st.metric("Progression moyenne", f"{avg_progress:.0f}%")
-        else:
-            st.metric("Progression moyenne", "—")
-
+    
+    # ════════════════════════════════════════════════════════════════════════
+    # STATISTIQUES
+    # ════════════════════════════════════════════════════════════════════════
+    
+    stats = get_stats_projets()
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.metric("Total", stats["total"])
+    
+    with col2:
+        st.metric("En cours", stats["en_cours"])
+    
+    with col3:
+        st.metric("Terminés", stats["termines"])
+    
+    with col4:
+        st.metric("Progression", f"{stats['avg_progress']:.0f}%")
+    
     st.markdown("---")
-
-    # ===================================
-    # TABS PRINCIPAUX
-    # ===================================
-
+    
+    # ════════════════════════════════════════════════════════════════════════
+    # TABS
+    # ════════════════════════════════════════════════════════════════════════
+    
     tab1, tab2, tab3, tab4 = st.tabs(
-        ["📋 Mes Projets", "🤖 Priorisation IA", "➕ Nouveau Projet", "📊 Statistiques"]
+        ["📋 En cours", "🤖 Assistant IA", "➕ Nouveau", "📊 Tableau"]
     )
-
-    # ===================================
-    # TAB 1 : LISTE DES PROJETS
-    # ===================================
-
+    
+    # ════════════════════════════════════════════════════════════════════════
+    # TAB 1: PROJETS EN COURS
+    # ════════════════════════════════════════════════════════════════════════
+    
     with tab1:
-        st.subheader("Tous mes projets")
-
-        # Filtres
-        col_f1, col_f2, col_f3 = st.columns(3)
-
-        with col_f1:
-            filtre_statut = st.selectbox(
-                "Statut", ["Tous", "à faire", "en cours", "terminé", "annulé"]
-            )
-
-        with col_f2:
-            filtre_priorite = st.selectbox("Priorité", ["Toutes", "haute", "moyenne", "basse"])
-
-        with col_f3:
-            _tri = st.selectbox(
-                "Trier par", ["Priorité", "Progression", "Date mise à jour", "Échéance"]
-            )
-
-        # Appliquer filtres
-        df_filtré = df_all.copy()
-
-        if filtre_statut != "Tous":
-            df_filtré = df_filtré[df_filtré["statut"] == filtre_statut]
-
-        if filtre_priorite != "Toutes":
-            df_filtré = df_filtré[df_filtré["priorite"] == filtre_priorite]
-
-        # Afficher
-        if df_filtré.empty:
-            st.info("Aucun projet correspondant aux filtres")
+        st.subheader("Projets actifs")
+        
+        df_projets = charger_projets("en_cours")
+        
+        if df_projets.empty:
+            st.info("Aucun projet en cours")
         else:
-            for _, projet in df_filtré.iterrows():
-                with st.expander(
-                    f"{'🟢' if projet['priorite'] == 'haute' else '🟡' if projet['priorite'] == 'moyenne' else '⚪'} **{projet['nom']}** — {projet['progres']}%",
-                    expanded=False,
-                ):
-                    col_p1, col_p2 = st.columns([2, 1])
-
-                    with col_p1:
-                        st.write(f"**Catégorie :** {projet['categorie']}")
-                        st.write(f"**Statut :** {projet['statut']}")
-                        st.write(f"**Priorité :** {projet['priorite']}")
-
-                        if projet["debut"]:
-                            st.write(f"**Début :** {projet['debut'].strftime('%d/%m/%Y')}")
-                        if projet["fin"]:
-                            st.write(f"**Échéance :** {projet['fin'].strftime('%d/%m/%Y')}")
-
-                        if projet["ia_score"] > 0:
-                            st.info(f"🤖 Score IA : {projet['ia_score']:.0f}/100")
-
-                    with col_p2:
-                        # Jauge progression
-                        st.progress(projet["progres"] / 100)
-                        st.caption(f"{projet['progres']}% complété")
-
-                    # Tâches du projet
-                    st.markdown("**📋 Tâches**")
-
-                    df_taches = charger_taches_projet(projet["id"])
-
-                    if df_taches.empty:
-                        st.caption("Aucune tâche. Clique sur '➕ Tâche' pour en ajouter.")
-                    else:
-                        for _, tache in df_taches.iterrows():
-                            col_t1, col_t2, col_t3 = st.columns([3, 1, 1])
-
-                            with col_t1:
-                                statut_emoji = "✅" if tache["statut"] == "terminé" else "⏳"
-                                st.write(f"{statut_emoji} {tache['nom']}")
-                                if tache["description"]:
-                                    st.caption(tache["description"])
-
-                            with col_t2:
-                                if tache["echeance"]:
-                                    st.caption(f"📅 {tache['echeance'].strftime('%d/%m')}")
-
-                            with col_t3:
-                                if tache["statut"] != "terminé":
-                                    if st.button(
-                                        "✅",
-                                        key=f"complete_{tache['id']}",
-                                        use_container_width=True,
-                                    ):
-                                        marquer_tache_complete(tache["id"])
-                                        st.success("Tâche terminée !")
-                                        st.rerun()
-
-                    # Actions projet
-                    st.markdown("---")
-
-                    col_act1, col_act2, col_act3 = st.columns(3)
-
-                    with col_act1:
-                        if st.button(
-                            "➕ Tâche", key=f"add_task_{projet['id']}", use_container_width=True
-                        ):
-                            st.session_state[f"adding_task_{projet['id']}"] = True
+            for idx, projet in df_projets.iterrows():
+                col1, col2 = st.columns([3, 1])
+                
+                with col1:
+                    st.markdown(f"### {projet['nom']}")
+                    
+                    # Barre de progression
+                    st.progress(projet['progress'] / 100)
+                    st.caption(f"✅ {projet['progress']:.0f}% • {projet['taches_count']} tâches")
+                    
+                    if projet['description']:
+                        st.caption(projet['description'][:100] + "...")
+                    
+                    # Priorité et échéance
+                    col_a, col_b = st.columns(2)
+                    
+                    with col_a:
+                        badge = "🔴" if projet['priorite'] == "urgente" else "🟠" if projet['priorite'] == "haute" else "🟡"
+                        st.caption(f"{badge} {projet['priorite'].upper()}")
+                    
+                    with col_b:
+                        if projet['jours_restants'] is not None:
+                            jours = projet['jours_restants']
+                            if jours < 0:
+                                st.caption(f"📅 **En retard de {-jours}j**")
+                            elif jours == 0:
+                                st.caption("📅 **À livrer aujourd'hui!**")
+                            else:
+                                st.caption(f"📅 {jours}j restants")
+                
+                with col2:
+                    if st.button("✅ Terminer", key=f"done_{projet['id']}", use_container_width=True):
+                        if marquer_projet_done(projet['id']):
+                            st.success("Projet marqué comme terminé!")
                             st.rerun()
-
-                    with col_act2:
-                        if st.button(
-                            "✏️ Modifier", key=f"edit_{projet['id']}", use_container_width=True
-                        ):
-                            st.info("Fonctionnalité en développement")
-
-                    with col_act3:
-                        if st.button(
-                            "🗑️ Supprimer",
-                            key=f"del_{projet['id']}",
-                            type="secondary",
-                            use_container_width=True,
-                        ):
-                            supprimer_projet(projet["id"])
-                            st.success("Projet supprimé")
-                            st.rerun()
-
-                    # Formulaire ajout tâche
-                    if st.session_state.get(f"adding_task_{projet['id']}", False):
-                        with st.form(f"form_task_{projet['id']}"):
-                            st.markdown("**Nouvelle tâche**")
-
-                            task_name = st.text_input("Nom *")
-                            task_desc = st.text_area("Description")
-
-                            col_tf1, col_tf2 = st.columns(2)
-
-                            with col_tf1:
-                                task_due = st.date_input("Échéance", value=None)
-
-                            with col_tf2:
-                                task_duration = st.number_input(
-                                    "Durée estimée (min)", 0, 480, 60, 15
-                                )
-
-                            col_submit1, col_submit2 = st.columns(2)
-
-                            with col_submit1:
-                                if st.form_submit_button("✅ Ajouter"):
-                                    if task_name:
-                                        ajouter_tache_projet(
-                                            projet["id"],
-                                            task_name,
-                                            task_desc,
-                                            task_due,
-                                            task_duration,
-                                        )
-                                        st.success("Tâche ajoutée")
-                                        del st.session_state[f"adding_task_{projet['id']}"]
-                                        st.rerun()
-
-                            with col_submit2:
-                                if st.form_submit_button("❌ Annuler"):
-                                    del st.session_state[f"adding_task_{projet['id']}"]
-                                    st.rerun()
-
-    # ===================================
-    # TAB 2 : PRIORISATION IA
-    # ===================================
-
+                
+                # Afficher les tâches
+                with st.expander("Voir tâches"):
+                    with get_db_context() as session:
+                        taches = session.query(ProjectTask).filter_by(
+                            project_id=projet['id']
+                        ).all()
+                        
+                        if not taches:
+                            st.caption("Aucune tâche")
+                        else:
+                            for t in taches:
+                                col_t1, col_t2, col_t3 = st.columns([3, 1, 1])
+                                
+                                with col_t1:
+                                    emoji = "✅" if t.statut == "terminé" else "⏳"
+                                    st.caption(f"{emoji} {t.nom}")
+                                
+                                with col_t2:
+                                    if t.date_echéance:
+                                        st.caption(t.date_echéance.strftime("%d/%m"))
+                                
+                                with col_t3:
+                                    if t.statut != "terminé":
+                                        if st.button("✓", key=f"task_{t.id}", use_container_width=True):
+                                            if marquer_tache_done(t.id):
+                                                st.rerun()
+                
+                st.divider()
+    
+    # ════════════════════════════════════════════════════════════════════════
+    # TAB 2: ASSISTANT IA
+    # ════════════════════════════════════════════════════════════════════════
+    
     with tab2:
-        st.subheader("🤖 Priorisation intelligente")
-
-        if not agent:
-            st.error("Agent IA non disponible")
-        else:
-            st.info(
-                "💡 L'IA analyse tes projets et suggère les priorités selon la méthode Eisenhower"
+        st.subheader("🤖 Assistant Projets IA")
+        
+        col_ia1, col_ia2 = st.columns(2)
+        
+        # Suggérer tâches
+        with col_ia1:
+            st.markdown("#### 📋 Suggérer des tâches")
+            
+            projet_nom_ia = st.text_input("Nom du projet", placeholder="Ex: Rénover cuisine")
+            projet_desc_ia = st.text_area(
+                "Description",
+                placeholder="Détails du projet...",
+                height=100
             )
-
-            df_actifs = charger_projets()
-            df_actifs = df_actifs[df_actifs["statut"].isin(["à faire", "en cours"])]
-
-            if df_actifs.empty:
-                st.warning("Aucun projet actif à prioriser")
-            else:
-                if st.button("🤖 Analyser et prioriser", type="primary", use_container_width=True):
-                    with st.spinner("🤖 Analyse en cours..."):
+            
+            if st.button("💡 Générer tâches", key="ia_taches", use_container_width=True):
+                if projet_nom_ia:
+                    with st.spinner("IA analyse le projet..."):
                         try:
-                            # Préparer données
-                            projets_data = [
-                                {
-                                    "nom": row["nom"],
-                                    "statut": row["statut"],
-                                    "priorite": row["priorite"],
-                                    "progres": row["progres"],
-                                    "echeance": str(row["fin"]) if row["fin"] else None,
-                                }
-                                for _, row in df_actifs.iterrows()
-                            ]
-
-                            contraintes = {"nb_projets": len(projets_data), "urgents": len(urgents)}
-
-                            # Appel IA
-                            loop = asyncio.new_event_loop()
-                            asyncio.set_event_loop(loop)
-
-                            priorisation = loop.run_until_complete(
-                                agent.prioriser_projets(projets_data, contraintes)
-                            )
-
-                            st.session_state["priorisation_ia"] = priorisation
-                            st.success("✅ Priorisation terminée")
-
+                            import asyncio
+                            taches = asyncio.run(service.suggerer_taches(projet_nom_ia, projet_desc_ia))
+                            if taches:
+                                st.success(taches)
                         except Exception as e:
-                            st.error(f"Erreur IA : {e}")
-
-                # Afficher résultats
-                if "priorisation_ia" in st.session_state:
-                    priorisation = st.session_state["priorisation_ia"]
-
-                    st.markdown("---")
-                    st.markdown("### 🎯 Ordre de priorité suggéré")
-
-                    for i, item in enumerate(priorisation, 1):
-                        priorite_color = {1: "🔴", 2: "🟡", 3: "🟢"}.get(
-                            item.get("priorite", 3), "⚪"
-                        )
-
-                        st.markdown(f"{priorite_color} **{i}. {item['projet']}**")
-                        st.caption(f"💡 {item.get('raison', 'Priorisation IA')}")
-                        st.markdown("---")
-
-                    # Appliquer les priorités
-                    if st.button("✅ Appliquer ces priorités", type="primary"):
-                        with get_db_context() as db:
-                            for item in priorisation:
-                                projet = (
-                                    db.query(Project).filter(Project.name == item["projet"]).first()
-                                )
-
-                                if projet:
-                                    if item["priorite"] == 1:
-                                        projet.priority = "haute"
-                                    elif item["priorite"] == 2:
-                                        projet.priority = "moyenne"
-                                    else:
-                                        projet.priority = "basse"
-
-                                    projet.ai_priority_score = (4 - item["priorite"]) * 33
-
-                            db.commit()
-
-                        st.success("✅ Priorités mises à jour")
-                        del st.session_state["priorisation_ia"]
-                        st.rerun()
-
-    # ===================================
-    # TAB 3 : NOUVEAU PROJET
-    # ===================================
-
+                            st.warning(f"⚠️ IA indisponible: {e}")
+        
+        # Estimer durée
+        with col_ia2:
+            st.markdown("#### ⏱️ Estimer la durée")
+            
+            projet_nom_dur = st.text_input("Nom du projet", placeholder="Ex: Repeindre salon", key="dur")
+            complexite = st.selectbox(
+                "Complexité",
+                ["simple", "moyen", "complexe"],
+                key="complex"
+            )
+            
+            if st.button("🔮 Estimer durée", key="ia_duree", use_container_width=True):
+                if projet_nom_dur:
+                    with st.spinner("Estimation en cours..."):
+                        try:
+                            import asyncio
+                            duree = asyncio.run(service.estimer_duree(projet_nom_dur, complexite))
+                            if duree:
+                                st.info(duree)
+                        except Exception as e:
+                            st.warning(f"⚠️ IA indisponible: {e}")
+        
+        st.markdown("---")
+        
+        # Analyser blocages
+        st.markdown("#### ⚠️ Analyser les risques")
+        
+        col_r1, col_r2 = st.columns(2)
+        
+        with col_r1:
+            projet_risque = st.text_input("Nom du projet", placeholder="Ex: Installer piscine")
+        
+        with col_r2:
+            if st.button("🔍 Identifier risques", use_container_width=True):
+                if projet_risque:
+                    with st.spinner("Analyse des risques..."):
+                        try:
+                            import asyncio
+                            risques = asyncio.run(service.conseil_blocages(projet_risque, ""))
+                            if risques:
+                                st.warning(risques)
+                        except Exception as e:
+                            st.warning(f"⚠️ IA indisponible: {e}")
+    
+    # ════════════════════════════════════════════════════════════════════════
+    # TAB 3: CRÉER NOUVEAU PROJET
+    # ════════════════════════════════════════════════════════════════════════
+    
     with tab3:
-        st.subheader("➕ Créer un nouveau projet")
-
+        st.subheader("Créer un nouveau projet")
+        
         with st.form("form_nouveau_projet"):
             nom = st.text_input("Nom du projet *", placeholder="Ex: Aménagement jardin")
-
+            
             description = st.text_area(
-                "Description", height=100, placeholder="Objectifs, détails du projet..."
+                "Description",
+                height=100,
+                placeholder="Objectifs, détails du projet..."
             )
-
-            col_n1, col_n2 = st.columns(2)
-
-            with col_n1:
-                categorie = st.selectbox(
-                    "Catégorie",
-                    ["Intérieur", "Extérieur", "Rénovation", "Décoration", "Entretien", "Autre"],
-                )
-
-                priorite = st.selectbox("Priorité", ["haute", "moyenne", "basse"])
-
-            with col_n2:
-                date_debut = st.date_input("Date de début (optionnel)", value=None)
+            
+            col_p1, col_p2 = st.columns(2)
+            
+            with col_p1:
+                priorite = st.selectbox("Priorité", ["basse", "moyenne", "haute", "urgente"])
+            
+            with col_p2:
                 date_fin = st.date_input("Date d'échéance (optionnel)", value=None)
-
+            
             submitted = st.form_submit_button("💾 Créer le projet", type="primary")
-
+            
             if submitted:
                 if not nom:
-                    st.error("Le nom est obligatoire")
+                    st.error("Nom obligatoire")
                 else:
-                    project_id = creer_projet(
-                        nom, description, categorie, priorite, date_debut, date_fin
-                    )
-
-                    st.success(f"✅ Projet '{nom}' créé !")
-                    st.balloons()
-                    st.rerun()
-
+                    project_id = creer_projet(nom, description, "Général", priorite, date_fin)
+                    if project_id:
+                        st.success(f"✅ Projet '{nom}' créé!")
+                        st.balloons()
+                        st.rerun()
+        
         st.markdown("---")
-
-        # Templates de projets
-        st.markdown("### 📋 Templates de projets")
-
+        
+        # Templates
+        st.markdown("### 📋 Templates rapides")
+        
         templates = [
             {
-                "nom": "Rénovation chambre",
-                "categorie": "Intérieur",
-                "taches": ["Choisir couleurs", "Acheter peinture", "Préparer murs", "Peindre"],
+                "nom": "Rénovation cuisine",
+                "taches": ["Planifier layout", "Acheter matériaux", "Préparer", "Installer", "Finitions"]
             },
             {
-                "nom": "Potager",
-                "categorie": "Extérieur",
-                "taches": ["Préparer sol", "Acheter graines", "Planter", "Installer arrosage"],
+                "nom": "Aménagement jardin",
+                "taches": ["Préparer sol", "Acheter plants", "Planter", "Installer arrosage", "Entretien"]
             },
+            {
+                "nom": "Repeindre chambre",
+                "taches": ["Choisir couleurs", "Préparer murs", "Acheter peinture", "Peindre", "Finitions"]
+            }
         ]
-
-        for template in templates:
-            with st.expander(f"✨ {template['nom']}", expanded=False):
-                st.write(f"**Catégorie :** {template['categorie']}")
-                st.write("**Tâches suggérées :**")
-                for tache in template["taches"]:
-                    st.write(f"• {tache}")
-
-                if st.button("➕ Créer depuis ce template", key=f"template_{template['nom']}"):
-                    project_id = creer_projet(
-                        template["nom"],
-                        "Projet créé depuis template",
-                        template["categorie"],
-                        "moyenne",
-                    )
-
-                    for tache in template["taches"]:
-                        ajouter_tache_projet(project_id, tache)
-
-                    st.success(f"✅ Projet '{template['nom']}' créé !")
+        
+        for templ in templates:
+            if st.button(f"📋 {templ['nom']}", use_container_width=True):
+                p_id = creer_projet(templ["nom"], "", "Général", "moyenne")
+                if p_id:
+                    for tache in templ["taches"]:
+                        ajouter_tache(p_id, tache)
+                    st.success("✅ Projet template créé avec tâches!")
                     st.rerun()
-
-    # ===================================
-    # TAB 4 : STATISTIQUES
-    # ===================================
-
+    
+    # ════════════════════════════════════════════════════════════════════════
+    # TAB 4: TABLEAU DE BORD
+    # ════════════════════════════════════════════════════════════════════════
+    
     with tab4:
-        st.subheader("📊 Statistiques des projets")
-
+        st.subheader("📊 Vue d'ensemble")
+        
+        df_all = charger_projets()
+        
         if df_all.empty:
-            st.info("Aucun projet à analyser")
+            st.info("Aucun projet")
         else:
-            # Graphiques
-            col_g1, col_g2 = st.columns(2)
+            # Graphique progression
+            fig = go.Figure(
+                data=[
+                    go.Bar(
+                        x=df_all["nom"],
+                        y=df_all["progress"],
+                        marker_color="green"
+                    )
+                ]
+            )
+            fig.update_layout(
+                title="Progression des projets (%)",
+                height=400
+            )
+            st.plotly_chart(fig, use_container_width=True)
+            
+            # Tableau
+            st.dataframe(
+                df_all[["nom", "priorite", "progress", "taches_count", "jours_restants"]],
+                use_container_width=True,
+                hide_index=True
+            )
 
-            with col_g1:
-                st.markdown("**Répartition par statut**")
-                statut_counts = df_all["statut"].value_counts()
-                st.bar_chart(statut_counts)
 
-            with col_g2:
-                st.markdown("**Répartition par catégorie**")
-                cat_counts = df_all["categorie"].value_counts()
-                st.bar_chart(cat_counts)
-
-            st.markdown("---")
-
-            # Projets par priorité
-            st.markdown("### 🎯 Par niveau de priorité")
-
-            for priorite in ["haute", "moyenne", "basse"]:
-                df_p = df_all[df_all["priorite"] == priorite]
-                st.write(f"**{priorite.capitalize()}** : {len(df_p)} projet(s)")
-
-            st.markdown("---")
-
-            # Progression globale
-            st.markdown("### 📈 Progression globale")
-
-            if not df_all.empty:
-                avg_progress = df_all["progres"].mean()
-                st.progress(avg_progress / 100)
-                st.write(f"Progression moyenne : {format_quantity(avg_progress)}%")
+if __name__ == "__main__":
+    app()
