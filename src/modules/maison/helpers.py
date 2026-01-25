@@ -156,6 +156,8 @@ def charger_plantes() -> pd.DataFrame:
 def get_plantes_a_arroser() -> list[dict]:
     """Détecte les plantes qui ont besoin d'eau"""
     df = charger_plantes()
+    if df.empty:
+        return []
     return df[df["a_arroser"]].to_dict(orient="records")
 
 
