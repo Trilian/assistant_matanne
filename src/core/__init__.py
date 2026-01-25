@@ -195,6 +195,37 @@ AICache = CacheIA
 from .constants import *
 
 # ═══════════════════════════════════════════════════════════
+# PERFORMANCE
+# ═══════════════════════════════════════════════════════════
+
+from .performance import (
+    FunctionProfiler,
+    MemoryMonitor,
+    SQLOptimizer,
+    PerformanceDashboard,
+    ComponentLoader,
+    profile,
+    debounce,
+    throttle,
+    measure_time,
+    track_query,
+    render_performance_panel,
+    render_mini_performance_badge,
+)
+
+# ═══════════════════════════════════════════════════════════
+# SQL OPTIMIZER
+# ═══════════════════════════════════════════════════════════
+
+from .sql_optimizer import (
+    SQLAlchemyListener,
+    N1Detector,
+    BatchLoader,
+    OptimizedQueryBuilder,
+    render_sql_analysis,
+)
+
+# ═══════════════════════════════════════════════════════════
 # EXPORTS
 # ═══════════════════════════════════════════════════════════
 
@@ -309,4 +340,23 @@ __all__ = [
     "offline_aware",
     "render_connection_status",
     "render_sync_panel",
+    # Performance
+    "FunctionProfiler",
+    "MemoryMonitor",
+    "SQLOptimizer",
+    "PerformanceDashboard",
+    "ComponentLoader",
+    "profile",
+    "debounce",
+    "throttle",
+    "measure_time",
+    "track_query",
+    "render_performance_panel",
+    "render_mini_performance_badge",
+    # SQL Optimizer
+    "SQLAlchemyListener",
+    "N1Detector",
+    "BatchLoader",
+    "OptimizedQueryBuilder",
+    "render_sql_analysis",
 ]
