@@ -54,8 +54,8 @@ def get_dashboard_data() -> dict:
             .filter(RoutineTask.status == "à faire", Routine.is_active)
             .count(),
             # Inventaire
-            "stock_bas": db.query(InventoryItem)
-            .filter(InventoryItem.quantity < InventoryItem.min_quantity)
+            "stock_bas": db.query(ArticleInventaire)
+            .filter(ArticleInventaire.quantite < ArticleInventaire.quantite_minimum)
             .count(),
             # Événements
             "events_semaine": db.query(CalendarEvent)
@@ -97,8 +97,8 @@ def get_prochaines_actions() -> list:
 
         # Stock bas
         stock_bas = (
-            db.query(InventoryItem)
-            .filter(InventoryItem.quantity < InventoryItem.min_quantity)
+            db.query(ArticleInventaire)
+            .filter(ArticleInventaire.quantite < ArticleInventaire.quantite_minimum)
             .count()
         )
 
@@ -134,23 +134,7 @@ def get_prochaines_actions() -> list:
                 }
             )
 
-        # Routines en attente
-        taches = (
-            db.query(RoutineTask)
-            .join(Routine)
-            .filter(RoutineTask.status == "à faire", Routine.is_active == True)
-            .count()
-        )
-
-        if taches > 5:
-            actions.append(
-                {
-                    "priorite": "basse",
-                    "module": "Routines",
-                    "action": f"{taches} tâches de routine en attente",
-                    "link": "famille.routines",
-                }
-            )
+        # Note: Routines legacy module removed (now integrated in famille module)
 
     return actions
 
