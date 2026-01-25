@@ -163,7 +163,7 @@ def get_recipe_suggestions(objectifs: List[Dict]) -> Dict:
     
     suggestions = {}
     for objectif in objectifs:
-        cat = objectif.categorie.lower()
+        cat = objectif['categorie'].lower()
         if cat in recette_map:
             suggestions[cat] = recette_map[cat]
     
@@ -282,14 +282,17 @@ def get_shopping_from_activities(activites: List) -> List[Dict]:
     
     shopping = []
     for activity in activites:
-        if activity.type_activite in activity_shopping_map:
-            items = activity_shopping_map[activity.type_activite]
+        activity_type = activity.get('type', activity.type_activite) if hasattr(activity, 'type_activite') else activity.get('type')
+        if activity_type and activity_type in activity_shopping_map:
+            items = activity_shopping_map[activity_type]
             for item_name, category in items:
+                activity_titre = activity.get('titre', activity.titre) if hasattr(activity, 'titre') else activity.get('titre')
+                activity_date = activity.get('date', activity.date_prevue) if hasattr(activity, 'date_prevue') else activity.get('date')
                 shopping.append({
                     "item": item_name,
                     "categorie": category,
-                    "activite": activity.titre,
-                    "date_activite": activity.date_prevue
+                    "activite": activity_titre,
+                    "date_activite": activity_date
                 })
     
     return shopping
@@ -434,7 +437,9 @@ def app():
         if activites:
             st.write("**Activités cette semaine:**")
             for activity in activites:
-                st.write(f"📅 {activity.titre} - {activity.date_prevue}")
+                titre = activity.get('titre', activity.titre) if hasattr(activity, 'titre') else activity.get('titre', 'Sans titre')
+                date_act = activity.get('date', activity.date_prevue) if hasattr(activity, 'date_prevue') else activity.get('date', '?')
+                st.write(f"📅 {titre} - {date_act}")
             
             if st.button("📋 Pré-remplir shopping depuis ces activités"):
                 shopping_from_act = get_shopping_from_activities(activites)

@@ -79,8 +79,9 @@ def get_notifications():
                 all_milestones.extend(milestones)
             
             if all_milestones:
-                recent = max(all_milestones, key=lambda x: x['date'])
-                days_since = (date.today() - recent['date']).days
+                recent = max(all_milestones, key=lambda x: x.get('date_atteint', date.today()))
+                recent_date = recent.get('date_atteint', date.today())
+                days_since = (date.today() - recent_date).days
                 if days_since < 7:
                     notifications.append({
                         "type": "success",
