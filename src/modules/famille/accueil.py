@@ -37,9 +37,10 @@ from src.modules.famille.helpers import (
 def get_dashboard_metrics():
     """Récupère les métriques principales du dashboard"""
     try:
+        child_id = get_or_create_jules()
         metrics = {
             "jules_age": calculer_age_julius(),
-            "milestones_count": count_milestones_by_category(),
+            "milestones_count": count_milestones_by_category(child_id),
             "objectifs_actifs": len(get_objectives_actifs()),
             "activites_semaine": len(get_activites_semaine()),
             "budget_mois": get_budget_par_period(30),
@@ -190,7 +191,8 @@ def app():
         
         # Jalons par catégorie
         try:
-            milestones_count = count_milestones_by_category()
+            child_id = get_or_create_jules()
+            milestones_count = count_milestones_by_category(child_id)
             if milestones_count:
                 st.markdown("### Jalons par catégorie")
                 for cat, count in sorted(milestones_count.items()):
