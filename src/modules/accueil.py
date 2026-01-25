@@ -20,6 +20,19 @@ from src.services.recettes import get_recette_service
 # UI
 from src.ui.domain import stock_alert
 
+# Dashboard widgets enrichis
+try:
+    from src.ui.components.dashboard_widgets import (
+        carte_metrique_avancee,
+        graphique_inventaire_categories,
+        graphique_repartition_repas,
+        afficher_sante_systeme,
+        widget_jules_apercu,
+    )
+    WIDGETS_DISPONIBLES = True
+except ImportError:
+    WIDGETS_DISPONIBLES = False
+
 # ═══════════════════════════════════════════════════════════
 # MODULE PRINCIPAL
 # ═══════════════════════════════════════════════════════════
@@ -60,6 +73,11 @@ def app():
 
     st.markdown("---")
 
+    # Graphiques enrichis (si widgets disponibles)
+    if WIDGETS_DISPONIBLES:
+        render_graphiques_enrichis()
+        st.markdown("---")
+
     # Vue par module
     col1, col2 = st.columns(2)
 
@@ -72,6 +90,50 @@ def app():
         render_inventaire_summary()
         st.markdown("")
         render_courses_summary()
+    
+    # Footer avec santé système
+    st.markdown("---")
+    if WIDGETS_DISPONIBLES:
+        col_footer1, col_footer2 = st.columns([3, 1])
+        with col_footer1:
+            afficher_sante_systeme()
+        with col_footer2:
+            widget_jules_apercu()
+
+
+def render_graphiques_enrichis():
+    """Affiche les graphiques Plotly enrichis."""
+    
+    st.markdown("### 📈 Visualisations")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        # Graphique inventaire par catégorie
+        inventaire = get_inventaire_service().get_inventaire_complet()
+        fig = graphique_inventaire_categories(inventaire)
+        if fig:
+            st.markdown("**📦 Stock par Catégorie**")
+            st.plotly_chart(fig, use_container_width=True, key="chart_inventaire")
+        else:
+            st.info("Pas de données d'inventaire")
+    
+    with col2:
+        # Graphique répartition repas
+        planning = get_planning_service().get_planning()
+        if planning and planning.repas:
+            repas_data = [
+                {"type_repas": getattr(r, 'type_repas', 'autre')} 
+                for r in planning.repas
+            ]
+            fig = graphique_repartition_repas(repas_data)
+            if fig:
+                st.markdown("**🍽️ Répartition des Repas**")
+                st.plotly_chart(fig, use_container_width=True, key="chart_repas")
+            else:
+                st.info("Pas de planning cette semaine")
+        else:
+            st.info("Pas de planning cette semaine")
 
 
 # ═══════════════════════════════════════════════════════════
@@ -384,7 +446,9 @@ def render_planning_summary():
 
         if planning and planning.repas:
             total_repas = len(planning.repas)
-            repas_bebe = 0  # À implémenter selon le modèle
+            
+            # Repas adaptés bébé
+            repas_bebe = len([r for r in planning.repas if getattr(r, 'compatible_bebe', False)])
 
             col1, col2 = st.columns(2)
 
@@ -394,17 +458,19 @@ def render_planning_summary():
             with col2:
                 st.metric("👶 Bébé", repas_bebe)
 
-            # Aujourd'hui
+            # Repas d'aujourd'hui
             aujourd_hui = date.today()
-            jour_idx = aujourd_hui.weekday()
+            repas_aujourdhui = [
+                r for r in planning.repas 
+                if hasattr(r, 'date') and r.date == aujourd_hui
+            ]
 
-            jour_data = next((j for j in structure["jours"] if j["jour_idx"] == jour_idx), None)
-
-            if jour_data and jour_data["repas"]:
+            if repas_aujourdhui:
                 st.markdown("**Aujourd'hui:**")
-                for repas in jour_data["repas"][:2]:
-                    if repas.get("recette"):
-                        st.caption(f"• {repas['type']}: {repas['recette']['nom']}")
+                for repas in repas_aujourdhui[:2]:
+                    type_repas = getattr(repas, 'type_repas', 'Repas')
+                    nom_recette = getattr(repas, 'recette_nom', None) or "Non défini"
+                    st.caption(f"• {type_repas}: {nom_recette}")
 
         else:
             st.info("Aucun planning cette semaine")

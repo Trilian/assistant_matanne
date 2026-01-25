@@ -74,6 +74,28 @@ from .cache import (
     cached,
 )
 
+# Cache multi-niveaux (nouveau)
+from .cache_multi import (
+    MultiLevelCache,
+    get_cache,
+    cached as cached_multi,
+    CacheEntry,
+    CacheStats,
+)
+
+# Mode offline
+from .offline import (
+    ConnectionStatus,
+    ConnectionManager,
+    OperationType,
+    PendingOperation,
+    OfflineQueue,
+    OfflineSynchronizer,
+    offline_aware,
+    render_connection_status,
+    render_sync_panel,
+)
+
 # Alias anglais
 RateLimit = LimiteDebit
 
@@ -271,4 +293,20 @@ __all__ = [
     "get_ai_client",
     "AIParser",
     "AICache",
+    # Cache multi-niveaux
+    "MultiLevelCache",
+    "get_cache",
+    "cached_multi",
+    "CacheEntry",
+    "CacheStats",
+    # Mode offline
+    "ConnectionStatus",
+    "ConnectionManager",
+    "OperationType",
+    "PendingOperation",
+    "OfflineQueue",
+    "OfflineSynchronizer",
+    "offline_aware",
+    "render_connection_status",
+    "render_sync_panel",
 ]
