@@ -268,16 +268,17 @@ def app():
         try:
             activites = get_activites_semaine()
             if activites:
-                activites_texte = ", ".join([f"**{a.titre}**" for a in activites[:3]])
+                activites_texte = ", ".join([f"**{a['titre']}**" if isinstance(a, dict) else f"**{a.titre}**" for a in activites[:3]])
                 st.info(f"🎯 Vous avez prévu: {activites_texte}")
                 
                 # Suggestions contextées
                 for activity in activites[:2]:
-                    if activity.type_activite == "picnic":
+                    activity_type = activity.get('type') if isinstance(activity, dict) else activity.type_activite
+                    if activity_type == "picnic":
                         st.write("🧺 **Pour pique-nique**: Serviettes, gobelets, sacs glacés")
-                    elif activity.type_activite == "parc":
+                    elif activity_type == "parc":
                         st.write("⚽ **Pour parc**: Ballon, bubbles, frisbee")
-                    elif activity.type_activite == "sport":
+                    elif activity_type == "sport":
                         st.write("🏃 **Pour sport**: Bouteille eau, gourde, vêtements")
             else:
                 st.info("ℹ️ Aucune activité prévue cette semaine")

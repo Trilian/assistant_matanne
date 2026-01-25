@@ -209,14 +209,14 @@ def app():
             
             if objectifs:
                 for obj in objectifs[:3]:  # Top 3 objectifs
-                    progress = (obj.valeur_actuelle or 0) / (obj.valeur_cible or 1) * 100
+                    progress = (obj.get('valeur_actuelle') or 0) / (obj.get('valeur_cible') or 1) * 100
                     
-                    st.write(f"**{obj.titre}**")
+                    st.write(f"**{obj['titre']}**")
                     st.progress(min(progress / 100, 1.0))
-                    st.caption(f"{obj.valeur_actuelle or 0:.1f}/{obj.valeur_cible:.1f} {obj.unite}")
+                    st.caption(f"{obj.get('valeur_actuelle') or 0:.1f}/{obj.get('valeur_cible', 0):.1f} {obj.get('unite', '')}")
                     
-                    if obj.date_cible:
-                        days = (obj.date_cible - date.today()).days
+                    if obj.get('date_cible'):
+                        days = (obj['date_cible'] - date.today()).days
                         st.caption(f"⏱️ {days} jours restants")
                 
                 if len(objectifs) > 3:
@@ -261,10 +261,10 @@ def app():
             # Timeline graphique
             df_activites = pd.DataFrame([
                 {
-                    "Date": a.date_prevue,
-                    "Activité": a.titre,
-                    "Type": a.type_activite,
-                    "Coût": a.cout_estime or 0
+                    "Date": a.get('date') if isinstance(a, dict) else a.date_prevue,
+                    "Activité": a.get('titre') if isinstance(a, dict) else a.titre,
+                    "Type": a.get('type') if isinstance(a, dict) else a.type_activite,
+                    "Coût": a.get('cout_estime') or 0 if isinstance(a, dict) else a.cout_estime or 0
                 }
                 for a in activites
             ])
