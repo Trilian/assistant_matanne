@@ -87,6 +87,26 @@ from .maison import (
     GardenLog,
 )
 
+# Nouvelles fonctionnalités (budget étendu, météo, calendrier, notifications)
+from .nouveaux import (
+    Depense,
+    BudgetMensuelDB,
+    AlerteMeteo,
+    ConfigMeteo,
+    Backup,
+    CalendrierExterne,
+    EvenementCalendrier,
+    PushSubscription,
+    NotificationPreference,
+    # Enums
+    CategorieDepenseDB,
+    RecurrenceType,
+    NiveauAlerte,
+    TypeAlerteMeteo,
+    CalendarProvider,
+    SyncDirection,
+)
+
 
 # Export explicite de tous les symboles
 __all__ = [
@@ -136,4 +156,21 @@ __all__ = [
     "RoutineTask",
     "GardenItem",
     "GardenLog",
+    # Nouvelles fonctionnalités
+    "Depense",
+    "BudgetMensuelDB",
+    "AlerteMeteo",
+    "ConfigMeteo",
+    "Backup",
+    "CalendrierExterne",
+    "EvenementCalendrier",
+    "PushSubscription",
+    "NotificationPreference",
+    # Enums nouveaux
+    "CategorieDepenseDB",
+    "RecurrenceType",
+    "NiveauAlerte",
+    "TypeAlerteMeteo",
+    "CalendarProvider",
+    "SyncDirection",
 ]

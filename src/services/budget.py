@@ -196,8 +196,9 @@ class BudgetService:
             montant=depense.montant,
             categorie=depense.categorie.value,
             description=depense.description,
-            magasin=depense.magasin if hasattr(FamilyBudget, 'magasin') else None,
+            magasin=depense.magasin,
             est_recurrent=depense.est_recurrente,
+            frequence_recurrence=depense.frequence.value if depense.est_recurrente else None,
         )
         
         db.add(budget_entry)

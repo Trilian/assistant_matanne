@@ -120,7 +120,7 @@ class PDFExportService:
         """
         with obtenir_contexte_db() as db:
             recette = db.query(Recette).options(
-                joinedload(Recette.recette_ingredients).joinedload(RecetteIngredient.ingredient),
+                joinedload(Recette.ingredients).joinedload(RecetteIngredient.ingredient),
                 joinedload(Recette.etapes)
             ).filter(Recette.id == recette_id).first()
             
@@ -142,10 +142,10 @@ class PDFExportService:
                         "quantite": ri.quantite or 0,
                         "unite": ri.unite or ""
                     }
-                    for ri in recette.recette_ingredients
+                    for ri in recette.ingredients
                 ],
                 etapes=[e.description for e in sorted(recette.etapes, key=lambda x: x.ordre)],
-                tags=recette.tags if recette.tags else []
+                tags=recette.tags if hasattr(recette, 'tags') and recette.tags else []
             )
             
             return self._generer_pdf_recette(data)

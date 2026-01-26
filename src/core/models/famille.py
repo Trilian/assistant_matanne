@@ -202,6 +202,9 @@ class FamilyBudget(Base):
         categorie: Catégorie (Jules_jouets, Jules_vetements, Nous_sport, etc.)
         description: Description de la dépense
         montant: Montant dépensé
+        magasin: Magasin où l'achat a été fait
+        est_recurrent: Si c'est une dépense récurrente
+        frequence_recurrence: Fréquence de récurrence (mensuel, hebdomadaire, etc.)
         notes: Notes
     """
 
@@ -212,6 +215,9 @@ class FamilyBudget(Base):
     categorie: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     description: Mapped[str | None] = mapped_column(String(200))
     montant: Mapped[float] = mapped_column(Float, nullable=False)
+    magasin: Mapped[str | None] = mapped_column(String(200))
+    est_recurrent: Mapped[bool] = mapped_column(Boolean, default=False)
+    frequence_recurrence: Mapped[str | None] = mapped_column(String(50))  # mensuel, hebdomadaire, etc.
     notes: Mapped[str | None] = mapped_column(Text)
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
