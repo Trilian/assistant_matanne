@@ -459,6 +459,219 @@ class AuthService:
         except Exception as e:
             logger.debug(f"Session refresh: {e}")
             return False
+    
+    # ═══════════════════════════════════════════════════════════
+    # VALIDATION JWT (pour API REST)
+    # ═══════════════════════════════════════════════════════════
+    
+    def validate_token(self, token: str) -> UserProfile | None:
+        """
+        Valide un token JWT Supabase et retourne l'utilisateur.
+        
+        Args:
+            token: Token JWT Bearer
+            
+        Returns:
+            UserProfile si valide, None sinon
+        """
+        if not self.is_configured:
+            logger.warning("Auth non configuré pour validation JWT")
+            return None
+        
+        try:
+            # Utiliser l'API Supabase pour valider le token
+            self._client.auth._storage_key = token  # Temporaire
+            response = self._client.auth.get_user(token)
+            
+            if response and response.user:
+                metadata = response.user.user_metadata or {}
+                
+                return UserProfile(
+                    id=response.user.id,
+                    email=response.user.email or "",
+                    nom=metadata.get("nom", ""),
+                    prenom=metadata.get("prenom", ""),
+                    role=Role(metadata.get("role", "membre")),
+                    avatar_url=metadata.get("avatar_url"),
+                )
+            
+            return None
+            
+        except Exception as e:
+            logger.error(f"Erreur validation token JWT: {e}")
+            return None
+    
+    def decode_jwt_payload(self, token: str) -> dict | None:
+        """
+        Décode le payload d'un JWT sans validation signature.
+        Utile pour debug ou extraction d'infos basiques.
+        
+        Args:
+            token: Token JWT
+            
+        Returns:
+            Payload décodé ou None
+        """
+        try:
+            import base64
+            import json
+            
+            # JWT = header.payload.signature
+            parts = token.split('.')
+            if len(parts) != 3:
+                return None
+            
+            # Décoder le payload (partie 2)
+            payload = parts[1]
+            # Ajouter padding si nécessaire
+            payload += '=' * (4 - len(payload) % 4)
+            decoded = base64.urlsafe_b64decode(payload)
+            
+            return json.loads(decoded)
+            
+        except Exception as e:
+            logger.debug(f"Erreur décodage JWT: {e}")
+            return None
+    
+    # ═══════════════════════════════════════════════════════════
+    # MISE À JOUR PROFIL
+    # ═══════════════════════════════════════════════════════════
+    
+    def update_profile(
+        self,
+        nom: str | None = None,
+        prenom: str | None = None,
+        avatar_url: str | None = None,
+        preferences: dict | None = None,
+    ) -> AuthResult:
+        """
+        Met à jour le profil de l'utilisateur connecté.
+        
+        Args:
+            nom: Nouveau nom (optionnel)
+            prenom: Nouveau prénom (optionnel)
+            avatar_url: URL de l'avatar (optionnel)
+            preferences: Préférences utilisateur (optionnel)
+            
+        Returns:
+            Résultat de la mise à jour
+        """
+        if not self.is_configured:
+            return AuthResult(
+                success=False,
+                message="Service non configuré",
+                error_code="NOT_CONFIGURED"
+            )
+        
+        user = self.get_current_user()
+        if not user:
+            return AuthResult(
+                success=False,
+                message="Non connecté",
+                error_code="NOT_AUTHENTICATED"
+            )
+        
+        try:
+            # Construire les données à mettre à jour
+            update_data = {}
+            
+            if nom is not None:
+                update_data["nom"] = nom
+            if prenom is not None:
+                update_data["prenom"] = prenom
+            if avatar_url is not None:
+                update_data["avatar_url"] = avatar_url
+            if preferences is not None:
+                update_data["preferences"] = preferences
+            
+            if not update_data:
+                return AuthResult(
+                    success=True,
+                    message="Aucune modification",
+                    user=user
+                )
+            
+            # Mettre à jour via Supabase Auth
+            response = self._client.auth.update_user({
+                "data": update_data
+            })
+            
+            if response and response.user:
+                # Mettre à jour le profil local
+                metadata = response.user.user_metadata or {}
+                
+                updated_user = UserProfile(
+                    id=response.user.id,
+                    email=response.user.email or user.email,
+                    nom=metadata.get("nom", user.nom),
+                    prenom=metadata.get("prenom", user.prenom),
+                    role=Role(metadata.get("role", user.role.value)),
+                    avatar_url=metadata.get("avatar_url", user.avatar_url),
+                    preferences=metadata.get("preferences", {}),
+                    last_login=user.last_login,
+                    created_at=user.created_at,
+                )
+                
+                # Mettre à jour la session
+                st.session_state[self.USER_KEY] = updated_user
+                
+                logger.info(f"Profil mis à jour: {user.email}")
+                
+                return AuthResult(
+                    success=True,
+                    message="Profil mis à jour avec succès",
+                    user=updated_user
+                )
+            
+            return AuthResult(
+                success=False,
+                message="Erreur lors de la mise à jour"
+            )
+            
+        except Exception as e:
+            logger.error(f"Erreur update profile: {e}")
+            return AuthResult(
+                success=False,
+                message=f"Erreur: {str(e)}",
+                error_code="UPDATE_ERROR"
+            )
+    
+    def change_password(self, new_password: str) -> AuthResult:
+        """
+        Change le mot de passe de l'utilisateur connecté.
+        
+        Args:
+            new_password: Nouveau mot de passe (min 6 caractères)
+            
+        Returns:
+            Résultat du changement
+        """
+        if not self.is_configured:
+            return AuthResult(success=False, message="Service non configuré")
+        
+        if len(new_password) < 6:
+            return AuthResult(
+                success=False,
+                message="Mot de passe trop court (min 6 caractères)"
+            )
+        
+        try:
+            response = self._client.auth.update_user({
+                "password": new_password
+            })
+            
+            if response:
+                logger.info("Mot de passe changé")
+                return AuthResult(
+                    success=True,
+                    message="Mot de passe changé avec succès"
+                )
+            
+            return AuthResult(success=False, message="Erreur lors du changement")
+            
+        except Exception as e:
+            logger.error(f"Erreur changement mot de passe: {e}")
+            return AuthResult(success=False, message=f"Erreur: {str(e)}")
 
 
 # ═══════════════════════════════════════════════════════════
@@ -570,18 +783,51 @@ def render_profile_settings():
     
     st.markdown("### 👤 Mon profil")
     
+    # Formulaire de mise à jour du profil
     with st.form("profile_form"):
         prenom = st.text_input("Prénom", value=user.prenom)
         nom = st.text_input("Nom", value=user.nom)
+        avatar_url = st.text_input("URL Avatar", value=user.avatar_url or "", help="URL d'une image pour votre avatar")
         
         st.markdown("---")
-        st.caption(f"Email: {user.email}")
-        st.caption(f"Rôle: {user.role.value.title()}")
-        st.caption(f"Membre depuis: {user.created_at.strftime('%d/%m/%Y') if user.created_at else 'N/A'}")
+        st.caption(f"📧 Email: {user.email}")
+        st.caption(f"🏷️ Rôle: {user.role.value.title()}")
+        st.caption(f"📅 Membre depuis: {user.created_at.strftime('%d/%m/%Y') if user.created_at else 'N/A'}")
         
-        if st.form_submit_button("Enregistrer", use_container_width=True):
-            # TODO: Mettre à jour le profil via Supabase
-            st.success("Profil mis à jour!")
+        if st.form_submit_button("💾 Enregistrer les modifications", use_container_width=True, type="primary"):
+            result = auth.update_profile(
+                nom=nom if nom != user.nom else None,
+                prenom=prenom if prenom != user.prenom else None,
+                avatar_url=avatar_url if avatar_url != user.avatar_url else None,
+            )
+            
+            if result.success:
+                st.success(f"✅ {result.message}")
+                st.rerun()
+            else:
+                st.error(f"❌ {result.message}")
+    
+    # Section changement de mot de passe
+    st.markdown("---")
+    st.markdown("### 🔒 Changer le mot de passe")
+    
+    with st.form("password_form"):
+        new_password = st.text_input("Nouveau mot de passe", type="password", key="new_pwd")
+        confirm_password = st.text_input("Confirmer le mot de passe", type="password", key="confirm_pwd")
+        
+        if st.form_submit_button("🔐 Changer le mot de passe", use_container_width=True):
+            if not new_password:
+                st.error("Veuillez entrer un nouveau mot de passe")
+            elif new_password != confirm_password:
+                st.error("Les mots de passe ne correspondent pas")
+            elif len(new_password) < 6:
+                st.error("Mot de passe trop court (min 6 caractères)")
+            else:
+                result = auth.change_password(new_password)
+                if result.success:
+                    st.success(f"✅ {result.message}")
+                else:
+                    st.error(f"❌ {result.message}")
 
 
 # ═══════════════════════════════════════════════════════════

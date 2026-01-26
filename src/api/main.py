@@ -44,6 +44,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Rate Limiting Middleware
+from src.api.rate_limiting import RateLimitMiddleware, rate_limit, check_ai_rate_limit
+app.add_middleware(RateLimitMiddleware)
+
 
 # ═══════════════════════════════════════════════════════════
 # SCHÉMAS PYDANTIC
@@ -164,25 +168,50 @@ async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Security(security)
 ) -> dict | None:
     """
-    Valide le token JWT et retourne l'utilisateur.
+    Valide le token JWT Supabase et retourne l'utilisateur.
     
     En mode développement, retourne un utilisateur par défaut si pas de token.
     """
     if not credentials:
         # Mode développement - utilisateur par défaut
-        return {"id": "dev", "email": "dev@local", "role": "admin"}
+        import os
+        if os.getenv("ENVIRONMENT", "development") == "development":
+            return {"id": "dev", "email": "dev@local", "role": "admin"}
+        raise HTTPException(status_code=401, detail="Token requis")
     
     try:
-        # TODO: Valider le token Supabase JWT
-        # from src.services.auth import get_auth_service
-        # auth = get_auth_service()
-        # user = auth.validate_token(credentials.credentials)
+        from src.services.auth import get_auth_service
         
-        return {"id": "1", "email": "user@example.com", "role": "membre"}
+        auth = get_auth_service()
         
+        # Valider le token JWT via Supabase
+        user = auth.validate_token(credentials.credentials)
+        
+        if user:
+            return {
+                "id": user.id,
+                "email": user.email,
+                "role": user.role.value,
+                "nom": user.nom,
+                "prenom": user.prenom,
+            }
+        
+        # Fallback: décoder le JWT pour extraire les infos
+        payload = auth.decode_jwt_payload(credentials.credentials)
+        if payload:
+            return {
+                "id": payload.get("sub", "unknown"),
+                "email": payload.get("email", ""),
+                "role": payload.get("user_metadata", {}).get("role", "membre"),
+            }
+        
+        raise HTTPException(status_code=401, detail="Token invalide")
+        
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Erreur validation token: {e}")
-        raise HTTPException(status_code=401, detail="Token invalide")
+        raise HTTPException(status_code=401, detail="Token invalide ou expiré")
 
 
 def require_auth(user: dict = Depends(get_current_user)):

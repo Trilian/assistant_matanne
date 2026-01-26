@@ -472,28 +472,129 @@ class PushNotificationService:
         return self.send_notification(user_id, notification)
     
     # ═══════════════════════════════════════════════════════════
-    # PERSISTANCE (À IMPLÉMENTER AVEC SUPABASE)
+    # PERSISTANCE SUPABASE
     # ═══════════════════════════════════════════════════════════
     
+    def _get_supabase_client(self):
+        """Récupère le client Supabase."""
+        try:
+            from supabase import create_client
+            from src.core.config import obtenir_parametres
+            
+            params = obtenir_parametres()
+            supabase_url = getattr(params, 'SUPABASE_URL', None)
+            supabase_key = getattr(params, 'SUPABASE_SERVICE_KEY', None) or getattr(params, 'SUPABASE_ANON_KEY', None)
+            
+            if supabase_url and supabase_key:
+                return create_client(supabase_url, supabase_key)
+        except Exception as e:
+            logger.warning(f"Supabase non disponible: {e}")
+        return None
+    
     def _save_subscription_to_db(self, subscription: PushSubscription):
-        """Sauvegarde un abonnement en base."""
-        # TODO: Implémenter avec Supabase
-        pass
+        """Sauvegarde un abonnement en base Supabase."""
+        client = self._get_supabase_client()
+        if not client:
+            logger.debug("Supabase non configuré, abonnement en mémoire uniquement")
+            return
+        
+        try:
+            # Table: push_subscriptions
+            data = {
+                "user_id": subscription.user_id,
+                "endpoint": subscription.endpoint,
+                "p256dh_key": subscription.p256dh_key,
+                "auth_key": subscription.auth_key,
+                "user_agent": subscription.user_agent,
+                "created_at": subscription.created_at.isoformat(),
+                "is_active": subscription.is_active,
+            }
+            
+            # Upsert basé sur endpoint
+            client.table("push_subscriptions").upsert(
+                data,
+                on_conflict="endpoint"
+            ).execute()
+            
+            logger.debug(f"Abonnement sauvegardé pour {subscription.user_id}")
+        except Exception as e:
+            logger.error(f"Erreur sauvegarde abonnement: {e}")
     
     def _remove_subscription_from_db(self, user_id: str, endpoint: str):
-        """Supprime un abonnement de la base."""
-        # TODO: Implémenter avec Supabase
-        pass
+        """Supprime un abonnement de la base Supabase."""
+        client = self._get_supabase_client()
+        if not client:
+            return
+        
+        try:
+            client.table("push_subscriptions").delete().match({
+                "user_id": user_id,
+                "endpoint": endpoint
+            }).execute()
+            
+            logger.debug(f"Abonnement supprimé pour {user_id}")
+        except Exception as e:
+            logger.error(f"Erreur suppression abonnement: {e}")
     
     def _load_subscriptions_from_db(self, user_id: str) -> list[PushSubscription]:
-        """Charge les abonnements depuis la base."""
-        # TODO: Implémenter avec Supabase
-        return []
+        """Charge les abonnements depuis Supabase."""
+        client = self._get_supabase_client()
+        if not client:
+            return []
+        
+        try:
+            response = client.table("push_subscriptions").select("*").eq(
+                "user_id", user_id
+            ).eq("is_active", True).execute()
+            
+            subscriptions = []
+            for row in response.data:
+                subscriptions.append(PushSubscription(
+                    id=row.get("id"),
+                    user_id=row["user_id"],
+                    endpoint=row["endpoint"],
+                    p256dh_key=row["p256dh_key"],
+                    auth_key=row["auth_key"],
+                    user_agent=row.get("user_agent"),
+                    created_at=datetime.fromisoformat(row["created_at"]) if row.get("created_at") else datetime.now(),
+                    is_active=row.get("is_active", True),
+                ))
+            
+            return subscriptions
+        except Exception as e:
+            logger.error(f"Erreur chargement abonnements: {e}")
+            return []
     
     def _save_preferences_to_db(self, preferences: NotificationPreferences):
-        """Sauvegarde les préférences en base."""
-        # TODO: Implémenter avec Supabase
-        pass
+        """Sauvegarde les préférences en base Supabase."""
+        client = self._get_supabase_client()
+        if not client:
+            return
+        
+        try:
+            data = {
+                "user_id": preferences.user_id,
+                "stock_alerts": preferences.stock_alerts,
+                "expiration_alerts": preferences.expiration_alerts,
+                "meal_reminders": preferences.meal_reminders,
+                "activity_reminders": preferences.activity_reminders,
+                "shopping_updates": preferences.shopping_updates,
+                "family_reminders": preferences.family_reminders,
+                "system_updates": preferences.system_updates,
+                "quiet_hours_start": preferences.quiet_hours_start,
+                "quiet_hours_end": preferences.quiet_hours_end,
+                "max_per_hour": preferences.max_per_hour,
+                "digest_mode": preferences.digest_mode,
+            }
+            
+            client.table("notification_preferences").upsert(
+                data,
+                on_conflict="user_id"
+            ).execute()
+            
+            logger.debug(f"Préférences sauvegardées pour {preferences.user_id}")
+        except Exception as e:
+            logger.error(f"Erreur sauvegarde préférences: {e}")
 
 
 # ═══════════════════════════════════════════════════════════

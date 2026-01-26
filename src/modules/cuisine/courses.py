@@ -6,6 +6,7 @@ Module Courses - Gestion complète de la liste de courses
 - Suggestions IA par recettes
 - Historique & modèles récurrents
 - Partage & synchronisation multi-appareils
+- Synchronisation temps réel entre utilisateurs
 """
 
 import logging
@@ -16,6 +17,7 @@ from datetime import datetime, timedelta
 from src.services.courses import get_courses_service
 from src.services.inventaire import get_inventaire_service
 from src.services.recettes import get_recette_service
+from src.services.realtime_sync import get_realtime_sync_service
 from src.core.errors_base import ErreurValidation
 from src.core.database import obtenir_contexte_db
 
@@ -56,6 +58,9 @@ def app():
         st.session_state.courses_refresh = 0
     if "new_article_mode" not in st.session_state:
         st.session_state.new_article_mode = False
+    
+    # Initialiser la synchronisation temps réel
+    _init_realtime_sync()
 
     # Tabs principales
     tab_liste, tab_suggestions, tab_historique, tab_modeles, tab_outils = st.tabs([
@@ -915,6 +920,95 @@ def render_outils():
             
             # Phase 2: Budgeting
             st.subheader("💰 Budget tracking (PHASE 2)")
+
+
+# ═══════════════════════════════════════════════════════════
+# SYNCHRONISATION TEMPS RÉEL
+# ═══════════════════════════════════════════════════════════
+
+
+def _init_realtime_sync():
+    """Initialise la synchronisation temps réel."""
+    if "realtime_initialized" not in st.session_state:
+        st.session_state.realtime_initialized = False
+    
+    try:
+        sync_service = get_realtime_sync_service()
+        
+        if sync_service.is_configured and not st.session_state.realtime_initialized:
+            # Récupérer l'utilisateur courant
+            user_id = st.session_state.get("user_id", "anonymous")
+            user_name = st.session_state.get("user_name", "Utilisateur")
+            
+            # Rejoindre le canal de synchronisation (liste par défaut = 1)
+            liste_id = st.session_state.get("liste_active_id", 1)
+            
+            if sync_service.join_list(liste_id, user_id, user_name):
+                st.session_state.realtime_initialized = True
+                logger.info(f"Sync temps réel initialisée pour liste {liste_id}")
+        
+    except Exception as e:
+        logger.warning(f"Sync temps réel non disponible: {e}")
+
+
+def render_realtime_status():
+    """Affiche le statut de synchronisation temps réel."""
+    try:
+        sync_service = get_realtime_sync_service()
+        
+        if not sync_service.is_configured:
+            return
+        
+        from src.services.realtime_sync import (
+            render_presence_indicator,
+            render_typing_indicator,
+            render_sync_status,
+        )
+        
+        # Statut dans la sidebar
+        with st.sidebar:
+            st.divider()
+            st.markdown("### 🔄 Synchronisation")
+            
+            render_sync_status()
+            render_presence_indicator()
+            
+            # Afficher qui tape
+            if sync_service.state.users_present:
+                typing_users = [
+                    u for u in sync_service.state.users_present.values()
+                    if u.is_typing
+                ]
+                if typing_users:
+                    render_typing_indicator()
+    
+    except Exception as e:
+        logger.debug(f"Statut realtime non affiché: {e}")
+
+
+def _broadcast_article_change(event_type: str, article_data: dict):
+    """Diffuse un changement d'article aux autres utilisateurs."""
+    try:
+        sync_service = get_realtime_sync_service()
+        
+        if not sync_service.is_configured or not sync_service.state.connected:
+            return
+        
+        liste_id = st.session_state.get("liste_active_id", 1)
+        
+        if event_type == "added":
+            sync_service.broadcast_item_added(liste_id, article_data)
+        elif event_type == "checked":
+            sync_service.broadcast_item_checked(
+                liste_id,
+                article_data.get("id"),
+                article_data.get("achete", False)
+            )
+        elif event_type == "deleted":
+            sync_service.broadcast_item_deleted(liste_id, article_data.get("id"))
+    
+    except Exception as e:
+        logger.debug(f"Broadcast non envoyé: {e}")
             st.info("⏳ Estimation coût par article + recettes planifiées")
             
         except Exception as e:

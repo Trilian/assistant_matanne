@@ -33,9 +33,9 @@ def app():
 
     st.title("⚙️ Paramètres")
 
-    # Tabs
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(
-        ["👨‍👩‍👧‍👦 Foyer", "🤖 IA", "💾 Base de Données", "🗄️ Cache", "ℹ️ À Propos"]
+    # Tabs - Ajout des nouvelles fonctionnalités
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(
+        ["👨‍👩‍👧‍👦 Foyer", "🤖 IA", "💾 Base de Données", "🗄️ Cache", "📱 Affichage", "💰 Budget", "ℹ️ À Propos"]
     )
 
     with tab1:
@@ -51,6 +51,12 @@ def app():
         render_cache_config()
 
     with tab5:
+        render_display_config()
+
+    with tab6:
+        render_budget_config()
+
+    with tab7:
         render_about()
 
 
@@ -541,3 +547,176 @@ def render_about():
 
     with st.expander("État de l'application"):
         st.json(state_summary)
+
+# ═══════════════════════════════════════════════════════════
+# TAB 5: CONFIGURATION AFFICHAGE (Mode Tablette)
+# ═══════════════════════════════════════════════════════════
+
+
+def render_display_config():
+    """Configuration de l'affichage et mode tablette."""
+    
+    st.markdown("### 📱 Configuration Affichage")
+    st.caption("Personnalise l'interface selon ton appareil")
+    
+    try:
+        from src.ui.tablet_mode import (
+            TabletMode, get_tablet_mode, set_tablet_mode, render_mode_selector
+        )
+        
+        current_mode = get_tablet_mode()
+        
+        st.markdown("#### Mode d'affichage")
+        
+        mode_options = {
+            TabletMode.NORMAL: ("🖥️ Normal", "Interface standard pour ordinateur"),
+            TabletMode.TABLET: ("📱 Tablette", "Boutons plus grands, interface tactile"),
+            TabletMode.KITCHEN: ("👨‍🍳 Cuisine", "Mode cuisine avec navigation par étapes"),
+        }
+        
+        for mode, (label, description) in mode_options.items():
+            col1, col2 = st.columns([1, 3])
+            with col1:
+                if st.button(
+                    label, 
+                    key=f"mode_{mode.value}",
+                    type="primary" if current_mode == mode else "secondary",
+                    use_container_width=True
+                ):
+                    set_tablet_mode(mode)
+                    show_success(f"Mode {label} activé !")
+                    st.rerun()
+            with col2:
+                st.caption(description)
+        
+        st.markdown("---")
+        
+        st.markdown("#### Prévisualisation")
+        
+        if current_mode == TabletMode.NORMAL:
+            st.info("🖥️ Mode normal actif - Interface optimisée pour ordinateur")
+        elif current_mode == TabletMode.TABLET:
+            st.warning("📱 Mode tablette actif - Boutons et textes agrandis")
+        else:
+            st.success("👨‍🍳 Mode cuisine actif - Interface simplifiée pour cuisiner")
+        
+    except ImportError:
+        st.error("Module tablet_mode non disponible")
+
+
+# ═══════════════════════════════════════════════════════════
+# TAB 6: CONFIGURATION BUDGET
+# ═══════════════════════════════════════════════════════════
+
+
+def render_budget_config():
+    """Configuration du budget et backup."""
+    
+    st.markdown("### 💰 Budget & Sauvegarde")
+    
+    # Section Budget
+    st.markdown("#### 💵 Configuration Budget")
+    
+    try:
+        from src.services.budget import CategorieDepense
+        
+        st.markdown("**Catégories de dépenses disponibles:**")
+        
+        cols = st.columns(3)
+        categories = list(CategorieDepense)
+        
+        for i, cat in enumerate(categories):
+            with cols[i % 3]:
+                emoji_map = {
+                    "alimentation": "🍎",
+                    "transport": "🚗",
+                    "logement": "🏠",
+                    "sante": "💊",
+                    "loisirs": "🎮",
+                    "vetements": "👕",
+                    "education": "📚",
+                    "cadeaux": "🎁",
+                    "abonnements": "📺",
+                    "restaurant": "🍽️",
+                    "vacances": "✈️",
+                    "bebe": "👶",
+                    "autre": "📦",
+                }
+                emoji = emoji_map.get(cat.value, "📦")
+                st.checkbox(f"{emoji} {cat.value.capitalize()}", value=True, disabled=True)
+        
+        st.info("💡 Accède au module Budget dans le menu Famille pour gérer tes dépenses")
+        
+    except ImportError:
+        st.warning("Module budget non disponible")
+    
+    st.markdown("---")
+    
+    # Section Backup
+    st.markdown("#### 💾 Sauvegarde des données")
+    
+    try:
+        from src.services.backup import get_backup_service, render_backup_ui
+        
+        backup_service = get_backup_service()
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if st.button("📥 Créer une sauvegarde", type="primary", use_container_width=True):
+                with smart_spinner("Sauvegarde en cours..."):
+                    result = backup_service.create_backup()
+                    if result.success:
+                        show_success(f"✅ {result.message}")
+                    else:
+                        show_error(f"❌ {result.message}")
+        
+        with col2:
+            if st.button("📋 Voir les sauvegardes", use_container_width=True):
+                backups = backup_service.list_backups()
+                if backups:
+                    for b in backups[:5]:
+                        st.text(f"📄 {b.filename} ({b.size_bytes // 1024} KB)")
+                else:
+                    st.info("Aucune sauvegarde trouvée")
+        
+    except ImportError:
+        st.warning("Module backup non disponible")
+    
+    st.markdown("---")
+    
+    # Section Météo
+    st.markdown("#### 🌤️ Configuration Météo Jardin")
+    
+    try:
+        from src.services.weather import get_weather_garden_service
+        
+        weather = get_weather_garden_service()
+        
+        with st.form("meteo_config"):
+            ville = st.text_input("Ville", value="Paris")
+            surface = st.number_input("Surface jardin (m²)", min_value=1, max_value=1000, value=50)
+            
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                notif_gel = st.checkbox("Alertes gel", value=True)
+            with col2:
+                notif_canicule = st.checkbox("Alertes canicule", value=True)
+            with col3:
+                notif_pluie = st.checkbox("Alertes pluie", value=True)
+            
+            if st.form_submit_button("💾 Sauvegarder", use_container_width=True):
+                if weather.set_location_from_city(ville):
+                    st.session_state.meteo_config = {
+                        "ville": ville,
+                        "surface": surface,
+                        "notif_gel": notif_gel,
+                        "notif_canicule": notif_canicule,
+                        "notif_pluie": notif_pluie,
+                    }
+                    show_success("✅ Configuration météo sauvegardée")
+                else:
+                    show_error("Ville non trouvée")
+                    
+    except ImportError:
+        st.warning("Module météo non disponible")
