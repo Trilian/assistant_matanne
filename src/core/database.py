@@ -46,17 +46,23 @@ def obtenir_moteur(nombre_tentatives: int = DB_CONNECTION_RETRY, delai_tentative
     for tentative in range(nombre_tentatives):
         try:
             url_base = parametres.DATABASE_URL
-
+            
+            # Utiliser QueuePool pour de meilleures performances
+            # NullPool désactivé car inefficace pour les requêtes fréquentes
             moteur = create_engine(
                 url_base,
-                poolclass=pool.NullPool,
+                poolclass=pool.QueuePool,
+                pool_size=5,            # Connexions de base
+                max_overflow=10,        # Connexions supplémentaires si nécessaire
+                pool_timeout=30,        # Timeout attente connexion
+                pool_recycle=1800,      # Recycler connexions après 30min
+                pool_pre_ping=True,     # Vérifier connexion avant utilisation
                 echo=parametres.DEBUG,
                 connect_args={
                     "connect_timeout": DB_CONNECTION_TIMEOUT,
                     "options": "-c timezone=utc",
                     "sslmode": "require",
                 },
-                pool_pre_ping=True,
             )
 
             # Test de connexion

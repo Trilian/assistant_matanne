@@ -35,13 +35,24 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-# CORS pour les apps frontend
+# CORS sécurisé - domaines autorisés uniquement
+import os
+_cors_origins = os.getenv("CORS_ORIGINS", "").split(",") if os.getenv("CORS_ORIGINS") else []
+_default_origins = [
+    "http://localhost:8501",          # Streamlit local
+    "http://localhost:8000",          # API local
+    "http://127.0.0.1:8501",
+    "http://127.0.0.1:8000",
+    "https://matanne.streamlit.app",  # Production Streamlit Cloud
+]
+_allowed_origins = _cors_origins if _cors_origins else _default_origins
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # En prod: limiter aux domaines autorisés
+    allow_origins=_allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allow_headers=["Authorization", "Content-Type", "X-Request-ID"],
 )
 
 # Rate Limiting Middleware
