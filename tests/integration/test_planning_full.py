@@ -106,18 +106,16 @@ def famille_complete_setup(
     activite_jules = FamilyActivity(
         titre="Parc",
         type_activite="parc",
-        date_debut=datetime.combine(semaine_debut, datetime.min.time()),
-        adapte_pour_jules=True,
-        budget_estime=0,
+        date_prevue=semaine_debut,
+        age_minimal_recommande=12,  # adapté pour Jules
+        cout_estime=0,
     )
     activite_famille = FamilyActivity(
         titre="Musée",
         type_activite="culturel",
-        date_debut=datetime.combine(
-            semaine_debut + timedelta(days=3), datetime.min.time()
-        ),
-        adapte_pour_jules=True,
-        budget_estime=40.0,
+        date_prevue=semaine_debut + timedelta(days=3),
+        age_minimal_recommande=12,  # adapté pour Jules
+        cout_estime=40.0,
     )
     db.add_all([activite_jules, activite_famille])
 
@@ -145,12 +143,11 @@ def famille_complete_setup(
         statut="en_cours",
         priorite="haute",
         date_fin_prevue=semaine_debut + timedelta(days=5),
-        budget_estime=5000.0,
     )
     projet_hobby = Project(
         nom="Apprendre Python",
         statut="en_cours",
-        priorite="normale",
+        priorite="moyenne",
     )
     db.add_all([projet_maison, projet_hobby])
 

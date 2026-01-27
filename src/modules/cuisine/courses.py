@@ -920,6 +920,9 @@ def render_outils():
             
             # Phase 2: Budgeting
             st.subheader("💰 Budget tracking (PHASE 2)")
+            
+        except Exception as e:
+            st.error(f"❌ Erreur chargement stats: {str(e)}")
 
 
 # ═══════════════════════════════════════════════════════════
@@ -1009,7 +1012,3 @@ def _broadcast_article_change(event_type: str, article_data: dict):
     
     except Exception as e:
         logger.debug(f"Broadcast non envoyé: {e}")
-            st.info("⏳ Estimation coût par article + recettes planifiées")
-            
-        except Exception as e:
-            st.error(f"❌ Erreur: {str(e)}")

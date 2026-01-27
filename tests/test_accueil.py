@@ -132,7 +132,7 @@ class TestRaccourcis:
 class TestWeatherWidget:
     """Tests widget météo"""
 
-    @patch('src.services.weather.WeatherService')
+    @patch('src.services.weather.WeatherGardenService')
     def test_weather_display(self, mock_weather_service):
         """Test affichage météo"""
         mock_service = Mock()

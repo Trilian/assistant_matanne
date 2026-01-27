@@ -129,10 +129,10 @@ class RecipeParser:
         if not text:
             return ImportedIngredient(nom="")
         
-        # Patterns pour quantité + unité + nom
-        # Ex: "200 g de farine", "2 oeufs", "1 cuillère à soupe de sel"
+        # Patterns pour quantite + unite + nom
+        # Ex: "200 g de farine", "2 oeufs", "1 cuillere a soupe de sel"
         patterns = [
-            r'^(\d+(?:[.,]\d+)?)\s*(g|kg|ml|cl|l|cuillère[s]?\s*(?:à\s*)?(?:soupe|café)?|c\.?\s*[àa]?\s*[sc]\.?|pincée[s]?|sachet[s]?|tranche[s]?|feuille[s]?|gousse[s]?|brin[s]?)\s*(?:de\s*|d[\''])?\s*(.+)',
+            r'^(\d+(?:[.,]\d+)?)\s*(g|kg|ml|cl|l|cuill[eè]re[s]?\s*(?:[aà]\s*)?(?:soupe|caf[eé])?|c\.?\s*[aà]?\s*[sc]\.?|pinc[eé]e[s]?|sachet[s]?|tranche[s]?|feuille[s]?|gousse[s]?|brin[s]?)\s*(?:de\s*|d[\x27\x27])?\s*(.+)',
             r'^(\d+(?:[.,]\d+)?)\s+(.+)',  # Nombre + reste
         ]
         
