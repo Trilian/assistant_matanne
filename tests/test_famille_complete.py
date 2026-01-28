@@ -419,6 +419,7 @@ class TestIntegration:
             routine_id=routine.id,
             type_activite="marche",
             duree_minutes=35,
+            intensite="modérée",
             note_energie=9,
             note_moral=10
         )
