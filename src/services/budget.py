@@ -1,17 +1,17 @@
-"""
+﻿"""
 Service de suivi du budget familial.
 
-Fonctionnalités:
-- Suivi des dépenses par catégorie
+FonctionnalitÃ©s:
+- Suivi des dÃ©penses par catÃ©gorie
 - Budget mensuel avec alertes
 - Analyse des tendances
-- Prévisions basées sur l'historique
+- PrÃ©visions basÃ©es sur l'historique
 - Rapports et graphiques
-- Intégration avec les courses
+- IntÃ©gration avec les courses
 """
 
 import logging
-from datetime import datetime, date, timedelta
+from datetime import datetime, date as date_type, timedelta
 from decimal import Decimal
 from enum import Enum
 from typing import Any
@@ -27,30 +27,30 @@ from src.core.models import FamilyBudget
 logger = logging.getLogger(__name__)
 
 
-# ═══════════════════════════════════════════════════════════
-# TYPES ET SCHÉMAS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TYPES ET SCHÃ‰MAS
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class CategorieDepense(str, Enum):
-    """Catégories de dépenses."""
+    """CatÃ©gories de dÃ©penses."""
     ALIMENTATION = "alimentation"
     COURSES = "courses"
     MAISON = "maison"
-    SANTE = "santé"
+    SANTE = "santÃ©"
     TRANSPORT = "transport"
     LOISIRS = "loisirs"
-    VETEMENTS = "vêtements"
+    VETEMENTS = "vÃªtements"
     ENFANT = "enfant"
-    EDUCATION = "éducation"
+    EDUCATION = "Ã©ducation"
     SERVICES = "services"
-    IMPOTS = "impôts"
-    EPARGNE = "épargne"
+    IMPOTS = "impÃ´ts"
+    EPARGNE = "Ã©pargne"
     AUTRE = "autre"
 
 
 class FrequenceRecurrence(str, Enum):
-    """Fréquence des dépenses récurrentes."""
+    """FrÃ©quence des dÃ©penses rÃ©currentes."""
     PONCTUEL = "ponctuel"
     HEBDOMADAIRE = "hebdomadaire"
     MENSUEL = "mensuel"
@@ -59,22 +59,22 @@ class FrequenceRecurrence(str, Enum):
 
 
 class Depense(BaseModel):
-    """Une dépense."""
+    """Une dÃ©pense."""
     
     id: int | None = None
-    date: date = Field(default_factory=date.today)
+    date: date_type = Field(default_factory=date_type.today)
     montant: float
     categorie: CategorieDepense
     description: str = ""
     magasin: str = ""
     
-    # Récurrence
+    # RÃ©currence
     est_recurrente: bool = False
     frequence: FrequenceRecurrence = FrequenceRecurrence.PONCTUEL
     
-    # Métadonnées
-    payeur: str = ""  # Qui a payé
-    moyen_paiement: str = ""  # CB, espèces, etc.
+    # MÃ©tadonnÃ©es
+    payeur: str = ""  # Qui a payÃ©
+    moyen_paiement: str = ""  # CB, espÃ¨ces, etc.
     remboursable: bool = False
     rembourse: bool = False
     
@@ -82,7 +82,7 @@ class Depense(BaseModel):
 
 
 class BudgetMensuel(BaseModel):
-    """Budget mensuel par catégorie."""
+    """Budget mensuel par catÃ©gorie."""
     
     id: int | None = None
     mois: int  # 1-12
@@ -93,7 +93,7 @@ class BudgetMensuel(BaseModel):
     
     @property
     def pourcentage_utilise(self) -> float:
-        """Pourcentage du budget utilisé."""
+        """Pourcentage du budget utilisÃ©."""
         if self.budget_prevu <= 0:
             return 0.0
         return min((self.depense_reelle / self.budget_prevu) * 100, 999)
@@ -105,12 +105,12 @@ class BudgetMensuel(BaseModel):
     
     @property
     def est_depasse(self) -> bool:
-        """Budget dépassé ?"""
+        """Budget dÃ©passÃ© ?"""
         return self.depense_reelle > self.budget_prevu
 
 
 class ResumeFinancier(BaseModel):
-    """Résumé financier mensuel."""
+    """RÃ©sumÃ© financier mensuel."""
     
     mois: int
     annee: int
@@ -132,7 +132,7 @@ class ResumeFinancier(BaseModel):
 
 
 class PrevisionDepense(BaseModel):
-    """Prévision de dépense."""
+    """PrÃ©vision de dÃ©pense."""
     
     categorie: CategorieDepense
     montant_prevu: float
@@ -140,24 +140,24 @@ class PrevisionDepense(BaseModel):
     base_calcul: str = ""  # Explication du calcul
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SERVICE BUDGET
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class BudgetService:
     """
     Service de gestion du budget familial.
     
-    Fonctionnalités:
-    - CRUD dépenses
+    FonctionnalitÃ©s:
+    - CRUD dÃ©penses
     - Gestion des budgets mensuels
     - Calcul des statistiques
-    - Prévisions
-    - Alertes dépassement
+    - PrÃ©visions
+    - Alertes dÃ©passement
     """
     
-    # Budgets par défaut suggérés (pour une famille)
+    # Budgets par dÃ©faut suggÃ©rÃ©s (pour une famille)
     BUDGETS_DEFAUT = {
         CategorieDepense.ALIMENTATION: 600,
         CategorieDepense.COURSES: 200,
@@ -174,23 +174,23 @@ class BudgetService:
         """Initialise le service."""
         self._depenses_cache: dict[str, list[Depense]] = {}
     
-    # ═══════════════════════════════════════════════════════════
-    # GESTION DES DÉPENSES
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # GESTION DES DÃ‰PENSES
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     @with_db_session
     def ajouter_depense(self, depense: Depense, db: Session = None) -> Depense:
         """
-        Ajoute une nouvelle dépense.
+        Ajoute une nouvelle dÃ©pense.
         
         Args:
-            depense: Dépense à ajouter
+            depense: DÃ©pense Ã  ajouter
             db: Session DB
             
         Returns:
-            Dépense créée avec ID
+            DÃ©pense crÃ©Ã©e avec ID
         """
-        # Créer l'entrée FamilyBudget
+        # CrÃ©er l'entrÃ©e FamilyBudget
         budget_entry = FamilyBudget(
             date=depense.date,
             montant=depense.montant,
@@ -207,16 +207,16 @@ class BudgetService:
         
         depense.id = budget_entry.id
         
-        logger.info(f"Dépense ajoutée: {depense.montant}€ ({depense.categorie.value})")
+        logger.info(f"DÃ©pense ajoutÃ©e: {depense.montant}â‚¬ ({depense.categorie.value})")
         
-        # Vérifier si budget dépassé
+        # VÃ©rifier si budget dÃ©passÃ©
         self._verifier_alertes_budget(depense.date.month, depense.date.year, db)
         
         return depense
     
     @with_db_session
     def modifier_depense(self, depense_id: int, updates: dict, db: Session = None) -> bool:
-        """Modifie une dépense existante."""
+        """Modifie une dÃ©pense existante."""
         entry = db.query(FamilyBudget).filter(FamilyBudget.id == depense_id).first()
         
         if not entry:
@@ -231,7 +231,7 @@ class BudgetService:
     
     @with_db_session
     def supprimer_depense(self, depense_id: int, db: Session = None) -> bool:
-        """Supprime une dépense."""
+        """Supprime une dÃ©pense."""
         entry = db.query(FamilyBudget).filter(FamilyBudget.id == depense_id).first()
         
         if not entry:
@@ -251,16 +251,16 @@ class BudgetService:
         db: Session = None,
     ) -> list[Depense]:
         """
-        Récupère les dépenses d'un mois.
+        RÃ©cupÃ¨re les dÃ©penses d'un mois.
         
         Args:
             mois: Mois (1-12)
-            annee: Année
-            categorie: Filtrer par catégorie (optionnel)
+            annee: AnnÃ©e
+            categorie: Filtrer par catÃ©gorie (optionnel)
             db: Session DB
             
         Returns:
-            Liste des dépenses
+            Liste des dÃ©penses
         """
         query = db.query(FamilyBudget).filter(
             extract('month', FamilyBudget.date) == mois,
@@ -283,9 +283,9 @@ class BudgetService:
             for e in entries
         ]
     
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # GESTION DES BUDGETS
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     def definir_budget(
         self,
@@ -295,16 +295,16 @@ class BudgetService:
         annee: int | None = None,
     ):
         """
-        Définit le budget pour une catégorie.
+        DÃ©finit le budget pour une catÃ©gorie.
         
         Args:
-            categorie: Catégorie de dépense
+            categorie: CatÃ©gorie de dÃ©pense
             montant: Budget mensuel
-            mois: Mois spécifique (optionnel, défaut = mois courant)
-            annee: Année spécifique (optionnel, défaut = année courante)
+            mois: Mois spÃ©cifique (optionnel, dÃ©faut = mois courant)
+            annee: AnnÃ©e spÃ©cifique (optionnel, dÃ©faut = annÃ©e courante)
         """
-        mois = mois or date.today().month
-        annee = annee or date.today().year
+        mois = mois or date_type.today().month
+        annee = annee or date_type.today().year
         
         # Stocker en session (pour persistance simple)
         import streamlit as st
@@ -315,7 +315,7 @@ class BudgetService:
         
         st.session_state[key][categorie.value] = montant
         
-        logger.info(f"Budget défini: {categorie.value} = {montant}€ ({mois}/{annee})")
+        logger.info(f"Budget dÃ©fini: {categorie.value} = {montant}â‚¬ ({mois}/{annee})")
     
     def get_budget(
         self,
@@ -323,9 +323,9 @@ class BudgetService:
         mois: int | None = None,
         annee: int | None = None,
     ) -> float:
-        """Récupère le budget d'une catégorie."""
-        mois = mois or date.today().month
-        annee = annee or date.today().year
+        """RÃ©cupÃ¨re le budget d'une catÃ©gorie."""
+        mois = mois or date_type.today().month
+        annee = annee or date_type.today().year
         
         import streamlit as st
         
@@ -339,9 +339,9 @@ class BudgetService:
         mois: int | None = None,
         annee: int | None = None,
     ) -> dict[CategorieDepense, float]:
-        """Récupère tous les budgets du mois."""
-        mois = mois or date.today().month
-        annee = annee or date.today().year
+        """RÃ©cupÃ¨re tous les budgets du mois."""
+        mois = mois or date_type.today().month
+        annee = annee or date_type.today().year
         
         import streamlit as st
         
@@ -357,9 +357,9 @@ class BudgetService:
         
         return result
     
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # STATISTIQUES ET ANALYSES
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     @with_cache(ttl=600)
     @with_db_session
@@ -370,25 +370,25 @@ class BudgetService:
         db: Session = None,
     ) -> ResumeFinancier:
         """
-        Génère un résumé financier du mois.
+        GÃ©nÃ¨re un rÃ©sumÃ© financier du mois.
         
         Args:
-            mois: Mois (défaut = mois courant)
-            annee: Année (défaut = année courante)
+            mois: Mois (dÃ©faut = mois courant)
+            annee: AnnÃ©e (dÃ©faut = annÃ©e courante)
             db: Session DB
             
         Returns:
-            Résumé financier complet
+            RÃ©sumÃ© financier complet
         """
-        mois = mois or date.today().month
-        annee = annee or date.today().year
+        mois = mois or date_type.today().month
+        annee = annee or date_type.today().year
         
         resume = ResumeFinancier(mois=mois, annee=annee)
         
-        # Récupérer les dépenses du mois
+        # RÃ©cupÃ©rer les dÃ©penses du mois
         depenses = self.get_depenses_mois(mois, annee, db=db)
         
-        # Total et par catégorie
+        # Total et par catÃ©gorie
         for dep in depenses:
             resume.total_depenses += dep.montant
             cat_key = dep.categorie.value
@@ -417,7 +417,7 @@ class BudgetService:
             elif budget.pourcentage_utilise > 80:
                 resume.categories_a_risque.append(cat.value)
         
-        # Variation vs mois précédent
+        # Variation vs mois prÃ©cÃ©dent
         mois_prec = mois - 1 if mois > 1 else 12
         annee_prec = annee if mois > 1 else annee - 1
         depenses_prec = self.get_depenses_mois(mois_prec, annee_prec, db=db)
@@ -446,20 +446,20 @@ class BudgetService:
         db: Session = None,
     ) -> dict[str, list[float]]:
         """
-        Récupère les tendances de dépenses sur plusieurs mois.
+        RÃ©cupÃ¨re les tendances de dÃ©penses sur plusieurs mois.
         
         Args:
-            nb_mois: Nombre de mois à analyser
+            nb_mois: Nombre de mois Ã  analyser
             db: Session DB
             
         Returns:
-            Dict avec les tendances par catégorie
+            Dict avec les tendances par catÃ©gorie
         """
         tendances = {cat.value: [] for cat in CategorieDepense}
         tendances["total"] = []
         tendances["mois"] = []
         
-        aujourd_hui = date.today()
+        aujourd_hui = date_type.today()
         
         for i in range(nb_mois - 1, -1, -1):
             # Calculer le mois
@@ -473,10 +473,10 @@ class BudgetService:
             
             tendances["mois"].append(f"{mois:02d}/{annee}")
             
-            # Récupérer les dépenses
+            # RÃ©cupÃ©rer les dÃ©penses
             depenses = self.get_depenses_mois(mois, annee, db=db)
             
-            # Totaux par catégorie
+            # Totaux par catÃ©gorie
             totaux_cat = {cat.value: 0.0 for cat in CategorieDepense}
             total_mois = 0.0
             
@@ -497,18 +497,18 @@ class BudgetService:
         annee_cible: int,
     ) -> list[PrevisionDepense]:
         """
-        Prédit les dépenses pour un mois futur.
+        PrÃ©dit les dÃ©penses pour un mois futur.
         
         Args:
             mois_cible: Mois cible
-            annee_cible: Année cible
+            annee_cible: AnnÃ©e cible
             
         Returns:
-            Liste des prévisions par catégorie
+            Liste des prÃ©visions par catÃ©gorie
         """
         previsions = []
         
-        # Récupérer l'historique
+        # RÃ©cupÃ©rer l'historique
         with obtenir_contexte_db() as db:
             tendances = self.get_tendances(nb_mois=6, db=db)
         
@@ -518,11 +518,11 @@ class BudgetService:
             if not valeurs or all(v == 0 for v in valeurs):
                 continue
             
-            # Moyenne simple pondérée (plus récent = plus de poids)
+            # Moyenne simple pondÃ©rÃ©e (plus rÃ©cent = plus de poids)
             poids = [1, 1.2, 1.4, 1.6, 1.8, 2.0][:len(valeurs)]
             moyenne_ponderee = sum(v * p for v, p in zip(valeurs, poids)) / sum(poids)
             
-            # Tendance (croissance ou décroissance)
+            # Tendance (croissance ou dÃ©croissance)
             if len(valeurs) >= 3:
                 tendance = (valeurs[-1] - valeurs[0]) / len(valeurs)
             else:
@@ -530,7 +530,7 @@ class BudgetService:
             
             montant_prevu = max(0, moyenne_ponderee + tendance)
             
-            # Score de confiance basé sur la variance
+            # Score de confiance basÃ© sur la variance
             if len(valeurs) >= 3:
                 variance = sum((v - moyenne_ponderee) ** 2 for v in valeurs) / len(valeurs)
                 confiance = max(0, 1 - (variance / (moyenne_ponderee ** 2 + 1)))
@@ -541,23 +541,23 @@ class BudgetService:
                 categorie=cat,
                 montant_prevu=round(montant_prevu, 2),
                 confiance=round(confiance, 2),
-                base_calcul=f"Moyenne pondérée sur {len(valeurs)} mois",
+                base_calcul=f"Moyenne pondÃ©rÃ©e sur {len(valeurs)} mois",
             ))
         
         return sorted(previsions, key=lambda p: p.montant_prevu, reverse=True)
     
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # ALERTES
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     def _verifier_alertes_budget(self, mois: int, annee: int, db: Session):
-        """Vérifie et génère les alertes de budget."""
+        """VÃ©rifie et gÃ©nÃ¨re les alertes de budget."""
         import streamlit as st
         
         budgets = self.get_tous_budgets(mois, annee)
         depenses = self.get_depenses_mois(mois, annee, db=db)
         
-        # Calculer les totaux par catégorie
+        # Calculer les totaux par catÃ©gorie
         totaux = {}
         for dep in depenses:
             totaux[dep.categorie] = totaux.get(dep.categorie, 0) + dep.montant
@@ -572,14 +572,14 @@ class BudgetService:
                 alertes.append({
                     "type": "danger",
                     "categorie": cat.value,
-                    "message": f"Budget {cat.value} dépassé! ({depense:.0f}€ / {budget:.0f}€)",
+                    "message": f"Budget {cat.value} dÃ©passÃ©! ({depense:.0f}â‚¬ / {budget:.0f}â‚¬)",
                     "pourcentage": pourcentage,
                 })
             elif pourcentage >= 80:
                 alertes.append({
                     "type": "warning",
                     "categorie": cat.value,
-                    "message": f"Budget {cat.value} à {pourcentage:.0f}%",
+                    "message": f"Budget {cat.value} Ã  {pourcentage:.0f}%",
                     "pourcentage": pourcentage,
                 })
         
@@ -587,9 +587,9 @@ class BudgetService:
             st.session_state["budget_alertes"] = alertes
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FACTORY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 _budget_service: BudgetService | None = None
@@ -603,9 +603,9 @@ def get_budget_service() -> BudgetService:
     return _budget_service
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # COMPOSANT UI STREAMLIT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def render_budget_dashboard():
@@ -614,20 +614,20 @@ def render_budget_dashboard():
     import plotly.express as px
     import plotly.graph_objects as go
     
-    st.subheader("💰 Budget Familial")
+    st.subheader("ðŸ’° Budget Familial")
     
     service = get_budget_service()
     
-    # Sélecteur de période
+    # SÃ©lecteur de pÃ©riode
     col1, col2 = st.columns([2, 1])
     with col1:
-        aujourd_hui = date.today()
+        aujourd_hui = date_type.today()
         mois_options = [
             (f"{m:02d}/{aujourd_hui.year}", m, aujourd_hui.year)
             for m in range(1, 13)
         ]
         mois_select = st.selectbox(
-            "Période",
+            "PÃ©riode",
             options=mois_options,
             index=aujourd_hui.month - 1,
             format_func=lambda x: x[0],
@@ -635,54 +635,54 @@ def render_budget_dashboard():
         )
         _, mois, annee = mois_select
     
-    # Récupérer le résumé
+    # RÃ©cupÃ©rer le rÃ©sumÃ©
     resume = service.get_resume_mensuel(mois, annee)
     
     # Alertes
     if resume.categories_depassees:
-        st.error(f"⚠️ Budgets dépassés: {', '.join(resume.categories_depassees)}")
+        st.error(f"âš ï¸ Budgets dÃ©passÃ©s: {', '.join(resume.categories_depassees)}")
     if resume.categories_a_risque:
-        st.warning(f"⚡ À surveiller (>80%): {', '.join(resume.categories_a_risque)}")
+        st.warning(f"âš¡ Ã€ surveiller (>80%): {', '.join(resume.categories_a_risque)}")
     
-    # Métriques principales
+    # MÃ©triques principales
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
         st.metric(
-            "💸 Dépenses",
-            f"{resume.total_depenses:.0f}€",
-            delta=f"{resume.variation_vs_mois_precedent:+.1f}% vs mois préc.",
+            "ðŸ’¸ DÃ©penses",
+            f"{resume.total_depenses:.0f}â‚¬",
+            delta=f"{resume.variation_vs_mois_precedent:+.1f}% vs mois prÃ©c.",
             delta_color="inverse"
         )
     
     with col2:
         st.metric(
-            "📊 Budget Total",
-            f"{resume.total_budget:.0f}€"
+            "ðŸ“Š Budget Total",
+            f"{resume.total_budget:.0f}â‚¬"
         )
     
     with col3:
         reste = resume.total_budget - resume.total_depenses
         st.metric(
-            "💵 Reste",
-            f"{reste:.0f}€",
-            delta="OK" if reste >= 0 else "Dépassé!",
+            "ðŸ’µ Reste",
+            f"{reste:.0f}â‚¬",
+            delta="OK" if reste >= 0 else "DÃ©passÃ©!",
             delta_color="normal" if reste >= 0 else "inverse"
         )
     
     with col4:
         st.metric(
-            "📈 Moyenne 6 mois",
-            f"{resume.moyenne_6_mois:.0f}€"
+            "ðŸ“ˆ Moyenne 6 mois",
+            f"{resume.moyenne_6_mois:.0f}â‚¬"
         )
     
     st.markdown("---")
     
     # Tabs
-    tab1, tab2, tab3, tab4 = st.tabs(["📊 Vue d'ensemble", "➕ Ajouter", "📈 Tendances", "⚙️ Budgets"])
+    tab1, tab2, tab3, tab4 = st.tabs(["ðŸ“Š Vue d'ensemble", "âž• Ajouter", "ðŸ“ˆ Tendances", "âš™ï¸ Budgets"])
     
     with tab1:
-        # Graphique dépenses par catégorie
+        # Graphique dÃ©penses par catÃ©gorie
         if resume.depenses_par_categorie:
             col_chart1, col_chart2 = st.columns(2)
             
@@ -691,14 +691,14 @@ def render_budget_dashboard():
                 fig_pie = px.pie(
                     values=list(resume.depenses_par_categorie.values()),
                     names=list(resume.depenses_par_categorie.keys()),
-                    title="Répartition des dépenses",
+                    title="RÃ©partition des dÃ©penses",
                     hole=0.4,
                 )
                 fig_pie.update_traces(textposition='inside', textinfo='percent+label')
                 st.plotly_chart(fig_pie, use_container_width=True)
             
             with col_chart2:
-                # Barres budget vs dépenses
+                # Barres budget vs dÃ©penses
                 categories = []
                 budgets_vals = []
                 depenses_vals = []
@@ -710,17 +710,17 @@ def render_budget_dashboard():
                 
                 fig_bar = go.Figure(data=[
                     go.Bar(name='Budget', x=categories, y=budgets_vals, marker_color='lightblue'),
-                    go.Bar(name='Dépensé', x=categories, y=depenses_vals, marker_color='coral'),
+                    go.Bar(name='DÃ©pensÃ©', x=categories, y=depenses_vals, marker_color='coral'),
                 ])
                 fig_bar.update_layout(
-                    title="Budget vs Dépenses",
+                    title="Budget vs DÃ©penses",
                     barmode='group',
                     xaxis_tickangle=-45
                 )
                 st.plotly_chart(fig_bar, use_container_width=True)
         
-        # Liste des dépenses récentes
-        st.markdown("### 📝 Dernières dépenses")
+        # Liste des dÃ©penses rÃ©centes
+        st.markdown("### ðŸ“ DerniÃ¨res dÃ©penses")
         depenses = service.get_depenses_mois(mois, annee)
         
         if depenses:
@@ -731,35 +731,35 @@ def render_budget_dashboard():
                 with col_d2:
                     st.write(f"**{dep.categorie.value}** - {dep.description or 'Sans description'}")
                 with col_d3:
-                    st.write(f"**{dep.montant:.0f}€**")
+                    st.write(f"**{dep.montant:.0f}â‚¬**")
         else:
-            st.info("Aucune dépense ce mois-ci")
+            st.info("Aucune dÃ©pense ce mois-ci")
     
     with tab2:
-        # Formulaire d'ajout de dépense
-        st.markdown("### ➕ Nouvelle dépense")
+        # Formulaire d'ajout de dÃ©pense
+        st.markdown("### âž• Nouvelle dÃ©pense")
         
         with st.form("add_expense_form"):
             col_f1, col_f2 = st.columns(2)
             
             with col_f1:
-                montant = st.number_input("Montant (€)", min_value=0.0, step=1.0, key="expense_amount")
+                montant = st.number_input("Montant (â‚¬)", min_value=0.0, step=1.0, key="expense_amount")
                 categorie = st.selectbox(
-                    "Catégorie",
+                    "CatÃ©gorie",
                     options=list(CategorieDepense),
                     format_func=lambda x: x.value.title(),
                     key="expense_cat"
                 )
             
             with col_f2:
-                date_depense = st.date_input("Date", value=date.today(), key="expense_date")
+                date_depense = st.date_input("Date", value=date_type.today(), key="expense_date")
                 description = st.text_input("Description", key="expense_desc")
             
             magasin = st.text_input("Magasin (optionnel)", key="expense_shop")
             
-            est_recurrente = st.checkbox("Dépense récurrente", key="expense_recurring")
+            est_recurrente = st.checkbox("DÃ©pense rÃ©currente", key="expense_recurring")
             
-            if st.form_submit_button("💾 Enregistrer", type="primary", use_container_width=True):
+            if st.form_submit_button("ðŸ’¾ Enregistrer", type="primary", use_container_width=True):
                 if montant > 0:
                     depense = Depense(
                         date=date_depense,
@@ -771,14 +771,14 @@ def render_budget_dashboard():
                     )
                     
                     service.ajouter_depense(depense)
-                    st.success(f"✅ Dépense de {montant}€ ajoutée!")
+                    st.success(f"âœ… DÃ©pense de {montant}â‚¬ ajoutÃ©e!")
                     st.rerun()
                 else:
-                    st.error("Le montant doit être supérieur à 0")
+                    st.error("Le montant doit Ãªtre supÃ©rieur Ã  0")
     
     with tab3:
         # Graphique de tendances
-        st.markdown("### 📈 Évolution sur 6 mois")
+        st.markdown("### ðŸ“ˆ Ã‰volution sur 6 mois")
         
         tendances = service.get_tendances(nb_mois=6)
         
@@ -793,7 +793,7 @@ def render_budget_dashboard():
                 line=dict(width=3, color='blue'),
             ))
             
-            # Top 3 catégories
+            # Top 3 catÃ©gories
             moyennes_cat = {
                 cat: sum(tendances.get(cat.value, [])) / max(1, len(tendances.get(cat.value, [])))
                 for cat in CategorieDepense
@@ -812,16 +812,16 @@ def render_budget_dashboard():
                     ))
             
             fig_trend.update_layout(
-                title="Évolution des dépenses",
+                title="Ã‰volution des dÃ©penses",
                 xaxis_title="Mois",
-                yaxis_title="Montant (€)",
+                yaxis_title="Montant (â‚¬)",
                 hovermode='x unified',
             )
             
             st.plotly_chart(fig_trend, use_container_width=True)
         
-        # Prévisions
-        st.markdown("### 🔮 Prévisions mois prochain")
+        # PrÃ©visions
+        st.markdown("### ðŸ”® PrÃ©visions mois prochain")
         mois_prochain = mois + 1 if mois < 12 else 1
         annee_prochain = annee if mois < 12 else annee + 1
         
@@ -829,21 +829,21 @@ def render_budget_dashboard():
         
         if previsions:
             total_prevu = sum(p.montant_prevu for p in previsions)
-            st.metric("Total prévu", f"{total_prevu:.0f}€")
+            st.metric("Total prÃ©vu", f"{total_prevu:.0f}â‚¬")
             
             for prev in previsions[:5]:
                 col_p1, col_p2, col_p3 = st.columns([2, 2, 1])
                 with col_p1:
                     st.write(f"**{prev.categorie.value.title()}**")
                 with col_p2:
-                    st.write(f"{prev.montant_prevu:.0f}€")
+                    st.write(f"{prev.montant_prevu:.0f}â‚¬")
                 with col_p3:
-                    confiance_color = "🟢" if prev.confiance > 0.7 else "🟡" if prev.confiance > 0.4 else "🔴"
+                    confiance_color = "ðŸŸ¢" if prev.confiance > 0.7 else "ðŸŸ¡" if prev.confiance > 0.4 else "ðŸ”´"
                     st.write(f"{confiance_color} {prev.confiance:.0%}")
     
     with tab4:
         # Configuration des budgets
-        st.markdown("### ⚙️ Définir les budgets mensuels")
+        st.markdown("### âš™ï¸ DÃ©finir les budgets mensuels")
         
         budgets_actuels = service.get_tous_budgets(mois, annee)
         
@@ -865,9 +865,10 @@ def render_budget_dashboard():
                         key=f"budget_{cat.value}"
                     )
             
-            if st.form_submit_button("💾 Enregistrer les budgets", use_container_width=True):
+            if st.form_submit_button("ðŸ’¾ Enregistrer les budgets", use_container_width=True):
                 for cat, montant in new_budgets.items():
                     service.definir_budget(cat, montant, mois, annee)
                 
-                st.success("✅ Budgets mis à jour!")
+                st.success("âœ… Budgets mis Ã  jour!")
                 st.rerun()
+

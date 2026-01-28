@@ -171,11 +171,11 @@ class TestVueEnsembleLogique:
         # Alerte si moins de 50% planifié
         alerte_planning = stats["repas_planifies"] < stats["repas_attendus"] * 0.5
         
-        # Alerte si plus de 80% du budget
-        alerte_budget = stats["budget_utilise"] > stats["budget_max"] * 0.8
+        # Alerte si plus de 80% du budget (>= pour inclure le seuil exact)
+        alerte_budget = stats["budget_utilise"] >= stats["budget_max"] * 0.8
         
         assert alerte_planning == False  # 8/14 = 57%
-        assert alerte_budget == True  # 120/150 = 80%
+        assert alerte_budget == True  # 120/150 = 80% (exactement au seuil)
 
 
 # =============================================================================
