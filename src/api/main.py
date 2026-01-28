@@ -89,8 +89,7 @@ class RecetteResponse(RecetteBase):
     created_at: datetime | None = None
     updated_at: datetime | None = None
     
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
 class InventaireItemBase(BaseModel):
@@ -114,8 +113,7 @@ class InventaireItemResponse(InventaireItemBase):
     code_barres: str | None = None
     created_at: datetime | None = None
     
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
 class PlanningBase(BaseModel):

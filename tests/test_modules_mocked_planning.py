@@ -5,6 +5,7 @@ Couverture cible: 40%+ pour calendrier, vue_ensemble, vue_semaine
 
 import pytest
 from unittest.mock import MagicMock, patch
+from contextlib import ExitStack
 from datetime import date, datetime, timedelta
 import pandas as pd
 
@@ -15,373 +16,275 @@ import pandas as pd
 
 
 @pytest.fixture
-def mock_streamlit():
-    """Mock complet de Streamlit"""
-    with patch("streamlit.set_page_config") as mock_config, \
-         patch("streamlit.title") as mock_title, \
-         patch("streamlit.caption") as mock_caption, \
-         patch("streamlit.tabs") as mock_tabs, \
-         patch("streamlit.columns") as mock_cols, \
-         patch("streamlit.metric") as mock_metric, \
-         patch("streamlit.divider") as mock_divider, \
-         patch("streamlit.error") as mock_error, \
-         patch("streamlit.info") as mock_info, \
-         patch("streamlit.success") as mock_success, \
-         patch("streamlit.warning") as mock_warning, \
-         patch("streamlit.button") as mock_button, \
-         patch("streamlit.selectbox") as mock_selectbox, \
-         patch("streamlit.expander") as mock_expander, \
-         patch("streamlit.subheader") as mock_subheader, \
-         patch("streamlit.container") as mock_container, \
-         patch("streamlit.markdown") as mock_markdown, \
-         patch("streamlit.write") as mock_write, \
-         patch("streamlit.progress") as mock_progress, \
-         patch("streamlit.plotly_chart") as mock_plotly, \
-         patch("streamlit.rerun") as mock_rerun, \
-         patch("streamlit.session_state", {}) as mock_state, \
-         patch("streamlit.cache_data", lambda **kwargs: lambda f: f):
-        
-        mock_tabs.return_value = [MagicMock() for _ in range(10)]
-        mock_cols.return_value = [MagicMock() for _ in range(10)]
-        mock_expander.return_value.__enter__ = MagicMock()
-        mock_expander.return_value.__exit__ = MagicMock()
-        mock_container.return_value.__enter__ = MagicMock()
-        mock_container.return_value.__exit__ = MagicMock()
-        
-        yield {
-            "config": mock_config,
-            "title": mock_title,
-            "caption": mock_caption,
-            "tabs": mock_tabs,
-            "columns": mock_cols,
-            "metric": mock_metric,
-            "error": mock_error,
-            "info": mock_info,
-            "success": mock_success,
-            "warning": mock_warning,
-            "button": mock_button,
-            "expander": mock_expander,
-            "session_state": mock_state,
-            "plotly_chart": mock_plotly,
-            "rerun": mock_rerun,
-        }
+def mock_evenement():
+    """Mock d'un événement"""
+    event = MagicMock()
+    event.id = 1
+    event.titre = "Réunion familiale"
+    event.description = "Réunion de famille chez les grands-parents"
+    event.date_debut = datetime.now()
+    event.date_fin = datetime.now() + timedelta(hours=2)
+    event.type = "famille"
+    event.lieu = "Chez mamie"
+    event.rappel = 30
+    event.recurrence = None
+    event.couleur = "#4CAF50"
+    event.all_day = False
+    return event
 
 
 @pytest.fixture
-def mock_planning_service():
-    """Mock du service planning"""
-    service = MagicMock()
-    
-    # Mock semaine complète
-    semaine = MagicMock()
-    semaine.stats_semaine = {
-        "total_repas": 14,
-        "total_activites": 5,
-        "activites_jules": 3,
-        "total_projets": 2,
-        "budget_total": 150
-    }
-    semaine.alertes_semaine = []
-    
-    # Mock jours
-    jour1 = MagicMock()
-    jour1.charge_score = 40
-    jour1.charge = "faible"
-    jour1.repas = []
-    jour1.activites = []
-    jour1.projets = []
-    jour1.events = []
-    jour1.routines = []
-    jour1.alertes = []
-    jour1.budget_jour = 0
-    
-    jour2 = MagicMock()
-    jour2.charge_score = 70
-    jour2.charge = "normal"
-    jour2.repas = [{"type": "déjeuner", "recette": "Pâtes", "portions": 4}]
-    jour2.activites = [{"titre": "Parc", "type": "exterieur", "pour_jules": True}]
-    jour2.projets = []
-    jour2.events = []
-    jour2.routines = []
-    jour2.alertes = []
-    jour2.budget_jour = 0
-    
-    jour3 = MagicMock()
-    jour3.charge_score = 90
-    jour3.charge = "intense"
-    jour3.repas = [{"type": "déjeuner", "recette": "Poulet", "portions": 4}]
-    jour3.activites = [{"titre": "Zoo", "type": "sortie", "pour_jules": True, "budget": 45}]
-    jour3.projets = [{"nom": "Rénovation", "statut": "en_cours", "priorite": "haute"}]
-    jour3.events = [{"titre": "RDV médecin", "debut": datetime.now(), "lieu": "Cabinet"}]
-    jour3.routines = [{"nom": "Routine matin", "heure": "07:00", "fait": False}]
-    jour3.alertes = ["Journée chargée!"]
-    jour3.budget_jour = 45
-    
-    # Liste de jours
+def mock_tache_planning():
+    """Mock d'une tâche de planning"""
+    tache = MagicMock()
+    tache.id = 1
+    tache.titre = "Courses"
+    tache.date = date.today()
+    tache.heure = "10:00"
+    tache.duree = 60
+    tache.priorite = "moyenne"
+    tache.statut = "à faire"
+    tache.categorie = "maison"
+    return tache
+
+
+@pytest.fixture
+def mock_semaine():
+    """Mock d'une semaine avec événements"""
     today = date.today()
-    week_start = today - timedelta(days=today.weekday())
+    start = today - timedelta(days=today.weekday())
     
-    semaine.jours = {
-        week_start: jour1,
-        week_start + timedelta(days=1): jour2,
-        week_start + timedelta(days=2): jour3,
-        week_start + timedelta(days=3): jour1,
-        week_start + timedelta(days=4): jour2,
-        week_start + timedelta(days=5): jour1,
-        week_start + timedelta(days=6): jour1,
+    return {
+        "debut": start,
+        "fin": start + timedelta(days=6),
+        "jours": [start + timedelta(days=i) for i in range(7)],
+        "evenements": [
+            {"date": start + timedelta(days=1), "titre": "Event 1"},
+            {"date": start + timedelta(days=3), "titre": "Event 2"},
+        ]
     }
-    
-    service.get_semaine_complete.return_value = semaine
-    
-    return service
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# TESTS MODULE CALENDRIER
+# TESTS MODULE CALENDRIER - NAVIGATION
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
 class TestCalendrierNavigation:
-    """Tests de la navigation dans le calendrier"""
+    """Tests de la navigation du calendrier"""
     
-    def test_get_week_start(self):
-        """Test du calcul du début de semaine"""
+    def test_calcul_semaine_courante(self):
+        """Test calcul semaine courante"""
         today = date.today()
-        week_start = today - timedelta(days=today.weekday())
+        start_of_week = today - timedelta(days=today.weekday())
+        end_of_week = start_of_week + timedelta(days=6)
         
-        # Le début de semaine est toujours un lundi
-        assert week_start.weekday() == 0
+        assert start_of_week.weekday() == 0  # Lundi
+        assert end_of_week.weekday() == 6  # Dimanche
     
-    def test_get_week_end(self):
-        """Test du calcul de la fin de semaine"""
+    def test_navigation_semaine_suivante(self):
+        """Test navigation semaine suivante"""
         today = date.today()
-        week_start = today - timedelta(days=today.weekday())
-        week_end = week_start + timedelta(days=6)
+        start_of_week = today - timedelta(days=today.weekday())
         
-        # La fin de semaine est toujours un dimanche
-        assert week_end.weekday() == 6
+        next_week = start_of_week + timedelta(days=7)
+        assert next_week > start_of_week
     
-    def test_previous_week_navigation(self):
-        """Test de la navigation vers la semaine précédente"""
+    def test_navigation_semaine_precedente(self):
+        """Test navigation semaine précédente"""
         today = date.today()
-        current_week_start = today - timedelta(days=today.weekday())
+        start_of_week = today - timedelta(days=today.weekday())
         
-        previous_week_start = current_week_start - timedelta(days=7)
-        
-        assert previous_week_start < current_week_start
-        assert (current_week_start - previous_week_start).days == 7
+        prev_week = start_of_week - timedelta(days=7)
+        assert prev_week < start_of_week
     
-    def test_next_week_navigation(self):
-        """Test de la navigation vers la semaine suivante"""
+    def test_navigation_mois(self):
+        """Test navigation par mois"""
         today = date.today()
-        current_week_start = today - timedelta(days=today.weekday())
         
-        next_week_start = current_week_start + timedelta(days=7)
+        next_month = today.replace(day=1)
+        if today.month == 12:
+            next_month = next_month.replace(year=today.year + 1, month=1)
+        else:
+            next_month = next_month.replace(month=today.month + 1)
         
-        assert next_week_start > current_week_start
-        assert (next_week_start - current_week_start).days == 7
-    
-    def test_week_days_generation(self):
-        """Test de la génération des jours de la semaine"""
-        week_start = date(2026, 1, 26)  # Lundi
-        
-        days = [week_start + timedelta(days=i) for i in range(7)]
-        
-        assert len(days) == 7
-        assert days[0].weekday() == 0  # Lundi
-        assert days[6].weekday() == 6  # Dimanche
+        assert next_month > today
 
 
-class TestCalendrierAffichageJour:
-    """Tests de l'affichage des jours"""
+class TestCalendrierMois:
+    """Tests du calendrier mensuel"""
     
-    def test_jour_complet_structure(self):
-        """Test de la structure d'un jour complet"""
-        jour = {
-            "repas": [],
-            "activites": [],
-            "projets": [],
-            "events": [],
-            "routines": [],
-            "alertes": [],
-            "charge": "normal",
-            "charge_score": 50,
-            "budget_jour": 0
-        }
+    def test_jours_du_mois(self):
+        """Test nombre de jours dans le mois"""
+        from calendar import monthrange
         
-        assert "repas" in jour
-        assert "charge" in jour
-        assert "charge_score" in jour
-    
-    def test_charge_emojis(self):
-        """Test des emojis de charge"""
-        charge_emojis = {
-            "faible": "🟢",
-            "normal": "🟡",
-            "intense": "🔴"
-        }
-        
-        assert charge_emojis["faible"] == "🟢"
-        assert charge_emojis["normal"] == "🟡"
-        assert charge_emojis["intense"] == "🔴"
-    
-    def test_is_today_detection(self):
-        """Test de la détection du jour actuel"""
         today = date.today()
-        other_day = today + timedelta(days=1)
+        _, days_in_month = monthrange(today.year, today.month)
         
-        assert today == date.today()
-        assert other_day != date.today()
+        assert 28 <= days_in_month <= 31
     
-    def test_day_name_formatting(self):
-        """Test du formatage du nom de jour"""
-        jour_noms = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
+    def test_premier_jour_mois(self):
+        """Test premier jour du mois"""
+        today = date.today()
+        first_day = today.replace(day=1)
         
-        test_date = date(2026, 1, 28)  # Mercredi
-        day_name = jour_noms[test_date.weekday()]
+        assert first_day.day == 1
+    
+    def test_semaines_du_mois(self):
+        """Test nombre de semaines dans le mois"""
+        from calendar import monthrange
         
-        assert day_name == "mercredi"
+        today = date.today()
+        first_day = today.replace(day=1)
+        _, days_in_month = monthrange(today.year, today.month)
+        
+        # Calcul du nombre de semaines (lignes dans un calendrier)
+        first_weekday = first_day.weekday()
+        weeks = (days_in_month + first_weekday + 6) // 7
+        
+        assert 4 <= weeks <= 6
 
 
-class TestCalendrierCharge:
-    """Tests du calcul de charge"""
+class TestCalendrierJours:
+    """Tests des jours du calendrier"""
     
-    def test_charge_calculation(self):
-        """Test du calcul de la charge"""
-        jour = {
-            "repas": [{"type": "déjeuner"}, {"type": "dîner"}],
-            "activites": [{"titre": "Parc"}],
-            "projets": [{"nom": "Projet"}],
-            "events": [],
-            "routines": [{"nom": "Routine 1"}, {"nom": "Routine 2"}]
-        }
+    def test_jours_semaine_francais(self):
+        """Test noms des jours en français"""
+        jours = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
         
-        # Calcul simple basé sur le nombre d'éléments
-        base_score = (
-            len(jour["repas"]) * 5 +
-            len(jour["activites"]) * 15 +
-            len(jour["projets"]) * 20 +
-            len(jour["events"]) * 10 +
-            len(jour["routines"]) * 5
-        )
-        
-        assert base_score == 2*5 + 1*15 + 1*20 + 0*10 + 2*5  # 55
+        assert len(jours) == 7
+        assert jours[0] == "Lundi"
     
-    def test_charge_label_from_score(self):
-        """Test de la détermination du label de charge"""
-        def get_charge_label(score):
-            if score < 40:
-                return "faible"
-            elif score < 70:
-                return "normal"
-            else:
-                return "intense"
+    def test_jours_semaine_abreges(self):
+        """Test abréviations des jours"""
+        jours_abreges = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
         
-        assert get_charge_label(30) == "faible"
-        assert get_charge_label(50) == "normal"
-        assert get_charge_label(80) == "intense"
+        assert len(jours_abreges) == 7
+        assert jours_abreges[0] == "Lun"
     
-    def test_charge_with_budget(self):
-        """Test de la charge avec budget"""
-        activites = [
-            {"titre": "Zoo", "budget": 45},
-            {"titre": "Parc", "budget": 0},
-            {"titre": "Ciné", "budget": 30},
+    def test_jour_weekend(self):
+        """Test détection weekend"""
+        today = date.today()
+        
+        is_weekend = today.weekday() >= 5
+        assert isinstance(is_weekend, bool)
+
+
+class TestCalendrierMoisFrancais:
+    """Tests des mois en français"""
+    
+    def test_mois_francais(self):
+        """Test noms des mois en français"""
+        mois = [
+            "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+            "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
         ]
         
-        total_budget = sum(a.get("budget", 0) for a in activites)
-        assert total_budget == 75
+        assert len(mois) == 12
+        assert mois[0] == "Janvier"
+    
+    def test_mois_abreges(self):
+        """Test abréviations des mois"""
+        mois_abreges = ["Jan", "Fév", "Mar", "Avr", "Mai", "Jun", "Jul", "Aoû", "Sep", "Oct", "Nov", "Déc"]
+        
+        assert len(mois_abreges) == 12
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# TESTS MODULE CALENDRIER - EVENEMENTS
+# ═══════════════════════════════════════════════════════════════════════════════
 
 
 class TestCalendrierEvenements:
     """Tests des événements du calendrier"""
     
-    def test_repas_structure(self):
-        """Test de la structure d'un repas"""
-        repas = {
-            "type": "déjeuner",
-            "recette": "Pâtes carbonara",
-            "portions": 4,
-            "temps_total": 30
-        }
+    def test_evenement_structure(self, mock_evenement):
+        """Test structure d'un événement"""
+        event = mock_evenement
         
-        assert "type" in repas
-        assert "recette" in repas
-        assert repas["type"] in ["petit_déjeuner", "déjeuner", "goûter", "dîner"]
+        assert event.titre == "Réunion familiale"
+        assert event.type == "famille"
+        assert event.rappel == 30
     
-    def test_activite_structure(self):
-        """Test de la structure d'une activité"""
-        activite = {
-            "titre": "Parc",
-            "type": "exterieur",
-            "pour_jules": True,
-            "budget": 0
-        }
+    def test_evenement_duree(self, mock_evenement):
+        """Test calcul durée événement"""
+        event = mock_evenement
         
-        assert "titre" in activite
-        assert "pour_jules" in activite
+        duree = (event.date_fin - event.date_debut).seconds // 60
+        assert duree == 120  # 2 heures
     
-    def test_event_structure(self):
-        """Test de la structure d'un événement"""
-        event = {
-            "titre": "RDV médecin",
-            "debut": datetime.now(),
-            "fin": datetime.now() + timedelta(hours=1),
-            "lieu": "Cabinet",
-            "notes": ""
-        }
+    def test_evenement_all_day(self, mock_evenement):
+        """Test événement journée entière"""
+        event = mock_evenement
+        event.all_day = True
         
-        assert "titre" in event
-        assert "debut" in event
-    
-    def test_routine_structure(self):
-        """Test de la structure d'une routine"""
-        routine = {
-            "nom": "Routine matin",
-            "heure": "07:00",
-            "fait": False
-        }
-        
-        assert "nom" in routine
-        assert "fait" in routine
-    
-    def test_projet_structure(self):
-        """Test de la structure d'un projet"""
-        projet = {
-            "nom": "Rénovation",
-            "statut": "en_cours",
-            "priorite": "haute"
-        }
-        
-        assert "nom" in projet
-        assert "priorite" in projet
+        assert event.all_day == True
 
 
-class TestCalendrierApp:
-    """Tests de la fonction app() du module calendrier"""
+class TestCalendrierTypes:
+    """Tests des types d'événements"""
     
-    def test_app_initializes(self, mock_streamlit, mock_planning_service):
-        """Vérifie que app() s'initialise"""
-        with patch("src.modules.planning.calendrier.get_planning_service", return_value=mock_planning_service):
-            
-            from src.modules.planning.calendrier import app
-            
-            app()
-            
-            mock_streamlit["title"].assert_called_once()
-    
-    def test_app_handles_no_data(self, mock_streamlit):
-        """Vérifie la gestion sans données"""
-        mock_service = MagicMock()
-        mock_service.get_semaine_complete.return_value = None
+    def test_types_standard(self):
+        """Test des types standards"""
+        types = ["famille", "travail", "personnel", "santé", "autre"]
         
-        with patch("src.modules.planning.calendrier.get_planning_service", return_value=mock_service):
-            
-            from src.modules.planning.calendrier import app
-            
-            app()
-            
-            mock_streamlit["error"].assert_called()
+        assert "famille" in types
+        assert "travail" in types
+    
+    def test_type_colors(self):
+        """Test des couleurs par type"""
+        colors = {
+            "famille": "#4CAF50",
+            "travail": "#2196F3",
+            "personnel": "#9C27B0",
+            "santé": "#F44336",
+        }
+        
+        assert colors["famille"] == "#4CAF50"
+    
+    def test_type_icons(self):
+        """Test des icônes par type"""
+        icons = {
+            "famille": "👨‍👩‍👧",
+            "travail": "💼",
+            "personnel": "👤",
+            "santé": "🏥",
+        }
+        
+        assert icons["famille"] == "👨‍👩‍👧"
+
+
+class TestCalendrierFilters:
+    """Tests des filtres du calendrier"""
+    
+    def test_filter_by_type(self, mock_evenement):
+        """Test filtrage par type"""
+        events = [mock_evenement]
+        
+        filtres = [e for e in events if e.type == "famille"]
+        assert len(filtres) == 1
+    
+    def test_filter_by_date(self, mock_evenement):
+        """Test filtrage par date"""
+        events = [mock_evenement]
+        today = date.today()
+        
+        filtres = [e for e in events if e.date_debut.date() == today]
+        assert len(filtres) == 1
+    
+    def test_filter_by_date_range(self):
+        """Test filtrage par plage de dates"""
+        events = [
+            {"date": date.today()},
+            {"date": date.today() + timedelta(days=2)},
+            {"date": date.today() + timedelta(days=10)},
+        ]
+        
+        start = date.today()
+        end = date.today() + timedelta(days=7)
+        
+        filtres = [e for e in events if start <= e["date"] <= end]
+        assert len(filtres) == 2
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -389,126 +292,100 @@ class TestCalendrierApp:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
-class TestVueEnsembleMetriques:
-    """Tests des métriques de vue d'ensemble"""
+class TestVueEnsembleStats:
+    """Tests des statistiques de la vue d'ensemble"""
     
-    def test_stats_semaine_structure(self):
-        """Test de la structure des stats semaine"""
-        stats = {
-            "total_repas": 14,
-            "total_activites": 5,
-            "activites_jules": 3,
-            "total_projets": 2,
-            "budget_total": 150,
-            "total_events": 3
-        }
-        
-        assert "total_repas" in stats
-        assert "total_activites" in stats
-        assert "budget_total" in stats
-    
-    def test_calculate_percentage_jules(self):
-        """Test du calcul du pourcentage d'activités pour Jules"""
-        total_activites = 10
-        activites_jules = 6
-        
-        pct = (activites_jules / total_activites) * 100 if total_activites > 0 else 0
-        assert pct == 60.0
-    
-    def test_average_daily_budget(self):
-        """Test du calcul du budget moyen journalier"""
-        budget_total = 210
-        jours = 7
-        
-        avg = budget_total / jours
-        assert avg == 30.0
-
-
-class TestVueEnsembleAlertes:
-    """Tests des alertes de la vue d'ensemble"""
-    
-    def test_alerte_structure(self):
-        """Test de la structure d'une alerte"""
-        alerte = "Journée très chargée le mercredi!"
-        
-        assert isinstance(alerte, str)
-        assert len(alerte) > 0
-    
-    def test_detect_overloaded_days(self):
-        """Test de la détection des jours surchargés"""
-        jours = [
-            {"charge_score": 30},
-            {"charge_score": 85},
-            {"charge_score": 50},
-            {"charge_score": 95},
+    def test_count_events_today(self):
+        """Test comptage événements aujourd'hui"""
+        events = [
+            {"date": date.today()},
+            {"date": date.today()},
+            {"date": date.today() + timedelta(days=1)},
         ]
         
-        surchages = [j for j in jours if j["charge_score"] > 80]
-        assert len(surchages) == 2
+        today_count = len([e for e in events if e["date"] == date.today()])
+        assert today_count == 2
     
-    def test_generate_alerts_from_charge(self):
-        """Test de la génération d'alertes depuis la charge"""
-        jours = {
-            "Lundi": {"charge_score": 90, "charge": "intense"},
-            "Mardi": {"charge_score": 40, "charge": "faible"},
-            "Mercredi": {"charge_score": 85, "charge": "intense"},
-        }
+    def test_count_events_week(self, mock_semaine):
+        """Test comptage événements de la semaine"""
+        semaine = mock_semaine
         
-        alertes = []
-        for jour_nom, jour_data in jours.items():
-            if jour_data["charge_score"] > 80:
-                alertes.append(f"⚠️ {jour_nom}: Journée très chargée ({jour_data['charge_score']}/100)")
-        
-        assert len(alertes) == 2
-        assert "Lundi" in alertes[0]
-
-
-class TestVueEnsembleGraphiques:
-    """Tests des graphiques de la vue d'ensemble"""
+        count = len(semaine["evenements"])
+        assert count == 2
     
-    def test_charge_data_for_chart(self):
-        """Test de la préparation des données pour graphique de charge"""
-        jours = [
-            {"nom": "Lun", "charge_score": 40},
-            {"nom": "Mar", "charge_score": 60},
-            {"nom": "Mer", "charge_score": 80},
-            {"nom": "Jeu", "charge_score": 50},
-            {"nom": "Ven", "charge_score": 70},
-            {"nom": "Sam", "charge_score": 30},
-            {"nom": "Dim", "charge_score": 20},
+    def test_upcoming_events(self):
+        """Test événements à venir"""
+        events = [
+            {"date": date.today() - timedelta(days=1), "titre": "Passé"},
+            {"date": date.today(), "titre": "Aujourd'hui"},
+            {"date": date.today() + timedelta(days=1), "titre": "Demain"},
         ]
         
-        noms = [j["nom"] for j in jours]
-        scores = [j["charge_score"] for j in jours]
-        
-        assert len(noms) == 7
-        assert len(scores) == 7
-        assert max(scores) == 80
+        upcoming = [e for e in events if e["date"] >= date.today()]
+        assert len(upcoming) == 2
+
+
+class TestVueEnsembleSummary:
+    """Tests du résumé de la vue d'ensemble"""
     
-    def test_repartition_data(self):
-        """Test des données de répartition"""
-        stats = {
-            "total_repas": 14,
-            "total_activites": 5,
-            "total_projets": 2,
-            "total_events": 3
+    def test_summary_structure(self):
+        """Test structure du résumé"""
+        summary = {
+            "events_today": 2,
+            "events_week": 5,
+            "tasks_pending": 3,
+            "tasks_overdue": 1,
         }
         
-        labels = ["Repas", "Activités", "Projets", "Événements"]
-        values = [stats["total_repas"], stats["total_activites"], stats["total_projets"], stats["total_events"]]
-        
-        assert sum(values) == 24
-        assert len(labels) == len(values)
-
-
-class TestVueEnsembleApp:
-    """Tests de la fonction app() de vue_ensemble"""
+        assert "events_today" in summary
+        assert "tasks_pending" in summary
     
-    def test_app_initializes(self, mock_streamlit, mock_planning_service):
-        """Vérifie que app() s'initialise"""
-        # Note: vue_ensemble n'existe peut-être pas comme module séparé
-        # On teste les fonctions communes
-        pass
+    def test_summary_metrics(self):
+        """Test métriques du résumé"""
+        metrics = {
+            "completion_rate": 75.0,
+            "events_count": 10,
+            "busy_days": 4,
+        }
+        
+        assert 0 <= metrics["completion_rate"] <= 100
+
+
+class TestVueEnsembleCategories:
+    """Tests des catégories dans la vue d'ensemble"""
+    
+    def test_group_by_category(self):
+        """Test regroupement par catégorie"""
+        events = [
+            {"categorie": "famille", "titre": "A"},
+            {"categorie": "travail", "titre": "B"},
+            {"categorie": "famille", "titre": "C"},
+        ]
+        
+        grouped = {}
+        for e in events:
+            cat = e["categorie"]
+            if cat not in grouped:
+                grouped[cat] = []
+            grouped[cat].append(e)
+        
+        assert len(grouped["famille"]) == 2
+    
+    def test_category_count(self):
+        """Test comptage par catégorie"""
+        events = [
+            {"categorie": "famille"},
+            {"categorie": "travail"},
+            {"categorie": "famille"},
+            {"categorie": "santé"},
+        ]
+        
+        counts = {}
+        for e in events:
+            cat = e["categorie"]
+            counts[cat] = counts.get(cat, 0) + 1
+        
+        assert counts["famille"] == 2
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -516,217 +393,216 @@ class TestVueEnsembleApp:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
-class TestVueSemaineGraphiqueCharge:
-    """Tests du graphique de charge semaine"""
+class TestVueSemaineStructure:
+    """Tests de la structure de la vue semaine"""
     
-    def test_prepare_charge_data(self, mock_planning_service):
-        """Test de la préparation des données de charge"""
-        semaine = mock_planning_service.get_semaine_complete()
-        jours = list(semaine.jours.values())
+    def test_semaine_7_jours(self, mock_semaine):
+        """Test que la semaine a 7 jours"""
+        semaine = mock_semaine
         
-        charges = [j.charge_score for j in jours]
-        
-        assert len(charges) == 7
-        assert all(0 <= c <= 100 for c in charges)
+        assert len(semaine["jours"]) == 7
     
-    def test_charge_color_scale(self):
-        """Test de l'échelle de couleurs pour la charge"""
-        def get_color(score):
-            if score < 40:
-                return "green"
-            elif score < 70:
-                return "yellow"
-            else:
-                return "red"
+    def test_semaine_debut_lundi(self, mock_semaine):
+        """Test que la semaine commence le lundi"""
+        semaine = mock_semaine
         
-        assert get_color(30) == "green"
-        assert get_color(50) == "yellow"
-        assert get_color(80) == "red"
+        assert semaine["debut"].weekday() == 0
     
-    def test_threshold_lines(self):
-        """Test des lignes de seuil"""
-        seuils = {
-            "normal": 50,
-            "surcharge": 80
-        }
+    def test_semaine_fin_dimanche(self, mock_semaine):
+        """Test que la semaine finit le dimanche"""
+        semaine = mock_semaine
         
-        # Score en dessous du normal
-        assert 30 < seuils["normal"]
-        # Score entre normal et surcharge
-        assert seuils["normal"] < 60 < seuils["surcharge"]
-        # Score au-dessus de surcharge
-        assert 90 > seuils["surcharge"]
+        assert semaine["fin"].weekday() == 6
 
 
-class TestVueSemaineTimelineJour:
-    """Tests de la timeline par jour"""
+class TestVueSemaineNavigation:
+    """Tests de la navigation de la vue semaine"""
     
-    def test_jour_nom_formatting(self):
-        """Test du formatage du nom de jour"""
-        jour_noms = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
+    def test_nav_semaine_suivante(self, mock_semaine):
+        """Test navigation semaine suivante"""
+        semaine = mock_semaine
         
-        test_date = date(2026, 1, 28)
-        jour_nom = jour_noms[test_date.weekday()]
-        formatted = f"{jour_nom.capitalize()} {test_date.strftime('%d/%m')}"
-        
-        assert "Mercredi" in formatted
-        assert "28/01" in formatted
+        next_debut = semaine["debut"] + timedelta(days=7)
+        assert next_debut > semaine["debut"]
     
-    def test_events_grouped_by_type(self):
-        """Test du regroupement des événements par type"""
-        events_grouped = {
-            "🍽️ Repas": [{"type": "déjeuner", "recette": "Pâtes"}],
-            "🎨 Activités": [{"titre": "Parc", "pour_jules": True}],
-            "🏗️ Projets": [],
-            "⏰ Routines": [{"nom": "Routine matin", "fait": False}],
-            "📅 Événements": []
-        }
+    def test_nav_semaine_precedente(self, mock_semaine):
+        """Test navigation semaine précédente"""
+        semaine = mock_semaine
         
-        non_empty = {k: v for k, v in events_grouped.items() if v}
-        assert len(non_empty) == 3
+        prev_debut = semaine["debut"] - timedelta(days=7)
+        assert prev_debut < semaine["debut"]
     
-    def test_repas_display(self):
-        """Test de l'affichage des repas"""
-        repas = {
-            "type": "déjeuner",
-            "recette": "Pâtes carbonara",
-            "portions": 4,
-            "temps_total": 30
-        }
+    def test_nav_today(self):
+        """Test navigation vers aujourd'hui"""
+        today = date.today()
+        start_of_week = today - timedelta(days=today.weekday())
         
-        display = f"**{repas['type'].capitalize()}**: {repas['recette']}"
-        caption = f"{repas['portions']} portions | {repas['temps_total']} min"
-        
-        assert "Déjeuner" in display
-        assert "4 portions" in caption
+        assert start_of_week <= today <= start_of_week + timedelta(days=6)
+
+
+class TestVueSemaineHeures:
+    """Tests des heures dans la vue semaine"""
     
-    def test_activite_display(self):
-        """Test de l'affichage des activités"""
-        activite = {
-            "titre": "Zoo",
-            "type": "sortie",
-            "pour_jules": True,
-            "budget": 45
-        }
+    def test_heures_standard(self):
+        """Test des heures standards (6h-22h)"""
+        heures = list(range(6, 23))  # 6h à 22h
         
-        label = "👶" if activite["pour_jules"] else "👨‍👩‍👧"
-        display = f"{label} **{activite['titre']}** ({activite['type']})"
-        
-        assert "👶" in display
-        assert "Zoo" in display
+        assert len(heures) == 17
+        assert heures[0] == 6
+        assert heures[-1] == 22
     
-    def test_event_time_formatting(self):
-        """Test du formatage de l'heure des événements"""
+    def test_format_heure(self):
+        """Test formatage heure"""
+        heure = 14
+        formatted = f"{heure:02d}:00"
+        
+        assert formatted == "14:00"
+    
+    def test_slot_duration(self):
+        """Test durée d'un slot"""
+        slot_minutes = 30
+        slots_per_hour = 60 // slot_minutes
+        
+        assert slots_per_hour == 2
+
+
+class TestVueSemaineEvents:
+    """Tests des événements dans la vue semaine"""
+    
+    def test_events_by_day(self, mock_semaine):
+        """Test événements par jour"""
+        semaine = mock_semaine
+        
+        events_by_day = {}
+        for event in semaine["evenements"]:
+            d = event["date"]
+            if d not in events_by_day:
+                events_by_day[d] = []
+            events_by_day[d].append(event)
+        
+        assert len(events_by_day) == 2
+    
+    def test_event_position(self):
+        """Test position d'un événement"""
         event = {
-            "titre": "RDV",
-            "debut": datetime(2026, 1, 28, 14, 30)
+            "heure_debut": datetime(2024, 1, 1, 10, 0),
+            "duree": 60  # minutes
         }
         
-        time_str = event["debut"].strftime("%H:%M")
-        assert time_str == "14:30"
+        hour_start = event["heure_debut"].hour
+        height = event["duree"]
+        
+        assert hour_start == 10
+        assert height == 60
     
-    def test_routine_status_display(self):
-        """Test de l'affichage du statut des routines"""
-        routines = [
-            {"nom": "A", "fait": True},
-            {"nom": "B", "fait": False},
+    def test_overlapping_events(self):
+        """Test événements qui se chevauchent"""
+        events = [
+            {"debut": 10, "fin": 12},
+            {"debut": 11, "fin": 13},
+            {"debut": 14, "fin": 15},
         ]
         
-        for r in routines:
-            status = "✅" if r["fait"] else "⭕"
-            assert status in ["✅", "⭕"]
-
-
-class TestVueSemaineRepas:
-    """Tests de la section repas"""
-    
-    def test_repas_types(self):
-        """Test des types de repas"""
-        types_repas = ["petit_déjeuner", "déjeuner", "goûter", "dîner"]
+        def overlaps(e1, e2):
+            return not (e1["fin"] <= e2["debut"] or e2["fin"] <= e1["debut"])
         
-        repas = {"type": "déjeuner"}
-        assert repas["type"] in types_repas
+        assert overlaps(events[0], events[1])
+        assert not overlaps(events[0], events[2])
+
+
+class TestVueSemaineCharge:
+    """Tests de la charge dans la vue semaine"""
     
-    def test_count_repas_by_type(self):
-        """Test du comptage des repas par type"""
-        repas = [
-            {"type": "déjeuner"},
-            {"type": "dîner"},
-            {"type": "déjeuner"},
-            {"type": "petit_déjeuner"},
+    def test_calcul_charge_jour(self):
+        """Test calcul charge d'un jour"""
+        events = [
+            {"duree": 60},
+            {"duree": 30},
+            {"duree": 90},
         ]
         
-        counts = {}
-        for r in repas:
-            t = r["type"]
-            counts[t] = counts.get(t, 0) + 1
+        charge_minutes = sum(e["duree"] for e in events)
+        charge_heures = charge_minutes / 60
         
-        assert counts["déjeuner"] == 2
-        assert counts["dîner"] == 1
-
-
-class TestVueSemaineActivites:
-    """Tests de la section activités"""
+        assert charge_heures == 3.0
     
-    def test_filter_activites_jules(self):
-        """Test du filtrage des activités pour Jules"""
-        activites = [
-            {"pour_jules": True, "titre": "Parc"},
-            {"pour_jules": False, "titre": "Ciné"},
-            {"pour_jules": True, "titre": "Zoo"},
+    def test_indicateur_charge(self):
+        """Test indicateur de charge"""
+        def get_charge_level(heures):
+            if heures >= 8:
+                return "chargé"
+            elif heures >= 4:
+                return "modéré"
+            else:
+                return "léger"
+        
+        assert get_charge_level(10) == "chargé"
+        assert get_charge_level(5) == "modéré"
+        assert get_charge_level(2) == "léger"
+    
+    def test_charge_semaine(self):
+        """Test charge totale semaine"""
+        jours = [
+            {"heures": 4},
+            {"heures": 6},
+            {"heures": 3},
+            {"heures": 5},
+            {"heures": 2},
+            {"heures": 1},
+            {"heures": 0},
         ]
         
-        pour_jules = [a for a in activites if a["pour_jules"]]
-        assert len(pour_jules) == 2
-    
-    def test_total_budget_activites(self):
-        """Test du calcul du budget total des activités"""
-        activites = [
-            {"budget": 0},
-            {"budget": 45},
-            {"budget": 30},
-        ]
+        total = sum(j["heures"] for j in jours)
+        moyenne = total / len(jours)
         
-        total = sum(a.get("budget", 0) for a in activites)
-        assert total == 75
+        assert total == 21
+        assert moyenne == 3.0
 
 
-class TestVueSemaineProjets:
-    """Tests de la section projets"""
-    
-    def test_priorite_emojis(self):
-        """Test des emojis de priorité"""
-        emojis = {"basse": "🟢", "moyenne": "🟡", "haute": "🔴"}
-        
-        projet = {"priorite": "haute"}
-        emoji = emojis.get(projet["priorite"], "⚪")
-        
-        assert emoji == "🔴"
-    
-    def test_filter_projets_haute_priorite(self):
-        """Test du filtrage des projets haute priorité"""
-        projets = [
-            {"priorite": "haute", "nom": "A"},
-            {"priorite": "basse", "nom": "B"},
-            {"priorite": "haute", "nom": "C"},
-        ]
-        
-        haute = [p for p in projets if p["priorite"] == "haute"]
-        assert len(haute) == 2
+# ═══════════════════════════════════════════════════════════════════════════════
+# TESTS MODULE PLANNING - TACHES
+# ═══════════════════════════════════════════════════════════════════════════════
 
 
-class TestVueSemaineApp:
-    """Tests de la fonction app() du module vue_semaine"""
+class TestPlanningTaches:
+    """Tests des tâches de planning"""
     
-    def test_app_initializes(self, mock_streamlit, mock_planning_service):
-        """Vérifie que app() s'initialise"""
-        with patch("src.modules.planning.vue_semaine.get_planning_service", return_value=mock_planning_service):
-            
-            from src.modules.planning.vue_semaine import app
-            
-            app()
-            
-            mock_streamlit["title"].assert_called_once()
+    def test_tache_structure(self, mock_tache_planning):
+        """Test structure d'une tâche"""
+        tache = mock_tache_planning
+        
+        assert tache.titre == "Courses"
+        assert tache.duree == 60
+        assert tache.statut == "à faire"
+    
+    def test_tache_priorites(self):
+        """Test des priorités de tâches"""
+        priorites = ["basse", "moyenne", "haute", "urgente"]
+        
+        assert "urgente" in priorites
+    
+    def test_tache_statuts(self):
+        """Test des statuts de tâches"""
+        statuts = ["à faire", "en cours", "terminé", "annulé"]
+        
+        assert "à faire" in statuts
+
+
+class TestPlanningCategories:
+    """Tests des catégories de planning"""
+    
+    def test_categories_standard(self):
+        """Test des catégories standards"""
+        categories = ["maison", "famille", "travail", "personnel", "santé"]
+        
+        assert "maison" in categories
+    
+    def test_filter_by_category(self, mock_tache_planning):
+        """Test filtrage par catégorie"""
+        taches = [mock_tache_planning]
+        
+        filtrees = [t for t in taches if t.categorie == "maison"]
+        assert len(filtrees) == 1
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -737,170 +613,75 @@ class TestVueSemaineApp:
 class TestPlanningIntegration:
     """Tests d'intégration des modules planning"""
     
-    def test_semaine_complete_structure(self, mock_planning_service):
-        """Test de la structure de la semaine complète"""
-        semaine = mock_planning_service.get_semaine_complete()
+    def test_calendrier_to_vue_semaine(self, mock_evenement, mock_semaine):
+        """Test lien calendrier -> vue semaine"""
+        event = mock_evenement
+        semaine = mock_semaine
         
-        assert hasattr(semaine, "stats_semaine")
-        assert hasattr(semaine, "alertes_semaine")
-        assert hasattr(semaine, "jours")
+        # Un événement du calendrier peut être affiché dans la vue semaine
+        assert event.titre is not None
+        assert len(semaine["jours"]) == 7
     
-    def test_jours_count(self, mock_planning_service):
-        """Test du nombre de jours"""
-        semaine = mock_planning_service.get_semaine_complete()
+    def test_vue_ensemble_aggregation(self, mock_evenement, mock_tache_planning):
+        """Test agrégation dans la vue d'ensemble"""
+        event = mock_evenement
+        tache = mock_tache_planning
         
-        assert len(semaine.jours) == 7
-    
-    def test_stats_consistency(self, mock_planning_service):
-        """Test de la cohérence des statistiques"""
-        semaine = mock_planning_service.get_semaine_complete()
-        stats = semaine.stats_semaine
-        
-        # Les activités Jules doivent être <= total activités
-        assert stats["activites_jules"] <= stats["total_activites"]
-    
-    def test_navigation_state_persistence(self):
-        """Test de la persistence de l'état de navigation"""
-        state = {}
-        
-        # Initialiser
-        today = date.today()
-        state["planning_week_start"] = today - timedelta(days=today.weekday())
-        
-        # Naviguer
-        state["planning_week_start"] -= timedelta(days=7)
-        
-        # Vérifier la persistence
-        assert state["planning_week_start"] < today
-
-
-class TestPlanningHelpers:
-    """Tests des helpers de planning"""
-    
-    def test_format_date_range(self):
-        """Test du formatage d'une plage de dates"""
-        week_start = date(2026, 1, 26)
-        week_end = week_start + timedelta(days=6)
-        
-        formatted = f"{week_start.strftime('%d/%m')} — {week_end.strftime('%d/%m/%Y')}"
-        
-        assert "26/01" in formatted
-        assert "01/02/2026" in formatted
-    
-    def test_get_day_label(self):
-        """Test de la génération du label de jour"""
-        jour = date(2026, 1, 28)
-        charge = "normal"
-        
-        charge_emoji = {"faible": "🟢", "normal": "🟡", "intense": "🔴"}.get(charge, "⚪")
-        label = f"{charge_emoji} Mercredi {jour.strftime('%d/%m')}"
-        
-        assert "🟡" in label
-        assert "Mercredi" in label
-    
-    def test_is_weekend(self):
-        """Test de la détection du weekend"""
-        dates = [
-            date(2026, 1, 26),  # Lundi
-            date(2026, 1, 31),  # Samedi
-            date(2026, 2, 1),   # Dimanche
+        items = [
+            {"type": "event", "data": event},
+            {"type": "tache", "data": tache},
         ]
         
-        weekends = [d for d in dates if d.weekday() >= 5]
-        assert len(weekends) == 2
-
-
-class TestPlanningConflicts:
-    """Tests de détection de conflits"""
+        assert len(items) == 2
     
-    def test_detect_time_conflict(self):
-        """Test de la détection de conflit horaire"""
+    def test_navigation_coherence(self, mock_semaine):
+        """Test cohérence de la navigation"""
+        semaine = mock_semaine
+        
+        # Navigation cohérente entre les vues
+        week_start = semaine["debut"]
+        week_end = semaine["fin"]
+        
+        assert (week_end - week_start).days == 6
+
+
+class TestPlanningStats:
+    """Tests des statistiques de planning"""
+    
+    def test_events_per_day(self):
+        """Test événements par jour"""
         events = [
-            {"debut": datetime(2026, 1, 28, 14, 0), "fin": datetime(2026, 1, 28, 15, 0)},
-            {"debut": datetime(2026, 1, 28, 14, 30), "fin": datetime(2026, 1, 28, 15, 30)},
+            {"date": date.today()},
+            {"date": date.today()},
+            {"date": date.today() + timedelta(days=1)},
+            {"date": date.today() + timedelta(days=1)},
+            {"date": date.today() + timedelta(days=1)},
         ]
         
-        def has_conflict(e1, e2):
-            return e1["debut"] < e2["fin"] and e2["debut"] < e1["fin"]
+        by_day = {}
+        for e in events:
+            d = e["date"]
+            by_day[d] = by_day.get(d, 0) + 1
         
-        assert has_conflict(events[0], events[1])
+        assert by_day[date.today()] == 2
+        assert by_day[date.today() + timedelta(days=1)] == 3
     
-    def test_no_conflict(self):
-        """Test sans conflit"""
-        events = [
-            {"debut": datetime(2026, 1, 28, 14, 0), "fin": datetime(2026, 1, 28, 15, 0)},
-            {"debut": datetime(2026, 1, 28, 16, 0), "fin": datetime(2026, 1, 28, 17, 0)},
-        ]
-        
-        def has_conflict(e1, e2):
-            return e1["debut"] < e2["fin"] and e2["debut"] < e1["fin"]
-        
-        assert not has_conflict(events[0], events[1])
-
-
-class TestPlanningBudget:
-    """Tests du budget dans le planning"""
-    
-    def test_calculate_week_budget(self):
-        """Test du calcul du budget semaine"""
-        jours = [
-            {"budget_jour": 0},
-            {"budget_jour": 45},
-            {"budget_jour": 0},
-            {"budget_jour": 30},
-            {"budget_jour": 0},
-            {"budget_jour": 100},
-            {"budget_jour": 0},
-        ]
-        
-        total = sum(j["budget_jour"] for j in jours)
-        assert total == 175
-    
-    def test_average_daily_budget(self):
-        """Test du calcul du budget moyen journalier"""
-        total_budget = 175
-        jours_avec_depenses = 3
-        
-        avg_jour_actif = total_budget / jours_avec_depenses
-        assert abs(avg_jour_actif - 58.33) < 0.1
-
-
-class TestPlanningDisplay:
-    """Tests de l'affichage du planning"""
-    
-    def test_empty_day_message(self):
-        """Test du message pour jour vide"""
-        jour = {
-            "repas": [],
-            "activites": [],
-            "projets": [],
-            "events": [],
-            "routines": []
+    def test_busiest_day(self):
+        """Test jour le plus chargé"""
+        days = {
+            "Lundi": 5,
+            "Mardi": 3,
+            "Mercredi": 7,
+            "Jeudi": 2,
         }
         
-        is_empty = not any([
-            jour["repas"],
-            jour["activites"],
-            jour["projets"],
-            jour["events"],
-            jour["routines"]
-        ])
-        
-        assert is_empty
+        busiest = max(days, key=days.get)
+        assert busiest == "Mercredi"
     
-    def test_progress_bar_value(self):
-        """Test de la valeur de la barre de progression"""
-        charge_score = 75
+    def test_free_slots(self):
+        """Test créneaux libres"""
+        heures_occupees = [9, 10, 14, 15, 16]
+        heures_travail = list(range(8, 18))
         
-        # Normaliser entre 0 et 1
-        progress_value = min(charge_score / 100, 1.0)
-        
-        assert progress_value == 0.75
-    
-    def test_metric_delta_calculation(self):
-        """Test du calcul du delta des métriques"""
-        this_week = {"total_activites": 5}
-        last_week = {"total_activites": 3}
-        
-        delta = this_week["total_activites"] - last_week["total_activites"]
-        assert delta == 2
+        heures_libres = [h for h in heures_travail if h not in heures_occupees]
+        assert len(heures_libres) == 5

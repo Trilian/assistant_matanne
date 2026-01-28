@@ -50,7 +50,7 @@ def marquer_terminee(activity_id: int, cout_reel: float = None, notes: str = "")
     """Marque une activité comme terminée"""
     try:
         with get_session() as session:
-            activity = session.query(FamilyActivity).get(activity_id)
+            activity = session.get(FamilyActivity, activity_id)
             if activity:
                 activity.statut = "terminé"
                 if cout_reel is not None:

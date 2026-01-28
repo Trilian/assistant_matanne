@@ -28,6 +28,21 @@ from src.modules.famille.helpers import (
     get_stats_santé_semaine
 )
 
+# Import du module logique métier séparé
+from src.modules.famille.accueil_logic import (
+    JULIUS_BIRTHDAY,
+    NOTIFICATION_TYPES,
+    DASHBOARD_SECTIONS,
+    calculer_age_julius,
+    formater_age_julius,
+    calculer_metriques_globales,
+    calculer_metriques_sante,
+    calculer_metriques_budget,
+    generer_notifications_critiques,
+    generer_suggestions_actions,
+    calculer_temps_ecoule,
+)
+
 
 # ════════════════════════════════════════════════════════════════════════════
 # HELPER: DASHBOARD METRICS

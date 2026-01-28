@@ -145,7 +145,7 @@ def update_objectif_progression(objective_id: int, nouvelle_valeur: float):
     """Met à jour la progression d'un objectif"""
     try:
         with get_session() as session:
-            objective = session.query(HealthObjective).get(objective_id)
+            objective = session.get(HealthObjective, objective_id)
             if objective:
                 objective.valeur_actuelle = nouvelle_valeur
                 if nouvelle_valeur >= objective.valeur_cible:

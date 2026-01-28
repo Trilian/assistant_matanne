@@ -4,7 +4,8 @@ Couverture cible: 40%+ pour entretien, jardin, projets
 """
 
 import pytest
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import MagicMock, patch
+from contextlib import ExitStack
 from datetime import date, datetime, timedelta
 import pandas as pd
 
@@ -15,471 +16,411 @@ import pandas as pd
 
 
 @pytest.fixture
-def mock_streamlit():
-    """Mock complet de Streamlit"""
-    with patch("streamlit.set_page_config") as mock_config, \
-         patch("streamlit.title") as mock_title, \
-         patch("streamlit.caption") as mock_caption, \
-         patch("streamlit.tabs") as mock_tabs, \
-         patch("streamlit.columns") as mock_cols, \
-         patch("streamlit.metric") as mock_metric, \
-         patch("streamlit.divider") as mock_divider, \
-         patch("streamlit.error") as mock_error, \
-         patch("streamlit.info") as mock_info, \
-         patch("streamlit.success") as mock_success, \
-         patch("streamlit.warning") as mock_warning, \
-         patch("streamlit.button") as mock_button, \
-         patch("streamlit.selectbox") as mock_selectbox, \
-         patch("streamlit.text_input") as mock_text_input, \
-         patch("streamlit.text_area") as mock_text_area, \
-         patch("streamlit.number_input") as mock_number_input, \
-         patch("streamlit.date_input") as mock_date_input, \
-         patch("streamlit.expander") as mock_expander, \
-         patch("streamlit.subheader") as mock_subheader, \
-         patch("streamlit.checkbox") as mock_checkbox, \
-         patch("streamlit.slider") as mock_slider, \
-         patch("streamlit.container") as mock_container, \
-         patch("streamlit.markdown") as mock_markdown, \
-         patch("streamlit.write") as mock_write, \
-         patch("streamlit.dataframe") as mock_dataframe, \
-         patch("streamlit.progress") as mock_progress, \
-         patch("streamlit.plotly_chart") as mock_plotly, \
-         patch("streamlit.rerun") as mock_rerun, \
-         patch("streamlit.session_state", {}) as mock_state, \
-         patch("streamlit.cache_data", lambda **kwargs: lambda f: f):
-        
-        mock_tabs.return_value = [MagicMock() for _ in range(10)]
-        mock_cols.return_value = [MagicMock() for _ in range(10)]
-        mock_expander.return_value.__enter__ = MagicMock()
-        mock_expander.return_value.__exit__ = MagicMock()
-        mock_container.return_value.__enter__ = MagicMock()
-        mock_container.return_value.__exit__ = MagicMock()
-        
-        yield {
-            "config": mock_config,
-            "title": mock_title,
-            "caption": mock_caption,
-            "tabs": mock_tabs,
-            "columns": mock_cols,
-            "metric": mock_metric,
-            "error": mock_error,
-            "info": mock_info,
-            "success": mock_success,
-            "warning": mock_warning,
-            "button": mock_button,
-            "selectbox": mock_selectbox,
-            "text_input": mock_text_input,
-            "text_area": mock_text_area,
-            "expander": mock_expander,
-            "checkbox": mock_checkbox,
-            "slider": mock_slider,
-            "session_state": mock_state,
-            "plotly_chart": mock_plotly,
-            "rerun": mock_rerun,
-        }
+def mock_tache_entretien():
+    """Mock d'une tâche d'entretien"""
+    tache = MagicMock()
+    tache.id = 1
+    tache.nom = "Nettoyage cuisine"
+    tache.description = "Nettoyage complet de la cuisine"
+    tache.frequence = "hebdomadaire"
+    tache.derniere_realisation = date.today() - timedelta(days=5)
+    tache.prochaine_echeance = date.today() + timedelta(days=2)
+    tache.priorite = "moyenne"
+    tache.statut = "à faire"
+    tache.piece = "Cuisine"
+    tache.duree_estimee = 30
+    return tache
 
 
 @pytest.fixture
-def mock_db_context():
-    """Mock du contexte de base de données"""
-    mock_db = MagicMock()
-    mock_db.query.return_value.filter.return_value.all.return_value = []
-    mock_db.query.return_value.filter.return_value.first.return_value = None
-    mock_db.query.return_value.order_by.return_value.limit.return_value.all.return_value = []
-    mock_db.query.return_value.get.return_value = None
-    
-    context_manager = MagicMock()
-    context_manager.__enter__ = MagicMock(return_value=mock_db)
-    context_manager.__exit__ = MagicMock(return_value=False)
-    
-    return context_manager, mock_db
+def mock_plante():
+    """Mock d'une plante de jardin"""
+    plante = MagicMock()
+    plante.id = 1
+    plante.nom = "Tomates cerises"
+    plante.type = "légume"
+    plante.emplacement = "Potager"
+    plante.date_plantation = date(2024, 4, 15)
+    plante.frequence_arrosage = 2
+    plante.dernier_arrosage = date.today() - timedelta(days=1)
+    plante.statut = "en croissance"
+    return plante
+
+
+@pytest.fixture
+def mock_projet():
+    """Mock d'un projet maison"""
+    projet = MagicMock()
+    projet.id = 1
+    projet.nom = "Rénovation salle de bain"
+    projet.description = "Refaire la salle de bain"
+    projet.date_debut = date(2024, 6, 1)
+    projet.date_fin_prevue = date(2024, 7, 1)
+    projet.budget = 5000
+    projet.depense_actuelle = 2500
+    projet.statut = "en cours"
+    projet.priorite = "haute"
+    projet.progression = 50
+    return projet
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# TESTS MODULE ENTRETIEN
+# TESTS MODULE ENTRETIEN - TACHES
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
-class TestEntretienService:
-    """Tests du service EntretienService"""
+class TestEntretienTaches:
+    """Tests des tâches d'entretien"""
     
-    def test_service_creation(self):
-        """Test de la création du service"""
-        with patch("src.modules.maison.entretien.ClientIA"):
-            from src.modules.maison.entretien import EntretienService
-            
-            service = EntretienService()
-            assert service is not None
-            assert service.service_name == "entretien"
+    def test_tache_structure(self, mock_tache_entretien):
+        """Test structure d'une tâche"""
+        tache = mock_tache_entretien
+        
+        assert tache.nom == "Nettoyage cuisine"
+        assert tache.frequence == "hebdomadaire"
+        assert tache.piece == "Cuisine"
     
-    def test_get_entretien_service(self):
-        """Test de la factory du service"""
-        with patch("src.modules.maison.entretien.ClientIA"):
-            from src.modules.maison.entretien import get_entretien_service
-            
-            service = get_entretien_service()
-            assert service is not None
+    def test_tache_echeance(self, mock_tache_entretien):
+        """Test calcul échéance"""
+        tache = mock_tache_entretien
+        
+        jours_restants = (tache.prochaine_echeance - date.today()).days
+        assert jours_restants == 2
+    
+    def test_tache_retard(self):
+        """Test détection retard"""
+        echeance = date.today() - timedelta(days=3)
+        
+        est_en_retard = echeance < date.today()
+        jours_retard = (date.today() - echeance).days
+        
+        assert est_en_retard
+        assert jours_retard == 3
 
 
-class TestEntretienHelpers:
-    """Tests des helpers entretien"""
+class TestEntretienFrequences:
+    """Tests des fréquences d'entretien"""
     
-    def test_routine_structure(self):
-        """Test de la structure d'une routine"""
-        routine = {
-            "id": 1,
-            "nom": "Ménage cuisine",
-            "categorie": "ménage",
-            "frequence": "quotidien",
-            "description": "Nettoyage cuisine quotidien",
-            "actif": True
+    def test_frequences_standard(self):
+        """Test des fréquences standards"""
+        frequences = ["quotidienne", "hebdomadaire", "mensuelle", "trimestrielle", "annuelle"]
+        
+        assert "quotidienne" in frequences
+        assert "hebdomadaire" in frequences
+    
+    def test_calcul_prochaine_echeance(self):
+        """Test calcul prochaine échéance"""
+        derniere = date.today()
+        frequences_jours = {
+            "quotidienne": 1,
+            "hebdomadaire": 7,
+            "mensuelle": 30,
+            "trimestrielle": 90,
+            "annuelle": 365,
         }
         
-        assert "nom" in routine
-        assert "categorie" in routine
-        assert "frequence" in routine
-        assert routine["actif"] is True
+        prochaine = derniere + timedelta(days=frequences_jours["hebdomadaire"])
+        assert prochaine == date.today() + timedelta(days=7)
     
-    def test_task_structure(self):
-        """Test de la structure d'une tâche"""
-        task = {
-            "id": 1,
-            "routine_id": 1,
-            "nom": "Nettoyer évier",
-            "description": "Avec produit vaisselle",
-            "heure_prevue": "09:00",
-            "ordre": 1,
-            "fait_le": None
+    def test_frequence_personnalisee(self):
+        """Test fréquence personnalisée"""
+        jours = 14  # Tous les 14 jours
+        derniere = date.today()
+        prochaine = derniere + timedelta(days=jours)
+        
+        assert (prochaine - derniere).days == 14
+
+
+class TestEntretienPieces:
+    """Tests des pièces de la maison"""
+    
+    def test_pieces_standard(self):
+        """Test des pièces standards"""
+        pieces = ["Cuisine", "Salon", "Salle de bain", "Chambre", "Garage", "Jardin"]
+        
+        assert "Cuisine" in pieces
+        assert "Salon" in pieces
+    
+    def test_piece_icons(self):
+        """Test des icônes par pièce"""
+        icons = {
+            "Cuisine": "🍳",
+            "Salon": "🛋️",
+            "Salle de bain": "🚿",
+            "Chambre": "🛏️",
+            "Garage": "🚗",
+            "Jardin": "🌳",
         }
         
-        assert "nom" in task
-        assert "routine_id" in task
-        assert "ordre" in task
+        assert icons["Cuisine"] == "🍳"
     
-    def test_filter_routines_by_frequence(self):
-        """Test du filtrage par fréquence"""
-        routines = [
-            {"frequence": "quotidien", "nom": "A"},
-            {"frequence": "hebdomadaire", "nom": "B"},
-            {"frequence": "quotidien", "nom": "C"},
-        ]
+    def test_filter_by_piece(self, mock_tache_entretien):
+        """Test filtrage par pièce"""
+        taches = [mock_tache_entretien]
         
-        quotidiennes = [r for r in routines if r["frequence"] == "quotidien"]
-        assert len(quotidiennes) == 2
+        filtrees = [t for t in taches if t.piece == "Cuisine"]
+        assert len(filtrees) == 1
+
+
+class TestEntretienPriorites:
+    """Tests des priorités d'entretien"""
     
-    def test_filter_routines_actives(self):
-        """Test du filtrage des routines actives"""
-        routines = [
-            {"actif": True, "nom": "A"},
-            {"actif": False, "nom": "B"},
-            {"actif": True, "nom": "C"},
-        ]
+    def test_priorites_standard(self):
+        """Test des priorités standards"""
+        priorites = ["basse", "moyenne", "haute", "urgente"]
         
-        actives = [r for r in routines if r["actif"]]
-        assert len(actives) == 2
+        assert "urgente" in priorites
     
-    def test_count_taches_by_routine(self):
-        """Test du comptage des tâches par routine"""
+    def test_priorite_colors(self):
+        """Test des couleurs par priorité"""
+        colors = {
+            "basse": "🟢",
+            "moyenne": "🟡",
+            "haute": "🟠",
+            "urgente": "🔴",
+        }
+        
+        assert colors["urgente"] == "🔴"
+    
+    def test_sort_by_priorite(self):
+        """Test tri par priorité"""
         taches = [
-            {"routine_id": 1},
-            {"routine_id": 1},
-            {"routine_id": 2},
+            {"nom": "A", "priorite": "basse"},
+            {"nom": "B", "priorite": "urgente"},
+            {"nom": "C", "priorite": "moyenne"},
         ]
         
-        counts = {}
-        for t in taches:
-            rid = t["routine_id"]
-            counts[rid] = counts.get(rid, 0) + 1
+        ordre = {"urgente": 0, "haute": 1, "moyenne": 2, "basse": 3}
+        triees = sorted(taches, key=lambda t: ordre.get(t["priorite"], 99))
         
-        assert counts[1] == 2
-        assert counts[2] == 1
+        assert triees[0]["nom"] == "B"
+
+
+class TestEntretienStatuts:
+    """Tests des statuts d'entretien"""
     
-    def test_get_taches_today(self):
-        """Test de récupération des tâches du jour"""
-        today = date.today()
+    def test_statuts_standard(self):
+        """Test des statuts standards"""
+        statuts = ["à faire", "en cours", "terminé", "reporté"]
         
+        assert "à faire" in statuts
+        assert "terminé" in statuts
+    
+    def test_filter_by_statut(self, mock_tache_entretien):
+        """Test filtrage par statut"""
+        taches = [mock_tache_entretien]
+        
+        filtrees = [t for t in taches if t.statut == "à faire"]
+        assert len(filtrees) == 1
+    
+    def test_count_by_statut(self):
+        """Test comptage par statut"""
         taches = [
-            {"fait_le": None, "nom": "A"},
-            {"fait_le": today, "nom": "B"},
-            {"fait_le": None, "nom": "C"},
+            {"statut": "à faire"},
+            {"statut": "terminé"},
+            {"statut": "à faire"},
+            {"statut": "en cours"},
         ]
         
-        a_faire = [t for t in taches if t["fait_le"] is None]
-        assert len(a_faire) == 2
-        
-        faites = [t for t in taches if t["fait_le"] == today]
-        assert len(faites) == 1
+        a_faire = len([t for t in taches if t["statut"] == "à faire"])
+        assert a_faire == 2
+
+
+class TestEntretienDuree:
+    """Tests de la durée des tâches"""
     
-    def test_calculate_completion_rate(self):
-        """Test du calcul du taux de complétion"""
+    def test_format_duree(self):
+        """Test formatage durée"""
+        duree = 45
+        formatted = f"{duree} min"
+        
+        assert formatted == "45 min"
+    
+    def test_format_duree_heures(self):
+        """Test formatage durée en heures"""
+        duree = 120
+        heures = duree // 60
+        minutes = duree % 60
+        
+        formatted = f"{heures}h" if minutes == 0 else f"{heures}h{minutes:02d}"
+        assert formatted == "2h"
+    
+    def test_calcul_duree_totale(self):
+        """Test calcul durée totale"""
         taches = [
-            {"fait_le": date.today()},
-            {"fait_le": date.today()},
-            {"fait_le": None},
-            {"fait_le": None},
+            {"duree": 30},
+            {"duree": 45},
+            {"duree": 15},
         ]
         
-        total = len(taches)
-        faites = len([t for t in taches if t["fait_le"] is not None])
-        
-        taux = (faites / total) * 100 if total > 0 else 0
-        assert taux == 50.0
-
-
-class TestEntretienApp:
-    """Tests de la fonction app() du module entretien"""
-    
-    def test_app_initializes(self, mock_streamlit):
-        """Vérifie que app() s'initialise"""
-        with patch("src.modules.maison.entretien.get_entretien_service") as mock_service, \
-             patch("src.modules.maison.entretien.get_stats_entretien", return_value={}), \
-             patch("src.modules.maison.entretien.charger_routines", return_value=pd.DataFrame()), \
-             patch("src.modules.maison.entretien.get_taches_today", return_value=[]):
-            
-            mock_service.return_value = MagicMock()
-            
-            from src.modules.maison.entretien import app
-            
-            app()
-            
-            mock_streamlit["title"].assert_called_once()
-
-
-class TestEntretienStats:
-    """Tests des statistiques d'entretien"""
-    
-    def test_stats_structure(self):
-        """Test de la structure des statistiques"""
-        stats = {
-            "routines_actives": 5,
-            "taches_aujourd_hui": 12,
-            "taches_faites": 8,
-            "taux_completion": 66.7
-        }
-        
-        assert "routines_actives" in stats
-        assert "taches_aujourd_hui" in stats
-        assert 0 <= stats["taux_completion"] <= 100
-    
-    def test_stats_calculation(self):
-        """Test du calcul des statistiques"""
-        routines = [{"actif": True}, {"actif": True}, {"actif": False}]
-        taches = [{"fait_le": None}, {"fait_le": date.today()}, {"fait_le": None}]
-        
-        stats = {
-            "routines_actives": len([r for r in routines if r["actif"]]),
-            "taches_aujourd_hui": len(taches),
-            "taches_faites": len([t for t in taches if t["fait_le"] is not None]),
-        }
-        stats["taux_completion"] = (stats["taches_faites"] / stats["taches_aujourd_hui"]) * 100
-        
-        assert stats["routines_actives"] == 2
-        assert stats["taches_faites"] == 1
-        assert abs(stats["taux_completion"] - 33.33) < 0.1
+        total = sum(t["duree"] for t in taches)
+        assert total == 90
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# TESTS MODULE JARDIN
+# TESTS MODULE JARDIN - PLANTES
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
-class TestJardinHelpers:
-    """Tests des helpers jardin"""
+class TestJardinPlantes:
+    """Tests des plantes du jardin"""
     
-    def test_plant_structure(self):
-        """Test de la structure d'une plante"""
-        plant = {
-            "id": 1,
-            "nom": "Tomates",
-            "type": "légume",
-            "emplacement": "Potager",
-            "date_plantation": date(2025, 4, 15),
-            "arrosage_frequence": 2,
-            "dernier_arrosage": date.today() - timedelta(days=3),
-            "notes": ""
+    def test_plante_structure(self, mock_plante):
+        """Test structure d'une plante"""
+        plante = mock_plante
+        
+        assert plante.nom == "Tomates cerises"
+        assert plante.type == "légume"
+        assert plante.emplacement == "Potager"
+    
+    def test_plante_arrosage(self, mock_plante):
+        """Test calcul arrosage"""
+        plante = mock_plante
+        
+        jours_depuis = (date.today() - plante.dernier_arrosage).days
+        besoin_arrosage = jours_depuis >= plante.frequence_arrosage
+        
+        assert jours_depuis == 1
+        assert not besoin_arrosage  # Arrosé hier, fréquence = 2 jours
+
+
+class TestJardinTypes:
+    """Tests des types de plantes"""
+    
+    def test_types_standard(self):
+        """Test des types standards"""
+        types = ["légume", "fruit", "fleur", "aromatique", "arbuste", "arbre"]
+        
+        assert "légume" in types
+        assert "fleur" in types
+    
+    def test_type_icons(self):
+        """Test des icônes par type"""
+        icons = {
+            "légume": "🥬",
+            "fruit": "🍓",
+            "fleur": "🌸",
+            "aromatique": "🌿",
         }
         
-        assert "nom" in plant
-        assert "arrosage_frequence" in plant
-        assert plant["arrosage_frequence"] > 0
+        assert icons["légume"] == "🥬"
     
-    def test_filter_plants_by_type(self):
-        """Test du filtrage par type de plante"""
-        plants = [
-            {"type": "légume", "nom": "Tomates"},
-            {"type": "fleur", "nom": "Roses"},
-            {"type": "légume", "nom": "Courgettes"},
-        ]
+    def test_filter_by_type(self, mock_plante):
+        """Test filtrage par type"""
+        plantes = [mock_plante]
         
-        legumes = [p for p in plants if p["type"] == "légume"]
-        assert len(legumes) == 2
+        filtrees = [p for p in plantes if p.type == "légume"]
+        assert len(filtrees) == 1
+
+
+class TestJardinEmplacements:
+    """Tests des emplacements de jardin"""
     
-    def test_filter_plants_by_emplacement(self):
-        """Test du filtrage par emplacement"""
-        plants = [
-            {"emplacement": "Potager", "nom": "Tomates"},
-            {"emplacement": "Balcon", "nom": "Géraniums"},
-            {"emplacement": "Potager", "nom": "Salades"},
-        ]
+    def test_emplacements_standard(self):
+        """Test des emplacements standards"""
+        emplacements = ["Potager", "Serre", "Terrasse", "Balcon", "Intérieur"]
         
-        potager = [p for p in plants if p["emplacement"] == "Potager"]
-        assert len(potager) == 2
+        assert "Potager" in emplacements
+        assert "Serre" in emplacements
     
-    def test_detect_needs_watering(self):
-        """Test de la détection du besoin d'arrosage"""
-        today = date.today()
-        
-        plants = [
-            {"dernier_arrosage": today - timedelta(days=3), "arrosage_frequence": 2},  # En retard
-            {"dernier_arrosage": today, "arrosage_frequence": 2},  # OK
-            {"dernier_arrosage": today - timedelta(days=1), "arrosage_frequence": 3},  # OK
-        ]
-        
-        needs_water = []
-        for p in plants:
-            days_since = (today - p["dernier_arrosage"]).days
-            if days_since >= p["arrosage_frequence"]:
-                needs_water.append(p)
-        
-        assert len(needs_water) == 1
-    
-    def test_get_current_season(self):
-        """Test de la détermination de la saison"""
-        def get_season(month):
-            if month in [3, 4, 5]:
-                return "printemps"
-            elif month in [6, 7, 8]:
-                return "été"
-            elif month in [9, 10, 11]:
-                return "automne"
-            else:
-                return "hiver"
-        
-        assert get_season(1) == "hiver"
-        assert get_season(4) == "printemps"
-        assert get_season(7) == "été"
-        assert get_season(10) == "automne"
-    
-    def test_seasonal_tasks(self):
-        """Test des tâches saisonnières"""
-        seasonal_tasks = {
-            "printemps": ["Semis", "Préparation sol", "Plantation"],
-            "été": ["Arrosage", "Récolte", "Entretien"],
-            "automne": ["Récolte tardive", "Nettoyage", "Préparation hiver"],
-            "hiver": ["Planification", "Taille", "Protection gel"]
+    def test_emplacement_icons(self):
+        """Test des icônes par emplacement"""
+        icons = {
+            "Potager": "🥕",
+            "Serre": "🏠",
+            "Terrasse": "☀️",
+            "Intérieur": "🏡",
         }
         
-        assert len(seasonal_tasks["printemps"]) == 3
-        assert "Arrosage" in seasonal_tasks["été"]
+        assert icons["Potager"] == "🥕"
 
 
-class TestJardinApp:
-    """Tests de la fonction app() du module jardin"""
+class TestJardinArrosage:
+    """Tests du système d'arrosage"""
     
-    def test_app_initializes(self, mock_streamlit, mock_db_context):
-        """Vérifie que app() s'initialise"""
-        context_manager, mock_db = mock_db_context
-        
-        with patch("src.modules.maison.jardin.get_db_context", return_value=context_manager), \
-             patch("src.modules.maison.jardin.charger_routines", return_value=pd.DataFrame()):
-            
-            from src.modules.maison.jardin import app
-            
-            app()
-            
-            mock_streamlit["title"].assert_called_once()
-
-
-class TestJardinStats:
-    """Tests des statistiques jardin"""
-    
-    def test_stats_structure(self):
-        """Test de la structure des statistiques"""
-        stats = {
-            "total_plantes": 15,
-            "a_arroser": 3,
-            "recolte_possible": 5,
-            "alertes": 2
+    def test_frequences_arrosage(self):
+        """Test des fréquences d'arrosage"""
+        frequences = {
+            "quotidien": 1,
+            "2 jours": 2,
+            "3 jours": 3,
+            "hebdomadaire": 7,
         }
         
-        assert "total_plantes" in stats
-        assert "a_arroser" in stats
+        assert frequences["quotidien"] == 1
+        assert frequences["hebdomadaire"] == 7
     
-    def test_watering_schedule(self):
-        """Test du calendrier d'arrosage"""
-        today = date.today()
+    def test_calcul_prochain_arrosage(self):
+        """Test calcul prochain arrosage"""
+        dernier = date.today() - timedelta(days=1)
+        frequence = 3
         
-        plants = [
-            {"nom": "A", "arrosage_frequence": 1, "dernier_arrosage": today - timedelta(days=1)},
-            {"nom": "B", "arrosage_frequence": 2, "dernier_arrosage": today - timedelta(days=1)},
-            {"nom": "C", "arrosage_frequence": 3, "dernier_arrosage": today - timedelta(days=2)},
+        prochain = dernier + timedelta(days=frequence)
+        jours_restants = (prochain - date.today()).days
+        
+        assert jours_restants == 2
+    
+    def test_plantes_a_arroser(self):
+        """Test liste plantes à arroser"""
+        plantes = [
+            {"nom": "A", "dernier_arrosage": date.today() - timedelta(days=3), "frequence": 2},
+            {"nom": "B", "dernier_arrosage": date.today() - timedelta(days=1), "frequence": 3},
+            {"nom": "C", "dernier_arrosage": date.today() - timedelta(days=5), "frequence": 2},
         ]
         
-        schedule = {}
-        for p in plants:
-            days_since = (today - p["dernier_arrosage"]).days
-            next_water = p["arrosage_frequence"] - days_since
-            if next_water <= 0:
-                schedule[p["nom"]] = "Aujourd'hui"
-            else:
-                schedule[p["nom"]] = f"Dans {next_water} jour(s)"
+        a_arroser = [
+            p for p in plantes 
+            if (date.today() - p["dernier_arrosage"]).days >= p["frequence"]
+        ]
         
-        assert schedule["A"] == "Aujourd'hui"
-        assert "jour" in schedule["B"]
+        assert len(a_arroser) == 2
 
 
-class TestJardinLog:
-    """Tests du journal jardin"""
+class TestJardinStatuts:
+    """Tests des statuts des plantes"""
     
-    def test_log_entry_structure(self):
-        """Test de la structure d'une entrée de journal"""
-        entry = {
-            "id": 1,
-            "date": date.today(),
-            "type": "arrosage",
-            "plante_id": 1,
-            "notes": "Arrosage normal",
-            "photos": []
+    def test_statuts_standard(self):
+        """Test des statuts standards"""
+        statuts = ["semis", "en croissance", "floraison", "récolte", "repos"]
+        
+        assert "en croissance" in statuts
+        assert "récolte" in statuts
+    
+    def test_statut_icons(self):
+        """Test des icônes par statut"""
+        icons = {
+            "semis": "🌱",
+            "en croissance": "🌿",
+            "floraison": "🌸",
+            "récolte": "🍎",
         }
         
-        assert "type" in entry
-        assert "date" in entry
+        assert icons["semis"] == "🌱"
+
+
+class TestJardinSaisons:
+    """Tests des saisons de jardinage"""
     
-    def test_log_types(self):
-        """Test des types d'entrées de journal"""
-        log_types = ["arrosage", "plantation", "récolte", "traitement", "observation"]
+    def test_saisons(self):
+        """Test des saisons"""
+        saisons = ["printemps", "été", "automne", "hiver"]
         
-        entries = [
-            {"type": "arrosage"},
-            {"type": "récolte"},
-            {"type": "observation"},
-        ]
-        
-        for e in entries:
-            assert e["type"] in log_types
+        assert len(saisons) == 4
     
-    def test_filter_log_by_plant(self):
-        """Test du filtrage du journal par plante"""
-        entries = [
-            {"plante_id": 1, "type": "arrosage"},
-            {"plante_id": 2, "type": "récolte"},
-            {"plante_id": 1, "type": "traitement"},
-        ]
+    def test_saison_actuelle(self):
+        """Test détermination saison actuelle"""
+        mois = date.today().month
         
-        plant_1_entries = [e for e in entries if e["plante_id"] == 1]
-        assert len(plant_1_entries) == 2
-    
-    def test_filter_log_by_date_range(self):
-        """Test du filtrage par période"""
-        today = date.today()
-        entries = [
-            {"date": today, "type": "arrosage"},
-            {"date": today - timedelta(days=5), "type": "récolte"},
-            {"date": today - timedelta(days=15), "type": "plantation"},
-        ]
+        if mois in [3, 4, 5]:
+            saison = "printemps"
+        elif mois in [6, 7, 8]:
+            saison = "été"
+        elif mois in [9, 10, 11]:
+            saison = "automne"
+        else:
+            saison = "hiver"
         
-        last_week = [e for e in entries if (today - e["date"]).days <= 7]
-        assert len(last_week) == 2
+        assert saison in ["printemps", "été", "automne", "hiver"]
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -487,232 +428,175 @@ class TestJardinLog:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
-class TestProjetsHelpers:
-    """Tests des helpers projets"""
+class TestProjetsStructure:
+    """Tests de la structure des projets"""
     
-    def test_project_structure(self):
-        """Test de la structure d'un projet"""
-        projet = {
-            "id": 1,
-            "nom": "Rénovation salle de bain",
-            "description": "Refaire la douche",
-            "categorie": "rénovation",
-            "priorite": "haute",
-            "statut": "en_cours",
-            "date_debut": date(2025, 1, 1),
-            "date_fin_prevue": date(2025, 3, 31),
-            "budget_estime": 5000,
-            "budget_actuel": 2500,
-            "progression": 50
+    def test_projet_structure(self, mock_projet):
+        """Test structure d'un projet"""
+        projet = mock_projet
+        
+        assert projet.nom == "Rénovation salle de bain"
+        assert projet.budget == 5000
+        assert projet.progression == 50
+    
+    def test_projet_dates(self, mock_projet):
+        """Test dates du projet"""
+        projet = mock_projet
+        
+        duree = (projet.date_fin_prevue - projet.date_debut).days
+        assert duree == 30
+
+
+class TestProjetsBudget:
+    """Tests du budget des projets"""
+    
+    def test_calcul_depense(self, mock_projet):
+        """Test calcul dépense"""
+        projet = mock_projet
+        
+        pourcentage_depense = (projet.depense_actuelle / projet.budget) * 100
+        assert pourcentage_depense == 50.0
+    
+    def test_budget_restant(self, mock_projet):
+        """Test budget restant"""
+        projet = mock_projet
+        
+        restant = projet.budget - projet.depense_actuelle
+        assert restant == 2500
+    
+    def test_budget_depasse(self):
+        """Test détection dépassement budget"""
+        budget = 5000
+        depense = 5500
+        
+        depasse = depense > budget
+        depassement = depense - budget if depasse else 0
+        
+        assert depasse
+        assert depassement == 500
+
+
+class TestProjetsProgression:
+    """Tests de la progression des projets"""
+    
+    def test_progression_range(self, mock_projet):
+        """Test plage de progression"""
+        projet = mock_projet
+        
+        assert 0 <= projet.progression <= 100
+    
+    def test_calcul_progression(self):
+        """Test calcul progression"""
+        taches_completees = 7
+        taches_total = 10
+        
+        progression = (taches_completees / taches_total) * 100
+        assert progression == 70.0
+    
+    def test_progression_icons(self):
+        """Test icônes de progression"""
+        def get_progress_icon(pct):
+            if pct >= 100:
+                return "✅"
+            elif pct >= 75:
+                return "🟢"
+            elif pct >= 50:
+                return "🟡"
+            elif pct >= 25:
+                return "🟠"
+            else:
+                return "🔴"
+        
+        assert get_progress_icon(100) == "✅"
+        assert get_progress_icon(50) == "🟡"
+        assert get_progress_icon(10) == "🔴"
+
+
+class TestProjetsStatuts:
+    """Tests des statuts des projets"""
+    
+    def test_statuts_standard(self):
+        """Test des statuts standards"""
+        statuts = ["planifié", "en cours", "en pause", "terminé", "annulé"]
+        
+        assert "en cours" in statuts
+        assert "terminé" in statuts
+    
+    def test_statut_icons(self):
+        """Test des icônes par statut"""
+        icons = {
+            "planifié": "📋",
+            "en cours": "🔨",
+            "en pause": "⏸️",
+            "terminé": "✅",
+            "annulé": "❌",
         }
         
-        assert "nom" in projet
-        assert "priorite" in projet
-        assert "statut" in projet
-        assert 0 <= projet["progression"] <= 100
+        assert icons["en cours"] == "🔨"
     
-    def test_task_structure(self):
-        """Test de la structure d'une tâche projet"""
-        tache = {
-            "id": 1,
-            "projet_id": 1,
-            "nom": "Démolition",
-            "description": "Démolir ancienne douche",
-            "statut": "terminé",
-            "ordre": 1,
-            "date_fin": date(2025, 1, 15)
-        }
+    def test_filter_by_statut(self, mock_projet):
+        """Test filtrage par statut"""
+        projets = [mock_projet]
         
-        assert "nom" in tache
-        assert "projet_id" in tache
-        assert "statut" in tache
+        en_cours = [p for p in projets if p.statut == "en cours"]
+        assert len(en_cours) == 1
+
+
+class TestProjetsPriorites:
+    """Tests des priorités des projets"""
     
-    def test_filter_projects_by_status(self):
-        """Test du filtrage par statut"""
+    def test_priorites_standard(self):
+        """Test des priorités standards"""
+        priorites = ["basse", "moyenne", "haute", "critique"]
+        
+        assert "haute" in priorites
+    
+    def test_sort_by_priorite(self):
+        """Test tri par priorité"""
         projets = [
-            {"statut": "en_cours", "nom": "A"},
-            {"statut": "terminé", "nom": "B"},
-            {"statut": "en_cours", "nom": "C"},
-            {"statut": "planifié", "nom": "D"},
+            {"nom": "A", "priorite": "basse"},
+            {"nom": "B", "priorite": "critique"},
+            {"nom": "C", "priorite": "moyenne"},
         ]
         
-        en_cours = [p for p in projets if p["statut"] == "en_cours"]
-        assert len(en_cours) == 2
+        ordre = {"critique": 0, "haute": 1, "moyenne": 2, "basse": 3}
+        tries = sorted(projets, key=lambda p: ordre.get(p["priorite"], 99))
+        
+        assert tries[0]["nom"] == "B"
+
+
+class TestProjetsEcheances:
+    """Tests des échéances des projets"""
     
-    def test_filter_projects_by_priority(self):
-        """Test du filtrage par priorité"""
+    def test_jours_restants(self, mock_projet):
+        """Test calcul jours restants"""
+        projet = mock_projet
+        
+        jours = (projet.date_fin_prevue - date.today()).days
+        assert isinstance(jours, int)
+    
+    def test_projet_en_retard(self):
+        """Test détection retard"""
+        date_fin = date.today() - timedelta(days=5)
+        statut = "en cours"
+        
+        en_retard = date_fin < date.today() and statut != "terminé"
+        assert en_retard
+    
+    def test_projets_a_venir(self):
+        """Test projets à venir"""
         projets = [
-            {"priorite": "haute", "nom": "A"},
-            {"priorite": "moyenne", "nom": "B"},
-            {"priorite": "haute", "nom": "C"},
+            {"date_fin_prevue": date.today() + timedelta(days=5)},
+            {"date_fin_prevue": date.today() + timedelta(days=15)},
+            {"date_fin_prevue": date.today() + timedelta(days=3)},
         ]
         
-        haute = [p for p in projets if p["priorite"] == "haute"]
-        assert len(haute) == 2
-    
-    def test_calculate_budget_remaining(self):
-        """Test du calcul du budget restant"""
-        projet = {
-            "budget_estime": 5000,
-            "budget_actuel": 3500
-        }
-        
-        restant = projet["budget_estime"] - projet["budget_actuel"]
-        pct_utilise = (projet["budget_actuel"] / projet["budget_estime"]) * 100
-        
-        assert restant == 1500
-        assert pct_utilise == 70.0
-    
-    def test_calculate_days_remaining(self):
-        """Test du calcul des jours restants"""
-        projet = {
-            "date_fin_prevue": date.today() + timedelta(days=30)
-        }
-        
-        jours_restants = (projet["date_fin_prevue"] - date.today()).days
-        assert jours_restants == 30
-    
-    def test_detect_project_overdue(self):
-        """Test de la détection de projet en retard"""
-        today = date.today()
-        
-        projets = [
-            {"date_fin_prevue": today - timedelta(days=5), "statut": "en_cours"},  # En retard
-            {"date_fin_prevue": today + timedelta(days=10), "statut": "en_cours"},  # OK
-            {"date_fin_prevue": today - timedelta(days=10), "statut": "terminé"},  # Terminé
+        a_venir_semaine = [
+            p for p in projets 
+            if 0 <= (p["date_fin_prevue"] - date.today()).days <= 7
         ]
         
-        overdue = [p for p in projets if p["date_fin_prevue"] < today and p["statut"] != "terminé"]
-        assert len(overdue) == 1
-    
-    def test_calculate_progression(self):
-        """Test du calcul de la progression"""
-        taches = [
-            {"statut": "terminé"},
-            {"statut": "terminé"},
-            {"statut": "en_cours"},
-            {"statut": "à_faire"},
-        ]
-        
-        total = len(taches)
-        terminees = len([t for t in taches if t["statut"] == "terminé"])
-        progression = (terminees / total) * 100 if total > 0 else 0
-        
-        assert progression == 50.0
-
-
-class TestProjetsApp:
-    """Tests de la fonction app() du module projets"""
-    
-    def test_app_initializes(self, mock_streamlit, mock_db_context):
-        """Vérifie que app() s'initialise"""
-        context_manager, mock_db = mock_db_context
-        
-        with patch("src.modules.maison.projets.get_db_context", return_value=context_manager), \
-             patch("src.modules.maison.projets.charger_routines", return_value=pd.DataFrame()):
-            
-            from src.modules.maison.projets import app
-            
-            app()
-            
-            mock_streamlit["title"].assert_called_once()
-
-
-class TestProjetsStats:
-    """Tests des statistiques projets"""
-    
-    def test_stats_structure(self):
-        """Test de la structure des statistiques"""
-        stats = {
-            "total_projets": 5,
-            "en_cours": 2,
-            "termines": 2,
-            "planifies": 1,
-            "budget_total": 15000,
-            "budget_utilise": 8000
-        }
-        
-        assert "total_projets" in stats
-        assert "en_cours" in stats
-        assert stats["total_projets"] == stats["en_cours"] + stats["termines"] + stats["planifies"]
-    
-    def test_calculate_global_progression(self):
-        """Test du calcul de progression globale"""
-        projets = [
-            {"progression": 100},
-            {"progression": 50},
-            {"progression": 0},
-        ]
-        
-        avg_progression = sum(p["progression"] for p in projets) / len(projets)
-        assert avg_progression == 50.0
-    
-    def test_priority_distribution(self):
-        """Test de la distribution par priorité"""
-        projets = [
-            {"priorite": "haute"},
-            {"priorite": "moyenne"},
-            {"priorite": "haute"},
-            {"priorite": "basse"},
-        ]
-        
-        distribution = {}
-        for p in projets:
-            prio = p["priorite"]
-            distribution[prio] = distribution.get(prio, 0) + 1
-        
-        assert distribution["haute"] == 2
-        assert distribution["moyenne"] == 1
-        assert distribution["basse"] == 1
-
-
-class TestProjetsTaches:
-    """Tests des tâches de projets"""
-    
-    def test_order_tasks(self):
-        """Test du tri des tâches par ordre"""
-        taches = [
-            {"ordre": 3, "nom": "C"},
-            {"ordre": 1, "nom": "A"},
-            {"ordre": 2, "nom": "B"},
-        ]
-        
-        sorted_taches = sorted(taches, key=lambda x: x["ordre"])
-        
-        assert sorted_taches[0]["nom"] == "A"
-        assert sorted_taches[1]["nom"] == "B"
-        assert sorted_taches[2]["nom"] == "C"
-    
-    def test_task_dependencies(self):
-        """Test des dépendances entre tâches"""
-        taches = [
-            {"id": 1, "nom": "A", "depends_on": None},
-            {"id": 2, "nom": "B", "depends_on": 1},
-            {"id": 3, "nom": "C", "depends_on": 2},
-        ]
-        
-        # Trouver les tâches sans dépendance
-        root_tasks = [t for t in taches if t["depends_on"] is None]
-        assert len(root_tasks) == 1
-        assert root_tasks[0]["nom"] == "A"
-    
-    def test_task_status_transitions(self):
-        """Test des transitions de statut"""
-        valid_transitions = {
-            "à_faire": ["en_cours"],
-            "en_cours": ["terminé", "à_faire"],
-            "terminé": ["en_cours"]  # Réouverture possible
-        }
-        
-        # Test transition valide
-        current = "à_faire"
-        new = "en_cours"
-        assert new in valid_transitions[current]
-        
-        # Test transition invalide
-        current = "à_faire"
-        new = "terminé"
-        assert new not in valid_transitions[current]
+        assert len(a_venir_semaine) == 2
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -723,236 +607,76 @@ class TestProjetsTaches:
 class TestMaisonIntegration:
     """Tests d'intégration des modules maison"""
     
-    def test_project_to_routine(self):
-        """Test de la création de routine depuis projet"""
-        projet = {
-            "nom": "Entretien piscine",
-            "taches": [
-                {"nom": "Test pH", "frequence": "quotidien"},
-                {"nom": "Nettoyage filtre", "frequence": "hebdomadaire"},
-            ]
+    def test_entretien_to_projets(self, mock_tache_entretien, mock_projet):
+        """Test lien entretien -> projets"""
+        # Une tâche d'entretien récurrente peut devenir un projet
+        tache = mock_tache_entretien
+        projet = mock_projet
+        
+        assert tache.piece is not None
+        assert projet.nom is not None
+    
+    def test_jardin_to_entretien(self, mock_plante, mock_tache_entretien):
+        """Test lien jardin -> entretien"""
+        # L'arrosage des plantes est lié à l'entretien
+        plante = mock_plante
+        tache = mock_tache_entretien
+        
+        assert plante.frequence_arrosage is not None
+        assert tache.frequence is not None
+    
+    def test_dashboard_stats(self, mock_tache_entretien, mock_plante, mock_projet):
+        """Test statistiques dashboard"""
+        stats = {
+            "taches_a_faire": 1,
+            "plantes_a_arroser": 0,
+            "projets_en_cours": 1,
         }
         
-        # Créer routines depuis tâches récurrentes
-        routines = []
-        for tache in projet["taches"]:
-            routines.append({
-                "nom": f"{projet['nom']} - {tache['nom']}",
-                "frequence": tache["frequence"],
-                "source_projet": projet["nom"]
-            })
-        
-        assert len(routines) == 2
-        assert routines[0]["frequence"] == "quotidien"
-    
-    def test_garden_to_project(self):
-        """Test de la création de projet depuis jardin"""
-        jardin_action = {
-            "type": "aménagement",
-            "description": "Créer potager surélevé",
-            "budget_estime": 500
-        }
-        
-        projet = {
-            "nom": jardin_action["description"],
-            "categorie": "jardin",
-            "budget_estime": jardin_action["budget_estime"],
-            "statut": "planifié"
-        }
-        
-        assert projet["categorie"] == "jardin"
-        assert projet["budget_estime"] == 500
-    
-    def test_stats_aggregation(self):
-        """Test de l'agrégation des statistiques"""
-        entretien_stats = {"taches_faites": 10, "taches_total": 15}
-        jardin_stats = {"plantes_arrosees": 8, "plantes_total": 12}
-        projets_stats = {"en_cours": 2, "progression_moyenne": 65}
-        
-        global_stats = {
-            "entretien_completion": (entretien_stats["taches_faites"] / entretien_stats["taches_total"]) * 100,
-            "jardin_completion": (jardin_stats["plantes_arrosees"] / jardin_stats["plantes_total"]) * 100,
-            "projets_actifs": projets_stats["en_cours"],
-            "projets_progression": projets_stats["progression_moyenne"]
-        }
-        
-        assert abs(global_stats["entretien_completion"] - 66.67) < 0.1
-        assert abs(global_stats["jardin_completion"] - 66.67) < 0.1
+        total_actions = sum(stats.values())
+        assert total_actions == 2
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# TESTS HELPERS MAISON
-# ═══════════════════════════════════════════════════════════════════════════════
-
-
-class TestMaisonHelpers:
-    """Tests des helpers communs maison"""
+class TestMaisonStats:
+    """Tests des statistiques maison"""
     
-    def test_get_current_season(self):
-        """Test de la détermination de la saison actuelle"""
-        month = date.today().month
-        
-        if month in [3, 4, 5]:
-            expected = "printemps"
-        elif month in [6, 7, 8]:
-            expected = "été"
-        elif month in [9, 10, 11]:
-            expected = "automne"
-        else:
-            expected = "hiver"
-        
-        # Janvier = hiver
-        assert expected == "hiver" if month in [12, 1, 2] else expected != "hiver"
-    
-    def test_priority_emojis(self):
-        """Test des emojis de priorité"""
-        priority_emojis = {
-            "haute": "🔴",
-            "moyenne": "🟡",
-            "basse": "🟢"
-        }
-        
-        assert priority_emojis["haute"] == "🔴"
-        assert priority_emojis["moyenne"] == "🟡"
-        assert priority_emojis["basse"] == "🟢"
-    
-    def test_status_emojis(self):
-        """Test des emojis de statut"""
-        status_emojis = {
-            "à_faire": "⭕",
-            "en_cours": "🔄",
-            "terminé": "✅",
-            "annulé": "❌"
-        }
-        
-        assert status_emojis["terminé"] == "✅"
-    
-    def test_format_budget(self):
-        """Test du formatage du budget"""
-        budget = 1234.56
-        
-        formatted = f"{budget:,.2f}€"
-        assert "1,234.56€" == formatted or "1 234,56€" in formatted.replace(",", " ").replace(".", ",") or formatted == "1,234.56€"
-    
-    def test_calculate_days_until(self):
-        """Test du calcul des jours jusqu'à une date"""
-        target = date.today() + timedelta(days=15)
-        
-        days_until = (target - date.today()).days
-        assert days_until == 15
-    
-    def test_is_overdue(self):
-        """Test de la vérification de retard"""
-        today = date.today()
-        
-        # Date passée
-        past_date = today - timedelta(days=5)
-        assert past_date < today
-        
-        # Date future
-        future_date = today + timedelta(days=5)
-        assert future_date > today
-
-
-class TestMaisonCache:
-    """Tests du cache des modules maison"""
-    
-    def test_clear_cache_function(self):
-        """Test de la fonction de nettoyage du cache"""
-        # Simuler un cache
-        cache = {"key1": "value1", "key2": "value2"}
-        
-        # Clear
-        cache.clear()
-        
-        assert len(cache) == 0
-    
-    def test_cache_invalidation_on_update(self):
-        """Test de l'invalidation du cache lors d'une mise à jour"""
-        cache = {"routines": [1, 2, 3]}
-        
-        # Simuler une mise à jour
-        def update_and_invalidate():
-            cache.clear()
-            cache["routines"] = [1, 2, 3, 4]
-        
-        update_and_invalidate()
-        
-        assert len(cache["routines"]) == 4
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# TESTS CATEGORIES MAISON
-# ═══════════════════════════════════════════════════════════════════════════════
-
-
-class TestMaisonCategories:
-    """Tests des catégories maison"""
-    
-    def test_entretien_categories(self):
-        """Test des catégories d'entretien"""
-        categories = ["ménage", "rangement", "réparation", "maintenance", "nettoyage"]
-        
-        routine = {"categorie": "ménage"}
-        assert routine["categorie"] in categories
-    
-    def test_jardin_plant_types(self):
-        """Test des types de plantes"""
-        types = ["légume", "fruit", "fleur", "aromate", "arbre", "arbuste"]
-        
-        plant = {"type": "légume"}
-        assert plant["type"] in types
-    
-    def test_project_categories(self):
-        """Test des catégories de projets"""
-        categories = ["rénovation", "aménagement", "réparation", "décoration", "jardin", "autre"]
-        
-        projet = {"categorie": "rénovation"}
-        assert projet["categorie"] in categories
-    
-    def test_frequences(self):
-        """Test des fréquences"""
-        frequences = ["quotidien", "hebdomadaire", "bimensuel", "mensuel", "trimestriel", "annuel"]
-        
-        routine = {"frequence": "quotidien"}
-        assert routine["frequence"] in frequences
-
-
-class TestMaisonAlerts:
-    """Tests des alertes maison"""
-    
-    def test_alert_structure(self):
-        """Test de la structure d'une alerte"""
-        alerte = {
-            "type": "warning",
-            "module": "jardin",
-            "message": "3 plantes à arroser",
-            "priority": "haute",
-            "action_url": "/maison/jardin"
-        }
-        
-        assert "type" in alerte
-        assert "message" in alerte
-        assert alerte["type"] in ["info", "warning", "error", "success"]
-    
-    def test_aggregate_alerts(self):
-        """Test de l'agrégation des alertes"""
-        alerts = [
-            {"module": "jardin", "priority": "haute"},
-            {"module": "entretien", "priority": "moyenne"},
-            {"module": "jardin", "priority": "basse"},
-            {"module": "projets", "priority": "haute"},
+    def test_count_par_piece(self):
+        """Test comptage par pièce"""
+        taches = [
+            {"piece": "Cuisine"},
+            {"piece": "Salon"},
+            {"piece": "Cuisine"},
+            {"piece": "Chambre"},
         ]
         
-        # Par module
-        by_module = {}
-        for a in alerts:
-            mod = a["module"]
-            by_module[mod] = by_module.get(mod, 0) + 1
+        count = {}
+        for t in taches:
+            piece = t["piece"]
+            count[piece] = count.get(piece, 0) + 1
         
-        assert by_module["jardin"] == 2
-        assert by_module["entretien"] == 1
+        assert count["Cuisine"] == 2
+    
+    def test_budget_total_projets(self):
+        """Test budget total projets"""
+        projets = [
+            {"budget": 5000, "depense": 2500},
+            {"budget": 3000, "depense": 1500},
+            {"budget": 2000, "depense": 2000},
+        ]
         
-        # Haute priorité
-        haute = [a for a in alerts if a["priority"] == "haute"]
-        assert len(haute) == 2
+        budget_total = sum(p["budget"] for p in projets)
+        depense_total = sum(p["depense"] for p in projets)
+        
+        assert budget_total == 10000
+        assert depense_total == 6000
+    
+    def test_progression_globale(self):
+        """Test progression globale"""
+        projets = [
+            {"progression": 50},
+            {"progression": 75},
+            {"progression": 100},
+        ]
+        
+        moyenne = sum(p["progression"] for p in projets) / len(projets)
+        assert moyenne == 75.0

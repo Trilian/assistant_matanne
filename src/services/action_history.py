@@ -84,8 +84,7 @@ class ActionEntry(BaseModel):
     user_agent: str | None = None
     created_at: datetime = Field(default_factory=datetime.now)
     
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
 class ActionFilter(BaseModel):

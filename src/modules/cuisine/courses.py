@@ -21,29 +21,27 @@ from src.services.realtime_sync import get_realtime_sync_service
 from src.core.errors_base import ErreurValidation
 from src.core.database import obtenir_contexte_db
 
+# Import du module logique métier séparé
+from src.modules.cuisine.courses_logic import (
+    PRIORITY_EMOJIS,
+    PRIORITY_ORDER,
+    RAYONS_DEFAULT,
+    filtrer_par_priorite,
+    trier_par_priorite,
+    grouper_par_rayon,
+    calculer_statistiques,
+    valider_article,
+    formater_article_label,
+    deduper_suggestions,
+    analyser_historique,
+)
+
 logger = logging.getLogger(__name__)
 
 # ═══════════════════════════════════════════════════════════
-# CONSTANTES & HELPERS
+# CONSTANTES (réexportées depuis courses_logic)
 # ═══════════════════════════════════════════════════════════
-
-PRIORITY_EMOJIS = {
-    "haute": "🔴",
-    "moyenne": "🟡",
-    "basse": "🟢"
-}
-
-RAYONS_DEFAULT = [
-    "Fruits & Légumes",
-    "Laitier",
-    "Boulangerie",
-    "Viandes",
-    "Poissons",
-    "Surgelés",
-    "Épices",
-    "Boissons",
-    "Autre"
-]
+# Note: PRIORITY_EMOJIS et RAYONS_DEFAULT sont importés depuis courses_logic
 
 
 def app():

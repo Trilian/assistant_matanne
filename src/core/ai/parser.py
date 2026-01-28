@@ -49,7 +49,7 @@ class AnalyseurIA:
         # Stratégie 1: Parse direct
         try:
             nettoye = AnalyseurIA._nettoyer_basique(reponse)
-            result = modele.parse_raw(nettoye)
+            result = modele.model_validate_json(nettoye)
             logger.info(f"✅ Stratégie 1 (parse direct) réussie pour {modele.__name__}")
             return result
         except (ValidationError, json.JSONDecodeError) as e:
@@ -59,7 +59,7 @@ class AnalyseurIA:
         # Stratégie 2: Extraction JSON
         try:
             json_str = AnalyseurIA._extraire_objet_json(reponse)
-            result = modele.parse_raw(json_str)
+            result = modele.model_validate_json(json_str)
             logger.info(f"✅ Stratégie 2 (extraction JSON) réussie pour {modele.__name__}")
             return result
         except (ValidationError, json.JSONDecodeError, ValueError) as e:
@@ -171,7 +171,7 @@ class AnalyseurIA:
     def _analyser_partiel(texte: str, modele: type[BaseModel]) -> dict | None:
         """Parse partiel si JSON cassé"""
         try:
-            champs_modele = modele.__fields__.keys()
+            champs_modele = modele.model_fields.keys()
             resultat = {}
 
             for champ in champs_modele:

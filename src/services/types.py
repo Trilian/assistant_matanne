@@ -70,7 +70,7 @@ class BaseService(Generic[T]):
             if cached:
                 return cached
 
-            entity = session.query(self.model).get(entity_id)
+            entity = session.get(self.model, entity_id)
             if entity:
                 Cache.definir(cache_key, entity, ttl=self.cache_ttl)
             return entity
@@ -107,7 +107,7 @@ class BaseService(Generic[T]):
 
         @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=None)
         def _execute(session: Session) -> T | None:
-            entity = session.query(self.model).get(entity_id)
+            entity = session.get(self.model, entity_id)
             if not entity:
                 raise ErreurNonTrouve(f"{self.model_name} {entity_id} non trouvé")
             for key, value in data.items():
