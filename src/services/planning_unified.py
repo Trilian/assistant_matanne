@@ -450,7 +450,7 @@ class PlanningAIService(BaseService[CalendarEvent], BaseAIService, PlanningAIMix
 
     def _calculer_budget_jour(self, activites: list[dict], projets: list[dict]) -> float:
         """Calcule budget estimé du jour"""
-        return sum(a.get("budget", 0) for a in activites)
+        return sum(a.get("budget") or 0 for a in activites)
 
     def _calculer_stats_semaine(self, jours: dict[str, JourCompletSchema]) -> dict:
         """Calcule stats globales semaine"""
@@ -585,12 +585,11 @@ class PlanningAIService(BaseService[CalendarEvent], BaseAIService, PlanningAIMix
 
     def _invalider_cache_semaine(self, date_jour: date) -> None:
         """Invalide cache pour la semaine contenant date_jour"""
-        cache = Cache()
         # Trouver début semaine (lundi)
         debut_semaine = date_jour - timedelta(days=date_jour.weekday())
-        cache.nettoyer(f"semaine_complete_{debut_semaine.isoformat()}")
-        cache.nettoyer(f"semaine_ia_{debut_semaine.isoformat()}")
-        logger.debug(f"🔄 Cache semaine invalié: {debut_semaine}")
+        Cache.invalider(pattern=f"semaine_complete_{debut_semaine.isoformat()}")
+        Cache.invalider(pattern=f"semaine_ia_{debut_semaine.isoformat()}")
+        logger.debug(f"🔄 Cache semaine invalidé: {debut_semaine}")
 
 
 # ═══════════════════════════════════════════════════════════
