@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from src.core.cache import Cache
 from src.core.database import obtenir_contexte_db
 from src.core.errors_base import ErreurNonTrouve
+from src.core.errors import gerer_erreurs
 from src.core.decorators import with_db_session
 
 logger = logging.getLogger(__name__)
