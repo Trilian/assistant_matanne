@@ -1,26 +1,29 @@
 # 🗺️ ROADMAP - Assistant Matanne
 
-> Dernière mise à jour: 26 janvier 2026
+> Dernière mise à jour: 28 janvier 2026
 
 ---
 
-## ✅ Terminé (Session 26 janvier)
+## ✅ Terminé (Session 28 janvier)
 
-### Modèles & Base de données
-- [x] Créer modèles SQLAlchemy pour nouvelles tables (`nouveaux.py`)
-- [x] Mettre à jour `FamilyBudget` (ajout `magasin`, `est_recurrent`)
-- [x] Corriger `budget.py` attributs manquants
-- [x] Corriger `pdf_export.py` relation `Recette.ingredients`
-- [x] Générer script SQL complet (`SUPABASE_COMPLET_V3.sql`)
+### Tests & Couverture
+- [x] Créer 11 fichiers de tests pour modules 0% couverture (~315 tests)
+- [x] Corriger tests alignés avec vraie structure services
+- [x] Corriger bug Pydantic v2 dans `budget.py` (`date: date` → `date_type`)
+- [x] Couverture passée de 26% à **28.32%** (+1.80%)
+- [x] Tests: **1491 passés**, 37 skippés, 1 échec mineur (TTL cache)
 
-### Documentation
-- [x] Nettoyer 52 fichiers .md obsolètes
-- [x] Créer `README.md` unifié
-- [x] Créer `docs/ARCHITECTURE.md`
+### Session 26 janvier
+- [x] Modèles SQLAlchemy pour nouvelles tables (`nouveaux.py`)
+- [x] Mise à jour `FamilyBudget` (ajout `magasin`, `est_recurrent`)
+- [x] Correction `budget.py` attributs manquants
+- [x] Script SQL complet (`SUPABASE_COMPLET_V3.sql`)
+- [x] Nettoyage 52 fichiers .md obsolètes
+- [x] Création `README.md` unifié + `docs/ARCHITECTURE.md`
 
 ---
 
-## 🔴 À faire demain (27 janvier) - PRIORITÉ HAUTE
+## 🔴 À faire - PRIORITÉ HAUTE
 
 ### 1. Configuration & Secrets (1-2h)
 
@@ -96,18 +99,27 @@ def sauvegarder_alerte(alerte: dict, db: Session):
 
 ## 🟡 À faire cette semaine - PRIORITÉ MOYENNE
 
-### 4. Tests (2-3h)
+### 4. Tests - PARTIELLEMENT TERMINÉ ✅
 
 ```bash
 # Objectif: passer de ~40% à 70% couverture
+# Actuel: 28.32% (amélioration significative)
 python manage.py test_coverage
 ```
 
-**Fichiers tests à compléter:**
-- [ ] `tests/test_budget.py` - Tester nouveau modèle Depense
-- [ ] `tests/test_weather.py` - Créer fichier
-- [ ] `tests/test_backup.py` - Créer fichier
-- [ ] `tests/test_nouveaux_models.py` - Tester tous les nouveaux modèles
+**Fichiers tests créés:**
+- [x] `tests/test_budget.py` - 26 tests pour modèles Depense
+- [x] `tests/test_notifications.py` - 20 tests
+- [x] `tests/test_predictions.py` - 24 tests
+- [x] `tests/test_action_history.py` - 24 tests
+- [x] `tests/test_suggestions_ia.py` - 16 tests
+- [x] `tests/test_recipe_import.py` - 36 tests
+- [x] `tests/test_redis_multi_tenant.py` - 22 tests
+
+**Fichiers tests à créer:**
+- [ ] `tests/test_weather.py` - Service météo
+- [ ] `tests/test_backup.py` - Service backup
+- [ ] `tests/test_calendar_sync.py` - Sync calendrier
 
 ### 5. Migration Alembic (1h)
 
@@ -155,25 +167,26 @@ streamlit run src/app.py
 
 ## 📊 Métriques projet
 
-| Métrique | Actuel | Objectif |
-|----------|--------|----------|
-| Couverture tests | ~40% | 70% |
-| Temps démarrage | ~2s | <1.5s |
-| Tables SQL | 35 | ✅ |
-| Services | 25 | ✅ |
-| Fichiers .md | 3 | ✅ (était 52) |
+| Métrique | Actuel | Objectif | Status |
+|----------|--------|----------|--------|
+| Couverture tests | **28.32%** | 70% | 🟡 En cours |
+| Tests passés | **1491** | 2000+ | 🟢 |
+| Temps démarrage | ~2s | <1.5s | 🟡 |
+| Tables SQL | 35 | ✅ | ✅ |
+| Services | 25 | ✅ | ✅ |
+| Fichiers .md | 3 | ✅ | ✅ (était 52) |
 
 ---
 
-## 🔧 Checklist rapide demain matin
+## 🔧 Prochaines actions recommandées
 
 ```
-□ Créer .env.example
-□ Générer VAPID keys
+✅ .env.example existe déjà (complet)
+□ Générer VAPID keys: npx web-push generate-vapid-keys
 □ Déployer SUPABASE_COMPLET_V3.sql
-□ Tester streamlit run src/app.py
-□ Vérifier logs pour erreurs
-□ Commiter les changements
+□ Migrer services vers nouveaux modèles DB
+□ Créer tests pour weather, backup, calendar_sync
+□ Viser 40% couverture (+12%)
 ```
 
 ---

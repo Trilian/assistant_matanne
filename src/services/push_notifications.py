@@ -13,13 +13,22 @@ Fonctionnalités:
 
 import json
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from enum import Enum
 from typing import Any
+from uuid import UUID
 
 import streamlit as st
 import streamlit.components.v1 as components
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
+
+from src.core.database import obtenir_contexte_db
+from src.core.decorators import with_db_session
+from src.core.models import (
+    PushSubscription as PushSubscriptionModel,
+    NotificationPreference as NotificationPreferenceModel,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -595,6 +604,177 @@ class PushNotificationService:
             logger.debug(f"Préférences sauvegardées pour {preferences.user_id}")
         except Exception as e:
             logger.error(f"Erreur sauvegarde préférences: {e}")
+
+    # ═══════════════════════════════════════════════════════════
+    # PERSISTANCE SQLALCHEMY (ALTERNATIVE)
+    # ═══════════════════════════════════════════════════════════
+
+    @with_db_session
+    def sauvegarder_abonnement_db(
+        self,
+        user_id: UUID | str,
+        endpoint: str,
+        p256dh_key: str,
+        auth_key: str,
+        device_info: dict | None = None,
+        db: Session = None,
+    ) -> PushSubscriptionModel:
+        """
+        Sauvegarde un abonnement push via SQLAlchemy.
+        
+        Args:
+            user_id: UUID de l'utilisateur
+            endpoint: URL de l'endpoint push
+            p256dh_key: Clé p256dh
+            auth_key: Clé d'authentification
+            device_info: Infos appareil (optionnel)
+            db: Session SQLAlchemy
+            
+        Returns:
+            Modèle PushSubscription créé
+        """
+        # Vérifier si l'endpoint existe déjà
+        existing = db.query(PushSubscriptionModel).filter(
+            PushSubscriptionModel.endpoint == endpoint
+        ).first()
+        
+        if existing:
+            existing.p256dh_key = p256dh_key
+            existing.auth_key = auth_key
+            existing.device_info = device_info or {}
+            existing.last_used = datetime.now()
+            db.commit()
+            db.refresh(existing)
+            return existing
+        
+        subscription = PushSubscriptionModel(
+            endpoint=endpoint,
+            p256dh_key=p256dh_key,
+            auth_key=auth_key,
+            device_info=device_info or {},
+            user_id=UUID(str(user_id)),
+        )
+        db.add(subscription)
+        db.commit()
+        db.refresh(subscription)
+        return subscription
+
+    @with_db_session
+    def lister_abonnements_utilisateur(
+        self,
+        user_id: UUID | str,
+        db: Session = None,
+    ) -> list[PushSubscriptionModel]:
+        """
+        Liste les abonnements push d'un utilisateur.
+        
+        Args:
+            user_id: UUID de l'utilisateur
+            db: Session SQLAlchemy
+            
+        Returns:
+            Liste des abonnements
+        """
+        return db.query(PushSubscriptionModel).filter(
+            PushSubscriptionModel.user_id == UUID(str(user_id))
+        ).all()
+
+    @with_db_session
+    def supprimer_abonnement_db(
+        self,
+        endpoint: str,
+        db: Session = None,
+    ) -> bool:
+        """
+        Supprime un abonnement par endpoint.
+        
+        Args:
+            endpoint: URL de l'endpoint
+            db: Session SQLAlchemy
+            
+        Returns:
+            True si supprimé
+        """
+        subscription = db.query(PushSubscriptionModel).filter(
+            PushSubscriptionModel.endpoint == endpoint
+        ).first()
+        if subscription:
+            db.delete(subscription)
+            db.commit()
+            return True
+        return False
+
+    @with_db_session
+    def obtenir_preferences_db(
+        self,
+        user_id: UUID | str,
+        db: Session = None,
+    ) -> NotificationPreferenceModel | None:
+        """
+        Récupère les préférences de notification depuis DB.
+        
+        Args:
+            user_id: UUID de l'utilisateur
+            db: Session SQLAlchemy
+            
+        Returns:
+            Préférences ou None
+        """
+        return db.query(NotificationPreferenceModel).filter(
+            NotificationPreferenceModel.user_id == UUID(str(user_id))
+        ).first()
+
+    @with_db_session
+    def sauvegarder_preferences_db(
+        self,
+        user_id: UUID | str,
+        courses_rappel: bool = True,
+        repas_suggestion: bool = True,
+        stock_alerte: bool = True,
+        meteo_alerte: bool = True,
+        budget_alerte: bool = True,
+        quiet_hours_start: time | None = None,
+        quiet_hours_end: time | None = None,
+        db: Session = None,
+    ) -> NotificationPreferenceModel:
+        """
+        Crée ou met à jour les préférences de notification.
+        
+        Args:
+            user_id: UUID de l'utilisateur
+            courses_rappel: Rappels courses
+            repas_suggestion: Suggestions repas
+            stock_alerte: Alertes stock
+            meteo_alerte: Alertes météo
+            budget_alerte: Alertes budget
+            quiet_hours_start: Début heures silencieuses
+            quiet_hours_end: Fin heures silencieuses
+            db: Session SQLAlchemy
+            
+        Returns:
+            Préférences créées/mises à jour
+        """
+        prefs = db.query(NotificationPreferenceModel).filter(
+            NotificationPreferenceModel.user_id == UUID(str(user_id))
+        ).first()
+        
+        if not prefs:
+            prefs = NotificationPreferenceModel(user_id=UUID(str(user_id)))
+            db.add(prefs)
+        
+        prefs.courses_rappel = courses_rappel
+        prefs.repas_suggestion = repas_suggestion
+        prefs.stock_alerte = stock_alerte
+        prefs.meteo_alerte = meteo_alerte
+        prefs.budget_alerte = budget_alerte
+        if quiet_hours_start:
+            prefs.quiet_hours_start = quiet_hours_start
+        if quiet_hours_end:
+            prefs.quiet_hours_end = quiet_hours_end
+        
+        db.commit()
+        db.refresh(prefs)
+        return prefs
 
 
 # ═══════════════════════════════════════════════════════════

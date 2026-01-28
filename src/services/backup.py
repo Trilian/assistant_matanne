@@ -18,6 +18,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Literal
 from dataclasses import dataclass, field
+from uuid import UUID
 
 import streamlit as st
 from pydantic import BaseModel, Field
@@ -50,6 +51,7 @@ from src.core.models import (
     GardenItem,
     GardenLog,
     CalendarEvent,
+    Backup as BackupModel,  # Modèle DB pour historique
 )
 
 logger = logging.getLogger(__name__)
@@ -592,6 +594,100 @@ class BackupService:
         except Exception as e:
             logger.error(f"Erreur téléchargement Supabase: {e}")
             return None
+
+    # ═══════════════════════════════════════════════════════════
+    # PERSISTANCE BASE DE DONNÉES (HISTORIQUE)
+    # ═══════════════════════════════════════════════════════════
+
+    @with_db_session
+    def enregistrer_backup_historique(
+        self,
+        metadata: BackupMetadata,
+        storage_path: str | None = None,
+        user_id: UUID | str | None = None,
+        db: Session = None,
+    ) -> BackupModel | None:
+        """
+        Enregistre un backup dans l'historique de la base de données.
+        
+        Args:
+            metadata: Métadonnées du backup
+            storage_path: Chemin Supabase Storage (optionnel)
+            user_id: UUID de l'utilisateur
+            db: Session SQLAlchemy
+            
+        Returns:
+            Modèle Backup créé
+        """
+        try:
+            db_backup = BackupModel(
+                filename=f"backup_{metadata.id}.json" + (".gz" if metadata.compressed else ""),
+                tables_included=[],  # Sera rempli si disponible
+                row_counts={},
+                size_bytes=metadata.file_size_bytes,
+                compressed=metadata.compressed,
+                storage_path=storage_path,
+                version=metadata.version,
+                user_id=UUID(str(user_id)) if user_id else None,
+            )
+            db.add(db_backup)
+            db.commit()
+            db.refresh(db_backup)
+            logger.info(f"Backup enregistré dans historique: {db_backup.id}")
+            return db_backup
+        except Exception as e:
+            logger.error(f"Erreur enregistrement backup historique: {e}")
+            db.rollback()
+            return None
+
+    @with_db_session
+    def lister_backups_historique(
+        self,
+        user_id: UUID | str | None = None,
+        limit: int = 20,
+        db: Session = None,
+    ) -> list[BackupModel]:
+        """
+        Liste les backups depuis l'historique DB.
+        
+        Args:
+            user_id: UUID de l'utilisateur (filtre optionnel)
+            limit: Nombre max de résultats
+            db: Session SQLAlchemy
+            
+        Returns:
+            Liste des backups
+        """
+        query = db.query(BackupModel)
+        
+        if user_id:
+            query = query.filter(BackupModel.user_id == UUID(str(user_id)))
+        
+        return query.order_by(BackupModel.created_at.desc()).limit(limit).all()
+
+    @with_db_session
+    def supprimer_backup_historique(
+        self,
+        backup_id: int,
+        db: Session = None,
+    ) -> bool:
+        """
+        Supprime un backup de l'historique.
+        
+        Args:
+            backup_id: ID du backup
+            db: Session SQLAlchemy
+            
+        Returns:
+            True si succès
+        """
+        backup = db.query(BackupModel).filter(BackupModel.id == backup_id).first()
+        if backup:
+            db.delete(backup)
+            db.commit()
+            logger.info(f"Backup supprimé de l'historique: {backup_id}")
+            return True
+        return False
 
 
 # ═══════════════════════════════════════════════════════════

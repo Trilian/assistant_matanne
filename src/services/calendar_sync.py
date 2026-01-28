@@ -13,14 +13,24 @@ import logging
 from datetime import datetime, date, timedelta
 from enum import Enum
 from typing import Any
-from uuid import uuid4
+from uuid import uuid4, UUID
 
 import httpx
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
-from src.core.decorators import with_error_handling
+from src.core.decorators import with_error_handling, with_db_session
 from src.core.database import obtenir_contexte_db
-from src.core.models import CalendarEvent, Planning, Repas, FamilyActivity
+from src.core.models import (
+    CalendarEvent,
+    Planning,
+    Repas,
+    FamilyActivity,
+    CalendrierExterne,
+    EvenementCalendrier,
+    CalendarProvider as CalendarProviderEnum,
+    SyncDirection as SyncDirectionEnum,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -719,17 +729,202 @@ class CalendarSyncService:
         return count
     
     # ═══════════════════════════════════════════════════════════
-    # PERSISTANCE
+    # PERSISTANCE BASE DE DONNÉES
     # ═══════════════════════════════════════════════════════════
     
     def _save_config_to_db(self, config: ExternalCalendarConfig):
         """Sauvegarde la configuration en base."""
-        # Implémentation avec Supabase ou SQLAlchemy
-        pass
+        with obtenir_contexte_db() as db:
+            # Chercher config existante
+            existing = db.query(CalendrierExterne).filter(
+                CalendrierExterne.id == int(config.id) if config.id.isdigit() else False
+            ).first()
+            
+            if existing:
+                existing.provider = config.provider.value
+                existing.nom = config.name
+                existing.url = config.ical_url
+                existing.credentials = {
+                    "access_token": config.access_token,
+                    "refresh_token": config.refresh_token,
+                    "token_expiry": config.token_expiry.isoformat() if config.token_expiry else None,
+                }
+                existing.enabled = config.is_active
+                existing.sync_direction = config.sync_direction.value
+                existing.last_sync = config.last_sync
+            else:
+                db_config = CalendrierExterne(
+                    provider=config.provider.value,
+                    nom=config.name,
+                    url=config.ical_url,
+                    credentials={
+                        "access_token": config.access_token,
+                        "refresh_token": config.refresh_token,
+                        "token_expiry": config.token_expiry.isoformat() if config.token_expiry else None,
+                    },
+                    enabled=config.is_active,
+                    sync_direction=config.sync_direction.value,
+                    user_id=UUID(config.user_id) if config.user_id else None,
+                )
+                db.add(db_config)
+            
+            db.commit()
     
     def _remove_config_from_db(self, calendar_id: str):
         """Supprime la configuration de la base."""
-        pass
+        with obtenir_contexte_db() as db:
+            if calendar_id.isdigit():
+                config = db.query(CalendrierExterne).filter(
+                    CalendrierExterne.id == int(calendar_id)
+                ).first()
+                if config:
+                    db.delete(config)
+                    db.commit()
+
+    @with_db_session
+    def ajouter_calendrier_externe(
+        self,
+        user_id: UUID | str,
+        provider: str,
+        nom: str,
+        url: str | None = None,
+        credentials: dict | None = None,
+        db: Session = None,
+    ) -> CalendrierExterne:
+        """
+        Ajoute un calendrier externe dans la DB.
+        
+        Args:
+            user_id: UUID de l'utilisateur
+            provider: google, apple, outlook, ical
+            nom: Nom du calendrier
+            url: URL iCal (optionnel)
+            credentials: Tokens OAuth (optionnel)
+            db: Session SQLAlchemy
+            
+        Returns:
+            Calendrier créé
+        """
+        calendrier = CalendrierExterne(
+            provider=provider,
+            nom=nom,
+            url=url,
+            credentials=credentials or {},
+            user_id=UUID(str(user_id)),
+        )
+        db.add(calendrier)
+        db.commit()
+        db.refresh(calendrier)
+        return calendrier
+
+    @with_db_session
+    def lister_calendriers_utilisateur(
+        self,
+        user_id: UUID | str,
+        db: Session = None,
+    ) -> list[CalendrierExterne]:
+        """
+        Liste les calendriers externes d'un utilisateur.
+        
+        Args:
+            user_id: UUID de l'utilisateur
+            db: Session SQLAlchemy
+            
+        Returns:
+            Liste des calendriers
+        """
+        return db.query(CalendrierExterne).filter(
+            CalendrierExterne.user_id == UUID(str(user_id)),
+            CalendrierExterne.enabled == True,
+        ).all()
+
+    @with_db_session
+    def sauvegarder_evenement_calendrier(
+        self,
+        calendrier_id: int,
+        event: CalendarEventExternal,
+        user_id: UUID | str | None = None,
+        db: Session = None,
+    ) -> EvenementCalendrier:
+        """
+        Sauvegarde un événement de calendrier externe.
+        
+        Args:
+            calendrier_id: ID du calendrier source
+            event: Événement Pydantic
+            user_id: UUID de l'utilisateur
+            db: Session SQLAlchemy
+            
+        Returns:
+            Événement créé
+        """
+        # Chercher si l'événement existe déjà
+        existing = db.query(EvenementCalendrier).filter(
+            EvenementCalendrier.uid == event.external_id,
+            EvenementCalendrier.user_id == UUID(str(user_id)) if user_id else True,
+        ).first()
+        
+        if existing:
+            existing.titre = event.title
+            existing.description = event.description
+            existing.date_debut = event.start_time
+            existing.date_fin = event.end_time
+            existing.lieu = event.location
+            existing.all_day = event.all_day
+            db.commit()
+            db.refresh(existing)
+            return existing
+        
+        db_event = EvenementCalendrier(
+            uid=event.external_id or str(uuid4()),
+            titre=event.title,
+            description=event.description,
+            date_debut=event.start_time,
+            date_fin=event.end_time,
+            lieu=event.location,
+            all_day=event.all_day,
+            source_calendrier_id=calendrier_id,
+            user_id=UUID(str(user_id)) if user_id else None,
+        )
+        db.add(db_event)
+        db.commit()
+        db.refresh(db_event)
+        return db_event
+
+    @with_db_session
+    def lister_evenements_calendrier(
+        self,
+        user_id: UUID | str,
+        date_debut: date | None = None,
+        date_fin: date | None = None,
+        calendrier_id: int | None = None,
+        db: Session = None,
+    ) -> list[EvenementCalendrier]:
+        """
+        Liste les événements de calendrier.
+        
+        Args:
+            user_id: UUID de l'utilisateur
+            date_debut: Date de début (filtre)
+            date_fin: Date de fin (filtre)
+            calendrier_id: ID du calendrier source (filtre)
+            db: Session SQLAlchemy
+            
+        Returns:
+            Liste des événements
+        """
+        query = db.query(EvenementCalendrier).filter(
+            EvenementCalendrier.user_id == UUID(str(user_id))
+        )
+        
+        if date_debut:
+            query = query.filter(EvenementCalendrier.date_debut >= datetime.combine(date_debut, datetime.min.time()))
+        if date_fin:
+            query = query.filter(EvenementCalendrier.date_debut <= datetime.combine(date_fin, datetime.max.time()))
+        if calendrier_id:
+            query = query.filter(EvenementCalendrier.source_calendrier_id == calendrier_id)
+        
+        return query.order_by(EvenementCalendrier.date_debut).all()
 
 
 # ═══════════════════════════════════════════════════════════

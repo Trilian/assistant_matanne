@@ -8,9 +8,10 @@ Migration 007 - Ajouter modèles pour module Famille refondé
 
 from sqlalchemy import (
     Column, Integer, String, Text, Date, DateTime, Float, Boolean,
-    ForeignKey, JSONB, CheckConstraint,
+    ForeignKey, CheckConstraint,
     create_engine, MetaData, Table
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from datetime import datetime
 
 # Migration basique: si les tables n'existent pas, on les crée via ORM
