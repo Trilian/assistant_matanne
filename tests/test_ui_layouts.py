@@ -153,6 +153,12 @@ class TestItemCard:
         """Test carte avec statut"""
         from src.ui.components.layouts import item_card
 
+        # Mock colonnes pour le layout avec statut
+        mock_col = MagicMock()
+        mock_col.__enter__ = MagicMock(return_value=None)
+        mock_col.__exit__ = MagicMock(return_value=None)
+        mock_streamlit.columns.return_value = [mock_col, mock_col]
+
         item_card(
             title="Test",
             metadata=["Info"],
@@ -190,6 +196,12 @@ class TestItemCard:
     def test_item_card_with_image(self, mock_streamlit):
         """Test carte avec image"""
         from src.ui.components.layouts import item_card
+
+        # Mock colonnes pour layout image + contenu
+        mock_col = MagicMock()
+        mock_col.__enter__ = MagicMock(return_value=None)
+        mock_col.__exit__ = MagicMock(return_value=None)
+        mock_streamlit.columns.return_value = [mock_col, mock_col]
 
         item_card(
             title="Test",

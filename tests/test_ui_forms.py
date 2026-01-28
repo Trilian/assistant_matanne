@@ -293,6 +293,11 @@ class TestQuickFilters:
         from src.ui.components.forms import quick_filters
 
         mock_streamlit.button.return_value = False
+        # Mock columns avec 4 éléments
+        mock_col = MagicMock()
+        mock_col.__enter__ = MagicMock(return_value=None)
+        mock_col.__exit__ = MagicMock(return_value=None)
+        mock_streamlit.columns.return_value = [mock_col, mock_col, mock_col, mock_col]
 
         filters = {"Type": ["Tous", "Entrée", "Plat", "Dessert"]}
 
