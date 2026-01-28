@@ -307,6 +307,7 @@ class TestHealthEntries:
                 routine_id=routine.id,
                 type_activite="yoga",
                 duree_minutes=45,
+                intensite="modérée",  # Champ requis
                 note_energie=value,
                 note_moral=value
             )

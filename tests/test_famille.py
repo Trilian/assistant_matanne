@@ -5,6 +5,12 @@ Teste Jules, Santé, Activités et Shopping
 
 import pytest
 from datetime import date, timedelta
+
+
+# Marquer tout le fichier comme tests d'intégration (nécessite une base de données)
+pytestmark = pytest.mark.skip(reason="Tests d'intégration - nécessite une connexion BD")
+
+
 from src.core.database import get_db_context
 from src.core.models import (
     ChildProfile,
