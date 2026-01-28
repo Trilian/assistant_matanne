@@ -379,6 +379,65 @@ def pytest_configure(config):
 # HELPER FIXTURES
 # ═══════════════════════════════════════════════════════════
 
+# ═══════════════════════════════════════════════════════════
+# STREAMLIT MOCK UTILITIES
+# ═══════════════════════════════════════════════════════════
+
+class SessionStateMock(dict):
+    """
+    Mock for Streamlit's session_state that supports both
+    attribute access (st.session_state.key) and 
+    dict access (st.session_state["key"]).
+    """
+    def __getattr__(self, key):
+        try:
+            return self[key]
+        except KeyError:
+            raise AttributeError(f"'{type(self).__name__}' object has no attribute '{key}'")
+    
+    def __setattr__(self, key, value):
+        self[key] = value
+    
+    def __delattr__(self, key):
+        try:
+            del self[key]
+        except KeyError:
+            raise AttributeError(f"'{type(self).__name__}' object has no attribute '{key}'")
+
+
+def create_streamlit_mock(session_state_data: dict = None):
+    """
+    Creates a configured Streamlit mock with SessionStateMock.
+    
+    Args:
+        session_state_data: Initial data for session_state
+        
+    Returns:
+        MagicMock configured for Streamlit testing
+    """
+    from unittest.mock import MagicMock
+    
+    mock_st = MagicMock()
+    mock_st.session_state = SessionStateMock(session_state_data or {})
+    
+    # Configure context managers for columns/tabs
+    def create_context_mock():
+        ctx = MagicMock()
+        ctx.__enter__ = MagicMock(return_value=ctx)
+        ctx.__exit__ = MagicMock(return_value=False)
+        return ctx
+    
+    # Default columns behavior
+    mock_st.columns = MagicMock(side_effect=lambda *args, **kwargs: 
+        [create_context_mock() for _ in range(args[0] if args and isinstance(args[0], int) else 2)])
+    
+    # Default tabs behavior  
+    mock_st.tabs = MagicMock(side_effect=lambda labels: 
+        [create_context_mock() for _ in labels])
+    
+    return mock_st
+
+
 @pytest.fixture(autouse=True)
 def clear_cache():
     """Clear cache before/after each test."""
