@@ -519,7 +519,7 @@ def render_suggestions_ia():
                                                 # Récupérer ingrédient
                                                 ing_nom = ing_obj.ingredient.nom if hasattr(ing_obj, 'ingredient') else ing_obj.nom
                                                 ing_quantite = ing_obj.quantite if hasattr(ing_obj, 'quantite') else 1
-                                                ing_unite = ing_data.get('unite', 'pièce')
+                                                ing_unite = ing_obj.ingredient.unite if hasattr(ing_obj, 'ingredient') and hasattr(ing_obj.ingredient, 'unite') else 'pièce'
                                                 
                                                 if not ing_nom:
                                                     continue

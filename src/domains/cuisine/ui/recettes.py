@@ -243,7 +243,11 @@ def render_liste():
                 
                 # Titre et infos compactes - HAUTEUR FIXE
                 difficulty_emoji = {"facile": "🟢", "moyen": "🟡", "difficile": "🔴"}.get(recette.difficulte, "⚫")
-                st.markdown(f"<h4 style='margin: 6px 0; line-height: 1.3; font-size: 15px; height: 2.6em; min-height: 2.6em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;'>{difficulty_emoji} {recette.nom}</h4>", unsafe_allow_html=True)
+                
+                # Échapper le nom pour éviter les problèmes d'encodage
+                import html
+                nom_echappé = html.escape(recette.nom, quote=True)
+                st.markdown(f"<h4 style='margin: 6px 0; line-height: 1.3; font-size: 15px; height: 2.6em; min-height: 2.6em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: break-word;'>{difficulty_emoji} {nom_echappé}</h4>", unsafe_allow_html=True)
                 
                 # Description sur hauteur fixe pour éviter décalage
                 if recette.description:

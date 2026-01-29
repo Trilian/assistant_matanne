@@ -153,7 +153,7 @@ def render_planning():
                                 if repas_db:
                                     repas_db.recette_id = recettes_dict[new_recette]
                                     db.commit()
-                                    st.success(f"êœ… Recette mise à jour")
+                                    st.success(f"✨ Recette mise à jour")
                                     st.rerun()
                             except Exception as e:
                                 st.error(f"❌ Erreur: {str(e)}")
@@ -189,7 +189,7 @@ def render_planning():
                         )
                         col_a, col_b = st.columns(2)
                         with col_a:
-                            if st.button("êœ… Sauvegarder", key=f"save_notes_{repas.id}"):
+                            if st.button("✨ Sauvegarder", key=f"save_notes_{repas.id}"):
                                 try:
                                     from src.core.models import Repas as RepasModel
                                     repas_db = db.query(RepasModel).filter_by(id=repas.id).first()
@@ -197,7 +197,7 @@ def render_planning():
                                         repas_db.notes = notes if notes else None
                                         db.commit()
                                         st.session_state[f"editing_notes_{repas.id}"] = False
-                                        st.success("êœ… Notes sauvegardées")
+                                        st.success("✨ Notes sauvegardées")
                                         st.rerun()
                                 except Exception as e:
                                     st.error(f"❌ Erreur: {str(e)}")
@@ -213,12 +213,12 @@ def render_planning():
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            if st.button("êœ… Marquer tout préparé", use_container_width=True):
+            if st.button("✨ Marquer tout préparé", use_container_width=True):
                 try:
                     from src.core.models import Repas as RepasModel
                     db.query(RepasModel).filter_by(planning_id=planning.id).update({"prepare": True})
                     db.commit()
-                    st.success("êœ… Tous les repas marqués comme préparés")
+                    st.success("✨ Tous les repas marqués comme préparés")
                     st.rerun()
                 except Exception as e:
                     st.error(f"❌ Erreur: {str(e)}")
@@ -255,7 +255,7 @@ def render_planning():
                         db.add(nouveau_repas)
                     
                     db.commit()
-                    st.success("êœ… Planning dupliqué pour la semaine suivante")
+                    st.success("✨ Planning dupliqué pour la semaine suivante")
                     st.rerun()
                 except Exception as e:
                     st.error(f"❌ Erreur: {str(e)}")
@@ -268,7 +268,7 @@ def render_planning():
                     if planning_db:
                         planning_db.actif = False
                         db.commit()
-                        st.success("êœ… Planning archivé")
+                        st.success("✨ Planning archivé")
                         st.rerun()
                 except Exception as e:
                     st.error(f"❌ Erreur: {str(e)}")
@@ -359,7 +359,7 @@ def render_generer():
                     )
                     
                     if planning:
-                        st.success("êœ… Planning généré avec succès!")
+                        st.success("✨ Planning généré avec succès!")
                         
                         # Afficher preview
                         st.subheader("ðŸ“‹ Aperçu du planning")
@@ -390,7 +390,7 @@ def render_generer():
                                 st.dataframe(df, use_container_width=True)
                         
                         st.divider()
-                        st.info("êœ… Planning sauvegardé en BD et prêt à utiliser!")
+                        st.info("✨ Planning sauvegardé en BD et prêt à utiliser!")
                         
                         if st.button("ðŸ“‹ Voir planning", use_container_width=True):
                             st.session_state.go_to_planning = True
@@ -483,7 +483,7 @@ def render_historique():
                         if planning_db:
                             planning_db.actif = True
                             db.commit()
-                            st.success("êœ… Planning chargé")
+                            st.success("✨ Planning chargé")
                             st.rerun()
                     except Exception as e:
                         st.error(f"❌ Erreur: {str(e)}")
@@ -493,7 +493,7 @@ def render_historique():
                     try:
                         db.query(PlanningModel).filter_by(id=planning.id).delete()
                         db.commit()
-                        st.success("êœ… Planning supprimé")
+                        st.success("✨ Planning supprimé")
                         st.rerun()
                     except Exception as e:
                         st.error(f"❌ Erreur: {str(e)}")

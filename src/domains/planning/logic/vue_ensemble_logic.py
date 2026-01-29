@@ -303,10 +303,10 @@ def calculer_statistiques_periode(items: List[Dict[str, Any]], periode: str = "S
 def formater_niveau_charge(niveau: str) -> str:
     """Formate le niveau de charge avec emoji."""
     emojis = {
-        "Libre": "ðŸ˜Œ",
-        "Léger": "ðŸ™‚",
-        "Moyen": "ðŸ˜",
-        "Ã‰levé": "ðŸ˜°",
+        "Libre": "😌",
+        "Léger": "🙂",
+        "Moyen": "😐",
+        "Ã‰levé": "😐°",
         "Très élevé": "ðŸ”¥"
     }
     emoji = emojis.get(niveau, "")

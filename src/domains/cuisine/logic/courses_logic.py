@@ -10,14 +10,14 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════════════════════════════
 # CONSTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════════════════════════════
 
 PRIORITY_EMOJIS = {
-    "haute": "ðŸ”´",
-    "moyenne": "ðŸŸ¡",
-    "basse": "ðŸŸ¢"
+    "haute": "[RED]",
+    "moyenne": "[YELLOW]",
+    "basse": "[GREEN]"
 }
 
 PRIORITY_ORDER = {"haute": 0, "moyenne": 1, "basse": 2}
@@ -29,15 +29,15 @@ RAYONS_DEFAULT = [
     "Viandes",
     "Poissons",
     "Surgelés",
-    "Ã‰pices",
+    "Épices",
     "Boissons",
     "Autre"
 ]
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════════════════════════════
 # FONCTIONS DE FILTRAGE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════════════════════════════
 
 def filtrer_par_priorite(articles: list[dict], priorite: str) -> list[dict]:
     """
@@ -125,9 +125,9 @@ def filtrer_articles(
     return result
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════════════════════
 # FONCTIONS DE TRI
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════════════════════
 
 def trier_par_priorite(articles: list[dict], reverse: bool = False) -> list[dict]:
     """
@@ -368,7 +368,7 @@ def formater_article_label(article: dict) -> str:
     Returns:
         Label formaté
     """
-    priorite_emoji = PRIORITY_EMOJIS.get(article.get("priorite", "moyenne"), "âšª")
+    priorite_emoji = PRIORITY_EMOJIS.get(article.get("priorite", "moyenne"), "[BLACK]")
     nom = article.get("ingredient_nom", "???")
     quantite = article.get("quantite_necessaire", 1)
     unite = article.get("unite", "")
@@ -376,10 +376,10 @@ def formater_article_label(article: dict) -> str:
     label = f"{priorite_emoji} {nom} ({quantite} {unite})"
     
     if article.get("notes"):
-        label += f" | ðŸ“ {article['notes']}"
+        label += f" | [NOTE] {article['notes']}"
     
     if article.get("suggere_par_ia"):
-        label += " âœ¨"
+        label += " [SPARKLE]"
     
     return label
 

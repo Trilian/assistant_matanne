@@ -167,9 +167,9 @@ def update_objectif_progression(objective_id: int, nouvelle_valeur: float):
 
 def app():
     """Interface principale du module Santé"""
-    st.title("ðŸ’ª Santé & Sport")
+    st.title("💪 Santé & Sport")
     
-    tabs = st.tabs(["ðŸƒ Routines", "ðŸŽ¯ Objectifs", "[CHART] Tracking", "ðŸŽ Nutrition"])
+    tabs = st.tabs(["🏃 Routines", "🎯 Objectifs", "[CHART] Tracking", "🍎 Nutrition"])
     
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TAB 1: ROUTINES
@@ -190,7 +190,7 @@ def app():
                             st.write(f"**{r['nom']}** ({r['type']})")
                             st.caption(f"{r['duree']} min | {r['frequence']} | {r['intensite']}")
                             if r.get('calories'):
-                                st.caption(f"ðŸ”¥ ~{r['calories']} cal")
+                                st.caption(f"🔥 ~{r['calories']} cal")
                         with col_action:
                             if st.button("Faire", key=f"routine_{r['id']}", use_container_width=True):
                                 ajouter_entree_santé(r['type'], r['duree'], r['intensite'], r.get('calories', 0))
@@ -209,7 +209,7 @@ def app():
                 calories = st.number_input("Calories (~)", 0, 1000, 200)
                 notes = st.text_area("Notes", height=80)
                 
-                if st.form_submit_button("âž• Créer", use_container_width=True):
+                if st.form_submit_button("➕ Créer", use_container_width=True):
                     if nom and type_routine:
                         ajouter_routine_santé(nom, type_routine, frequence, duree, intensite, calories, [], notes)
     
@@ -242,12 +242,12 @@ def app():
                             st.metric("Valeur", f"{obj['valeur_actuelle'] or 0:.1f} / {obj['valeur_cible']:.1f} {obj['unite']}")
                         with col_details[2]:
                             jours = obj['jours_restants']
-                            couleur = "ðŸŸ¢" if jours > 7 else "ðŸŸ¡" if jours > 0 else "ðŸ”´"
+                            couleur = "🟢" if jours > 7 else "🟡" if jours > 0 else "🔴"
                             st.metric("Délai", f"{couleur} {jours}j")
                     
                     with col2:
-                        priority_colors = {"haute": "ðŸ”´", "moyenne": "ðŸŸ¡", "basse": "ðŸŸ¢"}
-                        st.write(f"{priority_colors.get(obj['priorite'], 'âšª')} {obj['priorite']}")
+                        priority_colors = {"haute": "🔴", "moyenne": "🟡", "basse": "🟢"}
+                        st.write(f"{priority_colors.get(obj['priorite'], '⚫')} {obj['priorite']}")
             
             # Formulaire mise à jour progression
             st.divider()
@@ -323,11 +323,11 @@ def app():
             st.subheader("Semaine en cours")
             stats = get_stats_santé_semaine()
             
-            st.metric("ðŸƒ Séances", stats['nb_seances'])
+            st.metric("🏃 Séances", stats['nb_seances'])
             st.metric("â±ï¸ Temps", f"{stats['total_minutes']} min")
-            st.metric("ðŸ”¥ Calories", f"{stats['total_calories']:.0f}")
+            st.metric("🔥 Calories", f"{stats['total_calories']:.0f}")
             st.metric("âš¡ Ã‰nergie", f"{stats['energie_moyenne']:.1f}/10")
-            st.metric("ðŸ˜Š Moral", f"{stats['moral_moyen']:.1f}/10")
+            st.metric("😊 Moral", f"{stats['moral_moyen']:.1f}/10")
         
         st.divider()
         
