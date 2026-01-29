@@ -1,10 +1,10 @@
 ﻿"""
-Tests pour le service mÃ©tÃ©o (weather.py).
+Tests pour le service météo (weather.py).
 
-Ce fichier teste les fonctionnalitÃ©s mÃ©tÃ©o pour le jardinage:
-- ModÃ¨les de donnÃ©es mÃ©tÃ©o (MeteoJour, AlerteMeteo, ConseilJardin)
-- Conversion des codes mÃ©tÃ©o
-- GÃ©nÃ©ration d'alertes (gel, canicule, pluie forte)
+Ce fichier teste les fonctionnalités météo pour le jardinage:
+- Modèles de données météo (MeteoJour, AlerteMeteo, ConseilJardin)
+- Conversion des codes météo
+- Génération d'alertes (gel, canicule, pluie forte)
 - Plans d'arrosage intelligent
 """
 
@@ -14,23 +14,23 @@ from unittest.mock import patch, MagicMock
 import httpx
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ENUMS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestTypeAlertMeteoEnum:
     """Tests pour TypeAlertMeteo enum."""
 
     def test_types_alertes_disponibles(self):
-        """VÃ©rifie tous les types d'alertes."""
+        """Vérifie tous les types d'alertes."""
         from src.services.weather import TypeAlertMeteo
         
         types = [t.value for t in TypeAlertMeteo]
         assert "gel" in types
         assert "canicule" in types
         assert "pluie_forte" in types
-        assert "sÃ©cheresse" in types
+        assert "sécheresse" in types
         assert "vent_fort" in types
         assert "orage" in types
 
@@ -46,7 +46,7 @@ class TestNiveauAlerteEnum:
     """Tests pour NiveauAlerte enum."""
 
     def test_niveaux_disponibles(self):
-        """VÃ©rifie les niveaux de gravitÃ©."""
+        """Vérifie les niveaux de gravité."""
         from src.services.weather import NiveauAlerte
         
         niveaux = [n.value for n in NiveauAlerte]
@@ -55,16 +55,16 @@ class TestNiveauAlerteEnum:
         assert "danger" in niveaux
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MODÃˆLES PYDANTIC
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestMeteoJourModel:
     """Tests pour MeteoJour model."""
 
     def test_meteo_jour_creation(self):
-        """CrÃ©ation d'un MeteoJour."""
+        """Création d'un MeteoJour."""
         from src.services.weather import MeteoJour
         
         meteo = MeteoJour(
@@ -83,7 +83,7 @@ class TestMeteoJourModel:
         assert meteo.humidite == 60
 
     def test_meteo_jour_defaults(self):
-        """Valeurs par dÃ©faut de MeteoJour."""
+        """Valeurs par défaut de MeteoJour."""
         from src.services.weather import MeteoJour
         
         meteo = MeteoJour(
@@ -107,15 +107,15 @@ class TestAlerteMeteoModel:
     """Tests pour AlerteMeteo model."""
 
     def test_alerte_creation(self):
-        """CrÃ©ation d'une alerte mÃ©tÃ©o."""
+        """Création d'une alerte météo."""
         from src.services.weather import AlerteMeteo, TypeAlertMeteo, NiveauAlerte
         
         alerte = AlerteMeteo(
             type_alerte=TypeAlertMeteo.GEL,
             niveau=NiveauAlerte.DANGER,
             titre="ðŸ¥¶ Risque de gel",
-            message="TempÃ©rature -2Â°C prÃ©vue",
-            conseil_jardin="ProtÃ©gez vos plantes",
+            message="Température -2Â°C prévue",
+            conseil_jardin="Protégez vos plantes",
             date_debut=date.today(),
         )
         
@@ -142,13 +142,13 @@ class TestConseilJardinModel:
     """Tests pour ConseilJardin model."""
 
     def test_conseil_creation(self):
-        """CrÃ©ation d'un conseil jardin."""
+        """Création d'un conseil jardin."""
         from src.services.weather import ConseilJardin
         
         conseil = ConseilJardin(
             priorite=1,
             icone="ðŸ’§",
-            titre="Arrosage nÃ©cessaire",
+            titre="Arrosage nécessaire",
             description="Le sol est sec",
             plantes_concernees=["Tomates", "Courgettes"],
             action_recommandee="Arroser le matin",
@@ -159,7 +159,7 @@ class TestConseilJardinModel:
         assert len(conseil.plantes_concernees) == 2
 
     def test_conseil_defaults(self):
-        """Valeurs par dÃ©faut ConseilJardin."""
+        """Valeurs par défaut ConseilJardin."""
         from src.services.weather import ConseilJardin
         
         conseil = ConseilJardin(
@@ -176,14 +176,14 @@ class TestPlanArrosageModel:
     """Tests pour PlanArrosage model."""
 
     def test_plan_arrosage_creation(self):
-        """CrÃ©ation d'un plan d'arrosage."""
+        """Création d'un plan d'arrosage."""
         from src.services.weather import PlanArrosage
         
         plan = PlanArrosage(
             date=date.today(),
             besoin_arrosage=True,
             quantite_recommandee_litres=5.0,
-            raison="Pas de pluie prÃ©vue",
+            raison="Pas de pluie prévue",
             plantes_prioritaires=["Tomates"],
         )
         
@@ -191,26 +191,26 @@ class TestPlanArrosageModel:
         assert plan.quantite_recommandee_litres == 5.0
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SERVICE - INITIALISATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestWeatherGardenServiceInit:
     """Tests pour l'initialisation du service."""
 
     def test_service_creation(self):
-        """CrÃ©ation du service avec coordonnÃ©es par dÃ©faut."""
+        """Création du service avec coordonnées par défaut."""
         from src.services.weather import WeatherGardenService
         
         service = WeatherGardenService()
         
-        # Paris par dÃ©faut
+        # Paris par défaut
         assert service.latitude == 48.8566
         assert service.longitude == 2.3522
 
     def test_service_creation_custom_location(self):
-        """CrÃ©ation avec coordonnÃ©es personnalisÃ©es."""
+        """Création avec coordonnées personnalisées."""
         from src.services.weather import WeatherGardenService
         
         service = WeatherGardenService(latitude=45.75, longitude=4.85)  # Lyon
@@ -219,7 +219,7 @@ class TestWeatherGardenServiceInit:
         assert service.longitude == 4.85
 
     def test_set_location(self):
-        """Mise Ã  jour de la localisation."""
+        """Mise à jour de la localisation."""
         from src.services.weather import WeatherGardenService
         
         service = WeatherGardenService()
@@ -229,16 +229,16 @@ class TestWeatherGardenServiceInit:
         assert service.longitude == 1.4442
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONVERSION CODES MÃ‰TÃ‰O
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestWeathercodeConversion:
-    """Tests pour conversion des codes mÃ©tÃ©o."""
+    """Tests pour conversion des codes météo."""
 
     def test_direction_from_degrees(self):
-        """Conversion degrÃ©s â†’ direction cardinale."""
+        """Conversion degrés â†’ direction cardinale."""
         from src.services.weather import WeatherGardenService
         
         service = WeatherGardenService()
@@ -257,19 +257,19 @@ class TestWeathercodeConversion:
         assert service._direction_from_degrees(None) == ""
 
     def test_weathercode_to_condition_soleil(self):
-        """Code 0 = EnsoleillÃ©."""
+        """Code 0 = Ensoleillé."""
         from src.services.weather import WeatherGardenService
         
         service = WeatherGardenService()
-        assert service._weathercode_to_condition(0) == "EnsoleillÃ©"
+        assert service._weathercode_to_condition(0) == "Ensoleillé"
 
     def test_weathercode_to_condition_pluie(self):
         """Codes pluie."""
         from src.services.weather import WeatherGardenService
         
         service = WeatherGardenService()
-        assert service._weathercode_to_condition(61) == "Pluie lÃ©gÃ¨re"
-        assert service._weathercode_to_condition(63) == "Pluie modÃ©rÃ©e"
+        assert service._weathercode_to_condition(61) == "Pluie légère"
+        assert service._weathercode_to_condition(63) == "Pluie modérée"
         assert service._weathercode_to_condition(65) == "Pluie forte"
 
     def test_weathercode_to_condition_neige(self):
@@ -277,7 +277,7 @@ class TestWeathercodeConversion:
         from src.services.weather import WeatherGardenService
         
         service = WeatherGardenService()
-        assert service._weathercode_to_condition(71) == "Neige lÃ©gÃ¨re"
+        assert service._weathercode_to_condition(71) == "Neige légère"
         assert service._weathercode_to_condition(75) == "Neige forte"
 
     def test_weathercode_to_condition_none(self):
@@ -288,42 +288,42 @@ class TestWeathercodeConversion:
         assert service._weathercode_to_condition(None) == "Inconnu"
 
     def test_weathercode_to_icon_soleil(self):
-        """IcÃ´ne soleil."""
+        """Icône soleil."""
         from src.services.weather import WeatherGardenService
         
         service = WeatherGardenService()
-        assert service._weathercode_to_icon(0) == "â˜€ï¸"
+        assert service._weathercode_to_icon(0) == "â˜€ï¸"
 
     def test_weathercode_to_icon_pluie(self):
-        """IcÃ´ne pluie."""
+        """Icône pluie."""
         from src.services.weather import WeatherGardenService
         
         service = WeatherGardenService()
-        assert service._weathercode_to_icon(61) == "ðŸŒ§ï¸"
+        assert service._weathercode_to_icon(61) == "ðŸŒ§ï¸"
 
     def test_weathercode_to_icon_orage(self):
-        """IcÃ´ne orage."""
+        """Icône orage."""
         from src.services.weather import WeatherGardenService
         
         service = WeatherGardenService()
-        assert service._weathercode_to_icon(95) == "â›ˆï¸"
+        assert service._weathercode_to_icon(95) == "â›ˆï¸"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GÃ‰NÃ‰RATION ALERTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGenererAlertes:
-    """Tests pour gÃ©nÃ©ration d'alertes."""
+    """Tests pour génération d'alertes."""
 
     def test_alerte_gel(self):
-        """GÃ©nÃ©ration alerte gel."""
+        """Génération alerte gel."""
         from src.services.weather import WeatherGardenService, MeteoJour, TypeAlertMeteo
         
         service = WeatherGardenService()
         
-        # PrÃ©vision avec gel
+        # Prévision avec gel
         previsions = [
             MeteoJour(
                 date=date.today(),
@@ -345,7 +345,7 @@ class TestGenererAlertes:
         assert alerte_gel.temperature == -2.0
 
     def test_alerte_canicule(self):
-        """GÃ©nÃ©ration alerte canicule."""
+        """Génération alerte canicule."""
         from src.services.weather import WeatherGardenService, MeteoJour, TypeAlertMeteo
         
         service = WeatherGardenService()
@@ -370,7 +370,7 @@ class TestGenererAlertes:
         assert alerte_canicule.temperature == 38.0
 
     def test_pas_alerte_temperature_normale(self):
-        """Pas d'alerte pour tempÃ©rature normale."""
+        """Pas d'alerte pour température normale."""
         from src.services.weather import WeatherGardenService, MeteoJour, TypeAlertMeteo
         
         service = WeatherGardenService()
@@ -397,7 +397,7 @@ class TestGenererAlertes:
         assert alerte_canicule is None
 
     def test_alertes_previsions_vides(self):
-        """Retourne liste vide si pas de prÃ©visions."""
+        """Retourne liste vide si pas de prévisions."""
         from src.services.weather import WeatherGardenService
         
         service = WeatherGardenService()
@@ -406,9 +406,9 @@ class TestGenererAlertes:
         assert alertes == []
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SEUILS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestSeuils:
@@ -439,16 +439,16 @@ class TestSeuils:
         assert WeatherGardenService.SEUIL_VENT_FORT == 50.0
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS NIVEAUX ALERTE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestNiveauxAlerte:
-    """Tests pour dÃ©termination niveau alerte."""
+    """Tests pour détermination niveau alerte."""
 
     def test_niveau_danger_gel_negatif(self):
-        """Gel nÃ©gatif = DANGER."""
+        """Gel négatif = DANGER."""
         from src.services.weather import WeatherGardenService, MeteoJour, NiveauAlerte
         
         service = WeatherGardenService()
@@ -496,17 +496,17 @@ class TestNiveauxAlerte:
         assert alerte_gel.niveau == NiveauAlerte.ATTENTION
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS API (MOCKED)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAPIGeocoding:
-    """Tests pour le gÃ©ocodage."""
+    """Tests pour le géocodage."""
 
     @patch.object(httpx.Client, 'get')
     def test_set_location_from_city_success(self, mock_get):
-        """GÃ©ocodage rÃ©ussi."""
+        """Géocodage réussi."""
         from src.services.weather import WeatherGardenService
         
         mock_response = MagicMock()
@@ -529,7 +529,7 @@ class TestAPIGeocoding:
 
     @patch.object(httpx.Client, 'get')
     def test_set_location_from_city_not_found(self, mock_get):
-        """Ville non trouvÃ©e."""
+        """Ville non trouvée."""
         from src.services.weather import WeatherGardenService
         
         mock_response = MagicMock()
@@ -540,25 +540,25 @@ class TestAPIGeocoding:
         result = service.set_location_from_city("VilleInexistante12345")
         
         assert result is False
-        # CoordonnÃ©es inchangÃ©es (Paris)
+        # Coordonnées inchangées (Paris)
         assert service.latitude == 48.8566
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CAS LIMITES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCasLimites:
     """Tests pour cas limites."""
 
     def test_multiple_alertes_meme_jour(self):
-        """Plusieurs alertes pour un mÃªme jour."""
+        """Plusieurs alertes pour un même jour."""
         from src.services.weather import WeatherGardenService, MeteoJour, TypeAlertMeteo
         
         service = WeatherGardenService()
         
-        # PrÃ©vision avec gel ET vent fort
+        # Prévision avec gel ET vent fort
         previsions = [
             MeteoJour(
                 date=date.today(),
@@ -574,12 +574,12 @@ class TestCasLimites:
         
         alertes = service.generer_alertes(previsions)
         
-        # Au moins l'alerte gel (vent fort peut ne pas Ãªtre implÃ©mentÃ©)
+        # Au moins l'alerte gel (vent fort peut ne pas être implémenté)
         types_alertes = [a.type_alerte for a in alertes]
         assert TypeAlertMeteo.GEL in types_alertes
 
     def test_previsions_plusieurs_jours(self):
-        """PrÃ©visions sur plusieurs jours."""
+        """Prévisions sur plusieurs jours."""
         from src.services.weather import WeatherGardenService, MeteoJour, TypeAlertMeteo
         
         service = WeatherGardenService()
@@ -609,7 +609,7 @@ class TestCasLimites:
         
         alertes = service.generer_alertes(previsions)
         
-        # Une alerte gel pour le 2Ã¨me jour
+        # Une alerte gel pour le 2ème jour
         alerte_gel = next((a for a in alertes if a.type_alerte == TypeAlertMeteo.GEL), None)
         assert alerte_gel is not None
         assert alerte_gel.date_debut == date.today() + timedelta(days=1)

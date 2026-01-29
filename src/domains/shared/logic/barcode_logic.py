@@ -1,5 +1,5 @@
 ﻿"""
-Logique mÃ©tier du module Barcode (scan codes-barres) - SÃ©parÃ©e de l'UI
+Logique métier du module Barcode (scan codes-barres) - Séparée de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
 
@@ -9,16 +9,16 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # VALIDATION CODE-BARRES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def valider_code_barres(code: str) -> Tuple[bool, Optional[str]]:
     """
     Valide un code-barres.
     
     Args:
-        code: Code-barres Ã  valider
+        code: Code-barres à valider
         
     Returns:
         Tuple (valide, message_erreur)
@@ -30,12 +30,12 @@ def valider_code_barres(code: str) -> Tuple[bool, Optional[str]]:
     code = code.strip()
     
     if len(code) < 8:
-        return False, "Code-barres trop court (minimum 8 caractÃ¨res)"
+        return False, "Code-barres trop court (minimum 8 caractères)"
     
     if not code.isdigit():
         return False, "Code-barres doit contenir uniquement des chiffres"
     
-    # VÃ©rifier longueurs standards
+    # Vérifier longueurs standards
     longueurs_valides = [8, 12, 13, 14]
     if len(code) not in longueurs_valides:
         return False, f"Longueur invalide: {len(code)} (attendu: {', '.join(map(str, longueurs_valides))})"
@@ -48,7 +48,7 @@ def valider_checksum_ean13(code: str) -> bool:
     Valide le checksum d'un code EAN-13.
     
     Args:
-        code: Code EAN-13 Ã  valider
+        code: Code EAN-13 à valider
         
     Returns:
         True si le checksum est valide
@@ -75,16 +75,16 @@ def valider_checksum_ean13(code: str) -> bool:
         return False
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # DÃ‰TECTION TYPE CODE-BARRES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def detecter_type_code_barres(code: str) -> str:
     """
-    DÃ©tecte le type de code-barres.
+    Détecte le type de code-barres.
     
     Args:
-        code: Code-barres Ã  analyser
+        code: Code-barres à analyser
         
     Returns:
         Type de code (EAN-8, EAN-13, UPC-A, ITF-14, Inconnu)
@@ -105,7 +105,7 @@ def detecter_type_code_barres(code: str) -> str:
 
 def detecter_pays_origine(code: str) -> Optional[str]:
     """
-    DÃ©tecte le pays d'origine Ã  partir d'un code EAN-13.
+    Détecte le pays d'origine à partir d'un code EAN-13.
     
     Args:
         code: Code EAN-13
@@ -116,7 +116,7 @@ def detecter_pays_origine(code: str) -> Optional[str]:
     if len(code) != 13:
         return None
     
-    # PrÃ©fixe GS1 (3 premiers chiffres)
+    # Préfixe GS1 (3 premiers chiffres)
     prefixe = code[:3]
     
     pays_map = {
@@ -125,21 +125,21 @@ def detecter_pays_origine(code: str) -> Optional[str]:
         ("450", "459"): "Japon",
         ("460", "469"): "Russie",
         ("470",): "Kirghizistan",
-        ("471",): "TaÃ¯wan",
+        ("471",): "Taïwan",
         ("474",): "Estonie",
         ("475",): "Lettonie",
-        ("476",): "AzerbaÃ¯djan",
+        ("476",): "Azerbaïdjan",
         ("477",): "Lituanie",
-        ("478",): "OuzbÃ©kistan",
+        ("478",): "Ouzbékistan",
         ("479",): "Sri Lanka",
         ("480", "489"): "Philippines",
         ("490", "499"): "Japon",
         ("500", "509"): "Royaume-Uni",
-        ("520", "521"): "GrÃ¨ce",
+        ("520", "521"): "Grèce",
         ("528",): "Liban",
         ("529",): "Chypre",
         ("530",): "Albanie",
-        ("531",): "MacÃ©doine",
+        ("531",): "Macédoine",
         ("535",): "Malte",
         ("539",): "Irlande",
         ("540", "549"): "Belgique/Luxembourg",
@@ -151,68 +151,68 @@ def detecter_pays_origine(code: str) -> Optional[str]:
         ("599",): "Hongrie",
         ("600", "601"): "Afrique du Sud",
         ("603",): "Ghana",
-        ("608",): "BahreÃ¯n",
+        ("608",): "Bahreïn",
         ("609",): "Maurice",
         ("611",): "Maroc",
-        ("613",): "AlgÃ©rie",
+        ("613",): "Algérie",
         ("615",): "Nigeria",
         ("616",): "Kenya",
-        ("618",): "CÃ´te d'Ivoire",
+        ("618",): "Côte d'Ivoire",
         ("619",): "Tunisie",
         ("621",): "Syrie",
         ("622",): "Ã‰gypte",
         ("624",): "Libye",
         ("625",): "Jordanie",
         ("626",): "Iran",
-        ("627",): "KoweÃ¯t",
+        ("627",): "Koweït",
         ("628",): "Arabie saoudite",
         ("629",): "Ã‰mirats arabes unis",
         ("640", "649"): "Finlande",
         ("690", "699"): "Chine",
-        ("700", "709"): "NorvÃ¨ge",
-        ("729",): "IsraÃ«l",
-        ("730", "739"): "SuÃ¨de",
+        ("700", "709"): "Norvège",
+        ("729",): "Israël",
+        ("730", "739"): "Suède",
         ("740",): "Guatemala",
         ("741",): "Salvador",
         ("742",): "Honduras",
         ("743",): "Nicaragua",
         ("744",): "Costa Rica",
         ("745",): "Panama",
-        ("746",): "RÃ©publique dominicaine",
+        ("746",): "République dominicaine",
         ("750",): "Mexique",
         ("754", "755"): "Canada",
         ("759",): "Venezuela",
         ("760", "769"): "Suisse",
         ("770", "771"): "Colombie",
         ("773",): "Uruguay",
-        ("775",): "PÃ©rou",
+        ("775",): "Pérou",
         ("777",): "Bolivie",
         ("778", "779"): "Argentine",
         ("780",): "Chili",
         ("784",): "Paraguay",
         ("786",): "Ã‰quateur",
-        ("789", "790"): "BrÃ©sil",
+        ("789", "790"): "Brésil",
         ("800", "839"): "Italie",
         ("840", "849"): "Espagne",
         ("850",): "Cuba",
         ("858",): "Slovaquie",
-        ("859",): "RÃ©publique tchÃ¨que",
+        ("859",): "République tchèque",
         ("860",): "Serbie",
         ("865",): "Mongolie",
-        ("867",): "CorÃ©e du Nord",
+        ("867",): "Corée du Nord",
         ("868", "869"): "Turquie",
         ("870", "879"): "Pays-Bas",
-        ("880",): "CorÃ©e du Sud",
+        ("880",): "Corée du Sud",
         ("884",): "Cambodge",
-        ("885",): "ThaÃ¯lande",
+        ("885",): "Thaïlande",
         ("888",): "Singapour",
         ("890",): "Inde",
         ("893",): "Vietnam",
         ("896",): "Pakistan",
-        ("899",): "IndonÃ©sie",
+        ("899",): "Indonésie",
         ("900", "919"): "Autriche",
         ("930", "939"): "Australie",
-        ("940", "949"): "Nouvelle-ZÃ©lande",
+        ("940", "949"): "Nouvelle-Zélande",
     }
     
     try:
@@ -230,19 +230,19 @@ def detecter_pays_origine(code: str) -> Optional[str]:
     return None
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FORMATAGE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def formater_code_barres(code: str) -> str:
     """
     Formate un code-barres pour l'affichage.
     
     Args:
-        code: Code-barres Ã  formater
+        code: Code-barres à formater
         
     Returns:
-        Code formatÃ© avec espaces
+        Code formaté avec espaces
     """
     code = code.strip()
     
@@ -274,14 +274,14 @@ def nettoyer_code_barres(code: str) -> str:
         code: Code brut
         
     Returns:
-        Code nettoyÃ©
+        Code nettoyé
     """
     return "".join(c for c in code if c.isdigit())
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ANALYSE PRODUIT
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def extraire_infos_produit(code: str) -> Dict[str, Any]:
     """
@@ -320,30 +320,30 @@ def extraire_infos_produit(code: str) -> Dict[str, Any]:
     }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SUGGESTIONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def suggerer_categorie_produit(code: str) -> Optional[str]:
     """
-    SuggÃ¨re une catÃ©gorie de produit basÃ©e sur le prÃ©fixe.
-    (SimplifiÃ© - en production, utiliser une API comme Open Food Facts)
+    Suggère une catégorie de produit basée sur le préfixe.
+    (Simplifié - en production, utiliser une API comme Open Food Facts)
     
     Args:
         code: Code EAN-13
         
     Returns:
-        CatÃ©gorie suggÃ©rÃ©e
+        Catégorie suggérée
     """
     if len(code) != 13:
         return None
     
-    # PrÃ©fixes courants (approximatif)
+    # Préfixes courants (approximatif)
     prefixe = code[:3]
     
     # France (300-379)
     if 300 <= int(prefixe) <= 379:
-        return "Produit franÃ§ais"
+        return "Produit français"
     
-    return "Produit importÃ©"
+    return "Produit importé"
 

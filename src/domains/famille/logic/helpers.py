@@ -15,34 +15,34 @@ from src.core.models import (
 from src.core.database import get_session
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CHILD PROFILE HELPERS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @st.cache_data(ttl=3600)
 def get_or_create_jules() -> int:
-    """RÃ©cupÃ¨re ou crÃ©e le profil Jules, retourne son ID"""
+    """Récupère ou crée le profil Jules, retourne son ID"""
     try:
         with get_session() as session:
             child = session.query(ChildProfile).filter_by(name="Jules", actif=True).first()
             
             if not child:
-                # CrÃ©er Jules (nÃ© le 22 juin 2024)
+                # Créer Jules (né le 22 juin 2024)
                 child = ChildProfile(
                     name="Jules",
                     date_of_birth=date(2024, 6, 22),
                     gender="M",
-                    notes="Notre petit Jules â¤ï¸",
+                    notes="Notre petit Jules â¤ï¸",
                     actif=True
                 )
                 session.add(child)
                 session.commit()
-                st.success("âœ… Profil Jules crÃ©Ã© !")
+                st.success("âœ… Profil Jules créé !")
             
             return child.id
     except Exception as e:
-        st.error(f"âŒ Erreur crÃ©ation Jules: {str(e)}")
+        st.error(f"âŒ Erreur création Jules: {str(e)}")
         raise
 
 
@@ -71,18 +71,18 @@ def calculer_age_jules() -> dict:
                 "date_naissance": child.date_of_birth
             }
     except Exception as e:
-        st.error(f"âŒ Erreur calcul Ã¢ge: {str(e)}")
+        st.error(f"âŒ Erreur calcul Ã¢ge: {str(e)}")
         return {"jours": 0, "semaines": 0, "mois": 0, "ans": 0}
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # MILESTONE HELPERS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @st.cache_data(ttl=1800)
 def get_milestones_by_category(child_id: int) -> dict:
-    """RÃ©cupÃ¨re les jalons groupÃ©s par catÃ©gorie"""
+    """Récupère les jalons groupés par catégorie"""
     try:
         with get_session() as session:
             milestones = session.query(Milestone).filter_by(child_id=child_id).all()
@@ -102,12 +102,12 @@ def get_milestones_by_category(child_id: int) -> dict:
             
             return result
     except Exception as e:
-        st.error(f"âŒ Erreur lecture jalons: {str(e)}")
+        st.error(f"âŒ Erreur lecture jalons: {str(e)}")
         return {}
 
 
 def count_milestones_by_category(child_id: int) -> dict:
-    """Compte les jalons par catÃ©gorie"""
+    """Compte les jalons par catégorie"""
     try:
         with get_session() as session:
             result = session.query(
@@ -117,17 +117,17 @@ def count_milestones_by_category(child_id: int) -> dict:
             
             return {cat: count for cat, count in result}
     except Exception as e:
-        st.error(f"âŒ Erreur comptage jalons: {str(e)}")
+        st.error(f"âŒ Erreur comptage jalons: {str(e)}")
         return {}
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # HEALTH OBJECTIVE HELPERS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def calculer_progression_objectif(objective: HealthObjective) -> float:
-    """Calcule le % de progression d'un objectif santÃ©"""
+    """Calcule le % de progression d'un objectif santé"""
     try:
         if not objective.valeur_cible or not objective.valeur_actuelle:
             return 0.0
@@ -140,7 +140,7 @@ def calculer_progression_objectif(objective: HealthObjective) -> float:
 
 @st.cache_data(ttl=1800)
 def get_objectives_actifs() -> list:
-    """RÃ©cupÃ¨re tous les objectifs en cours avec progression"""
+    """Récupère tous les objectifs en cours avec progression"""
     try:
         with get_session() as session:
             objectives = session.query(HealthObjective).filter_by(statut="en_cours").all()
@@ -162,18 +162,18 @@ def get_objectives_actifs() -> list:
             
             return sorted(result, key=lambda x: x["priorite"] == "haute", reverse=True)
     except Exception as e:
-        st.error(f"âŒ Erreur lecture objectifs: {str(e)}")
+        st.error(f"âŒ Erreur lecture objectifs: {str(e)}")
         return []
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # BUDGET HELPERS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @st.cache_data(ttl=1800)
 def get_budget_par_period(period: str = "month") -> dict:
-    """RÃ©cupÃ¨re le budget par pÃ©riode (day, week, month)"""
+    """Récupère le budget par période (day, week, month)"""
     try:
         with get_session() as session:
             if period == "day":
@@ -205,12 +205,12 @@ def get_budget_par_period(period: str = "month") -> dict:
             result["TOTAL"] = total
             return result
     except Exception as e:
-        st.error(f"âŒ Erreur lecture budget: {str(e)}")
+        st.error(f"âŒ Erreur lecture budget: {str(e)}")
         return {}
 
 
 def get_budget_mois_dernier() -> float:
-    """RÃ©cupÃ¨re le budget total du mois dernier"""
+    """Récupère le budget total du mois dernier"""
     try:
         aujourd_hui = date.today()
         
@@ -232,18 +232,18 @@ def get_budget_mois_dernier() -> float:
             
             return float(total)
     except Exception as e:
-        st.error(f"âŒ Erreur calcul budget mois dernier: {str(e)}")
+        st.error(f"âŒ Erreur calcul budget mois dernier: {str(e)}")
         return 0.0
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ACTIVITY HELPERS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @st.cache_data(ttl=1800)
 def get_activites_semaine() -> list:
-    """RÃ©cupÃ¨re les activitÃ©s de cette semaine"""
+    """Récupère les activités de cette semaine"""
     try:
         debut_semaine = date.today() - timedelta(days=date.today().weekday())
         fin_semaine = debut_semaine + timedelta(days=6)
@@ -253,7 +253,7 @@ def get_activites_semaine() -> list:
                 and_(
                     FamilyActivity.date_prevue >= debut_semaine,
                     FamilyActivity.date_prevue <= fin_semaine,
-                    FamilyActivity.statut != "annulÃ©"
+                    FamilyActivity.statut != "annulé"
                 )
             ).order_by(FamilyActivity.date_prevue).all()
             
@@ -271,12 +271,12 @@ def get_activites_semaine() -> list:
                 for act in activities
             ]
     except Exception as e:
-        st.error(f"âŒ Erreur lecture activitÃ©s: {str(e)}")
+        st.error(f"âŒ Erreur lecture activités: {str(e)}")
         return []
 
 
 def get_budget_activites_mois() -> float:
-    """RÃ©cupÃ¨re les dÃ©penses en activitÃ©s ce mois"""
+    """Récupère les dépenses en activités ce mois"""
     try:
         debut_mois = date(date.today().year, date.today().month, 1)
         if date.today().month == 12:
@@ -295,18 +295,18 @@ def get_budget_activites_mois() -> float:
             
             return float(total)
     except Exception as e:
-        st.error(f"âŒ Erreur budget activitÃ©s: {str(e)}")
+        st.error(f"âŒ Erreur budget activités: {str(e)}")
         return 0.0
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # HEALTH ROUTINE HELPERS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @st.cache_data(ttl=1800)
 def get_routines_actives() -> list:
-    """RÃ©cupÃ¨re les routines de santÃ© actives"""
+    """Récupère les routines de santé actives"""
     try:
         with get_session() as session:
             routines = session.query(HealthRoutine).filter_by(actif=True).all()
@@ -348,7 +348,7 @@ def get_stats_sante_semaine() -> dict:
             
             return stats
     except Exception as e:
-        st.error(f"âŒ Erreur stats santÃ©: {str(e)}")
+        st.error(f"âŒ Erreur stats santé: {str(e)}")
         return {
             "nb_seances": 0,
             "total_minutes": 0,
@@ -358,20 +358,20 @@ def get_stats_sante_semaine() -> dict:
         }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # UTILITY FUNCTIONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def clear_famille_cache():
-    """Vide le cache du module famille (Ã  utiliser aprÃ¨s modifications)"""
+    """Vide le cache du module famille (à utiliser après modifications)"""
     st.cache_data.clear()
 
 
 def format_date_fr(d: date) -> str:
-    """Formate une date en franÃ§ais"""
+    """Formate une date en français"""
     jours = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
-    mois = ["jan", "fÃ©v", "mar", "avr", "mai", "jun", "jul", "aoÃ»", "sep", "oct", "nov", "dÃ©c"]
+    mois = ["jan", "fév", "mar", "avr", "mai", "jun", "jul", "aoû", "sep", "oct", "nov", "déc"]
     
     return f"{jours[d.weekday()]} {d.day} {mois[d.month-1]} {d.year}"
 

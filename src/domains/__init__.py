@@ -1,11 +1,11 @@
-﻿"""Domaines organisÃ©s par contexte mÃ©tier.
+﻿"""Domaines organisés par contexte métier.
 
 Architecture:
 - cuisine: Recettes, planning repas, inventaire, courses
-- famille: Jules, santÃ©, activitÃ©s, shopping
+- famille: Jules, santé, activités, shopping
 - planning: Calendrier, routines, planification
 - maison: Entretien, projets, jardin
-- shared: Accueil, paramÃ¨tres, rapports
+- shared: Accueil, paramètres, rapports
 """
 
 from . import cuisine, famille, planning, maison, shared

@@ -1,5 +1,5 @@
 ﻿"""
-Tests pour les validators de donnÃ©es cuisine
+Tests pour les validators de données cuisine
 """
 
 import pytest
@@ -49,7 +49,7 @@ class TestValidateRecipe:
         }
         is_valid, errors = validate_recipe(data)
         assert is_valid is False
-        assert any("3 caractÃ¨res" in e for e in errors)
+        assert any("3 caractères" in e for e in errors)
 
     def test_validate_recipe_temps_invalid(self):
         """Test temps invalide"""
@@ -75,7 +75,7 @@ class TestValidateRecipe:
         assert any("portions" in e for e in errors)
 
     def test_validate_recipe_invalid_difficulte(self):
-        """Test difficultÃ© invalide"""
+        """Test difficulté invalide"""
         data = {
             "nom": "Tarte aux pommes",
             "temps_preparation": 30,
@@ -92,35 +92,35 @@ class TestValidateIngredient:
     """Tests pour validate_ingredient"""
 
     def test_validate_ingredient_valid(self):
-        """Test ingrÃ©dient valide"""
-        data = {"nom": "Pomme", "unite": "pcs"}  # pcs = piÃ¨ces
+        """Test ingrédient valide"""
+        data = {"nom": "Pomme", "unite": "pcs"}  # pcs = pièces
         is_valid, errors = validate_ingredient(data)
         assert is_valid is True
         assert errors == []
 
     def test_validate_ingredient_missing_nom(self):
         """Test nom manquant"""
-        data = {"unite": "piÃ¨ce"}
+        data = {"unite": "pièce"}
         is_valid, errors = validate_ingredient(data)
         assert is_valid is False
         assert any("nom" in e for e in errors)
 
     def test_validate_ingredient_nom_too_short(self):
         """Test nom trop court"""
-        data = {"nom": "a", "unite": "piÃ¨ce"}
+        data = {"nom": "a", "unite": "pièce"}
         is_valid, errors = validate_ingredient(data)
         assert is_valid is False
-        assert any("2 caractÃ¨res" in e for e in errors)
+        assert any("2 caractères" in e for e in errors)
 
     def test_validate_ingredient_missing_unite(self):
-        """Test unitÃ© manquante"""
+        """Test unité manquante"""
         data = {"nom": "Pomme"}
         is_valid, errors = validate_ingredient(data)
         assert is_valid is False
         assert any("unite" in e for e in errors)
 
     def test_validate_ingredient_invalid_unite(self):
-        """Test unitÃ© invalide"""
+        """Test unité invalide"""
         data = {"nom": "Pomme", "unite": "invalid"}
         is_valid, errors = validate_ingredient(data)
         assert is_valid is False
@@ -145,7 +145,7 @@ class TestValidateInventoryItem:
         assert any("ingredient_id" in e for e in errors)
 
     def test_validate_inventory_item_negative_quantite(self):
-        """Test quantitÃ© nÃ©gative"""
+        """Test quantité négative"""
         data = {"ingredient_id": 1, "quantite": -5}
         is_valid, errors = validate_inventory_item(data)
         assert is_valid is False
@@ -177,14 +177,14 @@ class TestValidateShoppingItem:
         assert any("ingredient_id" in e for e in errors)
 
     def test_validate_shopping_item_zero_quantite(self):
-        """Test quantitÃ© Ã  zÃ©ro"""
+        """Test quantité à zéro"""
         data = {"ingredient_id": 1, "quantite_necessaire": 0}
         is_valid, errors = validate_shopping_item(data)
         assert is_valid is False
         assert any("quantite_necessaire" in e for e in errors)
 
     def test_validate_shopping_item_invalid_priorite(self):
-        """Test prioritÃ© invalide"""
+        """Test priorité invalide"""
         data = {
             "ingredient_id": 1,
             "quantite_necessaire": 5,
@@ -204,7 +204,7 @@ class TestValidateMeal:
             "planning_id": 1,
             "jour_semaine": 0,
             "date": "2025-01-15",
-            "type_repas": "dÃ©jeuner",
+            "type_repas": "déjeuner",
         }
         is_valid, errors = validate_meal(data)
         assert is_valid is True
@@ -215,7 +215,7 @@ class TestValidateMeal:
         data = {
             "jour_semaine": 0,
             "date": "2025-01-15",
-            "type_repas": "dÃ©jeuner",
+            "type_repas": "déjeuner",
         }
         is_valid, errors = validate_meal(data)
         assert is_valid is False
@@ -227,7 +227,7 @@ class TestValidateMeal:
             "planning_id": 1,
             "jour_semaine": 10,
             "date": "2025-01-15",
-            "type_repas": "dÃ©jeuner",
+            "type_repas": "déjeuner",
         }
         is_valid, errors = validate_meal(data)
         assert is_valid is False
@@ -251,7 +251,7 @@ class TestValidateMeal:
             "planning_id": 1,
             "jour_semaine": 0,
             "date": "2025-01-15",
-            "type_repas": "dÃ©jeuner",
+            "type_repas": "déjeuner",
             "portions": 100,
         }
         is_valid, errors = validate_meal(data)

@@ -25,9 +25,9 @@ from src.services.inventaire import (
 )
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
@@ -50,12 +50,12 @@ def inventaire_service(mock_client_ia):
 
 @pytest.fixture
 def sample_article_data():
-    """DonnÃ©es d'article inventaire valide."""
+    """Données d'article inventaire valide."""
     return {
         "id": 1,
         "ingredient_id": 10,
         "ingredient_nom": "Tomates",
-        "ingredient_categorie": "LÃ©gumes",
+        "ingredient_categorie": "Légumes",
         "quantite": 5,
         "quantite_min": 2,
         "unite": "kg",
@@ -68,7 +68,7 @@ def sample_article_data():
 
 @pytest.fixture
 def sample_article_critique():
-    """Article en Ã©tat critique (quantitÃ© < 50% du minimum)."""
+    """Article en état critique (quantité < 50% du minimum)."""
     return {
         "id": 2,
         "ingredient_id": 11,
@@ -86,7 +86,7 @@ def sample_article_critique():
 
 @pytest.fixture
 def sample_article_peremption_proche():
-    """Article avec pÃ©remption proche (< 7 jours)."""
+    """Article avec péremption proche (< 7 jours)."""
     return {
         "id": 3,
         "ingredient_id": 12,
@@ -94,7 +94,7 @@ def sample_article_peremption_proche():
         "ingredient_categorie": "Laitier",
         "quantite": 6,
         "quantite_min": 2,
-        "unite": "unitÃ©s",
+        "unite": "unités",
         "emplacement": "Frigo",
         "date_peremption": date.today() + timedelta(days=3),
         "statut": "peremption_proche",
@@ -102,29 +102,29 @@ def sample_article_peremption_proche():
     }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS VALIDATION PYDANTIC
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestSuggestionCoursesValidation:
-    """Tests de validation du schÃ©ma SuggestionCourses."""
+    """Tests de validation du schéma SuggestionCourses."""
 
     def test_suggestion_courses_valide(self):
-        """Test crÃ©ation avec donnÃ©es valides."""
+        """Test création avec données valides."""
         suggestion = SuggestionCourses(
             nom="Tomates cerises",
             quantite=500,
             unite="g",
             priorite="haute",
-            rayon="Fruits et lÃ©gumes",
+            rayon="Fruits et légumes",
         )
         assert suggestion.nom == "Tomates cerises"
         assert suggestion.quantite == 500
         assert suggestion.priorite == "haute"
 
     def test_suggestion_courses_nom_trop_court(self):
-        """Test nom trop court (< 2 caractÃ¨res)."""
+        """Test nom trop court (< 2 caractères)."""
         with pytest.raises(ValidationError) as exc_info:
             SuggestionCourses(
                 nom="A",  # Trop court
@@ -136,43 +136,43 @@ class TestSuggestionCoursesValidation:
         assert "min_length" in str(exc_info.value).lower() or "at least 2" in str(exc_info.value).lower()
 
     def test_suggestion_courses_quantite_negative(self):
-        """Test quantitÃ© nÃ©gative."""
+        """Test quantité négative."""
         with pytest.raises(ValidationError) as exc_info:
             SuggestionCourses(
                 nom="Pommes",
-                quantite=-5,  # NÃ©gatif
+                quantite=-5,  # Négatif
                 unite="kg",
                 priorite="moyenne",
-                rayon="Fruits et lÃ©gumes",
+                rayon="Fruits et légumes",
             )
         assert "greater than" in str(exc_info.value).lower()
 
     def test_suggestion_courses_quantite_zero(self):
-        """Test quantitÃ© Ã  zÃ©ro."""
+        """Test quantité à zéro."""
         with pytest.raises(ValidationError) as exc_info:
             SuggestionCourses(
                 nom="Pommes",
-                quantite=0,  # ZÃ©ro non autorisÃ©
+                quantite=0,  # Zéro non autorisé
                 unite="kg",
                 priorite="moyenne",
-                rayon="Fruits et lÃ©gumes",
+                rayon="Fruits et légumes",
             )
         assert "greater than" in str(exc_info.value).lower()
 
     def test_suggestion_courses_priorite_invalide(self):
-        """Test prioritÃ© non autorisÃ©e."""
+        """Test priorité non autorisée."""
         with pytest.raises(ValidationError) as exc_info:
             SuggestionCourses(
                 nom="Pommes",
                 quantite=2,
                 unite="kg",
-                priorite="urgente",  # Non autorisÃ©
-                rayon="Fruits et lÃ©gumes",
+                priorite="urgente",  # Non autorisé
+                rayon="Fruits et légumes",
             )
         assert "pattern" in str(exc_info.value).lower() or "string_pattern" in str(exc_info.value).lower()
 
     def test_suggestion_courses_priorites_valides(self):
-        """Test toutes les prioritÃ©s valides."""
+        """Test toutes les priorités valides."""
         priorites = ["haute", "moyenne", "basse"]
         
         for prio in priorites:
@@ -186,7 +186,7 @@ class TestSuggestionCoursesValidation:
             assert suggestion.priorite == prio
 
     def test_suggestion_courses_unite_vide(self):
-        """Test unitÃ© vide."""
+        """Test unité vide."""
         with pytest.raises(ValidationError) as exc_info:
             SuggestionCourses(
                 nom="Pommes",
@@ -199,7 +199,7 @@ class TestSuggestionCoursesValidation:
 
 
 class TestArticleImportValidation:
-    """Tests de validation du schÃ©ma ArticleImport."""
+    """Tests de validation du schéma ArticleImport."""
 
     def test_article_import_valide(self):
         """Test import article valide."""
@@ -228,7 +228,7 @@ class TestArticleImportValidation:
         assert article.date_peremption is None
 
     def test_article_import_quantite_negative(self):
-        """Test quantitÃ© nÃ©gative interdite."""
+        """Test quantité négative interdite."""
         with pytest.raises(ValidationError) as exc_info:
             ArticleImport(
                 nom="Test",
@@ -239,40 +239,40 @@ class TestArticleImportValidation:
         assert "greater than or equal" in str(exc_info.value).lower()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONSTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestConstantes:
     """Tests des constantes du module."""
 
     def test_categories_definies(self):
-        """Test que les catÃ©gories sont dÃ©finies."""
+        """Test que les catégories sont définies."""
         assert len(CATEGORIES) > 0
-        assert "LÃ©gumes" in CATEGORIES
+        assert "Légumes" in CATEGORIES
         assert "Fruits" in CATEGORIES
-        assert "ProtÃ©ines" in CATEGORIES
+        assert "Protéines" in CATEGORIES
 
     def test_emplacements_definis(self):
-        """Test que les emplacements sont dÃ©finis."""
+        """Test que les emplacements sont définis."""
         assert len(EMPLACEMENTS) > 0
         assert "Frigo" in EMPLACEMENTS
-        assert "CongÃ©lateur" in EMPLACEMENTS
+        assert "Congélateur" in EMPLACEMENTS
         assert "Placard" in EMPLACEMENTS
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CALCUL STATUT
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalculStatut:
     """Tests du calcul de statut des articles."""
 
     def test_calcul_statut_ok(self, inventaire_service):
-        """Test statut OK quand quantitÃ© suffisante et pas de pÃ©remption proche."""
-        # Mock d'un article avec quantitÃ© > quantite_min
+        """Test statut OK quand quantité suffisante et pas de péremption proche."""
+        # Mock d'un article avec quantité > quantite_min
         article = MagicMock()
         article.quantite = 5.0
         article.quantite_min = 2.0
@@ -282,7 +282,7 @@ class TestCalculStatut:
         assert statut == "ok"
 
     def test_calcul_statut_stock_bas(self, inventaire_service):
-        """Test statut stock_bas quand quantitÃ© < quantite_min."""
+        """Test statut stock_bas quand quantité < quantite_min."""
         article = MagicMock()
         article.quantite = 1.5  # < 2.0 mais >= 1.0 (50%)
         article.quantite_min = 2.0
@@ -292,7 +292,7 @@ class TestCalculStatut:
         assert statut == "stock_bas"
 
     def test_calcul_statut_critique(self, inventaire_service):
-        """Test statut critique quand quantitÃ© < 50% du minimum."""
+        """Test statut critique quand quantité < 50% du minimum."""
         article = MagicMock()
         article.quantite = 0.5  # < 1.0 (50% de 2.0)
         article.quantite_min = 2.0
@@ -304,7 +304,7 @@ class TestCalculStatut:
     def test_calcul_statut_peremption_proche(self, inventaire_service):
         """Test statut peremption_proche quand <= 7 jours."""
         article = MagicMock()
-        article.quantite = 10.0  # QuantitÃ© OK
+        article.quantite = 10.0  # Quantité OK
         article.quantite_min = 2.0
         article.date_peremption = date.today() + timedelta(days=5)  # 5 jours
         
@@ -312,18 +312,18 @@ class TestCalculStatut:
         assert statut == "peremption_proche"
 
     def test_calcul_statut_peremption_prioritaire(self, inventaire_service):
-        """Test que pÃ©remption proche prime sur stock OK."""
+        """Test que péremption proche prime sur stock OK."""
         article = MagicMock()
         article.quantite = 100.0  # Beaucoup de stock
         article.quantite_min = 1.0
-        article.date_peremption = date.today() + timedelta(days=2)  # PÃ©rime bientÃ´t
+        article.date_peremption = date.today() + timedelta(days=2)  # Périme bientôt
         
         statut = inventaire_service._calculer_statut(article, date.today())
         assert statut == "peremption_proche"
 
 
 class TestJoursAvantPeremption:
-    """Tests du calcul des jours avant pÃ©remption."""
+    """Tests du calcul des jours avant péremption."""
 
     def test_jours_avant_peremption_positif(self, inventaire_service):
         """Test calcul avec date future."""
@@ -334,7 +334,7 @@ class TestJoursAvantPeremption:
         assert jours == 10
 
     def test_jours_avant_peremption_negatif(self, inventaire_service):
-        """Test calcul avec date passÃ©e (pÃ©rimÃ©)."""
+        """Test calcul avec date passée (périmé)."""
         article = MagicMock()
         article.date_peremption = date.today() - timedelta(days=3)
         
@@ -342,7 +342,7 @@ class TestJoursAvantPeremption:
         assert jours == -3
 
     def test_jours_avant_peremption_none(self, inventaire_service):
-        """Test sans date de pÃ©remption."""
+        """Test sans date de péremption."""
         article = MagicMock()
         article.date_peremption = None
         
@@ -350,7 +350,7 @@ class TestJoursAvantPeremption:
         assert jours is None
 
     def test_jours_avant_peremption_aujourdhui(self, inventaire_service):
-        """Test pÃ©remption aujourd'hui."""
+        """Test péremption aujourd'hui."""
         article = MagicMock()
         article.date_peremption = date.today()
         
@@ -358,26 +358,26 @@ class TestJoursAvantPeremption:
         assert jours == 0
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ALERTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAlertes:
-    """Tests du systÃ¨me d'alertes."""
+    """Tests du système d'alertes."""
 
     def test_get_alertes_structure(self, inventaire_service):
-        """Test structure retournÃ©e par get_alertes."""
+        """Test structure retournée par get_alertes."""
         with patch.object(inventaire_service, "get_inventaire_complet", return_value=[]):
             alertes = inventaire_service.get_alertes()
             
-            # Doit avoir les 3 catÃ©gories
+            # Doit avoir les 3 catégories
             assert "stock_bas" in alertes
             assert "critique" in alertes
             assert "peremption_proche" in alertes
 
     def test_get_alertes_trie_par_statut(self, inventaire_service, sample_article_critique, sample_article_peremption_proche):
-        """Test que les alertes sont triÃ©es par statut."""
+        """Test que les alertes sont triées par statut."""
         inventaire = [
             sample_article_critique,
             sample_article_peremption_proche,
@@ -401,9 +401,9 @@ class TestAlertes:
             assert total_alertes == 0
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SUGGESTIONS IA
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestSuggestionsIA:
@@ -417,12 +417,12 @@ class TestSuggestionsIA:
              patch.object(inventaire_service, "build_json_prompt") as mock_prompt, \
              patch.object(inventaire_service, "call_with_list_parsing_sync", return_value=[]):
             
-            mock_summary.return_value = "RÃ©sumÃ© inventaire"
+            mock_summary.return_value = "Résumé inventaire"
             mock_prompt.return_value = "Prompt JSON"
             
             inventaire_service.suggerer_courses_ia()
             
-            # VÃ©rifier que build_inventory_summary a Ã©tÃ© appelÃ©
+            # Vérifier que build_inventory_summary a été appelé
             mock_summary.assert_called_once()
 
     def test_suggerer_courses_ia_retourne_suggestions(self, inventaire_service):
@@ -455,21 +455,21 @@ class TestSuggestionsIA:
         with patch.object(inventaire_service, "get_alertes", side_effect=Exception("Erreur")):
             result = inventaire_service.suggerer_courses_ia()
             
-            # GrÃ¢ce au dÃ©corateur @with_error_handling(default_return=[])
+            # GrÃ¢ce au décorateur @with_error_handling(default_return=[])
             assert result == []
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GESTION ARTICLES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGestionArticles:
     """Tests de la gestion des articles."""
 
     def test_ajouter_article_parametres(self, inventaire_service):
-        """Test que ajouter_article accepte les bons paramÃ¨tres."""
-        # La mÃ©thode doit accepter ces paramÃ¨tres
+        """Test que ajouter_article accepte les bons paramètres."""
+        # La méthode doit accepter ces paramètres
         import inspect
         sig = inspect.signature(inventaire_service.ajouter_article)
         params = list(sig.parameters.keys())
@@ -481,7 +481,7 @@ class TestGestionArticles:
         assert "date_peremption" in params
 
     def test_mettre_a_jour_article_parametres(self, inventaire_service):
-        """Test que mettre_a_jour_article accepte les bons paramÃ¨tres."""
+        """Test que mettre_a_jour_article accepte les bons paramètres."""
         import inspect
         sig = inspect.signature(inventaire_service.mettre_a_jour_article)
         params = list(sig.parameters.keys())
@@ -499,9 +499,9 @@ class TestGestionArticles:
         assert "article_id" in params
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS HISTORIQUE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestHistorique:
@@ -529,52 +529,52 @@ class TestHistorique:
         assert "quantite_apres" in params
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PHOTOS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPhotos:
     """Tests de la gestion des photos."""
 
     def test_ajouter_photo_existe(self, inventaire_service):
-        """Test que la mÃ©thode ajouter_photo existe."""
+        """Test que la méthode ajouter_photo existe."""
         assert hasattr(inventaire_service, "ajouter_photo")
         assert callable(inventaire_service.ajouter_photo)
 
     def test_supprimer_photo_existe(self, inventaire_service):
-        """Test que la mÃ©thode supprimer_photo existe."""
+        """Test que la méthode supprimer_photo existe."""
         assert hasattr(inventaire_service, "supprimer_photo")
         assert callable(inventaire_service.supprimer_photo)
 
     def test_obtenir_photo_existe(self, inventaire_service):
-        """Test que la mÃ©thode obtenir_photo existe."""
+        """Test que la méthode obtenir_photo existe."""
         assert hasattr(inventaire_service, "obtenir_photo")
         assert callable(inventaire_service.obtenir_photo)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CACHE ET INVALIDATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCacheInventaire:
     """Tests du comportement du cache."""
 
     def test_invalider_cache_existe(self, inventaire_service):
-        """Test que _invalider_cache est disponible (hÃ©ritÃ©e de BaseService)."""
+        """Test que _invalider_cache est disponible (héritée de BaseService)."""
         assert hasattr(inventaire_service, "_invalider_cache")
         assert callable(inventaire_service._invalider_cache)
 
     @patch("src.services.inventaire.Cache")
     def test_get_inventaire_complet_cache_key(self, mock_cache_class, inventaire_service):
-        """Test que la clÃ© de cache inclut les paramÃ¨tres."""
-        # Le dÃ©corateur @with_cache gÃ©nÃ¨re une clÃ© basÃ©e sur les paramÃ¨tres
+        """Test que la clé de cache inclut les paramètres."""
+        # Le décorateur @with_cache génère une clé basée sur les paramètres
         # key_func: f"inventaire_{emplacement}_{categorie}_{include_ok}"
         
-        # On vÃ©rifie que le pattern de clÃ© est cohÃ©rent
+        # On vérifie que le pattern de clé est cohérent
         emplacement = "Frigo"
-        categorie = "LÃ©gumes"
+        categorie = "Légumes"
         include_ok = True
         
         expected_key = f"inventaire_{emplacement}_{categorie}_{include_ok}"
@@ -582,40 +582,40 @@ class TestCacheInventaire:
         assert emplacement in expected_key
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS INTÃ‰GRATION SERVICE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.integration
 class TestInventaireServiceIntegration:
-    """Tests d'intÃ©gration lÃ©gers (sans vraie DB)."""
+    """Tests d'intégration légers (sans vraie DB)."""
 
     def test_service_herite_base_service(self, inventaire_service):
-        """Test que InventaireService hÃ©rite de BaseService."""
+        """Test que InventaireService hérite de BaseService."""
         from src.services.types import BaseService
         assert isinstance(inventaire_service, BaseService)
 
     def test_service_herite_base_ai_service(self, inventaire_service):
-        """Test que InventaireService hÃ©rite de BaseAIService."""
+        """Test que InventaireService hérite de BaseAIService."""
         from src.services.base_ai_service import BaseAIService
         assert isinstance(inventaire_service, BaseAIService)
 
     def test_service_a_methodes_mixin(self, inventaire_service):
-        """Test que les mÃ©thodes du mixin sont disponibles."""
+        """Test que les méthodes du mixin sont disponibles."""
         # InventoryAIMixin fournit build_inventory_summary
         assert hasattr(inventaire_service, "build_inventory_summary")
         assert callable(inventaire_service.build_inventory_summary)
 
     def test_model_est_article_inventaire(self, inventaire_service):
-        """Test que le modÃ¨le est ArticleInventaire."""
+        """Test que le modèle est ArticleInventaire."""
         from src.core.models import ArticleInventaire
         assert inventaire_service.model == ArticleInventaire
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FILTRES INVENTAIRE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFiltresInventaire:
@@ -623,13 +623,13 @@ class TestFiltresInventaire:
 
     def test_get_inventaire_complet_filtre_emplacement(self, inventaire_service):
         """Test filtre par emplacement."""
-        # La mÃ©thode doit accepter le paramÃ¨tre emplacement
+        # La méthode doit accepter le paramètre emplacement
         import inspect
         sig = inspect.signature(inventaire_service.get_inventaire_complet)
         assert "emplacement" in sig.parameters
 
     def test_get_inventaire_complet_filtre_categorie(self, inventaire_service):
-        """Test filtre par catÃ©gorie."""
+        """Test filtre par catégorie."""
         import inspect
         sig = inspect.signature(inventaire_service.get_inventaire_complet)
         assert "categorie" in sig.parameters
@@ -640,7 +640,7 @@ class TestFiltresInventaire:
         sig = inspect.signature(inventaire_service.get_inventaire_complet)
         assert "include_ok" in sig.parameters
         
-        # Valeur par dÃ©faut doit Ãªtre True
+        # Valeur par défaut doit être True
         default = sig.parameters["include_ok"].default
         assert default is True
 

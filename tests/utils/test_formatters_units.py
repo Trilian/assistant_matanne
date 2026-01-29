@@ -1,5 +1,5 @@
 ﻿"""
-Tests pour les formatters d'unitÃ©s (poids/volume)
+Tests pour les formatters d'unités (poids/volume)
 """
 
 import pytest
@@ -31,13 +31,13 @@ class TestFormatWeight:
         assert "kg" in result
 
     def test_format_weight_kg_decimal(self):
-        """Test kg dÃ©cimal"""
+        """Test kg décimal"""
         result = format_weight(1500)
         assert "1.5" in result
         assert "kg" in result
 
     def test_format_weight_small(self):
-        """Test petite quantitÃ©"""
+        """Test petite quantité"""
         result = format_weight(50)
         assert "50" in result
         assert "g" in result
@@ -71,13 +71,13 @@ class TestFormatVolume:
         assert "L" in result
 
     def test_format_volume_liter_decimal(self):
-        """Test litre dÃ©cimal"""
+        """Test litre décimal"""
         result = format_volume(1500)
         assert "1.5" in result
         assert "L" in result
 
     def test_format_volume_small(self):
-        """Test petite quantitÃ©"""
+        """Test petite quantité"""
         result = format_volume(50)
         assert "50" in result
         assert "mL" in result

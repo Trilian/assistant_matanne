@@ -2,10 +2,10 @@
 Tests pour le module cache multi-niveaux (cache_multi.py).
 
 Tests couverts:
-- L1MemoryCache (LRU, TTL, Ã©viction)
+- L1MemoryCache (LRU, TTL, éviction)
 - L3FileCache (pickle, persistence)
 - MultiLevelCache (cascade, invalidation, stats)
-- DÃ©corateur @cached
+- Décorateur @cached
 """
 
 import os
@@ -17,9 +17,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
@@ -32,14 +32,14 @@ def mock_session_state():
 
 @pytest.fixture
 def temp_cache_dir():
-    """CrÃ©e un dossier temporaire pour le cache fichier."""
+    """Crée un dossier temporaire pour le cache fichier."""
     with tempfile.TemporaryDirectory() as tmpdir:
         yield tmpdir
 
 
 @pytest.fixture
 def l1_cache():
-    """Instance L1MemoryCache isolÃ©e."""
+    """Instance L1MemoryCache isolée."""
     from src.core.cache_multi import L1MemoryCache
     cache = L1MemoryCache(max_entries=10)
     yield cache
@@ -55,13 +55,13 @@ def l3_cache(temp_cache_dir):
     cache.clear()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS L1 MEMORY CACHE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestL1MemoryCache:
-    """Tests pour le cache mÃ©moire L1."""
+    """Tests pour le cache mémoire L1."""
     
     def test_set_get_basic(self, l1_cache):
         """Test set/get basique avec CacheEntry."""
@@ -75,7 +75,7 @@ class TestL1MemoryCache:
         assert result.value["data"] == "value1"
     
     def test_get_missing_key(self, l1_cache):
-        """Test get clÃ© inexistante."""
+        """Test get clé inexistante."""
         result = l1_cache.get("nonexistent")
         assert result is None
     
@@ -86,17 +86,17 @@ class TestL1MemoryCache:
         entry = CacheEntry(value="expiring_value", ttl=0.1)  # 100ms
         l1_cache.set("expiring", entry)
         
-        # ImmÃ©diatement disponible
+        # Immédiatement disponible
         result = l1_cache.get("expiring")
         assert result is not None
         assert result.value == "expiring_value"
         
-        # AprÃ¨s expiration
+        # Après expiration
         time.sleep(0.15)
         assert l1_cache.get("expiring") is None
     
     def test_lru_eviction(self):
-        """Test Ã©viction LRU quand max_entries atteint."""
+        """Test éviction LRU quand max_entries atteint."""
         from src.core.cache_multi import L1MemoryCache, CacheEntry
         
         cache = L1MemoryCache(max_entries=3)
@@ -105,14 +105,14 @@ class TestL1MemoryCache:
         cache.set("b", CacheEntry(value=2))
         cache.set("c", CacheEntry(value=3))
         
-        # AccÃ©der Ã  "a" pour le rendre rÃ©cent
+        # Accéder à "a" pour le rendre récent
         cache.get("a")
         
-        # Ajouter "d" devrait Ã©vincer "b" (le moins rÃ©cent)
+        # Ajouter "d" devrait évincer "b" (le moins récent)
         cache.set("d", CacheEntry(value=4))
         
-        assert cache.get("a") is not None  # Toujours lÃ 
-        assert cache.get("b") is None  # Ã‰vincÃ©
+        assert cache.get("a") is not None  # Toujours là
+        assert cache.get("b") is None  # Ã‰vincé
         assert cache.get("c") is not None
         assert cache.get("d") is not None
     
@@ -144,9 +144,9 @@ class TestL1MemoryCache:
         count = l1_cache.invalidate(tags=["desserts"])
         
         assert count == 1
-        assert l1_cache.get("recipe:1") is None  # InvalidÃ©
-        assert l1_cache.get("recipe:2") is not None  # Pas touchÃ©
-        assert l1_cache.get("user:1") is not None  # Pas touchÃ©
+        assert l1_cache.get("recipe:1") is None  # Invalidé
+        assert l1_cache.get("recipe:2") is not None  # Pas touché
+        assert l1_cache.get("user:1") is not None  # Pas touché
     
     def test_clear(self, l1_cache):
         """Test vidage complet."""
@@ -177,9 +177,9 @@ class TestL1MemoryCache:
         assert stats["max_entries"] == 10
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS L3 FILE CACHE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestL3FileCache:
@@ -200,11 +200,11 @@ class TestL3FileCache:
         """Test persistance entre instances."""
         from src.core.cache_multi import L3FileCache, CacheEntry
         
-        # PremiÃ¨re instance
+        # Première instance
         cache1 = L3FileCache(cache_dir=temp_cache_dir)
         cache1.set("persistent", CacheEntry(value={"value": 42}, ttl=3600))
         
-        # Nouvelle instance avec mÃªme dossier
+        # Nouvelle instance avec même dossier
         cache2 = L3FileCache(cache_dir=temp_cache_dir)
         result = cache2.get("persistent")
         
@@ -232,9 +232,9 @@ class TestL3FileCache:
         l3_cache.set("to_delete", CacheEntry(value="value"))
         
         count = l3_cache.invalidate(pattern="to_delete")
-        # Peut Ãªtre 0 si le fichier n'a pas Ã©tÃ© Ã©crit correctement
+        # Peut être 0 si le fichier n'a pas été écrit correctement
         assert count >= 0
-        # L'important est que la clÃ© n'existe plus
+        # L'important est que la clé n'existe plus
         assert l3_cache.get("to_delete") is None
     
     def test_clear(self, l3_cache):
@@ -249,7 +249,7 @@ class TestL3FileCache:
         assert l3_cache.get("key1") is None
     
     def test_complex_data(self, l3_cache):
-        """Test donnÃ©es complexes (sÃ©rialisables)."""
+        """Test données complexes (sérialisables)."""
         from src.core.cache_multi import CacheEntry
         
         complex_data = {
@@ -265,26 +265,26 @@ class TestL3FileCache:
         assert result.value["nested"]["a"]["b"] == "c"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MULTI-LEVEL CACHE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
-@pytest.mark.skip(reason="Tests flaky - dÃ©pendance sur singleton et Ã©tat partagÃ©")
+@pytest.mark.skip(reason="Tests flaky - dépendance sur singleton et état partagé")
 class TestMultiLevelCache:
     """Tests pour le cache multi-niveaux."""
     
     @pytest.fixture
     def multi_cache(self, temp_cache_dir, mock_session_state):
-        """Instance MultiLevelCache isolÃ©e."""
+        """Instance MultiLevelCache isolée."""
         from src.core.cache_multi import MultiLevelCache
         
-        # RÃ©initialiser singleton
+        # Réinitialiser singleton
         MultiLevelCache._instance = None
         
         cache = MultiLevelCache(
             l1_max_entries=10,
-            l2_enabled=False,  # DÃ©sactiver L2 pour tests isolÃ©s
+            l2_enabled=False,  # Désactiver L2 pour tests isolés
             l3_enabled=True,
             l3_cache_dir=temp_cache_dir,
         )
@@ -293,13 +293,13 @@ class TestMultiLevelCache:
         MultiLevelCache._instance = None
     
     def test_cascade_write(self, multi_cache):
-        """Test Ã©criture en cascade."""
+        """Test écriture en cascade."""
         multi_cache.set("cascade_key", {"data": "test"})
         
-        # Doit Ãªtre dans L1
+        # Doit être dans L1
         assert multi_cache.l1.get("cascade_key") is not None
         
-        # Doit Ãªtre dans L3
+        # Doit être dans L3
         if multi_cache.l3:
             assert multi_cache.l3.get("cascade_key") is not None
     
@@ -318,7 +318,7 @@ class TestMultiLevelCache:
         result = multi_cache.get("l3_only")
         
         assert result == "value"
-        # VÃ©rifie promotion
+        # Vérifie promotion
         l1_entry = multi_cache.l1.get("l3_only")
         assert l1_entry is not None
     
@@ -353,18 +353,18 @@ class TestMultiLevelCache:
             call_count += 1
             return {"loaded": True}
         
-        # Premier appel â†’ exÃ©cute loader
+        # Premier appel â†’ exécute loader
         result1 = multi_cache.get_or_set("lazy_key", loader, ttl=60)
         assert result1["loaded"] is True
         assert call_count == 1
         
-        # DeuxiÃ¨me appel â†’ utilise cache
+        # Deuxième appel â†’ utilise cache
         result2 = multi_cache.get_or_set("lazy_key", loader, ttl=60)
         assert result2["loaded"] is True
         assert call_count == 1  # Pas de nouvel appel
     
     def test_stats_aggregation(self, multi_cache):
-        """Test agrÃ©gation des statistiques."""
+        """Test agrégation des statistiques."""
         multi_cache.set("key1", "v1")
         multi_cache.get("key1")  # Hit L1
         multi_cache.get("nonexistent")  # Miss
@@ -374,13 +374,13 @@ class TestMultiLevelCache:
         assert "l1" in stats or "hits" in str(stats)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS DECORATOR @cached
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCachedDecorator:
-    """Tests pour le dÃ©corateur @cached."""
+    """Tests pour le décorateur @cached."""
     
     def test_basic_caching(self, mock_session_state, temp_cache_dir):
         """Test caching basique."""
@@ -401,12 +401,12 @@ class TestCachedDecorator:
         assert result1 == 10
         assert call_count == 1
         
-        # DeuxiÃ¨me appel avec mÃªmes args â†’ cache
+        # Deuxième appel avec mêmes args â†’ cache
         result2 = expensive_function(5)
         assert result2 == 10
         assert call_count == 1  # Pas de nouvel appel
         
-        # Appel avec args diffÃ©rents
+        # Appel avec args différents
         result3 = expensive_function(7)
         assert result3 == 14
         assert call_count == 2
@@ -414,7 +414,7 @@ class TestCachedDecorator:
         MultiLevelCache._instance = None
     
     def test_cache_key_generation(self, mock_session_state, temp_cache_dir):
-        """Test gÃ©nÃ©ration des clÃ©s de cache."""
+        """Test génération des clés de cache."""
         from src.core.cache_multi import cached, MultiLevelCache
         
         MultiLevelCache._instance = None
@@ -423,7 +423,7 @@ class TestCachedDecorator:
         def func_with_kwargs(a: int, b: str = "default") -> str:
             return f"{a}-{b}"
         
-        # DiffÃ©rentes combinaisons d'args
+        # Différentes combinaisons d'args
         assert func_with_kwargs(1) == "1-default"
         assert func_with_kwargs(1, "custom") == "1-custom"
         assert func_with_kwargs(1, b="custom") == "1-custom"  # Depuis cache
@@ -431,7 +431,7 @@ class TestCachedDecorator:
         MultiLevelCache._instance = None
     
     def test_tags_decorator(self, mock_session_state, temp_cache_dir):
-        """Test tags via dÃ©corateur."""
+        """Test tags via décorateur."""
         from src.core.cache_multi import cached, get_cache, MultiLevelCache
         
         MultiLevelCache._instance = None
@@ -446,9 +446,9 @@ class TestCachedDecorator:
         MultiLevelCache._instance = None
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EDGE CASES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCacheEdgeCases:
@@ -461,12 +461,12 @@ class TestCacheEdgeCases:
         l1_cache.set("none_key", CacheEntry(value=None))
         
         result = l1_cache.get("none_key")
-        # L'entrÃ©e existe mais value est None
+        # L'entrée existe mais value est None
         assert result is not None
         assert result.value is None
     
     def test_empty_string_key(self, l1_cache):
-        """Test clÃ© vide."""
+        """Test clé vide."""
         from src.core.cache_multi import CacheEntry
         
         l1_cache.set("", CacheEntry(value="value"))
@@ -475,10 +475,10 @@ class TestCacheEdgeCases:
         assert result.value == "value"
     
     def test_special_characters_key(self, l1_cache):
-        """Test caractÃ¨res spÃ©ciaux dans clÃ©."""
+        """Test caractères spéciaux dans clé."""
         from src.core.cache_multi import CacheEntry
         
-        special_key = "clÃ©:avec/spÃ©ciaux#chars"
+        special_key = "clé:avec/spéciaux#chars"
         l1_cache.set(special_key, CacheEntry(value="value"))
         
         result = l1_cache.get(special_key)
@@ -497,7 +497,7 @@ class TestCacheEdgeCases:
         assert len(result.value["items"]) == 10000
     
     def test_concurrent_access(self, l1_cache):
-        """Test accÃ¨s concurrent basique."""
+        """Test accès concurrent basique."""
         import threading
         from src.core.cache_multi import CacheEntry
         
@@ -521,5 +521,5 @@ class TestCacheEdgeCases:
         t1.join()
         t2.join()
         
-        # Pas d'exception = succÃ¨s basique
+        # Pas d'exception = succès basique
 

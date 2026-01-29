@@ -85,7 +85,7 @@ class TestCalendrierLogique:
         
         # Janvier 2026
         jours_janvier = monthrange(2026, 1)[1]
-        # FÃ©vrier 2026 (non bissextile)
+        # Février 2026 (non bissextile)
         jours_fevrier = monthrange(2026, 2)[1]
         
         assert jours_janvier == 31
@@ -101,12 +101,12 @@ class TestCalendrierLogique:
         assert premier_jour == 3  # Jeudi
 
     def test_evenements_du_jour(self):
-        """Filtrer les Ã©vÃ©nements d'un jour donnÃ©."""
+        """Filtrer les événements d'un jour donné."""
         jour = date(2026, 1, 28)
         
         evenements = [
-            {"titre": "RÃ©union", "date": date(2026, 1, 28), "heure": "10:00"},
-            {"titre": "RDV mÃ©decin", "date": date(2026, 1, 28), "heure": "14:00"},
+            {"titre": "Réunion", "date": date(2026, 1, 28), "heure": "10:00"},
+            {"titre": "RDV médecin", "date": date(2026, 1, 28), "heure": "14:00"},
             {"titre": "Anniversaire", "date": date(2026, 1, 30)},
         ]
         
@@ -115,7 +115,7 @@ class TestCalendrierLogique:
         assert len(du_jour) == 2
 
     def test_vue_mois_grille(self):
-        """GÃ©nÃ©ration de la grille du mois."""
+        """Génération de la grille du mois."""
         from calendar import monthcalendar
         
         # Grille de janvier 2026
@@ -139,7 +139,7 @@ class TestVueEnsembleLogique:
         repas = [
             {"type": "dejeuner", "recette_id": 1},
             {"type": "diner", "recette_id": 2},
-            {"type": "dejeuner", "recette_id": 1},  # RÃ©pÃ©tition
+            {"type": "dejeuner", "recette_id": 1},  # Répétition
             {"type": "diner", "recette_id": 3},
         ]
         
@@ -150,7 +150,7 @@ class TestVueEnsembleLogique:
         assert recettes_uniques == 3
 
     def test_calculer_diversite(self):
-        """Calcul de l'indice de diversitÃ©."""
+        """Calcul de l'indice de diversité."""
         recettes_utilisees = [1, 2, 1, 3, 2, 1, 4]
         
         total = len(recettes_utilisees)
@@ -168,7 +168,7 @@ class TestVueEnsembleLogique:
             "budget_max": 150,
         }
         
-        # Alerte si moins de 50% planifiÃ©
+        # Alerte si moins de 50% planifié
         alerte_planning = stats["repas_planifies"] < stats["repas_attendus"] * 0.5
         
         # Alerte si plus de 80% du budget (>= pour inclure le seuil exact)
@@ -195,7 +195,7 @@ class TestComposantsPlanning:
         assert jour == "Mercredi"
 
     def test_couleur_type_repas(self):
-        """Couleur associÃ©e au type de repas."""
+        """Couleur associée au type de repas."""
         couleurs = {
             "petit_dejeuner": "#FFD700",  # Or
             "dejeuner": "#4CAF50",  # Vert
@@ -227,17 +227,17 @@ class TestComposantsPlanning:
 # =============================================================================
 
 class TestGenerationCourses:
-    """Tests pour la gÃ©nÃ©ration de liste de courses depuis le planning."""
+    """Tests pour la génération de liste de courses depuis le planning."""
 
     def test_extraire_ingredients_semaine(self):
-        """Extraction des ingrÃ©dients de la semaine."""
+        """Extraction des ingrédients de la semaine."""
         planning = [
             {
                 "recette_id": 1,
                 "portions": 4,
                 "ingredients": [
                     {"nom": "PÃ¢tes", "quantite": 500, "unite": "g"},
-                    {"nom": "Tomates", "quantite": 3, "unite": "piÃ¨ces"},
+                    {"nom": "Tomates", "quantite": 3, "unite": "pièces"},
                 ]
             },
             {
@@ -257,11 +257,11 @@ class TestGenerationCourses:
         assert len(tous_ingredients) == 4
 
     def test_fusionner_ingredients(self):
-        """Fusion des ingrÃ©dients identiques."""
+        """Fusion des ingrédients identiques."""
         ingredients = [
             {"nom": "PÃ¢tes", "quantite": 500, "unite": "g"},
             {"nom": "PÃ¢tes", "quantite": 300, "unite": "g"},
-            {"nom": "Tomates", "quantite": 3, "unite": "piÃ¨ces"},
+            {"nom": "Tomates", "quantite": 3, "unite": "pièces"},
         ]
         
         merged = {}
@@ -276,7 +276,7 @@ class TestGenerationCourses:
         assert pates["quantite"] == 800
 
     def test_ajuster_portions(self):
-        """Ajustement des quantitÃ©s selon les portions."""
+        """Ajustement des quantités selon les portions."""
         ingredient = {"quantite": 200, "pour_portions": 4}
         portions_voulues = 6
         
@@ -346,7 +346,7 @@ class TestValidationPlanning:
         """Validation de la date du repas."""
         today = date.today()
         
-        # Date passÃ©e = invalide (sauf pour Ã©dition)
+        # Date passée = invalide (sauf pour édition)
         date_passee = today - timedelta(days=5)
         date_future = today + timedelta(days=5)
         
@@ -364,7 +364,7 @@ class TestValidationPlanning:
         assert type_invalide not in types_valides
 
     def test_detecter_conflit(self):
-        """DÃ©tection de conflit (mÃªme date/type)."""
+        """Détection de conflit (même date/type)."""
         repas_existants = [
             {"date": date(2026, 1, 28), "type": "dejeuner"},
             {"date": date(2026, 1, 28), "type": "diner"},
@@ -404,7 +404,7 @@ class TestStatistiquesPlanning:
         assert counts["diner"] == 2
 
     def test_recettes_favorites(self):
-        """Recettes les plus utilisÃ©es."""
+        """Recettes les plus utilisées."""
         repas = [
             {"recette_id": 1},
             {"recette_id": 2},

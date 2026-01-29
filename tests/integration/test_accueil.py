@@ -20,16 +20,16 @@ class TestAccueilModule:
         """Test exports du module"""
         from src.modules import accueil
         
-        # VÃ©rifier fonction principale
+        # Vérifier fonction principale
         assert hasattr(accueil, 'app')
 
 
 class TestDashboardMetrics:
-    """Tests des mÃ©triques du dashboard"""
+    """Tests des métriques du dashboard"""
 
     def test_metrics_calculation(self):
-        """Test calcul des mÃ©triques"""
-        # Les mÃ©triques typiques du dashboard
+        """Test calcul des métriques"""
+        # Les métriques typiques du dashboard
         expected_metrics = [
             'recettes_total',
             'articles_stock',
@@ -37,13 +37,13 @@ class TestDashboardMetrics:
             'courses_pending'
         ]
         
-        # Simplement vÃ©rifier que ces concepts existent
+        # Simplement vérifier que ces concepts existent
         for metric in expected_metrics:
             assert isinstance(metric, str)
 
     @patch('src.core.database.obtenir_contexte_db')
     def test_fetch_dashboard_data(self, mock_db_context):
-        """Test rÃ©cupÃ©ration donnÃ©es dashboard"""
+        """Test récupération données dashboard"""
         mock_session = MagicMock()
         mock_db_context.return_value.__enter__ = Mock(return_value=mock_session)
         mock_db_context.return_value.__exit__ = Mock(return_value=False)
@@ -61,7 +61,7 @@ class TestAlertes:
 
     def test_stock_alerts(self):
         """Test alertes stock bas"""
-        # Une alerte stock bas devrait avoir ces propriÃ©tÃ©s
+        # Une alerte stock bas devrait avoir ces propriétés
         alerte = {
             "type": "stock_bas",
             "article": "Lait",
@@ -74,7 +74,7 @@ class TestAlertes:
         assert alerte["quantite_actuelle"] < alerte["seuil"]
 
     def test_expiration_alerts(self):
-        """Test alertes pÃ©remption"""
+        """Test alertes péremption"""
         today = datetime.now()
         expiration = today + timedelta(days=2)
         
@@ -89,7 +89,7 @@ class TestAlertes:
         assert alerte["jours_restants"] <= 3  # Urgence si < 3 jours
 
     def test_budget_alerts(self):
-        """Test alertes budget dÃ©passÃ©"""
+        """Test alertes budget dépassé"""
         alerte = {
             "type": "budget",
             "categorie": "alimentation",
@@ -106,9 +106,9 @@ class TestRaccourcis:
     """Tests des raccourcis rapides"""
 
     def test_quick_actions_defined(self):
-        """Test actions rapides dÃ©finies"""
+        """Test actions rapides définies"""
         quick_actions = [
-            {"label": "Nouvelle recette", "icon": "ðŸ³", "module": "cuisine"},
+            {"label": "Nouvelle recette", "icon": "ðŸ³", "module": "cuisine"},
             {"label": "Liste courses", "icon": "ðŸ›’", "module": "courses"},
             {"label": "Planning semaine", "icon": "ðŸ“…", "module": "planning"},
             {"label": "Scan produit", "icon": "ðŸ“·", "module": "barcode"},
@@ -125,20 +125,20 @@ class TestRaccourcis:
         # Simuler un clic sur un raccourci
         target_module = "cuisine"
         
-        # Devrait mettre Ã  jour session_state
+        # Devrait mettre à jour session_state
         assert target_module in ["cuisine", "courses", "planning", "barcode"]
 
 
 class TestWeatherWidget:
-    """Tests widget mÃ©tÃ©o"""
+    """Tests widget météo"""
 
     @patch('src.services.weather.WeatherGardenService')
     def test_weather_display(self, mock_weather_service):
-        """Test affichage mÃ©tÃ©o"""
+        """Test affichage météo"""
         mock_service = Mock()
         mock_service.get_current_weather.return_value = {
             "temperature": 18,
-            "condition": "EnsoleillÃ©",
+            "condition": "Ensoleillé",
             "humidity": 65,
             "alerts": []
         }
@@ -150,11 +150,11 @@ class TestWeatherWidget:
         assert "condition" in weather
 
     def test_weather_alerts_garden(self):
-        """Test alertes mÃ©tÃ©o jardin"""
+        """Test alertes météo jardin"""
         weather_alert = {
             "type": "gel",
             "message": "Risque de gel cette nuit",
-            "conseil": "ProtÃ©ger les plantes sensibles",
+            "conseil": "Protéger les plantes sensibles",
             "temperature_min": -2
         }
         
@@ -177,7 +177,7 @@ class TestFamilyStats:
         assert isinstance(jules_stats["milestones_recents"], list)
 
     def test_family_activities_summary(self):
-        """Test rÃ©sumÃ© activitÃ©s famille"""
+        """Test résumé activités famille"""
         activities_week = {
             "total": 5,
             "par_type": {
@@ -191,26 +191,26 @@ class TestFamilyStats:
 
 
 class TestRecentActivity:
-    """Tests activitÃ© rÃ©cente"""
+    """Tests activité récente"""
 
     def test_recent_recipes(self):
-        """Test recettes rÃ©centes"""
+        """Test recettes récentes"""
         recent_recipes = [
             {"nom": "Gratin", "date": datetime.now()},
             {"nom": "Soupe", "date": datetime.now() - timedelta(days=1)},
         ]
         
         assert len(recent_recipes) > 0
-        # TriÃ©es par date dÃ©croissante
+        # Triées par date décroissante
         assert recent_recipes[0]["date"] >= recent_recipes[1]["date"]
 
     def test_upcoming_meals(self):
-        """Test repas Ã  venir"""
+        """Test repas à venir"""
         today = datetime.now()
         upcoming = [
-            {"date": today, "type": "dÃ©jeuner", "recette": "Poulet rÃ´ti"},
-            {"date": today, "type": "dÃ®ner", "recette": "Salade"},
-            {"date": today + timedelta(days=1), "type": "dÃ©jeuner", "recette": "PÃ¢tes"},
+            {"date": today, "type": "déjeuner", "recette": "Poulet rôti"},
+            {"date": today, "type": "dîner", "recette": "Salade"},
+            {"date": today + timedelta(days=1), "type": "déjeuner", "recette": "PÃ¢tes"},
         ]
         
         assert len(upcoming) > 0
@@ -232,8 +232,8 @@ class TestDashboardLayout:
 
     @patch('streamlit.metric')
     def test_metrics_display(self, mock_metric):
-        """Test affichage mÃ©triques Streamlit"""
-        # Simuler affichage mÃ©trique
+        """Test affichage métriques Streamlit"""
+        # Simuler affichage métrique
         mock_metric("Recettes", 42, delta=5)
         mock_metric.assert_called_with("Recettes", 42, delta=5)
 
@@ -242,29 +242,29 @@ class TestDashboardCache:
     """Tests cache dashboard"""
 
     def test_metrics_cached(self):
-        """Test que les mÃ©triques sont cachÃ©es"""
+        """Test que les métriques sont cachées"""
         from src.core.cache import Cache
         
-        # Les mÃ©triques dashboard devraient Ãªtre cachÃ©es
+        # Les métriques dashboard devraient être cachées
         cache_key = "dashboard_metrics"
         
-        # VÃ©rifier que le cache est accessible
+        # Vérifier que le cache est accessible
         assert Cache is not None
 
     def test_cache_ttl(self):
         """Test TTL cache dashboard"""
-        # Les mÃ©triques dashboard: TTL court (5-10 min)
+        # Les métriques dashboard: TTL court (5-10 min)
         expected_ttl = 300  # 5 minutes
         
         assert expected_ttl <= 600  # Max 10 minutes
 
 
 class TestDashboardRefresh:
-    """Tests rafraÃ®chissement dashboard"""
+    """Tests rafraîchissement dashboard"""
 
     @patch('streamlit.button')
     def test_refresh_button(self, mock_button):
-        """Test bouton rafraÃ®chissement"""
+        """Test bouton rafraîchissement"""
         mock_button.return_value = False
         
         # Le dashboard devrait avoir un bouton refresh
@@ -272,8 +272,8 @@ class TestDashboardRefresh:
         assert refresh_clicked == False
 
     def test_auto_refresh(self):
-        """Test rafraÃ®chissement auto"""
-        # Streamlit peut rafraÃ®chir automatiquement
+        """Test rafraîchissement auto"""
+        # Streamlit peut rafraîchir automatiquement
         # via st.rerun() ou st.experimental_rerun()
         
         auto_refresh_interval = 300  # 5 minutes

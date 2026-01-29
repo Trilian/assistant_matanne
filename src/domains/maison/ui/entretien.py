@@ -1,5 +1,5 @@
 ﻿"""
-Module Entretien - Gestion du mÃ©nage et routines domestiques
+Module Entretien - Gestion du ménage et routines domestiques
 Suivi des tÃ¢ches quotidiennes, planification hebdomadaire, IA d'optimisation
 """
 
@@ -14,7 +14,7 @@ from src.core.decorators import with_db_session
 from src.services.base_ai_service import BaseAIService
 from src.core.ai import ClientIA
 
-# Logique mÃ©tier pure
+# Logique métier pure
 from src.domains.maison.logic.entretien_logic import (
     calculer_frequence_tache,
     determiner_urgence_tache,
@@ -29,13 +29,13 @@ from src.domains.maison.logic.helpers import (
 )
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SERVICE IA ENTRETIEN
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class EntretienService(BaseAIService):
-    """Service IA pour optimisation du mÃ©nage et routines"""
+    """Service IA pour optimisation du ménage et routines"""
     
     def __init__(self, client: ClientIA = None):
         if client is None:
@@ -48,9 +48,9 @@ class EntretienService(BaseAIService):
         )
     
     async def creer_routine(self, nom: str, description: str = "") -> str:
-        """CrÃ©e une routine avec tÃ¢ches suggÃ©rÃ©es"""
+        """Crée une routine avec tÃ¢ches suggérées"""
         prompt = f"""Pour la routine "{nom}" {description},
-suggÃ¨re 5-8 tÃ¢ches pratiques et dans un ordre logique.
+suggère 5-8 tÃ¢ches pratiques et dans un ordre logique.
 Format: "- TÃ¢che : description courte"."""
         
         return await self.call_with_cache(
@@ -61,10 +61,10 @@ Format: "- TÃ¢che : description courte"."""
     
     async def optimiser_semaine(self, types_taches: str) -> str:
         """Optimise la distribution des tÃ¢ches sur la semaine"""
-        prompt = f"""Propose une rÃ©partition optimale pour ces tÃ¢ches mÃ©nagÃ¨res:
+        prompt = f"""Propose une répartition optimale pour ces tÃ¢ches ménagères:
 {types_taches}
 
-Organise par jour (Lun-Dim) pour Ã©quilibrer la charge et ne pas surcharger un jour."""
+Organise par jour (Lun-Dim) pour équilibrer la charge et ne pas surcharger un jour."""
         
         return await self.call_with_cache(
             prompt=prompt,
@@ -73,24 +73,24 @@ Organise par jour (Lun-Dim) pour Ã©quilibrer la charge et ne pas surcharger un
         )
     
     async def conseil_temps_estime(self, tache: str) -> str:
-        """Estime le temps pour une tÃ¢che mÃ©nagÃ¨re"""
-        prompt = f"""Pour la tÃ¢che mÃ©nagÃ¨re "{tache}",
-estime le temps nÃ©cessaire (min/max), la frÃ©quence idÃ©ale et des astuces."""
+        """Estime le temps pour une tÃ¢che ménagère"""
+        prompt = f"""Pour la tÃ¢che ménagère "{tache}",
+estime le temps nécessaire (min/max), la fréquence idéale et des astuces."""
         
         return await self.call_with_cache(
             prompt=prompt,
-            system_prompt="Tu es expert en optimisation du mÃ©nage",
+            system_prompt="Tu es expert en optimisation du ménage",
             max_tokens=400
         )
     
     async def conseil_efficacite(self) -> str:
-        """Donne des astuces pour gagner du temps au mÃ©nage"""
-        prompt = """Donne 5 astuces pratiques pour rendre le mÃ©nage plus efficace et moins chronophage.
-Sois spÃ©cifique et actionnable."""
+        """Donne des astuces pour gagner du temps au ménage"""
+        prompt = """Donne 5 astuces pratiques pour rendre le ménage plus efficace et moins chronophage.
+Sois spécifique et actionnable."""
         
         return await self.call_with_cache(
             prompt=prompt,
-            system_prompt="Tu es expert en organisation domestique et efficacitÃ©",
+            system_prompt="Tu es expert en organisation domestique et efficacité",
             max_tokens=500
         )
 
@@ -100,9 +100,9 @@ def get_entretien_service() -> EntretienService:
     return EntretienService()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # HELPERS MÃ‰TIER
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @with_db_session
@@ -113,7 +113,7 @@ def creer_routine(
     description: str = "",
     db=None
 ) -> int:
-    """CrÃ©e une nouvelle routine"""
+    """Crée une nouvelle routine"""
     try:
         routine = Routine(
             nom=nom,
@@ -128,7 +128,7 @@ def creer_routine(
         clear_maison_cache()
         return routine.id
     except Exception as e:
-        st.error(f"âŒ Erreur crÃ©ation routine: {e}")
+        st.error(f"âŒ Erreur création routine: {e}")
         return None
 
 
@@ -142,7 +142,7 @@ def ajouter_tache_routine(
     ordre: int = 1,
     db=None
 ) -> bool:
-    """Ajoute une tÃ¢che Ã  une routine"""
+    """Ajoute une tÃ¢che à une routine"""
     try:
         tache = RoutineTask(
             routine_id=routine_id,
@@ -156,7 +156,7 @@ def ajouter_tache_routine(
         clear_maison_cache()
         return True
     except Exception as e:
-        st.error(f"âŒ Erreur ajout tÃ¢che: {e}")
+        st.error(f"âŒ Erreur ajout tÃ¢che: {e}")
         return False
 
 
@@ -171,13 +171,13 @@ def marquer_tache_faite(task_id: int, db=None) -> bool:
             clear_maison_cache()
             return True
     except Exception as e:
-        st.error(f"âŒ Erreur: {e}")
+        st.error(f"âŒ Erreur: {e}")
     return False
 
 
 @with_db_session
 def desactiver_routine(routine_id: int, db=None) -> bool:
-    """DÃ©sactive une routine"""
+    """Désactive une routine"""
     try:
         routine = db.query(Routine).get(routine_id)
         if routine:
@@ -186,25 +186,25 @@ def desactiver_routine(routine_id: int, db=None) -> bool:
             clear_maison_cache()
             return True
     except Exception as e:
-        st.error(f"âŒ Erreur: {e}")
+        st.error(f"âŒ Erreur: {e}")
     return False
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # MODULE PRINCIPAL
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def app():
-    """Point d'entrÃ©e module Entretien"""
-    st.title("ðŸ§¹ Entretien & MÃ©nage")
-    st.caption("Gestion des routines et tÃ¢ches mÃ©nagÃ¨res avec IA")
+    """Point d'entrée module Entretien"""
+    st.title("ðŸ§¹ Entretien & Ménage")
+    st.caption("Gestion des routines et tÃ¢ches ménagères avec IA")
     
     service = get_entretien_service()
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # STATISTIQUES
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     stats = get_stats_entretien()
     
@@ -224,17 +224,17 @@ def app():
     
     st.markdown("---")
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TABS
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     tab1, tab2, tab3, tab4 = st.tabs(
-        ["â˜‘ï¸ Aujourd'hui", "ðŸ“… Routines", "ðŸ¤– Assistant IA", "âž• CrÃ©er"]
+        ["â˜‘ï¸ Aujourd'hui", "ðŸ“… Routines", "ðŸ¤– Assistant IA", "âž• Créer"]
     )
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TAB 1: TÃ‚CHES AUJOURD'HUI
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     with tab1:
         st.subheader("Checklist d'aujourd'hui")
@@ -261,20 +261,20 @@ def app():
                 col1, col2, col3 = st.columns([3, 1, 1])
                 
                 with col1:
-                    emoji = "âœ…" if tache["fait"] else "â³"
+                    emoji = "âœ…" if tache["fait"] else "â³"
                     st.markdown(f"### {emoji} {tache['nom']}")
                     
                     if tache.get("description"):
                         st.caption(tache["description"])
                     
                     if tache.get("heure"):
-                        st.caption(f"ðŸ• {tache['heure']}")
+                        st.caption(f"ðŸ• {tache['heure']}")
                 
                 with col2:
                     if not tache["fait"]:
                         if st.button("âœ“ Fait", key=f"check_{tache['id']}", use_container_width=True):
                             if marquer_tache_faite(tache["id"]):
-                                st.success("âœ… TÃ¢che marquÃ©e!")
+                                st.success("âœ… TÃ¢che marquée!")
                                 st.rerun()
                 
                 with col3:
@@ -283,9 +283,9 @@ def app():
                 
                 st.divider()
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TAB 2: ROUTINES
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     with tab2:
         st.subheader("Mes routines")
@@ -293,11 +293,11 @@ def app():
         df_routines = charger_routines()
         
         if df_routines.empty:
-            st.info("Aucune routine crÃ©Ã©e. CrÃ©ez-en une!")
+            st.info("Aucune routine créée. Créez-en une!")
         else:
-            # Filtre par catÃ©gorie
+            # Filtre par catégorie
             categories = ["Tous"] + sorted(df_routines["categorie"].unique().tolist())
-            filtre_cat = st.selectbox("Filtrer par catÃ©gorie", categories)
+            filtre_cat = st.selectbox("Filtrer par catégorie", categories)
             
             if filtre_cat != "Tous":
                 df_routines = df_routines[df_routines["categorie"] == filtre_cat]
@@ -313,16 +313,16 @@ def app():
                     st.caption(
                         f"ðŸ“Š {routine['completion']:.0f}% â€¢ "
                         f"{routine['tasks_aujourd_hui']}/{routine['tasks_count']} tÃ¢ches â€¢ "
-                        f"FrÃ©quence: {routine['frequence']}"
+                        f"Fréquence: {routine['frequence']}"
                     )
                     
                     if routine['description']:
                         st.caption(routine['description'])
                 
                 with col2:
-                    if st.button("âš™ï¸", key=f"settings_{routine['id']}", use_container_width=True):
+                    if st.button("âš™ï¸", key=f"settings_{routine['id']}", use_container_width=True):
                         if desactiver_routine(routine['id']):
-                            st.info("Routine dÃ©sactivÃ©e")
+                            st.info("Routine désactivée")
                             st.rerun()
                 
                 # TÃ¢ches
@@ -339,10 +339,10 @@ def app():
                                 col_t1, col_t2 = st.columns([4, 1])
                                 
                                 with col_t1:
-                                    emoji = "âœ…" if t.fait_le == date.today() else "â³"
+                                    emoji = "âœ…" if t.fait_le == date.today() else "â³"
                                     st.caption(f"{emoji} {t.nom}")
                                     if t.heure_prevue:
-                                        st.caption(f"ðŸ• {t.heure_prevue}")
+                                        st.caption(f"ðŸ• {t.heure_prevue}")
                                 
                                 with col_t2:
                                     if t.fait_le != date.today():
@@ -352,15 +352,15 @@ def app():
                 
                 st.divider()
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TAB 3: ASSISTANT IA
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     with tab3:
         st.subheader("ðŸ¤– Assistant Entretien IA")
         
-        # CrÃ©er routine avec IA
-        st.markdown("#### ðŸ“‹ CrÃ©er une routine avec IA")
+        # Créer routine avec IA
+        st.markdown("#### ðŸ“‹ Créer une routine avec IA")
         
         col_r1, col_r2 = st.columns(2)
         
@@ -372,31 +372,31 @@ def app():
         
         with col_r2:
             routine_freq = st.selectbox(
-                "FrÃ©quence",
+                "Fréquence",
                 ["quotidien", "hebdomadaire", "mensuel", "hebdomadaire 2x"]
             )
         
-        if st.button("ðŸ’¡ GÃ©nÃ©rer tÃ¢ches", use_container_width=True):
+        if st.button("ðŸ’¡ Générer tÃ¢ches", use_container_width=True):
             if routine_nom:
-                with st.spinner("IA crÃ©e la routine..."):
+                with st.spinner("IA crée la routine..."):
                     try:
                         import asyncio
-                        taches = asyncio.run(service.creer_routine(routine_nom, f"FrÃ©quence: {routine_freq}"))
+                        taches = asyncio.run(service.creer_routine(routine_nom, f"Fréquence: {routine_freq}"))
                         if taches:
                             st.success(taches)
                             
-                            # Proposer de crÃ©er
-                            if st.button("âœ… CrÃ©er cette routine", use_container_width=True):
-                                r_id = creer_routine(routine_nom, "GÃ©nÃ©ral", routine_freq)
+                            # Proposer de créer
+                            if st.button("âœ… Créer cette routine", use_container_width=True):
+                                r_id = creer_routine(routine_nom, "Général", routine_freq)
                                 if r_id:
-                                    st.success("Routine crÃ©Ã©e!")
+                                    st.success("Routine créée!")
                     except Exception as e:
-                        st.warning(f"âš ï¸ IA indisponible: {e}")
+                        st.warning(f"âš ï¸ IA indisponible: {e}")
         
         st.markdown("---")
         
         # Optimiser semaine
-        st.markdown("#### ðŸ—“ï¸ Optimiser la semaine")
+        st.markdown("#### ðŸ—“ï¸ Optimiser la semaine")
         
         types = st.text_area(
             "Lister les tÃ¢ches (une par ligne)",
@@ -404,7 +404,7 @@ def app():
             height=120
         )
         
-        if st.button("ðŸ”® Proposer rÃ©partition", use_container_width=True):
+        if st.button("ðŸ”® Proposer répartition", use_container_width=True):
             if types:
                 with st.spinner("Optimisation en cours..."):
                     try:
@@ -413,12 +413,12 @@ def app():
                         if repartition:
                             st.info(repartition)
                     except Exception as e:
-                        st.warning(f"âš ï¸ IA indisponible: {e}")
+                        st.warning(f"âš ï¸ IA indisponible: {e}")
         
         st.markdown("---")
         
         # Astuces
-        st.markdown("#### ðŸ’¡ Astuces d'efficacitÃ©")
+        st.markdown("#### ðŸ’¡ Astuces d'efficacité")
         
         if st.button("ðŸš€ Obtenir astuces", use_container_width=True):
             with st.spinner("Recherche astuces..."):
@@ -428,12 +428,12 @@ def app():
                     if astuces:
                         st.success(astuces)
                 except Exception as e:
-                    st.warning(f"âš ï¸ IA indisponible: {e}")
+                    st.warning(f"âš ï¸ IA indisponible: {e}")
         
         st.markdown("---")
         
         # Estimer temps
-        st.markdown("#### â±ï¸ Estimer temps d'une tÃ¢che")
+        st.markdown("#### â±ï¸ Estimer temps d'une tÃ¢che")
         
         tache_temps = st.text_input(
             "Nom de la tÃ¢che",
@@ -449,14 +449,14 @@ def app():
                         if temps:
                             st.info(temps)
                     except Exception as e:
-                        st.warning(f"âš ï¸ IA indisponible: {e}")
+                        st.warning(f"âš ï¸ IA indisponible: {e}")
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TAB 4: CRÃ‰ER ROUTINE
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     with tab4:
-        st.subheader("CrÃ©er une nouvelle routine")
+        st.subheader("Créer une nouvelle routine")
         
         with st.form("form_routine"):
             nom_r = st.text_input("Nom *", placeholder="Ex: Nettoyage salle de bain")
@@ -465,13 +465,13 @@ def app():
             
             with col_r1:
                 categorie_r = st.selectbox(
-                    "CatÃ©gorie",
-                    ["Cuisine", "Salle de bain", "Chambres", "Salon", "ExtÃ©rieur", "Autre"]
+                    "Catégorie",
+                    ["Cuisine", "Salle de bain", "Chambres", "Salon", "Extérieur", "Autre"]
                 )
             
             with col_r2:
                 frequence_r = st.selectbox(
-                    "FrÃ©quence",
+                    "Fréquence",
                     ["quotidien", "hebdomadaire", "bi-hebdomadaire", "mensuel"]
                 )
             
@@ -481,9 +481,9 @@ def app():
                 height=80
             )
             
-            nb_taches = st.number_input("Nombre de tÃ¢ches Ã  ajouter", 1, 10, 3)
+            nb_taches = st.number_input("Nombre de tÃ¢ches à ajouter", 1, 10, 3)
             
-            submitted = st.form_submit_button("âœ… CrÃ©er routine", type="primary")
+            submitted = st.form_submit_button("âœ… Créer routine", type="primary")
             
             if submitted:
                 if not nom_r:
@@ -491,7 +491,7 @@ def app():
                 else:
                     r_id = creer_routine(nom_r, categorie_r, frequence_r, desc_r)
                     if r_id:
-                        st.success(f"âœ… Routine '{nom_r}' crÃ©Ã©e!")
+                        st.success(f"âœ… Routine '{nom_r}' créée!")
                         st.rerun()
         
         st.markdown("---")
@@ -516,7 +516,7 @@ def app():
                 "nom": "Lessive",
                 "categorie": "Chambres",
                 "freq": "hebdomadaire",
-                "taches": ["Trier linge", "Laver", "SÃ©cher", "Plier", "Ranger"]
+                "taches": ["Trier linge", "Laver", "Sécher", "Plier", "Ranger"]
             }
         ]
         
@@ -526,7 +526,7 @@ def app():
                 if r_id:
                     for ordre, tache_nom in enumerate(templ["taches"], 1):
                         ajouter_tache_routine(r_id, tache_nom, ordre=ordre)
-                    st.success("âœ… Routine crÃ©Ã©e!")
+                    st.success("âœ… Routine créée!")
                     st.rerun()
 
 

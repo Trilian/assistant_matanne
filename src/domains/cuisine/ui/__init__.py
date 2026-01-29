@@ -1,5 +1,5 @@
 ﻿"""
-Package Cuisine - Modules sÃ©parÃ©s pour une meilleure organisation
+Package Cuisine - Modules séparés pour une meilleure organisation
 
 Structure:
 - recettes.py: Gestion des recettes

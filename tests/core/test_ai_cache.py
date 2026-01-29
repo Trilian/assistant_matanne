@@ -12,7 +12,7 @@ import pytest
 
 @pytest.fixture
 def mock_session_state():
-    """Mock st.session_state pour tests isolÃ©s."""
+    """Mock st.session_state pour tests isolés."""
     mock_state = {}
 
     def getitem(key):
@@ -37,16 +37,16 @@ def mock_session_state():
     return mock
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CACHE IA GENERATION CLE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCacheIAGenererCle:
     """Tests pour CacheIA.generer_cle()."""
 
     def test_generer_cle_returns_string(self):
-        """Test gÃ©nÃ©ration clÃ© retourne string."""
+        """Test génération clé retourne string."""
         from src.core.ai.cache import CacheIA
 
         cle = CacheIA.generer_cle("Mon prompt", "System", 0.7, "mistral")
@@ -54,7 +54,7 @@ class TestCacheIAGenererCle:
         assert isinstance(cle, str)
 
     def test_generer_cle_prefixee(self):
-        """Test clÃ© prÃ©fixÃ©e avec ia_."""
+        """Test clé préfixée avec ia_."""
         from src.core.ai.cache import CacheIA
 
         cle = CacheIA.generer_cle("Mon prompt")
@@ -62,7 +62,7 @@ class TestCacheIAGenererCle:
         assert cle.startswith("ia_")
 
     def test_generer_cle_deterministe(self):
-        """Test gÃ©nÃ©ration dÃ©terministe (mÃªme entrÃ©e = mÃªme clÃ©)."""
+        """Test génération déterministe (même entrée = même clé)."""
         from src.core.ai.cache import CacheIA
 
         cle1 = CacheIA.generer_cle("prompt", "sys", 0.7, "model")
@@ -71,7 +71,7 @@ class TestCacheIAGenererCle:
         assert cle1 == cle2
 
     def test_generer_cle_differente_pour_prompts_differents(self):
-        """Test clÃ©s diffÃ©rentes pour prompts diffÃ©rents."""
+        """Test clés différentes pour prompts différents."""
         from src.core.ai.cache import CacheIA
 
         cle1 = CacheIA.generer_cle("prompt1")
@@ -80,7 +80,7 @@ class TestCacheIAGenererCle:
         assert cle1 != cle2
 
     def test_generer_cle_differente_pour_temperatures_differentes(self):
-        """Test clÃ©s diffÃ©rentes pour tempÃ©ratures diffÃ©rentes."""
+        """Test clés différentes pour températures différentes."""
         from src.core.ai.cache import CacheIA
 
         cle1 = CacheIA.generer_cle("prompt", temperature=0.5)
@@ -89,27 +89,27 @@ class TestCacheIAGenererCle:
         assert cle1 != cle2
 
     def test_generer_cle_hash_md5(self):
-        """Test que la clÃ© utilise un hash MD5."""
+        """Test que la clé utilise un hash MD5."""
         from src.core.ai.cache import CacheIA
 
         cle = CacheIA.generer_cle("test")
 
-        # AprÃ¨s prÃ©fixe, devrait Ãªtre un hash MD5 (32 caractÃ¨res hex)
+        # Après préfixe, devrait être un hash MD5 (32 caractères hex)
         hash_part = cle[3:]  # Enlever "ia_"
         assert len(hash_part) == 32
         assert all(c in "0123456789abcdef" for c in hash_part)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CACHE IA OBTENIR
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCacheIAObtenir:
     """Tests pour CacheIA.obtenir()."""
 
     def test_obtenir_returns_none_if_not_cached(self, mock_session_state):
-        """Test obtenir retourne None si non cachÃ©."""
+        """Test obtenir retourne None si non caché."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.ai.cache import CacheIA
 
@@ -118,34 +118,34 @@ class TestCacheIAObtenir:
             assert result is None
 
     def test_obtenir_returns_cached_value(self, mock_session_state):
-        """Test obtenir retourne valeur cachÃ©e."""
+        """Test obtenir retourne valeur cachée."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.ai.cache import CacheIA
 
-            # DÃ©finir d'abord
-            CacheIA.definir("mon prompt", "rÃ©ponse IA", "system", 0.7, "mistral")
+            # Définir d'abord
+            CacheIA.definir("mon prompt", "réponse IA", "system", 0.7, "mistral")
 
             # Obtenir
             result = CacheIA.obtenir("mon prompt", "system", 0.7, "mistral")
 
-            assert result == "rÃ©ponse IA"
+            assert result == "réponse IA"
 
     def test_obtenir_with_custom_ttl(self, mock_session_state):
-        """Test obtenir avec TTL personnalisÃ©."""
+        """Test obtenir avec TTL personnalisé."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.ai.cache import CacheIA
 
-            CacheIA.definir("prompt", "rÃ©ponse")
+            CacheIA.definir("prompt", "réponse")
 
             # Devrait retourner avec TTL court
             result = CacheIA.obtenir("prompt", ttl=3600)
 
-            assert result == "rÃ©ponse"
+            assert result == "réponse"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CACHE IA DEFINIR
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCacheIADefinir:
@@ -156,28 +156,28 @@ class TestCacheIADefinir:
         with patch("streamlit.session_state", mock_session_state):
             from src.core.ai.cache import CacheIA
 
-            CacheIA.definir("prompt", "rÃ©ponse IA")
+            CacheIA.definir("prompt", "réponse IA")
 
-            # VÃ©rifier via obtenir
+            # Vérifier via obtenir
             result = CacheIA.obtenir("prompt")
-            assert result == "rÃ©ponse IA"
+            assert result == "réponse IA"
 
     def test_definir_with_all_params(self, mock_session_state):
-        """Test definir avec tous les paramÃ¨tres."""
+        """Test definir avec tous les paramètres."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.ai.cache import CacheIA
 
             CacheIA.definir(
-                prompt="GÃ©nÃ¨re une recette",
+                prompt="Génère une recette",
                 reponse="Voici une recette...",
                 systeme="Tu es un chef",
                 temperature=0.8,
                 modele="mistral-large",
             )
 
-            # VÃ©rifier via obtenir avec mÃªmes params
+            # Vérifier via obtenir avec mêmes params
             result = CacheIA.obtenir(
-                prompt="GÃ©nÃ¨re une recette",
+                prompt="Génère une recette",
                 systeme="Tu es un chef",
                 temperature=0.8,
                 modele="mistral-large",
@@ -186,9 +186,9 @@ class TestCacheIADefinir:
             assert result == "Voici une recette..."
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CACHE IA INVALIDER
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCacheIAInvalider:
@@ -199,21 +199,21 @@ class TestCacheIAInvalider:
         with patch("streamlit.session_state", mock_session_state):
             from src.core.ai.cache import CacheIA
 
-            # Ajouter des entrÃ©es
-            CacheIA.definir("prompt1", "rÃ©ponse1")
-            CacheIA.definir("prompt2", "rÃ©ponse2")
+            # Ajouter des entrées
+            CacheIA.definir("prompt1", "réponse1")
+            CacheIA.definir("prompt2", "réponse2")
 
             # Invalider
             CacheIA.invalider_tout()
 
-            # VÃ©rifier suppression
+            # Vérifier suppression
             assert CacheIA.obtenir("prompt1") is None
             assert CacheIA.obtenir("prompt2") is None
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CACHE IA STATISTIQUES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCacheIAStatistiques:
@@ -229,35 +229,35 @@ class TestCacheIAStatistiques:
             assert isinstance(stats, dict)
 
     def test_statistiques_contains_expected_keys(self, mock_session_state):
-        """Test statistiques contient les clÃ©s attendues."""
+        """Test statistiques contient les clés attendues."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.ai.cache import CacheIA
 
             stats = CacheIA.obtenir_statistiques()
 
-            # Le cache IA a ses propres clÃ©s
+            # Le cache IA a ses propres clés
             assert "entrees_ia" in stats or "taux_hit" in stats or len(stats) > 0
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PREFIXE ET TTL
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCacheIAConstants:
     """Tests pour constantes CacheIA."""
 
     def test_prefixe_constant(self):
-        """Test prÃ©fixe constant."""
+        """Test préfixe constant."""
         from src.core.ai.cache import CacheIA
 
         assert CacheIA.PREFIXE == "ia_"
 
     def test_ttl_par_defaut(self):
-        """Test TTL par dÃ©faut dÃ©fini."""
+        """Test TTL par défaut défini."""
         from src.core.ai.cache import CacheIA
 
         assert CacheIA.TTL_PAR_DEFAUT > 0
-        # GÃ©nÃ©ralement 1h = 3600s
+        # Généralement 1h = 3600s
         assert CacheIA.TTL_PAR_DEFAUT >= 3600
 

@@ -2,11 +2,11 @@
 Tests unitaires pour database.py (src/core/database.py).
 
 Tests couvrant:
-- CrÃ©ation engine PostgreSQL avec retry
+- Création engine PostgreSQL avec retry
 - Session factory et context managers
 - Gestionnaire de migrations
-- VÃ©rifications et health checks
-- Initialisation de la base de donnÃ©es
+- Vérifications et health checks
+- Initialisation de la base de données
 """
 
 import pytest
@@ -39,26 +39,26 @@ from src.core.database import (
 from src.core.errors import ErreurBaseDeDonnees
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 1: TESTS ENGINE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestDatabaseEngine:
-    """Test crÃ©ation engine."""
+    """Test création engine."""
 
     def test_obtenir_moteur_returns_engine(self):
         """Test que obtenir_moteur retourne un engine."""
-        # Ce test utilise l'engine de test configurÃ© dans conftest
-        # On vÃ©rifie juste que la fonction existe et retourne quelque chose
+        # Ce test utilise l'engine de test configuré dans conftest
+        # On vérifie juste que la fonction existe et retourne quelque chose
         with patch("src.core.database.obtenir_parametres") as mock_params:
             mock_params.return_value = MagicMock(
                 DATABASE_URL="sqlite:///:memory:",
                 DEBUG=False,
             )
             with patch("src.core.database.st.cache_resource", lambda **kw: lambda f: f):
-                # Le test vÃ©rifie que la logique fonctionne
+                # Le test vérifie que la logique fonctionne
                 assert callable(obtenir_moteur)
 
     def test_obtenir_moteur_securise_returns_none_on_error(self):
@@ -71,7 +71,7 @@ class TestDatabaseEngine:
             assert result is None
 
     def test_obtenir_moteur_securise_returns_engine_on_success(self):
-        """Test que obtenir_moteur_securise retourne l'engine en cas de succÃ¨s."""
+        """Test que obtenir_moteur_securise retourne l'engine en cas de succès."""
         mock_engine = MagicMock()
         with patch("src.core.database.obtenir_moteur") as mock_moteur:
             mock_moteur.return_value = mock_engine
@@ -85,9 +85,9 @@ class TestDatabaseEngine:
         assert get_engine == obtenir_moteur
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 2: TESTS SESSION FACTORY
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -106,9 +106,9 @@ class TestSessionFactory:
             assert callable(factory)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 3: TESTS CONTEXT MANAGERS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -127,7 +127,7 @@ class TestContextManagers:
                 assert db is not None
 
     def test_obtenir_contexte_db_commits_on_success(self):
-        """Test que le context manager commit en cas de succÃ¨s."""
+        """Test que le context manager commit en cas de succès."""
         mock_session = MagicMock(spec=Session)
         mock_factory = MagicMock(return_value=mock_session)
         
@@ -135,7 +135,7 @@ class TestContextManagers:
             mock_fab.return_value = mock_factory
             
             with obtenir_contexte_db() as db:
-                pass  # SuccÃ¨s
+                pass  # Succès
             
             mock_session.commit.assert_called()
 
@@ -183,9 +183,9 @@ class TestContextManagers:
         assert get_safe_db == obtenir_db_securise
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 4: TESTS GESTIONNAIRE MIGRATIONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -242,7 +242,7 @@ class TestGestionnaireMigrations:
         assert isinstance(migrations, list)
 
     def test_obtenir_migrations_disponibles_has_required_keys(self):
-        """Test que chaque migration a les clÃ©s requises."""
+        """Test que chaque migration a les clés requises."""
         migrations = GestionnaireMigrations.obtenir_migrations_disponibles()
         
         for migration in migrations:
@@ -256,14 +256,14 @@ class TestGestionnaireMigrations:
         assert MigrationManager == GestionnaireMigrations
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 5: TESTS VÃ‰RIFICATIONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestDatabaseVerifications:
-    """Test fonctions de vÃ©rification."""
+    """Test fonctions de vérification."""
 
     def test_verifier_connexion_returns_tuple(self):
         """Test que verifier_connexion retourne un tuple (bool, str)."""
@@ -284,11 +284,11 @@ class TestDatabaseVerifications:
 
     def test_verifier_connexion_returns_false_if_no_engine(self):
         """Test que verifier_connexion retourne False si pas d'engine."""
-        # Ce test vÃ©rifie le comportement attendu lorsque l'engine n'est pas disponible
-        # Le test est implÃ©mentÃ© en vÃ©rifiant que la fonction retourne bien un tuple
+        # Ce test vérifie le comportement attendu lorsque l'engine n'est pas disponible
+        # Le test est implémenté en vérifiant que la fonction retourne bien un tuple
         with patch("src.core.database.obtenir_moteur_securise") as mock_moteur:
             mock_moteur.return_value = None
-            # La fonction est cachÃ©e par Streamlit, donc on vÃ©rifie juste la signature
+            # La fonction est cachée par Streamlit, donc on vérifie juste la signature
             # Le vrai test serait fait sans le cache
             assert callable(verifier_connexion)
 
@@ -297,9 +297,9 @@ class TestDatabaseVerifications:
         assert check_connection == verifier_connexion
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 6: TESTS HEALTH CHECK
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -322,7 +322,7 @@ class TestHealthCheck:
             assert isinstance(result, dict)
 
     def test_verifier_sante_has_sain_key(self):
-        """Test que verifier_sante contient la clÃ© 'sain'."""
+        """Test que verifier_sante contient la clé 'sain'."""
         mock_engine = MagicMock()
         mock_conn = MagicMock()
         mock_engine.connect.return_value.__enter__ = MagicMock(return_value=mock_conn)
@@ -362,17 +362,17 @@ class TestHealthCheck:
             assert "timestamp" in result
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 7: TESTS INITIALISATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestDatabaseInitialisation:
-    """Test initialisation de la base de donnÃ©es."""
+    """Test initialisation de la base de données."""
 
     def test_initialiser_database_returns_bool(self):
-        """Test que initialiser_database retourne un boolÃ©en."""
+        """Test que initialiser_database retourne un booléen."""
         mock_engine = MagicMock()
         mock_conn = MagicMock()
         mock_engine.connect.return_value.__enter__ = MagicMock(return_value=mock_conn)
@@ -399,7 +399,7 @@ class TestDatabaseInitialisation:
                 assert result is False
 
     def test_initialiser_database_skips_migrations_if_disabled(self):
-        """Test que initialiser_database saute les migrations si dÃ©sactivÃ©."""
+        """Test que initialiser_database saute les migrations si désactivé."""
         mock_engine = MagicMock()
         mock_conn = MagicMock()
         mock_engine.connect.return_value.__enter__ = MagicMock(return_value=mock_conn)
@@ -415,30 +415,30 @@ class TestDatabaseInitialisation:
                     mock_exec.assert_not_called()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 8: TESTS INFOS DB
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestDatabaseInfos:
-    """Test informations de la base de donnÃ©es."""
+    """Test informations de la base de données."""
 
     def test_obtenir_infos_db_returns_dict(self):
         """Test que obtenir_infos_db retourne un dictionnaire."""
-        # La fonction est cachÃ©e par Streamlit, on vÃ©rifie juste qu'elle existe
+        # La fonction est cachée par Streamlit, on vérifie juste qu'elle existe
         assert callable(obtenir_infos_db)
 
     def test_obtenir_infos_db_has_statut_key(self):
-        """Test que obtenir_infos_db contient la clÃ© 'statut'."""
-        # La fonction est cachÃ©e par Streamlit, donc on vÃ©rifie la structure attendue
+        """Test que obtenir_infos_db contient la clé 'statut'."""
+        # La fonction est cachée par Streamlit, donc on vérifie la structure attendue
         # en cas d'erreur (seul cas testable facilement)
         with patch("src.core.database.obtenir_moteur") as mock_moteur:
             mock_moteur.side_effect = Exception("Test error")
             with patch("src.core.database.st.cache_data", lambda **kw: lambda f: f):
-                # RÃ©-importer la fonction pour bypass le cache
+                # Ré-importer la fonction pour bypass le cache
                 from src.core.database import obtenir_infos_db as get_infos
-                # Le test vÃ©rifie que la fonction est callable
+                # Le test vérifie que la fonction est callable
                 assert callable(get_infos)
 
     def test_obtenir_infos_db_returns_error_on_exception(self):
@@ -452,14 +452,14 @@ class TestDatabaseInfos:
                 assert "erreur" in result
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 9: TESTS D'INTÃ‰GRATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.integration
 class TestDatabaseIntegration:
-    """Tests d'intÃ©gration database."""
+    """Tests d'intégration database."""
 
     def test_context_manager_workflow(self, db):
         """Test workflow complet context manager."""
@@ -471,7 +471,7 @@ class TestDatabaseIntegration:
         """Test isolation des transactions."""
         from src.core.models import Recette
         
-        # CrÃ©er une recette
+        # Créer une recette
         recette = Recette(
             nom="Test Transaction",
             temps_preparation=10,
@@ -481,16 +481,16 @@ class TestDatabaseIntegration:
         db.add(recette)
         db.flush()
         
-        # VÃ©rifier qu'elle existe dans la session
+        # Vérifier qu'elle existe dans la session
         assert recette.id is not None
         
         # Rollback dans la fixture nettoiera
 
     def test_query_execution(self, db):
-        """Test exÃ©cution de requÃªtes."""
+        """Test exécution de requêtes."""
         from src.core.models import Recette
         
-        # ExÃ©cuter une requÃªte simple
+        # Exécuter une requête simple
         count = db.query(Recette).count()
         
         assert isinstance(count, int)

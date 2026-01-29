@@ -1,6 +1,6 @@
 ﻿"""
-Module ParamÃ¨tres - Configuration Application
-Gestion configuration foyer, IA, base de donnÃ©es, cache
+Module Paramètres - Configuration Application
+Gestion configuration foyer, IA, base de données, cache
 """
 
 from datetime import datetime
@@ -20,7 +20,7 @@ from src.core.database import verifier_sante as health_check
 from src.core.state import StateManager, get_state
 from src.ui.components import Modal
 
-# Logique mÃ©tier pure
+# Logique métier pure
 from src.domains.shared.logic.parametres_logic import (
     valider_parametres,
     generer_config_defaut,
@@ -30,19 +30,19 @@ from src.domains.shared.logic.parametres_logic import (
 # UI
 from src.ui.feedback import show_error, show_success, smart_spinner
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # MODULE PRINCIPAL
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def app():
-    """Point d'entrÃ©e module paramÃ¨tres"""
+    """Point d'entrée module paramètres"""
 
-    st.title("âš™ï¸ ParamÃ¨tres")
+    st.title("âš™ï¸ Paramètres")
 
-    # Tabs - Ajout des nouvelles fonctionnalitÃ©s
+    # Tabs - Ajout des nouvelles fonctionnalités
     tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(
-        ["ðŸ‘¨â€ðŸ‘©â€ðŸ‘§â€ðŸ‘¦ Foyer", "ðŸ¤– IA", "ðŸ’¾ Base de DonnÃ©es", "ðŸ—„ï¸ Cache", "ðŸ“± Affichage", "ðŸ’° Budget", "â„¹ï¸ Ã€ Propos"]
+        ["ðŸ‘¨â€ðŸ‘©â€ðŸ‘§â€ðŸ‘¦ Foyer", "ðŸ¤– IA", "ðŸ’¾ Base de Données", "ðŸ—„ï¸ Cache", "ðŸ“± Affichage", "ðŸ’° Budget", "â„¹ï¸ Ã€ Propos"]
     )
 
     with tab1:
@@ -67,21 +67,21 @@ def app():
         render_about()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TAB 1: CONFIGURATION FOYER
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def render_foyer_config():
     """Configuration du foyer"""
 
-    st.markdown("### ðŸ‘¨â€ðŸ‘©â€ðŸ‘§â€ðŸ‘¦ Configuration Foyer")
+    st.markdown("### ðŸ‘¨â€ðŸ‘©â€ðŸ‘§â€ðŸ‘¦ Configuration Foyer")
     st.caption("Configure les informations de ton foyer")
 
     # Ã‰tat actuel
     state = get_state()
 
-    # RÃ©cupÃ©rer config existante
+    # Récupérer config existante
     config = st.session_state.get(
         "foyer_config",
         {
@@ -115,21 +115,21 @@ def render_foyer_config():
             )
 
             a_bebe = st.checkbox(
-                "ðŸ‘¶ PrÃ©sence d'un jeune enfant (< 24 mois)", value=config.get("a_bebe", False)
+                "ðŸ‘¶ Présence d'un jeune enfant (< 24 mois)", value=config.get("a_bebe", False)
             )
 
-        st.markdown("#### PrÃ©fÃ©rences Alimentaires")
+        st.markdown("#### Préférences Alimentaires")
 
         preferences = st.multiselect(
-            "RÃ©gimes / Restrictions",
+            "Régimes / Restrictions",
             [
-                "VÃ©gÃ©tarien",
-                "VÃ©gÃ©talien",
+                "Végétarien",
+                "Végétalien",
                 "Sans gluten",
                 "Sans lactose",
                 "Halal",
                 "Casher",
-                "PalÃ©o",
+                "Paléo",
                 "Sans porc",
             ],
             default=config.get("preferences_alimentaires", []),
@@ -139,7 +139,7 @@ def render_foyer_config():
             "Allergies alimentaires",
             value=config.get("allergies", ""),
             placeholder="Ex: Arachides, fruits de mer...",
-            help="Liste des allergies Ã  prendre en compte",
+            help="Liste des allergies à prendre en compte",
         )
 
         st.markdown("---")
@@ -162,10 +162,10 @@ def render_foyer_config():
 
             st.session_state.foyer_config = new_config
 
-            # Mettre Ã  jour state
+            # Mettre à jour state
             state.nom_utilisateur = nom_utilisateur
 
-            show_success("âœ… Configuration sauvegardÃ©e !")
+            show_success("âœ… Configuration sauvegardée !")
             st.rerun()
 
     # Afficher config actuelle
@@ -173,36 +173,36 @@ def render_foyer_config():
         st.json(config)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TAB 2: CONFIGURATION IA
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def render_ia_config():
     """Configuration IA"""
 
     st.markdown("### ðŸ¤– Configuration IA")
-    st.caption("ParamÃ¨tres du service d'intelligence artificielle")
+    st.caption("Paramètres du service d'intelligence artificielle")
 
     settings = get_settings()
 
-    # Infos modÃ¨le
-    st.markdown("#### ModÃ¨le Actuel")
+    # Infos modèle
+    st.markdown("#### Modèle Actuel")
 
     col1, col2 = st.columns(2)
 
     with col1:
-        st.info(f"**ModÃ¨le:** {settings.MISTRAL_MODEL}")
+        st.info(f"**Modèle:** {settings.MISTRAL_MODEL}")
         st.info("**Provider:** Mistral AI")
 
     with col2:
-        st.info("**TempÃ©rature:** 0.7 (dÃ©faut)")
-        st.info("**Max Tokens:** 1000 (dÃ©faut)")
+        st.info("**Température:** 0.7 (défaut)")
+        st.info("**Max Tokens:** 1000 (défaut)")
 
     st.markdown("---")
 
     # Rate Limiting
-    st.markdown("#### â³ Rate Limiting")
+    st.markdown("#### â³ Rate Limiting")
 
     col3, col4 = st.columns(2)
 
@@ -238,8 +238,8 @@ def render_ia_config():
 
     st.markdown("---")
 
-    # Cache SÃ©mantique
-    st.markdown("#### ðŸ§  Cache SÃ©mantique")
+    # Cache Sémantique
+    st.markdown("#### ðŸ§  Cache Sémantique")
 
     cache_stats = SemanticCache.obtenir_statistiques()
 
@@ -249,47 +249,47 @@ def render_ia_config():
         st.metric(
             "Taux de Hit",
             f"{cache_stats.get('taux_hit', 0):.1f}%",
-            help="Pourcentage de rÃ©ponses servies depuis le cache",
+            help="Pourcentage de réponses servies depuis le cache",
         )
 
     with col8:
-        st.metric("EntrÃ©es CachÃ©es", cache_stats.get("entrees_ia", 0))
+        st.metric("Entrées Cachées", cache_stats.get("entrees_ia", 0))
 
     with col9:
-        st.metric("Appels Ã‰conomisÃ©s", cache_stats.get("saved_api_calls", 0))
+        st.metric("Appels Ã‰conomisés", cache_stats.get("saved_api_calls", 0))
 
-    mode = "ðŸ§  SÃ©mantique" if cache_stats.get("embeddings_available", False) else "ðŸ”¤ MD5"
+    mode = "ðŸ§  Sémantique" if cache_stats.get("embeddings_available", False) else "ðŸ”¤ MD5"
     st.info(f"**Mode:** {mode}")
     if cache_stats.get("embeddings_available", False):
-        st.success("âœ… Embeddings actifs (similaritÃ© sÃ©mantique)")
+        st.success("âœ… Embeddings actifs (similarité sémantique)")
     else:
-        st.warning("âš ï¸ Embeddings indisponibles (fallback MD5)")
+        st.warning("âš ï¸ Embeddings indisponibles (fallback MD5)")
 
     # Actions cache IA
     col10, col11 = st.columns(2)
 
     with col10:
-        if st.button("ðŸ—‘ï¸ Vider Cache IA", key="btn_clear_semantic_cache", use_container_width=True):
+        if st.button("ðŸ—‘ï¸ Vider Cache IA", key="btn_clear_semantic_cache", use_container_width=True):
             SemanticCache.invalider_tout()
-            show_success("Cache IA vidÃ© !")
+            show_success("Cache IA vidé !")
             st.rerun()
 
     with col11:
-        if st.button("ðŸ“Š DÃ©tails Cache", key="btn_cache_details", use_container_width=True):
-            with st.expander("ðŸ“Š Statistiques DÃ©taillÃ©es", expanded=True):
+        if st.button("ðŸ“Š Détails Cache", key="btn_cache_details", use_container_width=True):
+            with st.expander("ðŸ“Š Statistiques Détaillées", expanded=True):
                 st.json(cache_stats)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TAB 3: BASE DE DONNÃ‰ES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def render_database_config():
-    """Configuration base de donnÃ©es"""
+    """Configuration base de données"""
 
-    st.markdown("### ðŸ’¾ Base de DonnÃ©es")
-    st.caption("Informations et maintenance de la base de donnÃ©es")
+    st.markdown("### ðŸ’¾ Base de Données")
+    st.caption("Informations et maintenance de la base de données")
 
     # Infos DB
     db_info = get_db_info()
@@ -307,22 +307,22 @@ def render_database_config():
         with col2:
             st.info(f"**Version:** {db_info.get('version', 'â€”')}")
             st.info(f"**Taille:** {db_info.get('taille', 'â€”')}")
-            st.info(f"**SchÃ©ma:** v{db_info.get('version_schema', 0)}")
+            st.info(f"**Schéma:** v{db_info.get('version_schema', 0)}")
 
     else:
-        st.error(f"âŒ Erreur: {db_info.get('erreur', 'Inconnue')}")
+        st.error(f"âŒ Erreur: {db_info.get('erreur', 'Inconnue')}")
 
     st.markdown("---")
 
     # Health Check
-    st.markdown("#### ðŸ¥ Health Check")
+    st.markdown("#### ðŸ¥ Health Check")
 
-    if st.button("ðŸ” VÃ©rifier l'Ã©tat", key="btn_check_db_status", use_container_width=True):
-        with smart_spinner("VÃ©rification en cours...", estimated_seconds=2):
+    if st.button("ðŸ” Vérifier l'état", key="btn_check_db_status", use_container_width=True):
+        with smart_spinner("Vérification en cours...", estimated_seconds=2):
             health = health_check()
 
         if health.get("sain"):
-            st.success("âœ… Base de donnÃ©es en bonne santÃ©")
+            st.success("âœ… Base de données en bonne santé")
 
             col3, col4 = st.columns(2)
 
@@ -333,7 +333,7 @@ def render_database_config():
                 db_size_mb = health.get("taille_base_octets", 0) / 1024 / 1024
                 st.metric("Taille DB", f"{db_size_mb:.2f} MB")
         else:
-            st.error(f"âŒ ProblÃ¨me dÃ©tectÃ©: {health.get('erreur')}")
+            st.error(f"âŒ Problème détecté: {health.get('erreur')}")
 
     st.markdown("---")
 
@@ -341,22 +341,22 @@ def render_database_config():
     st.markdown("#### ðŸ”„ Migrations")
 
     current_version = MigrationManager.obtenir_version_courante()
-    st.info(f"**Version du schÃ©ma:** v{current_version}")
+    st.info(f"**Version du schéma:** v{current_version}")
 
     col5, col6 = st.columns(2)
 
     with col5:
-        if st.button("ðŸ”„ ExÃ©cuter Migrations", key="btn_run_migrations", use_container_width=True):
-            with smart_spinner("ExÃ©cution des migrations...", estimated_seconds=5):
+        if st.button("ðŸ”„ Exécuter Migrations", key="btn_run_migrations", use_container_width=True):
+            with smart_spinner("Exécution des migrations...", estimated_seconds=5):
                 try:
                     MigrationManager.executer_migrations()
-                    show_success("âœ… Migrations exÃ©cutÃ©es !")
+                    show_success("âœ… Migrations exécutées !")
                     st.rerun()
                 except Exception as e:
-                    show_error(f"âŒ Erreur: {str(e)}")
+                    show_error(f"âŒ Erreur: {str(e)}")
 
     with col6:
-        if st.button("â„¹ï¸ Voir Historique", key="btn_show_migration_history", use_container_width=True):
+        if st.button("â„¹ï¸ Voir Historique", key="btn_show_migration_history", use_container_width=True):
             st.session_state.show_migrations_history = True
 
     st.markdown("---")
@@ -364,7 +364,7 @@ def render_database_config():
     # Maintenance
     st.markdown("#### ðŸ§¹ Maintenance")
 
-    st.warning("âš ï¸ Ces opÃ©rations peuvent Ãªtre longues")
+    st.warning("âš ï¸ Ces opérations peuvent être longues")
 
     col7, col8 = st.columns(2)
 
@@ -381,27 +381,27 @@ def render_database_config():
                     with smart_spinner("Optimisation en cours...", estimated_seconds=10):
                         try:
                             vacuum_database()
-                            show_success("âœ… Optimisation terminÃ©e !")
+                            show_success("âœ… Optimisation terminée !")
                             modal.close()
                         except Exception as e:
-                            show_error(f"âŒ Erreur: {str(e)}")
+                            show_error(f"âŒ Erreur: {str(e)}")
 
-                modal.cancel("âŒ Annuler")
+                modal.cancel("âŒ Annuler")
 
     with col8:
         if st.button("ðŸ’¾ Backup (TODO)", key="btn_backup_db", use_container_width=True):
-            st.info("FonctionnalitÃ© Ã  implÃ©menter")
+            st.info("Fonctionnalité à implémenter")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TAB 4: CACHE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def render_cache_config():
     """Configuration cache"""
 
-    st.markdown("### ðŸ—„ï¸ Gestion du Cache")
+    st.markdown("### ðŸ—„ï¸ Gestion du Cache")
     st.caption("Cache applicatif et cache IA")
 
     # Cache applicatif
@@ -413,7 +413,7 @@ def render_cache_config():
         col1, col2 = st.columns(2)
 
         with col1:
-            st.metric("EntrÃ©es", cache_size)
+            st.metric("Entrées", cache_size)
 
         with col2:
             if "cache_stats" in st.session_state:
@@ -423,9 +423,9 @@ def render_cache_config():
 
                 st.metric("Taux de Hit", f"{hit_rate:.1f}%")
 
-        if st.button("ðŸ—‘ï¸ Vider Cache Applicatif", key="btn_clear_cache_app", use_container_width=True):
+        if st.button("ðŸ—‘ï¸ Vider Cache Applicatif", key="btn_clear_cache_app", use_container_width=True):
             Cache.clear_all()
-            show_success("Cache applicatif vidÃ© !")
+            show_success("Cache applicatif vidé !")
             st.rerun()
 
     else:
@@ -441,7 +441,7 @@ def render_cache_config():
     col3, col4, col5 = st.columns(3)
 
     with col3:
-        st.metric("EntrÃ©es", cache_stats.get("entrees_ia", 0))
+        st.metric("Entrées", cache_stats.get("entrees_ia", 0))
 
     with col4:
         st.metric("Hits", cache_stats.get("entrees_ia", 0))
@@ -449,26 +449,26 @@ def render_cache_config():
     with col5:
         st.metric("Misses", 0)
 
-    if st.button("ðŸ—‘ï¸ Vider Cache IA", key="btn_clear_cache_ia", use_container_width=True):
+    if st.button("ðŸ—‘ï¸ Vider Cache IA", key="btn_clear_cache_ia", use_container_width=True):
         SemanticCache.invalider_tout()
-        show_success("Cache IA vidÃ© !")
+        show_success("Cache IA vidé !")
         st.rerun()
 
     st.markdown("---")
 
-    # Actions groupÃ©es
-    st.markdown("#### ðŸ§¹ Actions GroupÃ©es")
+    # Actions groupées
+    st.markdown("#### ðŸ§¹ Actions Groupées")
 
-    if st.button("ðŸ—‘ï¸ TOUT Vider (Cache App + IA)", key="btn_clear_all", type="primary", use_container_width=True):
+    if st.button("ðŸ—‘ï¸ TOUT Vider (Cache App + IA)", key="btn_clear_all", type="primary", use_container_width=True):
         Cache.clear_all()
         SemanticCache.invalider_tout()
-        show_success("âœ… Tous les caches vidÃ©s !")
+        show_success("âœ… Tous les caches vidés !")
         st.rerun()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TAB 5: Ã€ PROPOS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def render_about():
@@ -476,7 +476,7 @@ def render_about():
 
     settings = get_settings()
 
-    st.markdown("### â„¹ï¸ Ã€ Propos")
+    st.markdown("### â„¹ï¸ Ã€ Propos")
 
     # Infos app
     st.markdown(
@@ -486,8 +486,8 @@ def render_about():
     **Version:** {settings.APP_VERSION}
     
     **Description:**  
-    Assistant familial intelligent pour gÃ©rer :
-    - ðŸ½ï¸ Recettes et planning repas
+    Assistant familial intelligent pour gérer :
+    - ðŸ½ï¸ Recettes et planning repas
     - ðŸ“¦ Inventaire alimentaire
     - ðŸ›’ Liste de courses
     - ðŸ“… Planning hebdomadaire
@@ -509,23 +509,23 @@ def render_about():
 
     with col1:
         st.info(f"**Mode:** {settings.ENV}")
-        st.info(f"**Debug:** {'ActivÃ©' if settings.DEBUG else 'DÃ©sactivÃ©'}")
+        st.info(f"**Debug:** {'Activé' if settings.DEBUG else 'Désactivé'}")
 
     with col2:
         db_configured = (
-            "âœ… ConfigurÃ©e" if settings._verifier_db_configuree() else "âŒ Non configurÃ©e"
+            "âœ… Configurée" if settings._verifier_db_configuree() else "âŒ Non configurée"
         )
         ai_configured = (
-            "âœ… ConfigurÃ©e" if settings._verifier_mistral_configure() else "âŒ Non configurÃ©e"
+            "âœ… Configurée" if settings._verifier_mistral_configure() else "âŒ Non configurée"
         )
 
-        st.info(f"**Base de donnÃ©es:** {db_configured}")
+        st.info(f"**Base de données:** {db_configured}")
         st.info(f"**IA:** {ai_configured}")
 
     st.markdown("---")
 
-    # Configuration sÃ©curisÃ©e (sans secrets)
-    st.markdown("#### âš™ï¸ Configuration")
+    # Configuration sécurisée (sans secrets)
+    st.markdown("#### âš™ï¸ Configuration")
 
     with st.expander("Voir la configuration (sans secrets)"):
         safe_config = settings.obtenir_config_publique()
@@ -540,24 +540,24 @@ def render_about():
         """
     **Besoin d'aide ?**
     - ðŸ“§ Contact: support@example.com
-    - ðŸ› Bugs: GitHub Issues
+    - ðŸ› Bugs: GitHub Issues
     - ðŸ“š Documentation: /docs
     """
     )
 
     st.markdown("---")
 
-    # Ã‰tat systÃ¨me
-    st.markdown("#### ðŸ–¥ï¸ Ã‰tat SystÃ¨me")
+    # Ã‰tat système
+    st.markdown("#### ðŸ–¥ï¸ Ã‰tat Système")
 
     state_summary = StateManager.get_state_summary()
 
     with st.expander("Ã‰tat de l'application"):
         st.json(state_summary)
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TAB 5: CONFIGURATION AFFICHAGE (Mode Tablette)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def render_display_config():
@@ -576,9 +576,9 @@ def render_display_config():
         st.markdown("#### Mode d'affichage")
         
         mode_options = {
-            TabletMode.NORMAL: ("ðŸ–¥ï¸ Normal", "Interface standard pour ordinateur"),
+            TabletMode.NORMAL: ("ðŸ–¥ï¸ Normal", "Interface standard pour ordinateur"),
             TabletMode.TABLET: ("ðŸ“± Tablette", "Boutons plus grands, interface tactile"),
-            TabletMode.KITCHEN: ("ðŸ‘¨â€ðŸ³ Cuisine", "Mode cuisine avec navigation par Ã©tapes"),
+            TabletMode.KITCHEN: ("ðŸ‘¨â€ðŸ³ Cuisine", "Mode cuisine avec navigation par étapes"),
         }
         
         for mode, (label, description) in mode_options.items():
@@ -591,29 +591,29 @@ def render_display_config():
                     use_container_width=True
                 ):
                     set_tablet_mode(mode)
-                    show_success(f"Mode {label} activÃ© !")
+                    show_success(f"Mode {label} activé !")
                     st.rerun()
             with col2:
                 st.caption(description)
         
         st.markdown("---")
         
-        st.markdown("#### PrÃ©visualisation")
+        st.markdown("#### Prévisualisation")
         
         if current_mode == TabletMode.NORMAL:
-            st.info("ðŸ–¥ï¸ Mode normal actif - Interface optimisÃ©e pour ordinateur")
+            st.info("ðŸ–¥ï¸ Mode normal actif - Interface optimisée pour ordinateur")
         elif current_mode == TabletMode.TABLET:
             st.warning("ðŸ“± Mode tablette actif - Boutons et textes agrandis")
         else:
-            st.success("ðŸ‘¨â€ðŸ³ Mode cuisine actif - Interface simplifiÃ©e pour cuisiner")
+            st.success("ðŸ‘¨â€ðŸ³ Mode cuisine actif - Interface simplifiée pour cuisiner")
         
     except ImportError:
         st.error("Module tablet_mode non disponible")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TAB 6: CONFIGURATION BUDGET
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def render_budget_config():
@@ -627,7 +627,7 @@ def render_budget_config():
     try:
         from src.services.budget import CategorieDepense
         
-        st.markdown("**CatÃ©gories de dÃ©penses disponibles:**")
+        st.markdown("**Catégories de dépenses disponibles:**")
         
         cols = st.columns(3)
         categories = list(CategorieDepense)
@@ -635,24 +635,24 @@ def render_budget_config():
         for i, cat in enumerate(categories):
             with cols[i % 3]:
                 emoji_map = {
-                    "alimentation": "ðŸŽ",
+                    "alimentation": "ðŸŽ",
                     "transport": "ðŸš—",
-                    "logement": "ðŸ ",
+                    "logement": "ðŸ ",
                     "sante": "ðŸ’Š",
                     "loisirs": "ðŸŽ®",
                     "vetements": "ðŸ‘•",
                     "education": "ðŸ“š",
-                    "cadeaux": "ðŸŽ",
+                    "cadeaux": "ðŸŽ",
                     "abonnements": "ðŸ“º",
-                    "restaurant": "ðŸ½ï¸",
-                    "vacances": "âœˆï¸",
+                    "restaurant": "ðŸ½ï¸",
+                    "vacances": "âœˆï¸",
                     "bebe": "ðŸ‘¶",
                     "autre": "ðŸ“¦",
                 }
                 emoji = emoji_map.get(cat.value, "ðŸ“¦")
                 st.checkbox(f"{emoji} {cat.value.capitalize()}", value=True, disabled=True)
         
-        st.info("ðŸ’¡ AccÃ¨de au module Budget dans le menu Famille pour gÃ©rer tes dÃ©penses")
+        st.info("ðŸ’¡ Accède au module Budget dans le menu Famille pour gérer tes dépenses")
         
     except ImportError:
         st.warning("Module budget non disponible")
@@ -660,7 +660,7 @@ def render_budget_config():
     st.markdown("---")
     
     # Section Backup
-    st.markdown("#### ðŸ’¾ Sauvegarde des donnÃ©es")
+    st.markdown("#### ðŸ’¾ Sauvegarde des données")
     
     try:
         from src.services.backup import get_backup_service, render_backup_ui
@@ -670,13 +670,13 @@ def render_budget_config():
         col1, col2 = st.columns(2)
         
         with col1:
-            if st.button("ðŸ“¥ CrÃ©er une sauvegarde", type="primary", use_container_width=True):
+            if st.button("ðŸ“¥ Créer une sauvegarde", type="primary", use_container_width=True):
                 with smart_spinner("Sauvegarde en cours..."):
                     result = backup_service.create_backup()
                     if result.success:
                         show_success(f"âœ… {result.message}")
                     else:
-                        show_error(f"âŒ {result.message}")
+                        show_error(f"âŒ {result.message}")
         
         with col2:
             if st.button("ðŸ“‹ Voir les sauvegardes", use_container_width=True):
@@ -685,15 +685,15 @@ def render_budget_config():
                     for b in backups[:5]:
                         st.text(f"ðŸ“„ {b.filename} ({b.size_bytes // 1024} KB)")
                 else:
-                    st.info("Aucune sauvegarde trouvÃ©e")
+                    st.info("Aucune sauvegarde trouvée")
         
     except ImportError:
         st.warning("Module backup non disponible")
     
     st.markdown("---")
     
-    # Section MÃ©tÃ©o
-    st.markdown("#### ðŸŒ¤ï¸ Configuration MÃ©tÃ©o Jardin")
+    # Section Météo
+    st.markdown("#### ðŸŒ¤ï¸ Configuration Météo Jardin")
     
     try:
         from src.services.weather import get_weather_garden_service
@@ -721,9 +721,9 @@ def render_budget_config():
                         "notif_canicule": notif_canicule,
                         "notif_pluie": notif_pluie,
                     }
-                    show_success("âœ… Configuration mÃ©tÃ©o sauvegardÃ©e")
+                    show_success("âœ… Configuration météo sauvegardée")
                 else:
-                    show_error("Ville non trouvÃ©e")
+                    show_error("Ville non trouvée")
                     
     except ImportError:
-        st.warning("Module mÃ©tÃ©o non disponible")
+        st.warning("Module météo non disponible")

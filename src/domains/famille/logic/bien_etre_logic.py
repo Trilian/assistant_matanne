@@ -1,5 +1,5 @@
 ﻿"""
-Logique mÃ©tier du module Bien-Ãªtre (famille) - SÃ©parÃ©e de l'UI
+Logique métier du module Bien-être (famille) - Séparée de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
 
@@ -10,27 +10,27 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONSTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-CATEGORIES_BIEN_ETRE = ["Sommeil", "Nutrition", "ActivitÃ© physique", "Mental", "Social", "Hydratation"]
-HUMEURS = ["ðŸ˜Š Joyeux", "ðŸ˜Œ Calme", "ðŸ˜ Neutre", "ðŸ˜¢ Triste", "ðŸ˜  Irritable", "ðŸ˜´ FatiguÃ©"]
-NIVEAUX_ENERGIE = ["TrÃ¨s bas", "Bas", "Moyen", "Bon", "Excellent"]
+CATEGORIES_BIEN_ETRE = ["Sommeil", "Nutrition", "Activité physique", "Mental", "Social", "Hydratation"]
+HUMEURS = ["ðŸ˜Š Joyeux", "ðŸ˜Œ Calme", "ðŸ˜ Neutre", "ðŸ˜¢ Triste", "ðŸ˜  Irritable", "ðŸ˜´ Fatigué"]
+NIVEAUX_ENERGIE = ["Très bas", "Bas", "Moyen", "Bon", "Excellent"]
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ANALYSE DES TENDANCES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def analyser_tendance(entrees: List[Dict[str, Any]], categorie: str, jours: int = 7) -> Dict[str, Any]:
     """
-    Analyse la tendance d'une catÃ©gorie de bien-Ãªtre.
+    Analyse la tendance d'une catégorie de bien-être.
     
     Args:
-        entrees: Liste des entrÃ©es
-        categorie: CatÃ©gorie Ã  analyser
-        jours: PÃ©riode d'analyse
+        entrees: Liste des entrées
+        categorie: Catégorie à analyser
+        jours: Période d'analyse
         
     Returns:
         Statistiques de tendance
@@ -59,7 +59,7 @@ def analyser_tendance(entrees: List[Dict[str, Any]], categorie: str, jours: int 
     valeurs = [e.get("valeur", 0) for e in entrees_categorie]
     moyenne = sum(valeurs) / len(valeurs)
     
-    # DÃ©terminer tendance (comparer premiÃ¨re et derniÃ¨re moitiÃ©)
+    # Déterminer tendance (comparer première et dernière moitié)
     mid = len(valeurs) // 2
     if mid > 0:
         moyenne_debut = sum(valeurs[:mid]) / mid
@@ -87,13 +87,13 @@ def analyser_tendance(entrees: List[Dict[str, Any]], categorie: str, jours: int 
 
 def calculer_score_global(entrees_par_categorie: Dict[str, List[Dict[str, Any]]]) -> Dict[str, Any]:
     """
-    Calcule un score global de bien-Ãªtre.
+    Calcule un score global de bien-être.
     
     Args:
-        entrees_par_categorie: EntrÃ©es groupÃ©es par catÃ©gorie
+        entrees_par_categorie: Entrées groupées par catégorie
         
     Returns:
-        Score et dÃ©tails
+        Score et détails
     """
     scores_par_categorie = {}
     
@@ -104,7 +104,7 @@ def calculer_score_global(entrees_par_categorie: Dict[str, List[Dict[str, Any]]]
         else:
             scores_par_categorie[cat] = 0
     
-    # Score global (moyenne des catÃ©gories)
+    # Score global (moyenne des catégories)
     if scores_par_categorie:
         score_global = sum(scores_par_categorie.values()) / len(scores_par_categorie)
     else:
@@ -127,12 +127,12 @@ def calculer_score_global(entrees_par_categorie: Dict[str, List[Dict[str, Any]]]
     }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ANALYSES SPÃ‰CIFIQUES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def analyser_sommeil(entrees: List[Dict[str, Any]], jours: int = 7) -> Dict[str, Any]:
-    """Analyse spÃ©cifique du sommeil."""
+    """Analyse spécifique du sommeil."""
     date_limite = date.today() - timedelta(days=jours)
     
     heures_sommeil = []
@@ -156,7 +156,7 @@ def analyser_sommeil(entrees: List[Dict[str, Any]], jours: int = 7) -> Dict[str,
     
     moyenne = sum(heures_sommeil) / len(heures_sommeil)
     
-    # QualitÃ© basÃ©e sur moyenne
+    # Qualité basée sur moyenne
     if moyenne >= 8:
         qualite = "Excellent"
     elif moyenne >= 7:
@@ -166,16 +166,16 @@ def analyser_sommeil(entrees: List[Dict[str, Any]], jours: int = 7) -> Dict[str,
     else:
         qualite = "Insuffisant"
     
-    # RÃ©gularitÃ© (Ã©cart-type)
+    # Régularité (écart-type)
     variance = sum((h - moyenne) ** 2 for h in heures_sommeil) / len(heures_sommeil)
     ecart_type = variance ** 0.5
     
     if ecart_type < 0.5:
-        regularite = "TrÃ¨s rÃ©gulier"
+        regularite = "Très régulier"
     elif ecart_type < 1:
-        regularite = "RÃ©gulier"
+        regularite = "Régulier"
     else:
-        regularite = "IrrÃ©gulier"
+        regularite = "Irrégulier"
     
     return {
         "moyenne": moyenne,
@@ -197,7 +197,7 @@ def analyser_humeurs(entrees: List[Dict[str, Any]], jours: int = 7) -> Dict[str,
             date_entree = datetime.fromisoformat(date_entree).date()
         
         if date_entree >= date_limite:
-            humeur = entree.get("humeur", "ðŸ˜ Neutre")
+            humeur = entree.get("humeur", "ðŸ˜ Neutre")
             compteur[humeur] = compteur.get(humeur, 0) + 1
     
     # Humeur dominante
@@ -212,48 +212,48 @@ def analyser_humeurs(entrees: List[Dict[str, Any]], jours: int = 7) -> Dict[str,
     }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # RECOMMANDATIONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def generer_recommandations(scores: Dict[str, float]) -> List[str]:
-    """GÃ©nÃ¨re des recommandations basÃ©es sur les scores."""
+    """Génère des recommandations basées sur les scores."""
     recommandations = []
     
     for categorie, score in scores.items():
         if score < 5:
             if categorie == "Sommeil":
-                recommandations.append("ðŸ’¤ AmÃ©liorer la qualitÃ© du sommeil (routine, horaires rÃ©guliers)")
+                recommandations.append("ðŸ’¤ Améliorer la qualité du sommeil (routine, horaires réguliers)")
             elif categorie == "Nutrition":
-                recommandations.append("ðŸŽ Ã‰quilibrer l'alimentation (fruits, lÃ©gumes, hydratation)")
-            elif categorie == "ActivitÃ© physique":
-                recommandations.append("ðŸƒ Augmenter l'activitÃ© physique (30min/jour minimum)")
+                recommandations.append("ðŸŽ Ã‰quilibrer l'alimentation (fruits, légumes, hydratation)")
+            elif categorie == "Activité physique":
+                recommandations.append("ðŸƒ Augmenter l'activité physique (30min/jour minimum)")
             elif categorie == "Mental":
-                recommandations.append("ðŸ§˜ Prendre du temps pour soi (mÃ©ditation, relaxation)")
+                recommandations.append("ðŸ§˜ Prendre du temps pour soi (méditation, relaxation)")
             elif categorie == "Social":
                 recommandations.append("ðŸ‘¥ Renforcer les liens sociaux (famille, amis)")
     
     return recommandations
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # VALIDATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def valider_entree_bien_etre(data: Dict[str, Any]) -> tuple[bool, List[str]]:
-    """Valide une entrÃ©e bien-Ãªtre."""
+    """Valide une entrée bien-être."""
     erreurs = []
     
     if "categorie" not in data or not data["categorie"]:
-        erreurs.append("La catÃ©gorie est requise")
+        erreurs.append("La catégorie est requise")
     
     if "categorie" in data and data["categorie"] not in CATEGORIES_BIEN_ETRE:
-        erreurs.append(f"CatÃ©gorie invalide. Valeurs: {', '.join(CATEGORIES_BIEN_ETRE)}")
+        erreurs.append(f"Catégorie invalide. Valeurs: {', '.join(CATEGORIES_BIEN_ETRE)}")
     
     if "valeur" in data:
         val = data["valeur"]
         if not isinstance(val, (int, float)) or not (0 <= val <= 10):
-            erreurs.append("La valeur doit Ãªtre entre 0 et 10")
+            erreurs.append("La valeur doit être entre 0 et 10")
     
     if "humeur" in data and data["humeur"] not in HUMEURS:
         erreurs.append(f"Humeur invalide. Valeurs: {', '.join(HUMEURS)}")
@@ -261,22 +261,22 @@ def valider_entree_bien_etre(data: Dict[str, Any]) -> tuple[bool, List[str]]:
     return len(erreurs) == 0, erreurs
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FORMATAGE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def formater_evolution(evolution: float) -> str:
-    """Formate une Ã©volution en pourcentage."""
+    """Formate une évolution en pourcentage."""
     if evolution > 0:
         return f"ðŸ“ˆ +{evolution:.1f}%"
     elif evolution < 0:
         return f"ðŸ“‰ {evolution:.1f}%"
     else:
-        return "âž¡ï¸ Stable"
+        return "âž¡ï¸ Stable"
 
 
 def grouper_par_semaine(entrees: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
-    """Groupe les entrÃ©es par semaine."""
+    """Groupe les entrées par semaine."""
     groupes = {}
     
     for entree in entrees:
@@ -286,7 +286,7 @@ def grouper_par_semaine(entrees: List[Dict[str, Any]]) -> Dict[str, List[Dict[st
             date_entree = datetime.fromisoformat(date_entree).date()
         
         if date_entree:
-            # Calculer numÃ©ro de semaine
+            # Calculer numéro de semaine
             semaine = date_entree.isocalendar()[1]
             annee = date_entree.year
             key = f"{annee}-S{semaine}"

@@ -4,16 +4,16 @@ import pytest
 from datetime import datetime, timezone
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ENUMS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestTypeAlerteEnum:
     """Tests pour l'enum TypeAlerte."""
 
     def test_types_alertes_disponibles(self):
-        """VÃ©rifie tous les types d'alertes."""
+        """Vérifie tous les types d'alertes."""
         from src.services.notifications import TypeAlerte
         
         assert TypeAlerte.STOCK_CRITIQUE is not None
@@ -29,16 +29,16 @@ class TestTypeAlerteEnum:
             assert isinstance(t.value, str)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MODÃˆLES PYDANTIC
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestNotificationModel:
-    """Tests pour le modÃ¨le Notification."""
+    """Tests pour le modèle Notification."""
 
     def test_notification_creation(self):
-        """CrÃ©ation d'une notification."""
+        """Création d'une notification."""
         from src.services.notifications import Notification, TypeAlerte
         
         notif = Notification(
@@ -46,14 +46,14 @@ class TestNotificationModel:
             article_id=1,
             ingredient_id=10,
             titre="Stock bas: Lait",
-            message="Le lait est bientÃ´t Ã©puisÃ©"
+            message="Le lait est bientôt épuisé"
         )
         
         assert notif.titre == "Stock bas: Lait"
         assert notif.type_alerte == TypeAlerte.STOCK_BAS
 
     def test_notification_non_lue_par_defaut(self):
-        """Notification non lue par dÃ©faut."""
+        """Notification non lue par défaut."""
         from src.services.notifications import Notification, TypeAlerte
         
         notif = Notification(
@@ -67,7 +67,7 @@ class TestNotificationModel:
         assert notif.lue is False
 
     def test_notification_priorites(self):
-        """PrioritÃ©s de notification."""
+        """Priorités de notification."""
         from src.services.notifications import Notification, TypeAlerte
         
         notif_haute = Notification(
@@ -83,7 +83,7 @@ class TestNotificationModel:
             type_alerte=TypeAlerte.ARTICLE_AJOUTE,
             article_id=2,
             ingredient_id=20,
-            titre="Article ajoutÃ©",
+            titre="Article ajouté",
             message="Nouvel article",
             priorite="basse"
         )
@@ -92,16 +92,16 @@ class TestNotificationModel:
         assert notif_basse.priorite == "basse"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SERVICE NOTIFICATIONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestNotificationServiceInit:
     """Tests d'initialisation du service."""
 
     def test_service_creation(self):
-        """CrÃ©ation du service."""
+        """Création du service."""
         from src.services.notifications import NotificationService
         
         service = NotificationService()
@@ -110,7 +110,7 @@ class TestNotificationServiceInit:
         assert service.notifications == {}
 
     def test_service_methodes_requises(self):
-        """Le service a les mÃ©thodes requises."""
+        """Le service a les méthodes requises."""
         from src.services.notifications import NotificationService
         
         service = NotificationService()
@@ -125,7 +125,7 @@ class TestCreerNotificationStockCritique:
     """Tests pour creer_notification_stock_critique."""
 
     def test_creation_notification_critique(self):
-        """CrÃ©ation notification stock critique."""
+        """Création notification stock critique."""
         from src.services.notifications import NotificationService
         
         service = NotificationService()
@@ -150,7 +150,7 @@ class TestCreerNotificationStockBas:
     """Tests pour creer_notification_stock_bas."""
 
     def test_creation_notification_stock_bas(self):
-        """CrÃ©ation notification stock bas."""
+        """Création notification stock bas."""
         from src.services.notifications import NotificationService
         
         service = NotificationService()
@@ -161,7 +161,7 @@ class TestCreerNotificationStockBas:
             "nom": "Beurre",
             "quantite": 1,
             "quantite_min": 2,
-            "unite": "piÃ¨ces"
+            "unite": "pièces"
         }
         
         notif = service.creer_notification_stock_bas(article)
@@ -175,7 +175,7 @@ class TestCreerNotificationPeremption:
     """Tests pour creer_notification_peremption."""
 
     def test_notification_peremption_expiree(self):
-        """Notification pour produit expirÃ©."""
+        """Notification pour produit expiré."""
         from src.services.notifications import NotificationService, TypeAlerte
         
         service = NotificationService()
@@ -194,7 +194,7 @@ class TestCreerNotificationPeremption:
         assert notif.priorite == "haute"
 
     def test_notification_peremption_proche(self):
-        """Notification pour pÃ©remption proche."""
+        """Notification pour péremption proche."""
         from src.services.notifications import NotificationService, TypeAlerte
         
         service = NotificationService()
@@ -202,7 +202,7 @@ class TestCreerNotificationPeremption:
         article = {
             "id": 4,
             "ingredient_id": 40,
-            "nom": "CrÃ¨me",
+            "nom": "Crème",
             "date_peremption": "2026-01-30"
         }
         
@@ -260,20 +260,20 @@ class TestAjouterNotification:
         result1 = service.ajouter_notification(notif1, utilisateur_id=1)
         result2 = service.ajouter_notification(notif2, utilisateur_id=1)
         
-        # Le deuxiÃ¨me devrait retourner le premier (doublon)
+        # Le deuxième devrait retourner le premier (doublon)
         assert result1.id == result2.id
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS LOGIQUE PURE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestLogiquePriorite:
-    """Tests pour la logique de prioritÃ©."""
+    """Tests pour la logique de priorité."""
 
     def test_priorite_stock_critique(self):
-        """Stock critique = haute prioritÃ©."""
+        """Stock critique = haute priorité."""
         quantite = 0
         quantite_min = 2
         
@@ -287,7 +287,7 @@ class TestLogiquePriorite:
         assert priorite == "haute"
 
     def test_priorite_stock_bas(self):
-        """Stock bas = moyenne prioritÃ©."""
+        """Stock bas = moyenne priorité."""
         quantite = 1
         quantite_min = 2
         
@@ -302,58 +302,58 @@ class TestLogiquePriorite:
 
 
 class TestLogiquePeremption:
-    """Tests pour la logique de pÃ©remption."""
+    """Tests pour la logique de péremption."""
 
     def test_peremption_jours_negatifs(self):
-        """Jours nÃ©gatifs = expirÃ©."""
+        """Jours négatifs = expiré."""
         jours_avant = -3
         
         if jours_avant <= 0:
-            status = "expirÃ©"
+            status = "expiré"
         elif jours_avant <= 3:
-            status = "trÃ¨s proche"
+            status = "très proche"
         elif jours_avant <= 7:
             status = "proche"
         else:
             status = "ok"
         
-        assert status == "expirÃ©"
+        assert status == "expiré"
 
     def test_peremption_3_jours(self):
-        """3 jours = trÃ¨s proche."""
+        """3 jours = très proche."""
         jours_avant = 3
         
         if jours_avant <= 0:
-            status = "expirÃ©"
+            status = "expiré"
         elif jours_avant <= 3:
-            status = "trÃ¨s proche"
+            status = "très proche"
         elif jours_avant <= 7:
             status = "proche"
         else:
             status = "ok"
         
-        assert status == "trÃ¨s proche"
+        assert status == "très proche"
 
 
 class TestLogiqueIcones:
-    """Tests pour les icÃ´nes de notification."""
+    """Tests pour les icônes de notification."""
 
     def test_icone_stock_critique(self):
-        """IcÃ´ne pour stock critique."""
+        """Icône pour stock critique."""
         icones = {
-            "stock_critique": "âŒ",
-            "stock_bas": "âš ï¸",
+            "stock_critique": "âŒ",
+            "stock_bas": "âš ï¸",
             "peremption_proche": "ðŸŸ ",
             "peremption_depassee": "ðŸš¨"
         }
         
-        assert icones["stock_critique"] == "âŒ"
+        assert icones["stock_critique"] == "âŒ"
 
     def test_icone_peremption(self):
-        """IcÃ´ne pour pÃ©remption."""
+        """Icône pour péremption."""
         icones = {
-            "stock_critique": "âŒ",
-            "stock_bas": "âš ï¸",
+            "stock_critique": "âŒ",
+            "stock_bas": "âš ï¸",
             "peremption_proche": "ðŸŸ ",
             "peremption_depassee": "ðŸš¨"
         }
@@ -365,7 +365,7 @@ class TestTriNotifications:
     """Tests pour le tri des notifications."""
 
     def test_tri_par_priorite(self):
-        """Tri par prioritÃ©."""
+        """Tri par priorité."""
         notifications = [
             {"titre": "A", "priorite": "basse"},
             {"titre": "B", "priorite": "haute"},
@@ -378,7 +378,7 @@ class TestTriNotifications:
         assert triees[0]["titre"] == "B"  # haute en premier
 
     def test_tri_par_date(self):
-        """Tri par date crÃ©ation."""
+        """Tri par date création."""
         notifications = [
             {"titre": "A", "date": datetime(2026, 1, 10)},
             {"titre": "B", "date": datetime(2026, 1, 28)},
@@ -387,5 +387,5 @@ class TestTriNotifications:
         
         triees = sorted(notifications, key=lambda x: x["date"], reverse=True)
         
-        assert triees[0]["titre"] == "B"  # Plus rÃ©cent en premier
+        assert triees[0]["titre"] == "B"  # Plus récent en premier
 

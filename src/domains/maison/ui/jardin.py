@@ -1,6 +1,6 @@
 ﻿"""
-Module Jardin - Gestion du jardin avec IA intÃ©grÃ©e
-Conseils saisonniers, arrosage intelligent, rÃ©coltes planifiÃ©es
+Module Jardin - Gestion du jardin avec IA intégrée
+Conseils saisonniers, arrosage intelligent, récoltes planifiées
 """
 
 from datetime import date, timedelta
@@ -14,7 +14,7 @@ from src.core.decorators import with_db_session
 from src.services.base_ai_service import BaseAIService
 from src.core.ai import ClientIA
 
-# Logique mÃ©tier pure
+# Logique métier pure
 from src.domains.maison.logic.jardin_logic import (
     get_saison_actuelle,
     calculer_jours_avant_arrosage,
@@ -34,9 +34,9 @@ from src.domains.maison.logic.helpers import (
 )
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SERVICE IA JARDIN
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class JardinService(BaseAIService):
@@ -53,7 +53,7 @@ class JardinService(BaseAIService):
         )
     
     async def generer_conseils_saison(self, saison: str) -> str:
-        """GÃ©nÃ¨re des conseils spÃ©cifiques Ã  la saison"""
+        """Génère des conseils spécifiques à la saison"""
         prompt = f"""Tu es un expert jardinier. Donne 3-4 conseils pratiques 
 pour les travaux de jardinage en {saison} (maintenant). Sois concis et actionnable."""
         
@@ -63,21 +63,21 @@ pour les travaux de jardinage en {saison} (maintenant). Sois concis et actionnab
             max_tokens=500
         )
     
-    async def suggerer_plantes_saison(self, saison: str, climat: str = "tempÃ©rÃ©") -> str:
-        """SuggÃ¨re des plantes Ã  planter cette saison"""
-        prompt = f"""SuggÃ¨re 5 plantes/lÃ©gumes parfaits Ã  planter en {saison} 
+    async def suggerer_plantes_saison(self, saison: str, climat: str = "tempéré") -> str:
+        """Suggère des plantes à planter cette saison"""
+        prompt = f"""Suggère 5 plantes/légumes parfaits à planter en {saison} 
 sous climat {climat}. Format: "- Nom (type) : description courte"."""
         
         return await self.call_with_cache(
             prompt=prompt,
-            system_prompt="Tu es expert en jardinage et sÃ©lection de plantes",
+            system_prompt="Tu es expert en jardinage et sélection de plantes",
             max_tokens=600
         )
     
     async def conseil_arrosage(self, nom_plante: str, saison: str) -> str:
-        """Conseil d'arrosage pour une plante spÃ©cifique"""
+        """Conseil d'arrosage pour une plante spécifique"""
         prompt = f"""Donne un conseil d'arrosage pour {nom_plante} en {saison}. 
-Inclus: frÃ©quence, quantitÃ©, moment de la journÃ©e."""
+Inclus: fréquence, quantité, moment de la journée."""
         
         return await self.call_with_cache(
             prompt=prompt,
@@ -91,9 +91,9 @@ def get_jardin_service() -> JardinService:
     return JardinService()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # HELPERS MÃ‰TIER
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @with_db_session
@@ -122,7 +122,7 @@ def ajouter_plante(
         clear_maison_cache()
         return True
     except Exception as e:
-        st.error(f"âŒ Erreur ajout plante: {e}")
+        st.error(f"âŒ Erreur ajout plante: {e}")
         return False
 
 
@@ -141,13 +141,13 @@ def arroser_plante(item_id: int, notes: str = "", db=None) -> bool:
         clear_maison_cache()
         return True
     except Exception as e:
-        st.error(f"âŒ Erreur enregistrement: {e}")
+        st.error(f"âŒ Erreur enregistrement: {e}")
         return False
 
 
 @with_db_session
 def ajouter_log(item_id: int, action: str, notes: str = "", db=None) -> bool:
-    """Ajoute une entrÃ©e au journal du jardin"""
+    """Ajoute une entrée au journal du jardin"""
     try:
         log = GardenLog(
             garden_item_id=item_id,
@@ -160,54 +160,54 @@ def ajouter_log(item_id: int, action: str, notes: str = "", db=None) -> bool:
         clear_maison_cache()
         return True
     except Exception as e:
-        st.error(f"âŒ Erreur ajout log: {e}")
+        st.error(f"âŒ Erreur ajout log: {e}")
         return False
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # MODULE PRINCIPAL
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def app():
-    """Point d'entrÃ©e module Jardin"""
+    """Point d'entrée module Jardin"""
     st.title("ðŸŒ¿ Mon Jardin")
-    st.caption("Gestion intelligente du jardin avec conseils IA et mÃ©tÃ©o")
+    st.caption("Gestion intelligente du jardin avec conseils IA et météo")
     
     saison = get_saison()
-    st.info(f"ðŸŒ Saison actuelle : **{saison}**")
+    st.info(f"ðŸŒ Saison actuelle : **{saison}**")
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # ALERTES URGENTES
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     plantes_arroser = get_plantes_a_arroser()
     recoltes = get_recoltes_proches()
     
     if plantes_arroser:
-        st.warning(f"ðŸ’§ **{len(plantes_arroser)} plante(s) Ã  arroser aujourd'hui!**")
+        st.warning(f"ðŸ’§ **{len(plantes_arroser)} plante(s) à arroser aujourd'hui!**")
         for plante in plantes_arroser[:3]:
             st.caption(f"â€¢ {plante['nom']} ({plante['type']})")
     
     if recoltes:
-        st.success(f"ðŸŒ½ **{len(recoltes)} rÃ©colte(s) prÃ©vue(s) cette semaine!**")
+        st.success(f"ðŸŒ½ **{len(recoltes)} récolte(s) prévue(s) cette semaine!**")
         for r in recoltes[:3]:
             jours = (r["recolte"] - date.today()).days
             st.caption(f"â€¢ {r['nom']} dans {jours} jour(s)")
     
     st.markdown("---")
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TABS
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     tab1, tab2, tab3, tab4, tab5 = st.tabs(
         ["ðŸŒ± Mes Plantes", "ðŸ¤– Conseils IA", "âž• Ajouter", "ðŸ“Š Stats", "ðŸ“… Journal"]
     )
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TAB 1: MES PLANTES
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     with tab1:
         st.subheader("Inventaire du jardin")
@@ -227,7 +227,7 @@ def app():
                     df = df[df["type"] == filtre_type]
             
             with col_f2:
-                filtre_arrosage = st.checkbox("Montrer seulement Ã  arroser")
+                filtre_arrosage = st.checkbox("Montrer seulement à arroser")
                 if filtre_arrosage:
                     df = df[df["a_arroser"]]
             
@@ -238,14 +238,14 @@ def app():
                 with col1:
                     emoji = "ðŸ’§" if row["a_arroser"] else "âœ…"
                     st.markdown(f"### {emoji} {row['nom']}")
-                    st.caption(f"ðŸ“ {row['location']} â€¢ {row['type']}")
+                    st.caption(f"ðŸ“ {row['location']} â€¢ {row['type']}")
                     if row["notes"]:
-                        st.caption(f"ðŸ“ {row['notes']}")
+                        st.caption(f"ðŸ“ {row['notes']}")
                 
                 with col2:
                     if row["jours_depuis_arrosage"] is not None:
                         st.metric(
-                            "ArrosÃ© il y a",
+                            "Arrosé il y a",
                             f"{row['jours_depuis_arrosage']} j",
                             delta=None
                         )
@@ -253,7 +253,7 @@ def app():
                     if row["recolte"]:
                         jours = (row["recolte"] - date.today()).days
                         if jours > 0:
-                            st.metric("RÃ©colte dans", f"{jours} j")
+                            st.metric("Récolte dans", f"{jours} j")
                 
                 with col3:
                     if st.button("ðŸ’§ Arroser", key=f"arroser_{row['id']}"):
@@ -262,9 +262,9 @@ def app():
                 
                 st.divider()
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TAB 2: CONSEILS IA
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     with tab2:
         st.subheader("ðŸ¤– Conseils Jardin avec IA")
@@ -275,17 +275,17 @@ def app():
         
         with col_c1:
             if st.button("ðŸ’¡ Conseils pour cette saison", use_container_width=True):
-                with st.spinner("GÃ©nÃ©ration des conseils IA..."):
+                with st.spinner("Génération des conseils IA..."):
                     try:
                         import asyncio
                         conseils = asyncio.run(service.generer_conseils_saison(saison))
                         if conseils:
                             st.success(conseils)
                     except Exception as e:
-                        st.warning(f"âš ï¸ IA temporairement indisponible: {e}")
+                        st.warning(f"âš ï¸ IA temporairement indisponible: {e}")
         
         with col_c2:
-            if st.button("ðŸŒ¿ Plantes Ã  planter maintenant", use_container_width=True):
+            if st.button("ðŸŒ¿ Plantes à planter maintenant", use_container_width=True):
                 with st.spinner("Recherche des meilleures plantes..."):
                     try:
                         import asyncio
@@ -293,12 +293,12 @@ def app():
                         if suggestions:
                             st.success(suggestions)
                     except Exception as e:
-                        st.warning(f"âš ï¸ IA temporairement indisponible: {e}")
+                        st.warning(f"âš ï¸ IA temporairement indisponible: {e}")
         
         st.markdown("---")
         
-        # Conseil personnalisÃ© pour une plante
-        st.subheader("Conseil spÃ©cifique")
+        # Conseil personnalisé pour une plante
+        st.subheader("Conseil spécifique")
         plante_conseil = st.text_input("Nom de la plante (ex: Tomate)")
         
         if st.button("Obtenir conseil d'arrosage", use_container_width=True):
@@ -310,11 +310,11 @@ def app():
                         if conseil:
                             st.info(conseil)
                     except Exception as e:
-                        st.warning(f"âš ï¸ IA temporairement indisponible: {e}")
+                        st.warning(f"âš ï¸ IA temporairement indisponible: {e}")
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TAB 3: AJOUTER PLANTE
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     with tab3:
         st.subheader("Ajouter une plante")
@@ -327,7 +327,7 @@ def app():
             with col_1:
                 type_plante = st.selectbox(
                     "Type *",
-                    ["LÃ©gume", "Fruit", "Herbe aromatique", "Fleur", "Arbre", "Autre"]
+                    ["Légume", "Fruit", "Herbe aromatique", "Fleur", "Arbre", "Autre"]
                 )
                 emplacement = st.text_input(
                     "Emplacement",
@@ -336,11 +336,11 @@ def app():
             
             with col_2:
                 date_plantation = st.date_input("Date de plantation", value=date.today())
-                date_recolte = st.date_input("Date rÃ©colte (optionnel)", value=None)
+                date_recolte = st.date_input("Date récolte (optionnel)", value=None)
             
             notes = st.text_area(
                 "Notes",
-                placeholder="VariÃ©tÃ©, exposition, particularitÃ©s...",
+                placeholder="Variété, exposition, particularités...",
                 height=80
             )
             
@@ -360,10 +360,10 @@ def app():
         st.markdown("### âš¡ Ajouts rapides")
         
         suggestions = [
-            {"nom": "Tomates cerises", "type": "Fruit", "emoji": "ðŸ…"},
+            {"nom": "Tomates cerises", "type": "Fruit", "emoji": "ðŸ…"},
             {"nom": "Basilic", "type": "Herbe aromatique", "emoji": "ðŸŒ¿"},
-            {"nom": "Fraises", "type": "Fruit", "emoji": "ðŸ“"},
-            {"nom": "Courgettes", "type": "LÃ©gume", "emoji": "ðŸ¥’"},
+            {"nom": "Fraises", "type": "Fruit", "emoji": "ðŸ“"},
+            {"nom": "Courgettes", "type": "Légume", "emoji": "ðŸ¥’"},
         ]
         
         cols = st.columns(2)
@@ -372,12 +372,12 @@ def app():
             with col:
                 if st.button(f"{sugg['emoji']} {sugg['nom']}", use_container_width=True):
                     if ajouter_plante(sugg["nom"], sugg["type"], "Potager"):
-                        st.success(f"âœ… {sugg['nom']} ajoutÃ©!")
+                        st.success(f"âœ… {sugg['nom']} ajouté!")
                         st.rerun()
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TAB 4: STATS
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     with tab4:
         st.subheader("ðŸ“Š Statistiques")
@@ -393,10 +393,10 @@ def app():
             st.metric("Ã€ arroser", stats["a_arroser"])
         
         with col3:
-            st.metric("RÃ©coltes proches", stats["recoltes_proches"])
+            st.metric("Récoltes proches", stats["recoltes_proches"])
         
         with col4:
-            st.metric("CatÃ©gories", stats["categories"])
+            st.metric("Catégories", stats["categories"])
         
         st.markdown("---")
         
@@ -409,16 +409,16 @@ def app():
                 data=[go.Bar(x=type_counts.index, y=type_counts.values, marker_color="green")]
             )
             fig.update_layout(
-                title="Plantes par catÃ©gorie",
+                title="Plantes par catégorie",
                 xaxis_title="Type",
                 yaxis_title="Nombre",
                 height=400
             )
             st.plotly_chart(fig, use_container_width=True)
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TAB 5: JOURNAL
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     with tab5:
         st.subheader("ðŸ“… Journal d'entretien")
@@ -429,7 +429,7 @@ def app():
             st.info("Aucune plante pour le moment")
         else:
             plante_selected = st.selectbox(
-                "SÃ©lectionner une plante",
+                "Sélectionner une plante",
                 df_plantes["nom"].tolist(),
                 key="journal_plante"
             )
@@ -441,19 +441,19 @@ def app():
             with col_a1:
                 action = st.selectbox(
                     "Action",
-                    ["arrosage", "dÃ©sherbage", "taille", "traitement", "fertilisation", "rÃ©colte"]
+                    ["arrosage", "désherbage", "taille", "traitement", "fertilisation", "récolte"]
                 )
             
             with col_a2:
                 notes_log = st.text_input("Notes", placeholder="Observations...")
             
-            if st.button("ðŸ“ Enregistrer", use_container_width=True):
+            if st.button("ðŸ“ Enregistrer", use_container_width=True):
                 if ajouter_log(selected_id, action, notes_log):
-                    st.success("âœ… EnregistrÃ©!")
+                    st.success("âœ… Enregistré!")
                     st.rerun()
             
             st.markdown("---")
-            st.caption(f"ðŸ“ Dernier enregistrement pour {plante_selected}")
+            st.caption(f"ðŸ“ Dernier enregistrement pour {plante_selected}")
 
 
 if __name__ == "__main__":

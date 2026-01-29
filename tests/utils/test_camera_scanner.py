@@ -8,13 +8,13 @@ import sys
 import numpy as np
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # MOCK STREAMLIT ET DÃ‰PENDANCES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @pytest.fixture(autouse=True)
 def mock_dependencies():
-    """Mock Streamlit et autres dÃ©pendances"""
+    """Mock Streamlit et autres dépendances"""
     mock_st = MagicMock()
     mock_st.session_state = {}
     
@@ -27,12 +27,12 @@ def mock_dependencies():
         yield mock_st
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FONCTION DETECT BARCODE PYZBAR
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestDetectBarcodePyzbar:
-    """Tests de la dÃ©tection avec pyzbar"""
+    """Tests de la détection avec pyzbar"""
     
     def test_function_exists(self, mock_dependencies):
         """Test que la fonction existe"""
@@ -44,7 +44,7 @@ class TestDetectBarcodePyzbar:
         """Test que la fonction retourne une liste"""
         from src.ui.components.camera_scanner import _detect_barcode_pyzbar
         
-        # CrÃ©er une frame vide
+        # Créer une frame vide
         frame = np.zeros((100, 100, 3), dtype=np.uint8)
         
         with patch.dict(sys.modules, {
@@ -61,17 +61,17 @@ class TestDetectBarcodePyzbar:
         
         frame = np.zeros((100, 100, 3), dtype=np.uint8)
         
-        # Sans pyzbar installÃ©, devrait retourner liste vide
+        # Sans pyzbar installé, devrait retourner liste vide
         result = _detect_barcode_pyzbar(frame)
         assert isinstance(result, list)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FONCTION DETECT BARCODE ZXING
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestDetectBarcodeZxing:
-    """Tests de la dÃ©tection avec zxing"""
+    """Tests de la détection avec zxing"""
     
     def test_function_exists(self, mock_dependencies):
         """Test que la fonction existe"""
@@ -89,9 +89,9 @@ class TestDetectBarcodeZxing:
         assert isinstance(result, list)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MODULE IMPORT
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestCameraScannerImport:
     """Tests d'import du module"""
@@ -103,7 +103,7 @@ class TestCameraScannerImport:
         assert camera_scanner is not None
     
     def test_has_detect_functions(self, mock_dependencies):
-        """Test que les fonctions de dÃ©tection existent"""
+        """Test que les fonctions de détection existent"""
         from src.ui.components import camera_scanner
         
         assert hasattr(camera_scanner, '_detect_barcode_pyzbar')

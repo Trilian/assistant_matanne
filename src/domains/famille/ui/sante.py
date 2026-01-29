@@ -1,5 +1,5 @@
 ﻿"""
-Module SantÃ© & Sport - Suivi des routines, objectifs et entrÃ©es de santÃ©
+Module Santé & Sport - Suivi des routines, objectifs et entrées de santé
 """
 
 import streamlit as st
@@ -11,7 +11,7 @@ import plotly.express as px
 from src.core.database import get_session
 from src.core.models import HealthRoutine, HealthObjective, HealthEntry
 
-# Logique mÃ©tier pure
+# Logique métier pure
 from src.domains.famille.logic.sante_logic import (
     calculer_progression_objectif_sante,
     valider_entree_sante
@@ -20,25 +20,25 @@ from src.domains.famille.logic.sante_logic import (
 from src.domains.famille.logic.helpers import (
     get_routines_actives, 
     get_objectives_actifs,
-    get_stats_santÃ©_semaine,
+    get_stats_santé_semaine,
     calculer_progression_objectif,
     clear_famille_cache
 )
 
 
-def charger_routines_santÃ©():
-    """Charge et retourne les routines de santÃ© actives"""
+def charger_routines_santé():
+    """Charge et retourne les routines de santé actives"""
     try:
         routines = get_routines_actives()
         return routines
     except Exception as e:
-        st.error(f"âŒ Erreur chargement routines: {str(e)}")
+        st.error(f"âŒ Erreur chargement routines: {str(e)}")
         return []
 
 
-def ajouter_routine_santÃ©(nom: str, type_routine: str, frequence: str, duree_minutes: int, 
+def ajouter_routine_santé(nom: str, type_routine: str, frequence: str, duree_minutes: int, 
                           intensite: str, calories: int, jours: list, notes: str = ""):
-    """Ajoute une nouvelle routine de santÃ©"""
+    """Ajoute une nouvelle routine de santé"""
     try:
         with get_session() as session:
             routine = HealthRoutine(
@@ -54,27 +54,27 @@ def ajouter_routine_santÃ©(nom: str, type_routine: str, frequence: str, duree_
             )
             session.add(routine)
             session.commit()
-            st.success(f"âœ… Routine '{nom}' crÃ©Ã©e!")
+            st.success(f"âœ… Routine '{nom}' créée!")
             clear_famille_cache()
             return True
     except Exception as e:
-        st.error(f"âŒ Erreur ajout routine: {str(e)}")
+        st.error(f"âŒ Erreur ajout routine: {str(e)}")
         return False
 
 
 def charger_objectifs():
-    """Charge les objectifs de santÃ© en cours"""
+    """Charge les objectifs de santé en cours"""
     try:
         objectives = get_objectives_actifs()
         return objectives
     except Exception as e:
-        st.error(f"âŒ Erreur chargement objectifs: {str(e)}")
+        st.error(f"âŒ Erreur chargement objectifs: {str(e)}")
         return []
 
 
 def ajouter_objectif(titre: str, categorie: str, valeur_cible: float, unite: str,
                      date_cible: date, priorite: str = "moyenne", notes: str = ""):
-    """Ajoute un nouveau objectif de santÃ©"""
+    """Ajoute un nouveau objectif de santé"""
     try:
         with get_session() as session:
             objective = HealthObjective(
@@ -89,16 +89,16 @@ def ajouter_objectif(titre: str, categorie: str, valeur_cible: float, unite: str
             )
             session.add(objective)
             session.commit()
-            st.success(f"âœ… Objectif '{titre}' crÃ©Ã©!")
+            st.success(f"âœ… Objectif '{titre}' créé!")
             clear_famille_cache()
             return True
     except Exception as e:
-        st.error(f"âŒ Erreur ajout objectif: {str(e)}")
+        st.error(f"âŒ Erreur ajout objectif: {str(e)}")
         return False
 
 
 def charger_entrees_recentes(jours: int = 30):
-    """Charge les entrÃ©es de santÃ© des N derniers jours"""
+    """Charge les entrées de santé des N derniers jours"""
     try:
         with get_session() as session:
             debut = date.today() - timedelta(days=jours)
@@ -119,13 +119,13 @@ def charger_entrees_recentes(jours: int = 30):
                 for e in entries
             ]
     except Exception as e:
-        st.error(f"âŒ Erreur chargement entrÃ©es: {str(e)}")
+        st.error(f"âŒ Erreur chargement entrées: {str(e)}")
         return []
 
 
-def ajouter_entree_santÃ©(type_activite: str, duree_minutes: int, intensite: str,
+def ajouter_entree_santé(type_activite: str, duree_minutes: int, intensite: str,
                         calories: int = 0, energie: int = 5, moral: int = 5, ressenti: str = ""):
-    """Ajoute une entrÃ©e de suivi santÃ© quotidien"""
+    """Ajoute une entrée de suivi santé quotidien"""
     try:
         with get_session() as session:
             entry = HealthEntry(
@@ -140,16 +140,16 @@ def ajouter_entree_santÃ©(type_activite: str, duree_minutes: int, intensite: s
             )
             session.add(entry)
             session.commit()
-            st.success(f"âœ… EntrÃ©e '{type_activite}' enregistrÃ©e!")
+            st.success(f"âœ… Entrée '{type_activite}' enregistrée!")
             clear_famille_cache()
             return True
     except Exception as e:
-        st.error(f"âŒ Erreur ajout entrÃ©e: {str(e)}")
+        st.error(f"âŒ Erreur ajout entrée: {str(e)}")
         return False
 
 
 def update_objectif_progression(objective_id: int, nouvelle_valeur: float):
-    """Met Ã  jour la progression d'un objectif"""
+    """Met à jour la progression d'un objectif"""
     try:
         with get_session() as session:
             objective = session.get(HealthObjective, objective_id)
@@ -158,30 +158,30 @@ def update_objectif_progression(objective_id: int, nouvelle_valeur: float):
                 if nouvelle_valeur >= objective.valeur_cible:
                     objective.statut = "atteint"
                 session.commit()
-                st.success("âœ… Progression mise Ã  jour!")
+                st.success("âœ… Progression mise à jour!")
                 clear_famille_cache()
                 return True
     except Exception as e:
-        st.error(f"âŒ Erreur mise Ã  jour: {str(e)}")
+        st.error(f"âŒ Erreur mise à jour: {str(e)}")
         return False
 
 
 def app():
-    """Interface principale du module SantÃ©"""
-    st.title("ðŸ’ª SantÃ© & Sport")
+    """Interface principale du module Santé"""
+    st.title("ðŸ’ª Santé & Sport")
     
-    tabs = st.tabs(["ðŸƒ Routines", "ðŸŽ¯ Objectifs", "ðŸ“Š Tracking", "ðŸŽ Nutrition"])
+    tabs = st.tabs(["ðŸƒ Routines", "ðŸŽ¯ Objectifs", "ðŸ“Š Tracking", "ðŸŽ Nutrition"])
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TAB 1: ROUTINES
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     with tabs[0]:
         st.header("Routines de Sport")
         
         col1, col2 = st.columns([2, 1])
         with col1:
             st.subheader("Mes routines actives")
-            routines = charger_routines_santÃ©()
+            routines = charger_routines_santé()
             
             if routines:
                 for r in routines:
@@ -194,31 +194,31 @@ def app():
                                 st.caption(f"ðŸ”¥ ~{r['calories']} cal")
                         with col_action:
                             if st.button("Faire", key=f"routine_{r['id']}", use_container_width=True):
-                                ajouter_entree_santÃ©(r['type'], r['duree'], r['intensite'], r.get('calories', 0))
+                                ajouter_entree_santé(r['type'], r['duree'], r['intensite'], r.get('calories', 0))
             else:
-                st.info("Aucune routine crÃ©Ã©e")
+                st.info("Aucune routine créée")
         
         with col2:
             st.subheader("Ajouter une routine")
             with st.form("form_routine"):
                 nom = st.text_input("Nom")
                 type_routine = st.selectbox("Type", 
-                    ["Yoga", "Course", "Gym", "Marche", "Natation", "VÃ©lo", "Autre"])
-                duree = st.number_input("DurÃ©e (min)", 15, 120, 30)
-                intensite = st.radio("IntensitÃ©", ["basse", "modÃ©rÃ©e", "haute"])
-                frequence = st.text_input("FrÃ©quence", "3x/semaine")
+                    ["Yoga", "Course", "Gym", "Marche", "Natation", "Vélo", "Autre"])
+                duree = st.number_input("Durée (min)", 15, 120, 30)
+                intensite = st.radio("Intensité", ["basse", "modérée", "haute"])
+                frequence = st.text_input("Fréquence", "3x/semaine")
                 calories = st.number_input("Calories (~)", 0, 1000, 200)
                 notes = st.text_area("Notes", height=80)
                 
-                if st.form_submit_button("âž• CrÃ©er", use_container_width=True):
+                if st.form_submit_button("âž• Créer", use_container_width=True):
                     if nom and type_routine:
-                        ajouter_routine_santÃ©(nom, type_routine, frequence, duree, intensite, calories, [], notes)
+                        ajouter_routine_santé(nom, type_routine, frequence, duree, intensite, calories, [], notes)
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TAB 2: OBJECTIFS
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     with tabs[1]:
-        st.header("Objectifs SantÃ©")
+        st.header("Objectifs Santé")
         
         objectives = charger_objectifs()
         
@@ -235,7 +235,7 @@ def app():
                         progress = obj['progression'] / 100.0
                         st.progress(progress)
                         
-                        # DÃ©tails
+                        # Détails
                         col_details = st.columns(3)
                         with col_details[0]:
                             st.metric("Progression", f"{obj['progression']:.0f}%")
@@ -244,15 +244,15 @@ def app():
                         with col_details[2]:
                             jours = obj['jours_restants']
                             couleur = "ðŸŸ¢" if jours > 7 else "ðŸŸ¡" if jours > 0 else "ðŸ”´"
-                            st.metric("DÃ©lai", f"{couleur} {jours}j")
+                            st.metric("Délai", f"{couleur} {jours}j")
                     
                     with col2:
                         priority_colors = {"haute": "ðŸ”´", "moyenne": "ðŸŸ¡", "basse": "ðŸŸ¢"}
                         st.write(f"{priority_colors.get(obj['priorite'], 'âšª')} {obj['priorite']}")
             
-            # Formulaire mise Ã  jour progression
+            # Formulaire mise à jour progression
             st.divider()
-            st.subheader("Mettre Ã  jour progression")
+            st.subheader("Mettre à jour progression")
             col1, col2, col3 = st.columns([2, 1, 1])
             with col1:
                 selected_obj = st.selectbox("Objectif", 
@@ -264,48 +264,48 @@ def app():
                                                  obj['valeur_actuelle'] or 0.0)
             with col3:
                 st.write("")  # Spacing
-                if st.button("âœ… Mettre Ã  jour", use_container_width=True):
+                if st.button("âœ… Mettre à jour", use_container_width=True):
                     update_objectif_progression(obj['id'], nouvelle_valeur)
         else:
-            st.info("Aucun objectif crÃ©Ã©")
+            st.info("Aucun objectif créé")
         
         st.divider()
-        st.subheader("CrÃ©er un nouvel objectif")
+        st.subheader("Créer un nouvel objectif")
         with st.form("form_objective"):
             col1, col2 = st.columns(2)
             with col1:
                 titre = st.text_input("Titre")
-                categorie = st.text_input("CatÃ©gorie", "Fitness")
+                categorie = st.text_input("Catégorie", "Fitness")
                 valeur_cible = st.number_input("Valeur cible", 1.0, 1000.0, 10.0)
             with col2:
-                unite = st.text_input("UnitÃ©", "km")
+                unite = st.text_input("Unité", "km")
                 date_cible = st.date_input("Date cible")
-                priorite = st.radio("PrioritÃ©", ["basse", "moyenne", "haute"])
+                priorite = st.radio("Priorité", ["basse", "moyenne", "haute"])
             
             notes = st.text_area("Notes")
             
-            if st.form_submit_button("âž• CrÃ©er objectif", use_container_width=True):
+            if st.form_submit_button("âž• Créer objectif", use_container_width=True):
                 if titre and valeur_cible and date_cible:
                     ajouter_objectif(titre, categorie, valeur_cible, unite, date_cible, priorite, notes)
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TAB 3: TRACKING
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     with tabs[2]:
         st.header("Suivi Quotidien")
         
         col1, col2 = st.columns([2, 1])
         
         with col1:
-            # Ajouter une entrÃ©e
-            st.subheader("Enregistrer une activitÃ©")
+            # Ajouter une entrée
+            st.subheader("Enregistrer une activité")
             with st.form("form_entry"):
                 col_form = st.columns(2)
                 with col_form[0]:
-                    type_activite = st.text_input("ActivitÃ©", "Course")
-                    duree = st.number_input("DurÃ©e (min)", 10, 180, 30)
+                    type_activite = st.text_input("Activité", "Course")
+                    duree = st.number_input("Durée (min)", 10, 180, 30)
                 with col_form[1]:
-                    intensite = st.radio("IntensitÃ©", ["basse", "modÃ©rÃ©e", "haute"], horizontal=True)
+                    intensite = st.radio("Intensité", ["basse", "modérée", "haute"], horizontal=True)
                     calories = st.number_input("Calories", 0, 2000, 200)
                 
                 col_notes = st.columns(2)
@@ -317,15 +317,15 @@ def app():
                 ressenti = st.text_area("Ressenti", height=60, placeholder="Comment tu te sens?")
                 
                 if st.form_submit_button("âœ… Enregistrer", use_container_width=True):
-                    ajouter_entree_santÃ©(type_activite, duree, intensite, calories, energie, moral, ressenti)
+                    ajouter_entree_santé(type_activite, duree, intensite, calories, energie, moral, ressenti)
         
         with col2:
             # Stats de la semaine
             st.subheader("Semaine en cours")
-            stats = get_stats_santÃ©_semaine()
+            stats = get_stats_santé_semaine()
             
-            st.metric("ðŸƒ SÃ©ances", stats['nb_seances'])
-            st.metric("â±ï¸ Temps", f"{stats['total_minutes']} min")
+            st.metric("ðŸƒ Séances", stats['nb_seances'])
+            st.metric("â±ï¸ Temps", f"{stats['total_minutes']} min")
             st.metric("ðŸ”¥ Calories", f"{stats['total_calories']:.0f}")
             st.metric("âš¡ Ã‰nergie", f"{stats['energie_moyenne']:.1f}/10")
             st.metric("ðŸ˜Š Moral", f"{stats['moral_moyen']:.1f}/10")
@@ -340,7 +340,7 @@ def app():
             df = pd.DataFrame(entries)
             df['date'] = pd.to_datetime(df['date'])
             
-            # Graphique 1: Progression calories et durÃ©e
+            # Graphique 1: Progression calories et durée
             fig1 = go.Figure()
             fig1.add_trace(go.Bar(
                 x=df['date'],
@@ -351,16 +351,16 @@ def app():
             fig1.add_trace(go.Scatter(
                 x=df['date'],
                 y=df['duree'],
-                name='DurÃ©e (min)',
+                name='Durée (min)',
                 yaxis='y2',
                 line_color='blue'
             ))
             
             fig1.update_layout(
-                title="Calories vs DurÃ©e",
+                title="Calories vs Durée",
                 xaxis_title="Date",
                 yaxis_title="Calories (kcal)",
-                yaxis2=dict(title="DurÃ©e (min)", overlaying='y', side='right'),
+                yaxis2=dict(title="Durée (min)", overlaying='y', side='right'),
                 height=400,
                 hovermode='x unified'
             )
@@ -392,22 +392,22 @@ def app():
             )
             st.plotly_chart(fig2, use_container_width=True)
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TAB 4: NUTRITION
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     with tabs[3]:
-        st.header("ðŸŽ Nutrition")
+        st.header("ðŸŽ Nutrition")
         
-        st.info("ðŸ’¡ Principes gÃ©nÃ©raux pour une bonne santÃ©:")
+        st.info("ðŸ’¡ Principes généraux pour une bonne santé:")
         
         col1, col2 = st.columns(2)
         
         with col1:
-            st.subheader("âœ… Ã€ privilÃ©gier")
+            st.subheader("âœ… Ã€ privilégier")
             points = [
-                "Fruits et lÃ©gumes frais (5 portions/jour)",
-                "ProtÃ©ines maigres (poulet, poisson, Å“ufs)",
-                "FÃ©culents complets (riz brun, pÃ¢tes complÃ¨tes)",
+                "Fruits et légumes frais (5 portions/jour)",
+                "Protéines maigres (poulet, poisson, Å“ufs)",
+                "Féculents complets (riz brun, pÃ¢tes complètes)",
                 "Produits laitiers ou substituts",
                 "Huiles saines (olive, tournesol)",
                 "Hydratation (1.5-2L eau/jour)"
@@ -416,13 +416,13 @@ def app():
                 st.write(f"âœ“ {point}")
         
         with col2:
-            st.subheader("âŒ Ã€ limiter")
+            st.subheader("âŒ Ã€ limiter")
             points = [
-                "Sucres raffinÃ©s et sodas",
-                "Graisses saturÃ©es (beurre, fritures)",
-                "Aliments ultra-transformÃ©s",
-                "Sel en excÃ¨s",
-                "Alcool rÃ©gulier",
+                "Sucres raffinés et sodas",
+                "Graisses saturées (beurre, fritures)",
+                "Aliments ultra-transformés",
+                "Sel en excès",
+                "Alcool régulier",
                 "Repas trop lourds le soir"
             ]
             for point in points:
@@ -435,33 +435,33 @@ def app():
         with col1:
             st.subheader("ðŸ¥— Exemple menu healthy")
             st.write("""
-            **Petit-dÃ©jeuner:**
-            - Oeufs brouillÃ©s + pain complet
+            **Petit-déjeuner:**
+            - Oeufs brouillés + pain complet
             - Fruit frais + verre de lait
             
-            **DÃ©jeuner:**
-            - Poulet grillÃ©
-            - Riz brun + lÃ©gumes vapeur
+            **Déjeuner:**
+            - Poulet grillé
+            - Riz brun + légumes vapeur
             - Salade verte
             
             **Collation:**
             - Yaourt nature + fruit
-            - PoignÃ©e de noix
+            - Poignée de noix
             
-            **DÃ®ner:**
+            **Dîner:**
             - Poisson (saumon, truite)
-            - Patate douce rÃ´tie
+            - Patate douce rôtie
             - Brocoli vapeur
             """)
         
         with col2:
             st.subheader("ðŸ“‹ Bonnes pratiques")
             practices = [
-                ("ðŸ´", "Manger lentement et bien mastiquer"),
-                ("â°", "3 repas rÃ©guliers + 2 collations"),
+                ("ðŸ´", "Manger lentement et bien mastiquer"),
+                ("â°", "3 repas réguliers + 2 collations"),
                 ("ðŸ¥¤", "Boire de l'eau entre les repas"),
-                ("ðŸŒ™", "DÃ®ner 2-3h avant le coucher"),
-                ("ðŸ›’", "PrÃ©parer ses courses Ã  l'avance"),
+                ("ðŸŒ™", "Dîner 2-3h avant le coucher"),
+                ("ðŸ›’", "Préparer ses courses à l'avance"),
                 ("ðŸ“Š", "Varier les aliments et couleurs"),
             ]
             for emoji, practice in practices:

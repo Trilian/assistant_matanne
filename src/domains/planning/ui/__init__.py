@@ -1,16 +1,16 @@
 ﻿"""
 Module Planning - Centre de Coordination Familiale
 
-AgrÃ¨ge TOUS les Ã©vÃ©nements familiaux en une vision unifiÃ©e:
-- ðŸ“… Calendrier: Tous les Ã©vÃ©nements intÃ©grÃ©s
-- ðŸ“Š Vue Semaine: Analyse charge et rÃ©partition
+Agrège TOUS les événements familiaux en une vision unifiée:
+- ðŸ“… Calendrier: Tous les événements intégrés
+- ðŸ“Š Vue Semaine: Analyse charge et répartition
 - ðŸŽ¯ Vue d'Ensemble: Actions prioritaires et suggestions
 
 Utilise PlanningAIService pour:
-âœ… AgrÃ©gation optimisÃ©e avec cache intelligent
+âœ… Agrégation optimisée avec cache intelligent
 âœ… Calcul charge familiale jour par jour
-âœ… DÃ©tection alertes intelligentes
-âœ… GÃ©nÃ©ration IA de semaines Ã©quilibrÃ©es
+âœ… Détection alertes intelligentes
+âœ… Génération IA de semaines équilibrées
 """
 
 from . import calendrier, vue_semaine, vue_ensemble
@@ -26,20 +26,20 @@ SUBMODULES = {
 
 
 def app():
-    """Point d'entrÃ©e module planning - Affiche la vue d'ensemble par dÃ©faut"""
-    # Import ici pour Ã©viter de charger Streamlit inutilement
+    """Point d'entrée module planning - Affiche la vue d'ensemble par défaut"""
+    # Import ici pour éviter de charger Streamlit inutilement
     import streamlit as st
 
-    # Menu de sÃ©lection
+    # Menu de sélection
     st.sidebar.markdown("### ðŸ“… Planning")
 
     view = st.sidebar.radio(
-        "SÃ©lectionner une vue",
+        "Sélectionner une vue",
         list(SUBMODULES.keys()),
         key="planning_view_selection",
     )
 
-    # Charger la vue sÃ©lectionnÃ©e
+    # Charger la vue sélectionnée
     submodule = SUBMODULES[view]
     submodule.app()
 

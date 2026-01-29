@@ -1,6 +1,6 @@
 ﻿"""
-Module Suivi Jules avec Agent IA intÃ©grÃ©
-Suivi du dÃ©veloppement avec conseils adaptÃ©s Ã  l'Ã¢ge
+Module Suivi Jules avec Agent IA intégré
+Suivi du développement avec conseils adaptés à l'Ã¢ge
 """
 
 import asyncio
@@ -14,7 +14,7 @@ from src.core.database import get_db_context
 from src.core.models import ChildProfile, WellbeingEntry
 from src.utils.formatters import format_quantity
 
-# Logique mÃ©tier pure
+# Logique métier pure
 from src.domains.famille.logic.suivi_jules_logic import (
     calculer_age_mois,
     suggerer_activites_developpement
@@ -26,14 +26,14 @@ from src.domains.famille.logic.suivi_jules_logic import (
 
 
 def get_child_profile() -> ChildProfile:
-    """RÃ©cupÃ¨re le profil de Jules"""
+    """Récupère le profil de Jules"""
     with get_db_context() as db:
         child = db.query(ChildProfile).filter(ChildProfile.name == "Jules").first()
 
         if not child:
-            # CrÃ©er le profil si inexistant
+            # Créer le profil si inexistant
             child = ChildProfile(
-                name="Jules", birth_date=date(2024, 6, 22), notes="Notre petit bout de chou â¤ï¸"
+                name="Jules", birth_date=date(2024, 6, 22), notes="Notre petit bout de chou â¤ï¸"
             )
             db.add(child)
             db.commit()
@@ -51,7 +51,7 @@ def calculer_age(birth_date: date) -> dict:
     semaines = jours // 7
     mois = (today.year - birth_date.year) * 12 + (today.month - birth_date.month)
 
-    # Ajuster si le jour n'est pas encore passÃ©
+    # Ajuster si le jour n'est pas encore passé
     if today.day < birth_date.day:
         mois -= 1
 
@@ -59,38 +59,38 @@ def calculer_age(birth_date: date) -> dict:
 
 
 def get_etapes_developpement(age_mois: int) -> list[dict]:
-    """Retourne les Ã©tapes clÃ©s du dÃ©veloppement selon l'Ã¢ge"""
+    """Retourne les étapes clés du développement selon l'Ã¢ge"""
     etapes = {
         0: [
-            "RÃ©flexes primitifs (succion, prÃ©hension)",
-            "Vision floue, reconnaÃ®t visages proches",
+            "Réflexes primitifs (succion, préhension)",
+            "Vision floue, reconnaît visages proches",
             "Dort 16-18h par jour",
         ],
         1: [
-            "Commence Ã  sourire",
+            "Commence à sourire",
             "Suit des objets du regard",
             "Meilleure coordination main-bouche",
         ],
-        2: ["Babillage (ah, oh, eu)", "Tient sa tÃªte", "ReconnaÃ®t les visages familiers"],
-        3: ["Rit aux Ã©clats", "Attrape les objets", "Se retourne sur le ventre"],
-        4: ["Assis avec soutien", "Exploration bouche-main", "DiffÃ©rencie voix connues/inconnues"],
+        2: ["Babillage (ah, oh, eu)", "Tient sa tête", "Reconnaît les visages familiers"],
+        3: ["Rit aux éclats", "Attrape les objets", "Se retourne sur le ventre"],
+        4: ["Assis avec soutien", "Exploration bouche-main", "Différencie voix connues/inconnues"],
         5: [
             "Diversification alimentaire possible",
-            "TransfÃ¨re objets d'une main Ã  l'autre",
+            "Transfère objets d'une main à l'autre",
             "Babillage plus complexe (ba-ba, ma-ma)",
         ],
-        6: ["Tient assis seul", "DÃ©but de la position 4 pattes", "Angoisse de sÃ©paration"],
-        9: ["Se met debout avec appui", "Premiers mots (papa, maman)", "Joue Ã  coucou-cachÃ©"],
+        6: ["Tient assis seul", "Début de la position 4 pattes", "Angoisse de séparation"],
+        9: ["Se met debout avec appui", "Premiers mots (papa, maman)", "Joue à coucou-caché"],
         12: ["Marche avec aide ou seul", "Premiers pas", "Comprend des consignes simples"],
     }
 
-    # Trouver l'Ã©tape la plus proche
+    # Trouver l'étape la plus proche
     mois_cle = min(etapes.keys(), key=lambda x: abs(x - age_mois))
-    return etapes.get(mois_cle, ["DÃ©veloppement en cours"])
+    return etapes.get(mois_cle, ["Développement en cours"])
 
 
 def charger_entrees_bien_etre(child_id: int, limit: int = 30) -> pd.DataFrame:
-    """Charge les entrÃ©es de bien-Ãªtre"""
+    """Charge les entrées de bien-être"""
     with get_db_context() as db:
         entries = (
             db.query(WellbeingEntry)
@@ -116,7 +116,7 @@ def charger_entrees_bien_etre(child_id: int, limit: int = 30) -> pd.DataFrame:
 
 
 def ajouter_entree(child_id: int, humeur: str, sommeil: float, activite: str, notes: str):
-    """Ajoute une entrÃ©e de bien-Ãªtre"""
+    """Ajoute une entrée de bien-être"""
     with get_db_context() as db:
         entry = WellbeingEntry(
             child_id=child_id,
@@ -136,15 +136,15 @@ def ajouter_entree(child_id: int, humeur: str, sommeil: float, activite: str, no
 
 
 def app():
-    """Module Suivi Jules avec IA intÃ©grÃ©e"""
+    """Module Suivi Jules avec IA intégrée"""
 
     st.title("ðŸ‘¶ Suivi de Jules")
-    st.caption("DÃ©veloppement et conseils adaptÃ©s avec l'IA")
+    st.caption("Développement et conseils adaptés avec l'IA")
 
-    # RÃ©cupÃ©rer l'agent IA
+    # Récupérer l'agent IA
     agent: AgentIA = st.session_state.get("agent_ia")
 
-    # RÃ©cupÃ©rer le profil de Jules
+    # Récupérer le profil de Jules
     jules = get_child_profile()
     age = calculer_age(jules.birth_date)
 
@@ -158,7 +158,7 @@ def app():
 
     with col_info1:
         st.markdown(f"### ðŸ‘¶ {jules.name}")
-        st.caption(f"NÃ© le {jules.birth_date.strftime('%d/%m/%Y')}")
+        st.caption(f"Né le {jules.birth_date.strftime('%d/%m/%Y')}")
 
         if jules.notes:
             st.info(jules.notes)
@@ -168,7 +168,7 @@ def app():
         st.metric("Jours de vie", age["jours"])
 
     with col_info3:
-        # Prochaine Ã©tape importante
+        # Prochaine étape importante
         prochaine_etape = ""
         if age["mois"] < 3:
             prochaine_etape = "3 mois : Rires"
@@ -177,9 +177,9 @@ def app():
         elif age["mois"] < 12:
             prochaine_etape = "12 mois : Marche"
         else:
-            prochaine_etape = "DÃ©veloppement continu"
+            prochaine_etape = "Développement continu"
 
-        st.metric("Prochaine Ã©tape", prochaine_etape)
+        st.metric("Prochaine étape", prochaine_etape)
 
     st.markdown("---")
 
@@ -188,7 +188,7 @@ def app():
     # ===================================
 
     tab1, tab2, tab3, tab4 = st.tabs(
-        ["ðŸ“Š Tableau de bord", "ðŸ¤– Conseils IA", "ðŸ“ Journal", "ðŸ“ˆ Statistiques"]
+        ["ðŸ“Š Tableau de bord", "ðŸ¤– Conseils IA", "ðŸ“ Journal", "ðŸ“ˆ Statistiques"]
     )
 
     # ===================================
@@ -196,10 +196,10 @@ def app():
     # ===================================
 
     with tab1:
-        st.subheader("DÃ©veloppement actuel")
+        st.subheader("Développement actuel")
 
-        # Ã‰tapes du dÃ©veloppement
-        st.markdown("### ðŸŽ¯ Ã‰tapes clÃ©s du dÃ©veloppement")
+        # Ã‰tapes du développement
+        st.markdown("### ðŸŽ¯ Ã‰tapes clés du développement")
 
         etapes = get_etapes_developpement(age["mois"])
 
@@ -208,13 +208,13 @@ def app():
 
         st.markdown("---")
 
-        # DerniÃ¨res entrÃ©es
-        st.markdown("### ðŸ“‹ DerniÃ¨res observations")
+        # Dernières entrées
+        st.markdown("### ðŸ“‹ Dernières observations")
 
         df = charger_entrees_bien_etre(jules.id, limit=7)
 
         if df.empty:
-            st.info("Aucune observation encore. Commence Ã  noter les progrÃ¨s !")
+            st.info("Aucune observation encore. Commence à noter les progrès !")
         else:
             # Graphique sommeil
             col_graph1, col_graph2 = st.columns(2)
@@ -224,23 +224,23 @@ def app():
                 if not df["sommeil"].isnull().all():
                     st.line_chart(df.set_index("date")["sommeil"])
                 else:
-                    st.caption("Pas de donnÃ©es de sommeil")
+                    st.caption("Pas de données de sommeil")
 
             with col_graph2:
                 st.markdown("**ðŸ˜Š Humeur**")
                 humeur_counts = df["humeur"].value_counts()
                 st.bar_chart(humeur_counts)
 
-            # Liste des entrÃ©es
+            # Liste des entrées
             st.markdown("---")
-            st.markdown("**DerniÃ¨res observations**")
+            st.markdown("**Dernières observations**")
 
             for _, row in df.head(5).iterrows():
                 with st.expander(
                     f"{row['date'].strftime('%d/%m/%Y')} - {row['humeur']}", expanded=False
                 ):
                     st.write(f"**Sommeil :** {row['sommeil']}h")
-                    st.write(f"**ActivitÃ© :** {row['activite']}")
+                    st.write(f"**Activité :** {row['activite']}")
                     if row["notes"]:
                         st.write(f"**Notes :** {row['notes']}")
 
@@ -252,13 +252,13 @@ def app():
             col_q1, col_q2, col_q3 = st.columns(3)
 
             with col_q1:
-                humeur = st.selectbox("Humeur", ["ðŸ˜Š Bien", "ðŸ˜ Moyen", "ðŸ˜ž Mal"])
+                humeur = st.selectbox("Humeur", ["ðŸ˜Š Bien", "ðŸ˜ Moyen", "ðŸ˜ž Mal"])
 
             with col_q2:
                 sommeil = st.number_input("Heures de sommeil", 0.0, 24.0, 10.0, 0.5)
 
             with col_q3:
-                activite = st.text_input("ActivitÃ©", placeholder="Ex: Promenade")
+                activite = st.text_input("Activité", placeholder="Ex: Promenade")
 
             notes = st.text_area("Notes (optionnel)", placeholder="Observations...")
 
@@ -266,7 +266,7 @@ def app():
 
             if submitted:
                 ajouter_entree(jules.id, humeur, sommeil, activite, notes)
-                st.success("âœ… Observation ajoutÃ©e")
+                st.success("âœ… Observation ajoutée")
                 st.balloons()
                 st.rerun()
 
@@ -275,12 +275,12 @@ def app():
     # ===================================
 
     with tab2:
-        st.subheader("ðŸ¤– Conseils personnalisÃ©s par l'IA")
+        st.subheader("ðŸ¤– Conseils personnalisés par l'IA")
 
         if not agent:
             st.error("Agent IA non disponible")
         else:
-            st.info(f"ðŸ’¡ Conseils adaptÃ©s Ã  l'Ã¢ge de Jules ({age['mois']} mois)")
+            st.info(f"ðŸ’¡ Conseils adaptés à l'Ã¢ge de Jules ({age['mois']} mois)")
 
             # Options
             col_c1, col_c2 = st.columns(2)
@@ -289,11 +289,11 @@ def app():
                 domaine = st.selectbox(
                     "Domaine",
                     [
-                        "GÃ©nÃ©ral",
+                        "Général",
                         "Sommeil",
                         "Alimentation",
-                        "DÃ©veloppement moteur",
-                        "DÃ©veloppement cognitif",
+                        "Développement moteur",
+                        "Développement cognitif",
                         "Socialisation",
                     ],
                 )
@@ -302,13 +302,13 @@ def app():
                 st.write("")
                 st.write("")
                 generer = st.button(
-                    "âœ¨ Demander conseil Ã  l'IA", type="primary", use_container_width=True
+                    "âœ¨ Demander conseil à l'IA", type="primary", use_container_width=True
                 )
 
             if generer:
-                with st.spinner("ðŸ¤– L'IA prÃ©pare des conseils personnalisÃ©s..."):
+                with st.spinner("ðŸ¤– L'IA prépare des conseils personnalisés..."):
                     try:
-                        # RÃ©cupÃ©rer contexte
+                        # Récupérer contexte
                         df_recent = charger_entrees_bien_etre(jules.id, limit=7)
 
                         contexte = {
@@ -331,7 +331,7 @@ def app():
                             loop.close()
 
                         st.session_state["conseils_jules"] = conseils
-                        st.success("âœ… Conseils gÃ©nÃ©rÃ©s !")
+                        st.success("âœ… Conseils générés !")
 
                     except Exception as e:
                         st.error(f"Erreur IA : {e}")
@@ -348,17 +348,17 @@ def app():
                     for conseil in conseils["conseils"]:
                         st.success(f"âœ… {conseil}")
 
-                # ActivitÃ©s
+                # Activités
                 if "activites" in conseils:
-                    st.markdown("### ðŸŽ¨ ActivitÃ©s suggÃ©rÃ©es")
+                    st.markdown("### ðŸŽ¨ Activités suggérées")
                     for activite in conseils["activites"]:
                         st.info(f"ðŸŽ¯ {activite}")
 
                 # Alertes
                 if "alertes" in conseils and conseils["alertes"]:
-                    st.markdown("### âš ï¸ Points d'attention")
+                    st.markdown("### âš ï¸ Points d'attention")
                     for alerte in conseils["alertes"]:
-                        st.warning(f"âš ï¸ {alerte}")
+                        st.warning(f"âš ï¸ {alerte}")
 
                 # Bouton pour sauvegarder
                 if st.button("ðŸ’¾ Sauvegarder ces conseils dans le journal"):
@@ -373,7 +373,7 @@ def app():
                         notes=notes_conseil,
                     )
 
-                    st.success("âœ… Conseils sauvegardÃ©s dans le journal")
+                    st.success("âœ… Conseils sauvegardés dans le journal")
                     del st.session_state["conseils_jules"]
 
             # Raccourcis conseils
@@ -384,11 +384,11 @@ def app():
 
             raccourcis = [
                 ("ðŸ˜´ Sommeil", "Sommeil"),
-                ("ðŸ¼ Alimentation", "Alimentation"),
-                ("ðŸ¤¸ MotricitÃ©", "DÃ©veloppement moteur"),
-                ("ðŸ§  Cognitif", "DÃ©veloppement cognitif"),
+                ("ðŸ¼ Alimentation", "Alimentation"),
+                ("ðŸ¤¸ Motricité", "Développement moteur"),
+                ("ðŸ§  Cognitif", "Développement cognitif"),
                 ("ðŸ‘¥ Social", "Socialisation"),
-                ("ðŸ“š Lecture", "GÃ©nÃ©ral"),
+                ("ðŸ“š Lecture", "Général"),
             ]
 
             for i, (label, dom) in enumerate(raccourcis):
@@ -403,29 +403,29 @@ def app():
     # ===================================
 
     with tab3:
-        st.subheader("ðŸ“ Journal de bord")
+        st.subheader("ðŸ“ Journal de bord")
 
-        # Formulaire dÃ©taillÃ©
+        # Formulaire détaillé
         with st.form("form_journal"):
-            st.markdown("### âž• Nouvelle entrÃ©e")
+            st.markdown("### âž• Nouvelle entrée")
 
             col_j1, col_j2 = st.columns(2)
 
             with col_j1:
                 _date_entry = st.date_input("Date", value=date.today())
-                humeur = st.selectbox("Humeur", ["ðŸ˜Š Bien", "ðŸ˜ Moyen", "ðŸ˜ž Mal"])
+                humeur = st.selectbox("Humeur", ["ðŸ˜Š Bien", "ðŸ˜ Moyen", "ðŸ˜ž Mal"])
                 sommeil = st.number_input("Heures de sommeil", 0.0, 24.0, 10.0, 0.5)
 
             with col_j2:
-                activite = st.text_input("ActivitÃ© principale", placeholder="Ex: Sortie au parc")
+                activite = st.text_input("Activité principale", placeholder="Ex: Sortie au parc")
 
-                # CatÃ©gories supplÃ©mentaires
+                # Catégories supplémentaires
                 categories = st.multiselect(
-                    "CatÃ©gories",
+                    "Catégories",
                     [
-                        "ProgrÃ¨s moteur",
-                        "ProgrÃ¨s langage",
-                        "SantÃ©",
+                        "Progrès moteur",
+                        "Progrès langage",
+                        "Santé",
                         "Socialisation",
                         "Alimentation",
                         "Autre",
@@ -433,9 +433,9 @@ def app():
                 )
 
             notes = st.text_area(
-                "Notes dÃ©taillÃ©es",
+                "Notes détaillées",
                 height=150,
-                placeholder="DÃ©cris la journÃ©e, les progrÃ¨s, les moments marquants...",
+                placeholder="Décris la journée, les progrès, les moments marquants...",
             )
 
             submitted = st.form_submit_button("ðŸ’¾ Enregistrer", type="primary")
@@ -443,16 +443,16 @@ def app():
             if submitted:
                 notes_complete = notes
                 if categories:
-                    notes_complete += f"\n\nCatÃ©gories: {', '.join(categories)}"
+                    notes_complete += f"\n\nCatégories: {', '.join(categories)}"
 
                 ajouter_entree(jules.id, humeur, sommeil, activite, notes_complete)
-                st.success("âœ… EntrÃ©e enregistrÃ©e dans le journal")
+                st.success("âœ… Entrée enregistrée dans le journal")
                 st.balloons()
                 st.rerun()
 
         st.markdown("---")
 
-        # Liste complÃ¨te du journal
+        # Liste complète du journal
         st.markdown("### ðŸ“– Historique complet")
 
         df_journal = charger_entrees_bien_etre(jules.id, limit=100)
@@ -463,11 +463,11 @@ def app():
 
             with col_f1:
                 filtre_humeur = st.multiselect(
-                    "Filtrer par humeur", ["ðŸ˜Š Bien", "ðŸ˜ Moyen", "ðŸ˜ž Mal"]
+                    "Filtrer par humeur", ["ðŸ˜Š Bien", "ðŸ˜ Moyen", "ðŸ˜ž Mal"]
                 )
 
             with col_f2:
-                periode = st.selectbox("PÃ©riode", ["7 derniers jours", "30 derniers jours", "Tout"])
+                periode = st.selectbox("Période", ["7 derniers jours", "30 derniers jours", "Tout"])
 
             # Appliquer filtres
             df_filtre = df_journal.copy()
@@ -490,7 +490,7 @@ def app():
                     "date": st.column_config.DateColumn("Date", format="DD/MM/YYYY"),
                     "humeur": "Humeur",
                     "sommeil": st.column_config.NumberColumn("Sommeil (h)", format="%.1f"),
-                    "activite": "ActivitÃ©",
+                    "activite": "Activité",
                     "notes": st.column_config.TextColumn("Notes", width="large"),
                 },
             )
@@ -500,13 +500,13 @@ def app():
             if st.button("ðŸ“¤ Exporter le journal (CSV)"):
                 csv = df_filtre.to_csv(index=False)
                 st.download_button(
-                    "TÃ©lÃ©charger",
+                    "Télécharger",
                     csv,
                     f"journal_jules_{date.today().strftime('%Y%m%d')}.csv",
                     "text/csv",
                 )
         else:
-            st.info("Journal vide. Commence Ã  noter les progrÃ¨s de Jules !")
+            st.info("Journal vide. Commence à noter les progrès de Jules !")
 
     # ===================================
     # TAB 4 : STATISTIQUES
@@ -518,13 +518,13 @@ def app():
         df_stats = charger_entrees_bien_etre(jules.id, limit=90)
 
         if df_stats.empty:
-            st.info("Pas assez de donnÃ©es pour les statistiques")
+            st.info("Pas assez de données pour les statistiques")
         else:
-            # MÃ©triques globales
+            # Métriques globales
             col_m1, col_m2, col_m3, col_m4 = st.columns(4)
 
             with col_m1:
-                st.metric("EntrÃ©es totales", len(df_stats))
+                st.metric("Entrées totales", len(df_stats))
 
             with col_m2:
                 avg_sleep = df_stats["sommeil"].mean()
@@ -537,7 +537,7 @@ def app():
 
             with col_m4:
                 activites_uniques = df_stats["activite"].nunique()
-                st.metric("ActivitÃ©s variÃ©es", activites_uniques)
+                st.metric("Activités variées", activites_uniques)
 
             st.markdown("---")
 
@@ -549,13 +549,13 @@ def app():
                 st.line_chart(df_stats.set_index("date")["sommeil"])
 
             with col_g2:
-                st.markdown("### ðŸ˜Š RÃ©partition humeur")
+                st.markdown("### ðŸ˜Š Répartition humeur")
                 humeur_counts = df_stats["humeur"].value_counts()
                 st.bar_chart(humeur_counts)
 
-            # ActivitÃ©s les plus frÃ©quentes
+            # Activités les plus fréquentes
             st.markdown("---")
-            st.markdown("### ðŸŽ¯ ActivitÃ©s favorites")
+            st.markdown("### ðŸŽ¯ Activités favorites")
 
             top_activites = df_stats["activite"].value_counts().head(10)
 
@@ -568,7 +568,7 @@ def app():
             if agent and st.button("ðŸ¤– Analyse IA des tendances", type="primary"):
                 with st.spinner("ðŸ¤– Analyse en cours..."):
                     try:
-                        # PrÃ©parer donnÃ©es
+                        # Préparer données
                         donnees_sommeil = [
                             {"date": str(row["date"]), "heures": row["sommeil"]}
                             for _, row in df_stats.iterrows()
@@ -591,8 +591,8 @@ def app():
                         finally:
                             loop.close()
 
-                        # Afficher rÃ©sultats
-                        st.success("âœ… Analyse terminÃ©e")
+                        # Afficher résultats
+                        st.success("âœ… Analyse terminée")
 
                         if "tendances" in analyse:
                             st.info(f"**Tendances :** {analyse['tendances']}")
@@ -603,7 +603,7 @@ def app():
                                 st.write(f"â€¢ {reco}")
 
                         if "score_bien_etre" in analyse:
-                            st.metric("Score bien-Ãªtre", f"{analyse['score_bien_etre']}/100")
+                            st.metric("Score bien-être", f"{analyse['score_bien_etre']}/100")
 
                     except Exception as e:
                         st.error(f"Erreur IA : {e}")

@@ -1,5 +1,5 @@
 ﻿"""
-Logique mÃ©tier du module ActivitÃ©s (famille) - SÃ©parÃ©e de l'UI
+Logique métier du module Activités (famille) - Séparée de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
 
@@ -10,31 +10,31 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONSTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 TYPES_ACTIVITE = ["Sport", "Culture", "Sortie", "Atelier", "Rendez-vous", "Jeu", "Autre"]
-LIEUX = ["Maison", "Parc", "Centre culturel", "Ã‰cole", "BibliothÃ¨que", "Piscine", "Autre"]
+LIEUX = ["Maison", "Parc", "Centre culturel", "Ã‰cole", "Bibliothèque", "Piscine", "Autre"]
 CATEGORIES_AGE = ["0-1 an", "1-2 ans", "2-3 ans", "3-5 ans", "5+ ans", "Famille"]
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FILTRAGE ET TRI
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def filtrer_par_type(activites: List[Dict[str, Any]], type_act: str) -> List[Dict[str, Any]]:
-    """Filtre les activitÃ©s par type."""
+    """Filtre les activités par type."""
     return [a for a in activites if a.get("type") == type_act]
 
 
 def filtrer_par_lieu(activites: List[Dict[str, Any]], lieu: str) -> List[Dict[str, Any]]:
-    """Filtre les activitÃ©s par lieu."""
+    """Filtre les activités par lieu."""
     return [a for a in activites if a.get("lieu") == lieu]
 
 
 def filtrer_par_date(activites: List[Dict[str, Any]], date_debut: date, date_fin: date) -> List[Dict[str, Any]]:
-    """Filtre les activitÃ©s par pÃ©riode."""
+    """Filtre les activités par période."""
     resultats = []
     
     for act in activites:
@@ -50,23 +50,23 @@ def filtrer_par_date(activites: List[Dict[str, Any]], date_debut: date, date_fin
 
 
 def get_activites_a_venir(activites: List[Dict[str, Any]], jours: int = 7) -> List[Dict[str, Any]]:
-    """Retourne les activitÃ©s Ã  venir dans X jours."""
+    """Retourne les activités à venir dans X jours."""
     date_fin = date.today() + timedelta(days=jours)
     return filtrer_par_date(activites, date.today(), date_fin)
 
 
 def get_activites_passees(activites: List[Dict[str, Any]], jours: int = 30) -> List[Dict[str, Any]]:
-    """Retourne les activitÃ©s passÃ©es des X derniers jours."""
+    """Retourne les activités passées des X derniers jours."""
     date_debut = date.today() - timedelta(days=jours)
     return filtrer_par_date(activites, date_debut, date.today())
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # STATISTIQUES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def calculer_statistiques_activites(activites: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """Calcule les statistiques des activitÃ©s."""
+    """Calcule les statistiques des activités."""
     total = len(activites)
     
     if total == 0:
@@ -90,7 +90,7 @@ def calculer_statistiques_activites(activites: List[Dict[str, Any]]) -> Dict[str
         lieu = act.get("lieu", "Autre")
         par_lieu[lieu] = par_lieu.get(lieu, 0) + 1
     
-    # CoÃ»ts et durÃ©e
+    # Coûts et durée
     cout_total = sum(act.get("cout", 0.0) for act in activites)
     durees = [act.get("duree", 0) for act in activites if act.get("duree")]
     duree_moyenne = sum(durees) / len(durees) if durees else 0.0
@@ -106,51 +106,51 @@ def calculer_statistiques_activites(activites: List[Dict[str, Any]]) -> Dict[str
 
 
 def calculer_frequence_hebdomadaire(activites: List[Dict[str, Any]], semaines: int = 4) -> float:
-    """Calcule la frÃ©quence hebdomadaire moyenne d'activitÃ©s."""
+    """Calcule la fréquence hebdomadaire moyenne d'activités."""
     if not activites or semaines == 0:
         return 0.0
     
     return len(activites) / semaines
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # RECOMMANDATIONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def suggerer_activites_age(age_mois: int) -> List[Dict[str, str]]:
-    """SuggÃ¨re des activitÃ©s adaptÃ©es Ã  l'Ã¢ge."""
+    """Suggère des activités adaptées à l'Ã¢ge."""
     suggestions = []
     
     if age_mois < 12:
         suggestions = [
-            {"type": "Jeu", "titre": "Jeux d'Ã©veil", "description": "Hochets, tapis d'Ã©veil"},
-            {"type": "Sport", "titre": "MotricitÃ© libre", "description": "Temps au sol pour ramper"},
+            {"type": "Jeu", "titre": "Jeux d'éveil", "description": "Hochets, tapis d'éveil"},
+            {"type": "Sport", "titre": "Motricité libre", "description": "Temps au sol pour ramper"},
             {"type": "Culture", "titre": "Comptines", "description": "Chansons et comptines"}
         ]
     elif age_mois < 24:
         suggestions = [
             {"type": "Jeu", "titre": "Jeux de manipulation", "description": "Empiler, encastrer"},
             {"type": "Sport", "titre": "Marche", "description": "Promenades, parc"},
-            {"type": "Culture", "titre": "Histoires", "description": "Livres imagÃ©s"}
+            {"type": "Culture", "titre": "Histoires", "description": "Livres imagés"}
         ]
     elif age_mois < 36:
         suggestions = [
-            {"type": "Jeu", "titre": "Jeux symboliques", "description": "PoupÃ©es, voitures"},
-            {"type": "Sport", "titre": "Parcours moteur", "description": "Escalade, vÃ©lo"},
+            {"type": "Jeu", "titre": "Jeux symboliques", "description": "Poupées, voitures"},
+            {"type": "Sport", "titre": "Parcours moteur", "description": "Escalade, vélo"},
             {"type": "Culture", "titre": "Musique", "description": "Instruments simples"}
         ]
     else:
         suggestions = [
-            {"type": "Atelier", "titre": "ActivitÃ©s crÃ©atives", "description": "Peinture, pÃ¢te Ã  modeler"},
+            {"type": "Atelier", "titre": "Activités créatives", "description": "Peinture, pÃ¢te à modeler"},
             {"type": "Sport", "titre": "Sport collectif", "description": "Football, natation"},
-            {"type": "Culture", "titre": "Sorties culturelles", "description": "MusÃ©es, spectacles"}
+            {"type": "Culture", "titre": "Sorties culturelles", "description": "Musées, spectacles"}
         ]
     
     return suggestions
 
 
 def detecter_desequilibre_types(activites: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """DÃ©tecte les dÃ©sÃ©quilibres dans les types d'activitÃ©s."""
+    """Détecte les déséquilibres dans les types d'activités."""
     stats = calculer_statistiques_activites(activites)
     par_type = stats.get("par_type", {})
     
@@ -160,13 +160,13 @@ def detecter_desequilibre_types(activites: List[Dict[str, Any]]) -> Dict[str, An
     total = stats["total"]
     recommandations = []
     
-    # VÃ©rifier si un type est sous-reprÃ©sentÃ© (< 15%)
+    # Vérifier si un type est sous-représenté (< 15%)
     for type_act in TYPES_ACTIVITE[:3]:  # Sport, Culture, Sortie
         count = par_type.get(type_act, 0)
         pourcentage = (count / total * 100) if total > 0 else 0
         
         if pourcentage < 15:
-            recommandations.append(f"Augmenter les activitÃ©s de type '{type_act}' ({pourcentage:.0f}%)")
+            recommandations.append(f"Augmenter les activités de type '{type_act}' ({pourcentage:.0f}%)")
     
     return {
         "equilibre": len(recommandations) == 0,
@@ -174,12 +174,12 @@ def detecter_desequilibre_types(activites: List[Dict[str, Any]]) -> Dict[str, An
     }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # VALIDATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def valider_activite(data: Dict[str, Any]) -> tuple[bool, List[str]]:
-    """Valide une activitÃ©."""
+    """Valide une activité."""
     erreurs = []
     
     if "titre" not in data or not data["titre"]:
@@ -194,23 +194,23 @@ def valider_activite(data: Dict[str, Any]) -> tuple[bool, List[str]]:
     if "duree" in data:
         duree = data["duree"]
         if not isinstance(duree, (int, float)) or duree <= 0:
-            erreurs.append("La durÃ©e doit Ãªtre > 0")
+            erreurs.append("La durée doit être > 0")
     
     if "cout" in data:
         cout = data["cout"]
         if not isinstance(cout, (int, float)) or cout < 0:
-            erreurs.append("Le coÃ»t doit Ãªtre >= 0")
+            erreurs.append("Le coût doit être >= 0")
     
     return len(erreurs) == 0, erreurs
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FORMATAGE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def formater_activite_resume(activite: Dict[str, Any]) -> str:
-    """Formate le rÃ©sumÃ© d'une activitÃ©."""
-    titre = activite.get("titre", "ActivitÃ©")
+    """Formate le résumé d'une activité."""
+    titre = activite.get("titre", "Activité")
     type_act = activite.get("type", "")
     lieu = activite.get("lieu", "")
     
@@ -224,7 +224,7 @@ def formater_activite_resume(activite: Dict[str, Any]) -> str:
 
 
 def grouper_par_mois(activites: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
-    """Groupe les activitÃ©s par mois."""
+    """Groupe les activités par mois."""
     groupes = {}
     
     for act in activites:

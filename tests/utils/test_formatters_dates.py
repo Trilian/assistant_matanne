@@ -34,10 +34,10 @@ class TestFormatDate:
         assert result == "01/12/2025"
 
     def test_format_date_long_french(self):
-        """Test format long franÃ§ais"""
+        """Test format long français"""
         d = date(2025, 12, 1)
         result = format_date(d, "long", "fr")
-        assert result == "1 dÃ©cembre 2025"
+        assert result == "1 décembre 2025"
 
     def test_format_date_long_january(self):
         """Test format long janvier"""
@@ -53,7 +53,7 @@ class TestFormatDate:
         assert "2025" in result
 
     def test_format_date_datetime_input(self):
-        """Test avec datetime en entrÃ©e"""
+        """Test avec datetime en entrée"""
         dt = datetime(2025, 12, 1, 14, 30)
         result = format_date(dt, "medium")
         assert result == "01/12/2025"
@@ -88,7 +88,7 @@ class TestFormatDatetime:
         """Test format long"""
         dt = datetime(2025, 12, 1, 14, 30)
         result = format_datetime(dt, "long")
-        assert "1 dÃ©cembre 2025" in result
+        assert "1 décembre 2025" in result
         assert "14:30" in result
 
     def test_format_datetime_unknown_format(self):
@@ -133,14 +133,14 @@ class TestFormatRelativeDate:
         assert "/" in result
 
     def test_format_relative_datetime_input(self):
-        """Test avec datetime en entrÃ©e"""
+        """Test avec datetime en entrée"""
         dt = datetime.now()
         result = format_relative_date(dt)
         assert result == "Aujourd'hui"
 
 
 class TestFormatTime:
-    """Tests pour format_time (durÃ©e en minutes)"""
+    """Tests pour format_time (durée en minutes)"""
 
     def test_format_time_none(self):
         """Test avec None"""
@@ -172,7 +172,7 @@ class TestFormatTime:
 
 
 class TestFormatDuration:
-    """Tests pour format_duration (durÃ©e en secondes)"""
+    """Tests pour format_duration (durée en secondes)"""
 
     def test_format_duration_none(self):
         """Test avec None"""

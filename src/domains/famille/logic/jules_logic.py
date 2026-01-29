@@ -1,5 +1,5 @@
 ﻿"""
-Logique mÃ©tier du module Jules (suivi enfant) - SÃ©parÃ©e de l'UI
+Logique métier du module Jules (suivi enfant) - Séparée de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
 
@@ -10,26 +10,26 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONSTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 ETAPES_DEVELOPPEMENT = {
-    "0-3": ["Sourire social", "Suit des yeux", "Tient sa tÃªte"],
-    "3-6": ["Rit aux Ã©clats", "Attrape objets", "Se retourne"],
+    "0-3": ["Sourire social", "Suit des yeux", "Tient sa tête"],
+    "3-6": ["Rit aux éclats", "Attrape objets", "Se retourne"],
     "6-9": ["Babille", "Tient assis", "Pince pouce-index"],
-    "9-12": ["Dit papa/maman", "Rampe/marche Ã  4 pattes", "Fait au revoir"],
+    "9-12": ["Dit papa/maman", "Rampe/marche à 4 pattes", "Fait au revoir"],
     "12-18": ["Premiers mots", "Marche seul", "Pointe du doigt"],
     "18-24": ["Phrases 2 mots", "Court", "Monte escaliers"],
-    "24-36": ["Phrases complÃ¨tes", "Saute", "PÃ©dale tricycle"]
+    "24-36": ["Phrases complètes", "Saute", "Pédale tricycle"]
 }
 
-CATEGORIES_MILESTONES = ["MotricitÃ©", "Langage", "Social", "Cognitif"]
+CATEGORIES_MILESTONES = ["Motricité", "Langage", "Social", "Cognitif"]
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CALCULS Ã‚GE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def calculer_age_mois(date_naissance: date, date_reference: Optional[date] = None) -> int:
     """Calcule l'Ã¢ge en mois."""
@@ -55,7 +55,7 @@ def calculer_age_mois(date_naissance: date, date_reference: Optional[date] = Non
 
 
 def calculer_age_annees_mois(date_naissance: date, date_reference: Optional[date] = None) -> Dict[str, int]:
-    """Calcule l'Ã¢ge en annÃ©es et mois."""
+    """Calcule l'Ã¢ge en années et mois."""
     mois_total = calculer_age_mois(date_naissance, date_reference)
     
     annees = mois_total // 12
@@ -69,7 +69,7 @@ def calculer_age_annees_mois(date_naissance: date, date_reference: Optional[date
 
 
 def formater_age(date_naissance: date, date_reference: Optional[date] = None) -> str:
-    """Formate l'Ã¢ge de maniÃ¨re lisible."""
+    """Formate l'Ã¢ge de manière lisible."""
     age = calculer_age_annees_mois(date_naissance, date_reference)
     
     if age["annees"] == 0:
@@ -81,9 +81,9 @@ def formater_age(date_naissance: date, date_reference: Optional[date] = None) ->
         return f"{age['annees']} {ans_txt} et {age['mois']} mois"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Ã‰TAPES DE DÃ‰VELOPPEMENT
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def get_tranche_age(age_mois: int) -> str:
     """Retourne la tranche d'Ã¢ge."""
@@ -106,20 +106,20 @@ def get_tranche_age(age_mois: int) -> str:
 
 
 def get_etapes_attendues(age_mois: int) -> List[str]:
-    """Retourne les Ã©tapes attendues pour l'Ã¢ge."""
+    """Retourne les étapes attendues pour l'Ã¢ge."""
     tranche = get_tranche_age(age_mois)
     return ETAPES_DEVELOPPEMENT.get(tranche, [])
 
 
 def get_prochaines_etapes(age_mois: int) -> List[str]:
-    """Retourne les prochaines Ã©tapes Ã  venir."""
+    """Retourne les prochaines étapes à venir."""
     age_suivant = age_mois + 3  # 3 mois d'avance
     tranche = get_tranche_age(age_suivant)
     return ETAPES_DEVELOPPEMENT.get(tranche, [])
 
 
 def calculer_progression_etapes(etapes_realisees: List[Dict[str, Any]], age_mois: int) -> Dict[str, Any]:
-    """Calcule la progression dans les Ã©tapes."""
+    """Calcule la progression dans les étapes."""
     etapes_attendues = get_etapes_attendues(age_mois)
     
     if not etapes_attendues:
@@ -130,13 +130,13 @@ def calculer_progression_etapes(etapes_realisees: List[Dict[str, Any]], age_mois
             "en_avance": 0
         }
     
-    # Compter Ã©tapes rÃ©alisÃ©es de la tranche actuelle
+    # Compter étapes réalisées de la tranche actuelle
     noms_attendus = set(etapes_attendues)
     noms_realises = {e.get("nom") for e in etapes_realisees}
     
     realise_tranche = len(noms_attendus.intersection(noms_realises))
     
-    # Compter Ã©tapes en avance (tranches suivantes)
+    # Compter étapes en avance (tranches suivantes)
     en_avance = 0
     for etape in etapes_realisees:
         if etape.get("nom") not in noms_attendus:
@@ -154,9 +154,9 @@ def calculer_progression_etapes(etapes_realisees: List[Dict[str, Any]], age_mois
     }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SUIVI CROISSANCE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def analyser_courbe_croissance(mesures: List[Dict[str, Any]], type_mesure: str = "poids") -> Dict[str, Any]:
     """Analyse une courbe de croissance (poids, taille)."""
@@ -174,12 +174,12 @@ def analyser_courbe_croissance(mesures: List[Dict[str, Any]], type_mesure: str =
     valeurs = [m.get(type_mesure, 0.0) for m in mesures_triees]
     derniere = valeurs[-1] if valeurs else 0.0
     
-    # Tendance (comparer derniÃ¨re et avant-derniÃ¨re)
+    # Tendance (comparer dernière et avant-dernière)
     if len(valeurs) >= 2:
         diff = valeurs[-1] - valeurs[-2]
         if diff > 0.5:  # Seuil positif
             tendance = "hausse"
-        elif diff < -0.5:  # Seuil nÃ©gatif
+        elif diff < -0.5:  # Seuil négatif
             tendance = "baisse"
         else:
             tendance = "stable"
@@ -202,8 +202,8 @@ def analyser_courbe_croissance(mesures: List[Dict[str, Any]], type_mesure: str =
 
 
 def calculer_percentile_indicatif(valeur: float, age_mois: int, type_mesure: str = "poids") -> str:
-    """Donne une indication de percentile (simplifiÃ©e)."""
-    # DonnÃ©es indicatives moyennes (garÃ§on, approximatif)
+    """Donne une indication de percentile (simplifiée)."""
+    # Données indicatives moyennes (garçon, approximatif)
     moyennes_poids = {
         0: 3.5, 3: 6.0, 6: 8.0, 9: 9.0, 12: 10.0,
         18: 11.5, 24: 12.5, 36: 15.0
@@ -214,7 +214,7 @@ def calculer_percentile_indicatif(valeur: float, age_mois: int, type_mesure: str
         18: 82, 24: 87, 36: 96
     }
     
-    # Trouver rÃ©fÃ©rence la plus proche
+    # Trouver référence la plus proche
     if type_mesure == "poids":
         ref = moyennes_poids
     else:
@@ -229,18 +229,18 @@ def calculer_percentile_indicatif(valeur: float, age_mois: int, type_mesure: str
     if ratio < 0.85:
         return "Sous la moyenne"
     elif ratio < 0.95:
-        return "LÃ©gÃ¨rement sous la moyenne"
+        return "Légèrement sous la moyenne"
     elif ratio < 1.05:
         return "Dans la moyenne"
     elif ratio < 1.15:
-        return "LÃ©gÃ¨rement au-dessus"
+        return "Légèrement au-dessus"
     else:
         return "Au-dessus de la moyenne"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ANALYSE SANTÃ‰ ET BIEN-ÃŠTRE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def analyser_sommeil(entrees: List[Dict[str, Any]], jours: int = 7) -> Dict[str, Any]:
     """Analyse le sommeil de l'enfant."""
@@ -270,16 +270,16 @@ def analyser_sommeil(entrees: List[Dict[str, Any]], jours: int = 7) -> Dict[str,
     # Recommandations par Ã¢ge (pour un jeune enfant)
     if moyenne >= 12:
         qualite = "Excellent"
-        recommandation = "Sommeil suffisant pour le dÃ©veloppement"
+        recommandation = "Sommeil suffisant pour le développement"
     elif moyenne >= 10:
         qualite = "Bon"
-        recommandation = "Sommeil adÃ©quat"
+        recommandation = "Sommeil adéquat"
     elif moyenne >= 8:
         qualite = "Moyen"
-        recommandation = "Augmenter lÃ©gÃ¨rement le temps de sommeil"
+        recommandation = "Augmenter légèrement le temps de sommeil"
     else:
         qualite = "Insuffisant"
-        recommandation = "Consulter pour amÃ©liorer le sommeil"
+        recommandation = "Consulter pour améliorer le sommeil"
     
     return {
         "moyenne": moyenne,
@@ -314,9 +314,9 @@ def analyser_humeurs(entrees: List[Dict[str, Any]], jours: int = 7) -> Dict[str,
     }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # VALIDATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def valider_mesure(data: Dict[str, Any]) -> tuple[bool, List[str]]:
     """Valide une mesure de croissance."""
@@ -328,19 +328,19 @@ def valider_mesure(data: Dict[str, Any]) -> tuple[bool, List[str]]:
     if "poids" in data:
         poids = data["poids"]
         if not isinstance(poids, (int, float)) or poids <= 0 or poids > 50:
-            erreurs.append("Poids invalide (doit Ãªtre entre 0 et 50 kg)")
+            erreurs.append("Poids invalide (doit être entre 0 et 50 kg)")
     
     if "taille" in data:
         taille = data["taille"]
         if not isinstance(taille, (int, float)) or taille <= 0 or taille > 150:
-            erreurs.append("Taille invalide (doit Ãªtre entre 0 et 150 cm)")
+            erreurs.append("Taille invalide (doit être entre 0 et 150 cm)")
     
     return len(erreurs) == 0, erreurs
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FORMATAGE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def formater_milestone(milestone: Dict[str, Any]) -> str:
     """Formate un milestone."""
@@ -353,7 +353,7 @@ def formater_milestone(milestone: Dict[str, Any]) -> str:
 
 
 def grouper_milestones_par_categorie(milestones: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
-    """Groupe les milestones par catÃ©gorie."""
+    """Groupe les milestones par catégorie."""
     groupes = {cat: [] for cat in CATEGORIES_MILESTONES}
     
     for ms in milestones:

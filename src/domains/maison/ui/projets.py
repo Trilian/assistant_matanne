@@ -1,6 +1,6 @@
 ﻿"""
-Module Projets - Gestion des projets maison avec IA intÃ©grÃ©e
-Priorisation intelligente, estimation de durÃ©e, suivi de progression
+Module Projets - Gestion des projets maison avec IA intégrée
+Priorisation intelligente, estimation de durée, suivi de progression
 """
 
 from datetime import date, datetime
@@ -14,7 +14,7 @@ from src.core.decorators import with_db_session
 from src.services.base_ai_service import BaseAIService
 from src.core.ai import ClientIA
 
-# Logique mÃ©tier pure
+# Logique métier pure
 from src.domains.maison.logic.projets_logic import (
     calculer_progression,
     calculer_jours_restants,
@@ -29,9 +29,9 @@ from src.domains.maison.logic.helpers import (
 )
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SERVICE IA PROJETS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class ProjetsService(BaseAIService):
@@ -48,9 +48,9 @@ class ProjetsService(BaseAIService):
         )
     
     async def suggerer_taches(self, nom_projet: str, description: str) -> str:
-        """SuggÃ¨re des tÃ¢ches pour un projet"""
+        """Suggère des tÃ¢ches pour un projet"""
         prompt = f"""Pour le projet "{nom_projet}" : {description}
-SuggÃ¨re 5-7 tÃ¢ches concrÃ¨tes et numÃ©rotÃ©es. Ordonne par ordre logique."""
+Suggère 5-7 tÃ¢ches concrètes et numérotées. Ordonne par ordre logique."""
         
         return await self.call_with_cache(
             prompt=prompt,
@@ -59,9 +59,9 @@ SuggÃ¨re 5-7 tÃ¢ches concrÃ¨tes et numÃ©rotÃ©es. Ordonne par ordre log
         )
     
     async def estimer_duree(self, nom_projet: str, complexite: str = "moyen") -> str:
-        """Estime la durÃ©e totale d'un projet"""
-        prompt = f"""Pour un projet "{nom_projet}" de complexitÃ© {complexite},
-estime la durÃ©e totale et le temps par phase (prÃ©paration, exÃ©cution, finition)."""
+        """Estime la durée totale d'un projet"""
+        prompt = f"""Pour un projet "{nom_projet}" de complexité {complexite},
+estime la durée totale et le temps par phase (préparation, exécution, finition)."""
         
         return await self.call_with_cache(
             prompt=prompt,
@@ -71,10 +71,10 @@ estime la durÃ©e totale et le temps par phase (prÃ©paration, exÃ©cution, f
     
     async def prioriser_taches(self, nom_projet: str, taches_texte: str) -> str:
         """Priorise les tÃ¢ches pour un projet"""
-        prompt = f"""Pour le projet "{nom_projet}", rÃ©ordonne ces tÃ¢ches par prioritÃ©:
+        prompt = f"""Pour le projet "{nom_projet}", réordonne ces tÃ¢ches par priorité:
 {taches_texte}
 
-Explique briÃ¨vement l'ordre."""
+Explique brièvement l'ordre."""
         
         return await self.call_with_cache(
             prompt=prompt,
@@ -83,9 +83,9 @@ Explique briÃ¨vement l'ordre."""
         )
     
     async def conseil_blocages(self, nom_projet: str, description: str) -> str:
-        """SuggÃ¨re comment Ã©viter les blocages"""
+        """Suggère comment éviter les blocages"""
         prompt = f"""Pour "{nom_projet}" : {description}
-Quels sont les 3 risques/blocages principaux et comment les Ã©viter?"""
+Quels sont les 3 risques/blocages principaux et comment les éviter?"""
         
         return await self.call_with_cache(
             prompt=prompt,
@@ -99,9 +99,9 @@ def get_projets_service() -> ProjetsService:
     return ProjetsService()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # HELPERS MÃ‰TIER
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @with_db_session
@@ -113,7 +113,7 @@ def creer_projet(
     date_fin: date = None,
     db=None
 ) -> int:
-    """CrÃ©e un nouveau projet"""
+    """Crée un nouveau projet"""
     try:
         projet = Project(
             nom=nom,
@@ -128,7 +128,7 @@ def creer_projet(
         clear_maison_cache()
         return projet.id
     except Exception as e:
-        st.error(f"âŒ Erreur crÃ©ation projet: {e}")
+        st.error(f"âŒ Erreur création projet: {e}")
         return None
 
 
@@ -138,79 +138,79 @@ def ajouter_tache(
     nom: str,
     description: str = "",
     priorite: str = "moyenne",
-    date_echÃ©ance: date = None,
+    date_echéance: date = None,
     db=None
 ) -> bool:
-    """Ajoute une tÃ¢che Ã  un projet"""
+    """Ajoute une tÃ¢che à un projet"""
     try:
         tache = ProjectTask(
             project_id=project_id,
             nom=nom,
             description=description,
             priorite=priorite,
-            date_echÃ©ance=date_echÃ©ance,
-            statut="Ã _faire"
+            date_echéance=date_echéance,
+            statut="à_faire"
         )
         db.add(tache)
         db.commit()
         clear_maison_cache()
         return True
     except Exception as e:
-        st.error(f"âŒ Erreur ajout tÃ¢che: {e}")
+        st.error(f"âŒ Erreur ajout tÃ¢che: {e}")
         return False
 
 
 @with_db_session
 def marquer_tache_done(task_id: int, db=None) -> bool:
-    """Marque une tÃ¢che comme terminÃ©e"""
+    """Marque une tÃ¢che comme terminée"""
     try:
         tache = db.query(ProjectTask).get(task_id)
         if tache:
-            tache.statut = "terminÃ©"
+            tache.statut = "terminé"
             db.commit()
             clear_maison_cache()
             return True
     except Exception as e:
-        st.error(f"âŒ Erreur mise Ã  jour: {e}")
+        st.error(f"âŒ Erreur mise à jour: {e}")
     return False
 
 
 @with_db_session
 def marquer_projet_done(project_id: int, db=None) -> bool:
-    """Marque un projet comme terminÃ©"""
+    """Marque un projet comme terminé"""
     try:
         projet = db.query(Project).get(project_id)
         if projet:
-            projet.statut = "terminÃ©"
+            projet.statut = "terminé"
             projet.date_fin_reelle = date.today()
             db.commit()
             clear_maison_cache()
             return True
     except Exception as e:
-        st.error(f"âŒ Erreur: {e}")
+        st.error(f"âŒ Erreur: {e}")
     return False
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # MODULE PRINCIPAL
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def app():
-    """Point d'entrÃ©e module Projets"""
-    st.title("ðŸ—ï¸ Projets Maison")
+    """Point d'entrée module Projets"""
+    st.title("ðŸ—ï¸ Projets Maison")
     st.caption("Gestion et priorisation intelligente des projets")
     
     service = get_projets_service()
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # ALERTES URGENTES
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     urgents = get_projets_urgents()
     
     if urgents:
-        st.warning(f"âš ï¸ **{len(urgents)} projet(s) nÃ©cessitent attention**")
+        st.warning(f"âš ï¸ **{len(urgents)} projet(s) nécessitent attention**")
         for urgent in urgents[:3]:
             if urgent["type"] == "RETARD":
                 st.error(f"ðŸ”´ **{urgent['projet']}** : {urgent['message']}")
@@ -218,9 +218,9 @@ def app():
                 st.warning(f"ðŸŸ¡ **{urgent['projet']}** : {urgent['message']}")
         st.markdown("---")
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # STATISTIQUES
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     stats = get_stats_projets()
     
@@ -233,24 +233,24 @@ def app():
         st.metric("En cours", stats["en_cours"])
     
     with col3:
-        st.metric("TerminÃ©s", stats["termines"])
+        st.metric("Terminés", stats["termines"])
     
     with col4:
         st.metric("Progression", f"{stats['avg_progress']:.0f}%")
     
     st.markdown("---")
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TABS
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     tab1, tab2, tab3, tab4 = st.tabs(
         ["ðŸ“‹ En cours", "ðŸ¤– Assistant IA", "âž• Nouveau", "ðŸ“Š Tableau"]
     )
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TAB 1: PROJETS EN COURS
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     with tab1:
         st.subheader("Projets actifs")
@@ -273,7 +273,7 @@ def app():
                     if projet['description']:
                         st.caption(projet['description'][:100] + "...")
                     
-                    # PrioritÃ© et Ã©chÃ©ance
+                    # Priorité et échéance
                     col_a, col_b = st.columns(2)
                     
                     with col_a:
@@ -293,7 +293,7 @@ def app():
                 with col2:
                     if st.button("âœ… Terminer", key=f"done_{projet['id']}", use_container_width=True):
                         if marquer_projet_done(projet['id']):
-                            st.success("Projet marquÃ© comme terminÃ©!")
+                            st.success("Projet marqué comme terminé!")
                             st.rerun()
                 
                 # Afficher les tÃ¢ches
@@ -310,42 +310,42 @@ def app():
                                 col_t1, col_t2, col_t3 = st.columns([3, 1, 1])
                                 
                                 with col_t1:
-                                    emoji = "âœ…" if t.statut == "terminÃ©" else "â³"
+                                    emoji = "âœ…" if t.statut == "terminé" else "â³"
                                     st.caption(f"{emoji} {t.nom}")
                                 
                                 with col_t2:
-                                    if t.date_echÃ©ance:
-                                        st.caption(t.date_echÃ©ance.strftime("%d/%m"))
+                                    if t.date_echéance:
+                                        st.caption(t.date_echéance.strftime("%d/%m"))
                                 
                                 with col_t3:
-                                    if t.statut != "terminÃ©":
+                                    if t.statut != "terminé":
                                         if st.button("âœ“", key=f"task_{t.id}", use_container_width=True):
                                             if marquer_tache_done(t.id):
                                                 st.rerun()
                 
                 st.divider()
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TAB 2: ASSISTANT IA
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     with tab2:
         st.subheader("ðŸ¤– Assistant Projets IA")
         
         col_ia1, col_ia2 = st.columns(2)
         
-        # SuggÃ©rer tÃ¢ches
+        # Suggérer tÃ¢ches
         with col_ia1:
-            st.markdown("#### ðŸ“‹ SuggÃ©rer des tÃ¢ches")
+            st.markdown("#### ðŸ“‹ Suggérer des tÃ¢ches")
             
-            projet_nom_ia = st.text_input("Nom du projet", placeholder="Ex: RÃ©nover cuisine")
+            projet_nom_ia = st.text_input("Nom du projet", placeholder="Ex: Rénover cuisine")
             projet_desc_ia = st.text_area(
                 "Description",
-                placeholder="DÃ©tails du projet...",
+                placeholder="Détails du projet...",
                 height=100
             )
             
-            if st.button("ðŸ’¡ GÃ©nÃ©rer tÃ¢ches", key="ia_taches", use_container_width=True):
+            if st.button("ðŸ’¡ Générer tÃ¢ches", key="ia_taches", use_container_width=True):
                 if projet_nom_ia:
                     with st.spinner("IA analyse le projet..."):
                         try:
@@ -354,20 +354,20 @@ def app():
                             if taches:
                                 st.success(taches)
                         except Exception as e:
-                            st.warning(f"âš ï¸ IA indisponible: {e}")
+                            st.warning(f"âš ï¸ IA indisponible: {e}")
         
-        # Estimer durÃ©e
+        # Estimer durée
         with col_ia2:
-            st.markdown("#### â±ï¸ Estimer la durÃ©e")
+            st.markdown("#### â±ï¸ Estimer la durée")
             
             projet_nom_dur = st.text_input("Nom du projet", placeholder="Ex: Repeindre salon", key="dur")
             complexite = st.selectbox(
-                "ComplexitÃ©",
+                "Complexité",
                 ["simple", "moyen", "complexe"],
                 key="complex"
             )
             
-            if st.button("ðŸ”® Estimer durÃ©e", key="ia_duree", use_container_width=True):
+            if st.button("ðŸ”® Estimer durée", key="ia_duree", use_container_width=True):
                 if projet_nom_dur:
                     with st.spinner("Estimation en cours..."):
                         try:
@@ -376,12 +376,12 @@ def app():
                             if duree:
                                 st.info(duree)
                         except Exception as e:
-                            st.warning(f"âš ï¸ IA indisponible: {e}")
+                            st.warning(f"âš ï¸ IA indisponible: {e}")
         
         st.markdown("---")
         
         # Analyser blocages
-        st.markdown("#### âš ï¸ Analyser les risques")
+        st.markdown("#### âš ï¸ Analyser les risques")
         
         col_r1, col_r2 = st.columns(2)
         
@@ -389,7 +389,7 @@ def app():
             projet_risque = st.text_input("Nom du projet", placeholder="Ex: Installer piscine")
         
         with col_r2:
-            if st.button("ðŸ” Identifier risques", use_container_width=True):
+            if st.button("ðŸ” Identifier risques", use_container_width=True):
                 if projet_risque:
                     with st.spinner("Analyse des risques..."):
                         try:
@@ -398,41 +398,41 @@ def app():
                             if risques:
                                 st.warning(risques)
                         except Exception as e:
-                            st.warning(f"âš ï¸ IA indisponible: {e}")
+                            st.warning(f"âš ï¸ IA indisponible: {e}")
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TAB 3: CRÃ‰ER NOUVEAU PROJET
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     with tab3:
-        st.subheader("CrÃ©er un nouveau projet")
+        st.subheader("Créer un nouveau projet")
         
         with st.form("form_nouveau_projet"):
-            nom = st.text_input("Nom du projet *", placeholder="Ex: AmÃ©nagement jardin")
+            nom = st.text_input("Nom du projet *", placeholder="Ex: Aménagement jardin")
             
             description = st.text_area(
                 "Description",
                 height=100,
-                placeholder="Objectifs, dÃ©tails du projet..."
+                placeholder="Objectifs, détails du projet..."
             )
             
             col_p1, col_p2 = st.columns(2)
             
             with col_p1:
-                priorite = st.selectbox("PrioritÃ©", ["basse", "moyenne", "haute", "urgente"])
+                priorite = st.selectbox("Priorité", ["basse", "moyenne", "haute", "urgente"])
             
             with col_p2:
-                date_fin = st.date_input("Date d'Ã©chÃ©ance (optionnel)", value=None)
+                date_fin = st.date_input("Date d'échéance (optionnel)", value=None)
             
-            submitted = st.form_submit_button("ðŸ’¾ CrÃ©er le projet", type="primary")
+            submitted = st.form_submit_button("ðŸ’¾ Créer le projet", type="primary")
             
             if submitted:
                 if not nom:
                     st.error("Nom obligatoire")
                 else:
-                    project_id = creer_projet(nom, description, "GÃ©nÃ©ral", priorite, date_fin)
+                    project_id = creer_projet(nom, description, "Général", priorite, date_fin)
                     if project_id:
-                        st.success(f"âœ… Projet '{nom}' crÃ©Ã©!")
+                        st.success(f"âœ… Projet '{nom}' créé!")
                         st.balloons()
                         st.rerun()
         
@@ -443,31 +443,31 @@ def app():
         
         templates = [
             {
-                "nom": "RÃ©novation cuisine",
-                "taches": ["Planifier layout", "Acheter matÃ©riaux", "PrÃ©parer", "Installer", "Finitions"]
+                "nom": "Rénovation cuisine",
+                "taches": ["Planifier layout", "Acheter matériaux", "Préparer", "Installer", "Finitions"]
             },
             {
-                "nom": "AmÃ©nagement jardin",
-                "taches": ["PrÃ©parer sol", "Acheter plants", "Planter", "Installer arrosage", "Entretien"]
+                "nom": "Aménagement jardin",
+                "taches": ["Préparer sol", "Acheter plants", "Planter", "Installer arrosage", "Entretien"]
             },
             {
                 "nom": "Repeindre chambre",
-                "taches": ["Choisir couleurs", "PrÃ©parer murs", "Acheter peinture", "Peindre", "Finitions"]
+                "taches": ["Choisir couleurs", "Préparer murs", "Acheter peinture", "Peindre", "Finitions"]
             }
         ]
         
         for templ in templates:
             if st.button(f"ðŸ“‹ {templ['nom']}", use_container_width=True):
-                p_id = creer_projet(templ["nom"], "", "GÃ©nÃ©ral", "moyenne")
+                p_id = creer_projet(templ["nom"], "", "Général", "moyenne")
                 if p_id:
                     for tache in templ["taches"]:
                         ajouter_tache(p_id, tache)
-                    st.success("âœ… Projet template crÃ©Ã© avec tÃ¢ches!")
+                    st.success("âœ… Projet template créé avec tÃ¢ches!")
                     st.rerun()
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TAB 4: TABLEAU DE BORD
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     with tab4:
         st.subheader("ðŸ“Š Vue d'ensemble")

@@ -1,6 +1,6 @@
 ﻿"""
 Tests pour src/ui/components/data.py
-Pagination, mÃ©triques, export, tableaux
+Pagination, métriques, export, tableaux
 """
 
 from unittest.mock import MagicMock, patch, call
@@ -9,9 +9,9 @@ import pandas as pd
 import pytest
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
@@ -41,9 +41,9 @@ def mock_streamlit():
         yield mock_st
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PAGINATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPagination:
@@ -57,7 +57,7 @@ class TestPagination:
 
         assert page == 1
         assert per_page == 20
-        # Pas de colonnes crÃ©Ã©es car pas de pagination
+        # Pas de colonnes créées car pas de pagination
         mock_streamlit.columns.assert_not_called()
 
     def test_pagination_many_items(self, mock_streamlit):
@@ -66,7 +66,7 @@ class TestPagination:
 
         page, per_page = pagination(total_items=100, items_per_page=20)
 
-        # Doit crÃ©er colonnes pour navigation
+        # Doit créer colonnes pour navigation
         mock_streamlit.columns.assert_called()
         assert per_page == 20
 
@@ -80,14 +80,14 @@ class TestPagination:
         assert mock_streamlit.session_state["test_page"] == 1
 
     def test_pagination_preserves_existing_page(self, mock_streamlit):
-        """Test prÃ©servation page existante"""
+        """Test préservation page existante"""
         from src.ui.components.data import pagination
 
         mock_streamlit.session_state["test_page"] = 3
 
         pagination(total_items=100, items_per_page=20, key="test")
 
-        # La page existante doit Ãªtre prÃ©servÃ©e
+        # La page existante doit être préservée
         assert mock_streamlit.session_state["test_page"] == 3
 
     def test_pagination_shows_caption(self, mock_streamlit):
@@ -122,9 +122,9 @@ class TestPagination:
         assert "3" in caption_text
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS METRICS_ROW
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestMetricsRow:
@@ -139,7 +139,7 @@ class TestMetricsRow:
         mock_streamlit.metric.assert_not_called()
 
     def test_metrics_row_single_stat(self, mock_streamlit):
-        """Test une seule mÃ©trique"""
+        """Test une seule métrique"""
         from src.ui.components.data import metrics_row
 
         stats = [{"label": "Total", "value": 42}]
@@ -153,7 +153,7 @@ class TestMetricsRow:
         )
 
     def test_metrics_row_multiple_stats(self, mock_streamlit):
-        """Test plusieurs mÃ©triques"""
+        """Test plusieurs métriques"""
         from src.ui.components.data import metrics_row
 
         stats = [
@@ -167,7 +167,7 @@ class TestMetricsRow:
         assert mock_streamlit.metric.call_count == 3
 
     def test_metrics_row_with_delta(self, mock_streamlit):
-        """Test mÃ©trique avec delta"""
+        """Test métrique avec delta"""
         from src.ui.components.data import metrics_row
 
         stats = [{"label": "Total", "value": 42, "delta": "+5"}]
@@ -181,7 +181,7 @@ class TestMetricsRow:
         )
 
     def test_metrics_row_custom_cols(self, mock_streamlit):
-        """Test nombre de colonnes personnalisÃ©"""
+        """Test nombre de colonnes personnalisé"""
         from src.ui.components.data import metrics_row
 
         stats = [{"label": "A", "value": 1}, {"label": "B", "value": 2}]
@@ -202,9 +202,9 @@ class TestMetricsRow:
         mock_streamlit.columns.assert_called_with(2)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EXPORT_BUTTONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestExportButtons:
@@ -240,7 +240,7 @@ class TestExportButtons:
         export_buttons(data, "test", formats=["csv"])
 
         call_args = mock_streamlit.download_button.call_args_list
-        # VÃ©rifier qu'un bouton CSV existe
+        # Vérifier qu'un bouton CSV existe
         csv_calls = [c for c in call_args if ".csv" in str(c)]
         assert len(csv_calls) >= 1
 
@@ -267,7 +267,7 @@ class TestExportButtons:
         assert mock_streamlit.download_button.call_count == 2
 
     def test_export_buttons_custom_filename(self, mock_streamlit):
-        """Test nom de fichier personnalisÃ©"""
+        """Test nom de fichier personnalisé"""
         from src.ui.components.data import export_buttons
 
         data = [{"nom": "Test"}]
@@ -278,9 +278,9 @@ class TestExportButtons:
         assert "mes_recettes.csv" in call_args[0] or "mes_recettes.csv" in str(call_args)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS DATA_TABLE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestDataTable:
@@ -307,7 +307,7 @@ class TestDataTable:
         mock_streamlit.dataframe.assert_called_once()
 
     def test_data_table_custom_key(self, mock_streamlit):
-        """Test clÃ© personnalisÃ©e"""
+        """Test clé personnalisée"""
         from src.ui.components.data import data_table
 
         data_table([{"a": 1}], key="my_table")
@@ -325,9 +325,9 @@ class TestDataTable:
         assert call_kwargs["use_container_width"] is True
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PROGRESS_BAR
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestProgressBar:
@@ -359,7 +359,7 @@ class TestProgressBar:
         mock_streamlit.markdown.assert_not_called()
 
     def test_progress_bar_zero(self, mock_streamlit):
-        """Test valeur zÃ©ro"""
+        """Test valeur zéro"""
         from src.ui.components.data import progress_bar
 
         progress_bar(0.0)
@@ -375,24 +375,24 @@ class TestProgressBar:
         mock_streamlit.progress.assert_called()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS STATUS_INDICATOR
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestStatusIndicator:
     """Tests pour status_indicator()"""
 
     def test_status_indicator_success(self, mock_streamlit):
-        """Test indicateur succÃ¨s"""
+        """Test indicateur succès"""
         from src.ui.components.data import status_indicator
 
-        status_indicator("success", "ConnectÃ©")
+        status_indicator("success", "Connecté")
 
         mock_streamlit.markdown.assert_called_once()
         html = mock_streamlit.markdown.call_args[0][0]
         assert "#4CAF50" in html  # Couleur verte
-        assert "ConnectÃ©" in html
+        assert "Connecté" in html
 
     def test_status_indicator_warning(self, mock_streamlit):
         """Test indicateur warning"""
@@ -407,7 +407,7 @@ class TestStatusIndicator:
         """Test indicateur erreur"""
         from src.ui.components.data import status_indicator
 
-        status_indicator("error", "DÃ©connectÃ©")
+        status_indicator("error", "Déconnecté")
 
         html = mock_streamlit.markdown.call_args[0][0]
         assert "#f44336" in html  # Couleur rouge
@@ -427,11 +427,11 @@ class TestStatusIndicator:
 
         status_indicator("unknown", "Test")
 
-        # Doit quand mÃªme afficher
+        # Doit quand même afficher
         mock_streamlit.markdown.assert_called_once()
 
     def test_status_indicator_unsafe_html(self, mock_streamlit):
-        """Test HTML non sÃ©curisÃ© activÃ©"""
+        """Test HTML non sécurisé activé"""
         from src.ui.components.data import status_indicator
 
         status_indicator("success")

@@ -6,10 +6,10 @@ from bs4 import BeautifulSoup
 
 
 class TestImportedIngredientModel:
-    """Tests pour le modÃ¨le ImportedIngredient."""
+    """Tests pour le modèle ImportedIngredient."""
 
     def test_ingredient_creation(self):
-        """CrÃ©ation d'un ingrÃ©dient importÃ©."""
+        """Création d'un ingrédient importé."""
         from src.services.recipe_import import ImportedIngredient
         
         ingredient = ImportedIngredient(
@@ -23,7 +23,7 @@ class TestImportedIngredientModel:
         assert ingredient.unite == "g"
 
     def test_ingredient_sans_quantite(self):
-        """IngrÃ©dient sans quantitÃ© spÃ©cifiÃ©e."""
+        """Ingrédient sans quantité spécifiée."""
         from src.services.recipe_import import ImportedIngredient
         
         ingredient = ImportedIngredient(
@@ -35,23 +35,23 @@ class TestImportedIngredientModel:
 
 
 class TestImportedRecipeModel:
-    """Tests pour le modÃ¨le ImportedRecipe."""
+    """Tests pour le modèle ImportedRecipe."""
 
     def test_recipe_creation_complete(self):
-        """CrÃ©ation d'une recette complÃ¨te."""
+        """Création d'une recette complète."""
         from src.services.recipe_import import ImportedRecipe, ImportedIngredient
         
         recette = ImportedRecipe(
             nom="Tarte aux pommes",
-            description="Une dÃ©licieuse tarte",
+            description="Une délicieuse tarte",
             temps_preparation=30,
             temps_cuisson=45,
             portions=8,
             ingredients=[
-                ImportedIngredient(nom="Pommes", quantite=4, unite="piÃ¨ces"),
-                ImportedIngredient(nom="PÃ¢te feuilletÃ©e", quantite=1, unite="rouleau")
+                ImportedIngredient(nom="Pommes", quantite=4, unite="pièces"),
+                ImportedIngredient(nom="PÃ¢te feuilletée", quantite=1, unite="rouleau")
             ],
-            etapes=["PrÃ©chauffer le four", "Ã‰plucher les pommes", "Cuire"]
+            etapes=["Préchauffer le four", "Ã‰plucher les pommes", "Cuire"]
         )
         
         assert recette.nom == "Tarte aux pommes"
@@ -71,23 +71,23 @@ class TestImportedRecipeModel:
 
 
 class TestImportResultModel:
-    """Tests pour le modÃ¨le ImportResult."""
+    """Tests pour le modèle ImportResult."""
 
     def test_result_succes(self):
-        """RÃ©sultat d'import rÃ©ussi."""
+        """Résultat d'import réussi."""
         from src.services.recipe_import import ImportResult, ImportedRecipe
         
         result = ImportResult(
             success=True,
             recipe=ImportedRecipe(nom="Test"),
-            message="Import rÃ©ussi"
+            message="Import réussi"
         )
         
         assert result.success == True
         assert result.recipe is not None
 
     def test_result_echec(self):
-        """RÃ©sultat d'import Ã©chouÃ©."""
+        """Résultat d'import échoué."""
         from src.services.recipe_import import ImportResult
         
         result = ImportResult(
@@ -113,7 +113,7 @@ class TestRecipeParserCleanText:
         assert resultat == "Hello World"
 
     def test_clean_text_newlines(self):
-        """Nettoyage des retours Ã  la ligne."""
+        """Nettoyage des retours à la ligne."""
         from src.services.recipe_import import RecipeParser
         
         texte = "Ligne 1\n\n\nLigne 2"
@@ -142,7 +142,7 @@ class TestRecipeParserParseDuration:
     """Tests pour RecipeParser.parse_duration (statique)."""
 
     def test_parse_duration_minutes(self):
-        """Parse durÃ©e en minutes."""
+        """Parse durée en minutes."""
         from src.services.recipe_import import RecipeParser
         
         assert RecipeParser.parse_duration("30 min") == 30
@@ -150,7 +150,7 @@ class TestRecipeParserParseDuration:
         assert RecipeParser.parse_duration("30min") == 30
 
     def test_parse_duration_heures(self):
-        """Parse durÃ©e en heures."""
+        """Parse durée en heures."""
         from src.services.recipe_import import RecipeParser
         
         assert RecipeParser.parse_duration("1h") == 60
@@ -158,7 +158,7 @@ class TestRecipeParserParseDuration:
         assert RecipeParser.parse_duration("1 heure") == 60
 
     def test_parse_duration_heures_minutes(self):
-        """Parse durÃ©e heures + minutes."""
+        """Parse durée heures + minutes."""
         from src.services.recipe_import import RecipeParser
         
         # Test basiques - peut ne pas supporter tous les formats
@@ -166,10 +166,10 @@ class TestRecipeParserParseDuration:
         assert result >= 60  # Au moins les heures
 
     def test_parse_duration_invalide(self):
-        """DurÃ©e invalide."""
+        """Durée invalide."""
         from src.services.recipe_import import RecipeParser
         
-        resultat = RecipeParser.parse_duration("bientÃ´t")
+        resultat = RecipeParser.parse_duration("bientôt")
         
         assert resultat is None or resultat == 0
 
@@ -204,7 +204,7 @@ class TestRecipeParserParsePortions:
         
         resultat = RecipeParser.parse_portions("Beaucoup")
         
-        assert resultat is None or resultat == 0 or resultat == 4  # DÃ©faut
+        assert resultat is None or resultat == 0 or resultat == 4  # Défaut
 
 
 class TestRecipeParserParseIngredient:
@@ -230,13 +230,13 @@ class TestRecipeParserParseIngredient:
         assert "oeufs" in resultat.nom.lower() or "oeuf" in resultat.nom.lower()
 
     def test_parse_ingredient_cuillere(self):
-        """Parse '1 cuillÃ¨re Ã  soupe de sel'."""
+        """Parse '1 cuillère à soupe de sel'."""
         from src.services.recipe_import import RecipeParser
         
-        resultat = RecipeParser.parse_ingredient("1 cuillÃ¨re Ã  soupe de sel")
+        resultat = RecipeParser.parse_ingredient("1 cuillère à soupe de sel")
         
         assert resultat.quantite == 1
-        # L'unitÃ© peut Ãªtre "cuillÃ¨re Ã  soupe", "c. Ã  s.", "cas", etc.
+        # L'unité peut être "cuillère à soupe", "c. à s.", "cas", etc.
 
     def test_parse_ingredient_texte_libre(self):
         """Parse 'sel, poivre'."""
@@ -247,12 +247,12 @@ class TestRecipeParserParseIngredient:
         assert resultat.nom is not None
 
     def test_parse_ingredient_fractions(self):
-        """Parse '1/2 citron' - peut Ã©chouer selon l'implÃ©mentation."""
+        """Parse '1/2 citron' - peut échouer selon l'implémentation."""
         from src.services.recipe_import import RecipeParser
         
         resultat = RecipeParser.parse_ingredient("1/2 citron")
         
-        # Le parsing des fractions peut ne pas Ãªtre supportÃ©
+        # Le parsing des fractions peut ne pas être supporté
         assert resultat.nom is not None or resultat.quantite == 0.5
 
 
@@ -267,7 +267,7 @@ class TestRecipeImportServiceInit:
         assert service is not None
 
     def test_service_methodes(self):
-        """Le service expose les mÃ©thodes requises."""
+        """Le service expose les méthodes requises."""
         from src.services.recipe_import import get_recipe_import_service
         
         service = get_recipe_import_service()
@@ -280,18 +280,18 @@ class TestGetParserForUrl:
     """Tests pour _get_parser_for_url."""
 
     def test_parser_marmiton(self):
-        """DÃ©tection du parser Marmiton."""
+        """Détection du parser Marmiton."""
         from src.services.recipe_import import get_recipe_import_service, MarmitonParser
         
         service = get_recipe_import_service()
         
         parser_class = service._get_parser_for_url("https://www.marmiton.org/recettes/tarte.html")
         
-        # La mÃ©thode retourne une classe, pas une instance
+        # La méthode retourne une classe, pas une instance
         assert parser_class is MarmitonParser or parser_class.__name__ == "MarmitonParser"
 
     def test_parser_cuisineaz(self):
-        """DÃ©tection du parser CuisineAZ."""
+        """Détection du parser CuisineAZ."""
         from src.services.recipe_import import get_recipe_import_service, CuisineAZParser
         
         service = get_recipe_import_service()
@@ -301,7 +301,7 @@ class TestGetParserForUrl:
         assert parser_class is CuisineAZParser or parser_class.__name__ == "CuisineAZParser"
 
     def test_parser_generic(self):
-        """Parser gÃ©nÃ©rique pour sites inconnus."""
+        """Parser générique pour sites inconnus."""
         from src.services.recipe_import import get_recipe_import_service, GenericRecipeParser
         
         service = get_recipe_import_service()
@@ -335,7 +335,7 @@ class TestMarmitonParser:
         soup = BeautifulSoup(html, 'html.parser')
         parser = MarmitonParser()
         
-        # Le parse peut Ã©chouer si le HTML ne correspond pas exactement au format attendu
+        # Le parse peut échouer si le HTML ne correspond pas exactement au format attendu
         try:
             result = parser.parse(soup, "https://www.marmiton.org/recettes/tarte.html")
             if result:
@@ -350,10 +350,10 @@ class TestMarmitonParser:
         
         parser = MarmitonParser()
         
-        # Recette complÃ¨te avec plus d'ingrÃ©dients et Ã©tapes = haute confiance
+        # Recette complète avec plus d'ingrédients et étapes = haute confiance
         recette_complete = ImportedRecipe(
             nom="Tarte aux pommes",
-            description="DÃ©licieuse tarte",
+            description="Délicieuse tarte",
             temps_preparation=30,
             temps_cuisson=45,
             portions=8,
@@ -371,10 +371,10 @@ class TestMarmitonParser:
         confiance = parser._calculate_confidence(recette_complete)
         
         # Score attendu: nom(0.2) + ingredients(0.25) + etapes(0.3) + temps(0.1) + image(0.1) = 0.95
-        assert confiance >= 0.5  # Au moins 0.5 pour une recette complÃ¨te
+        assert confiance >= 0.5  # Au moins 0.5 pour une recette complète
 
     def test_calculate_confidence_incomplete(self):
-        """Confiance basse pour recette incomplÃ¨te."""
+        """Confiance basse pour recette incomplète."""
         from src.services.recipe_import import MarmitonParser, ImportedRecipe
         
         parser = MarmitonParser()
@@ -413,7 +413,7 @@ class TestGenericRecipeParser:
                     "@type": "Recipe",
                     "name": "Tarte aux pommes",
                     "recipeIngredient": ["200g farine", "3 pommes"],
-                    "recipeInstructions": [{"text": "PrÃ©chauffer le four"}],
+                    "recipeInstructions": [{"text": "Préchauffer le four"}],
                     "prepTime": "PT30M",
                     "cookTime": "PT45M"
                 }
@@ -431,7 +431,7 @@ class TestGenericRecipeParser:
             if result:
                 assert result.nom == "Tarte aux pommes"
         except Exception:
-            # Format non supportÃ©
+            # Format non supporté
             pass
 
 
@@ -440,10 +440,10 @@ class TestImportFromUrl:
 
     @patch('src.services.recipe_import.httpx')
     def test_import_url_success(self, mock_httpx):
-        """Import rÃ©ussi depuis URL."""
+        """Import réussi depuis URL."""
         from src.services.recipe_import import get_recipe_import_service
         
-        # Mock de la rÃ©ponse HTTP
+        # Mock de la réponse HTTP
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.text = """
@@ -458,7 +458,7 @@ class TestImportFromUrl:
         
         service = get_recipe_import_service()
         
-        # L'import peut rÃ©ussir ou Ã©chouer selon le parsing
+        # L'import peut réussir ou échouer selon le parsing
         try:
             result = service.import_from_url("https://www.marmiton.org/recettes/tarte.html")
             assert result is not None
@@ -479,7 +479,7 @@ class TestImportFromUrl:
         
         result = service.import_from_url("https://www.example.com/404")
         
-        # Devrait retourner un rÃ©sultat d'Ã©chec ou None (avec le dÃ©corateur @with_error_handling)
+        # Devrait retourner un résultat d'échec ou None (avec le décorateur @with_error_handling)
         if result is not None:
             assert result.success == False
 

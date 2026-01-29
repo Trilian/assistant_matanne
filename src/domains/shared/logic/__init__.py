@@ -1,4 +1,4 @@
-﻿"""Logic Shared - Logique partagÃ©e."""
+﻿"""Logic Shared - Logique partagée."""
 
 from . import parametres_logic, rapports_logic, barcode_logic
 

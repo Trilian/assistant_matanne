@@ -2,14 +2,14 @@
 Module Maison - Hub de gestion domestique
 
 Structure:
-- jardin.py: Gestion du jardin, plantes, rÃ©coltes avec conseils IA
-- projets.py: Projets maison (rÃ©novation, amÃ©nagement) avec priorisation IA
-- entretien.py: Routines mÃ©nagÃ¨res et tÃ¢ches quotidiennes avec optimisation IA
-- helpers.py: Fonctions partagÃ©es pour les 3 modules
+- jardin.py: Gestion du jardin, plantes, récoltes avec conseils IA
+- projets.py: Projets maison (rénovation, aménagement) avec priorisation IA
+- entretien.py: Routines ménagères et tÃ¢ches quotidiennes avec optimisation IA
+- helpers.py: Fonctions partagées pour les 3 modules
 
 Hub principal affichant:
-- Alertes urgentes (projets en retard, plantes Ã  arroser, tÃ¢ches mÃ©nage)
-- Statistiques clÃ©s
+- Alertes urgentes (projets en retard, plantes à arroser, tÃ¢ches ménage)
+- Statistiques clés
 - Raccourcis vers chaque sous-module
 """
 
@@ -26,13 +26,13 @@ from src.domains.maison.logic.helpers import (
 
 
 def app():
-    """Point d'entrÃ©e principal du module Maison"""
-    st.title("ðŸ  Maison")
-    st.caption("Gestion complÃ¨te : Projets, Jardin, Entretien")
+    """Point d'entrée principal du module Maison"""
+    st.title("ðŸ  Maison")
+    st.caption("Gestion complète : Projets, Jardin, Entretien")
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # ALERTES PRIORITAIRES
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     col1, col2, col3 = st.columns(3)
     
@@ -44,27 +44,27 @@ def app():
         else:
             st.success("âœ… Projets OK")
     
-    # Plantes Ã  arroser
+    # Plantes à arroser
     plantes = get_plantes_a_arroser()
     with col2:
         if plantes:
-            st.warning(f"ðŸ’§ {len(plantes)} plante(s) Ã  arroser")
+            st.warning(f"ðŸ’§ {len(plantes)} plante(s) à arroser")
         else:
             st.success("âœ… Jardin OK")
     
-    # TÃ¢ches mÃ©nage
+    # TÃ¢ches ménage
     stats_entretien = get_stats_entretien()
     with col3:
         if stats_entretien["completion_today"] < 100:
-            st.info(f"â³ {100 - stats_entretien['completion_today']:.0f}% tÃ¢ches restantes")
+            st.info(f"â³ {100 - stats_entretien['completion_today']:.0f}% tÃ¢ches restantes")
         else:
-            st.success("âœ… MÃ©nage complet!")
+            st.success("âœ… Ménage complet!")
     
     st.markdown("---")
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # STATISTIQUES
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     st.subheader("ðŸ“Š Tableau de bord")
     
@@ -74,7 +74,7 @@ def app():
     with col_stat1:
         stats_proj = get_stats_projets()
         st.metric(
-            "ðŸ—ï¸ Projets",
+            "ðŸ—ï¸ Projets",
             stats_proj["en_cours"],
             f"{stats_proj['avg_progress']:.0f}% progression"
         )
@@ -85,7 +85,7 @@ def app():
         st.metric(
             "ðŸŒ¿ Jardin",
             stats_jard["total_plantes"],
-            f"{stats_jard['a_arroser']} Ã  arroser"
+            f"{stats_jard['a_arroser']} à arroser"
         )
     
     # Entretien
@@ -98,16 +98,16 @@ def app():
     
     st.markdown("---")
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # NAVIGATION
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
-    st.subheader("ðŸš€ AccÃ¨s rapide")
+    st.subheader("ðŸš€ Accès rapide")
     
     col_nav1, col_nav2, col_nav3 = st.columns(3)
     
     with col_nav1:
-        if st.button("ðŸ—ï¸ Projets", use_container_width=True, key="nav_projets"):
+        if st.button("ðŸ—ï¸ Projets", use_container_width=True, key="nav_projets"):
             st.session_state.current_page = "Projets"
             st.rerun()
     
@@ -123,12 +123,12 @@ def app():
     
     st.markdown("---")
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # ALERTES DÃ‰TAILLÃ‰ES
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     if urgents:
-        st.markdown("### âš ï¸ Projets nÃ©cessitant attention")
+        st.markdown("### âš ï¸ Projets nécessitant attention")
         for urgent in urgents[:5]:
             if urgent["type"] == "RETARD":
                 st.error(f"ðŸ”´ **{urgent['projet']}** - {urgent['message']}")
@@ -137,21 +137,21 @@ def app():
         st.markdown("---")
     
     if plantes:
-        st.markdown("### ðŸ’§ Plantes Ã  arroser aujourd'hui")
+        st.markdown("### ðŸ’§ Plantes à arroser aujourd'hui")
         for p in plantes[:5]:
-            st.caption(f"â€¢ {p['nom']} ðŸ“ {p['location']}")
+            st.caption(f"â€¢ {p['nom']} ðŸ“ {p['location']}")
         st.markdown("---")
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # CONSEILS IA
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     st.info("""
     ðŸ’¡ **Besoin d'aide?**
     
-    Chaque module (Projets, Jardin, Entretien) intÃ¨gre l'IA pour:
-    - GÃ©nÃ©rateurs de tÃ¢ches & routines
-    - Estimations de durÃ©e & planning
+    Chaque module (Projets, Jardin, Entretien) intègre l'IA pour:
+    - Générateurs de tÃ¢ches & routines
+    - Estimations de durée & planning
     - Conseils & astuces d'optimisation
     - Priorisation intelligente
     

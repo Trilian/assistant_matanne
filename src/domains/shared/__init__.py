@@ -1,4 +1,4 @@
-﻿"""Domaine Shared - Modules partagÃ©s (accueil, paramÃ¨tres, rapports)."""
+﻿"""Domaine Shared - Modules partagés (accueil, paramètres, rapports)."""
 
 # UI
 from .ui import accueil, parametres, rapports, barcode

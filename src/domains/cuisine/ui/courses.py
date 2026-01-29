@@ -1,12 +1,12 @@
 ﻿"""
-Module Courses - Gestion complÃ¨te de la liste de courses
-âœ¨ FonctionnalitÃ©s complÃ¨tes:
-- Gestion CRUD complÃ¨te de la liste
-- IntÃ©gration inventaire (stock bas â†’ courses)
+Module Courses - Gestion complète de la liste de courses
+âœ¨ Fonctionnalités complètes:
+- Gestion CRUD complète de la liste
+- Intégration inventaire (stock bas â†’ courses)
 - Suggestions IA par recettes
-- Historique & modÃ¨les rÃ©currents
+- Historique & modèles récurrents
 - Partage & synchronisation multi-appareils
-- Synchronisation temps rÃ©el entre utilisateurs
+- Synchronisation temps réel entre utilisateurs
 """
 
 import logging
@@ -21,7 +21,7 @@ from src.services.realtime_sync import get_realtime_sync_service
 from src.core.errors_base import ErreurValidation
 from src.core.database import obtenir_contexte_db
 
-# Import du module logique mÃ©tier sÃ©parÃ©
+# Import du module logique métier séparé
 from src.domains.cuisine.logic.courses_logic import (
     PRIORITY_EMOJIS,
     PRIORITY_ORDER,
@@ -38,14 +38,14 @@ from src.domains.cuisine.logic.courses_logic import (
 
 logger = logging.getLogger(__name__)
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# CONSTANTES (rÃ©exportÃ©es depuis courses_logic)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# Note: PRIORITY_EMOJIS et RAYONS_DEFAULT sont importÃ©s depuis courses_logic
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# CONSTANTES (réexportées depuis courses_logic)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# Note: PRIORITY_EMOJIS et RAYONS_DEFAULT sont importés depuis courses_logic
 
 
 def app():
-    """Point d'entrÃ©e module courses"""
+    """Point d'entrée module courses"""
     st.set_page_config(page_title="ðŸ›’ Courses", layout="wide")
     
     st.title("ðŸ›’ Courses")
@@ -57,7 +57,7 @@ def app():
     if "new_article_mode" not in st.session_state:
         st.session_state.new_article_mode = False
     
-    # Initialiser la synchronisation temps rÃ©el
+    # Initialiser la synchronisation temps réel
     _init_realtime_sync()
 
     # Tabs principales
@@ -65,7 +65,7 @@ def app():
         "ðŸ“‹ Liste Active",
         "âœ¨ Suggestions IA",
         "ðŸ“š Historique",
-        "ðŸ”„ ModÃ¨les",
+        "ðŸ”„ Modèles",
         "ðŸ”§ Outils"
     ])
 
@@ -85,9 +85,9 @@ def app():
         render_outils()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 1: LISTE ACTIVE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def render_liste_active():
     """Gestion interactive de la liste active"""
@@ -95,33 +95,33 @@ def render_liste_active():
     inventaire_service = get_inventaire_service()
     
     if service is None:
-        st.error("âŒ Service courses indisponible")
+        st.error("âŒ Service courses indisponible")
         return
     
     try:
-        # RÃ©cupÃ©rer la liste
+        # Récupérer la liste
         liste = service.get_liste_courses(achetes=False)
         
         # Statistiques
         col1, col2, col3, col4 = st.columns(4)
         with col1:
-            st.metric("ðŸ“ Ã€ acheter", len(liste))
+            st.metric("ðŸ“ Ã€ acheter", len(liste))
         with col2:
             haute = len([a for a in liste if a.get("priorite") == "haute"])
-            st.metric("ðŸ”´ Haute prioritÃ©", haute)
+            st.metric("ðŸ”´ Haute priorité", haute)
         with col3:
             if inventaire_service:
                 alertes = inventaire_service.get_alertes()
                 stock_bas = len(alertes.get("stock_bas", []))
-                st.metric("âš ï¸ Stock bas", stock_bas)
+                st.metric("âš ï¸ Stock bas", stock_bas)
         with col4:
             st.metric("ðŸ’° Total articles", len(service.get_liste_courses(achetes=True)))
         
         st.divider()
         
         if not liste:
-            st.info("âœ… Liste vide! Ajoutez des articles ou gÃ©nÃ©rez des suggestions IA.")
-            if st.button("âœ¨ GÃ©nÃ©rer suggestions IA"):
+            st.info("âœ… Liste vide! Ajoutez des articles ou générez des suggestions IA.")
+            if st.button("âœ¨ Générer suggestions IA"):
                 st.session_state.new_article_mode = False
                 st.rerun()
             return
@@ -130,7 +130,7 @@ def render_liste_active():
         col1, col2, col3 = st.columns(3)
         with col1:
             filter_priorite = st.selectbox(
-                "Filtrer par prioritÃ©",
+                "Filtrer par priorité",
                 ["Toutes", "ðŸ”´ Haute", "ðŸŸ¡ Moyenne", "ðŸŸ¢ Basse"],
                 key="filter_priorite"
             )
@@ -141,7 +141,7 @@ def render_liste_active():
                 key="filter_rayon"
             )
         with col3:
-            search_term = st.text_input("ðŸ” Chercher...", key="search_courses")
+            search_term = st.text_input("ðŸ” Chercher...", key="search_courses")
         
         # Appliquer filtres
         liste_filtree = liste.copy()
@@ -169,7 +169,7 @@ def render_liste_active():
             rayons[rayon].append(article)
         
         for rayon in sorted(rayons.keys()):
-            with st.expander(f"ðŸª {rayon} ({len(rayons[rayon])} articles)", expanded=True):
+            with st.expander(f"ðŸª {rayon} ({len(rayons[rayon])} articles)", expanded=True):
                 render_rayon_articles(service, rayon, rayons[rayon])
         
         st.divider()
@@ -184,9 +184,9 @@ def render_liste_active():
             if st.button("ðŸ“„ Imprimer liste", use_container_width=True):
                 render_print_view(liste_filtree)
         with col3:
-            if st.button("ðŸ—‘ï¸ Vider (achetÃ©s)", use_container_width=True):
+            if st.button("ðŸ—‘ï¸ Vider (achetés)", use_container_width=True):
                 if service.get_liste_courses(achetes=True):
-                    st.warning("âš ï¸ Suppression des articles achetÃ©s...")
+                    st.warning("âš ï¸ Suppression des articles achetés...")
                     st.session_state.courses_refresh += 1
                     st.rerun()
         
@@ -196,12 +196,12 @@ def render_liste_active():
             render_ajouter_article()
             
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"âŒ Erreur: {str(e)}")
         logger.error(f"Erreur render_liste_active: {e}")
 
 
 def render_rayon_articles(service, rayon: str, articles: list):
-    """Affiche et gÃ¨re les articles d'un rayon"""
+    """Affiche et gère les articles d'un rayon"""
     for article in articles:
         col1, col2, col3, col4 = st.columns([4, 1, 1, 1], gap="small")
         
@@ -210,7 +210,7 @@ def render_rayon_articles(service, rayon: str, articles: list):
             label = f"{priorite_emoji} {article.get('ingredient_nom')} ({article.get('quantite_necessaire')} {article.get('unite')})"
             
             if article.get("notes"):
-                label += f" | ðŸ“ {article.get('notes')}"
+                label += f" | ðŸ“ {article.get('notes')}"
             
             if article.get("suggere_par_ia"):
                 label += " âœ¨"
@@ -218,38 +218,38 @@ def render_rayon_articles(service, rayon: str, articles: list):
             st.write(label)
         
         with col2:
-            if st.button("âœ…", key=f"mark_{article['id']}", help="Marquer achetÃ©", use_container_width=True):
+            if st.button("âœ…", key=f"mark_{article['id']}", help="Marquer acheté", use_container_width=True):
                 try:
                     service.update(article['id'], {"achete": True, "achete_le": datetime.now()})
-                    st.success(f"âœ… {article.get('ingredient_nom')} marquÃ© achetÃ©!")
+                    st.success(f"âœ… {article.get('ingredient_nom')} marqué acheté!")
                     st.session_state.courses_refresh += 1
                     st.rerun()
                 except Exception as e:
-                    st.error(f"âŒ Erreur: {str(e)}")
+                    st.error(f"âŒ Erreur: {str(e)}")
         
         with col3:
-            if st.button("âœï¸", key=f"edit_{article['id']}", help="Modifier", use_container_width=True):
+            if st.button("âœï¸", key=f"edit_{article['id']}", help="Modifier", use_container_width=True):
                 st.session_state.edit_article_id = article['id']
                 st.rerun()
         
         with col4:
-            if st.button("ðŸ—‘ï¸", key=f"del_{article['id']}", help="Supprimer", use_container_width=True):
+            if st.button("ðŸ—‘ï¸", key=f"del_{article['id']}", help="Supprimer", use_container_width=True):
                 try:
                     service.delete(article['id'])
-                    st.success(f"âœ… {article.get('ingredient_nom')} supprimÃ©!")
+                    st.success(f"âœ… {article.get('ingredient_nom')} supprimé!")
                     st.session_state.courses_refresh += 1
                     st.rerun()
                 except Exception as e:
-                    st.error(f"âŒ Erreur: {str(e)}")
+                    st.error(f"âŒ Erreur: {str(e)}")
         
-        # Formulaire Ã©dition inline si sÃ©lectionnÃ©
+        # Formulaire édition inline si sélectionné
         if st.session_state.get('edit_article_id') == article['id']:
             st.divider()
             with st.form(f"edit_form_{article['id']}"):
                 col1, col2 = st.columns(2)
                 with col1:
                     new_quantite = st.number_input(
-                        "QuantitÃ©",
+                        "Quantité",
                         value=article.get('quantite_necessaire', 1.0),
                         min_value=0.1,
                         step=0.1,
@@ -257,7 +257,7 @@ def render_rayon_articles(service, rayon: str, articles: list):
                     )
                 with col2:
                     new_priorite = st.selectbox(
-                        "PrioritÃ©",
+                        "Priorité",
                         list(PRIORITY_EMOJIS.keys()),
                         index=list(PRIORITY_EMOJIS.keys()).index(article.get('priorite', 'moyenne')),
                         key=f"prio_{article['id']}"
@@ -287,15 +287,15 @@ def render_rayon_articles(service, rayon: str, articles: list):
                                 "rayon_magasin": new_rayon,
                                 "notes": new_notes or None
                             })
-                            st.success("âœ… Article mis Ã  jour!")
+                            st.success("âœ… Article mis à jour!")
                             st.session_state.edit_article_id = None
                             st.session_state.courses_refresh += 1
                             st.rerun()
                         except Exception as e:
-                            st.error(f"âŒ Erreur: {str(e)}")
+                            st.error(f"âŒ Erreur: {str(e)}")
                 
                 with col2:
-                    if st.form_submit_button("âŒ Annuler"):
+                    if st.form_submit_button("âŒ Annuler"):
                         st.session_state.edit_article_id = None
                         st.rerun()
 
@@ -306,7 +306,7 @@ def render_ajouter_article():
     
     service = get_courses_service()
     if service is None:
-        st.error("âŒ Service indisponible")
+        st.error("âŒ Service indisponible")
         return
     
     with st.form("form_new_article"):
@@ -314,13 +314,13 @@ def render_ajouter_article():
         with col1:
             nom = st.text_input("Nom de l'article", placeholder="ex: Tomates", max_chars=100)
         with col2:
-            unite = st.selectbox("UnitÃ©", ["kg", "l", "piÃ¨ce", "g", "ml", "paquet"])
+            unite = st.selectbox("Unité", ["kg", "l", "pièce", "g", "ml", "paquet"])
         
-        quantite = st.number_input("QuantitÃ©", min_value=0.1, value=1.0, step=0.1)
+        quantite = st.number_input("Quantité", min_value=0.1, value=1.0, step=0.1)
         
         col1, col2 = st.columns(2)
         with col1:
-            priorite = st.selectbox("PrioritÃ©", ["basse", "moyenne", "haute"])
+            priorite = st.selectbox("Priorité", ["basse", "moyenne", "haute"])
         with col2:
             rayon = st.selectbox("Rayon", RAYONS_DEFAULT)
         
@@ -329,11 +329,11 @@ def render_ajouter_article():
         submitted = st.form_submit_button("âœ… Ajouter", use_container_width=True)
         if submitted:
             if not nom:
-                st.error("âš ï¸ Entrez un nom d'article")
+                st.error("âš ï¸ Entrez un nom d'article")
                 return
             
             try:
-                # CrÃ©er/trouver l'ingrÃ©dient
+                # Créer/trouver l'ingrédient
                 from src.core.models import Ingredient
                 from src.core.database import obtenir_contexte_db
                 
@@ -356,18 +356,18 @@ def render_ajouter_article():
                 
                 service.create(data)
                 
-                st.success(f"âœ… {nom} ajoutÃ© Ã  la liste!")
+                st.success(f"âœ… {nom} ajouté à la liste!")
                 st.session_state.new_article_mode = False
                 st.session_state.courses_refresh += 1
                 st.rerun()
             except Exception as e:
-                st.error(f"âŒ Erreur: {str(e)}")
+                st.error(f"âŒ Erreur: {str(e)}")
                 logger.error(f"Erreur ajout article: {e}")
 
 
 def render_print_view(liste):
-    """Vue d'impression optimisÃ©e"""
-    st.subheader("ðŸ–¨ï¸ Liste Ã  imprimer")
+    """Vue d'impression optimisée"""
+    st.subheader("ðŸ–¨ï¸ Liste à imprimer")
     
     # Grouper par rayon
     rayons = {}
@@ -382,9 +382,9 @@ def render_print_view(liste):
     print_text += "=" * 40 + "\n\n"
     
     for rayon in sorted(rayons.keys()):
-        print_text += f"ðŸª {rayon}\n"
+        print_text += f"ðŸª {rayon}\n"
         for article in rayons[rayon]:
-            checkbox = "â˜"
+            checkbox = "â˜"
             qty = f"{article.get('quantite_necessaire')} {article.get('unite')}"
             print_text += f"  {checkbox} {article.get('ingredient_nom')} ({qty})\n"
         print_text += "\n"
@@ -392,9 +392,9 @@ def render_print_view(liste):
     st.text_area("Copier/Coller la liste:", value=print_text, height=400, disabled=True)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 2: SUGGESTIONS IA
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def render_suggestions_ia():
     """Suggestions IA depuis inventaire & recettes"""
@@ -404,24 +404,24 @@ def render_suggestions_ia():
     
     st.subheader("âœ¨ Suggestions intelligentes")
     
-    tab_inventaire, tab_recettes = st.tabs(["ðŸ“¦ Depuis inventaire", "ðŸ½ï¸ Par recettes"])
+    tab_inventaire, tab_recettes = st.tabs(["ðŸ“¦ Depuis inventaire", "ðŸ½ï¸ Par recettes"])
     
     with tab_inventaire:
-        st.write("**GÃ©nÃ©rer suggestions depuis stock bas**")
+        st.write("**Générer suggestions depuis stock bas**")
         
-        if st.button("ðŸ¤– Analyser inventaire & gÃ©nÃ©rer suggestions"):
-            with st.spinner("â³ Analyse en cours..."):
+        if st.button("ðŸ¤– Analyser inventaire & générer suggestions"):
+            with st.spinner("â³ Analyse en cours..."):
                 try:
                     suggestions = service.generer_suggestions_ia_depuis_inventaire()
                     
                     if suggestions:
-                        st.success(f"âœ… {len(suggestions)} suggestions gÃ©nÃ©rÃ©es!")
+                        st.success(f"âœ… {len(suggestions)} suggestions générées!")
                         
                         # Afficher suggestions
                         df = pd.DataFrame([{
                             "Article": s.nom,
-                            "QuantitÃ©": f"{s.quantite} {s.unite}",
-                            "PrioritÃ©": s.priorite,
+                            "Quantité": f"{s.quantite} {s.unite}",
+                            "Priorité": s.priorite,
                             "Rayon": s.rayon
                         } for s in suggestions])
                         
@@ -435,7 +435,7 @@ def render_suggestions_ia():
                                 count = 0
                                 
                                 for suggestion in suggestions:
-                                    # Trouver ou crÃ©er ingrÃ©dient
+                                    # Trouver ou créer ingrédient
                                     ingredient = db.query(Ingredient).filter(
                                         Ingredient.nom == suggestion.nom
                                     ).first()
@@ -448,7 +448,7 @@ def render_suggestions_ia():
                                         db.add(ingredient)
                                         db.commit()
                                     
-                                    # Ajouter Ã  la liste
+                                    # Ajouter à la liste
                                     data = {
                                         "ingredient_id": ingredient.id,
                                         "quantite_necessaire": suggestion.quantite,
@@ -459,21 +459,21 @@ def render_suggestions_ia():
                                     service.create(data)
                                     count += 1
                                 
-                                st.success(f"âœ… {count} articles ajoutÃ©s!")
+                                st.success(f"âœ… {count} articles ajoutés!")
                                 st.session_state.courses_refresh += 1
                                 st.rerun()
                             except Exception as e:
-                                st.error(f"âŒ Erreur sauvegarde: {str(e)}")
+                                st.error(f"âŒ Erreur sauvegarde: {str(e)}")
                     else:
                         st.info("Aucune suggestion (inventaire OK)")
                 except Exception as e:
-                    st.error(f"âŒ Erreur: {str(e)}")
+                    st.error(f"âŒ Erreur: {str(e)}")
     
     with tab_recettes:
-        st.write("**Ajouter ingrÃ©dients manquants pour recettes**")
+        st.write("**Ajouter ingrédients manquants pour recettes**")
         
         if recettes_service is None:
-            st.warning("âš ï¸ Service recettes indisponible")
+            st.warning("âš ï¸ Service recettes indisponible")
             return
         
         # Lister recettes
@@ -486,7 +486,7 @@ def render_suggestions_ia():
             
             recette_names = {r.id: r.nom for r in recettes}
             selected_recette_id = st.selectbox(
-                "SÃ©lectionner une recette",
+                "Sélectionner une recette",
                 options=list(recette_names.keys()),
                 format_func=lambda x: recette_names[x]
             )
@@ -494,17 +494,17 @@ def render_suggestions_ia():
             if selected_recette_id:
                 recette = recettes_service.get_by_id_full(selected_recette_id)
                 
-                if recette and st.button("ðŸ“ Ajouter ingrÃ©dients manquants"):
-                    # Calculer ingrÃ©dients manquants vs inventaire
-                    st.info("IngrÃ©dients manquants ajoutÃ©s!")
+                if recette and st.button("ðŸ“ Ajouter ingrédients manquants"):
+                    # Calculer ingrédients manquants vs inventaire
+                    st.info("Ingrédients manquants ajoutés!")
                     st.rerun()
         except Exception as e:
-            st.error(f"âŒ Erreur: {str(e)}")
+            st.error(f"âŒ Erreur: {str(e)}")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 3: HISTORIQUE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def render_historique():
     """Historique des listes de courses"""
@@ -519,7 +519,7 @@ def render_historique():
         date_fin = st.date_input("Au", value=datetime.now())
     
     try:
-        # RÃ©cupÃ©rer les articles achetÃ©s dans la pÃ©riode
+        # Récupérer les articles achetés dans la période
         from src.core.models import ArticleCourses
         
         with obtenir_contexte_db() as db:
@@ -530,7 +530,7 @@ def render_historique():
             ).all()
         
         if not articles_achetes:
-            st.info("Aucun achat pendant cette pÃ©riode")
+            st.info("Aucun achat pendant cette période")
             return
         
         # Statistiques
@@ -539,69 +539,69 @@ def render_historique():
         
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.metric("ðŸ“Š Articles achetÃ©s", total_articles)
+            st.metric("ðŸ“Š Articles achetés", total_articles)
         with col2:
-            st.metric("ðŸª Rayons diffÃ©rents", len(rayons_utilises))
+            st.metric("ðŸª Rayons différents", len(rayons_utilises))
         with col3:
             priorite_haute = len([a for a in articles_achetes if a.priorite == "haute"])
-            st.metric("ðŸ”´ Haute prioritÃ©", priorite_haute)
+            st.metric("ðŸ”´ Haute priorité", priorite_haute)
         
         st.divider()
         
-        # Tableau dÃ©taillÃ©
-        st.subheader("ðŸ“‹ DÃ©tail des achats")
+        # Tableau détaillé
+        st.subheader("ðŸ“‹ Détail des achats")
         
         df = pd.DataFrame([{
             "Article": a.ingredient.nom if a.ingredient else "N/A",
-            "QuantitÃ©": f"{a.quantite_necessaire} {a.ingredient.unite if a.ingredient else ''}",
-            "PrioritÃ©": PRIORITY_EMOJIS.get(a.priorite, "âšª") + " " + a.priorite,
+            "Quantité": f"{a.quantite_necessaire} {a.ingredient.unite if a.ingredient else ''}",
+            "Priorité": PRIORITY_EMOJIS.get(a.priorite, "âšª") + " " + a.priorite,
             "Rayon": a.rayon_magasin or "N/A",
-            "AchetÃ© le": a.achete_le.strftime("%d/%m/%Y %H:%M") if a.achete_le else "N/A",
+            "Acheté le": a.achete_le.strftime("%d/%m/%Y %H:%M") if a.achete_le else "N/A",
             "IA": "âœ¨" if a.suggere_par_ia else ""
         } for a in articles_achetes])
         
         st.dataframe(df, use_container_width=True)
         
         # Export CSV
-        if st.button("ðŸ“¥ TÃ©lÃ©charger en CSV"):
+        if st.button("ðŸ“¥ Télécharger en CSV"):
             csv = df.to_csv(index=False)
             st.download_button(
-                label="ðŸ’¾ TÃ©lÃ©charger CSV",
+                label="ðŸ’¾ Télécharger CSV",
                 data=csv,
                 file_name=f"historique_courses_{date_debut}_{date_fin}.csv",
                 mime="text/csv"
             )
         
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"âŒ Erreur: {str(e)}")
         logger.error(f"Erreur historique: {e}")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 4: MODÃˆLES RÃ‰CURRENTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def render_modeles():
-    """Gestion des modÃ¨les de listes rÃ©currentes (Phase 2: Persistance BD)"""
-    st.subheader("ðŸ”„ ModÃ¨les de listes - Phase 2")
+    """Gestion des modèles de listes récurrentes (Phase 2: Persistance BD)"""
+    st.subheader("ðŸ”„ Modèles de listes - Phase 2")
     
     service = get_courses_service()
     
     try:
-        # RÃ©cupÃ©rer modÃ¨les depuis BD (Phase 2)
+        # Récupérer modèles depuis BD (Phase 2)
         modeles = service.get_modeles(utilisateur_id=None)  # TODO: user_id depuis auth
         
-        tab_mes_modeles, tab_nouveau = st.tabs(["ðŸ“‹ Mes modÃ¨les", "âž• Nouveau"])
+        tab_mes_modeles, tab_nouveau = st.tabs(["ðŸ“‹ Mes modèles", "âž• Nouveau"])
         
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         # ONGLET: MES MODÃˆLES (affichage et actions)
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         
         with tab_mes_modeles:
-            st.write("**ModÃ¨les sauvegardÃ©s en BD**")
+            st.write("**Modèles sauvegardés en BD**")
             
             if not modeles:
-                st.info("âœ¨ Aucun modÃ¨le sauvegardÃ©. CrÃ©ez-en un dans l'onglet 'Nouveau'!")
+                st.info("âœ¨ Aucun modèle sauvegardé. Créez-en un dans l'onglet 'Nouveau'!")
             else:
                 for modele in modeles:
                     with st.container(border=True):
@@ -610,54 +610,54 @@ def render_modeles():
                         with col1:
                             st.write(f"**ðŸ“‹ {modele['nom']}**")
                             if modele.get('description'):
-                                st.caption(f"ðŸ“ {modele['description']}")
+                                st.caption(f"ðŸ“ {modele['description']}")
                             st.caption(f"ðŸ“¦ {len(modele.get('articles', []))} articles | ðŸ“… {modele.get('cree_le', '')[:10]}")
                         
                         with col2:
-                            if st.button("ðŸ“¥ Charger", key=f"load_{modele['id']}", use_container_width=True, help="Charger ce modÃ¨le dans la liste"):
+                            if st.button("ðŸ“¥ Charger", key=f"load_{modele['id']}", use_container_width=True, help="Charger ce modèle dans la liste"):
                                 try:
-                                    # Appliquer le modÃ¨le (crÃ©e articles courses)
+                                    # Appliquer le modèle (crée articles courses)
                                     article_ids = service.appliquer_modele(modele['id'])
-                                    st.success(f"âœ… ModÃ¨le chargÃ© ({len(article_ids)} articles)!")
+                                    st.success(f"âœ… Modèle chargé ({len(article_ids)} articles)!")
                                     st.session_state.courses_refresh += 1
                                     st.rerun()
                                 except Exception as e:
-                                    st.error(f"âŒ Erreur: {str(e)}")
+                                    st.error(f"âŒ Erreur: {str(e)}")
                         
                         with col3:
-                            if st.button("ðŸ—‘ï¸ Supprimer", key=f"del_{modele['id']}", use_container_width=True, help="Supprimer ce modÃ¨le"):
+                            if st.button("ðŸ—‘ï¸ Supprimer", key=f"del_{modele['id']}", use_container_width=True, help="Supprimer ce modèle"):
                                 try:
                                     service.delete_modele(modele['id'])
-                                    st.success("âœ… ModÃ¨le supprimÃ©!")
+                                    st.success("âœ… Modèle supprimé!")
                                     st.rerun()
                                 except Exception as e:
-                                    st.error(f"âŒ Erreur: {str(e)}")
+                                    st.error(f"âŒ Erreur: {str(e)}")
                         
-                        # Afficher les articles du modÃ¨le
-                        with st.expander(f"ðŸ‘ï¸ Voir {len(modele.get('articles', []))} articles"):
+                        # Afficher les articles du modèle
+                        with st.expander(f"ðŸ‘ï¸ Voir {len(modele.get('articles', []))} articles"):
                             for article in modele.get('articles', []):
                                 priorite_emoji = "ðŸ”´" if article['priorite'] == 'haute' else ("ðŸŸ¡" if article['priorite'] == 'moyenne' else "ðŸŸ¢")
                                 st.write(f"{priorite_emoji} **{article['nom']}** - {article['quantite']} {article['unite']} ({article['rayon']})")
                                 if article.get('notes'):
                                     st.caption(f"ðŸ“Œ {article['notes']}")
         
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         # ONGLET: CRÃ‰ER NOUVEAU MODÃˆLE
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         
         with tab_nouveau:
-            st.write("**Sauvegarder la liste actuelle comme modÃ¨le rÃ©utilisable**")
+            st.write("**Sauvegarder la liste actuelle comme modèle réutilisable**")
             
-            # RÃ©cupÃ©rer liste actuelle
+            # Récupérer liste actuelle
             liste_actuelle = service.get_liste_courses(achetes=False)
             
             if not liste_actuelle:
-                st.warning("âš ï¸ La liste est vide. Ajoutez des articles d'abord!")
+                st.warning("âš ï¸ La liste est vide. Ajoutez des articles d'abord!")
             else:
                 col1, col2 = st.columns(2)
                 with col1:
                     nom_modele = st.text_input(
-                        "Nom du modÃ¨le",
+                        "Nom du modèle",
                         placeholder="ex: Courses hebdomadaires",
                         max_chars=100,
                         key="new_modele_name"
@@ -674,7 +674,7 @@ def render_modeles():
                 
                 st.divider()
                 
-                # AperÃ§u des articles Ã  sauvegarder
+                # Aperçu des articles à sauvegarder
                 st.subheader(f"ðŸ“¦ Articles ({len(liste_actuelle)})")
                 for i, article in enumerate(liste_actuelle):
                     priorite_emoji = "ðŸ”´" if article['priorite'] == 'haute' else ("ðŸŸ¡" if article['priorite'] == 'moyenne' else "ðŸŸ¢")
@@ -682,17 +682,17 @@ def render_modeles():
                 
                 st.divider()
                 
-                if st.button("ðŸ’¾ Sauvegarder comme modÃ¨le", use_container_width=True, type="primary"):
+                if st.button("ðŸ’¾ Sauvegarder comme modèle", use_container_width=True, type="primary"):
                     if not nom_modele or nom_modele.strip() == "":
-                        st.error("âš ï¸ Entrez un nom pour le modÃ¨le")
+                        st.error("âš ï¸ Entrez un nom pour le modèle")
                     else:
                         try:
-                            # PrÃ©parer les donnÃ©es articles
+                            # Préparer les données articles
                             articles_data = [{
                                 "ingredient_id": a.get("ingredient_id"),
                                 "nom": a.get("ingredient_nom"),
                                 "quantite": float(a.get("quantite_necessaire", 1.0)),
-                                "unite": a.get("unite", "piÃ¨ce"),
+                                "unite": a.get("unite", "pièce"),
                                 "rayon": a.get("rayon_magasin", "Autre"),
                                 "priorite": a.get("priorite", "moyenne"),
                                 "notes": a.get("notes")
@@ -706,25 +706,25 @@ def render_modeles():
                                 utilisateur_id=None  # TODO: user_id depuis auth
                             )
                             
-                            st.success(f"âœ… ModÃ¨le '{nom_modele}' crÃ©Ã© et sauvegardÃ© en BD!")
+                            st.success(f"âœ… Modèle '{nom_modele}' créé et sauvegardé en BD!")
                             st.balloons()
                             st.rerun()
                         except Exception as e:
-                            st.error(f"âŒ Erreur lors de la sauvegarde: {str(e)}")
+                            st.error(f"âŒ Erreur lors de la sauvegarde: {str(e)}")
                             logger.error(f"Erreur create_modele: {e}")
     
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"âŒ Erreur: {str(e)}")
         logger.error(f"Erreur render_modeles: {e}")
 
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 5: OUTILS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def render_outils():
-    """Outils utilitaires - Phase 2: Code-barres, partage, UX amÃ©liorÃ©e"""
+    """Outils utilitaires - Phase 2: Code-barres, partage, UX améliorée"""
     st.subheader("ðŸ”§ Outils")
     
     # PHASE 2 FEATURES
@@ -735,27 +735,27 @@ def render_outils():
         "ðŸ“Š Stats"
     ])
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # PHASE 2: CODE-BARRES SCANNING
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     with tab_barcode:
         st.write("**ðŸ“± Scanner code-barres pour saisie rapide**")
-        st.info("â³ Phase 2 - En dÃ©veloppement")
+        st.info("â³ Phase 2 - En développement")
         
         # Simuler la structure Phase 2
         col1, col2 = st.columns(2)
         with col1:
             st.write("""
-            **FonctionnalitÃ©s planifiÃ©es:**
+            **Fonctionnalités planifiées:**
             - ðŸ“± Scan code-barres avec webcam
-            - ðŸ” Reconnaissance automatique article
+            - ðŸ” Reconnaissance automatique article
             - âš¡ Saisie 10x plus rapide
             - ðŸ“Š Base de codes-barres articles
             """)
         with col2:
             st.write("""
-            **IntÃ©gration:**
+            **Intégration:**
             - Ajout rapide en magasin
             - Sync prix automatique
             - Recommandations marque
@@ -763,30 +763,30 @@ def render_outils():
             """)
         
         st.divider()
-        st.markdown("**Estimation:** 2-3 jours (composant scanning + base donnÃ©es)")
+        st.markdown("**Estimation:** 2-3 jours (composant scanning + base données)")
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # PHASE 2: PARTAGE MULTI-UTILISATEURS
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     with tab_share:
         st.write("**ðŸ‘¥ Partager liste avec famille/colocataires**")
-        st.info("â³ Phase 2 - En dÃ©veloppement")
+        st.info("â³ Phase 2 - En développement")
         
         col1, col2 = st.columns(2)
         with col1:
             st.write("""
-            **FonctionnalitÃ©s planifiÃ©es:**
+            **Fonctionnalités planifiées:**
             - ðŸ‘¥ Partage par email/lien
-            - ðŸ”„ Sync temps rÃ©el
-            - âœ… Permissions (lecture/Ã©criture)
-            - ðŸ“± Notifications mises Ã  jour
+            - ðŸ”„ Sync temps réel
+            - âœ… Permissions (lecture/écriture)
+            - ðŸ“± Notifications mises à jour
             """)
         with col2:
             st.write("""
             **Avantages:**
-            - Colocataires voient qui achÃ¨te
-            - Une seule liste partagÃ©e
+            - Colocataires voient qui achète
+            - Une seule liste partagée
             - Pas de doublons articles
             - Historique collaboratif
             """)
@@ -794,7 +794,7 @@ def render_outils():
         st.divider()
         
         # Structure Phase 2
-        st.subheader("Configuration partage (Ã  venir)")
+        st.subheader("Configuration partage (à venir)")
         shared_with = st.multiselect(
             "Partager avec:",
             ["Alice", "Bob", "Charlie"],
@@ -804,9 +804,9 @@ def render_outils():
         
         st.markdown("**Estimation:** 3-4 jours (BD + permissions + notifications)")
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # EXPORT/IMPORT (EXISTANT)
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     with tab_export:
         st.write("**Exporter/Importer listes**")
@@ -816,19 +816,19 @@ def render_outils():
             service = get_courses_service()
             liste = service.get_liste_courses(achetes=False)
             
-            if liste and st.button("ðŸ“¥ TÃ©lÃ©charger liste (CSV)"):
+            if liste and st.button("ðŸ“¥ Télécharger liste (CSV)"):
                 df = pd.DataFrame([{
                     "Article": a.get('ingredient_nom'),
-                    "QuantitÃ©": a.get('quantite_necessaire'),
-                    "UnitÃ©": a.get('unite'),
-                    "PrioritÃ©": a.get('priorite'),
+                    "Quantité": a.get('quantite_necessaire'),
+                    "Unité": a.get('unite'),
+                    "Priorité": a.get('priorite'),
                     "Rayon": a.get('rayon_magasin'),
                     "Notes": a.get('notes', '')
                 } for a in liste])
                 
                 csv = df.to_csv(index=False)
                 st.download_button(
-                    label="ðŸ’¾ TÃ©lÃ©charger CSV",
+                    label="ðŸ’¾ Télécharger CSV",
                     data=csv,
                     file_name=f"liste_courses_{datetime.now().strftime('%Y%m%d')}.csv",
                     mime="text/csv"
@@ -856,29 +856,29 @@ def render_outils():
                             if not ingredient:
                                 ingredient = Ingredient(
                                     nom=row['Article'],
-                                    unite=row.get('UnitÃ©', 'piÃ¨ce')
+                                    unite=row.get('Unité', 'pièce')
                                 )
                                 db.add(ingredient)
                                 db.commit()
                             
                             service.create({
                                 "ingredient_id": ingredient.id,
-                                "quantite_necessaire": float(row['QuantitÃ©']),
-                                "priorite": row.get('PrioritÃ©', 'moyenne'),
+                                "quantite_necessaire": float(row['Quantité']),
+                                "priorite": row.get('Priorité', 'moyenne'),
                                 "rayon_magasin": row.get('Rayon', 'Autre'),
                                 "notes": row.get('Notes')
                             })
                             count += 1
                         
-                        st.success(f"âœ… {count} articles importÃ©s!")
+                        st.success(f"âœ… {count} articles importés!")
                         st.session_state.courses_refresh += 1
                         st.rerun()
                 except Exception as e:
-                    st.error(f"âŒ Erreur import: {str(e)}")
+                    st.error(f"âŒ Erreur import: {str(e)}")
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # STATISTIQUES GLOBALES (EXISTANT + PHASE 2)
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     with tab_stats:
         st.write("**ðŸ“Š Statistiques globales**")
@@ -893,16 +893,16 @@ def render_outils():
                 st.metric("ðŸ“‹ Articles actifs", len(liste))
             with col2:
                 liste_achetee = service.get_liste_courses(achetes=True)
-                st.metric("âœ… Articles achetÃ©s", len(liste_achetee))
+                st.metric("âœ… Articles achetés", len(liste_achetee))
             with col3:
                 rayons = set(a.get('rayon_magasin') for a in liste if a.get('rayon_magasin'))
-                st.metric("ðŸª Rayons utilisÃ©s", len(rayons))
+                st.metric("ðŸª Rayons utilisés", len(rayons))
             with col4:
-                st.metric("â±ï¸ DerniÃ¨re mise Ã  jour", datetime.now().strftime("%H:%M"))
+                st.metric("â±ï¸ Dernière mise à jour", datetime.now().strftime("%H:%M"))
             
             st.divider()
             
-            # Stats par prioritÃ©
+            # Stats par priorité
             col1, col2, col3 = st.columns(3)
             with col1:
                 haute = len([a for a in liste if a.get('priorite') == 'haute'])
@@ -920,16 +920,16 @@ def render_outils():
             st.subheader("ðŸ’° Budget tracking (PHASE 2)")
             
         except Exception as e:
-            st.error(f"âŒ Erreur chargement stats: {str(e)}")
+            st.error(f"âŒ Erreur chargement stats: {str(e)}")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SYNCHRONISATION TEMPS RÃ‰EL
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def _init_realtime_sync():
-    """Initialise la synchronisation temps rÃ©el."""
+    """Initialise la synchronisation temps réel."""
     if "realtime_initialized" not in st.session_state:
         st.session_state.realtime_initialized = False
     
@@ -937,23 +937,23 @@ def _init_realtime_sync():
         sync_service = get_realtime_sync_service()
         
         if sync_service.is_configured and not st.session_state.realtime_initialized:
-            # RÃ©cupÃ©rer l'utilisateur courant
+            # Récupérer l'utilisateur courant
             user_id = st.session_state.get("user_id", "anonymous")
             user_name = st.session_state.get("user_name", "Utilisateur")
             
-            # Rejoindre le canal de synchronisation (liste par dÃ©faut = 1)
+            # Rejoindre le canal de synchronisation (liste par défaut = 1)
             liste_id = st.session_state.get("liste_active_id", 1)
             
             if sync_service.join_list(liste_id, user_id, user_name):
                 st.session_state.realtime_initialized = True
-                logger.info(f"Sync temps rÃ©el initialisÃ©e pour liste {liste_id}")
+                logger.info(f"Sync temps réel initialisée pour liste {liste_id}")
         
     except Exception as e:
-        logger.warning(f"Sync temps rÃ©el non disponible: {e}")
+        logger.warning(f"Sync temps réel non disponible: {e}")
 
 
 def render_realtime_status():
-    """Affiche le statut de synchronisation temps rÃ©el."""
+    """Affiche le statut de synchronisation temps réel."""
     try:
         sync_service = get_realtime_sync_service()
         
@@ -984,7 +984,7 @@ def render_realtime_status():
                     render_typing_indicator()
     
     except Exception as e:
-        logger.debug(f"Statut realtime non affichÃ©: {e}")
+        logger.debug(f"Statut realtime non affiché: {e}")
 
 
 def _broadcast_article_change(event_type: str, article_data: dict):
@@ -1009,5 +1009,5 @@ def _broadcast_article_change(event_type: str, article_data: dict):
             sync_service.broadcast_item_deleted(liste_id, article_data.get("id"))
     
     except Exception as e:
-        logger.debug(f"Broadcast non envoyÃ©: {e}")
+        logger.debug(f"Broadcast non envoyé: {e}")
 

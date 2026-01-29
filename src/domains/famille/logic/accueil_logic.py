@@ -1,5 +1,5 @@
 ﻿"""
-Logique mÃ©tier du module Accueil - SÃ©parÃ©e de l'UI
+Logique métier du module Accueil - Séparée de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
 
@@ -10,16 +10,16 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONSTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 JULIUS_BIRTHDAY = date(2023, 10, 26)  # Date de naissance de Julius
 
 NOTIFICATION_TYPES = {
     "critique": {"emoji": "ðŸš¨", "color": "red"},
-    "alerte": {"emoji": "âš ï¸", "color": "orange"},
-    "info": {"emoji": "â„¹ï¸", "color": "blue"},
+    "alerte": {"emoji": "âš ï¸", "color": "orange"},
+    "info": {"emoji": "â„¹ï¸", "color": "blue"},
     "succes": {"emoji": "âœ…", "color": "green"},
 }
 
@@ -32,16 +32,16 @@ DASHBOARD_SECTIONS = [
 ]
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CALCULS JULIUS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def calculer_age_julius(date_reference: Optional[date] = None) -> dict:
     """
     Calcule l'Ã¢ge de Julius en mois et jours.
     
     Args:
-        date_reference: Date de rÃ©fÃ©rence (par dÃ©faut aujourd'hui)
+        date_reference: Date de référence (par défaut aujourd'hui)
         
     Returns:
         Dictionnaire avec mois, jours, total_jours
@@ -63,7 +63,7 @@ def calculer_age_julius(date_reference: Optional[date] = None) -> dict:
             try:
                 next_month = date(date_temp.year, date_temp.month + 1, date_temp.day)
             except ValueError:
-                # GÃ©rer les mois avec moins de jours
+                # Gérer les mois avec moins de jours
                 if date_temp.month + 1 == 2:
                     next_month = date(date_temp.year, date_temp.month + 1, 28)
                 else:
@@ -91,7 +91,7 @@ def calculer_semaines_julius(date_reference: Optional[date] = None) -> int:
     Calcule l'Ã¢ge de Julius en semaines.
     
     Args:
-        date_reference: Date de rÃ©fÃ©rence (par dÃ©faut aujourd'hui)
+        date_reference: Date de référence (par défaut aujourd'hui)
         
     Returns:
         Nombre de semaines
@@ -103,13 +103,13 @@ def calculer_semaines_julius(date_reference: Optional[date] = None) -> int:
 
 def formater_age_julius(date_reference: Optional[date] = None) -> str:
     """
-    Formate l'Ã¢ge de Julius de maniÃ¨re lisible.
+    Formate l'Ã¢ge de Julius de manière lisible.
     
     Args:
-        date_reference: Date de rÃ©fÃ©rence
+        date_reference: Date de référence
         
     Returns:
-        ChaÃ®ne formatÃ©e (ex: "19 mois et 5 jours")
+        Chaîne formatée (ex: "19 mois et 5 jours")
     """
     age = calculer_age_julius(date_reference)
     
@@ -121,19 +121,19 @@ def formater_age_julius(date_reference: Optional[date] = None) -> str:
         return f"{age['mois']} mois et {age['jours']} jours"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # MÃ‰TRIQUES DASHBOARD
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def calculer_metriques_recettes(recettes: list[dict]) -> dict:
     """
-    Calcule les mÃ©triques liÃ©es aux recettes.
+    Calcule les métriques liées aux recettes.
     
     Args:
         recettes: Liste des recettes
         
     Returns:
-        Dictionnaire des mÃ©triques
+        Dictionnaire des métriques
     """
     if not recettes:
         return {
@@ -166,13 +166,13 @@ def calculer_metriques_recettes(recettes: list[dict]) -> dict:
 
 def calculer_metriques_inventaire(articles: list[dict]) -> dict:
     """
-    Calcule les mÃ©triques liÃ©es Ã  l'inventaire.
+    Calcule les métriques liées à l'inventaire.
     
     Args:
         articles: Liste des articles de l'inventaire
         
     Returns:
-        Dictionnaire des mÃ©triques
+        Dictionnaire des métriques
     """
     if not articles:
         return {
@@ -195,7 +195,7 @@ def calculer_metriques_inventaire(articles: list[dict]) -> dict:
         if quantite <= seuil_alerte:
             alertes += 1
         
-        # Comptage pÃ©rimÃ©s
+        # Comptage périmés
         date_peremption = article.get("date_peremption")
         if date_peremption:
             if isinstance(date_peremption, datetime):
@@ -216,13 +216,13 @@ def calculer_metriques_inventaire(articles: list[dict]) -> dict:
 
 def calculer_metriques_courses(listes: list[dict]) -> dict:
     """
-    Calcule les mÃ©triques liÃ©es aux courses.
+    Calcule les métriques liées aux courses.
     
     Args:
         listes: Liste des listes de courses (avec articles)
         
     Returns:
-        Dictionnaire des mÃ©triques
+        Dictionnaire des métriques
     """
     if not listes:
         return {
@@ -258,13 +258,13 @@ def calculer_metriques_courses(listes: list[dict]) -> dict:
 
 def calculer_metriques_planning(evenements: list[dict]) -> dict:
     """
-    Calcule les mÃ©triques liÃ©es au planning.
+    Calcule les métriques liées au planning.
     
     Args:
-        evenements: Liste des Ã©vÃ©nements planifiÃ©s
+        evenements: Liste des événements planifiés
         
     Returns:
-        Dictionnaire des mÃ©triques
+        Dictionnaire des métriques
     """
     if not evenements:
         return {
@@ -310,13 +310,13 @@ def calculer_metriques_planning(evenements: list[dict]) -> dict:
 
 def calculer_metriques_sante(entrees: list[dict] = None) -> dict:
     """
-    Calcule les mÃ©triques de santÃ©/bien-Ãªtre.
+    Calcule les métriques de santé/bien-être.
     
     Args:
-        entrees: Liste des entrÃ©es de suivi santÃ©
+        entrees: Liste des entrées de suivi santé
         
     Returns:
-        Dictionnaire des mÃ©triques santÃ©
+        Dictionnaire des métriques santé
     """
     entrees = entrees or []
     if not entrees:
@@ -341,13 +341,13 @@ def calculer_metriques_sante(entrees: list[dict] = None) -> dict:
 
 def calculer_metriques_budget(transactions: list[dict] = None) -> dict:
     """
-    Calcule les mÃ©triques de budget.
+    Calcule les métriques de budget.
     
     Args:
         transactions: Liste des transactions
         
     Returns:
-        Dictionnaire des mÃ©triques budget
+        Dictionnaire des métriques budget
     """
     transactions = transactions or []
     if not transactions:
@@ -371,7 +371,7 @@ def calculer_metriques_budget(transactions: list[dict] = None) -> dict:
 
 
 def _est_cette_semaine(date_val) -> bool:
-    """VÃ©rifie si une date est dans cette semaine."""
+    """Vérifie si une date est dans cette semaine."""
     if date_val is None:
         return False
     if isinstance(date_val, str):
@@ -395,16 +395,16 @@ def calculer_metriques_globales(
     planning: list[dict] = None
 ) -> dict:
     """
-    Calcule toutes les mÃ©triques du dashboard.
+    Calcule toutes les métriques du dashboard.
     
     Args:
         recettes: Liste des recettes
         inventaire: Liste de l'inventaire
         courses: Liste des listes de courses
-        planning: Liste des Ã©vÃ©nements
+        planning: Liste des événements
         
     Returns:
-        Dictionnaire complet des mÃ©triques
+        Dictionnaire complet des métriques
     """
     return {
         "julius": calculer_age_julius(),
@@ -416,13 +416,13 @@ def calculer_metriques_globales(
     }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # NOTIFICATIONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def generer_notifications_inventaire(articles: list[dict]) -> list[dict]:
     """
-    GÃ©nÃ¨re les notifications liÃ©es Ã  l'inventaire.
+    Génère les notifications liées à l'inventaire.
     
     Args:
         articles: Liste des articles de l'inventaire
@@ -461,7 +461,7 @@ def generer_notifications_inventaire(articles: list[dict]) -> list[dict]:
                 "priorite": 2,
             })
         
-        # PÃ©remption
+        # Péremption
         date_peremption = article.get("date_peremption")
         if date_peremption:
             if isinstance(date_peremption, datetime):
@@ -470,8 +470,8 @@ def generer_notifications_inventaire(articles: list[dict]) -> list[dict]:
             if date_peremption < aujourd_hui:
                 notifications.append({
                     "type": "critique",
-                    "titre": f"Article pÃ©rimÃ©: {nom}",
-                    "message": f"PÃ©rimÃ© depuis le {date_peremption.strftime('%d/%m')}",
+                    "titre": f"Article périmé: {nom}",
+                    "message": f"Périmé depuis le {date_peremption.strftime('%d/%m')}",
                     "module": "inventaire",
                     "priorite": 0,
                 })
@@ -479,8 +479,8 @@ def generer_notifications_inventaire(articles: list[dict]) -> list[dict]:
                 jours = (date_peremption - aujourd_hui).days
                 notifications.append({
                     "type": "alerte",
-                    "titre": f"PÃ©remption proche: {nom}",
-                    "message": f"PÃ©rime dans {jours} jour(s)",
+                    "titre": f"Péremption proche: {nom}",
+                    "message": f"Périme dans {jours} jour(s)",
                     "module": "inventaire",
                     "priorite": 1,
                 })
@@ -490,7 +490,7 @@ def generer_notifications_inventaire(articles: list[dict]) -> list[dict]:
 
 def generer_notifications_courses(listes: list[dict]) -> list[dict]:
     """
-    GÃ©nÃ¨re les notifications liÃ©es aux courses.
+    Génère les notifications liées aux courses.
     
     Args:
         listes: Liste des listes de courses
@@ -513,7 +513,7 @@ def generer_notifications_courses(listes: list[dict]) -> list[dict]:
         notifications.append({
             "type": "alerte",
             "titre": "Articles urgents",
-            "message": f"{articles_haute_priorite} article(s) haute prioritÃ© Ã  acheter",
+            "message": f"{articles_haute_priorite} article(s) haute priorité à acheter",
             "module": "courses",
             "priorite": 2,
         })
@@ -523,10 +523,10 @@ def generer_notifications_courses(listes: list[dict]) -> list[dict]:
 
 def generer_notifications_planning(evenements: list[dict]) -> list[dict]:
     """
-    GÃ©nÃ¨re les notifications liÃ©es au planning.
+    Génère les notifications liées au planning.
     
     Args:
-        evenements: Liste des Ã©vÃ©nements
+        evenements: Liste des événements
         
     Returns:
         Liste de notifications
@@ -548,7 +548,7 @@ def generer_notifications_planning(evenements: list[dict]) -> list[dict]:
     if evt_aujourd_hui:
         notifications.append({
             "type": "info",
-            "titre": f"{len(evt_aujourd_hui)} Ã©vÃ©nement(s) aujourd'hui",
+            "titre": f"{len(evt_aujourd_hui)} événement(s) aujourd'hui",
             "message": ", ".join(e.get("titre", "?") for e in evt_aujourd_hui[:3]),
             "module": "planning",
             "priorite": 3,
@@ -563,15 +563,15 @@ def generer_notifications_globales(
     planning: list[dict] = None
 ) -> list[dict]:
     """
-    GÃ©nÃ¨re toutes les notifications du dashboard.
+    Génère toutes les notifications du dashboard.
     
     Args:
         inventaire: Liste de l'inventaire
         courses: Liste des listes de courses
-        planning: Liste des Ã©vÃ©nements
+        planning: Liste des événements
         
     Returns:
-        Liste de notifications triÃ©es par prioritÃ©
+        Liste de notifications triées par priorité
     """
     notifications = []
     
@@ -579,7 +579,7 @@ def generer_notifications_globales(
     notifications.extend(generer_notifications_courses(courses or []))
     notifications.extend(generer_notifications_planning(planning or []))
     
-    # Trier par prioritÃ© (0 = plus urgent)
+    # Trier par priorité (0 = plus urgent)
     notifications.sort(key=lambda n: n.get("priorite", 99))
     
     return notifications
@@ -591,12 +591,12 @@ def generer_notifications_critiques(
     planning: list[dict] = None
 ) -> list[dict]:
     """
-    GÃ©nÃ¨re uniquement les notifications critiques du dashboard.
+    Génère uniquement les notifications critiques du dashboard.
     
     Args:
         inventaire: Liste de l'inventaire
         courses: Liste des listes de courses
-        planning: Liste des Ã©vÃ©nements
+        planning: Liste des événements
         
     Returns:
         Liste de notifications critiques uniquement
@@ -611,19 +611,19 @@ def generer_suggestions_actions(
     planning: list[dict] = None
 ) -> list[dict]:
     """
-    GÃ©nÃ¨re des suggestions d'actions basÃ©es sur l'Ã©tat actuel.
+    Génère des suggestions d'actions basées sur l'état actuel.
     
     Args:
         inventaire: Liste de l'inventaire
         courses: Liste des listes de courses
-        planning: Liste des Ã©vÃ©nements
+        planning: Liste des événements
         
     Returns:
         Liste de suggestions d'actions
     """
     suggestions = []
     
-    # Suggestions basÃ©es sur l'inventaire
+    # Suggestions basées sur l'inventaire
     if inventaire:
         articles_bas = [a for a in inventaire if a.get("quantite", 0) < a.get("seuil_alerte", 5)]
         if articles_bas:
@@ -634,14 +634,14 @@ def generer_suggestions_actions(
                 "action": "courses",
             })
     
-    # Suggestions basÃ©es sur le planning
+    # Suggestions basées sur le planning
     if planning:
         today = date.today()
         evt_aujourd_hui = [e for e in planning if _parse_date_evenement(e) == today]
         if evt_aujourd_hui:
             suggestions.append({
-                "titre": "ðŸ“… Ã‰vÃ©nements aujourd'hui",
-                "description": f"{len(evt_aujourd_hui)} Ã©vÃ©nement(s) prÃ©vu(s)",
+                "titre": "ðŸ“… Ã‰vénements aujourd'hui",
+                "description": f"{len(evt_aujourd_hui)} événement(s) prévu(s)",
                 "priorite": 2,
                 "action": "planning",
             })
@@ -650,7 +650,7 @@ def generer_suggestions_actions(
 
 
 def _parse_date_evenement(evt: dict) -> Optional[date]:
-    """Parse la date d'un Ã©vÃ©nement."""
+    """Parse la date d'un événement."""
     date_str = evt.get("date") or evt.get("date_debut")
     if isinstance(date_str, date):
         return date_str
@@ -690,10 +690,10 @@ def filtrer_notifications(notifications: list[dict], type_filtre: Optional[str] 
     
     Args:
         notifications: Liste des notifications
-        type_filtre: Type Ã  filtrer ou None pour tout
+        type_filtre: Type à filtrer ou None pour tout
         
     Returns:
-        Liste filtrÃ©e
+        Liste filtrée
     """
     if not type_filtre or type_filtre == "tous":
         return notifications
@@ -701,34 +701,34 @@ def filtrer_notifications(notifications: list[dict], type_filtre: Optional[str] 
     return [n for n in notifications if n.get("type") == type_filtre]
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ACTIVITÃ‰S RÃ‰CENTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def formater_activite_recente(activite: dict) -> dict:
     """
-    Formate une activitÃ© rÃ©cente pour l'affichage.
+    Formate une activité récente pour l'affichage.
     
     Args:
-        activite: Dictionnaire de l'activitÃ©
+        activite: Dictionnaire de l'activité
         
     Returns:
-        ActivitÃ© formatÃ©e
+        Activité formatée
     """
     type_activite = activite.get("type", "autre")
     
     icones = {
-        "recette": "ðŸ³",
+        "recette": "ðŸ³",
         "courses": "ðŸ›’",
         "inventaire": "ðŸ“¦",
         "planning": "ðŸ“…",
-        "famille": "ðŸ‘¨â€ðŸ‘©â€ðŸ‘¦",
-        "autre": "ðŸ“",
+        "famille": "ðŸ‘¨â€ðŸ‘©â€ðŸ‘¦",
+        "autre": "ðŸ“",
     }
     
     return {
-        "icone": icones.get(type_activite, "ðŸ“"),
-        "titre": activite.get("titre", "ActivitÃ©"),
+        "icone": icones.get(type_activite, "ðŸ“"),
+        "titre": activite.get("titre", "Activité"),
         "description": activite.get("description", ""),
         "timestamp": activite.get("timestamp"),
         "type": type_activite,
@@ -738,13 +738,13 @@ def formater_activite_recente(activite: dict) -> dict:
 
 def calculer_temps_ecoule(timestamp: Optional[datetime]) -> str:
     """
-    Calcule le temps Ã©coulÃ© depuis un timestamp.
+    Calcule le temps écoulé depuis un timestamp.
     
     Args:
-        timestamp: Datetime de l'Ã©vÃ©nement
+        timestamp: Datetime de l'événement
         
     Returns:
-        ChaÃ®ne formatÃ©e (ex: "il y a 2 heures")
+        Chaîne formatée (ex: "il y a 2 heures")
     """
     if not timestamp:
         return "Date inconnue"
@@ -765,19 +765,19 @@ def calculer_temps_ecoule(timestamp: Optional[datetime]) -> str:
         minutes = delta.seconds // 60
         return f"il y a {minutes} min"
     else:
-        return "Ã  l'instant"
+        return "à l'instant"
 
 
 def trier_activites_par_date(activites: list[dict], limit: int = 10) -> list[dict]:
     """
-    Trie les activitÃ©s par date (plus rÃ©centes en premier).
+    Trie les activités par date (plus récentes en premier).
     
     Args:
-        activites: Liste des activitÃ©s
-        limit: Nombre maximum d'activitÃ©s Ã  retourner
+        activites: Liste des activités
+        limit: Nombre maximum d'activités à retourner
         
     Returns:
-        Liste triÃ©e et limitÃ©e
+        Liste triée et limitée
     """
     def sort_key(activite):
         timestamp = activite.get("timestamp")
@@ -789,16 +789,16 @@ def trier_activites_par_date(activites: list[dict], limit: int = 10) -> list[dic
     return sorted_activites[:limit]
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SUGGESTIONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def generer_suggestions_actions(metriques: dict, notifications: list[dict]) -> list[dict]:
     """
-    GÃ©nÃ¨re des suggestions d'actions basÃ©es sur les mÃ©triques.
+    Génère des suggestions d'actions basées sur les métriques.
     
     Args:
-        metriques: MÃ©triques du dashboard
+        metriques: Métriques du dashboard
         notifications: Liste des notifications
         
     Returns:
@@ -806,11 +806,11 @@ def generer_suggestions_actions(metriques: dict, notifications: list[dict]) -> l
     """
     suggestions = []
     
-    # Suggestions basÃ©es sur l'inventaire
+    # Suggestions basées sur l'inventaire
     inv_metriques = metriques.get("inventaire", {})
     if inv_metriques.get("alertes", 0) > 5:
         suggestions.append({
-            "action": "Mettre Ã  jour l'inventaire",
+            "action": "Mettre à jour l'inventaire",
             "raison": f"{inv_metriques['alertes']} articles en alerte",
             "priorite": 1,
             "module": "inventaire",
@@ -818,54 +818,54 @@ def generer_suggestions_actions(metriques: dict, notifications: list[dict]) -> l
     
     if inv_metriques.get("perimes", 0) > 0:
         suggestions.append({
-            "action": "Retirer les articles pÃ©rimÃ©s",
-            "raison": f"{inv_metriques['perimes']} article(s) pÃ©rimÃ©(s)",
+            "action": "Retirer les articles périmés",
+            "raison": f"{inv_metriques['perimes']} article(s) périmé(s)",
             "priorite": 0,
             "module": "inventaire",
         })
     
-    # Suggestions basÃ©es sur les courses
+    # Suggestions basées sur les courses
     courses_metriques = metriques.get("courses", {})
     if courses_metriques.get("articles_a_acheter", 0) > 10:
         suggestions.append({
             "action": "Planifier les courses",
-            "raison": f"{courses_metriques['articles_a_acheter']} articles Ã  acheter",
+            "raison": f"{courses_metriques['articles_a_acheter']} articles à acheter",
             "priorite": 2,
             "module": "courses",
         })
     
-    # Suggestions basÃ©es sur le planning
+    # Suggestions basées sur le planning
     planning_metriques = metriques.get("planning", {})
     if planning_metriques.get("aujourd_hui", 0) > 0:
         suggestions.append({
             "action": "Consulter le planning du jour",
-            "raison": f"{planning_metriques['aujourd_hui']} Ã©vÃ©nement(s) aujourd'hui",
+            "raison": f"{planning_metriques['aujourd_hui']} événement(s) aujourd'hui",
             "priorite": 1,
             "module": "planning",
         })
     
-    # Trier par prioritÃ©
+    # Trier par priorité
     suggestions.sort(key=lambda s: s.get("priorite", 99))
     
     return suggestions
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FORMATAGE DASHBOARD
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def formater_metrique_card(titre: str, valeur: Any, unite: str = "", icone: str = "ðŸ“Š") -> dict:
     """
-    Formate une carte mÃ©trique pour l'affichage.
+    Formate une carte métrique pour l'affichage.
     
     Args:
-        titre: Titre de la mÃ©trique
-        valeur: Valeur Ã  afficher
-        unite: UnitÃ© (optionnel)
-        icone: Emoji/icÃ´ne
+        titre: Titre de la métrique
+        valeur: Valeur à afficher
+        unite: Unité (optionnel)
+        icone: Emoji/icône
         
     Returns:
-        Dictionnaire formatÃ©
+        Dictionnaire formaté
     """
     return {
         "titre": titre,
@@ -878,13 +878,13 @@ def formater_metrique_card(titre: str, valeur: Any, unite: str = "", icone: str 
 
 def generer_cartes_metriques(metriques: dict) -> list[dict]:
     """
-    GÃ©nÃ¨re les cartes mÃ©triques Ã  afficher.
+    Génère les cartes métriques à afficher.
     
     Args:
-        metriques: Dictionnaire des mÃ©triques globales
+        metriques: Dictionnaire des métriques globales
         
     Returns:
-        Liste de cartes formatÃ©es
+        Liste de cartes formatées
     """
     julius = metriques.get("julius", {})
     recettes = metriques.get("recettes", {})
@@ -900,12 +900,12 @@ def generer_cartes_metriques(metriques: dict) -> list[dict]:
         formater_metrique_card(
             "Recettes",
             recettes.get("total", 0),
-            icone="ðŸ³"
+            icone="ðŸ³"
         ),
         formater_metrique_card(
             "Stock alertes",
             inventaire.get("alertes", 0),
-            icone="âš ï¸"
+            icone="âš ï¸"
         ),
         formater_metrique_card(
             "Ã€ acheter",

@@ -1,6 +1,6 @@
 ﻿"""
 Tests pour src/ui/feedback/progress.py
-Tracking de progression pour opÃ©rations longues
+Tracking de progression pour opérations longues
 """
 
 from datetime import datetime
@@ -10,9 +10,9 @@ import time
 import pytest
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
@@ -32,9 +32,9 @@ def mock_time():
         yield mock_t
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PROGRESS TRACKER
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestProgressTracker:
@@ -44,25 +44,25 @@ class TestProgressTracker:
         """Test initialisation basique"""
         from src.ui.feedback.progress import ProgressTracker
 
-        tracker = ProgressTracker("Test opÃ©ration", total=100)
+        tracker = ProgressTracker("Test opération", total=100)
 
-        assert tracker.operation == "Test opÃ©ration"
+        assert tracker.operation == "Test opération"
         assert tracker.total == 100
         assert tracker.current == 0
         assert tracker.show_percentage is True
 
     def test_init_creates_ui_elements(self, mock_streamlit):
-        """Test crÃ©ation Ã©lÃ©ments UI"""
+        """Test création éléments UI"""
         from src.ui.feedback.progress import ProgressTracker
 
         ProgressTracker("Test", total=50)
 
-        # Doit crÃ©er 2 placeholders et 1 progress bar
+        # Doit créer 2 placeholders et 1 progress bar
         assert mock_streamlit.empty.call_count == 2
         mock_streamlit.progress.assert_called_once_with(0)
 
     def test_update_sets_current(self, mock_streamlit):
-        """Test update() met Ã  jour current"""
+        """Test update() met à jour current"""
         from src.ui.feedback.progress import ProgressTracker
 
         tracker = ProgressTracker("Test", total=100)
@@ -77,7 +77,7 @@ class TestProgressTracker:
         tracker = ProgressTracker("Test", total=100)
         tracker.update(25, status="Traitement item 25")
 
-        # Le statut doit Ãªtre affichÃ© via caption
+        # Le statut doit être affiché via caption
         tracker.status_placeholder.caption.assert_called()
 
     def test_increment_single_step(self, mock_streamlit):
@@ -90,7 +90,7 @@ class TestProgressTracker:
         assert tracker.current == 1
 
     def test_increment_custom_step(self, mock_streamlit):
-        """Test increment() avec pas personnalisÃ©"""
+        """Test increment() avec pas personnalisé"""
         from src.ui.feedback.progress import ProgressTracker
 
         tracker = ProgressTracker("Test", total=100)
@@ -99,7 +99,7 @@ class TestProgressTracker:
         assert tracker.current == 10
 
     def test_increment_respects_max(self, mock_streamlit):
-        """Test increment() ne dÃ©passe pas total"""
+        """Test increment() ne dépasse pas total"""
         from src.ui.feedback.progress import ProgressTracker
 
         tracker = ProgressTracker("Test", total=100)
@@ -109,7 +109,7 @@ class TestProgressTracker:
         assert tracker.current == 100  # Pas 105
 
     def test_complete_sets_to_total(self, mock_streamlit, mock_time):
-        """Test complete() met current Ã  total"""
+        """Test complete() met current à total"""
         from src.ui.feedback.progress import ProgressTracker
 
         tracker = ProgressTracker("Test", total=100)
@@ -118,7 +118,7 @@ class TestProgressTracker:
         assert tracker.current == 100
 
     def test_complete_shows_success(self, mock_streamlit, mock_time):
-        """Test complete() affiche succÃ¨s"""
+        """Test complete() affiche succès"""
         from src.ui.feedback.progress import ProgressTracker
 
         tracker = ProgressTracker("Test", total=100)
@@ -127,25 +127,25 @@ class TestProgressTracker:
         tracker.status_placeholder.success.assert_called()
 
     def test_complete_with_message(self, mock_streamlit, mock_time):
-        """Test complete() avec message personnalisÃ©"""
+        """Test complete() avec message personnalisé"""
         from src.ui.feedback.progress import ProgressTracker
 
         tracker = ProgressTracker("Test", total=100)
-        tracker.complete(message="Import terminÃ©")
+        tracker.complete(message="Import terminé")
 
         call_args = tracker.status_placeholder.success.call_args[0][0]
-        assert "Import terminÃ©" in call_args
+        assert "Import terminé" in call_args
 
     def test_complete_clears_ui(self, mock_streamlit, mock_time):
-        """Test complete() nettoie l'UI aprÃ¨s dÃ©lai"""
+        """Test complete() nettoie l'UI après délai"""
         from src.ui.feedback.progress import ProgressTracker
 
         tracker = ProgressTracker("Test", total=100)
         tracker.complete()
 
-        # time.sleep doit Ãªtre appelÃ©
+        # time.sleep doit être appelé
         mock_time.sleep.assert_called_with(2)
-        # Placeholders doivent Ãªtre vidÃ©s
+        # Placeholders doivent être vidés
         tracker.title_placeholder.empty.assert_called()
         tracker.progress_bar.empty.assert_called()
 
@@ -185,9 +185,9 @@ class TestProgressTracker:
         assert "50/100" in call_args
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS LOADING STATE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestLoadingState:
@@ -204,7 +204,7 @@ class TestLoadingState:
         assert loading.current_step is None
 
     def test_init_creates_ui(self, mock_streamlit):
-        """Test crÃ©ation Ã©lÃ©ments UI"""
+        """Test création éléments UI"""
         from src.ui.feedback.progress import LoadingState
 
         LoadingState("Test")
@@ -212,7 +212,7 @@ class TestLoadingState:
         assert mock_streamlit.empty.call_count == 2
 
     def test_add_step_creates_step(self, mock_streamlit):
-        """Test add_step() crÃ©e une Ã©tape"""
+        """Test add_step() crée une étape"""
         from src.ui.feedback.progress import LoadingState
 
         loading = LoadingState("Test")
@@ -223,7 +223,7 @@ class TestLoadingState:
         assert loading.steps[0]["completed"] is False
 
     def test_add_step_sets_current(self, mock_streamlit):
-        """Test add_step() dÃ©finit current_step"""
+        """Test add_step() définit current_step"""
         from src.ui.feedback.progress import LoadingState
 
         loading = LoadingState("Test")
@@ -232,7 +232,7 @@ class TestLoadingState:
         assert loading.current_step == 0
 
     def test_add_multiple_steps(self, mock_streamlit):
-        """Test ajout de plusieurs Ã©tapes"""
+        """Test ajout de plusieurs étapes"""
         from src.ui.feedback.progress import LoadingState
 
         loading = LoadingState("Test")
@@ -251,12 +251,12 @@ class TestLoadingState:
         loading.add_step("Connexion")
         loading.complete_step("Connexion")
 
-        # Chercher l'Ã©tape complÃ©tÃ©e
+        # Chercher l'étape complétée
         step = next(s for s in loading.steps if s["name"] == "Connexion")
         assert step["completed"] is True
 
     def test_complete_step_current(self, mock_streamlit):
-        """Test complete_step() sur Ã©tape courante"""
+        """Test complete_step() sur étape courante"""
         from src.ui.feedback.progress import LoadingState
 
         loading = LoadingState("Test")
@@ -266,7 +266,7 @@ class TestLoadingState:
         assert loading.steps[0]["completed"] is True
 
     def test_complete_step_success_status(self, mock_streamlit):
-        """Test complete_step() avec succÃ¨s"""
+        """Test complete_step() avec succès"""
         from src.ui.feedback.progress import LoadingState
 
         loading = LoadingState("Test")
@@ -283,5 +283,5 @@ class TestLoadingState:
         loading.add_step("Ã‰tape")
         loading.complete_step(success=False)
 
-        assert "âŒ" in loading.steps[0]["status"]
+        assert "âŒ" in loading.steps[0]["status"]
 

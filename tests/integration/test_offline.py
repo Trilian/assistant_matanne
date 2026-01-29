@@ -5,7 +5,7 @@ Tests couverts:
 - ConnectionManager
 - OfflineQueue
 - OfflineSynchronizer
-- DÃ©corateur @offline_aware
+- Décorateur @offline_aware
 """
 
 import json
@@ -18,9 +18,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
@@ -40,16 +40,16 @@ def temp_queue_file():
             yield queue_file
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PENDING OPERATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPendingOperation:
     """Tests pour PendingOperation dataclass."""
     
     def test_create_operation(self):
-        """Test crÃ©ation opÃ©ration."""
+        """Test création opération."""
         from src.core.offline import PendingOperation, OperationType
         
         op = PendingOperation(
@@ -65,7 +65,7 @@ class TestPendingOperation:
         assert op.retry_count == 0
     
     def test_to_dict(self):
-        """Test sÃ©rialisation."""
+        """Test sérialisation."""
         from src.core.offline import PendingOperation, OperationType
         
         op = PendingOperation(
@@ -81,7 +81,7 @@ class TestPendingOperation:
         assert "created_at" in data
     
     def test_from_dict(self):
-        """Test dÃ©sÃ©rialisation."""
+        """Test désérialisation."""
         from src.core.offline import PendingOperation, OperationType
         
         data = {
@@ -102,9 +102,9 @@ class TestPendingOperation:
         assert op.last_error == "Connection timeout"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONNECTION MANAGER
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestConnectionManager:
@@ -116,7 +116,7 @@ class TestConnectionManager:
         
         status = ConnectionManager.get_status()
         
-        # Par dÃ©faut, supposÃ© online
+        # Par défaut, supposé online
         assert status == ConnectionStatus.ONLINE
     
     def test_set_status(self, mock_session_state):
@@ -152,16 +152,16 @@ class TestConnectionManager:
         assert ConnectionManager.get_status() == ConnectionStatus.OFFLINE
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS OFFLINE QUEUE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestOfflineQueue:
     """Tests pour OfflineQueue."""
     
     def test_add_operation(self, mock_session_state, temp_queue_file):
-        """Test ajout opÃ©ration."""
+        """Test ajout opération."""
         from src.core.offline import OfflineQueue, OperationType
         
         op = OfflineQueue.add(
@@ -174,7 +174,7 @@ class TestOfflineQueue:
         assert OfflineQueue.get_count() == 1
     
     def test_get_pending(self, mock_session_state, temp_queue_file):
-        """Test rÃ©cupÃ©ration opÃ©rations."""
+        """Test récupération opérations."""
         from src.core.offline import OfflineQueue, OperationType
         
         OfflineQueue.add(OperationType.CREATE, "model1", {"a": 1})
@@ -185,7 +185,7 @@ class TestOfflineQueue:
         assert len(pending) == 2
     
     def test_remove_operation(self, mock_session_state, temp_queue_file):
-        """Test suppression opÃ©ration."""
+        """Test suppression opération."""
         from src.core.offline import OfflineQueue, OperationType
         
         op = OfflineQueue.add(OperationType.CREATE, "test", {})
@@ -203,7 +203,7 @@ class TestOfflineQueue:
         assert result is False
     
     def test_update_retry(self, mock_session_state, temp_queue_file):
-        """Test mise Ã  jour retry."""
+        """Test mise à jour retry."""
         from src.core.offline import OfflineQueue, OperationType
         
         op = OfflineQueue.add(OperationType.CREATE, "test", {})
@@ -234,7 +234,7 @@ class TestOfflineQueue:
         
         OfflineQueue.add(OperationType.CREATE, "persistent", {"data": "test"})
         
-        # VÃ©rifier que le fichier existe
+        # Vérifier que le fichier existe
         assert temp_queue_file.exists()
         
         # Lire le contenu
@@ -245,9 +245,9 @@ class TestOfflineQueue:
         assert data[0]["model_name"] == "persistent"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS OFFLINE SYNCHRONIZER
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestOfflineSynchronizer:
@@ -288,7 +288,7 @@ class TestOfflineSynchronizer:
         def progress_callback(current, total):
             progress_calls.append((current, total))
         
-        # Mock le sync pour Ã©viter vrai appel DB
+        # Mock le sync pour éviter vrai appel DB
         with patch.object(OfflineSynchronizer, "_sync_operation", return_value=True):
             OfflineQueue.add(OperationType.CREATE, "test1", {})
             OfflineQueue.add(OperationType.CREATE, "test2", {})
@@ -300,16 +300,16 @@ class TestOfflineSynchronizer:
         assert progress_calls[1] == (2, 2)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS OFFLINE_AWARE DECORATOR
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestOfflineAwareDecorator:
-    """Tests pour le dÃ©corateur @offline_aware."""
+    """Tests pour le décorateur @offline_aware."""
     
     def test_online_execution(self, mock_session_state, temp_queue_file):
-        """Test exÃ©cution en ligne."""
+        """Test exécution en ligne."""
         from src.core.offline import (
             offline_aware,
             OperationType,
@@ -349,24 +349,24 @@ class TestOfflineAwareDecorator:
         # Doit retourner objet avec flag _offline
         assert result.get("_offline") is True
         
-        # Doit avoir ajoutÃ© Ã  la queue
+        # Doit avoir ajouté à la queue
         assert OfflineQueue.get_count() == 1
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EDGE CASES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestOfflineEdgeCases:
     """Tests cas limites."""
     
     def test_queue_with_special_data(self, mock_session_state, temp_queue_file):
-        """Test queue avec donnÃ©es spÃ©ciales."""
+        """Test queue avec données spéciales."""
         from src.core.offline import OfflineQueue, OperationType
         
         special_data = {
-            "unicode": "Ã‰mojis: ðŸŽ‰ Accents: Ã©Ã Ã¼",
+            "unicode": "Ã‰mojis: ðŸŽ‰ Accents: éàü",
             "nested": {"a": {"b": [1, 2, 3]}},
             "null": None,
         }
@@ -395,7 +395,7 @@ class TestOfflineEdgeCases:
         assert updated.last_error == "Error 4"
     
     def test_empty_queue_operations(self, mock_session_state, temp_queue_file):
-        """Test opÃ©rations sur queue vide."""
+        """Test opérations sur queue vide."""
         from src.core.offline import OfflineQueue
         
         assert OfflineQueue.get_count() == 0

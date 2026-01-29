@@ -1,5 +1,5 @@
 ﻿"""
-Logique mÃ©tier du module Vue semaine (planning) - SÃ©parÃ©e de l'UI
+Logique métier du module Vue semaine (planning) - Séparée de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
 
@@ -10,20 +10,20 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONSTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
 HEURES_JOURNEE = list(range(0, 24))
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # NAVIGATION SEMAINE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def get_debut_semaine(date_ref: Optional[date] = None) -> date:
-    """Retourne le lundi de la semaine (dÃ©but)."""
+    """Retourne le lundi de la semaine (début)."""
     if date_ref is None:
         date_ref = date.today()
     
@@ -43,7 +43,7 @@ def get_jours_semaine(date_ref: Optional[date] = None) -> List[date]:
 
 
 def get_semaine_precedente(date_ref: date) -> date:
-    """Retourne une date de la semaine prÃ©cÃ©dente."""
+    """Retourne une date de la semaine précédente."""
     return date_ref - timedelta(days=7)
 
 
@@ -53,19 +53,19 @@ def get_semaine_suivante(date_ref: date) -> date:
 
 
 def get_numero_semaine(date_ref: Optional[date] = None) -> int:
-    """Retourne le numÃ©ro de semaine dans l'annÃ©e."""
+    """Retourne le numéro de semaine dans l'année."""
     if date_ref is None:
         date_ref = date.today()
     
     return date_ref.isocalendar()[1]
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FILTRAGE Ã‰VÃ‰NEMENTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def filtrer_evenements_semaine(evenements: List[Dict[str, Any]], date_ref: Optional[date] = None) -> List[Dict[str, Any]]:
-    """Filtre les Ã©vÃ©nements de la semaine."""
+    """Filtre les événements de la semaine."""
     debut = get_debut_semaine(date_ref)
     fin = get_fin_semaine(date_ref)
     
@@ -82,7 +82,7 @@ def filtrer_evenements_semaine(evenements: List[Dict[str, Any]], date_ref: Optio
 
 
 def filtrer_evenements_jour(evenements: List[Dict[str, Any]], jour: date) -> List[Dict[str, Any]]:
-    """Filtre les Ã©vÃ©nements d'un jour spÃ©cifique."""
+    """Filtre les événements d'un jour spécifique."""
     resultats = []
     
     for evt in evenements:
@@ -97,7 +97,7 @@ def filtrer_evenements_jour(evenements: List[Dict[str, Any]], jour: date) -> Lis
 
 
 def grouper_evenements_par_jour(evenements: List[Dict[str, Any]]) -> Dict[date, List[Dict[str, Any]]]:
-    """Groupe les Ã©vÃ©nements par jour."""
+    """Groupe les événements par jour."""
     groupes = {}
     
     for evt in evenements:
@@ -113,7 +113,7 @@ def grouper_evenements_par_jour(evenements: List[Dict[str, Any]]) -> Dict[date, 
 
 
 def trier_evenements_par_heure(evenements: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Trie les Ã©vÃ©nements par heure."""
+    """Trie les événements par heure."""
     def get_heure_key(evt):
         heure = evt.get("heure")
         if not heure:
@@ -125,9 +125,9 @@ def trier_evenements_par_heure(evenements: List[Dict[str, Any]]) -> List[Dict[st
     return sorted(evenements, key=get_heure_key)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ANALYSE SEMAINE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def calculer_charge_semaine(evenements: List[Dict[str, Any]], date_ref: Optional[date] = None) -> Dict[str, Any]:
     """Calcule la charge de travail de la semaine."""
@@ -140,7 +140,7 @@ def calculer_charge_semaine(evenements: List[Dict[str, Any]], date_ref: Optional
         evt_jour = filtrer_evenements_jour(evt_semaine, jour)
         charge_par_jour[jour] = len(evt_jour)
     
-    # Jour le plus chargÃ©
+    # Jour le plus chargé
     if charge_par_jour:
         jour_plus_charge = max(charge_par_jour.items(), key=lambda x: x[1])
     else:
@@ -159,7 +159,7 @@ def calculer_charge_semaine(evenements: List[Dict[str, Any]], date_ref: Optional
 
 
 def detecter_conflits_horaires(evenements: List[Dict[str, Any]]) -> List[Tuple[Dict, Dict]]:
-    """DÃ©tecte les conflits d'horaires dans la semaine."""
+    """Détecte les conflits d'horaires dans la semaine."""
     conflits = []
     
     # Grouper par jour
@@ -193,7 +193,7 @@ def detecter_conflits_horaires(evenements: List[Dict[str, Any]]) -> List[Tuple[D
                 if isinstance(heure2, str):
                     heure2 = datetime.fromisoformat(heure2).time()
                 
-                # VÃ©rifier chevauchement
+                # Vérifier chevauchement
                 if heure2 < fin1:
                     conflits.append((evt1, evt2))
     
@@ -210,7 +210,7 @@ def calculer_temps_libre(evenements: List[Dict[str, Any]], date_ref: Optional[da
     for jour in jours:
         evt_jour = filtrer_evenements_jour(evt_semaine, jour)
         
-        # Calculer temps occupÃ©
+        # Calculer temps occupé
         temps_occupe = sum(evt.get("duree", 60) for evt in evt_jour)
         
         # Temps libre (sur 16h de veille = 960 min)
@@ -219,9 +219,9 @@ def calculer_temps_libre(evenements: List[Dict[str, Any]], date_ref: Optional[da
     return temps_libre
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # STATISTIQUES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def calculer_statistiques_semaine(evenements: List[Dict[str, Any]], date_ref: Optional[date] = None) -> Dict[str, Any]:
     """Calcule les statistiques de la semaine."""
@@ -241,7 +241,7 @@ def calculer_statistiques_semaine(evenements: List[Dict[str, Any]], date_ref: Op
         type_evt = evt.get("type", "Autre")
         par_type[type_evt] = par_type.get(type_evt, 0) + 1
     
-    # DurÃ©es
+    # Durées
     duree_totale = sum(evt.get("duree", 60) for evt in evt_semaine)
     duree_moyenne = duree_totale / len(evt_semaine)
     
@@ -253,12 +253,12 @@ def calculer_statistiques_semaine(evenements: List[Dict[str, Any]], date_ref: Op
     }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # RECOMMANDATIONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def suggerer_creneaux_libres(evenements: List[Dict[str, Any]], jour: date, duree_minutes: int = 60) -> List[Dict[str, Any]]:
-    """SuggÃ¨re des crÃ©neaux libres dans la journÃ©e."""
+    """Suggère des créneaux libres dans la journée."""
     evt_jour = filtrer_evenements_jour(evenements, jour)
     evt_tries = trier_evenements_par_heure(evt_jour)
     
@@ -278,7 +278,7 @@ def suggerer_creneaux_libres(evenements: List[Dict[str, Any]], jour: date, duree
         if isinstance(heure_evt, str):
             heure_evt = datetime.fromisoformat(heure_evt).time()
         
-        # Si gap suffisant avant l'Ã©vÃ©nement
+        # Si gap suffisant avant l'événement
         dt_actuelle = datetime.combine(jour, heure_actuelle)
         dt_evt = datetime.combine(jour, heure_evt)
         
@@ -291,12 +291,12 @@ def suggerer_creneaux_libres(evenements: List[Dict[str, Any]], jour: date, duree
                 "duree": int(gap_minutes)
             })
         
-        # Avancer aprÃ¨s l'Ã©vÃ©nement
+        # Avancer après l'événement
         duree_evt = evt.get("duree", 60)
         dt_fin_evt = dt_evt + timedelta(minutes=duree_evt)
         heure_actuelle = dt_fin_evt.time()
     
-    # VÃ©rifier gap jusqu'Ã  la fin de journÃ©e
+    # Vérifier gap jusqu'à la fin de journée
     dt_actuelle = datetime.combine(jour, heure_actuelle)
     dt_fin = datetime.combine(jour, heure_fin)
     gap_final = (dt_fin - dt_actuelle).total_seconds() / 60
@@ -311,12 +311,12 @@ def suggerer_creneaux_libres(evenements: List[Dict[str, Any]], jour: date, duree
     return creneaux_libres
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FORMATAGE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def formater_periode_semaine(date_ref: Optional[date] = None) -> str:
-    """Formate la pÃ©riode de la semaine."""
+    """Formate la période de la semaine."""
     debut = get_debut_semaine(date_ref)
     fin = get_fin_semaine(date_ref)
     

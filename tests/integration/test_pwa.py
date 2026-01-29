@@ -1,6 +1,6 @@
 ﻿"""
 Tests pour pwa.py - Configuration PWA
-Tests unitaires pour la gÃ©nÃ©ration des fichiers PWA
+Tests unitaires pour la génération des fichiers PWA
 """
 
 import pytest
@@ -9,9 +9,9 @@ from unittest.mock import MagicMock, patch
 from pathlib import Path
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONFIGURATION PWA
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPWAConfig:
@@ -45,7 +45,7 @@ class TestPWAConfig:
         assert PWA_CONFIG["display"] in valid_modes
     
     def test_pwa_theme_color_format(self):
-        """Test format couleur de thÃ¨me"""
+        """Test format couleur de thème"""
         from src.services.pwa import PWA_CONFIG
         
         # Couleur hex valide
@@ -61,7 +61,7 @@ class TestPWAConfig:
         assert bg_color.startswith("#")
     
     def test_pwa_start_url(self):
-        """Test URL de dÃ©marrage"""
+        """Test URL de démarrage"""
         from src.services.pwa import PWA_CONFIG
         
         assert PWA_CONFIG["start_url"] == "/"
@@ -84,23 +84,23 @@ class TestPWAConfig:
         assert PWA_CONFIG["lang"] == "fr-FR"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ICONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPWAIcons:
-    """Tests des icÃ´nes PWA"""
+    """Tests des icônes PWA"""
     
     def test_icons_present(self):
-        """Test prÃ©sence des icÃ´nes"""
+        """Test présence des icônes"""
         from src.services.pwa import PWA_CONFIG
         
         assert "icons" in PWA_CONFIG
         assert len(PWA_CONFIG["icons"]) > 0
     
     def test_icon_structure(self):
-        """Test structure d'une icÃ´ne"""
+        """Test structure d'une icône"""
         from src.services.pwa import PWA_CONFIG
         
         for icon in PWA_CONFIG["icons"]:
@@ -109,7 +109,7 @@ class TestPWAIcons:
             assert "type" in icon
     
     def test_icon_sizes_format(self):
-        """Test format des tailles d'icÃ´nes"""
+        """Test format des tailles d'icônes"""
         from src.services.pwa import PWA_CONFIG
         
         import re
@@ -119,14 +119,14 @@ class TestPWAIcons:
             assert re.match(size_pattern, icon["sizes"])
     
     def test_icon_type_png(self):
-        """Test type d'icÃ´ne PNG"""
+        """Test type d'icône PNG"""
         from src.services.pwa import PWA_CONFIG
         
         for icon in PWA_CONFIG["icons"]:
             assert icon["type"] == "image/png"
     
     def test_required_icon_sizes(self):
-        """Test tailles d'icÃ´nes requises"""
+        """Test tailles d'icônes requises"""
         from src.services.pwa import PWA_CONFIG
         
         required_sizes = ["192x192", "512x512"]
@@ -136,7 +136,7 @@ class TestPWAIcons:
             assert size in icon_sizes, f"Taille requise manquante: {size}"
     
     def test_icon_purpose(self):
-        """Test purpose des icÃ´nes"""
+        """Test purpose des icônes"""
         from src.services.pwa import PWA_CONFIG
         
         for icon in PWA_CONFIG["icons"]:
@@ -145,16 +145,16 @@ class TestPWAIcons:
                 assert icon["purpose"] in valid_purposes
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SHORTCUTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPWAShortcuts:
     """Tests des raccourcis PWA"""
     
     def test_shortcuts_present(self):
-        """Test prÃ©sence des raccourcis"""
+        """Test présence des raccourcis"""
         from src.services.pwa import PWA_CONFIG
         
         assert "shortcuts" in PWA_CONFIG
@@ -173,22 +173,22 @@ class TestPWAShortcuts:
         
         shortcut_names = [s["name"] for s in PWA_CONFIG.get("shortcuts", [])]
         
-        # VÃ©rifier quelques raccourcis attendus
+        # Vérifier quelques raccourcis attendus
         expected = ["Recettes", "Liste de courses", "Planning"]
         for name in expected:
             assert name in shortcut_names, f"Raccourci manquant: {name}"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SERVICE WORKER
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestServiceWorker:
     """Tests du Service Worker"""
     
     def test_service_worker_defined(self):
-        """Test que le SW est dÃ©fini"""
+        """Test que le SW est défini"""
         from src.services.pwa import SERVICE_WORKER_JS
         
         assert SERVICE_WORKER_JS is not None
@@ -201,77 +201,77 @@ class TestServiceWorker:
         assert "CACHE_NAME" in SERVICE_WORKER_JS
     
     def test_sw_install_event(self):
-        """Test Ã©vÃ©nement install"""
+        """Test événement install"""
         from src.services.pwa import SERVICE_WORKER_JS
         
         assert "addEventListener('install'" in SERVICE_WORKER_JS
     
     def test_sw_activate_event(self):
-        """Test Ã©vÃ©nement activate"""
+        """Test événement activate"""
         from src.services.pwa import SERVICE_WORKER_JS
         
         assert "addEventListener('activate'" in SERVICE_WORKER_JS
     
     def test_sw_fetch_event(self):
-        """Test Ã©vÃ©nement fetch"""
+        """Test événement fetch"""
         from src.services.pwa import SERVICE_WORKER_JS
         
         assert "addEventListener('fetch'" in SERVICE_WORKER_JS
     
     def test_sw_precache_urls(self):
-        """Test URLs prÃ©-cachÃ©es"""
+        """Test URLs pré-cachées"""
         from src.services.pwa import SERVICE_WORKER_JS
         
         assert "PRECACHE_URLS" in SERVICE_WORKER_JS
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MANIFEST JSON
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestManifestGeneration:
-    """Tests de gÃ©nÃ©ration du manifest"""
+    """Tests de génération du manifest"""
     
     def test_manifest_json_valid(self):
         """Test que le manifest est du JSON valide"""
         from src.services.pwa import PWA_CONFIG
         
-        # Doit Ãªtre sÃ©rialisable en JSON
+        # Doit être sérialisable en JSON
         json_str = json.dumps(PWA_CONFIG)
         parsed = json.loads(json_str)
         
         assert parsed == PWA_CONFIG
     
     def test_manifest_no_circular_refs(self):
-        """Test pas de rÃ©fÃ©rences circulaires"""
+        """Test pas de références circulaires"""
         from src.services.pwa import PWA_CONFIG
         
-        # json.dumps Ã©chouerait avec des refs circulaires
+        # json.dumps échouerait avec des refs circulaires
         try:
             json.dumps(PWA_CONFIG)
             assert True
         except ValueError:
-            assert False, "RÃ©fÃ©rences circulaires dÃ©tectÃ©es"
+            assert False, "Références circulaires détectées"
     
     def test_manifest_categories(self):
-        """Test catÃ©gories du manifest"""
+        """Test catégories du manifest"""
         from src.services.pwa import PWA_CONFIG
         
         assert "categories" in PWA_CONFIG
         assert isinstance(PWA_CONFIG["categories"], list)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SCREENSHOTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestScreenshots:
-    """Tests des captures d'Ã©cran"""
+    """Tests des captures d'écran"""
     
     def test_screenshots_present(self):
-        """Test prÃ©sence des screenshots"""
+        """Test présence des screenshots"""
         from src.services.pwa import PWA_CONFIG
         
         assert "screenshots" in PWA_CONFIG
@@ -298,16 +298,16 @@ class TestScreenshots:
                 assert factor in valid_factors
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS OFFLINE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestOfflineSupport:
     """Tests du support offline"""
     
     def test_offline_url_defined(self):
-        """Test URL offline dÃ©finie"""
+        """Test URL offline définie"""
         from src.services.pwa import SERVICE_WORKER_JS
         
         assert "OFFLINE_URL" in SERVICE_WORKER_JS
@@ -319,49 +319,49 @@ class TestOfflineSupport:
         assert "DB_NAME" in SERVICE_WORKER_JS
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS VALIDATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPWAValidation:
     """Tests de validation PWA"""
     
     def test_scope_defined(self):
-        """Test scope dÃ©fini"""
+        """Test scope défini"""
         from src.services.pwa import PWA_CONFIG
         
         assert "scope" in PWA_CONFIG
         assert PWA_CONFIG["scope"] == "/"
     
     def test_related_applications(self):
-        """Test applications liÃ©es"""
+        """Test applications liées"""
         from src.services.pwa import PWA_CONFIG
         
         assert "related_applications" in PWA_CONFIG
         assert "prefer_related_applications" in PWA_CONFIG
     
     def test_description_present(self):
-        """Test description prÃ©sente"""
+        """Test description présente"""
         from src.services.pwa import PWA_CONFIG
         
         assert "description" in PWA_CONFIG
         assert len(PWA_CONFIG["description"]) > 0
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CACHE STRATEGIES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCacheStrategies:
-    """Tests des stratÃ©gies de cache"""
+    """Tests des stratégies de cache"""
     
     def test_network_first_strategy(self):
-        """Test stratÃ©gie Network First"""
+        """Test stratégie Network First"""
         from src.services.pwa import SERVICE_WORKER_JS
         
-        # Le SW devrait implÃ©menter Network First
+        # Le SW devrait implémenter Network First
         assert "fetch" in SERVICE_WORKER_JS.lower()
     
     def test_cache_cleanup(self):
@@ -372,24 +372,24 @@ class TestCacheStrategies:
         assert "delete" in SERVICE_WORKER_JS
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CAS LIMITES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPWAEdgeCases:
     """Tests des cas limites"""
     
     def test_empty_shortcuts_handled(self):
-        """Test raccourcis vides gÃ©rÃ©s"""
+        """Test raccourcis vides gérés"""
         from src.services.pwa import PWA_CONFIG
         
-        # MÃªme si vide, devrait Ãªtre une liste
+        # Même si vide, devrait être une liste
         shortcuts = PWA_CONFIG.get("shortcuts", [])
         assert isinstance(shortcuts, list)
     
     def test_icon_paths_start_with_slash(self):
-        """Test chemins d'icÃ´nes commencent par /"""
+        """Test chemins d'icônes commencent par /"""
         from src.services.pwa import PWA_CONFIG
         
         for icon in PWA_CONFIG["icons"]:
@@ -404,28 +404,28 @@ class TestPWAEdgeCases:
             assert PWA_CONFIG["scope"].endswith("/") or PWA_CONFIG["scope"] == "/"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS INTÃ‰GRATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPWAIntegration:
-    """Tests d'intÃ©gration PWA"""
+    """Tests d'intégration PWA"""
     
     def test_full_manifest_generation(self):
-        """Test gÃ©nÃ©ration complÃ¨te du manifest"""
+        """Test génération complète du manifest"""
         from src.services.pwa import PWA_CONFIG
         
-        # GÃ©nÃ©rer le manifest JSON
+        # Générer le manifest JSON
         manifest = json.dumps(PWA_CONFIG, indent=2, ensure_ascii=False)
         
-        # VÃ©rifier qu'il contient les Ã©lÃ©ments clÃ©s
+        # Vérifier qu'il contient les éléments clés
         assert "Assistant Matanne" in manifest
         assert "icon" in manifest
         assert "display" in manifest
     
     def test_sw_and_manifest_compatible(self):
-        """Test compatibilitÃ© SW et manifest"""
+        """Test compatibilité SW et manifest"""
         from src.services.pwa import PWA_CONFIG, SERVICE_WORKER_JS
         
         # Le SW et le manifest existent ensemble
@@ -441,7 +441,7 @@ class TestPWAIntegration:
         assert PWA_CONFIG.get("start_url")
         assert PWA_CONFIG.get("display") in ["standalone", "fullscreen"]
         
-        # Au moins une icÃ´ne 192x192
+        # Au moins une icône 192x192
         icon_sizes = [i["sizes"] for i in PWA_CONFIG["icons"]]
         assert "192x192" in icon_sizes
 

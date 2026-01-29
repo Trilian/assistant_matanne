@@ -8,7 +8,7 @@ from src.services.recettes import get_recette_service
 from src.core.models import Recette, RecetteIngredient, Ingredient, EtapeRecette
 from src.core.database import obtenir_contexte_db
 
-# Logique mÃ©tier pure
+# Logique métier pure
 from src.domains.cuisine.logic.recettes_logic import (
     valider_recette
 )
@@ -19,8 +19,8 @@ def render_importer():
     st.subheader("ðŸ“¥ Importer une recette")
     st.write("Importez une recette depuis un site web, un PDF ou du texte")
     
-    # Onglets pour diffÃ©rents types d'import
-    import_tab1, import_tab2, import_tab3 = st.tabs(["ðŸŒ URL/Site Web", "ðŸ“„ Fichier PDF", "ðŸ“ Texte"])
+    # Onglets pour différents types d'import
+    import_tab1, import_tab2, import_tab3 = st.tabs(["ðŸŒ URL/Site Web", "ðŸ“„ Fichier PDF", "ðŸ“ Texte"])
     
     with import_tab1:
         _render_import_url()
@@ -34,17 +34,17 @@ def render_importer():
 
 def _render_import_url():
     """Import depuis une URL"""
-    st.markdown("### ðŸŒ Importer depuis une URL")
+    st.markdown("### ðŸŒ Importer depuis une URL")
     st.info("Entrez l'URL d'un site contenant une recette (recipetin, marmiton, cuisineaz, etc.)")
     
     url = st.text_input("URL du site", placeholder="https://www.marmiton.org/recettes/...")
     
-    if st.button("ðŸ” Analyser le site", use_container_width=True):
+    if st.button("ðŸ” Analyser le site", use_container_width=True):
         if not url:
-            st.error("âŒ Veuillez entrer une URL")
+            st.error("âŒ Veuillez entrer une URL")
             return
         
-        with st.spinner("â³ Extraction de la recette..."):
+        with st.spinner("â³ Extraction de la recette..."):
             try:
                 recipe_data = RecipeImporter.from_url(url)
                 
@@ -52,16 +52,16 @@ def _render_import_url():
                     st.success("âœ… Recette extraite!")
                     _show_import_preview(recipe_data)
                 else:
-                    st.error("âŒ Impossible d'extraire la recette. VÃ©rifiez l'URL.")
+                    st.error("âŒ Impossible d'extraire la recette. Vérifiez l'URL.")
                     
             except Exception as e:
-                st.error(f"âŒ Erreur: {str(e)}")
+                st.error(f"âŒ Erreur: {str(e)}")
 
 
 def _render_import_pdf():
     """Import depuis un PDF"""
     st.markdown("### ðŸ“„ Importer depuis un PDF")
-    st.info("TÃ©lÃ©chargez un fichier PDF contenant une recette")
+    st.info("Téléchargez un fichier PDF contenant une recette")
     
     pdf_file = st.file_uploader("Choisissez un fichier PDF", type=["pdf"])
     
@@ -74,8 +74,8 @@ def _render_import_pdf():
             tmp.write(pdf_file.getbuffer())
             tmp_path = tmp.name
         
-        if st.button("ðŸ” Analyser le PDF", use_container_width=True):
-            with st.spinner("â³ Extraction de la recette..."):
+        if st.button("ðŸ” Analyser le PDF", use_container_width=True):
+            with st.spinner("â³ Extraction de la recette..."):
                 try:
                     recipe_data = RecipeImporter.from_pdf(tmp_path)
                     
@@ -83,41 +83,41 @@ def _render_import_pdf():
                         st.success("âœ… Recette extraite!")
                         _show_import_preview(recipe_data)
                     else:
-                        st.error("âŒ Impossible d'extraire la recette du PDF.")
+                        st.error("âŒ Impossible d'extraire la recette du PDF.")
                         
                 except Exception as e:
-                    st.error(f"âŒ Erreur: {str(e)}")
+                    st.error(f"âŒ Erreur: {str(e)}")
                 finally:
                     os.unlink(tmp_path)
 
 
 def _render_import_text():
     """Import depuis du texte"""
-    st.markdown("### ðŸ“ Importer depuis du texte")
+    st.markdown("### ðŸ“ Importer depuis du texte")
     st.info("Collez le texte d'une recette (HTML, texte brut, etc.)")
     
     text = st.text_area(
         "Collez la recette ici",
         height=300,
-        placeholder="""PÃ¢tes Ã  la Bolognaise
+        placeholder="""PÃ¢tes à la Bolognaise
 
-IngrÃ©dients:
+Ingrédients:
 - 400g de pÃ¢tes
-- 500g de viande hachÃ©e
+- 500g de viande hachée
 - 2 oignons
 
 Ã‰tapes:
 1. Cuire les pÃ¢tes
-2. PrÃ©parer la sauce
+2. Préparer la sauce
 ..."""
     )
     
-    if st.button("ðŸ” Analyser le texte", use_container_width=True):
+    if st.button("ðŸ” Analyser le texte", use_container_width=True):
         if not text:
-            st.error("âŒ Veuillez entrer du texte")
+            st.error("âŒ Veuillez entrer du texte")
             return
         
-        with st.spinner("â³ Extraction de la recette..."):
+        with st.spinner("â³ Extraction de la recette..."):
             try:
                 recipe_data = RecipeImporter.from_text(text)
                 
@@ -125,17 +125,17 @@ IngrÃ©dients:
                     st.success("âœ… Recette extraite!")
                     _show_import_preview(recipe_data)
                 else:
-                    st.error("âŒ Impossible d'extraire la recette du texte.")
+                    st.error("âŒ Impossible d'extraire la recette du texte.")
                     
             except Exception as e:
-                st.error(f"âŒ Erreur: {str(e)}")
+                st.error(f"âŒ Erreur: {str(e)}")
 
 
 def _show_import_preview(recipe_data: dict):
-    """Affiche l'aperÃ§u et permet de modifier avant import"""
-    st.markdown("### ðŸ“‹ AperÃ§u et modification")
+    """Affiche l'aperçu et permet de modifier avant import"""
+    st.markdown("### ðŸ“‹ Aperçu et modification")
     
-    # Formulaire d'Ã©dition
+    # Formulaire d'édition
     with st.form("form_import_recette"):
         # Infos de base
         col1, col2 = st.columns(2)
@@ -144,7 +144,7 @@ def _show_import_preview(recipe_data: dict):
         with col2:
             type_repas = st.selectbox(
                 "Type de repas *",
-                ["petit_dÃ©jeuner", "dÃ©jeuner", "dÃ®ner", "goÃ»ter", "apÃ©ritif", "dessert"]
+                ["petit_déjeuner", "déjeuner", "dîner", "goûter", "apéritif", "dessert"]
             )
         
         description = st.text_area(
@@ -157,7 +157,7 @@ def _show_import_preview(recipe_data: dict):
         col1, col2, col3 = st.columns(3)
         with col1:
             temps_prep = st.number_input(
-                "Temps prÃ©paration (min)",
+                "Temps préparation (min)",
                 min_value=0,
                 max_value=300,
                 value=recipe_data.get('temps_preparation', 15)
@@ -178,41 +178,41 @@ def _show_import_preview(recipe_data: dict):
             )
         
         difficulte = st.selectbox(
-            "DifficultÃ©",
+            "Difficulté",
             ["facile", "moyen", "difficile"],
             index=0
         )
         
-        # IngrÃ©dients
-        st.markdown("#### ðŸ›’ IngrÃ©dients")
+        # Ingrédients
+        st.markdown("#### ðŸ›’ Ingrédients")
         ingredients = recipe_data.get('ingredients', [])
         
-        # Afficher et permettre l'Ã©dition
+        # Afficher et permettre l'édition
         edited_ingredients = []
         for idx, ing in enumerate(ingredients):
-            ing_text = st.text_input(f"IngrÃ©dient {idx + 1}", value=ing, key=f"ing_{idx}")
+            ing_text = st.text_input(f"Ingrédient {idx + 1}", value=ing, key=f"ing_{idx}")
             if ing_text:
                 edited_ingredients.append(ing_text)
         
-        # Ajouter un ingrÃ©dient vierge pour en ajouter plus
-        new_ing = st.text_input("Nouvel ingrÃ©dient (optionnel)", key="new_ing")
+        # Ajouter un ingrédient vierge pour en ajouter plus
+        new_ing = st.text_input("Nouvel ingrédient (optionnel)", key="new_ing")
         if new_ing:
             edited_ingredients.append(new_ing)
         
         # Ã‰tapes
-        st.markdown("#### ðŸ‘¨â€ðŸ³ Ã‰tapes de prÃ©paration")
+        st.markdown("#### ðŸ‘¨â€ðŸ³ Ã‰tapes de préparation")
         etapes = recipe_data.get('etapes', [])
         
         edited_etapes = []
         for idx, etape in enumerate(etapes):
-            # Enlever le numÃ©ro si prÃ©sent
+            # Enlever le numéro si présent
             etape_text = etape.lstrip('0123456789.').strip()
             etape_input = st.text_area(f"Ã‰tape {idx + 1}", value=etape_text, height=60, key=f"step_{idx}")
             if etape_input:
                 edited_etapes.append(etape_input)
         
-        # Ajouter une Ã©tape vierge
-        new_step = st.text_area("Nouvelle Ã©tape (optionnel)", height=60, key="new_step")
+        # Ajouter une étape vierge
+        new_step = st.text_area("Nouvelle étape (optionnel)", height=60, key="new_step")
         if new_step:
             edited_etapes.append(new_step)
         
@@ -221,15 +221,15 @@ def _show_import_preview(recipe_data: dict):
         
         if submitted:
             if not nom:
-                st.error("âŒ Le nom est obligatoire")
+                st.error("âŒ Le nom est obligatoire")
                 return
             
             if not edited_ingredients:
-                st.error("âŒ Au moins un ingrÃ©dient est obligatoire")
+                st.error("âŒ Au moins un ingrédient est obligatoire")
                 return
             
             if not edited_etapes:
-                st.error("âŒ Au moins une Ã©tape est obligatoire")
+                st.error("âŒ Au moins une étape est obligatoire")
                 return
             
             _save_imported_recipe(
@@ -256,15 +256,15 @@ def _save_imported_recipe(
     ingredients: list,
     etapes: list
 ):
-    """Sauvegarde la recette importÃ©e"""
+    """Sauvegarde la recette importée"""
     try:
         service = get_recette_service()
         if not service:
-            st.error("âŒ Service indisponible")
+            st.error("âŒ Service indisponible")
             return
         
         with st.spinner("ðŸ’¾ Sauvegarde en cours..."):
-            # CrÃ©er la recette
+            # Créer la recette
             recette = Recette(
                 nom=nom,
                 type_repas=type_repas,
@@ -273,7 +273,7 @@ def _save_imported_recipe(
                 temps_cuisson=temps_cuisson,
                 portions=portions,
                 difficulte=difficulte,
-                source="import"  # Marquer comme importÃ©e
+                source="import"  # Marquer comme importée
             )
             
             with obtenir_contexte_db() as db:
@@ -281,9 +281,9 @@ def _save_imported_recipe(
                 db.add(recette)
                 db.flush()  # Pour avoir l'ID
                 
-                # Ajouter les ingrÃ©dients
+                # Ajouter les ingrédients
                 for idx, ing_text in enumerate(ingredients, 1):
-                    # Parser "quantitÃ© unitÃ© nom"
+                    # Parser "quantité unité nom"
                     parts = ing_text.split(maxsplit=2)
                     
                     if len(parts) >= 3:
@@ -298,7 +298,7 @@ def _save_imported_recipe(
                         unite = ""
                         nom_ing = ing_text
                     
-                    # Chercher ou crÃ©er l'ingrÃ©dient
+                    # Chercher ou créer l'ingrédient
                     ingredient = db.query(Ingredient).filter_by(nom=nom_ing).first()
                     if not ingredient:
                         ingredient = Ingredient(nom=nom_ing)
@@ -314,7 +314,7 @@ def _save_imported_recipe(
                     )
                     db.add(ri)
                 
-                # Ajouter les Ã©tapes
+                # Ajouter les étapes
                 for idx, etape_text in enumerate(etapes, 1):
                     etape = EtapeRecette(
                         recette_id=recette.id,
@@ -325,16 +325,16 @@ def _save_imported_recipe(
                 
                 db.commit()
             
-            st.success(f"âœ… Recette '{nom}' importÃ©e avec succÃ¨s!")
+            st.success(f"âœ… Recette '{nom}' importée avec succès!")
             st.balloons()
             
-            # RÃ©initialiser le formulaire
+            # Réinitialiser le formulaire
             import time
             time.sleep(1)
             st.rerun()
             
     except Exception as e:
-        st.error(f"âŒ Erreur sauvegarde: {str(e)}")
+        st.error(f"âŒ Erreur sauvegarde: {str(e)}")
         import logging
         logging.error(f"Erreur import recette: {e}")
 

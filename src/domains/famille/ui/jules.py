@@ -1,6 +1,6 @@
 ﻿"""
-Module Jules - Suivi dÃ©veloppement et apprentissages (19 mois)
-Version amÃ©liorÃ©e avec helpers, caching et graphiques
+Module Jules - Suivi développement et apprentissages (19 mois)
+Version améliorée avec helpers, caching et graphiques
 """
 
 import streamlit as st
@@ -43,29 +43,29 @@ def ajouter_milestone(titre: str, description: str, categorie: str, notes: str =
             )
             session.add(milestone)
             session.commit()
-            st.success(f"âœ… Jalon '{titre}' enregistrÃ©!")
+            st.success(f"âœ… Jalon '{titre}' enregistré!")
             clear_famille_cache()
             return True
     except Exception as e:
-        st.error(f"âŒ Erreur ajout jalon: {str(e)}")
+        st.error(f"âŒ Erreur ajout jalon: {str(e)}")
         return False
 
 
 MILESTONES_CATEGORIES = {
-    "langage": "ðŸ—£ï¸ Langage",
-    "motricitÃ©": "ðŸš¶ MotricitÃ©",
+    "langage": "ðŸ—£ï¸ Langage",
+    "motricité": "ðŸš¶ Motricité",
     "social": "ðŸ‘¥ Social",
     "cognitif": "ðŸ§  Cognitif",
-    "alimentation": "ðŸ½ï¸ Alimentation",
+    "alimentation": "ðŸ½ï¸ Alimentation",
     "sommeil": "ðŸ˜´ Sommeil",
-    "autre": "â­ Autre"
+    "autre": "â­ Autre"
 }
 
 ACTIVITES_19_MOIS = {
     "parc": [
         "Jeux dans le sable",
         "Toboggan (avec aide)",
-        "BalanÃ§oire",
+        "Balançoire",
         "Courir dans l'herbe",
         "Observer les oiseaux"
     ],
@@ -73,22 +73,22 @@ ACTIVITES_19_MOIS = {
         "Jeux de cache-cache simples",
         "Danser sur musique",
         "Construire avec blocs",
-        "Lire des livres illustrÃ©s",
-        "Jouer avec des jouets Ã  pousser"
+        "Lire des livres illustrés",
+        "Jouer avec des jouets à pousser"
     ],
     "eau": [
-        "Piscine bÃ©bÃ© (peu profonde)",
+        "Piscine bébé (peu profonde)",
         "Baignoire avec jouets",
         "Arroser des plantes",
         "Verser de l'eau d'un verre",
-        "Jouer avec Ã©ponges"
+        "Jouer avec éponges"
     ],
     "apprentissage": [
         "Montrer des animaux (bruits)",
         "Nommer les couleurs",
-        "Compter jusqu'Ã  3",
+        "Compter jusqu'à 3",
         "Imiter les gestes",
-        "Puzzles simples (2-3 piÃ¨ces)"
+        "Puzzles simples (2-3 pièces)"
     ],
     "sport": [
         "Marcher sur ligne",
@@ -101,14 +101,14 @@ ACTIVITES_19_MOIS = {
 
 SHOPPING_JULES = {
     "jouets": [
-        "Jouets Ã  empiler",
+        "Jouets à empiler",
         "Balles sensorielles",
-        "Livres cartonnÃ©s",
-        "Voitures Ã  pousser",
+        "Livres cartonnés",
+        "Voitures à pousser",
         "Figurines animaux"
     ],
     "vetements": [
-        "VÃªtements confortables",
+        "Vêtements confortables",
         "Chaussures souples",
         "Bonnet/gants (hiver)",
         "Maillot de bain",
@@ -116,9 +116,9 @@ SHOPPING_JULES = {
     ],
     "hygiene": [
         "Couches (taille 4)",
-        "Lingettes bÃ©bÃ©",
+        "Lingettes bébé",
         "Savon doux",
-        "Brosse Ã  dents souple",
+        "Brosse à dents souple",
         "Dentifrice enfant"
     ]
 }
@@ -136,35 +136,35 @@ def app():
         # Afficher Ã¢ge en gros
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.metric("ðŸ—“ï¸ Ã‚ge", f"{age_info['mois']} mois", f"{age_info['jours']} jours")
+            st.metric("ðŸ—“ï¸ Ã‚ge", f"{age_info['mois']} mois", f"{age_info['jours']} jours")
         with col2:
-            st.metric("ðŸ“… NÃ© le", age_info['date_naissance'].strftime("%d/%m/%Y"))
+            st.metric("ðŸ“… Né le", age_info['date_naissance'].strftime("%d/%m/%Y"))
         with col3:
             st.metric("ðŸŽ‚ Prochain anniversaire", f"Dans {365 - (age_info['jours'] % 365)} jours")
     
     except Exception as e:
-        st.error(f"âŒ Erreur chargement profil Jules: {str(e)}")
+        st.error(f"âŒ Erreur chargement profil Jules: {str(e)}")
         return
     
-    tabs = st.tabs(["ðŸ“Š Jalons", "ðŸŽ¯ ActivitÃ©s Semaine", "ðŸ›ï¸ Shopping"])
+    tabs = st.tabs(["ðŸ“Š Jalons", "ðŸŽ¯ Activités Semaine", "ðŸ›ï¸ Shopping"])
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TAB 1: JALONS
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     with tabs[0]:
         st.header("Jalons & Apprentissages")
         
         col1, col2 = st.columns([2, 1])
         
         with col1:
-            st.subheader("Jalons enregistrÃ©s")
+            st.subheader("Jalons enregistrés")
             
             try:
                 milestones_dict = get_milestones_by_category(child_id)
                 counts = count_milestones_by_category(child_id)
                 
                 if milestones_dict:
-                    # Afficher par catÃ©gorie
+                    # Afficher par catégorie
                     for cat, title in MILESTONES_CATEGORIES.items():
                         if cat in milestones_dict:
                             with st.container(border=True):
@@ -180,10 +180,10 @@ def app():
                                     if m['description']:
                                         st.caption(m['description'])
                 else:
-                    st.info("Aucun jalon enregistrÃ©. Commencez Ã  documenter!")
+                    st.info("Aucun jalon enregistré. Commencez à documenter!")
             
             except Exception as e:
-                st.error(f"âŒ Erreur chargement jalons: {str(e)}")
+                st.error(f"âŒ Erreur chargement jalons: {str(e)}")
         
         with col2:
             st.subheader("Ajouter un jalon")
@@ -191,24 +191,24 @@ def app():
             with st.form("form_milestone"):
                 titre = st.text_input("Titre", placeholder="Ex: Premiers pas")
                 description = st.text_area("Description", height=80, 
-                                         placeholder="DÃ©tails du jalon")
-                categorie = st.selectbox("CatÃ©gorie", 
+                                         placeholder="Détails du jalon")
+                categorie = st.selectbox("Catégorie", 
                     list(MILESTONES_CATEGORIES.keys()),
                     format_func=lambda x: MILESTONES_CATEGORIES[x])
                 notes = st.text_area("Notes", height=60, 
-                                   placeholder="DÃ©tails supplÃ©mentaires")
+                                   placeholder="Détails supplémentaires")
                 
                 if st.form_submit_button("âœ… Ajouter", use_container_width=True):
                     if titre and categorie:
                         ajouter_milestone(titre, description, categorie, notes)
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TAB 2: ACTIVITÃ‰S SEMAINE
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     with tabs[1]:
-        st.header("ActivitÃ©s AdaptÃ©es Ã  l'Ã‚ge")
+        st.header("Activités Adaptées à l'Ã‚ge")
         
-        st.info("ðŸ’¡ IdÃ©es d'activitÃ©s recommandÃ©es pour Jules (19 mois)")
+        st.info("ðŸ’¡ Idées d'activités recommandées pour Jules (19 mois)")
         
         col1, col2, col3 = st.columns(3)
         
@@ -218,7 +218,7 @@ def app():
                 st.write(f"â€¢ {act}")
         
         with col2:
-            st.subheader("ðŸ  Maison")
+            st.subheader("ðŸ  Maison")
             for act in ACTIVITES_19_MOIS["maison"]:
                 st.write(f"â€¢ {act}")
         
@@ -239,9 +239,9 @@ def app():
             for act in ACTIVITES_19_MOIS["sport"]:
                 st.write(f"â€¢ {act}")
         
-        # ActivitÃ©s planifiÃ©es
+        # Activités planifiées
         st.divider()
-        st.subheader("ðŸ“… ActivitÃ©s Familiales PrÃ©vues")
+        st.subheader("ðŸ“… Activités Familiales Prévues")
         
         try:
             activites = get_activites_semaine()
@@ -255,20 +255,20 @@ def app():
                             if act.get('participants'):
                                 st.caption(f"ðŸ‘¥ {', '.join(act['participants'])}")
                         with col_status:
-                            status_emoji = "âœ…" if act['statut'] == "terminÃ©" else "ðŸ“…"
+                            status_emoji = "âœ…" if act['statut'] == "terminé" else "ðŸ“…"
                             st.write(status_emoji)
             else:
-                st.info("Aucune activitÃ© planifiÃ©e cette semaine")
+                st.info("Aucune activité planifiée cette semaine")
         except Exception as e:
-            st.error(f"âŒ Erreur chargement activitÃ©s: {str(e)}")
+            st.error(f"âŒ Erreur chargement activités: {str(e)}")
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TAB 3: SHOPPING
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     with tabs[2]:
-        st.header("ðŸ›ï¸ Ã€ Acheter pour Jules")
+        st.header("ðŸ›ï¸ Ã€ Acheter pour Jules")
         
-        st.subheader("Suggestions par catÃ©gorie")
+        st.subheader("Suggestions par catégorie")
         
         col1, col2, col3 = st.columns(3)
         
@@ -279,13 +279,13 @@ def app():
                     st.write(f"âœ“ {item}")
         
         with col2:
-            st.subheader("ðŸ‘• VÃªtements")
+            st.subheader("ðŸ‘• Vêtements")
             for item in SHOPPING_JULES["vetements"]:
                 if st.checkbox(item, key=f"vetements_{item}"):
                     st.write(f"âœ“ {item}")
         
         with col3:
-            st.subheader("ðŸ§¼ HygiÃ¨ne")
+            st.subheader("ðŸ§¼ Hygiène")
             for item in SHOPPING_JULES["hygiene"]:
                 if st.checkbox(item, key=f"hygiene_{item}"):
                     st.write(f"âœ“ {item}")

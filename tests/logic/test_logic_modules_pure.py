@@ -1,15 +1,15 @@
 ﻿"""
 Tests purs des modules *_logic - Cible 40% de couverture.
-Ces tests couvrent la logique mÃ©tier pure sans dÃ©pendance Streamlit.
+Ces tests couvrent la logique métier pure sans dépendance Streamlit.
 """
 import pytest
 from unittest.mock import Mock, patch, MagicMock
 from datetime import date, timedelta
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS RECETTES_LOGIC
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestRecettesLogicPure:
     """Tests pour recettes_logic.py - fonctions pures."""
@@ -30,7 +30,7 @@ class TestRecettesLogicPure:
         assert "nom" in error.lower()
     
     def test_valider_recette_ingredients_vide(self):
-        """Validation: ingrÃ©dients vides."""
+        """Validation: ingrédients vides."""
         from src.domains.cuisine.logic.recettes_logic import valider_recette
         
         data = {"nom": "Test", "ingredients": [], "instructions": ["test"]}
@@ -55,7 +55,7 @@ class TestRecettesLogicPure:
         assert error is None
     
     def test_calculer_cout_recette(self):
-        """Calcul coÃ»t recette."""
+        """Calcul coût recette."""
         from src.domains.cuisine.logic.recettes_logic import calculer_cout_recette
         
         recette = Mock()
@@ -78,9 +78,9 @@ class TestRecettesLogicPure:
         assert calories == 200.0
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS INVENTAIRE_LOGIC
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestInventaireLogicPure:
     """Tests pour inventaire_logic.py - fonctions pures."""
@@ -107,7 +107,7 @@ class TestInventaireLogicPure:
         assert status == "ok"
     
     def test_calculer_status_peremption_expire(self):
-        """Status: article expirÃ©."""
+        """Status: article expiré."""
         from src.domains.cuisine.logic.inventaire_logic import calculer_status_peremption
         
         article = {"date_expiration": date.today() - timedelta(days=1)}
@@ -115,7 +115,7 @@ class TestInventaireLogicPure:
         assert status == "perime"
     
     def test_calculer_status_peremption_bientot(self):
-        """Status: bientÃ´t pÃ©rimÃ©."""
+        """Status: bientôt périmé."""
         from src.domains.cuisine.logic.inventaire_logic import calculer_status_peremption
         
         article = {"date_expiration": date.today() + timedelta(days=3)}
@@ -123,7 +123,7 @@ class TestInventaireLogicPure:
         assert status == "bientot_perime"
     
     def test_calculer_status_peremption_ok(self):
-        """Status: pÃ©remption ok."""
+        """Status: péremption ok."""
         from src.domains.cuisine.logic.inventaire_logic import calculer_status_peremption
         
         article = {"date_expiration": date.today() + timedelta(days=15)}
@@ -151,26 +151,26 @@ class TestInventaireLogicPure:
         from src.domains.cuisine.logic.inventaire_logic import filtrer_par_emplacement
         
         articles = [
-            {"nom": "Art1", "emplacement": "RÃ©frigÃ©rateur"},
-            {"nom": "Art2", "emplacement": "CongÃ©lateur"},
-            {"nom": "Art3", "emplacement": "RÃ©frigÃ©rateur"}
+            {"nom": "Art1", "emplacement": "Réfrigérateur"},
+            {"nom": "Art2", "emplacement": "Congélateur"},
+            {"nom": "Art3", "emplacement": "Réfrigérateur"}
         ]
         
-        resultats = filtrer_par_emplacement(articles, "RÃ©frigÃ©rateur")
+        resultats = filtrer_par_emplacement(articles, "Réfrigérateur")
         assert len(resultats) == 2
-        assert all(a["emplacement"] == "RÃ©frigÃ©rateur" for a in resultats)
+        assert all(a["emplacement"] == "Réfrigérateur" for a in resultats)
     
     def test_filtrer_par_categorie(self):
-        """Filtrage par catÃ©gorie."""
+        """Filtrage par catégorie."""
         from src.domains.cuisine.logic.inventaire_logic import filtrer_par_categorie
         
         articles = [
-            {"nom": "Art1", "categorie": "Fruits & LÃ©gumes"},
+            {"nom": "Art1", "categorie": "Fruits & Légumes"},
             {"nom": "Art2", "categorie": "Viandes & Poissons"},
-            {"nom": "Art3", "categorie": "Fruits & LÃ©gumes"}
+            {"nom": "Art3", "categorie": "Fruits & Légumes"}
         ]
         
-        resultats = filtrer_par_categorie(articles, "Fruits & LÃ©gumes")
+        resultats = filtrer_par_categorie(articles, "Fruits & Légumes")
         assert len(resultats) == 2
     
     def test_filtrer_par_recherche(self):
@@ -232,8 +232,8 @@ class TestInventaireLogicPure:
         article = {
             "nom": "Tomate",
             "quantite": 5,
-            "emplacement": "RÃ©frigÃ©rateur",
-            "categorie": "Fruits & LÃ©gumes",
+            "emplacement": "Réfrigérateur",
+            "categorie": "Fruits & Légumes",
             "date_expiration": date.today() + timedelta(days=7)
         }
         valid, errors = valider_article_inventaire(article)
@@ -242,7 +242,7 @@ class TestInventaireLogicPure:
         assert len(errors) == 0
     
     def test_calculer_jours_avant_peremption(self):
-        """Jours avant pÃ©remption."""
+        """Jours avant péremption."""
         from src.domains.cuisine.logic.inventaire_logic import calculer_jours_avant_peremption
         
         article = {"date_expiration": date.today() + timedelta(days=5)}
@@ -255,19 +255,19 @@ class TestInventaireLogicPure:
         from src.domains.cuisine.logic.inventaire_logic import grouper_par_emplacement
         
         articles = [
-            {"nom": "Art1", "emplacement": "RÃ©frigÃ©rateur"},
-            {"nom": "Art2", "emplacement": "CongÃ©lateur"},
-            {"nom": "Art3", "emplacement": "RÃ©frigÃ©rateur"}
+            {"nom": "Art1", "emplacement": "Réfrigérateur"},
+            {"nom": "Art2", "emplacement": "Congélateur"},
+            {"nom": "Art3", "emplacement": "Réfrigérateur"}
         ]
         
         groupes = grouper_par_emplacement(articles)
-        assert len(groupes["RÃ©frigÃ©rateur"]) == 2
-        assert len(groupes["CongÃ©lateur"]) == 1
+        assert len(groupes["Réfrigérateur"]) == 2
+        assert len(groupes["Congélateur"]) == 1
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS COURSES_LOGIC
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestCoursesLogicPure:
     """Tests pour courses_logic.py - fonctions pures."""
@@ -278,7 +278,7 @@ class TestCoursesLogicPure:
         assert courses_logic is not None
     
     def test_filtrer_par_priorite(self):
-        """Filtrage par prioritÃ©."""
+        """Filtrage par priorité."""
         from src.domains.cuisine.logic.courses_logic import filtrer_par_priorite
         
         articles = [
@@ -296,12 +296,12 @@ class TestCoursesLogicPure:
         from src.domains.cuisine.logic.courses_logic import filtrer_par_rayon
         
         articles = [
-            {"nom": "Art1", "rayon": "Fruits & LÃ©gumes"},
+            {"nom": "Art1", "rayon": "Fruits & Légumes"},
             {"nom": "Art2", "rayon": "Laitier"},
-            {"nom": "Art3", "rayon": "Fruits & LÃ©gumes"}
+            {"nom": "Art3", "rayon": "Fruits & Légumes"}
         ]
         
-        resultats = filtrer_par_rayon(articles, "Fruits & LÃ©gumes")
+        resultats = filtrer_par_rayon(articles, "Fruits & Légumes")
         assert len(resultats) == 2
     
     def test_filtrer_par_recherche(self):
@@ -318,7 +318,7 @@ class TestCoursesLogicPure:
         assert len(resultats) == 2
     
     def test_trier_par_priorite(self):
-        """Tri par prioritÃ©."""
+        """Tri par priorité."""
         from src.domains.cuisine.logic.courses_logic import trier_par_priorite
         
         articles = [
@@ -350,17 +350,17 @@ class TestCoursesLogicPure:
         from src.domains.cuisine.logic.courses_logic import grouper_par_rayon
         
         articles = [
-            {"nom": "Art1", "rayon": "Fruits & LÃ©gumes"},
+            {"nom": "Art1", "rayon": "Fruits & Légumes"},
             {"nom": "Art2", "rayon": "Laitier"},
-            {"nom": "Art3", "rayon": "Fruits & LÃ©gumes"}
+            {"nom": "Art3", "rayon": "Fruits & Légumes"}
         ]
         
         groupes = grouper_par_rayon(articles)
-        assert len(groupes["Fruits & LÃ©gumes"]) == 2
+        assert len(groupes["Fruits & Légumes"]) == 2
         assert len(groupes["Laitier"]) == 1
     
     def test_grouper_par_priorite(self):
-        """Groupement par prioritÃ©."""
+        """Groupement par priorité."""
         from src.domains.cuisine.logic.courses_logic import grouper_par_priorite
         
         articles = [
@@ -404,7 +404,7 @@ class TestCoursesLogicPure:
         article = {
             "nom": "Pommes",
             "quantite": 5,
-            "rayon": "Fruits & LÃ©gumes",
+            "rayon": "Fruits & Légumes",
             "priorite": "moyenne"
         }
         valid, errors = valider_article(article)
@@ -441,7 +441,7 @@ class TestCoursesLogicPure:
         assert isinstance(suggestions, list)
     
     def test_deduper_suggestions(self):
-        """DÃ©doublonnage suggestions."""
+        """Dédoublonnage suggestions."""
         from src.domains.cuisine.logic.courses_logic import deduper_suggestions
         
         suggestions = [
@@ -455,9 +455,9 @@ class TestCoursesLogicPure:
         assert noms.count("Tomates") == 1
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS STRUCTURE MODULES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestLogicModulesStructure:
     """Tests de structure des modules logic."""
@@ -478,7 +478,7 @@ class TestLogicModulesStructure:
                 pytest.skip(f"Module {module_name} non disponible: {e}")
     
     def test_recettes_logic_has_functions(self):
-        """recettes_logic: fonctions prÃ©sentes."""
+        """recettes_logic: fonctions présentes."""
         from src.domains.cuisine.logic import recettes_logic
         
         expected = [
@@ -491,7 +491,7 @@ class TestLogicModulesStructure:
             assert hasattr(recettes_logic, func), f"Fonction {func} manquante"
     
     def test_inventaire_logic_has_functions(self):
-        """inventaire_logic: fonctions prÃ©sentes."""
+        """inventaire_logic: fonctions présentes."""
         from src.domains.cuisine.logic import inventaire_logic
         
         expected = [
@@ -506,7 +506,7 @@ class TestLogicModulesStructure:
             assert hasattr(inventaire_logic, func), f"Fonction {func} manquante"
     
     def test_courses_logic_has_functions(self):
-        """courses_logic: fonctions prÃ©sentes."""
+        """courses_logic: fonctions présentes."""
         from src.domains.cuisine.logic import courses_logic
         
         expected = [

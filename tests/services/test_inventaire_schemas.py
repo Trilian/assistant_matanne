@@ -2,9 +2,9 @@
 Tests pour le module inventaire (services/inventaire.py).
 
 Tests couverts:
-- SchÃ©mas Pydantic (SuggestionCourses, ArticleImport)
+- Schémas Pydantic (SuggestionCourses, ArticleImport)
 - Constantes (CATEGORIES, EMPLACEMENTS)
-- Logique de calcul de statut (mockÃ©e)
+- Logique de calcul de statut (mockée)
 """
 
 from datetime import date, timedelta
@@ -14,34 +14,34 @@ import pytest
 from pydantic import ValidationError
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONSTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestConstantes:
     """Tests pour les constantes de l'inventaire."""
 
     def test_categories_defined(self):
-        """Test que les catÃ©gories sont dÃ©finies."""
+        """Test que les catégories sont définies."""
         from src.services.inventaire import CATEGORIES
         
         assert len(CATEGORIES) > 0
-        assert "LÃ©gumes" in CATEGORIES
+        assert "Légumes" in CATEGORIES
         assert "Fruits" in CATEGORIES
-        assert "ProtÃ©ines" in CATEGORIES
+        assert "Protéines" in CATEGORIES
 
     def test_emplacements_defined(self):
-        """Test que les emplacements sont dÃ©finis."""
+        """Test que les emplacements sont définis."""
         from src.services.inventaire import EMPLACEMENTS
         
         assert len(EMPLACEMENTS) > 0
         assert "Frigo" in EMPLACEMENTS
-        assert "CongÃ©lateur" in EMPLACEMENTS
+        assert "Congélateur" in EMPLACEMENTS
         assert "Placard" in EMPLACEMENTS
 
     def test_categories_all_strings(self):
-        """Test que toutes les catÃ©gories sont des strings."""
+        """Test que toutes les catégories sont des strings."""
         from src.services.inventaire import CATEGORIES
         
         for cat in CATEGORIES:
@@ -55,13 +55,13 @@ class TestConstantes:
             assert isinstance(emp, str)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SCHÃ‰MA SUGGESTION COURSES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestSuggestionCourses:
-    """Tests pour le schÃ©ma SuggestionCourses."""
+    """Tests pour le schéma SuggestionCourses."""
 
     def test_valid_suggestion(self):
         """Test suggestion valide."""
@@ -72,17 +72,17 @@ class TestSuggestionCourses:
             quantite=500,
             unite="g",
             priorite="haute",
-            rayon="LÃ©gumes frais",
+            rayon="Légumes frais",
         )
         
         assert suggestion.nom == "Tomates"
         assert suggestion.quantite == 500
         assert suggestion.unite == "g"
         assert suggestion.priorite == "haute"
-        assert suggestion.rayon == "LÃ©gumes frais"
+        assert suggestion.rayon == "Légumes frais"
 
     def test_all_priority_values(self):
-        """Test toutes les valeurs de prioritÃ©."""
+        """Test toutes les valeurs de priorité."""
         from src.services.inventaire import SuggestionCourses
         
         for priority in ["haute", "moyenne", "basse"]:
@@ -96,7 +96,7 @@ class TestSuggestionCourses:
             assert suggestion.priorite == priority
 
     def test_invalid_priority_rejected(self):
-        """Test prioritÃ© invalide rejetÃ©e."""
+        """Test priorité invalide rejetée."""
         from src.services.inventaire import SuggestionCourses
         
         with pytest.raises(ValidationError) as exc_info:
@@ -111,12 +111,12 @@ class TestSuggestionCourses:
         assert "priorite" in str(exc_info.value)
 
     def test_nom_too_short_rejected(self):
-        """Test nom trop court rejetÃ©."""
+        """Test nom trop court rejeté."""
         from src.services.inventaire import SuggestionCourses
         
         with pytest.raises(ValidationError) as exc_info:
             SuggestionCourses(
-                nom="A",  # < 2 caractÃ¨res
+                nom="A",  # < 2 caractères
                 quantite=1,
                 unite="kg",
                 priorite="haute",
@@ -126,7 +126,7 @@ class TestSuggestionCourses:
         assert "nom" in str(exc_info.value)
 
     def test_quantite_zero_rejected(self):
-        """Test quantitÃ© 0 rejetÃ©e."""
+        """Test quantité 0 rejetée."""
         from src.services.inventaire import SuggestionCourses
         
         with pytest.raises(ValidationError) as exc_info:
@@ -141,7 +141,7 @@ class TestSuggestionCourses:
         assert "quantite" in str(exc_info.value)
 
     def test_quantite_negative_rejected(self):
-        """Test quantitÃ© nÃ©gative rejetÃ©e."""
+        """Test quantité négative rejetée."""
         from src.services.inventaire import SuggestionCourses
         
         with pytest.raises(ValidationError) as exc_info:
@@ -156,7 +156,7 @@ class TestSuggestionCourses:
         assert "quantite" in str(exc_info.value)
 
     def test_unite_empty_rejected(self):
-        """Test unitÃ© vide rejetÃ©e."""
+        """Test unité vide rejetée."""
         from src.services.inventaire import SuggestionCourses
         
         with pytest.raises(ValidationError) as exc_info:
@@ -171,7 +171,7 @@ class TestSuggestionCourses:
         assert "unite" in str(exc_info.value)
 
     def test_rayon_too_short_rejected(self):
-        """Test rayon trop court rejetÃ©."""
+        """Test rayon trop court rejeté."""
         from src.services.inventaire import SuggestionCourses
         
         with pytest.raises(ValidationError) as exc_info:
@@ -180,19 +180,19 @@ class TestSuggestionCourses:
                 quantite=1,
                 unite="kg",
                 priorite="haute",
-                rayon="AB",  # < 3 caractÃ¨res
+                rayon="AB",  # < 3 caractères
             )
         
         assert "rayon" in str(exc_info.value)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SCHÃ‰MA ARTICLE IMPORT
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestArticleImport:
-    """Tests pour le schÃ©ma ArticleImport."""
+    """Tests pour le schéma ArticleImport."""
 
     def test_valid_article_minimal(self):
         """Test article valide minimal."""
@@ -233,11 +233,11 @@ class TestArticleImport:
         assert article.date_peremption == "2024-02-15"
 
     def test_quantite_zero_accepted(self):
-        """Test quantitÃ© 0 acceptÃ©e (ge=0)."""
+        """Test quantité 0 acceptée (ge=0)."""
         from src.services.inventaire import ArticleImport
         
         article = ArticleImport(
-            nom="Ã‰puisÃ©",
+            nom="Ã‰puisé",
             quantite=0,
             quantite_min=0,
             unite="kg",
@@ -246,7 +246,7 @@ class TestArticleImport:
         assert article.quantite == 0
 
     def test_quantite_negative_rejected(self):
-        """Test quantitÃ© nÃ©gative rejetÃ©e."""
+        """Test quantité négative rejetée."""
         from src.services.inventaire import ArticleImport
         
         with pytest.raises(ValidationError) as exc_info:
@@ -260,12 +260,12 @@ class TestArticleImport:
         assert "quantite" in str(exc_info.value)
 
     def test_nom_too_short_rejected(self):
-        """Test nom trop court rejetÃ©."""
+        """Test nom trop court rejeté."""
         from src.services.inventaire import ArticleImport
         
         with pytest.raises(ValidationError) as exc_info:
             ArticleImport(
-                nom="X",  # < 2 caractÃ¨res
+                nom="X",  # < 2 caractères
                 quantite=1,
                 quantite_min=0,
                 unite="kg",
@@ -274,7 +274,7 @@ class TestArticleImport:
         assert "nom" in str(exc_info.value)
 
     def test_unite_empty_rejected(self):
-        """Test unitÃ© vide rejetÃ©e."""
+        """Test unité vide rejetée."""
         from src.services.inventaire import ArticleImport
         
         with pytest.raises(ValidationError) as exc_info:
@@ -288,19 +288,19 @@ class TestArticleImport:
         assert "unite" in str(exc_info.value)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS LOGIQUE DE STATUT (PURE LOGIC)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalculerStatutLogic:
     """Tests pour la logique de calcul de statut.
     
-    Note: Ces tests vÃ©rifient la logique pure sans base de donnÃ©es.
+    Note: Ces tests vérifient la logique pure sans base de données.
     """
 
     def test_peremption_proche_logic(self):
-        """Test logique pÃ©remption proche (< 7 jours)."""
+        """Test logique péremption proche (< 7 jours)."""
         # Simulation: date_peremption dans 5 jours
         today = date.today()
         peremption = today + timedelta(days=5)
@@ -310,7 +310,7 @@ class TestCalculerStatutLogic:
         assert days_left <= 7
         expected_status = "peremption_proche"
         
-        # VÃ©rifier la logique
+        # Vérifier la logique
         if days_left <= 7:
             status = "peremption_proche"
         else:
@@ -319,14 +319,14 @@ class TestCalculerStatutLogic:
         assert status == expected_status
 
     def test_peremption_ok_logic(self):
-        """Test logique pÃ©remption OK (> 7 jours)."""
+        """Test logique péremption OK (> 7 jours)."""
         today = date.today()
         peremption = today + timedelta(days=30)
         days_left = (peremption - today).days
         
         assert days_left > 7
         
-        # VÃ©rifier la logique
+        # Vérifier la logique
         if days_left <= 7:
             status = "peremption_proche"
         else:
@@ -385,10 +385,10 @@ class TestCalculerStatutLogic:
 
 
 class TestJoursAvantPeremptionLogic:
-    """Tests pour la logique de calcul des jours avant pÃ©remption."""
+    """Tests pour la logique de calcul des jours avant péremption."""
 
     def test_no_peremption_date(self):
-        """Test sans date de pÃ©remption."""
+        """Test sans date de péremption."""
         date_peremption = None
         
         if not date_peremption:
@@ -399,7 +399,7 @@ class TestJoursAvantPeremptionLogic:
         assert result is None
 
     def test_future_peremption(self):
-        """Test pÃ©remption future."""
+        """Test péremption future."""
         today = date.today()
         date_peremption = today + timedelta(days=10)
         
@@ -408,7 +408,7 @@ class TestJoursAvantPeremptionLogic:
         assert result == 10
 
     def test_past_peremption(self):
-        """Test pÃ©remption passÃ©e (nÃ©gatif)."""
+        """Test péremption passée (négatif)."""
         today = date.today()
         date_peremption = today - timedelta(days=3)
         
@@ -417,7 +417,7 @@ class TestJoursAvantPeremptionLogic:
         assert result == -3
 
     def test_today_peremption(self):
-        """Test pÃ©remption aujourd'hui."""
+        """Test péremption aujourd'hui."""
         today = date.today()
         date_peremption = today
         
@@ -426,16 +426,16 @@ class TestJoursAvantPeremptionLogic:
         assert result == 0
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS D'EDGE CASES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestEdgeCases:
     """Tests pour les cas limites."""
 
     def test_suggestion_float_quantite(self):
-        """Test suggestion avec quantitÃ© dÃ©cimale."""
+        """Test suggestion avec quantité décimale."""
         from src.services.inventaire import SuggestionCourses
         
         suggestion = SuggestionCourses(
@@ -443,7 +443,7 @@ class TestEdgeCases:
             quantite=0.5,
             unite="kg",
             priorite="moyenne",
-            rayon="CrÃ©merie",
+            rayon="Crémerie",
         )
         
         assert suggestion.quantite == 0.5
@@ -456,24 +456,24 @@ class TestEdgeCases:
             nom="Å’ufs frais",
             quantite=12,
             quantite_min=6,
-            unite="piÃ¨ces",
+            unite="pièces",
         )
         
         assert article.nom == "Å’ufs frais"
 
     def test_article_accented_chars(self):
-        """Test article avec caractÃ¨res accentuÃ©s."""
+        """Test article avec caractères accentués."""
         from src.services.inventaire import ArticleImport
         
         article = ArticleImport(
-            nom="PÃ¢tÃ© de campagne",
+            nom="PÃ¢té de campagne",
             quantite=1,
             quantite_min=0,
             unite="pot",
             categorie="Ã‰picerie",
         )
         
-        assert "Ã©" in article.categorie or "pÃ¢t" in article.nom.lower()
+        assert "é" in article.categorie or "pÃ¢t" in article.nom.lower()
 
     def test_suggestion_long_rayon(self):
         """Test suggestion avec rayon long."""
@@ -484,7 +484,7 @@ class TestEdgeCases:
             quantite=1,
             unite="u",
             priorite="basse",
-            rayon="Rayon des produits frais et rÃ©frigÃ©rÃ©s du magasin",
+            rayon="Rayon des produits frais et réfrigérés du magasin",
         )
         
         assert len(suggestion.rayon) > 30

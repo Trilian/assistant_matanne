@@ -1,6 +1,6 @@
 ﻿"""
 Tests pour le module planning/vue_ensemble.py
-Tableau de bord et vue d'ensemble du planning familial (logique mÃ©tier)
+Tableau de bord et vue d'ensemble du planning familial (logique métier)
 """
 
 import pytest
@@ -13,7 +13,7 @@ class TestActionsPrioritaires:
     """Tests pour la logique des actions prioritaires"""
 
     def test_detecte_taches_urgentes(self):
-        """DÃ©tecte les tÃ¢ches urgentes (deadline proche)"""
+        """Détecte les tÃ¢ches urgentes (deadline proche)"""
         aujourd_hui = date.today()
         demain = aujourd_hui + timedelta(days=1)
         dans_7_jours = aujourd_hui + timedelta(days=7)
@@ -24,12 +24,12 @@ class TestActionsPrioritaires:
             MagicMock(deadline=demain, complete=True, priorite="haute"),
         ]
         
-        # Urgentes = deadline < 3 jours et non complÃ©tÃ©es
+        # Urgentes = deadline < 3 jours et non complétées
         urgentes = [t for t in taches if (t.deadline - aujourd_hui).days < 3 and not t.complete]
         assert len(urgentes) == 1
 
     def test_tri_par_priorite(self):
-        """Trie les actions par prioritÃ©"""
+        """Trie les actions par priorité"""
         ORDRE_PRIORITE = {"haute": 0, "moyenne": 1, "basse": 2}
         
         actions = [
@@ -46,10 +46,10 @@ class TestActionsPrioritaires:
 
 
 class TestMetriquesCles:
-    """Tests pour les mÃ©triques clÃ©s du planning"""
+    """Tests pour les métriques clés du planning"""
 
     def test_compte_evenements_semaine(self):
-        """Compte les Ã©vÃ©nements de la semaine"""
+        """Compte les événements de la semaine"""
         aujourd_hui = date.today()
         debut_semaine = aujourd_hui - timedelta(days=aujourd_hui.weekday())
         fin_semaine = debut_semaine + timedelta(days=6)
@@ -57,7 +57,7 @@ class TestMetriquesCles:
         evenements = [
             MagicMock(date=debut_semaine + timedelta(days=1)),
             MagicMock(date=debut_semaine + timedelta(days=3)),
-            MagicMock(date=debut_semaine - timedelta(days=1)),  # Semaine prÃ©cÃ©dente
+            MagicMock(date=debut_semaine - timedelta(days=1)),  # Semaine précédente
         ]
         
         cette_semaine = [e for e in evenements if debut_semaine <= e.date <= fin_semaine]
@@ -94,10 +94,10 @@ class TestMetriquesCles:
 
 
 class TestSyntheseJours:
-    """Tests pour la synthÃ¨se des jours de la semaine"""
+    """Tests pour la synthèse des jours de la semaine"""
 
     def test_genere_jours_semaine(self):
-        """GÃ©nÃ¨re les jours de la semaine Ã  partir d'une date"""
+        """Génère les jours de la semaine à partir d'une date"""
         date_debut = date(2024, 1, 1)  # Un lundi
         
         jours = []
@@ -108,7 +108,7 @@ class TestSyntheseJours:
         assert jours[0].weekday() == 0  # Lundi
 
     def test_groupe_evenements_par_jour(self):
-        """Groupe les Ã©vÃ©nements par jour"""
+        """Groupe les événements par jour"""
         evenements = [
             MagicMock(date=date(2024, 1, 1)),
             MagicMock(date=date(2024, 1, 1)),
@@ -126,7 +126,7 @@ class TestSyntheseJours:
         assert len(grouped[date(2024, 1, 2)]) == 1
 
     def test_detecte_jour_charge(self):
-        """DÃ©tecte un jour chargÃ© (>3 Ã©vÃ©nements)"""
+        """Détecte un jour chargé (>3 événements)"""
         evenements_jour = [MagicMock() for _ in range(5)]
         
         est_charge = len(evenements_jour) > 3
@@ -135,10 +135,10 @@ class TestSyntheseJours:
 
 
 class TestOpportunities:
-    """Tests pour les suggestions d'opportunitÃ©s"""
+    """Tests pour les suggestions d'opportunités"""
 
     def test_detecte_creneaux_libres(self):
-        """DÃ©tecte les crÃ©neaux libres"""
+        """Détecte les créneaux libres"""
         jours_semaine = [
             MagicMock(date=date(2024, 1, 1), evenements=[]),
             MagicMock(date=date(2024, 1, 2), evenements=[MagicMock()]),
@@ -150,13 +150,13 @@ class TestOpportunities:
         assert len(jours_libres) == 2
 
     def test_suggere_activites_famille(self):
-        """SuggÃ¨re des activitÃ©s si temps libre"""
+        """Suggère des activités si temps libre"""
         SUGGESTIONS = ["Sortie au parc", "Film en famille", "Cuisine ensemble"]
         
         jours_libres = 2
         
         if jours_libres > 0:
-            suggestion = SUGGESTIONS[0]  # PremiÃ¨re suggestion
+            suggestion = SUGGESTIONS[0]  # Première suggestion
         else:
             suggestion = None
         
@@ -167,7 +167,7 @@ class TestNavigationSemaine:
     """Tests pour la navigation entre semaines"""
 
     def test_semaine_precedente(self):
-        """Navigation vers la semaine prÃ©cÃ©dente"""
+        """Navigation vers la semaine précédente"""
         semaine_actuelle = date(2024, 1, 8)  # Un lundi
         
         semaine_prec = semaine_actuelle - timedelta(weeks=1)
@@ -183,7 +183,7 @@ class TestNavigationSemaine:
         assert semaine_suiv == date(2024, 1, 8)
 
     def test_retour_semaine_courante(self):
-        """Retour Ã  la semaine courante"""
+        """Retour à la semaine courante"""
         aujourd_hui = date.today()
         debut_semaine_courante = aujourd_hui - timedelta(days=aujourd_hui.weekday())
         
@@ -191,10 +191,10 @@ class TestNavigationSemaine:
 
 
 class TestAlertes:
-    """Tests pour le systÃ¨me d'alertes"""
+    """Tests pour le système d'alertes"""
 
     def test_alerte_tache_en_retard(self):
-        """GÃ©nÃ¨re une alerte pour tÃ¢che en retard"""
+        """Génère une alerte pour tÃ¢che en retard"""
         aujourd_hui = date.today()
         
         tache = MagicMock()
@@ -206,7 +206,7 @@ class TestAlertes:
         if tache.deadline < aujourd_hui and not tache.complete:
             alertes.append({
                 "type": "retard",
-                "message": f"âš ï¸ {tache.nom} en retard de {(aujourd_hui - tache.deadline).days} jour(s)",
+                "message": f"âš ï¸ {tache.nom} en retard de {(aujourd_hui - tache.deadline).days} jour(s)",
                 "priorite": "haute"
             })
         
@@ -214,7 +214,7 @@ class TestAlertes:
         assert alertes[0]["type"] == "retard"
 
     def test_alerte_deadline_proche(self):
-        """GÃ©nÃ¨re une alerte pour deadline proche"""
+        """Génère une alerte pour deadline proche"""
         aujourd_hui = date.today()
         
         tache = MagicMock()
@@ -227,7 +227,7 @@ class TestAlertes:
         if 0 < jours_restants <= 2 and not tache.complete:
             alertes.append({
                 "type": "urgent",
-                "message": f"â° {tache.nom} dans {jours_restants} jour(s)",
+                "message": f"â° {tache.nom} dans {jours_restants} jour(s)",
                 "priorite": "moyenne"
             })
         
@@ -235,7 +235,7 @@ class TestAlertes:
         assert alertes[0]["type"] == "urgent"
 
     def test_pas_alerte_tache_complete(self):
-        """Pas d'alerte pour tÃ¢che complÃ©tÃ©e"""
+        """Pas d'alerte pour tÃ¢che complétée"""
         aujourd_hui = date.today()
         
         tache = MagicMock()
@@ -250,24 +250,24 @@ class TestAlertes:
 
 
 class TestCategoriesPlanning:
-    """Tests pour les catÃ©gories de planning"""
+    """Tests pour les catégories de planning"""
 
     def test_emojis_categories(self):
-        """VÃ©rifie les emojis des catÃ©gories"""
+        """Vérifie les emojis des catégories"""
         CATEGORIE_EMOJIS = {
-            "repas": "ðŸ½ï¸",
+            "repas": "ðŸ½ï¸",
             "activite": "ðŸŽ¯",
             "rdv": "ðŸ“…",
             "tache": "âœ…",
             "routine": "ðŸ”„"
         }
         
-        assert CATEGORIE_EMOJIS.get("repas") == "ðŸ½ï¸"
+        assert CATEGORIE_EMOJIS.get("repas") == "ðŸ½ï¸"
         assert CATEGORIE_EMOJIS.get("activite") == "ðŸŽ¯"
         assert CATEGORIE_EMOJIS.get("rdv") == "ðŸ“…"
 
     def test_couleurs_categories(self):
-        """VÃ©rifie les couleurs des catÃ©gories"""
+        """Vérifie les couleurs des catégories"""
         CATEGORIE_COULEURS = {
             "repas": "#4CAF50",
             "activite": "#2196F3",
@@ -282,7 +282,7 @@ class TestFormattageDate:
     """Tests pour le formattage des dates"""
 
     def test_format_jour_semaine_francais(self):
-        """Formate le jour de la semaine en franÃ§ais"""
+        """Formate le jour de la semaine en français"""
         JOURS_FR = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
         
         date_test = date(2024, 1, 1)  # C'est un lundi

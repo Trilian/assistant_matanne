@@ -1,20 +1,20 @@
 ﻿"""
-Tests unitaires pour lazy_loader.py (Chargement diffÃ©rÃ© des modules)
+Tests unitaires pour lazy_loader.py (Chargement différé des modules)
 """
 
 import pytest
 from unittest.mock import MagicMock, patch
 
-# Import direct du module Ã  tester
+# Import direct du module à tester
 from src.core.lazy_loader import LazyModuleLoader, OptimizedRouter
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS LAZY MODULE LOADER
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestLazyModuleLoader:
-    """Tests du chargeur de modules diffÃ©rÃ©"""
+    """Tests du chargeur de modules différé"""
     
     def test_class_exists(self):
         """Test que la classe existe"""
@@ -25,12 +25,12 @@ class TestLazyModuleLoader:
         assert callable(LazyModuleLoader)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS OPTIMIZED ROUTER
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestOptimizedRouter:
-    """Tests du routeur optimisÃ©"""
+    """Tests du routeur optimisé"""
     
     def test_class_exists(self):
         """Test que la classe existe"""
@@ -46,6 +46,6 @@ class TestOptimizedRouter:
             router = OptimizedRouter()
             assert router is not None
         except Exception:
-            # Peut Ã©chouer si Streamlit n'est pas disponible
+            # Peut échouer si Streamlit n'est pas disponible
             pass
 

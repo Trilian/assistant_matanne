@@ -14,19 +14,19 @@ class TestRedisConfig:
     """Tests pour RedisConfig."""
 
     def test_config_defaults(self):
-        """Valeurs par dÃ©faut de configuration Redis."""
+        """Valeurs par défaut de configuration Redis."""
         from src.core.redis_cache import RedisConfig
         
         config = RedisConfig()
         
-        # Valeurs par dÃ©faut attendues
+        # Valeurs par défaut attendues
         assert config.HOST == "localhost"
         assert config.PORT == 6379
         assert config.DB == 0
 
 
 class TestMemoryCache:
-    """Tests pour MemoryCache (cache fallback en mÃ©moire)."""
+    """Tests pour MemoryCache (cache fallback en mémoire)."""
 
     def test_memory_cache_get_set(self):
         """Get/Set basique."""
@@ -40,7 +40,7 @@ class TestMemoryCache:
         assert result == "test_value"
 
     def test_memory_cache_get_inexistant(self):
-        """Get clÃ© inexistante."""
+        """Get clé inexistante."""
         from src.core.redis_cache import MemoryCache
         
         cache = MemoryCache()
@@ -56,18 +56,18 @@ class TestMemoryCache:
         
         cache = MemoryCache()
         
-        # TTL trÃ¨s court (1 seconde)
+        # TTL très court (1 seconde)
         cache.set("ephemere", "valeur", ttl=1)
         
-        # ImmÃ©diatement disponible
+        # Immédiatement disponible
         assert cache.get("ephemere") == "valeur"
         
-        # AprÃ¨s expiration
+        # Après expiration
         time.sleep(1.5)
         assert cache.get("ephemere") is None
 
     def test_memory_cache_delete(self):
-        """Suppression de clÃ©."""
+        """Suppression de clé."""
         from src.core.redis_cache import MemoryCache
         
         cache = MemoryCache()
@@ -92,10 +92,10 @@ class TestMemoryCache:
         # Invalider le tag "recettes"
         cache.invalidate_tag("recettes")
         
-        # Les recettes sont invalidÃ©es
+        # Les recettes sont invalidées
         assert cache.get("recette_1") is None
         assert cache.get("recette_2") is None
-        # L'autre est prÃ©servÃ©
+        # L'autre est préservé
         assert cache.get("autre") == "data3"
 
     def test_memory_cache_clear(self):
@@ -195,7 +195,7 @@ class TestUserContextManager:
     """Tests pour le context manager user_context."""
 
     def test_user_context_manager(self):
-        """Context manager dÃ©finit l'utilisateur temporairement."""
+        """Context manager définit l'utilisateur temporairement."""
         from src.core.multi_tenant import UserContext, user_context
         
         UserContext.clear()
@@ -203,11 +203,11 @@ class TestUserContextManager:
         with user_context("temp-user"):
             assert UserContext.get_user() == "temp-user"
         
-        # AprÃ¨s le context, retour Ã  None
+        # Après le context, retour à None
         assert UserContext.get_user() is None
 
     def test_user_context_manager_nested(self):
-        """Context managers imbriquÃ©s."""
+        """Context managers imbriqués."""
         from src.core.multi_tenant import UserContext, user_context
         
         UserContext.clear()
@@ -218,7 +218,7 @@ class TestUserContextManager:
             with user_context("user-2"):
                 assert UserContext.get_user() == "user-2"
             
-            # Retour Ã  user-1
+            # Retour à user-1
             assert UserContext.get_user() == "user-1"
 
 
@@ -235,15 +235,15 @@ class TestAdminContext:
         with admin_context():
             assert UserContext.is_bypassed() is True
         
-        # AprÃ¨s le context, retour Ã  False
+        # Après le context, retour à False
         assert UserContext.is_bypassed() is False
 
 
 class TestWithUserIsolationDecorator:
-    """Tests pour le dÃ©corateur with_user_isolation."""
+    """Tests pour le décorateur with_user_isolation."""
 
     def test_decorator_exists(self):
-        """Le dÃ©corateur existe."""
+        """Le décorateur existe."""
         from src.core.multi_tenant import with_user_isolation
         
         assert callable(with_user_isolation)
@@ -276,24 +276,24 @@ class TestTTLCalculation:
         assert (expiry - now).total_seconds() == ttl_seconds
 
     def test_ttl_est_expire(self):
-        """VÃ©rification si une entrÃ©e est expirÃ©e."""
+        """Vérification si une entrée est expirée."""
         def est_expire(expiry_timestamp: float) -> bool:
             return datetime.now().timestamp() > expiry_timestamp
         
-        # PassÃ© = expirÃ©
+        # Passé = expiré
         passe = datetime.now().timestamp() - 100
         assert est_expire(passe) is True
         
-        # Futur = non expirÃ©
+        # Futur = non expiré
         futur = datetime.now().timestamp() + 100
         assert est_expire(futur) is False
 
 
 class TestKeyGeneration:
-    """Tests pour la gÃ©nÃ©ration de clÃ©s cache."""
+    """Tests pour la génération de clés cache."""
 
     def test_generer_cle_simple(self):
-        """GÃ©nÃ©ration de clÃ© simple."""
+        """Génération de clé simple."""
         def gen_key(prefix: str, *args) -> str:
             return f"{prefix}:{':'.join(str(a) for a in args)}"
         
@@ -301,7 +301,7 @@ class TestKeyGeneration:
         assert key == "recettes:user-1:page-1"
 
     def test_generer_cle_avec_hash(self):
-        """GÃ©nÃ©ration de clÃ© avec hash pour donnÃ©es complexes."""
+        """Génération de clé avec hash pour données complexes."""
         import hashlib
         import json
         

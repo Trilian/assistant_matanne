@@ -1,20 +1,20 @@
 ﻿"""
-Tests complets pour tous les modules *_logic crÃ©Ã©s.
+Tests complets pour tous les modules *_logic créés.
 Objectif: Atteindre 40% de couverture en testant la logique pure.
 """
 import pytest
 from datetime import date, timedelta, time
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PLANNING LOGIC (CUISINE)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestPlanningLogicCuisine:
     """Tests pour planning_logic.py (cuisine)."""
     
     def test_get_debut_semaine(self):
-        """Calcul dÃ©but de semaine."""
+        """Calcul début de semaine."""
         from src.domains.cuisine.logic.planning_logic import get_debut_semaine
         
         # Mercredi 29 jan 2026 â†’ lundi 27 jan
@@ -36,7 +36,7 @@ class TestPlanningLogicCuisine:
         """Validation repas valide."""
         from src.domains.cuisine.logic.planning_logic import valider_repas
         
-        data = {"jour": "Lundi", "type_repas": "dÃ©jeuner", "recette_id": 1}
+        data = {"jour": "Lundi", "type_repas": "déjeuner", "recette_id": 1}
         valid, error = valider_repas(data)
         assert valid is True
         assert error is None
@@ -45,15 +45,15 @@ class TestPlanningLogicCuisine:
         """Validation sans jour."""
         from src.domains.cuisine.logic.planning_logic import valider_repas
         
-        data = {"type_repas": "dÃ©jeuner", "recette_id": 1}
+        data = {"type_repas": "déjeuner", "recette_id": 1}
         valid, error = valider_repas(data)
         assert valid is False
         assert "jour" in error.lower()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS JARDIN LOGIC (MAISON)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestJardinLogic:
     """Tests pour jardin_logic.py."""
@@ -63,7 +63,7 @@ class TestJardinLogic:
         from src.domains.maison.logic.jardin_logic import get_saison_actuelle
         
         saison = get_saison_actuelle()
-        assert saison in ["Printemps", "Ã‰tÃ©", "Automne", "Hiver"]
+        assert saison in ["Printemps", "Ã‰té", "Automne", "Hiver"]
     
     def test_calculer_jours_avant_arrosage(self):
         """Jours avant arrosage."""
@@ -77,7 +77,7 @@ class TestJardinLogic:
         assert jours == 2
     
     def test_get_plantes_a_arroser(self):
-        """Liste plantes Ã  arroser."""
+        """Liste plantes à arroser."""
         from src.domains.maison.logic.jardin_logic import get_plantes_a_arroser
         
         plantes = [
@@ -89,9 +89,9 @@ class TestJardinLogic:
         assert len(a_arroser) >= 1
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PROJETS LOGIC (MAISON)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestProjetsLogic:
     """Tests pour projets_logic.py."""
@@ -113,7 +113,7 @@ class TestProjetsLogic:
         
         projets = [
             {"titre": "P1", "statut": "En cours"},
-            {"titre": "P2", "statut": "TerminÃ©"},
+            {"titre": "P2", "statut": "Terminé"},
             {"titre": "P3", "statut": "En cours"}
         ]
         
@@ -124,14 +124,14 @@ class TestProjetsLogic:
         """Calcul progression."""
         from src.domains.maison.logic.projets_logic import calculer_progression
         
-        projet = {"statut": "TerminÃ©"}
+        projet = {"statut": "Terminé"}
         prog = calculer_progression(projet)
         assert prog == 100.0
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ENTRETIEN LOGIC (MAISON)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestEntretienLogic:
     """Tests pour entretien_logic.py."""
@@ -160,14 +160,14 @@ class TestEntretienLogic:
         """Validation tÃ¢che."""
         from src.domains.maison.logic.entretien_logic import valider_tache
         
-        data = {"titre": "MÃ©nage", "frequence": "Quotidienne", "categorie": "MÃ©nage"}
+        data = {"titre": "Ménage", "frequence": "Quotidienne", "categorie": "Ménage"}
         valid, errors = valider_tache(data)
         assert valid is True
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SUIVI JULES LOGIC (FAMILLE)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestSuiviJulesLogic:
     """Tests pour suivi_jules_logic.py."""
@@ -195,7 +195,7 @@ class TestSuiviJulesLogic:
         assert "7 mois" in texte
     
     def test_get_etapes_age(self):
-        """Ã‰tapes dÃ©veloppement."""
+        """Ã‰tapes développement."""
         from src.domains.famille.logic.suivi_jules_logic import get_etapes_age
         
         etapes = get_etapes_age(18)
@@ -203,9 +203,9 @@ class TestSuiviJulesLogic:
         assert len(etapes) > 0
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SANTÃ‰ LOGIC (FAMILLE)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestSanteLogic:
     """Tests pour sante_logic.py."""
@@ -230,9 +230,9 @@ class TestSanteLogic:
         assert valid is True
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PLANNING LOGIC (MODULES PLANNING)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestPlanningLogicModules:
     """Tests pour planning_logic.py (modules planning)."""
@@ -246,7 +246,7 @@ class TestPlanningLogicModules:
         assert charge["niveau"] == "faible"
     
     def test_calculer_charge_jour_charge(self):
-        """Charge jour chargÃ©."""
+        """Charge jour chargé."""
         from src.domains.planning.logic.planning_logic import calculer_charge_jour
         
         activites = [{"titre": f"Act{i}"} for i in range(12)]
@@ -256,7 +256,7 @@ class TestPlanningLogicModules:
         assert charge["niveau"] in ["eleve", "tres_eleve"]
     
     def test_grouper_par_categorie(self):
-        """Groupement catÃ©gories."""
+        """Groupement catégories."""
         from src.domains.planning.logic.planning_logic import grouper_par_categorie
         
         activites = [
@@ -270,15 +270,15 @@ class TestPlanningLogicModules:
         assert len(groupes["Loisir"]) == 1
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FAMILLE LOGIC (SHOPPING, ACTIVITÃ‰S, BIEN-ÃŠTRE)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestFamilleLogic:
     """Tests pour modules famille logic (shopping, bien_etre)."""
     
     def test_calculer_cout_liste(self):
-        """CoÃ»t liste shopping."""
+        """Coût liste shopping."""
         from src.domains.famille.logic.shopping_logic import calculer_budget_shopping
         
         articles = [
@@ -287,30 +287,30 @@ class TestFamilleLogic:
         ]
         
         # Fonction existe, adapter le test ou skip
-        pytest.skip("Fonction calculer_cout_liste Ã  vÃ©rifier dans shopping_logic")
+        pytest.skip("Fonction calculer_cout_liste à vérifier dans shopping_logic")
     
     def test_filtrer_shopping_par_liste(self):
         """Filtrage par liste."""
-        # Fonction probablement dans shopping_logic mais nom diffÃ©rent
-        pytest.skip("Fonction filtrer_shopping_par_liste Ã  vÃ©rifier dans shopping_logic")
+        # Fonction probablement dans shopping_logic mais nom différent
+        pytest.skip("Fonction filtrer_shopping_par_liste à vérifier dans shopping_logic")
     
     def test_valider_article_shopping(self):
         """Validation article."""
-        # Fonction probablement dans shopping_logic mais nom diffÃ©rent
-        pytest.skip("Fonction valider_article_shopping Ã  vÃ©rifier dans shopping_logic")
+        # Fonction probablement dans shopping_logic mais nom différent
+        pytest.skip("Fonction valider_article_shopping à vérifier dans shopping_logic")
     
     def test_calculer_score_bien_etre_global(self):
-        """Score bien-Ãªtre."""
+        """Score bien-être."""
         from src.domains.famille.logic.bien_etre_logic import calculer_score_bien_etre
         
-        # Adapter aux vrais paramÃ¨tres de la fonction
-        pytest.skip("Fonction calculer_score_bien_etre existe mais paramÃ¨tres diffÃ©rents")
+        # Adapter aux vrais paramètres de la fonction
+        pytest.skip("Fonction calculer_score_bien_etre existe mais paramètres différents")
         assert 0 <= score["score"] <= 10
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS DE STRUCTURE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestTousLesModulesLogic:
     """Tests de structure pour tous les modules logic."""

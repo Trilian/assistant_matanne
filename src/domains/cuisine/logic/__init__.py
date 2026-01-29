@@ -1,4 +1,4 @@
-﻿"""Logic Cuisine - Logique mÃ©tier sans dÃ©pendances Streamlit."""
+﻿"""Logic Cuisine - Logique métier sans dépendances Streamlit."""
 
 from . import recettes_logic
 from . import planning_logic

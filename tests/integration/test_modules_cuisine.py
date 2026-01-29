@@ -14,8 +14,8 @@ class TestPrepareInventaireDataframe:
     """Tests pour _prepare_inventaire_dataframe."""
 
     def test_prepare_dataframe_basique(self):
-        """PrÃ©paration d'un DataFrame basique."""
-        # DonnÃ©es d'inventaire mockÃ©es
+        """Préparation d'un DataFrame basique."""
+        # Données d'inventaire mockées
         items = [
             MagicMock(
                 id=1,
@@ -59,7 +59,7 @@ class TestPrepareInventaireDataframe:
         assert len(df) == 0
 
     def test_prepare_dataframe_avec_peremption_passee(self):
-        """DataFrame avec articles expirÃ©s."""
+        """DataFrame avec articles expirés."""
         items = [
             {
                 "nom": "Yaourt",
@@ -70,7 +70,7 @@ class TestPrepareInventaireDataframe:
         
         df = pd.DataFrame(items)
         
-        # Ajouter colonne "expirÃ©"
+        # Ajouter colonne "expiré"
         df["expire"] = df["date_peremption"] < date.today()
         
         assert df["expire"].iloc[0] == True
@@ -80,7 +80,7 @@ class TestPrepareStatsDataframe:
     """Tests pour _prepare_stats_dataframe."""
 
     def test_stats_par_emplacement(self):
-        """Statistiques groupÃ©es par emplacement."""
+        """Statistiques groupées par emplacement."""
         items = [
             {"emplacement": "Frigo", "quantite": 5, "valeur": 10.0},
             {"emplacement": "Frigo", "quantite": 3, "valeur": 8.0},
@@ -98,7 +98,7 @@ class TestPrepareStatsDataframe:
         assert frigo_stats["valeur"].values[0] == 18.0
 
     def test_stats_par_categorie(self):
-        """Statistiques groupÃ©es par catÃ©gorie."""
+        """Statistiques groupées par catégorie."""
         items = [
             {"categorie": "Produits laitiers", "count": 5},
             {"categorie": "Produits laitiers", "count": 3},
@@ -146,7 +146,7 @@ class TestFiltrageInventaire:
         assert len(stock_bas) == 2
 
     def test_filtre_peremption_proche(self):
-        """Filtrage des pÃ©remptions proches (7 jours)."""
+        """Filtrage des péremptions proches (7 jours)."""
         today = date.today()
         items = [
             {"nom": "Yaourt", "date_peremption": today + timedelta(days=3)},  # Proche
@@ -181,7 +181,7 @@ class TestCalculsInventaire:
         assert valeur_totale == 11.00
 
     def test_calcul_jours_avant_peremption(self):
-        """Calcul des jours avant pÃ©remption."""
+        """Calcul des jours avant péremption."""
         today = date.today()
         date_peremption = today + timedelta(days=5)
         
@@ -204,7 +204,7 @@ class TestCalculsInventaire:
 # =============================================================================
 
 class TestParsingIngredients:
-    """Tests pour le parsing d'ingrÃ©dients dans recettes_import."""
+    """Tests pour le parsing d'ingrédients dans recettes_import."""
 
     def test_parse_ingredient_simple(self):
         """Parse '200 g de farine'."""
@@ -242,7 +242,7 @@ class TestParsingIngredients:
         text = "3 Å“ufs (gros)"
         
         import re
-        # Retirer les parenthÃ¨ses
+        # Retirer les parenthèses
         clean = re.sub(r'\([^)]*\)', '', text).strip()
         pattern = r'(\d+)\s*(.+)'
         match = re.match(pattern, clean)
@@ -260,7 +260,7 @@ class TestValidationRecettes:
     """Tests de validation des recettes."""
 
     def test_validation_temps_positif(self):
-        """Le temps de prÃ©paration doit Ãªtre positif."""
+        """Le temps de préparation doit être positif."""
         temps_preparation = 30
         temps_cuisson = 45
         
@@ -268,7 +268,7 @@ class TestValidationRecettes:
         assert temps_cuisson >= 0
 
     def test_validation_portions(self):
-        """Les portions doivent Ãªtre entre 1 et 50."""
+        """Les portions doivent être entre 1 et 50."""
         portions_valides = [1, 4, 8, 12, 50]
         portions_invalides = [0, -1, 100]
         
@@ -279,7 +279,7 @@ class TestValidationRecettes:
             assert not (1 <= p <= 50)
 
     def test_validation_difficulte(self):
-        """La difficultÃ© doit Ãªtre 1-5."""
+        """La difficulté doit être 1-5."""
         difficultes_valides = [1, 2, 3, 4, 5]
         
         for d in difficultes_valides:
@@ -307,10 +307,10 @@ class TestFiltrageRecettes:
         assert len(rapides) == 2
 
     def test_filtre_par_categorie(self):
-        """Filtrage par catÃ©gorie."""
+        """Filtrage par catégorie."""
         recettes = [
             {"nom": "Tarte aux pommes", "categorie": "dessert"},
-            {"nom": "Poulet rÃ´ti", "categorie": "plat"},
+            {"nom": "Poulet rôti", "categorie": "plat"},
             {"nom": "GÃ¢teau chocolat", "categorie": "dessert"},
         ]
         
@@ -319,14 +319,14 @@ class TestFiltrageRecettes:
         assert len(desserts) == 2
 
     def test_filtre_par_difficulte(self):
-        """Filtrage par niveau de difficultÃ©."""
+        """Filtrage par niveau de difficulté."""
         recettes = [
             {"nom": "Salade", "difficulte": 1},
             {"nom": "BÅ“uf bourguignon", "difficulte": 4},
             {"nom": "Omelette", "difficulte": 2},
         ]
         
-        # Recettes faciles (difficultÃ© <= 2)
+        # Recettes faciles (difficulté <= 2)
         faciles = [r for r in recettes if r["difficulte"] <= 2]
         
         assert len(faciles) == 2
@@ -334,8 +334,8 @@ class TestFiltrageRecettes:
     def test_filtre_recherche_texte(self):
         """Recherche textuelle dans nom/description."""
         recettes = [
-            {"nom": "Tarte aux pommes", "description": "DÃ©licieuse tarte"},
-            {"nom": "Poulet curry", "description": "Ã‰picÃ© et savoureux"},
+            {"nom": "Tarte aux pommes", "description": "Délicieuse tarte"},
+            {"nom": "Poulet curry", "description": "Ã‰picé et savoureux"},
             {"nom": "Crumble pommes", "description": "Dessert facile"},
         ]
         
@@ -356,12 +356,12 @@ class TestSuggestionsRecettes:
     """Tests pour les suggestions de recettes."""
 
     def test_suggestion_par_ingredients_disponibles(self):
-        """Suggestion basÃ©e sur ingrÃ©dients disponibles."""
+        """Suggestion basée sur ingrédients disponibles."""
         ingredients_dispo = {"farine", "Å“ufs", "sucre", "beurre"}
         
         recettes = [
             {"nom": "GÃ¢teau", "ingredients": {"farine", "Å“ufs", "sucre"}},  # 100%
-            {"nom": "Quiche", "ingredients": {"farine", "Å“ufs", "crÃ¨me"}},  # 66%
+            {"nom": "Quiche", "ingredients": {"farine", "Å“ufs", "crème"}},  # 66%
             {"nom": "Sushi", "ingredients": {"riz", "poisson", "algue"}},  # 0%
         ]
         
@@ -377,13 +377,13 @@ class TestSuggestionsRecettes:
         assert scores[0][1] == 1.0
 
     def test_suggestion_par_saison(self):
-        """Suggestion basÃ©e sur la saison."""
+        """Suggestion basée sur la saison."""
         mois_actuel = 1  # Janvier
         
         recettes = [
             {"nom": "Soupe", "saisons": [10, 11, 12, 1, 2, 3]},  # Hiver
-            {"nom": "Salade", "saisons": [4, 5, 6, 7, 8, 9]},  # Ã‰tÃ©
-            {"nom": "Tarte", "saisons": list(range(1, 13))},  # Toute l'annÃ©e
+            {"nom": "Salade", "saisons": [4, 5, 6, 7, 8, 9]},  # Ã‰té
+            {"nom": "Tarte", "saisons": list(range(1, 13))},  # Toute l'année
         ]
         
         de_saison = [r for r in recettes if mois_actuel in r["saisons"]]
@@ -397,14 +397,14 @@ class TestSuggestionsRecettes:
 # =============================================================================
 
 class TestGenerationListeCourses:
-    """Tests pour la gÃ©nÃ©ration de liste de courses."""
+    """Tests pour la génération de liste de courses."""
 
     def test_extraire_ingredients_recette(self):
-        """Extraction des ingrÃ©dients d'une recette."""
+        """Extraction des ingrédients d'une recette."""
         recette = {
             "ingredients": [
                 {"nom": "Farine", "quantite": 200, "unite": "g"},
-                {"nom": "Å’ufs", "quantite": 3, "unite": "piÃ¨ces"},
+                {"nom": "Å’ufs", "quantite": 3, "unite": "pièces"},
                 {"nom": "Lait", "quantite": 250, "unite": "ml"},
             ]
         }
@@ -414,11 +414,11 @@ class TestGenerationListeCourses:
         assert len(ingredients) == 3
 
     def test_grouper_ingredients_par_categorie(self):
-        """Groupement des ingrÃ©dients par catÃ©gorie."""
+        """Groupement des ingrédients par catégorie."""
         ingredients = [
             {"nom": "Lait", "categorie": "Produits laitiers"},
             {"nom": "Yaourt", "categorie": "Produits laitiers"},
-            {"nom": "Carottes", "categorie": "LÃ©gumes"},
+            {"nom": "Carottes", "categorie": "Légumes"},
             {"nom": "Pommes", "categorie": "Fruits"},
         ]
         
@@ -429,10 +429,10 @@ class TestGenerationListeCourses:
         grouped = {k: list(v) for k, v in groupby(sorted_ing, key=itemgetter("categorie"))}
         
         assert len(grouped["Produits laitiers"]) == 2
-        assert len(grouped["LÃ©gumes"]) == 1
+        assert len(grouped["Légumes"]) == 1
 
     def test_fusionner_ingredients_identiques(self):
-        """Fusion des ingrÃ©dients identiques."""
+        """Fusion des ingrédients identiques."""
         ingredients = [
             {"nom": "Farine", "quantite": 200, "unite": "g"},
             {"nom": "Farine", "quantite": 150, "unite": "g"},

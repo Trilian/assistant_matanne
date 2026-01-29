@@ -9,9 +9,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
@@ -32,9 +32,9 @@ def mock_streamlit():
         yield mock_st
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FORM_FIELD
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFormField:
@@ -59,7 +59,7 @@ class TestFormField:
 
         form_field(config, "test")
 
-        # VÃ©rifier que le label contient *
+        # Vérifier que le label contient *
         call_args = mock_streamlit.text_input.call_args
         assert " *" in call_args[0][0]
 
@@ -89,8 +89,8 @@ class TestFormField:
         config = {
             "type": "select",
             "name": "categorie",
-            "label": "CatÃ©gorie",
-            "options": ["EntrÃ©e", "Plat", "Dessert"],
+            "label": "Catégorie",
+            "options": ["Entrée", "Plat", "Dessert"],
         }
 
         result = form_field(config, "test")
@@ -106,7 +106,7 @@ class TestFormField:
             "type": "multiselect",
             "name": "tags",
             "label": "Tags",
-            "options": ["VÃ©gÃ©tarien", "Rapide", "Facile"],
+            "options": ["Végétarien", "Rapide", "Facile"],
         }
 
         result = form_field(config, "test")
@@ -145,7 +145,7 @@ class TestFormField:
         """Test champ date"""
         from src.ui.components.forms import form_field
 
-        config = {"type": "date", "name": "date_debut", "label": "Date dÃ©but"}
+        config = {"type": "date", "name": "date_debut", "label": "Date début"}
 
         result = form_field(config, "test")
 
@@ -171,7 +171,7 @@ class TestFormField:
         assert result == 75
 
     def test_unknown_field_type_defaults_to_text(self, mock_streamlit):
-        """Test type inconnu -> text_input par dÃ©faut"""
+        """Test type inconnu -> text_input par défaut"""
         from src.ui.components.forms import form_field
 
         config = {"type": "unknown_type", "name": "field", "label": "Field"}
@@ -183,7 +183,7 @@ class TestFormField:
         assert result == "test_value"
 
     def test_field_default_values(self, mock_streamlit):
-        """Test valeurs par dÃ©faut des champs"""
+        """Test valeurs par défaut des champs"""
         from src.ui.components.forms import form_field
 
         # Config minimale
@@ -191,20 +191,20 @@ class TestFormField:
 
         form_field(config, "prefix")
 
-        # Doit utiliser text_input par dÃ©faut
+        # Doit utiliser text_input par défaut
         mock_streamlit.text_input.assert_called()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SEARCH_BAR
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestSearchBar:
     """Tests pour search_bar()"""
 
     def test_search_bar_default(self, mock_streamlit):
-        """Test barre de recherche par dÃ©faut"""
+        """Test barre de recherche par défaut"""
         from src.ui.components.forms import search_bar
 
         mock_streamlit.text_input.return_value = "recherche"
@@ -213,12 +213,12 @@ class TestSearchBar:
 
         mock_streamlit.text_input.assert_called_once()
         call_kwargs = mock_streamlit.text_input.call_args[1]
-        assert "ðŸ”" in call_kwargs["placeholder"]
+        assert "ðŸ”" in call_kwargs["placeholder"]
         assert call_kwargs["label_visibility"] == "collapsed"
         assert result == "recherche"
 
     def test_search_bar_custom_placeholder(self, mock_streamlit):
-        """Test placeholder personnalisÃ©"""
+        """Test placeholder personnalisé"""
         from src.ui.components.forms import search_bar
 
         search_bar(placeholder="Rechercher recettes...")
@@ -227,7 +227,7 @@ class TestSearchBar:
         assert "Rechercher recettes..." in call_kwargs["placeholder"]
 
     def test_search_bar_custom_key(self, mock_streamlit):
-        """Test clÃ© personnalisÃ©e"""
+        """Test clé personnalisée"""
         from src.ui.components.forms import search_bar
 
         search_bar(key="recipe_search")
@@ -236,9 +236,9 @@ class TestSearchBar:
         assert call_kwargs["key"] == "recipe_search"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FILTER_PANEL
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFilterPanel:
@@ -248,7 +248,7 @@ class TestFilterPanel:
         """Test panneau avec un filtre"""
         from src.ui.components.forms import filter_panel
 
-        filters_config = {"saison": {"type": "select", "label": "Saison", "options": ["Toutes", "Ã‰tÃ©", "Hiver"]}}
+        filters_config = {"saison": {"type": "select", "label": "Saison", "options": ["Toutes", "Ã‰té", "Hiver"]}}
 
         result = filter_panel(filters_config, "recipe")
 
@@ -260,7 +260,7 @@ class TestFilterPanel:
 
         filters_config = {
             "saison": {"type": "select", "label": "Saison", "options": ["Toutes"]},
-            "difficulte": {"type": "select", "label": "DifficultÃ©", "options": ["Facile", "Moyen"]},
+            "difficulte": {"type": "select", "label": "Difficulté", "options": ["Facile", "Moyen"]},
             "actif": {"type": "checkbox", "label": "Actif seulement"},
         }
 
@@ -280,44 +280,44 @@ class TestFilterPanel:
         assert result == {}
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS QUICK_FILTERS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestQuickFilters:
     """Tests pour quick_filters()"""
 
     def test_quick_filters_no_selection(self, mock_streamlit):
-        """Test filtres rapides sans sÃ©lection"""
+        """Test filtres rapides sans sélection"""
         from src.ui.components.forms import quick_filters
 
         mock_streamlit.button.return_value = False
-        # Mock columns avec 4 Ã©lÃ©ments
+        # Mock columns avec 4 éléments
         mock_col = MagicMock()
         mock_col.__enter__ = MagicMock(return_value=None)
         mock_col.__exit__ = MagicMock(return_value=None)
         mock_streamlit.columns.return_value = [mock_col, mock_col, mock_col, mock_col]
 
-        filters = {"Type": ["Tous", "EntrÃ©e", "Plat", "Dessert"]}
+        filters = {"Type": ["Tous", "Entrée", "Plat", "Dessert"]}
 
         result = quick_filters(filters)
 
-        # Pas de sÃ©lection car button retourne False
+        # Pas de sélection car button retourne False
         assert result == {}
 
     def test_quick_filters_with_selection(self, mock_streamlit):
-        """Test filtres rapides avec sÃ©lection"""
+        """Test filtres rapides avec sélection"""
         from src.ui.components.forms import quick_filters
 
-        # Premier bouton sÃ©lectionnÃ©
+        # Premier bouton sélectionné
         mock_streamlit.button.side_effect = [True, False, False, False]
         mock_col = MagicMock()
         mock_col.__enter__ = MagicMock(return_value=None)
         mock_col.__exit__ = MagicMock(return_value=None)
         mock_streamlit.columns.return_value = [mock_col, mock_col, mock_col, mock_col]
 
-        filters = {"Type": ["Tous", "EntrÃ©e", "Plat", "Dessert"]}
+        filters = {"Type": ["Tous", "Entrée", "Plat", "Dessert"]}
 
         result = quick_filters(filters)
 
@@ -335,17 +335,17 @@ class TestQuickFilters:
         mock_streamlit.columns.return_value = [mock_col, mock_col, mock_col]
 
         filters = {
-            "Type": ["Tous", "EntrÃ©e", "Plat"],
-            "DifficultÃ©": ["Facile", "Moyen", "Difficile"],
+            "Type": ["Tous", "Entrée", "Plat"],
+            "Difficulté": ["Facile", "Moyen", "Difficile"],
         }
 
         result = quick_filters(filters, key_prefix="custom")
 
-        # columns appelÃ© deux fois (une par groupe)
+        # columns appelé deux fois (une par groupe)
         assert mock_streamlit.columns.call_count == 2
 
     def test_quick_filters_custom_key_prefix(self, mock_streamlit):
-        """Test prÃ©fixe de clÃ© personnalisÃ©"""
+        """Test préfixe de clé personnalisé"""
         from src.ui.components.forms import quick_filters
 
         mock_streamlit.button.return_value = False
@@ -356,7 +356,7 @@ class TestQuickFilters:
 
         quick_filters({"Groupe": ["A", "B"]}, key_prefix="my_prefix")
 
-        # VÃ©rifier que les boutons utilisent le prÃ©fixe
+        # Vérifier que les boutons utilisent le préfixe
         call_args = mock_streamlit.button.call_args_list
         for call in call_args:
             assert "my_prefix" in call[1]["key"]

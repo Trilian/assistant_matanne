@@ -11,9 +11,9 @@ import pytest
 import re
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ALIGNEMENT RECETTES CARDS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @pytest.mark.unit
 class TestRecetteCardAlignment:
@@ -24,18 +24,18 @@ class TestRecetteCardAlignment:
         # Style du titre comme dans recettes.py ligne 201
         title_style = "margin: 6px 0; line-height: 1.2; font-size: 15px; height: 2.4em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;"
         
-        # VÃ©rifier la prÃ©sence des propriÃ©tÃ©s clÃ©s
+        # Vérifier la présence des propriétés clés
         assert "height: 2.4em" in title_style
         assert "overflow: hidden" in title_style
         assert "-webkit-line-clamp: 2" in title_style
         assert "display: -webkit-box" in title_style
     
     def test_recipe_card_title_overflow_ellipsis(self):
-        """Teste que le texte qui dÃ©passe est tronquÃ© avec points."""
+        """Teste que le texte qui dépasse est tronqué avec points."""
         # Style avec ellipsis
         title_style = "height: 2.4em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;"
         
-        # Ces styles ensemble crÃ©ent un effet de truncate automatique
+        # Ces styles ensemble créent un effet de truncate automatique
         required_styles = [
             "height",
             "overflow",
@@ -46,7 +46,7 @@ class TestRecetteCardAlignment:
             assert style in title_style
     
     def test_recipe_card_emoji_preserved(self):
-        """Teste que l'emoji de difficultÃ© est prÃ©servÃ©."""
+        """Teste que l'emoji de difficulté est préservé."""
         difficulty_emoji_map = {
             "facile": "ðŸŸ¢",
             "moyen": "ðŸŸ¡",
@@ -54,15 +54,15 @@ class TestRecetteCardAlignment:
         }
         
         for difficulty, emoji in difficulty_emoji_map.items():
-            html_title = f'<h4>{emoji} Titre trÃ¨s long qui pourrait s\'Ã©tendre sur deux lignes</h4>'
+            html_title = f'<h4>{emoji} Titre très long qui pourrait s\'étendre sur deux lignes</h4>'
             
-            # L'emoji doit Ãªtre prÃ©sent
+            # L'emoji doit être présent
             assert emoji in html_title
     
     def test_recipe_card_title_multiline_aligned(self):
-        """Teste que les titres de 1 et 2 lignes ont mÃªme hauteur."""
+        """Teste que les titres de 1 et 2 lignes ont même hauteur."""
         # Tous les titres avec height: 2.4em auront exactement 2.4em de haut
-        # peu importe le nombre de lignes (grÃ¢ce Ã  line-height: 1.2)
+        # peu importe le nombre de lignes (grÃ¢ce à line-height: 1.2)
         # 2.4em â‰ˆ 2 lignes de height
         height_em = 2.4
         line_height = 1.2
@@ -71,23 +71,23 @@ class TestRecetteCardAlignment:
         assert max_lines == 2
     
     def test_recipe_card_description_text_preserved(self):
-        """Teste que la description n'est pas affectÃ©e par l'alignement du titre."""
-        # La description est sur une ligne sÃ©parÃ©e et ne doit pas Ãªtre limitÃ©e
+        """Teste que la description n'est pas affectée par l'alignement du titre."""
+        # La description est sur une ligne séparée et ne doit pas être limitée
         # par les styles du titre
         description_style = "margin: 2px 0; font-size: 11px; opacity: 0.7;"
         
-        # La description n'a pas de height limitÃ©e, donc elle peut s'Ã©tendre
+        # La description n'a pas de height limitée, donc elle peut s'étendre
         assert "height" not in description_style
         assert "overflow" not in description_style
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS VALIDATION HTML SANITAIRE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @pytest.mark.unit
 class TestHTMLSanitization:
-    """Tests pour la sÃ©curitÃ© des styles HTML."""
+    """Tests pour la sécurité des styles HTML."""
     
     def test_recipe_card_style_no_malicious_code(self):
         """Teste qu'aucune injection de code n'est possible via styles."""
@@ -106,37 +106,37 @@ class TestHTMLSanitization:
             assert re.search(pattern, safe_style, re.IGNORECASE) is None
     
     def test_recipe_card_numeric_values_valid(self):
-        """Teste que les valeurs numÃ©riques des styles sont valides."""
+        """Teste que les valeurs numériques des styles sont valides."""
         # Valeurs du style
         style_values = {
             "margin": "6px",
-            "line-height": "1.2",  # Sans unitÃ© pour les multiples
+            "line-height": "1.2",  # Sans unité pour les multiples
             "font-size": "15px",
             "height": "2.4em",
         }
         
-        # Regex pour valider les valeurs (incluant les valeurs sans unitÃ© pour line-height)
+        # Regex pour valider les valeurs (incluant les valeurs sans unité pour line-height)
         numeric_pattern = r"^[\d.]+(?:px|em|rem|%|vh|vw)?$"
         
         for key, value in style_values.items():
             assert re.match(numeric_pattern, value), f"{key}: {value} is not a valid CSS value"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS RESPONSIVE DESIGN
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @pytest.mark.unit
 class TestResponsiveDesign:
     """Tests pour le design responsive."""
     
     def test_recipe_card_relative_units(self):
-        """Teste l'utilisation d'unitÃ©s relatives pour la responsivitÃ©."""
-        # Tous les sizes doivent utiliser des unitÃ©s relatives
-        # pour Ãªtre responsive
+        """Teste l'utilisation d'unités relatives pour la responsivité."""
+        # Tous les sizes doivent utiliser des unités relatives
+        # pour être responsive
         style_with_em = "font-size: 15px; height: 2.4em; line-height: 1.2;"
         
-        # em est une unitÃ© relative
+        # em est une unité relative
         assert "em" in style_with_em
     
     def test_recipe_card_flexbox_compatible(self):
@@ -148,16 +148,16 @@ class TestResponsiveDesign:
         assert "box" in style
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS COMPATIBILITÃ‰ NAVIGATEURS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @pytest.mark.unit
 class TestBrowserCompatibility:
-    """Tests pour la compatibilitÃ© navigateurs."""
+    """Tests pour la compatibilité navigateurs."""
     
     def test_webkit_prefix_present(self):
-        """Teste que les prÃ©fixes -webkit- sont prÃ©sents pour Chrome/Safari."""
+        """Teste que les préfixes -webkit- sont présents pour Chrome/Safari."""
         style = "display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;"
         
         # Webkit prefixes pour anciens navigateurs
@@ -165,7 +165,7 @@ class TestBrowserCompatibility:
         assert "-webkit-line-clamp" in style
     
     def test_fallback_properties_present(self):
-        """Teste que les propriÃ©tÃ©s de fallback existent."""
+        """Teste que les propriétés de fallback existent."""
         style = "overflow: hidden; height: 2.4em; display: -webkit-box;"
         
         # overflow: hidden est un fallback si line-clamp ne fonctionne pas
@@ -176,9 +176,9 @@ class TestBrowserCompatibility:
         emojis = ["ðŸŸ¢", "ðŸŸ¡", "ðŸ”´", "âšª"]
         
         for emoji in emojis:
-            # VÃ©rifier que l'emoji est un caractÃ¨re Unicode valide
+            # Vérifier que l'emoji est un caractère Unicode valide
             assert len(emoji) > 0
-            assert ord(emoji[0]) > 127  # CaractÃ¨re non-ASCII
+            assert ord(emoji[0]) > 127  # Caractère non-ASCII
 
 
 if __name__ == "__main__":

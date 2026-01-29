@@ -1,5 +1,5 @@
 ﻿"""
-Helpers Maison - Fonctions rÃ©utilisables pour les 3 modules
+Helpers Maison - Fonctions réutilisables pour les 3 modules
 Gestion des projets, jardin et entretien
 """
 
@@ -13,9 +13,9 @@ from src.core.database import get_db_context
 from src.core.models import Project, ProjectTask, GardenItem, GardenLog, Routine, RoutineTask
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # PROJETS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @st.cache_data(ttl=1800)
@@ -35,7 +35,7 @@ def charger_projets(statut: str = None) -> pd.DataFrame:
             
             completion = 0
             if p.tasks:
-                completed = len([t for t in p.tasks if t.statut == "terminÃ©"])
+                completed = len([t for t in p.tasks if t.statut == "terminé"])
                 completion = (completed / len(p.tasks) * 100) if p.tasks else 0
             
             data.append({
@@ -55,18 +55,18 @@ def charger_projets(statut: str = None) -> pd.DataFrame:
 
 @st.cache_data(ttl=1800)
 def get_projets_urgents() -> list[dict]:
-    """DÃ©tecte les projets urgents ou en retard"""
+    """Détecte les projets urgents ou en retard"""
     with get_db_context() as session:
         projets = session.query(Project).filter_by(statut="en_cours").all()
         urgents = []
         
         for p in projets:
-            # PrioritÃ© haute ou trÃ¨s haute + en cours
+            # Priorité haute ou très haute + en cours
             if p.priorite in ["haute", "urgente"]:
                 urgents.append({
                     "type": "PRIORITE",
                     "projet": p.nom,
-                    "message": f"PrioritÃ© {p.priorite.upper()}"
+                    "message": f"Priorité {p.priorite.upper()}"
                 })
             
             # En retard
@@ -83,18 +83,18 @@ def get_projets_urgents() -> list[dict]:
 
 @st.cache_data(ttl=1800)
 def get_stats_projets() -> dict:
-    """RÃ©cupÃ¨re les statistiques des projets"""
+    """Récupère les statistiques des projets"""
     with get_db_context() as session:
         total = session.query(Project).count()
         en_cours = session.query(Project).filter_by(statut="en_cours").count()
-        termines = session.query(Project).filter_by(statut="terminÃ©").count()
+        termines = session.query(Project).filter_by(statut="terminé").count()
         
         # Progression moyenne
         projets = session.query(Project).all()
         progressions = []
         for p in projets:
             if p.tasks:
-                completed = len([t for t in p.tasks if t.statut == "terminÃ©"])
+                completed = len([t for t in p.tasks if t.statut == "terminé"])
                 progressions.append(completed / len(p.tasks) * 100)
         
         avg_progress = sum(progressions) / len(progressions) if progressions else 0
@@ -107,9 +107,9 @@ def get_stats_projets() -> dict:
         }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # JARDIN
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @st.cache_data(ttl=1800)
@@ -120,7 +120,7 @@ def charger_plantes() -> pd.DataFrame:
         
         data = []
         for item in items:
-            # DÃ©terminer si elle doit Ãªtre arrosÃ©e
+            # Déterminer si elle doit être arrosée
             derniers_logs = session.query(GardenLog).filter_by(
                 garden_item_id=item.id,
                 action="arrosage"
@@ -130,8 +130,8 @@ def charger_plantes() -> pd.DataFrame:
             if derniers_logs:
                 jours_depuis_arrosage = (date.today() - derniers_logs[0].date).days
             
-            # DÃ©terminer la frÃ©quence d'arrosage (mock pour dÃ©mo)
-            freq_arrosage = 2  # Ã€ adapter selon modÃ¨le BD
+            # Déterminer la fréquence d'arrosage (mock pour démo)
+            freq_arrosage = 2  # Ã€ adapter selon modèle BD
             a_arroser = (
                 jours_depuis_arrosage is None or 
                 jours_depuis_arrosage >= freq_arrosage
@@ -154,7 +154,7 @@ def charger_plantes() -> pd.DataFrame:
 
 @st.cache_data(ttl=1800)
 def get_plantes_a_arroser() -> list[dict]:
-    """DÃ©tecte les plantes qui ont besoin d'eau"""
+    """Détecte les plantes qui ont besoin d'eau"""
     df = charger_plantes()
     if df.empty:
         return []
@@ -163,7 +163,7 @@ def get_plantes_a_arroser() -> list[dict]:
 
 @st.cache_data(ttl=1800)
 def get_recoltes_proches() -> list[dict]:
-    """DÃ©tecte les rÃ©coltes prÃ©vues dans les 7 prochains jours"""
+    """Détecte les récoltes prévues dans les 7 prochains jours"""
     df = charger_plantes()
     aujourd_hui = date.today()
     dans_7_jours = aujourd_hui + timedelta(days=7)
@@ -182,7 +182,7 @@ def get_recoltes_proches() -> list[dict]:
 
 @st.cache_data(ttl=1800)
 def get_stats_jardin() -> dict:
-    """RÃ©cupÃ¨re les statistiques du jardin"""
+    """Récupère les statistiques du jardin"""
     df = charger_plantes()
     
     return {
@@ -194,21 +194,21 @@ def get_stats_jardin() -> dict:
 
 
 def get_saison() -> str:
-    """DÃ©termine la saison actuelle"""
+    """Détermine la saison actuelle"""
     month = date.today().month
     if month in [3, 4, 5]:
         return "Printemps"
     elif month in [6, 7, 8]:
-        return "Ã‰tÃ©"
+        return "Ã‰té"
     elif month in [9, 10, 11]:
         return "Automne"
     else:
         return "Hiver"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ENTRETIEN / MÃ‰NAGE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @st.cache_data(ttl=1800)
@@ -243,7 +243,7 @@ def charger_routines() -> pd.DataFrame:
 
 @st.cache_data(ttl=1800)
 def get_taches_today() -> list[dict]:
-    """Retourne les tÃ¢ches du jour Ã  faire"""
+    """Retourne les tÃ¢ches du jour à faire"""
     with get_db_context() as session:
         taches = session.query(RoutineTask).filter(
             RoutineTask.fait_le != date.today()
@@ -264,7 +264,7 @@ def get_taches_today() -> list[dict]:
 
 @st.cache_data(ttl=1800)
 def get_stats_entretien() -> dict:
-    """RÃ©cupÃ¨re les statistiques d'entretien"""
+    """Récupère les statistiques d'entretien"""
     with get_db_context() as session:
         total_routines = session.query(Routine).filter_by(actif=True).count()
         total_taches = session.query(RoutineTask).count()
@@ -281,9 +281,9 @@ def get_stats_entretien() -> dict:
         }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # GESTION CACHE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def clear_maison_cache():

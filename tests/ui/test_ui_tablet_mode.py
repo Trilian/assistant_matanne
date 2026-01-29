@@ -8,7 +8,7 @@ class TestTabletModeBasics:
     """Tests pour les fonctions de base du mode tablette."""
     
     def test_get_tablet_mode_default(self):
-        """Mode tablette par dÃ©faut est NORMAL."""
+        """Mode tablette par défaut est NORMAL."""
         from src.ui.tablet_mode import get_tablet_mode, TabletMode
         
         st.session_state.clear()
@@ -16,7 +16,7 @@ class TestTabletModeBasics:
         assert mode == TabletMode.NORMAL
     
     def test_set_tablet_mode(self):
-        """Peut dÃ©finir le mode tablette."""
+        """Peut définir le mode tablette."""
         from src.ui.tablet_mode import set_tablet_mode, get_tablet_mode, TabletMode
         
         set_tablet_mode(TabletMode.TABLET)
@@ -31,7 +31,7 @@ class TestTabletComponents:
     
     @patch('streamlit.button')
     def test_tablet_button(self, mock_button):
-        """Teste crÃ©ation bouton tactile."""
+        """Teste création bouton tactile."""
         from src.ui.tablet_mode import tablet_button
         
         mock_button.return_value = False
@@ -41,7 +41,7 @@ class TestTabletComponents:
     @patch('streamlit.columns')
     @patch('streamlit.button')
     def test_tablet_select_grid(self, mock_button, mock_columns):
-        """Teste grille de sÃ©lection."""
+        """Teste grille de sélection."""
         from src.ui.tablet_mode import tablet_select_grid
         
         mock_button.return_value = False
@@ -52,11 +52,11 @@ class TestTabletComponents:
     
     @patch('streamlit.number_input')
     def test_tablet_number_input(self, mock_input):
-        """Teste saisie numÃ©rique tactile."""
+        """Teste saisie numérique tactile."""
         from src.ui.tablet_mode import tablet_number_input
         
         mock_input.return_value = 5
-        result = tablet_number_input("QuantitÃ©", min_value=0, max_value=10, key="num")
+        result = tablet_number_input("Quantité", min_value=0, max_value=10, key="num")
         assert result == 5
 
 
@@ -80,7 +80,7 @@ class TestTabletModeApplication:
         from src.ui.tablet_mode import close_tablet_mode
         
         close_tablet_mode()
-        # VÃ©rifie que la fonction s'exÃ©cute sans erreur
+        # Vérifie que la fonction s'exécute sans erreur
         assert True
 
 
@@ -101,16 +101,16 @@ class TestTabletKitchenMode:
             "instructions": ["step1", "step2"]
         }
         
-        # La fonction s'exÃ©cute sans erreur
+        # La fonction s'exécute sans erreur
         try:
             render_kitchen_recipe_view(recipe_data)
             assert True
         except Exception:
-            pytest.skip("Fonction nÃ©cessite session_state configurÃ©")
+            pytest.skip("Fonction nécessite session_state configuré")
     
     @patch('streamlit.selectbox')
     def test_render_mode_selector(self, mock_selectbox):
-        """Teste sÃ©lecteur de mode."""
+        """Teste sélecteur de mode."""
         from src.ui.tablet_mode import render_mode_selector, TabletMode
         
         mock_selectbox.return_value = "Normal"
@@ -119,7 +119,7 @@ class TestTabletKitchenMode:
 
 
 class TestTabletEnums:
-    """Tests pour les Ã©numÃ©rations."""
+    """Tests pour les énumérations."""
     
     def test_tablet_mode_enum(self):
         """Teste l'enum TabletMode."""
@@ -146,7 +146,7 @@ class TestTabletChecklist:
     
     @patch('streamlit.checkbox')
     def test_tablet_checklist(self, mock_checkbox):
-        """Teste crÃ©ation checklist tactile."""
+        """Teste création checklist tactile."""
         from src.ui.tablet_mode import tablet_checklist
         
         mock_checkbox.return_value = False

@@ -1,5 +1,5 @@
 ﻿"""
-Logique mÃ©tier du module Planning (cuisine) - SÃ©parÃ©e de l'UI
+Logique métier du module Planning (cuisine) - Séparée de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
 
@@ -10,28 +10,28 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONSTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
 JOURS_EMOJI = ["ðŸŸ¡", "ðŸŸ ", "ðŸŸ£", "ðŸ”µ", "ðŸŸ¢", "âš«", "ðŸ”´"]
-TYPES_REPAS = ["dÃ©jeuner", "dÃ®ner"]
-REGIMES = ["Omnivore", "VÃ©gÃ©tarien", "VÃ©gan", "Sans gluten"]
+TYPES_REPAS = ["déjeuner", "dîner"]
+REGIMES = ["Omnivore", "Végétarien", "Végan", "Sans gluten"]
 TEMPS_CUISINE = ["Rapide (< 30 min)", "Moyen (30-60 min)", "Long (> 60 min)"]
 BUDGETS = ["Bas (< 20â‚¬)", "Moyen (20-40â‚¬)", "Haut (> 40â‚¬)"]
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FONCTIONS DE CALCUL DE DATES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def get_debut_semaine(date_ref: date = None) -> date:
     """
-    Retourne le lundi de la semaine donnÃ©e.
+    Retourne le lundi de la semaine donnée.
     
     Args:
-        date_ref: Date de rÃ©fÃ©rence (aujourd'hui par dÃ©faut)
+        date_ref: Date de référence (aujourd'hui par défaut)
         
     Returns:
         Date du lundi de la semaine
@@ -45,10 +45,10 @@ def get_debut_semaine(date_ref: date = None) -> date:
 
 def get_fin_semaine(date_ref: date = None) -> date:
     """
-    Retourne le dimanche de la semaine donnÃ©e.
+    Retourne le dimanche de la semaine donnée.
     
     Args:
-        date_ref: Date de rÃ©fÃ©rence (aujourd'hui par dÃ©faut)
+        date_ref: Date de référence (aujourd'hui par défaut)
         
     Returns:
         Date du dimanche de la semaine
@@ -62,10 +62,10 @@ def get_dates_semaine(date_ref: date = None) -> List[date]:
     Retourne la liste des 7 dates de la semaine.
     
     Args:
-        date_ref: Date de rÃ©fÃ©rence (aujourd'hui par dÃ©faut)
+        date_ref: Date de référence (aujourd'hui par défaut)
         
     Returns:
-        Liste des 7 dates (lundi Ã  dimanche)
+        Liste des 7 dates (lundi à dimanche)
     """
     debut = get_debut_semaine(date_ref)
     return [debut + timedelta(days=i) for i in range(7)]
@@ -73,13 +73,13 @@ def get_dates_semaine(date_ref: date = None) -> List[date]:
 
 def get_numero_semaine(date_ref: date = None) -> int:
     """
-    Retourne le numÃ©ro de semaine ISO.
+    Retourne le numéro de semaine ISO.
     
     Args:
-        date_ref: Date de rÃ©fÃ©rence (aujourd'hui par dÃ©faut)
+        date_ref: Date de référence (aujourd'hui par défaut)
         
     Returns:
-        NumÃ©ro de semaine (1-53)
+        Numéro de semaine (1-53)
     """
     if date_ref is None:
         date_ref = date.today()
@@ -87,9 +87,9 @@ def get_numero_semaine(date_ref: date = None) -> int:
     return date_ref.isocalendar()[1]
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ORGANISATION DES REPAS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def organiser_repas_par_jour(repas: List[Any]) -> Dict[str, List[Any]]:
     """
@@ -115,7 +115,7 @@ def organiser_repas_par_jour(repas: List[Any]) -> Dict[str, List[Any]]:
 
 def organiser_repas_par_type(repas: List[Any]) -> Dict[str, List[Any]]:
     """
-    Organise une liste de repas par type (dÃ©jeuner/dÃ®ner).
+    Organise une liste de repas par type (déjeuner/dîner).
     
     Args:
         repas: Liste d'objets Repas
@@ -134,9 +134,9 @@ def organiser_repas_par_type(repas: List[Any]) -> Dict[str, List[Any]]:
     return repas_par_type
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # STATISTIQUES ET MÃ‰TRIQUES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def calculer_statistiques_planning(planning: Any) -> Dict[str, Any]:
     """
@@ -166,8 +166,8 @@ def calculer_statistiques_planning(planning: Any) -> Dict[str, Any]:
     
     return {
         "total_repas": len(repas),
-        "repas_dejeuner": len(repas_par_type.get("dÃ©jeuner", [])),
-        "repas_diner": len(repas_par_type.get("dÃ®ner", [])),
+        "repas_dejeuner": len(repas_par_type.get("déjeuner", [])),
+        "repas_diner": len(repas_par_type.get("dîner", [])),
         "jours_complets": jours_complets,
         "taux_completion": (len(repas) / 14.0) * 100 if repas else 0.0
     }
@@ -175,14 +175,14 @@ def calculer_statistiques_planning(planning: Any) -> Dict[str, Any]:
 
 def calculer_cout_planning(planning: Any, prix_recettes: Dict[int, float]) -> float:
     """
-    Calcule le coÃ»t total d'un planning.
+    Calcule le coût total d'un planning.
     
     Args:
         planning: Objet Planning avec repas
         prix_recettes: Dictionnaire {recette_id: prix}
         
     Returns:
-        CoÃ»t total en euros
+        Coût total en euros
     """
     if not planning or not hasattr(planning, 'repas'):
         return 0.0
@@ -198,13 +198,13 @@ def calculer_cout_planning(planning: Any, prix_recettes: Dict[int, float]) -> fl
 
 def calculer_variete_planning(planning: Any) -> Dict[str, Any]:
     """
-    Calcule les mÃ©triques de variÃ©tÃ© d'un planning.
+    Calcule les métriques de variété d'un planning.
     
     Args:
         planning: Objet Planning avec repas
         
     Returns:
-        Dictionnaire avec mÃ©triques de variÃ©tÃ©
+        Dictionnaire avec métriques de variété
     """
     if not planning or not hasattr(planning, 'repas'):
         return {
@@ -217,7 +217,7 @@ def calculer_variete_planning(planning: Any) -> Dict[str, Any]:
     recettes_ids = [r.recette_id for r in repas if hasattr(r, 'recette_id')]
     recettes_uniques = set(recettes_ids)
     
-    # Trouver rÃ©pÃ©titions
+    # Trouver répétitions
     from collections import Counter
     compteur = Counter(recettes_ids)
     repetees = [(rid, count) for rid, count in compteur.items() if count > 1]
@@ -229,16 +229,16 @@ def calculer_variete_planning(planning: Any) -> Dict[str, Any]:
     }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # VALIDATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def valider_repas(data: Dict[str, Any]) -> tuple[bool, Optional[str]]:
     """
-    Valide les donnÃ©es d'un repas.
+    Valide les données d'un repas.
     
     Args:
-        data: DonnÃ©es du repas
+        data: Données du repas
         
     Returns:
         (est_valide, message_erreur)
@@ -251,32 +251,32 @@ def valider_repas(data: Dict[str, Any]) -> tuple[bool, Optional[str]]:
     if "type_repas" not in data or not data["type_repas"]:
         return False, "Le type de repas est requis"
     
-    # VÃ©rifier type repas valide
+    # Vérifier type repas valide
     if data["type_repas"] not in TYPES_REPAS:
-        return False, f"Type de repas invalide. Valeurs autorisÃ©es: {', '.join(TYPES_REPAS)}"
+        return False, f"Type de repas invalide. Valeurs autorisées: {', '.join(TYPES_REPAS)}"
     
     # Recette requise
     if "recette_id" not in data or not data["recette_id"]:
-        return False, "Une recette doit Ãªtre sÃ©lectionnÃ©e"
+        return False, "Une recette doit être sélectionnée"
     
     return True, None
 
 
 def valider_planning(data: Dict[str, Any]) -> tuple[bool, List[str]]:
     """
-    Valide les donnÃ©es d'un planning complet.
+    Valide les données d'un planning complet.
     
     Args:
-        data: DonnÃ©es du planning
+        data: Données du planning
         
     Returns:
         (est_valide, liste_erreurs)
     """
     erreurs = []
     
-    # Semaine dÃ©but requise
+    # Semaine début requise
     if "semaine_debut" not in data or not data["semaine_debut"]:
-        erreurs.append("La date de dÃ©but de semaine est requise")
+        erreurs.append("La date de début de semaine est requise")
     
     # Repas
     if "repas" in data and data["repas"]:
@@ -288,13 +288,13 @@ def valider_planning(data: Dict[str, Any]) -> tuple[bool, List[str]]:
     return len(erreurs) == 0, erreurs
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # GÃ‰NÃ‰RATION ET SUGGESTIONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def generer_structure_semaine() -> Dict[str, List[str]]:
     """
-    GÃ©nÃ¨re la structure vide d'une semaine (7 jours, 2 repas/jour).
+    Génère la structure vide d'une semaine (7 jours, 2 repas/jour).
     
     Returns:
         Dictionnaire {jour: [types_repas]}
@@ -307,13 +307,13 @@ def generer_structure_semaine() -> Dict[str, List[str]]:
 
 def calculer_contraintes_ia(preferences: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Convertit les prÃ©fÃ©rences utilisateur en contraintes pour l'IA.
+    Convertit les préférences utilisateur en contraintes pour l'IA.
     
     Args:
-        preferences: PrÃ©fÃ©rences utilisateur (rÃ©gimes, temps, budget, etc.)
+        preferences: Préférences utilisateur (régimes, temps, budget, etc.)
         
     Returns:
-        Contraintes formatÃ©es pour l'IA
+        Contraintes formatées pour l'IA
     """
     contraintes = {
         "regimes": preferences.get("regimes", ["Omnivore"]),
@@ -342,7 +342,7 @@ def formater_historique_planning(plannings: List[Any]) -> List[Dict[str, Any]]:
         plannings: Liste d'objets Planning
         
     Returns:
-        Liste de dictionnaires formatÃ©s
+        Liste de dictionnaires formatés
     """
     resultats = []
     

@@ -262,7 +262,7 @@ class TestValidateExpiryDate:
         past = date.today() - timedelta(days=1)
         is_valid, msg = validate_expiry_date(past)
         assert is_valid is False
-        assert "passÃ©e" in msg
+        assert "passée" in msg
     
     def test_too_soon(self):
         from src.utils.validators.dates import validate_expiry_date

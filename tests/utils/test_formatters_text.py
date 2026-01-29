@@ -28,12 +28,12 @@ class TestTruncate:
 
     def test_truncate_long_text(self):
         """Test texte long"""
-        result = truncate("Un texte trÃ¨s long qui dÃ©passe", length=10)
+        result = truncate("Un texte très long qui dépasse", length=10)
         assert len(result) == 10
         assert result.endswith("...")
 
     def test_truncate_custom_suffix(self):
-        """Test suffixe personnalisÃ©"""
+        """Test suffixe personnalisé"""
         result = truncate("Un texte long", length=10, suffix="â€¦")
         assert result.endswith("â€¦")
 
@@ -64,7 +64,7 @@ class TestCleanText:
         assert "}" not in result
 
     def test_clean_text_empty(self):
-        """Test chaÃ®ne vide"""
+        """Test chaîne vide"""
         assert clean_text("") == ""
 
     def test_clean_text_none(self):
@@ -82,11 +82,11 @@ class TestSlugify:
 
     def test_slugify_accents(self):
         """Test accents"""
-        result = slugify("CrÃ¨me brÃ»lÃ©e")
+        result = slugify("Crème brûlée")
         assert result == "creme-brulee"
 
     def test_slugify_special_chars(self):
-        """Test caractÃ¨res spÃ©ciaux"""
+        """Test caractères spéciaux"""
         result = slugify("Test & Test (2)")
         assert "&" not in result
         assert "(" not in result
@@ -111,17 +111,17 @@ class TestExtractNumber:
         assert result == 2.5
 
     def test_extract_number_comma(self):
-        """Test virgule franÃ§aise"""
+        """Test virgule française"""
         result = extract_number("Prix: 10,50â‚¬")
         assert result == 10.5
 
     def test_extract_number_integer(self):
         """Test entier"""
-        result = extract_number("QuantitÃ©: 5")
+        result = extract_number("Quantité: 5")
         assert result == 5.0
 
     def test_extract_number_negative(self):
-        """Test nombre nÃ©gatif"""
+        """Test nombre négatif"""
         result = extract_number("-15.5")
         assert result == -15.5
 
@@ -131,7 +131,7 @@ class TestExtractNumber:
         assert result is None
 
     def test_extract_number_empty(self):
-        """Test chaÃ®ne vide"""
+        """Test chaîne vide"""
         result = extract_number("")
         assert result is None
 
@@ -160,12 +160,12 @@ class TestCapitalizeFirst:
         assert result == "Tomate"
 
     def test_capitalize_first_single_char(self):
-        """Test un caractÃ¨re"""
+        """Test un caractère"""
         result = capitalize_first("a")
         assert result == "A"
 
     def test_capitalize_first_empty(self):
-        """Test chaÃ®ne vide"""
+        """Test chaîne vide"""
         result = capitalize_first("")
         assert result == ""
 

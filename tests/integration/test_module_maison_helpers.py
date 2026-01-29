@@ -1,6 +1,6 @@
 ﻿"""
 Tests pour le module maison/helpers.py
-Fonctions utilitaires pour la gestion de la maison (logique mÃ©tier)
+Fonctions utilitaires pour la gestion de la maison (logique métier)
 """
 
 import pytest
@@ -9,10 +9,10 @@ from unittest.mock import MagicMock
 
 
 class TestProjetsPriorite:
-    """Tests pour la logique de prioritÃ© des projets"""
+    """Tests pour la logique de priorité des projets"""
 
     def test_detecte_priorite_haute(self):
-        """DÃ©tecte les projets haute prioritÃ©"""
+        """Détecte les projets haute priorité"""
         projets = [
             MagicMock(priorite="haute"),
             MagicMock(priorite="basse"),
@@ -23,7 +23,7 @@ class TestProjetsPriorite:
         assert len(urgents) == 2
 
     def test_detecte_projets_en_retard(self):
-        """DÃ©tecte les projets en retard"""
+        """Détecte les projets en retard"""
         aujourd_hui = date.today()
         hier = aujourd_hui - timedelta(days=1)
         demain = aujourd_hui + timedelta(days=1)
@@ -31,7 +31,7 @@ class TestProjetsPriorite:
         projets = [
             MagicMock(date_echeance=hier, complete=False),
             MagicMock(date_echeance=demain, complete=False),
-            MagicMock(date_echeance=hier, complete=True),  # Pas en retard car complÃ©tÃ©
+            MagicMock(date_echeance=hier, complete=True),  # Pas en retard car complété
         ]
         
         en_retard = [p for p in projets if p.date_echeance < aujourd_hui and not p.complete]
@@ -80,12 +80,12 @@ class TestSaison:
     """Tests pour get_saison()"""
 
     def test_saison_printemps(self):
-        """DÃ©tecte le printemps (mars-mai)"""
+        """Détecte le printemps (mars-mai)"""
         def get_saison(mois):
             if mois in [3, 4, 5]:
                 return "Printemps"
             elif mois in [6, 7, 8]:
-                return "Ã‰tÃ©"
+                return "Ã‰té"
             elif mois in [9, 10, 11]:
                 return "Automne"
             else:
@@ -94,26 +94,26 @@ class TestSaison:
         assert get_saison(4) == "Printemps"
 
     def test_saison_ete(self):
-        """DÃ©tecte l'Ã©tÃ© (juin-aoÃ»t)"""
+        """Détecte l'été (juin-août)"""
         def get_saison(mois):
             if mois in [3, 4, 5]:
                 return "Printemps"
             elif mois in [6, 7, 8]:
-                return "Ã‰tÃ©"
+                return "Ã‰té"
             elif mois in [9, 10, 11]:
                 return "Automne"
             else:
                 return "Hiver"
         
-        assert get_saison(7) == "Ã‰tÃ©"
+        assert get_saison(7) == "Ã‰té"
 
     def test_saison_automne(self):
-        """DÃ©tecte l'automne (septembre-novembre)"""
+        """Détecte l'automne (septembre-novembre)"""
         def get_saison(mois):
             if mois in [3, 4, 5]:
                 return "Printemps"
             elif mois in [6, 7, 8]:
-                return "Ã‰tÃ©"
+                return "Ã‰té"
             elif mois in [9, 10, 11]:
                 return "Automne"
             else:
@@ -122,12 +122,12 @@ class TestSaison:
         assert get_saison(10) == "Automne"
 
     def test_saison_hiver(self):
-        """DÃ©tecte l'hiver (dÃ©cembre-fÃ©vrier)"""
+        """Détecte l'hiver (décembre-février)"""
         def get_saison(mois):
             if mois in [3, 4, 5]:
                 return "Printemps"
             elif mois in [6, 7, 8]:
-                return "Ã‰tÃ©"
+                return "Ã‰té"
             elif mois in [9, 10, 11]:
                 return "Automne"
             else:
@@ -141,7 +141,7 @@ class TestPlantesJardin:
     """Tests pour les plantes du jardin"""
 
     def test_plantes_a_arroser(self):
-        """DÃ©tecte les plantes Ã  arroser"""
+        """Détecte les plantes à arroser"""
         aujourd_hui = date.today()
         avant_hier = aujourd_hui - timedelta(days=2)
         demain = aujourd_hui + timedelta(days=1)
@@ -157,10 +157,10 @@ class TestPlantesJardin:
             return jours_depuis >= plante.frequence_arrosage
         
         a_arroser = [p for p in plantes if doit_arroser(p)]
-        assert len(a_arroser) == 1  # Seule la premiÃ¨re doit Ãªtre arrosÃ©e
+        assert len(a_arroser) == 1  # Seule la première doit être arrosée
 
     def test_recoltes_proches(self):
-        """DÃ©tecte les rÃ©coltes proches (7 jours)"""
+        """Détecte les récoltes proches (7 jours)"""
         aujourd_hui = date.today()
         dans_5_jours = aujourd_hui + timedelta(days=5)
         dans_10_jours = aujourd_hui + timedelta(days=10)
@@ -180,8 +180,8 @@ class TestStatsJardin:
     def test_compte_plantes_par_type(self):
         """Compte les plantes par type"""
         plantes = [
-            MagicMock(type_plante="lÃ©gume"),
-            MagicMock(type_plante="lÃ©gume"),
+            MagicMock(type_plante="légume"),
+            MagicMock(type_plante="légume"),
             MagicMock(type_plante="fruit"),
             MagicMock(type_plante="herbe"),
         ]
@@ -192,7 +192,7 @@ class TestStatsJardin:
                 stats[p.type_plante] = 0
             stats[p.type_plante] += 1
         
-        assert stats["lÃ©gume"] == 2
+        assert stats["légume"] == 2
         assert stats["fruit"] == 1
         assert stats["herbe"] == 1
 
@@ -212,7 +212,7 @@ class TestRoutinesEntretien:
     """Tests pour les routines d'entretien"""
 
     def test_taches_today(self):
-        """DÃ©tecte les tÃ¢ches du jour"""
+        """Détecte les tÃ¢ches du jour"""
         aujourd_hui = date.today()
         jour_semaine = aujourd_hui.weekday()  # 0=lundi, 6=dimanche
         
@@ -242,13 +242,13 @@ class TestStatsEntretien:
     """Tests pour les statistiques d'entretien"""
 
     def test_taches_completees_mois(self):
-        """Compte les tÃ¢ches complÃ©tÃ©es ce mois"""
+        """Compte les tÃ¢ches complétées ce mois"""
         aujourd_hui = date.today()
         debut_mois = date(aujourd_hui.year, aujourd_hui.month, 1)
         
         completions = [
             MagicMock(date_completion=debut_mois + timedelta(days=5)),
-            MagicMock(date_completion=debut_mois - timedelta(days=5)),  # Mois prÃ©cÃ©dent
+            MagicMock(date_completion=debut_mois - timedelta(days=5)),  # Mois précédent
             MagicMock(date_completion=debut_mois + timedelta(days=10)),
         ]
         
@@ -266,20 +266,20 @@ class TestStatsEntretien:
 
 
 class TestPrioriteEmojis:
-    """Tests pour les emojis de prioritÃ© maison"""
+    """Tests pour les emojis de priorité maison"""
 
     def test_emoji_priorite_haute(self):
-        """Emoji pour haute prioritÃ©"""
+        """Emoji pour haute priorité"""
         PRIORITE_EMOJIS = {"haute": "ðŸ”´", "moyenne": "ðŸŸ¡", "basse": "ðŸŸ¢"}
         assert PRIORITE_EMOJIS.get("haute") == "ðŸ”´"
 
     def test_emoji_priorite_moyenne(self):
-        """Emoji pour prioritÃ© moyenne"""
+        """Emoji pour priorité moyenne"""
         PRIORITE_EMOJIS = {"haute": "ðŸ”´", "moyenne": "ðŸŸ¡", "basse": "ðŸŸ¢"}
         assert PRIORITE_EMOJIS.get("moyenne") == "ðŸŸ¡"
 
     def test_emoji_priorite_basse(self):
-        """Emoji pour basse prioritÃ©"""
+        """Emoji pour basse priorité"""
         PRIORITE_EMOJIS = {"haute": "ðŸ”´", "moyenne": "ðŸŸ¡", "basse": "ðŸŸ¢"}
         assert PRIORITE_EMOJIS.get("basse") == "ðŸŸ¢"
 
@@ -288,7 +288,7 @@ class TestStatutProjets:
     """Tests pour les statuts de projets"""
 
     def test_statuts_possibles(self):
-        """VÃ©rifie les statuts possibles"""
+        """Vérifie les statuts possibles"""
         STATUTS = ["planifie", "en_cours", "en_attente", "termine", "annule"]
         
         assert "planifie" in STATUTS

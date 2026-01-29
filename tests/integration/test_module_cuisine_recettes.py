@@ -1,6 +1,6 @@
 ﻿"""
 Tests pour le module cuisine/recettes.py
-Gestion complÃ¨te des recettes avec filtres, pagination et dÃ©tails
+Gestion complète des recettes avec filtres, pagination et détails
 """
 
 import pytest
@@ -36,7 +36,7 @@ class TestAppRecettes:
     @patch("src.modules.cuisine.recettes.get_recette_service")
     @patch("src.modules.cuisine.recettes.st")
     def test_affiche_detail_recette_si_selectionnee(self, mock_st, mock_get_service, mock_render_detail):
-        """Affiche le dÃ©tail si une recette est sÃ©lectionnÃ©e"""
+        """Affiche le détail si une recette est sélectionnée"""
         from src.domains.cuisine.logic.recettes import app
         
         mock_st.session_state = SessionStateMock({"detail_recette_id": 42})
@@ -67,7 +67,7 @@ class TestAppRecettes:
     @patch("src.modules.cuisine.recettes.get_recette_service")
     @patch("src.modules.cuisine.recettes.st")
     def test_recette_non_trouvee(self, mock_st, mock_get_service):
-        """Affiche erreur si recette non trouvÃ©e"""
+        """Affiche erreur si recette non trouvée"""
         from src.domains.cuisine.logic.recettes import app
         
         mock_st.session_state = SessionStateMock({"detail_recette_id": 999})
@@ -116,7 +116,7 @@ class TestRenderListe:
 
 
 class TestFiltresRecettes:
-    """Tests pour les filtres de recettes (logique mÃ©tier)"""
+    """Tests pour les filtres de recettes (logique métier)"""
 
     def test_filtre_score_bio(self):
         """Filtre par score bio minimum"""
@@ -147,7 +147,7 @@ class TestFiltresRecettes:
         assert filtered[0].score_local == 80
 
     def test_filtre_robots_cookeo(self):
-        """Filtre par compatibilitÃ© Cookeo"""
+        """Filtre par compatibilité Cookeo"""
         mock_recettes = [
             MagicMock(compatible_cookeo=True, compatible_airfryer=False),
             MagicMock(compatible_cookeo=False, compatible_airfryer=True),
@@ -180,7 +180,7 @@ class TestFiltresRecettes:
         assert len(filtered) == 2
 
     def test_filtre_tags_equilibre(self):
-        """Filtre par tag Ã©quilibrÃ©"""
+        """Filtre par tag équilibré"""
         mock_recettes = [
             MagicMock(est_equilibre=True),
             MagicMock(est_equilibre=False),
@@ -190,7 +190,7 @@ class TestFiltresRecettes:
         assert len(filtered) == 1
 
     def test_filtre_congelable(self):
-        """Filtre par tag congÃ©lable"""
+        """Filtre par tag congélable"""
         mock_recettes = [
             MagicMock(congelable=True),
             MagicMock(congelable=True),
@@ -226,7 +226,7 @@ class TestPagination:
         assert total_pages == 3
 
     def test_calcul_indices_page_0(self):
-        """Calcul des indices pour la premiÃ¨re page"""
+        """Calcul des indices pour la première page"""
         PAGE_SIZE = 9
         page = 0
         start_idx = page * PAGE_SIZE
@@ -235,7 +235,7 @@ class TestPagination:
         assert end_idx == 9
 
     def test_calcul_indices_page_1(self):
-        """Calcul des indices pour la deuxiÃ¨me page"""
+        """Calcul des indices pour la deuxième page"""
         PAGE_SIZE = 9
         page = 1
         start_idx = page * PAGE_SIZE
@@ -244,7 +244,7 @@ class TestPagination:
         assert end_idx == 18
 
     def test_limite_page_max(self):
-        """La page ne dÃ©passe pas le maximum"""
+        """La page ne dépasse pas le maximum"""
         PAGE_SIZE = 9
         recettes = list(range(25))
         total_pages = (len(recettes) + PAGE_SIZE - 1) // PAGE_SIZE
@@ -256,7 +256,7 @@ class TestPagination:
 
 
 class TestDifficulteEmoji:
-    """Tests pour le mapping des emojis de difficultÃ©"""
+    """Tests pour le mapping des emojis de difficulté"""
 
     def test_emoji_facile(self):
         """Emoji vert pour facile"""
@@ -274,7 +274,7 @@ class TestDifficulteEmoji:
         assert emoji_map.get("difficile") == "ðŸ”´"
 
     def test_emoji_inconnu(self):
-        """Emoji par dÃ©faut pour valeur inconnue"""
+        """Emoji par défaut pour valeur inconnue"""
         emoji_map = {"facile": "ðŸŸ¢", "moyen": "ðŸŸ¡", "difficile": "ðŸ”´"}
         assert emoji_map.get("inconnu", "âšª") == "âšª"
 
@@ -295,21 +295,21 @@ class TestBadgesRecette:
         if recette.est_bio:
             badges.append("ðŸŒ± Bio")
         if recette.est_local:
-            badges.append("ðŸ“ Local")
+            badges.append("ðŸ“ Local")
         if recette.est_rapide:
             badges.append("âš¡ Rapide")
         if recette.est_equilibre:
-            badges.append("ðŸ’ª Ã‰quilibrÃ©")
+            badges.append("ðŸ’ª Ã‰quilibré")
         if recette.congelable:
-            badges.append("â„ï¸ CongÃ©lable")
+            badges.append("â„ï¸ Congélable")
         
         assert len(badges) == 3
         assert "ðŸŒ± Bio" in badges
         assert "âš¡ Rapide" in badges
-        assert "â„ï¸ CongÃ©lable" in badges
+        assert "â„ï¸ Congélable" in badges
 
     def test_badges_vides(self):
-        """GÃ¨re le cas sans badges"""
+        """Gère le cas sans badges"""
         recette = MagicMock()
         recette.est_bio = False
         recette.est_local = False
@@ -336,22 +336,22 @@ class TestBadgesRecette:
         if recette.est_bio:
             badges.append("ðŸŒ± Bio")
         if recette.est_local:
-            badges.append("ðŸ“ Local")
+            badges.append("ðŸ“ Local")
         if recette.est_rapide:
             badges.append("âš¡ Rapide")
         if recette.est_equilibre:
-            badges.append("ðŸ’ª Ã‰quilibrÃ©")
+            badges.append("ðŸ’ª Ã‰quilibré")
         if recette.congelable:
-            badges.append("â„ï¸ CongÃ©lable")
+            badges.append("â„ï¸ Congélable")
         
         assert len(badges) == 5
 
 
 class TestRobotsCompatibles:
-    """Tests pour la compatibilitÃ© robots"""
+    """Tests pour la compatibilité robots"""
 
     def test_robot_cookeo(self):
-        """VÃ©rifie badge Cookeo"""
+        """Vérifie badge Cookeo"""
         recette = MagicMock()
         recette.compatible_cookeo = True
         recette.compatible_monsieur_cuisine = False
@@ -386,7 +386,7 @@ class TestRobotsCompatibles:
         assert len(robots) == 3
 
     def test_aucun_robot(self):
-        """Recette sans compatibilitÃ© robot"""
+        """Recette sans compatibilité robot"""
         recette = MagicMock()
         recette.compatible_cookeo = False
         recette.compatible_monsieur_cuisine = False

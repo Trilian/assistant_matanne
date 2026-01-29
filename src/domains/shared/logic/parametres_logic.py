@@ -1,5 +1,5 @@
 ﻿"""
-Logique mÃ©tier du module ParamÃ¨tres (configuration) - SÃ©parÃ©e de l'UI
+Logique métier du module Paramètres (configuration) - Séparée de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
 
@@ -9,16 +9,16 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # VALIDATION PARAMÃˆTRES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def valider_parametres(data: Dict[str, Any]) -> Tuple[bool, List[str]]:
     """
-    Valide les paramÃ¨tres de configuration.
+    Valide les paramètres de configuration.
     
     Args:
-        data: Dictionnaire de paramÃ¨tres
+        data: Dictionnaire de paramètres
         
     Returns:
         Tuple (valide, liste_erreurs)
@@ -29,9 +29,9 @@ def valider_parametres(data: Dict[str, Any]) -> Tuple[bool, List[str]]:
     if "nom_famille" in data:
         nom = data["nom_famille"]
         if not nom or len(nom) < 2:
-            erreurs.append("Le nom de famille doit contenir au moins 2 caractÃ¨res")
+            erreurs.append("Le nom de famille doit contenir au moins 2 caractères")
         elif len(nom) > 50:
-            erreurs.append("Le nom de famille ne peut pas dÃ©passer 50 caractÃ¨res")
+            erreurs.append("Le nom de famille ne peut pas dépasser 50 caractères")
     
     # Email
     if "email" in data:
@@ -46,21 +46,21 @@ def valider_parametres(data: Dict[str, Any]) -> Tuple[bool, List[str]]:
         devise = data["devise"]
         devises_supportees = ["EUR", "USD", "GBP", "CHF", "CAD"]
         if devise not in devises_supportees:
-            erreurs.append(f"Devise non supportÃ©e. Valeurs acceptÃ©es: {', '.join(devises_supportees)}")
+            erreurs.append(f"Devise non supportée. Valeurs acceptées: {', '.join(devises_supportees)}")
     
     # Langue
     if "langue" in data:
         langue = data["langue"]
         langues_supportees = ["fr", "en", "es", "de"]
         if langue not in langues_supportees:
-            erreurs.append(f"Langue non supportÃ©e. Valeurs acceptÃ©es: {', '.join(langues_supportees)}")
+            erreurs.append(f"Langue non supportée. Valeurs acceptées: {', '.join(langues_supportees)}")
     
-    # ThÃ¨me
+    # Thème
     if "theme" in data:
         theme = data["theme"]
         themes_supportes = ["light", "dark", "auto"]
         if theme not in themes_supportes:
-            erreurs.append(f"ThÃ¨me non supportÃ©. Valeurs acceptÃ©es: {', '.join(themes_supportes)}")
+            erreurs.append(f"Thème non supporté. Valeurs acceptées: {', '.join(themes_supportes)}")
     
     return len(erreurs) == 0, erreurs
 
@@ -70,7 +70,7 @@ def valider_email(email: str) -> Tuple[bool, Optional[str]]:
     Valide une adresse email.
     
     Args:
-        email: Email Ã  valider
+        email: Email à valider
         
     Returns:
         Tuple (valide, message_erreur)
@@ -94,17 +94,17 @@ def valider_email(email: str) -> Tuple[bool, Optional[str]]:
         return False, "Domaine invalide"
     
     if len(email) > 254:
-        return False, "Email trop long (max 254 caractÃ¨res)"
+        return False, "Email trop long (max 254 caractères)"
     
     return True, None
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONFIGURATION PAR DÃ‰FAUT
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def generer_config_defaut() -> Dict[str, Any]:
-    """GÃ©nÃ¨re une configuration par dÃ©faut."""
+    """Génère une configuration par défaut."""
     return {
         "nom_famille": "Ma Famille",
         "email": "",
@@ -123,23 +123,23 @@ def generer_config_defaut() -> Dict[str, Any]:
 
 def fusionner_config(config_actuelle: Dict[str, Any], nouveaux_params: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Fusionne la config actuelle avec de nouveaux paramÃ¨tres.
+    Fusionne la config actuelle avec de nouveaux paramètres.
     
     Args:
         config_actuelle: Configuration actuelle
-        nouveaux_params: Nouveaux paramÃ¨tres
+        nouveaux_params: Nouveaux paramètres
         
     Returns:
-        Configuration fusionnÃ©e
+        Configuration fusionnée
     """
     config_fusionnee = config_actuelle.copy()
     config_fusionnee.update(nouveaux_params)
     return config_fusionnee
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # VERSIONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def comparer_versions(version_actuelle: str, version_cible: str) -> int:
     """
@@ -150,7 +150,7 @@ def comparer_versions(version_actuelle: str, version_cible: str) -> int:
         version_cible: Version cible (ex: "1.3.0")
         
     Returns:
-        -1 si actuelle < cible, 0 si Ã©gales, 1 si actuelle > cible
+        -1 si actuelle < cible, 0 si égales, 1 si actuelle > cible
     """
     def parse_version(v: str) -> List[int]:
         return [int(x) for x in v.split(".")]
@@ -159,18 +159,18 @@ def comparer_versions(version_actuelle: str, version_cible: str) -> int:
         v1 = parse_version(version_actuelle)
         v2 = parse_version(version_cible)
         
-        # Comparer Ã©lÃ©ment par Ã©lÃ©ment
+        # Comparer élément par élément
         for a, b in zip(v1, v2):
             if a < b:
                 return -1
             elif a > b:
                 return 1
         
-        # Si mÃªme longueur et mÃªmes valeurs
+        # Si même longueur et mêmes valeurs
         if len(v1) == len(v2):
             return 0
         
-        # Si longueurs diffÃ©rentes
+        # Si longueurs différentes
         return -1 if len(v1) < len(v2) else 1
         
     except (ValueError, AttributeError):
@@ -179,7 +179,7 @@ def comparer_versions(version_actuelle: str, version_cible: str) -> int:
 
 def version_est_superieure(version_actuelle: str, version_minimale: str) -> bool:
     """
-    VÃ©rifie si version actuelle >= version minimale.
+    Vérifie si version actuelle >= version minimale.
     
     Args:
         version_actuelle: Version actuelle
@@ -199,26 +199,26 @@ def formater_version(version: str) -> str:
         version: Version brute (ex: "1.2.3")
         
     Returns:
-        Version formatÃ©e (ex: "v1.2.3")
+        Version formatée (ex: "v1.2.3")
     """
     if not version.startswith("v"):
         return f"v{version}"
     return version
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # PRÃ‰FÃ‰RENCES UTILISATEUR
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def get_preferences_par_categorie(preferences: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
     """
-    Groupe les prÃ©fÃ©rences par catÃ©gorie.
+    Groupe les préférences par catégorie.
     
     Args:
-        preferences: Dictionnaire de prÃ©fÃ©rences
+        preferences: Dictionnaire de préférences
         
     Returns:
-        PrÃ©fÃ©rences groupÃ©es par catÃ©gorie
+        Préférences groupées par catégorie
     """
     categories = {
         "general": ["nom_famille", "langue", "fuseau_horaire"],
@@ -241,14 +241,14 @@ def get_preferences_par_categorie(preferences: Dict[str, Any]) -> Dict[str, Dict
 
 def exporter_config(config: Dict[str, Any], format: str = "json") -> str:
     """
-    Exporte la configuration dans un format donnÃ©.
+    Exporte la configuration dans un format donné.
     
     Args:
-        config: Configuration Ã  exporter
+        config: Configuration à exporter
         format: Format d'export (json, yaml, ini)
         
     Returns:
-        Configuration exportÃ©e en string
+        Configuration exportée en string
     """
     if format == "json":
         import json
@@ -276,35 +276,35 @@ def exporter_config(config: Dict[str, Any], format: str = "json") -> str:
         return str(config)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SANTÃ‰ DE L'APPLICATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def verifier_sante_config(config: Dict[str, Any]) -> Dict[str, Any]:
     """
-    VÃ©rifie la santÃ© de la configuration.
+    Vérifie la santé de la configuration.
     
     Args:
-        config: Configuration Ã  vÃ©rifier
+        config: Configuration à vérifier
         
     Returns:
-        Rapport de santÃ©
+        Rapport de santé
     """
     problemes = []
     avertissements = []
     
-    # VÃ©rifier paramÃ¨tres obligatoires
+    # Vérifier paramètres obligatoires
     obligatoires = ["nom_famille", "devise", "langue"]
     for param in obligatoires:
         if param not in config or not config[param]:
-            problemes.append(f"ParamÃ¨tre obligatoire manquant: {param}")
+            problemes.append(f"Paramètre obligatoire manquant: {param}")
     
-    # VÃ©rifier cohÃ©rence
+    # Vérifier cohérence
     if config.get("notifications_email") and not config.get("email"):
-        avertissements.append("Notifications email activÃ©es mais pas d'email configurÃ©")
+        avertissements.append("Notifications email activées mais pas d'email configuré")
     
     if config.get("sync_calendrier") and not config.get("api_externe"):
-        avertissements.append("Sync calendrier activÃ©e mais pas d'API configurÃ©e")
+        avertissements.append("Sync calendrier activée mais pas d'API configurée")
     
     # Statut global
     if problemes:
@@ -322,28 +322,28 @@ def verifier_sante_config(config: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FORMATAGE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def formater_parametre_affichage(cle: str, valeur: Any) -> str:
     """
-    Formate un paramÃ¨tre pour l'affichage.
+    Formate un paramètre pour l'affichage.
     
     Args:
-        cle: ClÃ© du paramÃ¨tre
-        valeur: Valeur du paramÃ¨tre
+        cle: Clé du paramètre
+        valeur: Valeur du paramètre
         
     Returns:
-        Texte formatÃ©
+        Texte formaté
     """
     if isinstance(valeur, bool):
-        return "âœ… ActivÃ©" if valeur else "âŒ DÃ©sactivÃ©"
+        return "âœ… Activé" if valeur else "âŒ Désactivé"
     elif cle == "devise":
         symboles = {"EUR": "â‚¬", "USD": "$", "GBP": "Â£", "CHF": "CHF"}
         return f"{valeur} ({symboles.get(valeur, '')})"
     elif cle == "langue":
-        langues = {"fr": "ðŸ‡«ðŸ‡· FranÃ§ais", "en": "ðŸ‡¬ðŸ‡§ Anglais", "es": "ðŸ‡ªðŸ‡¸ Espagnol", "de": "ðŸ‡©ðŸ‡ª Allemand"}
+        langues = {"fr": "ðŸ‡«ðŸ‡· Français", "en": "ðŸ‡¬ðŸ‡§ Anglais", "es": "ðŸ‡ªðŸ‡¸ Espagnol", "de": "ðŸ‡©ðŸ‡ª Allemand"}
         return langues.get(valeur, valeur)
     else:
         return str(valeur)

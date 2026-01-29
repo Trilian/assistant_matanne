@@ -1,10 +1,10 @@
 ﻿"""
 Module Inventaire - Gestion du stock
-âœ¨ FonctionnalitÃ©s complÃ¨tes:
-- Gestion complÃ¨te du stock avec alertes
-- CatÃ©gorisation et filtres avancÃ©s
+âœ¨ Fonctionnalités complètes:
+- Gestion complète du stock avec alertes
+- Catégorisation et filtres avancés
 - Suggestions IA pour les courses
-- Export/Import des donnÃ©es
+- Export/Import des données
 """
 
 import streamlit as st
@@ -16,7 +16,7 @@ from src.services.inventaire import get_inventaire_service
 from src.services.predictions import obtenir_service_predictions
 from src.core.errors_base import ErreurValidation
 
-# Import du module logique mÃ©tier sÃ©parÃ©
+# Import du module logique métier séparé
 from src.domains.cuisine.logic.inventaire_logic import (
     EMPLACEMENTS,
     CATEGORIES,
@@ -36,11 +36,11 @@ from src.domains.cuisine.logic.inventaire_logic import (
 
 
 def app():
-    """Point d'entrÃ©e module inventaire"""
+    """Point d'entrée module inventaire"""
     st.set_page_config(page_title="ðŸ“¦ Inventaire", layout="wide")
     
     st.title("ðŸ“¦ Inventaire")
-    st.caption("Gestion complÃ¨te de votre stock d'ingrÃ©dients")
+    st.caption("Gestion complète de votre stock d'ingrédients")
 
     # Initialiser session state
     if "show_form" not in st.session_state:
@@ -51,13 +51,13 @@ def app():
     # Tabs principales
     tab_stock, tab_alertes, tab_categories, tab_suggestions, tab_historique, tab_photos, tab_notifications, tab_predictions, tab_tools = st.tabs([
         "ðŸ“Š Stock", 
-        "âš ï¸ Alertes", 
-        "ðŸ·ï¸ CatÃ©gories", 
+        "âš ï¸ Alertes", 
+        "ðŸ·ï¸ Catégories", 
         "ðŸ›’ Suggestions IA",
         "ðŸ“œ Historique",
         "ðŸ“¸ Photos",
         "ðŸ”” Notifications",
-        "ðŸ”® PrÃ©visions",
+        "ðŸ”® Prévisions",
         "ðŸ”§ Outils"
     ])
 
@@ -94,7 +94,7 @@ def render_stock():
     service = get_inventaire_service()
     
     if service is None:
-        st.error("âŒ Service inventaire indisponible")
+        st.error("âŒ Service inventaire indisponible")
         return
     
     try:
@@ -106,9 +106,9 @@ def render_stock():
                 st.session_state.show_form = True
             return
         
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         # STATISTIQUES GLOBALES
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         col1, col2, col3, col4 = st.columns(4)
         
         alertes = service.get_alertes()
@@ -126,19 +126,19 @@ def render_stock():
             st.metric(f"{color} Faible", stock_bas)
         with col4:
             color = "ðŸ””" if peremption > 0 else "ðŸŸ¢"
-            st.metric(f"{color} PÃ©remption", peremption)
+            st.metric(f"{color} Péremption", peremption)
         
         st.divider()
         
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         # FILTRES ET TRI
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         col_filter1, col_filter2, col_filter3 = st.columns(3)
         
         with col_filter1:
             emplacements = sorted(set(a["emplacement"] for a in inventaire if a["emplacement"]))
             selected_emplacements = st.multiselect(
-                "ðŸ“ Emplacement",
+                "ðŸ“ Emplacement",
                 options=emplacements,
                 default=[]
             )
@@ -146,21 +146,21 @@ def render_stock():
         with col_filter2:
             categories = sorted(set(a["ingredient_categorie"] for a in inventaire))
             selected_categories = st.multiselect(
-                "ðŸ·ï¸ CatÃ©gorie",
+                "ðŸ·ï¸ Catégorie",
                 options=categories,
                 default=[]
             )
         
         with col_filter3:
             status_filter = st.multiselect(
-                "âš ï¸ Statut",
+                "âš ï¸ Statut",
                 options=["critique", "stock_bas", "peremption_proche", "ok"],
                 default=[]
             )
         
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         # APPLIQUER LES FILTRES
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         inventaire_filtres = inventaire
         
         if selected_emplacements:
@@ -172,9 +172,9 @@ def render_stock():
         if status_filter:
             inventaire_filtres = [a for a in inventaire_filtres if a["statut"] in status_filter]
         
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         # AFFICHER LE TABLEAU
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         if inventaire_filtres:
             df = _prepare_inventory_dataframe(inventaire_filtres)
             st.dataframe(
@@ -183,16 +183,16 @@ def render_stock():
                 hide_index=True,
                 column_config={
                     "Statut": st.column_config.TextColumn(width="small"),
-                    "QuantitÃ©": st.column_config.NumberColumn(width="small"),
+                    "Quantité": st.column_config.NumberColumn(width="small"),
                     "Jours": st.column_config.NumberColumn(width="small"),
                 }
             )
         else:
-            st.info("Aucun article ne correspond aux filtres sÃ©lectionnÃ©s.")
+            st.info("Aucun article ne correspond aux filtres sélectionnés.")
         
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         # BOUTONS D'ACTION
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         st.divider()
         col_btn1, col_btn2, col_btn3 = st.columns(3)
         
@@ -202,7 +202,7 @@ def render_stock():
                 st.rerun()
         
         with col_btn2:
-            if st.button("ðŸ”„ RafraÃ®chir", use_container_width=True):
+            if st.button("ðŸ”„ Rafraîchir", use_container_width=True):
                 st.session_state.refresh_counter += 1
                 st.rerun()
         
@@ -211,13 +211,13 @@ def render_stock():
                 st.session_state.show_import = True
     
     except ErreurValidation as e:
-        st.error(f"âŒ Erreur de validation: {e}")
+        st.error(f"âŒ Erreur de validation: {e}")
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"âŒ Erreur: {str(e)}")
 
 
 def render_notifications_widget():
-    """Widget affichant les notifications actives (Ã  utiliser en sidebar)"""
+    """Widget affichant les notifications actives (à utiliser en sidebar)"""
     from src.services.notifications import obtenir_service_notifications
     
     service_notifs = obtenir_service_notifications()
@@ -242,7 +242,7 @@ def render_notifications_widget():
                 service_notifs.marquer_lue(notif.id)
             st.rerun()
     
-    # Affiche les notifications groupÃ©es par prioritÃ©
+    # Affiche les notifications groupées par priorité
     st.divider()
     
     # Critiques
@@ -263,8 +263,8 @@ def render_notifications_widget():
     # Moyennes
     moyennes = [n for n in notifs if n.priorite == "moyenne"]
     if moyennes:
-        st.markdown("### âš ï¸ MOYENNES")
-        for notif in moyennes[:3]:  # Affiche seulement les 3 premiÃ¨res
+        st.markdown("### âš ï¸ MOYENNES")
+        for notif in moyennes[:3]:  # Affiche seulement les 3 premières
             with st.container(border=True):
                 col1, col2 = st.columns([0.9, 0.1])
                 with col1:
@@ -284,19 +284,19 @@ def render_alertes():
     service = get_inventaire_service()
     
     if service is None:
-        st.error("âŒ Service inventaire indisponible")
+        st.error("âŒ Service inventaire indisponible")
         return
     
     try:
         alertes = service.get_alertes()
         
         if not any(alertes.values()):
-            st.success("âœ… Aucune alerte! Votre inventaire est en bon Ã©tat.")
+            st.success("âœ… Aucune alerte! Votre inventaire est en bon état.")
             return
         
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         # ARTICLES CRITIQUES
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         if alertes["critique"]:
             st.error(f"ðŸ”´ {len(alertes['critique'])} articles en stock critique")
             df = _prepare_alert_dataframe(alertes["critique"])
@@ -304,9 +304,9 @@ def render_alertes():
         
         st.divider()
         
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         # STOCK BAS
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         if alertes["stock_bas"]:
             st.warning(f"ðŸŸ  {len(alertes['stock_bas'])} articles avec stock faible")
             df = _prepare_alert_dataframe(alertes["stock_bas"])
@@ -314,24 +314,24 @@ def render_alertes():
         
         st.divider()
         
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         # PÃ‰REMPTION PROCHE
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         if alertes["peremption_proche"]:
-            st.warning(f"ðŸ”” {len(alertes['peremption_proche'])} articles proche pÃ©remption")
+            st.warning(f"ðŸ”” {len(alertes['peremption_proche'])} articles proche péremption")
             df = _prepare_alert_dataframe(alertes["peremption_proche"])
             st.dataframe(df, use_container_width=True, hide_index=True)
     
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"âŒ Erreur: {str(e)}")
 
 
 def render_categories():
-    """Gestion des catÃ©gories d'ingrÃ©dients"""
+    """Gestion des catégories d'ingrédients"""
     service = get_inventaire_service()
     
     if service is None:
-        st.error("âŒ Service inventaire indisponible")
+        st.error("âŒ Service inventaire indisponible")
         return
     
     try:
@@ -341,7 +341,7 @@ def render_categories():
             st.info("Inventaire vide")
             return
         
-        # Grouper par catÃ©gorie
+        # Grouper par catégorie
         categories = {}
         for article in inventaire:
             cat = article["ingredient_categorie"]
@@ -350,30 +350,30 @@ def render_categories():
             categories[cat].append(article)
         
         # Afficher par onglet
-        tabs = st.tabs([f"ðŸ·ï¸ {cat} ({len(articles)})" for cat, articles in sorted(categories.items())])
+        tabs = st.tabs([f"ðŸ·ï¸ {cat} ({len(articles)})" for cat, articles in sorted(categories.items())])
         
         for (cat, articles), tab in zip(sorted(categories.items()), tabs):
             with tab:
-                # Statistiques catÃ©gorie
+                # Statistiques catégorie
                 col1, col2, col3 = st.columns(3)
                 with col1:
                     st.metric("Articles", len(articles))
                 with col2:
                     total_qty = sum(a["quantite"] for a in articles)
-                    st.metric("QuantitÃ© totale", f"{total_qty:.1f}")
+                    st.metric("Quantité totale", f"{total_qty:.1f}")
                 with col3:
                     alertes = service.get_alertes()
                     cat_alertes = len([a for a in articles if a["statut"] in ["critique", "stock_bas"]])
-                    st.metric("âš ï¸ Alertes", cat_alertes)
+                    st.metric("âš ï¸ Alertes", cat_alertes)
                 
                 st.divider()
                 
-                # Tableau catÃ©gorie
+                # Tableau catégorie
                 df = _prepare_inventory_dataframe(articles)
                 st.dataframe(df, use_container_width=True, hide_index=True)
     
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"âŒ Erreur: {str(e)}")
 
 
 def render_suggestions_ia():
@@ -381,20 +381,20 @@ def render_suggestions_ia():
     service = get_inventaire_service()
     
     if service is None:
-        st.error("âŒ Service inventaire indisponible")
+        st.error("âŒ Service inventaire indisponible")
         return
     
-    st.info("ðŸ¤– Suggestions IA basÃ©es sur l'Ã©tat de votre inventaire")
+    st.info("ðŸ¤– Suggestions IA basées sur l'état de votre inventaire")
     
-    if st.button("ðŸ›’ GÃ©nÃ©rer les suggestions", use_container_width=True):
+    if st.button("ðŸ›’ Générer les suggestions", use_container_width=True):
         try:
-            with st.spinner("GÃ©nÃ©ration des suggestions..."):
+            with st.spinner("Génération des suggestions..."):
                 suggestions = service.suggerer_courses_ia()
             
             if suggestions:
-                st.success(f"âœ… {len(suggestions)} suggestions gÃ©nÃ©rÃ©es")
+                st.success(f"âœ… {len(suggestions)} suggestions générées")
                 
-                # Grouper par prioritÃ©
+                # Grouper par priorité
                 by_priority = {}
                 for sugg in suggestions:
                     p = sugg.priorite
@@ -402,11 +402,11 @@ def render_suggestions_ia():
                         by_priority[p] = []
                     by_priority[p].append(sugg)
                 
-                # Afficher par prioritÃ©
+                # Afficher par priorité
                 for priority in ["haute", "moyenne", "basse"]:
                     if priority in by_priority:
                         icon = "ðŸ”´" if priority == "haute" else "ðŸŸ " if priority == "moyenne" else "ðŸŸ¢"
-                        with st.expander(f"{icon} PrioritÃ© {priority.upper()} ({len(by_priority[priority])})"):
+                        with st.expander(f"{icon} Priorité {priority.upper()} ({len(by_priority[priority])})"):
                             for sugg in by_priority[priority]:
                                 col1, col2, col3, col4 = st.columns(4)
                                 with col1:
@@ -414,22 +414,22 @@ def render_suggestions_ia():
                                 with col2:
                                     st.write(f"{sugg.quantite} {sugg.unite}")
                                 with col3:
-                                    st.write(f"ðŸ“ {sugg.rayon}")
+                                    st.write(f"ðŸ“ {sugg.rayon}")
                                 with col4:
                                     if st.button("âœ… Ajouter", key=f"add_{sugg.nom}"):
-                                        st.success(f"âœ… {sugg.nom} ajoutÃ© aux courses")
+                                        st.success(f"âœ… {sugg.nom} ajouté aux courses")
             else:
-                st.warning("Aucune suggestion gÃ©nÃ©rÃ©e")
+                st.warning("Aucune suggestion générée")
         
         except Exception as e:
-            st.error(f"âŒ Erreur: {str(e)}")
+            st.error(f"âŒ Erreur: {str(e)}")
 
 
 def render_photos():
     """Gestion des photos pour les articles de l'inventaire"""
     st.subheader("ðŸ“¸ Gestion des photos")
     
-    # RÃ©cupÃ¨re l'inventaire
+    # Récupère l'inventaire
     service = get_inventaire_service()
     articles_data = service.get_inventaire_complet()
     
@@ -437,17 +437,17 @@ def render_photos():
         st.info("Aucun article dans l'inventaire")
         return
     
-    # SÃ©lectionne un article
+    # Sélectionne un article
     col1, col2 = st.columns([3, 1])
     with col1:
         article_names = [f"{a['nom']} ({a['quantite']} {a['unite']})" for a in articles_data]
-        selected_idx = st.selectbox("SÃ©lectionne un article", range(len(article_names)), format_func=lambda i: article_names[i], key="select_photo_article")
+        selected_idx = st.selectbox("Sélectionne un article", range(len(article_names)), format_func=lambda i: article_names[i], key="select_photo_article")
         selected_article = articles_data[selected_idx]
         article_id = selected_article["id"]
     
     # Affiche la photo actuelle
     with col2:
-        st.metric("Ã‰tat", "ðŸ“¸ Photo" if selected_article.get("photo_url") else "âŒ Pas photo")
+        st.metric("Ã‰tat", "ðŸ“¸ Photo" if selected_article.get("photo_url") else "âŒ Pas photo")
     
     # Onglets upload/gestion
     tab_upload, tab_view = st.tabs(["ðŸ“¤ Ajouter/Remplacer", "ðŸ‘€ Afficher"])
@@ -457,16 +457,16 @@ def render_photos():
         
         # Upload image
         uploaded_file = st.file_uploader(
-            "SÃ©lectionne une image",
+            "Sélectionne une image",
             type=["jpg", "jpeg", "png", "webp"],
             help="Format: JPG, PNG, ou WebP. Max 5 MB"
         )
         
         if uploaded_file:
-            # Affiche un aperÃ§u
+            # Affiche un aperçu
             col1, col2 = st.columns([1, 2])
             with col1:
-                st.image(uploaded_file, width=150, caption="AperÃ§u")
+                st.image(uploaded_file, width=150, caption="Aperçu")
             
             with col2:
                 st.write(f"**Fichier:** {uploaded_file.name}")
@@ -484,8 +484,8 @@ def render_photos():
                             photo_filename=uploaded_file.name,
                         )
                         
-                        st.success("âœ… Photo ajoutÃ©e avec succÃ¨s!")
-                        st.toast("Photo mise Ã  jour", icon="ðŸ“¸")
+                        st.success("âœ… Photo ajoutée avec succès!")
+                        st.toast("Photo mise à jour", icon="ðŸ“¸")
                         st.rerun()
                     except Exception as e:
                         st.error(f"Erreur: {str(e)}")
@@ -493,10 +493,10 @@ def render_photos():
         # Bouton supprimer
         if selected_article.get("photo_url"):
             st.divider()
-            if st.button("ðŸ—‘ï¸  Supprimer la photo", key="delete_photo"):
+            if st.button("ðŸ—‘ï¸  Supprimer la photo", key="delete_photo"):
                 try:
                     service.supprimer_photo(article_id)
-                    st.success("âœ… Photo supprimÃ©e")
+                    st.success("âœ… Photo supprimée")
                     st.rerun()
                 except Exception as e:
                     st.error(f"Erreur: {str(e)}")
@@ -523,7 +523,7 @@ def render_photos():
                 # Info
                 st.metric("Fichier", selected_article.get("photo_filename", "N/A"))
                 if selected_article.get("photo_uploaded_at"):
-                    st.caption(f"UploadÃ©e: {selected_article['photo_uploaded_at']}")
+                    st.caption(f"Uploadée: {selected_article['photo_uploaded_at']}")
         else:
             st.info("Pas de photo pour cet article")
             st.write("Ajoute une photo dans l'onglet 'Ajouter/Remplacer'")
@@ -539,7 +539,7 @@ def render_notifications():
     service_notifs = obtenir_service_notifications()
     
     # Onglets
-    tab_center, tab_config = st.tabs(["ðŸ“¬ Centre de notifications", "âš™ï¸ Configuration"])
+    tab_center, tab_config = st.tabs(["ðŸ“¬ Centre de notifications", "âš™ï¸ Configuration"])
     
     with tab_center:
         # Actualiser les notifications
@@ -550,7 +550,7 @@ def render_notifications():
                 try:
                     stats = service.generer_notifications_alertes()
                     total = sum(len(v) for v in stats.values())
-                    st.toast(f"âœ… {total} alertes dÃ©tectÃ©es", icon="ðŸ””")
+                    st.toast(f"âœ… {total} alertes détectées", icon="ðŸ””")
                 except Exception as e:
                     st.error(f"Erreur: {str(e)}")
         
@@ -561,18 +561,18 @@ def render_notifications():
         with col3:
             if st.button("âœ… Tout marquer comme lu", use_container_width=True):
                 service_notifs.effacer_toutes_lues()
-                st.toast("âœ… Notifications marquÃ©es comme lues")
+                st.toast("âœ… Notifications marquées comme lues")
                 st.rerun()
         
         st.divider()
         
-        # Affiche les notifications groupÃ©es
+        # Affiche les notifications groupées
         notifs = service_notifs.obtenir_notifications()
         
         if not notifs:
             st.info("âœ… Aucune notification pour le moment")
         else:
-            # Grouper par prioritÃ©
+            # Grouper par priorité
             critiques = [n for n in notifs if n.priorite == "haute"]
             moyennes = [n for n in notifs if n.priorite == "moyenne"]
             basses = [n for n in notifs if n.priorite == "basse"]
@@ -600,7 +600,7 @@ def render_notifications():
             
             # Affiche les moyennes
             if moyennes:
-                st.markdown("### âš ï¸ Alertes Moyennes")
+                st.markdown("### âš ï¸ Alertes Moyennes")
                 for notif in moyennes:
                     with st.container(border=True):
                         col1, col2 = st.columns([0.85, 0.15])
@@ -621,7 +621,7 @@ def render_notifications():
             
             # Affiche les basses
             if basses:
-                st.markdown("### â„¹ï¸ Informations")
+                st.markdown("### â„¹ï¸ Informations")
                 for notif in basses[:5]:  # Limit to 5
                     with st.container(border=True):
                         col1, col2 = st.columns([0.85, 0.15])
@@ -652,18 +652,18 @@ def render_notifications():
             st.markdown("### ðŸ”” Alertes actives")
             enable_stock = st.checkbox("Stock critique", value=True, key="alert_stock_crit")
             enable_stock_bas = st.checkbox("Stock bas", value=True, key="alert_stock_bas")
-            enable_peremption = st.checkbox("PÃ©remption", value=True, key="alert_peremption")
+            enable_peremption = st.checkbox("Péremption", value=True, key="alert_peremption")
         
         with col2:
             st.markdown("### ðŸ“§ Canaux")
             browser_notif = st.checkbox("Notifications navigateur", value=True, help="Popup dans le navigateur")
-            email_notif = st.checkbox("Email (bientÃ´t)", value=False, disabled=True)
-            slack_notif = st.checkbox("Slack (bientÃ´t)", value=False, disabled=True)
+            email_notif = st.checkbox("Email (bientôt)", value=False, disabled=True)
+            slack_notif = st.checkbox("Slack (bientôt)", value=False, disabled=True)
         
         st.divider()
         
-        # Bouton pour gÃ©nÃ©rer les alertes
-        if st.button("ðŸ”„ GÃ©nÃ©rer les alertes maintenant", use_container_width=True, type="primary"):
+        # Bouton pour générer les alertes
+        if st.button("ðŸ”„ Générer les alertes maintenant", use_container_width=True, type="primary"):
             try:
                 stats = service.generer_notifications_alertes()
                 
@@ -673,11 +673,11 @@ def render_notifications():
                 with col2:
                     st.metric("ðŸŸ  Bas", len(stats["stock_bas"]))
                 with col3:
-                    st.metric("ðŸ”” PÃ©remption", len(stats["peremption_proche"]))
+                    st.metric("ðŸ”” Péremption", len(stats["peremption_proche"]))
                 with col4:
-                    st.metric("ðŸš¨ ExpirÃ©s", len(stats["peremption_depassee"]))
+                    st.metric("ðŸš¨ Expirés", len(stats["peremption_depassee"]))
                 
-                st.toast(f"âœ… {sum(len(v) for v in stats.values())} alertes crÃ©Ã©es", icon="ðŸ””")
+                st.toast(f"âœ… {sum(len(v) for v in stats.values())} alertes créées", icon="ðŸ””")
             except Exception as e:
                 st.error(f"Erreur: {str(e)}")
 
@@ -708,7 +708,7 @@ def render_tools():
                     st.metric("Emplacements", emplacements)
                 with col3:
                     categories = len(set(a["ingredient_categorie"] for a in inventaire))
-                    st.metric("CatÃ©gories", categories)
+                    st.metric("Catégories", categories)
                 with col4:
                     total_alertes = sum(len(v) for v in alertes.values())
                     st.metric("Alertes actives", total_alertes)
@@ -716,7 +716,7 @@ def render_tools():
                 st.divider()
                 
                 # Graphiques
-                st.subheader("ðŸ“ˆ RÃ©partition")
+                st.subheader("ðŸ“ˆ Répartition")
                 
                 col_graph1, col_graph2 = st.columns(2)
                 
@@ -729,7 +729,7 @@ def render_tools():
                     st.bar_chart(statuts)
                 
                 with col_graph2:
-                    st.write("**CatÃ©gories**")
+                    st.write("**Catégories**")
                     cats = {}
                     for article in inventaire:
                         c = article["ingredient_categorie"]
@@ -737,14 +737,14 @@ def render_tools():
                     st.bar_chart(cats)
             
             except Exception as e:
-                st.error(f"âŒ Erreur: {str(e)}")
+                st.error(f"âŒ Erreur: {str(e)}")
 
 
 def render_import_export():
-    """Gestion import/export avancÃ©e"""
+    """Gestion import/export avancée"""
     service = get_inventaire_service()
     
-    st.subheader("ðŸ“¥ðŸ“¤ Import/Export AvancÃ©")
+    st.subheader("ðŸ“¥ðŸ“¤ Import/Export Avancé")
     
     tab_import, tab_export = st.tabs(["ðŸ“¥ Importer", "ðŸ“¤ Exporter"])
     
@@ -753,9 +753,9 @@ def render_import_export():
         
         # Uploader fichier
         uploaded_file = st.file_uploader(
-            "SÃ©lectionne un fichier CSV ou Excel",
+            "Sélectionne un fichier CSV ou Excel",
             type=["csv", "xlsx", "xls"],
-            help="Format: Nom, QuantitÃ©, UnitÃ©, Seuil Min, Emplacement, CatÃ©gorie, Date PÃ©remption"
+            help="Format: Nom, Quantité, Unité, Seuil Min, Emplacement, Catégorie, Date Péremption"
         )
         
         if uploaded_file:
@@ -768,12 +768,12 @@ def render_import_export():
                 else:
                     df = pd.read_excel(uploaded_file)
                 
-                st.write(f"**Fichier parsÃ©:** {len(df)} lignes")
+                st.write(f"**Fichier parsé:** {len(df)} lignes")
                 
-                # Affiche un aperÃ§u
+                # Affiche un aperçu
                 st.dataframe(df.head(5), use_container_width=True)
                 
-                # Valide les donnÃ©es
+                # Valide les données
                 if st.button("âœ… Valider & Importer", type="primary", use_container_width=True):
                     try:
                         # Convertit en format attendu
@@ -783,12 +783,12 @@ def render_import_export():
                         articles_list = [
                             {
                                 "nom": row.get("Nom") or row.get("nom"),
-                                "quantite": float(row.get("QuantitÃ©") or row.get("quantite") or 0),
+                                "quantite": float(row.get("Quantité") or row.get("quantite") or 0),
                                 "quantite_min": float(row.get("Seuil Min") or row.get("quantite_min") or 1),
-                                "unite": row.get("UnitÃ©") or row.get("unite") or "piÃ¨ce",
+                                "unite": row.get("Unité") or row.get("unite") or "pièce",
                                 "emplacement": row.get("Emplacement") or row.get("emplacement"),
-                                "categorie": row.get("CatÃ©gorie") or row.get("categorie"),
-                                "date_peremption": row.get("Date PÃ©remption") or row.get("date_peremption"),
+                                "categorie": row.get("Catégorie") or row.get("categorie"),
+                                "date_peremption": row.get("Date Péremption") or row.get("date_peremption"),
                             }
                             for row in articles_list
                         ]
@@ -800,7 +800,7 @@ def render_import_export():
                         with col1:
                             st.metric("âœ… Valides", rapport["valides"])
                         with col2:
-                            st.metric("âŒ Invalides", rapport["invalides"])
+                            st.metric("âŒ Invalides", rapport["invalides"])
                         with col3:
                             if rapport["valides"] > 0:
                                 pct = (rapport["valides"] / (rapport["valides"] + rapport["invalides"]) * 100) if (rapport["valides"] + rapport["invalides"]) > 0 else 0
@@ -819,23 +819,23 @@ def render_import_export():
                             if st.button("ðŸš€ Importer les articles valides", use_container_width=True):
                                 resultats = service.importer_articles(articles_list)
                                 
-                                # Affiche rÃ©sultats
+                                # Affiche résultats
                                 success = [r for r in resultats if r["status"] == "âœ…"]
-                                errors = [r for r in resultats if r["status"] == "âŒ"]
+                                errors = [r for r in resultats if r["status"] == "âŒ"]
                                 
-                                st.success(f"âœ… {len(success)}/{len(resultats)} articles importÃ©s!")
-                                st.toast(f"Import complÃ©tÃ©: {len(success)} rÃ©ussis", icon="âœ…")
+                                st.success(f"âœ… {len(success)}/{len(resultats)} articles importés!")
+                                st.toast(f"Import complété: {len(success)} réussis", icon="âœ…")
                                 
                                 if errors:
-                                    st.warning(f"âš ï¸ {len(errors)} articles avec erreurs")
+                                    st.warning(f"âš ï¸ {len(errors)} articles avec erreurs")
                                     for err in errors[:3]:
                                         st.caption(f"â€¢ {err['nom']}: {err['message']}")
                     
                     except Exception as e:
-                        st.error(f"âŒ Erreur import: {str(e)}")
+                        st.error(f"âŒ Erreur import: {str(e)}")
             
             except Exception as e:
-                st.error(f"âŒ Erreur parsing fichier: {str(e)}")
+                st.error(f"âŒ Erreur parsing fichier: {str(e)}")
     
     with tab_export:
         st.write("**Exporter l'inventaire**")
@@ -843,32 +843,32 @@ def render_import_export():
         col1, col2 = st.columns(2)
         
         with col1:
-            if st.button("ðŸ“¥ TÃ©lÃ©charger CSV", use_container_width=True):
+            if st.button("ðŸ“¥ Télécharger CSV", use_container_width=True):
                 try:
                     csv_content = service.exporter_inventaire("csv")
                     st.download_button(
-                        label="ðŸ’¾ TÃ©lÃ©charger CSV",
+                        label="ðŸ’¾ Télécharger CSV",
                         data=csv_content,
                         file_name="inventaire.csv",
                         mime="text/csv",
                     )
-                    st.success("âœ… CSV prÃªt Ã  tÃ©lÃ©charger")
+                    st.success("âœ… CSV prêt à télécharger")
                 except Exception as e:
-                    st.error(f"âŒ Erreur: {str(e)}")
+                    st.error(f"âŒ Erreur: {str(e)}")
         
         with col2:
-            if st.button("ðŸ“¥ TÃ©lÃ©charger JSON", use_container_width=True):
+            if st.button("ðŸ“¥ Télécharger JSON", use_container_width=True):
                 try:
                     json_content = service.exporter_inventaire("json")
                     st.download_button(
-                        label="ðŸ’¾ TÃ©lÃ©charger JSON",
+                        label="ðŸ’¾ Télécharger JSON",
                         data=json_content,
                         file_name="inventaire.json",
                         mime="application/json",
                     )
-                    st.success("âœ… JSON prÃªt Ã  tÃ©lÃ©charger")
+                    st.success("âœ… JSON prêt à télécharger")
                 except Exception as e:
-                    st.error(f"âŒ Erreur: {str(e)}")
+                    st.error(f"âŒ Erreur: {str(e)}")
         
         st.divider()
         
@@ -883,36 +883,36 @@ def render_import_export():
 
 
 def render_predictions():
-    """Affiche les prÃ©dictions et recommandations ML"""
-    st.subheader("ðŸ”® PrÃ©visions et Recommandations")
+    """Affiche les prédictions et recommandations ML"""
+    st.subheader("ðŸ”® Prévisions et Recommandations")
     
     try:
         service = get_inventaire_service()
         service_pred = obtenir_service_predictions()
         
         if service is None:
-            st.error("âŒ Service inventaire indisponible")
+            st.error("âŒ Service inventaire indisponible")
             return
         
-        # RÃ©cupÃ¨re les donnÃ©es
+        # Récupère les données
         articles = service.get_inventaire_complet()
         
         if not articles:
-            st.info("Aucun article dans l'inventaire pour gÃ©nÃ©rer les prÃ©dictions")
+            st.info("Aucun article dans l'inventaire pour générer les prédictions")
             return
         
-        # Bouton pour gÃ©nÃ©rer les prÃ©dictions
+        # Bouton pour générer les prédictions
         col1, col2, col3 = st.columns([2, 1, 1])
         
         with col1:
-            if st.button("ðŸ”„ GÃ©nÃ©rer les prÃ©dictions", use_container_width=True, key="btn_generate_predictions"):
+            if st.button("ðŸ”„ Générer les prédictions", use_container_width=True, key="btn_generate_predictions"):
                 st.session_state.predictions_generated = True
                 st.session_state.predictions_data = None
         
         with col2:
-            # PÃ©riode de prÃ©diction
+            # Période de prédiction
             periode = st.selectbox(
-                "PrÃ©diction pour",
+                "Prédiction pour",
                 ["1 semaine", "1 mois", "3 mois"],
                 key="prediction_period"
             )
@@ -922,9 +922,9 @@ def render_predictions():
         
         st.divider()
         
-        # Affiche les prÃ©dictions si gÃ©nÃ©rÃ©es
+        # Affiche les prédictions si générées
         if st.session_state.get("predictions_generated", False):
-            with st.spinner("â³ GÃ©nÃ©ration des prÃ©dictions ML..."):
+            with st.spinner("â³ Génération des prédictions ML..."):
                 try:
                     predictions = service_pred.generer_predictions()
                     analyse_globale = service_pred.obtenir_analyse_globale()
@@ -936,35 +936,35 @@ def render_predictions():
                         "recommandations": recommandations
                     }
                 except Exception as e:
-                    st.error(f"âŒ Erreur lors de la gÃ©nÃ©ration: {str(e)}")
+                    st.error(f"âŒ Erreur lors de la génération: {str(e)}")
                     st.session_state.predictions_generated = False
                     return
         
-        # Affiche les rÃ©sultats
+        # Affiche les résultats
         if st.session_state.get("predictions_data"):
             data = st.session_state.predictions_data
             predictions = data["predictions"]
             analyse = data["analyse"]
             recommandations = data["recommandations"]
             
-            # Tabs pour les diffÃ©rentes vues
+            # Tabs pour les différentes vues
             tab_pred, tab_tendances, tab_recom, tab_analyse = st.tabs([
-                "ðŸ“Š PrÃ©dictions",
+                "ðŸ“Š Prédictions",
                 "ðŸ“ˆ Tendances",
                 "ðŸ’¡ Recommandations",
-                "ðŸ” Analyse globale"
+                "ðŸ” Analyse globale"
             ])
             
             with tab_pred:
-                st.write("**PrÃ©dictions pour tous les articles**")
+                st.write("**Prédictions pour tous les articles**")
                 
-                # PrÃ©pare le dataframe
+                # Prépare le dataframe
                 df_pred = []
                 for pred in predictions:
                     df_pred.append({
                         "Article": pred.nom,
-                        "QuantitÃ© actuelle": pred.quantite_actuelle,
-                        "PrÃ©dite (1 mois)": f"{pred.quantite_predite:.1f}",
+                        "Quantité actuelle": pred.quantite_actuelle,
+                        "Prédite (1 mois)": f"{pred.quantite_predite:.1f}",
                         "Tendance": pred.tendance,
                         "Confiance": f"{pred.confiance:.0%}",
                         "Risque rupture": "ðŸ”´ OUI" if pred.risque_rupture else "ðŸŸ¢ Non",
@@ -976,24 +976,24 @@ def render_predictions():
                 
                 st.divider()
                 
-                # Filtres et dÃ©tails
+                # Filtres et détails
                 col1, col2, col3 = st.columns(3)
                 
                 with col1:
                     filter_trend = st.multiselect(
                         "Filtrer par tendance",
-                        ["croissante", "dÃ©croissante", "stable"],
-                        default=["croissante", "dÃ©croissante", "stable"],
+                        ["croissante", "décroissante", "stable"],
+                        default=["croissante", "décroissante", "stable"],
                         key="filter_trend_pred"
                     )
                 
                 with col2:
-                    filter_risk = st.checkbox("Afficher seulement les articles Ã  risque", key="filter_risk_pred")
+                    filter_risk = st.checkbox("Afficher seulement les articles à risque", key="filter_risk_pred")
                 
                 with col3:
                     min_confiance = st.slider("Confiance minimale", 0, 100, 0, key="min_confiance_pred")
                 
-                # Filtre et affiche les dÃ©tails
+                # Filtre et affiche les détails
                 filtered_pred = [
                     p for p in predictions 
                     if p.tendance in filter_trend 
@@ -1008,8 +1008,8 @@ def render_predictions():
                             col1, col2, col3 = st.columns(3)
                             
                             with col1:
-                                st.metric("QuantitÃ© actuelle", f"{pred.quantite_actuelle:.1f} {pred.unite}")
-                                st.metric("PrÃ©dite (1 mois)", f"{pred.quantite_predite:.1f}")
+                                st.metric("Quantité actuelle", f"{pred.quantite_actuelle:.1f} {pred.unite}")
+                                st.metric("Prédite (1 mois)", f"{pred.quantite_predite:.1f}")
                             
                             with col2:
                                 st.metric("Consommation/jour", f"{pred.consommation_moyenne:.2f}")
@@ -1017,17 +1017,17 @@ def render_predictions():
                             
                             with col3:
                                 if pred.risque_rupture:
-                                    st.metric("âš ï¸ Rupture dans", f"{pred.jours_avant_rupture} j")
+                                    st.metric("âš ï¸ Rupture dans", f"{pred.jours_avant_rupture} j")
                                     st.warning(f"Stock insuffisant dans {pred.jours_avant_rupture} jours!")
                                 else:
-                                    st.metric("Stock", "âœ… SÃ»r")
+                                    st.metric("Stock", "âœ… Sûr")
                                     st.success(f"Suffisant pour {pred.jours_avant_rupture} jours")
             
             with tab_tendances:
                 st.write("**Tendances de consommation**")
                 
                 # Groupe par tendance
-                tendances = {"croissante": [], "dÃ©croissante": [], "stable": []}
+                tendances = {"croissante": [], "décroissante": [], "stable": []}
                 for pred in predictions:
                     tendances[pred.tendance].append(pred)
                 
@@ -1041,14 +1041,14 @@ def render_predictions():
                                 st.write(f"â€¢ {p.nom} (+{p.consommation_moyenne:.2f}/jour)")
                 
                 with col2:
-                    st.metric("ðŸ“‰ DÃ©croissante", len(tendances["dÃ©croissante"]))
-                    if tendances["dÃ©croissante"]:
+                    st.metric("ðŸ“‰ Décroissante", len(tendances["décroissante"]))
+                    if tendances["décroissante"]:
                         with st.expander("Voir les articles"):
-                            for p in tendances["dÃ©croissante"]:
+                            for p in tendances["décroissante"]:
                                 st.write(f"â€¢ {p.nom} ({p.consommation_moyenne:.2f}/jour)")
                 
                 with col3:
-                    st.metric("âž¡ï¸ Stable", len(tendances["stable"]))
+                    st.metric("âž¡ï¸ Stable", len(tendances["stable"]))
                     if tendances["stable"]:
                         with st.expander("Voir les articles"):
                             for p in tendances["stable"]:
@@ -1069,7 +1069,7 @@ def render_predictions():
                 st.write("**Recommandations d'achat prioritaires**")
                 
                 if recommandations:
-                    # Groupe par prioritÃ©
+                    # Groupe par priorité
                     by_priority = {}
                     for rec in recommandations:
                         p = rec.priorite
@@ -1077,7 +1077,7 @@ def render_predictions():
                             by_priority[p] = []
                         by_priority[p].append(rec)
                     
-                    # Affiche par prioritÃ©
+                    # Affiche par priorité
                     for priority in ["CRITIQUE", "HAUTE", "MOYENNE"]:
                         if priority in by_priority:
                             icon = "ðŸ”´" if priority == "CRITIQUE" else "ðŸŸ " if priority == "HAUTE" else "ðŸŸ¡"
@@ -1092,14 +1092,14 @@ def render_predictions():
                                         st.caption(rec.raison)
                                     
                                     with col2:
-                                        st.metric("QuantitÃ©", f"{rec.quantite_recommandee:.0f} {rec.unite}")
+                                        st.metric("Quantité", f"{rec.quantite_recommandee:.0f} {rec.unite}")
                                     
                                     with col3:
                                         st.metric("Stock actuel", f"{rec.quantite_actuelle:.0f}")
                                     
                                     with col4:
                                         if st.button("âœ… Ajouter", key=f"add_rec_{rec.nom}", use_container_width=True):
-                                            st.toast(f"âœ… {rec.nom} ajoutÃ©", icon="ðŸ›’")
+                                            st.toast(f"âœ… {rec.nom} ajouté", icon="ðŸ›’")
                 else:
                     st.info("Aucune recommandation d'achat pour le moment")
             
@@ -1125,48 +1125,48 @@ def render_predictions():
                 
                 st.divider()
                 
-                # RÃ©sumÃ© de l'analyse
+                # Résumé de l'analyse
                 if analyse:
-                    st.write("**Tendance gÃ©nÃ©rale**: ", end="")
+                    st.write("**Tendance générale**: ", end="")
                     if analyse.tendance_globale == "croissante":
                         st.write("ðŸ“ˆ **Consommation en augmentation**")
-                        st.info("La consommation gÃ©nÃ©rale augmente. PrÃ©parez-vous Ã  augmenter vos achats.")
-                    elif analyse.tendance_globale == "dÃ©croissante":
+                        st.info("La consommation générale augmente. Préparez-vous à augmenter vos achats.")
+                    elif analyse.tendance_globale == "décroissante":
                         st.write("ðŸ“‰ **Consommation en diminution**")
-                        st.info("La consommation gÃ©nÃ©rale diminue. Vous pouvez rÃ©duire lÃ©gÃ¨rement vos achats.")
+                        st.info("La consommation générale diminue. Vous pouvez réduire légèrement vos achats.")
                     else:
-                        st.write("âž¡ï¸ **Consommation stable**")
+                        st.write("âž¡ï¸ **Consommation stable**")
                         st.info("La consommation est stable. Maintenez votre rythme d'achat actuel.")
                     
                     st.divider()
                     
-                    # Stats dÃ©taillÃ©es
+                    # Stats détaillées
                     col1, col2 = st.columns(2)
                     
                     with col1:
                         st.write("**Consommation quotidienne moyenne**")
-                        st.metric("Total", f"{analyse.consommation_moyenne_globale:.2f} unitÃ©s/jour")
+                        st.metric("Total", f"{analyse.consommation_moyenne_globale:.2f} unités/jour")
                         st.metric("Min", f"{analyse.consommation_min:.2f}")
                         st.metric("Max", f"{analyse.consommation_max:.2f}")
                     
                     with col2:
                         st.write("**Distribution des articles**")
                         st.metric("Croissants", f"{analyse.nb_articles_croissance}")
-                        st.metric("DÃ©croissants", f"{analyse.nb_articles_decroissance}")
+                        st.metric("Décroissants", f"{analyse.nb_articles_decroissance}")
                         st.metric("Stables", f"{analyse.nb_articles_stables}")
     
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"âŒ Erreur: {str(e)}")
         import traceback
         st.text(traceback.format_exc())
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # HELPERS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def _prepare_inventory_dataframe(inventaire: list[dict[str, Any]]) -> pd.DataFrame:
-    """PrÃ©pare un DataFrame pour affichage inventaire"""
+    """Prépare un DataFrame pour affichage inventaire"""
     data = []
     for article in inventaire:
         statut_icon = {
@@ -1174,13 +1174,13 @@ def _prepare_inventory_dataframe(inventaire: list[dict[str, Any]]) -> pd.DataFra
             "stock_bas": "ðŸŸ ",
             "peremption_proche": "ðŸ””",
             "ok": "ðŸŸ¢"
-        }.get(article["statut"], "â“")
+        }.get(article["statut"], "â“")
         
         data.append({
             "Statut": f"{statut_icon} {article['statut']}",
             "Article": article["ingredient_nom"],
-            "CatÃ©gorie": article["ingredient_categorie"],
-            "QuantitÃ©": f"{article['quantite']:.1f} {article['unite']}",
+            "Catégorie": article["ingredient_categorie"],
+            "Quantité": f"{article['quantite']:.1f} {article['unite']}",
             "Seuil min": f"{article['quantite_min']:.1f} {article['unite']}",
             "Emplacement": article["emplacement"] or "-",
             "Jours": article["jours_avant_peremption"] or "-",
@@ -1191,14 +1191,14 @@ def _prepare_inventory_dataframe(inventaire: list[dict[str, Any]]) -> pd.DataFra
 
 
 def _prepare_alert_dataframe(articles: list[dict[str, Any]]) -> pd.DataFrame:
-    """PrÃ©pare un DataFrame pour affichage alertes"""
+    """Prépare un DataFrame pour affichage alertes"""
     data = []
     for article in articles:
         statut_icon = {
             "critique": "ðŸ”´",
             "stock_bas": "ðŸŸ ",
             "peremption_proche": "ðŸ””",
-        }.get(article["statut"], "â“")
+        }.get(article["statut"], "â“")
         
         jours = ""
         if article["jours_avant_peremption"] is not None:
@@ -1206,11 +1206,11 @@ def _prepare_alert_dataframe(articles: list[dict[str, Any]]) -> pd.DataFrame:
         
         data.append({
             "Article": article["ingredient_nom"],
-            "CatÃ©gorie": article["ingredient_categorie"],
-            "QuantitÃ©": f"{article['quantite']:.1f} {article['unite']}",
+            "Catégorie": article["ingredient_categorie"],
+            "Quantité": f"{article['quantite']:.1f} {article['unite']}",
             "Seuil": f"{article['quantite_min']:.1f}",
             "Emplacement": article["emplacement"] or "-",
-            "ProblÃ¨me": jours if jours else "Stock critique",
+            "Problème": jours if jours else "Stock critique",
         })
     
     return pd.DataFrame(data)
@@ -1220,7 +1220,7 @@ def render_historique():
     service = get_inventaire_service()
     
     if service is None:
-        st.error("âŒ Service inventaire indisponible")
+        st.error("âŒ Service inventaire indisponible")
         return
     
     st.subheader("ðŸ“œ Historique des Modifications")
@@ -1229,7 +1229,7 @@ def render_historique():
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        days = st.slider("PÃ©riode (jours)", 1, 90, 30)
+        days = st.slider("Période (jours)", 1, 90, 30)
     
     with col2:
         article_id = st.selectbox(
@@ -1245,12 +1245,12 @@ def render_historique():
             default=["ajout", "modification", "suppression"]
         )
     
-    # RÃ©cupÃ©rer historique
+    # Récupérer historique
     try:
         historique = service.get_historique(days=days)
         
         if not historique:
-            st.info("ðŸ“­ Aucune modification enregistrÃ©e dans cette pÃ©riode")
+            st.info("ðŸ“­ Aucune modification enregistrée dans cette période")
             return
         
         # Filtrer par type
@@ -1268,20 +1268,20 @@ def render_historique():
         for h in historique_filtres:
             action_icon = {
                 "ajout": "âž•",
-                "modification": "âœï¸",
-                "suppression": "ðŸ—‘ï¸"
-            }.get(h["type"], "â“")
+                "modification": "âœï¸",
+                "suppression": "ðŸ—‘ï¸"
+            }.get(h["type"], "â“")
             
-            # RÃ©sumer les changements
+            # Résumer les changements
             changements = []
             if h["quantite_avant"] is not None:
                 changements.append(f"Qty: {h['quantite_avant']:.1f} â†’ {h['quantite_apres']:.1f}")
             if h["emplacement_avant"] is not None:
                 changements.append(f"Empl: {h['emplacement_avant']} â†’ {h['emplacement_apres']}")
             if h["date_peremption_avant"] is not None:
-                changements.append(f"PÃ©remption: {h['date_peremption_avant']} â†’ {h['date_peremption_apres']}")
+                changements.append(f"Péremption: {h['date_peremption_avant']} â†’ {h['date_peremption_apres']}")
             
-            changement_text = " | ".join(changements) if changements else "DÃ©tails disponibles"
+            changement_text = " | ".join(changements) if changements else "Détails disponibles"
             
             data.append({
                 "Date": pd.Timestamp(h["date_modification"]).strftime("%d/%m/%Y %H:%M"),
@@ -1307,4 +1307,4 @@ def render_historique():
             st.metric("Modifications", modifs)
     
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"âŒ Erreur: {str(e)}")

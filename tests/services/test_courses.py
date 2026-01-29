@@ -5,8 +5,8 @@ Tests couvrant:
 - CRUD articles courses
 - Liste de courses avec filtres
 - Suggestions IA
-- ModÃ¨les persistants de courses
-- SchÃ©ma Pydantic SuggestionCourses
+- Modèles persistants de courses
+- Schéma Pydantic SuggestionCourses
 """
 
 import pytest
@@ -23,9 +23,9 @@ from src.services.courses import (
 from src.core.models import ArticleCourses, Ingredient
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 1: TESTS INITIALISATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -43,7 +43,7 @@ class TestCoursesServiceInit:
             assert service.cache_ttl == 1800
 
     def test_service_inherits_base_service(self):
-        """Test que le service hÃ©rite de BaseService."""
+        """Test que le service hérite de BaseService."""
         with patch("src.services.courses.obtenir_client_ia") as mock_client:
             mock_client.return_value = MagicMock()
             service = CoursesService()
@@ -62,23 +62,23 @@ class TestCoursesServiceInit:
             assert isinstance(service, CoursesService)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 2: TESTS SCHÃ‰MA PYDANTIC
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestSuggestionCoursesSchema:
-    """Test schÃ©ma Pydantic SuggestionCourses."""
+    """Test schéma Pydantic SuggestionCourses."""
 
     def test_suggestion_courses_valid(self):
-        """Test crÃ©ation suggestion valide."""
+        """Test création suggestion valide."""
         suggestion = SuggestionCourses(
             nom="Tomates",
             quantite=2.0,
             unite="kg",
             priorite="haute",
-            rayon="Fruits & LÃ©gumes",
+            rayon="Fruits & Légumes",
         )
 
         assert suggestion.nom == "Tomates"
@@ -86,7 +86,7 @@ class TestSuggestionCoursesSchema:
         assert suggestion.priorite == "haute"
 
     def test_suggestion_courses_nom_min_length(self):
-        """Test que nom doit avoir au moins 2 caractÃ¨res."""
+        """Test que nom doit avoir au moins 2 caractères."""
         with pytest.raises(ValueError):
             SuggestionCourses(
                 nom="A",  # Trop court
@@ -97,11 +97,11 @@ class TestSuggestionCoursesSchema:
             )
 
     def test_suggestion_courses_quantite_positive(self):
-        """Test que quantite doit Ãªtre positive."""
+        """Test que quantite doit être positive."""
         with pytest.raises(ValueError):
             SuggestionCourses(
                 nom="Test",
-                quantite=0,  # Doit Ãªtre > 0
+                quantite=0,  # Doit être > 0
                 unite="kg",
                 priorite="haute",
                 rayon="Test",
@@ -120,7 +120,7 @@ class TestSuggestionCoursesSchema:
             assert suggestion.priorite == priorite
 
     def test_suggestion_courses_priorite_invalid_value(self):
-        """Test que priorite invalide lÃ¨ve une erreur."""
+        """Test que priorite invalide lève une erreur."""
         with pytest.raises(ValueError):
             SuggestionCourses(
                 nom="Test",
@@ -131,9 +131,9 @@ class TestSuggestionCoursesSchema:
             )
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 3: TESTS LISTE DE COURSES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -167,14 +167,14 @@ class TestListeCourses:
         assert isinstance(result, list)
 
     def test_get_liste_courses_with_articles(self, db, ingredient_factory):
-        """Test liste avec articles crÃ©Ã©s."""
+        """Test liste avec articles créés."""
         ingredient = ingredient_factory.create(nom="Tomates Test Liste")
         
         article = ArticleCourses(
             ingredient_id=ingredient.id,
             quantite_necessaire=2.0,
             priorite="haute",
-            rayon_magasin="Fruits & LÃ©gumes",
+            rayon_magasin="Fruits & Légumes",
             achete=False,
         )
         db.add(article)
@@ -197,7 +197,7 @@ class TestListeCourses:
             ingredient_id=ingredient.id,
             quantite_necessaire=2.5,
             priorite="moyenne",
-            rayon_magasin="LÃ©gumes",
+            rayon_magasin="Légumes",
             achete=False,
             notes="Bio si possible",
         )
@@ -220,9 +220,9 @@ class TestListeCourses:
                 assert "rayon_magasin" in item
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 4: TESTS SUGGESTIONS IA
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -242,17 +242,17 @@ class TestSuggestionsIA:
         )
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 5: TESTS MODÃˆLES DE COURSES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestCoursesServiceModeles:
-    """Test modÃ¨les de courses persistants."""
+    """Test modèles de courses persistants."""
 
     def test_get_modeles_method_exists(self):
-        """Test que la mÃ©thode get_modeles existe."""
+        """Test que la méthode get_modeles existe."""
         with patch("src.services.courses.obtenir_client_ia") as mock_client:
             mock_client.return_value = MagicMock()
             service = CoursesService()
@@ -261,7 +261,7 @@ class TestCoursesServiceModeles:
             assert callable(service.get_modeles)
 
     def test_create_modele_method_exists(self):
-        """Test que la mÃ©thode create_modele existe."""
+        """Test que la méthode create_modele existe."""
         with patch("src.services.courses.obtenir_client_ia") as mock_client:
             mock_client.return_value = MagicMock()
             service = CoursesService()
@@ -270,7 +270,7 @@ class TestCoursesServiceModeles:
             assert callable(service.create_modele)
 
     def test_delete_modele_method_exists(self):
-        """Test que la mÃ©thode delete_modele existe."""
+        """Test que la méthode delete_modele existe."""
         with patch("src.services.courses.obtenir_client_ia") as mock_client:
             mock_client.return_value = MagicMock()
             service = CoursesService()
@@ -279,7 +279,7 @@ class TestCoursesServiceModeles:
             assert callable(service.delete_modele)
 
     def test_appliquer_modele_method_exists(self):
-        """Test que la mÃ©thode appliquer_modele existe."""
+        """Test que la méthode appliquer_modele existe."""
         with patch("src.services.courses.obtenir_client_ia") as mock_client:
             mock_client.return_value = MagicMock()
             service = CoursesService()
@@ -288,9 +288,9 @@ class TestCoursesServiceModeles:
             assert callable(service.appliquer_modele)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 6: TESTS CRUD ARTICLES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -298,7 +298,7 @@ class TestCoursesServiceCRUD:
     """Test CRUD articles courses."""
 
     def test_create_article_courses(self, db, ingredient_factory):
-        """Test crÃ©ation article courses."""
+        """Test création article courses."""
         ingredient = ingredient_factory.create(nom="Nouvel Article")
         
         with patch("src.services.courses.obtenir_client_ia") as mock_client:
@@ -309,7 +309,7 @@ class TestCoursesServiceCRUD:
                 "ingredient_id": ingredient.id,
                 "quantite_necessaire": 3.0,
                 "priorite": "haute",
-                "rayon_magasin": "Fruits & LÃ©gumes",
+                "rayon_magasin": "Fruits & Légumes",
                 "achete": False,
             }
             
@@ -320,7 +320,7 @@ class TestCoursesServiceCRUD:
             assert result.quantite_necessaire == 3.0
 
     def test_get_article_by_id(self, db, ingredient_factory):
-        """Test rÃ©cupÃ©ration article par ID."""
+        """Test récupération article par ID."""
         ingredient = ingredient_factory.create(nom="Article GetById")
         
         article = ArticleCourses(
@@ -343,7 +343,7 @@ class TestCoursesServiceCRUD:
             assert result.id == article.id
 
     def test_update_article_courses(self, db, ingredient_factory):
-        """Test mise Ã  jour article courses."""
+        """Test mise à jour article courses."""
         ingredient = ingredient_factory.create(nom="Article Update")
         
         article = ArticleCourses(
@@ -395,7 +395,7 @@ class TestCoursesServiceCRUD:
             assert service.get_by_id(article_id, db=db) is None
 
     def test_marquer_achete(self, db, ingredient_factory):
-        """Test marquer article comme achetÃ©."""
+        """Test marquer article comme acheté."""
         ingredient = ingredient_factory.create(nom="Article Achete")
         
         article = ArticleCourses(
@@ -418,9 +418,9 @@ class TestCoursesServiceCRUD:
             assert result.achete is True
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 7: TESTS INTÃ‰GRATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.integration
@@ -436,15 +436,15 @@ class TestCoursesIntegration:
         assert isinstance(items, list)
 
     def test_workflow_complet_courses(self, db, ingredient_factory):
-        """Test workflow complet courses - crÃ©ation et lecture."""
+        """Test workflow complet courses - création et lecture."""
         with patch("src.services.courses.obtenir_client_ia") as mock_client:
             mock_client.return_value = MagicMock()
             service = CoursesService()
             
-            # CrÃ©er ingrÃ©dient
+            # Créer ingrédient
             ingredient = ingredient_factory.create(nom="Workflow Ingredient Unique")
             
-            # CrÃ©er article directement en DB
+            # Créer article directement en DB
             article = ArticleCourses(
                 ingredient_id=ingredient.id,
                 quantite_necessaire=2.0,
@@ -456,24 +456,24 @@ class TestCoursesIntegration:
             db.commit()
             article_id = article.id
             
-            # VÃ©rifier dans la liste (test principal)
+            # Vérifier dans la liste (test principal)
             liste = service.get_liste_courses(db=db)
             articles_ids = [item["id"] for item in liste]
-            assert article_id in articles_ids, f"Article {article_id} devrait Ãªtre dans {articles_ids}"
+            assert article_id in articles_ids, f"Article {article_id} devrait être dans {articles_ids}"
             
             # Nettoyer
             db.delete(article)
             db.commit()
 
     def test_filtres_combines(self, db, ingredient_factory):
-        """Test filtres combinÃ©s."""
+        """Test filtres combinés."""
         with patch("src.services.courses.obtenir_client_ia") as mock_client:
             mock_client.return_value = MagicMock()
             service = CoursesService()
             
             ingredient = ingredient_factory.create(nom="Filtre Combine")
             
-            # CrÃ©er plusieurs articles
+            # Créer plusieurs articles
             articles_data = [
                 {"priorite": "haute", "achete": False},
                 {"priorite": "haute", "achete": True},
@@ -490,7 +490,7 @@ class TestCoursesIntegration:
                 db.add(article)
             db.commit()
             
-            # Filtrer: haute prioritÃ© ET non achetÃ©
+            # Filtrer: haute priorité ET non acheté
             result = service.get_liste_courses(
                 achetes=False,
                 priorite="haute",
@@ -503,9 +503,9 @@ class TestCoursesIntegration:
             )
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 8: TESTS FIXTURES EXISTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit

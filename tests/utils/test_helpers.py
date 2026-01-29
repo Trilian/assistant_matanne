@@ -53,7 +53,7 @@ class TestRemoveAccents:
     
     def test_remove_accents_french(self):
         from src.utils.helpers.strings import remove_accents
-        assert remove_accents("cafÃ© crÃ¨me") == "cafe creme"
+        assert remove_accents("café crème") == "cafe creme"
     
     def test_remove_accents_uppercase(self):
         from src.utils.helpers.strings import remove_accents
@@ -63,8 +63,8 @@ class TestRemoveAccents:
     
     def test_remove_accents_spanish(self):
         from src.utils.helpers.strings import remove_accents
-        result = remove_accents("niÃ±o")
-        assert "Ã±" not in result
+        result = remove_accents("niño")
+        assert "ñ" not in result
 
 
 class TestCamelToSnake:
@@ -298,6 +298,6 @@ class TestCalculatePercentile:
     def test_percentile_empty(self):
         from src.utils.helpers.stats import calculate_percentile
         result = calculate_percentile([], 50)
-        # Peut retourner 0 ou lever une exception selon l'implÃ©mentation
+        # Peut retourner 0 ou lever une exception selon l'implémentation
         assert result == 0.0 or result is None
 

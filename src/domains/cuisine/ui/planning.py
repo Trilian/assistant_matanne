@@ -1,8 +1,8 @@
 ﻿"""
 Module Planning - Gestion du planning hebdomadaire
-âœ¨ FonctionnalitÃ©s complÃ¨tes:
-- Vue semaine avec Ã©dition en ligne
-- GÃ©nÃ©ration IA planning
+âœ¨ Fonctionnalités complètes:
+- Vue semaine avec édition en ligne
+- Génération IA planning
 - Historique et gestion plannings
 """
 
@@ -16,7 +16,7 @@ from src.services.recettes import get_recette_service
 from src.core.database import obtenir_contexte_db
 from src.core.errors_base import ErreurValidation
 
-# Logique mÃ©tier pure
+# Logique métier pure
 from src.domains.cuisine.logic.planning_logic import (
     get_debut_semaine,
     valider_planning,
@@ -25,26 +25,26 @@ from src.domains.cuisine.logic.planning_logic import (
 
 logger = logging.getLogger(__name__)
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONSTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
 JOURS_EMOJI = ["ðŸŸ¡", "ðŸŸ ", "ðŸŸ£", "ðŸ”µ", "ðŸŸ¢", "âš«", "ðŸ”´"]
-TYPES_REPAS = ["dÃ©jeuner", "dÃ®ner"]
-REGIMES = ["Omnivore", "VÃ©gÃ©tarien", "VÃ©gan", "Sans gluten"]
+TYPES_REPAS = ["déjeuner", "dîner"]
+REGIMES = ["Omnivore", "Végétarien", "Végan", "Sans gluten"]
 TEMPS_CUISINE = ["Rapide (< 30 min)", "Moyen (30-60 min)", "Long (> 60 min)"]
 BUDGETS = ["Bas (< 20â‚¬)", "Moyen (20-40â‚¬)", "Haut (> 40â‚¬)"]
 
 
 def app():
-    """Point d'entrÃ©e module planning"""
+    """Point d'entrée module planning"""
     st.title("ðŸ“… Planning Semaine")
-    st.caption("GÃ©rez vos repas de la semaine et gÃ©nÃ©rez des plannings avec IA")
+    st.caption("Gérez vos repas de la semaine et générez des plannings avec IA")
 
     tab_planning, tab_generer, tab_historique = st.tabs([
         "ðŸ“‹ Planning Actif", 
-        "âœ¨ GÃ©nÃ©rer avec IA", 
+        "âœ¨ Générer avec IA", 
         "ðŸ“š Historique"
     ])
 
@@ -58,28 +58,28 @@ def app():
         render_historique()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 1: PLANNING ACTIF
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def render_planning():
-    """Affiche et Ã©dite le planning actuel"""
+    """Affiche et édite le planning actuel"""
     service = get_planning_service()
     recette_service = get_recette_service()
     
     if service is None:
-        st.error("âŒ Service planning indisponible")
+        st.error("âŒ Service planning indisponible")
         return
     
     try:
-        # RÃ©cupÃ©rer planning actif
+        # Récupérer planning actif
         planning = service.get_planning()
         
         if not planning:
-            st.warning("âš ï¸ Aucun planning actif pour cette semaine")
+            st.warning("âš ï¸ Aucun planning actif pour cette semaine")
             col1, col2 = st.columns(2)
             with col1:
-                if st.button("âž• CrÃ©er nouveau planning", use_container_width=True, type="primary"):
+                if st.button("âž• Créer nouveau planning", use_container_width=True, type="primary"):
                     st.session_state.go_to_generer = True
                     st.rerun()
             return
@@ -89,14 +89,14 @@ def render_planning():
         with col1:
             st.metric("ðŸ“… Semaine du", planning.semaine_debut.strftime("%d/%m"))
         with col2:
-            st.metric("ðŸ“Š Repas planifiÃ©s", len(planning.repas) if planning.repas else 0)
+            st.metric("ðŸ“Š Repas planifiés", len(planning.repas) if planning.repas else 0)
         with col3:
-            genere_ia = "ðŸ¤– IA" if planning.genere_par_ia else "âœï¸ Manuel"
-            st.metric("CrÃ©Ã© par", genere_ia)
+            genere_ia = "ðŸ¤– IA" if planning.genere_par_ia else "âœï¸ Manuel"
+            st.metric("Créé par", genere_ia)
         
         st.divider()
         
-        # RÃ©cupÃ©rer toutes recettes pour selectbox
+        # Récupérer toutes recettes pour selectbox
         db = next(obtenir_contexte_db())
         from src.core.models import Recette
         recettes = db.query(Recette).all()
@@ -122,14 +122,14 @@ def render_planning():
                 repas_jour = repas_par_jour.get(jour_key, [])
                 
                 if not repas_jour:
-                    st.info(f"Aucun repas planifiÃ© ce jour")
+                    st.info(f"Aucun repas planifié ce jour")
                     continue
                 
                 for repas in repas_jour:
                     col1, col2, col3, col4 = st.columns([1.5, 2, 1.5, 1])
                     
                     with col1:
-                        type_emoji = "ðŸ½ï¸" if repas.type_repas == "dÃ®ner" else "â˜•"
+                        type_emoji = "ðŸ½ï¸" if repas.type_repas == "dîner" else "â˜•"
                         st.write(f"**{type_emoji} {repas.type_repas.capitalize()}**")
                     
                     with col2:
@@ -145,7 +145,7 @@ def render_planning():
                             label_visibility="collapsed"
                         )
                         
-                        # Mettre Ã  jour si changement
+                        # Mettre à jour si changement
                         if new_recette != "-- Aucune --" and new_recette != recette_current:
                             try:
                                 from src.core.models import Repas as RepasModel
@@ -153,15 +153,15 @@ def render_planning():
                                 if repas_db:
                                     repas_db.recette_id = recettes_dict[new_recette]
                                     db.commit()
-                                    st.success(f"âœ… Recette mise Ã  jour")
+                                    st.success(f"âœ… Recette mise à jour")
                                     st.rerun()
                             except Exception as e:
-                                st.error(f"âŒ Erreur: {str(e)}")
+                                st.error(f"âŒ Erreur: {str(e)}")
                     
                     with col3:
-                        # Toggle "PrÃ©parÃ©"
+                        # Toggle "Préparé"
                         prepared = st.checkbox(
-                            "PrÃ©parÃ©",
+                            "Préparé",
                             value=repas.prepare,
                             key=f"prepared_{repas.id}"
                         )
@@ -173,10 +173,10 @@ def render_planning():
                                     repas_db.prepare = prepared
                                     db.commit()
                             except Exception as e:
-                                st.error(f"âŒ Erreur: {str(e)}")
+                                st.error(f"âŒ Erreur: {str(e)}")
                     
                     with col4:
-                        if st.button("ðŸ“", key=f"edit_notes_{repas.id}", help="Ã‰diter notes"):
+                        if st.button("ðŸ“", key=f"edit_notes_{repas.id}", help="Ã‰diter notes"):
                             st.session_state[f"editing_notes_{repas.id}"] = True
                     
                     # Notes editor
@@ -197,38 +197,38 @@ def render_planning():
                                         repas_db.notes = notes if notes else None
                                         db.commit()
                                         st.session_state[f"editing_notes_{repas.id}"] = False
-                                        st.success("âœ… Notes sauvegardÃ©es")
+                                        st.success("âœ… Notes sauvegardées")
                                         st.rerun()
                                 except Exception as e:
-                                    st.error(f"âŒ Erreur: {str(e)}")
+                                    st.error(f"âŒ Erreur: {str(e)}")
                         with col_b:
-                            if st.button("âŒ Annuler", key=f"cancel_notes_{repas.id}"):
+                            if st.button("âŒ Annuler", key=f"cancel_notes_{repas.id}"):
                                 st.session_state[f"editing_notes_{repas.id}"] = False
                                 st.rerun()
         
         st.divider()
         
         # Actions de masse
-        st.subheader("âš™ï¸ Actions")
+        st.subheader("âš™ï¸ Actions")
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            if st.button("âœ… Marquer tout prÃ©parÃ©", use_container_width=True):
+            if st.button("âœ… Marquer tout préparé", use_container_width=True):
                 try:
                     from src.core.models import Repas as RepasModel
                     db.query(RepasModel).filter_by(planning_id=planning.id).update({"prepare": True})
                     db.commit()
-                    st.success("âœ… Tous les repas marquÃ©s comme prÃ©parÃ©s")
+                    st.success("âœ… Tous les repas marqués comme préparés")
                     st.rerun()
                 except Exception as e:
-                    st.error(f"âŒ Erreur: {str(e)}")
+                    st.error(f"âŒ Erreur: {str(e)}")
         
         with col2:
             if st.button("ðŸ“‹ Dupliquer (semaine suiv.)", use_container_width=True):
                 try:
                     from src.core.models import Planning as PlanningModel, Repas as RepasModel
                     
-                    # CrÃ©er nouveau planning
+                    # Créer nouveau planning
                     semaine_suivante = planning.semaine_debut + timedelta(days=7)
                     semaine_fin = planning.semaine_fin + timedelta(days=7)
                     
@@ -255,10 +255,10 @@ def render_planning():
                         db.add(nouveau_repas)
                     
                     db.commit()
-                    st.success("âœ… Planning dupliquÃ© pour la semaine suivante")
+                    st.success("âœ… Planning dupliqué pour la semaine suivante")
                     st.rerun()
                 except Exception as e:
-                    st.error(f"âŒ Erreur: {str(e)}")
+                    st.error(f"âŒ Erreur: {str(e)}")
         
         with col3:
             if st.button("ðŸ”’ Archiver planning", use_container_width=True):
@@ -268,32 +268,32 @@ def render_planning():
                     if planning_db:
                         planning_db.actif = False
                         db.commit()
-                        st.success("âœ… Planning archivÃ©")
+                        st.success("âœ… Planning archivé")
                         st.rerun()
                 except Exception as e:
-                    st.error(f"âŒ Erreur: {str(e)}")
+                    st.error(f"âŒ Erreur: {str(e)}")
     
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"âŒ Erreur: {str(e)}")
         logger.error(f"Erreur render_planning: {e}")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 2: GÃ‰NÃ‰RER PLANNING AVEC IA
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def render_generer():
-    """GÃ©nÃ©rer un planning hebdomadaire avec IA"""
+    """Générer un planning hebdomadaire avec IA"""
     service = get_planning_service()
     
     if service is None:
-        st.error("âŒ Service planning indisponible")
+        st.error("âŒ Service planning indisponible")
         return
     
-    st.subheader("ðŸ¤– GÃ©nÃ©rer Planning Hebdomadaire")
+    st.subheader("ðŸ¤– Générer Planning Hebdomadaire")
     
     try:
-        # Date de dÃ©but (dÃ©faut lundi prochain)
+        # Date de début (défaut lundi prochain)
         today = date.today()
         days_until_monday = (7 - today.weekday()) % 7
         if days_until_monday == 0:
@@ -304,23 +304,23 @@ def render_generer():
         
         with col1:
             semaine_debut = st.date_input(
-                "ðŸ“… Semaine Ã  partir du",
+                "ðŸ“… Semaine à partir du",
                 value=default_start,
                 format="YYYY-MM-DD"
             )
         
         with col2:
-            # VÃ©rifier que c'est un lundi
+            # Vérifier que c'est un lundi
             if semaine_debut.weekday() != 0:
-                st.warning("âš ï¸ Veuillez sÃ©lectionner un lundi")
+                st.warning("âš ï¸ Veuillez sélectionner un lundi")
                 semaine_debut = semaine_debut - timedelta(days=semaine_debut.weekday())
         
         st.divider()
-        st.subheader("ðŸ½ï¸ PrÃ©fÃ©rences")
+        st.subheader("ðŸ½ï¸ Préférences")
         
         col1, col2 = st.columns(2)
         with col1:
-            regime = st.radio("RÃ©gime alimentaire", REGIMES, index=0)
+            regime = st.radio("Régime alimentaire", REGIMES, index=0)
         with col2:
             temps = st.radio("Temps de cuisine", TEMPS_CUISINE, index=1)
         
@@ -328,22 +328,22 @@ def render_generer():
         with col1:
             budget = st.radio("Budget", BUDGETS, index=1)
         with col2:
-            allergies = st.multiselect("Allergies Ã  Ã©viter", [
+            allergies = st.multiselect("Allergies à éviter", [
                 "Arachides", "Noix", "Lait", "Gluten", "Å’ufs", "Fruits de mer"
             ])
         
         notes_prefs = st.text_area(
             "Notes additionnelles",
-            placeholder="Ex: pas de viande rouge, prÃ©fÃ©rez les pÃ¢tes...",
+            placeholder="Ex: pas de viande rouge, préférez les pÃ¢tes...",
             height=60
         )
         
         st.divider()
         
-        if st.button("ðŸš€ GÃ©nÃ©rer Planning avec IA", use_container_width=True, type="primary"):
+        if st.button("ðŸš€ Générer Planning avec IA", use_container_width=True, type="primary"):
             try:
-                with st.spinner("ðŸ¤– GÃ©nÃ©ration en cours..."):
-                    # PrÃ©parer prÃ©fÃ©rences
+                with st.spinner("ðŸ¤– Génération en cours..."):
+                    # Préparer préférences
                     preferences = {
                         "regime": regime,
                         "temps_cuisine": temps,
@@ -352,23 +352,23 @@ def render_generer():
                         "notes": notes_prefs
                     }
                     
-                    # GÃ©nÃ©rer planning
+                    # Générer planning
                     planning = service.generer_planning_ia(
                         semaine_debut=semaine_debut,
                         preferences=preferences
                     )
                     
                     if planning:
-                        st.success("âœ… Planning gÃ©nÃ©rÃ© avec succÃ¨s!")
+                        st.success("âœ… Planning généré avec succès!")
                         
                         # Afficher preview
-                        st.subheader("ðŸ“‹ AperÃ§u du planning")
+                        st.subheader("ðŸ“‹ Aperçu du planning")
                         
-                        # RÃ©cupÃ©rer planning complet
+                        # Récupérer planning complet
                         planning_complet = service.get_planning_complet(planning.id)
                         
                         if planning_complet:
-                            # CrÃ©er tableau
+                            # Créer tableau
                             data = []
                             for jour_offset in range(7):
                                 jour_date = semaine_debut + timedelta(days=jour_offset)
@@ -390,33 +390,33 @@ def render_generer():
                                 st.dataframe(df, use_container_width=True)
                         
                         st.divider()
-                        st.info("âœ… Planning sauvegardÃ© en BD et prÃªt Ã  utiliser!")
+                        st.info("âœ… Planning sauvegardé en BD et prêt à utiliser!")
                         
                         if st.button("ðŸ“‹ Voir planning", use_container_width=True):
                             st.session_state.go_to_planning = True
                             st.rerun()
                     else:
-                        st.error("âŒ Erreur lors de la gÃ©nÃ©ration")
+                        st.error("âŒ Erreur lors de la génération")
             
             except Exception as e:
-                st.error(f"âŒ Erreur: {str(e)}")
+                st.error(f"âŒ Erreur: {str(e)}")
                 logger.error(f"Erreur generer_planning_ia: {e}")
     
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"âŒ Erreur: {str(e)}")
         logger.error(f"Erreur render_generer: {e}")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 3: HISTORIQUE PLANNINGS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def render_historique():
     """Affiche historique des plannings"""
     service = get_planning_service()
     
     if service is None:
-        st.error("âŒ Service planning indisponible")
+        st.error("âŒ Service planning indisponible")
         return
     
     st.subheader("ðŸ“š Historique des Plannings")
@@ -430,11 +430,11 @@ def render_historique():
         with col2:
             date_fin = st.date_input("Au", value=date.today() + timedelta(days=30))
         with col3:
-            filter_ia = st.checkbox("GÃ©nÃ©rÃ©s par IA seulement")
+            filter_ia = st.checkbox("Générés par IA seulement")
         
         st.divider()
         
-        # RÃ©cupÃ©rer tous plannings
+        # Récupérer tous plannings
         with obtenir_contexte_db() as db:
             from src.core.models import Planning as PlanningModel
             
@@ -448,7 +448,7 @@ def render_historique():
             plannings = query.order_by(PlanningModel.semaine_debut.desc()).all()
         
         if not plannings:
-            st.info("Aucun planning trouvÃ©")
+            st.info("Aucun planning trouvé")
             return
         
         st.metric("ðŸ“Š Total plannings", len(plannings))
@@ -460,7 +460,7 @@ def render_historique():
             col1, col2, col3, col4, col5 = st.columns([2, 1.5, 1, 0.8, 0.8])
             
             with col1:
-                genere_icon = "ðŸ¤–" if planning.genere_par_ia else "âœï¸"
+                genere_icon = "ðŸ¤–" if planning.genere_par_ia else "âœï¸"
                 actif_icon = "ðŸŸ¢" if planning.actif else "âš«"
                 st.write(f"**{genere_icon} {planning.nom}** {actif_icon}")
                 st.caption(f"ðŸ“… {planning.semaine_debut.strftime('%d/%m')} â†’ {planning.semaine_fin.strftime('%d/%m')}")
@@ -471,37 +471,37 @@ def render_historique():
             
             with col3:
                 created = planning.cree_le.strftime("%d/%m/%y") if planning.cree_le else "N/A"
-                st.caption(f"CrÃ©Ã©: {created}")
+                st.caption(f"Créé: {created}")
             
             with col4:
                 if st.button("ðŸ“‚", key=f"load_{planning.id}", help="Charger ce planning"):
                     try:
-                        # DÃ©sactiver tous les autres
+                        # Désactiver tous les autres
                         db.query(PlanningModel).filter(PlanningModel.actif == True).update({"actif": False})
                         # Activer celui-ci
                         planning_db = db.query(PlanningModel).filter_by(id=planning.id).first()
                         if planning_db:
                             planning_db.actif = True
                             db.commit()
-                            st.success("âœ… Planning chargÃ©")
+                            st.success("âœ… Planning chargé")
                             st.rerun()
                     except Exception as e:
-                        st.error(f"âŒ Erreur: {str(e)}")
+                        st.error(f"âŒ Erreur: {str(e)}")
             
             with col5:
-                if st.button("ðŸ—‘ï¸", key=f"delete_{planning.id}", help="Supprimer ce planning"):
+                if st.button("ðŸ—‘ï¸", key=f"delete_{planning.id}", help="Supprimer ce planning"):
                     try:
                         db.query(PlanningModel).filter_by(id=planning.id).delete()
                         db.commit()
-                        st.success("âœ… Planning supprimÃ©")
+                        st.success("âœ… Planning supprimé")
                         st.rerun()
                     except Exception as e:
-                        st.error(f"âŒ Erreur: {str(e)}")
+                        st.error(f"âŒ Erreur: {str(e)}")
             
             st.divider()
 
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"âŒ Erreur: {str(e)}")
         logger.error(f"Erreur render_historique: {e}")
 
 

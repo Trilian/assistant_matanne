@@ -1,10 +1,10 @@
 ﻿"""
-Module Vue Semaine - Dashboard dÃ©taillÃ© de la semaine
+Module Vue Semaine - Dashboard détaillé de la semaine
 
 Vue intelligente jour par jour avec :
-- Charge Ã©quilibrÃ©e
+- Charge équilibrée
 - Alertes contextuelles
-- Suggestions d'amÃ©lioration
+- Suggestions d'amélioration
 - Vue globale charge familiale
 """
 
@@ -15,7 +15,7 @@ import plotly.graph_objects as go
 
 from src.services.planning_unified import get_planning_service
 
-# Logique mÃ©tier pure
+# Logique métier pure
 from src.domains.planning.logic.vue_semaine_logic import (
     get_debut_semaine,
     get_jours_semaine,
@@ -25,9 +25,9 @@ from src.domains.planning.logic.vue_semaine_logic import (
 logger = __import__("logging").getLogger(__name__)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # GRAPHIQUES & VISUALISATIONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def afficher_graphique_charge_semaine(jours: dict) -> None:
@@ -70,8 +70,8 @@ def afficher_graphique_charge_semaine(jours: dict) -> None:
 
 
 def afficher_graphique_repartition_activites(stats: dict) -> None:
-    """Pie chart rÃ©partition activitÃ©s"""
-    labels = ["Repas", "ActivitÃ©s", "Projets", "Ã‰vÃ©nements"]
+    """Pie chart répartition activités"""
+    labels = ["Repas", "Activités", "Projets", "Ã‰vénements"]
     values = [
         stats.get("total_repas", 0),
         stats.get("total_activites", 0),
@@ -81,13 +81,13 @@ def afficher_graphique_repartition_activites(stats: dict) -> None:
 
     fig = go.Figure(data=[go.Pie(labels=labels, values=values)])
 
-    fig.update_layout(title="ðŸŽ¯ RÃ©partition des Ã©vÃ©nements", height=400)
+    fig.update_layout(title="ðŸŽ¯ Répartition des événements", height=400)
 
     st.plotly_chart(fig, use_container_width=True)
 
 
 def afficher_timeline_jour(jour_complet: dict, jour: date) -> None:
-    """Affiche timeline des Ã©vÃ©nements du jour"""
+    """Affiche timeline des événements du jour"""
     jour_nom = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"][
         jour.weekday()
     ]
@@ -113,15 +113,15 @@ def afficher_timeline_jour(jour_complet: dict, jour: date) -> None:
 
     st.markdown("---")
 
-    # Ã‰vÃ©nements triÃ©s par type
-    st.markdown("#### ðŸ“‹ Ã‰vÃ©nements du jour")
+    # Ã‰vénements triés par type
+    st.markdown("#### ðŸ“‹ Ã‰vénements du jour")
 
     events_grouped = {
-        "ðŸ½ï¸ Repas": jour_complet.get("repas", []),
-        "ðŸŽ¨ ActivitÃ©s": jour_complet.get("activites", []),
-        "ðŸ—ï¸ Projets": jour_complet.get("projets", []),
-        "â° Routines": jour_complet.get("routines", []),
-        "ðŸ“… Ã‰vÃ©nements": jour_complet.get("events", []),
+        "ðŸ½ï¸ Repas": jour_complet.get("repas", []),
+        "ðŸŽ¨ Activités": jour_complet.get("activites", []),
+        "ðŸ—ï¸ Projets": jour_complet.get("projets", []),
+        "â° Routines": jour_complet.get("routines", []),
+        "ðŸ“… Ã‰vénements": jour_complet.get("events", []),
     }
 
     for groupe_nom, events in events_grouped.items():
@@ -129,17 +129,17 @@ def afficher_timeline_jour(jour_complet: dict, jour: date) -> None:
             with st.expander(f"{groupe_nom} ({len(events)})"):
                 for event in events:
                     # Affichage flexible selon le type
-                    if groupe_nom == "ðŸ½ï¸ Repas":
+                    if groupe_nom == "ðŸ½ï¸ Repas":
                         st.write(f"**{event['type'].capitalize()}**: {event['recette']}")
                         st.caption(f"{event['portions']} portions | {event.get('temps_total', 0)} min")
 
-                    elif groupe_nom == "ðŸŽ¨ ActivitÃ©s":
-                        label = "ðŸ‘¶" if event.get("pour_jules") else "ðŸ‘¨â€ðŸ‘©â€ðŸ‘§"
+                    elif groupe_nom == "ðŸŽ¨ Activités":
+                        label = "ðŸ‘¶" if event.get("pour_jules") else "ðŸ‘¨â€ðŸ‘©â€ðŸ‘§"
                         st.write(f"{label} **{event['titre']}** ({event['type']})")
                         if event.get("budget"):
                             st.caption(f"ðŸ’° {event['budget']:.0f}â‚¬")
 
-                    elif groupe_nom == "ðŸ—ï¸ Projets":
+                    elif groupe_nom == "ðŸ—ï¸ Projets":
                         priorite_emoji = {
                             "basse": "ðŸŸ¢",
                             "moyenne": "ðŸŸ¡",
@@ -147,43 +147,43 @@ def afficher_timeline_jour(jour_complet: dict, jour: date) -> None:
                         }.get(event.get("priorite", "moyenne"), "âšª")
                         st.write(f"{priorite_emoji} **{event['nom']}** ({event['statut']})")
 
-                    elif groupe_nom == "ðŸ“… Ã‰vÃ©nements":
+                    elif groupe_nom == "ðŸ“… Ã‰vénements":
                         debut = (
                             event["debut"].strftime("%H:%M")
                             if isinstance(event["debut"], datetime)
                             else "â€”"
                         )
-                        st.write(f"â° **{event['titre']}** ({debut})")
+                        st.write(f"â° **{event['titre']}** ({debut})")
                         if event.get("lieu"):
-                            st.caption(f"ðŸ“ {event['lieu']}")
+                            st.caption(f"ðŸ“ {event['lieu']}")
 
-                    elif groupe_nom == "â° Routines":
+                    elif groupe_nom == "â° Routines":
                         status = "âœ…" if event.get("fait") else "â­•"
                         st.write(f"{status} **{event['nom']}** ({event.get('heure', 'â€”')})")
 
     # Alertes jour
     if jour_complet.get("alertes"):
-        st.markdown("#### âš ï¸ Alertes")
+        st.markdown("#### âš ï¸ Alertes")
         for alerte in jour_complet["alertes"]:
             st.warning(alerte)
 
     st.markdown("---")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # MODULE PRINCIPAL
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def app():
-    """Module Vue Semaine - Dashboard dÃ©taillÃ©"""
+    """Module Vue Semaine - Dashboard détaillé"""
 
-    st.title("ðŸ“Š Vue Semaine DÃ©taillÃ©e")
-    st.caption("Analyse complÃ¨te de la charge familiale et rÃ©partition des Ã©vÃ©nements")
+    st.title("ðŸ“Š Vue Semaine Détaillée")
+    st.caption("Analyse complète de la charge familiale et répartition des événements")
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # NAVIGATION SEMAINE
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     if "semaine_view_start" not in st.session_state:
         today = date.today()
@@ -192,7 +192,7 @@ def app():
     col_nav1, col_nav2, col_nav3 = st.columns([1, 2, 1])
 
     with col_nav1:
-        if st.button("â¬…ï¸ Semaine prÃ©cÃ©dente", key="prev_semaine_view"):
+        if st.button("â¬…ï¸ Semaine précédente", key="prev_semaine_view"):
             st.session_state.semaine_view_start -= timedelta(days=7)
             st.rerun()
 
@@ -205,28 +205,28 @@ def app():
         )
 
     with col_nav3:
-        if st.button("Semaine suivante âž¡ï¸", key="next_semaine_view"):
+        if st.button("Semaine suivante âž¡ï¸", key="next_semaine_view"):
             st.session_state.semaine_view_start += timedelta(days=7)
             st.rerun()
 
     st.markdown("---")
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # CHARGEMENT DONNÃ‰ES
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     service = get_planning_service()
     semaine = service.get_semaine_complete(st.session_state.semaine_view_start)
 
     if not semaine:
-        st.error("âŒ Erreur lors du chargement de la semaine")
+        st.error("âŒ Erreur lors du chargement de la semaine")
         return
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # ONGLETS VUE
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-    tab1, tab2, tab3 = st.tabs(["ðŸ“ˆ Analyse Charge", "ðŸŽ¯ RÃ©partition", "ðŸ“… DÃ©tail Jours"])
+    tab1, tab2, tab3 = st.tabs(["ðŸ“ˆ Analyse Charge", "ðŸŽ¯ Répartition", "ðŸ“… Détail Jours"])
 
     with tab1:
         st.subheader("ðŸ“ˆ Analyse de la charge familiale")
@@ -242,15 +242,15 @@ def app():
         stats = semaine.stats_semaine
         jours_list = list(semaine.jours.values())
 
-        # Jour le plus chargÃ©
+        # Jour le plus chargé
         jour_max = max(jours_list, key=lambda j: j.charge_score)
         jour_max_nom = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"][
             (st.session_state.semaine_view_start + timedelta(days=list(semaine.jours.values()).index(jour_max))).weekday()
         ]
 
-        st.info(f"ðŸ”´ Jour le plus chargÃ©: **{jour_max_nom.capitalize()}** ({jour_max.charge_score}/100)")
+        st.info(f"ðŸ”´ Jour le plus chargé: **{jour_max_nom.capitalize()}** ({jour_max.charge_score}/100)")
 
-        # Jour le moins chargÃ©
+        # Jour le moins chargé
         jour_min = min(jours_list, key=lambda j: j.charge_score)
         jour_min_nom = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"][
             (st.session_state.semaine_view_start + timedelta(days=list(semaine.jours.values()).index(jour_min))).weekday()
@@ -260,7 +260,7 @@ def app():
 
         # Couverture Jules
         st.write(
-            f"ðŸ‘¶ **ActivitÃ©s Jules**: {stats.get('activites_jules', 0)} activitÃ©s "
+            f"ðŸ‘¶ **Activités Jules**: {stats.get('activites_jules', 0)} activités "
             f"({stats.get('total_activites', 0)} au total)"
         )
 
@@ -268,7 +268,7 @@ def app():
         st.write(f"ðŸ’° **Budget semaine**: {stats.get('budget_total', 0):.0f}â‚¬")
 
     with tab2:
-        st.subheader("ðŸŽ¯ RÃ©partition des Ã©vÃ©nements")
+        st.subheader("ðŸŽ¯ Répartition des événements")
 
         col_r1, col_r2 = st.columns(2)
 
@@ -276,21 +276,21 @@ def app():
             afficher_graphique_repartition_activites(stats)
 
         with col_r2:
-            st.markdown("### ðŸ“‹ RÃ©sumÃ©")
+            st.markdown("### ðŸ“‹ Résumé")
 
-            st.metric("ðŸ½ï¸ Repas planifiÃ©s", stats.get("total_repas", 0))
-            st.metric("ðŸŽ¨ ActivitÃ©s", stats.get("total_activites", 0))
-            st.metric("ðŸ—ï¸ Projets", stats.get("total_projets", 0))
-            st.metric("ðŸ“… Ã‰vÃ©nements", stats.get("total_events", 0))
+            st.metric("ðŸ½ï¸ Repas planifiés", stats.get("total_repas", 0))
+            st.metric("ðŸŽ¨ Activités", stats.get("total_activites", 0))
+            st.metric("ðŸ—ï¸ Projets", stats.get("total_projets", 0))
+            st.metric("ðŸ“… Ã‰vénements", stats.get("total_events", 0))
 
     with tab3:
-        st.subheader("ðŸ“… DÃ©tail par jour")
+        st.subheader("ðŸ“… Détail par jour")
 
         jours_semaine = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
 
-        # SÃ©lection du jour
+        # Sélection du jour
         jour_select = st.selectbox(
-            "SÃ©lectionner un jour",
+            "Sélectionner un jour",
             jours_semaine,
         )
 
@@ -303,16 +303,16 @@ def app():
         if jour_complet:
             afficher_timeline_jour(jour_complet.dict(), jour)
         else:
-            st.warning(f"Pas de donnÃ©es pour {jour_select.capitalize()}")
+            st.warning(f"Pas de données pour {jour_select.capitalize()}")
 
     st.markdown("---")
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # ALERTES SEMAINE GLOBALES
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     if semaine.alertes_semaine:
-        st.markdown("### âš ï¸ Alertes Semaine")
+        st.markdown("### âš ï¸ Alertes Semaine")
         for alerte in semaine.alertes_semaine:
-            st.warning(alerte, icon="âš ï¸")
+            st.warning(alerte, icon="âš ï¸")
 

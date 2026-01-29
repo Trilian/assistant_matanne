@@ -17,7 +17,7 @@ from src.services.planning import get_planning_service
 # Services
 from src.services.recettes import get_recette_service
 
-# Logique mÃ©tier pure
+# Logique métier pure
 from src.domains.shared.logic.accueil_logic import (
     calculer_metriques_dashboard,
     compter_alertes_critiques,
@@ -44,13 +44,13 @@ try:
 except ImportError:
     WIDGETS_DISPONIBLES = False
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # MODULE PRINCIPAL
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def app():
-    """Point d'entrÃ©e module accueil"""
+    """Point d'entrée module accueil"""
 
     # Header
     state = get_state()
@@ -102,7 +102,7 @@ def app():
         st.markdown("")
         render_courses_summary()
     
-    # Footer avec santÃ© systÃ¨me
+    # Footer avec santé système
     st.markdown("---")
     if WIDGETS_DISPONIBLES:
         col_footer1, col_footer2 = st.columns([3, 1])
@@ -120,17 +120,17 @@ def render_graphiques_enrichis():
     col1, col2 = st.columns(2)
     
     with col1:
-        # Graphique inventaire par catÃ©gorie
+        # Graphique inventaire par catégorie
         inventaire = get_inventaire_service().get_inventaire_complet()
         fig = graphique_inventaire_categories(inventaire)
         if fig:
-            st.markdown("**ðŸ“¦ Stock par CatÃ©gorie**")
+            st.markdown("**ðŸ“¦ Stock par Catégorie**")
             st.plotly_chart(fig, use_container_width=True, key="chart_inventaire")
         else:
-            st.info("Pas de donnÃ©es d'inventaire")
+            st.info("Pas de données d'inventaire")
     
     with col2:
-        # Graphique rÃ©partition repas
+        # Graphique répartition repas
         planning = get_planning_service().get_planning()
         if planning and planning.repas:
             repas_data = [
@@ -139,7 +139,7 @@ def render_graphiques_enrichis():
             ]
             fig = graphique_repartition_repas(repas_data)
             if fig:
-                st.markdown("**ðŸ½ï¸ RÃ©partition des Repas**")
+                st.markdown("**ðŸ½ï¸ Répartition des Repas**")
                 st.plotly_chart(fig, use_container_width=True, key="chart_repas")
             else:
                 st.info("Pas de planning cette semaine")
@@ -147,9 +147,9 @@ def render_graphiques_enrichis():
             st.info("Pas de planning cette semaine")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ALERTES CRITIQUES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def render_critical_alerts():
@@ -165,22 +165,22 @@ def render_critical_alerts():
         alerts.append(
             {
                 "type": "warning",
-                "icon": "âš ï¸",
+                "icon": "âš ï¸",
                 "title": f"{len(critiques)} article(s) en stock bas",
                 "action": "Voir l'inventaire",
                 "module": "cuisine.inventaire",
             }
         )
 
-    # PÃ©remption proche
+    # Péremption proche
     peremption = [art for art in inventaire if art.get("statut") == "peremption_proche"]
 
     if peremption:
         alerts.append(
             {
                 "type": "warning",
-                "icon": "â³",
-                "title": f"{len(peremption)} article(s) pÃ©riment bientÃ´t",
+                "icon": "â³",
+                "title": f"{len(peremption)} article(s) périment bientôt",
                 "action": "Voir l'inventaire",
                 "module": "cuisine.inventaire",
             }
@@ -195,7 +195,7 @@ def render_critical_alerts():
                 "type": "info",
                 "icon": "ðŸ“…",
                 "title": "Aucun planning pour cette semaine",
-                "action": "CrÃ©er un planning",
+                "action": "Créer un planning",
                 "module": "cuisine.planning_semaine",
             }
         )
@@ -227,9 +227,9 @@ def render_critical_alerts():
                     st.rerun()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # STATS GLOBALES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def render_global_stats():
@@ -244,12 +244,12 @@ def render_global_stats():
 
     inventaire = get_inventaire_service().get_inventaire_complet()
 
-    # Afficher mÃ©triques
+    # Afficher métriques
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
         total_recettes = stats_recettes.get("total", 0)
-        st.metric("ðŸ½ï¸ Recettes", total_recettes, help="Nombre total de recettes")
+        st.metric("ðŸ½ï¸ Recettes", total_recettes, help="Nombre total de recettes")
 
     with col2:
         total_inventaire = stats_inventaire.get("total", 0)
@@ -271,12 +271,12 @@ def render_global_stats():
         planning = get_planning_service().get_planning()
         nb_repas = len(planning.repas) if planning else 0
 
-        st.metric("ðŸ“… Repas PlanifiÃ©s", nb_repas, help="Cette semaine")
+        st.metric("ðŸ“… Repas Planifiés", nb_repas, help="Cette semaine")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # RACCOURCIS RAPIDES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def render_quick_actions():
@@ -300,7 +300,7 @@ def render_quick_actions():
             st.rerun()
 
     with col3:
-        if st.button("ðŸ“¦ GÃ©rer Inventaire", key="quick_view_inventaire", use_container_width=True):
+        if st.button("ðŸ“¦ Gérer Inventaire", key="quick_view_inventaire", use_container_width=True):
             StateManager.navigate_to("cuisine.inventaire")
             st.rerun()
 
@@ -310,13 +310,13 @@ def render_quick_actions():
             st.rerun()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # RÃ‰SUMÃ‰S PAR MODULE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def render_cuisine_summary():
-    """RÃ©sumÃ© module Cuisine"""
+    """Résumé module Cuisine"""
 
     with st.container():
         st.markdown(
@@ -325,7 +325,7 @@ def render_cuisine_summary():
             unsafe_allow_html=True,
         )
 
-        st.markdown("### ðŸ½ï¸ Recettes")
+        st.markdown("### ðŸ½ï¸ Recettes")
 
         stats = get_recette_service().get_stats(
             count_filters={
@@ -343,7 +343,7 @@ def render_cuisine_summary():
             st.metric("âš¡ Rapides", stats.get("rapides", 0))
 
         with col3:
-            st.metric("ðŸ‘¶ BÃ©bÃ©", stats.get("bebe", 0))
+            st.metric("ðŸ‘¶ Bébé", stats.get("bebe", 0))
 
         if st.button("ðŸ“š Voir les recettes", key="nav_recettes", use_container_width=True):
             StateManager.navigate_to("cuisine.recettes")
@@ -353,7 +353,7 @@ def render_cuisine_summary():
 
 
 def render_inventaire_summary():
-    """RÃ©sumÃ© inventaire"""
+    """Résumé inventaire"""
 
     with st.container():
         st.markdown(
@@ -376,7 +376,7 @@ def render_inventaire_summary():
             st.metric("Articles", len(inventaire))
 
         with col2:
-            st.metric("âš ï¸ Stock Bas", stock_bas, delta=None if stock_bas == 0 else "Ã€ commander")
+            st.metric("âš ï¸ Stock Bas", stock_bas, delta=None if stock_bas == 0 else "Ã€ commander")
 
         with col3:
             st.metric("ðŸ”´ Critiques", critiques, delta=None if critiques == 0 else "Urgent")
@@ -389,7 +389,7 @@ def render_inventaire_summary():
 
             stock_alert(articles_alert[:3], key="home_inventory_alert")  # Max 3
 
-        if st.button("ðŸ“¦ GÃ©rer l'inventaire", key="nav_inventaire", use_container_width=True):
+        if st.button("ðŸ“¦ Gérer l'inventaire", key="nav_inventaire", use_container_width=True):
             StateManager.navigate_to("cuisine.inventaire")
             st.rerun()
 
@@ -397,7 +397,7 @@ def render_inventaire_summary():
 
 
 def render_courses_summary():
-    """RÃ©sumÃ© courses"""
+    """Résumé courses"""
 
     with st.container():
         st.markdown(
@@ -423,9 +423,9 @@ def render_courses_summary():
         with col3:
             st.metric("ðŸŸ¡ Moyenne", moyenne)
 
-        # Top prioritÃ©s
+        # Top priorités
         if haute > 0:
-            st.markdown("**Ã€ acheter en prioritÃ©:**")
+            st.markdown("**Ã€ acheter en priorité:**")
             prioritaires = [a for a in liste if a.get("priorite") == "haute"]
 
             for art in prioritaires[:3]:
@@ -442,7 +442,7 @@ def render_courses_summary():
 
 
 def render_planning_summary():
-    """RÃ©sumÃ© planning"""
+    """Résumé planning"""
 
     with st.container():
         st.markdown(
@@ -458,7 +458,7 @@ def render_planning_summary():
         if planning and planning.repas:
             total_repas = len(planning.repas)
             
-            # Repas adaptÃ©s bÃ©bÃ©
+            # Repas adaptés bébé
             repas_bebe = len([r for r in planning.repas if getattr(r, 'compatible_bebe', False)])
 
             col1, col2 = st.columns(2)
@@ -467,7 +467,7 @@ def render_planning_summary():
                 st.metric("Repas", total_repas)
 
             with col2:
-                st.metric("ðŸ‘¶ BÃ©bÃ©", repas_bebe)
+                st.metric("ðŸ‘¶ Bébé", repas_bebe)
 
             # Repas d'aujourd'hui
             aujourd_hui = date.today()
@@ -480,7 +480,7 @@ def render_planning_summary():
                 st.markdown("**Aujourd'hui:**")
                 for repas in repas_aujourdhui[:2]:
                     type_repas = getattr(repas, 'type_repas', 'Repas')
-                    nom_recette = getattr(repas, 'recette_nom', None) or "Non dÃ©fini"
+                    nom_recette = getattr(repas, 'recette_nom', None) or "Non défini"
                     st.caption(f"â€¢ {type_repas}: {nom_recette}")
 
         else:

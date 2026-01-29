@@ -6,10 +6,10 @@ from unittest.mock import MagicMock, patch
 
 
 class TestProfilCulinaireModel:
-    """Tests pour le modÃ¨le ProfilCulinaire."""
+    """Tests pour le modèle ProfilCulinaire."""
 
     def test_profil_creation(self):
-        """CrÃ©ation d'un profil culinaire."""
+        """Création d'un profil culinaire."""
         from src.services.suggestions_ia import ProfilCulinaire
         
         profil = ProfilCulinaire(
@@ -23,27 +23,27 @@ class TestProfilCulinaireModel:
         assert profil.temps_moyen_minutes == 30
 
     def test_profil_defaults(self):
-        """Valeurs par dÃ©faut du profil."""
+        """Valeurs par défaut du profil."""
         from src.services.suggestions_ia import ProfilCulinaire
         
         profil = ProfilCulinaire()
         
         assert profil.categories_preferees == []
-        assert profil.temps_moyen_minutes == 45  # DÃ©faut
+        assert profil.temps_moyen_minutes == 45  # Défaut
         assert profil.difficulte_moyenne == "moyen"
 
 
 class TestContexteSuggestionModel:
-    """Tests pour le modÃ¨le ContexteSuggestion."""
+    """Tests pour le modèle ContexteSuggestion."""
 
     def test_contexte_creation(self):
-        """CrÃ©ation d'un contexte de suggestion."""
+        """Création d'un contexte de suggestion."""
         from src.services.suggestions_ia import ContexteSuggestion
         
         contexte = ContexteSuggestion(
             saison="hiver",
-            type_repas="dÃ®ner",
-            ingredients_disponibles=["poulet", "riz", "lÃ©gumes"],
+            type_repas="dîner",
+            ingredients_disponibles=["poulet", "riz", "légumes"],
             temps_disponible_minutes=45
         )
         
@@ -51,33 +51,33 @@ class TestContexteSuggestionModel:
         assert "poulet" in contexte.ingredients_disponibles
 
     def test_contexte_defaults(self):
-        """Valeurs par dÃ©faut du contexte."""
+        """Valeurs par défaut du contexte."""
         from src.services.suggestions_ia import ContexteSuggestion
         
         contexte = ContexteSuggestion()
         
-        # saison par dÃ©faut est "" (chaÃ®ne vide)
+        # saison par défaut est "" (chaîne vide)
         assert contexte.saison == ""
-        assert contexte.type_repas == "dÃ®ner"
+        assert contexte.type_repas == "dîner"
 
 
 class TestSuggestionRecetteModel:
-    """Tests pour le modÃ¨le SuggestionRecette."""
+    """Tests pour le modèle SuggestionRecette."""
 
     def test_suggestion_creation(self):
-        """CrÃ©ation d'une suggestion."""
+        """Création d'une suggestion."""
         from src.services.suggestions_ia import SuggestionRecette
         
         suggestion = SuggestionRecette(
             recette_id=1,
-            nom="Poulet rÃ´ti",
+            nom="Poulet rôti",
             score=0.85,
-            raison="IngrÃ©dients disponibles"
+            raison="Ingrédients disponibles"
         )
         
-        assert suggestion.nom == "Poulet rÃ´ti"
+        assert suggestion.nom == "Poulet rôti"
         assert suggestion.score == 0.85
-        assert suggestion.raison == "IngrÃ©dients disponibles"
+        assert suggestion.raison == "Ingrédients disponibles"
 
 
 class TestSuggestionsServiceInit:
@@ -91,7 +91,7 @@ class TestSuggestionsServiceInit:
         assert service is not None
 
     def test_service_methodes(self):
-        """Le service expose les mÃ©thodes requises."""
+        """Le service expose les méthodes requises."""
         from src.services.suggestions_ia import get_suggestions_ia_service
         
         service = get_suggestions_ia_service()
@@ -102,22 +102,22 @@ class TestSuggestionsServiceInit:
 
 
 class TestCalculerScoreCategorie:
-    """Tests pour le calcul de score par catÃ©gorie."""
+    """Tests pour le calcul de score par catégorie."""
 
     def test_score_categorie_preferee(self):
-        """Score Ã©levÃ© pour catÃ©gorie prÃ©fÃ©rÃ©e."""
+        """Score élevé pour catégorie préférée."""
         profil = {"categories_preferees": ["dessert", "plat"]}
         recette = {"categorie": "dessert"}
         
-        # Si catÃ©gorie dans prÃ©fÃ©rences â†’ score bonus
+        # Si catégorie dans préférences â†’ score bonus
         bonus = 0.2 if recette["categorie"] in profil["categories_preferees"] else 0
         
         assert bonus == 0.2
 
     def test_score_categorie_non_preferee(self):
-        """Score normal pour catÃ©gorie non prÃ©fÃ©rÃ©e."""
+        """Score normal pour catégorie non préférée."""
         profil = {"categories_preferees": ["dessert"]}
-        recette = {"categorie": "entrÃ©e"}
+        recette = {"categorie": "entrée"}
         
         bonus = 0.2 if recette["categorie"] in profil["categories_preferees"] else 0
         
@@ -128,7 +128,7 @@ class TestCalculerScoreTemps:
     """Tests pour le calcul de score temps."""
 
     def test_score_temps_adapte(self):
-        """Score pour temps adaptÃ© au profil."""
+        """Score pour temps adapté au profil."""
         profil = {"temps_moyen_minutes": 30}
         
         # Recette rapide
@@ -138,7 +138,7 @@ class TestCalculerScoreTemps:
         
         def score_temps(recette, profil):
             ecart = abs(recette["temps_total"] - profil["temps_moyen_minutes"])
-            # Plus l'Ã©cart est grand, plus le score est bas
+            # Plus l'écart est grand, plus le score est bas
             return max(0, 1 - (ecart / 60))
         
         score_rapide = score_temps(recette_rapide, profil)
@@ -148,10 +148,10 @@ class TestCalculerScoreTemps:
 
 
 class TestCalculerScoreRepetition:
-    """Tests pour le malus de rÃ©pÃ©tition."""
+    """Tests pour le malus de répétition."""
 
     def test_malus_repetition(self):
-        """Malus pour recette rÃ©cemment prÃ©parÃ©e."""
+        """Malus pour recette récemment préparée."""
         jours_depuis = 2
         
         # Malus diminue avec le temps
@@ -161,7 +161,7 @@ class TestCalculerScoreRepetition:
         assert abs(malus - 0.2) < 0.01
 
     def test_pas_malus_ancienne_recette(self):
-        """Pas de malus pour recette non prÃ©parÃ©e rÃ©cemment."""
+        """Pas de malus pour recette non préparée récemment."""
         jours_depuis = 30
         
         malus = max(0, 0.3 - (jours_depuis * 0.05))
@@ -173,10 +173,10 @@ class TestFiltrageRecettes:
     """Tests pour le filtrage des recettes."""
 
     def test_filtrer_par_ingredients(self):
-        """Filtrer les recettes avec ingrÃ©dients disponibles."""
+        """Filtrer les recettes avec ingrédients disponibles."""
         recettes = [
-            {"nom": "Poulet rÃ´ti", "ingredients": ["poulet", "huile", "sel"]},
-            {"nom": "Saumon grillÃ©", "ingredients": ["saumon", "citron"]},
+            {"nom": "Poulet rôti", "ingredients": ["poulet", "huile", "sel"]},
+            {"nom": "Saumon grillé", "ingredients": ["saumon", "citron"]},
         ]
         disponibles = {"poulet", "huile", "sel", "poivre"}
         
@@ -188,7 +188,7 @@ class TestFiltrageRecettes:
         
         scores = [score_disponibilite(r, disponibles) for r in recettes]
         
-        # Poulet rÃ´ti devrait avoir un meilleur score
+        # Poulet rôti devrait avoir un meilleur score
         assert scores[0] > scores[1]
 
     def test_filtrer_par_temps(self):
@@ -206,10 +206,10 @@ class TestFiltrageRecettes:
 
 
 class TestSaisons:
-    """Tests pour les suggestions saisonniÃ¨res."""
+    """Tests pour les suggestions saisonnières."""
 
     def test_detecter_saison(self):
-        """DÃ©tection de la saison courante."""
+        """Détection de la saison courante."""
         from datetime import date
         
         def get_saison(d: date) -> str:
@@ -217,7 +217,7 @@ class TestSaisons:
             if mois in [3, 4, 5]:
                 return "printemps"
             elif mois in [6, 7, 8]:
-                return "Ã©tÃ©"
+                return "été"
             elif mois in [9, 10, 11]:
                 return "automne"
             else:
@@ -225,18 +225,18 @@ class TestSaisons:
         
         assert get_saison(date(2024, 1, 15)) == "hiver"
         assert get_saison(date(2024, 4, 15)) == "printemps"
-        assert get_saison(date(2024, 7, 15)) == "Ã©tÃ©"
+        assert get_saison(date(2024, 7, 15)) == "été"
         assert get_saison(date(2024, 10, 15)) == "automne"
 
     def test_ingredients_saison(self):
-        """IngrÃ©dients de saison."""
+        """Ingrédients de saison."""
         saisons_ingredients = {
             "hiver": ["choux", "poireau", "carotte", "pomme"],
             "printemps": ["asperge", "fraise", "radis"],
-            "Ã©tÃ©": ["tomate", "courgette", "melon", "pÃªche"],
+            "été": ["tomate", "courgette", "melon", "pêche"],
             "automne": ["champignon", "potiron", "raisin", "noix"],
         }
         
-        assert "tomate" in saisons_ingredients["Ã©tÃ©"]
+        assert "tomate" in saisons_ingredients["été"]
         assert "choux" in saisons_ingredients["hiver"]
 

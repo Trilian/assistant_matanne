@@ -1,5 +1,5 @@
 ﻿"""
-Logique mÃ©tier du module Inventaire - SÃ©parÃ©e de l'UI
+Logique métier du module Inventaire - Séparée de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
 
@@ -10,13 +10,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONSTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 EMPLACEMENTS = [
-    "RÃ©frigÃ©rateur",
-    "CongÃ©lateur",
+    "Réfrigérateur",
+    "Congélateur",
     "Garde-manger",
     "Placard cuisine",
     "Cave",
@@ -24,11 +24,11 @@ EMPLACEMENTS = [
 ]
 
 CATEGORIES = [
-    "Fruits & LÃ©gumes",
+    "Fruits & Légumes",
     "Viandes & Poissons",
     "Produits laitiers",
     "Ã‰picerie",
-    "SurgelÃ©s",
+    "Surgelés",
     "Boissons",
     "Condiments",
     "Autre"
@@ -38,14 +38,14 @@ STATUS_CONFIG = {
     "critique": {"color": "red", "emoji": "ðŸ”´", "label": "Critique"},
     "stock_bas": {"color": "orange", "emoji": "ðŸŸ ", "label": "Stock bas"},
     "ok": {"color": "green", "emoji": "ðŸŸ¢", "label": "OK"},
-    "perime": {"color": "black", "emoji": "âš«", "label": "PÃ©rimÃ©"},
-    "bientot_perime": {"color": "yellow", "emoji": "ðŸŸ¡", "label": "BientÃ´t pÃ©rimÃ©"},
+    "perime": {"color": "black", "emoji": "âš«", "label": "Périmé"},
+    "bientot_perime": {"color": "yellow", "emoji": "ðŸŸ¡", "label": "Bientôt périmé"},
 }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CALCUL DE STATUT
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def calculer_status_stock(article: dict) -> str:
     """
@@ -70,11 +70,11 @@ def calculer_status_stock(article: dict) -> str:
 
 def calculer_status_peremption(article: dict, jours_alerte: int = 7) -> str:
     """
-    Calcule le statut de pÃ©remption d'un article.
+    Calcule le statut de péremption d'un article.
     
     Args:
         article: Dictionnaire de l'article d'inventaire
-        jours_alerte: Nombre de jours avant pÃ©remption pour alerter
+        jours_alerte: Nombre de jours avant péremption pour alerter
         
     Returns:
         Statut: 'perime', 'bientot_perime', 'ok'
@@ -104,11 +104,11 @@ def calculer_status_peremption(article: dict, jours_alerte: int = 7) -> str:
 
 def calculer_status_global(article: dict, jours_alerte_peremption: int = 7) -> dict:
     """
-    Calcule le statut global d'un article (stock + pÃ©remption).
+    Calcule le statut global d'un article (stock + péremption).
     
     Args:
         article: Dictionnaire de l'article d'inventaire
-        jours_alerte_peremption: Jours avant pÃ©remption pour alerter
+        jours_alerte_peremption: Jours avant péremption pour alerter
         
     Returns:
         Dictionnaire avec status_stock, status_peremption, status_prioritaire
@@ -116,7 +116,7 @@ def calculer_status_global(article: dict, jours_alerte_peremption: int = 7) -> d
     status_stock = calculer_status_stock(article)
     status_peremption = calculer_status_peremption(article, jours_alerte_peremption)
     
-    # PrioritÃ©: pÃ©rimÃ© > critique > bientÃ´t pÃ©rimÃ© > stock bas > ok
+    # Priorité: périmé > critique > bientôt périmé > stock bas > ok
     if status_peremption == "perime":
         prioritaire = "perime"
     elif status_stock == "critique":
@@ -136,9 +136,9 @@ def calculer_status_global(article: dict, jours_alerte_peremption: int = 7) -> d
     }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FILTRAGE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def filtrer_par_emplacement(articles: list[dict], emplacement: str) -> list[dict]:
     """
@@ -146,10 +146,10 @@ def filtrer_par_emplacement(articles: list[dict], emplacement: str) -> list[dict
     
     Args:
         articles: Liste des articles
-        emplacement: Emplacement Ã  filtrer ou None pour tout
+        emplacement: Emplacement à filtrer ou None pour tout
         
     Returns:
-        Liste filtrÃ©e
+        Liste filtrée
     """
     if not emplacement or emplacement.lower() == "tous":
         return articles
@@ -159,14 +159,14 @@ def filtrer_par_emplacement(articles: list[dict], emplacement: str) -> list[dict
 
 def filtrer_par_categorie(articles: list[dict], categorie: str) -> list[dict]:
     """
-    Filtre les articles par catÃ©gorie.
+    Filtre les articles par catégorie.
     
     Args:
         articles: Liste des articles
-        categorie: CatÃ©gorie Ã  filtrer ou None pour tout
+        categorie: Catégorie à filtrer ou None pour tout
         
     Returns:
-        Liste filtrÃ©e
+        Liste filtrée
     """
     if not categorie or categorie.lower() == "toutes":
         return articles
@@ -179,11 +179,11 @@ def filtrer_par_status(articles: list[dict], status: str) -> list[dict]:
     Filtre les articles par statut.
     
     Args:
-        articles: Liste des articles (avec status_prioritaire calculÃ©)
-        status: Statut Ã  filtrer ou None pour tout
+        articles: Liste des articles (avec status_prioritaire calculé)
+        status: Statut à filtrer ou None pour tout
         
     Returns:
-        Liste filtrÃ©e
+        Liste filtrée
     """
     if not status or status.lower() == "tous":
         return articles
@@ -203,7 +203,7 @@ def filtrer_par_recherche(articles: list[dict], terme: str) -> list[dict]:
         terme: Terme de recherche
         
     Returns:
-        Liste filtrÃ©e
+        Liste filtrée
     """
     if not terme:
         return articles
@@ -224,17 +224,17 @@ def filtrer_inventaire(
     recherche: Optional[str] = None
 ) -> list[dict]:
     """
-    Applique plusieurs filtres Ã  l'inventaire.
+    Applique plusieurs filtres à l'inventaire.
     
     Args:
         articles: Liste des articles
         emplacement: Filtre par emplacement
-        categorie: Filtre par catÃ©gorie
+        categorie: Filtre par catégorie
         status: Filtre par statut
         recherche: Terme de recherche
         
     Returns:
-        Liste filtrÃ©e
+        Liste filtrée
     """
     result = articles.copy()
     
@@ -250,9 +250,9 @@ def filtrer_inventaire(
     return result
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ALERTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def calculer_alertes(articles: list[dict], jours_peremption: int = 7) -> dict:
     """
@@ -260,7 +260,7 @@ def calculer_alertes(articles: list[dict], jours_peremption: int = 7) -> dict:
     
     Args:
         articles: Liste des articles de l'inventaire
-        jours_peremption: Jours avant pÃ©remption pour alerter
+        jours_peremption: Jours avant péremption pour alerter
         
     Returns:
         Dictionnaire des alertes par type
@@ -303,24 +303,24 @@ def compter_alertes(alertes: dict) -> dict:
 
 def alertes_critiques_existent(alertes: dict) -> bool:
     """
-    VÃ©rifie s'il existe des alertes critiques.
+    Vérifie s'il existe des alertes critiques.
     
     Args:
         alertes: Dictionnaire des alertes
         
     Returns:
-        True si des alertes critiques ou pÃ©rimÃ©es existent
+        True si des alertes critiques ou périmées existent
     """
     return len(alertes.get("critique", [])) > 0 or len(alertes.get("perime", [])) > 0
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # STATISTIQUES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def calculer_statistiques_inventaire(articles: list[dict]) -> dict:
     """
-    Calcule les statistiques gÃ©nÃ©rales de l'inventaire.
+    Calcule les statistiques générales de l'inventaire.
     
     Args:
         articles: Liste des articles de l'inventaire
@@ -394,7 +394,7 @@ def calculer_statistiques_par_emplacement(articles: list[dict]) -> dict[str, dic
 
 def calculer_statistiques_par_categorie(articles: list[dict]) -> dict[str, dict]:
     """
-    Calcule les statistiques par catÃ©gorie.
+    Calcule les statistiques par catégorie.
     
     Args:
         articles: Liste des articles
@@ -425,16 +425,16 @@ def calculer_statistiques_par_categorie(articles: list[dict]) -> dict[str, dict]
     return stats
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # VALIDATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def valider_article_inventaire(article: dict) -> tuple[bool, list[str]]:
     """
-    Valide les donnÃ©es d'un article d'inventaire.
+    Valide les données d'un article d'inventaire.
     
     Args:
-        article: Dictionnaire des donnÃ©es
+        article: Dictionnaire des données
         
     Returns:
         Tuple (est_valide, liste_erreurs)
@@ -443,39 +443,39 @@ def valider_article_inventaire(article: dict) -> tuple[bool, list[str]]:
     
     # Nom requis
     if not article.get("ingredient_nom"):
-        erreurs.append("Le nom de l'ingrÃ©dient est requis")
+        erreurs.append("Le nom de l'ingrédient est requis")
     elif len(article["ingredient_nom"]) < 2:
-        erreurs.append("Le nom doit contenir au moins 2 caractÃ¨res")
+        erreurs.append("Le nom doit contenir au moins 2 caractères")
     
-    # QuantitÃ© positive ou zÃ©ro
+    # Quantité positive ou zéro
     quantite = article.get("quantite", 0)
     if quantite is not None and quantite < 0:
-        erreurs.append("La quantitÃ© ne peut pas Ãªtre nÃ©gative")
+        erreurs.append("La quantité ne peut pas être négative")
     
-    # Seuils cohÃ©rents
+    # Seuils cohérents
     seuil_alerte = article.get("seuil_alerte", 5)
     seuil_critique = article.get("seuil_critique", 2)
     if seuil_critique > seuil_alerte:
-        erreurs.append("Le seuil critique ne peut pas Ãªtre supÃ©rieur au seuil d'alerte")
+        erreurs.append("Le seuil critique ne peut pas être supérieur au seuil d'alerte")
     
     # Emplacement valide
     emplacement = article.get("emplacement")
     if emplacement and emplacement not in EMPLACEMENTS:
         logger.warning(f"Emplacement non standard: {emplacement}")
     
-    # CatÃ©gorie valide
+    # Catégorie valide
     categorie = article.get("categorie")
     if categorie and categorie not in CATEGORIES:
-        logger.warning(f"CatÃ©gorie non standard: {categorie}")
+        logger.warning(f"Catégorie non standard: {categorie}")
     
-    # Date de pÃ©remption dans le futur (si fournie pour nouvel article)
+    # Date de péremption dans le futur (si fournie pour nouvel article)
     date_peremption = article.get("date_peremption")
     if date_peremption:
         if isinstance(date_peremption, str):
             try:
                 date_peremption = datetime.fromisoformat(date_peremption).date()
             except ValueError:
-                erreurs.append("Format de date de pÃ©remption invalide")
+                erreurs.append("Format de date de péremption invalide")
                 return len(erreurs) == 0, erreurs
         
         if isinstance(date_peremption, datetime):
@@ -495,15 +495,15 @@ def valider_nouvel_article_inventaire(
     seuil_critique: int = 2
 ) -> tuple[bool, dict | list[str]]:
     """
-    Valide et prÃ©pare les donnÃ©es d'un nouvel article d'inventaire.
+    Valide et prépare les données d'un nouvel article d'inventaire.
     
     Args:
-        nom: Nom de l'ingrÃ©dient
-        quantite: QuantitÃ© en stock
-        unite: UnitÃ© de mesure
+        nom: Nom de l'ingrédient
+        quantite: Quantité en stock
+        unite: Unité de mesure
         emplacement: Emplacement de stockage
-        categorie: CatÃ©gorie de l'article
-        date_peremption: Date de pÃ©remption (optionnel)
+        categorie: Catégorie de l'article
+        date_peremption: Date de péremption (optionnel)
         seuil_alerte: Seuil pour alerte stock bas
         seuil_critique: Seuil pour alerte critique
         
@@ -529,9 +529,9 @@ def valider_nouvel_article_inventaire(
     return False, erreurs
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FORMATAGE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def formater_article_label(article: dict) -> str:
     """
@@ -541,7 +541,7 @@ def formater_article_label(article: dict) -> str:
         article: Dictionnaire de l'article
         
     Returns:
-        Label formatÃ©
+        Label formaté
     """
     status = calculer_status_global(article)
     emoji = status["config"]["emoji"]
@@ -552,7 +552,7 @@ def formater_article_label(article: dict) -> str:
     
     label = f"{emoji} {nom} ({quantite} {unite})"
     
-    # Ajouter la date de pÃ©remption si proche
+    # Ajouter la date de péremption si proche
     if status["status_peremption"] in ["perime", "bientot_perime"]:
         date_peremption = article.get("date_peremption")
         if date_peremption:
@@ -571,7 +571,7 @@ def formater_inventaire_rapport(articles: list[dict]) -> str:
         articles: Liste des articles
         
     Returns:
-        Texte formatÃ©
+        Texte formaté
     """
     stats = calculer_statistiques_inventaire(articles)
     alertes = calculer_alertes(articles)
@@ -593,7 +593,7 @@ def formater_inventaire_rapport(articles: list[dict]) -> str:
     
     # Alertes
     if alertes_critiques_existent(alertes):
-        lignes.append("âš ï¸ ALERTES CRITIQUES")
+        lignes.append("âš ï¸ ALERTES CRITIQUES")
         lignes.append("-" * 20)
         
         for article in alertes.get("critique", []):
@@ -617,13 +617,13 @@ def formater_inventaire_rapport(articles: list[dict]) -> str:
     return "\n".join(lignes)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # UTILITAIRES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def calculer_jours_avant_peremption(article: dict) -> Optional[int]:
     """
-    Calcule le nombre de jours avant pÃ©remption.
+    Calcule le nombre de jours avant péremption.
     
     Args:
         article: Dictionnaire de l'article
@@ -668,7 +668,7 @@ def grouper_par_emplacement(articles: list[dict]) -> dict[str, list[dict]]:
 
 def grouper_par_categorie(articles: list[dict]) -> dict[str, list[dict]]:
     """
-    Groupe les articles par catÃ©gorie.
+    Groupe les articles par catégorie.
     
     Args:
         articles: Liste des articles
@@ -687,13 +687,13 @@ def grouper_par_categorie(articles: list[dict]) -> dict[str, list[dict]]:
 
 def trier_par_peremption(articles: list[dict]) -> list[dict]:
     """
-    Trie les articles par date de pÃ©remption (plus proche en premier).
+    Trie les articles par date de péremption (plus proche en premier).
     
     Args:
         articles: Liste des articles
         
     Returns:
-        Liste triÃ©e
+        Liste triée
     """
     def sort_key(article):
         jours = calculer_jours_avant_peremption(article)
@@ -704,13 +704,13 @@ def trier_par_peremption(articles: list[dict]) -> list[dict]:
 
 def trier_par_urgence(articles: list[dict]) -> list[dict]:
     """
-    Trie les articles par urgence (pÃ©rimÃ©s/critiques en premier).
+    Trie les articles par urgence (périmés/critiques en premier).
     
     Args:
         articles: Liste des articles
         
     Returns:
-        Liste triÃ©e
+        Liste triée
     """
     ordre_priorite = {"perime": 0, "critique": 1, "bientot_perime": 2, "stock_bas": 3, "ok": 4}
     
@@ -726,16 +726,16 @@ def formater_article_inventaire(article: dict) -> dict:
     Formate un article d'inventaire pour l'affichage.
     
     Args:
-        article: Article brut de la base de donnÃ©es
+        article: Article brut de la base de données
         
     Returns:
-        Article formatÃ© avec des champs supplÃ©mentaires pour l'UI
+        Article formaté avec des champs supplémentaires pour l'UI
     """
     status_stock = calculer_status_stock(article)
     status_peremption = calculer_status_peremption(article)
     
-    emoji_stock = STATUS_CONFIG.get(status_stock, {}).get("emoji", "â“")
-    emoji_peremption = STATUS_CONFIG.get(status_peremption, {}).get("emoji", "â“")
+    emoji_stock = STATUS_CONFIG.get(status_stock, {}).get("emoji", "â“")
+    emoji_peremption = STATUS_CONFIG.get(status_peremption, {}).get("emoji", "â“")
     
     jours_peremption = calculer_jours_avant_peremption(article)
     

@@ -8,9 +8,9 @@ from unittest.mock import MagicMock, patch
 from src.services.suggestions_ia import SuggestionsIAService
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @pytest.fixture
 def suggestions_service():
@@ -19,9 +19,9 @@ def suggestions_service():
         return SuggestionsIAService()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS INITIALISATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestSuggestionsIAServiceInit:
     """Tests d'initialisation du service"""
@@ -32,47 +32,47 @@ class TestSuggestionsIAServiceInit:
     
     @patch('src.services.suggestions_ia.ClientIA')
     def test_service_creation(self, mock_client):
-        """Test crÃ©ation du service"""
+        """Test création du service"""
         service = SuggestionsIAService()
         assert service is not None
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MÃ‰THODES SUGGESTIONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestSuggestionsIAMethods:
-    """Tests des mÃ©thodes de suggestions"""
+    """Tests des méthodes de suggestions"""
     
     def test_has_suggestion_methods(self, suggestions_service):
-        """Test que les mÃ©thodes de suggestion existent"""
+        """Test que les méthodes de suggestion existent"""
         suggest_methods = [m for m in dir(suggestions_service) 
                           if 'suggest' in m.lower() or 'proposition' in m.lower()]
-        # Le service devrait avoir des mÃ©thodes de suggestion
+        # Le service devrait avoir des méthodes de suggestion
         assert len(suggest_methods) >= 0
     
     def test_suggerer_recettes_if_exists(self, suggestions_service):
-        """Test mÃ©thode suggÃ©rer recettes"""
+        """Test méthode suggérer recettes"""
         if hasattr(suggestions_service, 'suggerer_recettes'):
             assert callable(suggestions_service.suggerer_recettes)
     
     def test_suggerer_repas_if_exists(self, suggestions_service):
-        """Test mÃ©thode suggÃ©rer repas"""
+        """Test méthode suggérer repas"""
         if hasattr(suggestions_service, 'suggerer_repas'):
             assert callable(suggestions_service.suggerer_repas)
     
     def test_analyser_inventaire_if_exists(self, suggestions_service):
-        """Test mÃ©thode analyser inventaire"""
+        """Test méthode analyser inventaire"""
         if hasattr(suggestions_service, 'analyser_inventaire'):
             assert callable(suggestions_service.analyser_inventaire)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS INTÃ‰GRATION IA
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestSuggestionsIAIntegration:
-    """Tests d'intÃ©gration IA"""
+    """Tests d'intégration IA"""
     
     def test_has_client_attribute(self, suggestions_service):
         """Test que le service a un client IA"""

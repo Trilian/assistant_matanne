@@ -17,9 +17,9 @@ from src.core.models import Recette, EtapeRecette, RecetteIngredient
 from src.core.errors_base import ErreurNonTrouve, ErreurValidation
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 1: CRUD TESTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @pytest.mark.unit
 class TestRecetteCRUD:
@@ -73,7 +73,7 @@ class TestRecetteCRUD:
             "portions": 4,
             "difficulte": "facile",
             "type_repas": "sauce",
-            "saison": "toute_annÃ©e",
+            "saison": "toute_année",
             "ingredients": [
                 {"nom": "Tomate", "quantite": 500, "unite": "g"},
                 {"nom": "Oignon", "quantite": 1, "unite": "pcs"},
@@ -110,7 +110,7 @@ class TestRecetteCRUD:
     ):
         """Test searching by term."""
         recette_factory.create("PÃ¢tes Carbonara")
-        recette_factory.create("Salade NiÃ§oise")
+        recette_factory.create("Salade Niçoise")
         
         results = recette_service.search_advanced(term="PÃ¢tes", db=db)
         
@@ -121,12 +121,12 @@ class TestRecetteCRUD:
         self, recette_service, recette_factory, db
     ):
         """Test searching by meal type."""
-        recette_factory.create(type_repas="petit_dÃ©jeuner")
-        recette_factory.create(type_repas="dÃ®ner")
-        recette_factory.create(type_repas="dÃ®ner")
+        recette_factory.create(type_repas="petit_déjeuner")
+        recette_factory.create(type_repas="dîner")
+        recette_factory.create(type_repas="dîner")
         
         results = recette_service.search_advanced(
-            type_repas="dÃ®ner", db=db
+            type_repas="dîner", db=db
         )
         
         assert len(results) == 2
@@ -166,9 +166,9 @@ class TestRecetteCRUD:
         assert results[0].nom == "Rapide"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 2: IA GENERATION TESTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @pytest.mark.unit
 class TestRecetteIAGeneration:
@@ -187,7 +187,7 @@ class TestRecetteIAGeneration:
         """Test that IA generation returns a list."""
         from unittest.mock import Mock
         
-        # Mock la rÃ©ponse IA avec un structure valide
+        # Mock la réponse IA avec un structure valide
         mock_response = '''{
             "items": [
                 {
@@ -197,15 +197,15 @@ class TestRecetteIAGeneration:
                     "temps_cuisson": 20,
                     "portions": 4,
                     "difficulte": "facile",
-                    "type_repas": "dÃ®ner",
-                    "saison": "toute_annÃ©e",
+                    "type_repas": "dîner",
+                    "saison": "toute_année",
                     "ingredients": [{"nom": "pÃ¢tes", "quantite": 400, "unite": "g"}],
                     "etapes": [{"description": "Cuire"}]
                 }
             ]
         }'''
         
-        # Patch call_with_cache pour retourner la rÃ©ponse mockÃ©e
+        # Patch call_with_cache pour retourner la réponse mockée
         def mock_call_with_cache(*args, **kwargs):
             return mock_response
         
@@ -214,15 +214,15 @@ class TestRecetteIAGeneration:
         
         try:
             result = recette_service.generer_recettes_ia(
-                type_repas="dÃ®ner",
-                saison="Ã©tÃ©",
+                type_repas="dîner",
+                saison="été",
                 nb_recettes=1
             )
             
-            # VÃ©rifications - le rÃ©sultat doit Ãªtre une liste
+            # Vérifications - le résultat doit être une liste
             assert isinstance(result, list)
-            # Peut Ãªtre 0 ou 1 selon si le parser Ã©choue ou rÃ©ussit
-            # Les deux sont acceptÃ©s (fallback ou parsing rÃ©ussi)
+            # Peut être 0 ou 1 selon si le parser échoue ou réussit
+            # Les deux sont acceptés (fallback ou parsing réussi)
         finally:
             recette_service.call_with_cache = original
     
@@ -239,7 +239,7 @@ class TestRecetteIAGeneration:
         """Test that max_items is respected."""
         from unittest.mock import Mock
         
-        # Mock une rÃ©ponse avec 5 recettes
+        # Mock une réponse avec 5 recettes
         mock_response = '''{
             "items": [
                 {
@@ -249,8 +249,8 @@ class TestRecetteIAGeneration:
                     "temps_cuisson": 10,
                     "portions": 4,
                     "difficulte": "facile",
-                    "type_repas": "dÃ®ner",
-                    "saison": "toute_annÃ©e",
+                    "type_repas": "dîner",
+                    "saison": "toute_année",
                     "ingredients": [],
                     "etapes": []
                 }
@@ -275,18 +275,18 @@ class TestRecetteIAGeneration:
         
         # Demander max 2
         result = recette_service.generer_recettes_ia(
-            type_repas="dÃ®ner",
-            saison="Ã©tÃ©",
+            type_repas="dîner",
+            saison="été",
             nb_recettes=2
         )
         
-        # Doit Ãªtre limitÃ© Ã  2 ou moins
+        # Doit être limité à 2 ou moins
         assert len(result) <= 2
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 3: VERSION BÃ‰BÃ‰ TESTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @pytest.mark.unit
 class TestVersionBebe:
@@ -300,9 +300,9 @@ class TestVersionBebe:
             recette_service.generer_version_bebe(99999, db=db)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 4: EXPORT TESTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @pytest.mark.unit
 class TestRecetteExport:
@@ -341,9 +341,9 @@ class TestRecetteExport:
         assert "ingredients" in json_str
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 6: HISTORIQUE & VERSIONS TESTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @pytest.mark.unit
 class TestHistoriqueRecette:
@@ -359,7 +359,7 @@ class TestHistoriqueRecette:
             recette_id=sample_recipe.id,
             portions=4,
             note=4,
-            avis="DÃ©licieux!",
+            avis="Délicieux!",
             db=db
         )
         
@@ -420,9 +420,9 @@ class TestVersionRecette:
         assert isinstance(versions, list)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 7: HELPER TESTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @pytest.mark.unit
 class TestRecetteHelpers:
@@ -452,7 +452,7 @@ class TestRecetteHelpers:
         assert result.id == existing.id
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 8: INTEGRATION TESTS
 
 @pytest.mark.integration
@@ -471,7 +471,7 @@ class TestRecetteIntegration:
             "temps_cuisson": 30,
             "portions": 4,
             "difficulte": "moyen",
-            "type_repas": "dÃ®ner",
+            "type_repas": "dîner",
             "saison": "automne",
             "ingredients": [
                 {"nom": "Riz", "quantite": 300, "unite": "g"},

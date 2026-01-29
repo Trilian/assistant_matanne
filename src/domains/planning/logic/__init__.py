@@ -1,4 +1,4 @@
-﻿"""Logic Planning - Logique mÃ©tier."""
+﻿"""Logic Planning - Logique métier."""
 
 from . import calendrier_logic, planning_logic
 

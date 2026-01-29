@@ -1,5 +1,5 @@
 ﻿"""
-Logique mÃ©tier du module Rapports (gÃ©nÃ©ration rapports) - SÃ©parÃ©e de l'UI
+Logique métier du module Rapports (génération rapports) - Séparée de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
 
@@ -10,20 +10,20 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # GÃ‰NÃ‰RATION RAPPORTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def generer_rapport_synthese(data: Dict[str, Any], periode: str = "mois") -> Dict[str, Any]:
     """
-    GÃ©nÃ¨re un rapport de synthÃ¨se.
+    Génère un rapport de synthèse.
     
     Args:
-        data: DonnÃ©es sources
-        periode: PÃ©riode du rapport (jour, semaine, mois, annee)
+        data: Données sources
+        periode: Période du rapport (jour, semaine, mois, annee)
         
     Returns:
-        Rapport gÃ©nÃ©rÃ©
+        Rapport généré
     """
     if periode == "jour":
         jours = 1
@@ -55,15 +55,15 @@ def generer_rapport_synthese(data: Dict[str, Any], periode: str = "mois") -> Dic
 
 def calculer_statistiques_periode(items: List[Dict[str, Any]], date_debut: date, date_fin: date) -> Dict[str, int]:
     """
-    Calcule les statistiques sur une pÃ©riode.
+    Calcule les statistiques sur une période.
     
     Args:
         items: Liste d'items avec dates
-        date_debut: Date de dÃ©but
+        date_debut: Date de début
         date_fin: Date de fin
         
     Returns:
-        Statistiques calculÃ©es
+        Statistiques calculées
     """
     resultats = {"total": 0, "par_jour": {}}
     
@@ -82,7 +82,7 @@ def calculer_statistiques_periode(items: List[Dict[str, Any]], date_debut: date,
 
 
 def generer_section_recettes(recettes: List[Dict[str, Any]], periode: str) -> Dict[str, Any]:
-    """GÃ©nÃ¨re la section recettes du rapport."""
+    """Génère la section recettes du rapport."""
     total = len(recettes)
     
     # Par type
@@ -91,7 +91,7 @@ def generer_section_recettes(recettes: List[Dict[str, Any]], periode: str) -> Di
         type_repas = recette.get("type_repas", "Autre")
         par_type[type_repas] = par_type.get(type_repas, 0) + 1
     
-    # Par difficultÃ©
+    # Par difficulté
     par_difficulte = {}
     for recette in recettes:
         diff = recette.get("difficulte", "moyen")
@@ -107,14 +107,14 @@ def generer_section_recettes(recettes: List[Dict[str, Any]], periode: str) -> Di
 
 
 def generer_section_courses(courses: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """GÃ©nÃ¨re la section courses du rapport."""
+    """Génère la section courses du rapport."""
     total = len(courses)
     achetes = len([c for c in courses if c.get("achete", False)])
     
     # Montants
     montant_total = sum(c.get("prix", 0) * c.get("quantite", 1) for c in courses)
     
-    # Par catÃ©gorie
+    # Par catégorie
     par_categorie = {}
     for course in courses:
         cat = course.get("categorie", "Autre")
@@ -132,7 +132,7 @@ def generer_section_courses(courses: List[Dict[str, Any]]) -> Dict[str, Any]:
 
 
 def generer_section_activites(activites: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """GÃ©nÃ¨re la section activitÃ©s du rapport."""
+    """Génère la section activités du rapport."""
     total = len(activites)
     
     # Par type
@@ -141,11 +141,11 @@ def generer_section_activites(activites: List[Dict[str, Any]]) -> Dict[str, Any]
         type_act = act.get("type", "Autre")
         par_type[type_act] = par_type.get(type_act, 0) + 1
     
-    # CoÃ»ts
+    # Coûts
     cout_total = sum(act.get("cout", 0) for act in activites)
     
     return {
-        "titre": "ðŸ“… ActivitÃ©s",
+        "titre": "ðŸ“… Activités",
         "total": total,
         "par_type": par_type,
         "cout_total": cout_total,
@@ -153,17 +153,17 @@ def generer_section_activites(activites: List[Dict[str, Any]]) -> Dict[str, Any]
     }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ANALYSE COMPARATIVE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def comparer_periodes(data_periode1: Dict[str, Any], data_periode2: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Compare deux pÃ©riodes.
+    Compare deux périodes.
     
     Args:
-        data_periode1: DonnÃ©es pÃ©riode 1 (ex: mois prÃ©cÃ©dent)
-        data_periode2: DonnÃ©es pÃ©riode 2 (ex: mois actuel)
+        data_periode1: Données période 1 (ex: mois précédent)
+        data_periode2: Données période 2 (ex: mois actuel)
         
     Returns:
         Comparaison
@@ -204,27 +204,27 @@ def comparer_periodes(data_periode1: Dict[str, Any], data_periode2: Dict[str, An
     }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FORMATAGE RAPPORTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def formater_rapport_texte(rapport: Dict[str, Any]) -> str:
     """
     Formate un rapport en texte brut.
     
     Args:
-        rapport: Rapport Ã  formater
+        rapport: Rapport à formater
         
     Returns:
-        Texte formatÃ©
+        Texte formaté
     """
     lignes = [
-        "â•" * 60,
+        "â•" * 60,
         f"ðŸ“Š {rapport.get('titre', 'RAPPORT').upper()}",
-        "â•" * 60,
-        f"PÃ©riode: {rapport.get('periode', 'N/A')}",
+        "â•" * 60,
+        f"Période: {rapport.get('periode', 'N/A')}",
         f"Du {rapport.get('date_debut')} au {rapport.get('date_fin')}",
-        f"GÃ©nÃ©rÃ© le: {rapport.get('date_generation')}",
+        f"Généré le: {rapport.get('date_generation')}",
         "",
         "STATISTIQUES GLOBALES:",
         "â”€" * 60,
@@ -245,7 +245,7 @@ def formater_rapport_texte(rapport: Dict[str, Any]) -> str:
             lignes.append(f"  Total: {section.get('total', 0)}")
     
     lignes.append("")
-    lignes.append("â•" * 60)
+    lignes.append("â•" * 60)
     
     return "\n".join(lignes)
 
@@ -255,17 +255,17 @@ def formater_rapport_markdown(rapport: Dict[str, Any]) -> str:
     Formate un rapport en Markdown.
     
     Args:
-        rapport: Rapport Ã  formater
+        rapport: Rapport à formater
         
     Returns:
-        Markdown formatÃ©
+        Markdown formaté
     """
     lignes = [
         f"# ðŸ“Š {rapport.get('titre', 'Rapport')}",
         "",
-        f"**PÃ©riode:** {rapport.get('periode', 'N/A')}  ",
+        f"**Période:** {rapport.get('periode', 'N/A')}  ",
         f"**Dates:** Du {rapport.get('date_debut')} au {rapport.get('date_fin')}  ",
-        f"**GÃ©nÃ©rÃ© le:** {rapport.get('date_generation')}",
+        f"**Généré le:** {rapport.get('date_generation')}",
         "",
         "## Statistiques Globales",
         ""
@@ -278,14 +278,14 @@ def formater_rapport_markdown(rapport: Dict[str, Any]) -> str:
     # Sections
     if rapport.get("sections"):
         lignes.append("")
-        lignes.append("## DÃ©tails")
+        lignes.append("## Détails")
         
         for section in rapport["sections"]:
             lignes.append(f"\n### {section.get('titre', 'Section')}")
             lignes.append(f"\n**Total:** {section.get('total', 0)}")
             
             if "par_type" in section:
-                lignes.append("\n**RÃ©partition:**")
+                lignes.append("\n**Répartition:**")
                 for type_key, count in section["par_type"].items():
                     lignes.append(f"- {type_key}: {count}")
     
@@ -297,10 +297,10 @@ def formater_rapport_html(rapport: Dict[str, Any]) -> str:
     Formate un rapport en HTML.
     
     Args:
-        rapport: Rapport Ã  formater
+        rapport: Rapport à formater
         
     Returns:
-        HTML formatÃ©
+        HTML formaté
     """
     html = f"""
 <!DOCTYPE html>
@@ -319,9 +319,9 @@ def formater_rapport_html(rapport: Dict[str, Any]) -> str:
     <h1>ðŸ“Š {rapport.get('titre', 'Rapport')}</h1>
     
     <div class="stats">
-        <p><strong>PÃ©riode:</strong> {rapport.get('periode', 'N/A')}</p>
+        <p><strong>Période:</strong> {rapport.get('periode', 'N/A')}</p>
         <p><strong>Dates:</strong> Du {rapport.get('date_debut')} au {rapport.get('date_fin')}</p>
-        <p><strong>GÃ©nÃ©rÃ© le:</strong> {rapport.get('date_generation')}</p>
+        <p><strong>Généré le:</strong> {rapport.get('date_generation')}</p>
     </div>
     
     <h2>Statistiques Globales</h2>
@@ -336,7 +336,7 @@ def formater_rapport_html(rapport: Dict[str, Any]) -> str:
     
     # Sections
     if rapport.get("sections"):
-        html += "    <h2>DÃ©tails</h2>\n"
+        html += "    <h2>Détails</h2>\n"
         
         for section in rapport["sections"]:
             html += f"""
@@ -354,17 +354,17 @@ def formater_rapport_html(rapport: Dict[str, Any]) -> str:
     return html
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # EXPORT
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def preparer_export_csv(data: List[Dict[str, Any]], colonnes: List[str]) -> str:
     """
-    PrÃ©pare les donnÃ©es pour export CSV.
+    Prépare les données pour export CSV.
     
     Args:
-        data: DonnÃ©es Ã  exporter
-        colonnes: Colonnes Ã  inclure
+        data: Données à exporter
+        colonnes: Colonnes à inclure
         
     Returns:
         Contenu CSV

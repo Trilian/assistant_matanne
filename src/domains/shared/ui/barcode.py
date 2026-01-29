@@ -3,7 +3,7 @@ Module Scanner Barcode/QR - Interface Streamlit
 
 âœ… Scanner codes-barres
 âœ… Ajout rapide articles
-âœ… VÃ©rification stock
+âœ… Vérification stock
 âœ… Import/Export
 """
 
@@ -16,32 +16,32 @@ from src.services.barcode import BarcodeService
 from src.services.inventaire import InventaireService
 from src.core.errors_base import ErreurValidation, ErreurNonTrouve
 
-# Logique mÃ©tier pure
+# Logique métier pure
 from src.domains.shared.logic.barcode_logic import (
     valider_code_barres,
     detecter_type_code_barres,
     extraire_infos_produit
 )
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # INITIALISATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def get_barcode_service() -> BarcodeService:
-    """Get ou crÃ©er service barcode"""
+    """Get ou créer service barcode"""
     if "barcode_service" not in st.session_state:
         st.session_state.barcode_service = BarcodeService()
     return st.session_state.barcode_service
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # MODULE PRINCIPAL
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def app():
-    """Point d'entrÃ©e module scanner barcode"""
+    """Point d'entrée module scanner barcode"""
     
     st.markdown(
         "<h1 style='text-align: center;'>ðŸ“± Scanner Code-Barres/QR</h1>",
@@ -55,7 +55,7 @@ def app():
     tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "ðŸ“· Scanner",
         "âž• Ajout rapide",
-        "âœ… VÃ©rifier stock",
+        "âœ… Vérifier stock",
         "ðŸ“Š Gestion",
         "ðŸ“¥ Import/Export"
     ])
@@ -76,9 +76,9 @@ def app():
         render_import_export()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ONGLET 1: SCANNER
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def render_scanner():
@@ -100,7 +100,7 @@ def render_scanner():
     
     with col2:
         scanner_button = st.button(
-            "ðŸ” Scanner",
+            "ðŸ” Scanner",
             use_container_width=True,
             key="btn_scanner"
         )
@@ -111,15 +111,15 @@ def render_scanner():
             valide, type_code = service.valider_barcode(code_input)
             
             if not valide:
-                st.error(f"âŒ Code invalide: {type_code}")
+                st.error(f"âŒ Code invalide: {type_code}")
                 return
             
             # Scanner
             resultat = service.scanner_code(code_input)
             
-            st.success("âœ… Scan rÃ©ussi!")
+            st.success("âœ… Scan réussi!")
             
-            # Afficher rÃ©sultats
+            # Afficher résultats
             col1, col2 = st.columns(2)
             
             with col1:
@@ -127,11 +127,11 @@ def render_scanner():
                 st.metric("Type", resultat.type_scan.upper())
             
             with col2:
-                st.info(f"â° ScannÃ©e: {resultat.timestamp.strftime('%H:%M:%S')}")
+                st.info(f"â° Scannée: {resultat.timestamp.strftime('%H:%M:%S')}")
             
-            # DÃ©tails
+            # Détails
             if resultat.type_scan == "article":
-                st.subheader("ðŸ“¦ Article trouvÃ©")
+                st.subheader("ðŸ“¦ Article trouvé")
                 details = resultat.details
                 
                 col1, col2, col3 = st.columns(3)
@@ -147,32 +147,32 @@ def render_scanner():
                 col1, col2, col3 = st.columns(3)
                 
                 with col1:
-                    if st.button("âž• Ajouter quantitÃ©", key="btn_add_qty"):
+                    if st.button("âž• Ajouter quantité", key="btn_add_qty"):
                         st.session_state.article_id_to_add = details["id"]
                         st.session_state.article_name_to_add = details["nom"]
                         st.switch_page("pages/0_accueil.py")
                 
                 with col2:
-                    if st.button("âœï¸ Ã‰diter article", key="btn_edit_article"):
+                    if st.button("âœï¸ Ã‰diter article", key="btn_edit_article"):
                         st.session_state.article_id_to_edit = details["id"]
                         st.switch_page("pages/0_accueil.py")
                 
                 with col3:
-                    if st.button("ðŸ—‘ï¸ Supprimer", key="btn_delete_article"):
+                    if st.button("ðŸ—‘ï¸ Supprimer", key="btn_delete_article"):
                         st.warning("Action non disponible ici")
             
             else:
-                st.warning("âš ï¸ Code non reconnu - doit Ãªtre ajoutÃ© dans le systÃ¨me")
+                st.warning("âš ï¸ Code non reconnu - doit être ajouté dans le système")
                 if st.button("âž• Ajouter ce code", key="btn_add_new_barcode"):
                     st.session_state.new_barcode_to_add = code_input
                     st.rerun()
         
         except Exception as e:
-            st.error(f"âŒ Erreur: {str(e)}")
+            st.error(f"âŒ Erreur: {str(e)}")
     
     # Info
     st.info("""
-    ðŸ“š **Formats supportÃ©s:**
+    ðŸ“š **Formats supportés:**
     - EAN-13 (13 chiffres)
     - EAN-8 (8 chiffres)
     - UPC (12 chiffres)
@@ -181,9 +181,9 @@ def render_scanner():
     """)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ONGLET 2: AJOUT RAPIDE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def render_ajout_rapide():
@@ -195,7 +195,7 @@ def render_ajout_rapide():
     st.subheader("âž• Ajouter Article Rapide")
     
     st.markdown("""
-    CrÃ©ez un nouvel article avec code-barres en quelques secondes.
+    Créez un nouvel article avec code-barres en quelques secondes.
     """)
     
     # Formulaire
@@ -212,7 +212,7 @@ def render_ajout_rapide():
                 placeholder="ex: Tomates cerises"
             )
             quantite = st.number_input(
-                "QuantitÃ©",
+                "Quantité",
                 min_value=0.1,
                 value=1.0,
                 step=0.5
@@ -220,20 +220,20 @@ def render_ajout_rapide():
         
         with col2:
             unite = st.selectbox(
-                "UnitÃ©",
-                ["unitÃ©", "kg", "g", "L", "ml", "paquet", "boÃ®te", "litre", "portion"]
+                "Unité",
+                ["unité", "kg", "g", "L", "ml", "paquet", "boîte", "litre", "portion"]
             )
             categorie = st.selectbox(
-                "CatÃ©gorie",
+                "Catégorie",
                 [
-                    "LÃ©gumes", "Fruits", "FÃ©culents", "ProtÃ©ines",
+                    "Légumes", "Fruits", "Féculents", "Protéines",
                     "Laitier", "Ã‰pices & Condiments", "Conserves",
-                    "SurgelÃ©s", "Autre"
+                    "Surgelés", "Autre"
                 ]
             )
             emplacement = st.selectbox(
                 "Emplacement",
-                ["Frigo", "CongÃ©lateur", "Placard", "Cave", "Garde-manger"]
+                ["Frigo", "Congélateur", "Placard", "Cave", "Garde-manger"]
             )
         
         col1, col2 = st.columns(2)
@@ -247,7 +247,7 @@ def render_ajout_rapide():
         
         with col2:
             jours_peremption = st.number_input(
-                "Jours avant pÃ©remption (optionnel)",
+                "Jours avant péremption (optionnel)",
                 min_value=0,
                 value=0,
                 step=1
@@ -257,7 +257,7 @@ def render_ajout_rapide():
     
     if submitted:
         if not barcode or not nom:
-            st.error("âŒ Veuillez remplir les champs obligatoires (*)")
+            st.error("âŒ Veuillez remplir les champs obligatoires (*)")
             return
         
         try:
@@ -273,40 +273,40 @@ def render_ajout_rapide():
                 emplacement=emplacement
             )
             
-            st.success(f"âœ… Article crÃ©Ã©: {nom}")
+            st.success(f"âœ… Article créé: {nom}")
             st.balloons()
             
-            # Afficher rÃ©sumÃ©
+            # Afficher résumé
             st.info(f"""
-            ðŸ“ **Article crÃ©Ã©:**
+            ðŸ“ **Article créé:**
             - Code: {barcode}
             - Nom: {nom}
             - Stock: {quantite} {unite}
             - Emplacement: {emplacement}
-            - CatÃ©gorie: {categorie}
+            - Catégorie: {categorie}
             """)
             
             st.session_state.clear()
         
         except ErreurValidation as e:
-            st.error(f"âŒ Validation: {str(e)}")
+            st.error(f"âŒ Validation: {str(e)}")
         except Exception as e:
-            st.error(f"âŒ Erreur: {str(e)}")
+            st.error(f"âŒ Erreur: {str(e)}")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ONGLET 3: VÃ‰RIFIER STOCK
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def render_verifier_stock():
-    """VÃ©rifier stock par code-barres"""
+    """Vérifier stock par code-barres"""
     
     service = get_barcode_service()
     
-    st.subheader("âœ… VÃ©rifier Stock par Code")
+    st.subheader("âœ… Vérifier Stock par Code")
     
-    st.markdown("Scannez un code pour vÃ©rifier instantanÃ©ment le stock")
+    st.markdown("Scannez un code pour vérifier instantanément le stock")
     
     col1, col2 = st.columns([3, 1])
     
@@ -318,7 +318,7 @@ def render_verifier_stock():
         )
     
     with col2:
-        if st.button("ðŸ” VÃ©rifier", key="btn_check_stock", use_container_width=True):
+        if st.button("ðŸ” Vérifier", key="btn_check_stock", use_container_width=True):
             check_clicked = True
         else:
             check_clicked = False
@@ -345,11 +345,11 @@ def render_verifier_stock():
                 if etat == "OK":
                     st.metric("Ã‰tat", "âœ… OK", delta="Normal")
                 elif etat == "FAIBLE":
-                    st.metric("Ã‰tat", "âš ï¸ FAIBLE", delta="Ã€ renouveler")
+                    st.metric("Ã‰tat", "âš ï¸ FAIBLE", delta="Ã€ renouveler")
                 else:
                     st.metric("Ã‰tat", "ðŸ”´ CRITIQUE", delta="Urgent!")
             
-            # DÃ©tails
+            # Détails
             st.divider()
             
             col1, col2, col3 = st.columns(3)
@@ -363,25 +363,25 @@ def render_verifier_stock():
             
             with col3:
                 etat_perem = info_stock["peremption_etat"]
-                emoji = "âœ…" if etat_perem == "OK" else "âš ï¸"
-                st.metric("PÃ©remption", f"{emoji} {etat_perem}")
+                emoji = "âœ…" if etat_perem == "OK" else "âš ï¸"
+                st.metric("Péremption", f"{emoji} {etat_perem}")
             
             # Actions
             if info_stock["etat_stock"] != "OK":
-                st.warning(f"ðŸ“¦ Stock faible - ConsidÃ©rer l'ajout de stock")
+                st.warning(f"ðŸ“¦ Stock faible - Considérer l'ajout de stock")
             
             if info_stock["peremption_etat"] in ["URGENT", "PÃ‰RIMÃ‰"]:
-                st.error(f"âŒ ProblÃ¨me pÃ©remption - Action requise")
+                st.error(f"âŒ Problème péremption - Action requise")
         
         except ErreurNonTrouve:
-            st.error("âŒ Code non trouvÃ© dans la base")
+            st.error("âŒ Code non trouvé dans la base")
         except Exception as e:
-            st.error(f"âŒ Erreur: {str(e)}")
+            st.error(f"âŒ Erreur: {str(e)}")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ONGLET 4: GESTION BARCODES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def render_gestion_barcodes():
@@ -406,8 +406,8 @@ def render_gestion_barcodes():
                 "nom": "Article",
                 "barcode": "Code-barres",
                 "quantite": "Stock",
-                "unite": "UnitÃ©",
-                "categorie": "CatÃ©gorie"
+                "unite": "Unité",
+                "categorie": "Catégorie"
             })
             
             st.dataframe(
@@ -421,7 +421,7 @@ def render_gestion_barcodes():
             
             # Ã‰dition
             st.divider()
-            st.subheader("ðŸ”„ Mettre Ã  jour code-barres")
+            st.subheader("ðŸ”„ Mettre à jour code-barres")
             
             col1, col2, col3 = st.columns([2, 2, 1])
             
@@ -440,28 +440,28 @@ def render_gestion_barcodes():
                 )
             
             with col3:
-                if st.button("âœ… Mettre Ã  jour", key="btn_update_barcode"):
+                if st.button("âœ… Mettre à jour", key="btn_update_barcode"):
                     if nouveau_code and article_id:
                         try:
                             service.mettre_a_jour_barcode(
                                 article_id[0],
                                 nouveau_code
                             )
-                            st.success("âœ… Code-barres mis Ã  jour")
+                            st.success("âœ… Code-barres mis à jour")
                             st.rerun()
                         except Exception as e:
-                            st.error(f"âŒ Erreur: {str(e)}")
+                            st.error(f"âŒ Erreur: {str(e)}")
         
         else:
-            st.info("â„¹ï¸ Aucun article avec code-barres pour le moment")
+            st.info("â„¹ï¸ Aucun article avec code-barres pour le moment")
     
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"âŒ Erreur: {str(e)}")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ONGLET 5: IMPORT/EXPORT
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def render_import_export():
@@ -477,19 +477,19 @@ def render_import_export():
     with col1:
         st.subheader("ðŸ“¤ Exporter")
         
-        if st.button("â¬‡ï¸ TÃ©lÃ©charger CSV", key="btn_export_barcode"):
+        if st.button("â¬‡ï¸ Télécharger CSV", key="btn_export_barcode"):
             try:
                 csv_data = service.exporter_barcodes()
                 st.download_button(
-                    label="ðŸ“¥ TÃ©lÃ©charger codes-barres.csv",
+                    label="ðŸ“¥ Télécharger codes-barres.csv",
                     data=csv_data,
                     file_name=f"codes_barres_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                     mime="text/csv",
                     key="download_barcode_csv"
                 )
-                st.success("âœ… CSV gÃ©nÃ©rÃ©")
+                st.success("âœ… CSV généré")
             except Exception as e:
-                st.error(f"âŒ Erreur: {str(e)}")
+                st.error(f"âŒ Erreur: {str(e)}")
     
     # IMPORT
     with col2:
@@ -508,19 +508,19 @@ def render_import_export():
                 try:
                     resultats = service.importer_barcodes(csv_content)
                     
-                    st.success(f"âœ… {resultats['success']} articles importÃ©s")
+                    st.success(f"âœ… {resultats['success']} articles importés")
                     
                     if resultats['errors']:
-                        st.warning(f"âš ï¸ {len(resultats['errors'])} erreurs")
+                        st.warning(f"âš ï¸ {len(resultats['errors'])} erreurs")
                         for err in resultats['errors'][:5]:
                             st.text(f"- {err['barcode']}: {err['erreur']}")
                 except Exception as e:
-                    st.error(f"âŒ Erreur import: {str(e)}")
+                    st.error(f"âŒ Erreur import: {str(e)}")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # PAGE ENTRY
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 if __name__ == "__main__":

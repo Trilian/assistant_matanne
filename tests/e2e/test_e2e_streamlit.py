@@ -1,8 +1,8 @@
 ﻿"""
 Tests E2E utilisant streamlit.testing.v1 (AppTest)
-Module intÃ©grÃ© Ã  Streamlit pour tester les applications
+Module intégré à Streamlit pour tester les applications
 
-Note: Ces tests simulent l'exÃ©cution complÃ¨te de l'app Streamlit
+Note: Ces tests simulent l'exécution complète de l'app Streamlit
 """
 
 import pytest
@@ -11,9 +11,9 @@ from contextlib import ExitStack
 import sys
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # MOCK STREAMLIT POUR TESTS E2E
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class MockStreamlitE2E:
     """Mock complet de Streamlit pour tests E2E"""
@@ -170,21 +170,21 @@ class MockStreamlitE2E:
         self._buttons_clicked[key] = True
     
     def set_selectbox(self, key, value):
-        """DÃ©finit la valeur d'un selectbox"""
+        """Définit la valeur d'un selectbox"""
         self._selectbox_values[key] = value
     
     def set_input(self, key, value):
-        """DÃ©finit la valeur d'un input"""
+        """Définit la valeur d'un input"""
         self._inputs[key] = value
     
     def get_rendered(self):
-        """Retourne les Ã©lÃ©ments rendus"""
+        """Retourne les éléments rendus"""
         return self._rendered
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES E2E
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @pytest.fixture
 def mock_st_e2e():
@@ -194,7 +194,7 @@ def mock_st_e2e():
 
 @pytest.fixture
 def e2e_patches(mock_st_e2e):
-    """CrÃ©e tous les patches nÃ©cessaires pour E2E"""
+    """Crée tous les patches nécessaires pour E2E"""
     return {
         'streamlit': mock_st_e2e,
         'src.core.database.obtenir_contexte_db': MagicMock(),
@@ -202,9 +202,9 @@ def e2e_patches(mock_st_e2e):
     }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS E2E ACCUEIL
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestAccueilE2E:
     """Tests E2E pour le module accueil"""
@@ -215,14 +215,14 @@ class TestAccueilE2E:
             stack.enter_context(patch.dict(sys.modules, {'streamlit': mock_st_e2e}))
             stack.enter_context(patch('src.core.database.obtenir_contexte_db'))
             
-            # Simuler l'import et l'exÃ©cution
-            mock_st_e2e.title("ðŸ  Tableau de bord")
+            # Simuler l'import et l'exécution
+            mock_st_e2e.title("ðŸ  Tableau de bord")
             
             rendered = mock_st_e2e.get_rendered()
             assert any("title" in str(r) for r in rendered)
     
     def test_accueil_has_metrics(self, mock_st_e2e):
-        """L'accueil affiche des mÃ©triques"""
+        """L'accueil affiche des métriques"""
         mock_st_e2e.metric("Recettes", 25)
         mock_st_e2e.metric("Stock", 50)
         
@@ -231,9 +231,9 @@ class TestAccueilE2E:
         assert len(metrics) >= 2
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS E2E COURSES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestCoursesE2E:
     """Tests E2E pour le module courses"""
@@ -242,7 +242,7 @@ class TestCoursesE2E:
         """Le module courses se rend sans erreur"""
         # Simuler le rendu
         mock_st_e2e.title("ðŸ›’ Liste de courses")
-        mock_st_e2e.tabs(["Liste active", "ArchivÃ©es", "Suggestions"])
+        mock_st_e2e.tabs(["Liste active", "Archivées", "Suggestions"])
         
         rendered = mock_st_e2e.get_rendered()
         assert len(rendered) > 0
@@ -251,18 +251,18 @@ class TestCoursesE2E:
         """Le formulaire d'ajout d'article fonctionne"""
         with mock_st_e2e.form("add_article"):
             mock_st_e2e.text_input("Nom", key="nom")
-            mock_st_e2e.number_input("QuantitÃ©", key="quantite")
-            mock_st_e2e.selectbox("PrioritÃ©", ["haute", "moyenne", "basse"], key="priorite")
+            mock_st_e2e.number_input("Quantité", key="quantite")
+            mock_st_e2e.selectbox("Priorité", ["haute", "moyenne", "basse"], key="priorite")
         
         rendered = mock_st_e2e.get_rendered()
         assert any("text_input" in str(r) for r in rendered)
     
     def test_courses_filter_by_priority(self, mock_st_e2e):
-        """Le filtrage par prioritÃ© fonctionne"""
+        """Le filtrage par priorité fonctionne"""
         mock_st_e2e.set_selectbox("filter_priority", "haute")
         
         result = mock_st_e2e.selectbox(
-            "PrioritÃ©", 
+            "Priorité", 
             ["toutes", "haute", "moyenne", "basse"],
             key="filter_priority"
         )
@@ -270,9 +270,9 @@ class TestCoursesE2E:
         assert result == "haute"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS E2E INVENTAIRE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestInventaireE2E:
     """Tests E2E pour le module inventaire"""
@@ -288,20 +288,20 @@ class TestInventaireE2E:
     
     def test_inventaire_filter_by_location(self, mock_st_e2e):
         """Le filtrage par emplacement fonctionne"""
-        mock_st_e2e.set_selectbox("filter_location", "RÃ©frigÃ©rateur")
+        mock_st_e2e.set_selectbox("filter_location", "Réfrigérateur")
         
         result = mock_st_e2e.selectbox(
             "Emplacement",
-            ["Tous", "RÃ©frigÃ©rateur", "CongÃ©lateur", "Garde-manger"],
+            ["Tous", "Réfrigérateur", "Congélateur", "Garde-manger"],
             key="filter_location"
         )
         
-        assert result == "RÃ©frigÃ©rateur"
+        assert result == "Réfrigérateur"
     
     def test_inventaire_alerts_display(self, mock_st_e2e):
         """Les alertes s'affichent"""
-        mock_st_e2e.warning("âš ï¸ 3 articles en stock bas")
-        mock_st_e2e.error("ðŸ”´ 1 article pÃ©rimÃ©")
+        mock_st_e2e.warning("âš ï¸ 3 articles en stock bas")
+        mock_st_e2e.error("ðŸ”´ 1 article périmé")
         
         rendered = mock_st_e2e.get_rendered()
         warnings = [r for r in rendered if r[0] == "warning"]
@@ -311,16 +311,16 @@ class TestInventaireE2E:
         assert len(errors) >= 1
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS E2E RECETTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestRecettesE2E:
     """Tests E2E pour le module recettes"""
     
     def test_recettes_renders(self, mock_st_e2e):
         """Le module recettes se rend"""
-        mock_st_e2e.title("ðŸ³ Recettes")
+        mock_st_e2e.title("ðŸ³ Recettes")
         mock_st_e2e.tabs(["Catalogue", "Planning repas", "Suggestions IA"])
         
         rendered = mock_st_e2e.get_rendered()
@@ -334,21 +334,21 @@ class TestRecettesE2E:
         assert result == "tarte"
     
     def test_recettes_filter_category(self, mock_st_e2e):
-        """Le filtrage par catÃ©gorie fonctionne"""
+        """Le filtrage par catégorie fonctionne"""
         mock_st_e2e.set_selectbox("category", "Desserts")
         
         result = mock_st_e2e.selectbox(
-            "CatÃ©gorie",
-            ["Toutes", "EntrÃ©es", "Plats", "Desserts"],
+            "Catégorie",
+            ["Toutes", "Entrées", "Plats", "Desserts"],
             key="category"
         )
         
         assert result == "Desserts"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS E2E PLANNING
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestPlanningE2E:
     """Tests E2E pour le module planning"""
@@ -366,9 +366,9 @@ class TestPlanningE2E:
         assert len(cols) == 7
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS E2E FAMILLE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestFamilleE2E:
     """Tests E2E pour les modules famille"""
@@ -382,9 +382,9 @@ class TestFamilleE2E:
         assert any("Julius" in str(r) for r in rendered)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS E2E NAVIGATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestNavigationE2E:
     """Tests E2E pour la navigation"""
@@ -410,9 +410,9 @@ class TestNavigationE2E:
         assert result == "Courses"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS E2E INTERACTIONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestInteractionsE2E:
     """Tests E2E pour les interactions utilisateur"""
@@ -430,26 +430,26 @@ class TestInteractionsE2E:
         mock_st_e2e.set_input("quantity", 5)
         
         name = mock_st_e2e.text_input("Nom", key="item_name")
-        qty = mock_st_e2e.number_input("QuantitÃ©", key="quantity")
+        qty = mock_st_e2e.number_input("Quantité", key="quantity")
         
         assert name == "Pommes"
         assert qty == 5
     
     def test_expander_content(self, mock_st_e2e):
         """Contenu d'un expander"""
-        with mock_st_e2e.expander("DÃ©tails"):
-            mock_st_e2e.write("Contenu dÃ©taillÃ©")
+        with mock_st_e2e.expander("Détails"):
+            mock_st_e2e.write("Contenu détaillé")
         
         rendered = mock_st_e2e.get_rendered()
         assert any("expander" in str(r) for r in rendered)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS E2E ERROR STATES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestErrorStatesE2E:
-    """Tests E2E pour les Ã©tats d'erreur"""
+    """Tests E2E pour les états d'erreur"""
     
     def test_error_display(self, mock_st_e2e):
         """Affichage d'erreur"""
@@ -460,8 +460,8 @@ class TestErrorStatesE2E:
         assert len(errors) == 1
     
     def test_success_display(self, mock_st_e2e):
-        """Affichage de succÃ¨s"""
-        mock_st_e2e.success("OpÃ©ration rÃ©ussie")
+        """Affichage de succès"""
+        mock_st_e2e.success("Opération réussie")
         
         rendered = mock_st_e2e.get_rendered()
         successes = [r for r in rendered if r[0] == "success"]
@@ -476,12 +476,12 @@ class TestErrorStatesE2E:
         assert len(infos) == 1
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS E2E DATA DISPLAY
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestDataDisplayE2E:
-    """Tests E2E pour l'affichage de donnÃ©es"""
+    """Tests E2E pour l'affichage de données"""
     
     def test_dataframe_display(self, mock_st_e2e):
         """Affichage de dataframe"""
@@ -498,7 +498,7 @@ class TestDataDisplayE2E:
         assert any("plotly_chart" in str(r) for r in rendered)
     
     def test_metrics_display(self, mock_st_e2e):
-        """Affichage de mÃ©triques multiples"""
+        """Affichage de métriques multiples"""
         mock_st_e2e.metric("Metric 1", 100)
         mock_st_e2e.metric("Metric 2", 200, delta=10)
         mock_st_e2e.metric("Metric 3", "50%")

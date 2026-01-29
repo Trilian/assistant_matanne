@@ -2,12 +2,12 @@
 Tests unitaires pour PlanningAIService (src/services/planning_unified.py).
 
 Tests couvrant:
-- AgrÃ©gation complÃ¨te de la semaine
-- Chargement des repas, activitÃ©s, projets, routines, Ã©vÃ©nements
+- Agrégation complète de la semaine
+- Chargement des repas, activités, projets, routines, événements
 - Calcul de charge familiale
-- DÃ©tection d'alertes intelligentes
-- GÃ©nÃ©ration IA
-- CRUD Ã©vÃ©nements calendrier
+- Détection d'alertes intelligentes
+- Génération IA
+- CRUD événements calendrier
 """
 
 import pytest
@@ -35,9 +35,9 @@ from src.core.models import (
 )
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 1: TESTS INITIALISATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -55,12 +55,12 @@ class TestPlanningAIServiceInit:
             assert service.cache_ttl == 1800
 
     def test_service_inherits_base_service(self):
-        """Test que le service hÃ©rite de BaseService."""
+        """Test que le service hérite de BaseService."""
         with patch("src.services.planning_unified.obtenir_client_ia") as mock_client:
             mock_client.return_value = MagicMock()
             service = PlanningAIService()
 
-            # VÃ©rifier mÃ©thodes hÃ©ritÃ©es
+            # Vérifier méthodes héritées
             assert hasattr(service, "create")
             assert hasattr(service, "get_by_id")
             assert hasattr(service, "update")
@@ -75,17 +75,17 @@ class TestPlanningAIServiceInit:
             assert isinstance(service, PlanningAIService)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 2: TESTS SCHEMAS PYDANTIC
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestPlanningSchemas:
-    """Test schÃ©mas Pydantic."""
+    """Test schémas Pydantic."""
 
     def test_jour_complet_schema_defaults(self):
-        """Test valeurs par dÃ©faut JourCompletSchema."""
+        """Test valeurs par défaut JourCompletSchema."""
         jour = JourCompletSchema(
             date=date.today(),
             charge="faible",
@@ -102,15 +102,15 @@ class TestPlanningSchemas:
         assert jour.suggestions_ia == []
 
     def test_jour_complet_schema_with_data(self):
-        """Test JourCompletSchema avec donnÃ©es."""
+        """Test JourCompletSchema avec données."""
         jour = JourCompletSchema(
             date=date.today(),
             charge="intense",
             charge_score=85,
-            repas=[{"id": 1, "type": "dÃ©jeuner"}],
+            repas=[{"id": 1, "type": "déjeuner"}],
             activites=[{"id": 2, "titre": "Parc"}],
             budget_jour=50.0,
-            alertes=["âš ï¸ Jour chargÃ©"],
+            alertes=["âš ï¸ Jour chargé"],
         )
 
         assert jour.charge_score == 85
@@ -132,7 +132,7 @@ class TestPlanningSchemas:
         assert semaine.alertes_semaine == []
 
     def test_semaine_generee_ia_schema_defaults(self):
-        """Test valeurs par dÃ©faut SemaineGenereeIASchema."""
+        """Test valeurs par défaut SemaineGenereeIASchema."""
         semaine = SemaineGenereeIASchema()
 
         assert semaine.repas_proposes == []
@@ -142,9 +142,9 @@ class TestPlanningSchemas:
         assert semaine.raisons == []
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 3: TESTS CALCUL CHARGE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -184,19 +184,19 @@ class TestPlanningChargeCalculation:
                 routines=[],
             )
 
-            # Score devrait augmenter avec le temps de prÃ©paration
+            # Score devrait augmenter avec le temps de préparation
             assert score > 0
             assert score <= 100
 
     def test_calculer_charge_with_activites(self):
-        """Test charge avec activitÃ©s."""
+        """Test charge avec activités."""
         with patch("src.services.planning_unified.obtenir_client_ia") as mock_client:
             mock_client.return_value = MagicMock()
             service = PlanningAIService()
 
             activites = [
-                {"id": 1, "titre": "ActivitÃ© 1"},
-                {"id": 2, "titre": "ActivitÃ© 2"},
+                {"id": 1, "titre": "Activité 1"},
+                {"id": 2, "titre": "Activité 2"},
             ]
 
             score = service._calculer_charge(
@@ -206,7 +206,7 @@ class TestPlanningChargeCalculation:
                 routines=[],
             )
 
-            assert score > 0  # 2 activitÃ©s = 20 points max
+            assert score > 0  # 2 activités = 20 points max
 
     def test_calculer_charge_with_urgent_projects(self):
         """Test charge avec projets urgents."""
@@ -229,12 +229,12 @@ class TestPlanningChargeCalculation:
             assert score > 0  # Projets urgents ajoutent des points
 
     def test_calculer_charge_capped_at_100(self):
-        """Test que la charge est plafonnÃ©e Ã  100."""
+        """Test que la charge est plafonnée à 100."""
         with patch("src.services.planning_unified.obtenir_client_ia") as mock_client:
             mock_client.return_value = MagicMock()
             service = PlanningAIService()
 
-            # Beaucoup d'Ã©lÃ©ments
+            # Beaucoup d'éléments
             repas = [{"temps_total": 120}] * 5
             activites = [{"id": i} for i in range(10)]
             projets = [{"priorite": "haute"}] * 5
@@ -250,9 +250,9 @@ class TestPlanningChargeCalculation:
             assert score <= 100
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 4: TESTS CONVERSION SCORE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -290,14 +290,14 @@ class TestPlanningScoreConversion:
             assert service._score_to_charge(100) == "intense"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 5: TESTS DÃ‰TECTION ALERTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestPlanningAlertes:
-    """Test dÃ©tection d'alertes."""
+    """Test détection d'alertes."""
 
     def test_detecter_alertes_surcharge(self):
         """Test alerte surcharge."""
@@ -313,7 +313,7 @@ class TestPlanningAlertes:
                 charge_score=85,
             )
 
-            assert any("chargÃ©" in a.lower() for a in alertes)
+            assert any("chargé" in a.lower() for a in alertes)
 
     def test_detecter_alertes_projets_urgents(self):
         """Test alerte projets urgents."""
@@ -355,7 +355,7 @@ class TestPlanningAlertes:
             assert any("repas" in a.lower() for a in alertes)
 
     def test_detecter_alertes_semaine_charge(self):
-        """Test alertes semaine trop chargÃ©e."""
+        """Test alertes semaine trop chargée."""
         with patch("src.services.planning_unified.obtenir_client_ia") as mock_client:
             mock_client.return_value = MagicMock()
             service = PlanningAIService()
@@ -371,11 +371,11 @@ class TestPlanningAlertes:
 
             alertes = service._detecter_alertes_semaine(jours)
 
-            # 4 jours intenses devrait dÃ©clencher alerte
-            assert any("burnout" in a.lower() or "chargÃ©" in a.lower() for a in alertes)
+            # 4 jours intenses devrait déclencher alerte
+            assert any("burnout" in a.lower() or "chargé" in a.lower() for a in alertes)
 
     def test_detecter_alertes_semaine_budget(self):
-        """Test alerte budget Ã©levÃ©."""
+        """Test alerte budget élevé."""
         with patch("src.services.planning_unified.obtenir_client_ia") as mock_client:
             mock_client.return_value = MagicMock()
             service = PlanningAIService()
@@ -395,9 +395,9 @@ class TestPlanningAlertes:
             assert any("budget" in a.lower() for a in alertes)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 6: TESTS CALCUL STATS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -426,7 +426,7 @@ class TestPlanningStats:
             assert stats["budget_total"] == 0.0
 
     def test_calculer_stats_semaine_with_data(self):
-        """Test stats avec donnÃ©es."""
+        """Test stats avec données."""
         with patch("src.services.planning_unified.obtenir_client_ia") as mock_client:
             mock_client.return_value = MagicMock()
             service = PlanningAIService()
@@ -466,7 +466,7 @@ class TestPlanningStats:
             mock_client.return_value = MagicMock()
             service = PlanningAIService()
 
-            # Test avec des valeurs non-None seulement (le code source ne gÃ¨re pas None)
+            # Test avec des valeurs non-None seulement (le code source ne gère pas None)
             activites = [
                 {"budget": 20.0},
                 {"budget": 15.0},
@@ -477,17 +477,17 @@ class TestPlanningStats:
             assert budget == 35.0
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 7: TESTS CRUD Ã‰VÃ‰NEMENTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestPlanningEventsCRUD:
-    """Test CRUD Ã©vÃ©nements calendrier."""
+    """Test CRUD événements calendrier."""
 
     def test_creer_event_method_exists(self):
-        """Test que la mÃ©thode creer_event existe."""
+        """Test que la méthode creer_event existe."""
         with patch("src.services.planning_unified.obtenir_client_ia") as mock_client:
             mock_client.return_value = MagicMock()
             service = PlanningAIService()
@@ -496,7 +496,7 @@ class TestPlanningEventsCRUD:
             assert callable(service.creer_event)
 
     def test_creer_event_signature(self):
-        """Test signature de la mÃ©thode creer_event."""
+        """Test signature de la méthode creer_event."""
         with patch("src.services.planning_unified.obtenir_client_ia") as mock_client:
             mock_client.return_value = MagicMock()
             service = PlanningAIService()
@@ -510,9 +510,9 @@ class TestPlanningEventsCRUD:
             assert "type_event" in params
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 8: TESTS INVALIDATION CACHE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -520,7 +520,7 @@ class TestPlanningCacheInvalidation:
     """Test invalidation du cache."""
 
     def test_invalider_cache_semaine_calculates_week_start(self):
-        """Test calcul dÃ©but de semaine pour invalidation."""
+        """Test calcul début de semaine pour invalidation."""
         with patch("src.services.planning_unified.obtenir_client_ia") as mock_client:
             mock_client.return_value = MagicMock()
             service = PlanningAIService()
@@ -530,21 +530,21 @@ class TestPlanningCacheInvalidation:
             expected_monday = date(2026, 1, 26)
 
             with patch.object(service, '_invalider_cache_semaine') as mock_invalider:
-                # Appeler directement la mÃ©thode
+                # Appeler directement la méthode
                 service._invalider_cache_semaine(test_date)
 
-                # La mÃ©thode devrait Ãªtre appelÃ©e avec la bonne date
+                # La méthode devrait être appelée avec la bonne date
                 mock_invalider.assert_called()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 9: TESTS GÃ‰NÃ‰RATION IA
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestPlanningIAGeneration:
-    """Test gÃ©nÃ©ration IA."""
+    """Test génération IA."""
 
     def test_construire_prompt_generation_includes_context(self):
         """Test que le prompt inclut le contexte."""
@@ -561,10 +561,10 @@ class TestPlanningIAGeneration:
             assert "300" in prompt  # Budget
             assert "faible" in prompt  # Ã‰nergie
             assert "20 mois" in prompt  # Ã‚ge Jules
-            assert "Sport" in prompt  # Objectif santÃ©
+            assert "Sport" in prompt  # Objectif santé
 
     def test_construire_prompt_generation_defaults(self):
-        """Test valeurs par dÃ©faut du prompt."""
+        """Test valeurs par défaut du prompt."""
         with patch("src.services.planning_unified.obtenir_client_ia") as mock_client:
             mock_client.return_value = MagicMock()
             service = PlanningAIService()
@@ -575,27 +575,27 @@ class TestPlanningIAGeneration:
                 contexte={},
             )
 
-            assert "400" in prompt  # Budget par dÃ©faut
-            assert "normal" in prompt  # Ã‰nergie par dÃ©faut
-            assert "19 mois" in prompt  # Ã‚ge Jules par dÃ©faut
+            assert "400" in prompt  # Budget par défaut
+            assert "normal" in prompt  # Ã‰nergie par défaut
+            assert "19 mois" in prompt  # Ã‚ge Jules par défaut
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 10: TESTS D'INTÃ‰GRATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.integration
 class TestPlanningIntegration:
-    """Tests d'intÃ©gration planning."""
+    """Tests d'intégration planning."""
 
     def test_service_methods_available(self):
-        """Test que les mÃ©thodes du service sont disponibles."""
+        """Test que les méthodes du service sont disponibles."""
         with patch("src.services.planning_unified.obtenir_client_ia") as mock_client:
             mock_client.return_value = MagicMock()
             service = PlanningAIService()
 
-            # VÃ©rifier les mÃ©thodes clÃ©s
+            # Vérifier les méthodes clés
             assert hasattr(service, "get_semaine_complete")
             assert hasattr(service, "generer_semaine_ia")
             assert hasattr(service, "creer_event")
@@ -603,16 +603,16 @@ class TestPlanningIntegration:
             assert hasattr(service, "_detecter_alertes")
 
     def test_charge_calculation_integration(self):
-        """Test intÃ©gration calcul de charge."""
+        """Test intégration calcul de charge."""
         with patch("src.services.planning_unified.obtenir_client_ia") as mock_client:
             mock_client.return_value = MagicMock()
             service = PlanningAIService()
 
-            # ScÃ©nario rÃ©aliste
+            # Scénario réaliste
             repas = [
-                {"temps_total": 45},  # Petit-dÃ©jeuner Ã©laborÃ©
-                {"temps_total": 30},  # DÃ©jeuner
-                {"temps_total": 60},  # DÃ®ner
+                {"temps_total": 45},  # Petit-déjeuner élaboré
+                {"temps_total": 30},  # Déjeuner
+                {"temps_total": 60},  # Dîner
             ]
             activites = [
                 {"id": 1, "titre": "Parc avec Jules"},
@@ -632,7 +632,7 @@ class TestPlanningIntegration:
                 routines=routines,
             )
 
-            # VÃ©rifier que le score est raisonnable
+            # Vérifier que le score est raisonnable
             assert 20 <= score <= 60
             assert service._score_to_charge(score) in ["faible", "normal"]
 

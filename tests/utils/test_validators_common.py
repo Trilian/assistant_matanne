@@ -47,19 +47,19 @@ class TestIsValidPhone:
     """Tests pour is_valid_phone"""
 
     def test_valid_phone_french(self):
-        """Test tÃ©lÃ©phone franÃ§ais valide"""
+        """Test téléphone français valide"""
         assert is_valid_phone("0612345678", "FR") is True
 
     def test_valid_phone_with_spaces(self):
-        """Test tÃ©lÃ©phone avec espaces"""
+        """Test téléphone avec espaces"""
         assert is_valid_phone("06 12 34 56 78", "FR") is True
 
     def test_valid_phone_with_prefix(self):
-        """Test tÃ©lÃ©phone avec prÃ©fixe international"""
+        """Test téléphone avec préfixe international"""
         assert is_valid_phone("+33 6 12 34 56 78", "FR") is True
 
     def test_invalid_phone_too_short(self):
-        """Test tÃ©lÃ©phone trop court"""
+        """Test téléphone trop court"""
         assert is_valid_phone("061234", "FR") is False
 
     def test_invalid_phone_unknown_country(self):
@@ -83,11 +83,11 @@ class TestClamp:
         assert clamp(15, 0, 10) == 10
 
     def test_clamp_at_min(self):
-        """Test valeur Ã©gale au min"""
+        """Test valeur égale au min"""
         assert clamp(0, 0, 10) == 0
 
     def test_clamp_at_max(self):
-        """Test valeur Ã©gale au max"""
+        """Test valeur égale au max"""
         assert clamp(10, 0, 10) == 10
 
 
@@ -160,7 +160,7 @@ class TestValidateRequiredFields:
     """Tests pour validate_required_fields"""
 
     def test_validate_required_fields_all_present(self):
-        """Test tous les champs prÃ©sents"""
+        """Test tous les champs présents"""
         data = {"nom": "Test", "email": "test@example.com"}
         is_valid, missing = validate_required_fields(data, ["nom", "email"])
         assert is_valid is True
@@ -201,7 +201,7 @@ class TestValidateChoice:
         """Test choix invalide"""
         is_valid, error = validate_choice("D", ["A", "B", "C"])
         assert is_valid is False
-        assert "doit Ãªtre dans" in error
+        assert "doit être dans" in error
 
     def test_validate_choice_numbers(self):
         """Test avec nombres"""

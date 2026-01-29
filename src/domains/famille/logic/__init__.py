@@ -1,4 +1,4 @@
-﻿"""Logic Famille - Logique mÃ©tier."""
+﻿"""Logic Famille - Logique métier."""
 
 from . import (
     jules_logic, sante_logic, activites_logic, bien_etre_logic,

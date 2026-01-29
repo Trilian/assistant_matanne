@@ -1,4 +1,4 @@
-﻿"""Domaine Famille - Gestion famille (Jules, santÃ©, activitÃ©s, shopping)."""
+﻿"""Domaine Famille - Gestion famille (Jules, santé, activités, shopping)."""
 
 # UI
 from .ui import jules, sante, activites, bien_etre, shopping, routines, suivi_jules

@@ -1,6 +1,6 @@
 ﻿"""
 Tests pour le module famille/helpers.py
-Fonctions utilitaires pour le suivi familial (logique mÃ©tier)
+Fonctions utilitaires pour le suivi familial (logique métier)
 """
 
 import pytest
@@ -40,7 +40,7 @@ class TestCalculerAgeLogique:
         assert mois == 6
 
     def test_calcul_ans(self):
-        """Calcule le nombre d'annÃ©es depuis la naissance"""
+        """Calcule le nombre d'années depuis la naissance"""
         date_naissance = date(2022, 6, 22)
         aujourd_hui = date(2024, 7, 22)
         
@@ -53,7 +53,7 @@ class TestCalculProgressionObjectif:
     """Tests pour calculer_progression_objectif()"""
 
     def test_progression_complete(self):
-        """Progression 100% quand rÃ©alisÃ© >= objectif"""
+        """Progression 100% quand réalisé >= objectif"""
         objectif = MagicMock()
         objectif.valeur_objectif = 10
         objectif.valeur_realisee = 10
@@ -73,7 +73,7 @@ class TestCalculProgressionObjectif:
         assert progression == 50
 
     def test_progression_depasse_objectif(self):
-        """Progression plafonnÃ©e Ã  100%"""
+        """Progression plafonnée à 100%"""
         objectif = MagicMock()
         objectif.valeur_objectif = 10
         objectif.valeur_realisee = 15
@@ -83,7 +83,7 @@ class TestCalculProgressionObjectif:
         assert progression == 100
 
     def test_progression_zero(self):
-        """Progression zÃ©ro"""
+        """Progression zéro"""
         objectif = MagicMock()
         objectif.valeur_objectif = 10
         objectif.valeur_realisee = 0
@@ -97,7 +97,7 @@ class TestMilestonesByCategory:
     """Tests pour get_milestones_by_category logique"""
 
     def test_groupe_milestones_par_categorie(self):
-        """Groupe les milestones par catÃ©gorie"""
+        """Groupe les milestones par catégorie"""
         milestones = [
             MagicMock(categorie="moteur", nom="Marcher"),
             MagicMock(categorie="moteur", nom="Courir"),
@@ -118,7 +118,7 @@ class TestMilestonesByCategory:
         assert len(grouped["social"]) == 1
 
     def test_categorie_vide(self):
-        """GÃ¨re le cas sans milestones"""
+        """Gère le cas sans milestones"""
         milestones = []
         
         grouped = {}
@@ -135,7 +135,7 @@ class TestCountMilestones:
     """Tests pour count_milestones_by_category logique"""
 
     def test_compte_milestones_par_categorie(self):
-        """Compte les milestones par catÃ©gorie"""
+        """Compte les milestones par catégorie"""
         milestones = [
             MagicMock(categorie="moteur", atteint=True),
             MagicMock(categorie="moteur", atteint=False),
@@ -173,7 +173,7 @@ class TestObjectifsActifs:
         assert len(actifs) == 1
 
     def test_tous_completes(self):
-        """Tous les objectifs complÃ©tÃ©s"""
+        """Tous les objectifs complétés"""
         objectifs = [
             MagicMock(actif=True, complete=True),
             MagicMock(actif=True, complete=True),
@@ -188,7 +188,7 @@ class TestBudgetParPeriod:
     """Tests pour get_budget_par_period logique"""
 
     def test_groupe_budget_par_mois(self):
-        """Groupe les dÃ©penses par mois"""
+        """Groupe les dépenses par mois"""
         depenses = [
             MagicMock(mois=1, montant=100),
             MagicMock(mois=1, montant=50),
@@ -205,7 +205,7 @@ class TestBudgetParPeriod:
         assert budget_mensuel[2] == 200
 
     def test_budget_vide(self):
-        """GÃ¨re le cas sans dÃ©penses"""
+        """Gère le cas sans dépenses"""
         depenses = []
         
         budget_mensuel = {}
@@ -218,33 +218,33 @@ class TestBudgetParPeriod:
 
 
 class TestCategorieEmojis:
-    """Tests pour les emojis de catÃ©gories de dÃ©veloppement"""
+    """Tests pour les emojis de catégories de développement"""
 
     def test_emoji_moteur(self):
-        """Emoji pour catÃ©gorie moteur"""
+        """Emoji pour catégorie moteur"""
         CATEGORIE_EMOJIS = {
-            "moteur": "ðŸƒ",
-            "langage": "ðŸ—£ï¸",
+            "moteur": "ðŸƒ",
+            "langage": "ðŸ—£ï¸",
             "social": "ðŸ‘¥",
             "cognitif": "ðŸ§ "
         }
-        assert CATEGORIE_EMOJIS.get("moteur") == "ðŸƒ"
+        assert CATEGORIE_EMOJIS.get("moteur") == "ðŸƒ"
 
     def test_emoji_langage(self):
-        """Emoji pour catÃ©gorie langage"""
+        """Emoji pour catégorie langage"""
         CATEGORIE_EMOJIS = {
-            "moteur": "ðŸƒ",
-            "langage": "ðŸ—£ï¸",
+            "moteur": "ðŸƒ",
+            "langage": "ðŸ—£ï¸",
             "social": "ðŸ‘¥",
             "cognitif": "ðŸ§ "
         }
-        assert CATEGORIE_EMOJIS.get("langage") == "ðŸ—£ï¸"
+        assert CATEGORIE_EMOJIS.get("langage") == "ðŸ—£ï¸"
 
     def test_emoji_default(self):
-        """Emoji par dÃ©faut pour catÃ©gorie inconnue"""
+        """Emoji par défaut pour catégorie inconnue"""
         CATEGORIE_EMOJIS = {
-            "moteur": "ðŸƒ",
-            "langage": "ðŸ—£ï¸",
+            "moteur": "ðŸƒ",
+            "langage": "ðŸ—£ï¸",
             "social": "ðŸ‘¥",
             "cognitif": "ðŸ§ "
         }

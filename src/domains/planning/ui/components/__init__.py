@@ -1,14 +1,14 @@
 ﻿"""
-Composants rÃ©utilisables pour le module planning
+Composants réutilisables pour le module planning
 """
 
 from datetime import date, datetime
 import streamlit as st
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # BADGES & INDICATEURS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def afficher_badge_charge(charge_score: int, taille: str = "normal") -> None:
@@ -33,7 +33,7 @@ def afficher_badge_charge(charge_score: int, taille: str = "normal") -> None:
 
 
 def afficher_badge_priorite(priorite: str) -> None:
-    """Affiche badge de prioritÃ© (basse, moyenne, haute)"""
+    """Affiche badge de priorité (basse, moyenne, haute)"""
     priorite_emoji = {
         "basse": ("ðŸŸ¢", "Basse"),
         "moyenne": ("ðŸŸ¡", "Moyenne"),
@@ -45,16 +45,16 @@ def afficher_badge_priorite(priorite: str) -> None:
 
 
 def afficher_badge_activite_jules(adapte: bool) -> None:
-    """Badge indiquant si activitÃ© est adaptÃ©e Ã  Jules"""
+    """Badge indiquant si activité est adaptée à Jules"""
     if adapte:
-        st.write("ðŸ‘¶ AdaptÃ© Jules (19m)")
+        st.write("ðŸ‘¶ Adapté Jules (19m)")
     else:
-        st.write("ðŸ‘¨â€ðŸ‘©â€ðŸ‘§ ActivitÃ© famille")
+        st.write("ðŸ‘¨â€ðŸ‘©â€ðŸ‘§ Activité famille")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SELECTEURS & FORMULAIRES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def selecteur_semaine(key_prefix: str = "semaine") -> tuple[date, date]:
@@ -66,7 +66,7 @@ def selecteur_semaine(key_prefix: str = "semaine") -> tuple[date, date]:
     col_nav1, col_nav2, col_nav3 = st.columns([1, 2, 1])
 
     with col_nav1:
-        if st.button("â¬…ï¸ PrÃ©cÃ©dente", key=f"{key_prefix}_prev"):
+        if st.button("â¬…ï¸ Précédente", key=f"{key_prefix}_prev"):
             st.session_state[f"{key_prefix}_start"] -= __import__("datetime").timedelta(days=7)
             st.rerun()
 
@@ -79,7 +79,7 @@ def selecteur_semaine(key_prefix: str = "semaine") -> tuple[date, date]:
         )
 
     with col_nav3:
-        if st.button("Suivante âž¡ï¸", key=f"{key_prefix}_next"):
+        if st.button("Suivante âž¡ï¸", key=f"{key_prefix}_next"):
             st.session_state[f"{key_prefix}_start"] += __import__("datetime").timedelta(days=7)
             st.rerun()
 
@@ -89,9 +89,9 @@ def selecteur_semaine(key_prefix: str = "semaine") -> tuple[date, date]:
     return week_start, week_end
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CARTES & AFFICHAGE Ã‰VÃ‰NEMENTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def carte_repas(repas: dict) -> None:
@@ -106,16 +106,16 @@ def carte_repas(repas: dict) -> None:
             st.caption(f"{repas['portions']} portions")
 
         if repas.get("temps_total"):
-            st.caption(f"â±ï¸ {repas['temps_total']} min")
+            st.caption(f"â±ï¸ {repas['temps_total']} min")
 
         if repas.get("notes"):
-            st.caption(f"ðŸ“ {repas['notes']}")
+            st.caption(f"ðŸ“ {repas['notes']}")
 
 
 def carte_activite(activite: dict) -> None:
-    """Carte pour afficher une activitÃ©"""
+    """Carte pour afficher une activité"""
     with st.container():
-        label = "ðŸ‘¶" if activite.get("pour_jules") else "ðŸ‘¨â€ðŸ‘©â€ðŸ‘§"
+        label = "ðŸ‘¶" if activite.get("pour_jules") else "ðŸ‘¨â€ðŸ‘©â€ðŸ‘§"
         col1, col2 = st.columns([3, 1])
 
         with col1:
@@ -139,12 +139,12 @@ def carte_projet(projet: dict) -> None:
         st.write(f"{priorite_emoji} **{projet['nom']}**")
         st.caption(f"Statut: {projet.get('statut', 'N/A')}")
 
-        if projet.get("echÃ©ance"):
-            st.caption(f"Ã‰chÃ©ance: {projet['echÃ©ance'].strftime('%d/%m')}")
+        if projet.get("echéance"):
+            st.caption(f"Ã‰chéance: {projet['echéance'].strftime('%d/%m')}")
 
 
 def carte_event(event: dict) -> None:
-    """Carte pour afficher un Ã©vÃ©nement calendrier"""
+    """Carte pour afficher un événement calendrier"""
     with st.container():
         debut = (
             event["debut"].strftime("%H:%M")
@@ -157,42 +157,42 @@ def carte_event(event: dict) -> None:
         with col1:
             st.write(f"**{event['titre']}**")
             if event.get("lieu"):
-                st.caption(f"ðŸ“ {event['lieu']}")
+                st.caption(f"ðŸ“ {event['lieu']}")
 
         with col2:
             st.caption(debut)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ALERTS & NOTIFICATIONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def afficher_alerte(alerte: str, type_alerte: str = "warning") -> None:
     """Affiche une alerte (warning, error, success, info)"""
     if type_alerte == "warning":
-        st.warning(alerte, icon="âš ï¸")
+        st.warning(alerte, icon="âš ï¸")
     elif type_alerte == "error":
-        st.error(alerte, icon="âŒ")
+        st.error(alerte, icon="âŒ")
     elif type_alerte == "success":
         st.success(alerte, icon="âœ…")
     else:
-        st.info(alerte, icon="â„¹ï¸")
+        st.info(alerte, icon="â„¹ï¸")
 
 
 def afficher_liste_alertes(alertes: list[str]) -> None:
-    """Affiche liste d'alertes groupÃ©es"""
+    """Affiche liste d'alertes groupées"""
     if not alertes:
         return
 
-    st.markdown("### âš ï¸ Alertes")
+    st.markdown("### âš ï¸ Alertes")
     for alerte in alertes:
         afficher_alerte(alerte)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # STATISTIQUES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def afficher_stats_semaine(stats: dict) -> None:
@@ -200,16 +200,16 @@ def afficher_stats_semaine(stats: dict) -> None:
     col1, col2, col3, col4, col5 = st.columns(5)
 
     with col1:
-        st.metric("ðŸ½ï¸ Repas", stats.get("total_repas", 0))
+        st.metric("ðŸ½ï¸ Repas", stats.get("total_repas", 0))
 
     with col2:
-        st.metric("ðŸŽ¨ ActivitÃ©s", stats.get("total_activites", 0))
+        st.metric("ðŸŽ¨ Activités", stats.get("total_activites", 0))
 
     with col3:
         st.metric("ðŸ‘¶ Pour Jules", stats.get("activites_jules", 0))
 
     with col4:
-        st.metric("ðŸ—ï¸ Projets", stats.get("total_projets", 0))
+        st.metric("ðŸ—ï¸ Projets", stats.get("total_projets", 0))
 
     with col5:
         budget = stats.get("budget_total", 0)

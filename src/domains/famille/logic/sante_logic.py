@@ -1,5 +1,5 @@
 ﻿"""
-Logique mÃ©tier du module SantÃ© (famille) - SÃ©parÃ©e de l'UI
+Logique métier du module Santé (famille) - Séparée de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
 
@@ -10,25 +10,25 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONSTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 CATEGORIES_OBJECTIF = ["Sport", "Nutrition", "Sommeil", "Hydratation", "Poids", "Autre"]
 UNITES = ["kg", "km", "heures", "litres", "calories", "min", "fois"]
-TYPES_ACTIVITE = ["Marche", "Course", "VÃ©lo", "Natation", "Musculation", "Yoga", "Autre"]
+TYPES_ACTIVITE = ["Marche", "Course", "Vélo", "Natation", "Musculation", "Yoga", "Autre"]
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # PROGRESSION DES OBJECTIFS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def calculer_progression_objectif(objectif: Dict[str, Any]) -> Dict[str, Any]:
     """
     Calcule la progression d'un objectif.
     
     Args:
-        objectif: DonnÃ©es de l'objectif
+        objectif: Données de l'objectif
         
     Returns:
         Dictionnaire avec progression
@@ -51,7 +51,7 @@ def calculer_progression_objectif(objectif: Dict[str, Any]) -> Dict[str, Any]:
     elif pourcentage >= 25:
         statut = "En cours"
     else:
-        statut = "DÃ©marrage"
+        statut = "Démarrage"
     
     return {
         "pourcentage": min(pourcentage, 100.0),
@@ -62,14 +62,14 @@ def calculer_progression_objectif(objectif: Dict[str, Any]) -> Dict[str, Any]:
 
 def estimer_date_achevement(objectif: Dict[str, Any], entrees_recentes: List[Dict[str, Any]]) -> Optional[date]:
     """
-    Estime la date d'achÃ¨vement d'un objectif basÃ© sur la progression rÃ©cente.
+    Estime la date d'achèvement d'un objectif basé sur la progression récente.
     
     Args:
-        objectif: DonnÃ©es de l'objectif
+        objectif: Données de l'objectif
         entrees_recentes: Historique des progressions
         
     Returns:
-        Date estimÃ©e ou None
+        Date estimée ou None
     """
     if not entrees_recentes or len(entrees_recentes) < 2:
         return None
@@ -99,13 +99,13 @@ def estimer_date_achevement(objectif: Dict[str, Any], entrees_recentes: List[Dic
     return date.today() + timedelta(days=jours_restants)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # STATISTIQUES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def calculer_statistiques_sante(objectifs: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
-    Calcule les statistiques santÃ© globales.
+    Calcule les statistiques santé globales.
     
     Args:
         objectifs: Liste des objectifs
@@ -135,7 +135,7 @@ def calculer_statistiques_sante(objectifs: List[Dict[str, Any]]) -> Dict[str, An
         else:
             en_cours += 1
     
-    # Par catÃ©gorie
+    # Par catégorie
     par_categorie = {}
     for objectif in objectifs:
         cat = objectif.get("categorie", "Autre")
@@ -152,14 +152,14 @@ def calculer_statistiques_sante(objectifs: List[Dict[str, Any]]) -> Dict[str, An
 
 def analyser_activites(entrees: List[Dict[str, Any]], jours: int = 30) -> Dict[str, Any]:
     """
-    Analyse les activitÃ©s sportives sur une pÃ©riode.
+    Analyse les activités sportives sur une période.
     
     Args:
-        entrees: Liste des entrÃ©es d'activitÃ©
-        jours: Nombre de jours Ã  analyser
+        entrees: Liste des entrées d'activité
+        jours: Nombre de jours à analyser
         
     Returns:
-        Statistiques d'activitÃ©s
+        Statistiques d'activités
     """
     date_limite = date.today() - timedelta(days=jours)
     
@@ -173,7 +173,7 @@ def analyser_activites(entrees: List[Dict[str, Any]], jours: int = 30) -> Dict[s
         if date_entree >= date_limite:
             entrees_periode.append(entree)
     
-    # Par type d'activitÃ©
+    # Par type d'activité
     par_type = {}
     duree_totale = 0
     
@@ -184,7 +184,7 @@ def analyser_activites(entrees: List[Dict[str, Any]], jours: int = 30) -> Dict[s
         duree = entree.get("duree", 0)
         duree_totale += duree
     
-    # FrÃ©quence par semaine
+    # Fréquence par semaine
     frequence_hebdo = len(entrees_periode) / (jours / 7) if jours > 0 else 0
     
     return {
@@ -196,16 +196,16 @@ def analyser_activites(entrees: List[Dict[str, Any]], jours: int = 30) -> Dict[s
     }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # VALIDATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def valider_objectif(data: Dict[str, Any]) -> tuple[bool, List[str]]:
     """
-    Valide un objectif santÃ©.
+    Valide un objectif santé.
     
     Args:
-        data: DonnÃ©es de l'objectif
+        data: Données de l'objectif
         
     Returns:
         (est_valide, liste_erreurs)
@@ -216,25 +216,25 @@ def valider_objectif(data: Dict[str, Any]) -> tuple[bool, List[str]]:
         erreurs.append("Le titre est requis")
     
     if "categorie" in data and data["categorie"] not in CATEGORIES_OBJECTIF:
-        erreurs.append(f"CatÃ©gorie invalide. Valeurs autorisÃ©es: {', '.join(CATEGORIES_OBJECTIF)}")
+        erreurs.append(f"Catégorie invalide. Valeurs autorisées: {', '.join(CATEGORIES_OBJECTIF)}")
     
     if "valeur_cible" in data:
         cible = data["valeur_cible"]
         if not isinstance(cible, (int, float)) or cible <= 0:
-            erreurs.append("La valeur cible doit Ãªtre > 0")
+            erreurs.append("La valeur cible doit être > 0")
     
     if "unite" in data and data["unite"] not in UNITES:
-        erreurs.append(f"UnitÃ© invalide. Valeurs autorisÃ©es: {', '.join(UNITES)}")
+        erreurs.append(f"Unité invalide. Valeurs autorisées: {', '.join(UNITES)}")
     
     return len(erreurs) == 0, erreurs
 
 
 def valider_entree_activite(data: Dict[str, Any]) -> tuple[bool, List[str]]:
     """
-    Valide une entrÃ©e d'activitÃ©.
+    Valide une entrée d'activité.
     
     Args:
-        data: DonnÃ©es de l'activitÃ©
+        data: Données de l'activité
         
     Returns:
         (est_valide, liste_erreurs)
@@ -242,29 +242,29 @@ def valider_entree_activite(data: Dict[str, Any]) -> tuple[bool, List[str]]:
     erreurs = []
     
     if "type_activite" in data and data["type_activite"] not in TYPES_ACTIVITE:
-        erreurs.append(f"Type d'activitÃ© invalide. Valeurs autorisÃ©es: {', '.join(TYPES_ACTIVITE)}")
+        erreurs.append(f"Type d'activité invalide. Valeurs autorisées: {', '.join(TYPES_ACTIVITE)}")
     
     if "duree" in data:
         duree = data["duree"]
         if not isinstance(duree, (int, float)) or duree <= 0:
-            erreurs.append("La durÃ©e doit Ãªtre > 0")
+            erreurs.append("La durée doit être > 0")
     
     return len(erreurs) == 0, erreurs
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FORMATAGE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def formater_objectif_label(objectif: Dict[str, Any]) -> str:
     """
     Formate le label d'un objectif.
     
     Args:
-        objectif: DonnÃ©es de l'objectif
+        objectif: Données de l'objectif
         
     Returns:
-        Label formatÃ©
+        Label formaté
     """
     titre = objectif.get("titre", "Objectif")
     prog = calculer_progression_objectif(objectif)
@@ -274,15 +274,15 @@ def formater_objectif_label(objectif: Dict[str, Any]) -> str:
 
 def formater_activite_resume(entree: Dict[str, Any]) -> str:
     """
-    Formate le rÃ©sumÃ© d'une activitÃ©.
+    Formate le résumé d'une activité.
     
     Args:
-        entree: DonnÃ©es de l'activitÃ©
+        entree: Données de l'activité
         
     Returns:
-        RÃ©sumÃ© formatÃ©
+        Résumé formaté
     """
-    type_act = entree.get("type_activite", "ActivitÃ©")
+    type_act = entree.get("type_activite", "Activité")
     duree = entree.get("duree", 0)
     
     return f"{type_act} - {duree} min"

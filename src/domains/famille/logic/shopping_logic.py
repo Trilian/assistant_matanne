@@ -1,5 +1,5 @@
 ﻿"""
-Logique mÃ©tier du module Shopping (famille) - SÃ©parÃ©e de l'UI
+Logique métier du module Shopping (famille) - Séparée de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
 
@@ -10,21 +10,21 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONSTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-CATEGORIES_SHOPPING = ["VÃªtements", "Chaussures", "Jouets", "Livres", "Ã‰lectronique", "Maison", "PuÃ©riculture", "Autre"]
+CATEGORIES_SHOPPING = ["Vêtements", "Chaussures", "Jouets", "Livres", "Ã‰lectronique", "Maison", "Puériculture", "Autre"]
 LISTES = ["Jules", "Nous", "Maison"]
 PRIORITES = ["Haute", "Moyenne", "Basse"]
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CALCULS FINANCIERS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def calculer_cout_liste(articles: List[Dict[str, Any]]) -> Dict[str, float]:
-    """Calcule le coÃ»t d'une liste de shopping."""
+    """Calcule le coût d'une liste de shopping."""
     cout_estime = 0.0
     cout_reel = 0.0
     
@@ -61,7 +61,7 @@ def calculer_budget_mensuel(articles: List[Dict[str, Any]], mois: int = 1) -> Di
     couts = calculer_cout_liste(articles)
     total = couts["reel"] if couts["reel"] else couts["estime"]
     
-    # Par catÃ©gorie
+    # Par catégorie
     par_categorie = {}
     for art in articles:
         cat = art.get("categorie", "Autre")
@@ -79,9 +79,9 @@ def calculer_budget_mensuel(articles: List[Dict[str, Any]], mois: int = 1) -> Di
     }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FILTRAGE ET TRI
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def filtrer_par_liste(articles: List[Dict[str, Any]], liste: str) -> List[Dict[str, Any]]:
     """Filtre les articles par liste."""
@@ -89,34 +89,34 @@ def filtrer_par_liste(articles: List[Dict[str, Any]], liste: str) -> List[Dict[s
 
 
 def filtrer_par_categorie(articles: List[Dict[str, Any]], categorie: str) -> List[Dict[str, Any]]:
-    """Filtre les articles par catÃ©gorie."""
+    """Filtre les articles par catégorie."""
     return [a for a in articles if a.get("categorie") == categorie]
 
 
 def filtrer_par_priorite(articles: List[Dict[str, Any]], priorite: str) -> List[Dict[str, Any]]:
-    """Filtre les articles par prioritÃ©."""
+    """Filtre les articles par priorité."""
     return [a for a in articles if a.get("priorite") == priorite]
 
 
 def get_articles_non_achetes(articles: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Retourne les articles non achetÃ©s."""
+    """Retourne les articles non achetés."""
     return [a for a in articles if not a.get("achete", False)]
 
 
 def get_articles_achetes(articles: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Retourne les articles achetÃ©s."""
+    """Retourne les articles achetés."""
     return [a for a in articles if a.get("achete", False)]
 
 
 def trier_par_priorite(articles: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Trie les articles par prioritÃ©."""
+    """Trie les articles par priorité."""
     ordre_priorite = {"Haute": 0, "Moyenne": 1, "Basse": 2}
     return sorted(articles, key=lambda x: ordre_priorite.get(x.get("priorite", "Moyenne"), 1))
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # STATISTIQUES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def calculer_statistiques_shopping(articles: List[Dict[str, Any]]) -> Dict[str, Any]:
     """Calcule les statistiques shopping."""
@@ -136,7 +136,7 @@ def calculer_statistiques_shopping(articles: List[Dict[str, Any]]) -> Dict[str, 
     achetes = len(get_articles_achetes(articles))
     non_achetes = len(get_articles_non_achetes(articles))
     
-    # Par catÃ©gorie
+    # Par catégorie
     par_categorie = {}
     for art in articles:
         cat = art.get("categorie", "Autre")
@@ -148,7 +148,7 @@ def calculer_statistiques_shopping(articles: List[Dict[str, Any]]) -> Dict[str, 
         liste = art.get("liste", "Autre")
         par_liste[liste] = par_liste.get(liste, 0) + 1
     
-    # CoÃ»ts
+    # Coûts
     couts = calculer_cout_liste(articles)
     
     return {
@@ -162,12 +162,12 @@ def calculer_statistiques_shopping(articles: List[Dict[str, Any]]) -> Dict[str, 
     }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SUGGESTIONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def suggerer_budget_optimal(historique: List[Dict[str, Any]], mois: int = 3) -> Dict[str, float]:
-    """SuggÃ¨re un budget optimal basÃ© sur l'historique."""
+    """Suggère un budget optimal basé sur l'historique."""
     if not historique:
         return {
             "mensuel_suggere": 0.0,
@@ -179,7 +179,7 @@ def suggerer_budget_optimal(historique: List[Dict[str, Any]], mois: int = 3) -> 
     # Ajouter marge de 10%
     mensuel_suggere = budget["par_mois"] * 1.1
     
-    # Par catÃ©gorie avec marge
+    # Par catégorie avec marge
     par_categorie = {}
     for cat, montant in budget["par_categorie"].items():
         par_categorie[cat] = (montant / mois) * 1.1
@@ -191,7 +191,7 @@ def suggerer_budget_optimal(historique: List[Dict[str, Any]], mois: int = 3) -> 
 
 
 def detecter_articles_recurrents(historique: List[Dict[str, Any]], seuil: int = 3) -> List[str]:
-    """DÃ©tecte les articles achetÃ©s rÃ©curremment."""
+    """Détecte les articles achetés récurremment."""
     from collections import Counter
     
     titres = [a.get("titre", "").lower() for a in historique if a.get("achete")]
@@ -200,9 +200,9 @@ def detecter_articles_recurrents(historique: List[Dict[str, Any]], seuil: int = 
     return [titre for titre, count in compteur.items() if count >= seuil]
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # VALIDATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def valider_article_shopping(data: Dict[str, Any]) -> tuple[bool, List[str]]:
     """Valide un article shopping."""
@@ -212,7 +212,7 @@ def valider_article_shopping(data: Dict[str, Any]) -> tuple[bool, List[str]]:
         erreurs.append("Le titre est requis")
     
     if "categorie" in data and data["categorie"] not in CATEGORIES_SHOPPING:
-        erreurs.append(f"CatÃ©gorie invalide. Valeurs: {', '.join(CATEGORIES_SHOPPING)}")
+        erreurs.append(f"Catégorie invalide. Valeurs: {', '.join(CATEGORIES_SHOPPING)}")
     
     if "liste" in data and data["liste"] not in LISTES:
         erreurs.append(f"Liste invalide. Valeurs: {', '.join(LISTES)}")
@@ -220,19 +220,19 @@ def valider_article_shopping(data: Dict[str, Any]) -> tuple[bool, List[str]]:
     if "quantite" in data:
         qty = data["quantite"]
         if not isinstance(qty, int) or qty < 1:
-            erreurs.append("La quantitÃ© doit Ãªtre >= 1")
+            erreurs.append("La quantité doit être >= 1")
     
     if "prix_estime" in data:
         prix = data["prix_estime"]
         if not isinstance(prix, (int, float)) or prix < 0:
-            erreurs.append("Le prix estimÃ© doit Ãªtre >= 0")
+            erreurs.append("Le prix estimé doit être >= 0")
     
     return len(erreurs) == 0, erreurs
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FORMATAGE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def formater_article_label(article: Dict[str, Any]) -> str:
     """Formate le label d'un article."""
@@ -251,7 +251,7 @@ def grouper_par_magasin(articles: List[Dict[str, Any]]) -> Dict[str, List[Dict[s
     groupes = {}
     
     for art in articles:
-        magasin = art.get("magasin", "Non dÃ©fini")
+        magasin = art.get("magasin", "Non défini")
         if magasin not in groupes:
             groupes[magasin] = []
         groupes[magasin].append(art)

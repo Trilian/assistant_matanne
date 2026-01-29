@@ -30,15 +30,15 @@ class TestRoutinesLogique:
     def test_trier_taches_par_ordre(self):
         """Tri des tÃ¢ches par ordre."""
         taches = [
-            {"nom": "Petit-dÃ©jeuner", "ordre": 2},
-            {"nom": "RÃ©veil", "ordre": 1},
+            {"nom": "Petit-déjeuner", "ordre": 2},
+            {"nom": "Réveil", "ordre": 1},
             {"nom": "Habillage", "ordre": 3},
         ]
         
         triees = sorted(taches, key=lambda t: t["ordre"])
         
-        assert triees[0]["nom"] == "RÃ©veil"
-        assert triees[1]["nom"] == "Petit-dÃ©jeuner"
+        assert triees[0]["nom"] == "Réveil"
+        assert triees[1]["nom"] == "Petit-déjeuner"
         assert triees[2]["nom"] == "Habillage"
 
     def test_filtrer_routines_actives(self):
@@ -54,7 +54,7 @@ class TestRoutinesLogique:
         assert len(actives) == 2
 
     def test_routines_par_moment(self):
-        """Routines par moment de la journÃ©e."""
+        """Routines par moment de la journée."""
         routines = [
             {"nom": "Routine matin", "moment": "matin"},
             {"nom": "Routine midi", "moment": "midi"},
@@ -77,10 +77,10 @@ class TestRoutinesLogique:
 # =============================================================================
 
 class TestBienEtreLogique:
-    """Tests pour la logique bien-Ãªtre."""
+    """Tests pour la logique bien-être."""
 
     def test_calculer_moyenne_humeur(self):
-        """Calcul de la moyenne d'humeur sur une pÃ©riode."""
+        """Calcul de la moyenne d'humeur sur une période."""
         entrees = [
             {"date": date.today() - timedelta(days=i), "humeur": 3 + (i % 3)}
             for i in range(7)
@@ -91,7 +91,7 @@ class TestBienEtreLogique:
         assert 3 <= moyenne <= 5
 
     def test_detecter_tendance_humeur(self):
-        """DÃ©tection de tendance d'humeur."""
+        """Détection de tendance d'humeur."""
         # Tendance croissante
         entrees_croissante = [
             {"humeur": 2},
@@ -105,15 +105,15 @@ class TestBienEtreLogique:
             for i in range(len(entrees_croissante) - 1)
         ]
         
-        tendance = "croissante" if sum(variations) > 0 else "dÃ©croissante" if sum(variations) < 0 else "stable"
+        tendance = "croissante" if sum(variations) > 0 else "décroissante" if sum(variations) < 0 else "stable"
         
         assert tendance == "croissante"
 
     def test_statistiques_activites(self):
-        """Statistiques par type d'activitÃ©."""
+        """Statistiques par type d'activité."""
         entrees = [
             {"activite": "Sport", "duree": 60},
-            {"activite": "MÃ©ditation", "duree": 15},
+            {"activite": "Méditation", "duree": 15},
             {"activite": "Sport", "duree": 45},
             {"activite": "Lecture", "duree": 30},
         ]
@@ -139,7 +139,7 @@ class TestProfilsEnfants:
 
     def test_calculer_age_mois(self):
         """Calcul de l'Ã¢ge en mois."""
-        date_naissance = date(2024, 6, 15)  # NÃ© le 15 juin 2024
+        date_naissance = date(2024, 6, 15)  # Né le 15 juin 2024
         today = date(2026, 1, 28)  # Aujourd'hui
         
         # Calcul approximatif en mois
@@ -148,7 +148,7 @@ class TestProfilsEnfants:
         assert mois == 19  # 19 mois
 
     def test_calculer_age_annees(self):
-        """Calcul de l'Ã¢ge en annÃ©es."""
+        """Calcul de l'Ã¢ge en années."""
         date_naissance = date(2022, 5, 10)
         today = date(2026, 1, 28)
         
@@ -173,12 +173,12 @@ class TestProfilsEnfants:
         assert display == "19 mois"
 
     def test_etapes_developpement(self):
-        """VÃ©rification des Ã©tapes de dÃ©veloppement."""
+        """Vérification des étapes de développement."""
         etapes_19_mois = [
             "Marche acquise",
             "Premiers mots",
-            "Mange seul (cuillÃ¨re)",
-            "Joue Ã  cÃ´tÃ© des autres enfants",
+            "Mange seul (cuillère)",
+            "Joue à côté des autres enfants",
         ]
         
         profil = {"age_mois": 19, "etapes_validees": ["Marche acquise", "Premiers mots"]}
@@ -193,15 +193,15 @@ class TestProfilsEnfants:
 # =============================================================================
 
 class TestActivitesLogique:
-    """Tests pour la logique des activitÃ©s."""
+    """Tests pour la logique des activités."""
 
     def test_activites_par_jour_semaine(self):
-        """ActivitÃ©s groupÃ©es par jour de la semaine."""
+        """Activités groupées par jour de la semaine."""
         activites = [
-            {"nom": "CrÃ¨che", "jour": "lundi"},
-            {"nom": "CrÃ¨che", "jour": "mardi"},
+            {"nom": "Crèche", "jour": "lundi"},
+            {"nom": "Crèche", "jour": "mardi"},
             {"nom": "Piscine", "jour": "mercredi"},
-            {"nom": "CrÃ¨che", "jour": "jeudi"},
+            {"nom": "Crèche", "jour": "jeudi"},
             {"nom": "Parc", "jour": "samedi"},
         ]
         
@@ -212,13 +212,13 @@ class TestActivitesLogique:
                 par_jour[jour] = []
             par_jour[jour].append(a["nom"])
         
-        assert "CrÃ¨che" in par_jour["lundi"]
+        assert "Crèche" in par_jour["lundi"]
         assert "Piscine" in par_jour["mercredi"]
 
     def test_filtrer_activites_recurrentes(self):
-        """Filtrage des activitÃ©s rÃ©currentes."""
+        """Filtrage des activités récurrentes."""
         activites = [
-            {"nom": "CrÃ¨che", "recurrente": True, "frequence": "hebdomadaire"},
+            {"nom": "Crèche", "recurrente": True, "frequence": "hebdomadaire"},
             {"nom": "Anniversaire", "recurrente": False},
             {"nom": "Piscine", "recurrente": True, "frequence": "hebdomadaire"},
         ]
@@ -233,7 +233,7 @@ class TestActivitesLogique:
 # =============================================================================
 
 class TestSanteLogique:
-    """Tests pour le module santÃ©."""
+    """Tests pour le module santé."""
 
     def test_calculer_imc(self):
         """Calcul de l'IMC."""
@@ -245,21 +245,21 @@ class TestSanteLogique:
         assert 24 < imc < 25  # IMC normal
 
     def test_interpreter_imc(self):
-        """InterprÃ©tation de l'IMC."""
+        """Interprétation de l'IMC."""
         def interpreter_imc(imc):
             if imc < 18.5:
-                return "Insuffisance pondÃ©rale"
+                return "Insuffisance pondérale"
             elif imc < 25:
                 return "Poids normal"
             elif imc < 30:
                 return "Surpoids"
             else:
-                return "ObÃ©sitÃ©"
+                return "Obésité"
         
-        assert interpreter_imc(17) == "Insuffisance pondÃ©rale"
+        assert interpreter_imc(17) == "Insuffisance pondérale"
         assert interpreter_imc(22) == "Poids normal"
         assert interpreter_imc(27) == "Surpoids"
-        assert interpreter_imc(35) == "ObÃ©sitÃ©"
+        assert interpreter_imc(35) == "Obésité"
 
     def test_suivre_objectif_pas(self):
         """Suivi de l'objectif de pas quotidiens."""
@@ -273,7 +273,7 @@ class TestSanteLogique:
         assert atteint == False
 
     def test_calculer_calories_brulees(self):
-        """Estimation des calories brÃ»lÃ©es (marche)."""
+        """Estimation des calories brûlées (marche)."""
         pas = 10000
         calories_par_pas = 0.04  # Approximation
         
@@ -325,16 +325,16 @@ class TestShoppingLogique:
 # =============================================================================
 
 class TestIntegrationCuisineCourses:
-    """Tests pour l'intÃ©gration cuisine/courses."""
+    """Tests pour l'intégration cuisine/courses."""
 
     def test_extraire_ingredients_planning(self):
-        """Extraction des ingrÃ©dients du planning."""
+        """Extraction des ingrédients du planning."""
         planning = [
             {
                 "recette": "Tarte aux pommes",
                 "ingredients": [
                     {"nom": "Pommes", "quantite": 4},
-                    {"nom": "PÃ¢te feuilletÃ©e", "quantite": 1},
+                    {"nom": "PÃ¢te feuilletée", "quantite": 1},
                 ]
             },
             {
@@ -353,7 +353,7 @@ class TestIntegrationCuisineCourses:
         assert len(tous_ingredients) == 4
 
     def test_generer_liste_courses_depuis_planning(self):
-        """GÃ©nÃ©ration de liste de courses depuis le planning."""
+        """Génération de liste de courses depuis le planning."""
         ingredients_necessaires = [
             {"nom": "Pommes", "quantite": 4},
             {"nom": "Lait", "quantite": 2},
@@ -381,7 +381,7 @@ class TestHelpersFamille:
     """Tests pour les helpers du module famille."""
 
     def test_format_duree(self):
-        """Format de durÃ©e en texte lisible."""
+        """Format de durée en texte lisible."""
         def format_duree(minutes):
             if minutes < 60:
                 return f"{minutes} min"
@@ -415,7 +415,7 @@ class TestHelpersFamille:
         assert format_date_relative(date.today() - timedelta(days=3)) == "Il y a 3 jours"
 
     def test_calculer_streak(self):
-        """Calcul de la sÃ©rie (streak) de jours consÃ©cutifs."""
+        """Calcul de la série (streak) de jours consécutifs."""
         dates_completees = [
             date.today(),
             date.today() - timedelta(days=1),
@@ -432,7 +432,7 @@ class TestHelpersFamille:
             streak += 1
             current -= timedelta(days=1)
         
-        assert streak == 3  # 3 jours consÃ©cutifs
+        assert streak == 3  # 3 jours consécutifs
 
 
 # =============================================================================
@@ -443,7 +443,7 @@ class TestStatistiquesFamille:
     """Tests pour les statistiques familiales."""
 
     def test_compter_routines_par_categorie(self):
-        """Comptage des routines par catÃ©gorie."""
+        """Comptage des routines par catégorie."""
         routines = [
             {"categorie": "matin"},
             {"categorie": "matin"},
@@ -466,7 +466,7 @@ class TestStatistiquesFamille:
         assert moyenne == pytest.approx(4.0, rel=0.1)
 
     def test_temps_total_activites(self):
-        """Temps total passÃ© sur les activitÃ©s."""
+        """Temps total passé sur les activités."""
         activites = [
             {"duree": 60},
             {"duree": 45},
