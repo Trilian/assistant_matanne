@@ -15,8 +15,14 @@ from src.core.models import ChildProfile, Routine, RoutineTask
 
 # Logique métier pure
 from src.domains.famille.logic.routines_logic import (
-    calculer_completion_routine,
-    suggerer_horaire_routine
+    get_routines_aujourdhui,
+    grouper_par_moment,
+    calculer_duree_routine,
+    calculer_statistiques_routines,
+    analyser_regularite,
+    suggerer_routines_age,
+    detecter_conflits_horaires,
+    valider_routine
 )
 
 # ===================================

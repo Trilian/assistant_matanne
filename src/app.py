@@ -22,12 +22,12 @@ env_file = project_root / '.env.local'
 if env_file.exists():
     result = load_dotenv(env_file, override=True)  # Force override!
     mistral_key = _os.getenv("MISTRAL_API_KEY")
-    print(f"📄 Loaded environment from {env_file}")
+    print(f"Loaded environment from {env_file}")
     print(f"   load_dotenv() returned: {result}")
     print(f"   MISTRAL_API_KEY after load_dotenv: {mistral_key[:10] if mistral_key else 'MISSING'}...")
 else:
     # Fallback: try current directory
-    print(f"⚠️  {env_file} not found, trying fallback")
+    print(f"WARNING: {env_file} not found, trying fallback")
     load_dotenv('.env.local', override=True)
 
 import streamlit as st

@@ -19,8 +19,12 @@ from src.core.models import FamilyActivity, FamilyBudget, ShoppingItem
 
 # Logique métier pure
 from src.domains.famille.logic.shopping_logic import (
-    calculer_budget_shopping,
-    suggerer_articles_par_activite
+    calculer_cout_liste,
+    calculer_budget_mensuel,
+    calculer_statistiques_shopping,
+    suggerer_budget_optimal,
+    detecter_articles_recurrents,
+    valider_article_shopping
 )
 
 from src.domains.famille.logic.helpers import (

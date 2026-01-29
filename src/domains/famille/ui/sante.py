@@ -21,7 +21,6 @@ from src.domains.famille.logic.helpers import (
     get_routines_actives, 
     get_objectives_actifs,
     get_stats_sante_semaine,
-    calculer_progression_objectif,
     clear_famille_cache
 )
 

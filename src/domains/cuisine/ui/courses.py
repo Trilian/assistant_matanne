@@ -1,8 +1,8 @@
-﻿"""
+"""
 Module Courses - Gestion complète de la liste de courses
-âœ¨ Fonctionnalités complètes:
+✨ Fonctionnalités complètes:
 - Gestion CRUD complète de la liste
-- Intégration inventaire (stock bas â†’ courses)
+- Intégration inventaire (stock bas → courses)
 - Suggestions IA par recettes
 - Historique & modèles récurrents
 - Partage & synchronisation multi-appareils
@@ -38,17 +38,17 @@ from src.domains.cuisine.logic.courses_logic import (
 
 logger = logging.getLogger(__name__)
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ─────────────────────────────────────────────────────────────────────────────
 # CONSTANTES (réexportées depuis courses_logic)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ─────────────────────────────────────────────────────────────────────────────
 # Note: PRIORITY_EMOJIS et RAYONS_DEFAULT sont importés depuis courses_logic
 
 
 def app():
     """Point d'entrée module courses"""
-    st.set_page_config(page_title="ðŸ›’ Courses", layout="wide")
+    st.set_page_config(page_title="🛍 Courses", layout="wide")
     
-    st.title("ðŸ›’ Courses")
+    st.title("🛍 Courses")
     st.caption("Gestion de votre liste de courses")
 
     # Initialiser session state
@@ -62,11 +62,11 @@ def app():
 
     # Tabs principales
     tab_liste, tab_suggestions, tab_historique, tab_modeles, tab_outils = st.tabs([
-        "ðŸ“‹ Liste Active",
-        "âœ¨ Suggestions IA",
-        "ðŸ“š Historique",
-        "ðŸ”„ Modèles",
-        "ðŸ”§ Outils"
+        "📋 Liste Active",
+        "✨ Suggestions IA",
+        "📚 Historique",
+        "📄 Modèles",
+        "📧 Outils"
     ])
 
     with tab_liste:
@@ -85,9 +85,9 @@ def app():
         render_outils()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ─────────────────────────────────────────────────────────────────────────────
 # SECTION 1: LISTE ACTIVE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ─────────────────────────────────────────────────────────────────────────────
 
 def render_liste_active():
     """Gestion interactive de la liste active"""
@@ -95,7 +95,7 @@ def render_liste_active():
     inventaire_service = get_inventaire_service()
     
     if service is None:
-        st.error("âŒ Service courses indisponible")
+        st.error("❌ Service courses indisponible")
         return
     
     try:
@@ -105,23 +105,23 @@ def render_liste_active():
         # Statistiques
         col1, col2, col3, col4 = st.columns(4)
         with col1:
-            st.metric("ðŸ“ Ã€ acheter", len(liste))
+            st.metric("📥 À acheter", len(liste))
         with col2:
             haute = len([a for a in liste if a.get("priorite") == "haute"])
-            st.metric("ðŸ”´ Haute priorité", haute)
+            st.metric("🔴 Haute priorité", haute)
         with col3:
             if inventaire_service:
                 alertes = inventaire_service.get_alertes()
                 stock_bas = len(alertes.get("stock_bas", []))
-                st.metric("âš ï¸ Stock bas", stock_bas)
+                st.metric("⚠️ Stock bas", stock_bas)
         with col4:
-            st.metric("ðŸ’° Total articles", len(service.get_liste_courses(achetes=True)))
+            st.metric("💰 Total articles", len(service.get_liste_courses(achetes=True)))
         
         st.divider()
         
         if not liste:
-            st.info("âœ… Liste vide! Ajoutez des articles ou générez des suggestions IA.")
-            if st.button("âœ¨ Générer suggestions IA"):
+            st.info("✅ Liste vide! Ajoutez des articles ou générez des suggestions IA.")
+            if st.button("✨ Générer suggestions IA"):
                 st.session_state.new_article_mode = False
                 st.rerun()
             return
@@ -131,7 +131,7 @@ def render_liste_active():
         with col1:
             filter_priorite = st.selectbox(
                 "Filtrer par priorité",
-                ["Toutes", "ðŸ”´ Haute", "ðŸŸ¡ Moyenne", "ðŸŸ¢ Basse"],
+                ["Toutes", "🔴 Haute", "🟡 Moyenne", "🟢 Basse"],
                 key="filter_priorite"
             )
         with col2:
@@ -141,13 +141,13 @@ def render_liste_active():
                 key="filter_rayon"
             )
         with col3:
-            search_term = st.text_input("ðŸ” Chercher...", key="search_courses")
+            search_term = st.text_input("🔍 Chercher...", key="search_courses")
         
         # Appliquer filtres
         liste_filtree = liste.copy()
         
         if filter_priorite != "Toutes":
-            priority_map = {"ðŸ”´ Haute": "haute", "ðŸŸ¡ Moyenne": "moyenne", "ðŸŸ¢ Basse": "basse"}
+            priority_map = {"🔴 Haute": "haute", "🟡 Moyenne": "moyenne", "🟢 Basse": "basse"}
             liste_filtree = [a for a in liste_filtree if a.get("priorite") == priority_map[filter_priorite]]
         
         if filter_rayon != "Tous les rayons":
@@ -156,10 +156,10 @@ def render_liste_active():
         if search_term:
             liste_filtree = [a for a in liste_filtree if search_term.lower() in a.get("ingredient_nom", "").lower()]
         
-        st.success(f"ðŸ“Š {len(liste_filtree)}/{len(liste)} article(s)")
+        st.success(f"📊 {len(liste_filtree)}/{len(liste)} article(s)")
         
         # Afficher par rayon
-        st.subheader("ðŸ“¦ Articles par rayon")
+        st.subheader("📦 Articles par rayon")
         
         rayons = {}
         for article in liste_filtree:
@@ -169,7 +169,7 @@ def render_liste_active():
             rayons[rayon].append(article)
         
         for rayon in sorted(rayons.keys()):
-            with st.expander(f"ðŸª {rayon} ({len(rayons[rayon])} articles)", expanded=True):
+            with st.expander(f"🪑 {rayon} ({len(rayons[rayon])} articles)", expanded=True):
                 render_rayon_articles(service, rayon, rayons[rayon])
         
         st.divider()
@@ -177,16 +177,16 @@ def render_liste_active():
         # Actions rapides
         col1, col2, col3 = st.columns(3)
         with col1:
-            if st.button("âž• Ajouter article", use_container_width=True):
+            if st.button("➕ Ajouter article", use_container_width=True):
                 st.session_state.new_article_mode = True
                 st.rerun()
         with col2:
-            if st.button("ðŸ“„ Imprimer liste", use_container_width=True):
+            if st.button("📄 Imprimer liste", use_container_width=True):
                 render_print_view(liste_filtree)
         with col3:
-            if st.button("ðŸ—‘ï¸ Vider (achetés)", use_container_width=True):
+            if st.button("🗑️ Vider (achetés)", use_container_width=True):
                 if service.get_liste_courses(achetes=True):
-                    st.warning("âš ï¸ Suppression des articles achetés...")
+                    st.warning("⚠️ Suppression des articles achetés...")
                     st.session_state.courses_refresh += 1
                     st.rerun()
         
@@ -196,7 +196,7 @@ def render_liste_active():
             render_ajouter_article()
             
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"❌ Erreur: {str(e)}")
         logger.error(f"Erreur render_liste_active: {e}")
 
 
@@ -206,41 +206,41 @@ def render_rayon_articles(service, rayon: str, articles: list):
         col1, col2, col3, col4 = st.columns([4, 1, 1, 1], gap="small")
         
         with col1:
-            priorite_emoji = PRIORITY_EMOJIS.get(article.get("priorite", "moyenne"), "âšª")
+            priorite_emoji = PRIORITY_EMOJIS.get(article.get("priorite", "moyenne"), "⚫")
             label = f"{priorite_emoji} {article.get('ingredient_nom')} ({article.get('quantite_necessaire')} {article.get('unite')})"
             
             if article.get("notes"):
-                label += f" | ðŸ“ {article.get('notes')}"
+                label += f" | 📝 {article.get('notes')}"
             
             if article.get("suggere_par_ia"):
-                label += " âœ¨"
+                label += " ✨"
             
             st.write(label)
         
         with col2:
-            if st.button("âœ…", key=f"mark_{article['id']}", help="Marquer acheté", use_container_width=True):
+            if st.button("✅", key=f"mark_{article['id']}", help="Marquer acheté", use_container_width=True):
                 try:
                     service.update(article['id'], {"achete": True, "achete_le": datetime.now()})
-                    st.success(f"âœ… {article.get('ingredient_nom')} marqué acheté!")
+                    st.success(f"✅ {article.get('ingredient_nom')} marqué acheté!")
                     st.session_state.courses_refresh += 1
                     st.rerun()
                 except Exception as e:
-                    st.error(f"âŒ Erreur: {str(e)}")
+                    st.error(f"❌ Erreur: {str(e)}")
         
         with col3:
-            if st.button("âœï¸", key=f"edit_{article['id']}", help="Modifier", use_container_width=True):
+            if st.button("✏️", key=f"edit_{article['id']}", help="Modifier", use_container_width=True):
                 st.session_state.edit_article_id = article['id']
                 st.rerun()
         
         with col4:
-            if st.button("ðŸ—‘ï¸", key=f"del_{article['id']}", help="Supprimer", use_container_width=True):
+            if st.button("🗑️", key=f"del_{article['id']}", help="Supprimer", use_container_width=True):
                 try:
                     service.delete(article['id'])
-                    st.success(f"âœ… {article.get('ingredient_nom')} supprimé!")
+                    st.success(f"✅ {article.get('ingredient_nom')} supprimé!")
                     st.session_state.courses_refresh += 1
                     st.rerun()
                 except Exception as e:
-                    st.error(f"âŒ Erreur: {str(e)}")
+                    st.error(f"❌ Erreur: {str(e)}")
         
         # Formulaire édition inline si sélectionné
         if st.session_state.get('edit_article_id') == article['id']:
@@ -279,7 +279,7 @@ def render_rayon_articles(service, rayon: str, articles: list):
                 
                 col1, col2 = st.columns(2)
                 with col1:
-                    if st.form_submit_button("ðŸ’¾ Sauvegarder"):
+                    if st.form_submit_button("💾 Sauvegarder"):
                         try:
                             service.update(article['id'], {
                                 "quantite_necessaire": new_quantite,
@@ -287,26 +287,26 @@ def render_rayon_articles(service, rayon: str, articles: list):
                                 "rayon_magasin": new_rayon,
                                 "notes": new_notes or None
                             })
-                            st.success("âœ… Article mis à jour!")
+                            st.success("✅ Article mis à jour!")
                             st.session_state.edit_article_id = None
                             st.session_state.courses_refresh += 1
                             st.rerun()
                         except Exception as e:
-                            st.error(f"âŒ Erreur: {str(e)}")
+                            st.error(f"❌ Erreur: {str(e)}")
                 
                 with col2:
-                    if st.form_submit_button("âŒ Annuler"):
+                    if st.form_submit_button("❌ Annuler"):
                         st.session_state.edit_article_id = None
                         st.rerun()
 
 
 def render_ajouter_article():
     """Formulaire ajout article"""
-    st.subheader("âž• Ajouter un article")
+    st.subheader("➕ Ajouter un article")
     
     service = get_courses_service()
     if service is None:
-        st.error("âŒ Service indisponible")
+        st.error("❌ Service indisponible")
         return
     
     with st.form("form_new_article"):
@@ -326,10 +326,10 @@ def render_ajouter_article():
         
         notes = st.text_area("Notes (optionnel)", max_chars=200)
         
-        submitted = st.form_submit_button("âœ… Ajouter", use_container_width=True)
+        submitted = st.form_submit_button("✅ Ajouter", use_container_width=True)
         if submitted:
             if not nom:
-                st.error("âš ï¸ Entrez un nom d'article")
+                st.error("⚠️ Entrez un nom d'article")
                 return
             
             try:
@@ -356,18 +356,18 @@ def render_ajouter_article():
                 
                 service.create(data)
                 
-                st.success(f"âœ… {nom} ajouté à la liste!")
+                st.success(f"✅ {nom} ajouté à la liste!")
                 st.session_state.new_article_mode = False
                 st.session_state.courses_refresh += 1
                 st.rerun()
             except Exception as e:
-                st.error(f"âŒ Erreur: {str(e)}")
+                st.error(f"❌ Erreur: {str(e)}")
                 logger.error(f"Erreur ajout article: {e}")
 
 
 def render_print_view(liste):
     """Vue d'impression optimisée"""
-    st.subheader("ðŸ–¨ï¸ Liste à imprimer")
+    st.subheader("🖨️ Liste à imprimer")
     
     # Grouper par rayon
     rayons = {}
@@ -377,14 +377,14 @@ def render_print_view(liste):
             rayons[rayon] = []
         rayons[rayon].append(article)
     
-    print_text = "ðŸ“‹ LISTE DE COURSES\n"
-    print_text += f"ðŸ“… {datetime.now().strftime('%d/%m/%Y %H:%M')}\n"
+    print_text = "📋 LISTE DE COURSES\n"
+    print_text += f"📅 {datetime.now().strftime('%d/%m/%Y %H:%M')}\n"
     print_text += "=" * 40 + "\n\n"
     
     for rayon in sorted(rayons.keys()):
-        print_text += f"ðŸª {rayon}\n"
+        print_text += f"🪑 {rayon}\n"
         for article in rayons[rayon]:
-            checkbox = "â˜"
+            checkbox = "☑"
             qty = f"{article.get('quantite_necessaire')} {article.get('unite')}"
             print_text += f"  {checkbox} {article.get('ingredient_nom')} ({qty})\n"
         print_text += "\n"
@@ -392,9 +392,9 @@ def render_print_view(liste):
     st.text_area("Copier/Coller la liste:", value=print_text, height=400, disabled=True)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ─────────────────────────────────────────────────────────────────────────────
 # SECTION 2: SUGGESTIONS IA
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ─────────────────────────────────────────────────────────────────────────────
 
 def render_suggestions_ia():
     """Suggestions IA depuis inventaire & recettes"""
@@ -402,20 +402,20 @@ def render_suggestions_ia():
     inventaire_service = get_inventaire_service()
     recettes_service = get_recette_service()
     
-    st.subheader("âœ¨ Suggestions intelligentes")
+    st.subheader("✨ Suggestions intelligentes")
     
-    tab_inventaire, tab_recettes = st.tabs(["ðŸ“¦ Depuis inventaire", "ðŸ½ï¸ Par recettes"])
+    tab_inventaire, tab_recettes = st.tabs(["📦 Depuis inventaire", "🍽️ Par recettes"])
     
     with tab_inventaire:
         st.write("**Générer suggestions depuis stock bas**")
         
-        if st.button("ðŸ¤– Analyser inventaire & générer suggestions"):
-            with st.spinner("â³ Analyse en cours..."):
+        if st.button("🤖 Analyser inventaire & générer suggestions"):
+            with st.spinner("⏳ Analyse en cours..."):
                 try:
                     suggestions = service.generer_suggestions_ia_depuis_inventaire()
                     
                     if suggestions:
-                        st.success(f"âœ… {len(suggestions)} suggestions générées!")
+                        st.success(f"✅ {len(suggestions)} suggestions générées!")
                         
                         # Afficher suggestions
                         df = pd.DataFrame([{
@@ -427,7 +427,7 @@ def render_suggestions_ia():
                         
                         st.dataframe(df, use_container_width=True)
                         
-                        if st.button("âœ… Ajouter toutes les suggestions"):
+                        if st.button("✅ Ajouter toutes les suggestions"):
                             try:
                                 from src.core.models import Ingredient
                                 
@@ -459,21 +459,21 @@ def render_suggestions_ia():
                                     service.create(data)
                                     count += 1
                                 
-                                st.success(f"âœ… {count} articles ajoutés!")
+                                st.success(f"✅ {count} articles ajoutés!")
                                 st.session_state.courses_refresh += 1
                                 st.rerun()
                             except Exception as e:
-                                st.error(f"âŒ Erreur sauvegarde: {str(e)}")
+                                st.error(f"❌ Erreur sauvegarde: {str(e)}")
                     else:
                         st.info("Aucune suggestion (inventaire OK)")
                 except Exception as e:
-                    st.error(f"âŒ Erreur: {str(e)}")
+                    st.error(f"❌ Erreur: {str(e)}")
     
     with tab_recettes:
         st.write("**Ajouter ingrédients manquants pour recettes**")
         
         if recettes_service is None:
-            st.warning("âš ï¸ Service recettes indisponible")
+            st.warning("⚠️ Service recettes indisponible")
             return
         
         # Lister recettes
@@ -494,23 +494,23 @@ def render_suggestions_ia():
             if selected_recette_id:
                 recette = recettes_service.get_by_id_full(selected_recette_id)
                 
-                if recette and st.button("ðŸ“ Ajouter ingrédients manquants"):
+                if recette and st.button("🔍 Ajouter ingrédients manquants"):
                     # Calculer ingrédients manquants vs inventaire
                     st.info("Ingrédients manquants ajoutés!")
                     st.rerun()
         except Exception as e:
-            st.error(f"âŒ Erreur: {str(e)}")
+            st.error(f"❌ Erreur: {str(e)}")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ─────────────────────────────────────────────────────────────────────────────
 # SECTION 3: HISTORIQUE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ─────────────────────────────────────────────────────────────────────────────
 
 def render_historique():
     """Historique des listes de courses"""
     service = get_courses_service()
     
-    st.subheader("ðŸ“š Historique des courses")
+    st.subheader("📚 Historique des courses")
     
     col1, col2 = st.columns(2)
     with col1:
@@ -539,51 +539,51 @@ def render_historique():
         
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.metric("ðŸ“Š Articles achetés", total_articles)
+            st.metric("📊 Articles achetés", total_articles)
         with col2:
-            st.metric("ðŸª Rayons différents", len(rayons_utilises))
+            st.metric("🪑 Rayons différents", len(rayons_utilises))
         with col3:
             priorite_haute = len([a for a in articles_achetes if a.priorite == "haute"])
-            st.metric("ðŸ”´ Haute priorité", priorite_haute)
+            st.metric("🔴 Haute priorité", priorite_haute)
         
         st.divider()
         
         # Tableau détaillé
-        st.subheader("ðŸ“‹ Détail des achats")
+        st.subheader("📋 Détail des achats")
         
         df = pd.DataFrame([{
             "Article": a.ingredient.nom if a.ingredient else "N/A",
             "Quantité": f"{a.quantite_necessaire} {a.ingredient.unite if a.ingredient else ''}",
-            "Priorité": PRIORITY_EMOJIS.get(a.priorite, "âšª") + " " + a.priorite,
+            "Priorité": PRIORITY_EMOJIS.get(a.priorite, "⚫") + " " + a.priorite,
             "Rayon": a.rayon_magasin or "N/A",
             "Acheté le": a.achete_le.strftime("%d/%m/%Y %H:%M") if a.achete_le else "N/A",
-            "IA": "âœ¨" if a.suggere_par_ia else ""
+            "IA": "✨" if a.suggere_par_ia else ""
         } for a in articles_achetes])
         
         st.dataframe(df, use_container_width=True)
         
         # Export CSV
-        if st.button("ðŸ“¥ Télécharger en CSV"):
+        if st.button("📥 Télécharger en CSV"):
             csv = df.to_csv(index=False)
             st.download_button(
-                label="ðŸ’¾ Télécharger CSV",
+                label="💾 Télécharger CSV",
                 data=csv,
                 file_name=f"historique_courses_{date_debut}_{date_fin}.csv",
                 mime="text/csv"
             )
         
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"❌ Erreur: {str(e)}")
         logger.error(f"Erreur historique: {e}")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# SECTION 4: MODÃˆLES RÃ‰CURRENTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 4: MODÈLES RÉCURRENTS
+# ─────────────────────────────────────────────────────────────────────────────
 
 def render_modeles():
     """Gestion des modèles de listes récurrentes (Phase 2: Persistance BD)"""
-    st.subheader("ðŸ”„ Modèles de listes - Phase 2")
+    st.subheader("📄 Modèles de listes - Phase 2")
     
     service = get_courses_service()
     
@@ -591,59 +591,59 @@ def render_modeles():
         # Récupérer modèles depuis BD (Phase 2)
         modeles = service.get_modeles(utilisateur_id=None)  # TODO: user_id depuis auth
         
-        tab_mes_modeles, tab_nouveau = st.tabs(["ðŸ“‹ Mes modèles", "âž• Nouveau"])
+        tab_mes_modeles, tab_nouveau = st.tabs(["📋 Mes modèles", "➕ Nouveau"])
         
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-        # ONGLET: MES MODÃˆLES (affichage et actions)
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # ─────────────────────────────────────────────────────────────────────────────
+        # ONGLET: MES MODÈLES (affichage et actions)
+        # ─────────────────────────────────────────────────────────────────────────────
         
         with tab_mes_modeles:
             st.write("**Modèles sauvegardés en BD**")
             
             if not modeles:
-                st.info("âœ¨ Aucun modèle sauvegardé. Créez-en un dans l'onglet 'Nouveau'!")
+                st.info("✨ Aucun modèle sauvegardé. Créez-en un dans l'onglet 'Nouveau'!")
             else:
                 for modele in modeles:
                     with st.container(border=True):
                         col1, col2, col3 = st.columns([3, 1, 1])
                         
                         with col1:
-                            st.write(f"**ðŸ“‹ {modele['nom']}**")
+                            st.write(f"**📋 {modele['nom']}**")
                             if modele.get('description'):
-                                st.caption(f"ðŸ“ {modele['description']}")
-                            st.caption(f"ðŸ“¦ {len(modele.get('articles', []))} articles | ðŸ“… {modele.get('cree_le', '')[:10]}")
+                                st.caption(f"📝 {modele['description']}")
+                            st.caption(f"📦 {len(modele.get('articles', []))} articles | 📅 {modele.get('cree_le', '')[:10]}")
                         
                         with col2:
-                            if st.button("ðŸ“¥ Charger", key=f"load_{modele['id']}", use_container_width=True, help="Charger ce modèle dans la liste"):
+                            if st.button("📥 Charger", key=f"load_{modele['id']}", use_container_width=True, help="Charger ce modèle dans la liste"):
                                 try:
                                     # Appliquer le modèle (crée articles courses)
                                     article_ids = service.appliquer_modele(modele['id'])
-                                    st.success(f"âœ… Modèle chargé ({len(article_ids)} articles)!")
+                                    st.success(f"✅ Modèle chargé ({len(article_ids)} articles)!")
                                     st.session_state.courses_refresh += 1
                                     st.rerun()
                                 except Exception as e:
-                                    st.error(f"âŒ Erreur: {str(e)}")
+                                    st.error(f"❌ Erreur: {str(e)}")
                         
                         with col3:
-                            if st.button("ðŸ—‘ï¸ Supprimer", key=f"del_{modele['id']}", use_container_width=True, help="Supprimer ce modèle"):
+                            if st.button("🗑️ Supprimer", key=f"del_{modele['id']}", use_container_width=True, help="Supprimer ce modèle"):
                                 try:
                                     service.delete_modele(modele['id'])
-                                    st.success("âœ… Modèle supprimé!")
+                                    st.success("✅ Modèle supprimé!")
                                     st.rerun()
                                 except Exception as e:
-                                    st.error(f"âŒ Erreur: {str(e)}")
+                                    st.error(f"❌ Erreur: {str(e)}")
                         
                         # Afficher les articles du modèle
-                        with st.expander(f"ðŸ‘ï¸ Voir {len(modele.get('articles', []))} articles"):
+                        with st.expander(f"👁️ Voir {len(modele.get('articles', []))} articles"):
                             for article in modele.get('articles', []):
-                                priorite_emoji = "ðŸ”´" if article['priorite'] == 'haute' else ("ðŸŸ¡" if article['priorite'] == 'moyenne' else "ðŸŸ¢")
+                                priorite_emoji = "🔴" if article['priorite'] == 'haute' else ("🟡" if article['priorite'] == 'moyenne' else "🟢")
                                 st.write(f"{priorite_emoji} **{article['nom']}** - {article['quantite']} {article['unite']} ({article['rayon']})")
                                 if article.get('notes'):
-                                    st.caption(f"ðŸ“Œ {article['notes']}")
+                                    st.caption(f"📌 {article['notes']}")
         
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-        # ONGLET: CRÃ‰ER NOUVEAU MODÃˆLE
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # ─────────────────────────────────────────────────────────────────────────────
+        # ONGLET: CRÉER NOUVEAU MODÈLE
+        # ─────────────────────────────────────────────────────────────────────────────
         
         with tab_nouveau:
             st.write("**Sauvegarder la liste actuelle comme modèle réutilisable**")
@@ -652,7 +652,7 @@ def render_modeles():
             liste_actuelle = service.get_liste_courses(achetes=False)
             
             if not liste_actuelle:
-                st.warning("âš ï¸ La liste est vide. Ajoutez des articles d'abord!")
+                st.warning("⚠️ La liste est vide. Ajoutez des articles d'abord!")
             else:
                 col1, col2 = st.columns(2)
                 with col1:
@@ -675,16 +675,16 @@ def render_modeles():
                 st.divider()
                 
                 # Aperçu des articles à sauvegarder
-                st.subheader(f"ðŸ“¦ Articles ({len(liste_actuelle)})")
+                st.subheader(f"📦 Articles ({len(liste_actuelle)})")
                 for i, article in enumerate(liste_actuelle):
-                    priorite_emoji = "ðŸ”´" if article['priorite'] == 'haute' else ("ðŸŸ¡" if article['priorite'] == 'moyenne' else "ðŸŸ¢")
+                    priorite_emoji = "🔴" if article['priorite'] == 'haute' else ("🟡" if article['priorite'] == 'moyenne' else "🟢")
                     st.write(f"{i+1}. {priorite_emoji} **{article['ingredient_nom']}** - {article['quantite_necessaire']} {article['unite']} ({article['rayon_magasin']})")
                 
                 st.divider()
                 
-                if st.button("ðŸ’¾ Sauvegarder comme modèle", use_container_width=True, type="primary"):
+                if st.button("💾 Sauvegarder comme modèle", use_container_width=True, type="primary"):
                     if not nom_modele or nom_modele.strip() == "":
-                        st.error("âš ï¸ Entrez un nom pour le modèle")
+                        st.error("⚠️ Entrez un nom pour le modèle")
                     else:
                         try:
                             # Préparer les données articles
@@ -706,52 +706,52 @@ def render_modeles():
                                 utilisateur_id=None  # TODO: user_id depuis auth
                             )
                             
-                            st.success(f"âœ… Modèle '{nom_modele}' créé et sauvegardé en BD!")
+                            st.success(f"✅ Modèle '{nom_modele}' créé et sauvegardé en BD!")
                             st.balloons()
                             st.rerun()
                         except Exception as e:
-                            st.error(f"âŒ Erreur lors de la sauvegarde: {str(e)}")
+                            st.error(f"❌ Erreur lors de la sauvegarde: {str(e)}")
                             logger.error(f"Erreur create_modele: {e}")
     
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"❌ Erreur: {str(e)}")
         logger.error(f"Erreur render_modeles: {e}")
 
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ─────────────────────────────────────────────────────────────────────────────
 # SECTION 5: OUTILS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ─────────────────────────────────────────────────────────────────────────────
 
 def render_outils():
     """Outils utilitaires - Phase 2: Code-barres, partage, UX améliorée"""
-    st.subheader("ðŸ”§ Outils")
+    st.subheader("📧 Outils")
     
     # PHASE 2 FEATURES
     tab_barcode, tab_share, tab_export, tab_stats = st.tabs([
-        "ðŸ“± Code-barres (PHASE 2)",
-        "ðŸ‘¥ Partage (PHASE 2)", 
-        "ðŸ’¾ Export/Import", 
-        "ðŸ“Š Stats"
+        "📱 Code-barres (PHASE 2)",
+        "👥 Partage (PHASE 2)", 
+        "💾 Export/Import", 
+        "📊 Stats"
     ])
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ─────────────────────────────────────────────────────────────────────────────
     # PHASE 2: CODE-BARRES SCANNING
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ─────────────────────────────────────────────────────────────────────────────
     
     with tab_barcode:
-        st.write("**ðŸ“± Scanner code-barres pour saisie rapide**")
-        st.info("â³ Phase 2 - En développement")
+        st.write("**📱 Scanner code-barres pour saisie rapide**")
+        st.info("⏳ Phase 2 - En développement")
         
         # Simuler la structure Phase 2
         col1, col2 = st.columns(2)
         with col1:
             st.write("""
             **Fonctionnalités planifiées:**
-            - ðŸ“± Scan code-barres avec webcam
-            - ðŸ” Reconnaissance automatique article
-            - âš¡ Saisie 10x plus rapide
-            - ðŸ“Š Base de codes-barres articles
+            - 📱 Scan code-barres avec webcam
+            - 🔍 Reconnaissance automatique article
+            - ⚡ Saisie 10x plus rapide
+            - 📊 Base de codes-barres articles
             """)
         with col2:
             st.write("""
@@ -765,22 +765,22 @@ def render_outils():
         st.divider()
         st.markdown("**Estimation:** 2-3 jours (composant scanning + base données)")
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ─────────────────────────────────────────────────────────────────────────────
     # PHASE 2: PARTAGE MULTI-UTILISATEURS
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ─────────────────────────────────────────────────────────────────────────────
     
     with tab_share:
-        st.write("**ðŸ‘¥ Partager liste avec famille/colocataires**")
-        st.info("â³ Phase 2 - En développement")
+        st.write("**👥 Partager liste avec famille/colocataires**")
+        st.info("⏳ Phase 2 - En développement")
         
         col1, col2 = st.columns(2)
         with col1:
             st.write("""
             **Fonctionnalités planifiées:**
-            - ðŸ‘¥ Partage par email/lien
-            - ðŸ”„ Sync temps réel
-            - âœ… Permissions (lecture/écriture)
-            - ðŸ“± Notifications mises à jour
+            - 👥 Partage par email/lien
+            - 📄 Sync temps réel
+            - ✅ Permissions (lecture/écriture)
+            - 📱 Notifications mises à jour
             """)
         with col2:
             st.write("""
@@ -804,9 +804,9 @@ def render_outils():
         
         st.markdown("**Estimation:** 3-4 jours (BD + permissions + notifications)")
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ─────────────────────────────────────────────────────────────────────────────
     # EXPORT/IMPORT (EXISTANT)
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ─────────────────────────────────────────────────────────────────────────────
     
     with tab_export:
         st.write("**Exporter/Importer listes**")
@@ -816,7 +816,7 @@ def render_outils():
             service = get_courses_service()
             liste = service.get_liste_courses(achetes=False)
             
-            if liste and st.button("ðŸ“¥ Télécharger liste (CSV)"):
+            if liste and st.button("📥 Télécharger liste (CSV)"):
                 df = pd.DataFrame([{
                     "Article": a.get('ingredient_nom'),
                     "Quantité": a.get('quantite_necessaire'),
@@ -828,21 +828,21 @@ def render_outils():
                 
                 csv = df.to_csv(index=False)
                 st.download_button(
-                    label="ðŸ’¾ Télécharger CSV",
+                    label="💾 Télécharger CSV",
                     data=csv,
                     file_name=f"liste_courses_{datetime.now().strftime('%Y%m%d')}.csv",
                     mime="text/csv"
                 )
         
         with col2:
-            uploaded = st.file_uploader("ðŸ“¤ Importer liste (CSV)", type=["csv"], key="import_csv")
+            uploaded = st.file_uploader("📤 Importer liste (CSV)", type=["csv"], key="import_csv")
             if uploaded:
                 try:
                     import io
                     df_import = pd.read_csv(io.BytesIO(uploaded.getvalue()))
-                    st.write(f"âœ… Fichier contient {len(df_import)} articles")
+                    st.write(f"✅ Fichier contient {len(df_import)} articles")
                     
-                    if st.button("âœ… Confirmer import"):
+                    if st.button("✅ Confirmer import"):
                         from src.core.models import Ingredient
                         db = next(obtenir_contexte_db())
                         service = get_courses_service()
@@ -870,18 +870,18 @@ def render_outils():
                             })
                             count += 1
                         
-                        st.success(f"âœ… {count} articles importés!")
+                        st.success(f"✅ {count} articles importés!")
                         st.session_state.courses_refresh += 1
                         st.rerun()
                 except Exception as e:
-                    st.error(f"âŒ Erreur import: {str(e)}")
+                    st.error(f"❌ Erreur import: {str(e)}")
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ─────────────────────────────────────────────────────────────────────────────
     # STATISTIQUES GLOBALES (EXISTANT + PHASE 2)
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ─────────────────────────────────────────────────────────────────────────────
     
     with tab_stats:
-        st.write("**ðŸ“Š Statistiques globales**")
+        st.write("**📊 Statistiques globales**")
         
         try:
             service = get_courses_service()
@@ -890,15 +890,15 @@ def render_outils():
             col1, col2, col3, col4 = st.columns(4)
             with col1:
                 liste = service.get_liste_courses(achetes=False)
-                st.metric("ðŸ“‹ Articles actifs", len(liste))
+                st.metric("📋 Articles actifs", len(liste))
             with col2:
                 liste_achetee = service.get_liste_courses(achetes=True)
-                st.metric("âœ… Articles achetés", len(liste_achetee))
+                st.metric("✅ Articles achetés", len(liste_achetee))
             with col3:
                 rayons = set(a.get('rayon_magasin') for a in liste if a.get('rayon_magasin'))
-                st.metric("ðŸª Rayons utilisés", len(rayons))
+                st.metric("🪑 Rayons utilisés", len(rayons))
             with col4:
-                st.metric("â±ï¸ Dernière mise à jour", datetime.now().strftime("%H:%M"))
+                st.metric("⏲️ Dernière mise à jour", datetime.now().strftime("%H:%M"))
             
             st.divider()
             
@@ -906,26 +906,26 @@ def render_outils():
             col1, col2, col3 = st.columns(3)
             with col1:
                 haute = len([a for a in liste if a.get('priorite') == 'haute'])
-                st.metric("ðŸ”´ Haute", haute)
+                st.metric("🔴 Haute", haute)
             with col2:
                 moyenne = len([a for a in liste if a.get('priorite') == 'moyenne'])
-                st.metric("ðŸŸ¡ Moyenne", moyenne)
+                st.metric("🟡 Moyenne", moyenne)
             with col3:
                 basse = len([a for a in liste if a.get('priorite') == 'basse'])
-                st.metric("ðŸŸ¢ Basse", basse)
+                st.metric("🟢 Basse", basse)
             
             st.divider()
             
             # Phase 2: Budgeting
-            st.subheader("ðŸ’° Budget tracking (PHASE 2)")
+            st.subheader("💰 Budget tracking (PHASE 2)")
             
         except Exception as e:
-            st.error(f"âŒ Erreur chargement stats: {str(e)}")
+            st.error(f"❌ Erreur chargement stats: {str(e)}")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# SYNCHRONISATION TEMPS RÃ‰EL
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ─────────────────────────────────────────────────────────────────────────────
+# SYNCHRONISATION TEMPS RÉEL
+# ─────────────────────────────────────────────────────────────────────────────
 
 
 def _init_realtime_sync():
@@ -969,7 +969,7 @@ def render_realtime_status():
         # Statut dans la sidebar
         with st.sidebar:
             st.divider()
-            st.markdown("### ðŸ”„ Synchronisation")
+            st.markdown("### 📄 Synchronisation")
             
             render_sync_status()
             render_presence_indicator()
@@ -1010,4 +1010,3 @@ def _broadcast_article_change(event_type: str, article_data: dict):
     
     except Exception as e:
         logger.debug(f"Broadcast non envoyé: {e}")
-

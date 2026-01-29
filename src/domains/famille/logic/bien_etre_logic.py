@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 CATEGORIES_BIEN_ETRE = ["Sommeil", "Nutrition", "Activité physique", "Mental", "Social", "Hydratation"]
-HUMEURS = ["ðŸ˜Š Joyeux", "ðŸ˜Œ Calme", "ðŸ˜ Neutre", "ðŸ˜¢ Triste", "ðŸ˜  Irritable", "ðŸ˜´ Fatigué"]
+HUMEURS = ["😊 Joyeux", "😌 Calme", "😐 Neutre", "😢 Triste", "😠 Irritable", "😴 Fatigué"]
 NIVEAUX_ENERGIE = ["Très bas", "Bas", "Moyen", "Bon", "Excellent"]
 
 

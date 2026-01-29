@@ -1,6 +1,6 @@
 ﻿"""
 Module Planning - Gestion du planning hebdomadaire
-âœ¨ Fonctionnalités complètes:
+ Fonctionnalités complètes:
 - Vue semaine avec édition en ligne
 - Génération IA planning
 - Historique et gestion plannings
@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
-JOURS_EMOJI = ["ðŸŸ¡", "ðŸŸ ", "ðŸŸ£", "ðŸ”µ", "ðŸŸ¢", "âš«", "ðŸ”´"]
+JOURS_EMOJI = ["¡", " ", "£", "ðŸ”µ", "¢", "âš«", "ðŸ”´"]
 TYPES_REPAS = ["déjeuner", "dîner"]
 REGIMES = ["Omnivore", "Végétarien", "Végan", "Sans gluten"]
 TEMPS_CUISINE = ["Rapide (< 30 min)", "Moyen (30-60 min)", "Long (> 60 min)"]
@@ -44,7 +44,7 @@ def app():
 
     tab_planning, tab_generer, tab_historique = st.tabs([
         "ðŸ“‹ Planning Actif", 
-        "âœ¨ Générer avec IA", 
+        " Générer avec IA", 
         "ðŸ“š Historique"
     ])
 
@@ -461,7 +461,7 @@ def render_historique():
             
             with col1:
                 genere_icon = "ðŸ¤–" if planning.genere_par_ia else "âœï¸"
-                actif_icon = "ðŸŸ¢" if planning.actif else "âš«"
+                actif_icon = "¢" if planning.actif else "âš«"
                 st.write(f"**{genere_icon} {planning.nom}** {actif_icon}")
                 st.caption(f"ðŸ“… {planning.semaine_debut.strftime('%d/%m')} â†’ {planning.semaine_fin.strftime('%d/%m')}")
             
@@ -503,5 +503,6 @@ def render_historique():
     except Exception as e:
         st.error(f"âŒ Erreur: {str(e)}")
         logger.error(f"Erreur render_historique: {e}")
+
 
 

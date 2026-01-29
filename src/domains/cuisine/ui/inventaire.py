@@ -1,6 +1,6 @@
 ﻿"""
 Module Inventaire - Gestion du stock
-âœ¨ Fonctionnalités complètes:
+ Fonctionnalités complètes:
 - Gestion complète du stock avec alertes
 - Catégorisation et filtres avancés
 - Suggestions IA pour les courses
@@ -119,13 +119,13 @@ def render_stock():
         with col1:
             st.metric("ðŸ“¦ Articles", len(inventaire), delta=None)
         with col2:
-            color = "ðŸ”´" if stock_critique > 0 else "ðŸŸ¢"
+            color = "ðŸ”´" if stock_critique > 0 else "¢"
             st.metric(f"{color} Critique", stock_critique)
         with col3:
-            color = "ðŸŸ " if stock_bas > 0 else "ðŸŸ¢"
+            color = " " if stock_bas > 0 else "¢"
             st.metric(f"{color} Faible", stock_bas)
         with col4:
-            color = "ðŸ””" if peremption > 0 else "ðŸŸ¢"
+            color = "ðŸ””" if peremption > 0 else "¢"
             st.metric(f"{color} Péremption", peremption)
         
         st.divider()
@@ -308,7 +308,7 @@ def render_alertes():
         # STOCK BAS
         # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         if alertes["stock_bas"]:
-            st.warning(f"ðŸŸ  {len(alertes['stock_bas'])} articles avec stock faible")
+            st.warning(f"  {len(alertes['stock_bas'])} articles avec stock faible")
             df = _prepare_alert_dataframe(alertes["stock_bas"])
             st.dataframe(df, use_container_width=True, hide_index=True)
         
@@ -405,7 +405,7 @@ def render_suggestions_ia():
                 # Afficher par priorité
                 for priority in ["haute", "moyenne", "basse"]:
                     if priority in by_priority:
-                        icon = "ðŸ”´" if priority == "haute" else "ðŸŸ " if priority == "moyenne" else "ðŸŸ¢"
+                        icon = "ðŸ”´" if priority == "haute" else " " if priority == "moyenne" else "¢"
                         with st.expander(f"{icon} Priorité {priority.upper()} ({len(by_priority[priority])})"):
                             for sugg in by_priority[priority]:
                                 col1, col2, col3, col4 = st.columns(4)
@@ -671,7 +671,7 @@ def render_notifications():
                 with col1:
                     st.metric("ðŸ”´ Critique", len(stats["stock_critique"]))
                 with col2:
-                    st.metric("ðŸŸ  Bas", len(stats["stock_bas"]))
+                    st.metric("  Bas", len(stats["stock_bas"]))
                 with col3:
                     st.metric("ðŸ”” Péremption", len(stats["peremption_proche"]))
                 with col4:
@@ -967,7 +967,7 @@ def render_predictions():
                         "Prédite (1 mois)": f"{pred.quantite_predite:.1f}",
                         "Tendance": pred.tendance,
                         "Confiance": f"{pred.confiance:.0%}",
-                        "Risque rupture": "ðŸ”´ OUI" if pred.risque_rupture else "ðŸŸ¢ Non",
+                        "Risque rupture": "ðŸ”´ OUI" if pred.risque_rupture else "¢ Non",
                         "Jours avant rupture": pred.jours_avant_rupture if pred.jours_avant_rupture else "-"
                     })
                 
@@ -1080,7 +1080,7 @@ def render_predictions():
                     # Affiche par priorité
                     for priority in ["CRITIQUE", "HAUTE", "MOYENNE"]:
                         if priority in by_priority:
-                            icon = "ðŸ”´" if priority == "CRITIQUE" else "ðŸŸ " if priority == "HAUTE" else "ðŸŸ¡"
+                            icon = "ðŸ”´" if priority == "CRITIQUE" else " " if priority == "HAUTE" else "¡"
                             count = len(by_priority[priority])
                             
                             with st.expander(f"{icon} {priority} ({count})", expanded=(priority=="CRITIQUE")):
@@ -1171,9 +1171,9 @@ def _prepare_inventory_dataframe(inventaire: list[dict[str, Any]]) -> pd.DataFra
     for article in inventaire:
         statut_icon = {
             "critique": "ðŸ”´",
-            "stock_bas": "ðŸŸ ",
+            "stock_bas": " ",
             "peremption_proche": "ðŸ””",
-            "ok": "ðŸŸ¢"
+            "ok": "¢"
         }.get(article["statut"], "â“")
         
         data.append({
@@ -1196,7 +1196,7 @@ def _prepare_alert_dataframe(articles: list[dict[str, Any]]) -> pd.DataFrame:
     for article in articles:
         statut_icon = {
             "critique": "ðŸ”´",
-            "stock_bas": "ðŸŸ ",
+            "stock_bas": " ",
             "peremption_proche": "ðŸ””",
         }.get(article["statut"], "â“")
         
@@ -1308,3 +1308,4 @@ def render_historique():
     
     except Exception as e:
         st.error(f"âŒ Erreur: {str(e)}")
+

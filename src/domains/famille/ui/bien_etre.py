@@ -16,8 +16,12 @@ from src.utils.formatters import format_quantity
 
 # Logique métier pure
 from src.domains.famille.logic.bien_etre_logic import (
-    calculer_score_bien_etre,
-    analyser_tendances_bien_etre
+    calculer_score_global,
+    analyser_tendance,
+    analyser_sommeil,
+    analyser_humeurs,
+    generer_recommandations,
+    valider_entree_bien_etre
 )
 
 # ===================================

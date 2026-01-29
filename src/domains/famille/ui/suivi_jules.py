@@ -16,8 +16,13 @@ from src.utils.formatters import format_quantity
 
 # Logique métier pure
 from src.domains.famille.logic.suivi_jules_logic import (
-    calculer_age_mois,
-    suggerer_activites_developpement
+    calculer_age,
+    formater_age,
+    get_etapes_age,
+    calculer_moyenne_sommeil,
+    analyser_humeurs,
+    valider_entree_bien_etre,
+    valider_milestone
 )
 
 # ===================================
