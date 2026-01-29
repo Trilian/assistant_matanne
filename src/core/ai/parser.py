@@ -227,12 +227,45 @@ def analyser_liste_reponse(
     reponse_debut = reponse[:500] if len(reponse) > 500 else reponse
     logger.debug(f"RAW AI RESPONSE (first 500 chars): {repr(reponse_debut)}")
 
-    class EnvelopeListe(BaseModel):
-        items: list[modele_item]
+    # Stratégie 1: Essayer de parser comme liste directe
+    try:
+        json_str = AnalyseurIA._extraire_objet_json(reponse)
+        items_data = json.loads(json_str)
+        
+        # Si c'est une liste directe
+        if isinstance(items_data, list):
+            logger.info(f"✅ Parser directe liste pour {modele_item.__name__}")
+            return [modele_item(**item) for item in items_data]
+        
+        # Si c'est un dict avec la clé attendue
+        if isinstance(items_data, dict) and cle_liste in items_data:
+            items_list = items_data[cle_liste]
+            if isinstance(items_list, list):
+                logger.info(f"✅ Parser liste avec clé '{cle_liste}' pour {modele_item.__name__}")
+                return [modele_item(**item) for item in items_list]
+    except Exception as e:
+        logger.debug(f"Stratégie 1 échouée: {str(e)[:100]}")
+        pass
 
-    # [OK] Utiliser 'items' (clé réelle) pas cle_liste (qui est ignorée)
-    donnees_enveloppe = AnalyseurIA.analyser(
-        reponse, EnvelopeListe, valeur_secours={"items": items_secours or []}, strict=False
-    )
+    # Stratégie 2: Utiliser 'items' hardcoded comme fallback
+    try:
+        class EnvelopeListe(BaseModel):
+            items: list[modele_item]
+        
+        donnees_enveloppe = AnalyseurIA.analyser(
+            reponse, EnvelopeListe, valeur_secours={"items": items_secours or []}, strict=False
+        )
+        return donnees_enveloppe.items
+    except Exception as e:
+        logger.warning(f"Stratégie 2 échouée: {e}")
 
-    return donnees_enveloppe.items
+    # Fallback final: retourner items_secours
+    if items_secours:
+        logger.warning(f"Utilisation fallback avec {len(items_secours)} items")
+        try:
+            return [modele_item(**item) for item in items_secours]
+        except Exception:
+            pass
+    
+    logger.error(f"[ERROR] Impossible de parser liste pour {modele_item.__name__}")
+    return []

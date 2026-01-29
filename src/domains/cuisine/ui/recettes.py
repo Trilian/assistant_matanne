@@ -247,9 +247,17 @@ def render_liste():
                 
                 # Description sur hauteur fixe pour éviter décalage
                 if recette.description:
-                    desc = recette.description[:60]
-                    if len(recette.description) > 60:
-                        desc += "..."
+                    # Limiter à ~150 caractères pour laisser la CSS faire le clamp sur 2 lignes
+                    desc = recette.description
+                    # Tronquer à limite mais sans couper mid-word
+                    if len(desc) > 150:
+                        # Trouver le dernier espace avant 150 caractères
+                        truncated = desc[:150]
+                        last_space = truncated.rfind(' ')
+                        if last_space > 100:  # Au moins 100 caractères
+                            desc = truncated[:last_space] + "..."
+                        else:
+                            desc = truncated + "..."
                     st.markdown(f"<p style='margin: 4px 0; font-size: 11px; opacity: 0.7; height: 2.2em; min-height: 2.2em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;'>{desc}</p>", unsafe_allow_html=True)
                 else:
                     # Espaceur pour maintenir la hauteur même sans description

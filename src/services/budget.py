@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TYPES ET SCHÃ‰MAS
+# TYPES ET SCHÉMAS
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
@@ -175,7 +175,7 @@ class BudgetService:
         self._depenses_cache: dict[str, list[Depense]] = {}
     
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    # GESTION DES DÃ‰PENSES
+    # GESTION DES DÉPENSES
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     @with_db_session
@@ -614,7 +614,7 @@ def render_budget_dashboard():
     import plotly.express as px
     import plotly.graph_objects as go
     
-    st.subheader("ðŸ’° Budget Familial")
+    st.subheader("[WALLET] Budget Familial")
     
     service = get_budget_service()
     
@@ -640,17 +640,17 @@ def render_budget_dashboard():
     
     # Alertes
     if resume.categories_depassees:
-        st.error(f"âš ï¸ Budgets dépassés: {', '.join(resume.categories_depassees)}")
+        st.error(f"[!] Budgets dépassés: {', '.join(resume.categories_depassees)}")
     if resume.categories_a_risque:
-        st.warning(f"âš¡ Ã€ surveiller (>80%): {', '.join(resume.categories_a_risque)}")
+        st.warning(f"[!] À surveiller (>80%): {', '.join(resume.categories_a_risque)}")
     
     # Métriques principales
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
         st.metric(
-            "ðŸ’¸ Dépenses",
-            f"{resume.total_depenses:.0f}â‚¬",
+            "[MONEY] Dépenses",
+            f"{resume.total_depenses:.0f}€",
             delta=f"{resume.variation_vs_mois_precedent:+.1f}% vs mois préc.",
             delta_color="inverse"
         )
@@ -658,28 +658,28 @@ def render_budget_dashboard():
     with col2:
         st.metric(
             "[CHART] Budget Total",
-            f"{resume.total_budget:.0f}â‚¬"
+            f"{resume.total_budget:.0f}€"
         )
     
     with col3:
         reste = resume.total_budget - resume.total_depenses
         st.metric(
-            "ðŸ’µ Reste",
-            f"{reste:.0f}â‚¬",
+            "[WALLET] Reste",
+            f"{reste:.0f}€",
             delta="OK" if reste >= 0 else "Dépassé!",
             delta_color="normal" if reste >= 0 else "inverse"
         )
     
     with col4:
         st.metric(
-            "ðŸ“ˆ Moyenne 6 mois",
-            f"{resume.moyenne_6_mois:.0f}â‚¬"
+            "[CHART] Moyenne 6 mois",
+            f"{resume.moyenne_6_mois:.0f}€"
         )
     
     st.markdown("---")
     
     # Tabs
-    tab1, tab2, tab3, tab4 = st.tabs(["[CHART] Vue d'ensemble", "âž• Ajouter", "ðŸ“ˆ Tendances", "âš™ï¸ Budgets"])
+    tab1, tab2, tab3, tab4 = st.tabs(["[CHART] Vue d'ensemble", "[+] Ajouter", "[CHART] Tendances", "[GEAR] Budgets"])
     
     with tab1:
         # Graphique dépenses par catégorie
@@ -720,7 +720,7 @@ def render_budget_dashboard():
                 st.plotly_chart(fig_bar, use_container_width=True)
         
         # Liste des dépenses récentes
-        st.markdown("### ðŸ“ Dernières dépenses")
+        st.markdown("### [CHART] Dernières dépenses")
         depenses = service.get_depenses_mois(mois, annee)
         
         if depenses:
@@ -759,7 +759,7 @@ def render_budget_dashboard():
             
             est_recurrente = st.checkbox("Dépense récurrente", key="expense_recurring")
             
-            if st.form_submit_button("ðŸ’¾ Enregistrer", type="primary", use_container_width=True):
+            if st.form_submit_button("[SAVE] Enregistrer", type="primary", use_container_width=True):
                 if montant > 0:
                     depense = Depense(
                         date=date_depense,
@@ -778,7 +778,7 @@ def render_budget_dashboard():
     
     with tab3:
         # Graphique de tendances
-        st.markdown("### ðŸ“ˆ Ã‰volution sur 6 mois")
+        st.markdown("### [CHART] Évolution sur 6 mois")
         
         tendances = service.get_tendances(nb_mois=6)
         
@@ -812,7 +812,7 @@ def render_budget_dashboard():
                     ))
             
             fig_trend.update_layout(
-                title="Ã‰volution des dépenses",
+                title="Évolution des dépenses",
                 xaxis_title="Mois",
                 yaxis_title="Montant (â‚¬)",
                 hovermode='x unified',
@@ -821,7 +821,7 @@ def render_budget_dashboard():
             st.plotly_chart(fig_trend, use_container_width=True)
         
         # Prévisions
-        st.markdown("### ðŸ”® Prévisions mois prochain")
+        st.markdown("### [FORECAST] Prévisions mois prochain")
         mois_prochain = mois + 1 if mois < 12 else 1
         annee_prochain = annee if mois < 12 else annee + 1
         
@@ -838,7 +838,7 @@ def render_budget_dashboard():
                 with col_p2:
                     st.write(f"{prev.montant_prevu:.0f}â‚¬")
                 with col_p3:
-                    confiance_color = "ðŸŸ¢" if prev.confiance > 0.7 else "ðŸŸ¡" if prev.confiance > 0.4 else "ðŸ”´"
+                    confiance_color = "[GREEN]" if prev.confiance > 0.7 else "[YELLOW]" if prev.confiance > 0.4 else "[RED]"
                     st.write(f"{confiance_color} {prev.confiance:.0%}")
     
     with tab4:
@@ -865,7 +865,7 @@ def render_budget_dashboard():
                         key=f"budget_{cat.value}"
                     )
             
-            if st.form_submit_button("ðŸ’¾ Enregistrer les budgets", use_container_width=True):
+            if st.form_submit_button("[SAVE] Enregistrer les budgets", use_container_width=True):
                 for cat, montant in new_budgets.items():
                     service.definir_budget(cat, montant, mois, annee)
                 

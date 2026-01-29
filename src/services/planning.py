@@ -229,9 +229,42 @@ class PlanningService(BaseService[Planning], BaseAIService, PlanningAIMixin):
             max_items=7,
         )
 
+        # Log de debug pour voir la réponse
         if not planning_data:
-            logger.warning(f"⚠️ Failed to generate planning for {semaine_debut}")
-            raise ValueError("Invalid IA response for planning generation")
+            logger.warning(f"⚠️ Failed to generate planning for {semaine_debut} - no data returned")
+            logger.debug(f"Checking if we can create default planning instead...")
+            
+            # Créer un planning par défaut avec des repas simples
+            planning = Planning(
+                nom=f"Planning {semaine_debut.strftime('%d/%m/%Y')}",
+                semaine_debut=semaine_debut,
+                semaine_fin=semaine_fin,
+                actif=True,
+                genere_par_ia=False,  # Non généré par IA car fallback
+            )
+            db.add(planning)
+            db.flush()
+
+            # Créer repas par défaut (simplement lundi à dimanche)
+            jours_semaine = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
+            for idx, jour_name in enumerate(jours_semaine):
+                date_jour = semaine_debut + timedelta(days=idx)
+                
+                repas = Repas(
+                    planning_id=planning.id,
+                    date_repas=date_jour,
+                    type_repas="dejeuner",
+                    nom_repas=f"Repas du {jour_name}",
+                    description="À remplir manuellement",
+                )
+                db.add(repas)
+            
+            db.commit()
+            logger.info(f"✅ Created default planning for {semaine_debut} with 7 days")
+            return planning
+        
+        # Planning IA réussi
+        logger.info(f"✅ Generated planning with {len(planning_data)} days using AI")
 
         # Créer planning en DB
         planning = Planning(
