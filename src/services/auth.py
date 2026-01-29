@@ -252,13 +252,57 @@ class AuthService:
         Returns:
             Résultat de la connexion
         """
+        # Mode DÉMO - Permet la connexion sans Supabase en développement
         if not self.is_configured:
+            logger.warning("⚠️ Mode démo: Authentification Supabase non configurée")
+            
+            # Comptes de démonstration disponibles
+            DEMO_ACCOUNTS = {
+                "anne@matanne.fr": "password123",  # Admin
+                "demo@test.fr": "password123",      # Membre
+                "test@test.fr": "password123",      # Invité
+            }
+            
+            # Vérifier si c'est un compte démo valide
+            if email in DEMO_ACCOUNTS and DEMO_ACCOUNTS[email] == password:
+                # Créer un profil de test
+                roles_map = {
+                    "anne@matanne.fr": Role.ADMIN,
+                    "demo@test.fr": Role.MEMBRE,
+                    "test@test.fr": Role.INVITE,
+                }
+                
+                nom_parts = email.split("@")[0].split(".")
+                prenom = nom_parts[0].capitalize()
+                nom = nom_parts[1].capitalize() if len(nom_parts) > 1 else "Test"
+                
+                user = UserProfile(
+                    id=email.replace("@", "_").replace(".", "_"),
+                    email=email,
+                    nom=nom,
+                    prenom=prenom,
+                    role=roles_map.get(email, Role.MEMBRE),
+                    display_name=f"{prenom} {nom}",
+                    created_at=datetime.now(),
+                )
+                
+                # Sauvegarder en session
+                st.session_state[self.USER_KEY] = user
+                logger.info(f"✅ Connexion démo réussie: {email} ({user.role.value})")
+                
+                return AuthResult(
+                    success=True,
+                    user=user,
+                    message=f"Bienvenue {prenom}! (Mode démo)"
+                )
+            
             return AuthResult(
                 success=False,
-                message="Service d'authentification non configuré",
-                error_code="NOT_CONFIGURED"
+                message="❌ Mode démo: Utilisez anne@matanne.fr / password123 (ou demo@test.fr / password123)",
+                error_code="DEMO_MODE"
             )
         
+        # Mode NORMAL - Authentification via Supabase
         try:
             response = self._client.auth.sign_in_with_password({
                 "email": email,
