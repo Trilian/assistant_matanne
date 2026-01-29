@@ -50,14 +50,14 @@ class RedisCache:
             if redis_url:
                 self._client = redis.from_url(redis_url, decode_responses=True)
                 self._client.ping()  # Test connexion
-                logger.info("✅ Redis connecté")
+                logger.info("[OK] Redis connecté")
             else:
                 logger.info("ℹ️ Redis non configuré, utilisation cache mémoire")
                 
         except ImportError:
-            logger.warning("⚠️ Package redis non installé")
+            logger.warning("[!] Package redis non installé")
         except Exception as e:
-            logger.warning(f"⚠️ Connexion Redis échouée: {e}")
+            logger.warning(f"[!] Connexion Redis échouée: {e}")
             self._client = None
     
     @property

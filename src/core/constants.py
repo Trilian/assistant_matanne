@@ -338,25 +338,25 @@ CATEGORIES_JARDIN = ["Légumes", "Fruits", "Herbes aromatiques", "Fleurs", "Arbr
 # MESSAGES UTILISATEUR
 # ═══════════════════════════════════════════════════════════
 
-MSG_SUCCESS_CREATE = "✅ {item} créé avec succès"
+MSG_SUCCESS_CREATE = "[OK] {item} créé avec succès"
 """Message de succès création."""
 
-MSG_SUCCESS_UPDATE = "✅ {item} mis à jour"
+MSG_SUCCESS_UPDATE = "[OK] {item} mis à jour"
 """Message de succès mise à jour."""
 
 MSG_SUCCESS_DELETE = "🗑️ {item} supprimé"
 """Message de succès suppression."""
 
-MSG_ERROR_NOT_FOUND = "❌ {item} introuvable"
+MSG_ERROR_NOT_FOUND = "[ERROR] {item} introuvable"
 """Message d'erreur élément non trouvé."""
 
-MSG_ERROR_INVALID_DATA = "❌ Données invalides"
+MSG_ERROR_INVALID_DATA = "[ERROR] Données invalides"
 """Message d'erreur données invalides."""
 
-MSG_ERROR_REQUIRED_FIELD = "⚠️ {field} est requis"
+MSG_ERROR_REQUIRED_FIELD = "[!] {field} est requis"
 """Message d'erreur champ requis."""
 
-MSG_ERROR_DB_CONNECTION = "❌ Erreur de connexion à la base de données"
+MSG_ERROR_DB_CONNECTION = "[ERROR] Erreur de connexion à la base de données"
 """Message d'erreur connexion DB."""
 
 MSG_ERROR_AI_SERVICE = "🤖 Service IA temporairement indisponible"
@@ -365,7 +365,7 @@ MSG_ERROR_AI_SERVICE = "🤖 Service IA temporairement indisponible"
 MSG_ERROR_RATE_LIMIT = "⏳ Limite d'appels atteinte, réessayez plus tard"
 """Message d'erreur rate limit."""
 
-MSG_WARNING_STOCK_BAS = "⚠️ Stock bas : {item}"
+MSG_WARNING_STOCK_BAS = "[!] Stock bas : {item}"
 """Message d'alerte stock bas."""
 
 MSG_WARNING_PEREMPTION = "⏳ {item} périme bientôt"

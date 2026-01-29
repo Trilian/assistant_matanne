@@ -50,7 +50,7 @@ class AnalyseurIA:
         try:
             nettoye = AnalyseurIA._nettoyer_basique(reponse)
             result = modele.model_validate_json(nettoye)
-            logger.info(f"✅ Stratégie 1 (parse direct) réussie pour {modele.__name__}")
+            logger.info(f"[OK] Stratégie 1 (parse direct) réussie pour {modele.__name__}")
             return result
         except (ValidationError, json.JSONDecodeError) as e:
             logger.debug(f"Stratégie 1 échouée: {str(e)[:100]}")
@@ -60,7 +60,7 @@ class AnalyseurIA:
         try:
             json_str = AnalyseurIA._extraire_objet_json(reponse)
             result = modele.model_validate_json(json_str)
-            logger.info(f"✅ Stratégie 2 (extraction JSON) réussie pour {modele.__name__}")
+            logger.info(f"[OK] Stratégie 2 (extraction JSON) réussie pour {modele.__name__}")
             return result
         except (ValidationError, json.JSONDecodeError, ValueError) as e:
             logger.debug(f"Stratégie 2 échouée: {str(e)[:100]}")
@@ -71,7 +71,7 @@ class AnalyseurIA:
             repare = AnalyseurIA._reparer_intelligemment(reponse)
             donnees = json.loads(repare)
             result = modele(**donnees)
-            logger.info(f"✅ Stratégie 3 (réparation) réussie pour {modele.__name__}")
+            logger.info(f"[OK] Stratégie 3 (réparation) réussie pour {modele.__name__}")
             return result
         except (ValidationError, json.JSONDecodeError, TypeError) as e:
             logger.debug(f"Stratégie 3 échouée: {str(e)[:100]}")
@@ -82,7 +82,7 @@ class AnalyseurIA:
             donnees_partielles = AnalyseurIA._analyser_partiel(reponse, modele)
             if donnees_partielles:
                 result = modele(**donnees_partielles)
-                logger.info(f"✅ Stratégie 4 (parse partiel) réussie pour {modele.__name__}")
+                logger.info(f"[OK] Stratégie 4 (parse partiel) réussie pour {modele.__name__}")
                 return result
         except Exception as e:
             logger.debug(f"Stratégie 4 échouée: {str(e)[:100]}")
@@ -90,12 +90,12 @@ class AnalyseurIA:
 
         # Stratégie 5: Fallback
         if not strict and valeur_secours:
-            logger.warning(f"⚠️  Toutes stratégies échouées, utilisation fallback pour {modele.__name__}")
+            logger.warning(f"[!]  Toutes stratégies échouées, utilisation fallback pour {modele.__name__}")
             logger.debug(f"   Response était: {reponse[:300]}")
             return modele(**valeur_secours)
 
         # Échec total
-        logger.error(f"❌ Impossible d'analyser réponse pour {modele.__name__}: {reponse[:200]}")
+        logger.error(f"[ERROR] Impossible d'analyser réponse pour {modele.__name__}: {reponse[:200]}")
         raise ValueError(f"Impossible d'analyser la réponse IA pour {modele.__name__}")
 
     @staticmethod
@@ -230,7 +230,7 @@ def analyser_liste_reponse(
     class EnvelopeListe(BaseModel):
         items: list[modele_item]
 
-    # ✅ Utiliser 'items' (clé réelle) pas cle_liste (qui est ignorée)
+    # [OK] Utiliser 'items' (clé réelle) pas cle_liste (qui est ignorée)
     donnees_enveloppe = AnalyseurIA.analyser(
         reponse, EnvelopeListe, valeur_secours={"items": items_secours or []}, strict=False
     )

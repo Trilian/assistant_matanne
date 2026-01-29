@@ -146,7 +146,7 @@ def app():
         st.error(f"âŒ Erreur chargement profil Jules: {str(e)}")
         return
     
-    tabs = st.tabs(["ðŸ“Š Jalons", "ðŸŽ¯ Activités Semaine", "ðŸ›ï¸ Shopping"])
+    tabs = st.tabs(["[CHART] Jalons", "ðŸŽ¯ Activités Semaine", "ðŸ›ï¸ Shopping"])
     
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TAB 1: JALONS

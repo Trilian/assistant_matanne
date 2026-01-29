@@ -209,7 +209,7 @@ def app():
     # ===================================
 
     tab1, tab2, tab3, tab4 = st.tabs(
-        ["ðŸ“Š Vue d'ensemble", "âž• Ajouter une entrée", "– Analyse IA", "ðŸ“ˆ Tendances"]
+        ["[CHART] Vue d'ensemble", "âž• Ajouter une entrée", "– Analyse IA", "ðŸ“ˆ Tendances"]
     )
 
     # ===================================
@@ -408,7 +408,7 @@ def app():
                     analyse = st.session_state["analyse_bien_etre"]
 
                     st.markdown("---")
-                    st.markdown("### ðŸ“Š Résultats de l'analyse")
+                    st.markdown("### [CHART] Résultats de l'analyse")
 
                     # Score
                     if "score_bien_etre" in analyse:

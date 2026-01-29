@@ -143,7 +143,7 @@ def app():
         "ðŸ“‹ Ma Liste",
         "ðŸ’¡ Suggestions",
         "ðŸ’° Budget",
-        "ðŸ“Š Analytics"
+        "[CHART] Analytics"
     ])
     
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -358,7 +358,7 @@ def app():
                 
                 with col2:
                     avg = df_categorie["Montant"].mean()
-                    st.metric("ðŸ“Š Moyenne/catégorie", f"{avg:.2f}â‚¬")
+                    st.metric("[CHART] Moyenne/catégorie", f"{avg:.2f}â‚¬")
                 
                 with col3:
                     if len(df_categorie) > 0:
@@ -380,7 +380,7 @@ def app():
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     with tab4:
-        st.subheader("ðŸ“Š Analytics Shopping")
+        st.subheader("[CHART] Analytics Shopping")
         
         try:
             # Récupérer tous les articles achetés ce mois
@@ -429,7 +429,7 @@ def app():
                         st.metric("ðŸ’¨ Différence", f"{diff:+.2f}â‚¬", delta=f"{diff/df_achetes['Estimé'].sum()*100:.1f}%")
                     
                     with col2:
-                        st.metric("ðŸ“¦ Articles achetés", len(items_achetes))
+                        st.metric("[PKG] Articles achetés", len(items_achetes))
                     
                     with col3:
                         precision = ((df_achetes["Estimé"].sum() - abs(diff)) / df_achetes["Estimé"].sum() * 100)

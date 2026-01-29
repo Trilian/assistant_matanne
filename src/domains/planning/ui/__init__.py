@@ -3,7 +3,7 @@ Module Planning - Centre de Coordination Familiale
 
 Agrège TOUS les événements familiaux en une vision unifiée:
 - ðŸ“… Calendrier: Tous les événements intégrés
-- ðŸ“Š Vue Semaine: Analyse charge et répartition
+- [CHART] Vue Semaine: Analyse charge et répartition
 - ðŸŽ¯ Vue d'Ensemble: Actions prioritaires et suggestions
 
 Utilise PlanningAIService pour:
@@ -20,7 +20,7 @@ __all__ = ["calendrier", "vue_semaine", "vue_ensemble"]
 # Enregistrement automatique pour OptimizedRouter
 SUBMODULES = {
     "ðŸ“… Calendrier Familial": calendrier,
-    "ðŸ“Š Vue Semaine": vue_semaine,
+    "[CHART] Vue Semaine": vue_semaine,
     "ðŸŽ¯ Vue d'Ensemble": vue_ensemble,
 }
 

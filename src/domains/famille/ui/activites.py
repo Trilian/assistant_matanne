@@ -193,7 +193,7 @@ def app():
             with col1:
                 st.metric("ðŸ’° Ce mois", f"{budget_mois:.2f}â‚¬")
             with col2:
-                st.metric("ðŸ“Š Cette semaine", f"{budget_semaine:.2f}â‚¬")
+                st.metric("[CHART] Cette semaine", f"{budget_semaine:.2f}â‚¬")
             with col3:
                 st.metric("ðŸ“ˆ Budget moyen", f"{budget_mois / 4:.2f}â‚¬ par semaine")
         

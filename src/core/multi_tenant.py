@@ -1,10 +1,10 @@
 ﻿"""
 Service Multi-utilisateurs - Isolation des données par utilisateur
 
-✅ Filtrage automatique par user_id
-✅ Décorateur pour isolation données
-✅ Middleware pour injection user context
-✅ Helpers pour requêtes multi-tenant
+[OK] Filtrage automatique par user_id
+[OK] Décorateur pour isolation données
+[OK] Middleware pour injection user context
+[OK] Helpers pour requêtes multi-tenant
 """
 
 import logging

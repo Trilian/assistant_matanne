@@ -61,7 +61,7 @@ def afficher_actions_prioritaires(alertes_semaine: list) -> None:
 
 def afficher_metriques_cles(stats: dict, charge_globale: str) -> None:
     """Affiche les KPIs principaux"""
-    st.markdown("### ðŸ“Š Métriques Clés")
+    st.markdown("### [CHART] Métriques Clés")
 
     col_m1, col_m2, col_m3, col_m4, col_m5 = st.columns(5)
 

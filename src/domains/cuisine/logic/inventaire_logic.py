@@ -582,7 +582,7 @@ def formater_inventaire_rapport(articles: list[dict]) -> str:
         "=" * 40,
         f"Date: {datetime.now().strftime('%d/%m/%Y %H:%M')}",
         "",
-        "ðŸ“Š RÃ‰SUMÃ‰",
+        "[CHART] RÃ‰SUMÃ‰",
         "-" * 20,
         f"Total articles: {stats['total_articles']}",
         f"Articles OK: {stats['articles_ok']} ({stats['pct_ok']:.1f}%)",
@@ -605,7 +605,7 @@ def formater_inventaire_rapport(articles: list[dict]) -> str:
         lignes.append("")
     
     # Par emplacement
-    lignes.append("ðŸ“¦ PAR EMPLACEMENT")
+    lignes.append("[PKG] PAR EMPLACEMENT")
     lignes.append("-" * 20)
     
     stats_emp = calculer_statistiques_par_emplacement(articles)

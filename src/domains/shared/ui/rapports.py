@@ -41,7 +41,7 @@ def app():
     """Point d'entrée module rapports PDF"""
     
     st.markdown(
-        "<h1 style='text-align: center;'>ðŸ“Š Rapports PDF</h1>",
+        "<h1 style='text-align: center;'>[CHART] Rapports PDF</h1>",
         unsafe_allow_html=True,
     )
     
@@ -50,7 +50,7 @@ def app():
     
     # Onglets
     tab1, tab2, tab3, tab4 = st.tabs([
-        "ðŸ“¦ Stocks",
+        "[PKG] Stocks",
         "ðŸ’° Budget",
         "ðŸ—‘ï¸ Gaspillage",
         "ðŸ“ˆ Historique"
@@ -79,7 +79,7 @@ def render_rapport_stocks():
     
     service = get_rapports_service()
     
-    st.subheader("ðŸ“¦ Rapport Stocks Hebdomadaire")
+    st.subheader("[PKG] Rapport Stocks Hebdomadaire")
     
     st.markdown("""
     Générez un rapport détaillé de votre stock chaque semaine:
@@ -165,7 +165,7 @@ def render_rapport_stocks():
             
             # Catégories
             if donnees.categories_resumee:
-                st.subheader("ðŸ“Š Stock par catégorie")
+                st.subheader("[CHART] Stock par catégorie")
                 cat_data = []
                 for cat, data in donnees.categories_resumee.items():
                     cat_data.append({
@@ -267,7 +267,7 @@ def render_rapport_budget():
             
             # Dépenses par catégorie
             if donnees.depenses_par_categorie:
-                st.subheader("ðŸ“Š Dépenses par catégorie")
+                st.subheader("[CHART] Dépenses par catégorie")
                 
                 cat_data = []
                 for cat, montant in donnees.depenses_par_categorie.items():
@@ -407,7 +407,7 @@ def render_analyse_gaspillage():
             
             # Gaspillage par catégorie
             if analyse.categories_gaspillage:
-                st.subheader("ðŸ“Š Gaspillage par catégorie")
+                st.subheader("[CHART] Gaspillage par catégorie")
                 
                 cat_data = []
                 for cat, data in sorted(
@@ -506,7 +506,7 @@ def render_historique():
             """)
     
     with col2:
-        st.subheader("ðŸ“Š Statistiques")
+        st.subheader("[CHART] Statistiques")
         
         st.metric("Rapports générés ce mois", 12)
         st.metric("Articles analysés", 47)

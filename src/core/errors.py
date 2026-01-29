@@ -6,7 +6,7 @@ Ce module :
 - Ajoute les fonctions d'affichage UI
 - Fournit des décorateurs de gestion d'erreurs avec UI
 
-⚠️ IMPORTANT: Les exceptions pures sont dans errors_base.py (sans dépendances UI)
+[!] IMPORTANT: Les exceptions pures sont dans errors_base.py (sans dépendances UI)
 """
 
 import logging
@@ -98,7 +98,7 @@ def gerer_erreurs(
             except ErreurValidation as e:
                 logger.warning(f"ErreurValidation dans {func.__name__}: {e.message}")
                 if afficher_dans_ui:
-                    st.error(f"❌ {e.message_utilisateur}")
+                    st.error(f"[ERROR] {e.message_utilisateur}")
                 if relancer:
                     raise
                 return valeur_fallback
@@ -106,7 +106,7 @@ def gerer_erreurs(
             except ErreurNonTrouve as e:
                 logger.info(f"ErreurNonTrouve dans {func.__name__}: {e.message}")
                 if afficher_dans_ui:
-                    st.warning(f"⚠️ {e.message_utilisateur}")
+                    st.warning(f"[!] {e.message_utilisateur}")
                 if relancer:
                     raise
                 return valeur_fallback
@@ -146,7 +146,7 @@ def gerer_erreurs(
             except Exception as e:
                 logger.critical(f"Erreur inattendue dans {func.__name__}: {e}", exc_info=True)
                 if afficher_dans_ui:
-                    st.error("❌ Une erreur inattendue s'est produite")
+                    st.error("[ERROR] Une erreur inattendue s'est produite")
 
                     # Afficher stack trace en mode debug
                     if _is_debug_mode():
@@ -329,8 +329,8 @@ def afficher_erreur_streamlit(erreur: Exception, contexte: str = "") -> None:
     """
     if isinstance(erreur, ExceptionApp):
         mapping = {
-            ErreurValidation: (st.error, "❌"),
-            ErreurNonTrouve: (st.warning, "⚠️"),
+            ErreurValidation: (st.error, "[ERROR]"),
+            ErreurNonTrouve: (st.warning, "[!]"),
             ErreurBaseDeDonnees: (st.error, "💾"),
             ErreurServiceIA: (st.error, "🤖"),
             ErreurLimiteDebit: (st.warning, "⏳"),
@@ -342,15 +342,15 @@ def afficher_erreur_streamlit(erreur: Exception, contexte: str = "") -> None:
                 render_fn(f"{prefix} {erreur.message_utilisateur}")
                 break
         else:
-            st.error(f"❌ {erreur.message_utilisateur}")
+            st.error(f"[ERROR] {erreur.message_utilisateur}")
 
         # Afficher détails en mode debug
         if _is_debug_mode() and getattr(erreur, "details", None):
-            with st.expander("🔍 Détails"):
+            with st.expander("[SEARCH] Détails"):
                 st.json(erreur.details)
     else:
         # Erreurs inconnues
-        st.error("❌ Une erreur inattendue s'est produite")
+        st.error("[ERROR] Une erreur inattendue s'est produite")
 
         if contexte:
             st.caption(f"Contexte : {contexte}")

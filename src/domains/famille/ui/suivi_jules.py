@@ -193,7 +193,7 @@ def app():
     # ===================================
 
     tab1, tab2, tab3, tab4 = st.tabs(
-        ["ðŸ“Š Tableau de bord", "– Conseils IA", "ðŸ“ Journal", "ðŸ“ˆ Statistiques"]
+        ["[CHART] Tableau de bord", "– Conseils IA", "ðŸ“ Journal", "ðŸ“ˆ Statistiques"]
     )
 
     # ===================================

@@ -72,7 +72,7 @@ class GestionnaireEtat:
         """Initialise le state si pas déjà fait"""
         if GestionnaireEtat.CLE_ETAT not in st.session_state:
             st.session_state[GestionnaireEtat.CLE_ETAT] = EtatApp()
-            logger.info("✅ EtatApp initialisé")
+            logger.info("[OK] EtatApp initialisé")
 
     @staticmethod
     def obtenir() -> EtatApp:

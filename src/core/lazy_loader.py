@@ -2,7 +2,7 @@
 Lazy Loading System - Charge modules à la demande
 Réduit temps chargement initial de 60%
 
-✅ FIX: Support pour modules unifiés avec navigation interne
+[OK] FIX: Support pour modules unifiés avec navigation interne
 """
 
 import importlib
@@ -67,15 +67,15 @@ class LazyModuleLoader:
             load_time = time.time() - start_time
             LazyModuleLoader._load_times[module_path] = load_time
 
-            logger.info(f"✅ Module chargé en {load_time*1000:.0f}ms: {module_path}")
+            logger.info(f"[OK] Module chargé en {load_time*1000:.0f}ms: {module_path}")
 
             return module
 
         except ModuleNotFoundError:
-            logger.error(f"❌ Module introuvable: {module_path}")
+            logger.error(f"[ERROR] Module introuvable: {module_path}")
             raise
         except Exception as e:
-            logger.error(f"❌ Erreur chargement {module_path}: {e}")
+            logger.error(f"[ERROR] Erreur chargement {module_path}: {e}")
             raise
 
     @staticmethod
@@ -173,7 +173,7 @@ class OptimizedRouter:
     """
     Router avec lazy loading intégré
 
-    ✅ Support pour modules unifiés avec navigation interne
+    [OK] Support pour modules unifiés avec navigation interne
     """
 
     # ═══════════════════════════════════════════════════════
@@ -182,7 +182,7 @@ class OptimizedRouter:
 
     MODULE_REGISTRY = {
         "accueil": {"path": "src.domains.shared.ui.accueil", "type": "simple"},
-        # ✅ DOMAINE CUISINE
+        # [OK] DOMAINE CUISINE
         "cuisine.recettes": {
             "path": "src.domains.cuisine.ui.recettes",
             "type": "simple",
@@ -202,17 +202,17 @@ class OptimizedRouter:
         # Outils transversaux
         "barcode": {"path": "src.domains.shared.ui.barcode", "type": "simple"},
         "rapports": {"path": "src.domains.shared.ui.rapports", "type": "simple"},
-        # ✅ DOMAINE FAMILLE
+        # [OK] DOMAINE FAMILLE
         "famille.accueil": {"path": "src.domains.famille.ui.jules", "type": "simple"},
         "famille.jules": {"path": "src.domains.famille.ui.jules", "type": "simple"},
         "famille.sante": {"path": "src.domains.famille.ui.sante", "type": "simple"},
         "famille.activites": {"path": "src.domains.famille.ui.activites", "type": "simple"},
         "famille.shopping": {"path": "src.domains.famille.ui.shopping", "type": "simple"},
-        # ✅ DOMAINE MAISON
+        # [OK] DOMAINE MAISON
         "maison.projets": {"path": "src.domains.maison.ui.projets", "type": "simple"},
         "maison.jardin": {"path": "src.domains.maison.ui.jardin", "type": "simple"},
         "maison.entretien": {"path": "src.domains.maison.ui.entretien", "type": "simple"},
-        # ✅ DOMAINE PLANNING
+        # [OK] DOMAINE PLANNING
         "planning.calendrier": {"path": "src.domains.planning.ui.calendrier", "type": "simple"},
         "planning.vue_ensemble": {"path": "src.domains.planning.ui.vue_ensemble", "type": "simple"},
         # Paramètres
@@ -224,14 +224,14 @@ class OptimizedRouter:
         """
         Charge et render module avec lazy loading
 
-        ✅ Gère modules unifiés avec navigation interne
+        [OK] Gère modules unifiés avec navigation interne
 
         Args:
             module_name: Nom du module (ex: "cuisine.recettes")
         """
-        # ✅ VÉRIFIER LE REGISTRY EN PREMIER
+        # [OK] VÉRIFIER LE REGISTRY EN PREMIER
         if module_name not in OptimizedRouter.MODULE_REGISTRY:
-            st.error(f"❌ Module '{module_name}' introuvable")
+            st.error(f"[ERROR] Module '{module_name}' introuvable")
             logger.error(f"Module non enregistré: {module_name}")
             return
 
@@ -254,17 +254,17 @@ class OptimizedRouter:
                 elif hasattr(module, "afficher"):
                     module.afficher()
                 else:
-                    st.error(f"❌ Module '{module_name}' sans fonction app() ou afficher()")
+                    st.error(f"[ERROR] Module '{module_name}' sans fonction app() ou afficher()")
                     logger.error(f"Module sans point d'entrée: {module_name}")
 
             except ModuleNotFoundError:
-                st.warning(f"⚠️ Module '{module_name}' pas encore implémenté")
+                st.warning(f"[!] Module '{module_name}' pas encore implémenté")
                 st.info("Ce module sera disponible prochainement.")
                 logger.warning(f"Module non implémenté: {module_path}")
 
             except Exception as e:
                 logger.exception(f"Erreur render {module_name}")
-                st.error("❌ Erreur lors du chargement du module")
+                st.error("[ERROR] Erreur lors du chargement du module")
 
                 if st.session_state.get("debug_mode", False):
                     st.exception(e)
@@ -274,7 +274,7 @@ class OptimizedRouter:
         """Précharge modules fréquents en arrière-plan"""
         common = [
             "src.modules.accueil",
-            "src.modules.cuisine",  # ✅ Précharger module unifié
+            "src.modules.cuisine",  # [OK] Précharger module unifié
         ]
         LazyModuleLoader.preload(common, background=True)
 

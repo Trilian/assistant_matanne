@@ -6,7 +6,7 @@ Ce module centralise UNIQUEMENT :
 - Les types d'erreurs
 - Les détails d'erreur
 
-⚠️ IMPORTANT: Ne doit JAMAIS importer streamlit ou éléments UI
+[!] IMPORTANT: Ne doit JAMAIS importer streamlit ou éléments UI
 """
 
 from typing import Any

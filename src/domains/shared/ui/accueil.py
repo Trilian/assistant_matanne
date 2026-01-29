@@ -235,7 +235,7 @@ def render_critical_alerts():
 def render_global_stats():
     """Stats globales de l'application"""
 
-    st.markdown("### ðŸ“Š Vue d'Ensemble")
+    st.markdown("### [CHART] Vue d'Ensemble")
 
     # Charger stats
     stats_recettes = get_recette_service().get_stats()
@@ -256,7 +256,7 @@ def render_global_stats():
         stock_bas = len([a for a in inventaire if a.get("statut") in ["critique", "sous_seuil"]])
 
         st.metric(
-            "ðŸ“¦ Inventaire",
+            "[PKG] Inventaire",
             total_inventaire,
             delta=f"-{stock_bas} stock bas" if stock_bas > 0 else None,
             delta_color="inverse",
@@ -300,7 +300,7 @@ def render_quick_actions():
             st.rerun()
 
     with col3:
-        if st.button("ðŸ“¦ Gérer Inventaire", key="quick_view_inventaire", use_container_width=True):
+        if st.button("[PKG] Gérer Inventaire", key="quick_view_inventaire", use_container_width=True):
             StateManager.navigate_to("cuisine.inventaire")
             st.rerun()
 
@@ -362,7 +362,7 @@ def render_inventaire_summary():
             unsafe_allow_html=True,
         )
 
-        st.markdown("### ðŸ“¦ Inventaire")
+        st.markdown("### [PKG] Inventaire")
 
         inventaire = get_inventaire_service().get_inventaire_complet()
 
@@ -389,7 +389,7 @@ def render_inventaire_summary():
 
             stock_alert(articles_alert[:3], key="home_inventory_alert")  # Max 3
 
-        if st.button("ðŸ“¦ Gérer l'inventaire", key="nav_inventaire", use_container_width=True):
+        if st.button("[PKG] Gérer l'inventaire", key="nav_inventaire", use_container_width=True):
             StateManager.navigate_to("cuisine.inventaire")
             st.rerun()
 

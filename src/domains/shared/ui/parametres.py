@@ -275,8 +275,8 @@ def render_ia_config():
             st.rerun()
 
     with col11:
-        if st.button("ðŸ“Š Détails Cache", key="btn_cache_details", use_container_width=True):
-            with st.expander("ðŸ“Š Statistiques Détaillées", expanded=True):
+        if st.button("[CHART] Détails Cache", key="btn_cache_details", use_container_width=True):
+            with st.expander("[CHART] Statistiques Détaillées", expanded=True):
                 st.json(cache_stats)
 
 
@@ -405,7 +405,7 @@ def render_cache_config():
     st.caption("Cache applicatif et cache IA")
 
     # Cache applicatif
-    st.markdown("#### ðŸ“¦ Cache Applicatif")
+    st.markdown("#### [PKG] Cache Applicatif")
 
     if "cache_data" in st.session_state:
         cache_size = len(st.session_state.cache_data)
@@ -488,7 +488,7 @@ def render_about():
     **Description:**  
     Assistant familial intelligent pour gérer :
     - ðŸ½ï¸ Recettes et planning repas
-    - ðŸ“¦ Inventaire alimentaire
+    - [PKG] Inventaire alimentaire
     - ðŸ›’ Liste de courses
     - ðŸ“… Planning hebdomadaire
     
@@ -539,7 +539,7 @@ def render_about():
     st.info(
         """
     **Besoin d'aide ?**
-    - ðŸ“§ Contact: support@example.com
+    - [WATER] Contact: support@example.com
     - ðŸ› Bugs: GitHub Issues
     - ðŸ“š Documentation: /docs
     """
@@ -647,9 +647,9 @@ def render_budget_config():
                     "restaurant": "ðŸ½ï¸",
                     "vacances": "âœˆï¸",
                     "bebe": "ðŸ‘¶",
-                    "autre": "ðŸ“¦",
+                    "autre": "[PKG]",
                 }
-                emoji = emoji_map.get(cat.value, "ðŸ“¦")
+                emoji = emoji_map.get(cat.value, "[PKG]")
                 st.checkbox(f"{emoji} {cat.value.capitalize()}", value=True, disabled=True)
         
         st.info("ðŸ’¡ Accède au module Budget dans le menu Famille pour gérer tes dépenses")

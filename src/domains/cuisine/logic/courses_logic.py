@@ -399,7 +399,7 @@ def formater_liste_impression(articles: list[dict]) -> str:
     rayons = grouper_par_rayon(articles)
     
     for rayon in sorted(rayons.keys()):
-        lignes.append(f"\nðŸ“¦ {rayon.upper()}")
+        lignes.append(f"\n[PKG] {rayon.upper()}")
         lignes.append("-" * 20)
         
         for article in trier_par_priorite(rayons[rayon]):

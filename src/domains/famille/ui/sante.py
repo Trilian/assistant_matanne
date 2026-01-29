@@ -169,7 +169,7 @@ def app():
     """Interface principale du module Santé"""
     st.title("ðŸ’ª Santé & Sport")
     
-    tabs = st.tabs(["ðŸƒ Routines", "ðŸŽ¯ Objectifs", "ðŸ“Š Tracking", "ðŸŽ Nutrition"])
+    tabs = st.tabs(["ðŸƒ Routines", "ðŸŽ¯ Objectifs", "[CHART] Tracking", "ðŸŽ Nutrition"])
     
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TAB 1: ROUTINES
@@ -461,7 +461,7 @@ def app():
                 ("ðŸ¥¤", "Boire de l'eau entre les repas"),
                 ("ðŸŒ™", "Dîner 2-3h avant le coucher"),
                 ("ðŸ›’", "Préparer ses courses à l'avance"),
-                ("ðŸ“Š", "Varier les aliments et couleurs"),
+                ("[CHART]", "Varier les aliments et couleurs"),
             ]
             for emoji, practice in practices:
                 st.write(f"{emoji} {practice}")

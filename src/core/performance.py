@@ -216,7 +216,7 @@ class MemoryMonitor:
         if not cls._tracking_active:
             tracemalloc.start()
             cls._tracking_active = True
-            logger.info("📊 Tracking mémoire démarré")
+            logger.info("[CHART] Tracking mémoire démarré")
     
     @classmethod
     def stop_tracking(cls) -> None:
@@ -224,7 +224,7 @@ class MemoryMonitor:
         if cls._tracking_active:
             tracemalloc.stop()
             cls._tracking_active = False
-            logger.info("📊 Tracking mémoire arrêté")
+            logger.info("[CHART] Tracking mémoire arrêté")
     
     @classmethod
     def get_current_usage(cls) -> dict:
@@ -372,7 +372,7 @@ class SQLOptimizer:
         if duration_ms > 100:
             stats["slow_queries"].append(query_info)
             stats["slow_queries"] = stats["slow_queries"][-20:]
-            logger.warning(f"⚠️ Requête lente ({duration_ms:.0f}ms): {query[:100]}")
+            logger.warning(f"[!] Requête lente ({duration_ms:.0f}ms): {query[:100]}")
     
     @classmethod
     def get_stats(cls) -> dict:
@@ -526,7 +526,7 @@ def render_performance_panel():
     summary = PerformanceDashboard.get_summary()
     score, status = PerformanceDashboard.get_health_score()
     
-    with st.expander(f"📊 Performance {status} {score}/100"):
+    with st.expander(f"[CHART] Performance {status} {score}/100"):
         
         # Tabs pour différentes métriques
         tab1, tab2, tab3 = st.tabs(["⚡ Général", "🧠 Mémoire", "🗃️ SQL"])

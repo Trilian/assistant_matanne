@@ -202,7 +202,7 @@ class GestionnaireLog:
         root_logger.addHandler(console_handler)
 
         GestionnaireLog._initialise = True
-        root_logger.info(f"✅ Logging initialisé (niveau: {niveau_log})")
+        root_logger.info(f"[OK] Logging initialisé (niveau: {niveau_log})")
 
     @staticmethod
     def obtenir_logger(nom: str) -> logging.Logger:

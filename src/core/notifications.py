@@ -189,9 +189,9 @@ class NotificationManager:
         if icone is None:
             icones = {
                 NotificationType.INFO: "ℹ️",
-                NotificationType.SUCCESS: "✅",
-                NotificationType.WARNING: "⚠️",
-                NotificationType.ERROR: "❌",
+                NotificationType.SUCCESS: "[OK]",
+                NotificationType.WARNING: "[!]",
+                NotificationType.ERROR: "[ERROR]",
                 NotificationType.ALERT: "🔔",
             }
             icone = icones.get(type, "ℹ️")

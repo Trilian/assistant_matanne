@@ -251,7 +251,7 @@ def app():
             st.error(f"âŒ {e}")
     
     with col3:
-        st.subheader("ðŸ“Š Stats Santé (7j)")
+        st.subheader("[CHART] Stats Santé (7j)")
         
         try:
             stats = get_stats_santé_semaine()

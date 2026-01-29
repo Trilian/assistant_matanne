@@ -2,12 +2,12 @@
 Redis Cache - Cache distribué haute performance.
 
 Fonctionnalités:
-✅ Cache Redis avec fallback mémoire
-✅ TTL automatique
-✅ Invalidation par tags
-✅ Serialisation JSON/Pickle
-✅ Connection pooling
-✅ Compression optionnelle
+[OK] Cache Redis avec fallback mémoire
+[OK] TTL automatique
+[OK] Invalidation par tags
+[OK] Serialisation JSON/Pickle
+[OK] Connection pooling
+[OK] Compression optionnelle
 """
 
 import hashlib
@@ -194,10 +194,10 @@ class RedisCache:
             
             # Test de connexion
             self._redis.ping()
-            logger.info(f"✅ Redis connecté: {host}:{port}")
+            logger.info(f"[OK] Redis connecté: {host}:{port}")
             
         except Exception as e:
-            logger.warning(f"❌ Redis indisponible ({e}) - mode fallback mémoire")
+            logger.warning(f"[ERROR] Redis indisponible ({e}) - mode fallback mémoire")
             self._redis = None
     
     def _make_key(self, key: str) -> str:

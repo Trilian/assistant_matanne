@@ -628,7 +628,7 @@ def generer_suggestions_actions(
         articles_bas = [a for a in inventaire if a.get("quantite", 0) < a.get("seuil_alerte", 5)]
         if articles_bas:
             suggestions.append({
-                "titre": "ðŸ“¦ Faire les courses",
+                "titre": "[PKG] Faire les courses",
                 "description": f"{len(articles_bas)} article(s) en stock bas",
                 "priorite": 1,
                 "action": "courses",
@@ -720,7 +720,7 @@ def formater_activite_recente(activite: dict) -> dict:
     icones = {
         "recette": "ðŸ³",
         "courses": "ðŸ›’",
-        "inventaire": "ðŸ“¦",
+        "inventaire": "[PKG]",
         "planning": "ðŸ“…",
         "famille": "ðŸ‘¨â€ðŸ‘©â€ðŸ‘¦",
         "autre": "ðŸ“",
@@ -854,7 +854,7 @@ def generer_suggestions_actions(metriques: dict, notifications: list[dict]) -> l
 # FORMATAGE DASHBOARD
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-def formater_metrique_card(titre: str, valeur: Any, unite: str = "", icone: str = "ðŸ“Š") -> dict:
+def formater_metrique_card(titre: str, valeur: Any, unite: str = "", icone: str = "[CHART]") -> dict:
     """
     Formate une carte métrique pour l'affichage.
     

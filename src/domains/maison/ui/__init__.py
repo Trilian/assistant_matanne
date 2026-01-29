@@ -66,7 +66,7 @@ def app():
     # STATISTIQUES
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
-    st.subheader("ðŸ“Š Tableau de bord")
+    st.subheader("[CHART] Tableau de bord")
     
     col_stat1, col_stat2, col_stat3 = st.columns(3)
     

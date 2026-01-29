@@ -105,7 +105,7 @@ class RateLimitIA:
                 RateLimitIA.CLE_RATE_LIMIT
             ]["historique"][-100:]
 
-        logger.debug(f"✅ Appel IA enregistré ({service})")
+        logger.debug(f"[OK] Appel IA enregistré ({service})")
 
     @staticmethod
     def obtenir_statistiques() -> dict:
@@ -148,7 +148,7 @@ class RateLimitIA:
         RateLimitIA._initialiser()
         st.session_state[RateLimitIA.CLE_RATE_LIMIT]["appels_jour"] = 0
         st.session_state[RateLimitIA.CLE_RATE_LIMIT]["appels_heure"] = 0
-        logger.warning("⚠️ Reset manuel des quotas IA")
+        logger.warning("[!] Reset manuel des quotas IA")
 
 
 # ═══════════════════════════════════════════════════════════

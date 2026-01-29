@@ -311,7 +311,7 @@ def app():
                     # Barre de progression
                     st.progress(routine['completion'] / 100)
                     st.caption(
-                        f"ðŸ“Š {routine['completion']:.0f}% â€¢ "
+                        f"[CHART] {routine['completion']:.0f}% â€¢ "
                         f"{routine['tasks_aujourd_hui']}/{routine['tasks_count']} tÃ¢ches â€¢ "
                         f"Fréquence: {routine['frequence']}"
                     )

@@ -223,7 +223,7 @@ def with_error_handling(
                     try:
                         import streamlit as st
 
-                        st.error(f"❌ {str(e)}")
+                        st.error(f"[ERROR] {str(e)}")
                     except Exception:
                         pass  # Streamlit pas initialisé
 

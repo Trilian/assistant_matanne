@@ -17,63 +17,63 @@ def run_cmd(cmd: str, shell: bool = False):
             subprocess.run(cmd.split(), check=True)
         return True
     except subprocess.CalledProcessError as e:
-        print(f"❌ Erreur: {e}")
+        print(f"[ERROR] Erreur: {e}")
         return False
 
 
 def run():
     """Lance l'application Streamlit"""
-    print("🚀 Démarrage de l'application...")
+    print("[RUN] Démarrage de l'application...")
     run_cmd("streamlit run src/app.py")
 
 
 def test():
     """Lance les tests"""
-    print("🧪 Lancement des tests...")
+    print("[TEST] Lancement des tests...")
     run_cmd("pytest")
 
 
 def test_coverage():
     """Lance les tests avec couverture"""
-    print("📊 Tests avec couverture...")
+    print("[CHART] Tests avec couverture...")
     run_cmd("pytest --cov=src --cov-report=html --cov-report=term")
 
 
 def format_code():
     """Formate le code avec black"""
-    print("✨ Formatage du code...")
+    print("[STAR] Formatage du code...")
     run_cmd("black src tests")
 
 
 def lint():
     """Vérifie le code avec ruff"""
-    print("🔍 Vérification du code...")
+    print("[SEARCH] Vérification du code...")
     run_cmd("ruff check src tests")
 
 
 def migrate():
     """Applique les migrations Alembic"""
-    print("🗄️ Application des migrations...")
+    print("[DB] Application des migrations...")
     run_cmd("alembic upgrade head")
 
 
 def create_migration():
     """Crée une nouvelle migration"""
     message = input("Message de migration: ")
-    print(f"📝 Création migration: {message}")
+    print(f"[EDIT] Création migration: {message}")
     run_cmd(f"alembic revision --autogenerate -m '{message}'", shell=True)
 
 
 def generate_requirements():
     """Génère requirements.txt depuis pyproject.toml"""
-    print("📦 Génération requirements.txt...")
+    print("[PKG] Génération requirements.txt...")
     if run_cmd("poetry export -f requirements.txt --output requirements.txt --without-hashes"):
-        print("✅ requirements.txt généré")
+        print("[OK] requirements.txt généré")
 
 
 def clean():
     """Nettoie les fichiers temporaires"""
-    print("🧹 Nettoyage...")
+    print("[CLEAN] Nettoyage...")
     import shutil
 
     patterns = [
@@ -94,12 +94,12 @@ def clean():
                 path.unlink()
                 print(f"  Supprimé: {path}")
 
-    print("✅ Nettoyage terminé")
+    print("[OK] Nettoyage terminé")
 
 
 def reset_supabase():
     """Reset complet de la base Supabase"""
-    print("🔥 Lancement du reset Supabase...")
+    print("[FIRE] Lancement du reset Supabase...")
     run_cmd("python scripts/reset_supabase.py")
 
 
@@ -120,7 +120,7 @@ Développement:
 Base de données:
   migrate              Applique les migrations
   create-migration     Crée une nouvelle migration
-  reset-supabase       🔥 Reset COMPLET Supabase (DANGER)
+  reset-supabase       [FIRE] Reset COMPLET Supabase (DANGER)
 
 Déploiement:
   requirements         Génère requirements.txt
@@ -155,7 +155,7 @@ def main():
     command = sys.argv[1]
 
     if command not in COMMANDS:
-        print(f"❌ Commande inconnue: {command}")
+        print(f"[ERROR] Commande inconnue: {command}")
         help_cmd()
         sys.exit(1)
 

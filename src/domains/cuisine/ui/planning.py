@@ -68,7 +68,7 @@ def render_planning():
     recette_service = get_recette_service()
     
     if service is None:
-        st.error("êŒ Service planning indisponible")
+        st.error("❌ Service planning indisponible")
         return
     
     try:
@@ -89,7 +89,7 @@ def render_planning():
         with col1:
             st.metric("ðŸ“… Semaine du", planning.semaine_debut.strftime("%d/%m"))
         with col2:
-            st.metric("ðŸ“Š Repas planifiés", len(planning.repas) if planning.repas else 0)
+            st.metric("[CHART] Repas planifiés", len(planning.repas) if planning.repas else 0)
         with col3:
             genere_ia = "🤖 IA" if planning.genere_par_ia else "êœï¸ Manuel"
             st.metric("Créé par", genere_ia)
@@ -156,7 +156,7 @@ def render_planning():
                                     st.success(f"êœ… Recette mise à jour")
                                     st.rerun()
                             except Exception as e:
-                                st.error(f"êŒ Erreur: {str(e)}")
+                                st.error(f"❌ Erreur: {str(e)}")
                     
                     with col3:
                         # Toggle "Préparé"
@@ -173,7 +173,7 @@ def render_planning():
                                     repas_db.prepare = prepared
                                     db.commit()
                             except Exception as e:
-                                st.error(f"êŒ Erreur: {str(e)}")
+                                st.error(f"❌ Erreur: {str(e)}")
                     
                     with col4:
                         if st.button("ðŸ“", key=f"edit_notes_{repas.id}", help="Ã‰diter notes"):
@@ -200,16 +200,16 @@ def render_planning():
                                         st.success("êœ… Notes sauvegardées")
                                         st.rerun()
                                 except Exception as e:
-                                    st.error(f"êŒ Erreur: {str(e)}")
+                                    st.error(f"❌ Erreur: {str(e)}")
                         with col_b:
-                            if st.button("êŒ Annuler", key=f"cancel_notes_{repas.id}"):
+                            if st.button("❌ Annuler", key=f"cancel_notes_{repas.id}"):
                                 st.session_state[f"editing_notes_{repas.id}"] = False
                                 st.rerun()
         
         st.divider()
         
         # Actions de masse
-        st.subheader("êš™ï¸ Actions")
+        st.subheader("⚙️ Actions")
         col1, col2, col3 = st.columns(3)
         
         with col1:
@@ -221,7 +221,7 @@ def render_planning():
                     st.success("êœ… Tous les repas marqués comme préparés")
                     st.rerun()
                 except Exception as e:
-                    st.error(f"êŒ Erreur: {str(e)}")
+                    st.error(f"❌ Erreur: {str(e)}")
         
         with col2:
             if st.button("ðŸ“‹ Dupliquer (semaine suiv.)", use_container_width=True):
@@ -258,7 +258,7 @@ def render_planning():
                     st.success("êœ… Planning dupliqué pour la semaine suivante")
                     st.rerun()
                 except Exception as e:
-                    st.error(f"êŒ Erreur: {str(e)}")
+                    st.error(f"❌ Erreur: {str(e)}")
         
         with col3:
             if st.button("ðŸ”’ Archiver planning", use_container_width=True):
@@ -271,10 +271,10 @@ def render_planning():
                         st.success("êœ… Planning archivé")
                         st.rerun()
                 except Exception as e:
-                    st.error(f"êŒ Erreur: {str(e)}")
+                    st.error(f"❌ Erreur: {str(e)}")
     
     except Exception as e:
-        st.error(f"êŒ Erreur: {str(e)}")
+        st.error(f"❌ Erreur: {str(e)}")
         logger.error(f"Erreur render_planning: {e}")
 
 
@@ -287,7 +287,7 @@ def render_generer():
     service = get_planning_service()
     
     if service is None:
-        st.error("êŒ Service planning indisponible")
+        st.error("❌ Service planning indisponible")
         return
     
     st.subheader("🤖 Générer Planning Hebdomadaire")
@@ -312,7 +312,7 @@ def render_generer():
         with col2:
             # Vérifier que c'est un lundi
             if semaine_debut.weekday() != 0:
-                st.warning("êš ï¸ Veuillez sélectionner un lundi")
+                st.warning("[!] Veuillez sélectionner un lundi")
                 semaine_debut = semaine_debut - timedelta(days=semaine_debut.weekday())
         
         st.divider()
@@ -396,14 +396,14 @@ def render_generer():
                             st.session_state.go_to_planning = True
                             st.rerun()
                     else:
-                        st.error("êŒ Erreur lors de la génération")
+                        st.error("❌ Erreur lors de la génération")
             
             except Exception as e:
-                st.error(f"êŒ Erreur: {str(e)}")
+                st.error(f"❌ Erreur: {str(e)}")
                 logger.error(f"Erreur generer_planning_ia: {e}")
     
     except Exception as e:
-        st.error(f"êŒ Erreur: {str(e)}")
+        st.error(f"❌ Erreur: {str(e)}")
         logger.error(f"Erreur render_generer: {e}")
 
 
@@ -416,7 +416,7 @@ def render_historique():
     service = get_planning_service()
     
     if service is None:
-        st.error("êŒ Service planning indisponible")
+        st.error("❌ Service planning indisponible")
         return
     
     st.subheader("ðŸ“š Historique des Plannings")
@@ -451,7 +451,7 @@ def render_historique():
             st.info("Aucun planning trouvé")
             return
         
-        st.metric("ðŸ“Š Total plannings", len(plannings))
+        st.metric("[CHART] Total plannings", len(plannings))
         
         st.divider()
         
@@ -467,7 +467,7 @@ def render_historique():
             
             with col2:
                 repas_count = len(planning.repas) if planning.repas else 0
-                st.metric("ðŸ“Š Repas", repas_count)
+                st.metric("[CHART] Repas", repas_count)
             
             with col3:
                 created = planning.cree_le.strftime("%d/%m/%y") if planning.cree_le else "N/A"
@@ -486,7 +486,7 @@ def render_historique():
                             st.success("êœ… Planning chargé")
                             st.rerun()
                     except Exception as e:
-                        st.error(f"êŒ Erreur: {str(e)}")
+                        st.error(f"❌ Erreur: {str(e)}")
             
             with col5:
                 if st.button("ðŸ—‘ï¸", key=f"delete_{planning.id}", help="Supprimer ce planning"):
@@ -496,12 +496,12 @@ def render_historique():
                         st.success("êœ… Planning supprimé")
                         st.rerun()
                     except Exception as e:
-                        st.error(f"êŒ Erreur: {str(e)}")
+                        st.error(f"❌ Erreur: {str(e)}")
             
             st.divider()
 
     except Exception as e:
-        st.error(f"êŒ Erreur: {str(e)}")
+        st.error(f"❌ Erreur: {str(e)}")
         logger.error(f"Erreur render_historique: {e}")
 
 

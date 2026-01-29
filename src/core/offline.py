@@ -495,10 +495,10 @@ def render_sync_panel():
     with st.expander(f"🔄 Synchronisation ({pending} en attente)", expanded=pending > 0):
         
         if pending == 0:
-            st.success("✅ Tout est synchronisé")
+            st.success("[OK] Tout est synchronisé")
             return
         
-        st.warning(f"⚠️ {pending} opération(s) en attente de synchronisation")
+        st.warning(f"[!] {pending} opération(s) en attente de synchronisation")
         
         # Liste des opérations
         operations = OfflineQueue.get_pending()
@@ -526,13 +526,13 @@ def render_sync_panel():
                         results = OfflineSynchronizer.sync_all()
                     
                     if results["success"] > 0:
-                        st.success(f"✅ {results['success']} opération(s) synchronisée(s)")
+                        st.success(f"[OK] {results['success']} opération(s) synchronisée(s)")
                     if results["failed"] > 0:
-                        st.warning(f"⚠️ {results['failed']} échec(s)")
+                        st.warning(f"[!] {results['failed']} échec(s)")
                     
                     st.rerun()
                 else:
-                    st.error("❌ Pas de connexion disponible")
+                    st.error("[ERROR] Pas de connexion disponible")
         
         with col2:
             if st.button("🗑️ Tout annuler", key="clear_queue", use_container_width=True):

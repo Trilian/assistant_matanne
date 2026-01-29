@@ -96,7 +96,7 @@ class SQLAlchemyListener:
                 cls._log_query(statement, duration_ms, parameters)
         
         cls._installed = True
-        logger.info("✅ SQLAlchemy listener installé")
+        logger.info("[OK] SQLAlchemy listener installé")
     
     @classmethod
     def _log_query(cls, sql: str, duration_ms: float, parameters: Any) -> None:
@@ -125,7 +125,7 @@ class SQLAlchemyListener:
         
         # Log si lente
         if duration_ms > 100:
-            logger.warning(f"⚠️ Requête lente ({duration_ms:.0f}ms) sur {table}: {operation}")
+            logger.warning(f"[!] Requête lente ({duration_ms:.0f}ms) sur {table}: {operation}")
     
     @classmethod
     def _extract_operation(cls, sql: str) -> str:
@@ -258,7 +258,7 @@ class N1Detector:
         st.session_state[cls.SESSION_KEY] = detections
         
         if detections:
-            logger.warning(f"⚠️ {len(detections)} problème(s) N+1 détecté(s)")
+            logger.warning(f"[!] {len(detections)} problème(s) N+1 détecté(s)")
         
         return detections
     
@@ -540,14 +540,14 @@ def render_sql_analysis():
             )
         
         # Par opération
-        st.caption("📊 Par opération:")
+        st.caption("[CHART] Par opération:")
         for op, count in stats["by_operation"].items():
             st.progress(count / stats["total"], text=f"{op}: {count}")
         
         # Détection N+1
         detections = N1Detector.analyze()
         if detections:
-            st.warning(f"⚠️ {len(detections)} problème(s) N+1 détecté(s)")
+            st.warning(f"[!] {len(detections)} problème(s) N+1 détecté(s)")
             
             for suggestion in N1Detector.get_suggestions():
                 st.caption(suggestion)

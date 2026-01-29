@@ -63,10 +63,10 @@ class ClientIA:
             self.timeout = parametres.MISTRAL_TIMEOUT
             self._config_loaded = True
 
-            logger.info(f"✅ ClientIA initialisé (modèle: {self.modele})")
+            logger.info(f"[OK] ClientIA initialisé (modèle: {self.modele})")
 
         except ValueError as e:
-            logger.error(f"❌ Configuration IA manquante: Clé API Mistral non configurée")
+            logger.error(f"[ERROR] Configuration IA manquante: Clé API Mistral non configurée")
             # NE PAS marquer comme loaded en cas d'erreur
             # Cela permet une tentative lors du prochain appel (quand st.secrets sera prêt)
             self.cle_api = None
@@ -153,7 +153,7 @@ class ClientIA:
 
             except httpx.HTTPError as e:
                 if tentative == max_tentatives - 1:
-                    logger.error(f"❌ Erreur API après {max_tentatives} tentatives: {e}")
+                    logger.error(f"[ERROR] Erreur API après {max_tentatives} tentatives: {e}")
                     raise ErreurServiceIA(
                         f"Erreur API Mistral: {str(e)}",
                         message_utilisateur="L'IA est temporairement indisponible",
@@ -165,7 +165,7 @@ class ClientIA:
                 await asyncio.sleep(temps_attente)
 
             except Exception as e:
-                logger.error(f"❌ Erreur inattendue: {e}")
+                logger.error(f"[ERROR] Erreur inattendue: {e}")
                 raise ErreurServiceIA(
                     f"Erreur inattendue: {str(e)}", message_utilisateur="Erreur lors de l'appel IA"
                 ) from e
@@ -226,7 +226,7 @@ class ClientIA:
                 )
 
             contenu = resultat["choices"][0]["message"]["content"]
-            logger.info(f"✅ Réponse reçue ({len(contenu)} caractères)")
+            logger.info(f"[OK] Réponse reçue ({len(contenu)} caractères)")
 
             return contenu
 
@@ -294,5 +294,5 @@ def obtenir_client_ia() -> ClientIA | None:
         _client = ClientIA()
         # NE PAS vérifier cle_api ici - la config est chargée en lazy
         # Elle sera validée au moment du premier appel
-        logger.debug("✅ ClientIA créé (config chargée en lazy)")
+        logger.debug("[OK] ClientIA créé (config chargée en lazy)")
     return _client

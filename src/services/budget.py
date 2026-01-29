@@ -657,7 +657,7 @@ def render_budget_dashboard():
     
     with col2:
         st.metric(
-            "ðŸ“Š Budget Total",
+            "[CHART] Budget Total",
             f"{resume.total_budget:.0f}â‚¬"
         )
     
@@ -679,7 +679,7 @@ def render_budget_dashboard():
     st.markdown("---")
     
     # Tabs
-    tab1, tab2, tab3, tab4 = st.tabs(["ðŸ“Š Vue d'ensemble", "âž• Ajouter", "ðŸ“ˆ Tendances", "âš™ï¸ Budgets"])
+    tab1, tab2, tab3, tab4 = st.tabs(["[CHART] Vue d'ensemble", "âž• Ajouter", "ðŸ“ˆ Tendances", "âš™ï¸ Budgets"])
     
     with tab1:
         # Graphique dépenses par catégorie

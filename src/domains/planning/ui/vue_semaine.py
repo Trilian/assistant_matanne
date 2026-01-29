@@ -59,7 +59,7 @@ def afficher_graphique_charge_semaine(jours: dict) -> None:
     fig.add_hline(y=80, line_dash="dash", line_color="red", annotation_text="Surcharge")
 
     fig.update_layout(
-        title="ðŸ“Š Charge familiale par jour",
+        title="[CHART] Charge familiale par jour",
         xaxis_title="Jour",
         yaxis_title="Score de charge (0-100)",
         height=400,
@@ -178,7 +178,7 @@ def afficher_timeline_jour(jour_complet: dict, jour: date) -> None:
 def app():
     """Module Vue Semaine - Dashboard détaillé"""
 
-    st.title("ðŸ“Š Vue Semaine Détaillée")
+    st.title("[CHART] Vue Semaine Détaillée")
     st.caption("Analyse complète de la charge familiale et répartition des événements")
 
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•

@@ -217,7 +217,7 @@ class Parametres(BaseSettings):
 
         # 4. Échec - guide utilisateur
         raise ValueError(
-            "❌ Configuration DB manquante!\n\n"
+            "[ERROR] Configuration DB manquante!\n\n"
             "Configure l'une de ces options:\n"
             "1. Streamlit Secrets (.streamlit/secrets.toml):\n"
             "   [db]\n"
@@ -255,19 +255,19 @@ class Parametres(BaseSettings):
         # 1. Variable d'environnement directe (PREMIÈRE PRIORITÉ - dev local)
         cle = os.getenv("MISTRAL_API_KEY")
         if cle and cle.strip() and cle != "sk-test-dummy-key-replace-with-real-key":
-            print(f"[CONFIG] ✅ Clé API Mistral chargée depuis env var MISTRAL_API_KEY")
+            print(f"[CONFIG] [OK] Clé API Mistral chargée depuis env var MISTRAL_API_KEY")
             return cle
 
         # 2. Vérifier si c'est un edge case en Streamlit Cloud (STREAMLIT_SECRETS_MISTRAL_API_KEY)
         cle = os.getenv("STREAMLIT_SECRETS_MISTRAL_API_KEY")
         if cle and cle.strip():
-            print(f"[CONFIG] ✅ Clé API Mistral chargée depuis env var STREAMLIT_SECRETS_MISTRAL_API_KEY")
+            print(f"[CONFIG] [OK] Clé API Mistral chargée depuis env var STREAMLIT_SECRETS_MISTRAL_API_KEY")
             return cle
 
         # 3. Secrets Streamlit - Essayer plusieurs chemins (Streamlit Cloud)
         api_key = _get_mistral_api_key_from_secrets()
         if api_key and api_key.strip() and api_key != "sk-test-dummy-key-replace-with-real-key":
-            print(f"[CONFIG] ✅ Clé API Mistral chargée depuis st.secrets")
+            print(f"[CONFIG] [OK] Clé API Mistral chargée depuis st.secrets")
             return api_key
 
         # Erreur: aucune clé trouvée
@@ -277,7 +277,7 @@ class Parametres(BaseSettings):
         # En Streamlit Cloud, on lance une erreur MAIS on la laisse remonter
         # Le ClientIA.appeler() attendra le prochain appel quand st.secrets sera disponible
         raise ValueError(
-            f"❌ Clé API Mistral manquante ({env_info})!\n\n"
+            f"[ERROR] Clé API Mistral manquante ({env_info})!\n\n"
             "Configure l'une de ces options:\n"
             "1. Fichier .env.local (Dev local):\n"
             "   MISTRAL_API_KEY='sk-xxx' ou autre format\n\n"
@@ -444,5 +444,5 @@ def obtenir_parametres() -> Parametres:
         # Fallback: continue if logging config échoue
         pass
 
-    logger.info(f"✅ Configuration chargée: {_parametres.APP_NAME} v{_parametres.APP_VERSION}")
+    logger.info(f"[OK] Configuration chargée: {_parametres.APP_NAME} v{_parametres.APP_VERSION}")
     return _parametres

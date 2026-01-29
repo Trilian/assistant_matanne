@@ -173,7 +173,7 @@ def app():
     # STATS SEMAINE
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-    st.markdown("### ðŸ“Š Résumé de la semaine")
+    st.markdown("### [CHART] Résumé de la semaine")
 
     cols_stats = st.columns(5)
 

@@ -56,7 +56,7 @@ def app():
         "ðŸ“· Scanner",
         "âž• Ajout rapide",
         "âœ… Vérifier stock",
-        "ðŸ“Š Gestion",
+        "[CHART] Gestion",
         "ðŸ“¥ Import/Export"
     ])
     
@@ -131,7 +131,7 @@ def render_scanner():
             
             # Détails
             if resultat.type_scan == "article":
-                st.subheader("ðŸ“¦ Article trouvé")
+                st.subheader("[PKG] Article trouvé")
                 details = resultat.details
                 
                 col1, col2, col3 = st.columns(3)
@@ -368,7 +368,7 @@ def render_verifier_stock():
             
             # Actions
             if info_stock["etat_stock"] != "OK":
-                st.warning(f"ðŸ“¦ Stock faible - Considérer l'ajout de stock")
+                st.warning(f"[PKG] Stock faible - Considérer l'ajout de stock")
             
             if info_stock["peremption_etat"] in ["URGENT", "PÃ‰RIMÃ‰"]:
                 st.error(f"âŒ Problème péremption - Action requise")
@@ -389,7 +389,7 @@ def render_gestion_barcodes():
     
     service = get_barcode_service()
     
-    st.subheader("ðŸ“Š Gestion Codes-Barres")
+    st.subheader("[CHART] Gestion Codes-Barres")
     
     # Lister articles avec barcode
     try:

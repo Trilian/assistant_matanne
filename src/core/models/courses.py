@@ -109,7 +109,7 @@ class ModeleCourses(Base):
     modifie_le: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)  # TODO: Make NOT NULL after migration applied
     actif: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
     
     # Données articles (JSON)

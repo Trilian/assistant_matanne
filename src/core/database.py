@@ -69,12 +69,12 @@ def obtenir_moteur(nombre_tentatives: int = DB_CONNECTION_RETRY, delai_tentative
             with moteur.connect() as conn:
                 conn.execute(text("SELECT 1"))
 
-            logger.info(f"✅ Connexion DB établie (tentative {tentative + 1})")
+            logger.info(f"[OK] Connexion DB établie (tentative {tentative + 1})")
             return moteur
 
         except (OperationalError, DatabaseError) as e:
             derniere_erreur = e
-            logger.warning(f"❌ Tentative {tentative + 1}/{nombre_tentatives} échouée: {e}")
+            logger.warning(f"[ERROR] Tentative {tentative + 1}/{nombre_tentatives} échouée: {e}")
 
             if tentative < nombre_tentatives - 1:
                 time.sleep(delai_tentative)
@@ -155,7 +155,7 @@ def obtenir_contexte_db() -> Generator[Session, None, None]:
 
     except OperationalError as e:
         db.rollback()
-        logger.error(f"❌ Erreur opérationnelle DB: {e}")
+        logger.error(f"[ERROR] Erreur opérationnelle DB: {e}")
         raise ErreurBaseDeDonnees(
             f"Erreur réseau/connexion: {e}",
             message_utilisateur="Problème de connexion à la base de données",
@@ -163,14 +163,14 @@ def obtenir_contexte_db() -> Generator[Session, None, None]:
 
     except DatabaseError as e:
         db.rollback()
-        logger.error(f"❌ Erreur base de données: {e}")
+        logger.error(f"[ERROR] Erreur base de données: {e}")
         raise ErreurBaseDeDonnees(
             str(e), message_utilisateur="Erreur lors de l'opération en base de données"
         )
 
     except Exception as e:
         db.rollback()
-        logger.error(f"❌ Erreur inattendue: {e}")
+        logger.error(f"[ERROR] Erreur inattendue: {e}")
         raise
 
     finally:
@@ -239,7 +239,7 @@ class GestionnaireMigrations:
             )
             conn.commit()
 
-        logger.info("✅ Table migrations initialisée")
+        logger.info("[OK] Table migrations initialisée")
 
     @staticmethod
     def obtenir_version_courante() -> int:
@@ -298,11 +298,11 @@ class GestionnaireMigrations:
                     {"version": version, "name": nom},
                 )
 
-            logger.info(f"✅ Migration v{version} appliquée: {nom}")
+            logger.info(f"[OK] Migration v{version} appliquée: {nom}")
             return True
 
         except Exception as e:
-            logger.error(f"❌ Échec migration v{version}: {e}")
+            logger.error(f"[ERROR] Échec migration v{version}: {e}")
             raise ErreurBaseDeDonnees(
                 f"Échec migration v{version}: {e}",
                 message_utilisateur="Erreur lors de la mise à jour du schéma",
@@ -325,7 +325,7 @@ class GestionnaireMigrations:
         en_attente = [m for m in migrations if m["version"] > version_courante]
 
         if not en_attente:
-            logger.info("✅ Aucune migration en attente")
+            logger.info("[OK] Aucune migration en attente")
             return
 
         logger.info(f"🔄 {len(en_attente)} migration(s) en attente")
@@ -336,7 +336,7 @@ class GestionnaireMigrations:
                 migration["version"], migration["name"], migration["sql"]
             )
 
-        logger.info("✅ Toutes les migrations appliquées")
+        logger.info("[OK] Toutes les migrations appliquées")
 
     @staticmethod
     def obtenir_migrations_disponibles() -> list[dict]:
@@ -389,7 +389,7 @@ def verifier_connexion() -> tuple[bool, str]:
         return False, f"Erreur connexion: {e.message}"
 
     except Exception as e:
-        logger.error(f"❌ Test connexion échoué: {e}")
+        logger.error(f"[ERROR] Test connexion échoué: {e}")
         return False, f"Erreur: {str(e)}"
 
 
@@ -474,7 +474,7 @@ def initialiser_database(executer_migrations: bool = True):
         with moteur.connect() as conn:
             conn.execute(text("SELECT 1"))
 
-        logger.info("✅ Connexion DB OK")
+        logger.info("[OK] Connexion DB OK")
 
         # Exécuter migrations si demandé
         if executer_migrations:
@@ -484,7 +484,7 @@ def initialiser_database(executer_migrations: bool = True):
         return True
 
     except Exception as e:
-        logger.error(f"❌ Erreur initialisation DB: {e}")
+        logger.error(f"[ERROR] Erreur initialisation DB: {e}")
         return False
 
 
@@ -492,7 +492,7 @@ def creer_toutes_tables():
     """
     Crée toutes les tables (dev/setup uniquement).
 
-    ⚠️ ATTENTION: Ne pas appeler en production.
+    [!] ATTENTION: Ne pas appeler en production.
     """
     parametres = obtenir_parametres()
 
@@ -505,7 +505,7 @@ def creer_toutes_tables():
 
         moteur = obtenir_moteur()
         Base.metadata.create_all(bind=moteur)
-        logger.info("✅ Tables créées/vérifiées")
+        logger.info("[OK] Tables créées/vérifiées")
 
     except Exception as e:
         logger.error(f"Erreur création tables: {e}")

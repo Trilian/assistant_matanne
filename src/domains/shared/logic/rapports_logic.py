@@ -220,7 +220,7 @@ def formater_rapport_texte(rapport: Dict[str, Any]) -> str:
     """
     lignes = [
         "â•" * 60,
-        f"ðŸ“Š {rapport.get('titre', 'RAPPORT').upper()}",
+        f"[CHART] {rapport.get('titre', 'RAPPORT').upper()}",
         "â•" * 60,
         f"Période: {rapport.get('periode', 'N/A')}",
         f"Du {rapport.get('date_debut')} au {rapport.get('date_fin')}",
@@ -261,7 +261,7 @@ def formater_rapport_markdown(rapport: Dict[str, Any]) -> str:
         Markdown formaté
     """
     lignes = [
-        f"# ðŸ“Š {rapport.get('titre', 'Rapport')}",
+        f"# [CHART] {rapport.get('titre', 'Rapport')}",
         "",
         f"**Période:** {rapport.get('periode', 'N/A')}  ",
         f"**Dates:** Du {rapport.get('date_debut')} au {rapport.get('date_fin')}  ",
@@ -316,7 +316,7 @@ def formater_rapport_html(rapport: Dict[str, Any]) -> str:
     </style>
 </head>
 <body>
-    <h1>ðŸ“Š {rapport.get('titre', 'Rapport')}</h1>
+    <h1>[CHART] {rapport.get('titre', 'Rapport')}</h1>
     
     <div class="stats">
         <p><strong>Période:</strong> {rapport.get('periode', 'N/A')}</p>

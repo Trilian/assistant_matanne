@@ -22,9 +22,9 @@ class AgentIA:
         try:
             self.client = ClientIA()
             self.contexte = {}
-            logger.info("✅ AgentIA initialisé")
+            logger.info("[OK] AgentIA initialisé")
         except Exception as e:
-            logger.error(f"❌ Erreur lors de l'initialisation d'AgentIA: {e}")
+            logger.error(f"[ERROR] Erreur lors de l'initialisation d'AgentIA: {e}")
             self.client = None
             self.contexte = {}
 
@@ -46,7 +46,7 @@ class AgentIA:
             Réponse texte de l'IA
         """
         if not self.client:
-            logger.warning("❌ ClientIA non disponible, retournant réponse par défaut")
+            logger.warning("[ERROR] ClientIA non disponible, retournant réponse par défaut")
             return "L'IA n'est pas disponible pour le moment."
 
         try:
@@ -65,7 +65,7 @@ class AgentIA:
             return reponse
 
         except Exception as e:
-            logger.error(f"❌ Erreur lors de l'appel IA: {e}")
+            logger.error(f"[ERROR] Erreur lors de l'appel IA: {e}")
             return f"Erreur lors du traitement: {str(e)}"
 
     async def generer_analyse(

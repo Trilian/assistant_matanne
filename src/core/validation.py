@@ -116,7 +116,7 @@ class NettoyeurEntrees:
         # Détecter patterns SQL
         for pattern in NettoyeurEntrees.PATTERNS_SQL:
             if re.search(pattern, valeur, re.IGNORECASE):
-                logger.warning(f"⚠️ Tentative injection SQL détectée: {valeur[:50]}")
+                logger.warning(f"[!] Tentative injection SQL détectée: {valeur[:50]}")
                 # On laisse passer mais on log (pour ne pas bloquer faux positifs)
 
         # Supprimer caractères de contrôle
@@ -558,7 +558,7 @@ def valider_formulaire_streamlit(
     for champ, regles in schema.items():
         if regles.get("required", False):
             if champ not in nettoye or not nettoye[champ]:
-                erreurs.append(f"⚠️ {regles.get('label', champ)} est requis")
+                erreurs.append(f"[!] {regles.get('label', champ)} est requis")
 
     # Vérifier plages numériques
     for champ, valeur in nettoye.items():
@@ -566,15 +566,15 @@ def valider_formulaire_streamlit(
 
         if regles.get("type") == "number" and valeur is not None:
             if regles.get("min") is not None and valeur < regles["min"]:
-                erreurs.append(f"⚠️ {regles.get('label', champ)} doit être ≥ {regles['min']}")
+                erreurs.append(f"[!] {regles.get('label', champ)} doit être ≥ {regles['min']}")
             if regles.get("max") is not None and valeur > regles["max"]:
-                erreurs.append(f"⚠️ {regles.get('label', champ)} doit être ≤ {regles['max']}")
+                erreurs.append(f"[!] {regles.get('label', champ)} doit être ≤ {regles['max']}")
 
         if regles.get("type") == "string" and valeur:
             longueur_max = regles.get("max_length", 1000)
             if len(valeur) > longueur_max:
                 erreurs.append(
-                    f"⚠️ {regles.get('label', champ)} trop long " f"(max {longueur_max} caractères)"
+                    f"[!] {regles.get('label', champ)} trop long " f"(max {longueur_max} caractères)"
                 )
 
     est_valide = len(erreurs) == 0
@@ -633,7 +633,7 @@ def afficher_erreurs_validation(erreurs: list[str]):
     import streamlit as st
 
     if erreurs:
-        with st.expander("❌ Erreurs de validation", expanded=True):
+        with st.expander("[ERROR] Erreurs de validation", expanded=True):
             for erreur in erreurs:
                 st.error(erreur)
 

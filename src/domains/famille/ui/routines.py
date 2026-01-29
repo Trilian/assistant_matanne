@@ -227,7 +227,7 @@ def app():
     # ===================================
 
     tab1, tab2, tab3, tab4 = st.tabs(
-        ["ðŸ“‹ Mes Routines", "– Rappels IA", "âž• Créer Routine", "ðŸ“Š Suivi"]
+        ["ðŸ“‹ Mes Routines", "– Rappels IA", "âž• Créer Routine", "[CHART] Suivi"]
     )
 
     # ===================================
@@ -543,7 +543,7 @@ def app():
     # ===================================
 
     with tab4:
-        st.subheader("ðŸ“Š Suivi des routines")
+        st.subheader("[CHART] Suivi des routines")
 
         df_all = charger_routines(actives_uniquement=False)
 
