@@ -136,6 +136,7 @@ class RecipeImporter:
     def _extract_from_html(soup, url: str) -> Optional[Dict[str, Any]]:
         """
         Extrait les infos de recette depuis du HTML
+        Optimisé pour Marmiton, RecettesTin, CuisineAZ, etc.
         """
         from bs4 import BeautifulSoup
         
@@ -168,30 +169,74 @@ class RecipeImporter:
             if desc_elem:
                 recipe['description'] = desc_elem.get_text(strip=True)
         
-        # Chercher les ingrédients
-        # Chercher des listes d'ingrédients courants
-        ingredient_patterns = [
-            re.compile('ingredient', re.I),
-            re.compile('ingredient', re.I),
-        ]
+        # MARMITON - Extraction spécifique des ingrédients
+        marmiton_ingredients = soup.find_all(re.compile('^li$', re.I), class_=re.compile('ingredient', re.I))
+        if marmiton_ingredients:
+            for li in marmiton_ingredients:
+                text = li.get_text(strip=True)
+                if text and len(text) > 2:
+                    recipe['ingredients'].append(text)
         
-        # Chercher des listes <ul> ou <ol> contenant des ingrédients
-        for ul in soup.find_all(['ul', 'ol']):
-            section_name = ul.find_previous(['h2', 'h3', 'h4'])
-            if section_name and 'ingrédient' in section_name.get_text().lower():
-                for li in ul.find_all('li'):
-                    text = li.get_text(strip=True)
-                    if text and len(text) > 2:
-                        recipe['ingredients'].append(text)
+        # MARMITON - Extraction spécifique des étapes
+        marmiton_etapes = soup.find_all(re.compile('^li$', re.I), class_=re.compile('recipe-step', re.I))
+        if marmiton_etapes:
+            for idx, li in enumerate(marmiton_etapes, 1):
+                text = li.get_text(strip=True)
+                if text and len(text) > 2:
+                    recipe['etapes'].append(f"{idx}. {text}")
         
-        # Chercher les étapes
-        for ol in soup.find_all('ol'):
-            section_name = ol.find_previous(['h2', 'h3', 'h4'])
-            if section_name and any(word in section_name.get_text().lower() for word in ['étape', 'preparation', 'instruction']):
-                for idx, li in enumerate(ol.find_all('li'), 1):
-                    text = li.get_text(strip=True)
-                    if text and len(text) > 2:
-                        recipe['etapes'].append(f"{idx}. {text}")
+        # Si pas trouvé avec Marmiton, chercher les listes génériques
+        if not recipe['ingredients']:
+            # Chercher des listes <ul> ou <ol> contenant des ingrédients
+            for ul in soup.find_all(['ul', 'ol']):
+                section_name = ul.find_previous(['h2', 'h3', 'h4', 'div'])
+                if section_name:
+                    section_text = section_name.get_text().lower()
+                    if 'ingrédient' in section_text or 'ingredient' in section_text:
+                        for li in ul.find_all('li', recursive=False):
+                            text = li.get_text(strip=True)
+                            if text and len(text) > 2:
+                                recipe['ingredients'].append(text)
+                        break
+        
+        # Si pas trouvé, chercher avec des classes communes
+        if not recipe['ingredients']:
+            ingredient_classes = ['ingredients', 'ingredient-list', 'ingredient', 'ingredient-item']
+            for ing_class in ingredient_classes:
+                ing_list = soup.find('div', class_=re.compile(ing_class, re.I))
+                if ing_list:
+                    for li in ing_list.find_all('li'):
+                        text = li.get_text(strip=True)
+                        if text and len(text) > 2:
+                            recipe['ingredients'].append(text)
+                    if recipe['ingredients']:
+                        break
+        
+        # Si pas trouvé les étapes, chercher les listes génériques
+        if not recipe['etapes']:
+            for ol in soup.find_all(['ol', 'ul']):
+                section_name = ol.find_previous(['h2', 'h3', 'h4', 'div'])
+                if section_name:
+                    section_text = section_name.get_text().lower()
+                    if any(word in section_text for word in ['étape', 'preparation', 'instruction', 'steps', 'directions']):
+                        for idx, li in enumerate(ol.find_all('li', recursive=False), 1):
+                            text = li.get_text(strip=True)
+                            if text and len(text) > 2:
+                                recipe['etapes'].append(f"{idx}. {text}")
+                        break
+        
+        # Si pas trouvé, chercher avec des classes communes
+        if not recipe['etapes']:
+            etape_classes = ['steps', 'instructions', 'etapes', 'directions', 'preparation']
+            for etape_class in etape_classes:
+                etape_list = soup.find('div', class_=re.compile(etape_class, re.I))
+                if etape_list:
+                    for idx, li in enumerate(etape_list.find_all('li'), 1):
+                        text = li.get_text(strip=True)
+                        if text and len(text) > 2:
+                            recipe['etapes'].append(f"{idx}. {text}")
+                    if recipe['etapes']:
+                        break
         
         # Chercher le temps de préparation/cuisson (schema.org)
         time_elem = soup.find(re.compile('^meta$', re.I), {'property': 'recipe:prep_time'})
@@ -199,10 +244,24 @@ class RecipeImporter:
             time_str = time_elem.get('content', '0')
             recipe['temps_preparation'] = RecipeImporter._parse_duration(time_str)
         
+        # Si pas trouvé avec schema.org, chercher avec itemprop
+        if recipe['temps_preparation'] == 0:
+            prep_time = soup.find(re.compile('^[^>]*$', re.I), {'itemprop': 'prepTime'})
+            if prep_time:
+                time_str = prep_time.get('content', '0')
+                recipe['temps_preparation'] = RecipeImporter._parse_duration(time_str)
+        
         cook_time = soup.find(re.compile('^meta$', re.I), {'property': 'recipe:cook_time'})
         if cook_time:
             time_str = cook_time.get('content', '0')
             recipe['temps_cuisson'] = RecipeImporter._parse_duration(time_str)
+        
+        # Si pas trouvé, chercher avec itemprop
+        if recipe['temps_cuisson'] == 0:
+            cook_time_elem = soup.find(re.compile('^[^>]*$', re.I), {'itemprop': 'cookTime'})
+            if cook_time_elem:
+                time_str = cook_time_elem.get('content', '0')
+                recipe['temps_cuisson'] = RecipeImporter._parse_duration(time_str)
         
         # Chercher les portions
         yield_elem = soup.find(re.compile('^meta$', re.I), {'property': 'recipe:yield'})
@@ -212,6 +271,15 @@ class RecipeImporter:
                 recipe['portions'] = int(re.search(r'\d+', yield_str).group())
             except:
                 recipe['portions'] = 4
+        
+        # Si pas trouvé, chercher avec itemprop
+        if recipe['portions'] == 4:
+            yield_elem = soup.find(re.compile('^[^>]*$', re.I), {'itemprop': 'recipeYield'})
+            if yield_elem:
+                try:
+                    recipe['portions'] = int(re.search(r'\d+', yield_elem.get_text()).group())
+                except:
+                    recipe['portions'] = 4
         
         return recipe if recipe['nom'] else None
     

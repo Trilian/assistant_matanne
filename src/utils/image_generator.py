@@ -137,11 +137,12 @@ def generer_image_recette(nom_recette: str, description: str = "", ingredients_l
 def _construire_query_optimisee(nom_recette: str, ingredients_list: list = None, type_plat: str = "") -> str:
     """
     Construit une requête de recherche optimisée pour trouver les meilleures images.
+    Amélioration: Force les images du plat cuit/fini, pas des ingrédients bruts.
     
     Exemples:
-    - "Compote de pommes" → "apple compote cooked fresh"
-    - "Pâtes carbonara" → "spaghetti carbonara pasta cooked"
-    - "Salade" → "salad fresh vegetables"
+    - "Compote de pommes" → "apple compote cooked finished served fresh homemade delicious"
+    - "Pâtes carbonara" → "spaghetti carbonara pasta cooked finished plated fresh homemade"
+    - "Salade" → "salad fresh vegetables arranged plated served homemade"
     """
     
     # Ingrédient principal (premier ingrédient si disponible)
@@ -152,8 +153,9 @@ def _construire_query_optimisee(nom_recette: str, ingredients_list: list = None,
     # Construire la query avec priorité sur:
     # 1. Le nom de la recette
     # 2. L'ingrédient principal (pour des images plus pertinentes)
-    # 3. "cooked" ou "prepared" pour montrer le résultat final
-    # 4. "fresh" pour meilleure qualité
+    # 3. INSISTER sur "finished", "cooked", "plated", "served" pour le résultat final
+    # 4. "fresh", "homemade", "delicious" pour qualité
+    # 5. Exclure implicitement les mots qui donnent des images brutes
     
     parts = []
     
@@ -164,16 +166,20 @@ def _construire_query_optimisee(nom_recette: str, ingredients_list: list = None,
     if main_ingredient and main_ingredient not in nom_recette.lower():
         parts.append(main_ingredient)
     
-    # Ajouter un descripteur du résultat final
+    # Ajouter des descripteurs FORTS du résultat final
+    # Ceci est crucial pour éviter les images de légumes bruts
     if type_plat.lower() in ["dessert", "pâtisserie"]:
-        parts.append("dessert fresh")
+        parts.extend(["dessert", "finished", "plated", "beautiful", "decorated"])
     elif type_plat.lower() in ["soupe", "potage"]:
-        parts.append("soup cooked")
+        parts.extend(["soup", "cooked", "served", "hot", "finished", "in bowl"])
+    elif type_plat.lower() in ["petit_déjeuner", "breakfast"]:
+        parts.extend(["breakfast", "cooked", "served", "plated", "ready", "eating"])
     else:
-        parts.append("cooked prepared")
+        # Plat général
+        parts.extend(["cooked", "finished", "plated", "served", "prepared", "eating"])
     
-    # Ajouter "fresh" pour qualité
-    parts.append("fresh")
+    # Ajouter des descripteurs de qualité
+    parts.extend(["fresh", "homemade", "delicious", "appetizing"])
     
     query = " ".join(parts)
     logger.debug(f"Query optimisée pour '{nom_recette}': '{query}'")

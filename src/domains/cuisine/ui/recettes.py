@@ -3,6 +3,7 @@ Module Recettes - Gestion complète des recettes
 """
 
 import logging
+import time
 import streamlit as st
 from src.services.recettes import get_recette_service
 from src.core.errors_base import ErreurValidation
@@ -68,14 +69,33 @@ def render_liste():
     service = get_recette_service()
     
     if service is None:
-        st.error("âŒ Service recettes indisponible")
+        st.error("❌ Service recettes indisponible")
         return
     
     # Initialiser pagination
     if "recettes_page" not in st.session_state:
         st.session_state.recettes_page = 0
     
-    PAGE_SIZE = 9  # 3 colonnes x 3 lignes
+    if "recettes_page_size" not in st.session_state:
+        st.session_state.recettes_page_size = 9
+    
+    # Contrôles de pagination en haut
+    col_size1, col_size2, col_size3 = st.columns([2, 1.5, 2])
+    with col_size1:
+        st.caption("👁️ Options d'affichage")
+    with col_size2:
+        page_size = st.selectbox(
+            "Recettes/page",
+            [6, 9, 12, 15],
+            index=[6, 9, 12, 15].index(st.session_state.recettes_page_size),
+            key="select_page_size",
+            label_visibility="collapsed"
+        )
+        st.session_state.recettes_page_size = page_size
+    with col_size3:
+        st.write("")  # Espacement
+    
+    PAGE_SIZE = st.session_state.recettes_page_size
     
     # Filtres
     col1, col2, col3 = st.columns(3)
@@ -190,24 +210,24 @@ def render_liste():
         with cols[idx % 3]:
             # Container avec flexbox minimal
             with st.container(border=True):
-                # Image avec hauteur FIXE (120px) et conteneur strictement dimensionné
+                # Image avec hauteur RÉDUITE (100px) et conteneur strictement dimensionné
                 if recette.url_image:
                     try:
                         st.markdown(
-                            f'<div style="height: 120px; width: 100%; overflow: hidden; border-radius: 6px; margin-bottom: 8px; background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%); display: flex; align-items: center; justify-content: center;"><img src="{recette.url_image}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;" /></div>',
+                            f'<div style="height: 100px; width: 100%; overflow: hidden; border-radius: 6px; margin-bottom: 6px; background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%); display: flex; align-items: center; justify-content: center;"><img src="{recette.url_image}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;" /></div>',
                             unsafe_allow_html=True
                         )
                     except Exception:
                         st.markdown(
-                            '<div style="height: 120px; width: 100%; border-radius: 6px; margin-bottom: 8px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 48px; opacity: 0.3;">ðŸ–¼ï¸</div>',
+                            '<div style="height: 100px; width: 100%; border-radius: 6px; margin-bottom: 6px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 40px; opacity: 0.3;">🖼️</div>',
                             unsafe_allow_html=True
                         )
                 else:
                     import random
-                    food_emojis = ["ðŸ½ï¸", "ðŸ³", "ðŸ¥˜", "ðŸ²", "ðŸ¥—", "ðŸœ"]
+                    food_emojis = ["🍽️", "🍳", "🥘", "🍲", "🥗", "🜗"]
                     emoji = random.choice(food_emojis)
                     st.markdown(
-                        f'<div style="height: 120px; width: 100%; border-radius: 6px; margin-bottom: 8px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 48px; opacity: 0.3;">{emoji}</div>',
+                        f'<div style="height: 100px; width: 100%; border-radius: 6px; margin-bottom: 6px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 40px; opacity: 0.3;">{emoji}</div>',
                         unsafe_allow_html=True
                     )
                 
@@ -666,6 +686,73 @@ def render_detail_recette(recette):
                                             st.error("âŒ Erreur lors de la génération")
                                     except Exception as e:
                                         st.error(f"âŒ Erreur: {str(e)}")
+    
+    # Actions sur la recette
+    st.divider()
+    st.markdown("### âš™ï¸ Actions")
+    
+    action_cols = st.columns(3)
+    
+    with action_cols[0]:
+        if st.button("✏️ Modifier", use_container_width=True, key="btn_modifier_recette"):
+            st.session_state.edit_mode_recette = recette.id
+            st.rerun()
+    
+    with action_cols[1]:
+        if st.button("📋 Dupliquer", use_container_width=True, key="btn_dupliquer_recette"):
+            if service:
+                try:
+                    with st.spinner("Duplication en cours..."):
+                        # Créer une copie de la recette
+                        recette_dict = {
+                            "nom": f"{recette.nom} (copie)",
+                            "description": recette.description,
+                            "type_repas": recette.type_repas,
+                            "categorie": recette.categorie,
+                            "temps_preparation": recette.temps_preparation,
+                            "temps_cuisson": recette.temps_cuisson,
+                            "portions": recette.portions,
+                            "difficulte": recette.difficulte,
+                            "saison": recette.saison,
+                            "calories": recette.calories,
+                            "proteines": recette.proteines,
+                            "lipides": recette.lipides,
+                            "glucides": recette.glucides,
+                        }
+                        nouvelle_recette = service.create(recette_dict)
+                        st.success("✅ Recette dupliquée!")
+                        st.rerun()
+                except Exception as e:
+                    st.error(f"❌ Erreur: {str(e)}")
+    
+    with action_cols[2]:
+        if st.button("🗑️ Supprimer", use_container_width=True, key="btn_supprimer_recette"):
+            st.session_state.show_delete_confirmation = True
+    
+    # Afficher confirmation de suppression si activée
+    if st.session_state.get("show_delete_confirmation"):
+        st.warning(f"Êtes-vous sûr de vouloir supprimer la recette '{recette.nom}' ?")
+        col_oui, col_non = st.columns(2)
+        with col_oui:
+            if st.button("✅ Oui, supprimer", use_container_width=True, key="btn_confirmer_suppression"):
+                if service:
+                    try:
+                        with st.spinner("Suppression en cours..."):
+                            if service.delete(recette.id):
+                                st.success("✅ Recette supprimée!")
+                                st.session_state.detail_recette_id = None
+                                st.session_state.show_delete_confirmation = False
+                                time.sleep(1)
+                                st.rerun()
+                            else:
+                                st.error("❌ Impossible de supprimer la recette")
+                    except Exception as e:
+                        st.error(f"❌ Erreur lors de la suppression: {str(e)}")
+        with col_non:
+            if st.button("❌ Annuler", use_container_width=True, key="btn_annuler_suppression"):
+                st.session_state.show_delete_confirmation = False
+                st.rerun()
+
 
 
 def render_ajouter_manuel():
@@ -843,7 +930,7 @@ def render_generer_ia():
             nb_recettes = st.number_input(
                 "Nombre de suggestions",
                 min_value=1,
-                max_value=5,
+                max_value=10,
                 value=3
             )
         
@@ -941,7 +1028,7 @@ def render_generer_ia():
                             st.divider()
                             col_btn_add, col_btn_space = st.columns([2, 1])
                             with col_btn_add:
-                                if st.button(f"âœ… Ajouter à mes recettes", key=f"add_suggestion_{idx}", use_container_width=True, type="primary"):
+                                if st.button(f"✅ Ajouter à mes recettes", key=f"add_suggestion_{idx}", use_container_width=True, type="primary"):
                                     try:
                                         # Préparer les données pour la création
                                         data = {
@@ -958,11 +1045,12 @@ def render_generer_ia():
                                         }
                                         
                                         recette = service.create_complete(data)
-                                        st.success(f"âœ… '{recette.nom}' ajoutée à vos recettes!")
-                                        st.toast(f"ðŸŽ‰ {recette.nom} sauvegardée!", icon="âœ…")
+                                        st.success(f"✅ '{recette.nom}' ajoutée à vos recettes!")
+                                        st.toast(f"🎉 {recette.nom} sauvegardée!", icon="✅")
+                                        # NE PAS appeler st.rerun() pour rester sur cet onglet
                                         
                                     except Exception as e:
-                                        st.error(f"âŒ Erreur: {str(e)}")
+                                        st.error(f"❌ Erreur: {str(e)}")
                                         logger.error(f"Erreur ajout suggestion: {e}")
                             
                             st.write("")  # Espacement
