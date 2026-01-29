@@ -13,8 +13,8 @@ from src.services.planning_unified import get_planning_service
 
 # Logique métier pure
 from src.modules.planning.vue_ensemble_logic import (
-    calculer_statistiques_planning,
-    generer_resume_periode
+    analyser_charge_globale,
+    identifier_taches_urgentes
 )
 from src.core.state import get_state
 

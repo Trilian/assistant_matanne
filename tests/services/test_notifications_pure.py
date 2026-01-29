@@ -1,11 +1,11 @@
-"""
-Tests pour le module notifications (notifications.py) - VERSION CORRIGÉE.
+﻿"""
+Tests pour le module notifications (notifications.py) - VERSION CORRIGÃ‰E.
 
 Tests couverts:
-- Notification dataclass (pure Python, pas de mock nécessaire)
+- Notification dataclass (pure Python, pas de mock nÃ©cessaire)
 - NotificationType et NotificationCategory enums
-- Sérialisation to_dict/from_dict
-- Propriétés calculées (is_expired, age_str)
+- SÃ©rialisation to_dict/from_dict
+- PropriÃ©tÃ©s calculÃ©es (is_expired, age_str)
 """
 
 from datetime import datetime, timedelta
@@ -20,9 +20,9 @@ from src.core.notifications import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ENUMS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestNotificationType:
@@ -45,13 +45,13 @@ class TestNotificationType:
         assert NotificationType.ALERT.value == "alert"
 
     def test_type_from_string(self):
-        """Test création depuis string."""
+        """Test crÃ©ation depuis string."""
         assert NotificationType("info") == NotificationType.INFO
         assert NotificationType("success") == NotificationType.SUCCESS
         assert NotificationType("warning") == NotificationType.WARNING
 
     def test_invalid_type_raises(self):
-        """Test type invalide lève une erreur."""
+        """Test type invalide lÃ¨ve une erreur."""
         with pytest.raises(ValueError):
             NotificationType("invalid")
 
@@ -60,7 +60,7 @@ class TestNotificationCategory:
     """Tests pour NotificationCategory enum."""
 
     def test_all_categories_exist(self):
-        """Test toutes les catégories existent."""
+        """Test toutes les catÃ©gories existent."""
         assert NotificationCategory.INVENTAIRE
         assert NotificationCategory.COURSES
         assert NotificationCategory.RECETTES
@@ -70,27 +70,27 @@ class TestNotificationCategory:
         assert NotificationCategory.SYSTEME
 
     def test_category_values(self):
-        """Test valeurs des catégories."""
+        """Test valeurs des catÃ©gories."""
         assert NotificationCategory.INVENTAIRE.value == "inventaire"
         assert NotificationCategory.COURSES.value == "courses"
         assert NotificationCategory.SYSTEME.value == "systeme"
 
     def test_category_from_string(self):
-        """Test création depuis string."""
+        """Test crÃ©ation depuis string."""
         assert NotificationCategory("inventaire") == NotificationCategory.INVENTAIRE
         assert NotificationCategory("planning") == NotificationCategory.PLANNING
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS NOTIFICATION DATACLASS (PURE PYTHON)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestNotificationCreation:
-    """Tests création de Notification."""
+    """Tests crÃ©ation de Notification."""
 
     def test_create_minimal(self):
-        """Test création minimale."""
+        """Test crÃ©ation minimale."""
         notif = Notification()
         
         assert notif.id is not None
@@ -104,7 +104,7 @@ class TestNotificationCreation:
         assert notif.priority == 0
 
     def test_create_with_message(self):
-        """Test création avec message."""
+        """Test crÃ©ation avec message."""
         notif = Notification(
             titre="Test titre",
             message="Test message",
@@ -114,7 +114,7 @@ class TestNotificationCreation:
         assert notif.message == "Test message"
 
     def test_create_with_type(self):
-        """Test création avec type."""
+        """Test crÃ©ation avec type."""
         notif = Notification(
             type=NotificationType.WARNING,
             message="Attention!",
@@ -123,7 +123,7 @@ class TestNotificationCreation:
         assert notif.type == NotificationType.WARNING
 
     def test_create_with_category(self):
-        """Test création avec catégorie."""
+        """Test crÃ©ation avec catÃ©gorie."""
         notif = Notification(
             category=NotificationCategory.INVENTAIRE,
             message="Stock bas",
@@ -132,7 +132,7 @@ class TestNotificationCreation:
         assert notif.category == NotificationCategory.INVENTAIRE
 
     def test_create_with_all_fields(self):
-        """Test création avec tous les champs."""
+        """Test crÃ©ation avec tous les champs."""
         now = datetime.now()
         expires = now + timedelta(hours=24)
         
@@ -142,7 +142,7 @@ class TestNotificationCreation:
             message="Message complet",
             type=NotificationType.SUCCESS,
             category=NotificationCategory.RECETTES,
-            icone="🎉",
+            icone="ðŸŽ‰",
             created_at=now,
             read=True,
             dismissed=False,
@@ -158,7 +158,7 @@ class TestNotificationCreation:
         assert notif.message == "Message complet"
         assert notif.type == NotificationType.SUCCESS
         assert notif.category == NotificationCategory.RECETTES
-        assert notif.icone == "🎉"
+        assert notif.icone == "ðŸŽ‰"
         assert notif.created_at == now
         assert notif.read is True
         assert notif.action_label == "Voir"
@@ -168,14 +168,14 @@ class TestNotificationCreation:
         assert notif.priority == 2
 
     def test_auto_generated_id(self):
-        """Test ID généré automatiquement est unique."""
+        """Test ID gÃ©nÃ©rÃ© automatiquement est unique."""
         notif1 = Notification()
         notif2 = Notification()
         
         assert notif1.id != notif2.id
 
     def test_auto_generated_created_at(self):
-        """Test created_at généré automatiquement."""
+        """Test created_at gÃ©nÃ©rÃ© automatiquement."""
         before = datetime.now()
         notif = Notification()
         after = datetime.now()
@@ -183,13 +183,13 @@ class TestNotificationCreation:
         assert before <= notif.created_at <= after
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS PROPRIÉTÉS CALCULÉES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS PROPRIÃ‰TÃ‰S CALCULÃ‰ES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestNotificationIsExpired:
-    """Tests pour la propriété is_expired."""
+    """Tests pour la propriÃ©tÃ© is_expired."""
 
     def test_no_expiration(self):
         """Test sans date d'expiration."""
@@ -197,31 +197,31 @@ class TestNotificationIsExpired:
         assert notif.is_expired is False
 
     def test_not_expired(self):
-        """Test non expiré."""
+        """Test non expirÃ©."""
         future = datetime.now() + timedelta(hours=1)
         notif = Notification(expires_at=future)
         assert notif.is_expired is False
 
     def test_expired(self):
-        """Test expiré."""
+        """Test expirÃ©."""
         past = datetime.now() - timedelta(hours=1)
         notif = Notification(expires_at=past)
         assert notif.is_expired is True
 
     def test_just_expired(self):
-        """Test tout juste expiré."""
+        """Test tout juste expirÃ©."""
         past = datetime.now() - timedelta(seconds=1)
         notif = Notification(expires_at=past)
         assert notif.is_expired is True
 
 
 class TestNotificationAgeStr:
-    """Tests pour la propriété age_str."""
+    """Tests pour la propriÃ©tÃ© age_str."""
 
     def test_just_now(self):
-        """Test à l'instant."""
+        """Test Ã  l'instant."""
         notif = Notification(created_at=datetime.now())
-        assert notif.age_str == "À l'instant"
+        assert notif.age_str == "Ã€ l'instant"
 
     def test_few_minutes_ago(self):
         """Test il y a quelques minutes."""
@@ -234,11 +234,11 @@ class TestNotificationAgeStr:
         assert "1h" in notif.age_str
 
     def test_yesterday(self):
-        """Test hier (la logique vérifie days == 1)."""
+        """Test hier (la logique vÃ©rifie days == 1)."""
         # Note: age_str utilise delta.days qui est 0 si < 24h
         # Pour avoir "Hier", il faut delta.days == 1
         notif = Notification(created_at=datetime.now() - timedelta(days=1, hours=1))
-        # Selon l'implémentation: delta.days == 1 retourne "Hier"
+        # Selon l'implÃ©mentation: delta.days == 1 retourne "Hier"
         assert notif.age_str == "Hier"
 
     def test_several_days_ago(self):
@@ -248,16 +248,16 @@ class TestNotificationAgeStr:
         assert "5 jours" in notif.age_str
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS SÉRIALISATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS SÃ‰RIALISATION
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestNotificationToDict:
     """Tests pour to_dict()."""
 
     def test_to_dict_minimal(self):
-        """Test sérialisation minimale."""
+        """Test sÃ©rialisation minimale."""
         notif = Notification(
             id="abc123",
             message="Test",
@@ -274,14 +274,14 @@ class TestNotificationToDict:
         assert "created_at" in data
 
     def test_to_dict_complete(self):
-        """Test sérialisation complète."""
+        """Test sÃ©rialisation complÃ¨te."""
         notif = Notification(
             id="xyz789",
             titre="Titre",
             message="Message",
             type=NotificationType.WARNING,
             category=NotificationCategory.INVENTAIRE,
-            icone="⚠️",
+            icone="âš ï¸",
             read=True,
             dismissed=True,
             action_label="Action",
@@ -296,7 +296,7 @@ class TestNotificationToDict:
         assert data["message"] == "Message"
         assert data["type"] == "warning"
         assert data["category"] == "inventaire"
-        assert data["icone"] == "⚠️"
+        assert data["icone"] == "âš ï¸"
         assert data["read"] is True
         assert data["dismissed"] is True
         assert data["action_label"] == "Action"
@@ -304,7 +304,7 @@ class TestNotificationToDict:
         assert data["priority"] == 1
 
     def test_to_dict_datetime_serialized(self):
-        """Test datetime est sérialisé en ISO."""
+        """Test datetime est sÃ©rialisÃ© en ISO."""
         now = datetime(2024, 1, 15, 10, 30, 0)
         notif = Notification(created_at=now)
         
@@ -317,7 +317,7 @@ class TestNotificationFromDict:
     """Tests pour from_dict()."""
 
     def test_from_dict_minimal(self):
-        """Test désérialisation minimale."""
+        """Test dÃ©sÃ©rialisation minimale."""
         data = {
             "id": "test123",
             "message": "Hello",
@@ -335,7 +335,7 @@ class TestNotificationFromDict:
         assert notif.created_at == datetime(2024, 1, 15, 10, 30, 0)
 
     def test_from_dict_defaults(self):
-        """Test valeurs par défaut lors de la désérialisation."""
+        """Test valeurs par dÃ©faut lors de la dÃ©sÃ©rialisation."""
         data = {}
         
         notif = Notification.from_dict(data)
@@ -347,14 +347,14 @@ class TestNotificationFromDict:
         assert notif.read is False
 
     def test_from_dict_complete(self):
-        """Test désérialisation complète."""
+        """Test dÃ©sÃ©rialisation complÃ¨te."""
         data = {
             "id": "full123",
             "titre": "Titre complet",
             "message": "Message complet",
             "type": "error",
             "category": "famille",
-            "icone": "❌",
+            "icone": "âŒ",
             "created_at": "2024-06-01T14:00:00",
             "read": True,
             "dismissed": False,
@@ -370,7 +370,7 @@ class TestNotificationFromDict:
         assert notif.message == "Message complet"
         assert notif.type == NotificationType.ERROR
         assert notif.category == NotificationCategory.FAMILLE
-        assert notif.icone == "❌"
+        assert notif.icone == "âŒ"
         assert notif.read is True
         assert notif.dismissed is False
         assert notif.action_label == "Corriger"
@@ -382,13 +382,13 @@ class TestNotificationRoundTrip:
     """Tests de conversion aller-retour."""
 
     def test_roundtrip_preserves_data(self):
-        """Test to_dict -> from_dict préserve les données."""
+        """Test to_dict -> from_dict prÃ©serve les donnÃ©es."""
         original = Notification(
             titre="Original",
             message="Test roundtrip",
             type=NotificationType.WARNING,
             category=NotificationCategory.PLANNING,
-            icone="📅",
+            icone="ðŸ“…",
             read=True,
             action_label="Voir",
             priority=1,
@@ -407,56 +407,57 @@ class TestNotificationRoundTrip:
         assert restored.priority == original.priority
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PRIORITY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestNotificationPriority:
-    """Tests pour la priorité des notifications."""
+    """Tests pour la prioritÃ© des notifications."""
 
     def test_default_priority(self):
-        """Test priorité par défaut."""
+        """Test prioritÃ© par dÃ©faut."""
         notif = Notification()
         assert notif.priority == 0
 
     def test_priority_normal(self):
-        """Test priorité normale."""
+        """Test prioritÃ© normale."""
         notif = Notification(priority=0)
         assert notif.priority == 0
 
     def test_priority_important(self):
-        """Test priorité importante."""
+        """Test prioritÃ© importante."""
         notif = Notification(priority=1)
         assert notif.priority == 1
 
     def test_priority_urgent(self):
-        """Test priorité urgente."""
+        """Test prioritÃ© urgente."""
         notif = Notification(priority=2)
         assert notif.priority == 2
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS ICÔNES PAR DÉFAUT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS ICÃ”NES PAR DÃ‰FAUT
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestNotificationIcunes:
-    """Tests pour les icônes."""
+    """Tests pour les icÃ´nes."""
 
     def test_default_icone(self):
-        """Test icône par défaut."""
+        """Test icÃ´ne par dÃ©faut."""
         notif = Notification()
-        assert notif.icone == "ℹ️"
+        assert notif.icone == "â„¹ï¸"
 
     def test_custom_icone(self):
-        """Test icône personnalisée."""
-        notif = Notification(icone="🔔")
-        assert notif.icone == "🔔"
+        """Test icÃ´ne personnalisÃ©e."""
+        notif = Notification(icone="ðŸ””")
+        assert notif.icone == "ðŸ””"
 
     def test_icone_preserved_in_roundtrip(self):
-        """Test icône préservée après conversion."""
-        original = Notification(icone="🎯")
+        """Test icÃ´ne prÃ©servÃ©e aprÃ¨s conversion."""
+        original = Notification(icone="ðŸŽ¯")
         data = original.to_dict()
         restored = Notification.from_dict(data)
-        assert restored.icone == "🎯"
+        assert restored.icone == "ðŸŽ¯"
+

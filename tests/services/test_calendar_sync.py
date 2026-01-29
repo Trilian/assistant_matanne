@@ -1,10 +1,10 @@
-"""
+﻿"""
 Tests pour le service de synchronisation calendrier (calendar_sync.py).
 
-Ce fichier teste les fonctionnalités de sync calendrier:
+Ce fichier teste les fonctionnalitÃ©s de sync calendrier:
 - Configuration (ExternalCalendarConfig)
-- Événements externes (CalendarEventExternal)
-- Génération iCal
+- Ã‰vÃ©nements externes (CalendarEventExternal)
+- GÃ©nÃ©ration iCal
 - Parsing iCal
 - Service de synchronisation
 """
@@ -15,16 +15,16 @@ from unittest.mock import patch, MagicMock
 from uuid import uuid4
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ENUMS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalendarProviderEnum:
     """Tests pour CalendarProvider enum."""
 
     def test_providers_disponibles(self):
-        """Vérifie les providers disponibles."""
+        """VÃ©rifie les providers disponibles."""
         from src.services.calendar_sync import CalendarProvider
         
         providers = [p.value for p in CalendarProvider]
@@ -46,7 +46,7 @@ class TestSyncDirectionEnum:
     """Tests pour SyncDirection enum."""
 
     def test_directions_disponibles(self):
-        """Vérifie les directions de sync."""
+        """VÃ©rifie les directions de sync."""
         from src.services.calendar_sync import SyncDirection
         
         directions = [d.value for d in SyncDirection]
@@ -56,16 +56,16 @@ class TestSyncDirectionEnum:
         assert "both" in directions
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS MODÈLES - CONFIGURATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS MODÃˆLES - CONFIGURATION
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestExternalCalendarConfigModel:
     """Tests pour ExternalCalendarConfig model."""
 
     def test_config_creation(self):
-        """Création d'une config calendrier."""
+        """CrÃ©ation d'une config calendrier."""
         from src.services.calendar_sync import ExternalCalendarConfig, CalendarProvider
         
         config = ExternalCalendarConfig(
@@ -80,7 +80,7 @@ class TestExternalCalendarConfigModel:
         assert config.name == "Mon Google Calendar"
 
     def test_config_defaults(self):
-        """Valeurs par défaut de la config."""
+        """Valeurs par dÃ©faut de la config."""
         from src.services.calendar_sync import (
             ExternalCalendarConfig, 
             CalendarProvider, 
@@ -99,7 +99,7 @@ class TestExternalCalendarConfigModel:
         assert config.is_active is True
 
     def test_config_id_auto_generated(self):
-        """ID est auto-généré."""
+        """ID est auto-gÃ©nÃ©rÃ©."""
         from src.services.calendar_sync import ExternalCalendarConfig, CalendarProvider
         
         config1 = ExternalCalendarConfig(
@@ -111,7 +111,7 @@ class TestExternalCalendarConfigModel:
             provider=CalendarProvider.GOOGLE,
         )
         
-        # IDs différents
+        # IDs diffÃ©rents
         assert config1.id != config2.id
         # ID a une longueur raisonnable
         assert len(config1.id) > 0
@@ -133,30 +133,30 @@ class TestExternalCalendarConfigModel:
         assert config.token_expiry > datetime.now()
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS MODÈLES - ÉVÉNEMENTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS MODÃˆLES - Ã‰VÃ‰NEMENTS
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalendarEventExternalModel:
     """Tests pour CalendarEventExternal model."""
 
     def test_event_creation(self):
-        """Création d'un événement externe."""
+        """CrÃ©ation d'un Ã©vÃ©nement externe."""
         from src.services.calendar_sync import CalendarEventExternal
         
         event = CalendarEventExternal(
-            title="Réunion importante",
+            title="RÃ©union importante",
             description="Discussion projet",
             start_time=datetime(2026, 1, 28, 14, 0),
             end_time=datetime(2026, 1, 28, 15, 0),
         )
         
-        assert event.title == "Réunion importante"
+        assert event.title == "RÃ©union importante"
         assert event.start_time.hour == 14
 
     def test_event_all_day(self):
-        """Événement toute la journée."""
+        """Ã‰vÃ©nement toute la journÃ©e."""
         from src.services.calendar_sync import CalendarEventExternal
         
         event = CalendarEventExternal(
@@ -169,11 +169,11 @@ class TestCalendarEventExternalModel:
         assert event.all_day is True
 
     def test_event_with_source(self):
-        """Événement avec source (repas, activité)."""
+        """Ã‰vÃ©nement avec source (repas, activitÃ©)."""
         from src.services.calendar_sync import CalendarEventExternal
         
         event = CalendarEventExternal(
-            title="Dîner en famille",
+            title="DÃ®ner en famille",
             start_time=datetime(2026, 1, 28, 19, 0),
             end_time=datetime(2026, 1, 28, 20, 0),
             source_type="meal",
@@ -184,7 +184,7 @@ class TestCalendarEventExternalModel:
         assert event.source_id == 42
 
     def test_event_defaults(self):
-        """Valeurs par défaut de l'événement."""
+        """Valeurs par dÃ©faut de l'Ã©vÃ©nement."""
         from src.services.calendar_sync import CalendarEventExternal
         
         event = CalendarEventExternal(
@@ -200,21 +200,21 @@ class TestCalendarEventExternalModel:
         assert event.location == ""
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS MODÈLES - RÉSULTATS SYNC
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS MODÃˆLES - RÃ‰SULTATS SYNC
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestSyncResultModel:
     """Tests pour SyncResult model."""
 
     def test_sync_result_success(self):
-        """Résultat de sync réussi."""
+        """RÃ©sultat de sync rÃ©ussi."""
         from src.services.calendar_sync import SyncResult
         
         result = SyncResult(
             success=True,
-            message="Synchronisation terminée",
+            message="Synchronisation terminÃ©e",
             events_imported=10,
             events_exported=5,
             events_updated=3,
@@ -225,7 +225,7 @@ class TestSyncResultModel:
         assert result.events_exported == 5
 
     def test_sync_result_with_conflicts(self):
-        """Résultat avec conflits."""
+        """RÃ©sultat avec conflits."""
         from src.services.calendar_sync import SyncResult
         
         result = SyncResult(
@@ -233,15 +233,15 @@ class TestSyncResultModel:
             message="Sync avec conflits",
             events_imported=8,
             conflicts=[
-                {"event_id": "123", "reason": "Heure modifiée"},
-                {"event_id": "456", "reason": "Supprimé localement"},
+                {"event_id": "123", "reason": "Heure modifiÃ©e"},
+                {"event_id": "456", "reason": "SupprimÃ© localement"},
             ],
         )
         
         assert len(result.conflicts) == 2
 
     def test_sync_result_defaults(self):
-        """Valeurs par défaut de SyncResult."""
+        """Valeurs par dÃ©faut de SyncResult."""
         from src.services.calendar_sync import SyncResult
         
         result = SyncResult()
@@ -253,16 +253,16 @@ class TestSyncResultModel:
         assert result.errors == []
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS GÉNÉRATEUR iCAL
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS GÃ‰NÃ‰RATEUR iCAL
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestICalGenerator:
     """Tests pour ICalGenerator."""
 
     def test_generate_ical_header(self):
-        """Génère un header iCal valide."""
+        """GÃ©nÃ¨re un header iCal valide."""
         from src.services.calendar_sync import ICalGenerator
         
         ical = ICalGenerator.generate_ical([], calendar_name="Test")
@@ -273,13 +273,13 @@ class TestICalGenerator:
         assert "X-WR-CALNAME:Test" in ical
 
     def test_generate_ical_with_events(self):
-        """Génère un iCal avec événements."""
+        """GÃ©nÃ¨re un iCal avec Ã©vÃ©nements."""
         from src.services.calendar_sync import ICalGenerator, CalendarEventExternal
         
         events = [
             CalendarEventExternal(
                 external_id="event1",
-                title="Réunion",
+                title="RÃ©union",
                 start_time=datetime(2026, 1, 28, 10, 0),
                 end_time=datetime(2026, 1, 28, 11, 0),
             ),
@@ -289,10 +289,10 @@ class TestICalGenerator:
         
         assert "BEGIN:VEVENT" in ical
         assert "END:VEVENT" in ical
-        assert "SUMMARY:Réunion" in ical
+        assert "SUMMARY:RÃ©union" in ical
 
     def test_generate_ical_all_day_event(self):
-        """Événement toute la journée en iCal."""
+        """Ã‰vÃ©nement toute la journÃ©e en iCal."""
         from src.services.calendar_sync import ICalGenerator, CalendarEventExternal
         
         events = [
@@ -311,7 +311,7 @@ class TestICalGenerator:
         assert "DTSTART;VALUE=DATE:20260215" in ical
 
     def test_generate_ical_escape_special_chars(self):
-        """Les caractères spéciaux sont échappés."""
+        """Les caractÃ¨res spÃ©ciaux sont Ã©chappÃ©s."""
         from src.services.calendar_sync import ICalGenerator, CalendarEventExternal
         
         events = [
@@ -324,11 +324,11 @@ class TestICalGenerator:
         
         ical = ICalGenerator.generate_ical(events)
         
-        # Les virgules et points-virgules sont échappés
+        # Les virgules et points-virgules sont Ã©chappÃ©s
         assert "\\," in ical or "\\;" in ical
 
     def test_generate_ical_with_location(self):
-        """Événement avec lieu."""
+        """Ã‰vÃ©nement avec lieu."""
         from src.services.calendar_sync import ICalGenerator, CalendarEventExternal
         
         events = [
@@ -336,21 +336,21 @@ class TestICalGenerator:
                 title="RDV",
                 start_time=datetime(2026, 1, 28, 14, 0),
                 end_time=datetime(2026, 1, 28, 15, 0),
-                location="Café du Centre",
+                location="CafÃ© du Centre",
             ),
         ]
         
         ical = ICalGenerator.generate_ical(events)
         
-        assert "LOCATION:Café du Centre" in ical
+        assert "LOCATION:CafÃ© du Centre" in ical
 
     def test_generate_ical_meal_category(self):
-        """Événement repas a la catégorie Repas."""
+        """Ã‰vÃ©nement repas a la catÃ©gorie Repas."""
         from src.services.calendar_sync import ICalGenerator, CalendarEventExternal
         
         events = [
             CalendarEventExternal(
-                title="Dîner",
+                title="DÃ®ner",
                 start_time=datetime(2026, 1, 28, 19, 0),
                 end_time=datetime(2026, 1, 28, 20, 0),
                 source_type="meal",
@@ -362,9 +362,9 @@ class TestICalGenerator:
         assert "CATEGORIES:Repas" in ical
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PARSING iCAL
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestICalParser:
@@ -390,7 +390,7 @@ END:VCALENDAR"""
         assert events[0].title == "Test Event"
 
     def test_parse_all_day_event(self):
-        """Parse événement toute la journée."""
+        """Parse Ã©vÃ©nement toute la journÃ©e."""
         from src.services.calendar_sync import ICalGenerator
         
         ical_content = """BEGIN:VCALENDAR
@@ -409,15 +409,15 @@ END:VCALENDAR"""
         assert events[0].all_day is True
 
     def test_parse_event_with_description(self):
-        """Parse événement avec description."""
+        """Parse Ã©vÃ©nement avec description."""
         from src.services.calendar_sync import ICalGenerator
         
         ical_content = """BEGIN:VCALENDAR
 VERSION:2.0
 BEGIN:VEVENT
 UID:desc@example.com
-SUMMARY:Réunion
-DESCRIPTION:Discussion du projet\\nAvec retour à la ligne
+SUMMARY:RÃ©union
+DESCRIPTION:Discussion du projet\\nAvec retour Ã  la ligne
 DTSTART:20260128T140000
 DTEND:20260128T150000
 END:VEVENT
@@ -426,11 +426,11 @@ END:VCALENDAR"""
         events = ICalGenerator.parse_ical(ical_content)
         
         assert len(events) == 1
-        # Les \n sont convertis en vrais retours à la ligne
+        # Les \n sont convertis en vrais retours Ã  la ligne
         assert "Discussion du projet" in events[0].description
 
     def test_parse_multiple_events(self):
-        """Parse plusieurs événements."""
+        """Parse plusieurs Ã©vÃ©nements."""
         from src.services.calendar_sync import ICalGenerator
         
         ical_content = """BEGIN:VCALENDAR
@@ -469,16 +469,16 @@ END:VCALENDAR"""
         assert events == []
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SERVICE - INITIALISATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalendarSyncServiceInit:
     """Tests pour l'initialisation du service."""
 
     def test_service_creation(self):
-        """Création du service."""
+        """CrÃ©ation du service."""
         from src.services.calendar_sync import CalendarSyncService
         
         service = CalendarSyncService()
@@ -487,9 +487,9 @@ class TestCalendarSyncServiceInit:
         assert service.http_client is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GESTION CALENDRIERS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalendarManagement:
@@ -543,7 +543,7 @@ class TestCalendarManagement:
         assert "cal_to_remove" not in service._configs
 
     def test_get_user_calendars(self):
-        """Récupération des calendriers d'un utilisateur."""
+        """RÃ©cupÃ©ration des calendriers d'un utilisateur."""
         from src.services.calendar_sync import (
             CalendarSyncService, 
             ExternalCalendarConfig, 
@@ -576,9 +576,9 @@ class TestCalendarManagement:
         assert len(user2_cals) == 1
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EXPORT iCAL
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestExportIcal:
@@ -586,10 +586,10 @@ class TestExportIcal:
 
     @patch('src.services.calendar_sync.obtenir_contexte_db')
     def test_export_to_ical_empty(self, mock_db):
-        """Export sans données retourne iCal vide."""
+        """Export sans donnÃ©es retourne iCal vide."""
         from src.services.calendar_sync import CalendarSyncService
         
-        # Mock la session sans données
+        # Mock la session sans donnÃ©es
         mock_session = MagicMock()
         mock_session.query.return_value.join.return_value.filter.return_value.all.return_value = []
         mock_db.return_value.__enter__.return_value = mock_session
@@ -603,9 +603,9 @@ class TestExportIcal:
             assert "END:VCALENDAR" in ical
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS DATETIME PARSING
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestICalDatetimeParsing:
@@ -643,16 +643,16 @@ class TestICalDatetimeParsing:
         assert dt.day == 1
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CAS LIMITES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalendarSyncEdgeCases:
     """Tests pour cas limites."""
 
     def test_generate_ical_empty_list(self):
-        """Génération avec liste vide."""
+        """GÃ©nÃ©ration avec liste vide."""
         from src.services.calendar_sync import ICalGenerator
         
         ical = ICalGenerator.generate_ical([])
@@ -661,7 +661,7 @@ class TestCalendarSyncEdgeCases:
         assert "BEGIN:VEVENT" not in ical
 
     def test_parse_malformed_ical(self):
-        """Parse iCal malformé ne crash pas."""
+        """Parse iCal malformÃ© ne crash pas."""
         from src.services.calendar_sync import ICalGenerator
         
         malformed = "Not valid iCal content"
@@ -672,7 +672,7 @@ class TestCalendarSyncEdgeCases:
         assert events == []
 
     def test_event_without_external_id(self):
-        """Événement sans external_id génère un UID."""
+        """Ã‰vÃ©nement sans external_id gÃ©nÃ¨re un UID."""
         from src.services.calendar_sync import ICalGenerator, CalendarEventExternal
         
         events = [
@@ -686,11 +686,11 @@ class TestCalendarSyncEdgeCases:
         
         ical = ICalGenerator.generate_ical(events)
         
-        # Un UID est quand même généré
+        # Un UID est quand mÃªme gÃ©nÃ©rÃ©
         assert "UID:" in ical
 
     def test_config_ical_url_provider(self):
-        """Config pour URL iCal générique."""
+        """Config pour URL iCal gÃ©nÃ©rique."""
         from src.services.calendar_sync import (
             ExternalCalendarConfig, 
             CalendarProvider
@@ -704,3 +704,4 @@ class TestCalendarSyncEdgeCases:
         
         assert config.ical_url == "https://calendar.example.com/feed.ics"
         assert config.provider == CalendarProvider.ICAL_URL
+

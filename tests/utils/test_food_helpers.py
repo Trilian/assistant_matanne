@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/utils/helpers/food.py - Fonctions utilitaires pour la nourriture.
 """
 
@@ -18,16 +18,16 @@ from src.utils.helpers.food import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS BATCH FIND OR CREATE INGREDIENTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBatchFindOrCreateIngredients:
     """Tests pour batch_find_or_create_ingredients."""
 
     def test_returns_same_list(self):
-        """Test retourne la même liste."""
+        """Test retourne la mÃªme liste."""
         data = [{"name": "Tomate"}, {"name": "Oignon"}]
         result = batch_find_or_create_ingredients(data)
         assert result == data
@@ -38,16 +38,16 @@ class TestBatchFindOrCreateIngredients:
         assert result == []
 
     def test_preserves_data(self):
-        """Test préserve les données."""
+        """Test prÃ©serve les donnÃ©es."""
         data = [{"name": "Carotte", "quantity": 5, "extra": "info"}]
         result = batch_find_or_create_ingredients(data)
         assert result[0]["name"] == "Carotte"
         assert result[0]["quantity"] == 5
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CALCULATE RECIPE COST
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalculateRecipeCost:
@@ -59,22 +59,22 @@ class TestCalculateRecipeCost:
         assert result == 0.0
 
     def test_with_ingredients(self):
-        """Test avec des ingrédients."""
+        """Test avec des ingrÃ©dients."""
         ingredients = [{"name": "Farine", "cost": 2.5}]
         result = calculate_recipe_cost(ingredients)
         assert result == 0.0  # Implementation actuelle retourne toujours 0
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONSOLIDATE DUPLICATES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestConsolidateDuplicates:
     """Tests pour consolidate_duplicates."""
 
     def test_returns_same_list(self):
-        """Test retourne la même liste."""
+        """Test retourne la mÃªme liste."""
         items = [{"id": 1}, {"id": 2}]
         result = consolidate_duplicates(items)
         assert result == items
@@ -85,16 +85,16 @@ class TestConsolidateDuplicates:
         assert result == []
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ENRICH WITH INGREDIENT INFO
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestEnrichWithIngredientInfo:
     """Tests pour enrich_with_ingredient_info."""
 
     def test_returns_same_list(self):
-        """Test retourne la même liste."""
+        """Test retourne la mÃªme liste."""
         items = [{"name": "Sel"}]
         result = enrich_with_ingredient_info(items)
         assert result == items
@@ -105,9 +105,9 @@ class TestEnrichWithIngredientInfo:
         assert result == []
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FIND OR CREATE INGREDIENT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFindOrCreateIngredient:
@@ -119,7 +119,7 @@ class TestFindOrCreateIngredient:
         assert result == {"name": "Tomate"}
 
     def test_preserves_name(self):
-        """Test préserve le nom."""
+        """Test prÃ©serve le nom."""
         result = find_or_create_ingredient("Oignon Rouge")
         assert result["name"] == "Oignon Rouge"
 
@@ -129,29 +129,29 @@ class TestFindOrCreateIngredient:
         assert result == {"name": ""}
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FORMAT INVENTORY SUMMARY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFormatInventorySummary:
     """Tests pour format_inventory_summary."""
 
     def test_returns_default_message(self):
-        """Test retourne message par défaut."""
+        """Test retourne message par dÃ©faut."""
         result = format_inventory_summary({})
         assert result == "Inventaire vide"
 
     def test_with_data(self):
-        """Test avec données."""
+        """Test avec donnÃ©es."""
         data = {"items": 10, "value": 100}
         result = format_inventory_summary(data)
         assert result == "Inventaire vide"  # Implementation actuelle
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FORMAT RECIPE SUMMARY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFormatRecipeSummary:
@@ -173,9 +173,9 @@ class TestFormatRecipeSummary:
         assert result == "Recette: "
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GET ALL INGREDIENTS CACHED
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGetAllIngredientsCached:
@@ -192,9 +192,9 @@ class TestGetAllIngredientsCached:
         assert isinstance(result, list)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SUGGEST INGREDIENT SUBSTITUTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestSuggestIngredientSubstitutes:
@@ -206,14 +206,14 @@ class TestSuggestIngredientSubstitutes:
         assert result == []
 
     def test_any_ingredient(self):
-        """Test avec n'importe quel ingrédient."""
+        """Test avec n'importe quel ingrÃ©dient."""
         result = suggest_ingredient_substitutes("Farine")
         assert result == []
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS VALIDATE STOCK LEVEL
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestValidateStockLevel:
@@ -225,7 +225,7 @@ class TestValidateStockLevel:
         assert result is True
 
     def test_stock_equal_minimum(self):
-        """Test stock égal au minimum."""
+        """Test stock Ã©gal au minimum."""
         result = validate_stock_level(5, 5)
         assert result is True
 
@@ -245,11 +245,12 @@ class TestValidateStockLevel:
         assert result is False
 
     def test_float_values(self):
-        """Test avec valeurs décimales."""
+        """Test avec valeurs dÃ©cimales."""
         result = validate_stock_level(5.5, 5.0)
         assert result is True
 
     def test_float_below(self):
-        """Test décimal sous le minimum."""
+        """Test dÃ©cimal sous le minimum."""
         result = validate_stock_level(4.9, 5.0)
         assert result is False
+

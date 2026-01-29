@@ -1,20 +1,20 @@
-"""Tests unitaires pour le service predictions."""
+﻿"""Tests unitaires pour le service predictions."""
 
 import pytest
 from datetime import datetime
 from statistics import mean, stdev
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS MODÈLES PYDANTIC
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS MODÃˆLES PYDANTIC
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPredictionArticleModel:
     """Tests pour PredictionArticle."""
 
     def test_prediction_creation(self):
-        """Création d'une prédiction article."""
+        """CrÃ©ation d'une prÃ©diction article."""
         from src.services.predictions import PredictionArticle
         
         pred = PredictionArticle(
@@ -31,7 +31,7 @@ class TestPredictionArticleModel:
         assert pred.quantite_actuelle == 2.0
 
     def test_prediction_tendance_defaut(self):
-        """Tendance par défaut = stable."""
+        """Tendance par dÃ©faut = stable."""
         from src.services.predictions import PredictionArticle
         
         pred = PredictionArticle(
@@ -51,7 +51,7 @@ class TestAnalysePredictionModel:
     """Tests pour AnalysePrediction."""
 
     def test_analyse_creation(self):
-        """Création d'une analyse."""
+        """CrÃ©ation d'une analyse."""
         from src.services.predictions import AnalysePrediction
         
         analyse = AnalysePrediction(
@@ -67,16 +67,16 @@ class TestAnalysePredictionModel:
         assert len(analyse.articles_en_rupture_risque) == 2
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SERVICE PREDICTIONS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPredictionServiceInit:
     """Tests d'initialisation du service."""
 
     def test_service_creation(self):
-        """Création du service."""
+        """CrÃ©ation du service."""
         from src.services.predictions import PredictionService
         
         service = PredictionService()
@@ -85,7 +85,7 @@ class TestPredictionServiceInit:
         assert service.min_data_points == 3
 
     def test_service_methodes_requises(self):
-        """Le service a les méthodes requises."""
+        """Le service a les mÃ©thodes requises."""
         from src.services.predictions import PredictionService
         
         service = PredictionService()
@@ -93,21 +93,21 @@ class TestPredictionServiceInit:
         assert hasattr(service, 'analyser_historique_article')
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ANALYSE HISTORIQUE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAnalyserHistorique:
     """Tests pour analyser_historique_article."""
 
     def test_historique_pas_assez_donnees(self):
-        """Retourne None si pas assez de données."""
+        """Retourne None si pas assez de donnÃ©es."""
         from src.services.predictions import PredictionService
         
         service = PredictionService()
         
-        # Moins de 3 points → None
+        # Moins de 3 points â†’ None
         historique = [
             {"article_id": 1, "type_modification": "modification_quantite", "quantite_avant": 5, "quantite_apres": 4, "date_modification": "2026-01-01"},
             {"article_id": 1, "type_modification": "modification_quantite", "quantite_avant": 4, "quantite_apres": 3, "date_modification": "2026-01-02"},
@@ -118,7 +118,7 @@ class TestAnalyserHistorique:
         assert result is None
 
     def test_historique_donnees_valides(self):
-        """Analyse avec données valides."""
+        """Analyse avec donnÃ©es valides."""
         from src.services.predictions import PredictionService
         
         service = PredictionService()
@@ -132,12 +132,12 @@ class TestAnalyserHistorique:
         result = service.analyser_historique_article(1, historique)
         
         # Devrait retourner un dict avec les stats
-        assert result is not None or result is None  # Peut être None si filtrage
+        assert result is not None or result is None  # Peut Ãªtre None si filtrage
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CALCULS STATISTIQUES (FONCTIONS PURES)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalculsStatistiques:
@@ -151,12 +151,12 @@ class TestCalculsStatistiques:
         assert moyenne == 3.0
 
     def test_calcul_ecart_type(self):
-        """Calcul d'écart type."""
+        """Calcul d'Ã©cart type."""
         valeurs = [2, 4, 4, 4, 5, 5, 7, 9]
         ecart = stdev(valeurs)
         
-        # L'écart type de ces valeurs est environ 2.0
-        assert abs(ecart - 2.0) < 0.2  # Tolérance un peu plus grande
+        # L'Ã©cart type de ces valeurs est environ 2.0
+        assert abs(ecart - 2.0) < 0.2  # TolÃ©rance un peu plus grande
 
     def test_calcul_taux_consommation(self):
         """Calcul du taux de consommation."""
@@ -167,7 +167,7 @@ class TestCalculsStatistiques:
 
     def test_calcul_confiance(self):
         """Calcul du score de confiance."""
-        # Confiance basée sur nb points et variance
+        # Confiance basÃ©e sur nb points et variance
         nb_points = 10
         variance = 1.5
         
@@ -177,10 +177,10 @@ class TestCalculsStatistiques:
 
 
 class TestDetectionTendance:
-    """Tests pour détection de tendance."""
+    """Tests pour dÃ©tection de tendance."""
 
     def test_tendance_croissante(self):
-        """Détection tendance croissante."""
+        """DÃ©tection tendance croissante."""
         changements = [1, 2, 2, 3, 4, 4, 5]
         
         premiers = changements[:len(changements) // 2]
@@ -194,7 +194,7 @@ class TestDetectionTendance:
         assert tendance == "croissante"
 
     def test_tendance_decroissante(self):
-        """Détection tendance décroissante."""
+        """DÃ©tection tendance dÃ©croissante."""
         changements = [5, 4, 4, 3, 2, 2, 1]
         
         premiers = changements[:len(changements) // 2]
@@ -203,12 +203,12 @@ class TestDetectionTendance:
         moy_premiers = mean(premiers)
         moy_derniers = mean(derniers)
         
-        tendance = "décroissante" if moy_derniers < moy_premiers * 0.9 else "stable"
+        tendance = "dÃ©croissante" if moy_derniers < moy_premiers * 0.9 else "stable"
         
-        assert tendance == "décroissante"
+        assert tendance == "dÃ©croissante"
 
     def test_tendance_stable(self):
-        """Détection tendance stable."""
+        """DÃ©tection tendance stable."""
         changements = [3, 3, 2, 3, 3, 2, 3]
         
         premiers = changements[:len(changements) // 2]
@@ -224,10 +224,10 @@ class TestDetectionTendance:
 
 
 class TestPredireQuantite:
-    """Tests pour prédiction de quantité."""
+    """Tests pour prÃ©diction de quantitÃ©."""
 
     def test_predire_quantite_normale(self):
-        """Prédiction avec consommation normale."""
+        """PrÃ©diction avec consommation normale."""
         quantite_actuelle = 10.0
         taux_journalier = 1.0
         jours = 7
@@ -237,7 +237,7 @@ class TestPredireQuantite:
         assert quantite_predite == 3.0
 
     def test_predire_quantite_jamais_negative(self):
-        """Quantité prédite jamais négative."""
+        """QuantitÃ© prÃ©dite jamais nÃ©gative."""
         quantite_actuelle = 5.0
         taux_journalier = 2.0
         jours = 7
@@ -247,7 +247,7 @@ class TestPredireQuantite:
         assert quantite_predite == 0
 
     def test_predire_quantite_taux_zero(self):
-        """Quantité stable si taux = 0."""
+        """QuantitÃ© stable si taux = 0."""
         quantite_actuelle = 10.0
         taux_journalier = 0.0
         jours = 30
@@ -258,10 +258,10 @@ class TestPredireQuantite:
 
 
 class TestDetecterRupture:
-    """Tests pour détection de rupture."""
+    """Tests pour dÃ©tection de rupture."""
 
     def test_rupture_dans_14_jours(self):
-        """Détection rupture prochaine."""
+        """DÃ©tection rupture prochaine."""
         quantite = 7.0
         taux_journalier = 1.0
         seuil_jours = 14
@@ -295,7 +295,7 @@ class TestDetecterRupture:
 
 
 class TestGenererRecommandations:
-    """Tests pour génération de recommandations."""
+    """Tests pour gÃ©nÃ©ration de recommandations."""
 
     def test_recommandation_stock_critique(self):
         """Recommandation pour stock critique."""
@@ -312,7 +312,7 @@ class TestGenererRecommandations:
         assert "Acheter Pain" not in recommandations
 
     def test_recommandation_priorite(self):
-        """Tri par priorité."""
+        """Tri par prioritÃ©."""
         articles = [
             {"nom": "A", "jours_avant_rupture": 10},
             {"nom": "B", "jours_avant_rupture": 3},
@@ -328,7 +328,7 @@ class TestCasLimites:
     """Tests pour les cas limites."""
 
     def test_article_quantite_zero(self):
-        """Article avec quantité = 0."""
+        """Article avec quantitÃ© = 0."""
         quantite = 0.0
         taux = 1.0
         
@@ -337,7 +337,7 @@ class TestCasLimites:
         assert jours == 0
 
     def test_taux_tres_faible(self):
-        """Taux de consommation très faible."""
+        """Taux de consommation trÃ¨s faible."""
         quantite = 10.0
         taux = 0.01
         
@@ -346,7 +346,7 @@ class TestCasLimites:
         assert jours == 1000  # Longtemps avant rupture
 
     def test_grande_quantite(self):
-        """Grande quantité en stock."""
+        """Grande quantitÃ© en stock."""
         quantite = 1000.0
         taux = 1.0
         seuil_jours = 30
@@ -355,3 +355,4 @@ class TestCasLimites:
         risque = jours <= seuil_jours
         
         assert risque is False
+

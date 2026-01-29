@@ -1,6 +1,6 @@
-"""
+﻿"""
 Tests pour le module cuisine/recettes.py
-Gestion complète des recettes avec filtres, pagination et détails
+Gestion complÃ¨te des recettes avec filtres, pagination et dÃ©tails
 """
 
 import pytest
@@ -15,7 +15,7 @@ class TestAppRecettes:
     @patch("src.modules.cuisine.recettes.st")
     def test_initialise_session_state(self, mock_st, mock_get_service):
         """Initialise correctement le session_state"""
-        from src.modules.cuisine.recettes import app
+        from src.domains.cuisine.logic.recettes import app
         
         mock_st.session_state = SessionStateMock()
         mock_service = MagicMock()
@@ -36,8 +36,8 @@ class TestAppRecettes:
     @patch("src.modules.cuisine.recettes.get_recette_service")
     @patch("src.modules.cuisine.recettes.st")
     def test_affiche_detail_recette_si_selectionnee(self, mock_st, mock_get_service, mock_render_detail):
-        """Affiche le détail si une recette est sélectionnée"""
-        from src.modules.cuisine.recettes import app
+        """Affiche le dÃ©tail si une recette est sÃ©lectionnÃ©e"""
+        from src.domains.cuisine.logic.recettes import app
         
         mock_st.session_state = SessionStateMock({"detail_recette_id": 42})
         
@@ -67,8 +67,8 @@ class TestAppRecettes:
     @patch("src.modules.cuisine.recettes.get_recette_service")
     @patch("src.modules.cuisine.recettes.st")
     def test_recette_non_trouvee(self, mock_st, mock_get_service):
-        """Affiche erreur si recette non trouvée"""
-        from src.modules.cuisine.recettes import app
+        """Affiche erreur si recette non trouvÃ©e"""
+        from src.domains.cuisine.logic.recettes import app
         
         mock_st.session_state = SessionStateMock({"detail_recette_id": 999})
         
@@ -104,7 +104,7 @@ class TestRenderListe:
     @patch("src.modules.cuisine.recettes.st")
     def test_service_indisponible(self, mock_st, mock_get_service):
         """Affiche erreur si service indisponible"""
-        from src.modules.cuisine.recettes import render_liste
+        from src.domains.cuisine.logic.recettes import render_liste
         
         mock_get_service.return_value = None
         mock_st.session_state = SessionStateMock()
@@ -116,7 +116,7 @@ class TestRenderListe:
 
 
 class TestFiltresRecettes:
-    """Tests pour les filtres de recettes (logique métier)"""
+    """Tests pour les filtres de recettes (logique mÃ©tier)"""
 
     def test_filtre_score_bio(self):
         """Filtre par score bio minimum"""
@@ -147,7 +147,7 @@ class TestFiltresRecettes:
         assert filtered[0].score_local == 80
 
     def test_filtre_robots_cookeo(self):
-        """Filtre par compatibilité Cookeo"""
+        """Filtre par compatibilitÃ© Cookeo"""
         mock_recettes = [
             MagicMock(compatible_cookeo=True, compatible_airfryer=False),
             MagicMock(compatible_cookeo=False, compatible_airfryer=True),
@@ -180,7 +180,7 @@ class TestFiltresRecettes:
         assert len(filtered) == 2
 
     def test_filtre_tags_equilibre(self):
-        """Filtre par tag équilibré"""
+        """Filtre par tag Ã©quilibrÃ©"""
         mock_recettes = [
             MagicMock(est_equilibre=True),
             MagicMock(est_equilibre=False),
@@ -190,7 +190,7 @@ class TestFiltresRecettes:
         assert len(filtered) == 1
 
     def test_filtre_congelable(self):
-        """Filtre par tag congélable"""
+        """Filtre par tag congÃ©lable"""
         mock_recettes = [
             MagicMock(congelable=True),
             MagicMock(congelable=True),
@@ -226,7 +226,7 @@ class TestPagination:
         assert total_pages == 3
 
     def test_calcul_indices_page_0(self):
-        """Calcul des indices pour la première page"""
+        """Calcul des indices pour la premiÃ¨re page"""
         PAGE_SIZE = 9
         page = 0
         start_idx = page * PAGE_SIZE
@@ -235,7 +235,7 @@ class TestPagination:
         assert end_idx == 9
 
     def test_calcul_indices_page_1(self):
-        """Calcul des indices pour la deuxième page"""
+        """Calcul des indices pour la deuxiÃ¨me page"""
         PAGE_SIZE = 9
         page = 1
         start_idx = page * PAGE_SIZE
@@ -244,7 +244,7 @@ class TestPagination:
         assert end_idx == 18
 
     def test_limite_page_max(self):
-        """La page ne dépasse pas le maximum"""
+        """La page ne dÃ©passe pas le maximum"""
         PAGE_SIZE = 9
         recettes = list(range(25))
         total_pages = (len(recettes) + PAGE_SIZE - 1) // PAGE_SIZE
@@ -256,27 +256,27 @@ class TestPagination:
 
 
 class TestDifficulteEmoji:
-    """Tests pour le mapping des emojis de difficulté"""
+    """Tests pour le mapping des emojis de difficultÃ©"""
 
     def test_emoji_facile(self):
         """Emoji vert pour facile"""
-        emoji_map = {"facile": "🟢", "moyen": "🟡", "difficile": "🔴"}
-        assert emoji_map.get("facile") == "🟢"
+        emoji_map = {"facile": "ðŸŸ¢", "moyen": "ðŸŸ¡", "difficile": "ðŸ”´"}
+        assert emoji_map.get("facile") == "ðŸŸ¢"
 
     def test_emoji_moyen(self):
         """Emoji jaune pour moyen"""
-        emoji_map = {"facile": "🟢", "moyen": "🟡", "difficile": "🔴"}
-        assert emoji_map.get("moyen") == "🟡"
+        emoji_map = {"facile": "ðŸŸ¢", "moyen": "ðŸŸ¡", "difficile": "ðŸ”´"}
+        assert emoji_map.get("moyen") == "ðŸŸ¡"
 
     def test_emoji_difficile(self):
         """Emoji rouge pour difficile"""
-        emoji_map = {"facile": "🟢", "moyen": "🟡", "difficile": "🔴"}
-        assert emoji_map.get("difficile") == "🔴"
+        emoji_map = {"facile": "ðŸŸ¢", "moyen": "ðŸŸ¡", "difficile": "ðŸ”´"}
+        assert emoji_map.get("difficile") == "ðŸ”´"
 
     def test_emoji_inconnu(self):
-        """Emoji par défaut pour valeur inconnue"""
-        emoji_map = {"facile": "🟢", "moyen": "🟡", "difficile": "🔴"}
-        assert emoji_map.get("inconnu", "⚪") == "⚪"
+        """Emoji par dÃ©faut pour valeur inconnue"""
+        emoji_map = {"facile": "ðŸŸ¢", "moyen": "ðŸŸ¡", "difficile": "ðŸ”´"}
+        assert emoji_map.get("inconnu", "âšª") == "âšª"
 
 
 class TestBadgesRecette:
@@ -293,23 +293,23 @@ class TestBadgesRecette:
         
         badges = []
         if recette.est_bio:
-            badges.append("🌱 Bio")
+            badges.append("ðŸŒ± Bio")
         if recette.est_local:
-            badges.append("📍 Local")
+            badges.append("ðŸ“ Local")
         if recette.est_rapide:
-            badges.append("⚡ Rapide")
+            badges.append("âš¡ Rapide")
         if recette.est_equilibre:
-            badges.append("💪 Équilibré")
+            badges.append("ðŸ’ª Ã‰quilibrÃ©")
         if recette.congelable:
-            badges.append("❄️ Congélable")
+            badges.append("â„ï¸ CongÃ©lable")
         
         assert len(badges) == 3
-        assert "🌱 Bio" in badges
-        assert "⚡ Rapide" in badges
-        assert "❄️ Congélable" in badges
+        assert "ðŸŒ± Bio" in badges
+        assert "âš¡ Rapide" in badges
+        assert "â„ï¸ CongÃ©lable" in badges
 
     def test_badges_vides(self):
-        """Gère le cas sans badges"""
+        """GÃ¨re le cas sans badges"""
         recette = MagicMock()
         recette.est_bio = False
         recette.est_local = False
@@ -319,7 +319,7 @@ class TestBadgesRecette:
         
         badges = []
         if recette.est_bio:
-            badges.append("🌱 Bio")
+            badges.append("ðŸŒ± Bio")
         
         assert len(badges) == 0
 
@@ -334,24 +334,24 @@ class TestBadgesRecette:
         
         badges = []
         if recette.est_bio:
-            badges.append("🌱 Bio")
+            badges.append("ðŸŒ± Bio")
         if recette.est_local:
-            badges.append("📍 Local")
+            badges.append("ðŸ“ Local")
         if recette.est_rapide:
-            badges.append("⚡ Rapide")
+            badges.append("âš¡ Rapide")
         if recette.est_equilibre:
-            badges.append("💪 Équilibré")
+            badges.append("ðŸ’ª Ã‰quilibrÃ©")
         if recette.congelable:
-            badges.append("❄️ Congélable")
+            badges.append("â„ï¸ CongÃ©lable")
         
         assert len(badges) == 5
 
 
 class TestRobotsCompatibles:
-    """Tests pour la compatibilité robots"""
+    """Tests pour la compatibilitÃ© robots"""
 
     def test_robot_cookeo(self):
-        """Vérifie badge Cookeo"""
+        """VÃ©rifie badge Cookeo"""
         recette = MagicMock()
         recette.compatible_cookeo = True
         recette.compatible_monsieur_cuisine = False
@@ -386,7 +386,7 @@ class TestRobotsCompatibles:
         assert len(robots) == 3
 
     def test_aucun_robot(self):
-        """Recette sans compatibilité robot"""
+        """Recette sans compatibilitÃ© robot"""
         recette = MagicMock()
         recette.compatible_cookeo = False
         recette.compatible_monsieur_cuisine = False
@@ -398,3 +398,4 @@ class TestRobotsCompatibles:
             robots.append("Cookeo")
         
         assert len(robots) == 0
+

@@ -1,11 +1,11 @@
-"""
+﻿"""
 Tests pour les modules performance.py et sql_optimizer.py.
 
 Tests couverts:
 - FunctionProfiler
 - MemoryMonitor
 - SQLOptimizer
-- Décorateurs @profile, @debounce, @throttle
+- DÃ©corateurs @profile, @debounce, @throttle
 - SQLAlchemyListener
 - N1Detector
 - OptimizedQueryBuilder
@@ -19,9 +19,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
@@ -34,7 +34,7 @@ def mock_session_state():
 
 @pytest.fixture
 def function_profiler(mock_session_state):
-    """Instance FunctionProfiler fraîche."""
+    """Instance FunctionProfiler fraÃ®che."""
     from src.core.performance import FunctionProfiler
     
     FunctionProfiler.clear()
@@ -44,7 +44,7 @@ def function_profiler(mock_session_state):
 
 @pytest.fixture
 def sql_optimizer(mock_session_state):
-    """Instance SQLOptimizer fraîche."""
+    """Instance SQLOptimizer fraÃ®che."""
     from src.core.performance import SQLOptimizer
     
     SQLOptimizer.clear()
@@ -52,9 +52,9 @@ def sql_optimizer(mock_session_state):
     SQLOptimizer.clear()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FUNCTION PROFILER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFunctionProfiler:
@@ -94,7 +94,7 @@ class TestFunctionProfiler:
         assert stats["failing_func"].errors == 1
     
     def test_get_slowest(self, function_profiler):
-        """Test récupération des plus lentes."""
+        """Test rÃ©cupÃ©ration des plus lentes."""
         function_profiler.record("fast", 10.0)
         function_profiler.record("medium", 50.0)
         function_profiler.record("slow", 200.0)
@@ -106,7 +106,7 @@ class TestFunctionProfiler:
         assert slowest[1][0] == "medium"
     
     def test_get_most_called(self, function_profiler):
-        """Test récupération des plus appelées."""
+        """Test rÃ©cupÃ©ration des plus appelÃ©es."""
         function_profiler.record("rarely", 10.0)
         function_profiler.record("often", 10.0)
         function_profiler.record("often", 10.0)
@@ -129,13 +129,13 @@ class TestFunctionProfiler:
         assert len(stats) == 0
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PROFILE DECORATOR
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestProfileDecorator:
-    """Tests pour le décorateur @profile."""
+    """Tests pour le dÃ©corateur @profile."""
     
     def test_basic_profiling(self, mock_session_state):
         """Test profiling basique."""
@@ -153,11 +153,11 @@ class TestProfileDecorator:
         assert result == "result"
         
         stats = FunctionProfiler.get_all_stats()
-        # La clé contient le nom du module + fonction
+        # La clÃ© contient le nom du module + fonction
         assert any("sample_function" in key for key in stats.keys())
     
     def test_custom_name(self, mock_session_state):
-        """Test nom personnalisé."""
+        """Test nom personnalisÃ©."""
         from src.core.performance import profile, FunctionProfiler
         
         FunctionProfiler.clear()
@@ -185,14 +185,14 @@ class TestProfileDecorator:
             failing_function()
         
         stats = FunctionProfiler.get_all_stats()
-        # Doit avoir enregistré l'erreur
+        # Doit avoir enregistrÃ© l'erreur
         key = [k for k in stats.keys() if "failing_function" in k][0]
         assert stats[key].errors == 1
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MEASURE_TIME CONTEXT MANAGER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestMeasureTime:
@@ -226,16 +226,16 @@ class TestMeasureTime:
         assert stats["failing_block"].errors == 1
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MEMORY MONITOR
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestMemoryMonitor:
     """Tests pour MemoryMonitor."""
     
     def test_get_current_usage(self, mock_session_state):
-        """Test usage mémoire actuel."""
+        """Test usage mÃ©moire actuel."""
         from src.core.performance import MemoryMonitor
         
         usage = MemoryMonitor.get_current_usage()
@@ -246,10 +246,10 @@ class TestMemoryMonitor:
         assert usage["total_objects"] > 0
     
     def test_force_cleanup(self, mock_session_state):
-        """Test nettoyage forcé."""
+        """Test nettoyage forcÃ©."""
         from src.core.performance import MemoryMonitor
         
-        # Créer des objets pour avoir quelque chose à nettoyer
+        # CrÃ©er des objets pour avoir quelque chose Ã  nettoyer
         temp_list = [dict() for _ in range(1000)]
         del temp_list
         
@@ -261,35 +261,35 @@ class TestMemoryMonitor:
         assert "after_mb" in result
     
     def test_tracking(self, mock_session_state):
-        """Test tracking mémoire."""
+        """Test tracking mÃ©moire."""
         from src.core.performance import MemoryMonitor
         
-        # Démarrer tracking
+        # DÃ©marrer tracking
         MemoryMonitor.start_tracking()
         
-        # Allouer de la mémoire
+        # Allouer de la mÃ©moire
         data = [bytearray(1000) for _ in range(100)]
         
         usage = MemoryMonitor.get_current_usage()
         
-        # Arrêter tracking
+        # ArrÃªter tracking
         MemoryMonitor.stop_tracking()
         
-        # Si tracking actif, current_mb devrait être > 0
-        # Note: dépend de l'état du système
+        # Si tracking actif, current_mb devrait Ãªtre > 0
+        # Note: dÃ©pend de l'Ã©tat du systÃ¨me
         del data
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SQL OPTIMIZER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestSQLOptimizer:
     """Tests pour SQLOptimizer."""
     
     def test_record_query(self, sql_optimizer):
-        """Test enregistrement requête."""
+        """Test enregistrement requÃªte."""
         sql_optimizer.record_query(
             "SELECT * FROM users WHERE id = 1",
             duration_ms=25.0,
@@ -302,7 +302,7 @@ class TestSQLOptimizer:
         assert stats["avg_time_ms"] == 25.0
     
     def test_slow_query_detection(self, sql_optimizer):
-        """Test détection requêtes lentes."""
+        """Test dÃ©tection requÃªtes lentes."""
         sql_optimizer.record_query("SELECT * FROM small", 50.0)
         sql_optimizer.record_query("SELECT * FROM large", 150.0)  # > 100ms = lente
         sql_optimizer.record_query("SELECT * FROM huge", 500.0)
@@ -312,13 +312,13 @@ class TestSQLOptimizer:
         assert stats["slow_query_count"] == 2
     
     def test_recent_queries(self, sql_optimizer):
-        """Test requêtes récentes."""
+        """Test requÃªtes rÃ©centes."""
         for i in range(15):
             sql_optimizer.record_query(f"SELECT {i}", 10.0)
         
         stats = sql_optimizer.get_stats()
         
-        # Doit retourner les 10 dernières
+        # Doit retourner les 10 derniÃ¨res
         assert len(stats["recent_queries"]) == 10
     
     def test_clear(self, sql_optimizer):
@@ -330,13 +330,13 @@ class TestSQLOptimizer:
         assert stats["total_queries"] == 0
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS DEBOUNCE DECORATOR
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestDebounceDecorator:
-    """Tests pour le décorateur @debounce."""
+    """Tests pour le dÃ©corateur @debounce."""
     
     def test_basic_debounce(self):
         """Test debounce basique."""
@@ -355,23 +355,23 @@ class TestDebounceDecorator:
         debounced_func()
         debounced_func()
         
-        # Premier appel exécuté, les autres ignorés
+        # Premier appel exÃ©cutÃ©, les autres ignorÃ©s
         assert call_count == 1
         
-        # Attendre et réessayer
+        # Attendre et rÃ©essayer
         time.sleep(0.15)
         debounced_func()
         
         assert call_count == 2
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS THROTTLE DECORATOR
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestThrottleDecorator:
-    """Tests pour le décorateur @throttle."""
+    """Tests pour le dÃ©corateur @throttle."""
     
     def test_basic_throttle(self):
         """Test throttle basique."""
@@ -393,16 +393,16 @@ class TestThrottleDecorator:
         assert call_count == 3
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SQLALCHEMY LISTENER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestSQLAlchemyListener:
     """Tests pour SQLAlchemyListener."""
     
     def test_extract_operation(self):
-        """Test extraction type opération."""
+        """Test extraction type opÃ©ration."""
         from src.core.sql_optimizer import SQLAlchemyListener
         
         assert SQLAlchemyListener._extract_operation("SELECT * FROM users") == "SELECT"
@@ -419,16 +419,16 @@ class TestSQLAlchemyListener:
         assert SQLAlchemyListener._extract_table("UPDATE products SET") == "products"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS N1 DETECTOR
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestN1Detector:
     """Tests pour N1Detector."""
     
     def test_normalize_query(self):
-        """Test normalisation requête."""
+        """Test normalisation requÃªte."""
         from src.core.sql_optimizer import N1Detector
         
         query1 = "SELECT * FROM users WHERE id = 123"
@@ -437,7 +437,7 @@ class TestN1Detector:
         norm1 = N1Detector._normalize_query(query1)
         norm2 = N1Detector._normalize_query(query2)
         
-        assert norm1 == norm2  # Même pattern
+        assert norm1 == norm2  # MÃªme pattern
     
     def test_guess_parent_table(self):
         """Test devinette table parente."""
@@ -456,9 +456,9 @@ class TestN1Detector:
         assert parent == "post"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS BATCH LOADER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBatchLoader:
@@ -488,16 +488,16 @@ class TestBatchLoader:
         assert all(len(c) == 3 for c in chunks)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PERFORMANCE DASHBOARD
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPerformanceDashboard:
     """Tests pour PerformanceDashboard."""
     
     def test_get_summary(self, mock_session_state):
-        """Test résumé performances."""
+        """Test rÃ©sumÃ© performances."""
         from src.core.performance import PerformanceDashboard
         
         summary = PerformanceDashboard.get_summary()
@@ -508,25 +508,25 @@ class TestPerformanceDashboard:
         assert "sql" in summary
     
     def test_get_health_score(self, mock_session_state):
-        """Test score de santé."""
+        """Test score de santÃ©."""
         from src.core.performance import PerformanceDashboard
         
         score, status = PerformanceDashboard.get_health_score()
         
         assert 0 <= score <= 100
-        assert status in ["🟢", "🟡", "🔴"]
+        assert status in ["ðŸŸ¢", "ðŸŸ¡", "ðŸ”´"]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS OPTIMIZED QUERY BUILDER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestOptimizedQueryBuilder:
     """Tests pour OptimizedQueryBuilder."""
     
     def test_builder_chain(self, db):
-        """Test chaînage du builder."""
+        """Test chaÃ®nage du builder."""
         from src.core.sql_optimizer import OptimizedQueryBuilder
         from src.core.models import Recette
         
@@ -539,7 +539,7 @@ class TestOptimizedQueryBuilder:
         
         query = builder.build()
         
-        # Vérifier que la requête est construite
+        # VÃ©rifier que la requÃªte est construite
         assert query is not None
     
     def test_eager_load(self, db):
@@ -551,7 +551,7 @@ class TestOptimizedQueryBuilder:
         
         query = builder.build()
         
-        # La requête doit inclure le eager loading
+        # La requÃªte doit inclure le eager loading
         assert query is not None
     
     def test_pagination(self, db):
@@ -563,5 +563,6 @@ class TestOptimizedQueryBuilder:
         
         query = builder.build()
         
-        # Vérifier offset et limit
+        # VÃ©rifier offset et limit
         assert query is not None
+

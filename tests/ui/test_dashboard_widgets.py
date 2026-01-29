@@ -1,33 +1,33 @@
-"""Tests unitaires pour les widgets dashboard et logique UI pure."""
+﻿"""Tests unitaires pour les widgets dashboard et logique UI pure."""
 
 import pytest
 from datetime import date, datetime, timedelta
 from unittest.mock import MagicMock, patch
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS DASHBOARD_WIDGETS - GRAPHIQUES PLOTLY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGraphiqueRepartitionRepas:
     """Tests pour graphique_repartition_repas."""
 
     def test_graphique_avec_donnees_valides(self):
-        """Création graphique avec données."""
+        """CrÃ©ation graphique avec donnÃ©es."""
         from src.ui.components.dashboard_widgets import graphique_repartition_repas
         
         planning_data = [
-            {"type_repas": "déjeuner"},
-            {"type_repas": "déjeuner"},
-            {"type_repas": "dîner"},
-            {"type_repas": "petit_déjeuner"},
+            {"type_repas": "dÃ©jeuner"},
+            {"type_repas": "dÃ©jeuner"},
+            {"type_repas": "dÃ®ner"},
+            {"type_repas": "petit_dÃ©jeuner"},
         ]
         
         fig = graphique_repartition_repas(planning_data)
         
         assert fig is not None
-        # Vérifier que c'est un Pie chart
+        # VÃ©rifier que c'est un Pie chart
         assert len(fig.data) > 0
         assert fig.data[0].type == "pie"
 
@@ -40,14 +40,14 @@ class TestGraphiqueRepartitionRepas:
         assert result is None
 
     def test_comptage_types_repas(self):
-        """Vérification comptage par type."""
+        """VÃ©rification comptage par type."""
         from src.ui.components.dashboard_widgets import graphique_repartition_repas
         
         planning_data = [
-            {"type_repas": "déjeuner"},
-            {"type_repas": "déjeuner"},
-            {"type_repas": "déjeuner"},
-            {"type_repas": "dîner"},
+            {"type_repas": "dÃ©jeuner"},
+            {"type_repas": "dÃ©jeuner"},
+            {"type_repas": "dÃ©jeuner"},
+            {"type_repas": "dÃ®ner"},
         ]
         
         fig = graphique_repartition_repas(planning_data)
@@ -62,20 +62,20 @@ class TestGraphiqueInventaireCategories:
     """Tests pour graphique_inventaire_categories."""
 
     def test_graphique_avec_inventaire(self):
-        """Création graphique avec inventaire."""
+        """CrÃ©ation graphique avec inventaire."""
         from src.ui.components.dashboard_widgets import graphique_inventaire_categories
         
         inventaire = [
             {"categorie": "Fruits", "statut": "ok"},
             {"categorie": "Fruits", "statut": "critique"},
-            {"categorie": "Légumes", "statut": "ok"},
+            {"categorie": "LÃ©gumes", "statut": "ok"},
             {"categorie": "Viandes", "statut": "sous_seuil"},
         ]
         
         fig = graphique_inventaire_categories(inventaire)
         
         assert fig is not None
-        # Vérifier barres empilées (2 traces)
+        # VÃ©rifier barres empilÃ©es (2 traces)
         assert len(fig.data) == 2
 
     def test_graphique_inventaire_vide(self):
@@ -91,7 +91,7 @@ class TestGraphiqueActiviteSemaine:
     """Tests pour graphique_activite_semaine."""
 
     def test_graphique_avec_activites(self):
-        """Création graphique avec activités."""
+        """CrÃ©ation graphique avec activitÃ©s."""
         from src.ui.components.dashboard_widgets import graphique_activite_semaine
         
         today = date.today()
@@ -107,14 +107,14 @@ class TestGraphiqueActiviteSemaine:
         assert fig.data[0].type == "scatter"
 
     def test_graphique_activites_vides(self):
-        """Activités vides génère graphique vide."""
+        """ActivitÃ©s vides gÃ©nÃ¨re graphique vide."""
         from src.ui.components.dashboard_widgets import graphique_activite_semaine
         
-        # Même avec liste vide, retourne un graphique (7 jours à 0)
+        # MÃªme avec liste vide, retourne un graphique (7 jours Ã  0)
         fig = graphique_activite_semaine([])
         
         assert fig is not None
-        # Tous les counts doivent être 0
+        # Tous les counts doivent Ãªtre 0
         assert all(y == 0 for y in fig.data[0].y)
 
 
@@ -122,7 +122,7 @@ class TestGraphiqueProgressionObjectifs:
     """Tests pour graphique_progression_objectifs."""
 
     def test_graphique_avec_objectifs(self):
-        """Création graphique avec objectifs."""
+        """CrÃ©ation graphique avec objectifs."""
         from src.ui.components.dashboard_widgets import graphique_progression_objectifs
         
         objectifs = [
@@ -151,9 +151,9 @@ class TestGraphiqueProgressionObjectifs:
         from src.ui.components.dashboard_widgets import graphique_progression_objectifs
         
         objectifs = [
-            {"nom": "Haut", "actuel": 90, "cible": 100},  # 90% → vert
-            {"nom": "Moyen", "actuel": 60, "cible": 100},  # 60% → orange
-            {"nom": "Bas", "actuel": 20, "cible": 100},  # 20% → rouge
+            {"nom": "Haut", "actuel": 90, "cible": 100},  # 90% â†’ vert
+            {"nom": "Moyen", "actuel": 60, "cible": 100},  # 60% â†’ orange
+            {"nom": "Bas", "actuel": 20, "cible": 100},  # 20% â†’ rouge
         ]
         
         fig = graphique_progression_objectifs(objectifs)
@@ -175,7 +175,7 @@ class TestIndicateurSanteSysteme:
     @patch('src.core.database.verifier_connexion')
     @patch('src.core.cache_multi.get_cache')
     def test_sante_tout_ok(self, mock_cache, mock_db):
-        """Système sain retourne ok."""
+        """SystÃ¨me sain retourne ok."""
         from src.ui.components.dashboard_widgets import indicateur_sante_systeme
         
         mock_db.return_value = True
@@ -187,20 +187,20 @@ class TestIndicateurSanteSysteme:
         assert len(status["details"]) >= 1
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS BASE_IO - IMPORT/EXPORT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestIOConfig:
     """Tests pour IOConfig."""
 
     def test_config_creation(self):
-        """Création d'une config IO."""
+        """CrÃ©ation d'une config IO."""
         from src.ui.core.base_io import IOConfig
         
         config = IOConfig(
-            field_mapping={"nom": "Nom", "quantite": "Quantité"},
+            field_mapping={"nom": "Nom", "quantite": "QuantitÃ©"},
             required_fields=["nom"]
         )
         
@@ -225,7 +225,7 @@ class TestBaseIOServiceTransformers:
     """Tests pour _apply_transformers."""
 
     def test_transformer_applique(self):
-        """Transformer appliqué aux items."""
+        """Transformer appliquÃ© aux items."""
         from src.ui.core.base_io import IOConfig, BaseIOService
         
         config = IOConfig(
@@ -261,11 +261,11 @@ class TestBaseIOServiceTransformers:
         # Ne doit pas lever d'exception
         result = service._apply_transformers(items)
         
-        # La valeur originale est préservée
+        # La valeur originale est prÃ©servÃ©e
         assert result[0]["nom"] == "test"
 
     def test_transformer_champ_absent(self):
-        """Transformer ignoré si champ absent."""
+        """Transformer ignorÃ© si champ absent."""
         from src.ui.core.base_io import IOConfig, BaseIOService
         
         config = IOConfig(
@@ -279,21 +279,21 @@ class TestBaseIOServiceTransformers:
         
         result = service._apply_transformers(items)
         
-        # Pas d'erreur, item retourné tel quel
+        # Pas d'erreur, item retournÃ© tel quel
         assert result[0]["nom"] == "test"
         assert "autre" not in result[0]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS BASE_FORM - FORM BUILDER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFormBuilderInit:
     """Tests d'initialisation FormBuilder."""
 
     def test_creation_form(self):
-        """Création d'un FormBuilder."""
+        """CrÃ©ation d'un FormBuilder."""
         from src.ui.core.base_form import FormBuilder
         
         form = FormBuilder("test_form", title="Mon Formulaire")
@@ -344,7 +344,7 @@ class TestFormBuilderAddFields:
         from src.ui.core.base_form import FormBuilder
         
         form = FormBuilder("test")
-        form.add_number("quantite", "Quantité", min_value=0, max_value=100, step=0.5)
+        form.add_number("quantite", "QuantitÃ©", min_value=0, max_value=100, step=0.5)
         
         field = form.fields[0]
         assert field["type"] == "number"
@@ -394,36 +394,36 @@ class TestFormBuilderAddFields:
         
         today = date.today()
         form = FormBuilder("test")
-        form.add_date("date_debut", "Date début", default=today)
+        form.add_date("date_debut", "Date dÃ©but", default=today)
         
         field = form.fields[0]
         assert field["type"] == "date"
         assert field["default"] == today
 
     def test_chainable_methods(self):
-        """Méthodes chaînables."""
+        """MÃ©thodes chaÃ®nables."""
         from src.ui.core.base_form import FormBuilder
         
         form = (
             FormBuilder("test")
             .add_text("nom", "Nom", required=True)
-            .add_number("age", "Âge")
+            .add_number("age", "Ã‚ge")
             .add_checkbox("actif", "Actif")
         )
         
         assert len(form.fields) == 3
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CALCULS PURS (EXTRAITS DES WIDGETS)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalculProgressionCouleur:
     """Tests calcul couleur selon progression."""
 
     def test_couleur_progression_haute(self):
-        """≥80% = vert."""
+        """â‰¥80% = vert."""
         def calc_color(progression):
             return "#4CAF50" if progression >= 80 else "#FFB74D" if progression >= 50 else "#FF5722"
         
@@ -462,7 +462,7 @@ class TestCalculProgression:
         assert calc_progression(75, 100) == 75.0
 
     def test_progression_plafonnee(self):
-        """Progression plafonnée à 100%."""
+        """Progression plafonnÃ©e Ã  100%."""
         def calc_progression(actuel, cible):
             return min(100, (actuel / cible) * 100) if cible > 0 else 0
         
@@ -470,7 +470,7 @@ class TestCalculProgression:
         assert calc_progression(200, 50) == 100
 
     def test_progression_cible_zero(self):
-        """Cible à zéro retourne 0."""
+        """Cible Ã  zÃ©ro retourne 0."""
         def calc_progression(actuel, cible):
             return min(100, (actuel / cible) * 100) if cible > 0 else 0
         
@@ -483,9 +483,9 @@ class TestComptageTypesRepas:
     def test_comptage_simple(self):
         """Comptage basique par type."""
         planning_data = [
-            {"type_repas": "déjeuner"},
-            {"type_repas": "déjeuner"},
-            {"type_repas": "dîner"},
+            {"type_repas": "dÃ©jeuner"},
+            {"type_repas": "dÃ©jeuner"},
+            {"type_repas": "dÃ®ner"},
         ]
         
         types_count = {}
@@ -493,11 +493,11 @@ class TestComptageTypesRepas:
             type_repas = repas.get("type_repas", "autre")
             types_count[type_repas] = types_count.get(type_repas, 0) + 1
         
-        assert types_count["déjeuner"] == 2
-        assert types_count["dîner"] == 1
+        assert types_count["dÃ©jeuner"] == 2
+        assert types_count["dÃ®ner"] == 1
 
     def test_comptage_type_manquant(self):
-        """Type manquant → "autre"."""
+        """Type manquant â†’ "autre"."""
         planning_data = [
             {"nom": "Repas sans type"},
         ]
@@ -511,14 +511,14 @@ class TestComptageTypesRepas:
 
 
 class TestGroupementCategories:
-    """Tests groupement par catégories."""
+    """Tests groupement par catÃ©gories."""
 
     def test_groupement_inventaire(self):
-        """Groupement inventaire par catégorie."""
+        """Groupement inventaire par catÃ©gorie."""
         inventaire = [
             {"categorie": "Fruits", "statut": "ok"},
             {"categorie": "Fruits", "statut": "critique"},
-            {"categorie": "Légumes", "statut": "ok"},
+            {"categorie": "LÃ©gumes", "statut": "ok"},
         ]
         
         categories = {}
@@ -532,76 +532,76 @@ class TestGroupementCategories:
         
         assert categories["Fruits"]["total"] == 2
         assert categories["Fruits"]["bas"] == 1
-        assert categories["Légumes"]["total"] == 1
-        assert categories["Légumes"]["bas"] == 0
+        assert categories["LÃ©gumes"]["total"] == 1
+        assert categories["LÃ©gumes"]["bas"] == 0
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS LABELS FRANÇAIS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS LABELS FRANÃ‡AIS
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestLabelsFrancais:
-    """Tests pour labels français."""
+    """Tests pour labels franÃ§ais."""
 
     def test_labels_types_repas(self):
-        """Labels français pour types de repas."""
+        """Labels franÃ§ais pour types de repas."""
         labels_fr = {
-            "petit_déjeuner": "Petit-déjeuner",
-            "déjeuner": "Déjeuner",
-            "dîner": "Dîner",
-            "goûter": "Goûter",
+            "petit_dÃ©jeuner": "Petit-dÃ©jeuner",
+            "dÃ©jeuner": "DÃ©jeuner",
+            "dÃ®ner": "DÃ®ner",
+            "goÃ»ter": "GoÃ»ter",
         }
         
-        assert labels_fr["déjeuner"] == "Déjeuner"
-        assert labels_fr["petit_déjeuner"] == "Petit-déjeuner"
+        assert labels_fr["dÃ©jeuner"] == "DÃ©jeuner"
+        assert labels_fr["petit_dÃ©jeuner"] == "Petit-dÃ©jeuner"
 
     def test_labels_jours_semaine(self):
         """Labels jours de la semaine."""
         jours_fr = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
         
         # Lundi = index 0
-        lundi = date(2024, 1, 1)  # C'était un lundi
+        lundi = date(2024, 1, 1)  # C'Ã©tait un lundi
         label = jours_fr[lundi.weekday()]
         
         assert label == "Lun"
 
     def test_icones_activites(self):
-        """Icônes par type d'activité."""
+        """IcÃ´nes par type d'activitÃ©."""
         icones = {
-            "recette": "🍽️",
-            "inventaire": "📦",
-            "courses": "🛒",
-            "planning": "📅",
-            "famille": "👨‍👩‍👦",
-            "maison": "🏠",
+            "recette": "ðŸ½ï¸",
+            "inventaire": "ðŸ“¦",
+            "courses": "ðŸ›’",
+            "planning": "ðŸ“…",
+            "famille": "ðŸ‘¨â€ðŸ‘©â€ðŸ‘¦",
+            "maison": "ðŸ ",
         }
         
-        assert icones["recette"] == "🍽️"
-        assert icones["maison"] == "🏠"
+        assert icones["recette"] == "ðŸ½ï¸"
+        assert icones["maison"] == "ðŸ "
 
     def test_icone_type_inconnu(self):
-        """Type inconnu → icône par défaut."""
+        """Type inconnu â†’ icÃ´ne par dÃ©faut."""
         icones = {
-            "recette": "🍽️",
+            "recette": "ðŸ½ï¸",
         }
         
         type_activite = "inconnu"
-        icone = icones.get(type_activite, "📌")
+        icone = icones.get(type_activite, "ðŸ“Œ")
         
-        assert icone == "📌"
+        assert icone == "ðŸ“Œ"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS IO SERVICE FACTORY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBaseIOServiceFactory:
     """Tests pour factory create_io_service."""
 
     def test_create_io_service(self):
-        """Factory crée service."""
+        """Factory crÃ©e service."""
         from src.ui.core.base_io import IOConfig, create_io_service
         
         config = IOConfig(
@@ -613,3 +613,4 @@ class TestBaseIOServiceFactory:
         
         assert service is not None
         assert service.config == config
+

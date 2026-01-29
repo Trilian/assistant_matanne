@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from src.core.database import get_db_context
 from src.services.recettes import get_recette_service
-from src.core.models import Recette, PlanningRepas
+from src.core.models import Recette, Repas
 
 
 # ═══════════════════════════════════════════════════════════
@@ -150,12 +150,12 @@ def toggle_favorite(recette_id: int, db: Optional[Session] = None) -> bool:
 # LOGIQUE PLANNING REPAS
 # ═══════════════════════════════════════════════════════════
 
-def get_planning_semaine(date_debut: date, date_fin: date, db: Optional[Session] = None) -> List[PlanningRepas]:
+def get_planning_semaine(date_debut: date, date_fin: date, db: Optional[Session] = None) -> List[Repas]:
     """Récupère le planning de repas pour une période."""
     with get_db_context() as session:
-        return session.query(PlanningRepas).filter(
-            PlanningRepas.date >= date_debut,
-            PlanningRepas.date <= date_fin
+        return session.query(Repas).filter(
+            Repas.date_repas >= date_debut,
+            Repas.date_repas <= date_fin
         ).all()
 
 
@@ -164,19 +164,19 @@ def ajouter_repas_planning(
     date_repas: date,
     type_repas: str = "diner",
     db: Optional[Session] = None
-) -> PlanningRepas:
+) -> Repas:
     """Ajoute un repas au planning."""
     with get_db_context() as session:
-        planning = PlanningRepas(
+        repas = Repas(
             recette_id=recette_id,
-            date=date_repas,
+            date_repas=date_repas,
             type_repas=type_repas
         )
         
-        session.add(planning)
+        session.add(repas)
         session.commit()
-        session.refresh(planning)
-        return planning
+        session.refresh(repas)
+        return repas
 
 
 # ═══════════════════════════════════════════════════════════

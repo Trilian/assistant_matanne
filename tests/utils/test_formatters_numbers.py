@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour les formatters de nombres
 """
 
@@ -37,7 +37,7 @@ class TestFormatQuantity:
         assert format_quantity(5.0) == "5"
 
     def test_format_quantity_float_decimal(self):
-        """Test float décimal"""
+        """Test float dÃ©cimal"""
         assert format_quantity(2.5) == "2.5"
 
     def test_format_quantity_long_decimal(self):
@@ -46,7 +46,7 @@ class TestFormatQuantity:
         assert result == "2.12"
 
     def test_format_quantity_custom_decimals(self):
-        """Test avec décimales personnalisées"""
+        """Test avec dÃ©cimales personnalisÃ©es"""
         result = format_quantity(2.12345, decimals=3)
         assert result == "2.123"
 
@@ -64,19 +64,19 @@ class TestFormatQuantityWithUnit:
         assert result == "2.5 kg"
 
     def test_format_quantity_with_unit_no_unit(self):
-        """Test sans unité"""
+        """Test sans unitÃ©"""
         result = format_quantity_with_unit(2.5, "")
         assert result == "2.5"
 
     def test_format_quantity_with_unit_none_unit(self):
-        """Test unité None"""
+        """Test unitÃ© None"""
         result = format_quantity_with_unit(2.5, None)
         assert result == "2.5"
 
     def test_format_quantity_with_unit_integer(self):
         """Test entier"""
-        result = format_quantity_with_unit(3, "pièces")
-        assert result == "3 pièces"
+        result = format_quantity_with_unit(3, "piÃ¨ces")
+        assert result == "3 piÃ¨ces"
 
 
 class TestFormatPrice:
@@ -84,37 +84,37 @@ class TestFormatPrice:
 
     def test_format_price_none(self):
         """Test avec None"""
-        assert format_price(None) == "0€"
+        assert format_price(None) == "0â‚¬"
 
     def test_format_price_integer(self):
         """Test prix entier"""
-        assert format_price(10) == "10€"
+        assert format_price(10) == "10â‚¬"
 
     def test_format_price_float_whole(self):
         """Test prix float entier"""
-        assert format_price(10.0) == "10€"
+        assert format_price(10.0) == "10â‚¬"
 
     def test_format_price_decimal(self):
-        """Test prix décimal"""
-        assert format_price(10.50) == "10.50€"
+        """Test prix dÃ©cimal"""
+        assert format_price(10.50) == "10.50â‚¬"
 
     def test_format_price_custom_currency(self):
-        """Test devise personnalisée"""
+        """Test devise personnalisÃ©e"""
         assert format_price(10, "$") == "10$"
 
     def test_format_price_invalid(self):
         """Test valeur invalide"""
-        assert format_price("invalid") == "0€"
+        assert format_price("invalid") == "0â‚¬"
 
 
 class TestFormatCurrency:
     """Tests pour format_currency"""
 
     def test_format_currency_french(self):
-        """Test format français"""
+        """Test format franÃ§ais"""
         result = format_currency(1234.56, "EUR", "fr_FR")
-        assert "€" in result
-        assert " " in result  # Séparateur milliers
+        assert "â‚¬" in result
+        assert " " in result  # SÃ©parateur milliers
 
     def test_format_currency_english(self):
         """Test format anglais"""
@@ -124,12 +124,12 @@ class TestFormatCurrency:
     def test_format_currency_none(self):
         """Test avec None"""
         result = format_currency(None)
-        assert "€" in result
+        assert "â‚¬" in result
 
     def test_format_currency_gbp(self):
         """Test livre sterling"""
         result = format_currency(100, "GBP", "fr_FR")
-        assert "£" in result
+        assert "Â£" in result
 
 
 class TestFormatPercentage:
@@ -148,12 +148,12 @@ class TestFormatPercentage:
         assert format_percentage(85.0) == "85%"
 
     def test_format_percentage_decimal(self):
-        """Test décimal"""
+        """Test dÃ©cimal"""
         result = format_percentage(85.5)
         assert "85.5%" == result or "85,5%" in result
 
     def test_format_percentage_custom_decimals(self):
-        """Test décimales personnalisées"""
+        """Test dÃ©cimales personnalisÃ©es"""
         result = format_percentage(85.567, decimals=2)
         assert "85.57%" == result or "85,57" in result
 
@@ -174,12 +174,12 @@ class TestFormatNumber:
         assert format_number(123) == "123"
 
     def test_format_number_thousands(self):
-        """Test avec séparateurs milliers"""
+        """Test avec sÃ©parateurs milliers"""
         result = format_number(1234567)
         assert "1 234 567" == result
 
     def test_format_number_decimals(self):
-        """Test avec décimales"""
+        """Test avec dÃ©cimales"""
         result = format_number(1234.56, decimals=2)
         assert "1 234" in result
 
@@ -234,12 +234,12 @@ class TestFormatRange:
         assert "10-20" == result
 
     def test_format_range_with_unit(self):
-        """Test avec unité"""
-        result = format_range(10, 20, "€")
-        assert "10-20 €" == result
+        """Test avec unitÃ©"""
+        result = format_range(10, 20, "â‚¬")
+        assert "10-20 â‚¬" == result
 
     def test_format_range_decimals(self):
-        """Test avec décimales"""
+        """Test avec dÃ©cimales"""
         result = format_range(10.5, 20.5)
         assert "10.5-20.5" == result
 
@@ -257,7 +257,7 @@ class TestSmartRound:
         assert result == 2.5
 
     def test_smart_round_precision(self):
-        """Test précision personnalisée"""
+        """Test prÃ©cision personnalisÃ©e"""
         result = smart_round(2.12345, precision=3)
         assert result == 2.123
 
@@ -268,3 +268,4 @@ class TestSmartRound:
     def test_smart_round_invalid(self):
         """Test valeur invalide"""
         assert smart_round("invalid") == 0.0
+

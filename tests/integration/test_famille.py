@@ -1,14 +1,14 @@
-"""
+﻿"""
 Tests pour le module Famille
-Teste Jules, Santé, Activités et Shopping
+Teste Jules, SantÃ©, ActivitÃ©s et Shopping
 """
 
 import pytest
 from datetime import date, timedelta
 
 
-# Marquer tout le fichier comme tests d'intégration (nécessite une base de données)
-pytestmark = pytest.mark.skip(reason="Tests d'intégration - nécessite une connexion BD")
+# Marquer tout le fichier comme tests d'intÃ©gration (nÃ©cessite une base de donnÃ©es)
+pytestmark = pytest.mark.skip(reason="Tests d'intÃ©gration - nÃ©cessite une connexion BD")
 
 
 from src.core.database import get_db_context
@@ -30,7 +30,7 @@ from src.core.models import (
 
 @pytest.fixture
 def child_profile():
-    """Crée un profil enfant pour les tests"""
+    """CrÃ©e un profil enfant pour les tests"""
     with get_db_context() as db:
         child = ChildProfile(
             name="Jules",
@@ -55,7 +55,7 @@ class TestMilestones:
     """Tests pour les jalons de Jules"""
 
     def test_create_milestone(self, child_profile):
-        """Test création d'un jalon"""
+        """Test crÃ©ation d'un jalon"""
         with get_db_context() as db:
             milestone = Milestone(
                 child_id=child_profile.id,
@@ -79,7 +79,7 @@ class TestMilestones:
             milestone = Milestone(
                 child_id=child_profile.id,
                 titre="Premier pas",
-                categorie="motricité",
+                categorie="motricitÃ©",
                 date_atteint=date.today(),
                 photo_url="https://example.com/photo.jpg",
             )
@@ -90,7 +90,7 @@ class TestMilestones:
             assert milestone.photo_url == "https://example.com/photo.jpg"
 
     def test_get_milestones_by_category(self, child_profile):
-        """Test récupération des jalons par catégorie"""
+        """Test rÃ©cupÃ©ration des jalons par catÃ©gorie"""
         with get_db_context() as db:
             # Ajouter plusieurs jalons
             for i in range(3):
@@ -104,7 +104,7 @@ class TestMilestones:
 
             db.commit()
 
-            # Vérifier
+            # VÃ©rifier
             milestones = (
                 db.query(Milestone)
                 .filter(Milestone.child_id == child_profile.id)
@@ -114,15 +114,15 @@ class TestMilestones:
 
 
 # ===================================
-# TESTS ACTIVITÉS
+# TESTS ACTIVITÃ‰S
 # ===================================
 
 
 class TestFamilyActivities:
-    """Tests pour les activités familiales"""
+    """Tests pour les activitÃ©s familiales"""
 
     def test_create_activity(self):
-        """Test création d'une activité"""
+        """Test crÃ©ation d'une activitÃ©"""
         with get_db_context() as db:
             activity = FamilyActivity(
                 titre="Parc dimanche",
@@ -133,7 +133,7 @@ class TestFamilyActivities:
                 lieu="Parc de la ville",
                 qui_participe=["Jules", "Maman", "Papa"],
                 cout_estime=0.0,
-                statut="planifié",
+                statut="planifiÃ©",
             )
             db.add(activity)
             db.commit()
@@ -141,39 +141,39 @@ class TestFamilyActivities:
 
             assert activity.id is not None
             assert activity.titre == "Parc dimanche"
-            assert activity.statut == "planifié"
+            assert activity.statut == "planifiÃ©"
 
     def test_mark_activity_complete(self):
-        """Test marquer activité comme terminée"""
+        """Test marquer activitÃ© comme terminÃ©e"""
         with get_db_context() as db:
             activity = FamilyActivity(
-                titre="Test activité",
+                titre="Test activitÃ©",
                 type_activite="parc",
                 date_prevue=date.today(),
-                statut="planifié",
+                statut="planifiÃ©",
             )
             db.add(activity)
             db.commit()
             db.refresh(activity)
 
-            # Marquer terminé
-            activity.statut = "terminé"
+            # Marquer terminÃ©
+            activity.statut = "terminÃ©"
             activity.cout_reel = 10.0
             db.commit()
 
-            # Vérifier
+            # VÃ©rifier
             updated = db.query(FamilyActivity).filter(FamilyActivity.id == activity.id).first()
-            assert updated.statut == "terminé"
+            assert updated.statut == "terminÃ©"
             assert updated.cout_reel == 10.0
 
     def test_activity_budget(self):
-        """Test suivi budget activités"""
+        """Test suivi budget activitÃ©s"""
         with get_db_context() as db:
-            # Ajouter plusieurs activités
+            # Ajouter plusieurs activitÃ©s
             total_estime = 0
             for i in range(3):
                 activity = FamilyActivity(
-                    titre=f"Activité {i}",
+                    titre=f"ActivitÃ© {i}",
                     type_activite="parc",
                     date_prevue=date.today() + timedelta(days=i),
                     cout_estime=10.0 + (i * 5),
@@ -183,22 +183,22 @@ class TestFamilyActivities:
 
             db.commit()
 
-            # Vérifier
+            # VÃ©rifier
             activities = db.query(FamilyActivity).all()
             assert len(activities) >= 3
             assert sum([a.cout_estime or 0 for a in activities]) >= total_estime
 
 
 # ===================================
-# TESTS SANTÉ & SPORT
+# TESTS SANTÃ‰ & SPORT
 # ===================================
 
 
 class TestHealthRoutines:
-    """Tests pour les routines de santé"""
+    """Tests pour les routines de santÃ©"""
 
     def test_create_routine(self):
-        """Test création d'une routine"""
+        """Test crÃ©ation d'une routine"""
         with get_db_context() as db:
             routine = HealthRoutine(
                 nom="Yoga le matin",
@@ -206,7 +206,7 @@ class TestHealthRoutines:
                 type_routine="yoga",
                 frequence="3x/semaine",
                 duree_minutes=30,
-                intensite="modérée",
+                intensite="modÃ©rÃ©e",
                 jours_semaine=["lundi", "mercredi", "vendredi"],
                 calories_brulees_estimees=150,
                 actif=True,
@@ -220,7 +220,7 @@ class TestHealthRoutines:
             assert routine.duree_minutes == 30
 
     def test_routine_with_entries(self):
-        """Test routine avec entrées de suivi"""
+        """Test routine avec entrÃ©es de suivi"""
         with get_db_context() as db:
             routine = HealthRoutine(
                 nom="Course",
@@ -233,7 +233,7 @@ class TestHealthRoutines:
             db.commit()
             db.refresh(routine)
 
-            # Ajouter entrées
+            # Ajouter entrÃ©es
             for i in range(3):
                 entry = HealthEntry(
                     routine_id=routine.id,
@@ -249,21 +249,21 @@ class TestHealthRoutines:
 
             db.commit()
 
-            # Vérifier
+            # VÃ©rifier
             entries = db.query(HealthEntry).filter(HealthEntry.routine_id == routine.id).all()
             assert len(entries) == 3
             assert entries[0].calories_brulees == 500
 
 
 class TestHealthObjectives:
-    """Tests pour les objectifs de santé"""
+    """Tests pour les objectifs de santÃ©"""
 
     def test_create_objective(self):
-        """Test création d'un objectif"""
+        """Test crÃ©ation d'un objectif"""
         with get_db_context() as db:
             objective = HealthObjective(
                 titre="Courir 5km",
-                description="Être capable de courir 5km sans arrêt",
+                description="ÃŠtre capable de courir 5km sans arrÃªt",
                 categorie="endurance",
                 valeur_cible=5.0,
                 unite="km",
@@ -300,11 +300,11 @@ class TestHealthObjectives:
             # Calculer progression
             progression = (objective.valeur_actuelle / objective.valeur_cible) * 100
 
-            # Mettre à jour valeur
+            # Mettre Ã  jour valeur
             objective.valeur_actuelle = 80.0
             db.commit()
 
-            # Vérifier
+            # VÃ©rifier
             updated = db.query(HealthObjective).filter(HealthObjective.id == objective.id).first()
             assert updated.valeur_actuelle == 80.0
 
@@ -318,7 +318,7 @@ class TestFamilyBudget:
     """Tests pour le budget famille"""
 
     def test_create_budget_entry(self):
-        """Test création entrée budget"""
+        """Test crÃ©ation entrÃ©e budget"""
         with get_db_context() as db:
             entry = FamilyBudget(
                 date=date.today(),
@@ -335,7 +335,7 @@ class TestFamilyBudget:
             assert entry.categorie == "Jules_jouets"
 
     def test_budget_by_category(self):
-        """Test budget par catégorie"""
+        """Test budget par catÃ©gorie"""
         with get_db_context() as db:
             categories = [
                 ("Jules_jouets", 30.0),
@@ -355,7 +355,7 @@ class TestFamilyBudget:
 
             db.commit()
 
-            # Vérifier
+            # VÃ©rifier
             entries = db.query(FamilyBudget).all()
             assert sum([e.montant for e in entries]) >= total
 
@@ -377,7 +377,7 @@ class TestFamilyBudget:
 
             db.commit()
 
-            # Vérifier
+            # VÃ©rifier
             entries = (
                 db.query(FamilyBudget)
                 .filter(FamilyBudget.date >= month_start)
@@ -387,15 +387,15 @@ class TestFamilyBudget:
 
 
 # ===================================
-# TESTS INTÉGRATION
+# TESTS INTÃ‰GRATION
 # ===================================
 
 
 class TestIntegration:
-    """Tests d'intégration entre modules"""
+    """Tests d'intÃ©gration entre modules"""
 
     def test_full_week_scenario(self, child_profile):
-        """Test scénario complet semaine"""
+        """Test scÃ©nario complet semaine"""
         with get_db_context() as db:
             # 1. Ajouter jalon Jules
             milestone = Milestone(
@@ -406,7 +406,7 @@ class TestIntegration:
             )
             db.add(milestone)
 
-            # 2. Planifier activité
+            # 2. Planifier activitÃ©
             activity = FamilyActivity(
                 titre="Parc samedi",
                 type_activite="parc",
@@ -416,7 +416,7 @@ class TestIntegration:
             )
             db.add(activity)
 
-            # 3. Créer routine sport
+            # 3. CrÃ©er routine sport
             routine = HealthRoutine(
                 nom="Course",
                 type_routine="course",
@@ -435,7 +435,7 @@ class TestIntegration:
 
             db.commit()
 
-            # Vérifier
+            # VÃ©rifier
             assert db.query(Milestone).filter(Milestone.child_id == child_profile.id).count() > 0
             assert db.query(FamilyActivity).count() > 0
             assert db.query(HealthRoutine).count() > 0
@@ -444,3 +444,4 @@ class TestIntegration:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour les validators communs
 """
 
@@ -47,19 +47,19 @@ class TestIsValidPhone:
     """Tests pour is_valid_phone"""
 
     def test_valid_phone_french(self):
-        """Test téléphone français valide"""
+        """Test tÃ©lÃ©phone franÃ§ais valide"""
         assert is_valid_phone("0612345678", "FR") is True
 
     def test_valid_phone_with_spaces(self):
-        """Test téléphone avec espaces"""
+        """Test tÃ©lÃ©phone avec espaces"""
         assert is_valid_phone("06 12 34 56 78", "FR") is True
 
     def test_valid_phone_with_prefix(self):
-        """Test téléphone avec préfixe international"""
+        """Test tÃ©lÃ©phone avec prÃ©fixe international"""
         assert is_valid_phone("+33 6 12 34 56 78", "FR") is True
 
     def test_invalid_phone_too_short(self):
-        """Test téléphone trop court"""
+        """Test tÃ©lÃ©phone trop court"""
         assert is_valid_phone("061234", "FR") is False
 
     def test_invalid_phone_unknown_country(self):
@@ -83,11 +83,11 @@ class TestClamp:
         assert clamp(15, 0, 10) == 10
 
     def test_clamp_at_min(self):
-        """Test valeur égale au min"""
+        """Test valeur Ã©gale au min"""
         assert clamp(0, 0, 10) == 0
 
     def test_clamp_at_max(self):
-        """Test valeur égale au max"""
+        """Test valeur Ã©gale au max"""
         assert clamp(10, 0, 10) == 10
 
 
@@ -160,7 +160,7 @@ class TestValidateRequiredFields:
     """Tests pour validate_required_fields"""
 
     def test_validate_required_fields_all_present(self):
-        """Test tous les champs présents"""
+        """Test tous les champs prÃ©sents"""
         data = {"nom": "Test", "email": "test@example.com"}
         is_valid, missing = validate_required_fields(data, ["nom", "email"])
         assert is_valid is True
@@ -201,9 +201,10 @@ class TestValidateChoice:
         """Test choix invalide"""
         is_valid, error = validate_choice("D", ["A", "B", "C"])
         assert is_valid is False
-        assert "doit être dans" in error
+        assert "doit Ãªtre dans" in error
 
     def test_validate_choice_numbers(self):
         """Test avec nombres"""
         is_valid, error = validate_choice(1, [1, 2, 3])
         assert is_valid is True
+

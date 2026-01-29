@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour les helpers statistiques
 """
 
@@ -25,7 +25,7 @@ class TestCalculateAverage:
         assert result == 3.0
 
     def test_average_single(self):
-        """Test un élément"""
+        """Test un Ã©lÃ©ment"""
         result = calculate_average([5])
         assert result == 5.0
 
@@ -44,12 +44,12 @@ class TestCalculateMedian:
     """Tests pour calculate_median"""
 
     def test_median_odd(self):
-        """Test médiane avec nombre impair"""
+        """Test mÃ©diane avec nombre impair"""
         result = calculate_median([1, 2, 3, 4, 5])
         assert result == 3.0
 
     def test_median_even(self):
-        """Test médiane avec nombre pair"""
+        """Test mÃ©diane avec nombre pair"""
         result = calculate_median([1, 2, 3, 4])
         assert result == 2.5
 
@@ -59,7 +59,7 @@ class TestCalculateMedian:
         assert result == 0.0
 
     def test_median_unsorted(self):
-        """Test liste non triée"""
+        """Test liste non triÃ©e"""
         result = calculate_median([5, 1, 3, 2, 4])
         assert result == 3.0
 
@@ -70,7 +70,7 @@ class TestCalculateVariance:
     def test_variance_basic(self):
         """Test variance basique"""
         result = calculate_variance([1, 2, 3, 4, 5])
-        assert result == 2.5  # Variance d'échantillon
+        assert result == 2.5  # Variance d'Ã©chantillon
 
     def test_variance_empty(self):
         """Test liste vide"""
@@ -78,7 +78,7 @@ class TestCalculateVariance:
         assert result == 0.0
 
     def test_variance_single(self):
-        """Test un élément"""
+        """Test un Ã©lÃ©ment"""
         result = calculate_variance([5])
         assert result == 0.0
 
@@ -87,9 +87,9 @@ class TestCalculateStdDev:
     """Tests pour calculate_std_dev"""
 
     def test_std_dev_basic(self):
-        """Test écart-type basique"""
+        """Test Ã©cart-type basique"""
         result = calculate_std_dev([1, 2, 3, 4, 5])
-        # Écart-type d'échantillon de [1,2,3,4,5] ≈ 1.58
+        # Ã‰cart-type d'Ã©chantillon de [1,2,3,4,5] â‰ˆ 1.58
         assert result > 1.5 and result < 1.6
 
     def test_std_dev_empty(self):
@@ -98,7 +98,7 @@ class TestCalculateStdDev:
         assert result == 0.0
 
     def test_std_dev_single(self):
-        """Test un élément"""
+        """Test un Ã©lÃ©ment"""
         result = calculate_std_dev([5])
         assert result == 0.0
 
@@ -107,7 +107,7 @@ class TestCalculatePercentile:
     """Tests pour calculate_percentile"""
 
     def test_percentile_50(self):
-        """Test 50e percentile (médiane)"""
+        """Test 50e percentile (mÃ©diane)"""
         result = calculate_percentile([1, 2, 3, 4, 5], 50)
         assert result == 3.0
 
@@ -141,7 +141,7 @@ class TestCalculateMode:
         assert result == 3
 
     def test_mode_single(self):
-        """Test un élément"""
+        """Test un Ã©lÃ©ment"""
         result = calculate_mode([5])
         assert result == 5
 
@@ -160,12 +160,12 @@ class TestCalculateRange:
     """Tests pour calculate_range"""
 
     def test_range_basic(self):
-        """Test étendue basique"""
+        """Test Ã©tendue basique"""
         result = calculate_range([1, 2, 3, 4, 5])
         assert result == 4.0
 
     def test_range_single(self):
-        """Test un élément"""
+        """Test un Ã©lÃ©ment"""
         result = calculate_range([5])
         assert result == 0.0
 
@@ -175,7 +175,7 @@ class TestCalculateRange:
         assert result == 0.0
 
     def test_range_negative(self):
-        """Test avec négatifs"""
+        """Test avec nÃ©gatifs"""
         result = calculate_range([-5, 0, 5])
         assert result == 10.0
 
@@ -189,16 +189,17 @@ class TestMovingAverage:
         assert result == [2.0, 3.0, 4.0]
 
     def test_moving_average_window_2(self):
-        """Test fenêtre de 2"""
+        """Test fenÃªtre de 2"""
         result = moving_average([1, 2, 3, 4], 2)
         assert result == [1.5, 2.5, 3.5]
 
     def test_moving_average_window_too_large(self):
-        """Test fenêtre trop grande"""
+        """Test fenÃªtre trop grande"""
         result = moving_average([1, 2], 3)
         assert result == []
 
     def test_moving_average_exact_size(self):
-        """Test fenêtre = taille liste"""
+        """Test fenÃªtre = taille liste"""
         result = moving_average([1, 2, 3], 3)
         assert result == [2.0]
+

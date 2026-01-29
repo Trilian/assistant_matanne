@@ -1,4 +1,4 @@
-"""Tests unitaires pour les modules maison (entretien, jardin, projets)."""
+﻿"""Tests unitaires pour les modules maison (entretien, jardin, projets)."""
 
 import pytest
 from datetime import datetime, date, timedelta
@@ -45,7 +45,7 @@ class TestProjetsLogique:
         depenses = [
             {"description": "Peinture", "montant": 150.0},
             {"description": "Pinceaux", "montant": 25.0},
-            {"description": "Bâche", "montant": 15.0},
+            {"description": "BÃ¢che", "montant": 15.0},
         ]
         
         budget_utilise = sum(d["montant"] for d in depenses)
@@ -55,7 +55,7 @@ class TestProjetsLogique:
         assert budget_utilise < budget_prevu
 
     def test_trier_projets_par_priorite(self):
-        """Tri des projets par priorité."""
+        """Tri des projets par prioritÃ©."""
         projets = [
             {"nom": "Urgent", "priorite": 1},
             {"nom": "Normal", "priorite": 3},
@@ -75,7 +75,7 @@ class TestProjetsLogique:
         assert jours_restants == 15
 
     def test_projet_en_retard(self):
-        """Détection d'un projet en retard."""
+        """DÃ©tection d'un projet en retard."""
         projets = [
             {"nom": "Retard", "deadline": date.today() - timedelta(days=5), "status": "in_progress"},
             {"nom": "OK", "deadline": date.today() + timedelta(days=10), "status": "in_progress"},
@@ -107,12 +107,12 @@ class TestEntretienLogique:
         assert prochaine == date(2026, 1, 31)
 
     def test_taches_a_faire_cette_semaine(self):
-        """Liste des tâches à faire cette semaine."""
+        """Liste des tÃ¢ches Ã  faire cette semaine."""
         today = date.today()
         fin_semaine = today + timedelta(days=7)
         
         taches = [
-            {"nom": "Ménage", "prochaine_date": today + timedelta(days=2)},
+            {"nom": "MÃ©nage", "prochaine_date": today + timedelta(days=2)},
             {"nom": "Lessive", "prochaine_date": today + timedelta(days=5)},
             {"nom": "Vitres", "prochaine_date": today + timedelta(days=15)},
         ]
@@ -125,12 +125,12 @@ class TestEntretienLogique:
         assert len(cette_semaine) == 2
 
     def test_taches_en_retard(self):
-        """Tâches d'entretien en retard."""
+        """TÃ¢ches d'entretien en retard."""
         today = date.today()
         
         taches = [
             {"nom": "Aspirateur", "prochaine_date": today - timedelta(days=3)},
-            {"nom": "Poussière", "prochaine_date": today - timedelta(days=1)},
+            {"nom": "PoussiÃ¨re", "prochaine_date": today - timedelta(days=1)},
             {"nom": "Vitres", "prochaine_date": today + timedelta(days=5)},
         ]
         
@@ -139,7 +139,7 @@ class TestEntretienLogique:
         assert len(en_retard) == 2
 
     def test_frequences_entretien(self):
-        """Conversion des fréquences en jours."""
+        """Conversion des frÃ©quences en jours."""
         frequences = {
             "quotidien": 1,
             "hebdomadaire": 7,
@@ -154,7 +154,7 @@ class TestEntretienLogique:
         assert frequences["mensuel"] == 30
 
     def test_grouper_taches_par_piece(self):
-        """Groupement des tâches par pièce."""
+        """Groupement des tÃ¢ches par piÃ¨ce."""
         taches = [
             {"nom": "Aspirateur", "piece": "Salon"},
             {"nom": "Vitres", "piece": "Salon"},
@@ -180,7 +180,7 @@ class TestJardinLogique:
     """Tests pour la logique jardin/potager."""
 
     def test_calculer_date_recolte(self):
-        """Calcul de la date de récolte estimée."""
+        """Calcul de la date de rÃ©colte estimÃ©e."""
         date_plantation = date(2026, 3, 15)
         jours_croissance = 90  # Tomates
         
@@ -189,7 +189,7 @@ class TestJardinLogique:
         assert date_recolte == date(2026, 6, 13)
 
     def test_plantes_a_arroser(self):
-        """Liste des plantes à arroser aujourd'hui."""
+        """Liste des plantes Ã  arroser aujourd'hui."""
         today = date.today()
         
         plantes = [
@@ -208,11 +208,11 @@ class TestJardinLogique:
     def test_calendrier_semis(self):
         """Calendrier des semis par mois."""
         calendrier = {
-            1: ["Tomates (intérieur)", "Poivrons (intérieur)"],
-            2: ["Laitues", "Épinards"],
+            1: ["Tomates (intÃ©rieur)", "Poivrons (intÃ©rieur)"],
+            2: ["Laitues", "Ã‰pinards"],
             3: ["Carottes", "Radis", "Oignons"],
             4: ["Haricots", "Courges"],
-            5: ["Tomates (extérieur)", "Courgettes"],
+            5: ["Tomates (extÃ©rieur)", "Courgettes"],
         }
         
         mois_actuel = 3  # Mars
@@ -243,7 +243,7 @@ class TestJardinLogique:
     def test_filtrer_par_type_plante(self):
         """Filtrage par type de plante."""
         plantes = [
-            {"nom": "Tomates", "type": "légume"},
+            {"nom": "Tomates", "type": "lÃ©gume"},
             {"nom": "Basilic", "type": "aromatique"},
             {"nom": "Rose", "type": "fleur"},
             {"nom": "Menthe", "type": "aromatique"},
@@ -254,7 +254,7 @@ class TestJardinLogique:
         assert len(aromatiques) == 2
 
     def test_journal_entretien(self):
-        """Entrées du journal d'entretien."""
+        """EntrÃ©es du journal d'entretien."""
         journal = [
             {"date": date.today() - timedelta(days=2), "action": "Arrosage", "plante": "Tomates"},
             {"date": date.today() - timedelta(days=1), "action": "Taille", "plante": "Tomates"},
@@ -307,7 +307,7 @@ class TestStatistiquesMaison:
         assert total_utilise == 1250
 
     def test_taches_completees_cette_semaine(self):
-        """Tâches complétées cette semaine."""
+        """TÃ¢ches complÃ©tÃ©es cette semaine."""
         today = date.today()
         debut_semaine = today - timedelta(days=today.weekday())
         
@@ -327,9 +327,9 @@ class TestStatistiquesMaison:
     def test_plantes_par_type(self):
         """Statistiques des plantes par type."""
         plantes = [
-            {"type": "légume"},
-            {"type": "légume"},
-            {"type": "légume"},
+            {"type": "lÃ©gume"},
+            {"type": "lÃ©gume"},
+            {"type": "lÃ©gume"},
             {"type": "aromatique"},
             {"type": "aromatique"},
             {"type": "fleur"},
@@ -338,7 +338,7 @@ class TestStatistiquesMaison:
         from collections import Counter
         counts = Counter(p["type"] for p in plantes)
         
-        assert counts["légume"] == 3
+        assert counts["lÃ©gume"] == 3
         assert counts["aromatique"] == 2
         assert counts["fleur"] == 1
 
@@ -351,18 +351,18 @@ class TestHelpersMaison:
     """Tests pour les helpers maison."""
 
     def test_format_priorite(self):
-        """Format de la priorité en texte."""
+        """Format de la prioritÃ© en texte."""
         def format_priorite(niveau):
             mapping = {
-                1: "🔴 Urgent",
-                2: "🟠 Haute",
-                3: "🟡 Normale",
-                4: "🟢 Basse",
+                1: "ðŸ”´ Urgent",
+                2: "ðŸŸ  Haute",
+                3: "ðŸŸ¡ Normale",
+                4: "ðŸŸ¢ Basse",
             }
             return mapping.get(niveau, "Inconnue")
         
-        assert format_priorite(1) == "🔴 Urgent"
-        assert format_priorite(3) == "🟡 Normale"
+        assert format_priorite(1) == "ðŸ”´ Urgent"
+        assert format_priorite(3) == "ðŸŸ¡ Normale"
 
     def test_format_status(self):
         """Format du statut en texte."""
@@ -370,13 +370,13 @@ class TestHelpersMaison:
             mapping = {
                 "pending": "En attente",
                 "in_progress": "En cours",
-                "completed": "Terminé",
-                "cancelled": "Annulé",
+                "completed": "TerminÃ©",
+                "cancelled": "AnnulÃ©",
             }
             return mapping.get(status, status)
         
         assert format_status("in_progress") == "En cours"
-        assert format_status("completed") == "Terminé"
+        assert format_status("completed") == "TerminÃ©"
 
     def test_calculer_progression_couleur(self):
         """Couleur selon la progression."""
@@ -396,7 +396,7 @@ class TestHelpersMaison:
         assert couleur_progression(90) == "green"
 
     def test_jours_depuis_derniere_action(self):
-        """Jours depuis la dernière action."""
+        """Jours depuis la derniÃ¨re action."""
         derniere_action = date.today() - timedelta(days=5)
         jours = (date.today() - derniere_action).days
         
@@ -411,7 +411,7 @@ class TestAlertesMaison:
     """Tests pour les alertes maison."""
 
     def test_alerte_projet_en_retard(self):
-        """Génération d'alerte pour projet en retard."""
+        """GÃ©nÃ©ration d'alerte pour projet en retard."""
         projets = [
             {"nom": "Peinture", "deadline": date.today() - timedelta(days=5), "status": "in_progress"},
             {"nom": "Jardin", "deadline": date.today() + timedelta(days=10), "status": "in_progress"},
@@ -431,9 +431,9 @@ class TestAlertesMaison:
         assert "Peinture" in alertes[0]["message"]
 
     def test_alerte_entretien_du(self):
-        """Alerte pour entretien dû."""
+        """Alerte pour entretien dÃ»."""
         taches = [
-            {"nom": "Ménage", "prochaine_date": date.today() - timedelta(days=2)},
+            {"nom": "MÃ©nage", "prochaine_date": date.today() - timedelta(days=2)},
             {"nom": "Vitres", "prochaine_date": date.today() + timedelta(days=5)},
         ]
         
@@ -444,10 +444,10 @@ class TestAlertesMaison:
         ]
         
         assert len(alertes) == 1
-        assert alertes[0]["tache"] == "Ménage"
+        assert alertes[0]["tache"] == "MÃ©nage"
 
     def test_alerte_arrosage_plantes(self):
-        """Alerte pour plantes à arroser."""
+        """Alerte pour plantes Ã  arroser."""
         plantes = [
             {"nom": "Tomates", "besoin_arrosage": True},
             {"nom": "Cactus", "besoin_arrosage": False},
@@ -458,3 +458,4 @@ class TestAlertesMaison:
         
         assert len(a_arroser) == 2
         assert "Tomates" in a_arroser
+

@@ -1,25 +1,25 @@
-"""
+﻿"""
 Tests unitaires pour ai_agent.py (Agent IA)
-Ce fichier teste spécifiquement src/core/ai_agent.py
+Ce fichier teste spÃ©cifiquement src/core/ai_agent.py
 """
 
 import pytest
 from unittest.mock import MagicMock, patch, AsyncMock
 
-# Import direct du module à tester
+# Import direct du module Ã  tester
 from src.core.ai_agent import AgentIA
 
 
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS INITIALISATION
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestAgentIAInit:
     """Tests d'initialisation de l'agent"""
     
     @patch('src.core.ai_agent.ClientIA')
     def test_init_creates_client(self, mock_client_class):
-        """Test que l'initialisation crée un client"""
+        """Test que l'initialisation crÃ©e un client"""
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client
         
@@ -29,14 +29,14 @@ class TestAgentIAInit:
     
     @patch('src.core.ai_agent.ClientIA')
     def test_init_creates_empty_contexte(self, mock_client_class):
-        """Test que le contexte est vide à l'init"""
+        """Test que le contexte est vide Ã  l'init"""
         agent = AgentIA()
         
         assert agent.contexte == {}
     
     @patch('src.core.ai_agent.ClientIA')
     def test_init_handles_client_error(self, mock_client_class):
-        """Test que les erreurs d'init sont gérées"""
+        """Test que les erreurs d'init sont gÃ©rÃ©es"""
         mock_client_class.side_effect = Exception("Erreur de connexion")
         
         agent = AgentIA()
@@ -45,9 +45,9 @@ class TestAgentIAInit:
         assert agent.contexte == {}
 
 
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONTEXTE
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestAgentIAContexte:
     """Tests de gestion du contexte"""
@@ -73,7 +73,7 @@ class TestAgentIAContexte:
     
     @patch('src.core.ai_agent.ClientIA')
     def test_obtenir_contexte(self, mock_client_class):
-        """Test la récupération de contexte"""
+        """Test la rÃ©cupÃ©ration de contexte"""
         agent = AgentIA()
         agent.contexte = {"ma_cle": "ma_valeur"}
         
@@ -83,7 +83,7 @@ class TestAgentIAContexte:
     
     @patch('src.core.ai_agent.ClientIA')
     def test_obtenir_contexte_missing_key(self, mock_client_class):
-        """Test récupération clé absente"""
+        """Test rÃ©cupÃ©ration clÃ© absente"""
         agent = AgentIA()
         
         result = agent.obtenir_contexte("cle_inexistante")
@@ -101,16 +101,16 @@ class TestAgentIAContexte:
         assert agent.contexte == {}
 
 
-# ═══════════════════════════════════════════════════════════════
-# TESTS MÉTHODE ANALYSER
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS MÃ‰THODE ANALYSER
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestAgentIAAnalyser:
-    """Tests de la méthode analyser"""
+    """Tests de la mÃ©thode analyser"""
     
     @patch('src.core.ai_agent.ClientIA')
     def test_analyser_exists(self, mock_client_class):
-        """Test que la méthode analyser existe"""
+        """Test que la mÃ©thode analyser existe"""
         agent = AgentIA()
         
         assert hasattr(agent, 'analyser')
@@ -118,24 +118,24 @@ class TestAgentIAAnalyser:
     
     @patch('src.core.ai_agent.ClientIA')
     def test_analyser_without_client_returns_default(self, mock_client_class):
-        """Test analyser sans client retourne message par défaut"""
+        """Test analyser sans client retourne message par dÃ©faut"""
         mock_client_class.side_effect = Exception("Error")
         agent = AgentIA()
         
-        # analyser est async, on vérifie juste que client is None
+        # analyser est async, on vÃ©rifie juste que client is None
         assert agent.client is None
 
 
-# ═══════════════════════════════════════════════════════════════
-# TESTS MÉTHODE GENERER_ANALYSE
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS MÃ‰THODE GENERER_ANALYSE
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestAgentIAGenererAnalyse:
-    """Tests de la méthode generer_analyse"""
+    """Tests de la mÃ©thode generer_analyse"""
     
     @patch('src.core.ai_agent.ClientIA')
     def test_generer_analyse_exists(self, mock_client_class):
-        """Test que la méthode generer_analyse existe"""
+        """Test que la mÃ©thode generer_analyse existe"""
         agent = AgentIA()
         
         assert hasattr(agent, 'generer_analyse')
@@ -143,24 +143,24 @@ class TestAgentIAGenererAnalyse:
     
     @patch('src.core.ai_agent.ClientIA')
     def test_generer_analyse_types_defined(self, mock_client_class):
-        """Test que les types d'analyse sont définis"""
+        """Test que les types d'analyse sont dÃ©finis"""
         # Les types attendus dans le code
         expected_types = ["bien_etre", "cuisine", "budget", "jardin", "routines"]
         
-        # On vérifie juste que la classe est importable et les types documentés
+        # On vÃ©rifie juste que la classe est importable et les types documentÃ©s
         assert len(expected_types) == 5
 
 
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS STRUCTURE ET INTERFACE
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestAgentIAInterface:
     """Tests de l'interface publique"""
     
     @patch('src.core.ai_agent.ClientIA')
     def test_has_all_public_methods(self, mock_client_class):
-        """Test que toutes les méthodes publiques existent"""
+        """Test que toutes les mÃ©thodes publiques existent"""
         agent = AgentIA()
         
         expected_methods = [
@@ -172,7 +172,7 @@ class TestAgentIAInterface:
         ]
         
         for method in expected_methods:
-            assert hasattr(agent, method), f"Méthode {method} manquante"
+            assert hasattr(agent, method), f"MÃ©thode {method} manquante"
     
     @patch('src.core.ai_agent.ClientIA')
     def test_contexte_is_dict(self, mock_client_class):
@@ -180,3 +180,4 @@ class TestAgentIAInterface:
         agent = AgentIA()
         
         assert isinstance(agent.contexte, dict)
+

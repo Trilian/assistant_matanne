@@ -1,5 +1,5 @@
-"""
-Tests pour les helpers de données
+﻿"""
+Tests pour les helpers de donnÃ©es
 """
 
 import pytest
@@ -21,27 +21,27 @@ class TestSafeGet:
     """Tests pour safe_get"""
 
     def test_safe_get_simple(self):
-        """Test accès simple"""
+        """Test accÃ¨s simple"""
         data = {"a": 1}
         assert safe_get(data, "a") == 1
 
     def test_safe_get_nested(self):
-        """Test accès imbriqué"""
+        """Test accÃ¨s imbriquÃ©"""
         data = {"a": {"b": {"c": 1}}}
         assert safe_get(data, "a", "b", "c") == 1
 
     def test_safe_get_missing(self):
-        """Test clé manquante"""
+        """Test clÃ© manquante"""
         data = {"a": 1}
         assert safe_get(data, "b") is None
 
     def test_safe_get_missing_nested(self):
-        """Test clé imbriquée manquante"""
+        """Test clÃ© imbriquÃ©e manquante"""
         data = {"a": 1}
         assert safe_get(data, "a", "b", "c") is None
 
     def test_safe_get_default(self):
-        """Test valeur par défaut"""
+        """Test valeur par dÃ©faut"""
         data = {"a": 1}
         assert safe_get(data, "b", default=0) == 0
 
@@ -98,23 +98,23 @@ class TestDeduplicate:
     """Tests pour deduplicate"""
 
     def test_deduplicate_simple(self):
-        """Test déduplication simple"""
+        """Test dÃ©duplication simple"""
         result = deduplicate([1, 2, 2, 3])
         assert result == [1, 2, 3]
 
     def test_deduplicate_with_key(self):
-        """Test déduplication avec clé"""
+        """Test dÃ©duplication avec clÃ©"""
         items = [{"id": 1}, {"id": 1}, {"id": 2}]
         result = deduplicate(items, key=lambda x: x["id"])
         assert len(result) == 2
 
     def test_deduplicate_strings(self):
-        """Test déduplication strings"""
+        """Test dÃ©duplication strings"""
         result = deduplicate(["a", "b", "a", "c"])
         assert result == ["a", "b", "c"]
 
     def test_deduplicate_preserves_order(self):
-        """Test préservation de l'ordre"""
+        """Test prÃ©servation de l'ordre"""
         result = deduplicate([3, 1, 2, 1, 3])
         assert result == [3, 1, 2]
 
@@ -169,7 +169,7 @@ class TestMergeDicts:
         assert result == {"a": 1, "b": 2}
 
     def test_merge_dicts_override(self):
-        """Test écrasement"""
+        """Test Ã©crasement"""
         result = merge_dicts({"a": 1}, {"a": 2})
         assert result == {"a": 2}
 
@@ -193,12 +193,12 @@ class TestPick:
         assert result == {"a": 1, "c": 3}
 
     def test_pick_missing_keys(self):
-        """Test clés manquantes"""
+        """Test clÃ©s manquantes"""
         result = pick({"a": 1}, ["a", "b"])
         assert result == {"a": 1}
 
     def test_pick_all_keys(self):
-        """Test toutes les clés"""
+        """Test toutes les clÃ©s"""
         result = pick({"a": 1, "b": 2}, ["a", "b"])
         assert result == {"a": 1, "b": 2}
 
@@ -212,11 +212,12 @@ class TestOmit:
         assert result == {"a": 1, "c": 3}
 
     def test_omit_missing_keys(self):
-        """Test clés manquantes"""
+        """Test clÃ©s manquantes"""
         result = omit({"a": 1, "b": 2}, ["c"])
         assert result == {"a": 1, "b": 2}
 
     def test_omit_all_keys(self):
-        """Test toutes les clés"""
+        """Test toutes les clÃ©s"""
         result = omit({"a": 1, "b": 2}, ["a", "b"])
         assert result == {}
+

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 Tests d'integration pour le module Planning.
 """
@@ -387,3 +387,4 @@ class TestIntegrationMultiModules:
             timeline.append({"type": "repas", "nom": repas.type_repas})
         
         assert len(timeline) > 0
+

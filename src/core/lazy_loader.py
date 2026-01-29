@@ -181,43 +181,42 @@ class OptimizedRouter:
     # ═══════════════════════════════════════════════════════
 
     MODULE_REGISTRY = {
-        "accueil": {"path": "src.modules.accueil", "type": "simple"},
-        # ✅ MODULE CUISINE - MODULES SÉPARÉS
+        "accueil": {"path": "src.domains.shared.ui.accueil", "type": "simple"},
+        # ✅ DOMAINE CUISINE
         "cuisine.recettes": {
-            "path": "src.modules.cuisine.recettes",
+            "path": "src.domains.cuisine.ui.recettes",
             "type": "simple",
         },
         "cuisine.inventaire": {
-            "path": "src.modules.cuisine.inventaire",
+            "path": "src.domains.cuisine.ui.inventaire",
             "type": "simple",
         },
         "cuisine.planning_semaine": {
-            "path": "src.modules.cuisine.planning",
+            "path": "src.domains.cuisine.ui.planning",
             "type": "simple",
         },
         "cuisine.courses": {
-            "path": "src.modules.cuisine.courses",
+            "path": "src.domains.cuisine.ui.courses",
             "type": "simple",
         },
         # Outils transversaux
-        "barcode": {"path": "src.modules.barcode", "type": "simple"},
-        "rapports": {"path": "src.modules.rapports", "type": "simple"},
-        # ✅ MODULE FAMILLE - MODULES REFONDUS
-        "famille.accueil": {"path": "src.modules.famille.accueil", "type": "simple"},
-        "famille.jules": {"path": "src.modules.famille.jules", "type": "simple"},
-        "famille.sante": {"path": "src.modules.famille.sante", "type": "simple"},
-        "famille.activites": {"path": "src.modules.famille.activites", "type": "simple"},
-        "famille.shopping": {"path": "src.modules.famille.shopping", "type": "simple"},
-        "famille.integration_cuisine_courses": {"path": "src.modules.famille.integration_cuisine_courses", "type": "simple"},
-        # Maison
-        "maison.projets": {"path": "src.modules.maison.projets", "type": "simple"},
-        "maison.jardin": {"path": "src.modules.maison.jardin", "type": "simple"},
-        "maison.entretien": {"path": "src.modules.maison.entretien", "type": "simple"},
-        # Planning
-        "planning.calendrier": {"path": "src.modules.planning.calendrier", "type": "simple"},
-        "planning.vue_ensemble": {"path": "src.modules.planning.vue_ensemble", "type": "simple"},
+        "barcode": {"path": "src.domains.shared.ui.barcode", "type": "simple"},
+        "rapports": {"path": "src.domains.shared.ui.rapports", "type": "simple"},
+        # ✅ DOMAINE FAMILLE
+        "famille.accueil": {"path": "src.domains.famille.ui.jules", "type": "simple"},
+        "famille.jules": {"path": "src.domains.famille.ui.jules", "type": "simple"},
+        "famille.sante": {"path": "src.domains.famille.ui.sante", "type": "simple"},
+        "famille.activites": {"path": "src.domains.famille.ui.activites", "type": "simple"},
+        "famille.shopping": {"path": "src.domains.famille.ui.shopping", "type": "simple"},
+        # ✅ DOMAINE MAISON
+        "maison.projets": {"path": "src.domains.maison.ui.projets", "type": "simple"},
+        "maison.jardin": {"path": "src.domains.maison.ui.jardin", "type": "simple"},
+        "maison.entretien": {"path": "src.domains.maison.ui.entretien", "type": "simple"},
+        # ✅ DOMAINE PLANNING
+        "planning.calendrier": {"path": "src.domains.planning.ui.calendrier", "type": "simple"},
+        "planning.vue_ensemble": {"path": "src.domains.planning.ui.vue_ensemble", "type": "simple"},
         # Paramètres
-        "parametres": {"path": "src.modules.parametres", "type": "simple"},
+        "parametres": {"path": "src.domains.shared.ui.parametres", "type": "simple"},
     }
 
     @staticmethod

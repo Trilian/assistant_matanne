@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour l'API REST FastAPI.
 """
 
@@ -9,15 +9,15 @@ from datetime import datetime
 from contextlib import contextmanager
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SETUP AVEC MOCKS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
-# Mock de session de base de données
+# Mock de session de base de donnÃ©es
 @pytest.fixture
 def mock_db_session():
-    """Crée une session DB mockée."""
+    """CrÃ©e une session DB mockÃ©e."""
     session = MagicMock()
     session.execute = Mock(return_value=None)
     session.commit = Mock()
@@ -28,7 +28,7 @@ def mock_db_session():
 
 @pytest.fixture
 def mock_db_context(mock_db_session):
-    """Mock du gestionnaire de contexte de base de données."""
+    """Mock du gestionnaire de contexte de base de donnÃ©es."""
     @contextmanager
     def _mock_get_db_context():
         yield mock_db_session
@@ -38,20 +38,20 @@ def mock_db_context(mock_db_session):
 
 @pytest.fixture
 def mock_user():
-    """Utilisateur mocké pour les tests."""
+    """Utilisateur mockÃ© pour les tests."""
     return {"id": "test-user", "email": "test@test.com", "role": "admin"}
 
 
 @pytest.fixture
 def client(mock_db_context, mock_user):
-    """Client de test FastAPI avec DB et auth mockées."""
-    # Désactiver le rate limiting pour les tests
+    """Client de test FastAPI avec DB et auth mockÃ©es."""
+    # DÃ©sactiver le rate limiting pour les tests
     os.environ["DISABLE_RATE_LIMIT"] = "true"
     
     from fastapi.testclient import TestClient
     from src.api.main import app, get_current_user, require_auth
     
-    # Override les dépendances d'auth
+    # Override les dÃ©pendances d'auth
     async def mock_get_current_user():
         return mock_user
     
@@ -70,9 +70,9 @@ def client(mock_db_context, mock_user):
     
     with patch('src.core.database.get_db_context', mock_db_context):
         with patch('src.api.rate_limiting._store') as mock_store:
-            # Mock le store pour désactiver le rate limiting
+            # Mock le store pour dÃ©sactiver le rate limiting
             mock_store.is_blocked.return_value = False
-            mock_store.increment.return_value = 1  # Toujours 1 requête
+            mock_store.increment.return_value = 1  # Toujours 1 requÃªte
             yield TestClient(app)
     
     # Cleanup
@@ -81,16 +81,16 @@ def client(mock_db_context, mock_user):
     os.environ.pop("DISABLE_RATE_LIMIT", None)
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS SCHÉMAS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS SCHÃ‰MAS
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestSchemas:
-    """Tests pour les schémas Pydantic."""
+    """Tests pour les schÃ©mas Pydantic."""
     
     def test_recette_base(self):
-        """Test schéma RecetteBase."""
+        """Test schÃ©ma RecetteBase."""
         from src.api.main import RecetteBase
         
         recette = RecetteBase(
@@ -103,17 +103,17 @@ class TestSchemas:
         assert recette.nom == "Tarte aux pommes"
         assert recette.temps_preparation == 30
         assert recette.portions == 8
-        assert recette.difficulte == "moyen"  # Valeur par défaut
+        assert recette.difficulte == "moyen"  # Valeur par dÃ©faut
     
     def test_recette_create(self):
-        """Test schéma RecetteCreate avec ingrédients."""
+        """Test schÃ©ma RecetteCreate avec ingrÃ©dients."""
         from src.api.main import RecetteCreate
         
         recette = RecetteCreate(
             nom="Salade",
             ingredients=[{"nom": "Laitue", "quantite": 1}],
             instructions=["Laver", "Couper", "Servir"],
-            tags=["rapide", "léger"],
+            tags=["rapide", "lÃ©ger"],
         )
         
         assert len(recette.ingredients) == 1
@@ -121,7 +121,7 @@ class TestSchemas:
         assert "rapide" in recette.tags
     
     def test_inventaire_item_base(self):
-        """Test schéma InventaireItemBase."""
+        """Test schÃ©ma InventaireItemBase."""
         from src.api.main import InventaireItemBase
         
         item = InventaireItemBase(
@@ -136,7 +136,7 @@ class TestSchemas:
         assert item.unite == "L"
     
     def test_course_item_base(self):
-        """Test schéma CourseItemBase."""
+        """Test schÃ©ma CourseItemBase."""
         from src.api.main import CourseItemBase
         
         item = CourseItemBase(
@@ -149,7 +149,7 @@ class TestSchemas:
         assert not item.coche
     
     def test_repas_base(self):
-        """Test schéma RepasBase."""
+        """Test schÃ©ma RepasBase."""
         from src.api.main import RepasBase
         
         repas = RepasBase(
@@ -162,13 +162,13 @@ class TestSchemas:
         assert repas.recette_id == 1
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS ENDPOINTS SANTÉ
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS ENDPOINTS SANTÃ‰
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestHealthEndpoints:
-    """Tests pour les endpoints de santé."""
+    """Tests pour les endpoints de santÃ©."""
     
     def test_root(self, client):
         """Test endpoint racine."""
@@ -192,9 +192,9 @@ class TestHealthEndpoints:
         assert "version" in data
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ENDPOINTS RECETTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestRecettesEndpoints:
@@ -238,7 +238,7 @@ class TestRecettesEndpoints:
         assert response.status_code == 200
     
     def test_get_recette_not_found(self, client, mock_db_session):
-        """Test récupération d'une recette inexistante."""
+        """Test rÃ©cupÃ©ration d'une recette inexistante."""
         mock_query = MagicMock()
         mock_query.filter.return_value = mock_query
         mock_query.first.return_value = None
@@ -260,15 +260,15 @@ class TestRecettesEndpoints:
         assert response.status_code == 404
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ENDPOINTS INVENTAIRE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestInventaireEndpoints:
     """Tests pour les endpoints d'inventaire."""
     
-    @pytest.mark.skip(reason="Nécessite mock complexe des modèles SQLAlchemy - endpoint utilise import local")
+    @pytest.mark.skip(reason="NÃ©cessite mock complexe des modÃ¨les SQLAlchemy - endpoint utilise import local")
     def test_list_inventaire(self, client, mock_db_session):
         """Test liste de l'inventaire."""
         mock_query = MagicMock()
@@ -286,9 +286,9 @@ class TestInventaireEndpoints:
         assert "items" in data
         assert "total" in data
     
-    @pytest.mark.skip(reason="Nécessite mock complexe des modèles SQLAlchemy - endpoint utilise import local")
+    @pytest.mark.skip(reason="NÃ©cessite mock complexe des modÃ¨les SQLAlchemy - endpoint utilise import local")
     def test_list_inventaire_expiring(self, client, mock_db_session):
-        """Test liste des articles qui expirent bientôt."""
+        """Test liste des articles qui expirent bientÃ´t."""
         mock_query = MagicMock()
         mock_query.filter.return_value = mock_query
         mock_query.count.return_value = 0
@@ -318,15 +318,15 @@ class TestInventaireEndpoints:
         assert response.status_code in [200, 404, 500]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ENDPOINTS COURSES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCoursesEndpoints:
     """Tests pour les endpoints de courses."""
     
-    @pytest.mark.skip(reason="Nécessite mock complexe des modèles SQLAlchemy - endpoint utilise import local")
+    @pytest.mark.skip(reason="NÃ©cessite mock complexe des modÃ¨les SQLAlchemy - endpoint utilise import local")
     def test_list_courses(self, client, mock_db_session):
         """Test liste des listes de courses."""
         mock_query = MagicMock()
@@ -339,11 +339,11 @@ class TestCoursesEndpoints:
         
         response = client.get("/api/v1/courses")
         
-        # Accepter 200 ou 500 car import local de modèle
+        # Accepter 200 ou 500 car import local de modÃ¨le
         assert response.status_code in [200, 500]
     
     def test_add_course_item_not_found(self, client, mock_db_session):
-        """Test ajout d'article à une liste inexistante."""
+        """Test ajout d'article Ã  une liste inexistante."""
         mock_query = MagicMock()
         mock_query.filter.return_value = mock_query
         mock_query.first.return_value = None
@@ -354,20 +354,20 @@ class TestCoursesEndpoints:
             json={"nom": "Lait", "quantite": 1}
         )
         
-        # Accepter 404, 422 ou 500 car import local de modèle
+        # Accepter 404, 422 ou 500 car import local de modÃ¨le
         assert response.status_code in [404, 422, 500]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ENDPOINTS PLANNING
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPlanningEndpoints:
     """Tests pour les endpoints de planning."""
     
     def test_get_planning_semaine(self, client, mock_db_session):
-        """Test récupération du planning de la semaine."""
+        """Test rÃ©cupÃ©ration du planning de la semaine."""
         mock_query = MagicMock()
         mock_query.filter.return_value = mock_query
         mock_query.all.return_value = []
@@ -375,20 +375,20 @@ class TestPlanningEndpoints:
         
         response = client.get("/api/v1/planning/semaine")
         
-        # Peut retourner 200, 404, ou 500 selon l'implémentation
+        # Peut retourner 200, 404, ou 500 selon l'implÃ©mentation
         assert response.status_code in [200, 404, 500]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PAGINATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPagination:
     """Tests pour la pagination."""
     
     def test_pagination_defaults(self, client, mock_db_session):
-        """Test pagination avec valeurs par défaut."""
+        """Test pagination avec valeurs par dÃ©faut."""
         mock_query = MagicMock()
         mock_query.count.return_value = 100
         mock_query.order_by.return_value = mock_query
@@ -402,10 +402,10 @@ class TestPagination:
         assert response.status_code == 200
         data = response.json()
         assert data["page"] == 1
-        assert data["page_size"] == 20  # Défaut
+        assert data["page_size"] == 20  # DÃ©faut
     
     def test_pagination_custom(self, client, mock_db_session):
-        """Test pagination personnalisée."""
+        """Test pagination personnalisÃ©e."""
         mock_query = MagicMock()
         mock_query.count.return_value = 100
         mock_query.order_by.return_value = mock_query
@@ -431,20 +431,20 @@ class TestPagination:
             params={"page": 0}  # Page 0 est invalide
         )
         
-        # FastAPI valide le paramètre avec ge=1
+        # FastAPI valide le paramÃ¨tre avec ge=1
         assert response.status_code == 422
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SUGGESTIONS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestSuggestionsEndpoints:
     """Tests pour les endpoints de suggestions."""
     
     def test_get_suggestions(self, client, mock_db_session):
-        """Test récupération des suggestions."""
+        """Test rÃ©cupÃ©ration des suggestions."""
         mock_query = MagicMock()
         mock_query.filter.return_value = mock_query
         mock_query.order_by.return_value = mock_query
@@ -454,5 +454,6 @@ class TestSuggestionsEndpoints:
         
         response = client.get("/api/v1/suggestions")
         
-        # Peut retourner 200, 404, ou 500 selon l'implémentation
+        # Peut retourner 200, 404, ou 500 selon l'implÃ©mentation
         assert response.status_code in [200, 404, 500]
+

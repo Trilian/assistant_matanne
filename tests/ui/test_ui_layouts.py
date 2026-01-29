@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/ui/components/layouts.py
 Grilles, cartes, containers
 """
@@ -8,9 +8,9 @@ from unittest.mock import MagicMock, patch, call
 import pytest
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
@@ -52,9 +52,9 @@ def mock_streamlit():
         yield mock_st
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GRID_LAYOUT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGridLayout:
@@ -66,7 +66,7 @@ class TestGridLayout:
 
         grid_layout([])
 
-        mock_streamlit.info.assert_called_once_with("Aucun élément")
+        mock_streamlit.info.assert_called_once_with("Aucun Ã©lÃ©ment")
 
     def test_grid_layout_single_item(self, mock_streamlit):
         """Test un seul item"""
@@ -90,7 +90,7 @@ class TestGridLayout:
         assert mock_streamlit.columns.call_count >= 2
 
     def test_grid_layout_custom_cols(self, mock_streamlit):
-        """Test colonnes personnalisées"""
+        """Test colonnes personnalisÃ©es"""
         from src.ui.components.layouts import grid_layout
 
         items = [{"nom": "Item"}]
@@ -100,7 +100,7 @@ class TestGridLayout:
         mock_streamlit.columns.assert_called_with(4)
 
     def test_grid_layout_with_renderer(self, mock_streamlit):
-        """Test avec fonction de rendu personnalisée"""
+        """Test avec fonction de rendu personnalisÃ©e"""
         from src.ui.components.layouts import grid_layout
 
         items = [{"nom": "Test"}]
@@ -118,7 +118,7 @@ class TestGridLayout:
 
         grid_layout(items)
 
-        # Doit utiliser st.write par défaut
+        # Doit utiliser st.write par dÃ©faut
         mock_streamlit.write.assert_called()
 
     def test_grid_layout_exact_rows(self, mock_streamlit):
@@ -133,9 +133,9 @@ class TestGridLayout:
         assert mock_streamlit.columns.call_count == 3
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ITEM_CARD
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestItemCard:
@@ -166,7 +166,7 @@ class TestItemCard:
             status_color="#4CAF50"
         )
 
-        # Vérifier colonnes pour titre + statut
+        # VÃ©rifier colonnes pour titre + statut
         mock_streamlit.columns.assert_called()
 
     def test_item_card_without_status(self, mock_streamlit):
@@ -175,7 +175,7 @@ class TestItemCard:
 
         item_card(title="Test", metadata=["Info"], status=None)
 
-        # Le markdown pour le titre doit être appelé
+        # Le markdown pour le titre doit Ãªtre appelÃ©
         assert any("### Test" in str(c) for c in mock_streamlit.markdown.call_args_list)
 
     def test_item_card_with_tags(self, mock_streamlit):
@@ -188,7 +188,7 @@ class TestItemCard:
             tags=["Tag1", "Tag2"]
         )
 
-        # Vérifier que les tags sont dans le HTML
+        # VÃ©rifier que les tags sont dans le HTML
         calls = mock_streamlit.markdown.call_args_list
         tag_calls = [c for c in calls if "Tag1" in str(c) or "Tag2" in str(c)]
         assert len(tag_calls) >= 1
@@ -229,10 +229,10 @@ class TestItemCard:
         item_card(
             title="Test",
             metadata=[],
-            actions=[("Voir", action1), ("Éditer", action2)]
+            actions=[("Voir", action1), ("Ã‰diter", action2)]
         )
 
-        # Buttons doivent être créés
+        # Buttons doivent Ãªtre crÃ©Ã©s
         assert mock_streamlit.button.call_count >= 2
 
     def test_item_card_action_callback(self, mock_streamlit):
@@ -251,7 +251,7 @@ class TestItemCard:
         mock_callback.assert_called_once()
 
     def test_item_card_metadata_display(self, mock_streamlit):
-        """Test affichage métadonnées"""
+        """Test affichage mÃ©tadonnÃ©es"""
         from src.ui.components.layouts import item_card
 
         item_card(
@@ -259,13 +259,13 @@ class TestItemCard:
             metadata=["45min", "6 portions", "Facile"]
         )
 
-        # Caption doit être appelé avec les métadonnées jointes
+        # Caption doit Ãªtre appelÃ© avec les mÃ©tadonnÃ©es jointes
         mock_streamlit.caption.assert_called()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS COLLAPSIBLE_SECTION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCollapsibleSection:
@@ -277,25 +277,25 @@ class TestCollapsibleSection:
 
         content_fn = MagicMock()
 
-        collapsible_section("Détails", content_fn)
+        collapsible_section("DÃ©tails", content_fn)
 
         mock_streamlit.expander.assert_called_once()
         content_fn.assert_called_once()
 
     def test_collapsible_section_expanded(self, mock_streamlit):
-        """Test section ouverte par défaut"""
+        """Test section ouverte par dÃ©faut"""
         from src.ui.components.layouts import collapsible_section
 
-        collapsible_section("Détails", lambda: None, expanded=True)
+        collapsible_section("DÃ©tails", lambda: None, expanded=True)
 
         call_args = mock_streamlit.expander.call_args
         assert call_args[1]["expanded"] is True
 
     def test_collapsible_section_collapsed(self, mock_streamlit):
-        """Test section fermée par défaut"""
+        """Test section fermÃ©e par dÃ©faut"""
         from src.ui.components.layouts import collapsible_section
 
-        collapsible_section("Détails", lambda: None, expanded=False)
+        collapsible_section("DÃ©tails", lambda: None, expanded=False)
 
         call_args = mock_streamlit.expander.call_args
         assert call_args[1]["expanded"] is False
@@ -309,9 +309,9 @@ class TestCollapsibleSection:
         mock_streamlit.expander.assert_called_with("Mon titre", expanded=False)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS TABS_LAYOUT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestTabsLayout:
@@ -356,9 +356,9 @@ class TestTabsLayout:
         content_fn.assert_called_once()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CARD_CONTAINER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCardContainer:
@@ -377,7 +377,7 @@ class TestCardContainer:
         assert mock_streamlit.markdown.call_count == 2
 
     def test_card_container_custom_color(self, mock_streamlit):
-        """Test couleur personnalisée"""
+        """Test couleur personnalisÃ©e"""
         from src.ui.components.layouts import card_container
 
         card_container(lambda: None, color="#f0f0f0")
@@ -386,7 +386,7 @@ class TestCardContainer:
         assert "#f0f0f0" in html
 
     def test_card_container_default_color(self, mock_streamlit):
-        """Test couleur par défaut"""
+        """Test couleur par dÃ©faut"""
         from src.ui.components.layouts import card_container
 
         card_container(lambda: None)
@@ -395,7 +395,7 @@ class TestCardContainer:
         assert "#ffffff" in html
 
     def test_card_container_unsafe_html(self, mock_streamlit):
-        """Test HTML non sécurisé"""
+        """Test HTML non sÃ©curisÃ©"""
         from src.ui.components.layouts import card_container
 
         card_container(lambda: None)
@@ -403,3 +403,4 @@ class TestCardContainer:
         # Les deux appels doivent avoir unsafe_allow_html=True
         for call in mock_streamlit.markdown.call_args_list:
             assert call[1]["unsafe_allow_html"] is True
+

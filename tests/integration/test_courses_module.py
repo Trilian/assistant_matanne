@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour le module Streamlit courses
 """
 
@@ -7,9 +7,9 @@ from unittest.mock import Mock, patch, MagicMock
 import streamlit as st
 from datetime import datetime
 
-# Import du module à tester
+# Import du module Ã  tester
 # Note: Dans un vrai projet, on utiliserait pytest-streamlit ou streamlit.testing
-from src.modules.cuisine.courses import (
+from src.domains.cuisine.logic.courses import (
     render_liste_active,
     render_rayon_articles,
     render_ajouter_article,
@@ -59,13 +59,13 @@ class TestRenderListeActive:
                 'quantite_necessaire': 2.0,
                 'unite': 'kg',
                 'priorite': 'haute',
-                'rayon_magasin': 'Fruits & Légumes'
+                'rayon_magasin': 'Fruits & LÃ©gumes'
             },
             {
                 'id': 2,
                 'ingredient_nom': 'Oeufs',
                 'quantite_necessaire': 6.0,
-                'unite': 'pièce',
+                'unite': 'piÃ¨ce',
                 'priorite': 'moyenne',
                 'rayon_magasin': 'Laitier'
             }
@@ -96,7 +96,7 @@ class TestRenderRayonArticles:
         }]
 
         # Simuler la fonction
-        rayon = "Fruits & Légumes"
+        rayon = "Fruits & LÃ©gumes"
         assert rayon is not None
         assert len(articles) == 1
 
@@ -114,16 +114,16 @@ class TestRenderRayonArticles:
         assert all(a.get('id') for a in articles)
 
     def test_priority_emoji_mapping(self):
-        """Test mapping emojis priorité"""
+        """Test mapping emojis prioritÃ©"""
         priority_emojis = {
-            "haute": "🔴",
-            "moyenne": "🟡",
-            "basse": "🟢"
+            "haute": "ðŸ”´",
+            "moyenne": "ðŸŸ¡",
+            "basse": "ðŸŸ¢"
         }
 
-        assert priority_emojis["haute"] == "🔴"
-        assert priority_emojis["moyenne"] == "🟡"
-        assert priority_emojis["basse"] == "🟢"
+        assert priority_emojis["haute"] == "ðŸ”´"
+        assert priority_emojis["moyenne"] == "ðŸŸ¡"
+        assert priority_emojis["basse"] == "ðŸŸ¢"
 
 
 class TestRenderAjouterArticle:
@@ -138,12 +138,12 @@ class TestRenderAjouterArticle:
             'quantite': 2.0,
             'unite': 'kg',
             'priorite': 'haute',
-            'rayon': 'Fruits & Légumes'
+            'rayon': 'Fruits & LÃ©gumes'
         }
 
         assert len(valid_inputs['nom']) > 0
         assert valid_inputs['quantite'] > 0
-        assert valid_inputs['unite'] in ['kg', 'l', 'pièce', 'g', 'ml', 'paquet']
+        assert valid_inputs['unite'] in ['kg', 'l', 'piÃ¨ce', 'g', 'ml', 'paquet']
 
     def test_form_inputs_invalid_empty_name(self):
         """Test rejet nom vide"""
@@ -152,13 +152,13 @@ class TestRenderAjouterArticle:
         assert is_valid is False
 
     def test_form_inputs_invalid_zero_quantite(self):
-        """Test rejet quantité zéro"""
+        """Test rejet quantitÃ© zÃ©ro"""
         quantite = 0.0
         is_valid = quantite > 0
         assert is_valid is False
 
     def test_form_inputs_invalid_priority(self):
-        """Test rejet priorité invalide"""
+        """Test rejet prioritÃ© invalide"""
         valid_priorities = ["basse", "moyenne", "haute"]
         invalid_priority = "mega_haute"
         is_valid = invalid_priority in valid_priorities
@@ -174,7 +174,7 @@ class TestRenderSuggestionsIA:
         mock_service = Mock()
         suggestions = [
             Mock(nom='Tomates', quantite=2.0, unite='kg', priorite='haute', rayon='Fruits'),
-            Mock(nom='Oeufs', quantite=6.0, unite='pièce', priorite='moyenne', rayon='Laitier')
+            Mock(nom='Oeufs', quantite=6.0, unite='piÃ¨ce', priorite='moyenne', rayon='Laitier')
         ]
         mock_service.generer_suggestions_ia_depuis_inventaire.return_value = suggestions
         mock_get_service.return_value = mock_service
@@ -198,7 +198,7 @@ class TestRenderHistorique:
     """Tests render_historique"""
 
     def test_date_range_selection(self):
-        """Test sélection plage de dates"""
+        """Test sÃ©lection plage de dates"""
         date_debut = datetime(2026, 1, 1)
         date_fin = datetime(2026, 1, 24)
 
@@ -228,7 +228,7 @@ class TestRenderModeles:
     """Tests render_modeles"""
 
     def test_modele_creation(self):
-        """Test création modèle"""
+        """Test crÃ©ation modÃ¨le"""
         modele = {
             "nom": "Courses hebdo",
             "articles": [
@@ -241,12 +241,12 @@ class TestRenderModeles:
         assert len(modele["articles"]) == 2
 
     def test_modele_empty_list(self):
-        """Test modèle vide"""
+        """Test modÃ¨le vide"""
         modeles = {}
         assert len(modeles) == 0
 
     def test_modele_multiple(self):
-        """Test plusieurs modèles"""
+        """Test plusieurs modÃ¨les"""
         modeles = {
             "Courses hebdo": [
                 {"nom": "Tomates", "quantite": 2.0}
@@ -263,16 +263,16 @@ class TestRenderModeles:
 
 
 class TestIntegrationScenarios:
-    """Tests scénarios intégration"""
+    """Tests scÃ©narios intÃ©gration"""
 
     @patch('src.modules.cuisine.courses.get_courses_service')
     def test_add_article_to_list(self, mock_get_service):
-        """Scénario: ajouter article à la liste"""
+        """ScÃ©nario: ajouter article Ã  la liste"""
         mock_service = Mock()
         mock_service.create.return_value = Mock(id=1)
         mock_get_service.return_value = mock_service
 
-        # 1. Créer article
+        # 1. CrÃ©er article
         data = {
             "ingredient_id": 1,
             "quantite_necessaire": 2.0,
@@ -280,18 +280,18 @@ class TestIntegrationScenarios:
         }
         result = mock_service.create(data)
 
-        # 2. Vérifier création
+        # 2. VÃ©rifier crÃ©ation
         assert result is not None
         assert result.id == 1
 
     @patch('src.modules.cuisine.courses.get_courses_service')
     def test_mark_article_purchased(self, mock_get_service):
-        """Scénario: marquer article acheté"""
+        """ScÃ©nario: marquer article achetÃ©"""
         mock_service = Mock()
         mock_service.update.return_value = True
         mock_get_service.return_value = mock_service
 
-        # 1. Marquer acheté
+        # 1. Marquer achetÃ©
         article_id = 1
         updates = {
             "achete": True,
@@ -299,24 +299,24 @@ class TestIntegrationScenarios:
         }
         result = mock_service.update(article_id, updates)
 
-        # 2. Vérifier mise à jour
+        # 2. VÃ©rifier mise Ã  jour
         assert result is True
 
     @patch('src.modules.cuisine.courses.get_courses_service')
     def test_save_and_load_modele(self, mock_get_service):
-        """Scénario: sauvegarder et charger modèle"""
+        """ScÃ©nario: sauvegarder et charger modÃ¨le"""
         mock_service = Mock()
 
-        # 1. Sauvegarder modèle
+        # 1. Sauvegarder modÃ¨le
         modele = {
             "nom": "Courses hebdo",
             "articles": [{"nom": "Tomates", "quantite": 2.0}]
         }
 
-        # 2. Charger modèle (simulé)
+        # 2. Charger modÃ¨le (simulÃ©)
         loaded_articles = modele["articles"]
 
-        # 3. Vérifier chargement
+        # 3. VÃ©rifier chargement
         assert len(loaded_articles) == 1
         assert loaded_articles[0]["nom"] == "Tomates"
 
@@ -345,7 +345,7 @@ class TestErrorHandling:
         assert is_valid is False
 
     def test_database_error_handling(self):
-        """Test gestion erreur base de données"""
+        """Test gestion erreur base de donnÃ©es"""
         with patch('src.modules.cuisine.courses.get_courses_service') as mock:
             mock_service = Mock()
             mock_service.create.side_effect = Exception("DB Error")
@@ -355,3 +355,4 @@ class TestErrorHandling:
             except Exception as e:
                 error_handled = "DB Error" in str(e)
                 assert error_handled is True
+

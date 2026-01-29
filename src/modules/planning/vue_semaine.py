@@ -17,8 +17,9 @@ from src.services.planning_unified import get_planning_service
 
 # Logique métier pure
 from src.modules.planning.vue_semaine_logic import (
-    calculer_evenements_semaine,
-    optimiser_planning_semaine
+    get_debut_semaine,
+    get_jours_semaine,
+    calculer_charge_semaine
 )
 
 logger = __import__("logging").getLogger(__name__)

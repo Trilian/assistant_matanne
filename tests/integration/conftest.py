@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 Configuration specifique pour les tests d'integration.
 
@@ -485,3 +485,4 @@ def planning_semaine(int_db, recettes_base):
         "planning": planning,
         "repas": repas_crees,
     }
+

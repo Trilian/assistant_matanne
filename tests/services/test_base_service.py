@@ -1,12 +1,12 @@
-"""
+﻿"""
 Tests unitaires pour BaseService (src/services/types.py).
 
 Tests couvrant:
-- Opérations CRUD (create, read, update, delete)
+- OpÃ©rations CRUD (create, read, update, delete)
 - Filtres et pagination
-- Recherche avancée
+- Recherche avancÃ©e
 - Bulk operations
-- Statistiques génériques
+- Statistiques gÃ©nÃ©riques
 - Cache automatique
 """
 
@@ -20,14 +20,14 @@ from src.services.types import BaseService
 from src.core.models import Recette, Ingredient
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 1: TESTS CRUD DE BASE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestBaseServiceCRUD:
-    """Test opérations CRUD de base."""
+    """Test opÃ©rations CRUD de base."""
 
     def test_init_sets_model_and_cache_ttl(self):
         """Test que l'initialisation configure model et cache_ttl."""
@@ -38,13 +38,13 @@ class TestBaseServiceCRUD:
         assert service.cache_ttl == 120
 
     def test_init_default_cache_ttl(self):
-        """Test que cache_ttl par défaut est 60."""
+        """Test que cache_ttl par dÃ©faut est 60."""
         service = BaseService(Ingredient)
 
         assert service.cache_ttl == 60
 
     def test_create_adds_entity_to_db(self, db):
-        """Test que create ajoute une entité en base."""
+        """Test que create ajoute une entitÃ© en base."""
         service = BaseService(Recette)
 
         data = {
@@ -74,7 +74,7 @@ class TestBaseServiceCRUD:
             mock_invalider.assert_called_once()
 
     def test_get_by_id_returns_entity(self, db, recette_factory):
-        """Test que get_by_id retourne l'entité correcte."""
+        """Test que get_by_id retourne l'entitÃ© correcte."""
         recette = recette_factory.create(nom="Recette Test GetById")
         service = BaseService(Recette)
 
@@ -100,7 +100,7 @@ class TestBaseServiceCRUD:
         # Premier appel - pas de cache
         result1 = service.get_by_id(recette.id, db=db)
         
-        # Vérifier cache
+        # VÃ©rifier cache
         from src.core.cache import Cache
         cache_key = f"recette_{recette.id}"
         cached = Cache.obtenir(cache_key)
@@ -141,20 +141,20 @@ class TestBaseServiceCRUD:
         assert len(result_skip) == len(result_all) - 2
 
     def test_update_modifies_entity(self, db, recette_factory):
-        """Test que update modifie l'entité."""
+        """Test que update modifie l'entitÃ©."""
         recette = recette_factory.create(nom="Recette Original")
         service = BaseService(Recette)
 
-        result = service.update(recette.id, {"nom": "Recette Modifiée"}, db=db)
+        result = service.update(recette.id, {"nom": "Recette ModifiÃ©e"}, db=db)
 
         assert result is not None
-        assert result.nom == "Recette Modifiée"
+        assert result.nom == "Recette ModifiÃ©e"
 
     def test_update_returns_none_for_missing(self, db):
         """Test que update retourne None pour ID inexistant."""
         service = BaseService(Recette)
 
-        # Le décorateur gerer_erreurs avec valeur_fallback=None retourne None
+        # Le dÃ©corateur gerer_erreurs avec valeur_fallback=None retourne None
         result = service.update(99999, {"nom": "Test"}, db=db)
 
         assert result is None
@@ -175,8 +175,8 @@ class TestBaseServiceCRUD:
         assert not hasattr(result, "champ_inexistant")
 
     def test_delete_removes_entity(self, db, recette_factory):
-        """Test que delete supprime l'entité."""
-        recette = recette_factory.create(nom="Recette À Supprimer")
+        """Test que delete supprime l'entitÃ©."""
+        recette = recette_factory.create(nom="Recette Ã€ Supprimer")
         service = BaseService(Recette)
         recette_id = recette.id
 
@@ -206,9 +206,9 @@ class TestBaseServiceCRUD:
         assert result == initial_count + 2
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 2: TESTS FILTRES ET TRI
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -233,7 +233,7 @@ class TestBaseServiceFilters:
 
         result = service.get_all(order_by="nom", db=db)
 
-        # Vérifier que le tri est appliqué
+        # VÃ©rifier que le tri est appliquÃ©
         assert len(result) >= 2
 
     def test_get_all_with_order_desc(self, db, recette_factory):
@@ -244,7 +244,7 @@ class TestBaseServiceFilters:
 
         result = service.get_all(order_by="nom", desc_order=True, db=db)
 
-        # Vérifier que le tri descendant est appliqué
+        # VÃ©rifier que le tri descendant est appliquÃ©
         assert len(result) >= 2
 
     def test_count_with_filters(self, db, recette_factory):
@@ -261,18 +261,18 @@ class TestBaseServiceFilters:
         assert result == initial + 2
 
 
-# ═══════════════════════════════════════════════════════════
-# SECTION 3: TESTS RECHERCHE AVANCÉE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# SECTION 3: TESTS RECHERCHE AVANCÃ‰E
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestBaseServiceAdvancedSearch:
-    """Test recherche avancée."""
+    """Test recherche avancÃ©e."""
 
     def test_advanced_search_returns_list(self, db, recette_factory):
         """Test que advanced_search retourne une liste."""
-        recette_factory.create(nom="Poulet Rôti", description="Délicieux poulet")
+        recette_factory.create(nom="Poulet RÃ´ti", description="DÃ©licieux poulet")
         service = BaseService(Recette)
 
         result = service.advanced_search(db=db)
@@ -281,8 +281,8 @@ class TestBaseServiceAdvancedSearch:
 
     def test_advanced_search_by_term(self, db, recette_factory):
         """Test recherche par terme textuel."""
-        recette_factory.create(nom="Poulet Grillé", description="Poulet au four")
-        recette_factory.create(nom="Salade César", description="Salade classique")
+        recette_factory.create(nom="Poulet GrillÃ©", description="Poulet au four")
+        recette_factory.create(nom="Salade CÃ©sar", description="Salade classique")
         service = BaseService(Recette)
 
         result = service.advanced_search(
@@ -323,21 +323,21 @@ class TestBaseServiceAdvancedSearch:
 
         result = service.advanced_search(sort_by="nom", sort_desc=True, db=db)
 
-        # Vérifier que le tri est appliqué
+        # VÃ©rifier que le tri est appliquÃ©
         assert len(result) >= 2
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 4: TESTS HELPERS INTERNES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestBaseServiceHelpers:
-    """Test méthodes helper internes."""
+    """Test mÃ©thodes helper internes."""
 
     def test_apply_filters_equality(self, db, recette_factory):
-        """Test filtre égalité."""
+        """Test filtre Ã©galitÃ©."""
         recette_factory.create(nom="Filter Eq", difficulte="moyen")
         service = BaseService(Recette)
 
@@ -398,7 +398,7 @@ class TestBaseServiceHelpers:
         assert called_with_session[0] == db
 
     def test_invalider_cache_clears_model_cache(self, clear_cache):
-        """Test que _invalider_cache nettoie le cache du modèle."""
+        """Test que _invalider_cache nettoie le cache du modÃ¨le."""
         service = BaseService(Recette)
         
         from src.core.cache import Cache
@@ -406,18 +406,18 @@ class TestBaseServiceHelpers:
         
         service._invalider_cache()
         
-        # Le cache devrait être invalidé pour le pattern "recette"
-        # Le test vérifie que la méthode s'exécute sans erreur
+        # Le cache devrait Ãªtre invalidÃ© pour le pattern "recette"
+        # Le test vÃ©rifie que la mÃ©thode s'exÃ©cute sans erreur
 
 
-# ═══════════════════════════════════════════════════════════
-# SECTION 5: TESTS D'INTÉGRATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# SECTION 5: TESTS D'INTÃ‰GRATION
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.integration
 class TestBaseServiceIntegration:
-    """Tests d'intégration BaseService."""
+    """Tests d'intÃ©gration BaseService."""
 
     def test_crud_workflow_complet(self, db):
         """Test workflow CRUD complet."""
@@ -441,8 +441,8 @@ class TestBaseServiceIntegration:
         assert read.nom == "Workflow Recette"
 
         # Update
-        updated = service.update(created_id, {"nom": "Workflow Modifié"}, db=db)
-        assert updated.nom == "Workflow Modifié"
+        updated = service.update(created_id, {"nom": "Workflow ModifiÃ©"}, db=db)
+        assert updated.nom == "Workflow ModifiÃ©"
 
         # Delete
         deleted = service.delete(created_id, db=db)
@@ -453,7 +453,7 @@ class TestBaseServiceIntegration:
         assert verify is None
 
     def test_pagination_and_filters_combined(self, db, recette_factory):
-        """Test pagination et filtres combinés."""
+        """Test pagination et filtres combinÃ©s."""
         for i in range(10):
             recette_factory.create(
                 nom=f"Pagination {i}",
@@ -470,3 +470,4 @@ class TestBaseServiceIntegration:
 
         assert len(result) <= 3
         assert all(r.difficulte == "facile" for r in result)
+

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/utils/validators/ - common, dates
 Ces tests couvrent ~67 statements de fonctions de validation utilitaires
 """
@@ -262,7 +262,7 @@ class TestValidateExpiryDate:
         past = date.today() - timedelta(days=1)
         is_valid, msg = validate_expiry_date(past)
         assert is_valid is False
-        assert "passée" in msg
+        assert "passÃ©e" in msg
     
     def test_too_soon(self):
         from src.utils.validators.dates import validate_expiry_date
@@ -310,3 +310,4 @@ class TestIsWithinDays:
     def test_today(self):
         from src.utils.validators.dates import is_within_days
         assert is_within_days(date.today(), 7) is True
+

@@ -1,11 +1,11 @@
-"""
+﻿"""
 Tests pour le module Maison (projets, jardin, entretien)
 
 Tests unitaires:
 - Helpers du module maison
-- Logique métier projets
-- Logique métier jardin
-- Logique métier entretien
+- Logique mÃ©tier projets
+- Logique mÃ©tier jardin
+- Logique mÃ©tier entretien
 """
 
 import pytest
@@ -14,22 +14,22 @@ from datetime import date, datetime, timedelta
 from sqlalchemy.orm import Session
 
 
-# ═══════════════════════════════════════════════════════════
-# MOCK STREAMLIT CACHING - Désactiver le caching pour les tests
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# MOCK STREAMLIT CACHING - DÃ©sactiver le caching pour les tests
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
-# Mock décorateur qui ne fait rien (passthrough)
+# Mock dÃ©corateur qui ne fait rien (passthrough)
 def mock_cache_decorator(*args, **kwargs):
-    """Désactive le caching Streamlit pour les tests"""
+    """DÃ©sactive le caching Streamlit pour les tests"""
     def decorator(func):
         return func
     return decorator if not args else args[0]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS HELPERS MAISON
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestMaisonHelpers:
@@ -37,8 +37,8 @@ class TestMaisonHelpers:
 
     @patch('src.modules.maison.helpers.get_db_context')
     def test_get_projets_urgents(self, mock_db):
-        """Test récupération projets urgents"""
-        from src.modules.maison.helpers import get_projets_urgents
+        """Test rÃ©cupÃ©ration projets urgents"""
+        from src.domains.maison.logic.helpers import get_projets_urgents
         
         # Mock session
         mock_session = MagicMock()
@@ -55,19 +55,19 @@ class TestMaisonHelpers:
         
         result = get_projets_urgents()
         
-        # Vérifie la structure du résultat
+        # VÃ©rifie la structure du rÃ©sultat
         assert isinstance(result, list)
 
     @patch('src.modules.maison.helpers.get_db_context')
     def test_get_plantes_a_arroser(self, mock_db):
-        """Test récupération plantes à arroser"""
-        from src.modules.maison.helpers import get_plantes_a_arroser
+        """Test rÃ©cupÃ©ration plantes Ã  arroser"""
+        from src.domains.maison.logic.helpers import get_plantes_a_arroser
         
         mock_session = MagicMock()
         mock_db.return_value.__enter__ = Mock(return_value=mock_session)
         mock_db.return_value.__exit__ = Mock(return_value=None)
         
-        # Aucune plante à arroser
+        # Aucune plante Ã  arroser
         mock_session.query.return_value.filter.return_value.all.return_value = []
         
         result = get_plantes_a_arroser()
@@ -75,11 +75,11 @@ class TestMaisonHelpers:
         assert isinstance(result, list)
         assert len(result) == 0
 
-    @pytest.mark.skip(reason="Utilise @st.cache_data qui nécessite un contexte Streamlit")
+    @pytest.mark.skip(reason="Utilise @st.cache_data qui nÃ©cessite un contexte Streamlit")
     @patch('src.modules.maison.helpers.get_db_context')
     def test_get_stats_projets(self, mock_db):
         """Test statistiques projets"""
-        from src.modules.maison.helpers import get_stats_projets
+        from src.domains.maison.logic.helpers import get_stats_projets
         
         mock_session = MagicMock()
         mock_db.return_value.__enter__ = Mock(return_value=mock_session)
@@ -92,11 +92,11 @@ class TestMaisonHelpers:
         assert isinstance(result, dict)
         assert "en_cours" in result or "avg_progress" in result or isinstance(result.get("en_cours", 0), int)
 
-    @pytest.mark.skip(reason="Utilise @st.cache_data qui nécessite un contexte Streamlit")
+    @pytest.mark.skip(reason="Utilise @st.cache_data qui nÃ©cessite un contexte Streamlit")
     @patch('src.modules.maison.helpers.get_db_context')
     def test_get_stats_entretien(self, mock_db):
         """Test statistiques entretien"""
-        from src.modules.maison.helpers import get_stats_entretien
+        from src.domains.maison.logic.helpers import get_stats_entretien
         
         mock_session = MagicMock()
         mock_db.return_value.__enter__ = Mock(return_value=mock_session)
@@ -110,20 +110,20 @@ class TestMaisonHelpers:
         assert "completion_today" in result
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS MODÈLES PROJET
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS MODÃˆLES PROJET
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestProjectModel:
-    """Tests pour le modèle Project"""
+    """Tests pour le modÃ¨le Project"""
 
     def test_project_creation(self, db: Session):
-        """Test création d'un projet"""
+        """Test crÃ©ation d'un projet"""
         from src.core.models import Project
         
         projet = Project(
-            nom="Rénovation cuisine",
+            nom="RÃ©novation cuisine",
             description="Refaire les meubles",
             statut="en_cours",
             priorite="haute",
@@ -135,7 +135,7 @@ class TestProjectModel:
         db.commit()
         
         assert projet.id is not None
-        assert projet.nom == "Rénovation cuisine"
+        assert projet.nom == "RÃ©novation cuisine"
         assert projet.statut == "en_cours"
         assert projet.priorite == "haute"
 
@@ -156,7 +156,7 @@ class TestProjectModel:
             assert projet.statut == statut
 
     def test_project_priority_values(self, db: Session):
-        """Test valeurs valides de priorité"""
+        """Test valeurs valides de prioritÃ©"""
         from src.core.models import Project
         
         priorites_valides = ["haute", "moyenne", "basse"]
@@ -172,17 +172,17 @@ class TestProjectModel:
             assert projet.priorite == priorite
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS LOGIQUE JARDIN
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestJardinLogic:
     """Tests pour la logique du module jardin"""
 
     def test_plante_needs_watering(self):
-        """Test détection plante à arroser"""
-        # Une plante arrosée il y a 5 jours avec fréquence 3 jours
+        """Test dÃ©tection plante Ã  arroser"""
+        # Une plante arrosÃ©e il y a 5 jours avec frÃ©quence 3 jours
         dernier_arrosage = date.today() - timedelta(days=5)
         frequence_arrosage = 3  # jours
         
@@ -192,7 +192,7 @@ class TestJardinLogic:
         assert needs_watering is True
 
     def test_plante_recently_watered(self):
-        """Test plante récemment arrosée"""
+        """Test plante rÃ©cemment arrosÃ©e"""
         dernier_arrosage = date.today() - timedelta(days=1)
         frequence_arrosage = 3
         
@@ -202,7 +202,7 @@ class TestJardinLogic:
         assert needs_watering is False
 
     def test_calculate_harvest_date(self):
-        """Test calcul date de récolte"""
+        """Test calcul date de rÃ©colte"""
         date_plantation = date.today() - timedelta(days=60)
         duree_croissance = 90  # jours
         
@@ -212,9 +212,9 @@ class TestJardinLogic:
         assert jours_restants == 30
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS LOGIQUE ENTRETIEN
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestEntretienLogic:
@@ -230,7 +230,7 @@ class TestEntretienLogic:
         assert percentage == 70.0
 
     def test_task_overdue_detection(self):
-        """Test détection tâche en retard"""
+        """Test dÃ©tection tÃ¢che en retard"""
         date_echeance = date.today() - timedelta(days=2)
         task_completed = False
         
@@ -239,7 +239,7 @@ class TestEntretienLogic:
         assert is_overdue is True
 
     def test_recurring_task_next_date(self):
-        """Test calcul prochaine occurrence tâche récurrente"""
+        """Test calcul prochaine occurrence tÃ¢che rÃ©currente"""
         frequence = "hebdomadaire"
         derniere_execution = date.today()
         
@@ -253,3 +253,4 @@ class TestEntretienLogic:
             prochaine = derniere_execution
         
         assert prochaine == date.today() + timedelta(weeks=1)
+

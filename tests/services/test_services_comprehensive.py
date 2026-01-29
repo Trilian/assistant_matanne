@@ -1,6 +1,6 @@
-"""
-Tests unitaires pour les services - Niveau service sans dépendance Streamlit
-Ces tests testent la logique des services avec des mocks de base de données
+﻿"""
+Tests unitaires pour les services - Niveau service sans dÃ©pendance Streamlit
+Ces tests testent la logique des services avec des mocks de base de donnÃ©es
 """
 
 import pytest
@@ -9,13 +9,13 @@ from unittest.mock import Mock, MagicMock, patch
 from sqlalchemy.orm import Session
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES COMMUNES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @pytest.fixture
 def mock_session():
-    """Session SQLAlchemy mockée"""
+    """Session SQLAlchemy mockÃ©e"""
     session = Mock(spec=Session)
     session.query.return_value = session
     session.filter.return_value = session
@@ -28,7 +28,7 @@ def mock_session():
 
 @pytest.fixture
 def mock_ingredient():
-    """Modèle Ingredient mocké"""
+    """ModÃ¨le Ingredient mockÃ©"""
     ingredient = Mock()
     ingredient.id = 1
     ingredient.nom = "Pommes"
@@ -38,7 +38,7 @@ def mock_ingredient():
 
 @pytest.fixture
 def mock_article_courses(mock_ingredient):
-    """ArticleCourses mocké"""
+    """ArticleCourses mockÃ©"""
     article = Mock()
     article.id = 1
     article.ingredient_id = 1
@@ -46,8 +46,8 @@ def mock_article_courses(mock_ingredient):
     article.quantite_necessaire = 5
     article.priorite = "haute"
     article.achete = False
-    article.rayon_magasin = "Fruits & Légumes"
-    article.magasin_cible = "Supermarché"
+    article.rayon_magasin = "Fruits & LÃ©gumes"
+    article.magasin_cible = "SupermarchÃ©"
     article.notes = "Bio"
     article.suggere_par_ia = False
     return article
@@ -55,25 +55,25 @@ def mock_article_courses(mock_ingredient):
 
 @pytest.fixture
 def mock_article_inventaire(mock_ingredient):
-    """ArticleInventaire mocké"""
+    """ArticleInventaire mockÃ©"""
     article = Mock()
     article.id = 1
     article.ingredient_id = 1
     article.ingredient = mock_ingredient
     article.quantite = 5
     article.quantite_min = 2
-    article.emplacement = "Réfrigérateur"
+    article.emplacement = "RÃ©frigÃ©rateur"
     article.categorie = "Fruits"
     article.date_peremption = date.today() + timedelta(days=10)
     return article
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS COURSES SERVICE SCHEMAS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestCoursesSchemas:
-    """Tests pour les schémas Pydantic du service courses"""
+    """Tests pour les schÃ©mas Pydantic du service courses"""
     
     def test_suggestion_courses_valide(self):
         """Suggestion valide"""
@@ -84,7 +84,7 @@ class TestCoursesSchemas:
             quantite=5.0,
             unite="kg",
             priorite="haute",
-            rayon="Fruits & Légumes"
+            rayon="Fruits & LÃ©gumes"
         )
         
         assert suggestion.nom == "Pommes"
@@ -92,7 +92,7 @@ class TestCoursesSchemas:
         assert suggestion.priorite == "haute"
     
     def test_suggestion_courses_priorite_invalide(self):
-        """Priorité invalide doit échouer"""
+        """PrioritÃ© invalide doit Ã©chouer"""
         from src.services.courses import SuggestionCourses
         from pydantic import ValidationError
         
@@ -106,21 +106,21 @@ class TestCoursesSchemas:
             )
     
     def test_suggestion_courses_quantite_negative(self):
-        """Quantité négative doit échouer"""
+        """QuantitÃ© nÃ©gative doit Ã©chouer"""
         from src.services.courses import SuggestionCourses
         from pydantic import ValidationError
         
         with pytest.raises(ValidationError):
             SuggestionCourses(
                 nom="Pommes",
-                quantite=-1.0,  # Négatif
+                quantite=-1.0,  # NÃ©gatif
                 unite="kg",
                 priorite="haute",
                 rayon="Fruits"
             )
     
     def test_suggestion_courses_nom_trop_court(self):
-        """Nom trop court doit échouer"""
+        """Nom trop court doit Ã©chouer"""
         from src.services.courses import SuggestionCourses
         from pydantic import ValidationError
         
@@ -134,12 +134,12 @@ class TestCoursesSchemas:
             )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS INVENTAIRE SERVICE SCHEMAS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestInventaireSchemas:
-    """Tests pour les schémas Pydantic du service inventaire"""
+    """Tests pour les schÃ©mas Pydantic du service inventaire"""
     
     def test_article_import_valide(self):
         """Import valide"""
@@ -150,7 +150,7 @@ class TestInventaireSchemas:
             quantite=2.0,
             quantite_min=1.0,
             unite="kg",
-            categorie="Épicerie",
+            categorie="Ã‰picerie",
             emplacement="Placard"
         )
         
@@ -158,7 +158,7 @@ class TestInventaireSchemas:
         assert article.quantite == 2.0
     
     def test_article_import_date_peremption(self):
-        """Import avec date de péremption"""
+        """Import avec date de pÃ©remption"""
         from src.services.inventaire import ArticleImport
         
         article = ArticleImport(
@@ -172,7 +172,7 @@ class TestInventaireSchemas:
         assert article.date_peremption == "2025-12-31"
     
     def test_article_import_quantite_zero(self):
-        """Quantité zéro acceptée"""
+        """QuantitÃ© zÃ©ro acceptÃ©e"""
         from src.services.inventaire import ArticleImport
         
         article = ArticleImport(
@@ -185,19 +185,19 @@ class TestInventaireSchemas:
         assert article.quantite == 0.0
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONSTANTES INVENTAIRE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestInventaireConstantes:
     """Tests pour les constantes du service inventaire"""
     
     def test_categories_non_vide(self):
-        """Les catégories ne sont pas vides"""
+        """Les catÃ©gories ne sont pas vides"""
         from src.services.inventaire import CATEGORIES
         
         assert len(CATEGORIES) > 0
-        assert "Légumes" in CATEGORIES
+        assert "LÃ©gumes" in CATEGORIES
         assert "Fruits" in CATEGORIES
     
     def test_emplacements_non_vide(self):
@@ -206,15 +206,15 @@ class TestInventaireConstantes:
         
         assert len(EMPLACEMENTS) > 0
         assert "Frigo" in EMPLACEMENTS
-        assert "Congélateur" in EMPLACEMENTS
+        assert "CongÃ©lateur" in EMPLACEMENTS
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS COURSES SERVICE MÉTHODES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS COURSES SERVICE MÃ‰THODES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestCoursesServiceMethods:
-    """Tests pour les méthodes du CoursesService"""
+    """Tests pour les mÃ©thodes du CoursesService"""
     
     @patch('src.services.courses.obtenir_client_ia')
     def test_service_initialization(self, mock_client):
@@ -226,8 +226,8 @@ class TestCoursesServiceMethods:
             service = CoursesService()
             assert service is not None
         except Exception:
-            # Si l'initialisation échoue pour une raison externe, le test passe quand même
-            pytest.skip("Initialisation du service nécessite une configuration complète")
+            # Si l'initialisation Ã©choue pour une raison externe, le test passe quand mÃªme
+            pytest.skip("Initialisation du service nÃ©cessite une configuration complÃ¨te")
     
     @patch('src.services.courses.obtenir_client_ia')
     @patch('src.services.courses.obtenir_contexte_db')
@@ -244,16 +244,16 @@ class TestCoursesServiceMethods:
         from src.services.courses import CoursesService
         service = CoursesService()
         
-        # La méthode devrait retourner une liste vide sans erreur
-        # Note: avec les décorateurs, c'est plus complexe à tester directement
+        # La mÃ©thode devrait retourner une liste vide sans erreur
+        # Note: avec les dÃ©corateurs, c'est plus complexe Ã  tester directement
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS INVENTAIRE SERVICE MÉTHODES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS INVENTAIRE SERVICE MÃ‰THODES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestInventaireServiceMethods:
-    """Tests pour les méthodes du InventaireService"""
+    """Tests pour les mÃ©thodes du InventaireService"""
     
     @patch('src.services.inventaire.obtenir_client_ia')
     def test_service_initialization(self, mock_client):
@@ -266,9 +266,9 @@ class TestInventaireServiceMethods:
         assert service is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS BASE SERVICE TYPES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestBaseServiceTypes:
     """Tests pour les types de base des services"""
@@ -284,9 +284,9 @@ class TestBaseServiceTypes:
         assert BaseAIService is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS UTILITAIRES DES SERVICES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestServiceUtilities:
     """Tests pour les utilitaires des services"""
@@ -299,7 +299,7 @@ class TestServiceUtilities:
         assert cache is not None
     
     def test_decorators_import(self):
-        """Import décorateurs"""
+        """Import dÃ©corateurs"""
         from src.core.decorators import (
             with_db_session,
             with_cache,
@@ -311,9 +311,9 @@ class TestServiceUtilities:
         assert callable(with_error_handling)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS RECETTES SERVICE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestRecettesService:
     """Tests pour le service recettes"""
@@ -336,12 +336,12 @@ class TestRecettesService:
             service = RecettesService()
             assert service is not None
         except Exception:
-            pytest.skip("Initialisation du service nécessite une configuration complète")
+            pytest.skip("Initialisation du service nÃ©cessite une configuration complÃ¨te")
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PLANNING SERVICE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestPlanningService:
     """Tests pour le service planning"""
@@ -356,17 +356,17 @@ class TestPlanningService:
             pytest.skip("PlanningService non disponible")
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS INTÉGRATION SERVICES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS INTÃ‰GRATION SERVICES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestServicesIntegration:
-    """Tests d'intégration entre services"""
+    """Tests d'intÃ©gration entre services"""
     
     @patch('src.services.courses.obtenir_client_ia')
     @patch('src.services.inventaire.obtenir_client_ia')
     def test_services_share_cache(self, mock_inv_client, mock_courses_client):
-        """Les services partagent le même système de cache"""
+        """Les services partagent le mÃªme systÃ¨me de cache"""
         mock_inv_client.return_value = Mock()
         mock_courses_client.return_value = Mock()
         
@@ -381,9 +381,9 @@ class TestServicesIntegration:
         assert inventaire is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ERROR HANDLING
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestServicesErrorHandling:
     """Tests pour la gestion d'erreurs des services"""
@@ -396,19 +396,19 @@ class TestServicesErrorHandling:
         assert str(error) == "Test"
     
     def test_with_error_handling_decorator(self):
-        """Décorateur with_error_handling"""
+        """DÃ©corateur with_error_handling"""
         from src.core.decorators import with_error_handling
         
         @with_error_handling(default_return="default")
         def failing_function():
             raise ValueError("Test error")
         
-        # Devrait retourner la valeur par défaut au lieu de lever l'erreur
+        # Devrait retourner la valeur par dÃ©faut au lieu de lever l'erreur
         result = failing_function()
         assert result == "default"
     
     def test_with_error_handling_success(self):
-        """with_error_handling laisse passer les succès"""
+        """with_error_handling laisse passer les succÃ¨s"""
         from src.core.decorators import with_error_handling
         
         @with_error_handling(default_return="default")
@@ -419,15 +419,15 @@ class TestServicesErrorHandling:
         assert result == "success"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PYDANTIC VALIDATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestPydanticValidation:
     """Tests pour la validation Pydantic dans les services"""
     
     def test_suggestion_courses_all_priorities(self):
-        """Test toutes les priorités valides"""
+        """Test toutes les prioritÃ©s valides"""
         from src.services.courses import SuggestionCourses
         
         for priorite in ["haute", "moyenne", "basse"]:
@@ -457,9 +457,9 @@ class TestPydanticValidation:
         assert article.date_peremption is None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FACTORY FUNCTIONS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestServiceFactories:
     """Tests pour les fonctions factory des services"""
@@ -488,3 +488,4 @@ class TestServiceFactories:
             assert callable(get_recettes_service)
         except ImportError:
             pass
+

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 Tests d'integration pour le module Cuisine.
 """
@@ -198,3 +198,4 @@ class TestStatistiquesCuisine:
         
         assert total_articles >= 4
         assert total_quantite > 0
+

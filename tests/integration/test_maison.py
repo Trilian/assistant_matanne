@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 Tests d'integration pour le module Maison.
 """
@@ -180,3 +180,4 @@ class TestStatistiquesMaison:
             emplacements[emp] = emplacements.get(emp, 0) + 1
         
         assert len(emplacements) >= 1
+

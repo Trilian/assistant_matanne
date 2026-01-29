@@ -1,9 +1,9 @@
-"""
+﻿"""
 Tests pour le module Rapports PDF
 
 Tests unitaires:
 - Schemas Pydantic (RapportStocks, RapportBudget, AnalyseGaspillage)
-- Structure des données de rapport
+- Structure des donnÃ©es de rapport
 - Validation et calculs
 """
 
@@ -12,16 +12,16 @@ from unittest.mock import Mock, patch, MagicMock
 from datetime import date, datetime, timedelta
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SCHEMAS PYDANTIC RAPPORTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestRapportsPDFService:
-    """Tests pour les schémas de rapports PDF"""
+    """Tests pour les schÃ©mas de rapports PDF"""
 
     def test_rapport_stocks_schema_default(self):
-        """Test schéma RapportStocks avec valeurs par défaut"""
+        """Test schÃ©ma RapportStocks avec valeurs par dÃ©faut"""
         from src.services.rapports_pdf import RapportStocks
         
         rapport = RapportStocks()
@@ -34,7 +34,7 @@ class TestRapportsPDFService:
         assert rapport.categories_resumee == {}
 
     def test_rapport_stocks_schema_custom(self):
-        """Test schéma RapportStocks avec valeurs personnalisées"""
+        """Test schÃ©ma RapportStocks avec valeurs personnalisÃ©es"""
         from src.services.rapports_pdf import RapportStocks
         
         rapport = RapportStocks(
@@ -50,7 +50,7 @@ class TestRapportsPDFService:
         assert rapport.valeur_stock_total == 450.50
 
     def test_rapport_budget_schema(self):
-        """Test schéma RapportBudget"""
+        """Test schÃ©ma RapportBudget"""
         from src.services.rapports_pdf import RapportBudget
         
         rapport = RapportBudget(
@@ -59,17 +59,17 @@ class TestRapportsPDFService:
         )
         
         assert rapport.depenses_total == 350.00
-        assert rapport.periode_jours == 30  # Défaut
+        assert rapport.periode_jours == 30  # DÃ©faut
         assert len(rapport.depenses_par_categorie) == 2
 
     def test_analyse_gaspillage_schema(self):
-        """Test schéma AnalyseGaspillage"""
+        """Test schÃ©ma AnalyseGaspillage"""
         from src.services.rapports_pdf import AnalyseGaspillage
         
         analyse = AnalyseGaspillage(
             articles_perimes_total=5,
             valeur_perdue=25.50,
-            recommandations=["Vérifier les dates", "Planifier les repas"]
+            recommandations=["VÃ©rifier les dates", "Planifier les repas"]
         )
         
         assert analyse.articles_perimes_total == 5
@@ -77,16 +77,16 @@ class TestRapportsPDFService:
         assert len(analyse.recommandations) == 2
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS DONNÉES RAPPORTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS DONNÃ‰ES RAPPORTS
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestRapportData:
-    """Tests pour les données de rapports"""
+    """Tests pour les donnÃ©es de rapports"""
 
     def test_rapport_stocks_structure(self):
-        """Test structure données rapport stocks"""
+        """Test structure donnÃ©es rapport stocks"""
         rapport_data = {
             "titre": "Rapport Stocks Hebdomadaire",
             "date_generation": datetime.now().isoformat(),
@@ -100,7 +100,7 @@ class TestRapportData:
                 },
                 "categories": [
                     {"nom": "Fruits", "quantite": 25, "valeur": 45.00},
-                    {"nom": "Légumes", "quantite": 30, "valeur": 35.00},
+                    {"nom": "LÃ©gumes", "quantite": 30, "valeur": 35.00},
                 ]
             }
         }
@@ -111,7 +111,7 @@ class TestRapportData:
         assert rapport_data["sections"]["resume"]["total_articles"] == 150
 
     def test_rapport_budget_structure(self):
-        """Test structure données rapport budget"""
+        """Test structure donnÃ©es rapport budget"""
         rapport_data = {
             "titre": "Rapport Budget Mensuel",
             "mois": "2026-01",
@@ -129,7 +129,7 @@ class TestRapportData:
         assert rapport_data["tendance"] == "positif"
 
     def test_calculate_budget_percentage(self):
-        """Test calcul pourcentage budget utilisé"""
+        """Test calcul pourcentage budget utilisÃ©"""
         budget = 500.00
         depenses = 350.00
         
@@ -138,10 +138,10 @@ class TestRapportData:
         assert pourcentage == 70.0
 
     def test_detect_budget_alert(self):
-        """Test détection alerte budget"""
+        """Test dÃ©tection alerte budget"""
         budget = 500.00
-        depenses = 475.00  # 95% utilisé
-        seuil_alerte = 80  # Alerte à 80%
+        depenses = 475.00  # 95% utilisÃ©
+        seuil_alerte = 80  # Alerte Ã  80%
         
         pourcentage = (depenses / budget) * 100
         alerte = pourcentage >= seuil_alerte
@@ -149,9 +149,9 @@ class TestRapportData:
         assert alerte is True
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ANALYSE GASPILLAGE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAnalyseGaspillage:
@@ -173,7 +173,7 @@ class TestAnalyseGaspillage:
         assert valeur_totale == 5.60  # 3.00 + 2.00 + 0.60
 
     def test_gaspillage_by_category(self):
-        """Test gaspillage par catégorie"""
+        """Test gaspillage par catÃ©gorie"""
         articles_jetes = [
             {"categorie": "Produits laitiers", "valeur": 5.00},
             {"categorie": "Produits laitiers", "valeur": 3.00},
@@ -199,22 +199,22 @@ class TestAnalyseGaspillage:
         
         # Tendance = comparaison premier et dernier mois
         variation = historique[-1]["valeur"] - historique[0]["valeur"]
-        tendance = "amélioration" if variation < 0 else "dégradation"
+        tendance = "amÃ©lioration" if variation < 0 else "dÃ©gradation"
         
-        assert tendance == "amélioration"
+        assert tendance == "amÃ©lioration"
         assert variation == -15.00
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FORMAT PDF
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPDFFormat:
     """Tests pour le formatage PDF"""
 
     def test_pdf_header_format(self):
-        """Test format en-tête PDF"""
+        """Test format en-tÃªte PDF"""
         header = {
             "titre": "Rapport Hebdomadaire",
             "sous_titre": "Semaine du 20 au 26 janvier 2026",
@@ -228,22 +228,23 @@ class TestPDFFormat:
     def test_pdf_table_format(self):
         """Test format tableau PDF"""
         table_data = {
-            "headers": ["Article", "Quantité", "Unité", "Prix"],
+            "headers": ["Article", "QuantitÃ©", "UnitÃ©", "Prix"],
             "rows": [
-                ["Lait", "2", "L", "2.40 €"],
-                ["Pain", "1", "u", "1.50 €"],
+                ["Lait", "2", "L", "2.40 â‚¬"],
+                ["Pain", "1", "u", "1.50 â‚¬"],
             ],
-            "footer": ["Total", "", "", "3.90 €"]
+            "footer": ["Total", "", "", "3.90 â‚¬"]
         }
         
         assert len(table_data["headers"]) == 4
         assert len(table_data["rows"]) == 2
-        assert table_data["footer"][-1] == "3.90 €"
+        assert table_data["footer"][-1] == "3.90 â‚¬"
 
     def test_currency_format(self):
         """Test formatage devise"""
         montant = 1234.56
         
-        formatted = f"{montant:,.2f} €".replace(",", " ")
+        formatted = f"{montant:,.2f} â‚¬".replace(",", " ")
         
-        assert formatted == "1 234.56 €"
+        assert formatted == "1 234.56 â‚¬"
+

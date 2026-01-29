@@ -1,6 +1,6 @@
-"""
+﻿"""
 Tests pour src/ui/core/base_form.py
-Générateur de formulaires universel
+GÃ©nÃ©rateur de formulaires universel
 """
 
 from datetime import date
@@ -9,9 +9,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
@@ -48,9 +48,9 @@ def mock_streamlit():
         yield mock_st
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FORMBUILDER INITIALIZATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFormBuilderInit:
@@ -76,9 +76,9 @@ class TestFormBuilderInit:
         assert form.title == "Mon formulaire"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ADD_TEXT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAddText:
@@ -113,18 +113,18 @@ class TestAddText:
         form.add_text(
             "description",
             "Description",
-            default="Défaut",
+            default="DÃ©faut",
             max_length=100,
             help_text="Aide"
         )
 
         field = form.fields[0]
-        assert field["default"] == "Défaut"
+        assert field["default"] == "DÃ©faut"
         assert field["max_length"] == 100
         assert field["help"] == "Aide"
 
     def test_add_text_chaining(self):
-        """Test chaînage des méthodes"""
+        """Test chaÃ®nage des mÃ©thodes"""
         from src.ui.core.base_form import FormBuilder
 
         form = FormBuilder("test")
@@ -133,9 +133,9 @@ class TestAddText:
         assert result is form  # Retourne self
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ADD_TEXTAREA
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAddTextarea:
@@ -160,9 +160,9 @@ class TestAddTextarea:
         assert form.fields[0]["height"] == 200
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ADD_NUMBER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAddNumber:
@@ -173,7 +173,7 @@ class TestAddNumber:
         from src.ui.core.base_form import FormBuilder
 
         form = FormBuilder("test")
-        form.add_number("age", "Âge")
+        form.add_number("age", "Ã‚ge")
 
         assert form.fields[0]["type"] == "number"
         assert form.fields[0]["default"] == 0.0
@@ -183,7 +183,7 @@ class TestAddNumber:
         from src.ui.core.base_form import FormBuilder
 
         form = FormBuilder("test")
-        form.add_number("age", "Âge", min_value=0, max_value=120)
+        form.add_number("age", "Ã‚ge", min_value=0, max_value=120)
 
         field = form.fields[0]
         assert field["min_value"] == 0
@@ -199,9 +199,9 @@ class TestAddNumber:
         assert form.fields[0]["step"] == 0.01
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ADD_SELECT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAddSelect:
@@ -212,13 +212,13 @@ class TestAddSelect:
         from src.ui.core.base_form import FormBuilder
 
         form = FormBuilder("test")
-        form.add_select("categorie", "Catégorie", ["A", "B", "C"])
+        form.add_select("categorie", "CatÃ©gorie", ["A", "B", "C"])
 
         assert form.fields[0]["type"] == "select"
         assert form.fields[0]["options"] == ["A", "B", "C"]
 
     def test_add_select_default_first_option(self):
-        """Test valeur par défaut = première option"""
+        """Test valeur par dÃ©faut = premiÃ¨re option"""
         from src.ui.core.base_form import FormBuilder
 
         form = FormBuilder("test")
@@ -227,7 +227,7 @@ class TestAddSelect:
         assert form.fields[0]["default"] == "Premier"
 
     def test_add_select_custom_default(self):
-        """Test valeur par défaut personnalisée"""
+        """Test valeur par dÃ©faut personnalisÃ©e"""
         from src.ui.core.base_form import FormBuilder
 
         form = FormBuilder("test")
@@ -236,9 +236,9 @@ class TestAddSelect:
         assert form.fields[0]["default"] == "B"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ADD_MULTISELECT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAddMultiselect:
@@ -255,7 +255,7 @@ class TestAddMultiselect:
         assert form.fields[0]["default"] == []
 
     def test_add_multiselect_with_default(self):
-        """Test multiselect avec défaut"""
+        """Test multiselect avec dÃ©faut"""
         from src.ui.core.base_form import FormBuilder
 
         form = FormBuilder("test")
@@ -264,9 +264,9 @@ class TestAddMultiselect:
         assert form.fields[0]["default"] == ["A", "B"]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ADD_CHECKBOX
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAddCheckbox:
@@ -283,7 +283,7 @@ class TestAddCheckbox:
         assert form.fields[0]["default"] is False
 
     def test_add_checkbox_default_true(self):
-        """Test checkbox coché par défaut"""
+        """Test checkbox cochÃ© par dÃ©faut"""
         from src.ui.core.base_form import FormBuilder
 
         form = FormBuilder("test")
@@ -292,9 +292,9 @@ class TestAddCheckbox:
         assert form.fields[0]["default"] is True
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ADD_DATE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAddDate:
@@ -305,13 +305,13 @@ class TestAddDate:
         from src.ui.core.base_form import FormBuilder
 
         form = FormBuilder("test")
-        form.add_date("date_debut", "Date début")
+        form.add_date("date_debut", "Date dÃ©but")
 
         assert form.fields[0]["type"] == "date"
         assert form.fields[0]["default"] == date.today()
 
     def test_add_date_custom_default(self):
-        """Test date avec défaut personnalisé"""
+        """Test date avec dÃ©faut personnalisÃ©"""
         from src.ui.core.base_form import FormBuilder
 
         custom_date = date(2026, 6, 15)
@@ -335,9 +335,9 @@ class TestAddDate:
         assert field["max_value"] == max_date
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ADD_SLIDER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAddSlider:
@@ -357,11 +357,11 @@ class TestAddSlider:
         assert field["default"] == 50
 
     def test_add_slider_custom_range(self):
-        """Test slider avec range personnalisé"""
+        """Test slider avec range personnalisÃ©"""
         from src.ui.core.base_form import FormBuilder
 
         form = FormBuilder("test")
-        form.add_slider("temp", "Température", min_value=-10, max_value=40, default=20)
+        form.add_slider("temp", "TempÃ©rature", min_value=-10, max_value=40, default=20)
 
         field = form.fields[0]
         assert field["min_value"] == -10
@@ -369,16 +369,16 @@ class TestAddSlider:
         assert field["default"] == 20
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ADD_DIVIDER / ADD_HEADER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAddDividerHeader:
     """Tests pour add_divider() et add_header()"""
 
     def test_add_divider(self):
-        """Test ajout séparateur"""
+        """Test ajout sÃ©parateur"""
         from src.ui.core.base_form import FormBuilder
 
         form = FormBuilder("test")
@@ -397,9 +397,9 @@ class TestAddDividerHeader:
         assert form.fields[0]["text"] == "Section 1"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS RENDER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestRender:
@@ -427,7 +427,7 @@ class TestRender:
         mock_streamlit.markdown.assert_any_call("### Mon Form")
 
     def test_render_submit_success(self, mock_streamlit):
-        """Test soumission réussie"""
+        """Test soumission rÃ©ussie"""
         from src.ui.core.base_form import FormBuilder
 
         mock_streamlit.form_submit_button.side_effect = [True, False]  # Submit True, Cancel False
@@ -471,9 +471,9 @@ class TestRender:
         mock_streamlit.error.assert_called()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS _RENDER_FIELD
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestRenderField:
@@ -498,13 +498,13 @@ class TestRenderField:
         mock_streamlit.form_submit_button.return_value = False
 
         form = FormBuilder("test")
-        form.add_number("age", "Âge")
+        form.add_number("age", "Ã‚ge")
         form.render()
 
         mock_streamlit.number_input.assert_called()
 
     def test_render_divider(self, mock_streamlit):
-        """Test rendu séparateur"""
+        """Test rendu sÃ©parateur"""
         from src.ui.core.base_form import FormBuilder
 
         mock_streamlit.form_submit_button.return_value = False
@@ -528,9 +528,9 @@ class TestRenderField:
         mock_streamlit.markdown.assert_any_call("#### Section")
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS _VALIDATE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestValidate:
@@ -587,16 +587,16 @@ class TestValidate:
         assert form._validate() is True
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GET_DATA
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGetData:
     """Tests pour get_data()"""
 
     def test_get_data_empty(self):
-        """Test données vides"""
+        """Test donnÃ©es vides"""
         from src.ui.core.base_form import FormBuilder
 
         form = FormBuilder("test")
@@ -604,7 +604,7 @@ class TestGetData:
         assert form.get_data() == {}
 
     def test_get_data_with_values(self):
-        """Test données avec valeurs"""
+        """Test donnÃ©es avec valeurs"""
         from src.ui.core.base_form import FormBuilder
 
         form = FormBuilder("test")
@@ -614,3 +614,4 @@ class TestGetData:
 
         assert data["nom"] == "Test"
         assert data["age"] == 25
+

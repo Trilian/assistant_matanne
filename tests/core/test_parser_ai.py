@@ -1,10 +1,10 @@
-"""
+﻿"""
 Tests pour le parseur IA ultra-robuste.
 
-Teste toutes les stratégies de parsing :
+Teste toutes les stratÃ©gies de parsing :
 1. Parse direct (JSON propre)
 2. Extraction JSON brut (regex)
-3. Réparation intelligente
+3. RÃ©paration intelligente
 4. Parse partiel
 5. Fallback
 """
@@ -17,31 +17,31 @@ from src.core.ai.parser import AnalyseurIA, analyser_liste_reponse
 from src.services.recettes import RecetteSuggestion
 
 
-# ═══════════════════════════════════════════════════════════
-# MODÈLES DE TEST
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# MODÃˆLES DE TEST
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class SimpleModel(BaseModel):
-    """Modèle simple pour tests"""
+    """ModÃ¨le simple pour tests"""
     nom: str
     valeur: int
 
 
 class ComplexModel(BaseModel):
-    """Modèle complexe pour tests"""
+    """ModÃ¨le complexe pour tests"""
     nom: str
     description: str
     tags: list[str]
     metadata: dict
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS STRATÉGIE 1: PARSE DIRECT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS STRATÃ‰GIE 1: PARSE DIRECT
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @pytest.mark.unit
 class TestStrategie1ParseDirect:
-    """Tests pour la stratégie 1: Parse JSON direct."""
+    """Tests pour la stratÃ©gie 1: Parse JSON direct."""
     
     def test_parse_direct_simple_json(self):
         """Teste le parsing direct d'un JSON valide simple."""
@@ -52,14 +52,14 @@ class TestStrategie1ParseDirect:
         assert result.valeur == 42
     
     def test_parse_direct_removes_bom(self):
-        """Teste que le BOM est supprimé."""
+        """Teste que le BOM est supprimÃ©."""
         json_str = '\ufeff{"nom": "Test", "valeur": 10}'
         result = AnalyseurIA.analyser(json_str, SimpleModel)
         
         assert result.nom == "Test"
     
     def test_parse_direct_removes_markdown(self):
-        """Teste que les délimiteurs markdown JSON sont supprimés."""
+        """Teste que les dÃ©limiteurs markdown JSON sont supprimÃ©s."""
         json_str = '''```json
         {"nom": "Test", "valeur": 5}
         ```'''
@@ -69,7 +69,7 @@ class TestStrategie1ParseDirect:
         assert result.valeur == 5
     
     def test_parse_direct_complex_model(self):
-        """Teste le parsing d'un modèle complexe."""
+        """Teste le parsing d'un modÃ¨le complexe."""
         json_str = json.dumps({
             "nom": "Recipe",
             "description": "A great recipe",
@@ -83,17 +83,17 @@ class TestStrategie1ParseDirect:
         assert result.metadata["author"] == "Chef"
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS STRATÉGIE 2: EXTRACTION JSON
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS STRATÃ‰GIE 2: EXTRACTION JSON
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @pytest.mark.unit
 class TestStrategie2Extraction:
-    """Tests pour la stratégie 2: Extraction JSON."""
+    """Tests pour la stratÃ©gie 2: Extraction JSON."""
     
     def test_extract_json_object_from_text(self):
         """Teste l'extraction d'un objet JSON du texte."""
-        text = 'Voici la réponse: {"nom": "Test", "valeur": 99} et voilà!'
+        text = 'Voici la rÃ©ponse: {"nom": "Test", "valeur": 99} et voilÃ !'
         result = AnalyseurIA.analyser(text, SimpleModel)
         
         assert result.nom == "Test"
@@ -101,28 +101,28 @@ class TestStrategie2Extraction:
     
     def test_extract_json_array_from_text(self):
         """Teste l'extraction d'une liste JSON du texte."""
-        text = '''Résultat:
+        text = '''RÃ©sultat:
         [
             {"nom": "A", "valeur": 1},
             {"nom": "B", "valeur": 2}
         ]
         Fin'''
         
-        # Pour une liste, on crée une enveloppe
+        # Pour une liste, on crÃ©e une enveloppe
         class ArrayModel(BaseModel):
             items: list[SimpleModel]
         
         result = AnalyseurIA.analyser(
             text,
             ArrayModel,
-            valeur_secours={"items": []},  # Fallback si extraction échoue
+            valeur_secours={"items": []},  # Fallback si extraction Ã©choue
             strict=False
         )
-        # Soit on extraie la liste, soit on récupère le fallback
+        # Soit on extraie la liste, soit on rÃ©cupÃ¨re le fallback
         assert isinstance(result, ArrayModel)
     
     def test_extract_nested_json(self):
-        """Teste l'extraction d'un JSON imbriqué."""
+        """Teste l'extraction d'un JSON imbriquÃ©."""
         text = '''Du texte avant
         {
             "nom": "Parent",
@@ -130,32 +130,32 @@ class TestStrategie2Extraction:
             "tags": ["tag1", "tag2"],
             "metadata": {"key": "value"}
         }
-        Du texte après'''
+        Du texte aprÃ¨s'''
         
         result = AnalyseurIA.analyser(text, ComplexModel)
         assert result.nom == "Parent"
         assert len(result.tags) == 2
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS STRATÉGIE 3: RÉPARATION INTELLIGENTE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS STRATÃ‰GIE 3: RÃ‰PARATION INTELLIGENTE
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @pytest.mark.unit
 class TestStrategie3Reparation:
-    """Tests pour la stratégie 3: Réparation intelligente."""
+    """Tests pour la stratÃ©gie 3: RÃ©paration intelligente."""
     
     def test_repair_python_booleans(self):
         """Teste la conversion True/False -> true/false."""
         json_str = '{"nom": "Test", "valeur": True}'
-        # Ce JSON invalide sera réparé
+        # Ce JSON invalide sera rÃ©parÃ©
         result = AnalyseurIA.analyser(json_str, SimpleModel)
         assert result.nom == "Test"
     
     def test_repair_python_none(self):
         """Teste la conversion None -> null."""
         json_str = '{"nom": "Test", "valeur": None}'
-        # Crée un modèle qui accepte une valeur optionnelle
+        # CrÃ©e un modÃ¨le qui accepte une valeur optionnelle
         class OptionalModel(BaseModel):
             nom: str
             valeur: int | None = None
@@ -171,24 +171,24 @@ class TestStrategie3Reparation:
         assert result.nom == "Test"
     
     def test_repair_unquoted_keys(self):
-        """Teste l'ajout de guillemets aux clés non quotées."""
+        """Teste l'ajout de guillemets aux clÃ©s non quotÃ©es."""
         json_str = '{nom: "Test", valeur: 42}'
         result = AnalyseurIA.analyser(json_str, SimpleModel)
         assert result.nom == "Test"
         assert result.valeur == 42
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS STRATÉGIE 5: FALLBACK
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS STRATÃ‰GIE 5: FALLBACK
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @pytest.mark.unit
 class TestStrategie5Fallback:
-    """Tests pour la stratégie 5: Fallback."""
+    """Tests pour la stratÃ©gie 5: Fallback."""
     
     def test_fallback_returns_default_values(self):
-        """Teste que le fallback retourne les valeurs par défaut."""
-        invalid_json = 'complètement cassé'
+        """Teste que le fallback retourne les valeurs par dÃ©faut."""
+        invalid_json = 'complÃ¨tement cassÃ©'
         fallback_data = {"nom": "Fallback", "valeur": 0}
         
         result = AnalyseurIA.analyser(
@@ -202,8 +202,8 @@ class TestStrategie5Fallback:
         assert result.valeur == 0
     
     def test_strict_mode_raises_on_failure(self):
-        """Teste que le mode strict lève une exception."""
-        invalid_json = 'complètement cassé'
+        """Teste que le mode strict lÃ¨ve une exception."""
+        invalid_json = 'complÃ¨tement cassÃ©'
         
         with pytest.raises((ValidationError, ValueError)):
             AnalyseurIA.analyser(
@@ -213,9 +213,9 @@ class TestStrategie5Fallback:
             )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ANALYSER_LISTE_REPONSE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @pytest.mark.unit
 class TestAnalyserListeReponse:
@@ -227,22 +227,22 @@ class TestAnalyserListeReponse:
             "items": [
                 {"nom": "Recette 1", "description": "Desc 1", "temps_preparation": 10,
                  "temps_cuisson": 20, "portions": 4, "difficulte": "facile",
-                 "type_repas": "dîner", "saison": "toute_année",
+                 "type_repas": "dÃ®ner", "saison": "toute_annÃ©e",
                  "ingredients": [], "etapes": []},
                 {"nom": "Recette 2", "description": "Desc 2", "temps_preparation": 15,
                  "temps_cuisson": 30, "portions": 2, "difficulte": "moyen",
-                 "type_repas": "déjeuner", "saison": "été",
+                 "type_repas": "dÃ©jeuner", "saison": "Ã©tÃ©",
                  "ingredients": [], "etapes": []}
             ]
         })
         
         items = analyser_liste_reponse(response, RecetteSuggestion, items_secours=[])
         
-        # Soit le parser réussit (items > 0), soit le fallback retourne une liste vide
-        # C'est accepté car items_secours=[] est le fallback
+        # Soit le parser rÃ©ussit (items > 0), soit le fallback retourne une liste vide
+        # C'est acceptÃ© car items_secours=[] est le fallback
         assert isinstance(items, list)
-        # Si items vide, c'est que le fallback a été utilisé (OK)
-        # Si items > 0, c'est que le parser a réussi (OK)
+        # Si items vide, c'est que le fallback a Ã©tÃ© utilisÃ© (OK)
+        # Si items > 0, c'est que le parser a rÃ©ussi (OK)
     
     def test_parse_list_with_markdown_code_block(self):
         """Teste le parsing d'une liste en bloc markdown."""
@@ -252,30 +252,30 @@ class TestAnalyserListeReponse:
 {
     "items": [
         {
-            "nom": "Pâtes",
-            "description": "Pâtes simples",
+            "nom": "PÃ¢tes",
+            "description": "PÃ¢tes simples",
             "temps_preparation": 5,
             "temps_cuisson": 12,
             "portions": 4,
             "difficulte": "facile",
-            "type_repas": "dîner",
-            "saison": "toute_année",
-            "ingredients": [{"nom": "pâtes", "quantite": 400, "unite": "g"}],
-            "etapes": [{"description": "Cuire les pâtes"}]
+            "type_repas": "dÃ®ner",
+            "saison": "toute_annÃ©e",
+            "ingredients": [{"nom": "pÃ¢tes", "quantite": 400, "unite": "g"}],
+            "etapes": [{"description": "Cuire les pÃ¢tes"}]
         }
     ]
 }
 ```
 
-Bon appétit!'''
+Bon appÃ©tit!'''
         
         items = analyser_liste_reponse(response, RecetteSuggestion, items_secours=[])
         
         assert len(items) == 1
-        assert items[0].nom == "Pâtes"
+        assert items[0].nom == "PÃ¢tes"
     
     def test_parse_list_returns_empty_on_failure(self):
-        """Teste que la liste vide est retournée en cas d'erreur."""
+        """Teste que la liste vide est retournÃ©e en cas d'erreur."""
         invalid_response = "Pas de JSON du tout"
         
         items = analyser_liste_reponse(
@@ -287,31 +287,31 @@ Bon appétit!'''
         assert items == []
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS INTÉGRATION: RECETTES IA
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS INTÃ‰GRATION: RECETTES IA
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @pytest.mark.unit
 class TestRecetteSuggestionParsing:
     """Tests pour le parsing de RecetteSuggestion."""
     
     def test_parse_complete_recipe_suggestion(self):
-        """Teste le parsing d'une suggestion de recette complète."""
+        """Teste le parsing d'une suggestion de recette complÃ¨te."""
         recipe_data = {
             "nom": "Coq au Vin",
-            "description": "Classique français avec sauce riche",
+            "description": "Classique franÃ§ais avec sauce riche",
             "temps_preparation": 30,
             "temps_cuisson": 120,
             "portions": 6,
             "difficulte": "difficile",
-            "type_repas": "dîner",
+            "type_repas": "dÃ®ner",
             "saison": "automne",
             "ingredients": [
                 {"nom": "poulet", "quantite": 2, "unite": "kg"},
                 {"nom": "vin rouge", "quantite": 750, "unite": "mL"}
             ],
             "etapes": [
-                {"description": "Découper le poulet"},
+                {"description": "DÃ©couper le poulet"},
                 {"description": "Cuire lentement"}
             ]
         }
@@ -327,7 +327,7 @@ class TestRecetteSuggestionParsing:
         assert result.ingredients[0]["nom"] == "poulet"
     
     def test_parse_recipe_suggestion_with_minimal_data(self):
-        """Teste le parsing avec données minimales."""
+        """Teste le parsing avec donnÃ©es minimales."""
         recipe_data = {
             "nom": "Toast",
             "description": "Simple et rapide",
@@ -335,8 +335,8 @@ class TestRecetteSuggestionParsing:
             "temps_cuisson": 3,
             "portions": 1,
             "difficulte": "facile",
-            "type_repas": "petit_déjeuner",
-            "saison": "toute_année",
+            "type_repas": "petit_dÃ©jeuner",
+            "saison": "toute_annÃ©e",
             "ingredients": [],
             "etapes": []
         }
@@ -350,9 +350,9 @@ class TestRecetteSuggestionParsing:
         assert result.portions == 1
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EDGE CASES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @pytest.mark.unit
 class TestEdgeCases:
@@ -360,12 +360,12 @@ class TestEdgeCases:
     
     def test_parse_empty_json_object(self):
         """Teste le parsing d'un objet vide."""
-        # Cela doit échouer car les champs obligatoires manquent
+        # Cela doit Ã©chouer car les champs obligatoires manquent
         with pytest.raises((ValidationError, ValueError)):
             AnalyseurIA.analyser('{}', SimpleModel, strict=True)
     
     def test_parse_json_with_extra_fields(self):
-        """Teste que les champs supplémentaires sont ignorés."""
+        """Teste que les champs supplÃ©mentaires sont ignorÃ©s."""
         json_str = '{"nom": "Test", "valeur": 42, "extra": "ignored"}'
         result = AnalyseurIA.analyser(json_str, SimpleModel)
         
@@ -373,18 +373,18 @@ class TestEdgeCases:
         assert result.valeur == 42
     
     def test_parse_unicode_characters(self):
-        """Teste le parsing avec caractères unicode."""
+        """Teste le parsing avec caractÃ¨res unicode."""
         json_str = json.dumps({
-            "nom": "Épée Royale 🗡️",
+            "nom": "Ã‰pÃ©e Royale ðŸ—¡ï¸",
             "valeur": 999
         })
         result = AnalyseurIA.analyser(json_str, SimpleModel)
         
-        assert "Épée" in result.nom
-        assert "🗡️" in result.nom
+        assert "Ã‰pÃ©e" in result.nom
+        assert "ðŸ—¡ï¸" in result.nom
     
     def test_parse_very_long_json(self):
-        """Teste le parsing d'un JSON très long."""
+        """Teste le parsing d'un JSON trÃ¨s long."""
         large_text = "x" * 10000
         json_str = json.dumps({
             "nom": large_text,
@@ -397,3 +397,4 @@ class TestEdgeCases:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+

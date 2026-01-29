@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/utils/helpers/dates.py - Fonctions de manipulation de dates.
 """
 
@@ -17,9 +17,9 @@ from src.utils.helpers.dates import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GET_WEEK_BOUNDS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGetWeekBounds:
@@ -51,7 +51,7 @@ class TestGetWeekBounds:
         assert sunday == date(2025, 1, 12)
 
     def test_across_year(self):
-        """Test semaine chevauchant l'année."""
+        """Test semaine chevauchant l'annÃ©e."""
         d = date(2025, 1, 1)  # Mercredi 1er janvier
         monday, sunday = get_week_bounds(d)
         
@@ -59,17 +59,17 @@ class TestGetWeekBounds:
         assert sunday == date(2025, 1, 5)
 
     def test_february_leap_year(self):
-        """Test en février année bissextile."""
-        d = date(2024, 2, 29)  # Jeudi (année bissextile)
+        """Test en fÃ©vrier annÃ©e bissextile."""
+        d = date(2024, 2, 29)  # Jeudi (annÃ©e bissextile)
         monday, sunday = get_week_bounds(d)
         
         assert monday == date(2024, 2, 26)
         assert sunday == date(2024, 3, 3)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS DATE_RANGE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestDateRange:
@@ -85,7 +85,7 @@ class TestDateRange:
         assert result[2] == date(2025, 1, 3)
 
     def test_same_day(self):
-        """Test même jour."""
+        """Test mÃªme jour."""
         result = date_range(date(2025, 1, 1), date(2025, 1, 1))
         
         assert len(result) == 1
@@ -113,9 +113,9 @@ class TestDateRange:
         assert all(isinstance(d, date) for d in result)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GET_MONTH_BOUNDS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGetMonthBounds:
@@ -129,14 +129,14 @@ class TestGetMonthBounds:
         assert last == date(2025, 1, 31)
 
     def test_february_normal(self):
-        """Test février non bissextile."""
+        """Test fÃ©vrier non bissextile."""
         first, last = get_month_bounds(date(2025, 2, 15))
         
         assert first == date(2025, 2, 1)
         assert last == date(2025, 2, 28)
 
     def test_february_leap_year(self):
-        """Test février bissextile."""
+        """Test fÃ©vrier bissextile."""
         first, last = get_month_bounds(date(2024, 2, 15))
         
         assert first == date(2024, 2, 1)
@@ -150,7 +150,7 @@ class TestGetMonthBounds:
         assert last == date(2025, 4, 30)
 
     def test_december(self):
-        """Test décembre (fin d'année)."""
+        """Test dÃ©cembre (fin d'annÃ©e)."""
         first, last = get_month_bounds(date(2025, 12, 25))
         
         assert first == date(2025, 12, 1)
@@ -171,16 +171,16 @@ class TestGetMonthBounds:
         assert last == date(2025, 3, 31)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ADD_BUSINESS_DAYS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAddBusinessDays:
     """Tests pour add_business_days."""
 
     def test_monday_plus_five(self):
-        """Test lundi + 5 jours ouvrés = lundi suivant."""
+        """Test lundi + 5 jours ouvrÃ©s = lundi suivant."""
         # 6 janvier 2025 est un lundi
         result = add_business_days(date(2025, 1, 6), 5)
         
@@ -208,15 +208,15 @@ class TestAddBusinessDays:
         assert result == d
 
     def test_ten_business_days(self):
-        """Test 10 jours ouvrés = 2 semaines."""
+        """Test 10 jours ouvrÃ©s = 2 semaines."""
         result = add_business_days(date(2025, 1, 6), 10)
         
         assert result == date(2025, 1, 20)  # 2 semaines plus tard
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS WEEKS_BETWEEN
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestWeeksBetween:
@@ -235,7 +235,7 @@ class TestWeeksBetween:
         assert result == 1
 
     def test_same_day(self):
-        """Test même jour."""
+        """Test mÃªme jour."""
         result = weeks_between(date(2025, 1, 1), date(2025, 1, 1))
         
         assert result == 0
@@ -253,9 +253,9 @@ class TestWeeksBetween:
         assert result == 1  # 9 jours = 1 semaine + 2 jours
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS IS_WEEKEND
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestIsWeekend:
@@ -284,9 +284,9 @@ class TestIsWeekend:
         assert is_weekend(date(2025, 1, 8)) is False
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GET_QUARTER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGetQuarter:
@@ -321,7 +321,7 @@ class TestGetQuarter:
         assert get_quarter(date(2025, 10, 1)) == 4
 
     def test_december(self):
-        """Test décembre = Q4."""
+        """Test dÃ©cembre = Q4."""
         assert get_quarter(date(2025, 12, 31)) == 4
 
     def test_all_months(self):
@@ -335,3 +335,4 @@ class TestGetQuarter:
         
         for month, expected_quarter in quarters.items():
             assert get_quarter(date(2025, month, 15)) == expected_quarter
+

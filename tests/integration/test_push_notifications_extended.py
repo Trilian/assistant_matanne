@@ -1,6 +1,6 @@
-"""
+﻿"""
 Tests pour push_notifications.py - Notifications Push Web
-Tests complets incluant les nouvelles méthodes DB SQLAlchemy
+Tests complets incluant les nouvelles mÃ©thodes DB SQLAlchemy
 """
 
 import pytest
@@ -16,9 +16,9 @@ from src.services.push_notifications import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
@@ -51,7 +51,7 @@ def sample_notification():
 
 @pytest.fixture
 def sample_preferences():
-    """Préférences de notification d'exemple"""
+    """PrÃ©fÃ©rences de notification d'exemple"""
     return NotificationPreferences(
         user_id="user_123",
         stock_alerts=True,
@@ -61,23 +61,23 @@ def sample_preferences():
     )
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS MODÈLES PYDANTIC - SUBSCRIPTION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS MODÃˆLES PYDANTIC - SUBSCRIPTION
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPushSubscriptionModel:
-    """Tests du modèle PushSubscription"""
+    """Tests du modÃ¨le PushSubscription"""
     
     def test_subscription_creation(self, sample_subscription):
-        """Test création d'abonnement"""
+        """Test crÃ©ation d'abonnement"""
         assert sample_subscription.endpoint.startswith("https://")
         assert sample_subscription.p256dh_key is not None
         assert sample_subscription.auth_key is not None
         assert sample_subscription.user_id == "user_123"
     
     def test_subscription_defaults(self):
-        """Test valeurs par défaut"""
+        """Test valeurs par dÃ©faut"""
         sub = PushSubscription(
             endpoint="https://example.com",
             p256dh_key="key1",
@@ -93,16 +93,16 @@ class TestPushSubscriptionModel:
 
 
 class TestPushNotificationModel:
-    """Tests du modèle PushNotification"""
+    """Tests du modÃ¨le PushNotification"""
     
     def test_notification_creation(self, sample_notification):
-        """Test création de notification"""
+        """Test crÃ©ation de notification"""
         assert sample_notification.title == "Test Notification"
         assert sample_notification.body == "Ceci est un test"
         assert sample_notification.tag == "test"
     
     def test_notification_defaults(self):
-        """Test valeurs par défaut"""
+        """Test valeurs par dÃ©faut"""
         notif = PushNotification(
             title="Test",
             body="Body"
@@ -112,21 +112,21 @@ class TestPushNotificationModel:
         assert notif.silent is False
     
     def test_notification_type_default(self, sample_notification):
-        """Test type de notification par défaut"""
+        """Test type de notification par dÃ©faut"""
         assert sample_notification.notification_type == NotificationType.SYSTEM_UPDATE
 
 
 class TestNotificationPreferencesModel:
-    """Tests du modèle NotificationPreferences"""
+    """Tests du modÃ¨le NotificationPreferences"""
     
     def test_preferences_creation(self, sample_preferences):
-        """Test création de préférences"""
+        """Test crÃ©ation de prÃ©fÃ©rences"""
         assert sample_preferences.user_id == "user_123"
         assert sample_preferences.stock_alerts is True
         assert sample_preferences.meal_reminders is True
     
     def test_preferences_defaults(self):
-        """Test valeurs par défaut"""
+        """Test valeurs par dÃ©faut"""
         prefs = NotificationPreferences(user_id="user")
         assert prefs.stock_alerts is True
         assert prefs.system_updates is False
@@ -138,9 +138,9 @@ class TestNotificationPreferencesModel:
         assert sample_preferences.quiet_hours_end == 8
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS NOTIFICATION TYPE ENUM
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestNotificationType:
@@ -159,27 +159,27 @@ class TestNotificationType:
         assert NotificationType.SHOPPING_LIST_SHARED.value == "shopping_list_shared"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SERVICE INITIALIZATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPushNotificationServiceInit:
     """Tests d'initialisation du service"""
     
     def test_service_creation(self, push_service):
-        """Test création du service"""
+        """Test crÃ©ation du service"""
         assert push_service is not None
     
     def test_service_has_methods(self, push_service):
-        """Test que le service a les méthodes attendues"""
+        """Test que le service a les mÃ©thodes attendues"""
         assert hasattr(push_service, "send_notification")
         assert hasattr(push_service, "sauvegarder_abonnement_db")
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GESTION ABONNEMENTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestSubscriptionManagement:
@@ -208,16 +208,16 @@ class TestSubscriptionManagement:
         assert is_valid
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ENVOI NOTIFICATIONS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestNotificationSending:
     """Tests d'envoi de notifications"""
     
     def test_notification_json_serialization(self, sample_notification):
-        """Test sérialisation JSON"""
+        """Test sÃ©rialisation JSON"""
         import json
         
         payload_dict = {
@@ -240,16 +240,16 @@ class TestNotificationSending:
         assert options["urgency"] in ["very-low", "low", "normal", "high"]
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS PRÉFÉRENCES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS PRÃ‰FÃ‰RENCES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPreferencesManagement:
-    """Tests de gestion des préférences"""
+    """Tests de gestion des prÃ©fÃ©rences"""
     
     def test_preference_structure(self, sample_preferences):
-        """Test structure des préférences"""
+        """Test structure des prÃ©fÃ©rences"""
         required_fields = ["user_id", "stock_alerts", "meal_reminders"]
         
         for field in required_fields:
@@ -261,7 +261,7 @@ class TestPreferencesManagement:
         assert 0 <= sample_preferences.quiet_hours_end <= 23
     
     def test_is_in_quiet_hours(self, sample_preferences):
-        """Test vérification heures silencieuses"""
+        """Test vÃ©rification heures silencieuses"""
         test_hour = 23
         start = sample_preferences.quiet_hours_start
         end = sample_preferences.quiet_hours_end
@@ -280,13 +280,13 @@ class TestPreferencesManagement:
         assert sample_preferences.max_per_hour <= 60
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS MÉTHODES DB (SQLAlchemy)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS MÃ‰THODES DB (SQLAlchemy)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestDBMethods:
-    """Tests des méthodes DB SQLAlchemy"""
+    """Tests des mÃ©thodes DB SQLAlchemy"""
     
     def test_subscription_to_db_format(self, sample_subscription):
         """Test conversion vers format DB"""
@@ -302,7 +302,7 @@ class TestDBMethods:
         assert db_data["is_active"] is True
     
     def test_preferences_to_db_format(self, sample_preferences):
-        """Test conversion préférences vers DB"""
+        """Test conversion prÃ©fÃ©rences vers DB"""
         db_data = {
             "user_id": sample_preferences.user_id,
             "stock_alerts": sample_preferences.stock_alerts,
@@ -314,19 +314,19 @@ class TestDBMethods:
         assert db_data["user_id"] == "user_123"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS VAPID
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestVAPID:
-    """Tests des fonctionnalités VAPID"""
+    """Tests des fonctionnalitÃ©s VAPID"""
     
     def test_vapid_key_format(self):
-        """Test format des clés VAPID"""
+        """Test format des clÃ©s VAPID"""
         import base64
         
-        # Exemple de clé publique VAPID
+        # Exemple de clÃ© publique VAPID
         sample_key = "BBsfbtwB1rAg9xVcy4WETJy4YoDKPpNT_wt0nMBc6jnGK0JP4fZjs_7OrRAsjaUdoMKIZBzZ-dhskstfYgqHSR0"
         
         try:
@@ -348,9 +348,9 @@ class TestVAPID:
         assert claims["sub"].startswith("mailto:")
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CAS LIMITES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestEdgeCases:
@@ -395,9 +395,9 @@ class TestEdgeCases:
         assert all(isinstance(v, int) for v in notif.vibrate)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS UTILITAIRES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestUtilities:
@@ -432,29 +432,30 @@ class TestUtilities:
         assert ttl_options["day"] == 86400
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS INTÉGRATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS INTÃ‰GRATION
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestIntegration:
-    """Tests d'intégration"""
+    """Tests d'intÃ©gration"""
     
     def test_full_notification_flow(self, sample_subscription, sample_notification):
         """Test flux complet de notification"""
-        # 1. Créer un abonnement
+        # 1. CrÃ©er un abonnement
         assert sample_subscription.user_id == "user_123"
         
-        # 2. Créer une notification
+        # 2. CrÃ©er une notification
         assert sample_notification.title == "Test Notification"
         
         # 3. Les deux sont compatibles
         assert sample_subscription.is_active is True
     
     def test_preferences_filter_notifications(self, sample_preferences, sample_notification):
-        """Test filtrage par préférences"""
-        # L'utilisateur a activé les alertes stock
+        """Test filtrage par prÃ©fÃ©rences"""
+        # L'utilisateur a activÃ© les alertes stock
         assert sample_preferences.stock_alerts is True
         
-        # La notification peut être envoyée
+        # La notification peut Ãªtre envoyÃ©e
         assert sample_notification is not None
+

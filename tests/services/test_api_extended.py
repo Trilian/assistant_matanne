@@ -1,9 +1,9 @@
-"""
-Tests API complémentaires - Endpoints manquants
+﻿"""
+Tests API complÃ©mentaires - Endpoints manquants
 
 Tests pour:
 - Endpoints budget
-- Endpoints météo
+- Endpoints mÃ©tÃ©o
 - Endpoints backup
 - Endpoints calendrier
 - Rate limiting
@@ -17,14 +17,14 @@ from contextlib import contextmanager
 from fastapi.testclient import TestClient
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
 def mock_db_session():
-    """Crée une session DB mockée."""
+    """CrÃ©e une session DB mockÃ©e."""
     session = MagicMock()
     session.execute = Mock(return_value=None)
     session.commit = Mock()
@@ -35,7 +35,7 @@ def mock_db_session():
 
 @pytest.fixture
 def mock_db_context(mock_db_session):
-    """Mock du gestionnaire de contexte de base de données."""
+    """Mock du gestionnaire de contexte de base de donnÃ©es."""
     @contextmanager
     def _mock_get_db_context():
         yield mock_db_session
@@ -45,19 +45,19 @@ def mock_db_context(mock_db_session):
 
 @pytest.fixture
 def mock_user():
-    """Utilisateur mocké pour les tests."""
+    """Utilisateur mockÃ© pour les tests."""
     return {"id": "test-user", "email": "test@test.com", "role": "admin"}
 
 
 @pytest.fixture
 def api_client(mock_db_context, mock_user):
-    """Client de test FastAPI avec rate limiting désactivé"""
-    # Désactiver le rate limiting pour les tests
+    """Client de test FastAPI avec rate limiting dÃ©sactivÃ©"""
+    # DÃ©sactiver le rate limiting pour les tests
     os.environ["DISABLE_RATE_LIMIT"] = "true"
     
     from src.api.main import app, get_current_user, require_auth
     
-    # Override les dépendances d'auth
+    # Override les dÃ©pendances d'auth
     async def mock_get_current_user():
         return mock_user
     
@@ -88,21 +88,21 @@ def api_client(mock_db_context, mock_user):
 
 @pytest.fixture
 def auth_headers():
-    """Headers d'authentification mockés"""
+    """Headers d'authentification mockÃ©s"""
     return {"Authorization": "Bearer test_token_12345"}
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ENDPOINTS BUDGET
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBudgetEndpoints:
     """Tests endpoints budget"""
 
-    @pytest.mark.skip(reason="Endpoint /api/budget/depenses non implémenté")
+    @pytest.mark.skip(reason="Endpoint /api/budget/depenses non implÃ©mentÃ©")
     def test_get_depenses_mois(self, api_client, auth_headers):
-        """Test récupération dépenses du mois"""
+        """Test rÃ©cupÃ©ration dÃ©penses du mois"""
         with patch('src.core.database.get_db_context') as mock_db:
             mock_session = MagicMock()
             mock_session.query.return_value.filter.return_value.all.return_value = []
@@ -112,12 +112,12 @@ class TestBudgetEndpoints:
             # L'endpoint peut ne pas exister encore - test conditionnel
             response = api_client.get("/api/budget/depenses", headers=auth_headers)
             
-            # 200 ou 404 si endpoint non implémenté
+            # 200 ou 404 si endpoint non implÃ©mentÃ©
             assert response.status_code in [200, 404, 401]
 
-    @pytest.mark.skip(reason="Endpoint /api/budget/depenses non implémenté")
+    @pytest.mark.skip(reason="Endpoint /api/budget/depenses non implÃ©mentÃ©")
     def test_create_depense(self, api_client, auth_headers):
-        """Test création dépense"""
+        """Test crÃ©ation dÃ©pense"""
         depense_data = {
             "montant": 45.50,
             "categorie": "alimentation",
@@ -138,9 +138,9 @@ class TestBudgetEndpoints:
             
             assert response.status_code in [200, 201, 404, 401, 422]
 
-    @pytest.mark.skip(reason="Endpoint /api/budget/resume non implémenté")
+    @pytest.mark.skip(reason="Endpoint /api/budget/resume non implÃ©mentÃ©")
     def test_get_budget_resume(self, api_client, auth_headers):
-        """Test résumé budget mensuel"""
+        """Test rÃ©sumÃ© budget mensuel"""
         mois = date.today().strftime("%Y-%m")
         
         with patch('src.core.database.get_db_context') as mock_db:
@@ -156,7 +156,7 @@ class TestBudgetEndpoints:
             assert response.status_code in [200, 404, 401]
 
     def test_budget_categories_valides(self):
-        """Test catégories budget valides"""
+        """Test catÃ©gories budget valides"""
         categories_valides = [
             'alimentation', 'transport', 'logement', 'sante',
             'loisirs', 'vetements', 'education', 'cadeaux',
@@ -167,16 +167,16 @@ class TestBudgetEndpoints:
         assert len(categories_valides) >= 10
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS ENDPOINTS MÉTÉO
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS ENDPOINTS MÃ‰TÃ‰O
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestWeatherEndpoints:
-    """Tests endpoints météo"""
+    """Tests endpoints mÃ©tÃ©o"""
 
     def test_get_current_weather(self, api_client):
-        """Test météo actuelle"""
+        """Test mÃ©tÃ©o actuelle"""
         with patch('src.services.weather.WeatherGardenService') as mock_service:
             mock_instance = Mock()
             mock_instance.get_current_weather.return_value = {
@@ -191,7 +191,7 @@ class TestWeatherEndpoints:
             assert response.status_code in [200, 404]
 
     def test_get_weather_alerts(self, api_client, auth_headers):
-        """Test alertes météo jardin"""
+        """Test alertes mÃ©tÃ©o jardin"""
         with patch('src.services.weather.WeatherGardenService') as mock_service:
             mock_instance = Mock()
             mock_instance.get_garden_alerts.return_value = []
@@ -205,22 +205,22 @@ class TestWeatherEndpoints:
             assert response.status_code in [200, 404, 401]
 
     def test_weather_forecast(self, api_client):
-        """Test prévisions météo"""
+        """Test prÃ©visions mÃ©tÃ©o"""
         response = api_client.get("/api/weather/forecast")
         
-        # Peut ne pas être implémenté
+        # Peut ne pas Ãªtre implÃ©mentÃ©
         assert response.status_code in [200, 404]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ENDPOINTS BACKUP
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBackupEndpoints:
     """Tests endpoints backup"""
 
-    @pytest.mark.skip(reason="Endpoint /api/backup/list non implémenté")
+    @pytest.mark.skip(reason="Endpoint /api/backup/list non implÃ©mentÃ©")
     def test_list_backups(self, api_client, auth_headers):
         """Test liste des backups"""
         with patch('src.core.database.get_db_context') as mock_db:
@@ -237,7 +237,7 @@ class TestBackupEndpoints:
             assert response.status_code in [200, 404, 401]
 
     def test_create_backup(self, api_client, auth_headers):
-        """Test création backup"""
+        """Test crÃ©ation backup"""
         with patch('src.services.backup.BackupService') as mock_service:
             mock_instance = Mock()
             mock_instance.create_backup.return_value = {
@@ -269,17 +269,17 @@ class TestBackupEndpoints:
             assert response.status_code in [200, 404, 401]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ENDPOINTS CALENDRIER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalendarEndpoints:
     """Tests endpoints calendrier"""
 
-    @pytest.mark.skip(reason="Endpoint /api/calendar/events non implémenté")
+    @pytest.mark.skip(reason="Endpoint /api/calendar/events non implÃ©mentÃ©")
     def test_get_events(self, api_client, auth_headers):
-        """Test récupération événements"""
+        """Test rÃ©cupÃ©ration Ã©vÃ©nements"""
         with patch('src.core.database.get_db_context') as mock_db:
             mock_session = MagicMock()
             mock_session.query.return_value.filter.return_value.all.return_value = []
@@ -293,7 +293,7 @@ class TestCalendarEndpoints:
             
             assert response.status_code in [200, 404, 401]
 
-    @pytest.mark.skip(reason="Endpoint /api/calendar/sync non implémenté")
+    @pytest.mark.skip(reason="Endpoint /api/calendar/sync non implÃ©mentÃ©")
     def test_sync_external_calendar(self, api_client, auth_headers):
         """Test synchronisation calendrier externe"""
         sync_data = {
@@ -315,27 +315,27 @@ class TestCalendarEndpoints:
             assert response.status_code in [200, 404, 401, 422]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS RATE LIMITING
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestRateLimiting:
     """Tests rate limiting API"""
 
     def test_rate_limit_headers(self, api_client):
-        """Test présence headers rate limit"""
+        """Test prÃ©sence headers rate limit"""
         response = api_client.get("/")
         
-        # Headers rate limit peuvent être présents
+        # Headers rate limit peuvent Ãªtre prÃ©sents
         headers = response.headers
         
-        # Vérifier que la réponse est OK ou serveur non dispo
+        # VÃ©rifier que la rÃ©ponse est OK ou serveur non dispo
         assert response.status_code in [200, 500]
 
     def test_rate_limit_exceeded(self, api_client):
-        """Test dépassement rate limit"""
-        # Simuler beaucoup de requêtes
+        """Test dÃ©passement rate limit"""
+        # Simuler beaucoup de requÃªtes
         # En pratique, le rate limiting devrait bloquer
         
         responses = []
@@ -343,14 +343,14 @@ class TestRateLimiting:
             response = api_client.get("/health")
             responses.append(response.status_code)
         
-        # Toutes devraient passer ou certaines bloquées (429)
+        # Toutes devraient passer ou certaines bloquÃ©es (429)
         assert all(code in [200, 429] for code in responses)
 
     def test_ai_rate_limit(self, api_client, auth_headers):
-        """Test rate limit spécifique IA"""
+        """Test rate limit spÃ©cifique IA"""
         # Les endpoints IA ont des limites plus strictes
         with patch('src.api.rate_limiting.check_ai_rate_limit') as mock_check:
-            mock_check.return_value = True  # Pas dépassé
+            mock_check.return_value = True  # Pas dÃ©passÃ©
             
             # Un endpoint qui utilise l'IA
             response = api_client.get(
@@ -361,16 +361,16 @@ class TestRateLimiting:
             assert response.status_code in [200, 404, 401, 429]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CORS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCORS:
     """Tests configuration CORS"""
 
     def test_cors_headers_preflight(self, api_client):
-        """Test headers CORS sur requête OPTIONS"""
+        """Test headers CORS sur requÃªte OPTIONS"""
         response = api_client.options(
             "/",
             headers={
@@ -383,7 +383,7 @@ class TestCORS:
         assert response.status_code in [200, 204]
 
     def test_cors_allowed_origin(self, api_client):
-        """Test origine autorisée"""
+        """Test origine autorisÃ©e"""
         response = api_client.get(
             "/",
             headers={"Origin": "http://localhost:8501"}
@@ -391,37 +391,37 @@ class TestCORS:
         
         assert response.status_code == 200
         
-        # Vérifier header Access-Control-Allow-Origin
+        # VÃ©rifier header Access-Control-Allow-Origin
         acl_header = response.headers.get("access-control-allow-origin")
         if acl_header:
             assert "localhost" in acl_header or acl_header == "*"
 
     def test_cors_blocked_origin(self, api_client):
-        """Test origine bloquée"""
+        """Test origine bloquÃ©e"""
         response = api_client.get(
             "/",
             headers={"Origin": "http://malicious-site.com"}
         )
         
-        # Devrait toujours répondre, mais sans header CORS ou bloqué
-        # Dépend de la configuration
+        # Devrait toujours rÃ©pondre, mais sans header CORS ou bloquÃ©
+        # DÃ©pend de la configuration
         assert response.status_code in [200, 403]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS AUTHENTIFICATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAuthentication:
     """Tests authentification API"""
 
     def test_endpoint_protected(self, api_client):
-        """Test endpoint protégé sans auth"""
-        # Un endpoint qui nécessite auth
+        """Test endpoint protÃ©gÃ© sans auth"""
+        # Un endpoint qui nÃ©cessite auth
         response = api_client.get("/api/user/profile")
         
-        # 401 Unauthorized ou 404 si non implémenté
+        # 401 Unauthorized ou 404 si non implÃ©mentÃ©
         assert response.status_code in [401, 403, 404]
 
     def test_invalid_token(self, api_client):
@@ -436,8 +436,8 @@ class TestAuthentication:
         assert response.status_code in [401, 403, 404]
 
     def test_expired_token(self, api_client):
-        """Test token expiré"""
-        # Token JWT expiré (simulé)
+        """Test token expirÃ©"""
+        # Token JWT expirÃ© (simulÃ©)
         expired_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MDAwMDAwMDB9.invalid"
         headers = {"Authorization": f"Bearer {expired_token}"}
         
@@ -449,13 +449,13 @@ class TestAuthentication:
         assert response.status_code in [401, 403, 404]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS VALIDATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestValidation:
-    """Tests validation des données"""
+    """Tests validation des donnÃ©es"""
 
     def test_invalid_json(self, api_client, auth_headers):
         """Test JSON invalide"""
@@ -465,7 +465,7 @@ class TestValidation:
             headers={**auth_headers, "Content-Type": "application/json"}
         )
         
-        # 404 acceptable si route non implémentée
+        # 404 acceptable si route non implÃ©mentÃ©e
         assert response.status_code in [400, 404, 422]
 
     def test_missing_required_field(self, api_client, auth_headers):
@@ -481,7 +481,7 @@ class TestValidation:
 
     def test_invalid_field_type(self, api_client, auth_headers):
         """Test type de champ invalide"""
-        # temps_preparation devrait être int, pas string
+        # temps_preparation devrait Ãªtre int, pas string
         response = api_client.post(
             "/api/recettes",
             json={
@@ -494,9 +494,9 @@ class TestValidation:
         assert response.status_code in [400, 422, 401, 404]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PAGINATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPagination:
@@ -519,7 +519,7 @@ class TestPagination:
         assert response.status_code in [200, 404]
 
     def test_pagination_params(self, api_client, mock_db_session):
-        """Test paramètres pagination"""
+        """Test paramÃ¨tres pagination"""
         mock_query = MagicMock()
         mock_query.offset.return_value = mock_query
         mock_query.limit.return_value = mock_query
@@ -541,10 +541,11 @@ class TestPagination:
         mock_query.order_by.return_value = mock_query
         mock_db_session.query.return_value = mock_query
         
-        # Limite très grande (devrait être rejetée ou limitée)
+        # Limite trÃ¨s grande (devrait Ãªtre rejetÃ©e ou limitÃ©e)
         response = api_client.get(
             "/api/v1/recettes?page_size=10000"
         )
         
-        # 422 si validé, 200 si limité automatiquement
+        # 422 si validÃ©, 200 si limitÃ© automatiquement
         assert response.status_code in [200, 400, 422, 404]
+

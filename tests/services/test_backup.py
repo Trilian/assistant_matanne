@@ -1,10 +1,10 @@
-"""
+﻿"""
 Tests pour le service de backup (backup.py).
 
-Ce fichier teste les fonctionnalités de sauvegarde:
+Ce fichier teste les fonctionnalitÃ©s de sauvegarde:
 - Configuration du backup (BackupConfig)
-- Métadonnées (BackupMetadata)
-- Résultats (BackupResult, RestoreResult)
+- MÃ©tadonnÃ©es (BackupMetadata)
+- RÃ©sultats (BackupResult, RestoreResult)
 - Service de backup et restauration
 """
 
@@ -17,16 +17,16 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS MODÈLES DE CONFIGURATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS MODÃˆLES DE CONFIGURATION
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBackupConfigModel:
     """Tests pour BackupConfig model."""
 
     def test_config_defaults(self):
-        """Configuration avec valeurs par défaut."""
+        """Configuration avec valeurs par dÃ©faut."""
         from src.services.backup import BackupConfig
         
         config = BackupConfig()
@@ -39,7 +39,7 @@ class TestBackupConfigModel:
         assert config.auto_backup_interval_hours == 24
 
     def test_config_custom_values(self):
-        """Configuration personnalisée."""
+        """Configuration personnalisÃ©e."""
         from src.services.backup import BackupConfig
         
         config = BackupConfig(
@@ -59,7 +59,7 @@ class TestBackupMetadataModel:
     """Tests pour BackupMetadata model."""
 
     def test_metadata_creation(self):
-        """Création de métadonnées."""
+        """CrÃ©ation de mÃ©tadonnÃ©es."""
         from src.services.backup import BackupMetadata
         
         metadata = BackupMetadata(
@@ -76,7 +76,7 @@ class TestBackupMetadataModel:
         assert metadata.total_records == 1500
 
     def test_metadata_defaults(self):
-        """Métadonnées avec valeurs par défaut."""
+        """MÃ©tadonnÃ©es avec valeurs par dÃ©faut."""
         from src.services.backup import BackupMetadata
         
         metadata = BackupMetadata()
@@ -87,12 +87,12 @@ class TestBackupMetadataModel:
         assert metadata.compressed is False
 
     def test_metadata_created_at_auto(self):
-        """created_at est auto-généré."""
+        """created_at est auto-gÃ©nÃ©rÃ©."""
         from src.services.backup import BackupMetadata
         
         metadata = BackupMetadata()
         
-        # created_at doit être récent
+        # created_at doit Ãªtre rÃ©cent
         assert (datetime.now() - metadata.created_at).total_seconds() < 5
 
 
@@ -100,14 +100,14 @@ class TestBackupResultModel:
     """Tests pour BackupResult model."""
 
     def test_result_success(self):
-        """Résultat de backup réussi."""
+        """RÃ©sultat de backup rÃ©ussi."""
         from src.services.backup import BackupResult, BackupMetadata
         
         metadata = BackupMetadata(id="test", tables_count=5, total_records=100)
         
         result = BackupResult(
             success=True,
-            message="Backup créé avec succès",
+            message="Backup crÃ©Ã© avec succÃ¨s",
             file_path="/path/to/backup.json.gz",
             metadata=metadata,
             duration_seconds=2.5,
@@ -118,7 +118,7 @@ class TestBackupResultModel:
         assert result.duration_seconds == 2.5
 
     def test_result_failure(self):
-        """Résultat de backup échoué."""
+        """RÃ©sultat de backup Ã©chouÃ©."""
         from src.services.backup import BackupResult
         
         result = BackupResult(
@@ -135,12 +135,12 @@ class TestRestoreResultModel:
     """Tests pour RestoreResult model."""
 
     def test_restore_result_success(self):
-        """Résultat de restauration réussie."""
+        """RÃ©sultat de restauration rÃ©ussie."""
         from src.services.backup import RestoreResult
         
         result = RestoreResult(
             success=True,
-            message="Restauration complète",
+            message="Restauration complÃ¨te",
             tables_restored=["recettes", "ingredients", "planning"],
             records_restored=500,
         )
@@ -154,27 +154,27 @@ class TestRestoreResultModel:
         from src.services.backup import RestoreResult
         
         result = RestoreResult(
-            success=True,  # Succès partiel
+            success=True,  # SuccÃ¨s partiel
             message="Restauration avec avertissements",
             tables_restored=["recettes", "ingredients"],
             records_restored=300,
-            errors=["Erreur table 'planning': clé étrangère manquante"],
+            errors=["Erreur table 'planning': clÃ© Ã©trangÃ¨re manquante"],
         )
         
         assert len(result.errors) == 1
         assert "planning" in result.errors[0]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SERVICE BACKUP - INITIALISATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBackupServiceInit:
     """Tests pour l'initialisation du service."""
 
     def test_service_creation_default(self):
-        """Création avec config par défaut."""
+        """CrÃ©ation avec config par dÃ©faut."""
         from src.services.backup import BackupService
         
         service = BackupService()
@@ -183,7 +183,7 @@ class TestBackupServiceInit:
         assert service.config.max_backups == 10
 
     def test_service_creation_custom_config(self):
-        """Création avec config personnalisée."""
+        """CrÃ©ation avec config personnalisÃ©e."""
         from src.services.backup import BackupService, BackupConfig
         
         config = BackupConfig(
@@ -196,7 +196,7 @@ class TestBackupServiceInit:
         assert service.config.max_backups == 5
 
     def test_models_to_backup_defined(self):
-        """MODELS_TO_BACKUP est défini avec les tables attendues."""
+        """MODELS_TO_BACKUP est dÃ©fini avec les tables attendues."""
         from src.services.backup import BackupService
         
         models = BackupService.MODELS_TO_BACKUP
@@ -208,16 +208,16 @@ class TestBackupServiceInit:
         assert "family_budgets" in models
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS UTILITAIRES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBackupUtilities:
-    """Tests pour les méthodes utilitaires."""
+    """Tests pour les mÃ©thodes utilitaires."""
 
     def test_generate_backup_id(self):
-        """Génération d'ID de backup."""
+        """GÃ©nÃ©ration d'ID de backup."""
         from src.services.backup import BackupService
         
         service = BackupService()
@@ -226,10 +226,10 @@ class TestBackupUtilities:
         # Format: YYYYMMDD_HHMMSS
         assert len(backup_id) == 15
         assert "_" in backup_id
-        assert backup_id[:4].isdigit()  # Année
+        assert backup_id[:4].isdigit()  # AnnÃ©e
 
     def test_generate_backup_id_unique(self):
-        """IDs sont différents à chaque appel (si temps différent)."""
+        """IDs sont diffÃ©rents Ã  chaque appel (si temps diffÃ©rent)."""
         from src.services.backup import BackupService
         import time
         
@@ -250,20 +250,20 @@ class TestBackupUtilities:
         checksum2 = service._calculate_checksum("test data")
         checksum3 = service._calculate_checksum("different data")
         
-        # Même donnée = même checksum
+        # MÃªme donnÃ©e = mÃªme checksum
         assert checksum1 == checksum2
-        # Données différentes = checksums différents
+        # DonnÃ©es diffÃ©rentes = checksums diffÃ©rents
         assert checksum1 != checksum3
-        # Checksum MD5 = 32 caractères hex
+        # Checksum MD5 = 32 caractÃ¨res hex
         assert len(checksum1) == 32
 
     def test_model_to_dict_basic(self):
-        """Conversion modèle vers dict."""
+        """Conversion modÃ¨le vers dict."""
         from src.services.backup import BackupService
         
         service = BackupService()
         
-        # Créer un mock d'objet SQLAlchemy
+        # CrÃ©er un mock d'objet SQLAlchemy
         mock_obj = MagicMock()
         mock_obj.__table__ = MagicMock()
         
@@ -301,16 +301,16 @@ class TestBackupUtilities:
         assert result["created_at"] == "2026-01-28T12:00:00"
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS CRÉATION BACKUP (MOCKED)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS CRÃ‰ATION BACKUP (MOCKED)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCreateBackup:
-    """Tests pour création de backup."""
+    """Tests pour crÃ©ation de backup."""
 
     def test_backup_creates_file(self):
-        """Le backup crée un fichier."""
+        """Le backup crÃ©e un fichier."""
         from src.services.backup import BackupService, BackupConfig
         
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -337,7 +337,7 @@ class TestCreateBackup:
                     assert result.success is True
 
     def test_backup_result_contains_metadata(self):
-        """Le résultat contient les métadonnées."""
+        """Le rÃ©sultat contient les mÃ©tadonnÃ©es."""
         from src.services.backup import BackupResult, BackupMetadata
         
         metadata = BackupMetadata(
@@ -360,9 +360,9 @@ class TestCreateBackup:
         assert result.metadata.compressed is True
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS COMPRESSION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBackupCompression:
@@ -379,17 +379,17 @@ class TestBackupCompression:
             temp_path = f.name
         
         try:
-            # Écrire compressé
+            # Ã‰crire compressÃ©
             with gzip.open(temp_path, 'wt', encoding='utf-8') as f:
                 f.write(data)
             
-            # Lire et vérifier
+            # Lire et vÃ©rifier
             with gzip.open(temp_path, 'rt', encoding='utf-8') as f:
                 read_data = f.read()
             
             assert read_data == data
             
-            # Fichier compressé plus petit
+            # Fichier compressÃ© plus petit
             import os
             compressed_size = os.path.getsize(temp_path)
             assert compressed_size < len(data)
@@ -398,9 +398,9 @@ class TestBackupCompression:
             os.unlink(temp_path)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ROTATION BACKUPS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBackupRotation:
@@ -411,7 +411,7 @@ class TestBackupRotation:
         from src.services.backup import BackupService, BackupConfig
         
         with tempfile.TemporaryDirectory() as tmpdir:
-            # Créer plus de fichiers que max_backups
+            # CrÃ©er plus de fichiers que max_backups
             for i in range(15):
                 backup_file = Path(tmpdir) / f"backup_20260128_{i:06d}.json"
                 backup_file.write_text("{}")
@@ -429,9 +429,9 @@ class TestBackupRotation:
             assert len(remaining) <= 10
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS LISTE BACKUPS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestListBackups:
@@ -445,13 +445,13 @@ class TestListBackups:
             config = BackupConfig(backup_dir=tmpdir)
             service = BackupService(config=config)
             
-            # Méthode list_backups si elle existe
+            # MÃ©thode list_backups si elle existe
             if hasattr(service, 'list_backups'):
                 backups = service.list_backups()
                 assert len(backups) == 0
 
     def test_backup_dir_created(self):
-        """Le répertoire de backup est créé automatiquement."""
+        """Le rÃ©pertoire de backup est crÃ©Ã© automatiquement."""
         from src.services.backup import BackupService, BackupConfig
         
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -463,16 +463,16 @@ class TestListBackups:
             assert backup_dir.exists()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS RESTAURATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestRestoreBackup:
     """Tests pour restauration de backup."""
 
     def test_restore_result_defaults(self):
-        """RestoreResult avec valeurs par défaut."""
+        """RestoreResult avec valeurs par dÃ©faut."""
         from src.services.backup import RestoreResult
         
         result = RestoreResult()
@@ -484,12 +484,12 @@ class TestRestoreBackup:
         assert result.errors == []
 
     def test_restore_result_with_data(self):
-        """RestoreResult avec données."""
+        """RestoreResult avec donnÃ©es."""
         from src.services.backup import RestoreResult
         
         result = RestoreResult(
             success=True,
-            message="Restauration terminée",
+            message="Restauration terminÃ©e",
             tables_restored=["recettes", "ingredients"],
             records_restored=250,
         )
@@ -498,9 +498,9 @@ class TestRestoreBackup:
         assert "recettes" in result.tables_restored
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS JSON STRUCTURE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBackupJsonStructure:
@@ -521,25 +521,25 @@ class TestBackupJsonStructure:
                     {"id": 2, "nom": "Recette 2"},
                 ],
                 "ingredients": [
-                    {"id": 1, "nom": "Ingrédient 1"},
+                    {"id": 1, "nom": "IngrÃ©dient 1"},
                 ],
             }
         }
         
-        # Vérifie que c'est sérialisable
+        # VÃ©rifie que c'est sÃ©rialisable
         json_str = json.dumps(backup_data, ensure_ascii=False)
         
-        # Et désérialisable
+        # Et dÃ©sÃ©rialisable
         parsed = json.loads(json_str)
         
         assert parsed["metadata"]["id"] == "20260128_120000"
         assert len(parsed["data"]["recettes"]) == 2
-        assert parsed["data"]["ingredients"][0]["nom"] == "Ingrédient 1"
+        assert parsed["data"]["ingredients"][0]["nom"] == "IngrÃ©dient 1"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CAS LIMITES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBackupEdgeCases:
@@ -553,7 +553,7 @@ class TestBackupEdgeCases:
             config = BackupConfig(backup_dir=tmpdir)
             service = BackupService(config=config)
             
-            # Vérifier que le service peut gérer une liste vide
+            # VÃ©rifier que le service peut gÃ©rer une liste vide
             assert service.MODELS_TO_BACKUP is not None
 
     def test_unknown_table_name(self):
@@ -573,3 +573,4 @@ class TestBackupEdgeCases:
         config = BackupConfig(max_backups=0)
         
         assert config.max_backups == 0
+

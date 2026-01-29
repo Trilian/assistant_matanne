@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour les composants UI
 
 Tests unitaires:
@@ -12,9 +12,9 @@ import pytest
 from unittest.mock import Mock, patch, MagicMock
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ATOMS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAtoms:
@@ -22,7 +22,7 @@ class TestAtoms:
 
     @patch('streamlit.markdown')
     def test_badge_default_color(self, mock_markdown):
-        """Test badge avec couleur par défaut"""
+        """Test badge avec couleur par dÃ©faut"""
         from src.ui.components.atoms import badge
         
         badge("Actif")
@@ -30,11 +30,11 @@ class TestAtoms:
         mock_markdown.assert_called_once()
         call_args = mock_markdown.call_args[0][0]
         assert "Actif" in call_args
-        assert "#4CAF50" in call_args  # Couleur par défaut
+        assert "#4CAF50" in call_args  # Couleur par dÃ©faut
 
     @patch('streamlit.markdown')
     def test_badge_custom_color(self, mock_markdown):
-        """Test badge avec couleur personnalisée"""
+        """Test badge avec couleur personnalisÃ©e"""
         from src.ui.components.atoms import badge
         
         badge("Urgent", "#FF5722")
@@ -48,27 +48,27 @@ class TestAtoms:
         """Test empty state basique"""
         from src.ui.components.atoms import empty_state
         
-        empty_state("Aucune donnée", "📭")
+        empty_state("Aucune donnÃ©e", "ðŸ“­")
         
         mock_markdown.assert_called_once()
         call_args = mock_markdown.call_args[0][0]
-        assert "Aucune donnée" in call_args
-        assert "📭" in call_args
+        assert "Aucune donnÃ©e" in call_args
+        assert "ðŸ“­" in call_args
 
     @patch('streamlit.markdown')
     def test_empty_state_with_subtext(self, mock_markdown):
         """Test empty state avec sous-texte"""
         from src.ui.components.atoms import empty_state
         
-        empty_state("Aucune recette", "🍽️", "Ajoutez votre première recette")
+        empty_state("Aucune recette", "ðŸ½ï¸", "Ajoutez votre premiÃ¨re recette")
         
         call_args = mock_markdown.call_args[0][0]
         assert "Aucune recette" in call_args
-        assert "Ajoutez votre première recette" in call_args
+        assert "Ajoutez votre premiÃ¨re recette" in call_args
 
     @patch('streamlit.markdown')
     def test_metric_card_basic(self, mock_markdown):
-        """Test carte métrique basique"""
+        """Test carte mÃ©trique basique"""
         from src.ui.components.atoms import metric_card
         
         metric_card("Total", "42")
@@ -80,7 +80,7 @@ class TestAtoms:
 
     @patch('streamlit.markdown')
     def test_metric_card_with_delta(self, mock_markdown):
-        """Test carte métrique avec variation"""
+        """Test carte mÃ©trique avec variation"""
         from src.ui.components.atoms import metric_card
         
         metric_card("Ventes", "150", "+12%")
@@ -92,12 +92,12 @@ class TestAtoms:
 
     @patch('streamlit.success')
     def test_toast_success(self, mock_success):
-        """Test toast succès"""
+        """Test toast succÃ¨s"""
         from src.ui.components.atoms import toast
         
-        toast("Sauvegardé", "success")
+        toast("SauvegardÃ©", "success")
         
-        mock_success.assert_called_once_with("Sauvegardé")
+        mock_success.assert_called_once_with("SauvegardÃ©")
 
     @patch('streamlit.error')
     def test_toast_error(self, mock_error):
@@ -118,9 +118,9 @@ class TestAtoms:
         mock_warning.assert_called_once_with("Attention")
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS DASHBOARD WIDGETS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestDashboardWidgets:
@@ -131,7 +131,7 @@ class TestDashboardWidgets:
         stat_data = {
             "label": "Recettes",
             "value": 42,
-            "icon": "📖",
+            "icon": "ðŸ“–",
             "trend": "+5%",
             "color": "green"
         }
@@ -141,40 +141,40 @@ class TestDashboardWidgets:
         assert isinstance(stat_data["value"], int)
 
     def test_chart_widget_data(self):
-        """Test données widget graphique"""
+        """Test donnÃ©es widget graphique"""
         chart_data = {
             "type": "bar",
-            "title": "Dépenses par catégorie",
+            "title": "DÃ©penses par catÃ©gorie",
             "data": [
                 {"category": "Alimentation", "value": 350},
                 {"category": "Transport", "value": 150},
                 {"category": "Loisirs", "value": 100},
             ],
-            "x_label": "Catégorie",
-            "y_label": "Montant (€)"
+            "x_label": "CatÃ©gorie",
+            "y_label": "Montant (â‚¬)"
         }
         
         assert chart_data["type"] in ["bar", "line", "pie", "area"]
         assert len(chart_data["data"]) == 3
 
     def test_alert_widget_priority(self):
-        """Test priorité widget alerte"""
+        """Test prioritÃ© widget alerte"""
         alerts = [
             {"type": "error", "message": "Stock critique", "priority": 1},
-            {"type": "warning", "message": "Péremption proche", "priority": 2},
+            {"type": "warning", "message": "PÃ©remption proche", "priority": 2},
             {"type": "info", "message": "Nouvelle suggestion", "priority": 3},
         ]
         
-        # Tri par priorité
+        # Tri par prioritÃ©
         sorted_alerts = sorted(alerts, key=lambda x: x["priority"])
         
         assert sorted_alerts[0]["type"] == "error"
         assert sorted_alerts[-1]["type"] == "info"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FORMS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFormComponents:
@@ -190,7 +190,7 @@ class TestFormComponents:
         assert validate_required(None) is False
 
     def test_form_number_range_validation(self):
-        """Test validation plage numérique"""
+        """Test validation plage numÃ©rique"""
         def validate_range(value, min_val, max_val):
             return min_val <= value <= max_val
         
@@ -220,9 +220,9 @@ class TestFormComponents:
         assert parsed_date.day == 27
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS LAYOUTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestLayouts:
@@ -260,14 +260,14 @@ class TestLayouts:
         assert layout == "three_columns"
 
     def test_sidebar_state(self):
-        """Test état sidebar"""
+        """Test Ã©tat sidebar"""
         sidebar_config = {
             "expanded": True,
             "width": 300,
             "items": [
-                {"label": "Accueil", "icon": "🏠", "active": True},
-                {"label": "Cuisine", "icon": "🍽️", "active": False},
-                {"label": "Planning", "icon": "📅", "active": False},
+                {"label": "Accueil", "icon": "ðŸ ", "active": True},
+                {"label": "Cuisine", "icon": "ðŸ½ï¸", "active": False},
+                {"label": "Planning", "icon": "ðŸ“…", "active": False},
             ]
         }
         
@@ -280,9 +280,9 @@ class TestLayouts:
         assert active_item["label"] == "Accueil"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FEEDBACK
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFeedbackComponents:
@@ -298,7 +298,7 @@ class TestFeedbackComponents:
         assert percentage == 75.0
 
     def test_spinner_states(self):
-        """Test états spinner"""
+        """Test Ã©tats spinner"""
         spinner_states = ["idle", "loading", "success", "error"]
         
         current_state = "loading"
@@ -308,11 +308,12 @@ class TestFeedbackComponents:
     def test_notification_types(self):
         """Test types de notification"""
         notification_types = {
-            "success": {"color": "#4CAF50", "icon": "✅"},
-            "error": {"color": "#f44336", "icon": "❌"},
-            "warning": {"color": "#ff9800", "icon": "⚠️"},
-            "info": {"color": "#2196F3", "icon": "ℹ️"},
+            "success": {"color": "#4CAF50", "icon": "âœ…"},
+            "error": {"color": "#f44336", "icon": "âŒ"},
+            "warning": {"color": "#ff9800", "icon": "âš ï¸"},
+            "info": {"color": "#2196F3", "icon": "â„¹ï¸"},
         }
         
         assert "success" in notification_types
         assert notification_types["error"]["color"] == "#f44336"
+

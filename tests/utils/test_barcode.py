@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour le service barcode (scan codes-barres)
 """
 
@@ -15,13 +15,13 @@ class TestBarcodeService:
         from src.services.barcode import BarcodeService
         assert BarcodeService is not None
 
-    @pytest.mark.skip(reason="httpx n'est pas utilisé dans ce service")
+    @pytest.mark.skip(reason="httpx n'est pas utilisÃ© dans ce service")
     @patch('src.services.barcode.httpx')
     def test_lookup_product_openfoodfacts(self, mock_httpx):
         """Test recherche produit via OpenFoodFacts API"""
         from src.services.barcode import BarcodeService
         
-        # Mock réponse API
+        # Mock rÃ©ponse API
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {
@@ -29,7 +29,7 @@ class TestBarcodeService:
             "product": {
                 "product_name": "Nutella",
                 "brands": "Ferrero",
-                "categories": "Pâtes à tartiner",
+                "categories": "PÃ¢tes Ã  tartiner",
                 "quantity": "400g",
                 "nutriscore_grade": "e"
             }
@@ -38,7 +38,7 @@ class TestBarcodeService:
         
         service = BarcodeService()
         
-        # Test lookup (si la méthode existe)
+        # Test lookup (si la mÃ©thode existe)
         if hasattr(service, 'lookup_product'):
             result = service.lookup_product("3017620422003")
             assert result is not None
@@ -50,7 +50,7 @@ class TestBarcodeService:
         
         service = BarcodeService()
         
-        # Tester si méthode de validation existe
+        # Tester si mÃ©thode de validation existe
         if hasattr(service, 'validate_barcode'):
             # EAN-13 valide
             assert service.validate_barcode("3017620422003") == True
@@ -63,14 +63,14 @@ class TestBarcodeService:
             assert service.validate_barcode("abc") == False
 
     def test_extract_product_info(self):
-        """Test extraction infos produit depuis réponse API"""
+        """Test extraction infos produit depuis rÃ©ponse API"""
         from src.services.barcode import BarcodeService
         
         service = BarcodeService()
         
         api_response = {
             "product": {
-                "product_name": "Lait demi-écrémé",
+                "product_name": "Lait demi-Ã©crÃ©mÃ©",
                 "brands": "Lactel",
                 "categories": "Laits",
                 "quantity": "1L",
@@ -89,10 +89,10 @@ class TestBarcodeService:
             assert info is not None
             assert "Lait" in str(info)
 
-    @pytest.mark.skip(reason="httpx n'est pas utilisé dans ce service")
+    @pytest.mark.skip(reason="httpx n'est pas utilisÃ© dans ce service")
     @patch('src.services.barcode.httpx')
     def test_product_not_found(self, mock_httpx):
-        """Test quand produit non trouvé"""
+        """Test quand produit non trouvÃ©"""
         from src.services.barcode import BarcodeService
         
         mock_response = Mock()
@@ -107,15 +107,15 @@ class TestBarcodeService:
             assert result is None or result == {}
 
     def test_barcode_to_inventory_item(self):
-        """Test conversion produit scanné vers article inventaire"""
+        """Test conversion produit scannÃ© vers article inventaire"""
         from src.services.barcode import BarcodeService
         
         service = BarcodeService()
         
         product_data = {
-            "nom": "Pâtes Barilla",
+            "nom": "PÃ¢tes Barilla",
             "marque": "Barilla",
-            "categorie": "Épicerie",
+            "categorie": "Ã‰picerie",
             "quantite": "500g"
         }
         
@@ -125,7 +125,7 @@ class TestBarcodeService:
             assert hasattr(item, 'nom') or 'nom' in item
 
     def test_barcode_to_shopping_item(self):
-        """Test conversion produit scanné vers article courses"""
+        """Test conversion produit scannÃ© vers article courses"""
         from src.services.barcode import BarcodeService
         
         service = BarcodeService()
@@ -169,24 +169,24 @@ class TestBarcodeValidation:
         assert checksum == 4
 
 
-@pytest.mark.skip(reason="Nécessite une fixture test_db - tests d'intégration")
+@pytest.mark.skip(reason="NÃ©cessite une fixture test_db - tests d'intÃ©gration")
 class TestBarcodeIntegration:
-    """Tests d'intégration barcode"""
+    """Tests d'intÃ©gration barcode"""
 
     @pytest.mark.integration
     def test_scan_and_add_to_inventory(self, test_db):
-        """Test scan + ajout inventaire (intégration)"""
+        """Test scan + ajout inventaire (intÃ©gration)"""
         from src.services.barcode import BarcodeService
         
         service = BarcodeService()
         
-        # Ce test nécessite une vraie DB
+        # Ce test nÃ©cessite une vraie DB
         # Simule le flow complet: scan -> lookup -> add
         pass
 
     @pytest.mark.integration
     def test_scan_and_add_to_shopping_list(self, test_db):
-        """Test scan + ajout liste courses (intégration)"""
+        """Test scan + ajout liste courses (intÃ©gration)"""
         from src.services.barcode import BarcodeService
         
         service = BarcodeService()
@@ -196,17 +196,17 @@ class TestBarcodeIntegration:
 
 
 class TestBarcodeCategories:
-    """Tests mapping catégories OpenFoodFacts"""
+    """Tests mapping catÃ©gories OpenFoodFacts"""
 
     def test_category_mapping(self):
-        """Test mapping catégories OFF vers catégories app"""
+        """Test mapping catÃ©gories OFF vers catÃ©gories app"""
         from src.services.barcode import BarcodeService
         
         service = BarcodeService()
         
         mappings = {
             "Laits": "produits_laitiers",
-            "Pâtes alimentaires": "epicerie",
+            "PÃ¢tes alimentaires": "epicerie",
             "Fruits": "fruits_legumes",
             "Viandes": "viande",
             "Poissons": "poisson",
@@ -217,3 +217,4 @@ class TestBarcodeCategories:
             for off_cat, expected in mappings.items():
                 result = service.map_category(off_cat)
                 assert result == expected or result is not None
+

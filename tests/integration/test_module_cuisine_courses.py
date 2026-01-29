@@ -1,6 +1,6 @@
-"""
+﻿"""
 Tests pour le module cuisine/courses.py
-Gestion complète de la liste de courses avec filtres et suggestions IA
+Gestion complÃ¨te de la liste de courses avec filtres et suggestions IA
 """
 
 import pytest
@@ -13,33 +13,33 @@ class TestConstantes:
     """Tests pour les constantes du module courses"""
 
     def test_priority_emojis(self):
-        """Vérifie les emojis de priorité"""
+        """VÃ©rifie les emojis de prioritÃ©"""
         PRIORITY_EMOJIS = {
-            "haute": "🔴",
-            "moyenne": "🟡",
-            "basse": "🟢"
+            "haute": "ðŸ”´",
+            "moyenne": "ðŸŸ¡",
+            "basse": "ðŸŸ¢"
         }
         
-        assert PRIORITY_EMOJIS["haute"] == "🔴"
-        assert PRIORITY_EMOJIS["moyenne"] == "🟡"
-        assert PRIORITY_EMOJIS["basse"] == "🟢"
+        assert PRIORITY_EMOJIS["haute"] == "ðŸ”´"
+        assert PRIORITY_EMOJIS["moyenne"] == "ðŸŸ¡"
+        assert PRIORITY_EMOJIS["basse"] == "ðŸŸ¢"
 
     def test_rayons_default(self):
-        """Vérifie les rayons par défaut"""
+        """VÃ©rifie les rayons par dÃ©faut"""
         RAYONS_DEFAULT = [
-            "Fruits & Légumes",
+            "Fruits & LÃ©gumes",
             "Laitier",
             "Boulangerie",
             "Viandes",
             "Poissons",
-            "Surgelés",
-            "Épices",
+            "SurgelÃ©s",
+            "Ã‰pices",
             "Boissons",
             "Autre"
         ]
         
         assert len(RAYONS_DEFAULT) == 9
-        assert "Fruits & Légumes" in RAYONS_DEFAULT
+        assert "Fruits & LÃ©gumes" in RAYONS_DEFAULT
         assert "Autre" in RAYONS_DEFAULT
 
 
@@ -51,7 +51,7 @@ class TestAppCourses:
     @patch("src.modules.cuisine.courses.st")
     def test_initialise_session_state(self, mock_st, mock_get_service, mock_init_sync):
         """Initialise correctement le session_state"""
-        from src.modules.cuisine.courses import app
+        from src.domains.cuisine.logic.courses import app
         
         mock_st.session_state = SessionStateMock()
         mock_service = MagicMock()
@@ -73,8 +73,8 @@ class TestAppCourses:
     @patch("src.modules.cuisine.courses.get_courses_service")
     @patch("src.modules.cuisine.courses.st")
     def test_appel_init_realtime_sync(self, mock_st, mock_get_service, mock_init_sync):
-        """Appelle l'initialisation de la sync temps réel"""
-        from src.modules.cuisine.courses import app
+        """Appelle l'initialisation de la sync temps rÃ©el"""
+        from src.domains.cuisine.logic.courses import app
         
         mock_st.session_state = SessionStateMock()
         mock_service = MagicMock()
@@ -98,8 +98,8 @@ class TestGroupementRayons:
     def test_groupe_articles_par_rayon(self):
         """Groupe les articles par rayon"""
         articles = [
-            MagicMock(rayon="Fruits & Légumes", nom="Pommes"),
-            MagicMock(rayon="Fruits & Légumes", nom="Bananes"),
+            MagicMock(rayon="Fruits & LÃ©gumes", nom="Pommes"),
+            MagicMock(rayon="Fruits & LÃ©gumes", nom="Bananes"),
             MagicMock(rayon="Laitier", nom="Lait"),
             MagicMock(rayon="Laitier", nom="Yaourt"),
             MagicMock(rayon="Boulangerie", nom="Pain"),
@@ -114,7 +114,7 @@ class TestGroupementRayons:
             grouped[rayon].append(article)
         
         assert len(grouped) == 3
-        assert len(grouped["Fruits & Légumes"]) == 2
+        assert len(grouped["Fruits & LÃ©gumes"]) == 2
         assert len(grouped["Laitier"]) == 2
         assert len(grouped["Boulangerie"]) == 1
 
@@ -137,31 +137,31 @@ class TestGroupementRayons:
 
 
 class TestPrioriteEmoji:
-    """Tests pour les emojis de priorité"""
+    """Tests pour les emojis de prioritÃ©"""
 
     def test_emoji_haute(self):
-        """Emoji rouge pour haute priorité"""
-        PRIORITY_EMOJIS = {"haute": "🔴", "moyenne": "🟡", "basse": "🟢"}
-        assert PRIORITY_EMOJIS.get("haute") == "🔴"
+        """Emoji rouge pour haute prioritÃ©"""
+        PRIORITY_EMOJIS = {"haute": "ðŸ”´", "moyenne": "ðŸŸ¡", "basse": "ðŸŸ¢"}
+        assert PRIORITY_EMOJIS.get("haute") == "ðŸ”´"
 
     def test_emoji_moyenne(self):
-        """Emoji jaune pour priorité moyenne"""
-        PRIORITY_EMOJIS = {"haute": "🔴", "moyenne": "🟡", "basse": "🟢"}
-        assert PRIORITY_EMOJIS.get("moyenne") == "🟡"
+        """Emoji jaune pour prioritÃ© moyenne"""
+        PRIORITY_EMOJIS = {"haute": "ðŸ”´", "moyenne": "ðŸŸ¡", "basse": "ðŸŸ¢"}
+        assert PRIORITY_EMOJIS.get("moyenne") == "ðŸŸ¡"
 
     def test_emoji_basse(self):
-        """Emoji vert pour basse priorité"""
-        PRIORITY_EMOJIS = {"haute": "🔴", "moyenne": "🟡", "basse": "🟢"}
-        assert PRIORITY_EMOJIS.get("basse") == "🟢"
+        """Emoji vert pour basse prioritÃ©"""
+        PRIORITY_EMOJIS = {"haute": "ðŸ”´", "moyenne": "ðŸŸ¡", "basse": "ðŸŸ¢"}
+        assert PRIORITY_EMOJIS.get("basse") == "ðŸŸ¢"
 
     def test_emoji_default(self):
-        """Emoji par défaut pour priorité inconnue"""
-        PRIORITY_EMOJIS = {"haute": "🔴", "moyenne": "🟡", "basse": "🟢"}
-        assert PRIORITY_EMOJIS.get("inconnue", "⚪") == "⚪"
+        """Emoji par dÃ©faut pour prioritÃ© inconnue"""
+        PRIORITY_EMOJIS = {"haute": "ðŸ”´", "moyenne": "ðŸŸ¡", "basse": "ðŸŸ¢"}
+        assert PRIORITY_EMOJIS.get("inconnue", "âšª") == "âšª"
 
 
 class TestCalculsMetriques:
-    """Tests pour le calcul des métriques de liste de courses"""
+    """Tests pour le calcul des mÃ©triques de liste de courses"""
 
     def test_calcul_total_articles(self):
         """Calcule le total d'articles"""
@@ -169,7 +169,7 @@ class TestCalculsMetriques:
         assert len(articles) == 15
 
     def test_calcul_articles_non_achetes(self):
-        """Calcule les articles non achetés"""
+        """Calcule les articles non achetÃ©s"""
         articles = [
             MagicMock(est_achete=False),
             MagicMock(est_achete=True),
@@ -181,7 +181,7 @@ class TestCalculsMetriques:
         assert len(non_achetes) == 2
 
     def test_calcul_articles_achetes(self):
-        """Calcule les articles achetés"""
+        """Calcule les articles achetÃ©s"""
         articles = [
             MagicMock(est_achete=True),
             MagicMock(est_achete=True),
@@ -207,7 +207,7 @@ class TestCalculsMetriques:
         assert pourcentage == 50.0
 
     def test_pourcentage_liste_vide(self):
-        """Gère le cas de liste vide"""
+        """GÃ¨re le cas de liste vide"""
         articles = []
         
         total = len(articles)
@@ -223,18 +223,18 @@ class TestFiltresArticles:
     def test_filtre_par_rayon(self):
         """Filtre les articles par rayon"""
         articles = [
-            MagicMock(rayon="Fruits & Légumes"),
+            MagicMock(rayon="Fruits & LÃ©gumes"),
             MagicMock(rayon="Laitier"),
-            MagicMock(rayon="Fruits & Légumes"),
+            MagicMock(rayon="Fruits & LÃ©gumes"),
         ]
         
-        filtre_rayon = "Fruits & Légumes"
+        filtre_rayon = "Fruits & LÃ©gumes"
         filtered = [a for a in articles if a.rayon == filtre_rayon]
         
         assert len(filtered) == 2
 
     def test_filtre_par_priorite(self):
-        """Filtre les articles par priorité"""
+        """Filtre les articles par prioritÃ©"""
         articles = [
             MagicMock(priorite="haute"),
             MagicMock(priorite="basse"),
@@ -247,7 +247,7 @@ class TestFiltresArticles:
         assert len(filtered) == 2
 
     def test_filtre_non_achetes(self):
-        """Filtre uniquement les articles non achetés"""
+        """Filtre uniquement les articles non achetÃ©s"""
         articles = [
             MagicMock(est_achete=False),
             MagicMock(est_achete=True),
@@ -258,7 +258,7 @@ class TestFiltresArticles:
         assert len(filtered) == 2
 
     def test_filtre_suggestions_ia(self):
-        """Filtre les articles suggérés par IA"""
+        """Filtre les articles suggÃ©rÃ©s par IA"""
         articles = [
             MagicMock(est_suggestion_ia=True),
             MagicMock(est_suggestion_ia=False),
@@ -273,7 +273,7 @@ class TestTriArticles:
     """Tests pour le tri des articles"""
 
     def test_tri_par_priorite(self):
-        """Trie les articles par priorité"""
+        """Trie les articles par prioritÃ©"""
         ordre_priorite = {"haute": 0, "moyenne": 1, "basse": 2}
         
         articles = [
@@ -289,7 +289,7 @@ class TestTriArticles:
         assert sorted_articles[2].priorite == "basse"
 
     def test_tri_par_nom(self):
-        """Trie les articles par nom alphabétique"""
+        """Trie les articles par nom alphabÃ©tique"""
         articles = [
             MagicMock(nom="Pommes"),
             MagicMock(nom="Bananes"),
@@ -307,7 +307,7 @@ class TestTriArticles:
         articles = [
             MagicMock(rayon="Viandes"),
             MagicMock(rayon="Boulangerie"),
-            MagicMock(rayon="Fruits & Légumes"),
+            MagicMock(rayon="Fruits & LÃ©gumes"),
         ]
         
         sorted_articles = sorted(articles, key=lambda a: a.rayon or "ZZZZ")
@@ -325,24 +325,24 @@ class TestValidationArticle:
             if not nom or not nom.strip():
                 errors.append("Le nom est obligatoire")
             if quantite <= 0:
-                errors.append("La quantité doit être positive")
+                errors.append("La quantitÃ© doit Ãªtre positive")
             return errors
         
         errors = valider_article("")
         assert "Le nom est obligatoire" in errors
 
     def test_quantite_positive(self):
-        """La quantité doit être positive"""
+        """La quantitÃ© doit Ãªtre positive"""
         def valider_article(nom, quantite=1):
             errors = []
             if not nom or not nom.strip():
                 errors.append("Le nom est obligatoire")
             if quantite <= 0:
-                errors.append("La quantité doit être positive")
+                errors.append("La quantitÃ© doit Ãªtre positive")
             return errors
         
         errors = valider_article("Pommes", quantite=0)
-        assert "La quantité doit être positive" in errors
+        assert "La quantitÃ© doit Ãªtre positive" in errors
 
     def test_article_valide(self):
         """Article valide sans erreurs"""
@@ -351,7 +351,7 @@ class TestValidationArticle:
             if not nom or not nom.strip():
                 errors.append("Le nom est obligatoire")
             if quantite <= 0:
-                errors.append("La quantité doit être positive")
+                errors.append("La quantitÃ© doit Ãªtre positive")
             return errors
         
         errors = valider_article("Pommes", quantite=5)
@@ -362,7 +362,7 @@ class TestStatutAchat:
     """Tests pour le changement de statut d'achat"""
 
     def test_marquer_comme_achete(self):
-        """Marque un article comme acheté"""
+        """Marque un article comme achetÃ©"""
         article = MagicMock()
         article.est_achete = False
         
@@ -372,7 +372,7 @@ class TestStatutAchat:
         assert article.est_achete is True
 
     def test_marquer_comme_non_achete(self):
-        """Remet un article en non acheté"""
+        """Remet un article en non achetÃ©"""
         article = MagicMock()
         article.est_achete = True
         
@@ -386,7 +386,7 @@ class TestSuggestionsIA:
     """Tests pour les suggestions IA"""
 
     def test_detecte_suggestions_ia(self):
-        """Détecte les articles suggérés par IA"""
+        """DÃ©tecte les articles suggÃ©rÃ©s par IA"""
         article = MagicMock()
         article.est_suggestion_ia = True
         article.source = "IA"
@@ -398,21 +398,21 @@ class TestSuggestionsIA:
         def get_badges(article):
             badges = []
             if article.est_suggestion_ia:
-                badges.append("🤖 IA")
+                badges.append("ðŸ¤– IA")
             return badges
         
         article = MagicMock()
         article.est_suggestion_ia = True
         
         badges = get_badges(article)
-        assert "🤖 IA" in badges
+        assert "ðŸ¤– IA" in badges
 
     def test_pas_badge_si_pas_ia(self):
         """Pas de badge IA si pas de suggestion"""
         def get_badges(article):
             badges = []
             if article.est_suggestion_ia:
-                badges.append("🤖 IA")
+                badges.append("ðŸ¤– IA")
             return badges
         
         article = MagicMock()
@@ -420,3 +420,4 @@ class TestSuggestionsIA:
         
         badges = get_badges(article)
         assert len(badges) == 0
+

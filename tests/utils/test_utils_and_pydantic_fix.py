@@ -1,6 +1,6 @@
-"""
+﻿"""
 Tests pour src/utils/helpers/helpers.py et src/utils/media.py
-Ces fichiers ont une couverture faible, ces tests visent à l'améliorer
+Ces fichiers ont une couverture faible, ces tests visent Ã  l'amÃ©liorer
 """
 
 import pytest
@@ -9,15 +9,15 @@ from datetime import datetime, timedelta
 import io
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MEDIA UTILITIES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestImageConfig:
     """Tests pour ImageConfig"""
     
     def test_default_values(self):
-        """Les valeurs par défaut sont correctes"""
+        """Les valeurs par dÃ©faut sont correctes"""
         from src.utils.media import ImageConfig
         
         config = ImageConfig()
@@ -74,7 +74,7 @@ class TestImageCache:
         assert result.size == (100, 100)
     
     def test_get_missing_key(self):
-        """Get retourne None pour clé inexistante"""
+        """Get retourne None pour clÃ© inexistante"""
         from src.utils.media import ImageCache
         
         cache = ImageCache()
@@ -83,7 +83,7 @@ class TestImageCache:
         assert result is None
     
     def test_get_expired(self):
-        """Get retourne None pour clé expirée"""
+        """Get retourne None pour clÃ© expirÃ©e"""
         from src.utils.media import ImageCache
         from PIL import Image
         from datetime import datetime, timedelta
@@ -91,7 +91,7 @@ class TestImageCache:
         cache = ImageCache(ttl_seconds=1)
         img = Image.new('RGB', (50, 50))
         
-        # Insérer avec timestamp passé
+        # InsÃ©rer avec timestamp passÃ©
         cache.cache["expired_key"] = (img, datetime.utcnow() - timedelta(seconds=10))
         
         result = cache.get("expired_key")
@@ -130,9 +130,9 @@ class TestImageCache:
         assert "key2" in stats["keys"]
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS HELPERS DATA (fonctions réelles)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS HELPERS DATA (fonctions rÃ©elles)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestDataHelpers:
     """Tests pour les helpers data"""
@@ -143,7 +143,7 @@ class TestDataHelpers:
         assert data is not None
     
     def test_safe_get_simple(self):
-        """safe_get fonctionne avec une clé"""
+        """safe_get fonctionne avec une clÃ©"""
         from src.utils.helpers.data import safe_get
         
         d = {"a": 1, "b": 2}
@@ -152,7 +152,7 @@ class TestDataHelpers:
         assert safe_get(d, "c", default="default") == "default"
     
     def test_safe_get_nested(self):
-        """safe_get fonctionne avec plusieurs clés"""
+        """safe_get fonctionne avec plusieurs clÃ©s"""
         from src.utils.helpers.data import safe_get
         
         d = {"a": {"b": {"c": 42}}}
@@ -192,7 +192,7 @@ class TestDataHelpers:
         assert result["b"] == 1
     
     def test_deduplicate(self):
-        """deduplicate enlève les doublons"""
+        """deduplicate enlÃ¨ve les doublons"""
         from src.utils.helpers.data import deduplicate
         
         items = [1, 2, 2, 3, 3, 3]
@@ -232,7 +232,7 @@ class TestDataHelpers:
         assert result == {"a": 1, "b": 2, "c": 3}
     
     def test_pick(self):
-        """pick extrait les clés spécifiées"""
+        """pick extrait les clÃ©s spÃ©cifiÃ©es"""
         from src.utils.helpers.data import pick
         
         d = {"a": 1, "b": 2, "c": 3}
@@ -241,7 +241,7 @@ class TestDataHelpers:
         assert result == {"a": 1, "c": 3}
     
     def test_omit(self):
-        """omit enlève les clés spécifiées"""
+        """omit enlÃ¨ve les clÃ©s spÃ©cifiÃ©es"""
         from src.utils.helpers.data import omit
         
         d = {"a": 1, "b": 2, "c": 3}
@@ -250,9 +250,9 @@ class TestDataHelpers:
         assert result == {"a": 1, "c": 3}
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS HELPERS STRINGS (fonctions réelles)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS HELPERS STRINGS (fonctions rÃ©elles)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestStringHelpers:
     """Tests pour les helpers strings"""
@@ -263,15 +263,15 @@ class TestStringHelpers:
         assert strings is not None
     
     def test_generate_id(self):
-        """generate_id génère un ID"""
+        """generate_id gÃ©nÃ¨re un ID"""
         from src.utils.helpers.strings import generate_id
         
         id1 = generate_id("test")
         id2 = generate_id("test")
         id3 = generate_id("other")
         
-        assert id1 == id2  # Même input = même ID
-        assert id1 != id3  # Input différent = ID différent
+        assert id1 == id2  # MÃªme input = mÃªme ID
+        assert id1 != id3  # Input diffÃ©rent = ID diffÃ©rent
     
     def test_normalize_whitespace(self):
         """normalize_whitespace normalise les espaces"""
@@ -281,10 +281,10 @@ class TestStringHelpers:
         assert result == "Hello World"
     
     def test_remove_accents(self):
-        """remove_accents enlève les accents"""
+        """remove_accents enlÃ¨ve les accents"""
         from src.utils.helpers.strings import remove_accents
         
-        result = remove_accents("Café crème")
+        result = remove_accents("CafÃ© crÃ¨me")
         assert result == "Cafe creme"
     
     def test_camel_to_snake(self):
@@ -310,7 +310,7 @@ class TestStringHelpers:
         assert pluralize("cheval", 2, "chevaux") == "2 chevaux"
     
     def test_mask_sensitive(self):
-        """mask_sensitive masque les données sensibles"""
+        """mask_sensitive masque les donnÃ©es sensibles"""
         from src.utils.helpers.strings import mask_sensitive
         
         # Affiche les premiers chars puis masque le reste
@@ -320,9 +320,9 @@ class TestStringHelpers:
         assert result.endswith("******")
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS HELPERS STATS (fonctions réelles)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS HELPERS STATS (fonctions rÃ©elles)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestStatsHelpers:
     """Tests pour les helpers stats"""
@@ -341,9 +341,9 @@ class TestStatsHelpers:
         assert calculate_average([]) == 0.0
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS HELPERS FOOD (fonctions réelles)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS HELPERS FOOD (fonctions rÃ©elles)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestFoodHelpers:
     """Tests pour les helpers food"""
@@ -361,12 +361,12 @@ class TestFoodHelpers:
         assert validate_stock_level(3, 5) is False  # Stock insuffisant
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS AI PARSER (après fix Pydantic)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS AI PARSER (aprÃ¨s fix Pydantic)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestAIParserPydanticV2:
-    """Tests pour vérifier la migration Pydantic v2"""
+    """Tests pour vÃ©rifier la migration Pydantic v2"""
     
     def test_import_parser(self):
         """Le parser s'importe sans erreur"""
@@ -374,7 +374,7 @@ class TestAIParserPydanticV2:
         assert AnalyseurIA is not None
     
     def test_model_validate_json_used(self):
-        """model_validate_json est utilisé (pas parse_raw)"""
+        """model_validate_json est utilisÃ© (pas parse_raw)"""
         import inspect
         from src.core.ai.parser import AnalyseurIA
         
@@ -383,7 +383,7 @@ class TestAIParserPydanticV2:
         assert "model_validate_json" in source
     
     def test_model_fields_used(self):
-        """model_fields est utilisé (pas __fields__)"""
+        """model_fields est utilisÃ© (pas __fields__)"""
         import inspect
         from src.core.ai.parser import AnalyseurIA
         
@@ -392,28 +392,28 @@ class TestAIParserPydanticV2:
         assert "model_fields" in source
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS ACTION HISTORY (après fix Pydantic)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS ACTION HISTORY (aprÃ¨s fix Pydantic)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestActionHistoryPydanticV2:
-    """Tests pour vérifier la migration Pydantic v2 dans action_history"""
+    """Tests pour vÃ©rifier la migration Pydantic v2 dans action_history"""
     
     def test_action_entry_model_config(self):
         """ActionEntry utilise model_config (pas class Config)"""
         from src.services.action_history import ActionEntry
         
-        # Vérifier que model_config est défini
+        # VÃ©rifier que model_config est dÃ©fini
         assert hasattr(ActionEntry, 'model_config')
         assert ActionEntry.model_config.get('from_attributes') is True
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS API MAIN (après fix Pydantic)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS API MAIN (aprÃ¨s fix Pydantic)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestAPIPydanticV2:
-    """Tests pour vérifier la migration Pydantic v2 dans api/main"""
+    """Tests pour vÃ©rifier la migration Pydantic v2 dans api/main"""
     
     def test_recette_response_model_config(self):
         """RecetteResponse utilise model_config"""
@@ -428,3 +428,4 @@ class TestAPIPydanticV2:
         
         assert hasattr(InventaireItemResponse, 'model_config')
         assert InventaireItemResponse.model_config.get('from_attributes') is True
+

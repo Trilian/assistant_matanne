@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/utils/formatters/ - dates, numbers, text, units
 Ces tests couvrent ~230 statements de fonctions pures
 """
@@ -16,7 +16,7 @@ class TestFormatDate:
     
     def test_format_date_none(self):
         from src.utils.formatters.dates import format_date
-        assert format_date(None) == "—"
+        assert format_date(None) == "â€”"
     
     def test_format_date_short(self):
         from src.utils.formatters.dates import format_date
@@ -31,7 +31,7 @@ class TestFormatDate:
     def test_format_date_long_fr(self):
         from src.utils.formatters.dates import format_date
         d = date(2025, 12, 1)
-        assert format_date(d, "long", "fr") == "1 décembre 2025"
+        assert format_date(d, "long", "fr") == "1 dÃ©cembre 2025"
     
     def test_format_date_long_en(self):
         from src.utils.formatters.dates import format_date
@@ -50,11 +50,11 @@ class TestFormatDate:
         assert format_date(d, "unknown") == "01/12/2025"
     
     def test_format_date_all_months_fr(self):
-        """Teste tous les mois en français"""
+        """Teste tous les mois en franÃ§ais"""
         from src.utils.formatters.dates import format_date
         months = [
-            "janvier", "février", "mars", "avril", "mai", "juin",
-            "juillet", "août", "septembre", "octobre", "novembre", "décembre"
+            "janvier", "fÃ©vrier", "mars", "avril", "mai", "juin",
+            "juillet", "aoÃ»t", "septembre", "octobre", "novembre", "dÃ©cembre"
         ]
         for i, month_name in enumerate(months, 1):
             d = date(2025, i, 15)
@@ -67,7 +67,7 @@ class TestFormatDatetime:
     
     def test_format_datetime_none(self):
         from src.utils.formatters.dates import format_datetime
-        assert format_datetime(None) == "—"
+        assert format_datetime(None) == "â€”"
     
     def test_format_datetime_short(self):
         from src.utils.formatters.dates import format_datetime
@@ -83,7 +83,7 @@ class TestFormatDatetime:
         from src.utils.formatters.dates import format_datetime
         dt = datetime(2025, 12, 1, 14, 30)
         result = format_datetime(dt, "long", "fr")
-        assert "1 décembre 2025" in result
+        assert "1 dÃ©cembre 2025" in result
         assert "14:30" in result
     
     def test_format_datetime_unknown(self):
@@ -138,7 +138,7 @@ class TestFormatRelativeDate:
 
 
 class TestFormatTime:
-    """Tests pour format_time (durée en minutes)"""
+    """Tests pour format_time (durÃ©e en minutes)"""
     
     def test_format_time_none(self):
         from src.utils.formatters.dates import format_time
@@ -166,7 +166,7 @@ class TestFormatTime:
 
 
 class TestFormatDuration:
-    """Tests pour format_duration (durée en secondes)"""
+    """Tests pour format_duration (durÃ©e en secondes)"""
     
     def test_format_duration_none(self):
         from src.utils.formatters.dates import format_duration
@@ -270,19 +270,19 @@ class TestFormatPrice:
     
     def test_format_price_none(self):
         from src.utils.formatters.numbers import format_price
-        assert format_price(None) == "0€"
+        assert format_price(None) == "0â‚¬"
     
     def test_format_price_integer(self):
         from src.utils.formatters.numbers import format_price
-        assert format_price(10.0) == "10€"
+        assert format_price(10.0) == "10â‚¬"
     
     def test_format_price_decimal(self):
         from src.utils.formatters.numbers import format_price
-        assert format_price(10.50) == "10.50€"
+        assert format_price(10.50) == "10.50â‚¬"
     
     def test_format_price_invalid(self):
         from src.utils.formatters.numbers import format_price
-        assert format_price("invalid") == "0€"
+        assert format_price("invalid") == "0â‚¬"
     
     def test_format_price_custom_currency(self):
         from src.utils.formatters.numbers import format_price
@@ -300,8 +300,8 @@ class TestFormatCurrency:
     def test_format_currency_fr(self):
         from src.utils.formatters.numbers import format_currency
         result = format_currency(1234.56, "EUR", "fr_FR")
-        assert "€" in result
-        assert "234" in result  # milliers séparés
+        assert "â‚¬" in result
+        assert "234" in result  # milliers sÃ©parÃ©s
     
     def test_format_currency_en(self):
         from src.utils.formatters.numbers import format_currency
@@ -344,13 +344,13 @@ class TestFormatNumber:
     def test_format_number_thousands(self):
         from src.utils.formatters.numbers import format_number
         result = format_number(1234567)
-        assert " " in result  # séparateur de milliers
+        assert " " in result  # sÃ©parateur de milliers
         assert "234" in result
     
     def test_format_number_decimals(self):
         from src.utils.formatters.numbers import format_number
         result = format_number(1234.56, decimals=2)
-        assert "," in result  # virgule décimale française
+        assert "," in result  # virgule dÃ©cimale franÃ§aise
     
     def test_format_number_invalid(self):
         from src.utils.formatters.numbers import format_number
@@ -399,7 +399,7 @@ class TestFormatRange:
     
     def test_format_range_with_unit(self):
         from src.utils.formatters.numbers import format_range
-        assert format_range(10, 20, "€") == "10-20 €"
+        assert format_range(10, 20, "â‚¬") == "10-20 â‚¬"
 
 
 class TestSmartRound:
@@ -431,14 +431,14 @@ class TestTruncate:
     
     def test_truncate_long_text(self):
         from src.utils.formatters.text import truncate
-        result = truncate("Un texte très long qui dépasse", 15)
+        result = truncate("Un texte trÃ¨s long qui dÃ©passe", 15)
         assert len(result) <= 15
         assert result.endswith("...")
     
     def test_truncate_custom_suffix(self):
         from src.utils.formatters.text import truncate
-        result = truncate("Un texte long", 10, suffix="…")
-        assert result.endswith("…")
+        result = truncate("Un texte long", 10, suffix="â€¦")
+        assert result.endswith("â€¦")
 
 
 class TestCleanText:
@@ -470,9 +470,9 @@ class TestSlugify:
     
     def test_slugify_accents(self):
         from src.utils.formatters.text import slugify
-        result = slugify("Café Crème")
-        assert "é" not in result
-        assert "è" not in result
+        result = slugify("CafÃ© CrÃ¨me")
+        assert "Ã©" not in result
+        assert "Ã¨" not in result
 
 
 class TestExtractNumber:
@@ -484,7 +484,7 @@ class TestExtractNumber:
     
     def test_extract_number_french(self):
         from src.utils.formatters.text import extract_number
-        assert extract_number("Prix: 10,50€") == 10.5
+        assert extract_number("Prix: 10,50â‚¬") == 10.5
     
     def test_extract_number_empty(self):
         from src.utils.formatters.text import extract_number
@@ -496,7 +496,7 @@ class TestExtractNumber:
     
     def test_extract_number_negative(self):
         from src.utils.formatters.text import extract_number
-        assert extract_number("-5 degrés") == -5
+        assert extract_number("-5 degrÃ©s") == -5
 
 
 class TestCapitalizeFirst:
@@ -513,3 +513,4 @@ class TestCapitalizeFirst:
     def test_capitalize_first_uppercase(self):
         from src.utils.formatters.text import capitalize_first
         assert capitalize_first("TOMATE") == "Tomate"
+

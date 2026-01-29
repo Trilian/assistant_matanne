@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour image_generator.py
 """
 
@@ -6,12 +6,12 @@ import pytest
 from unittest.mock import MagicMock, patch
 
 
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS IMAGE GENERATOR
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestImageGenerator:
-    """Tests du générateur d'images"""
+    """Tests du gÃ©nÃ©rateur d'images"""
     
     def test_module_imports(self):
         """Test que le module s'importe correctement"""
@@ -22,19 +22,19 @@ class TestImageGenerator:
             pytest.skip(f"Import failed: {e}")
     
     def test_has_generation_functions(self):
-        """Test que le module a des fonctions de génération"""
+        """Test que le module a des fonctions de gÃ©nÃ©ration"""
         try:
             from src.utils import image_generator
-            # Cherche des fonctions génératrices
+            # Cherche des fonctions gÃ©nÃ©ratrices
             funcs = [attr for attr in dir(image_generator) if not attr.startswith('_')]
             assert len(funcs) > 0
         except ImportError:
             pytest.skip("Module non importable")
 
 
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS RECIPE IMPORTER
-# ═══════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestRecipeImporter:
     """Tests de l'importateur de recettes"""
@@ -55,3 +55,4 @@ class TestRecipeImporter:
             assert len(funcs) > 0
         except ImportError:
             pytest.skip("Module non importable")
+

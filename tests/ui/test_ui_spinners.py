@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/ui/feedback/spinners.py
 Spinners et indicateurs de chargement
 """
@@ -10,9 +10,9 @@ import time
 import pytest
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
@@ -29,9 +29,9 @@ def mock_streamlit():
         yield mock_st
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SMART_SPINNER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestSmartSpinner:
@@ -41,26 +41,26 @@ class TestSmartSpinner:
         """Test smart_spinner basique"""
         from src.ui.feedback.spinners import smart_spinner
 
-        with smart_spinner("Test opération"):
+        with smart_spinner("Test opÃ©ration"):
             pass
 
         mock_streamlit.spinner.assert_called_once()
         call_args = mock_streamlit.spinner.call_args[0][0]
-        assert "Test opération" in call_args
+        assert "Test opÃ©ration" in call_args
 
     def test_smart_spinner_shows_elapsed_time(self, mock_streamlit):
-        """Test affichage temps écoulé"""
+        """Test affichage temps Ã©coulÃ©"""
         from src.ui.feedback.spinners import smart_spinner
 
         with smart_spinner("Test", show_elapsed=True):
-            time.sleep(0.01)  # Petit délai pour avoir du temps
+            time.sleep(0.01)  # Petit dÃ©lai pour avoir du temps
 
         mock_streamlit.caption.assert_called_once()
         caption_text = mock_streamlit.caption.call_args[0][0]
-        assert "✅ Terminé" in caption_text
+        assert "âœ… TerminÃ©" in caption_text
 
     def test_smart_spinner_no_elapsed_time(self, mock_streamlit):
-        """Test sans temps écoulé"""
+        """Test sans temps Ã©coulÃ©"""
         from src.ui.feedback.spinners import smart_spinner
 
         with smart_spinner("Test", show_elapsed=False):
@@ -89,11 +89,11 @@ class TestSmartSpinner:
         assert "estimation" not in call_args
 
     def test_smart_spinner_fast_operation_shows_ms(self, mock_streamlit):
-        """Test opération rapide affiche en ms"""
+        """Test opÃ©ration rapide affiche en ms"""
         from src.ui.feedback.spinners import smart_spinner
 
         with smart_spinner("Test rapide"):
-            pass  # Très rapide, moins d'1 seconde
+            pass  # TrÃ¨s rapide, moins d'1 seconde
 
         mock_streamlit.caption.assert_called_once()
         caption_text = mock_streamlit.caption.call_args[0][0]
@@ -107,20 +107,20 @@ class TestSmartSpinner:
             with smart_spinner("Test"):
                 raise ValueError("Test error")
 
-        # Caption doit quand même être appelé (dans finally)
+        # Caption doit quand mÃªme Ãªtre appelÃ© (dans finally)
         mock_streamlit.caption.assert_called_once()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS LOADING_INDICATOR
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestLoadingIndicator:
     """Tests pour loading_indicator()"""
 
     def test_loading_indicator_default(self, mock_streamlit):
-        """Test indicateur par défaut"""
+        """Test indicateur par dÃ©faut"""
         from src.ui.feedback.spinners import loading_indicator
 
         loading_indicator()
@@ -131,7 +131,7 @@ class TestLoadingIndicator:
         assert call_args[1]["unsafe_allow_html"] is True
 
     def test_loading_indicator_custom_message(self, mock_streamlit):
-        """Test message personnalisé"""
+        """Test message personnalisÃ©"""
         from src.ui.feedback.spinners import loading_indicator
 
         loading_indicator("Chargement des recettes...")
@@ -140,34 +140,34 @@ class TestLoadingIndicator:
         assert "Chargement des recettes..." in call_args
 
     def test_loading_indicator_contains_spinner_icon(self, mock_streamlit):
-        """Test contient icône spinner"""
+        """Test contient icÃ´ne spinner"""
         from src.ui.feedback.spinners import loading_indicator
 
         loading_indicator()
 
         call_args = mock_streamlit.markdown.call_args[0][0]
-        assert "⏳" in call_args
+        assert "â³" in call_args
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SKELETON_LOADER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestSkeletonLoader:
     """Tests pour skeleton_loader()"""
 
     def test_skeleton_loader_default_lines(self, mock_streamlit):
-        """Test lignes par défaut"""
+        """Test lignes par dÃ©faut"""
         from src.ui.feedback.spinners import skeleton_loader
 
         skeleton_loader()
 
-        # 3 lignes par défaut
+        # 3 lignes par dÃ©faut
         assert mock_streamlit.markdown.call_count == 3
 
     def test_skeleton_loader_custom_lines(self, mock_streamlit):
-        """Test nombre de lignes personnalisé"""
+        """Test nombre de lignes personnalisÃ©"""
         from src.ui.feedback.spinners import skeleton_loader
 
         skeleton_loader(lines=5)
@@ -183,7 +183,7 @@ class TestSkeletonLoader:
         assert mock_streamlit.markdown.call_count == 1
 
     def test_skeleton_loader_zero_lines(self, mock_streamlit):
-        """Test zéro ligne"""
+        """Test zÃ©ro ligne"""
         from src.ui.feedback.spinners import skeleton_loader
 
         skeleton_loader(lines=0)
@@ -199,7 +199,8 @@ class TestSkeletonLoader:
         call_args = mock_streamlit.markdown.call_args
         html_content = call_args[0][0]
 
-        # Vérifier éléments de style
+        # VÃ©rifier Ã©lÃ©ments de style
         assert "background" in html_content
         assert "animation" in html_content
         assert call_args[1]["unsafe_allow_html"] is True
+

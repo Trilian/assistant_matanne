@@ -1,0 +1,360 @@
+﻿"""
+Module Calendrier UnifiÃ© - Vue dÃ©taillÃ©e du calendrier familial
+
+Affiche tous les Ã©vÃ©nements calendrier avec interface interactive
+Utilise PlanningAIService pour agrÃ©gation optimisÃ©e
+"""
+
+import calendar
+from datetime import date, datetime, timedelta
+
+import streamlit as st
+
+from src.services.planning_unified import get_planning_service
+
+# Logique mÃ©tier pure
+from src.domains.planning.logic.calendrier_logic import (
+    get_jours_mois,
+    filtrer_evenements_jour,
+    grouper_evenements_par_jour
+)
+
+logger = __import__("logging").getLogger(__name__)
+
+
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# HELPERS UI
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+
+def afficher_jour_expandable(jour: date, jour_complet: dict, jour_nom: str) -> None:
+    """Affiche un jour avec tous ses Ã©vÃ©nements en expandable"""
+    is_today = jour == date.today()
+
+    # Header avec badge charge
+    charge_emoji = {
+        "faible": "ðŸŸ¢",
+        "normal": "ðŸŸ¡",
+        "intense": "ðŸ”´",
+    }.get(jour_complet.get("charge", "normal"), "âšª")
+
+    header = f"{charge_emoji} {jour_nom} {jour.strftime('%d/%m')}"
+    if is_today:
+        header = f"ðŸ”µ {header}"
+
+    with st.expander(header, expanded=is_today):
+        # Colonnes pour meilleure organisation
+        if jour_complet.get("repas"):
+            st.markdown("##### ðŸ½ï¸ Repas")
+            for repas in jour_complet["repas"]:
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    st.write(f"**{repas['type'].capitalize()}**: {repas['recette']}")
+                with col2:
+                    st.caption(f"{repas['portions']} portions")
+
+        if jour_complet.get("activites"):
+            st.markdown("##### ðŸŽ¨ ActivitÃ©s")
+            for act in jour_complet["activites"]:
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    label = "ðŸ‘¶" if act.get("pour_jules") else "ðŸ‘¨â€ðŸ‘©â€ðŸ‘§"
+                    st.write(f"{label} **{act['titre']}** ({act['type']})")
+                with col2:
+                    if act.get("budget"):
+                        st.caption(f"{act['budget']:.0f}â‚¬")
+
+        if jour_complet.get("projets"):
+            st.markdown("##### ðŸ—ï¸ Projets")
+            for proj in jour_complet["projets"]:
+                priorite_color = {
+                    "basse": "ðŸŸ¢",
+                    "moyenne": "ðŸŸ¡",
+                    "haute": "ðŸ”´",
+                }.get(proj.get("priorite", "moyenne"), "âšª")
+                st.write(f"{priorite_color} **{proj['nom']}** - {proj['statut']}")
+
+        if jour_complet.get("events"):
+            st.markdown("##### ðŸ“… Ã‰vÃ©nements")
+            for event in jour_complet["events"]:
+                debut = event["debut"].strftime("%H:%M") if isinstance(event["debut"], datetime) else "â€”"
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    st.write(f"â° **{event['titre']}**")
+                    if event.get("lieu"):
+                        st.caption(f"ðŸ“ {event['lieu']}")
+                with col2:
+                    st.caption(debut)
+
+        if jour_complet.get("routines"):
+            st.markdown("##### â° Routines")
+            for routine in jour_complet["routines"]:
+                heure = routine.get("heure", "â€”")
+                status = "âœ…" if routine.get("fait") else "â­•"
+                st.write(f"{status} **{routine['nom']}** ({heure})")
+
+        # Alertes du jour
+        if jour_complet.get("alertes"):
+            st.markdown("##### âš ï¸ Alertes")
+            for alerte in jour_complet["alertes"]:
+                st.warning(alerte, icon="âš ï¸")
+
+        # Si vide
+        if not any(
+            [
+                jour_complet.get("repas"),
+                jour_complet.get("activites"),
+                jour_complet.get("projets"),
+                jour_complet.get("events"),
+                jour_complet.get("routines"),
+            ]
+        ):
+            st.caption("Aucun Ã©vÃ©nement prÃ©vu ce jour")
+
+        # Charge visuelle
+        charge = jour_complet.get("charge_score", 0)
+        st.markdown(f"**Charge du jour**: {charge}/100")
+        st.progress(min(charge / 100, 1.0))
+
+
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# MODULE PRINCIPAL
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+
+def app():
+    """Module Calendrier unifiÃ©"""
+
+    st.title("ðŸ“… Calendrier Familial")
+    st.caption("Vue intÃ©grÃ©e de tous les Ã©vÃ©nements familiaux")
+
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # NAVIGATION SEMAINE
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+    if "planning_week_start" not in st.session_state:
+        today = date.today()
+        st.session_state.planning_week_start = today - timedelta(days=today.weekday())
+
+    col_nav1, col_nav2, col_nav3 = st.columns([1, 2, 1])
+
+    with col_nav1:
+        if st.button("â¬…ï¸ Semaine prÃ©cÃ©dente", use_container_width=True):
+            st.session_state.planning_week_start -= timedelta(days=7)
+            st.rerun()
+
+    with col_nav2:
+        week_start = st.session_state.planning_week_start
+        week_end = week_start + timedelta(days=6)
+        st.markdown(
+            f"<h3 style='text-align: center;'>{week_start.strftime('%d/%m')} â€” {week_end.strftime('%d/%m/%Y')}</h3>",
+            unsafe_allow_html=True,
+        )
+
+    with col_nav3:
+        if st.button("Semaine suivante âž¡ï¸", use_container_width=True):
+            st.session_state.planning_week_start += timedelta(days=7)
+            st.rerun()
+
+    st.markdown("---")
+
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # CHARGEMENT DONNÃ‰ES
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+    service = get_planning_service()
+    semaine = service.get_semaine_complete(st.session_state.planning_week_start)
+
+    if not semaine:
+        st.error("âŒ Erreur lors du chargement de la semaine")
+        return
+
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # STATS SEMAINE
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+    st.markdown("### ðŸ“Š RÃ©sumÃ© de la semaine")
+
+    cols_stats = st.columns(5)
+
+    stats = semaine.stats_semaine
+    with cols_stats[0]:
+        st.metric("ðŸ½ï¸ Repas", stats.get("total_repas", 0))
+
+    with cols_stats[1]:
+        st.metric("ðŸŽ¨ ActivitÃ©s", stats.get("total_activites", 0))
+
+    with cols_stats[2]:
+        st.metric("ðŸ‘¶ Pour Jules", stats.get("activites_jules", 0))
+
+    with cols_stats[3]:
+        st.metric("ðŸ—ï¸ Projets", stats.get("total_projets", 0))
+
+    with cols_stats[4]:
+        budget = stats.get("budget_total", 0)
+        st.metric(f"ðŸ’° Budget", f"{budget:.0f}â‚¬")
+
+    st.markdown("---")
+
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ALERTES SEMAINE
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+    if semaine.alertes_semaine:
+        st.markdown("### âš ï¸ Alertes Semaine")
+        for alerte in semaine.alertes_semaine:
+            st.warning(alerte, icon="âš ï¸")
+        st.markdown("---")
+
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # CHARGE GLOBALE SEMAINE
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+    charge_color = {
+        "faible": "ðŸŸ¢",
+        "normal": "ðŸŸ¡",
+        "intense": "ðŸ”´",
+    }
+    charge_emoji = charge_color.get(semaine.charge_globale, "âšª")
+
+    st.markdown(f"### {charge_emoji} Charge semaine globale: **{semaine.charge_globale.upper()}**")
+    st.progress(min(stats.get("charge_moyenne", 50) / 100, 1.0))
+
+    st.markdown("---")
+
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # VUE JOURS DÃ‰TAILLÃ‰E
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+    st.markdown("### ðŸ“… DÃ©tail par jour")
+
+    jours_semaine = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
+
+    for i in range(7):
+        jour = st.session_state.planning_week_start + timedelta(days=i)
+        jour_str = jour.isoformat()
+        jour_complet = semaine.jours.get(jour_str)
+
+        if jour_complet:
+            afficher_jour_expandable(jour, jour_complet.dict(), jours_semaine[i].capitalize())
+
+    st.markdown("---")
+
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ONGLETS ACTIONS
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+    tab1, tab2, tab3 = st.tabs(["âž• Nouvel Ã©vÃ©nement", "ðŸ¤– GÃ©nÃ©rer avec IA", "ðŸ“… Vue mois"])
+
+    with tab1:
+        st.subheader("âž• Ajouter un Ã©vÃ©nement")
+
+        with st.form("form_event_planning"):
+            titre = st.text_input("Titre *", placeholder="Ex: RDV mÃ©decin, Sortie parc...")
+            type_event = st.selectbox(
+                "Type d'Ã©vÃ©nement",
+                ["famille", "santÃ©", "loisirs", "social", "travail", "autre"],
+            )
+
+            col_e1, col_e2 = st.columns(2)
+            with col_e1:
+                date_event = st.date_input("Date *", value=date.today())
+                heure = st.time_input("Heure", value=datetime.now().time())
+
+            with col_e2:
+                lieu = st.text_input("Lieu", placeholder="Ex: Parc du chÃ¢teau")
+                couleur = st.selectbox("Couleur", ["bleu", "rouge", "vert", "jaune", "violet"])
+
+            description = st.text_area("Description (optionnel)")
+
+            submitted = st.form_submit_button("ðŸ’¾ CrÃ©er l'Ã©vÃ©nement", type="primary")
+
+            if submitted:
+                if not titre:
+                    st.error("Le titre est obligatoire")
+                else:
+                    debut = datetime.combine(date_event, heure)
+                    service.creer_event(
+                        titre=titre,
+                        date_debut=debut,
+                        type_event=type_event,
+                        description=description,
+                        lieu=lieu,
+                        couleur=couleur,
+                    )
+                    st.success(f"âœ… Ã‰vÃ©nement '{titre}' crÃ©Ã©!")
+                    st.balloons()
+                    st.rerun()
+
+    with tab2:
+        st.subheader("ðŸ¤– GÃ©nÃ©rer semaine avec IA")
+
+        st.info(
+            "ðŸ’¡ L'IA peut gÃ©nÃ©rer une semaine complÃ¨te Ã©quilibrÃ©e basÃ©e sur vos contraintes et objectifs familiaux"
+        )
+
+        with st.form("form_gen_ia"):
+            budget = st.slider("Budget semaine (â‚¬)", 100, 1000, 400)
+            energie = st.selectbox("Niveau d'Ã©nergie famille", ["faible", "normal", "Ã©levÃ©"])
+            objectifs = st.multiselect(
+                "Objectifs santÃ©",
+                ["Cardio", "Yoga", "Detente", "Temps en famille", "Sommeil"],
+            )
+
+            gen_submitted = st.form_submit_button("ðŸš€ GÃ©nÃ©rer une semaine Ã©quilibrÃ©e", type="primary")
+
+            if gen_submitted:
+                with st.spinner("ðŸ¤– L'IA rÃ©flÃ©chit..."):
+                    result = service.generer_semaine_ia(
+                        date_debut=st.session_state.planning_week_start,
+                        contraintes={"budget": budget, "energie": energie},
+                        contexte={"objectifs_sante": objectifs, "jules_age_mois": 19},
+                    )
+
+                    if result:
+                        st.success("âœ… Semaine gÃ©nÃ©rÃ©e!")
+                        st.markdown(f"**Harmonie**: {result.harmonie_description}")
+                        with st.expander("Raisons de cette proposition"):
+                            for raison in result.raisons:
+                                st.write(f"â€¢ {raison}")
+                    else:
+                        st.error("âŒ Erreur lors de la gÃ©nÃ©ration")
+
+    with tab3:
+        st.subheader("ðŸ“… Vue mensuelle")
+
+        col_m1, col_m2 = st.columns([2, 1])
+
+        with col_m1:
+            today = date.today()
+            mois_select = st.selectbox("Mois", list(calendar.month_name)[1:], index=today.month - 1)
+            mois_num = list(calendar.month_name).index(mois_select)
+
+        with col_m2:
+            annee = st.number_input("AnnÃ©e", 2020, 2030, today.year)
+
+        st.markdown(f"### {mois_select} {annee}")
+
+        # Calendrier minimal
+        cal = calendar.monthcalendar(annee, mois_num)
+
+        cols_jours = st.columns(7)
+        jours_semaine_abbr = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
+
+        for i, col in enumerate(cols_jours):
+            col.markdown(f"**{jours_semaine_abbr[i]}**")
+
+        for semaine_cal in cal:
+            cols = st.columns(7)
+            for i, jour in enumerate(semaine_cal):
+                if jour == 0:
+                    cols[i].write("")
+                else:
+                    date_jour = date(annee, mois_num, jour)
+                    is_today = date_jour == date.today()
+
+                    style = "ðŸ”µ" if is_today else ""
+                    cols[i].write(f"{style} **{jour}**")
+
+        st.caption("ðŸ”µ = Aujourd'hui")
+

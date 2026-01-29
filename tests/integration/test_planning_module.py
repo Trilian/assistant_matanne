@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour le module Planning Streamlit (test_planning_module.py)
 25+ tests couvrant les 3 onglets et interactions
 """
@@ -9,7 +9,7 @@ from unittest.mock import Mock, patch, MagicMock
 
 import streamlit as st
 
-from src.modules.cuisine.planning import (
+from src.domains.cuisine.logic.planning_logic import (
     render_planning,
     render_generer,
     render_historique
@@ -31,19 +31,19 @@ class TestRenderPlanning:
         planning.actif = True
         planning.genere_par_ia = False
         
-        # Créer repas
+        # CrÃ©er repas
         repas1 = Mock(spec=Repas)
         repas1.id = 1
         repas1.date_repas = date(2026, 1, 20)
-        repas1.type_repas = "déjeuner"
-        repas1.recette = Mock(nom="Pâtes")
+        repas1.type_repas = "dÃ©jeuner"
+        repas1.recette = Mock(nom="PÃ¢tes")
         repas1.prepare = False
         repas1.notes = "Note test"
         
         repas2 = Mock(spec=Repas)
         repas2.id = 2
         repas2.date_repas = date(2026, 1, 20)
-        repas2.type_repas = "dîner"
+        repas2.type_repas = "dÃ®ner"
         repas2.recette = Mock(nom="Poisson")
         repas2.prepare = True
         repas2.notes = None
@@ -75,7 +75,7 @@ class TestRenderPlanning:
     @patch("src.modules.cuisine.planning.get_planning_service")
     @patch("src.modules.cuisine.planning.obtenir_contexte_db")
     def test_render_planning_with_data(self, mock_db_context, mock_service, mock_planning):
-        """Test render_planning avec données"""
+        """Test render_planning avec donnÃ©es"""
         mock_service.return_value = Mock(get_planning=Mock(return_value=mock_planning))
         mock_query = Mock()
         mock_query.all.return_value = []
@@ -93,7 +93,7 @@ class TestRenderPlanning:
 
 
 class TestRenderGenerer:
-    """Tests render_generer() - Onglet Générer avec IA"""
+    """Tests render_generer() - Onglet GÃ©nÃ©rer avec IA"""
 
     @patch("src.modules.cuisine.planning.get_planning_service")
     def test_render_generer_no_service(self, mock_service):
@@ -106,7 +106,7 @@ class TestRenderGenerer:
 
     @patch("src.modules.cuisine.planning.get_planning_service")
     def test_render_generer_form_displayed(self, mock_service):
-        """Test que formulaire est affiché"""
+        """Test que formulaire est affichÃ©"""
         mock_service.return_value = Mock()
         
         with patch("streamlit.subheader"), \
@@ -120,10 +120,10 @@ class TestRenderGenerer:
 
     @patch("src.modules.cuisine.planning.get_planning_service")
     def test_render_generer_generation(self, mock_service):
-        """Test génération planning"""
+        """Test gÃ©nÃ©ration planning"""
         mock_planning = Mock(spec=Planning)
         mock_planning.id = 1
-        mock_planning.nom = "Planning Généré"
+        mock_planning.nom = "Planning GÃ©nÃ©rÃ©"
         
         mock_service.return_value = Mock(
             generer_planning_ia=Mock(return_value=mock_planning),
@@ -132,8 +132,8 @@ class TestRenderGenerer:
                 "repas_par_jour": {
                     "2026-01-20": [
                         {
-                            "type_repas": "déjeuner",
-                            "recette_nom": "Pâtes",
+                            "type_repas": "dÃ©jeuner",
+                            "recette_nom": "PÃ¢tes",
                             "notes": None
                         }
                     ]
@@ -148,7 +148,7 @@ class TestRenderGenerer:
              patch("streamlit.text_area", return_value=""), \
              patch("streamlit.button") as mock_button:
             
-            # Simuler click sur bouton générer
+            # Simuler click sur bouton gÃ©nÃ©rer
             mock_button.return_value = True
             
             with patch("streamlit.spinner"), \
@@ -256,10 +256,10 @@ class TestPlanningModuleIntegration:
     @patch("src.modules.cuisine.planning.get_planning_service")
     @patch("src.modules.cuisine.planning.obtenir_contexte_db")
     def test_workflow_create_to_historique(self, mock_db_context, mock_service):
-        """Test workflow: créer planning → voir en historique"""
+        """Test workflow: crÃ©er planning â†’ voir en historique"""
         mock_planning = Mock(spec=Planning)
         mock_planning.id = 1
-        mock_planning.nom = "Planning créé"
+        mock_planning.nom = "Planning crÃ©Ã©"
         mock_planning.semaine_debut = date(2026, 1, 20)
         mock_planning.semaine_fin = date(2026, 1, 26)
         mock_planning.repas = [Mock()]
@@ -285,14 +285,14 @@ class TestPlanningModuleIntegration:
         # Monday = 0, so go back to Monday
         monday = today - timedelta(days=today.weekday())
         
-        # Vérifier que c'est bien lundi
+        # VÃ©rifier que c'est bien lundi
         assert monday.weekday() == 0
         
         # Tester avec un samedi
         saturday = monday + timedelta(days=5)
         assert saturday.weekday() == 5  # Samedi
         
-        # Conversion samedi → lundi précédent
+        # Conversion samedi â†’ lundi prÃ©cÃ©dent
         converted = saturday - timedelta(days=5)
         assert converted.weekday() == 0
 
@@ -342,7 +342,7 @@ class TestPlanningModuleEmojis:
 
     def test_jours_emoji(self):
         """Test emojis jours semaine"""
-        from src.modules.cuisine.planning import JOURS_EMOJI, JOURS_SEMAINE
+        from src.domains.cuisine.logic.planning_logic import JOURS_EMOJI, JOURS_SEMAINE
         
         assert len(JOURS_EMOJI) == 7
         assert len(JOURS_SEMAINE) == 7
@@ -351,15 +351,17 @@ class TestPlanningModuleEmojis:
 
     def test_types_repas(self):
         """Test types de repas"""
-        from src.modules.cuisine.planning import TYPES_REPAS
+        from src.domains.cuisine.logic.planning_logic import TYPES_REPAS
         
-        assert "déjeuner" in TYPES_REPAS
-        assert "dîner" in TYPES_REPAS
+        assert "dÃ©jeuner" in TYPES_REPAS
+        assert "dÃ®ner" in TYPES_REPAS
 
     def test_preferences_options(self):
-        """Test options préférences"""
-        from src.modules.cuisine.planning import REGIMES, TEMPS_CUISINE, BUDGETS
+        """Test options prÃ©fÃ©rences"""
+        from src.domains.cuisine.logic.planning_logic import REGIMES, TEMPS_CUISINE, BUDGETS
         
         assert len(REGIMES) > 0
         assert len(TEMPS_CUISINE) > 0
         assert len(BUDGETS) > 0
+
+

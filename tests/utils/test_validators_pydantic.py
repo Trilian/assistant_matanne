@@ -1,5 +1,5 @@
-"""
-Tests pour src/core/validators_pydantic.py - Schémas Pydantic de validation.
+﻿"""
+Tests pour src/core/validators_pydantic.py - SchÃ©mas Pydantic de validation.
 """
 
 from datetime import date
@@ -20,16 +20,16 @@ from src.core.validators_pydantic import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS INGREDIENT INPUT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestIngredientInput:
     """Tests pour IngredientInput."""
 
     def test_valid_minimal(self):
-        """Test création minimale valide."""
+        """Test crÃ©ation minimale valide."""
         ing = IngredientInput(nom="Tomate")
         
         assert ing.nom == "Tomate"
@@ -37,7 +37,7 @@ class TestIngredientInput:
         assert ing.unite is None
 
     def test_valid_complete(self):
-        """Test création complète."""
+        """Test crÃ©ation complÃ¨te."""
         ing = IngredientInput(nom="farine", quantite=500, unite="g")
         
         assert ing.nom == "Farine"  # Capitalized
@@ -50,51 +50,51 @@ class TestIngredientInput:
         assert ing.nom == "Tomate"
 
     def test_nom_empty_rejected(self):
-        """Test nom vide rejeté."""
+        """Test nom vide rejetÃ©."""
         with pytest.raises(ValidationError):
             IngredientInput(nom="")
 
     def test_nom_too_long_rejected(self):
-        """Test nom trop long rejeté."""
+        """Test nom trop long rejetÃ©."""
         with pytest.raises(ValidationError):
             IngredientInput(nom="x" * 201)
 
     def test_quantite_negative_rejected(self):
-        """Test quantité négative rejetée."""
+        """Test quantitÃ© nÃ©gative rejetÃ©e."""
         with pytest.raises(ValidationError):
             IngredientInput(nom="Test", quantite=-1)
 
     def test_quantite_zero_rejected(self):
-        """Test quantité zéro rejetée (ge=0.01)."""
+        """Test quantitÃ© zÃ©ro rejetÃ©e (ge=0.01)."""
         with pytest.raises(ValidationError):
             IngredientInput(nom="Test", quantite=0)
 
     def test_quantite_too_large_rejected(self):
-        """Test quantité trop grande rejetée."""
+        """Test quantitÃ© trop grande rejetÃ©e."""
         with pytest.raises(ValidationError):
             IngredientInput(nom="Test", quantite=10001)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ETAPE INPUT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestEtapeInput:
     """Tests pour EtapeInput."""
 
     def test_valid_with_numero(self):
-        """Test création avec numero."""
-        etape = EtapeInput(numero=1, description="Préchauffer le four")
+        """Test crÃ©ation avec numero."""
+        etape = EtapeInput(numero=1, description="PrÃ©chauffer le four")
         
         assert etape.numero == 1
-        assert etape.description == "Préchauffer le four"
+        assert etape.description == "PrÃ©chauffer le four"
 
     def test_valid_with_ordre(self):
-        """Test création avec ordre (alias)."""
-        etape = EtapeInput(ordre=2, description="Mélanger les ingrédients")
+        """Test crÃ©ation avec ordre (alias)."""
+        etape = EtapeInput(ordre=2, description="MÃ©langer les ingrÃ©dients")
         
-        assert etape.numero == 2  # ordre copié vers numero
+        assert etape.numero == 2  # ordre copiÃ© vers numero
         assert etape.ordre == 2
 
     def test_description_cleaned(self):
@@ -103,41 +103,41 @@ class TestEtapeInput:
         assert etape.description == "Test"
 
     def test_description_too_short_rejected(self):
-        """Test description trop courte rejetée (min=5)."""
+        """Test description trop courte rejetÃ©e (min=5)."""
         with pytest.raises(ValidationError):
             EtapeInput(numero=1, description="Test")  # 4 chars
 
     def test_description_too_long_rejected(self):
-        """Test description trop longue rejetée."""
+        """Test description trop longue rejetÃ©e."""
         with pytest.raises(ValidationError):
             EtapeInput(numero=1, description="x" * 1001)
 
     def test_neither_numero_nor_ordre_rejected(self):
-        """Test sans numero ni ordre rejeté."""
+        """Test sans numero ni ordre rejetÃ©."""
         with pytest.raises(ValidationError):
             EtapeInput(description="Valid description here")
 
     def test_duree_valid(self):
-        """Test durée valide."""
+        """Test durÃ©e valide."""
         etape = EtapeInput(numero=1, description="Cuire", duree=30)
         assert etape.duree == 30
 
     def test_duree_too_long_rejected(self):
-        """Test durée trop longue rejetée (max 1440 = 24h)."""
+        """Test durÃ©e trop longue rejetÃ©e (max 1440 = 24h)."""
         with pytest.raises(ValidationError):
             EtapeInput(numero=1, description="Test step", duree=1441)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS RECETTE INPUT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestRecetteInput:
     """Tests pour RecetteInput."""
 
     def test_valid_minimal(self):
-        """Test création minimale."""
+        """Test crÃ©ation minimale."""
         recette = RecetteInput(
             nom="Tarte",
             temps_preparation=30,
@@ -162,7 +162,7 @@ class TestRecetteInput:
         assert recette.nom == "Tarte aux pommes"
 
     def test_nom_too_short_rejected(self):
-        """Test nom trop court rejeté (min 2 after clean)."""
+        """Test nom trop court rejetÃ© (min 2 after clean)."""
         with pytest.raises(ValidationError):
             RecetteInput(
                 nom="T",
@@ -178,7 +178,7 @@ class TestRecetteInput:
             nom="Soupe",
             temps_preparation=20,
             temps_cuisson=30,
-            ingredients=[IngredientInput(nom="Légume")],
+            ingredients=[IngredientInput(nom="LÃ©gume")],
             etapes=[EtapeInput(numero=1, description="Cuire la soupe")],
             saison="hiver",
         )
@@ -186,20 +186,20 @@ class TestRecetteInput:
         assert recette.saison == "hiver"
 
     def test_saison_uppercase_normalized(self):
-        """Test saison normalisée en minuscules."""
+        """Test saison normalisÃ©e en minuscules."""
         recette = RecetteInput(
             nom="Salade",
             temps_preparation=10,
             temps_cuisson=0,
             ingredients=[IngredientInput(nom="Salade")],
             etapes=[EtapeInput(numero=1, description="Laver la salade")],
-            saison="ÉTÉ",
+            saison="Ã‰TÃ‰",
         )
         
-        assert recette.saison == "été"
+        assert recette.saison == "Ã©tÃ©"
 
     def test_saison_invalid_rejected(self):
-        """Test saison invalide rejetée."""
+        """Test saison invalide rejetÃ©e."""
         with pytest.raises(ValidationError):
             RecetteInput(
                 nom="Test",
@@ -211,7 +211,7 @@ class TestRecetteInput:
             )
 
     def test_temps_total_exceeded_rejected(self):
-        """Test temps total > 24h rejeté."""
+        """Test temps total > 24h rejetÃ©."""
         with pytest.raises(ValidationError):
             RecetteInput(
                 nom="Test",
@@ -222,7 +222,7 @@ class TestRecetteInput:
             )
 
     def test_no_ingredients_rejected(self):
-        """Test sans ingrédients rejeté."""
+        """Test sans ingrÃ©dients rejetÃ©."""
         with pytest.raises(ValidationError):
             RecetteInput(
                 nom="Test",
@@ -233,7 +233,7 @@ class TestRecetteInput:
             )
 
     def test_no_etapes_rejected(self):
-        """Test sans étapes rejeté."""
+        """Test sans Ã©tapes rejetÃ©."""
         with pytest.raises(ValidationError):
             RecetteInput(
                 nom="Test",
@@ -244,16 +244,16 @@ class TestRecetteInput:
             )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS INGREDIENT STOCK INPUT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestIngredientStockInput:
     """Tests pour IngredientStockInput."""
 
     def test_valid_minimal(self):
-        """Test création minimale."""
+        """Test crÃ©ation minimale."""
         stock = IngredientStockInput(nom="Farine", quantite=1, unite="kg")
         
         assert stock.nom == "Farine"
@@ -261,7 +261,7 @@ class TestIngredientStockInput:
         assert stock.unite == "kg"
 
     def test_valid_complete(self):
-        """Test création complète."""
+        """Test crÃ©ation complÃ¨te."""
         stock = IngredientStockInput(
             nom="lait",
             quantite=2,
@@ -276,70 +276,70 @@ class TestIngredientStockInput:
         assert stock.prix_unitaire == 1.5
 
     def test_quantite_too_small_rejected(self):
-        """Test quantité trop petite rejetée (ge=0.01)."""
+        """Test quantitÃ© trop petite rejetÃ©e (ge=0.01)."""
         with pytest.raises(ValidationError):
             IngredientStockInput(nom="Test", quantite=0, unite="kg")
 
     def test_prix_negatif_rejected(self):
-        """Test prix négatif rejeté."""
+        """Test prix nÃ©gatif rejetÃ©."""
         with pytest.raises(ValidationError):
             IngredientStockInput(nom="Test", quantite=1, unite="kg", prix_unitaire=-1)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS REPAS INPUT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestRepasInput:
     """Tests pour RepasInput."""
 
     def test_valid_minimal(self):
-        """Test création minimale."""
-        repas = RepasInput(date=date(2025, 1, 15), type_repas="déjeuner")
+        """Test crÃ©ation minimale."""
+        repas = RepasInput(date=date(2025, 1, 15), type_repas="dÃ©jeuner")
         
         assert repas.date_repas == date(2025, 1, 15)
-        assert repas.type_repas == "déjeuner"
+        assert repas.type_repas == "dÃ©jeuner"
 
     def test_valid_with_recette(self):
         """Test avec recette."""
         repas = RepasInput(
             date=date(2025, 1, 15),
-            type_repas="dîner",
+            type_repas="dÃ®ner",
             recette_id=42,
         )
         
         assert repas.recette_id == 42
 
     def test_type_normalized(self):
-        """Test type normalisé en minuscules."""
-        repas = RepasInput(date=date(2025, 1, 15), type_repas="DÉJEUNER")
-        assert repas.type_repas == "déjeuner"
+        """Test type normalisÃ© en minuscules."""
+        repas = RepasInput(date=date(2025, 1, 15), type_repas="DÃ‰JEUNER")
+        assert repas.type_repas == "dÃ©jeuner"
 
     def test_type_invalid_rejected(self):
-        """Test type invalide rejeté."""
+        """Test type invalide rejetÃ©."""
         with pytest.raises(ValidationError):
             RepasInput(date=date(2025, 1, 15), type_repas="brunch")
 
     def test_all_valid_types(self):
         """Test tous les types valides."""
-        valid_types = ["petit_déjeuner", "déjeuner", "dîner", "goûter"]
+        valid_types = ["petit_dÃ©jeuner", "dÃ©jeuner", "dÃ®ner", "goÃ»ter"]
         
         for type_repas in valid_types:
             repas = RepasInput(date=date(2025, 1, 15), type_repas=type_repas)
             assert repas.type_repas == type_repas
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ROUTINE INPUT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestRoutineInput:
     """Tests pour RoutineInput."""
 
     def test_valid_minimal(self):
-        """Test création minimale."""
+        """Test crÃ©ation minimale."""
         routine = RoutineInput(
             nom="Routine du soir",
             pour_qui="Jules",
@@ -362,7 +362,7 @@ class TestRoutineInput:
         assert routine.nom == "Routine matin"
 
     def test_frequence_normalized(self):
-        """Test fréquence normalisée."""
+        """Test frÃ©quence normalisÃ©e."""
         routine = RoutineInput(
             nom="Test",
             pour_qui="Jules",
@@ -372,7 +372,7 @@ class TestRoutineInput:
         assert routine.frequence == "quotidien"
 
     def test_frequence_invalid_rejected(self):
-        """Test fréquence invalide rejetée."""
+        """Test frÃ©quence invalide rejetÃ©e."""
         with pytest.raises(ValidationError):
             RoutineInput(
                 nom="Test",
@@ -381,7 +381,7 @@ class TestRoutineInput:
             )
 
     def test_all_valid_frequences(self):
-        """Test toutes les fréquences valides."""
+        """Test toutes les frÃ©quences valides."""
         valid_freqs = ["quotidien", "hebdomadaire", "mensuel"]
         
         for freq in valid_freqs:
@@ -389,16 +389,16 @@ class TestRoutineInput:
             assert routine.frequence == freq
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS TACHE ROUTINE INPUT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestTacheRoutineInput:
     """Tests pour TacheRoutineInput."""
 
     def test_valid_minimal(self):
-        """Test création minimale."""
+        """Test crÃ©ation minimale."""
         tache = TacheRoutineInput(nom="Se brosser les dents")
         
         assert tache.nom == "Se brosser les dents"
@@ -406,24 +406,24 @@ class TestTacheRoutineInput:
 
     def test_valid_with_heure(self):
         """Test avec heure."""
-        tache = TacheRoutineInput(nom="Petit déjeuner", heure="08:00")
+        tache = TacheRoutineInput(nom="Petit dÃ©jeuner", heure="08:00")
         
         assert tache.heure == "08:00"
 
     def test_heure_invalid_format_rejected(self):
-        """Test format heure invalide rejeté."""
+        """Test format heure invalide rejetÃ©."""
         with pytest.raises(ValidationError):
-            TacheRoutineInput(nom="Test", heure="8:00")  # Doit être 08:00
+            TacheRoutineInput(nom="Test", heure="8:00")  # Doit Ãªtre 08:00
 
     def test_heure_invalid_format_letters(self):
-        """Test heure avec lettres rejetée."""
+        """Test heure avec lettres rejetÃ©e."""
         with pytest.raises(ValidationError):
             TacheRoutineInput(nom="Test", heure="abc")
 
     def test_heure_valid_edge_case(self):
         """Test heure 25:00 passe le pattern (regex ne valide pas la plage)."""
         # Note: Le pattern regex ^\d{2}:\d{2}$ ne valide pas la plage horaire
-        # 25:00 est accepté par le pattern car c'est 2 digits:2 digits
+        # 25:00 est acceptÃ© par le pattern car c'est 2 digits:2 digits
         tache = TacheRoutineInput(nom="Test", heure="25:00")
         assert tache.heure == "25:00"
 
@@ -433,37 +433,37 @@ class TestTacheRoutineInput:
         assert tache.nom == "Test"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ENTREE JOURNAL INPUT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestEntreeJournalInput:
     """Tests pour EntreeJournalInput."""
 
     def test_valid_minimal(self):
-        """Test création minimale."""
+        """Test crÃ©ation minimale."""
         entree = EntreeJournalInput(
-            domaine="santé",
-            titre="Visite médecin",
+            domaine="santÃ©",
+            titre="Visite mÃ©decin",
             contenu="Tout va bien",
         )
         
-        assert entree.domaine == "santé"
-        assert entree.titre == "Visite médecin"
+        assert entree.domaine == "santÃ©"
+        assert entree.titre == "Visite mÃ©decin"
 
     def test_domaine_normalized(self):
-        """Test domaine normalisé."""
+        """Test domaine normalisÃ©."""
         entree = EntreeJournalInput(
-            domaine="SANTÉ",
+            domaine="SANTÃ‰",
             titre="Test",
             contenu="Test contenu",
         )
         
-        assert entree.domaine == "santé"
+        assert entree.domaine == "santÃ©"
 
     def test_domaine_invalid_rejected(self):
-        """Test domaine invalide rejeté."""
+        """Test domaine invalide rejetÃ©."""
         with pytest.raises(ValidationError):
             EntreeJournalInput(
                 domaine="invalid",
@@ -473,7 +473,7 @@ class TestEntreeJournalInput:
 
     def test_all_valid_domaines(self):
         """Test tous les domaines valides."""
-        valid_domaines = ["santé", "humeur", "développement", "comportement"]
+        valid_domaines = ["santÃ©", "humeur", "dÃ©veloppement", "comportement"]
         
         for domaine in valid_domaines:
             entree = EntreeJournalInput(
@@ -486,7 +486,7 @@ class TestEntreeJournalInput:
     def test_titre_cleaned(self):
         """Test nettoyage titre."""
         entree = EntreeJournalInput(
-            domaine="santé",
+            domaine="santÃ©",
             titre="  test  ",
             contenu="Contenu",
         )
@@ -494,26 +494,26 @@ class TestEntreeJournalInput:
         assert entree.titre == "Test"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PROJET INPUT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestProjetInput:
     """Tests pour ProjetInput."""
 
     def test_valid_minimal(self):
-        """Test création minimale."""
+        """Test crÃ©ation minimale."""
         projet = ProjetInput(
-            nom="Rénovation cuisine",
+            nom="RÃ©novation cuisine",
             categorie="Maison",
         )
         
-        assert projet.nom == "Rénovation cuisine"
+        assert projet.nom == "RÃ©novation cuisine"
         assert projet.priorite == "moyenne"  # Default
 
     def test_priorite_normalized(self):
-        """Test priorité normalisée."""
+        """Test prioritÃ© normalisÃ©e."""
         projet = ProjetInput(
             nom="Test",
             categorie="Test",
@@ -523,7 +523,7 @@ class TestProjetInput:
         assert projet.priorite == "haute"
 
     def test_priorite_invalid_rejected(self):
-        """Test priorité invalide rejetée."""
+        """Test prioritÃ© invalide rejetÃ©e."""
         with pytest.raises(ValidationError):
             ProjetInput(
                 nom="Test",
@@ -532,7 +532,7 @@ class TestProjetInput:
             )
 
     def test_all_valid_priorites(self):
-        """Test toutes les priorités valides."""
+        """Test toutes les prioritÃ©s valides."""
         for priorite in ["basse", "moyenne", "haute"]:
             projet = ProjetInput(nom="Test", categorie="Test", priorite=priorite)
             assert projet.priorite == priorite
@@ -550,7 +550,7 @@ class TestProjetInput:
         assert projet.date_fin_estimee == date(2025, 6, 1)
 
     def test_date_fin_before_debut_rejected(self):
-        """Test date fin avant début rejetée."""
+        """Test date fin avant dÃ©but rejetÃ©e."""
         with pytest.raises(ValidationError):
             ProjetInput(
                 nom="Test",
@@ -567,3 +567,4 @@ class TestProjetInput:
         )
         
         assert projet.nom == "Test projet"
+

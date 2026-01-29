@@ -1,19 +1,19 @@
-"""Tests unitaires pour le service budget."""
+﻿"""Tests unitaires pour le service budget."""
 
 import pytest
 from datetime import date, datetime
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ENUMS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCategorieDepenseEnum:
     """Tests pour l'enum CategorieDepense."""
 
     def test_categories_disponibles(self):
-        """Vérifie que toutes les catégories sont définies."""
+        """VÃ©rifie que toutes les catÃ©gories sont dÃ©finies."""
         from src.services.budget import CategorieDepense
         
         assert CategorieDepense.ALIMENTATION is not None
@@ -22,7 +22,7 @@ class TestCategorieDepenseEnum:
         assert CategorieDepense.LOISIRS is not None
 
     def test_categorie_valeur_string(self):
-        """Les catégories ont des valeurs string."""
+        """Les catÃ©gories ont des valeurs string."""
         from src.services.budget import CategorieDepense
         
         for cat in CategorieDepense:
@@ -33,7 +33,7 @@ class TestFrequenceRecurrenceEnum:
     """Tests pour l'enum FrequenceRecurrence."""
 
     def test_frequences_disponibles(self):
-        """Vérifie les fréquences de dépenses."""
+        """VÃ©rifie les frÃ©quences de dÃ©penses."""
         from src.services.budget import FrequenceRecurrence
         
         assert FrequenceRecurrence.PONCTUEL is not None
@@ -42,16 +42,16 @@ class TestFrequenceRecurrenceEnum:
         assert FrequenceRecurrence.ANNUEL is not None
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS MODÈLES PYDANTIC
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS MODÃˆLES PYDANTIC
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestDepenseModel:
-    """Tests pour le modèle Pydantic Depense."""
+    """Tests pour le modÃ¨le Pydantic Depense."""
 
     def test_depense_creation_minimale(self):
-        """Création d'une dépense avec champs minimaux."""
+        """CrÃ©ation d'une dÃ©pense avec champs minimaux."""
         from src.services.budget import Depense, CategorieDepense
         
         depense = Depense(
@@ -65,7 +65,7 @@ class TestDepenseModel:
         assert depense.categorie == CategorieDepense.ALIMENTATION
 
     def test_depense_date_defaut(self):
-        """Date par défaut = aujourd'hui."""
+        """Date par dÃ©faut = aujourd'hui."""
         from src.services.budget import Depense, CategorieDepense
         
         depense = Depense(
@@ -76,7 +76,7 @@ class TestDepenseModel:
         assert depense.date == date.today()
 
     def test_depense_avec_recurrence(self):
-        """Dépense récurrente."""
+        """DÃ©pense rÃ©currente."""
         from src.services.budget import Depense, CategorieDepense, FrequenceRecurrence
         
         depense = Depense(
@@ -95,7 +95,7 @@ class TestBudgetMensuelModel:
     """Tests pour BudgetMensuel."""
 
     def test_budget_mensuel_creation(self):
-        """Création d'un budget mensuel."""
+        """CrÃ©ation d'un budget mensuel."""
         from src.services.budget import BudgetMensuel, CategorieDepense
         
         budget = BudgetMensuel(
@@ -111,7 +111,7 @@ class TestBudgetMensuelModel:
         assert budget.budget_prevu == 600.0
 
     def test_pourcentage_utilise(self):
-        """Calcul du pourcentage utilisé."""
+        """Calcul du pourcentage utilisÃ©."""
         from src.services.budget import BudgetMensuel, CategorieDepense
         
         budget = BudgetMensuel(
@@ -124,7 +124,7 @@ class TestBudgetMensuelModel:
         assert budget.pourcentage_utilise == 75.0
 
     def test_pourcentage_utilise_zero_prevu(self):
-        """Pourcentage avec budget prévu à 0."""
+        """Pourcentage avec budget prÃ©vu Ã  0."""
         from src.services.budget import BudgetMensuel, CategorieDepense
         
         budget = BudgetMensuel(
@@ -150,7 +150,7 @@ class TestBudgetMensuelModel:
         assert budget.reste_disponible == 200.0
 
     def test_reste_disponible_negatif(self):
-        """Reste disponible jamais négatif."""
+        """Reste disponible jamais nÃ©gatif."""
         from src.services.budget import BudgetMensuel, CategorieDepense
         
         budget = BudgetMensuel(
@@ -163,7 +163,7 @@ class TestBudgetMensuelModel:
         assert budget.reste_disponible == 0
 
     def test_est_depasse(self):
-        """Détection budget dépassé."""
+        """DÃ©tection budget dÃ©passÃ©."""
         from src.services.budget import BudgetMensuel, CategorieDepense
         
         budget = BudgetMensuel(
@@ -180,7 +180,7 @@ class TestResumeFinancierModel:
     """Tests pour ResumeFinancier."""
 
     def test_resume_creation(self):
-        """Création d'un résumé financier."""
+        """CrÃ©ation d'un rÃ©sumÃ© financier."""
         from src.services.budget import ResumeFinancier
         
         resume = ResumeFinancier(
@@ -198,7 +198,7 @@ class TestPrevisionDepenseModel:
     """Tests pour PrevisionDepense."""
 
     def test_prevision_creation(self):
-        """Création d'une prévision."""
+        """CrÃ©ation d'une prÃ©vision."""
         from src.services.budget import PrevisionDepense, CategorieDepense
         
         prevision = PrevisionDepense(
@@ -211,9 +211,9 @@ class TestPrevisionDepenseModel:
         assert prevision.confiance == 0.85
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SERVICE BUDGET
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBudgetServiceInit:
@@ -229,21 +229,21 @@ class TestBudgetServiceInit:
         assert service1 is service2
 
     def test_service_has_required_methods(self):
-        """Le service a les méthodes requises."""
+        """Le service a les mÃ©thodes requises."""
         from src.services.budget import get_budget_service
         
         service = get_budget_service()
         
         assert hasattr(service, 'ajouter_depense')
-        assert hasattr(service, 'get_depenses_mois')  # méthode réelle
+        assert hasattr(service, 'get_depenses_mois')  # mÃ©thode rÃ©elle
         assert hasattr(service, 'definir_budget')
 
 
 class TestBudgetServiceLogique:
-    """Tests de logique métier (fonctions pures)."""
+    """Tests de logique mÃ©tier (fonctions pures)."""
 
     def test_calculer_moyenne_ponderee(self):
-        """Calcul de moyenne pondérée."""
+        """Calcul de moyenne pondÃ©rÃ©e."""
         valeurs = [100, 200, 300]
         poids = [1, 2, 3]
         
@@ -267,7 +267,7 @@ class TestBudgetServiceAlerts:
     """Tests pour les alertes budget."""
 
     def test_alerte_budget_depasse(self):
-        """Alerte quand budget dépassé."""
+        """Alerte quand budget dÃ©passÃ©."""
         from src.services.budget import BudgetMensuel, CategorieDepense
         
         budget = BudgetMensuel(
@@ -280,7 +280,7 @@ class TestBudgetServiceAlerts:
         assert budget.est_depasse is True
 
     def test_alerte_seuil_80_pourcent(self):
-        """Alerte quand >80% utilisé."""
+        """Alerte quand >80% utilisÃ©."""
         from src.services.budget import BudgetMensuel, CategorieDepense
         
         budget = BudgetMensuel(
@@ -294,10 +294,10 @@ class TestBudgetServiceAlerts:
 
 
 class TestBudgetAggregation:
-    """Tests pour agrégation des dépenses."""
+    """Tests pour agrÃ©gation des dÃ©penses."""
 
     def test_grouper_par_categorie(self):
-        """Groupement des dépenses par catégorie."""
+        """Groupement des dÃ©penses par catÃ©gorie."""
         from src.services.budget import CategorieDepense
         
         depenses = [
@@ -315,7 +315,7 @@ class TestBudgetAggregation:
         assert par_cat[CategorieDepense.LOISIRS] == 80
 
     def test_total_mensuel(self):
-        """Total des dépenses du mois."""
+        """Total des dÃ©penses du mois."""
         depenses = [100.0, 200.0, 150.0, 80.0]
         total = sum(depenses)
         
@@ -326,7 +326,7 @@ class TestBudgetTendances:
     """Tests pour analyse des tendances."""
 
     def test_tendance_croissante(self):
-        """Détection tendance croissante."""
+        """DÃ©tection tendance croissante."""
         historique = [400, 450, 500, 550, 600]
         
         debut = sum(historique[:2]) / 2
@@ -337,30 +337,31 @@ class TestBudgetTendances:
         assert tendance == "croissante"
 
     def test_tendance_stable(self):
-        """Détection tendance stable."""
+        """DÃ©tection tendance stable."""
         historique = [500, 510, 495, 505, 500]
         
         debut = sum(historique[:2]) / 2
         fin = sum(historique[-2:]) / 2
         
-        tendance = "croissante" if fin > debut * 1.1 else "stable" if fin > debut * 0.9 else "décroissante"
+        tendance = "croissante" if fin > debut * 1.1 else "stable" if fin > debut * 0.9 else "dÃ©croissante"
         
         assert tendance == "stable"
 
 
 class TestBudgetDefaut:
-    """Tests pour les budgets par défaut."""
+    """Tests pour les budgets par dÃ©faut."""
 
     def test_budgets_defaut_existent(self):
-        """Budgets par défaut définis."""
+        """Budgets par dÃ©faut dÃ©finis."""
         from src.services.budget import BudgetService, CategorieDepense
         
         assert CategorieDepense.ALIMENTATION in BudgetService.BUDGETS_DEFAUT
         assert BudgetService.BUDGETS_DEFAUT[CategorieDepense.ALIMENTATION] == 600
 
     def test_budgets_defaut_positifs(self):
-        """Tous les budgets défaut sont positifs."""
+        """Tous les budgets dÃ©faut sont positifs."""
         from src.services.budget import BudgetService
         
         for cat, montant in BudgetService.BUDGETS_DEFAUT.items():
             assert montant > 0
+
