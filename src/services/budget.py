@@ -838,7 +838,7 @@ def render_budget_dashboard():
                 with col_p2:
                     st.write(f"{prev.montant_prevu:.0f}â‚¬")
                 with col_p3:
-                    confiance_color = "[GREEN]" if prev.confiance > 0.7 else "[YELLOW]" if prev.confiance > 0.4 else "[RED]"
+                    confiance_color = "🟢" if prev.confiance > 0.7 else "🟡" if prev.confiance > 0.4 else "🔴"
                     st.write(f"{confiance_color} {prev.confiance:.0%}")
     
     with tab4:

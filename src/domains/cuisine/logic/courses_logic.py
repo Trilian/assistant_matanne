@@ -15,9 +15,9 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════════════════════════════════════════
 
 PRIORITY_EMOJIS = {
-    "haute": "[RED]",
-    "moyenne": "[YELLOW]",
-    "basse": "[GREEN]"
+    "haute": "🔴",
+    "moyenne": "🟡",
+    "basse": "🟢"
 }
 
 PRIORITY_ORDER = {"haute": 0, "moyenne": 1, "basse": 2}

@@ -254,8 +254,7 @@ class PlanningService(BaseService[Planning], BaseAIService, PlanningAIMixin):
                     planning_id=planning.id,
                     date_repas=date_jour,
                     type_repas="dejeuner",
-                    nom_repas=f"Repas du {jour_name}",
-                    description="À remplir manuellement",
+                    notes=f"Repas du {jour_name} - À remplir manuellement",
                 )
                 db.add(repas)
             

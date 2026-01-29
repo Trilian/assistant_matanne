@@ -204,7 +204,7 @@ def render_stock():
 
         if not inventaire:
 
-            st.info("[PKG] Inventaire vide. Commencez par ajouter des articles!")
+            st.info("📆 Inventaire vide. Commencez par ajouter des articles!")
 
             if st.button("➕ Ajouter un article"):
 

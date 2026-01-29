@@ -39,13 +39,19 @@ BUDGETS = ["Bas (< 20€)", "Moyen (20-40€)", "Haut (> 40€)"]
 
 def app():
     """Point d'entrée module planning"""
-    st.title("ðŸ“… Planning Semaine")
+    st.title("📅 Planning Semaine")
     st.caption("Gérez vos repas de la semaine et générez des plannings avec IA")
 
+    # Si demande de créer nouveau planning, afficher directement l'onglet génération
+    if st.session_state.get('go_to_generer', False):
+        st.session_state.go_to_generer = False
+        render_generer()
+        return
+
     tab_planning, tab_generer, tab_historique = st.tabs([
-        "ðŸ“‹ Planning Actif", 
-        " Générer avec IA", 
-        "ðŸ“š Historique"
+        "📋 Planning Actif", 
+        "✨ Générer avec IA", 
+        "📚 Historique"
     ])
 
     with tab_planning:
@@ -87,11 +93,11 @@ def render_planning():
         # Afficher infos planning
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.metric("ðŸ“… Semaine du", planning.semaine_debut.strftime("%d/%m"))
+            st.metric("📅 Semaine du", planning.semaine_debut.strftime("%d/%m"))
         with col2:
-            st.metric("[CHART] Repas planifiés", len(planning.repas) if planning.repas else 0)
+            st.metric("📊 Repas planifiés", len(planning.repas) if planning.repas else 0)
         with col3:
-            genere_ia = "🤖 IA" if planning.genere_par_ia else "êœï¸ Manuel"
+            genere_ia = "🤖 IA" if planning.genere_par_ia else "✏️ Manuel"
             st.metric("Créé par", genere_ia)
         
         st.divider()
@@ -304,7 +310,7 @@ def render_generer():
         
         with col1:
             semaine_debut = st.date_input(
-                "ðŸ“… Semaine à partir du",
+                "📅 Semaine à partir du",
                 value=default_start,
                 format="YYYY-MM-DD"
             )
@@ -419,7 +425,7 @@ def render_historique():
         st.error("❌ Service planning indisponible")
         return
     
-    st.subheader("ðŸ“š Historique des Plannings")
+    st.subheader("📚 Historique des Plannings")
     
     try:
         # Filtres
