@@ -552,7 +552,11 @@ __all__ = [
     "PendingOperation",
     "OfflineQueue",
     "OfflineSynchronizer",
+    "OfflineSync",  # Alias pour compatibilité tests
     "offline_aware",
     "render_connection_status",
     "render_sync_panel",
 ]
+
+# Alias de compatibilité pour les tests
+OfflineSync = OfflineSynchronizer

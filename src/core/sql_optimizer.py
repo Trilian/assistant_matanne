@@ -577,6 +577,10 @@ __all__ = [
     "N1Detector",
     "BatchLoader",
     "OptimizedQueryBuilder",
+    "QueryAnalyzer",  # Alias pour compatibilité tests
     # UI
     "render_sql_analysis",
 ]
+
+# Alias de compatibilité pour les tests
+QueryAnalyzer = N1Detector

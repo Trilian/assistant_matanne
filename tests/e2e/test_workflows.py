@@ -414,7 +414,7 @@ class TestFamilyHubE2E:
         
         # Step 1: Record
         milestone = {"type": "first_word", "date": "2024-01-15"}
-        recorded = record_milestone(mock_session, child_id=1, milestone)
+        recorded = record_milestone(mock_session, child_id=1, milestone=milestone)
         
         # Step 2: View milestones
         milestones = get_development_milestones(mock_session)

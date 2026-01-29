@@ -97,7 +97,7 @@ class TestFamilleJules:
         from src.modules.famille import record_milestone
         
         milestone = {"type": "first_word", "date": "2024-01-15"}
-        result = record_milestone(mock_session, child_id=1, milestone)
+        result = record_milestone(mock_session, child_id=1, milestone=milestone)
         assert result is None or isinstance(result, bool)
     
     def test_get_child_summary(self, mock_session):
@@ -220,7 +220,7 @@ class TestPlanningCalendar:
         from src.modules.planning import update_event
         
         event = {"title": "Updated Birthday"}
-        result = update_event(mock_session, event_id=1, event)
+        result = update_event(mock_session, event_id=1, event=event)
         assert result is None or isinstance(result, bool)
     
     def test_event_deletion(self, mock_session):
@@ -302,7 +302,7 @@ class TestPlanningRoutines:
         from src.modules.planning import update_routine
         
         routine = {"name": "Updated Routine"}
-        result = update_routine(mock_session, routine_id=1, routine)
+        result = update_routine(mock_session, routine_id=1, routine=routine)
         assert result is None or isinstance(result, bool)
 
 
