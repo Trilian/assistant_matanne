@@ -13,14 +13,14 @@ from src.core.models import HealthRoutine, HealthObjective, HealthEntry
 
 # Logique métier pure
 from src.domains.famille.logic.sante_logic import (
-    calculer_progression_objectif_sante,
-    valider_entree_sante
+    calculer_progression_objectif,
+    valider_entree_activite
 )
 
 from src.domains.famille.logic.helpers import (
     get_routines_actives, 
     get_objectives_actifs,
-    get_stats_santé_semaine,
+    get_stats_sante_semaine,
     calculer_progression_objectif,
     clear_famille_cache
 )
