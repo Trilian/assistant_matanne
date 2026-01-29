@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Recettes - Gestion complète des recettes
 """
 
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 def app():
     """Point d'entrée module recettes"""
-    st.title("ðŸ½ï¸ Mes Recettes")
+    st.title("🍽️ Mes Recettes")
     st.caption("Gestion complète de votre base de recettes")
 
     # Gérer l'état de la vue détails
@@ -37,7 +37,7 @@ def app():
                 # Bouton retour en haut avec icône visible
                 col_retour, col_titre = st.columns([1, 10])
                 with col_retour:
-                    if st.button("â¬…ï¸", help="Retour à la liste", use_container_width=True):
+                    if st.button("⬅️", help="Retour à la liste", use_container_width=True):
                         st.session_state.detail_recette_id = None
                         st.rerun()
                 with col_titre:
@@ -45,11 +45,11 @@ def app():
                 st.divider()
                 render_detail_recette(recette)
                 return
-        st.error("âŒ Recette non trouvée")
+        st.error("❌ Recette non trouvée")
         st.session_state.detail_recette_id = None
 
     # Sous-tabs
-    tab_liste, tab_ajout, tab_import, tab_ia = st.tabs(["ðŸ“‹ Liste", "âž• Ajouter Manuel", "ðŸ“¥ Importer", "âœ¨ Générer IA"])
+    tab_liste, tab_ajout, tab_import, tab_ia = st.tabs(["📋 Liste", "➕ Ajouter Manuel", "📥 Importer", "✨ Générer IA"])
 
     with tab_liste:
         render_liste()
@@ -121,15 +121,15 @@ def render_liste():
         )
     
     # Filtres supplémentaires avancés
-    with st.expander("âš™ï¸ Filtres avancés", expanded=False):
+    with st.expander("⚙️ Filtres avancés", expanded=False):
         col_bio, col_local = st.columns(2)
         with col_bio:
-            min_score_bio = st.slider("ðŸŒ± Score bio min (%)", 0, 100, 0, key="filter_score_bio")
+            min_score_bio = st.slider("🌱 Score bio min (%)", 0, 100, 0, key="filter_score_bio")
         with col_local:
-            min_score_local = st.slider("ðŸ“ Score local min (%)", 0, 100, 0, key="filter_score_local")
+            min_score_local = st.slider("🚜 Score local min (%)", 0, 100, 0, key="filter_score_local")
         
         # Filtres robots
-        st.markdown("**ðŸ¤– Compatible avec:**")
+        st.markdown("**🤖 Compatible avec:**")
         col_robots = st.columns(4)
         robots_selected = {}
         with col_robots[0]:
@@ -142,14 +142,14 @@ def render_liste():
             robots_selected['multicooker'] = st.checkbox("Multicooker", key="robot_multicooker")
         
         # Filtres tags
-        st.markdown("**ðŸ·ï¸ Caractéristiques:**")
+        st.markdown("**🏷️ Caractéristiques:**")
         col_tags = st.columns(3)
         with col_tags[0]:
-            est_rapide = st.checkbox("âš¡ Rapide", key="tag_rapide")
+            est_rapide = st.checkbox("⚡ Rapide", key="tag_rapide")
         with col_tags[1]:
-            est_equilibre = st.checkbox("ðŸ’ª Ã‰quilibré", key="tag_equilibre")
+            est_equilibre = st.checkbox("💪 Équilibré", key="tag_equilibre")
         with col_tags[2]:
-            congelable = st.checkbox("â„ï¸ Congélable", key="tag_congelable")
+            congelable = st.checkbox("❄️ Congélable", key="tag_congelable")
     
     # Chercher les recettes
     type_repas_filter = None if type_repas == "Tous" else type_repas
@@ -202,7 +202,7 @@ def render_liste():
     end_idx = start_idx + PAGE_SIZE
     page_recettes = recettes[start_idx:end_idx]
     
-    st.success(f"âœ… {len(recettes)} recette(s) trouvée(s) | Page {st.session_state.recettes_page + 1}/{total_pages}")
+    st.success(f"✅ {len(recettes)} recette(s) trouvée(s) | Page {st.session_state.recettes_page + 1}/{total_pages}")
     
     # Afficher en grid avec badges
     cols = st.columns(3, gap="small")
@@ -231,23 +231,27 @@ def render_liste():
                         unsafe_allow_html=True
                     )
                 
-                # Titre et infos compactes
-                difficulty_emoji = {"facile": "ðŸŸ¢", "moyen": "ðŸŸ¡", "difficile": "ðŸ”´"}.get(recette.difficulte, "âšª")
-                st.markdown(f"<h4 style='margin: 6px 0; line-height: 1.2; font-size: 15px; height: 2.4em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;'>{difficulty_emoji} {recette.nom}</h4>", unsafe_allow_html=True)
+                # Titre et infos compactes - HAUTEUR FIXE
+                difficulty_emoji = {"facile": "🟢", "moyen": "🟡", "difficile": "🔴"}.get(recette.difficulte, "⚫")
+                st.markdown(f"<h4 style='margin: 6px 0; line-height: 1.3; font-size: 15px; height: 2.6em; min-height: 2.6em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;'>{difficulty_emoji} {recette.nom}</h4>", unsafe_allow_html=True)
                 
+                # Description sur hauteur fixe pour éviter décalage
                 if recette.description:
                     desc = recette.description[:60]
                     if len(recette.description) > 60:
                         desc += "..."
-                    st.markdown(f"<p style='margin: 2px 0; font-size: 11px; opacity: 0.7;'>{desc}</p>", unsafe_allow_html=True)
+                    st.markdown(f"<p style='margin: 4px 0; font-size: 11px; opacity: 0.7; height: 2.2em; min-height: 2.2em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;'>{desc}</p>", unsafe_allow_html=True)
+                else:
+                    # Espaceur pour maintenir la hauteur même sans description
+                    st.markdown(f"<p style='margin: 4px 0; font-size: 11px; opacity: 0; height: 2.2em; min-height: 2.2em;'>&nbsp;</p>", unsafe_allow_html=True)
                 
                 # Badges et robots sur la même ligne
                 badge_definitions = {
-                    "ðŸŒ±": "Bio",
-                    "ðŸ“": "Local",
-                    "âš¡": "Rapide",
-                    "ðŸ’ª": "Ã‰quilibré",
-                    "â„ï¸": "Congélable"
+                    "🌱": "Bio",
+                    "🚜": "Local",
+                    "⚡": "Rapide",
+                    "💪": "Équilibré",
+                    "❄️": "Congélable"
                 }
                 
                 # Construire tous les badges
@@ -255,26 +259,26 @@ def render_liste():
                 
                 # Ajouter badges classiques
                 if recette.est_bio:
-                    all_badges.append(f'<span title="{badge_definitions["ðŸŒ±"]}" style="cursor: help;">ðŸŒ±</span>')
+                    all_badges.append(f'<span title="{badge_definitions["🌱"]}" style="cursor: help;">🌱</span>')
                 if recette.est_local:
-                    all_badges.append(f'<span title="{badge_definitions["ðŸ“"]}" style="cursor: help;">ðŸ“</span>')
+                    all_badges.append(f'<span title="{badge_definitions["🚜"]}" style="cursor: help;">🚜</span>')
                 if recette.est_rapide:
-                    all_badges.append(f'<span title="{badge_definitions["âš¡"]}" style="cursor: help;">âš¡</span>')
+                    all_badges.append(f'<span title="{badge_definitions["⚡"]}" style="cursor: help;">⚡</span>')
                 if recette.est_equilibre:
-                    all_badges.append(f'<span title="{badge_definitions["ðŸ’ª"]}" style="cursor: help;">ðŸ’ª</span>')
+                    all_badges.append(f'<span title="{badge_definitions["💪"]}" style="cursor: help;">💪</span>')
                 if recette.congelable:
-                    all_badges.append(f'<span title="{badge_definitions["â„ï¸"]}" style="cursor: help;">â„ï¸</span>')
+                    all_badges.append(f'<span title="{badge_definitions["❄️"]}" style="cursor: help;">❄️</span>')
                 
                 # Ajouter robots
                 if recette.robots_compatibles:
                     robots_icons = {
-                        'Cookeo': ('ðŸ¤–', 'Cookeo'),
-                        'Monsieur Cuisine': ('ðŸ‘¨â€ðŸ³', 'MC'),
-                        'Airfryer': ('ðŸŒªï¸', 'Airfryer'),
-                        'Multicooker': ('â²ï¸', 'MC')
+                        'Cookeo': ('🤖', 'Cookeo'),
+                        'Monsieur Cuisine': ('👨‍🍳', 'MC'),
+                        'Airfryer': ('🌪️', 'Airfryer'),
+                        'Multicooker': ('²️', 'MC')
                     }
                     for robot in recette.robots_compatibles:
-                        icon, tooltip = robots_icons.get(robot, ('ðŸ¤–', robot))
+                        icon, tooltip = robots_icons.get(robot, ('🤖', robot))
                         all_badges.append(f'<span title="{tooltip}" style="cursor: help;">{icon}</span>')
                 
                 # Afficher tous les badges sur une ligne
@@ -288,16 +292,16 @@ def render_liste():
                 # Infos principales (3 colonnes compactes)
                 info_cols = st.columns(3, gap="small")
                 with info_cols[0]:
-                    st.markdown(f"<div style='text-align: center; font-size: 13px;'><div>â±ï¸</div><div style='font-weight: bold;'>{recette.temps_preparation}m</div></div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='text-align: center; font-size: 13px;'><div>⏱️</div><div style='font-weight: bold;'>{recette.temps_preparation}m</div></div>", unsafe_allow_html=True)
                 with info_cols[1]:
-                    st.markdown(f"<div style='text-align: center; font-size: 13px;'><div>ðŸ‘¥</div><div style='font-weight: bold;'>{recette.portions}</div></div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='text-align: center; font-size: 13px;'><div>👥</div><div style='font-weight: bold;'>{recette.portions}</div></div>", unsafe_allow_html=True)
                 with info_cols[2]:
-                    cal = recette.calories if recette.calories else "â€”"
-                    st.markdown(f"<div style='text-align: center; font-size: 13px;'><div>ðŸ”¥</div><div style='font-weight: bold;'>{cal}</div></div>", unsafe_allow_html=True)
+                    cal = recette.calories if recette.calories else "–"
+                    st.markdown(f"<div style='text-align: center; font-size: 13px;'><div>🔥</div><div style='font-weight: bold;'>{cal}</div></div>", unsafe_allow_html=True)
                 
                 # Bouton voir détails
                 if st.button(
-                    "ðŸ‘ï¸ Voir détails",
+                    "👁️ Voir détails",
                     use_container_width=True,
                     key=f"detail_{recette.id}"
                 ):
@@ -310,7 +314,7 @@ def render_liste():
     
     with col1:
         if st.session_state.recettes_page > 0:
-            if st.button("â¬…ï¸ Précédent"):
+            if st.button("⬅️ Précédent"):
                 st.session_state.recettes_page -= 1
                 st.rerun()
     
@@ -319,7 +323,7 @@ def render_liste():
     
     with col5:
         if st.session_state.recettes_page < total_pages - 1:
-            if st.button("Suivant âž¡ï¸"):
+            if st.button("Suivant ➡️"):
                 st.session_state.recettes_page += 1
                 st.rerun()
 
@@ -334,22 +338,22 @@ def render_detail_recette(recette):
         st.header(recette.nom)
     with col2:
         if recette.difficulte == "facile":
-            st.markdown("# ðŸŸ¢")
+            st.markdown("# 🟢")
         elif recette.difficulte == "moyen":
-            st.markdown("# ðŸŸ¡")
+            st.markdown("# 🟡")
         elif recette.difficulte == "difficile":
-            st.markdown("# ðŸ”´")
+            st.markdown("# 🔴")
     
     # Image si disponible
     if recette.url_image:
         try:
             st.image(recette.url_image, caption=recette.nom, width=400)
         except Exception:
-            st.caption("ðŸ–¼ï¸ Image indisponible")
+            st.caption("🖼️ Image indisponible")
     else:
         # Placeholder visuel
         import random
-        food_emojis = ["ðŸ½ï¸", "ðŸ³", "ðŸ¥˜", "ðŸ²", "ðŸ¥—", "ðŸœ", "ðŸ±", "ðŸ¥™", "ðŸ›", "ðŸ¥Ÿ", "ðŸš", "ðŸ¥˜"]
+        food_emojis = ["🍽️", "🍳", "🥘", "🍲", "🥗", "🜗", "🍱", "🥙", "🛕", "🥟", "🚽", "🥜"]
         emoji = random.choice(food_emojis)
         col = st.columns(1)[0]
         with col:
@@ -361,59 +365,59 @@ def render_detail_recette(recette):
     # Badges et caractéristiques
     badges = []
     if recette.est_bio:
-        badges.append("ðŸŒ± Bio")
+        badges.append("🌱 Bio")
     if recette.est_local:
-        badges.append("ðŸ“ Local")
+        badges.append("🚜 Local")
     if recette.est_rapide:
-        badges.append("âš¡ Rapide")
+        badges.append("⚡ Rapide")
     if recette.est_equilibre:
-        badges.append("ðŸ’ª Ã‰quilibré")
+        badges.append("💪 Équilibré")
     if recette.congelable:
-        badges.append("â„ï¸ Congélable")
+        badges.append("❄️ Congélable")
     if badges:
-        st.markdown(" â€¢ ".join(badges))
+        st.markdown(" • ".join(badges))
     
     # Scores bio et local
     if (recette.score_bio or 0) > 0 or (recette.score_local or 0) > 0:
         score_col1, score_col2 = st.columns(2)
         with score_col1:
             if (recette.score_bio or 0) > 0:
-                st.metric("ðŸŒ± Score Bio", f"{recette.score_bio}%", delta=None)
+                st.metric("🌱 Score Bio", f"{recette.score_bio}%", delta=None)
         with score_col2:
             if (recette.score_local or 0) > 0:
-                st.metric("ðŸ“ Score Local", f"{recette.score_local}%", delta=None)
+                st.metric("🚜 Score Local", f"{recette.score_local}%", delta=None)
     
     # Robots compatibles
     if recette.robots_compatibles:
         robots_icons = {
-            'Cookeo': ('ðŸ¤–', 'Cookeo'),
-            'Monsieur Cuisine': ('ðŸ‘¨â€ðŸ³', 'Monsieur Cuisine'),
-            'Airfryer': ('ðŸŒªï¸', 'Airfryer'),
-            'Multicooker': ('â²ï¸', 'Multicooker')
+            'Cookeo': ('🤖', 'Cookeo'),
+            'Monsieur Cuisine': ('👨‍🍳', 'Monsieur Cuisine'),
+            'Airfryer': ('🌪️', 'Airfryer'),
+            'Multicooker': ('²️', 'Multicooker')
         }
-        st.markdown("**ðŸ¤– Compatible avec:**")
+        st.markdown("**🤖 Compatible avec:**")
         robot_cols = st.columns(len(recette.robots_compatibles))
         for idx, robot in enumerate(recette.robots_compatibles):
-            icon, label = robots_icons.get(robot, ('ðŸ¤–', robot.replace('_', ' ').title()))
+            icon, label = robots_icons.get(robot, ('🤖', robot.replace('_', ' ').title()))
             robot_cols[idx].metric(icon, label)
     
     # Infos principales
     metric_cols = st.columns(4)
     with metric_cols[0]:
-        st.metric("â±ï¸ Préparation", f"{recette.temps_preparation} min")
+        st.metric("⏱️ Préparation", f"{recette.temps_preparation} min")
     with metric_cols[1]:
-        st.metric("ðŸ³ Cuisson", f"{recette.temps_cuisson} min")
+        st.metric("🍳 Cuisson", f"{recette.temps_cuisson} min")
     with metric_cols[2]:
-        st.metric("ðŸ‘¥ Portions", recette.portions)
+        st.metric("👥 Portions", recette.portions)
     with metric_cols[3]:
         if recette.calories:
-            st.metric("ðŸ”¥ Calories", f"{recette.calories} kcal")
+            st.metric("🔥 Calories", f"{recette.calories} kcal")
         else:
-            st.metric("ðŸ”¥ Calories", "â€”")
+            st.metric("🔥 Calories", "–")
     
     # Nutrition complète
     if any([recette.calories, recette.proteines, recette.lipides, recette.glucides]):
-        with st.expander("ðŸ“Š Nutrition détaillée", expanded=False):
+        with st.expander("📊 Nutrition détaillée", expanded=False):
             nutrition_cols = st.columns(4)
             if recette.calories:
                 nutrition_cols[0].metric("Calories", f"{recette.calories} kcal")
@@ -426,12 +430,12 @@ def render_detail_recette(recette):
     
     # Description
     if recette.description:
-        st.markdown("### ðŸ“ Description")
+        st.markdown("### 📝 Description")
         st.write(recette.description)
     
     # Ingrédients
     if recette.ingredients:
-        st.markdown("### ðŸ›’ Ingrédients")
+        st.markdown("### 🛍 Ingrédients")
         ingredient_cols = st.columns([2, 1, 1])
         ingredient_cols[0].markdown("**Ingrédient**")
         ingredient_cols[1].markdown("**Quantité**")
@@ -443,31 +447,31 @@ def render_detail_recette(recette):
             ingredient_cols[1].write(f"{ri.quantite}")
             ingredient_cols[2].write(f"{ri.unite}")
     
-    # Ã‰tapes de préparation
+    # Étapes de préparation
     if recette.etapes:
-        st.markdown("### ðŸ‘¨â€ðŸ³ Ã‰tapes de préparation")
+        st.markdown("### 👨‍🍳 Étapes de préparation")
         for etape in sorted(recette.etapes, key=lambda e: e.ordre or 0):
-            st.markdown(f"**Ã‰tape {etape.ordre}:** {etape.description}")
+            st.markdown(f"**Étape {etape.ordre}:** {etape.description}")
     
     # Historique d'utilisation
     st.divider()
-    st.markdown("### ðŸ“Š Historique d'utilisation")
+    st.markdown("### 📊 Historique d'utilisation")
     
     if service:
         stats = service.get_stats_recette(recette.id)
         
         stat_cols = st.columns(5)
-        stat_cols[0].metric("ðŸ½ï¸ Cuissons", stats.get("nb_cuissons", 0))
+        stat_cols[0].metric("🍽️ Cuissons", stats.get("nb_cuissons", 0))
         if stats.get("derniere_cuisson"):
-            stat_cols[1].metric("ðŸ“… Dernière", stats.get("jours_depuis_derniere", "?"), "jours")
+            stat_cols[1].metric("📅 Dernière", stats.get("jours_depuis_derniere", "?"), "jours")
         if stats.get("note_moyenne"):
-            stat_cols[2].metric("â­ Note moyenne", f"{stats.get('note_moyenne', 0):.1f}/5")
-        stat_cols[3].metric("ðŸ‘¥ Total portions", stats.get("total_portions", 0))
+            stat_cols[2].metric("⭐ Note moyenne", f"{stats.get('note_moyenne', 0):.1f}/5")
+        stat_cols[3].metric("👥 Total portions", stats.get("total_portions", 0))
         
         # Bouton pour enregistrer une cuisson
         col_a, col_b, col_c = st.columns([2, 1, 2])
         with col_b:
-            if st.button("âœ… Cuisinée aujourd'hui!", use_container_width=True):
+            if st.button("✅ Cuisinée aujourd'hui!", use_container_width=True):
                 with st.form("form_enregistrer_cuisson"):
                     portions = st.number_input("Portions cuisinées", min_value=1, max_value=20, value=recette.portions)
                     note = st.slider("Note (0-5 étoiles)", 0, 5, 0)
@@ -475,37 +479,37 @@ def render_detail_recette(recette):
                     
                     if st.form_submit_button("Enregistrer"):
                         if service.enregistrer_cuisson(recette.id, portions, note if note > 0 else None, avis if avis else None):
-                            st.success("âœ… Cuisson enregistrée!")
+                            st.success("✅ Cuisson enregistrée!")
                             st.rerun()
                         else:
-                            st.error("âŒ Erreur lors de l'enregistrement")
+                            st.error("❌ Erreur lors de l'enregistrement")
         
         # Historique des 5 dernières cuissons
         historique = service.get_historique(recette.id, nb_dernieres=5)
         if historique:
-            with st.expander("ðŸ“œ 5 dernières utilisations", expanded=True):
+            with st.expander("📜 5 dernières utilisations", expanded=True):
                 for h in historique:
                     col_date, col_portions, col_note = st.columns([1, 1, 1])
                     with col_date:
-                        st.caption(f"ðŸ“… {h.date_cuisson.strftime('%d/%m/%Y')}")
+                        st.caption(f"📅 {h.date_cuisson.strftime('%d/%m/%Y')}")
                     with col_portions:
-                        st.caption(f"ðŸ‘¥ {h.portions_cuisinees} portions")
+                        st.caption(f"👥 {h.portions_cuisinees} portions")
                     with col_note:
                         if h.note:
-                            st.caption(f"â­ {h.note}/5")
+                            st.caption(f"⭐ {h.note}/5")
                     if h.avis:
-                        st.caption(f"ðŸ’­ {h.avis}")
+                        st.caption(f"💭 {h.avis}")
                     st.divider()
     
     # Versions (bébé, batch cooking, robots)
     st.divider()
-    st.markdown("### ðŸŽ¯ Versions adaptées")
+    st.markdown("### 🎯 Versions adaptées")
     
     if service:
         versions = service.get_versions(recette.id)
         
         # Créer tabs pour les différents types
-        tab_list = ["ðŸ“‹ Versions existantes", "âœ¨ Générer avec IA"]
+        tab_list = ["📋 Versions existantes", "✨ Générer avec IA"]
         
         # Ajouter tab robots si compatibles
         robots_compatibles = []
@@ -519,7 +523,7 @@ def render_detail_recette(recette):
             robots_compatibles.append("Multicooker")
         
         if robots_compatibles:
-            tab_list.insert(1, "ðŸ¤– Robots compatibles")
+            tab_list.insert(1, "🤖 Robots compatibles")
         
         tab_versions = st.tabs(tab_list)
         
@@ -527,11 +531,11 @@ def render_detail_recette(recette):
             if versions:
                 for version in versions:
                     if version.type_version == "bébé":
-                        icon = "ðŸ‘¶"
+                        icon = "👶"
                     elif version.type_version == "batch cooking":
-                        icon = "â²ï¸"
+                        icon = "²️"
                     else:
-                        icon = "ðŸ“‹"
+                        icon = "📋"
                     
                     with st.expander(f"{icon} Version {version.type_version}"):
                         if version.instructions_modifiees:
@@ -542,23 +546,23 @@ def render_detail_recette(recette):
                             st.info(version.notes_bebe)
                         
                         if version.type_version == "batch cooking" and version.etapes_paralleles_batch:
-                            st.markdown("**Ã‰tapes parallèles:**")
+                            st.markdown("**Étapes parallèles:**")
                             for etape in version.etapes_paralleles_batch:
-                                st.caption(f"â€¢ {etape}")
+                                st.caption(f"• {etape}")
                         
                         if version.temps_optimise_batch:
-                            st.caption(f"â±ï¸ Temps optimisé: {version.temps_optimise_batch} minutes")
+                            st.caption(f"⏱️ Temps optimisé: {version.temps_optimise_batch} minutes")
             else:
                 st.info("Aucune version adaptée générée.")
         
         # Afficher onglet robots si compatible
         if robots_compatibles:
             with tab_versions[1]:
-                st.markdown("### ðŸ¤– Robots de cuisine compatibles")
+                st.markdown("### 🤖 Robots de cuisine compatibles")
                 
                 robot_info = {
                     "Cookeo": {
-                        "icon": "ðŸ²",
+                        "icon": "🍲",
                         "desc": "Fait-tout multicuiseur sous pression",
                         "temps": "Généralement réduit de 30-40%",
                         "conseils": [
@@ -568,7 +572,7 @@ def render_detail_recette(recette):
                         ]
                     },
                     "Monsieur Cuisine": {
-                        "icon": "ðŸ‘¨â€ðŸ³",
+                        "icon": "👨‍🍳",
                         "desc": "Robot cuiseur multifonction",
                         "temps": "Généralement similaire ou réduit",
                         "conseils": [
@@ -578,7 +582,7 @@ def render_detail_recette(recette):
                         ]
                     },
                     "Airfryer": {
-                        "icon": "ðŸŒªï¸",
+                        "icon": "🌪️",
                         "desc": "Friteuse à air chaud",
                         "temps": "Généralement réduit de 20-30%",
                         "conseils": [
@@ -588,7 +592,7 @@ def render_detail_recette(recette):
                         ]
                     },
                     "Multicooker": {
-                        "icon": "â²ï¸",
+                        "icon": "²️",
                         "desc": "Cuiseur multifonctions programmable",
                         "temps": "Généralement similaire",
                         "conseils": [
@@ -601,65 +605,65 @@ def render_detail_recette(recette):
                 
                 for robot in robots_compatibles:
                     info = robot_info.get(robot, {})
-                    with st.expander(f"{info.get('icon', 'ðŸ¤–')} {robot}", expanded=False):
+                    with st.expander(f"{info.get('icon', '🤖')} {robot}", expanded=False):
                         st.write(f"**Description:** {info.get('desc', '')}")
                         st.write(f"**Temps de cuisson:** {info.get('temps', '')}")
                         
                         if info.get('conseils'):
                             st.markdown("**Conseils d'adaptation:**")
                             for conseil in info.get('conseils', []):
-                                st.caption(f"â€¢ {conseil}")
+                                st.caption(f"• {conseil}")
         
         # Onglet génération
         generation_tab_idx = 2 if robots_compatibles else 1
         with tab_versions[generation_tab_idx]:
-            st.markdown("### âœ¨ Générer des versions adaptées")
+            st.markdown("### ✨ Générer des versions adaptées")
             
             # Versions standards
             col1, col2 = st.columns(2)
             with col1:
-                if st.button("ðŸ‘¶ Générer version bébé", use_container_width=True):
-                    with st.spinner("ðŸ¤– L'IA adapte la recette..."):
+                if st.button("👶 Générer version bébé", use_container_width=True):
+                    with st.spinner("🤖 L'IA adapte la recette..."):
                         try:
                             print(f"DEBUG: Appel generer_version_bebe({recette.id})")
                             version = service.generer_version_bebe(recette.id)
                             print(f"DEBUG: Résultat version = {version}")
                             if version:
-                                st.success("âœ… Version bébé créée!")
+                                st.success("✅ Version bébé créée!")
                                 print(f"DEBUG: Version créée avec succès: {version.id}")
                                 st.rerun()
                             else:
-                                st.error("âŒ Erreur lors de la génération (version=None)")
+                                st.error("❌ Erreur lors de la génération (version=None)")
                                 print(f"DEBUG: version est None!")
                         except Exception as e:
                             print(f"DEBUG: Exception = {type(e).__name__}: {str(e)}")
                             import traceback
                             print(traceback.format_exc())
-                            st.error(f"âŒ Erreur: {str(e)}")
+                            st.error(f"❌ Erreur: {str(e)}")
             
             with col2:
-                if st.button("â²ï¸ Générer version batch cooking", use_container_width=True):
-                    with st.spinner("ðŸ¤– L'IA optimise la recette pour le batch cooking..."):
+                if st.button("²️ Générer version batch cooking", use_container_width=True):
+                    with st.spinner("🤖 L'IA optimise la recette pour le batch cooking..."):
                         try:
                             version = service.generer_version_batch_cooking(recette.id)
                             if version:
-                                st.success("âœ… Version batch cooking créée!")
+                                st.success("✅ Version batch cooking créée!")
                                 st.rerun()
                             else:
-                                st.error("âŒ Erreur lors de la génération")
+                                st.error("❌ Erreur lors de la génération")
                         except Exception as e:
-                            st.error(f"âŒ Erreur: {str(e)}")
+                            st.error(f"❌ Erreur: {str(e)}")
             
             # Versions robots si compatibles
             if robots_compatibles:
                 st.markdown("---")
-                st.markdown("### ðŸ¤– Générer pour robots de cuisine")
+                st.markdown("### 🤖 Générer pour robots de cuisine")
                 
                 robot_buttons = {
-                    "Cookeo": ("ðŸ²", "cookeo"),
-                    "Monsieur Cuisine": ("ðŸ‘¨â€ðŸ³", "monsieur_cuisine"),
-                    "Airfryer": ("ðŸŒªï¸", "airfryer"),
-                    "Multicooker": ("â²ï¸", "multicooker"),
+                    "Cookeo": ("🍲", "cookeo"),
+                    "Monsieur Cuisine": ("👨‍🍳", "monsieur_cuisine"),
+                    "Airfryer": ("🌪️", "airfryer"),
+                    "Multicooker": ("²️", "multicooker"),
                 }
                 
                 # Créer colonnes pour les boutons disponibles
@@ -667,29 +671,29 @@ def render_detail_recette(recette):
                 if available_robots:
                     cols = st.columns(len(available_robots))
                     for idx, robot_name in enumerate(available_robots):
-                        icon, robot_key = robot_buttons.get(robot_name, ("ðŸ¤–", robot_name.lower()))
+                        icon, robot_key = robot_buttons.get(robot_name, ("🤖", robot_name.lower()))
                         with cols[idx]:
                             if st.button(
                                 f"{icon} {robot_name}", 
                                 use_container_width=True,
                                 key=f"gen_robot_{robot_key}"
                             ):
-                                with st.spinner(f"ðŸ¤– L'IA adapte pour {robot_name}..."):
+                                with st.spinner(f"🤖 L'IA adapte pour {robot_name}..."):
                                     try:
                                         version = service.generer_version_robot(
                                             recette.id, robot_key
                                         )
                                         if version:
-                                            st.success(f"âœ… Version {robot_name} créée!")
+                                            st.success(f"✅ Version {robot_name} créée!")
                                             st.rerun()
                                         else:
-                                            st.error("âŒ Erreur lors de la génération")
+                                            st.error("❌ Erreur lors de la génération")
                                     except Exception as e:
-                                        st.error(f"âŒ Erreur: {str(e)}")
+                                        st.error(f"❌ Erreur: {str(e)}")
     
     # Actions sur la recette
     st.divider()
-    st.markdown("### âš™ï¸ Actions")
+    st.markdown("### ⚙️ Actions")
     
     action_cols = st.columns(3)
     
@@ -757,7 +761,7 @@ def render_detail_recette(recette):
 
 def render_ajouter_manuel():
     """Formulaire pour ajouter une recette manuellement"""
-    st.subheader("âž• Ajouter une recette manuellement")
+    st.subheader("➕ Ajouter une recette manuellement")
     
     # Initialiser session_state si nécessaire
     if 'form_num_ingredients' not in st.session_state:
@@ -826,8 +830,8 @@ def render_ajouter_manuel():
                 "unite": ing_unit
             })
     
-    # Ã‰tapes
-    st.markdown("### Ã‰tapes de préparation")
+    # Étapes
+    st.markdown("### Étapes de préparation")
     col1, col2 = st.columns([3, 1])
     with col1:
         num_etapes = st.number_input(
@@ -841,7 +845,7 @@ def render_ajouter_manuel():
     
     etapes = []
     for i in range(int(num_etapes)):
-        etape_desc = st.text_area(f"Ã‰tape {i+1}", height=80, key=f"form_etape_{i}")
+        etape_desc = st.text_area(f"Étape {i+1}", height=80, key=f"form_etape_{i}")
         if etape_desc:
             etapes.append({
                 "description": etape_desc,
@@ -849,18 +853,18 @@ def render_ajouter_manuel():
             })
     
     # Bouton créer
-    if st.button("âœ… Créer la recette", use_container_width=True, type="primary"):
+    if st.button("✅ Créer la recette", use_container_width=True, type="primary"):
         if not nom or not type_repas:
-            st.error("âŒ Nom et type de repas sont obligatoires")
+            st.error("❌ Nom et type de repas sont obligatoires")
         elif not ingredients:
-            st.error("âŒ Ajoutez au moins un ingrédient")
+            st.error("❌ Ajoutez au moins un ingrédient")
         elif not etapes:
-            st.error("âŒ Ajoutez au moins une étape")
+            st.error("❌ Ajoutez au moins une étape")
         else:
             # Créer la recette
             service = get_recette_service()
             if service is None:
-                st.error("âŒ Service indisponible")
+                st.error("❌ Service indisponible")
             else:
                 try:
                     data = {
@@ -885,28 +889,28 @@ def render_ajouter_manuel():
                         if key.startswith('form_'):
                             del st.session_state[key]
                     
-                    st.success(f"âœ… Recette '{recette.nom}' créée avec succès!")
+                    st.success(f"✅ Recette '{recette.nom}' créée avec succès!")
                     st.balloons()
                     st.rerun()
                     
                 except ErreurValidation as e:
-                    st.error(f"âŒ Erreur validation: {e}")
+                    st.error(f"❌ Erreur validation: {e}")
                 except Exception as e:
-                    st.error(f"âŒ Erreur: {str(e)}")
+                    st.error(f"❌ Erreur: {str(e)}")
                     logger.error(f"Erreur création recette: {e}")
 
 
 def render_generer_ia():
     """Interface pour générer des recettes avec l'IA"""
-    st.subheader("âœ¨ Générer des recettes avec l'IA")
+    st.subheader("✨ Générer des recettes avec l'IA")
     
     service = get_recette_service()
     if service is None:
-        st.error("âŒ Service IA indisponible")
+        st.error("❌ Service IA indisponible")
         return
     
     with st.form("form_recette_ia", border=True):
-        st.info("ðŸ’¡ Laissez l'IA générer des recettes personnalisées basées sur vos préférences")
+        st.info("💡 Laissez l'IA générer des recettes personnalisées basées sur vos préférences")
         
         col1, col2 = st.columns(2)
         with col1:
@@ -940,17 +944,17 @@ def render_generer_ia():
             height=80
         )
         
-        submitted = st.form_submit_button("ðŸ¤– Générer avec l'IA", use_container_width=True)
+        submitted = st.form_submit_button("🤖 Générer avec l'IA", use_container_width=True)
     
     if submitted:
         if not type_repas or not saison:
-            st.error("âŒ Type de repas et saison sont obligatoires")
+            st.error("❌ Type de repas et saison sont obligatoires")
         else:
             ingredients_dispo = None
             if ingredients_str:
                 ingredients_dispo = [i.strip() for i in ingredients_str.split(",") if i.strip()]
             
-            with st.spinner("ðŸ¤– L'IA génère vos recettes..."):
+            with st.spinner("🤖 L'IA génère vos recettes..."):
                 try:
                     recettes_suggestions = service.generer_recettes_ia(
                         type_repas=type_repas,
@@ -961,10 +965,10 @@ def render_generer_ia():
                     )
                     
                     if not recettes_suggestions:
-                        st.warning("âš ï¸ Aucune recette générée. Réessayez.")
+                        st.warning("⚠️ Aucune recette générée. Réessayez.")
                         return
                     
-                    st.success(f"âœ… {len(recettes_suggestions)} recette(s) générée(s)!")
+                    st.success(f"✅ {len(recettes_suggestions)} recette(s) générée(s)!")
                     st.divider()
                     
                     # Afficher les suggestions en cartes
@@ -974,9 +978,9 @@ def render_generer_ia():
                             # Titre + Métrique difficulté en ligne
                             col_titre, col_diff = st.columns([4, 1])
                             with col_titre:
-                                st.subheader(f"ðŸ³ {suggestion.nom}", anchor=False)
+                                st.subheader(f"🍳 {suggestion.nom}", anchor=False)
                             with col_diff:
-                                difficulte_emoji = {"facile": "ðŸŸ¢", "moyen": "ðŸŸ¡", "difficile": "ðŸ”´"}.get(suggestion.difficulte, "")
+                                difficulte_emoji = {"facile": "🟢", "moyen": "🟡", "difficile": "🔴"}.get(suggestion.difficulte, "")
                                 st.caption(f"{difficulte_emoji} {suggestion.difficulte}")
                             
                             # Description
@@ -986,13 +990,13 @@ def render_generer_ia():
                             # Métriques en ligne
                             col1, col2, col3, col4 = st.columns(4)
                             with col1:
-                                st.metric("â±ï¸ Préparation", f"{suggestion.temps_preparation} min", label_visibility="collapsed")
+                                st.metric("⏱️ Préparation", f"{suggestion.temps_preparation} min", label_visibility="collapsed")
                             with col2:
-                                st.metric("ðŸ”¥ Cuisson", f"{suggestion.temps_cuisson} min", label_visibility="collapsed")
+                                st.metric("🔥 Cuisson", f"{suggestion.temps_cuisson} min", label_visibility="collapsed")
                             with col3:
-                                st.metric("ðŸ½ï¸ Portions", suggestion.portions, label_visibility="collapsed")
+                                st.metric("🍽️ Portions", suggestion.portions, label_visibility="collapsed")
                             with col4:
-                                st.metric("â° Total", f"{suggestion.temps_preparation + suggestion.temps_cuisson} min", label_visibility="collapsed")
+                                st.metric("⏰ Total", f"{suggestion.temps_preparation + suggestion.temps_cuisson} min", label_visibility="collapsed")
                             
                             st.divider()
                             
@@ -1004,20 +1008,20 @@ def render_generer_ia():
                                     ing_list = suggestion.ingredients[:len(suggestion.ingredients)//2 + 1]
                                     for ing in ing_list:
                                         if isinstance(ing, dict):
-                                            st.write(f"â€¢ {ing.get('nom', 'N/A')}: {ing.get('quantite', '')} {ing.get('unite', '')}")
+                                            st.write(f"• {ing.get('nom', 'N/A')}: {ing.get('quantite', '')} {ing.get('unite', '')}")
                                         else:
-                                            st.write(f"â€¢ {ing}")
+                                            st.write(f"• {ing}")
                                 with col_ing2:
                                     ing_list = suggestion.ingredients[len(suggestion.ingredients)//2 + 1:]
                                     for ing in ing_list:
                                         if isinstance(ing, dict):
-                                            st.write(f"â€¢ {ing.get('nom', 'N/A')}: {ing.get('quantite', '')} {ing.get('unite', '')}")
+                                            st.write(f"• {ing.get('nom', 'N/A')}: {ing.get('quantite', '')} {ing.get('unite', '')}")
                                         else:
-                                            st.write(f"â€¢ {ing}")
+                                            st.write(f"• {ing}")
                             
-                            # Ã‰tapes dans un expander
+                            # Étapes dans un expander
                             if suggestion.etapes:
-                                with st.expander("ðŸ“‹ Ã‰tapes de préparation"):
+                                with st.expander("📋 Étapes de préparation"):
                                     for i, etape in enumerate(suggestion.etapes, 1):
                                         if isinstance(etape, dict):
                                             st.write(f"**{i}.** {etape.get('description', etape)}")
@@ -1056,22 +1060,22 @@ def render_generer_ia():
                             st.write("")  # Espacement
                 
                 except Exception as e:
-                    st.error(f"âŒ Erreur génération: {str(e)}")
+                    st.error(f"❌ Erreur génération: {str(e)}")
                     logger.error(f"Erreur IA recettes: {e}")
 
 
 def render_generer_image(recette):
     """Affiche l'interface pour générer une image pour la recette"""
-    st.subheader("âœ¨ Générer une image pertinente")
+    st.subheader("✨ Générer une image pertinente")
     
     # Description du prompt - affichée complètement
     prompt = f"{recette.nom}"
     if recette.description:
         prompt += f": {recette.description}"
-    st.caption(f"ðŸ“ {prompt}")
+    st.caption(f"📝 {prompt}")
     
     # Bouton génération
-    if st.button("ðŸŽ¨ Générer Image", use_container_width=True, key=f"gen_img_{recette.id}"):
+    if st.button("🎨 Générer Image", use_container_width=True, key=f"gen_img_{recette.id}"):
         try:
             # Import et vérification des clés
             from src.utils.image_generator import generer_image_recette, UNSPLASH_API_KEY, PEXELS_API_KEY, PIXABAY_API_KEY
@@ -1080,8 +1084,8 @@ def render_generer_image(recette):
             status_placeholder = st.empty()
             
             with status_placeholder.container():
-                st.info(f"â³ Génération de l'image pour: **{recette.nom}**")
-                st.caption(f"ðŸ”‘ Sources: Unsplash={'âœ…' if UNSPLASH_API_KEY else 'âŒ'} | Pexels={'âœ…' if PEXELS_API_KEY else 'âŒ'} | Pixabay={'âœ…' if PIXABAY_API_KEY else 'âŒ'}")
+                st.info(f"⏳ Génération de l'image pour: **{recette.nom}**")
+                st.caption(f"🔗 Sources: Unsplash={'✅' if UNSPLASH_API_KEY else '❌'} | Pexels={'✅' if PEXELS_API_KEY else '❌'} | Pixabay={'✅' if PIXABAY_API_KEY else '❌'}")
             
             # Préparer la liste des ingrédients
             ingredients_list = []
@@ -1103,39 +1107,38 @@ def render_generer_image(recette):
             # Mettre à jour le status
             if url_image:
                 status_placeholder.empty()
-                st.success(f"âœ… Image générée pour: **{recette.nom}**")
+                st.success(f"✅ Image générée pour: **{recette.nom}**")
                 # Stocker dans session state
                 st.session_state[f"generated_image_{recette.id}"] = url_image
                 
                 # Afficher l'image en grande avec ratio maintenu
-                st.image(url_image, caption=f"ðŸ½ï¸ {recette.nom}", use_column_width=True)
+                st.image(url_image, caption=f"🍽️ {recette.nom}", use_column_width=True)
             else:
                 status_placeholder.empty()
-                st.error("âŒ Impossible de générer l'image - aucune source ne retourne d'image")
-                st.info("ðŸ’¡ Assurez-vous qu'une clé API est configurée dans Settings > Secrets")
+                st.error("❌ Impossible de générer l'image - aucune source ne retourne d'image")
+                st.info("💡 Assurez-vous qu'une clé API est configurée dans Settings > Secrets")
                     
         except ImportError as e:
-            st.error(f"âŒ Erreur d'import: {str(e)}")
+            st.error(f"❌ Erreur d'import: {str(e)}")
         except Exception as e:
             import traceback
-            st.error(f"âŒ Erreur: {str(e)}")
-            with st.expander("ðŸ“‹ Détails erreur"):
+            st.error(f"❌ Erreur: {str(e)}")
+            with st.expander("📋 Détails erreur"):
                 st.code(traceback.format_exc(), language="python")
     
     # Afficher l'image si elle existe en session state
     if f"generated_image_{recette.id}" in st.session_state:
         url_image = st.session_state[f"generated_image_{recette.id}"]
-        st.image(url_image, caption=f"ðŸ½ï¸ {recette.nom}", use_column_width=True)
+        st.image(url_image, caption=f"🍽️ {recette.nom}", use_column_width=True)
         
         # Proposer de sauvegarder
-        if st.button("ðŸ’¾ Sauvegarder cette image", use_container_width=True, key=f"save_img_{recette.id}"):
+        if st.button("💾 Sauvegarder cette image", use_container_width=True, key=f"save_img_{recette.id}"):
             service = get_recette_service()
             if service:
                 try:
                     recette.url_image = url_image
                     service.update(recette.id, {"url_image": url_image})
-                    st.success("âœ… Image sauvegardée dans la recette!")
+                    st.success("✅ Image sauvegardée dans la recette!")
                     st.rerun()
                 except Exception as e:
-                    st.error(f"âŒ Erreur sauvegarde: {str(e)}")
-
+                    st.error(f"❌ Erreur sauvegarde: {str(e)}")
