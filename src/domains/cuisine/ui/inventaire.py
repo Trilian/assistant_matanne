@@ -76,11 +76,11 @@ def app():
 
     """Point d'entrée module inventaire"""
 
-    st.set_page_config(page_title="[PKG] Inventaire", layout="wide")
+    st.set_page_config(page_title="📦 Inventaire", layout="wide")
 
     
 
-    st.title("[PKG] Inventaire")
+    st.title("📦 Inventaire")
 
     st.caption("Gestion complète de votre stock d'ingrédients")
 
@@ -102,9 +102,9 @@ def app():
 
     tab_stock, tab_alertes, tab_categories, tab_suggestions, tab_historique, tab_photos, tab_notifications, tab_predictions, tab_tools = st.tabs([
 
-        "[CHART] Stock", 
+        "📊 Stock", 
 
-        "[!] Alertes", 
+        "⚠️ Alertes", 
 
         "🏷️ Catégories", 
 
@@ -177,7 +177,79 @@ def app():
         render_tools()
 
 
+    # Afficher formulaire d'ajout si demandé
+    if st.session_state.show_form:
+        st.divider()
+        render_add_article_form()
 
+
+
+
+
+def render_add_article_form():
+    """Affiche le formulaire pour ajouter un nouvel article"""
+    service = get_inventaire_service()
+    
+    if service is None:
+        st.error("❌ Service inventaire indisponible")
+        return
+    
+    st.subheader("➕ Ajouter un nouvel article")
+    
+    try:
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            ingredient_nom = st.text_input("Nom de l'article *", placeholder="Ex: Tomates cerises")
+        
+        with col2:
+            quantite = st.number_input("Quantité", value=1.0, min_value=0.0)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            emplacement = st.text_input("Emplacement", placeholder="Frigo, Placard...")
+        
+        with col2:
+            date_peremption = st.date_input("Date de péremption", value=None)
+        
+        col1, col2 = st.columns([1, 4])
+        
+        with col1:
+            if st.button("✨ Ajouter", use_container_width=True, type="primary"):
+                if not ingredient_nom:
+                    st.error("❌ Le nom est obligatoire")
+                else:
+                    try:
+                        article = service.ajouter_article(
+                            ingredient_nom=ingredient_nom,
+                            quantite=quantite,
+                            emplacement=emplacement if emplacement else None,
+                            date_peremption=date_peremption if date_peremption else None
+                        )
+                        
+                        if article:
+                            st.success(f"✅ Article '{ingredient_nom}' ajouté avec succès!")
+                            st.session_state.show_form = False
+                            st.session_state.refresh_counter += 1
+                            st.rerun()
+                        else:
+                            st.error(f"❌ Impossible d'ajouter l'article")
+                    
+                    except ErreurValidation as e:
+                        st.error(f"❌ Erreur: {e}")
+                    except Exception as e:
+                        st.error(f"❌ Erreur lors de l'ajout: {str(e)}")
+                        logger.error(f"Erreur ajouter_article: {e}")
+        
+        with col2:
+            if st.button("❌ Annuler", use_container_width=True):
+                st.session_state.show_form = False
+                st.rerun()
+    
+    except Exception as e:
+        st.error(f"❌ Erreur: {str(e)}")
+        logger.error(f"Erreur render_add_article_form: {e}")
 
 
 def render_stock():

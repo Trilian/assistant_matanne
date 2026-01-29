@@ -368,7 +368,7 @@ def render_generer():
                         st.success("✨ Planning généré avec succès!")
                         
                         # Afficher preview
-                        st.subheader("ðŸ“‹ Aperçu du planning")
+                        st.subheader("📋 Aperçu du planning")
                         
                         # Récupérer planning complet
                         planning_complet = service.get_planning_complet(planning.id)
@@ -384,11 +384,13 @@ def render_generer():
                                 repas_jour = planning_complet.get("repas_par_jour", {}).get(jour_key, [])
                                 
                                 for repas in repas_jour:
+                                    # Afficher recette ou notes
+                                    display_text = repas.get("recette_nom") or repas.get("notes") or "À remplir"
                                     data.append({
                                         "Jour": jour_name,
                                         "Date": jour_date.strftime("%d/%m"),
                                         "Type": repas["type_repas"].capitalize(),
-                                        "Recette/Notes": repas.get("recette_nom", repas.get("notes", ""))
+                                        "Recette/Notes": display_text
                                     })
                             
                             if data:
@@ -398,7 +400,7 @@ def render_generer():
                         st.divider()
                         st.info("✨ Planning sauvegardé en BD et prêt à utiliser!")
                         
-                        if st.button("ðŸ“‹ Voir planning", use_container_width=True):
+                        if st.button("📋 Voir planning", use_container_width=True):
                             st.session_state.go_to_planning = True
                             st.rerun()
                     else:
@@ -443,8 +445,10 @@ def render_historique():
         # Récupérer tous plannings
         with obtenir_contexte_db() as db:
             from src.core.models import Planning as PlanningModel
+            from sqlalchemy.orm import joinedload
             
             query = db.query(PlanningModel)
+            query = query.options(joinedload(PlanningModel.repas))
             query = query.filter(PlanningModel.semaine_debut >= date_debut)
             query = query.filter(PlanningModel.semaine_debut <= date_fin)
             
@@ -457,7 +461,7 @@ def render_historique():
             st.info("Aucun planning trouvé")
             return
         
-        st.metric("[CHART] Total plannings", len(plannings))
+        st.metric("📊 Total plannings", len(plannings))
         
         st.divider()
         
@@ -466,14 +470,14 @@ def render_historique():
             col1, col2, col3, col4, col5 = st.columns([2, 1.5, 1, 0.8, 0.8])
             
             with col1:
-                genere_icon = "🤖" if planning.genere_par_ia else "êœï¸"
+                genere_icon = "🤖" if planning.genere_par_ia else "✏️"
                 actif_icon = "✅" if planning.actif else "⚫"
                 st.write(f"**{genere_icon} {planning.nom}** {actif_icon}")
-                st.caption(f"ðŸ“… {planning.semaine_debut.strftime('%d/%m')} ê†’ {planning.semaine_fin.strftime('%d/%m')}")
+                st.caption(f"📅 {planning.semaine_debut.strftime('%d/%m')} → {planning.semaine_fin.strftime('%d/%m')}")
             
             with col2:
                 repas_count = len(planning.repas) if planning.repas else 0
-                st.metric("[CHART] Repas", repas_count)
+                st.metric("🍽️ Repas", repas_count)
             
             with col3:
                 created = planning.cree_le.strftime("%d/%m/%y") if planning.cree_le else "N/A"
