@@ -337,17 +337,20 @@ def render_ajouter_article():
                 from src.core.models import Ingredient
                 from src.core.database import obtenir_contexte_db
                 
-                db = next(obtenir_contexte_db())
-                ingredient = db.query(Ingredient).filter(Ingredient.nom == nom).first()
+                with obtenir_contexte_db() as db:
+                    ingredient = db.query(Ingredient).filter(Ingredient.nom == nom).first()
+                    
+                    if not ingredient:
+                        ingredient = Ingredient(nom=nom, unite=unite)
+                        db.add(ingredient)
+                        db.flush()
+                        db.refresh(ingredient)
+                    
+                    ingredient_id = ingredient.id
                 
-                if not ingredient:
-                    ingredient = Ingredient(nom=nom, unite=unite)
-                    db.add(ingredient)
-                    db.commit()
-                
-                # Ajouter article courses
+                # Ajouter article courses avec le service
                 data = {
-                    "ingredient_id": ingredient.id,
+                    "ingredient_id": ingredient_id,
                     "quantite_necessaire": quantite,
                     "priorite": priorite,
                     "rayon_magasin": rayon,
@@ -474,32 +477,85 @@ def render_suggestions_ia():
         
         if recettes_service is None:
             st.warning("⚠️ Service recettes indisponible")
-            return
-        
-        # Lister recettes
-        try:
-            recettes = recettes_service.get_all()
-            
-            if not recettes:
-                st.info("Aucune recette disponible")
-                return
-            
-            recette_names = {r.id: r.nom for r in recettes}
-            selected_recette_id = st.selectbox(
-                "Sélectionner une recette",
-                options=list(recette_names.keys()),
-                format_func=lambda x: recette_names[x]
-            )
-            
-            if selected_recette_id:
-                recette = recettes_service.get_by_id_full(selected_recette_id)
+        else:
+            # Lister recettes
+            try:
+                recettes = recettes_service.get_all()
                 
-                if recette and st.button("🔍 Ajouter ingrédients manquants"):
-                    # Calculer ingrédients manquants vs inventaire
-                    st.info("Ingrédients manquants ajoutés!")
-                    st.rerun()
-        except Exception as e:
-            st.error(f"❌ Erreur: {str(e)}")
+                if not recettes:
+                    st.info("Aucune recette disponible")
+                else:
+                    recette_names = {r.id: r.nom for r in recettes}
+                    selected_recette_id = st.selectbox(
+                        "Sélectionner une recette",
+                        options=list(recette_names.keys()),
+                        format_func=lambda x: recette_names[x],
+                        key="select_recette_courses"
+                    )
+                    
+                    if selected_recette_id:
+                        recette = recettes_service.get_by_id_full(selected_recette_id)
+                        
+                        if recette:
+                            # Afficher ingrédients de la recette
+                            st.caption(f"📝 {recette.get('nb_ingredients', 0)} ingrédients")
+                            
+                            if st.button("🔍 Ajouter ingrédients manquants", key="btn_add_missing_ingredients"):
+                                try:
+                                    from src.core.models import Ingredient
+                                    from src.core.database import obtenir_contexte_db
+                                    
+                                    # Récupérer ingrédients de la recette
+                                    ingredients_recette = recette.get('ingredients', [])
+                                    
+                                    if not ingredients_recette:
+                                        st.warning("Aucun ingrédient dans cette recette")
+                                    else:
+                                        count_added = 0
+                                        
+                                        with obtenir_contexte_db() as db:
+                                            for ing_data in ingredients_recette:
+                                                # Récupérer ingrédient
+                                                ing_nom = ing_data.get('nom', ing_data.get('ingredient_nom', ''))
+                                                ing_quantite = ing_data.get('quantite', 1)
+                                                ing_unite = ing_data.get('unite', 'pièce')
+                                                
+                                                if not ing_nom:
+                                                    continue
+                                                
+                                                ingredient = db.query(Ingredient).filter(
+                                                    Ingredient.nom == ing_nom
+                                                ).first()
+                                                
+                                                if not ingredient:
+                                                    ingredient = Ingredient(
+                                                        nom=ing_nom,
+                                                        unite=ing_unite
+                                                    )
+                                                    db.add(ingredient)
+                                                    db.flush()
+                                                    db.refresh(ingredient)
+                                                
+                                                # Ajouter à la liste courses
+                                                data = {
+                                                    "ingredient_id": ingredient.id,
+                                                    "quantite_necessaire": ing_quantite,
+                                                    "priorite": "moyenne",
+                                                    "rayon_magasin": "Autre",
+                                                    "notes": f"Pour {recette.get('nom', 'recette')}"
+                                                }
+                                                service.create(data)
+                                                count_added += 1
+                                        
+                                        st.success(f"✅ {count_added} ingrédient(s) ajouté(s) à la liste!")
+                                        st.session_state.courses_refresh += 1
+                                        st.rerun()
+                                except Exception as e:
+                                    st.error(f"❌ Erreur: {str(e)}")
+                                    logger.error(f"Erreur ajout ingrédients recette: {e}")
+            except Exception as e:
+                st.error(f"❌ Erreur: {str(e)}")
+                logger.error(f"Erreur render tab recettes: {e}")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -618,11 +674,17 @@ def render_modeles():
                                 try:
                                     # Appliquer le modèle (crée articles courses)
                                     article_ids = service.appliquer_modele(modele['id'])
-                                    st.success(f"✅ Modèle chargé ({len(article_ids)} articles)!")
-                                    st.session_state.courses_refresh += 1
-                                    st.rerun()
+                                    if not article_ids:
+                                        st.warning(f"⚠️ Modèle chargé mais aucun article trouvé")
+                                    else:
+                                        st.success(f"✅ Modèle chargé ({len(article_ids)} articles)!")
+                                        st.session_state.courses_refresh += 1
+                                        st.rerun()
                                 except Exception as e:
+                                    import traceback
                                     st.error(f"❌ Erreur: {str(e)}")
+                                    with st.expander("📋 Détails d'erreur"):
+                                        st.code(traceback.format_exc())
                         
                         with col3:
                             if st.button("🗑️ Supprimer", key=f"del_{modele['id']}", use_container_width=True, help="Supprimer ce modèle"):

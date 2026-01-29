@@ -288,22 +288,30 @@ class CoursesService(BaseService[ArticleCourses], BaseAIService):
     def appliquer_modele(self, modele_id: int, utilisateur_id: str | None = None, 
                         db: Session | None = None) -> list[int]:
         """Appliquer un modèle à la liste active (crée articles cours)"""
-        from src.core.models import ModeleCourses, Ingredient
+        from src.core.models import ModeleCourses, Ingredient, ArticleModele
+        from sqlalchemy.orm import joinedload
         
-        modele = db.query(ModeleCourses).filter_by(id=modele_id).first()
+        # Load with eager loading to prevent lazy loading issues outside session
+        modele = db.query(ModeleCourses).options(
+            joinedload(ModeleCourses.articles).joinedload(ArticleModele.ingredient)
+        ).filter_by(id=modele_id).first()
+        
         if not modele:
             logger.error(f"Modèle {modele_id} non trouvé")
             return []
         
         article_ids = []
         for article_modele in modele.articles:
+            logger.debug(f"Processing article: {article_modele.nom_article}")
             # Récupérer ou créer l'ingrédient
             ingredient = article_modele.ingredient
             if not ingredient:
+                logger.debug(f"  Cherchant ingrédient par nom: {article_modele.nom_article}")
                 ingredient = db.query(Ingredient).filter_by(
                     nom=article_modele.nom_article
                 ).first()
                 if not ingredient:
+                    logger.debug(f"  Créant nouvel ingrédient: {article_modele.nom_article}")
                     ingredient = Ingredient(
                         nom=article_modele.nom_article,
                         unite=article_modele.unite,
@@ -323,6 +331,7 @@ class CoursesService(BaseService[ArticleCourses], BaseAIService):
             
             article_id = self.create(data, db=db)
             article_ids.append(article_id)
+            logger.debug(f"  ✓ Article créé: ID={article_id}")
         
         logger.info(f"✅ Modèle {modele_id} appliqué ({len(article_ids)} articles)")
         return article_ids

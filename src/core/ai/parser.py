@@ -90,11 +90,12 @@ class AnalyseurIA:
 
         # Stratégie 5: Fallback
         if not strict and valeur_secours:
-            logger.warning(f"Toutes stratégies échouées, utilisation fallback pour {modele.__name__}")
+            logger.warning(f"⚠️  Toutes stratégies échouées, utilisation fallback pour {modele.__name__}")
+            logger.debug(f"   Response était: {reponse[:300]}")
             return modele(**valeur_secours)
 
         # Échec total
-        logger.error(f"Impossible d'analyser réponse pour {modele.__name__}: {reponse[:200]}")
+        logger.error(f"❌ Impossible d'analyser réponse pour {modele.__name__}: {reponse[:200]}")
         raise ValueError(f"Impossible d'analyser la réponse IA pour {modele.__name__}")
 
     @staticmethod
@@ -221,6 +222,10 @@ def analyser_liste_reponse(
     Returns:
         Liste d'items validés
     """
+    
+    # LOG DEBUG: Première partie de la réponse pour diagnostiquer
+    reponse_debut = reponse[:500] if len(reponse) > 500 else reponse
+    logger.debug(f"RAW AI RESPONSE (first 500 chars): {repr(reponse_debut)}")
 
     class EnvelopeListe(BaseModel):
         items: list[modele_item]

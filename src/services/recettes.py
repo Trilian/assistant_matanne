@@ -19,7 +19,7 @@ import json
 import logging
 from io import StringIO
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict, field_validator
 from sqlalchemy.orm import Session, joinedload
 
 from src.core.ai import obtenir_client_ia
@@ -48,6 +48,9 @@ logger = logging.getLogger(__name__)
 
 class RecetteSuggestion(BaseModel):
     """Recette suggérée par l'IA"""
+    
+    # Convertir automatiquement les floats en entiers (Mistral peut retourner 20.0)
+    model_config = ConfigDict(coerce_numbers_to_str=False)
 
     nom: str = Field(..., min_length=3, max_length=200)
     description: str = Field(..., min_length=10)
@@ -59,10 +62,26 @@ class RecetteSuggestion(BaseModel):
     saison: str = "toute_année"
     ingredients: list[dict]
     etapes: list[dict]
+    
+    @field_validator("temps_preparation", "temps_cuisson", "portions", mode="before")
+    @classmethod
+    def convert_float_to_int(cls, v):
+        """Convertit les floats en entiers (Mistral peut retourner des floats)"""
+        if isinstance(v, float):
+            return int(v)
+        return v
 
 
 class VersionBebeGeneree(BaseModel):
     """Version bébé générée"""
+    
+    @field_validator("age_minimum_mois", mode="before")
+    @classmethod
+    def convert_float_to_int_age(cls, v):
+        """Convertit les floats en entiers"""
+        if isinstance(v, float):
+            return int(v)
+        return v
 
     instructions_modifiees: str
     notes_bebe: str
@@ -71,6 +90,14 @@ class VersionBebeGeneree(BaseModel):
 
 class VersionBatchCookingGeneree(BaseModel):
     """Version batch cooking générée"""
+    
+    @field_validator("nombre_portions_recommande", mode="before")
+    @classmethod
+    def convert_float_to_int_portions(cls, v):
+        """Convertit les floats en entiers"""
+        if isinstance(v, float):
+            return int(v)
+        return v
 
     instructions_modifiees: str
     nombre_portions_recommande: int = Field(12, ge=4, le=100)
@@ -82,6 +109,14 @@ class VersionBatchCookingGeneree(BaseModel):
 
 class VersionRobotGeneree(BaseModel):
     """Version adaptée pour robot de cuisine"""
+    
+    @field_validator("temps_cuisson_adapte_minutes", mode="before")
+    @classmethod
+    def convert_float_to_int_temps(cls, v):
+        """Convertit les floats en entiers"""
+        if isinstance(v, float):
+            return int(v)
+        return v
 
     instructions_modifiees: str
     reglages_robot: str

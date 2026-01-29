@@ -48,19 +48,29 @@ def app():
         st.error("❌ Recette non trouvée")
         st.session_state.detail_recette_id = None
 
-    # Sous-tabs
+    # Sous-tabs avec persistence d'état
+    if "recettes_selected_tab" not in st.session_state:
+        st.session_state.recettes_selected_tab = 0
+    
     tab_liste, tab_ajout, tab_import, tab_ia = st.tabs(["📋 Liste", "➕ Ajouter Manuel", "📥 Importer", "✨ Générer IA"])
-
+    
+    # Mapper les tabs à leurs indices pour la persistence
+    tabs_list = [tab_liste, tab_ajout, tab_import, tab_ia]
+    
     with tab_liste:
+        st.session_state.recettes_selected_tab = 0
         render_liste()
 
     with tab_ajout:
+        st.session_state.recettes_selected_tab = 1
         render_ajouter_manuel()
     
     with tab_import:
+        st.session_state.recettes_selected_tab = 2
         render_importer()
     
     with tab_ia:
+        st.session_state.recettes_selected_tab = 3
         render_generer_ia()
 
 

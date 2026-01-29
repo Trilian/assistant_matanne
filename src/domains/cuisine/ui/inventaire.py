@@ -51,8 +51,8 @@ def app():
     # Tabs principales
     tab_stock, tab_alertes, tab_categories, tab_suggestions, tab_historique, tab_photos, tab_notifications, tab_predictions, tab_tools = st.tabs([
         "ðŸ“Š Stock", 
-        "âš ï¸ Alertes", 
-        "ðŸ·ï¸ Catégories", 
+        "êš ï¸ Alertes", 
+        "🏷️ Catégories", 
         "ðŸ›’ Suggestions IA",
         "ðŸ“œ Historique",
         "ðŸ“¸ Photos",
@@ -94,7 +94,7 @@ def render_stock():
     service = get_inventaire_service()
     
     if service is None:
-        st.error("âŒ Service inventaire indisponible")
+        st.error("êŒ Service inventaire indisponible")
         return
     
     try:
@@ -102,13 +102,13 @@ def render_stock():
         
         if not inventaire:
             st.info("ðŸ“¦ Inventaire vide. Commencez par ajouter des articles!")
-            if st.button("âž• Ajouter un article"):
+            if st.button("êž• Ajouter un article"):
                 st.session_state.show_form = True
             return
         
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•
         # STATISTIQUES GLOBALES
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•
         col1, col2, col3, col4 = st.columns(4)
         
         alertes = service.get_alertes()
@@ -119,20 +119,20 @@ def render_stock():
         with col1:
             st.metric("ðŸ“¦ Articles", len(inventaire), delta=None)
         with col2:
-            color = "ðŸ”´" if stock_critique > 0 else "¢"
+            color = "ðŸ”´" if stock_critique > 0 else "✅"
             st.metric(f"{color} Critique", stock_critique)
         with col3:
-            color = " " if stock_bas > 0 else "¢"
+            color = " " if stock_bas > 0 else "✅"
             st.metric(f"{color} Faible", stock_bas)
         with col4:
-            color = "ðŸ””" if peremption > 0 else "¢"
+            color = "ðŸ””" if peremption > 0 else "✅"
             st.metric(f"{color} Péremption", peremption)
         
         st.divider()
         
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•
         # FILTRES ET TRI
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•
         col_filter1, col_filter2, col_filter3 = st.columns(3)
         
         with col_filter1:
@@ -146,21 +146,21 @@ def render_stock():
         with col_filter2:
             categories = sorted(set(a["ingredient_categorie"] for a in inventaire))
             selected_categories = st.multiselect(
-                "ðŸ·ï¸ Catégorie",
+                "🏷️ Catégorie",
                 options=categories,
                 default=[]
             )
         
         with col_filter3:
             status_filter = st.multiselect(
-                "âš ï¸ Statut",
+                "êš ï¸ Statut",
                 options=["critique", "stock_bas", "peremption_proche", "ok"],
                 default=[]
             )
         
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•
         # APPLIQUER LES FILTRES
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•
         inventaire_filtres = inventaire
         
         if selected_emplacements:
@@ -172,9 +172,9 @@ def render_stock():
         if status_filter:
             inventaire_filtres = [a for a in inventaire_filtres if a["statut"] in status_filter]
         
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•
         # AFFICHER LE TABLEAU
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•
         if inventaire_filtres:
             df = _prepare_inventory_dataframe(inventaire_filtres)
             st.dataframe(
@@ -190,14 +190,14 @@ def render_stock():
         else:
             st.info("Aucun article ne correspond aux filtres sélectionnés.")
         
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•
         # BOUTONS D'ACTION
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•
         st.divider()
         col_btn1, col_btn2, col_btn3 = st.columns(3)
         
         with col_btn1:
-            if st.button("âž• Ajouter un article", use_container_width=True):
+            if st.button("êž• Ajouter un article", use_container_width=True):
                 st.session_state.show_form = True
                 st.rerun()
         
@@ -211,9 +211,9 @@ def render_stock():
                 st.session_state.show_import = True
     
     except ErreurValidation as e:
-        st.error(f"âŒ Erreur de validation: {e}")
+        st.error(f"êŒ Erreur de validation: {e}")
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"êŒ Erreur: {str(e)}")
 
 
 def render_notifications_widget():
@@ -230,14 +230,14 @@ def render_notifications_widget():
     col1, col2, col3 = st.columns([2, 1, 1])
     
     with col1:
-        st.metric("ðŸ”” Notifications", len(notifs), delta="Ã€ traiter")
+        st.metric("ðŸ”” Notifications", len(notifs), delta="À traiter")
     
     with col2:
         if st.button("ðŸ”„ Actualiser", key="refresh_notifs", use_container_width=True):
             st.rerun()
     
     with col3:
-        if st.button("âœ… Tout lire", key="mark_all_read", use_container_width=True):
+        if st.button("êœ… Tout lire", key="mark_all_read", use_container_width=True):
             for notif in notifs:
                 service_notifs.marquer_lue(notif.id)
             st.rerun()
@@ -248,7 +248,7 @@ def render_notifications_widget():
     # Critiques
     critiques = [n for n in notifs if n.priorite == "haute"]
     if critiques:
-        st.markdown("### ðŸš¨ CRITIQUES")
+        st.markdown("### 🚨 CRITIQUES")
         for notif in critiques:
             with st.container(border=True):
                 col1, col2 = st.columns([0.9, 0.1])
@@ -256,14 +256,14 @@ def render_notifications_widget():
                     st.write(f"**{notif.icone} {notif.titre}**")
                     st.caption(notif.message)
                 with col2:
-                    if st.button("âœ“", key=f"mark_read_{notif.id}", help="Marquer comme lu"):
+                    if st.button("êœ“", key=f"mark_read_{notif.id}", help="Marquer comme lu"):
                         service_notifs.marquer_lue(notif.id)
                         st.rerun()
     
     # Moyennes
     moyennes = [n for n in notifs if n.priorite == "moyenne"]
     if moyennes:
-        st.markdown("### âš ï¸ MOYENNES")
+        st.markdown("### êš ï¸ MOYENNES")
         for notif in moyennes[:3]:  # Affiche seulement les 3 premières
             with st.container(border=True):
                 col1, col2 = st.columns([0.9, 0.1])
@@ -271,7 +271,7 @@ def render_notifications_widget():
                     st.write(f"**{notif.icone} {notif.titre}**")
                     st.caption(notif.message)
                 with col2:
-                    if st.button("âœ“", key=f"mark_read_{notif.id}", help="Marquer comme lu"):
+                    if st.button("êœ“", key=f"mark_read_{notif.id}", help="Marquer comme lu"):
                         service_notifs.marquer_lue(notif.id)
                         st.rerun()
         
@@ -284,19 +284,19 @@ def render_alertes():
     service = get_inventaire_service()
     
     if service is None:
-        st.error("âŒ Service inventaire indisponible")
+        st.error("êŒ Service inventaire indisponible")
         return
     
     try:
         alertes = service.get_alertes()
         
         if not any(alertes.values()):
-            st.success("âœ… Aucune alerte! Votre inventaire est en bon état.")
+            st.success("êœ… Aucune alerte! Votre inventaire est en bon état.")
             return
         
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•
         # ARTICLES CRITIQUES
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•
         if alertes["critique"]:
             st.error(f"ðŸ”´ {len(alertes['critique'])} articles en stock critique")
             df = _prepare_alert_dataframe(alertes["critique"])
@@ -304,9 +304,9 @@ def render_alertes():
         
         st.divider()
         
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•
         # STOCK BAS
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•
         if alertes["stock_bas"]:
             st.warning(f"  {len(alertes['stock_bas'])} articles avec stock faible")
             df = _prepare_alert_dataframe(alertes["stock_bas"])
@@ -314,16 +314,16 @@ def render_alertes():
         
         st.divider()
         
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•
         # PÃ‰REMPTION PROCHE
-        # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        # ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•
         if alertes["peremption_proche"]:
             st.warning(f"ðŸ”” {len(alertes['peremption_proche'])} articles proche péremption")
             df = _prepare_alert_dataframe(alertes["peremption_proche"])
             st.dataframe(df, use_container_width=True, hide_index=True)
     
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"êŒ Erreur: {str(e)}")
 
 
 def render_categories():
@@ -331,7 +331,7 @@ def render_categories():
     service = get_inventaire_service()
     
     if service is None:
-        st.error("âŒ Service inventaire indisponible")
+        st.error("êŒ Service inventaire indisponible")
         return
     
     try:
@@ -350,7 +350,7 @@ def render_categories():
             categories[cat].append(article)
         
         # Afficher par onglet
-        tabs = st.tabs([f"ðŸ·ï¸ {cat} ({len(articles)})" for cat, articles in sorted(categories.items())])
+        tabs = st.tabs([f"🏷️ {cat} ({len(articles)})" for cat, articles in sorted(categories.items())])
         
         for (cat, articles), tab in zip(sorted(categories.items()), tabs):
             with tab:
@@ -364,7 +364,7 @@ def render_categories():
                 with col3:
                     alertes = service.get_alertes()
                     cat_alertes = len([a for a in articles if a["statut"] in ["critique", "stock_bas"]])
-                    st.metric("âš ï¸ Alertes", cat_alertes)
+                    st.metric("êš ï¸ Alertes", cat_alertes)
                 
                 st.divider()
                 
@@ -373,7 +373,7 @@ def render_categories():
                 st.dataframe(df, use_container_width=True, hide_index=True)
     
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"êŒ Erreur: {str(e)}")
 
 
 def render_suggestions_ia():
@@ -381,10 +381,10 @@ def render_suggestions_ia():
     service = get_inventaire_service()
     
     if service is None:
-        st.error("âŒ Service inventaire indisponible")
+        st.error("êŒ Service inventaire indisponible")
         return
     
-    st.info("ðŸ¤– Suggestions IA basées sur l'état de votre inventaire")
+    st.info("🤖 Suggestions IA basées sur l'état de votre inventaire")
     
     if st.button("ðŸ›’ Générer les suggestions", use_container_width=True):
         try:
@@ -392,7 +392,7 @@ def render_suggestions_ia():
                 suggestions = service.suggerer_courses_ia()
             
             if suggestions:
-                st.success(f"âœ… {len(suggestions)} suggestions générées")
+                st.success(f"êœ… {len(suggestions)} suggestions générées")
                 
                 # Grouper par priorité
                 by_priority = {}
@@ -405,7 +405,7 @@ def render_suggestions_ia():
                 # Afficher par priorité
                 for priority in ["haute", "moyenne", "basse"]:
                     if priority in by_priority:
-                        icon = "ðŸ”´" if priority == "haute" else " " if priority == "moyenne" else "¢"
+                        icon = "ðŸ”´" if priority == "haute" else " " if priority == "moyenne" else "✅"
                         with st.expander(f"{icon} Priorité {priority.upper()} ({len(by_priority[priority])})"):
                             for sugg in by_priority[priority]:
                                 col1, col2, col3, col4 = st.columns(4)
@@ -416,13 +416,13 @@ def render_suggestions_ia():
                                 with col3:
                                     st.write(f"ðŸ“ {sugg.rayon}")
                                 with col4:
-                                    if st.button("âœ… Ajouter", key=f"add_{sugg.nom}"):
-                                        st.success(f"âœ… {sugg.nom} ajouté aux courses")
+                                    if st.button("êœ… Ajouter", key=f"add_{sugg.nom}"):
+                                        st.success(f"êœ… {sugg.nom} ajouté aux courses")
             else:
                 st.warning("Aucune suggestion générée")
         
         except Exception as e:
-            st.error(f"âŒ Erreur: {str(e)}")
+            st.error(f"êŒ Erreur: {str(e)}")
 
 
 def render_photos():
@@ -447,7 +447,7 @@ def render_photos():
     
     # Affiche la photo actuelle
     with col2:
-        st.metric("Ã‰tat", "ðŸ“¸ Photo" if selected_article.get("photo_url") else "âŒ Pas photo")
+        st.metric("Ã‰tat", "ðŸ“¸ Photo" if selected_article.get("photo_url") else "êŒ Pas photo")
     
     # Onglets upload/gestion
     tab_upload, tab_view = st.tabs(["ðŸ“¤ Ajouter/Remplacer", "ðŸ‘€ Afficher"])
@@ -473,7 +473,7 @@ def render_photos():
                 st.write(f"**Taille:** {uploaded_file.size / 1024:.1f} KB")
                 
                 # Simule l'upload (dans une vraie app, on sauvegarderait le fichier)
-                if st.button("âœ… Confirmer l'upload", key="confirm_photo_upload"):
+                if st.button("êœ… Confirmer l'upload", key="confirm_photo_upload"):
                     try:
                         # Pour le prototype, on utilise une URL Streamlit
                         photo_url = f"streamlit_uploaded://{uploaded_file.name}"
@@ -484,7 +484,7 @@ def render_photos():
                             photo_filename=uploaded_file.name,
                         )
                         
-                        st.success("âœ… Photo ajoutée avec succès!")
+                        st.success("êœ… Photo ajoutée avec succès!")
                         st.toast("Photo mise à jour", icon="ðŸ“¸")
                         st.rerun()
                     except Exception as e:
@@ -496,7 +496,7 @@ def render_photos():
             if st.button("ðŸ—‘ï¸  Supprimer la photo", key="delete_photo"):
                 try:
                     service.supprimer_photo(article_id)
-                    st.success("âœ… Photo supprimée")
+                    st.success("êœ… Photo supprimée")
                     st.rerun()
                 except Exception as e:
                     st.error(f"Erreur: {str(e)}")
@@ -539,7 +539,7 @@ def render_notifications():
     service_notifs = obtenir_service_notifications()
     
     # Onglets
-    tab_center, tab_config = st.tabs(["ðŸ“¬ Centre de notifications", "âš™ï¸ Configuration"])
+    tab_center, tab_config = st.tabs(["ðŸ“¬ Centre de notifications", "êš™ï¸ Configuration"])
     
     with tab_center:
         # Actualiser les notifications
@@ -550,7 +550,7 @@ def render_notifications():
                 try:
                     stats = service.generer_notifications_alertes()
                     total = sum(len(v) for v in stats.values())
-                    st.toast(f"âœ… {total} alertes détectées", icon="ðŸ””")
+                    st.toast(f"êœ… {total} alertes détectées", icon="ðŸ””")
                 except Exception as e:
                     st.error(f"Erreur: {str(e)}")
         
@@ -559,9 +559,9 @@ def render_notifications():
             st.metric("ðŸ“¬ Non lues", stats_notifs["non_lues"])
         
         with col3:
-            if st.button("âœ… Tout marquer comme lu", use_container_width=True):
+            if st.button("êœ… Tout marquer comme lu", use_container_width=True):
                 service_notifs.effacer_toutes_lues()
-                st.toast("âœ… Notifications marquées comme lues")
+                st.toast("êœ… Notifications marquées comme lues")
                 st.rerun()
         
         st.divider()
@@ -570,7 +570,7 @@ def render_notifications():
         notifs = service_notifs.obtenir_notifications()
         
         if not notifs:
-            st.info("âœ… Aucune notification pour le moment")
+            st.info("êœ… Aucune notification pour le moment")
         else:
             # Grouper par priorité
             critiques = [n for n in notifs if n.priorite == "haute"]
@@ -579,64 +579,64 @@ def render_notifications():
             
             # Affiche les critiques
             if critiques:
-                st.markdown("### ðŸš¨ Alertes Critiques")
+                st.markdown("### 🚨 Alertes Critiques")
                 for notif in critiques:
                     with st.container(border=True):
                         col1, col2 = st.columns([0.85, 0.15])
                         with col1:
                             st.write(f"**{notif.icone} {notif.titre}**")
                             st.write(notif.message)
-                            st.caption(f"{'âœ… Lue' if notif.lue else 'ðŸ†• Non lue'} â€¢ {notif.date_creation.strftime('%d/%m %H:%M')}")
+                            st.caption(f"{'êœ… Lue' if notif.lue else 'ðŸ†• Non lue'} ê€✅ {notif.date_creation.strftime('%d/%m %H:%M')}")
                         with col2:
                             col_a, col_b = st.columns(2)
                             with col_a:
-                                if st.button("âœ“", key=f"mark_{notif.id}", help="Marquer comme lu", use_container_width=True):
+                                if st.button("êœ“", key=f"mark_{notif.id}", help="Marquer comme lu", use_container_width=True):
                                     service_notifs.marquer_lue(notif.id)
                                     st.rerun()
                             with col_b:
-                                if st.button("âœ•", key=f"delete_{notif.id}", help="Supprimer", use_container_width=True):
+                                if st.button("êœ•", key=f"delete_{notif.id}", help="Supprimer", use_container_width=True):
                                     service_notifs.supprimer_notification(notif.id)
                                     st.rerun()
             
             # Affiche les moyennes
             if moyennes:
-                st.markdown("### âš ï¸ Alertes Moyennes")
+                st.markdown("### êš ï¸ Alertes Moyennes")
                 for notif in moyennes:
                     with st.container(border=True):
                         col1, col2 = st.columns([0.85, 0.15])
                         with col1:
                             st.write(f"**{notif.icone} {notif.titre}**")
                             st.write(notif.message)
-                            st.caption(f"{'âœ… Lue' if notif.lue else 'ðŸ†• Non lue'} â€¢ {notif.date_creation.strftime('%d/%m %H:%M')}")
+                            st.caption(f"{'êœ… Lue' if notif.lue else 'ðŸ†• Non lue'} ê€✅ {notif.date_creation.strftime('%d/%m %H:%M')}")
                         with col2:
                             col_a, col_b = st.columns(2)
                             with col_a:
-                                if st.button("âœ“", key=f"mark_{notif.id}", help="Marquer comme lu", use_container_width=True):
+                                if st.button("êœ“", key=f"mark_{notif.id}", help="Marquer comme lu", use_container_width=True):
                                     service_notifs.marquer_lue(notif.id)
                                     st.rerun()
                             with col_b:
-                                if st.button("âœ•", key=f"delete_{notif.id}", help="Supprimer", use_container_width=True):
+                                if st.button("êœ•", key=f"delete_{notif.id}", help="Supprimer", use_container_width=True):
                                     service_notifs.supprimer_notification(notif.id)
                                     st.rerun()
             
             # Affiche les basses
             if basses:
-                st.markdown("### â„¹ï¸ Informations")
+                st.markdown("### ê„¹ï¸ Informations")
                 for notif in basses[:5]:  # Limit to 5
                     with st.container(border=True):
                         col1, col2 = st.columns([0.85, 0.15])
                         with col1:
                             st.write(f"**{notif.icone} {notif.titre}**")
                             st.write(notif.message)
-                            st.caption(f"{'âœ… Lue' if notif.lue else 'ðŸ†• Non lue'} â€¢ {notif.date_creation.strftime('%d/%m %H:%M')}")
+                            st.caption(f"{'êœ… Lue' if notif.lue else 'ðŸ†• Non lue'} ê€✅ {notif.date_creation.strftime('%d/%m %H:%M')}")
                         with col2:
                             col_a, col_b = st.columns(2)
                             with col_a:
-                                if st.button("âœ“", key=f"mark_{notif.id}", help="Marquer comme lu", use_container_width=True):
+                                if st.button("êœ“", key=f"mark_{notif.id}", help="Marquer comme lu", use_container_width=True):
                                     service_notifs.marquer_lue(notif.id)
                                     st.rerun()
                             with col_b:
-                                if st.button("âœ•", key=f"delete_{notif.id}", help="Supprimer", use_container_width=True):
+                                if st.button("êœ•", key=f"delete_{notif.id}", help="Supprimer", use_container_width=True):
                                     service_notifs.supprimer_notification(notif.id)
                                     st.rerun()
                 
@@ -675,9 +675,9 @@ def render_notifications():
                 with col3:
                     st.metric("ðŸ”” Péremption", len(stats["peremption_proche"]))
                 with col4:
-                    st.metric("ðŸš¨ Expirés", len(stats["peremption_depassee"]))
+                    st.metric("🚨 Expirés", len(stats["peremption_depassee"]))
                 
-                st.toast(f"âœ… {sum(len(v) for v in stats.values())} alertes créées", icon="ðŸ””")
+                st.toast(f"êœ… {sum(len(v) for v in stats.values())} alertes créées", icon="ðŸ””")
             except Exception as e:
                 st.error(f"Erreur: {str(e)}")
 
@@ -737,7 +737,7 @@ def render_tools():
                     st.bar_chart(cats)
             
             except Exception as e:
-                st.error(f"âŒ Erreur: {str(e)}")
+                st.error(f"êŒ Erreur: {str(e)}")
 
 
 def render_import_export():
@@ -774,7 +774,7 @@ def render_import_export():
                 st.dataframe(df.head(5), use_container_width=True)
                 
                 # Valide les données
-                if st.button("âœ… Valider & Importer", type="primary", use_container_width=True):
+                if st.button("êœ… Valider & Importer", type="primary", use_container_width=True):
                     try:
                         # Convertit en format attendu
                         articles_list = df.to_dict("records")
@@ -798,9 +798,9 @@ def render_import_export():
                         
                         col1, col2, col3 = st.columns(3)
                         with col1:
-                            st.metric("âœ… Valides", rapport["valides"])
+                            st.metric("êœ… Valides", rapport["valides"])
                         with col2:
-                            st.metric("âŒ Invalides", rapport["invalides"])
+                            st.metric("êŒ Invalides", rapport["invalides"])
                         with col3:
                             if rapport["valides"] > 0:
                                 pct = (rapport["valides"] / (rapport["valides"] + rapport["invalides"]) * 100) if (rapport["valides"] + rapport["invalides"]) > 0 else 0
@@ -816,26 +816,26 @@ def render_import_export():
                         
                         # Confirme et importe
                         if rapport["valides"] > 0:
-                            if st.button("ðŸš€ Importer les articles valides", use_container_width=True):
+                            if st.button("🚀 Importer les articles valides", use_container_width=True):
                                 resultats = service.importer_articles(articles_list)
                                 
                                 # Affiche résultats
-                                success = [r for r in resultats if r["status"] == "âœ…"]
-                                errors = [r for r in resultats if r["status"] == "âŒ"]
+                                success = [r for r in resultats if r["status"] == "êœ…"]
+                                errors = [r for r in resultats if r["status"] == "êŒ"]
                                 
-                                st.success(f"âœ… {len(success)}/{len(resultats)} articles importés!")
-                                st.toast(f"Import complété: {len(success)} réussis", icon="âœ…")
+                                st.success(f"êœ… {len(success)}/{len(resultats)} articles importés!")
+                                st.toast(f"Import complété: {len(success)} réussis", icon="êœ…")
                                 
                                 if errors:
-                                    st.warning(f"âš ï¸ {len(errors)} articles avec erreurs")
+                                    st.warning(f"êš ï¸ {len(errors)} articles avec erreurs")
                                     for err in errors[:3]:
-                                        st.caption(f"â€¢ {err['nom']}: {err['message']}")
+                                        st.caption(f"ê€✅ {err['nom']}: {err['message']}")
                     
                     except Exception as e:
-                        st.error(f"âŒ Erreur import: {str(e)}")
+                        st.error(f"êŒ Erreur import: {str(e)}")
             
             except Exception as e:
-                st.error(f"âŒ Erreur parsing fichier: {str(e)}")
+                st.error(f"êŒ Erreur parsing fichier: {str(e)}")
     
     with tab_export:
         st.write("**Exporter l'inventaire**")
@@ -852,9 +852,9 @@ def render_import_export():
                         file_name="inventaire.csv",
                         mime="text/csv",
                     )
-                    st.success("âœ… CSV prêt à télécharger")
+                    st.success("êœ… CSV prêt à télécharger")
                 except Exception as e:
-                    st.error(f"âŒ Erreur: {str(e)}")
+                    st.error(f"êŒ Erreur: {str(e)}")
         
         with col2:
             if st.button("ðŸ“¥ Télécharger JSON", use_container_width=True):
@@ -866,9 +866,9 @@ def render_import_export():
                         file_name="inventaire.json",
                         mime="application/json",
                     )
-                    st.success("âœ… JSON prêt à télécharger")
+                    st.success("êœ… JSON prêt à télécharger")
                 except Exception as e:
-                    st.error(f"âŒ Erreur: {str(e)}")
+                    st.error(f"êŒ Erreur: {str(e)}")
         
         st.divider()
         
@@ -876,9 +876,9 @@ def render_import_export():
         articles = service.get_inventaire_complet()
         st.info(
             f"ðŸ“Š **Statistiques export:**\n"
-            f"â€¢ **Articles:** {len(articles)}\n"
-            f"â€¢ **Stock total:** {sum(a['quantite'] for a in articles)}\n"
-            f"â€¢ **Date export:** Automatique"
+            f"ê€✅ **Articles:** {len(articles)}\n"
+            f"ê€✅ **Stock total:** {sum(a['quantite'] for a in articles)}\n"
+            f"ê€✅ **Date export:** Automatique"
         )
 
 
@@ -891,7 +891,7 @@ def render_predictions():
         service_pred = obtenir_service_predictions()
         
         if service is None:
-            st.error("âŒ Service inventaire indisponible")
+            st.error("êŒ Service inventaire indisponible")
             return
         
         # Récupère les données
@@ -924,7 +924,7 @@ def render_predictions():
         
         # Affiche les prédictions si générées
         if st.session_state.get("predictions_generated", False):
-            with st.spinner("â³ Génération des prédictions ML..."):
+            with st.spinner("ê³ Génération des prédictions ML..."):
                 try:
                     predictions = service_pred.generer_predictions()
                     analyse_globale = service_pred.obtenir_analyse_globale()
@@ -936,7 +936,7 @@ def render_predictions():
                         "recommandations": recommandations
                     }
                 except Exception as e:
-                    st.error(f"âŒ Erreur lors de la génération: {str(e)}")
+                    st.error(f"êŒ Erreur lors de la génération: {str(e)}")
                     st.session_state.predictions_generated = False
                     return
         
@@ -967,7 +967,7 @@ def render_predictions():
                         "Prédite (1 mois)": f"{pred.quantite_predite:.1f}",
                         "Tendance": pred.tendance,
                         "Confiance": f"{pred.confiance:.0%}",
-                        "Risque rupture": "ðŸ”´ OUI" if pred.risque_rupture else "¢ Non",
+                        "Risque rupture": "ðŸ”´ OUI" if pred.risque_rupture else "✅ Non",
                         "Jours avant rupture": pred.jours_avant_rupture if pred.jours_avant_rupture else "-"
                     })
                 
@@ -1017,10 +1017,10 @@ def render_predictions():
                             
                             with col3:
                                 if pred.risque_rupture:
-                                    st.metric("âš ï¸ Rupture dans", f"{pred.jours_avant_rupture} j")
+                                    st.metric("êš ï¸ Rupture dans", f"{pred.jours_avant_rupture} j")
                                     st.warning(f"Stock insuffisant dans {pred.jours_avant_rupture} jours!")
                                 else:
-                                    st.metric("Stock", "âœ… Sûr")
+                                    st.metric("Stock", "êœ… Sûr")
                                     st.success(f"Suffisant pour {pred.jours_avant_rupture} jours")
             
             with tab_tendances:
@@ -1038,21 +1038,21 @@ def render_predictions():
                     if tendances["croissante"]:
                         with st.expander("Voir les articles"):
                             for p in tendances["croissante"]:
-                                st.write(f"â€¢ {p.nom} (+{p.consommation_moyenne:.2f}/jour)")
+                                st.write(f"ê€✅ {p.nom} (+{p.consommation_moyenne:.2f}/jour)")
                 
                 with col2:
                     st.metric("ðŸ“‰ Décroissante", len(tendances["décroissante"]))
                     if tendances["décroissante"]:
                         with st.expander("Voir les articles"):
                             for p in tendances["décroissante"]:
-                                st.write(f"â€¢ {p.nom} ({p.consommation_moyenne:.2f}/jour)")
+                                st.write(f"ê€✅ {p.nom} ({p.consommation_moyenne:.2f}/jour)")
                 
                 with col3:
-                    st.metric("âž¡ï¸ Stable", len(tendances["stable"]))
+                    st.metric("êž¡ï¸ Stable", len(tendances["stable"]))
                     if tendances["stable"]:
                         with st.expander("Voir les articles"):
                             for p in tendances["stable"]:
-                                st.write(f"â€¢ {p.nom} (~{p.consommation_moyenne:.2f}/jour)")
+                                st.write(f"ê€✅ {p.nom} (~{p.consommation_moyenne:.2f}/jour)")
                 
                 st.divider()
                 
@@ -1098,8 +1098,8 @@ def render_predictions():
                                         st.metric("Stock actuel", f"{rec.quantite_actuelle:.0f}")
                                     
                                     with col4:
-                                        if st.button("âœ… Ajouter", key=f"add_rec_{rec.nom}", use_container_width=True):
-                                            st.toast(f"âœ… {rec.nom} ajouté", icon="ðŸ›’")
+                                        if st.button("êœ… Ajouter", key=f"add_rec_{rec.nom}", use_container_width=True):
+                                            st.toast(f"êœ… {rec.nom} ajouté", icon="ðŸ›’")
                 else:
                     st.info("Aucune recommandation d'achat pour le moment")
             
@@ -1135,7 +1135,7 @@ def render_predictions():
                         st.write("ðŸ“‰ **Consommation en diminution**")
                         st.info("La consommation générale diminue. Vous pouvez réduire légèrement vos achats.")
                     else:
-                        st.write("âž¡ï¸ **Consommation stable**")
+                        st.write("êž¡ï¸ **Consommation stable**")
                         st.info("La consommation est stable. Maintenez votre rythme d'achat actuel.")
                     
                     st.divider()
@@ -1156,14 +1156,14 @@ def render_predictions():
                         st.metric("Stables", f"{analyse.nb_articles_stables}")
     
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"êŒ Erreur: {str(e)}")
         import traceback
         st.text(traceback.format_exc())
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•
 # HELPERS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•
 
 def _prepare_inventory_dataframe(inventaire: list[dict[str, Any]]) -> pd.DataFrame:
     """Prépare un DataFrame pour affichage inventaire"""
@@ -1173,8 +1173,8 @@ def _prepare_inventory_dataframe(inventaire: list[dict[str, Any]]) -> pd.DataFra
             "critique": "ðŸ”´",
             "stock_bas": " ",
             "peremption_proche": "ðŸ””",
-            "ok": "¢"
-        }.get(article["statut"], "â“")
+            "ok": "✅"
+        }.get(article["statut"], "ê“")
         
         data.append({
             "Statut": f"{statut_icon} {article['statut']}",
@@ -1198,7 +1198,7 @@ def _prepare_alert_dataframe(articles: list[dict[str, Any]]) -> pd.DataFrame:
             "critique": "ðŸ”´",
             "stock_bas": " ",
             "peremption_proche": "ðŸ””",
-        }.get(article["statut"], "â“")
+        }.get(article["statut"], "ê“")
         
         jours = ""
         if article["jours_avant_peremption"] is not None:
@@ -1220,7 +1220,7 @@ def render_historique():
     service = get_inventaire_service()
     
     if service is None:
-        st.error("âŒ Service inventaire indisponible")
+        st.error("êŒ Service inventaire indisponible")
         return
     
     st.subheader("ðŸ“œ Historique des Modifications")
@@ -1267,19 +1267,19 @@ def render_historique():
         data = []
         for h in historique_filtres:
             action_icon = {
-                "ajout": "âž•",
-                "modification": "âœï¸",
+                "ajout": "êž•",
+                "modification": "êœï¸",
                 "suppression": "ðŸ—‘ï¸"
-            }.get(h["type"], "â“")
+            }.get(h["type"], "ê“")
             
             # Résumer les changements
             changements = []
             if h["quantite_avant"] is not None:
-                changements.append(f"Qty: {h['quantite_avant']:.1f} â†’ {h['quantite_apres']:.1f}")
+                changements.append(f"Qty: {h['quantite_avant']:.1f} ê†’ {h['quantite_apres']:.1f}")
             if h["emplacement_avant"] is not None:
-                changements.append(f"Empl: {h['emplacement_avant']} â†’ {h['emplacement_apres']}")
+                changements.append(f"Empl: {h['emplacement_avant']} ê†’ {h['emplacement_apres']}")
             if h["date_peremption_avant"] is not None:
-                changements.append(f"Péremption: {h['date_peremption_avant']} â†’ {h['date_peremption_apres']}")
+                changements.append(f"Péremption: {h['date_peremption_avant']} ê†’ {h['date_peremption_apres']}")
             
             changement_text = " | ".join(changements) if changements else "Détails disponibles"
             
@@ -1307,5 +1307,5 @@ def render_historique():
             st.metric("Modifications", modifs)
     
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"êŒ Erreur: {str(e)}")
 

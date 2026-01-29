@@ -117,8 +117,6 @@ def generer_image_recette(nom_recette: str, description: str = "", ingredients_l
         if result:
             return result
     except Exception as e:
-            print(f"  ❌ Pollinations returned None")
-    except Exception as e:
         logger.warning(f"Pollinations API échouée: {e}")
     
     # Essayer Replicate API (meilleure qualité IA)
