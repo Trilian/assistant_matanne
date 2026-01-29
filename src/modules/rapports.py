@@ -14,6 +14,12 @@ import pandas as pd
 from src.core.state import StateManager, get_state
 from src.services.rapports_pdf import RapportsPDFService
 
+# Logique métier pure
+from src.modules.rapports_logic import (
+    generer_rapport_synthese,
+    calculer_statistiques_periode
+)
+
 # ═══════════════════════════════════════════════════════════
 # INITIALISATION
 # ═══════════════════════════════════════════════════════════

@@ -13,6 +13,12 @@ from src.core.ai_agent import AgentIA
 from src.core.database import get_db_context
 from src.core.models import ChildProfile, Routine, RoutineTask
 
+# Logique métier pure
+from src.modules.famille.routines_logic import (
+    calculer_completion_routine,
+    suggerer_horaire_routine
+)
+
 # ===================================
 # HELPERS
 # ===================================

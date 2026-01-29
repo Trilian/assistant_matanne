@@ -15,6 +15,12 @@ import plotly.graph_objects as go
 
 from src.services.planning_unified import get_planning_service
 
+# Logique métier pure
+from src.modules.planning.vue_semaine_logic import (
+    calculer_evenements_semaine,
+    optimiser_planning_semaine
+)
+
 logger = __import__("logging").getLogger(__name__)
 
 

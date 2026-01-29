@@ -13,6 +13,14 @@ from src.core.models import Project, ProjectTask
 from src.core.decorators import with_db_session
 from src.services.base_ai_service import BaseAIService
 from src.core.ai import ClientIA
+
+# Logique métier pure
+from src.modules.maison.projets_logic import (
+    calculer_progression,
+    calculer_jours_restants,
+    calculer_urgence_projet
+)
+
 from src.modules.maison.helpers import (
     charger_projets,
     get_projets_urgents,

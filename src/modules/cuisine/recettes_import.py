@@ -8,6 +8,11 @@ from src.services.recettes import get_recette_service
 from src.core.models import Recette, RecetteIngredient, Ingredient, EtapeRecette
 from src.core.database import obtenir_contexte_db
 
+# Logique métier pure
+from src.modules.cuisine.recettes_logic import (
+    valider_recette
+)
+
 
 def render_importer():
     """Interface pour importer une recette"""

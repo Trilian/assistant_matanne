@@ -14,6 +14,12 @@ from src.core.database import get_db_context
 from src.core.models import ChildProfile, WellbeingEntry
 from src.utils.formatters import format_quantity
 
+# Logique métier pure
+from src.modules.famille.bien_etre_logic import (
+    calculer_score_bien_etre,
+    analyser_tendances_bien_etre
+)
+
 # ===================================
 # HELPERS
 # ===================================

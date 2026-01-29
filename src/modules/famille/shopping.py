@@ -16,6 +16,13 @@ import plotly.express as px
 
 from src.core.database import get_db
 from src.core.models import FamilyActivity, FamilyBudget, ShoppingItem
+
+# Logique métier pure
+from src.modules.famille.shopping_logic import (
+    calculer_budget_shopping,
+    suggerer_articles_par_activite
+)
+
 from src.modules.famille.helpers import (
     get_activites_semaine,
     get_budget_par_period,

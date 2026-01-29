@@ -8,6 +8,13 @@ from src.services.recettes import get_recette_service
 from src.core.errors_base import ErreurValidation
 from src.modules.cuisine.recettes_import import render_importer
 
+# Logique métier pure
+from src.modules.cuisine.recettes_logic import (
+    valider_recette,
+    calculer_cout_recette,
+    calculer_calories_portion
+)
+
 logger = logging.getLogger(__name__)
 
 

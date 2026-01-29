@@ -10,6 +10,12 @@ from datetime import date, datetime, timedelta
 import streamlit as st
 
 from src.services.planning_unified import get_planning_service
+
+# Logique métier pure
+from src.modules.planning.vue_ensemble_logic import (
+    calculer_statistiques_planning,
+    generer_resume_periode
+)
 from src.core.state import get_state
 
 logger = __import__("logging").getLogger(__name__)

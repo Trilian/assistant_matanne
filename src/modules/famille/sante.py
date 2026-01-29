@@ -10,6 +10,13 @@ import plotly.express as px
 
 from src.core.database import get_session
 from src.core.models import HealthRoutine, HealthObjective, HealthEntry
+
+# Logique métier pure
+from src.modules.famille.sante_logic import (
+    calculer_progression_objectif_sante,
+    valider_entree_sante
+)
+
 from src.modules.famille.helpers import (
     get_routines_actives, 
     get_objectives_actifs,

@@ -16,6 +16,13 @@ from src.services.recettes import get_recette_service
 from src.core.database import obtenir_contexte_db
 from src.core.errors_base import ErreurValidation
 
+# Logique métier pure
+from src.modules.cuisine.planning_logic import (
+    get_debut_semaine,
+    valider_planning,
+    calculer_statistiques_planning
+)
+
 logger = logging.getLogger(__name__)
 
 # ═══════════════════════════════════════════════════════════

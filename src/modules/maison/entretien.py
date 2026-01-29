@@ -13,6 +13,14 @@ from src.core.models import Routine, RoutineTask
 from src.core.decorators import with_db_session
 from src.services.base_ai_service import BaseAIService
 from src.core.ai import ClientIA
+
+# Logique métier pure
+from src.modules.maison.entretien_logic import (
+    calculer_frequence_tache,
+    determiner_urgence_tache,
+    suggerer_horaire_optimal
+)
+
 from src.modules.maison.helpers import (
     charger_routines,
     get_taches_today,

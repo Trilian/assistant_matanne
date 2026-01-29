@@ -17,6 +17,17 @@ from src.services.planning import get_planning_service
 # Services
 from src.services.recettes import get_recette_service
 
+# Logique métier pure
+from src.modules.accueil_logic import (
+    calculer_metriques_dashboard,
+    compter_alertes_critiques,
+    generer_notifications,
+    trier_notifications_par_priorite,
+    est_cette_semaine,
+    est_aujourdhui,
+    est_en_retard
+)
+
 # UI
 from src.ui.domain import stock_alert
 

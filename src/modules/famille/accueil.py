@@ -17,6 +17,13 @@ import plotly.express as px
 
 from src.core.database import get_db
 from src.core.models import ChildProfile, FamilyActivity, HealthObjective, FamilyBudget
+
+# Logique métier pure
+from src.modules.famille.accueil_logic import (
+    calculer_metriques_dashboard_famille,
+    generer_notifications_famille
+)
+
 from src.modules.famille.helpers import (
     get_or_create_jules,
     calculer_age_jules,

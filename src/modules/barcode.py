@@ -16,6 +16,13 @@ from src.services.barcode import BarcodeService
 from src.services.inventaire import InventaireService
 from src.core.errors_base import ErreurValidation, ErreurNonTrouve
 
+# Logique métier pure
+from src.modules.barcode_logic import (
+    valider_code_barres,
+    detecter_type_code_barres,
+    extraire_infos_produit
+)
+
 # ═══════════════════════════════════════════════════════════
 # INITIALISATION
 # ═══════════════════════════════════════════════════════════

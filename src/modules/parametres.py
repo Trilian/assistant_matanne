@@ -20,6 +20,13 @@ from src.core.database import verifier_sante as health_check
 from src.core.state import StateManager, get_state
 from src.ui.components import Modal
 
+# Logique métier pure
+from src.modules.parametres_logic import (
+    valider_parametres,
+    generer_config_defaut,
+    verifier_sante_config
+)
+
 # UI
 from src.ui.feedback import show_error, show_success, smart_spinner
 

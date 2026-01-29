@@ -12,6 +12,13 @@ import streamlit as st
 
 from src.services.planning_unified import get_planning_service
 
+# Logique métier pure
+from src.modules.planning.calendrier_logic import (
+    get_jours_mois,
+    filtrer_evenements_jour,
+    grouper_evenements_par_jour
+)
+
 logger = __import__("logging").getLogger(__name__)
 
 

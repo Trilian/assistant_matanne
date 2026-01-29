@@ -13,6 +13,17 @@ from src.core.models import GardenItem, GardenLog
 from src.core.decorators import with_db_session
 from src.services.base_ai_service import BaseAIService
 from src.core.ai import ClientIA
+
+# Logique métier pure
+from src.modules.maison.jardin_logic import (
+    get_saison_actuelle,
+    calculer_jours_avant_arrosage,
+    calculer_jours_avant_recolte,
+    get_plantes_a_arroser as logic_plantes_arroser,
+    get_recoltes_proches as logic_recoltes_proches,
+    calculer_statistiques_jardin
+)
+
 from src.modules.maison.helpers import (
     charger_plantes,
     get_plantes_a_arroser,

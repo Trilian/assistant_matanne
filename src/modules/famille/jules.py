@@ -10,6 +10,13 @@ import plotly.graph_objects as go
 
 from src.core.database import get_session
 from src.core.models import ChildProfile, Milestone, FamilyActivity
+
+# Logique métier pure
+from src.modules.famille.jules_logic import (
+    calculer_progression_milestones,
+    suggerer_prochains_milestones
+)
+
 from src.modules.famille.helpers import (
     get_or_create_jules,
     calculer_age_jules,

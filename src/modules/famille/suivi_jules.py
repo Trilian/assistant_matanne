@@ -14,6 +14,12 @@ from src.core.database import get_db_context
 from src.core.models import ChildProfile, WellbeingEntry
 from src.utils.formatters import format_quantity
 
+# Logique métier pure
+from src.modules.famille.suivi_jules_logic import (
+    calculer_age_mois,
+    suggerer_activites_developpement
+)
+
 # ===================================
 # HELPERS
 # ===================================

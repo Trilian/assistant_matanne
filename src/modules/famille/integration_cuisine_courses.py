@@ -15,6 +15,16 @@ import pandas as pd
 
 from src.core.database import get_db
 from src.core.models import HealthObjective, FamilyActivity, ShoppingItem, HealthEntry
+
+# Logique métier pure (si existe)
+try:
+    from src.modules.famille.integration_logic import (
+        mapper_objectifs_recettes,
+        calculer_calories_objectifs
+    )
+except ImportError:
+    pass  # Pas de logic file pour intégration
+
 from src.modules.famille.helpers import (
     get_objectives_actifs,
     get_activites_semaine,
