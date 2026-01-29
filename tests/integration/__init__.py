@@ -1,2 +1,0 @@
-﻿# Integration tests module
-

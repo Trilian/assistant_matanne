@@ -5,7 +5,6 @@ Tests couvrant:
 - Classe Cache (création, stockage, suppression)
 - CacheIA pour cache sémantique
 - LimiteDebit pour rate limiting
-- Décorateur @cached
 - Patterns d'expiration et invalidation
 """
 
@@ -14,7 +13,8 @@ import time
 from datetime import datetime, timedelta
 from unittest.mock import patch, MagicMock
 
-from src.core.cache import Cache, CacheIA, LimiteDebit
+from src.core.cache import Cache, LimiteDebit
+from src.core.ai.cache import CacheIA
 
 
 # ═══════════════════════════════════════════════════════════
