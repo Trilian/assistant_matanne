@@ -311,8 +311,9 @@ def test_modules_have_app_function(module_path, expected_attr):
     try:
         module = importlib.import_module(module_path)
         assert hasattr(module, expected_attr), f"{module_path} n'a pas {expected_attr}"
-    except ImportError:
-        pytest.skip(f"Module {module_path} non disponible")
+        assert callable(getattr(module, expected_attr))
+    except (ImportError, AttributeError) as e:
+        pytest.skip(f"Module {module_path} non disponible: {e}")
 
 
 class TestCoreImports:
