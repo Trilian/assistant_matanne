@@ -1,4 +1,4 @@
-"""
+﻿"""
 Core - Module central de l'application.
 
 Expose les composants essentiels pour l'ensemble de l'application.

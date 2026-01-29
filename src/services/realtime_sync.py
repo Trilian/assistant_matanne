@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service de synchronisation temps réel pour les listes de courses.
 
 Utilise Supabase Realtime pour synchroniser les modifications

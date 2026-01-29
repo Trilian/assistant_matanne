@@ -1,4 +1,4 @@
-"""
+﻿"""
 Database - Gestion de la base de données avec migrations.
 Tout harmonisé en français
 """

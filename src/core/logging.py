@@ -1,4 +1,4 @@
-"""
+﻿"""
 Central logging configuration for the application.
 
 Provides a small helper to configure Python logging consistently

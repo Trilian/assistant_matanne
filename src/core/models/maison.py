@@ -1,4 +1,4 @@
-"""
+﻿"""
 Modèles pour la maison (projets, routines, jardin).
 
 Contient :

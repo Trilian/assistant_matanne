@@ -1,4 +1,4 @@
-"""
+﻿"""
 Module Courses - Gestion complète de la liste de courses
 ✨ Fonctionnalités complètes:
 - Gestion CRUD complète de la liste
@@ -218,7 +218,7 @@ def render_rayon_articles(service, rayon: str, articles: list):
             st.write(label)
         
         with col2:
-            if st.button("✅", key=f"mark_{article['id']}", help="Marquer acheté", use_container_width=True):
+            if st.button("✅", key=f"article_mark_{article['id']}", help="Marquer acheté", use_container_width=True):
                 try:
                     service.update(article['id'], {"achete": True, "achete_le": datetime.now()})
                     st.success(f"✅ {article.get('ingredient_nom')} marqué acheté!")
@@ -228,12 +228,12 @@ def render_rayon_articles(service, rayon: str, articles: list):
                     st.error(f"❌ Erreur: {str(e)}")
         
         with col3:
-            if st.button("✏️", key=f"edit_{article['id']}", help="Modifier", use_container_width=True):
+            if st.button("✏️", key=f"article_edit_{article['id']}", help="Modifier", use_container_width=True):
                 st.session_state.edit_article_id = article['id']
                 st.rerun()
         
         with col4:
-            if st.button("🗑️", key=f"del_{article['id']}", help="Supprimer", use_container_width=True):
+            if st.button("🗑️", key=f"article_del_{article['id']}", help="Supprimer", use_container_width=True):
                 try:
                     service.delete(article['id'])
                     st.success(f"✅ {article.get('ingredient_nom')} supprimé!")
@@ -245,7 +245,7 @@ def render_rayon_articles(service, rayon: str, articles: list):
         # Formulaire édition inline si sélectionné
         if st.session_state.get('edit_article_id') == article['id']:
             st.divider()
-            with st.form(f"edit_form_{article['id']}"):
+            with st.form(f"article_edit_form_{article['id']}"):
                 col1, col2 = st.columns(2)
                 with col1:
                     new_quantite = st.number_input(
@@ -253,33 +253,33 @@ def render_rayon_articles(service, rayon: str, articles: list):
                         value=article.get('quantite_necessaire', 1.0),
                         min_value=0.1,
                         step=0.1,
-                        key=f"qty_{article['id']}"
+                        key=f"article_qty_{article['id']}"
                     )
                 with col2:
                     new_priorite = st.selectbox(
                         "Priorité",
                         list(PRIORITY_EMOJIS.keys()),
                         index=list(PRIORITY_EMOJIS.keys()).index(article.get('priorite', 'moyenne')),
-                        key=f"prio_{article['id']}"
+                        key=f"article_prio_{article['id']}"
                     )
                 
                 new_rayon = st.selectbox(
                     "Rayon",
                     RAYONS_DEFAULT,
                     index=RAYONS_DEFAULT.index(article.get('rayon_magasin', 'Autre')) if article.get('rayon_magasin') in RAYONS_DEFAULT else -1,
-                    key=f"ray_{article['id']}"
+                    key=f"article_ray_{article['id']}"
                 )
                 
                 new_notes = st.text_area(
                     "Notes",
                     value=article.get('notes', ''),
                     max_chars=200,
-                    key=f"notes_{article['id']}"
+                    key=f"article_notes_{article['id']}"
                 )
                 
                 col1, col2 = st.columns(2)
                 with col1:
-                    if st.form_submit_button("💾 Sauvegarder"):
+                    if st.form_submit_button("💾 Sauvegarder", key=f"article_save_{article['id']}"):
                         try:
                             service.update(article['id'], {
                                 "quantite_necessaire": new_quantite,
@@ -295,7 +295,7 @@ def render_rayon_articles(service, rayon: str, articles: list):
                             st.error(f"❌ Erreur: {str(e)}")
                 
                 with col2:
-                    if st.form_submit_button("❌ Annuler"):
+                    if st.form_submit_button("❌ Annuler", key=f"article_cancel_{article['id']}"):
                         st.session_state.edit_article_id = None
                         st.rerun()
 
@@ -670,7 +670,7 @@ def render_modeles():
                             st.caption(f"📦 {len(modele.get('articles', []))} articles | 📅 {modele.get('cree_le', '')[:10]}")
                         
                         with col2:
-                            if st.button("📥 Charger", key=f"load_{modele['id']}", use_container_width=True, help="Charger ce modèle dans la liste"):
+                            if st.button("📥 Charger", key=f"modele_load_{modele['id']}", use_container_width=True, help="Charger ce modèle dans la liste"):
                                 try:
                                     # Appliquer le modèle (crée articles courses)
                                     article_ids = service.appliquer_modele(modele['id'])
@@ -687,7 +687,7 @@ def render_modeles():
                                         st.code(traceback.format_exc())
                         
                         with col3:
-                            if st.button("🗑️ Supprimer", key=f"del_{modele['id']}", use_container_width=True, help="Supprimer ce modèle"):
+                            if st.button("🗑️ Supprimer", key=f"modele_del_{modele['id']}", use_container_width=True, help="Supprimer ce modèle"):
                                 try:
                                     service.delete_modele(modele['id'])
                                     st.success("✅ Modèle supprimé!")

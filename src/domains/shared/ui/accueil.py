@@ -56,7 +56,7 @@ def app():
     state = get_state()
 
     st.markdown(
-        f"<h1 style='text-align: center;'>ðŸ¤– Bienvenue {state.nom_utilisateur} !</h1>",
+        f"<h1 style='text-align: center;'>🤖 Bienvenue {state.nom_utilisateur} !</h1>",
         unsafe_allow_html=True,
     )
 
@@ -115,7 +115,7 @@ def app():
 def render_graphiques_enrichis():
     """Affiche les graphiques Plotly enrichis."""
     
-    st.markdown("### ðŸ“ˆ Visualisations")
+    st.markdown("### 📈 Visualisations")
     
     col1, col2 = st.columns(2)
     
@@ -124,7 +124,7 @@ def render_graphiques_enrichis():
         inventaire = get_inventaire_service().get_inventaire_complet()
         fig = graphique_inventaire_categories(inventaire)
         if fig:
-            st.markdown("**ðŸ“¦ Stock par Catégorie**")
+            st.markdown("**📦 Stock par Catégorie**")
             st.plotly_chart(fig, use_container_width=True, key="chart_inventaire")
         else:
             st.info("Pas de données d'inventaire")

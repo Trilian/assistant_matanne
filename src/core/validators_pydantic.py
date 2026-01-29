@@ -1,4 +1,4 @@
-"""
+﻿"""
 Validators Pydantic - Schémas Pydantic pour validation des entrées.
 
 Ce module centralise tous les modèles Pydantic pour validation

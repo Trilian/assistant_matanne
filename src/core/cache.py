@@ -1,4 +1,4 @@
-"""
+﻿"""
 Cache - Système de cache simplifié et performant.
 
 Ce module fournit un cache en mémoire avec :

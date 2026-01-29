@@ -1,4 +1,4 @@
-"""
+﻿"""
 Module Domain - Composants métier pour les domaines (cuisine, inventaire, etc.)
 Affichage d'alertes spécifiques au domaine
 """

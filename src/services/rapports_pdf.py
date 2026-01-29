@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service Génération Rapports PDF
 
 ✅ Rapports hebdo stocks

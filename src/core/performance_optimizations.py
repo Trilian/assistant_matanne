@@ -1,4 +1,4 @@
-"""
+﻿"""
 Performance Optimizations - Redis Cache, N+1 Prevention, Lazy Loading
 
 Ce module centralise les optimisations de performance avancées:

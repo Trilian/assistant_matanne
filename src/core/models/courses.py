@@ -1,4 +1,4 @@
-"""
+﻿"""
 Modèles pour les listes de courses.
 
 Contient :

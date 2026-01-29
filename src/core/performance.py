@@ -1,4 +1,4 @@
-"""
+﻿"""
 Performance - Métriques et optimisations.
 
 Fonctionnalités :

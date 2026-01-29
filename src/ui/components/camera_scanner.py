@@ -1,4 +1,4 @@
-"""
+﻿"""
 Composant de scan code-barres par caméra.
 
 Utilise streamlit-webrtc pour le streaming vidéo

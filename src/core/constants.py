@@ -1,4 +1,4 @@
-"""
+﻿"""
 Constantes - Toutes les constantes de l'application.
 
 Ce module centralise tous les "magic numbers" et chaînes constantes

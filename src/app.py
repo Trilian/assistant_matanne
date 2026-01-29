@@ -1,4 +1,4 @@
-"""
+﻿"""
 Application principale - VERSION OPTIMISÉE LAZY LOADING
 ✅ FIX: Import OptimizedRouter au lieu de AppRouter
 ✅ -60% temps chargement initial

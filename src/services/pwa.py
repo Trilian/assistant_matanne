@@ -1,4 +1,4 @@
-"""
+﻿"""
 Configuration PWA (Progressive Web App) pour l'Assistant Matanne.
 
 Ce module génère les fichiers nécessaires pour transformer

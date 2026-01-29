@@ -42,7 +42,7 @@ def app():
 
     # Tabs - Ajout des nouvelles fonctionnalités
     tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(
-        ["ðŸ‘¨â€ðŸ‘©â€ðŸ‘§â€ðŸ‘¦ Foyer", "ðŸ¤– IA", "ðŸ’¾ Base de Données", "ðŸ—„ï¸ Cache", "ðŸ“± Affichage", "ðŸ’° Budget", "â„¹ï¸ Ã€ Propos"]
+        ["ðŸ‘¨â€ðŸ‘©â€ðŸ‘§â€ðŸ‘¦ Foyer", "– IA", "ðŸ’¾ Base de Données", "ðŸ—„ï¸ Cache", "ðŸ“± Affichage", "ðŸ’° Budget", "â„¹ï¸ Ã€ Propos"]
     )
 
     with tab1:
@@ -181,7 +181,7 @@ def render_foyer_config():
 def render_ia_config():
     """Configuration IA"""
 
-    st.markdown("### ðŸ¤– Configuration IA")
+    st.markdown("### – Configuration IA")
     st.caption("Paramètres du service d'intelligence artificielle")
 
     settings = get_settings()
@@ -434,7 +434,7 @@ def render_cache_config():
     st.markdown("---")
 
     # Cache IA
-    st.markdown("#### ðŸ¤– Cache IA")
+    st.markdown("#### – Cache IA")
 
     cache_stats = SemanticCache.obtenir_statistiques()
 
@@ -481,7 +481,7 @@ def render_about():
     # Infos app
     st.markdown(
         f"""
-    ## ðŸ¤– {settings.APP_NAME}
+    ## – {settings.APP_NAME}
     
     **Version:** {settings.APP_VERSION}
     

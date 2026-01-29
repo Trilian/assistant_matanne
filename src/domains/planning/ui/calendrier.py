@@ -244,7 +244,7 @@ def app():
     # ONGLETS ACTIONS
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-    tab1, tab2, tab3 = st.tabs(["âž• Nouvel événement", "ðŸ¤– Générer avec IA", "ðŸ“… Vue mois"])
+    tab1, tab2, tab3 = st.tabs(["âž• Nouvel événement", "– Générer avec IA", "ðŸ“… Vue mois"])
 
     with tab1:
         st.subheader("âž• Ajouter un événement")
@@ -287,7 +287,7 @@ def app():
                     st.rerun()
 
     with tab2:
-        st.subheader("ðŸ¤– Générer semaine avec IA")
+        st.subheader("– Générer semaine avec IA")
 
         st.info(
             "ðŸ’¡ L'IA peut générer une semaine complète équilibrée basée sur vos contraintes et objectifs familiaux"
@@ -304,7 +304,7 @@ def app():
             gen_submitted = st.form_submit_button("ðŸš€ Générer une semaine équilibrée", type="primary")
 
             if gen_submitted:
-                with st.spinner("ðŸ¤– L'IA réfléchit..."):
+                with st.spinner("– L'IA réfléchit..."):
                     result = service.generer_semaine_ia(
                         date_debut=st.session_state.planning_week_start,
                         contraintes={"budget": budget, "energie": energie},

@@ -273,7 +273,7 @@ def app():
     # ONGLETS DÃ‰TAILS
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-    tab1, tab2, tab3 = st.tabs(["ðŸ”„ Rééquilibrer", "ðŸ¤– Optimiser avec IA", "ðŸ“‹ Détails"])
+    tab1, tab2, tab3 = st.tabs(["ðŸ”„ Rééquilibrer", "– Optimiser avec IA", "ðŸ“‹ Détails"])
 
     with tab1:
         st.subheader("ðŸ”„ Rééquilibrer la semaine")
@@ -303,7 +303,7 @@ def app():
             st.success("âœ… Semaine bien équilibrée - Aucun rééquilibrage nécessaire")
 
     with tab2:
-        st.subheader("ðŸ¤– Optimiser avec IA")
+        st.subheader("– Optimiser avec IA")
 
         st.info("L'IA peut générer une semaine optimale basée sur vos contraintes")
 
@@ -328,7 +328,7 @@ def app():
             submitted = st.form_submit_button("ðŸš€ Générer optimisation", type="primary")
 
             if submitted:
-                with st.spinner("ðŸ¤– L'IA analyse..."):
+                with st.spinner("– L'IA analyse..."):
                     result = service.generer_semaine_ia(
                         date_debut=st.session_state.ensemble_week_start,
                         contraintes={

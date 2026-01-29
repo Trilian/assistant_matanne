@@ -1,4 +1,4 @@
-"""
+﻿"""
 Base AI Service - Service IA Générique avec Rate Limiting Auto
 Version améliorée avec gestion automatique des quotas et retry
 """

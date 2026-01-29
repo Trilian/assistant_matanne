@@ -34,7 +34,7 @@ JOURS_EMOJI = ["🟡", "🟠", "🟣", "🟢", "⚫", "🔴", "🟢"]
 TYPES_REPAS = ["déjeuner", "dîner"]
 REGIMES = ["Omnivore", "Végétarien", "Végan", "Sans gluten"]
 TEMPS_CUISINE = ["Rapide (< 30 min)", "Moyen (30-60 min)", "Long (> 60 min)"]
-BUDGETS = ["Bas (< 20ê‚¬)", "Moyen (20-40ê‚¬)", "Haut (> 40ê‚¬)"]
+BUDGETS = ["Bas (< 20€)", "Moyen (20-40€)", "Haut (> 40€)"]
 
 
 def app():
@@ -76,10 +76,10 @@ def render_planning():
         planning = service.get_planning()
         
         if not planning:
-            st.warning("êš ï¸ Aucun planning actif pour cette semaine")
+            st.warning("⚠️ Aucun planning actif pour cette semaine")
             col1, col2 = st.columns(2)
             with col1:
-                if st.button("êž• Créer nouveau planning", use_container_width=True, type="primary"):
+                if st.button("➕ Créer nouveau planning", use_container_width=True, type="primary"):
                     st.session_state.go_to_generer = True
                     st.rerun()
             return

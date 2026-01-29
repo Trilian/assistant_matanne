@@ -1,4 +1,4 @@
-"""
+﻿"""
 Générateur d'images pour les recettes
 Utilise plusieurs APIs gratuites pour générer des images réelles de haute qualité
 """

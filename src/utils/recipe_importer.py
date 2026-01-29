@@ -1,4 +1,4 @@
-"""
+﻿"""
 Module d'import de recettes depuis différentes sources
 - Sites web (URLs HTML)
 - Fichiers PDF

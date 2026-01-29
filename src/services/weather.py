@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service d'alertes météo pour le jardin.
 
 Fonctionnalités:

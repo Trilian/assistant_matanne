@@ -1,4 +1,4 @@
-"""
+﻿"""
 UI Components - Atoms (composants de base)
 Badge, empty_state, metric_card
 """

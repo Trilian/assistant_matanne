@@ -1,4 +1,4 @@
-"""
+﻿"""
 API REST FastAPI pour l'Assistant Matanne.
 
 Fournit un accès programmatique aux fonctionnalités:

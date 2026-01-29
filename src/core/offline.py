@@ -1,4 +1,4 @@
-"""
+﻿"""
 Mode Offline - Gestion de la connectivité et synchronisation.
 
 Fonctionnalités :

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service Barcode/QR Code Scanner
 
 ✅ Scanner codes-barres et QR codes

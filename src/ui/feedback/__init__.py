@@ -1,4 +1,4 @@
-"""
+﻿"""
 UI Feedback - Point d'entrée
 Feedback temps réel pour l'utilisateur
 """

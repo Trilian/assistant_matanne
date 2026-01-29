@@ -1,4 +1,4 @@
-"""
+﻿"""
 Dashboard Widgets - Composants enrichis pour le tableau de bord.
 
 Fournit des widgets visuels avancés :

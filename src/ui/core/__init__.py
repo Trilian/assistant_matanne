@@ -1,4 +1,4 @@
-"""
+﻿"""
 UI Core - Point d'entrée
 Composants de base réutilisables
 """

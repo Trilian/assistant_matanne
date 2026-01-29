@@ -1,4 +1,4 @@
-"""
+﻿"""
 Constantes globales - Valeurs réutilisées dans toute l'app
 """
 

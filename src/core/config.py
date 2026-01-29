@@ -1,4 +1,4 @@
-"""
+﻿"""
 Configuration - Configuration centralisée de l'application.
 Tout harmonisé en français
 """

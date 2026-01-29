@@ -1,4 +1,4 @@
-"""
+﻿"""
 Errors Base - Exceptions pures sans dépendances UI/Streamlit.
 
 Ce module centralise UNIQUEMENT :

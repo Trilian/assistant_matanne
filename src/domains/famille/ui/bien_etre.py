@@ -209,7 +209,7 @@ def app():
     # ===================================
 
     tab1, tab2, tab3, tab4 = st.tabs(
-        ["ðŸ“Š Vue d'ensemble", "âž• Ajouter une entrée", "ðŸ¤– Analyse IA", "ðŸ“ˆ Tendances"]
+        ["ðŸ“Š Vue d'ensemble", "âž• Ajouter une entrée", "– Analyse IA", "ðŸ“ˆ Tendances"]
     )
 
     # ===================================
@@ -351,7 +351,7 @@ def app():
     # ===================================
 
     with tab3:
-        st.subheader("ðŸ¤– Analyse intelligente du bien-être")
+        st.subheader("– Analyse intelligente du bien-être")
 
         if not agent:
             st.error("Agent IA non disponible")
@@ -367,8 +367,8 @@ def app():
                 )
                 personne_analyse = st.selectbox("Analyser pour", personnes_dispo)
 
-                if st.button("ðŸ¤– Lancer l'analyse", type="primary", use_container_width=True):
-                    with st.spinner("ðŸ¤– Analyse en cours..."):
+                if st.button("– Lancer l'analyse", type="primary", use_container_width=True):
+                    with st.spinner("– Analyse en cours..."):
                         try:
                             # Filtrer données
                             if personne_analyse != "Toute la famille":

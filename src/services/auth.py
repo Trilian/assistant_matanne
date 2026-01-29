@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service d'authentification Supabase.
 
 Fonctionnalités:

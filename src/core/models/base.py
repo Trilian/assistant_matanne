@@ -1,4 +1,4 @@
-"""
+﻿"""
 Base SQLAlchemy et énumérations communes.
 
 Ce module contient :

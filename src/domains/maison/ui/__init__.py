@@ -155,6 +155,6 @@ def app():
     - Conseils & astuces d'optimisation
     - Priorisation intelligente
     
-    Explorez les onglets ðŸ¤– "Assistant IA" dans chaque module!
+    Explorez les onglets – "Assistant IA" dans chaque module!
     """)
 

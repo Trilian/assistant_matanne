@@ -1,4 +1,4 @@
-"""
+﻿"""
 Formatters - Point d'entrée unifié
 """
 

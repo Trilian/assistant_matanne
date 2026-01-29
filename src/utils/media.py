@@ -1,4 +1,4 @@
-"""
+﻿"""
 Media utilities - Image handling, caching, and optimization.
 
 Fournit des utilitaires pour gérer les images uploadées, les mettre en cache,

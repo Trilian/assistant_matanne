@@ -1,4 +1,4 @@
-"""
+﻿"""
 SQL Optimizer - Optimisation des requêtes SQLAlchemy.
 
 Fonctionnalités :

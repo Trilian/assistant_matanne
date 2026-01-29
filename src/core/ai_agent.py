@@ -1,4 +1,4 @@
-"""
+﻿"""
 Agent IA - Wrapper hautement intégré pour interactions IA
 Fournit une interface simplifiée pour les modules
 """

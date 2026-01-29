@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service de synchronisation avec calendriers externes.
 
 Fonctionnalités:

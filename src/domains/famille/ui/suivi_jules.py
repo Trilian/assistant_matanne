@@ -193,7 +193,7 @@ def app():
     # ===================================
 
     tab1, tab2, tab3, tab4 = st.tabs(
-        ["ðŸ“Š Tableau de bord", "ðŸ¤– Conseils IA", "ðŸ“ Journal", "ðŸ“ˆ Statistiques"]
+        ["ðŸ“Š Tableau de bord", "– Conseils IA", "ðŸ“ Journal", "ðŸ“ˆ Statistiques"]
     )
 
     # ===================================
@@ -280,7 +280,7 @@ def app():
     # ===================================
 
     with tab2:
-        st.subheader("ðŸ¤– Conseils personnalisés par l'IA")
+        st.subheader("– Conseils personnalisés par l'IA")
 
         if not agent:
             st.error("Agent IA non disponible")
@@ -311,7 +311,7 @@ def app():
                 )
 
             if generer:
-                with st.spinner("ðŸ¤– L'IA prépare des conseils personnalisés..."):
+                with st.spinner("– L'IA prépare des conseils personnalisés..."):
                     try:
                         # Récupérer contexte
                         df_recent = charger_entrees_bien_etre(jules.id, limit=7)
@@ -390,7 +390,7 @@ def app():
             raccourcis = [
                 ("ðŸ˜´ Sommeil", "Sommeil"),
                 ("ðŸ¼ Alimentation", "Alimentation"),
-                ("ðŸ¤¸ Motricité", "Développement moteur"),
+                ("¸ Motricité", "Développement moteur"),
                 ("ðŸ§  Cognitif", "Développement cognitif"),
                 ("ðŸ‘¥ Social", "Socialisation"),
                 ("ðŸ“š Lecture", "Général"),
@@ -570,8 +570,8 @@ def app():
             # Demander analyse IA
             st.markdown("---")
 
-            if agent and st.button("ðŸ¤– Analyse IA des tendances", type="primary"):
-                with st.spinner("ðŸ¤– Analyse en cours..."):
+            if agent and st.button("– Analyse IA des tendances", type="primary"):
+                with st.spinner("– Analyse en cours..."):
                     try:
                         # Préparer données
                         donnees_sommeil = [

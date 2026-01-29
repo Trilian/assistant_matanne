@@ -1,4 +1,4 @@
-"""
+﻿"""
 Errors - Gestion des erreurs avec intégration UI (Streamlit).
 
 Ce module :

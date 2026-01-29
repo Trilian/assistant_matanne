@@ -51,7 +51,7 @@ def charger_routines(actives_uniquement: bool = True) -> pd.DataFrame:
                     ),
                     "frequence": r.frequency,
                     "active": r.is_active,
-                    "ia": "ðŸ¤–" if r.ai_suggested else "",
+                    "ia": "–" if r.ai_suggested else "",
                     "nb_taches": len(r.tasks),
                 }
                 for r in routines
@@ -227,7 +227,7 @@ def app():
     # ===================================
 
     tab1, tab2, tab3, tab4 = st.tabs(
-        ["ðŸ“‹ Mes Routines", "ðŸ¤– Rappels IA", "âž• Créer Routine", "ðŸ“Š Suivi"]
+        ["ðŸ“‹ Mes Routines", "– Rappels IA", "âž• Créer Routine", "ðŸ“Š Suivi"]
     )
 
     # ===================================
@@ -361,7 +361,7 @@ def app():
     # ===================================
 
     with tab2:
-        st.subheader("ðŸ¤– Rappels intelligents")
+        st.subheader("– Rappels intelligents")
 
         if not agent:
             st.error("Agent IA non disponible")
@@ -370,8 +370,8 @@ def app():
 
             heure_actuelle = datetime.now().strftime("%H:%M")
 
-            if st.button("ðŸ¤– Demander rappels IA", type="primary", use_container_width=True):
-                with st.spinner("ðŸ¤– Analyse des routines..."):
+            if st.button("– Demander rappels IA", type="primary", use_container_width=True):
+                with st.spinner("– Analyse des routines..."):
                     try:
                         # Récupérer toutes les tÃ¢ches
                         with get_db_context() as db:
@@ -561,7 +561,7 @@ def app():
                 st.metric("Actives", actives)
 
             with col_m3:
-                ia_count = len(df_all[df_all["ia"] == "ðŸ¤–"])
+                ia_count = len(df_all[df_all["ia"] == "–"])
                 st.metric("Suggérées IA", ia_count)
 
             with col_m4:
