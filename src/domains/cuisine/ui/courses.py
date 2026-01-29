@@ -498,7 +498,8 @@ def render_suggestions_ia():
                         
                         if recette:
                             # Afficher ingrédients de la recette
-                            st.caption(f"📝 {recette.get('nb_ingredients', 0)} ingrédients")
+                            nb_ingredients = len(recette.ingredients) if recette.ingredients else 0
+                            st.caption(f"📝 {nb_ingredients} ingrédients")
                             
                             if st.button("🔍 Ajouter ingrédients manquants", key="btn_add_missing_ingredients"):
                                 try:
@@ -506,7 +507,7 @@ def render_suggestions_ia():
                                     from src.core.database import obtenir_contexte_db
                                     
                                     # Récupérer ingrédients de la recette
-                                    ingredients_recette = recette.get('ingredients', [])
+                                    ingredients_recette = recette.ingredients if recette.ingredients else []
                                     
                                     if not ingredients_recette:
                                         st.warning("Aucun ingrédient dans cette recette")
@@ -514,10 +515,10 @@ def render_suggestions_ia():
                                         count_added = 0
                                         
                                         with obtenir_contexte_db() as db:
-                                            for ing_data in ingredients_recette:
+                                            for ing_obj in ingredients_recette:
                                                 # Récupérer ingrédient
-                                                ing_nom = ing_data.get('nom', ing_data.get('ingredient_nom', ''))
-                                                ing_quantite = ing_data.get('quantite', 1)
+                                                ing_nom = ing_obj.ingredient.nom if hasattr(ing_obj, 'ingredient') else ing_obj.nom
+                                                ing_quantite = ing_obj.quantite if hasattr(ing_obj, 'quantite') else 1
                                                 ing_unite = ing_data.get('unite', 'pièce')
                                                 
                                                 if not ing_nom:
@@ -577,9 +578,12 @@ def render_historique():
     try:
         # Récupérer les articles achetés dans la période
         from src.core.models import ArticleCourses
+        from sqlalchemy.orm import joinedload
         
         with obtenir_contexte_db() as db:
-            articles_achetes = db.query(ArticleCourses).filter(
+            articles_achetes = db.query(ArticleCourses).options(
+                joinedload(ArticleCourses.ingredient)
+            ).filter(
                 ArticleCourses.achete == True,
                 ArticleCourses.achete_le >= datetime.combine(date_debut, datetime.min.time()),
                 ArticleCourses.achete_le <= datetime.combine(date_fin, datetime.max.time())

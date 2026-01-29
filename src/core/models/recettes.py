@@ -168,6 +168,7 @@ class Recette(Base):
     modifie_le: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     # Relations
     ingredients: Mapped[list["RecetteIngredient"]] = relationship(

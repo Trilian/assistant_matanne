@@ -160,7 +160,7 @@ class PlanningService(BaseService[Planning], BaseAIService, PlanningAIMixin):
 
     @with_cache(
         ttl=3600,
-        key_func=lambda self, semaine_debut: f"planning_ia_{semaine_debut.isoformat()}",
+        key_func=lambda self, semaine_debut, preferences=None: f"planning_ia_{semaine_debut.isoformat()}",
     )
     @with_error_handling(default_return=None)
     @with_db_session
