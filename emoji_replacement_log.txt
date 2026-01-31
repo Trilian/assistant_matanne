@@ -1,6 +1,0 @@
-Initial mojibake count: 60
-Final mojibake count: 60
-Replacements made: 0
-
-
-Total mojibake characters replaced: 0
