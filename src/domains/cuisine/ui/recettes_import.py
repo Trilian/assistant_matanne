@@ -367,8 +367,7 @@ def _save_imported_recipe(
                 temps_cuisson=temps_cuisson,
                 portions=portions,
                 difficulte=difficulte,
-                url_image=image_path,  # Ajouter l'image
-                source="import"  # Marquer comme importée
+                url_image=image_path  # Ajouter l'image
             )
             
             with obtenir_contexte_db() as db:

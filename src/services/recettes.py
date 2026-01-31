@@ -223,14 +223,18 @@ class RecetteService(BaseService[Recette], BaseAIService, RecipeAIMixin):
         Returns:
             Recette créée avec relations
         """
+        from datetime import datetime
+        
         # Validation avec Pydantic
         try:
             validated = RecetteInput(**data)
         except Exception as e:
             raise ErreurValidation(f"Données invalides: {str(e)}")
         
-        # Créer recette
-        recette = Recette(**validated.model_dump(exclude={"ingredients", "etapes"}))
+        # Créer recette avec updated_at
+        recette_dict = validated.model_dump(exclude={"ingredients", "etapes"})
+        recette_dict["updated_at"] = datetime.utcnow()  # ← Requis par le trigger PostgreSQL
+        recette = Recette(**recette_dict)
         db.add(recette)
         db.flush()
 
@@ -416,6 +420,85 @@ class RecetteService(BaseService[Recette], BaseAIService, RecipeAIMixin):
 
         logger.info(f"✅ Generated {len(recettes)} recipe suggestions")
         return recettes
+
+    def generer_variantes_recette_ia(
+        self,
+        nom_recette: str,
+        nb_variantes: int = 3,
+    ) -> list[RecetteSuggestion]:
+        """Génère plusieurs variantes d'une recette spécifique avec l'IA.
+
+        Generates multiple variations of a specific recipe (e.g., "spaghetti bolognaise")
+        with different ingredients, cooking methods, or cuisines.
+
+        Args:
+            nom_recette: Name of recipe to create variations for
+            nb_variantes: Number of variations to generate (1-5)
+
+        Returns:
+            List of RecetteSuggestion objects with variations
+        """
+        # Build context for variations
+        context = f"Créer {nb_variantes} variantes différentes et intéressantes de la recette: {nom_recette}"
+        context += "\nChaque variante doit avoir une twist unique (ingrédient différent, cuisine différente, technique différente)"
+
+        # Prompt pour générer les variantes
+        prompt = self.build_json_prompt(
+            context=context,
+            task=f"Generate {nb_variantes} different variations of {nom_recette} recipe",
+            json_schema='''{
+    "items": [
+        {
+            "nom": "string (recipe name with variation)",
+            "description": "string (what makes this variation unique)",
+            "temps_preparation": "integer (minutes)",
+            "temps_cuisson": "integer (minutes)",
+            "portions": "integer",
+            "difficulte": "string (facile|moyen|difficile)",
+            "type_repas": "string (meal type)",
+            "saison": "string (season)",
+            "ingredients": [{"nom": "string", "quantite": "number", "unite": "string"}],
+            "etapes": [{"description": "string"}]
+        }
+    ]
+}''',
+            constraints=[
+                "Each variation must be significantly different from the others",
+                "Include variations from different cuisines or cooking methods",
+                "Each recipe must be complete with ingredients and steps",
+                "Vary the ingredients while keeping the essence of the original",
+                "Make sure each variation is practical and achievable",
+                "Return EXACTLY this JSON structure with 'items' key containing the recipes array",
+            ],
+        )
+
+        logger.info(f"🤖 Generating {nb_variantes} variations of '{nom_recette}'")
+
+        # Call IA with auto rate limiting & parsing
+        variations = self.call_with_list_parsing_sync(
+            prompt=prompt,
+            item_model=RecetteSuggestion,
+            system_prompt=self.build_system_prompt(
+                role="Creative chef and culinary expert",
+                expertise=[
+                    "Recipe variations and adaptations",
+                    "Different cooking methods",
+                    "International cuisines",
+                    "Ingredient substitutions",
+                    "Culinary creativity",
+                ],
+                rules=[
+                    "Create truly different variations, not just minor changes",
+                    "Suggest creative twists (fusion, different cuisine, new cooking method)",
+                    "Keep recipes practical and achievable",
+                    "Respect seasonality where applicable",
+                ],
+            ),
+            max_items=nb_variantes,
+        )
+
+        logger.info(f"✅ Generated {len(variations)} variations of '{nom_recette}'")
+        return variations
 
     @with_cache(ttl=3600, key_func=lambda self, rid: f"version_bebe_{rid}")
     @with_error_handling(default_return=None)

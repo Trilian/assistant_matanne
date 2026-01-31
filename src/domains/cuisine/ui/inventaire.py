@@ -1418,7 +1418,7 @@ def render_tools():
 
     
 
-    tab_import_export, tab_stats = st.tabs(["📅Ÿ“¤ Import/Export", "[CHART] Statistiques"])
+    tab_import_export, tab_stats = st.tabs(["📅Ÿ“¤ Import/Export", "📊 Statistiques"])
 
     
 
@@ -1442,7 +1442,7 @@ def render_tools():
 
                 
 
-                st.subheader("[CHART] Statistiques globales")
+                st.subheader("📊 Statistiques globales")
 
                 
 
@@ -1796,7 +1796,7 @@ def render_import_export():
 
         st.info(
 
-            f"[CHART] **Statistiques export:**\n"
+            f"📊 **Statistiques export:**\n"
 
             f"ê€✅ **Articles:** {len(articles)}\n"
 
@@ -1947,7 +1947,7 @@ def render_predictions():
 
             tab_pred, tab_tendances, tab_recom, tab_analyse = st.tabs([
 
-                "[CHART] Prédictions",
+                "📈 Prédictions",
 
                 "📤 Tendances",
 
@@ -2267,7 +2267,7 @@ def render_predictions():
 
                 with col1:
 
-                    st.metric("[CHART] Total articles", len(predictions))
+                    st.metric("📦 Total articles", len(predictions))
 
                 
 
@@ -2303,7 +2303,7 @@ def render_predictions():
 
                 if analyse:
 
-                    st.write("**Tendance générale**: ", end="")
+                    st.write("**Tendance générale**: ")
 
                     if analyse.tendance_globale == "croissante":
 

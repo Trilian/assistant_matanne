@@ -19,6 +19,16 @@ from src.domains.cuisine.logic.recettes_logic import (
 logger = logging.getLogger(__name__)
 
 
+def formater_quantite(quantite: float | int) -> str:
+    """Formate une quantité: affiche 2 au lieu de 2.0"""
+    if isinstance(quantite, (int, float)):
+        if quantite == int(quantite):
+            return str(int(quantite))
+        else:
+            return str(quantite)
+    return str(quantite)
+
+
 def app():
     """Point d'entrée module recettes"""
     st.title("🍽️ Mes Recettes")
@@ -504,7 +514,7 @@ def render_detail_recette(recette):
             ingredient_cols = st.columns([2, 1, 1])
             ingredient_cols[0].write(f"{ri.ingredient.nom}")
             # Formater la quantité: afficher 1 au lieu de 1.0
-            quantite_display = int(ri.quantite) if ri.quantite == int(ri.quantite) else ri.quantite
+            quantite_display = formater_quantite(ri.quantite)
             ingredient_cols[1].write(f"{quantite_display}")
             ingredient_cols[2].write(f"{ri.unite}")
     
@@ -1000,76 +1010,46 @@ def render_generer_ia():
         st.error("❌ Service IA indisponible")
         return
     
-    with st.form("form_recette_ia", border=True):
-        st.info("💡 Laissez l'IA générer des recettes personnalisées basées sur vos préférences")
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            type_repas = st.selectbox(
-                "Type de repas *",
-                ["petit_déjeuner", "déjeuner", "dîner", "goûter", "apéritif", "dessert"]
-            )
-        with col2:
-            saison = st.selectbox(
-                "Saison *",
-                ["printemps", "été", "automne", "hiver", "toute_année"]
-            )
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            difficulte = st.selectbox(
-                "Niveau de difficulté",
-                ["facile", "moyen", "difficile"]
-            )
-        with col2:
-            nb_recettes = st.number_input(
-                "Nombre de suggestions",
-                min_value=1,
-                max_value=10,
-                value=3
-            )
-        
-        ingredients_str = st.text_area(
-            "Ingrédients disponibles (optionnel)",
-            placeholder="Séparez les ingrédients par des virgules\nEx: tomate, oignon, ail, riz",
-            height=80
-        )
-        
-        submitted = st.form_submit_button("🤖 Générer avec l'IA", use_container_width=True)
+    # Sélection du mode de génération
+    mode_gen = st.radio(
+        "Mode de génération",
+        ["Personnalisé", "Recherche spécifique"],
+        horizontal=True
+    )
     
-    if submitted:
-        if not type_repas or not saison:
-            st.error("❌ Type de repas et saison sont obligatoires")
-        else:
-            ingredients_dispo = None
-            if ingredients_str:
-                ingredients_dispo = [i.strip() for i in ingredients_str.split(",") if i.strip()]
-            
-            with st.spinner("🤖 L'IA génère vos recettes..."):
+    if mode_gen == "Recherche spécifique":
+        st.info("🔍 Générez plusieurs variantes d'une recette spécifique")
+        with st.form("form_recette_specifique", border=True):
+            recette_recherche = st.text_input(
+                "Nom de la recette recherchée *",
+                placeholder="Exemple: pâtes bolognaises, tarte tatin, pizza..."
+            )
+            nb_variantes = st.slider("Nombre de variantes", 1, 5, 3)
+            submitted_spec = st.form_submit_button("🔍 Chercher des variantes", use_container_width=True)
+        
+        if submitted_spec and recette_recherche:
+            with st.spinner(f"🤖 Génération de variantes de '{recette_recherche}'..."):
                 try:
-                    recettes_suggestions = service.generer_recettes_ia(
-                        type_repas=type_repas,
-                        saison=saison,
-                        difficulte=difficulte,
-                        ingredients_dispo=ingredients_dispo,
-                        nb_recettes=nb_recettes,
+                    recettes_variantes = service.generer_variantes_recette_ia(
+                        nom_recette=recette_recherche,
+                        nb_variantes=nb_variantes,
                     )
                     
-                    if not recettes_suggestions:
-                        st.warning("⚠️ Aucune recette générée. Réessayez.")
+                    if not recettes_variantes:
+                        st.warning("⚠️ Aucune variante générée. Réessayez.")
                         return
                     
-                    st.success(f"✅ {len(recettes_suggestions)} recette(s) générée(s)!")
+                    st.success(f"✅ {len(recettes_variantes)} variante(s) de '{recette_recherche}' générée(s)!")
                     st.divider()
                     
                     # Afficher les suggestions en cartes
-                    for idx, suggestion in enumerate(recettes_suggestions, 1):
+                    for idx, suggestion in enumerate(recettes_variantes, 1):
                         # Conteneur pour chaque recette
                         with st.container(border=True):
                             # Titre + Métrique difficulté en ligne
                             col_titre, col_diff = st.columns([4, 1])
                             with col_titre:
-                                st.subheader(f"🍳 {suggestion.nom}", anchor=False)
+                                st.subheader(f"🍳 Variante {idx}: {suggestion.nom}", anchor=False)
                             with col_diff:
                                 difficulte_emoji = {"facile": "🟢", "moyen": "🟡", "difficile": "🔴"}.get(suggestion.difficulte, "")
                                 st.caption(f"{difficulte_emoji} {suggestion.difficulte}")
@@ -1099,14 +1079,164 @@ def render_generer_ia():
                                     ing_list = suggestion.ingredients[:len(suggestion.ingredients)//2 + 1]
                                     for ing in ing_list:
                                         if isinstance(ing, dict):
-                                            st.write(f"• {ing.get('nom', 'N/A')}: {ing.get('quantite', '')} {ing.get('unite', '')}")
+                                            qty = formater_quantite(ing.get('quantite', ''))
+                                            st.write(f"• {ing.get('nom', 'N/A')}: {qty} {ing.get('unite', '')}")
                                         else:
                                             st.write(f"• {ing}")
                                 with col_ing2:
                                     ing_list = suggestion.ingredients[len(suggestion.ingredients)//2 + 1:]
                                     for ing in ing_list:
                                         if isinstance(ing, dict):
-                                            st.write(f"• {ing.get('nom', 'N/A')}: {ing.get('quantite', '')} {ing.get('unite', '')}")
+                                            qty = formater_quantite(ing.get('quantite', ''))
+                                            st.write(f"• {ing.get('nom', 'N/A')}: {qty} {ing.get('unite', '')}")
+                                        else:
+                                            st.write(f"• {ing}")
+                            
+                            # Étapes dans un expander
+                            if suggestion.etapes:
+                                with st.expander("📋 Étapes de préparation"):
+                                    for i, etape in enumerate(suggestion.etapes, 1):
+                                        if isinstance(etape, dict):
+                                            st.write(f"**{i}.** {etape.get('description', etape)}")
+                                        else:
+                                            st.write(f"**{i}.** {etape}")
+                            
+                            # Bouton ajouter
+                            col_btn1, col_btn2 = st.columns(2)
+                            with col_btn1:
+                                if st.button("➕ Ajouter aux recettes", key=f"add_variant_{idx}", use_container_width=True):
+                                    try:
+                                        recette_obj = service.create_complete({
+                                            "nom": suggestion.nom,
+                                            "description": suggestion.description,
+                                            "temps_preparation": suggestion.temps_preparation,
+                                            "temps_cuisson": suggestion.temps_cuisson,
+                                            "portions": suggestion.portions,
+                                            "difficulte": suggestion.difficulte,
+                                            "type_repas": suggestion.type_repas,
+                                            "ingredients": suggestion.ingredients if isinstance(suggestion.ingredients, list) else [],
+                                            "etapes": suggestion.etapes if isinstance(suggestion.etapes, list) else [],
+                                        }, session=None)
+                                        st.success(f"✅ {suggestion.nom} ajoutée aux recettes!")
+                                        st.session_state.courses_refresh += 1
+                                    except Exception as e:
+                                        st.error(f"❌ Erreur: {str(e)}")
+                            with col_btn2:
+                                st.button("❤️", key=f"like_variant_{idx}", use_container_width=True)
+                    
+                except Exception as e:
+                    st.error(f"❌ Erreur: {str(e)}")
+    
+    else:
+        # Mode personnalisé (existant)
+        st.info("💡 Laissez l'IA générer des recettes personnalisées basées sur vos préférences")
+        with st.form("form_recette_ia", border=True):
+            col1, col2 = st.columns(2)
+            with col1:
+                type_repas = st.selectbox(
+                    "Type de repas *",
+                    ["petit_déjeuner", "déjeuner", "dîner", "goûter", "apéritif", "dessert"]
+                )
+            with col2:
+                saison = st.selectbox(
+                    "Saison *",
+                    ["printemps", "été", "automne", "hiver", "toute_année"]
+                )
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                difficulte = st.selectbox(
+                    "Niveau de difficulté",
+                    ["facile", "moyen", "difficile"]
+                )
+            with col2:
+                nb_recettes = st.number_input(
+                    "Nombre de suggestions",
+                    min_value=1,
+                    max_value=10,
+                    value=3
+                )
+            
+            ingredients_str = st.text_area(
+                "Ingrédients disponibles (optionnel)",
+                placeholder="Séparez les ingrédients par des virgules\nEx: tomate, oignon, ail, riz",
+                height=80
+            )
+            
+            submitted = st.form_submit_button("🤖 Générer avec l'IA", use_container_width=True)
+        
+        if submitted:
+            if not type_repas or not saison:
+                st.error("❌ Type de repas et saison sont obligatoires")
+            else:
+                ingredients_dispo = None
+                if ingredients_str:
+                    ingredients_dispo = [i.strip() for i in ingredients_str.split(",") if i.strip()]
+                
+                with st.spinner("🤖 L'IA génère vos recettes..."):
+                    try:
+                        recettes_suggestions = service.generer_recettes_ia(
+                            type_repas=type_repas,
+                            saison=saison,
+                            difficulte=difficulte,
+                            ingredients_dispo=ingredients_dispo,
+                            nb_recettes=nb_recettes,
+                        )
+                        
+                        if not recettes_suggestions:
+                            st.warning("⚠️ Aucune recette générée. Réessayez.")
+                            return
+                        
+                        st.success(f"✅ {len(recettes_suggestions)} recette(s) générée(s)!")
+                        st.divider()
+                        
+                        # Afficher les suggestions en cartes
+                        for idx, suggestion in enumerate(recettes_suggestions, 1):
+                            # Conteneur pour chaque recette
+                            with st.container(border=True):
+                                # Titre + Métrique difficulté en ligne
+                                col_titre, col_diff = st.columns([4, 1])
+                                with col_titre:
+                                    st.subheader(f"🍳 {suggestion.nom}", anchor=False)
+                                with col_diff:
+                                    difficulte_emoji = {"facile": "🟢", "moyen": "🟡", "difficile": "🔴"}.get(suggestion.difficulte, "")
+                                    st.caption(f"{difficulte_emoji} {suggestion.difficulte}")
+                            
+                            # Description
+                            if suggestion.description:
+                                st.markdown(suggestion.description)
+                            
+                            # Métriques en ligne
+                            col1, col2, col3, col4 = st.columns(4)
+                            with col1:
+                                st.metric("⏱️ Préparation", f"{suggestion.temps_preparation} min", label_visibility="collapsed")
+                            with col2:
+                                st.metric("🔥 Cuisson", f"{suggestion.temps_cuisson} min", label_visibility="collapsed")
+                            with col3:
+                                st.metric("🍽️ Portions", suggestion.portions, label_visibility="collapsed")
+                            with col4:
+                                st.metric("⏰ Total", f"{suggestion.temps_preparation + suggestion.temps_cuisson} min", label_visibility="collapsed")
+                            
+                            st.divider()
+                            
+                            # Ingrédients en deux colonnes
+                            if suggestion.ingredients:
+                                st.markdown("**Ingrédients:**")
+                                col_ing1, col_ing2 = st.columns(2)
+                                with col_ing1:
+                                    ing_list = suggestion.ingredients[:len(suggestion.ingredients)//2 + 1]
+                                    for ing in ing_list:
+                                        if isinstance(ing, dict):
+                                            qty = formater_quantite(ing.get('quantite', ''))
+                                            st.write(f"• {ing.get('nom', 'N/A')}: {qty} {ing.get('unite', '')}")
+                                        else:
+                                            st.write(f"• {ing}")
+                                with col_ing2:
+                                    ing_list = suggestion.ingredients[len(suggestion.ingredients)//2 + 1:]
+                                    for ing in ing_list:
+                                        if isinstance(ing, dict):
+                                            qty = formater_quantite(ing.get('quantite', ''))
+                                            st.write(f"• {ing.get('nom', 'N/A')}: {qty} {ing.get('unite', '')}")
                                         else:
                                             st.write(f"• {ing}")
                             
@@ -1149,10 +1279,10 @@ def render_generer_ia():
                                         logger.error(f"Erreur ajout suggestion: {e}")
                             
                             st.write("")  # Espacement
-                
-                except Exception as e:
-                    st.error(f"❌ Erreur génération: {str(e)}")
-                    logger.error(f"Erreur IA recettes: {e}")
+                    
+                    except Exception as e:
+                        st.error(f"❌ Erreur génération: {str(e)}")
+                        logger.error(f"Erreur IA recettes: {e}")
 
 
 def render_generer_image(recette):

@@ -56,6 +56,8 @@ def app():
         st.session_state.courses_refresh = 0
     if "new_article_mode" not in st.session_state:
         st.session_state.new_article_mode = False
+    if "courses_active_tab" not in st.session_state:
+        st.session_state.courses_active_tab = 0
     
     # Initialiser la synchronisation temps réel
     _init_realtime_sync()
@@ -70,18 +72,23 @@ def app():
     ])
 
     with tab_liste:
+        st.session_state.courses_active_tab = 0
         render_liste_active()
 
     with tab_suggestions:
+        st.session_state.courses_active_tab = 1
         render_suggestions_ia()
 
     with tab_historique:
+        st.session_state.courses_active_tab = 2
         render_historique()
 
     with tab_modeles:
+        st.session_state.courses_active_tab = 3
         render_modeles()
 
     with tab_outils:
+        st.session_state.courses_active_tab = 4
         render_outils()
 
 
