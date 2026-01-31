@@ -1866,6 +1866,7 @@ def render_predictions():
 
         articles = service.get_inventaire_complet()
 
+        historique_complet = service.get_historique(days=90)  # 3 mois d'historique
         
 
         if not articles:
@@ -1922,11 +1923,11 @@ def render_predictions():
 
         if st.session_state.get("predictions_generated", False):
 
-            with st.spinner("ê³ Génération des prédictions ML..."):
+            with st.spinner("📊 Génération des prédictions ML..."):
 
                 try:
 
-                    predictions = service_pred.generer_predictions()
+                    predictions = service_pred.generer_predictions(articles, historique_complet)
 
                     analyse_globale = service_pred.obtenir_analyse_globale()
 
