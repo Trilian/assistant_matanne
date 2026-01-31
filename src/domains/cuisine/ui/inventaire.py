@@ -108,17 +108,17 @@ def app():
 
         "🏷️ Catégories", 
 
-        "ðŸ›’ Suggestions IA",
+        "🛒 Suggestions IA",
 
-        "ðŸ“œ Historique",
+        "📋 Historique",
 
-        "[CAMERA] Photos",
+        "📷 Photos",
 
-        "ðŸ”” Notifications",
+        "📢 Notifications",
 
-        "ðŸ”® Prévisions",
+        "🔮 Prévisions",
 
-        "ðŸ”§ Outils"
+        "🔧 Outils"
 
     ])
 

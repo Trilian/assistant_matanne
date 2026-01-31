@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Planning - Gestion du planning hebdomadaire
  Fonctionnalités complètes:
 - Vue semaine avec édition en ligne
@@ -25,9 +25,9 @@ from src.domains.cuisine.logic.planning_logic import (
 
 logger = logging.getLogger(__name__)
 
-# ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•
+# ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
 # CONSTANTES
-# ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•
+# ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
 JOURS_EMOJI = ["🟡", "🟠", "🟣", "🟢", "⚫", "🔴", "🟢"]
@@ -39,34 +39,20 @@ BUDGETS = ["Bas (< 20€)", "Moyen (20-40€)", "Haut (> 40€)"]
 
 def app():
     """Point d'entrée module planning"""
-    st.title("📅 Planning Semaine")
-    st.caption("Gérez vos repas de la semaine et générez des plannings avec IA")
-
-    # Si demande de créer nouveau planning, afficher directement l'onglet génération
-    if st.session_state.get('go_to_generer', False):
-        st.session_state.go_to_generer = False
-        render_generer()
-        return
-
-    tab_planning, tab_generer, tab_historique = st.tabs([
-        "📋 Planning Actif", 
-        "✨ Générer avec IA", 
-        "📚 Historique"
-    ])
-
-    with tab_planning:
+    st.set_page_config(page_title="Planning", layout="wide")
+    st.title("📅 Planning Hebdomadaire")
+    
+    tabs = st.tabs(["🍽️ Planning Actif", "🤖 Générer avec IA", "📚 Historique"])
+    
+    with tabs[0]:
         render_planning()
-
-    with tab_generer:
+    
+    with tabs[1]:
         render_generer()
-
-    with tab_historique:
+    
+    with tabs[2]:
         render_historique()
 
-
-# ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•
-# SECTION 1: PLANNING ACTIF
-# ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•
 
 def render_planning():
     """Affiche et édite le planning actuel"""
@@ -78,7 +64,8 @@ def render_planning():
         return
     
     try:
-        # Récupérer planning actif
+        # Récupérer planning actif AVEC eager loading des repas et recettes
+        # ✅ FIX: get_planning() charge maintenant les repas avec joinedload
         planning = service.get_planning()
         
         if not planning:
@@ -95,6 +82,7 @@ def render_planning():
         with col1:
             st.metric("📅 Semaine du", planning.semaine_debut.strftime("%d/%m"))
         with col2:
+            # ✅ FIX: planning.repas est maintenant accessible (eager loaded)
             st.metric("📊 Repas planifiés", len(planning.repas) if planning.repas else 0)
         with col3:
             genere_ia = "🤖 IA" if planning.genere_par_ia else "✏️ Manuel"
@@ -102,13 +90,13 @@ def render_planning():
         
         st.divider()
         
-        # Récupérer toutes recettes pour selectbox
-        db = next(obtenir_contexte_db())
+        # ✅ FIX: Récupérer recettes dans son propre contexte BD
         from src.core.models import Recette
-        recettes = db.query(Recette).all()
-        recettes_dict = {r.nom: r.id for r in recettes}
+        with obtenir_contexte_db() as db:
+            recettes = db.query(Recette).all()
+            recettes_dict = {r.nom: r.id for r in recettes}
         
-        # Organiser repas par jour
+        # Organiser repas par jour (les repas sont déjà chargés par eager loading du service)
         repas_par_jour = {}
         if planning.repas:
             for repas in planning.repas:
@@ -141,6 +129,7 @@ def render_planning():
                     with col2:
                         # Selectbox recette
                         recette_options = ["-- Aucune --"] + list(recettes_dict.keys())
+                        # ✅ FIX: repas.recette est accessible (eager loaded)
                         recette_current = repas.recette.nom if repas.recette else "-- Aucune --"
                         
                         new_recette = st.selectbox(
@@ -154,13 +143,15 @@ def render_planning():
                         # Mettre à jour si changement
                         if new_recette != "-- Aucune --" and new_recette != recette_current:
                             try:
+                                # ✅ FIX: Chaque modification usa son propre contexte BD
                                 from src.core.models import Repas as RepasModel
-                                repas_db = db.query(RepasModel).filter_by(id=repas.id).first()
-                                if repas_db:
-                                    repas_db.recette_id = recettes_dict[new_recette]
-                                    db.commit()
-                                    st.success(f"✨ Recette mise à jour")
-                                    st.rerun()
+                                with obtenir_contexte_db() as db:
+                                    repas_db = db.query(RepasModel).filter_by(id=repas.id).first()
+                                    if repas_db:
+                                        repas_db.recette_id = recettes_dict[new_recette]
+                                        db.commit()
+                                st.success(f"✨ Recette mise à jour")
+                                st.rerun()
                             except Exception as e:
                                 st.error(f"❌ Erreur: {str(e)}")
                     
@@ -174,15 +165,17 @@ def render_planning():
                         if prepared != repas.prepare:
                             try:
                                 from src.core.models import Repas as RepasModel
-                                repas_db = db.query(RepasModel).filter_by(id=repas.id).first()
-                                if repas_db:
-                                    repas_db.prepare = prepared
-                                    db.commit()
+                                with obtenir_contexte_db() as db:
+                                    repas_db = db.query(RepasModel).filter_by(id=repas.id).first()
+                                    if repas_db:
+                                        repas_db.prepare = prepared
+                                        db.commit()
+                                st.rerun()
                             except Exception as e:
                                 st.error(f"❌ Erreur: {str(e)}")
                     
                     with col4:
-                        if st.button("ðŸ“", key=f"edit_notes_{repas.id}", help="Ã‰diter notes"):
+                        if st.button("🖊️", key=f"edit_notes_{repas.id}", help="Éditer notes"):
                             st.session_state[f"editing_notes_{repas.id}"] = True
                     
                     # Notes editor
@@ -198,13 +191,14 @@ def render_planning():
                             if st.button("✨ Sauvegarder", key=f"save_notes_{repas.id}"):
                                 try:
                                     from src.core.models import Repas as RepasModel
-                                    repas_db = db.query(RepasModel).filter_by(id=repas.id).first()
-                                    if repas_db:
-                                        repas_db.notes = notes if notes else None
-                                        db.commit()
-                                        st.session_state[f"editing_notes_{repas.id}"] = False
-                                        st.success("✨ Notes sauvegardées")
-                                        st.rerun()
+                                    with obtenir_contexte_db() as db:
+                                        repas_db = db.query(RepasModel).filter_by(id=repas.id).first()
+                                        if repas_db:
+                                            repas_db.notes = notes if notes else None
+                                            db.commit()
+                                    st.session_state[f"editing_notes_{repas.id}"] = False
+                                    st.success("✨ Notes sauvegardées")
+                                    st.rerun()
                                 except Exception as e:
                                     st.error(f"❌ Erreur: {str(e)}")
                         with col_b:
@@ -222,60 +216,63 @@ def render_planning():
             if st.button("✨ Marquer tout préparé", use_container_width=True):
                 try:
                     from src.core.models import Repas as RepasModel
-                    db.query(RepasModel).filter_by(planning_id=planning.id).update({"prepare": True})
-                    db.commit()
+                    with obtenir_contexte_db() as db:
+                        db.query(RepasModel).filter_by(planning_id=planning.id).update({"prepare": True})
+                        db.commit()
                     st.success("✨ Tous les repas marqués comme préparés")
                     st.rerun()
                 except Exception as e:
                     st.error(f"❌ Erreur: {str(e)}")
         
         with col2:
-            if st.button("ðŸ“‹ Dupliquer (semaine suiv.)", use_container_width=True):
+            if st.button("🔄 Dupliquer (semaine suiv.)", use_container_width=True):
                 try:
                     from src.core.models import Planning as PlanningModel, Repas as RepasModel
                     
-                    # Créer nouveau planning
-                    semaine_suivante = planning.semaine_debut + timedelta(days=7)
-                    semaine_fin = planning.semaine_fin + timedelta(days=7)
-                    
-                    nouveau = PlanningModel(
-                        nom=f"Planning {semaine_suivante.strftime('%d/%m/%Y')}",
-                        semaine_debut=semaine_suivante,
-                        semaine_fin=semaine_fin,
-                        actif=False,
-                        genere_par_ia=planning.genere_par_ia
-                    )
-                    db.add(nouveau)
-                    db.flush()
-                    
-                    # Dupliquer repas
-                    for repas in planning.repas:
-                        nouveau_repas = RepasModel(
-                            planning_id=nouveau.id,
-                            recette_id=repas.recette_id,
-                            date_repas=repas.date_repas + timedelta(days=7),
-                            type_repas=repas.type_repas,
-                            portion_ajustee=repas.portion_ajustee,
-                            notes=repas.notes
+                    with obtenir_contexte_db() as db:
+                        # Créer nouveau planning
+                        semaine_suivante = planning.semaine_debut + timedelta(days=7)
+                        semaine_fin = planning.semaine_fin + timedelta(days=7)
+                        
+                        nouveau = PlanningModel(
+                            nom=f"Planning {semaine_suivante.strftime('%d/%m/%Y')}",
+                            semaine_debut=semaine_suivante,
+                            semaine_fin=semaine_fin,
+                            actif=False,
+                            genere_par_ia=planning.genere_par_ia
                         )
-                        db.add(nouveau_repas)
-                    
-                    db.commit()
+                        db.add(nouveau)
+                        db.flush()
+                        
+                        # Dupliquer repas
+                        for repas in planning.repas:
+                            nouveau_repas = RepasModel(
+                                planning_id=nouveau.id,
+                                recette_id=repas.recette_id,
+                                date_repas=repas.date_repas + timedelta(days=7),
+                                type_repas=repas.type_repas,
+                                portion_ajustee=repas.portion_ajustee,
+                                notes=repas.notes
+                            )
+                            db.add(nouveau_repas)
+                        
+                        db.commit()
                     st.success("✨ Planning dupliqué pour la semaine suivante")
                     st.rerun()
                 except Exception as e:
                     st.error(f"❌ Erreur: {str(e)}")
         
         with col3:
-            if st.button("ðŸ”’ Archiver planning", use_container_width=True):
+            if st.button("📦 Archiver planning", use_container_width=True):
                 try:
                     from src.core.models import Planning as PlanningModel
-                    planning_db = db.query(PlanningModel).filter_by(id=planning.id).first()
-                    if planning_db:
-                        planning_db.actif = False
-                        db.commit()
-                        st.success("✨ Planning archivé")
-                        st.rerun()
+                    with obtenir_contexte_db() as db:
+                        planning_db = db.query(PlanningModel).filter_by(id=planning.id).first()
+                        if planning_db:
+                            planning_db.actif = False
+                            db.commit()
+                    st.success("✨ Planning archivé")
+                    st.rerun()
                 except Exception as e:
                     st.error(f"❌ Erreur: {str(e)}")
     
@@ -284,9 +281,9 @@ def render_planning():
         logger.error(f"Erreur render_planning: {e}")
 
 
-# ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•
-# SECTION 2: GÃ‰NÃ‰RER PLANNING AVEC IA
-# ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•
+# ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
+# SECTION 2: GÉNÉRER PLANNING AVEC IA
+# ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 def render_generer():
     """Générer un planning hebdomadaire avec IA"""
@@ -335,12 +332,12 @@ def render_generer():
             budget = st.radio("Budget", BUDGETS, index=1)
         with col2:
             allergies = st.multiselect("Allergies à éviter", [
-                "Arachides", "Noix", "Lait", "Gluten", "Å’ufs", "Fruits de mer"
+                "Arachides", "Noix", "Lait", "Gluten", "Œufs", "Fruits de mer"
             ])
         
         notes_prefs = st.text_area(
             "Notes additionnelles",
-            placeholder="Ex: pas de viande rouge, préférez les pÃ✅tes...",
+            placeholder="Ex: pas de viande rouge, préférez les pâtes...",
             height=60
         )
         
@@ -415,9 +412,9 @@ def render_generer():
         logger.error(f"Erreur render_generer: {e}")
 
 
-# ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•
+# ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
 # SECTION 3: HISTORIQUE PLANNINGS
-# ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•ê•
+# ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 def render_historique():
     """Affiche historique des plannings"""
@@ -443,10 +440,10 @@ def render_historique():
         st.divider()
         
         # Récupérer tous plannings
+        from src.core.models import Planning as PlanningModel
+        from sqlalchemy.orm import joinedload
+        
         with obtenir_contexte_db() as db:
-            from src.core.models import Planning as PlanningModel
-            from sqlalchemy.orm import joinedload
-            
             query = db.query(PlanningModel)
             query = query.options(joinedload(PlanningModel.repas))
             query = query.filter(PlanningModel.semaine_debut >= date_debut)
@@ -484,25 +481,27 @@ def render_historique():
                 st.caption(f"Créé: {created}")
             
             with col4:
-                if st.button("ðŸ“‚", key=f"load_{planning.id}", help="Charger ce planning"):
+                if st.button("📂", key=f"load_{planning.id}", help="Charger ce planning"):
                     try:
-                        # Désactiver tous les autres
-                        db.query(PlanningModel).filter(PlanningModel.actif == True).update({"actif": False})
-                        # Activer celui-ci
-                        planning_db = db.query(PlanningModel).filter_by(id=planning.id).first()
-                        if planning_db:
-                            planning_db.actif = True
-                            db.commit()
-                            st.success("✨ Planning chargé")
-                            st.rerun()
+                        with obtenir_contexte_db() as db:
+                            # Désactiver tous les autres
+                            db.query(PlanningModel).filter(PlanningModel.actif == True).update({"actif": False})
+                            # Activer celui-ci
+                            planning_db = db.query(PlanningModel).filter_by(id=planning.id).first()
+                            if planning_db:
+                                planning_db.actif = True
+                                db.commit()
+                        st.success("✨ Planning chargé")
+                        st.rerun()
                     except Exception as e:
                         st.error(f"❌ Erreur: {str(e)}")
             
             with col5:
-                if st.button("ðŸ—‘ï¸", key=f"delete_{planning.id}", help="Supprimer ce planning"):
+                if st.button("🗑️", key=f"delete_{planning.id}", help="Supprimer ce planning"):
                     try:
-                        db.query(PlanningModel).filter_by(id=planning.id).delete()
-                        db.commit()
+                        with obtenir_contexte_db() as db:
+                            db.query(PlanningModel).filter_by(id=planning.id).delete()
+                            db.commit()
                         st.success("✨ Planning supprimé")
                         st.rerun()
                     except Exception as e:
@@ -513,6 +512,3 @@ def render_historique():
     except Exception as e:
         st.error(f"❌ Erreur: {str(e)}")
         logger.error(f"Erreur render_historique: {e}")
-
-
-

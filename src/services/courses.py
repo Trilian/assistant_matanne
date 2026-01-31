@@ -145,11 +145,12 @@ class CoursesService(BaseService[ArticleCourses], BaseAIService):
         Returns:
             List of SuggestionCourses objects, empty list on error
         """
-        from .inventaire import inventaire_service
+        from .inventaire import get_inventaire_service
 
         logger.info("🤖 Generating shopping suggestions from inventory with AI")
 
         # Récupérer état inventaire
+        inventaire_service = get_inventaire_service()
         inventaire = inventaire_service.get_inventaire_complet()
 
         # Utiliser le Mixin d'inventaire pour contexte
