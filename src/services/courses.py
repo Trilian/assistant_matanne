@@ -34,6 +34,40 @@ class SuggestionCourses(BaseModel):
     unite: str = Field(..., min_length=1)
     priorite: str = Field(..., pattern="^(haute|moyenne|basse)$")
     rayon: str = Field(..., min_length=3)
+    
+    @classmethod
+    def model_validate(cls, obj):
+        """Normalise les noms de champs alternatifs avant validation"""
+        if isinstance(obj, dict):
+            # Normaliser variantes de champs
+            field_aliases = {
+                'article': 'nom',
+                'name': 'nom',
+                'item': 'nom',
+                'product': 'nom',
+                'quantity': 'quantite',
+                'amount': 'quantite',
+                'unit': 'unite',
+                'priority': 'priorite',
+                'section': 'rayon',
+                'department': 'rayon',
+            }
+            
+            for alias, canonical in field_aliases.items():
+                if alias in obj and canonical not in obj:
+                    obj[canonical] = obj.pop(alias)
+            
+            # Normaliser les valeurs de priorité
+            if 'priorite' in obj:
+                priorite = str(obj['priorite']).lower().strip()
+                if 'haut' in priorite or 'high' in priorite:
+                    obj['priorite'] = 'haute'
+                elif 'moyen' in priorite or 'medium' in priorite:
+                    obj['priorite'] = 'moyenne'
+                elif 'bas' in priorite or 'low' in priorite:
+                    obj['priorite'] = 'basse'
+        
+        return super().model_validate(obj)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -149,50 +183,66 @@ class CoursesService(BaseService[ArticleCourses], BaseAIService):
 
         logger.info("🤖 Generating shopping suggestions from inventory with AI")
 
-        # Récupérer état inventaire
-        inventaire_service = get_inventaire_service()
-        inventaire = inventaire_service.get_inventaire_complet()
+        try:
+            # Récupérer état inventaire
+            inventaire_service = get_inventaire_service()
+            if not inventaire_service:
+                logger.warning("⚠️ Inventaire service unavailable")
+                return []
+            
+            inventaire = inventaire_service.get_inventaire_complet()
+            if not inventaire:
+                logger.info("ℹ️ Inventory empty, no suggestions")
+                return []
 
-        # Utiliser le Mixin d'inventaire pour contexte
-        context = inventaire_service.build_inventory_summary(inventaire)
+            # Utiliser le Mixin d'inventaire pour contexte
+            context = inventaire_service.build_inventory_summary(inventaire)
 
-        # Construire prompt
-        prompt = self.build_json_prompt(
-            context=context,
-            task="Suggest 15 priority shopping items",
-            json_schema='[{"nom": str, "quantite": float, "unite": str, "priorite": str, "rayon": str}]',
-            constraints=[
-                "Priority: haute/moyenne/basse",
-                "Focus on critical items first",
-                "Realistic quantities",
-                "Organize by store section",
-                "Budget-aware",
-            ],
-        )
-
-        # Appel IA avec auto rate limiting & parsing
-        suggestions = self.call_with_list_parsing_sync(
-            prompt=prompt,
-            item_model=SuggestionCourses,
-            system_prompt=self.build_system_prompt(
-                role="Smart shopping assistant",
-                expertise=[
-                    "Stock management",
-                    "Inventory optimization",
-                    "Shopping organization",
-                    "Budget management",
+            # Construire prompt avec schéma clair en français
+            prompt = self.build_json_prompt(
+                context=context,
+                task="Générer 15 articles prioritaires à acheter",
+                json_schema='[{"nom": str, "quantite": float, "unite": str, "priorite": str, "rayon": str}]',
+                constraints=[
+                    "Priorité: haute/moyenne/basse",
+                    "Articles critiques d'abord",
+                    "Quantités réalistes",
+                    "Grouper par rayon",
+                    "Respecter budget",
                 ],
-                rules=[
-                    "Suggest critical items first",
-                    "Group by store section",
-                    "Minimize shopping trips",
-                    "Quality and value balance",
-                ],
-            ),
-            max_items=15,
-        )
+            )
 
-        logger.info(f"✅ Generated {len(suggestions)} shopping suggestions")
+            # Appel IA avec auto rate limiting & parsing
+            suggestions = self.call_with_list_parsing_sync(
+                prompt=prompt,
+                item_model=SuggestionCourses,
+                system_prompt=self.build_system_prompt(
+                    role="Assistant d'achat intelligent",
+                    expertise=[
+                        "Gestion stock",
+                        "Optimisation inventaire",
+                        "Organisation achats",
+                        "Gestion budget",
+                    ],
+                    rules=[
+                        "Suggérer articles critiques d'abord",
+                        "Grouper par rayon magasin",
+                        "Minimiser trajets",
+                        "Équilibre qualité-prix",
+                    ],
+                ),
+                max_items=15,
+            )
+
+            logger.info(f"✅ Generated {len(suggestions)} shopping suggestions")
+            return suggestions or []
+        
+        except KeyError as e:
+            logger.error(f"❌ Parsing error (missing field): {e}")
+            return []
+        except Exception as e:
+            logger.error(f"❌ Error generating suggestions: {str(e)}")
+            return []
         return suggestions
 
     # ═══════════════════════════════════════════════════════════

@@ -1,0 +1,3 @@
+Before: 7 mojibake
+After: 7 mojibake
+Replaced: 7 patterns

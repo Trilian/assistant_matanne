@@ -1,0 +1,3 @@
+Mojibake before: 60
+Mojibake after: 7
+Removed: 53

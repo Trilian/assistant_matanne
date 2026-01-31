@@ -329,6 +329,27 @@ def render_liste():
                 ):
                     st.session_state.detail_recette_id = recette.id
                     st.rerun()
+                
+                # Bouton supprimer avec confirmation
+                if st.button(
+                    "🗑️ Supprimer",
+                    use_container_width=True,
+                    key=f"delete_{recette.id}",
+                    help="Supprimer cette recette",
+                ):
+                    # Confirmation avec dialog
+                    if st.session_state.get(f"confirm_delete_{recette.id}"):
+                        try:
+                            service.delete(recette.id)
+                            st.session_state.pop(f"confirm_delete_{recette.id}", None)
+                            st.success(f"✅ Recette supprimée!")
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"❌ Erreur: {str(e)}")
+                    else:
+                        st.session_state[f"confirm_delete_{recette.id}"] = True
+                        st.warning(f"⚠️ Cliquez à nouveau pour confirmer")
+                    st.rerun()
     
     # Pagination controls
     st.divider()

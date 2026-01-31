@@ -1246,7 +1246,7 @@ def render_notifications():
 
                             st.write(notif.message)
 
-                            st.caption(f"{'✨ Lue' if notif.lue else 'ðŸ†• Non lue'} ê€✅ {notif.date_creation.strftime('%d/%m %H:%M')}")
+                            st.caption(f"{'✨ Lue' if notif.lue else '📌 Non lue'} ê€✅ {notif.date_creation.strftime('%d/%m %H:%M')}")
 
                         with col2:
 

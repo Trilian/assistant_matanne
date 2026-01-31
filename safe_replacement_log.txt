@@ -1,0 +1,4 @@
+Mojibake before: 63
+Mojibake after: 62
+Replacements made: 1
+Improvement: 1
