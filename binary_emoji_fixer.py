@@ -15,7 +15,7 @@ print(f"File size: {len(content_bytes)} bytes")
 content_str = content_bytes.decode('utf-8', errors='replace')
 print(f"Mojibake count: {content_str.count(chr(0xd8) + chr(0x9f))}")
 
-# Build exact mojibake patterns (UTF-8 bytes for 'ðŸ' combinations)
+# Build exact mojibake patterns (UTF-8 bytes for '💰 combinations)
 # When UTF-8 is interpreted as Latin-1, you get mojibake
 # UTF-8 encoding of emoji: 4 bytes starting with F0 9F (actually it's mixed encoding)
 
@@ -23,7 +23,7 @@ print(f"Mojibake count: {content_str.count(chr(0xd8) + chr(0x9f))}")
 # So we need to find those byte sequences and replace them
 
 # For example: 📅 in UTF-8 is: F0 9F 93 85
-# Interpreted as Latin-1: ðŸ"…
+# Interpreted as Latin-1: 📅
 
 # Let's see what bytes are actually there
 print("\nSample mojibake bytes from line 315:")
@@ -32,9 +32,9 @@ print(repr(sample))
 
 # Now let's find the actual byte patterns
 patterns = [
-    (b'\xc3\xb0\xc2\x9f\xc2\x93\xb4', b'\xe2\x9d\x8c'),   # ðŸ"´ → ❌
-    (b'\xc3\xb0\xc2\x9f\xc2\x93\x93', b'\xe2\x8f\xb0'),   # ðŸ"" → ⏰
-    (b'\xc3\xb0\xc2\x9f\xc2\x93\xa0', b'\xf0\x9f\x93\x8d'),  # ðŸ"  → 📍
+    (b'\xc3\xb0\xc2\x9f\xc2\x93\xb4', b'\xe2\x9d\x8c'),   # 🎯´ → ❌
+    (b'\xc3\xb0\xc2\x9f\xc2\x93\x93', b'\xe2\x8f\xb0'),   # 🎯" → ⏰
+    (b'\xc3\xb0\xc2\x9f\xc2\x93\xa0', b'\xf0\x9f\x93\x8d'),  # 🎯  → 📍
 ]
 
 for old_bytes, new_bytes in patterns:

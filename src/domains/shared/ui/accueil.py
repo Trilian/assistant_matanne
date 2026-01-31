@@ -139,7 +139,7 @@ def render_graphiques_enrichis():
             ]
             fig = graphique_repartition_repas(repas_data)
             if fig:
-                st.markdown("**ðŸ½ï¸ Répartition des Repas**")
+                st.markdown("**💡 Répartition des Repas**")
                 st.plotly_chart(fig, use_container_width=True, key="chart_repas")
             else:
                 st.info("Pas de planning cette semaine")
@@ -193,7 +193,7 @@ def render_critical_alerts():
         alerts.append(
             {
                 "type": "info",
-                "icon": "ðŸ“…",
+                "icon": "💰,
                 "title": "Aucun planning pour cette semaine",
                 "action": "Créer un planning",
                 "module": "cuisine.planning_semaine",
@@ -205,7 +205,7 @@ def render_critical_alerts():
         st.success("âœ… Tout est en ordre !")
         return
 
-    st.markdown("### ðŸ”” Alertes")
+    st.markdown("### ⏰ Alertes")
 
     for alert in alerts:
         with st.container():
@@ -249,7 +249,7 @@ def render_global_stats():
 
     with col1:
         total_recettes = stats_recettes.get("total", 0)
-        st.metric("ðŸ½ï¸ Recettes", total_recettes, help="Nombre total de recettes")
+        st.metric("💡 Recettes", total_recettes, help="Nombre total de recettes")
 
     with col2:
         total_inventaire = stats_inventaire.get("total", 0)
@@ -264,14 +264,14 @@ def render_global_stats():
 
     with col3:
         total_courses = stats_courses.get("total", 0)
-        st.metric("ðŸ›’ Courses", total_courses, help="Articles dans la liste")
+        st.metric("📅 Courses", total_courses, help="Articles dans la liste")
 
     with col4:
         # Planning semaine
         planning = get_planning_service().get_planning()
         nb_repas = len(planning.repas) if planning else 0
 
-        st.metric("ðŸ“… Repas Planifiés", nb_repas, help="Cette semaine")
+        st.metric("🧹 Repas Planifiés", nb_repas, help="Cette semaine")
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -295,7 +295,7 @@ def render_quick_actions():
             st.rerun()
 
     with col2:
-        if st.button("ðŸ›’ Voir Courses", key="quick_view_courses", use_container_width=True):
+        if st.button("📅 Voir Courses", key="quick_view_courses", use_container_width=True):
             StateManager.navigate_to("cuisine.courses")
             st.rerun()
 
@@ -305,7 +305,7 @@ def render_quick_actions():
             st.rerun()
 
     with col4:
-        if st.button("ðŸ“… Planning Semaine", key="quick_view_planning", use_container_width=True):
+        if st.button("🧹 Planning Semaine", key="quick_view_planning", use_container_width=True):
             StateManager.navigate_to("cuisine.planning_semaine")
             st.rerun()
 
@@ -325,7 +325,7 @@ def render_cuisine_summary():
             unsafe_allow_html=True,
         )
 
-        st.markdown("### ðŸ½ï¸ Recettes")
+        st.markdown("### 💡 Recettes")
 
         stats = get_recette_service().get_stats(
             count_filters={
@@ -343,9 +343,9 @@ def render_cuisine_summary():
             st.metric("âš¡ Rapides", stats.get("rapides", 0))
 
         with col3:
-            st.metric("ðŸ‘¶ Bébé", stats.get("bebe", 0))
+            st.metric("🎯 Bébé", stats.get("bebe", 0))
 
-        if st.button("ðŸ“š Voir les recettes", key="nav_recettes", use_container_width=True):
+        if st.button("👶 Voir les recettes", key="nav_recettes", use_container_width=True):
             StateManager.navigate_to("cuisine.recettes")
             st.rerun()
 
@@ -379,7 +379,7 @@ def render_inventaire_summary():
             st.metric("âš ï¸ Stock Bas", stock_bas, delta=None if stock_bas == 0 else "Ã€ commander")
 
         with col3:
-            st.metric("ðŸ”´ Critiques", critiques, delta=None if critiques == 0 else "Urgent")
+            st.metric("❌ Critiques", critiques, delta=None if critiques == 0 else "Urgent")
 
         # Alertes
         if critiques > 0 or peremption > 0:
@@ -405,7 +405,7 @@ def render_courses_summary():
             'border-radius: 12px; border-left: 4px solid #FF9800;">',
             unsafe_allow_html=True,
         )
-        st.markdown("### ðŸ›’ Courses")
+        st.markdown("### 📅 Courses")
 
         liste = get_courses_service().get_liste_courses()
 
@@ -418,10 +418,10 @@ def render_courses_summary():
             st.metric("Total", len(liste))
 
         with col2:
-            st.metric("ðŸ”´ Haute", haute)
+            st.metric("❌ Haute", haute)
 
         with col3:
-            st.metric("ðŸŸ¡ Moyenne", moyenne)
+            st.metric("🍽️ Moyenne", moyenne)
 
         # Top priorités
         if haute > 0:
@@ -434,7 +434,7 @@ def render_courses_summary():
             if len(prioritaires) > 3:
                 st.caption(f"... et {len(prioritaires) - 3} autre(s)")
 
-        if st.button("ðŸ›’ Voir la liste", key="nav_courses", use_container_width=True):
+        if st.button("📅 Voir la liste", key="nav_courses", use_container_width=True):
             StateManager.navigate_to("cuisine.courses")
             st.rerun()
 
@@ -451,7 +451,7 @@ def render_planning_summary():
             unsafe_allow_html=True,
         )
 
-        st.markdown("### ðŸ“… Planning Semaine")
+        st.markdown("### 🧹 Planning Semaine")
 
         planning = get_planning_service().get_planning()
 
@@ -467,7 +467,7 @@ def render_planning_summary():
                 st.metric("Repas", total_repas)
 
             with col2:
-                st.metric("ðŸ‘¶ Bébé", repas_bebe)
+                st.metric("🎯 Bébé", repas_bebe)
 
             # Repas d'aujourd'hui
             aujourd_hui = date.today()
@@ -486,7 +486,7 @@ def render_planning_summary():
         else:
             st.info("Aucun planning cette semaine")
 
-        if st.button("ðŸ“… Voir le planning", key="nav_planning", use_container_width=True):
+        if st.button("🧹 Voir le planning", key="nav_planning", use_container_width=True):
             StateManager.navigate_to("cuisine.planning_semaine")
             st.rerun()
 

@@ -11,7 +11,7 @@ mojibake_indices = []
 for i in range(len(data) - 3):
     if data[i:i+2] == b'\xc3\xb0':  # ð
         if data[i+2:i+4] == b'\xc2\x9f':  # Ÿ
-            # Found "ðŸ" - extract the next few bytes
+            # Found "📅 - extract the next few bytes
             pattern = data[i:i+10]
             mojibake_indices.append((i, pattern.hex()))
 

@@ -240,7 +240,7 @@ def generer_alertes(evenements: List[Dict[str, Any]], taches: List[Dict[str, Any
     if urgentes:
         alertes.append({
             "type": "warning",
-            "message": f"ðŸ”” {len(urgentes)} tÃ¢che(s) urgente(s) (< 3 jours)"
+            "message": f"⏰ {len(urgentes)} tÃ¢che(s) urgente(s) (< 3 jours)"
         })
     
     # Ã‰vénements aujourd'hui
@@ -256,7 +256,7 @@ def generer_alertes(evenements: List[Dict[str, Any]], taches: List[Dict[str, Any
     if evt_aujourdhui:
         alertes.append({
             "type": "info",
-            "message": f"ðŸ“… {len(evt_aujourdhui)} événement(s) aujourd'hui"
+            "message": f"🎯 {len(evt_aujourdhui)} événement(s) aujourd'hui"
         })
     
     return alertes
@@ -307,7 +307,7 @@ def formater_niveau_charge(niveau: str) -> str:
         "Léger": "🙂",
         "Moyen": "😐",
         "Ã‰levé": "😐°",
-        "Très élevé": "ðŸ”¥"
+        "Très élevé": "📥"
     }
     emoji = emojis.get(niveau, "")
     return f"{emoji} {niveau}"
@@ -316,8 +316,8 @@ def formater_niveau_charge(niveau: str) -> str:
 def formater_evolution(evolution: str) -> str:
     """Formate l'évolution avec emoji."""
     emojis = {
-        "hausse": "ðŸ“ˆ",
-        "baisse": "ðŸ“‰",
+        "hausse": "📅,
+        "baisse": "💡,
         "stable": "âž¡ï¸"
     }
     emoji = emojis.get(evolution, "")

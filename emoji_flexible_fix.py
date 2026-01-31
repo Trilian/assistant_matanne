@@ -7,21 +7,21 @@ file_path = r"src/domains/cuisine/ui/inventaire.py"
 with open(file_path, 'r', encoding='utf-8') as f:
     content = f.read()
 
-initial_mojibake = content.count('ðŸ')
+initial_mojibake = content.count('📷
 
 # All replacements using text patterns
 replacements = [
-    ('ðŸ"´', '❌'),  # Critical
-    ('ðŸ""', '⏰'),  # Time/Expiration
-    ('ðŸ" ', '📍'),  # Location
-    ('ðŸ"„', '🔄'),  # Refresh
-    ('ðŸ"¥', '📥'),  # Import
-    ("ðŸ›'", '💡'),  # Suggestions
-    ("ðŸ'€", '👁️'),  # View
-    ('ðŸ"¤', '📤'),  # Export
-    ("ðŸ—'", '❌'),  # Delete
-    ('ðŸ"¬', '🔔'),  # Notifications/Bell
-    ('ðŸ†•', '📌'),  # Unread/marker
+    ('🎯´', '❌'),  # Critical
+    ('🎯"', '⏰'),  # Time/Expiration
+    ('🎯 ', '📍'),  # Location
+    ('🎯„', '🔄'),  # Refresh
+    ('🎯¥', '📥'),  # Import
+    ("📋, '💡'),  # Suggestions
+    ("💡, '👁️'),  # View
+    ('📅, '📤'),  # Export
+    ("💰, '❌'),  # Delete
+    ('🎯¬', '🔔'),  # Notifications/Bell
+    ('📌', '📌'),  # Unread/marker
 ]
 
 replaced = []
@@ -34,7 +34,7 @@ for old, new in replacements:
         if actual > 0:
             replaced.append((old, new, actual))
 
-final_mojibake = content.count('ðŸ')
+final_mojibake = content.count('📷
 
 with open(file_path, 'w', encoding='utf-8') as f:
     f.write(content)

@@ -7,18 +7,18 @@ file_path = r"d:\Projet_streamlit\assistant_matanne\src\domains\cuisine\ui\inven
 with open(file_path, 'rb') as f:
     content_bytes = f.read()
 
-# Find mojibake patterns (ðŸ)
-mojibake_start = b'\xc3\xb0\xc2\x9f'  # UTF-8 'ðŸ' as Latin-1 bytes
+# Find mojibake patterns (👶
+mojibake_start = b'\xc3\xb0\xc2\x9f'  # UTF-8 '💰 as Latin-1 bytes
 
 count = content_bytes.count(mojibake_start)
 print(f"Mojibake 'mojibake_start' count: {count}")
 
 # Find specific patterns
 patterns = {
-    'critical': b'\xc3\xb0\xc2\x9f\xc2\x93\xb4',   # ðŸ"´
-    'time': b'\xc3\xb0\xc2\x9f\xc2\x93\x93',       # ðŸ""
-    'location': b'\xc3\xb0\xc2\x9f\xc2\x93\xa0',   # ðŸ"
-    'refresh': b'\xc3\xb0\xc2\x9f\xc2\x93\x9e',    # ðŸ"„
+    'critical': b'\xc3\xb0\xc2\x9f\xc2\x93\xb4',   # 📅´
+    'time': b'\xc3\xb0\xc2\x9f\xc2\x93\x93',       # 📅"
+    'location': b'\xc3\xb0\xc2\x9f\xc2\x93\xa0',   # 📅
+    'refresh': b'\xc3\xb0\xc2\x9f\xc2\x93\x9e',    # 📅„
 }
 
 for name, pattern in patterns.items():

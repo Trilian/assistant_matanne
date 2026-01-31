@@ -1,0 +1,14 @@
+FINAL COMPREHENSIVE MOJIBAKE CLEANUP REPORT
+================================================================================
+
+Total files scanned: 321
+Files with mojibake: 5
+Total mojibake patterns replaced: 8
+
+DETAILS BY FILE:
+--------------------------------------------------------------------------------
+FINAL_CLEANUP.py: 1 replaced (before: 1, after: 0)
+final_cleanup_binary.py: 1 replaced (before: 1, after: 0)
+src\domains\maison\ui\entretien.py: 1 replaced (before: 1, after: 0)
+src\domains\maison\ui\__init__.py: 2 replaced (before: 2, after: 0)
+src\domains\shared\ui\parametres.py: 3 replaced (before: 3, after: 0)

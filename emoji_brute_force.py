@@ -6,16 +6,16 @@ file_path = r"src/domains/cuisine/ui/inventaire.py"
 with open(file_path, 'r', encoding='utf-8') as f:
     content = f.read()
 
-before = content.count('ðŸ')
+before = content.count('💰
 
 # Super simple: just replace the mojibake prefix with something sensible
-# ðŸ" → 📍 (location for most cases)
-# ðŸ"¥ → 📥 (import)
+# 📅 → 📍 (location for most cases)
+# 📅¥ → 📥 (import)
 
-content = content.replace('ðŸ"', '📍')
-content = content.replace('ðŸ"¥', '📥')
+content = content.replace('📅', '📍')
+content = content.replace('📅¥', '📥')
 
-after = content.count('ðŸ')
+after = content.count('💰
 
 with open(file_path, 'w', encoding='utf-8') as f:
     f.write(content)

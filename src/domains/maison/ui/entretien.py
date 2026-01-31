@@ -197,7 +197,7 @@ def desactiver_routine(routine_id: int, db=None) -> bool:
 
 def app():
     """Point d'entrée module Entretien"""
-    st.title("ðŸ§¹ Entretien & Ménage")
+    st.title("🧹 Entretien & Ménage")
     st.caption("Gestion des routines et tÃ¢ches ménagères avec IA")
     
     service = get_entretien_service()
@@ -229,7 +229,7 @@ def app():
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     tab1, tab2, tab3, tab4 = st.tabs(
-        ["â˜‘ï¸ Aujourd'hui", "ðŸ“… Routines", "– Assistant IA", "âž• Créer"]
+        ["â˜‘ï¸ Aujourd'hui", "🍽️ Routines", "– Assistant IA", "âž• Créer"]
     )
     
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -268,7 +268,7 @@ def app():
                         st.caption(tache["description"])
                     
                     if tache.get("heure"):
-                        st.caption(f"ðŸ• {tache['heure']}")
+                        st.caption(f"🎯 {tache['heure']}")
                 
                 with col2:
                     if not tache["fait"]:
@@ -342,7 +342,7 @@ def app():
                                     emoji = "âœ…" if t.fait_le == date.today() else "â³"
                                     st.caption(f"{emoji} {t.nom}")
                                     if t.heure_prevue:
-                                        st.caption(f"ðŸ• {t.heure_prevue}")
+                                        st.caption(f"🎯 {t.heure_prevue}")
                                 
                                 with col_t2:
                                     if t.fait_le != date.today():
@@ -360,7 +360,7 @@ def app():
         st.subheader("– Assistant Entretien IA")
         
         # Créer routine avec IA
-        st.markdown("#### ðŸ“‹ Créer une routine avec IA")
+        st.markdown("#### 📅 Créer une routine avec IA")
         
         col_r1, col_r2 = st.columns(2)
         
@@ -376,7 +376,7 @@ def app():
                 ["quotidien", "hebdomadaire", "mensuel", "hebdomadaire 2x"]
             )
         
-        if st.button("ðŸ’¡ Générer tÃ¢ches", use_container_width=True):
+        if st.button("👶 Générer tÃ¢ches", use_container_width=True):
             if routine_nom:
                 with st.spinner("IA crée la routine..."):
                     try:
@@ -396,7 +396,7 @@ def app():
         st.markdown("---")
         
         # Optimiser semaine
-        st.markdown("#### ðŸ—“ï¸ Optimiser la semaine")
+        st.markdown("#### 🧹¸ Optimiser la semaine")
         
         types = st.text_area(
             "Lister les tÃ¢ches (une par ligne)",
@@ -404,7 +404,7 @@ def app():
             height=120
         )
         
-        if st.button("ðŸ”® Proposer répartition", use_container_width=True):
+        if st.button("💡 Proposer répartition", use_container_width=True):
             if types:
                 with st.spinner("Optimisation en cours..."):
                     try:
@@ -418,9 +418,9 @@ def app():
         st.markdown("---")
         
         # Astuces
-        st.markdown("#### ðŸ’¡ Astuces d'efficacité")
+        st.markdown("#### 👶 Astuces d'efficacité")
         
-        if st.button("ðŸš€ Obtenir astuces", use_container_width=True):
+        if st.button("💰 Obtenir astuces", use_container_width=True):
             with st.spinner("Recherche astuces..."):
                 try:
                     import asyncio
@@ -497,7 +497,7 @@ def app():
         st.markdown("---")
         
         # Templates
-        st.markdown("### ðŸ“‹ Templates rapides")
+        st.markdown("### 📅 Templates rapides")
         
         templates = [
             {
@@ -521,7 +521,7 @@ def app():
         ]
         
         for templ in templates:
-            if st.button(f"ðŸ“‹ {templ['nom']}", use_container_width=True):
+            if st.button(f"📅 {templ['nom']}", use_container_width=True):
                 r_id = creer_routine(templ["nom"], templ["categorie"], templ["freq"])
                 if r_id:
                     for ordre, tache_nom in enumerate(templ["taches"], 1):

@@ -155,7 +155,7 @@ def detecter_alertes() -> list[dict]:
 def app():
     """Module Bien-être familial avec IA intégrée"""
 
-    st.title("ðŸ’š Bien-être Familial")
+    st.title("👶 Bien-être Familial")
     st.caption("Suivi et analyses du bien-être de toute la famille")
 
     # Récupérer l'agent IA
@@ -190,16 +190,16 @@ def app():
     alertes = detecter_alertes()
 
     if alertes:
-        st.markdown("### ðŸš¨ Points d'attention")
+        st.markdown("### 💡 Points d'attention")
 
         for alerte in alertes:
             if alerte["type"] == "ATTENTION":
                 st.warning(
-                    f"âš ï¸ **{alerte['personne']}** : {alerte['message']}\n\nðŸ’¡ {alerte['action']}"
+                    f"âš ï¸ **{alerte['personne']}** : {alerte['message']}\n\n🟢 {alerte['action']}"
                 )
             else:
                 st.info(
-                    f"â„¹ï¸ **{alerte['personne']}** : {alerte['message']}\n\nðŸ’¡ {alerte['action']}"
+                    f"â„¹ï¸ **{alerte['personne']}** : {alerte['message']}\n\n🟢 {alerte['action']}"
                 )
 
         st.markdown("---")
@@ -209,7 +209,7 @@ def app():
     # ===================================
 
     tab1, tab2, tab3, tab4 = st.tabs(
-        ["[CHART] Vue d'ensemble", "âž• Ajouter une entrée", "– Analyse IA", "ðŸ“ˆ Tendances"]
+        ["[CHART] Vue d'ensemble", "âž• Ajouter une entrée", "– Analyse IA", "👧 Tendances"]
     )
 
     # ===================================
@@ -253,11 +253,11 @@ def app():
                 col_g1, col_g2 = st.columns(2)
 
                 with col_g1:
-                    st.markdown("**ðŸ˜´ Sommeil**")
+                    st.markdown("**🗑️´ Sommeil**")
                     st.line_chart(df_filtre.set_index("date")["sommeil"])
 
                 with col_g2:
-                    st.markdown("**ðŸ˜Š Humeur**")
+                    st.markdown("**🗑️Š Humeur**")
                     humeur_counts = df_filtre["humeur"].value_counts()
                     st.bar_chart(humeur_counts)
 
@@ -292,7 +292,7 @@ def app():
             with col_a1:
                 personne = st.text_input("Pour qui ? *", value="Anne", placeholder="Prénom")
 
-                humeur = st.selectbox("Humeur *", ["ðŸ˜Š Bien", "ðŸ˜ Moyen", "ðŸ˜ž Mal"])
+                humeur = st.selectbox("Humeur *", ["🗑️Š Bien", "🗑️ Moyen", "🗑️ž Mal"])
 
                 sommeil = st.number_input("Heures de sommeil", 0.0, 24.0, 7.5, 0.5)
 
@@ -316,7 +316,7 @@ def app():
             if stress_level:
                 notes_complete += f"\n\nNiveau de stress : {stress_level}/10"
 
-            submitted = st.form_submit_button("ðŸ’¾ Enregistrer", type="primary")
+            submitted = st.form_submit_button("🚀 Enregistrer", type="primary")
 
             if submitted:
                 if not personne:
@@ -330,17 +330,17 @@ def app():
         st.markdown("---")
 
         # Suggestions IA
-        st.markdown("### ðŸ’¡ Suggestions pour améliorer le bien-être")
+        st.markdown("### 🟢 Suggestions pour améliorer le bien-être")
 
         suggestions_base = [
-            "ðŸƒ Activité physique régulière (30 min/jour)",
-            "ðŸ§˜ Méditation ou respiration (10 min/jour)",
-            "ðŸ’¤ Routine de sommeil stable (même horaires)",
-            "ðŸ‘¥ Temps de qualité en famille",
-            "ðŸ“µ Moments sans écrans",
-            "ðŸŽ¨ Activité créative ou hobby",
-            "ðŸŒ³ Temps dans la nature",
-            "ðŸ“– Lecture relaxante",
+            "📥 Activité physique régulière (30 min/jour)",
+            "🎯 Méditation ou respiration (10 min/jour)",
+            "📷 Routine de sommeil stable (même horaires)",
+            "📅 Temps de qualité en famille",
+            "📱 Moments sans écrans",
+            "🎨 Activité créative ou hobby",
+            "🍽️ Temps dans la nature",
+            "🔔 Lecture relaxante",
         ]
 
         for sugg in suggestions_base[:4]:
@@ -356,7 +356,7 @@ def app():
         if not agent:
             st.error("Agent IA non disponible")
         else:
-            st.info("ðŸ’¡ L'IA analyse les tendances et donne des recommandations personnalisées")
+            st.info("🟢 L'IA analyse les tendances et donne des recommandations personnalisées")
 
             # Sélection personne
             df_analyse = charger_entrees_famille(limit=30)
@@ -419,15 +419,15 @@ def app():
 
                             if score >= 80:
                                 _color = "green"
-                                emoji = "ðŸ˜Š"
+                                emoji = "🗑️Š"
                                 msg = "Excellent"
                             elif score >= 60:
                                 _color = "orange"
-                                emoji = "ðŸ˜"
+                                emoji = "🗑️"
                                 msg = "Correct"
                             else:
                                 _color = "red"
-                                emoji = "ðŸ˜ž"
+                                emoji = "💰
                                 msg = "Ã€ améliorer"
 
                             st.markdown(
@@ -445,18 +445,18 @@ def app():
 
                     # Tendances
                     if "tendances" in analyse:
-                        st.markdown("### ðŸ“ˆ Tendances observées")
+                        st.markdown("### 👧 Tendances observées")
                         st.info(analyse["tendances"])
 
                     # Recommandations
                     if "recommandations" in analyse:
-                        st.markdown("### ðŸ’¡ Recommandations personnalisées")
+                        st.markdown("### 🟢 Recommandations personnalisées")
 
                         for i, reco in enumerate(analyse["recommandations"], 1):
                             st.success(f"{i}. {reco}")
 
                     # Bouton reset
-                    if st.button("ðŸ”„ Nouvelle analyse"):
+                    if st.button("🔄 Nouvelle analyse"):
                         del st.session_state["analyse_bien_etre"]
                         st.rerun()
             else:
@@ -467,7 +467,7 @@ def app():
     # ===================================
 
     with tab4:
-        st.subheader("ðŸ“ˆ Tendances à long terme")
+        st.subheader("👧 Tendances à long terme")
 
         df_tendances = charger_entrees_famille(limit=90)
 
@@ -491,7 +491,7 @@ def app():
             st.markdown("---")
 
             # Ã‰volution du sommeil
-            st.markdown("### ðŸ˜´ Ã‰volution du sommeil (90 jours)")
+            st.markdown("### 🗑️´ Ã‰volution du sommeil (90 jours)")
 
             # Par personne
             for personne in df_tendances["personne"].unique():
@@ -503,7 +503,7 @@ def app():
             st.markdown("---")
 
             # Répartition humeur
-            st.markdown("### ðŸ˜Š Répartition de l'humeur")
+            st.markdown("### 🗑️Š Répartition de l'humeur")
 
             col_h1, col_h2 = st.columns(2)
 
@@ -515,7 +515,7 @@ def app():
                 st.markdown("**Par personne**")
                 for personne in df_tendances["personne"].unique():
                     df_p = df_tendances[df_tendances["personne"] == personne]
-                    bien = len(df_p[df_p["humeur"] == "ðŸ˜Š Bien"])
+                    bien = len(df_p[df_p["humeur"] == "🗑️Š Bien"])
                     total = len(df_p)
                     pct = (bien / total) * 100 if total > 0 else 0
 
@@ -523,7 +523,7 @@ def app():
 
             # Export
             st.markdown("---")
-            if st.button("ðŸ“¤ Exporter les données (CSV)"):
+            if st.button("🧹 Exporter les données (CSV)"):
                 csv = df_tendances.to_csv(index=False)
                 st.download_button(
                     "Télécharger",

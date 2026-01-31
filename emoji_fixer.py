@@ -13,22 +13,22 @@ with open(file_path, 'r', encoding='utf-8', errors='replace') as f:
     content = f.read()
 
 print(f"File size: {len(content)} chars")
-before = content.count('ðŸ')
+before = content.count('📷
 print(f"Mojibake count before: {before}")
 
 # Simple replacements - using unicode escape sequences
 replacements = [
     # Pattern → Replacement
-    ('ðŸ"´', '❌'),      # Line 315
-    ('ðŸ""', '⏰'),      # Lines 327, 537, 713, 1143, 1177 
-    ('ðŸ" ', '📍'),      # Line 353
-    ('ðŸ"„', '🔄'),      # Lines 481, 543, 1169
-    ('ðŸ"¥', '📥'),      # Line 491
-    ("ðŸ›'", '💡'),      # Line 849
-    ("ðŸ'€", '👁️'),     # Line 977
-    ('ðŸ"¤', '📤'),      # Line 977
-    ("ðŸ—'", '❌'),      # Line 1063 (corrected mojibake)
-    ('ðŸ"¬', '🔔'),      # Lines 1155, 1189
+    ('🎯´', '❌'),      # Line 315
+    ('🎯"', '⏰'),      # Lines 327, 537, 713, 1143, 1177 
+    ('🎯 ', '📍'),      # Line 353
+    ('🎯„', '🔄'),      # Lines 481, 543, 1169
+    ('🎯¥', '📥'),      # Line 491
+    ("📋, '💡'),      # Line 849
+    ("💡, '👁️'),     # Line 977
+    ('📅, '📤'),      # Line 977
+    ("💰, '❌'),      # Line 1063 (corrected mojibake)
+    ('🎯¬', '🔔'),      # Lines 1155, 1189
 ]
 
 for old_str, new_str in replacements:
@@ -37,7 +37,7 @@ for old_str, new_str in replacements:
     if count_before > 0:
         print(f"  Replaced '{old_str}' → '{new_str}': {count_before} occurrences")
 
-after = content.count('ðŸ')
+after = content.count('📷
 print(f"\nMojibake count after: {after}")
 
 # Write back with UTF-8 (no BOM)

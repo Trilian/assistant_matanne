@@ -301,10 +301,10 @@ class TestCasEdge:
 
     def test_unicode_emojis(self):
         """Test unicode et emojis."""
-        reponse = '{"nom": "Pizza ðŸ•", "temps_preparation": 30, "difficulte": "facile"}'
+        reponse = '{"nom": "Pizza 📅, "temps_preparation": 30, "difficulte": "facile"}'
         result = AnalyseurIA.analyser(reponse, RecetteTest)
         
-        assert "ðŸ•" in result.nom
+        assert "📅 in result.nom
 
     def test_nombres_float(self):
         """Test nombres à virgule."""

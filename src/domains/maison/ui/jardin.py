@@ -171,11 +171,11 @@ def ajouter_log(item_id: int, action: str, notes: str = "", db=None) -> bool:
 
 def app():
     """Point d'entrée module Jardin"""
-    st.title("ðŸŒ¿ Mon Jardin")
+    st.title("💡¿ Mon Jardin")
     st.caption("Gestion intelligente du jardin avec conseils IA et météo")
     
     saison = get_saison()
-    st.info(f"ðŸŒ Saison actuelle : **{saison}**")
+    st.info(f"💡 Saison actuelle : **{saison}**")
     
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # ALERTES URGENTES
@@ -185,12 +185,12 @@ def app():
     recoltes = get_recoltes_proches()
     
     if plantes_arroser:
-        st.warning(f"ðŸ’§ **{len(plantes_arroser)} plante(s) à arroser aujourd'hui!**")
+        st.warning(f"🔔 **{len(plantes_arroser)} plante(s) à arroser aujourd'hui!**")
         for plante in plantes_arroser[:3]:
             st.caption(f"â€¢ {plante['nom']} ({plante['type']})")
     
     if recoltes:
-        st.success(f"ðŸŒ½ **{len(recoltes)} récolte(s) prévue(s) cette semaine!**")
+        st.success(f"💡½ **{len(recoltes)} récolte(s) prévue(s) cette semaine!**")
         for r in recoltes[:3]:
             jours = (r["recolte"] - date.today()).days
             st.caption(f"â€¢ {r['nom']} dans {jours} jour(s)")
@@ -202,7 +202,7 @@ def app():
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     tab1, tab2, tab3, tab4, tab5 = st.tabs(
-        ["ðŸŒ± Mes Plantes", "– Conseils IA", "âž• Ajouter", "[CHART] Stats", "ðŸ“… Journal"]
+        ["💡± Mes Plantes", "– Conseils IA", "âž• Ajouter", "[CHART] Stats", "🍽️… Journal"]
     )
     
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -215,7 +215,7 @@ def app():
         df = charger_plantes()
         
         if df.empty:
-            st.info("ðŸŒ± Aucune plante pour le moment. Ajoutes-en une!")
+            st.info("💡± Aucune plante pour le moment. Ajoutes-en une!")
         else:
             # Filtre par type
             col_f1, col_f2 = st.columns(2)
@@ -236,11 +236,11 @@ def app():
                 col1, col2, col3 = st.columns([2, 1, 1])
                 
                 with col1:
-                    emoji = "ðŸ’§" if row["a_arroser"] else "âœ…"
+                    emoji = "📱 if row["a_arroser"] else "âœ…"
                     st.markdown(f"### {emoji} {row['nom']}")
-                    st.caption(f"ðŸ“ {row['location']} â€¢ {row['type']}")
+                    st.caption(f"🍽️ {row['location']} â€¢ {row['type']}")
                     if row["notes"]:
-                        st.caption(f"ðŸ“ {row['notes']}")
+                        st.caption(f"🍽️ {row['notes']}")
                 
                 with col2:
                     if row["jours_depuis_arrosage"] is not None:
@@ -256,7 +256,7 @@ def app():
                             st.metric("Récolte dans", f"{jours} j")
                 
                 with col3:
-                    if st.button("ðŸ’§ Arroser", key=f"arroser_{row['id']}"):
+                    if st.button("🔔 Arroser", key=f"arroser_{row['id']}"):
                         if arroser_plante(row["id"]):
                             st.rerun()
                 
@@ -274,7 +274,7 @@ def app():
         col_c1, col_c2 = st.columns(2)
         
         with col_c1:
-            if st.button("ðŸ’¡ Conseils pour cette saison", use_container_width=True):
+            if st.button("🧹 Conseils pour cette saison", use_container_width=True):
                 with st.spinner("Génération des conseils IA..."):
                     try:
                         import asyncio
@@ -285,7 +285,7 @@ def app():
                         st.warning(f"âš ï¸ IA temporairement indisponible: {e}")
         
         with col_c2:
-            if st.button("ðŸŒ¿ Plantes à planter maintenant", use_container_width=True):
+            if st.button("💡¿ Plantes à planter maintenant", use_container_width=True):
                 with st.spinner("Recherche des meilleures plantes..."):
                     try:
                         import asyncio
@@ -344,7 +344,7 @@ def app():
                 height=80
             )
             
-            submitted = st.form_submit_button("ðŸŒ± Ajouter au jardin", type="primary")
+            submitted = st.form_submit_button("💡± Ajouter au jardin", type="primary")
             
             if submitted:
                 if not nom or not type_plante:
@@ -360,10 +360,10 @@ def app():
         st.markdown("### âš¡ Ajouts rapides")
         
         suggestions = [
-            {"nom": "Tomates cerises", "type": "Fruit", "emoji": "ðŸ…"},
-            {"nom": "Basilic", "type": "Herbe aromatique", "emoji": "ðŸŒ¿"},
-            {"nom": "Fraises", "type": "Fruit", "emoji": "ðŸ“"},
-            {"nom": "Courgettes", "type": "Légume", "emoji": "ðŸ¥’"},
+            {"nom": "Tomates cerises", "type": "Fruit", "emoji": "📷,
+            {"nom": "Basilic", "type": "Herbe aromatique", "emoji": "📅},
+            {"nom": "Fraises", "type": "Fruit", "emoji": "👶,
+            {"nom": "Courgettes", "type": "Légume", "emoji": "🎯},
         ]
         
         cols = st.columns(2)
@@ -421,7 +421,7 @@ def app():
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     with tab5:
-        st.subheader("ðŸ“… Journal d'entretien")
+        st.subheader("🍽️… Journal d'entretien")
         
         df_plantes = charger_plantes()
         
@@ -447,13 +447,13 @@ def app():
             with col_a2:
                 notes_log = st.text_input("Notes", placeholder="Observations...")
             
-            if st.button("ðŸ“ Enregistrer", use_container_width=True):
+            if st.button("🍽️ Enregistrer", use_container_width=True):
                 if ajouter_log(selected_id, action, notes_log):
                     st.success("âœ… Enregistré!")
                     st.rerun()
             
             st.markdown("---")
-            st.caption(f"ðŸ“ Dernier enregistrement pour {plante_selected}")
+            st.caption(f"🍽️ Dernier enregistrement pour {plante_selected}")
 
 
 if __name__ == "__main__":

@@ -98,7 +98,7 @@ def generer_section_recettes(recettes: List[Dict[str, Any]], periode: str) -> Di
         par_difficulte[diff] = par_difficulte.get(diff, 0) + 1
     
     return {
-        "titre": "ðŸ“š Recettes",
+        "titre": "📅 Recettes",
         "total": total,
         "par_type": par_type,
         "par_difficulte": par_difficulte,
@@ -121,7 +121,7 @@ def generer_section_courses(courses: List[Dict[str, Any]]) -> Dict[str, Any]:
         par_categorie[cat] = par_categorie.get(cat, 0) + 1
     
     return {
-        "titre": "ðŸ›’ Courses",
+        "titre": "💡 Courses",
         "total": total,
         "achetes": achetes,
         "non_achetes": total - achetes,
@@ -145,7 +145,7 @@ def generer_section_activites(activites: List[Dict[str, Any]]) -> Dict[str, Any]
     cout_total = sum(act.get("cout", 0) for act in activites)
     
     return {
-        "titre": "ðŸ“… Activités",
+        "titre": "🎯 Activités",
         "total": total,
         "par_type": par_type,
         "cout_total": cout_total,

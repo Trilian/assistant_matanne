@@ -81,7 +81,7 @@ def afficher_graphique_repartition_activites(stats: dict) -> None:
 
     fig = go.Figure(data=[go.Pie(labels=labels, values=values)])
 
-    fig.update_layout(title="ðŸŽ¯ Répartition des événements", height=400)
+    fig.update_layout(title="🎯 Répartition des événements", height=400)
 
     st.plotly_chart(fig, use_container_width=True)
 
@@ -97,7 +97,7 @@ def afficher_timeline_jour(jour_complet: dict, jour: date) -> None:
     # Charge du jour
     charge = jour_complet.get("charge_score", 0)
     charge_label = jour_complet.get("charge", "normal")
-    charge_emoji = {"faible": "ðŸŸ¢", "normal": "ðŸŸ¡", "intense": "ðŸ”´"}.get(charge_label, "âšª")
+    charge_emoji = {"faible": "🎨", "normal": "💰, "intense": "❌"}.get(charge_label, "âšª")
 
     col1, col2, col3 = st.columns([2, 1, 2])
 
@@ -114,14 +114,14 @@ def afficher_timeline_jour(jour_complet: dict, jour: date) -> None:
     st.markdown("---")
 
     # Ã‰vénements triés par type
-    st.markdown("#### ðŸ“‹ Ã‰vénements du jour")
+    st.markdown("#### 🎯 Ã‰vénements du jour")
 
     events_grouped = {
-        "ðŸ½ï¸ Repas": jour_complet.get("repas", []),
-        "ðŸŽ¨ Activités": jour_complet.get("activites", []),
-        "ðŸ—ï¸ Projets": jour_complet.get("projets", []),
+        "📷 Repas": jour_complet.get("repas", []),
+        "🎨 Activités": jour_complet.get("activites", []),
+        "🧹 Projets": jour_complet.get("projets", []),
         "â° Routines": jour_complet.get("routines", []),
-        "ðŸ“… Ã‰vénements": jour_complet.get("events", []),
+        "📱… Ã‰vénements": jour_complet.get("events", []),
     }
 
     for groupe_nom, events in events_grouped.items():
@@ -129,25 +129,25 @@ def afficher_timeline_jour(jour_complet: dict, jour: date) -> None:
             with st.expander(f"{groupe_nom} ({len(events)})"):
                 for event in events:
                     # Affichage flexible selon le type
-                    if groupe_nom == "ðŸ½ï¸ Repas":
+                    if groupe_nom == "📷 Repas":
                         st.write(f"**{event['type'].capitalize()}**: {event['recette']}")
                         st.caption(f"{event['portions']} portions | {event.get('temps_total', 0)} min")
 
-                    elif groupe_nom == "ðŸŽ¨ Activités":
-                        label = "ðŸ‘¶" if event.get("pour_jules") else "ðŸ‘¨â€ðŸ‘©â€ðŸ‘§"
+                    elif groupe_nom == "🎨 Activités":
+                        label = "👶 if event.get("pour_jules") else "📅€🗑️€💡
                         st.write(f"{label} **{event['titre']}** ({event['type']})")
                         if event.get("budget"):
-                            st.caption(f"ðŸ’° {event['budget']:.0f}â‚¬")
+                            st.caption(f"📋 {event['budget']:.0f}â‚¬")
 
-                    elif groupe_nom == "ðŸ—ï¸ Projets":
+                    elif groupe_nom == "🧹 Projets":
                         priorite_emoji = {
-                            "basse": "ðŸŸ¢",
-                            "moyenne": "ðŸŸ¡",
-                            "haute": "ðŸ”´",
+                            "basse": "🎨",
+                            "moyenne": "💰,
+                            "haute": "❌",
                         }.get(event.get("priorite", "moyenne"), "âšª")
                         st.write(f"{priorite_emoji} **{event['nom']}** ({event['statut']})")
 
-                    elif groupe_nom == "ðŸ“… Ã‰vénements":
+                    elif groupe_nom == "📱… Ã‰vénements":
                         debut = (
                             event["debut"].strftime("%H:%M")
                             if isinstance(event["debut"], datetime)
@@ -155,7 +155,7 @@ def afficher_timeline_jour(jour_complet: dict, jour: date) -> None:
                         )
                         st.write(f"â° **{event['titre']}** ({debut})")
                         if event.get("lieu"):
-                            st.caption(f"ðŸ“ {event['lieu']}")
+                            st.caption(f"📱 {event['lieu']}")
 
                     elif groupe_nom == "â° Routines":
                         status = "âœ…" if event.get("fait") else "â­•"
@@ -226,10 +226,10 @@ def app():
     # ONGLETS VUE
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-    tab1, tab2, tab3 = st.tabs(["ðŸ“ˆ Analyse Charge", "ðŸŽ¯ Répartition", "ðŸ“… Détail Jours"])
+    tab1, tab2, tab3 = st.tabs(["📱ˆ Analyse Charge", "🎯 Répartition", "📱… Détail Jours"])
 
     with tab1:
-        st.subheader("ðŸ“ˆ Analyse de la charge familiale")
+        st.subheader("📱ˆ Analyse de la charge familiale")
 
         # Graphique charge semaine
         afficher_graphique_charge_semaine(semaine.jours)
@@ -237,7 +237,7 @@ def app():
         st.markdown("---")
 
         # Analyses textuelles
-        st.markdown("### ðŸ’¡ Observations")
+        st.markdown("### 🔔 Observations")
 
         stats = semaine.stats_semaine
         jours_list = list(semaine.jours.values())
@@ -248,7 +248,7 @@ def app():
             (st.session_state.semaine_view_start + timedelta(days=list(semaine.jours.values()).index(jour_max))).weekday()
         ]
 
-        st.info(f"ðŸ”´ Jour le plus chargé: **{jour_max_nom.capitalize()}** ({jour_max.charge_score}/100)")
+        st.info(f"❌ Jour le plus chargé: **{jour_max_nom.capitalize()}** ({jour_max.charge_score}/100)")
 
         # Jour le moins chargé
         jour_min = min(jours_list, key=lambda j: j.charge_score)
@@ -256,19 +256,19 @@ def app():
             (st.session_state.semaine_view_start + timedelta(days=list(semaine.jours.values()).index(jour_min))).weekday()
         ]
 
-        st.success(f"ðŸŸ¢ Jour le plus calme: **{jour_min_nom.capitalize()}** ({jour_min.charge_score}/100)")
+        st.success(f"🎨 Jour le plus calme: **{jour_min_nom.capitalize()}** ({jour_min.charge_score}/100)")
 
         # Couverture Jules
         st.write(
-            f"ðŸ‘¶ **Activités Jules**: {stats.get('activites_jules', 0)} activités "
+            f"🍽️ **Activités Jules**: {stats.get('activites_jules', 0)} activités "
             f"({stats.get('total_activites', 0)} au total)"
         )
 
         # Budget
-        st.write(f"ðŸ’° **Budget semaine**: {stats.get('budget_total', 0):.0f}â‚¬")
+        st.write(f"📋 **Budget semaine**: {stats.get('budget_total', 0):.0f}â‚¬")
 
     with tab2:
-        st.subheader("ðŸŽ¯ Répartition des événements")
+        st.subheader("🎯 Répartition des événements")
 
         col_r1, col_r2 = st.columns(2)
 
@@ -276,15 +276,15 @@ def app():
             afficher_graphique_repartition_activites(stats)
 
         with col_r2:
-            st.markdown("### ðŸ“‹ Résumé")
+            st.markdown("### 🎯 Résumé")
 
-            st.metric("ðŸ½ï¸ Repas planifiés", stats.get("total_repas", 0))
-            st.metric("ðŸŽ¨ Activités", stats.get("total_activites", 0))
-            st.metric("ðŸ—ï¸ Projets", stats.get("total_projets", 0))
-            st.metric("ðŸ“… Ã‰vénements", stats.get("total_events", 0))
+            st.metric("📷 Repas planifiés", stats.get("total_repas", 0))
+            st.metric("🎨 Activités", stats.get("total_activites", 0))
+            st.metric("🧹 Projets", stats.get("total_projets", 0))
+            st.metric("📱… Ã‰vénements", stats.get("total_events", 0))
 
     with tab3:
-        st.subheader("ðŸ“… Détail par jour")
+        st.subheader("📱… Détail par jour")
 
         jours_semaine = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
 

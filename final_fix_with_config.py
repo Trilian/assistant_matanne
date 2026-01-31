@@ -10,7 +10,7 @@ with open(file_path, 'r', encoding='utf-8-sig') as f:
 # Map of corrupted lines - find by keyword, replace the emoji part
 fixes = {
     # Line 311: [PKG] is OK, but search for it anyway
-    # Line 353: "ðŸ" Emplacement" -> "📅 Emplacement"
+    # Line 353: "🎯 Emplacement" -> "📅 Emplacement"
     # Line 383: "[!] Statut" -> "⚠️ Statut"
     # etc.
 }
@@ -18,12 +18,12 @@ fixes = {
 # Direct line-by-line fixes using line numbers
 replacements = [
     (310, lambda l: l.replace('[PKG]', '📦')),
-    (353, lambda l: l.replace('"ðŸ"', '"📅')),
+    (353, lambda l: l.replace('"🎯', '"📅')),
     (382, lambda l: l.replace('"[!]', '"⚠️')),
-    (490, lambda l: l.replace('"ðŸ"¥', '"📥')),
-    (712, lambda l: l.replace('f"ðŸ""', 'f"📅')),
-    (1422, lambda l: l.replace('st.metric("ðŸ""', 'st.metric("📅')),
-    (1568, lambda l: l.replace('"ðŸ"¥', '"📥').replace('"ðŸ"¤', '"📤')),
+    (490, lambda l: l.replace('"🎯¥', '"📥')),
+    (712, lambda l: l.replace('f"🎯"', 'f"📅')),
+    (1422, lambda l: l.replace('st.metric("🎯"', 'st.metric("📅')),
+    (1568, lambda l: l.replace('"🎯¥', '"📥').replace('"📅, '"📤')),
     (956, lambda l: l.replace("a['nom']", "a['ingredient_nom']")),
 ]
 

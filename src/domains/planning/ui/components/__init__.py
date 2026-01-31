@@ -14,15 +14,15 @@ import streamlit as st
 def afficher_badge_charge(charge_score: int, taille: str = "normal") -> None:
     """Affiche badge visuel de charge"""
     if charge_score < 35:
-        emoji = "ðŸŸ¢"
+        emoji = "🔔
         label = "Faible"
         couleur = "#00AA00"
     elif charge_score < 70:
-        emoji = "ðŸŸ¡"
+        emoji = "💰
         label = "Normal"
         couleur = "#FFAA00"
     else:
-        emoji = "ðŸ”´"
+        emoji = "❌"
         label = "Intense"
         couleur = "#FF0000"
 
@@ -35,9 +35,9 @@ def afficher_badge_charge(charge_score: int, taille: str = "normal") -> None:
 def afficher_badge_priorite(priorite: str) -> None:
     """Affiche badge de priorité (basse, moyenne, haute)"""
     priorite_emoji = {
-        "basse": ("ðŸŸ¢", "Basse"),
-        "moyenne": ("ðŸŸ¡", "Moyenne"),
-        "haute": ("ðŸ”´", "Haute"),
+        "basse": ("🔔, "Basse"),
+        "moyenne": ("💰, "Moyenne"),
+        "haute": ("❌", "Haute"),
     }
 
     emoji, label = priorite_emoji.get(priorite.lower(), ("âšª", "Autre"))
@@ -47,9 +47,9 @@ def afficher_badge_priorite(priorite: str) -> None:
 def afficher_badge_activite_jules(adapte: bool) -> None:
     """Badge indiquant si activité est adaptée à Jules"""
     if adapte:
-        st.write("ðŸ‘¶ Adapté Jules (19m)")
+        st.write("👶 Adapté Jules (19m)")
     else:
-        st.write("ðŸ‘¨â€ðŸ‘©â€ðŸ‘§ Activité famille")
+        st.write("📅€🧹€🎯 Activité famille")
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -109,13 +109,13 @@ def carte_repas(repas: dict) -> None:
             st.caption(f"â±ï¸ {repas['temps_total']} min")
 
         if repas.get("notes"):
-            st.caption(f"ðŸ“ {repas['notes']}")
+            st.caption(f"🗑️ {repas['notes']}")
 
 
 def carte_activite(activite: dict) -> None:
     """Carte pour afficher une activité"""
     with st.container():
-        label = "ðŸ‘¶" if activite.get("pour_jules") else "ðŸ‘¨â€ðŸ‘©â€ðŸ‘§"
+        label = "👶" if activite.get("pour_jules") else "📅€🧹€🎯"
         col1, col2 = st.columns([3, 1])
 
         with col1:
@@ -130,9 +130,9 @@ def carte_activite(activite: dict) -> None:
 def carte_projet(projet: dict) -> None:
     """Carte pour afficher un projet"""
     priorite_emoji = {
-        "basse": "ðŸŸ¢",
-        "moyenne": "ðŸŸ¡",
-        "haute": "ðŸ”´",
+        "basse": "🔔,
+        "moyenne": "💰,
+        "haute": "❌",
     }.get(projet.get("priorite", "moyenne"), "âšª")
 
     with st.container():
@@ -157,7 +157,7 @@ def carte_event(event: dict) -> None:
         with col1:
             st.write(f"**{event['titre']}**")
             if event.get("lieu"):
-                st.caption(f"ðŸ“ {event['lieu']}")
+                st.caption(f"🗑️ {event['lieu']}")
 
         with col2:
             st.caption(debut)
@@ -200,18 +200,18 @@ def afficher_stats_semaine(stats: dict) -> None:
     col1, col2, col3, col4, col5 = st.columns(5)
 
     with col1:
-        st.metric("ðŸ½ï¸ Repas", stats.get("total_repas", 0))
+        st.metric("📷 Repas", stats.get("total_repas", 0))
 
     with col2:
-        st.metric("ðŸŽ¨ Activités", stats.get("total_activites", 0))
+        st.metric("🎨 Activités", stats.get("total_activites", 0))
 
     with col3:
-        st.metric("ðŸ‘¶ Pour Jules", stats.get("activites_jules", 0))
+        st.metric("👶 Pour Jules", stats.get("activites_jules", 0))
 
     with col4:
-        st.metric("ðŸ—ï¸ Projets", stats.get("total_projets", 0))
+        st.metric("📋 Projets", stats.get("total_projets", 0))
 
     with col5:
         budget = stats.get("budget_total", 0)
-        st.metric("ðŸ’° Budget", f"{budget:.0f}â‚¬")
+        st.metric("📱 Budget", f"{budget:.0f}â‚¬")
 

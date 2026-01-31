@@ -51,9 +51,9 @@ def app():
     # Onglets
     tab1, tab2, tab3, tab4 = st.tabs([
         "[PKG] Stocks",
-        "ðŸ’° Budget",
-        "ðŸ—‘ï¸ Gaspillage",
-        "ðŸ“ˆ Historique"
+        "💡 Budget",
+        "🎯¸ Gaspillage",
+        "🗑️ Historique"
     ])
     
     with tab1:
@@ -102,11 +102,11 @@ def render_rapport_stocks():
         )[0]
     
     with col2:
-        if st.button("ðŸ‘ï¸ Aperçu", key="btn_preview_stocks", use_container_width=True):
+        if st.button("🧹 Aperçu", key="btn_preview_stocks", use_container_width=True):
             st.session_state.preview_stocks = True
     
     with col3:
-        if st.button("ðŸ“¥ Télécharger PDF", key="btn_download_stocks", use_container_width=True):
+        if st.button("👶 Télécharger PDF", key="btn_download_stocks", use_container_width=True):
             st.session_state.download_stocks = True
     
     # Aperçu
@@ -115,7 +115,7 @@ def render_rapport_stocks():
             donnees = service.generer_donnees_rapport_stocks(periode)
             
             # Résumé général
-            st.info("ðŸ” **RÃ‰SUMÃ‰ GÃ‰NÃ‰RAL**")
+            st.info("📍**RÃ‰SUMÃ‰ GÃ‰NÃ‰RAL**")
             col1, col2, col3, col4 = st.columns(4)
             
             with col1:
@@ -191,7 +191,7 @@ def render_rapport_stocks():
             filename = f"rapport_stocks_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
             
             st.download_button(
-                label="ðŸ“¥ Télécharger le PDF",
+                label="👶 Télécharger le PDF",
                 data=pdf.getvalue(),
                 file_name=filename,
                 mime="application/pdf",
@@ -214,7 +214,7 @@ def render_rapport_budget():
     
     service = get_rapports_service()
     
-    st.subheader("ðŸ’° Rapport Budget/Dépenses")
+    st.subheader("💡 Rapport Budget/Dépenses")
     
     st.markdown("""
     Analysez vos dépenses alimentaires:
@@ -238,11 +238,11 @@ def render_rapport_budget():
         )[0]
     
     with col2:
-        if st.button("ðŸ‘ï¸ Aperçu", key="btn_preview_budget", use_container_width=True):
+        if st.button("🧹 Aperçu", key="btn_preview_budget", use_container_width=True):
             st.session_state.preview_budget = True
     
     with col3:
-        if st.button("ðŸ“¥ Télécharger PDF", key="btn_download_budget", use_container_width=True):
+        if st.button("👶 Télécharger PDF", key="btn_download_budget", use_container_width=True):
             st.session_state.download_budget = True
     
     # Aperçu
@@ -251,7 +251,7 @@ def render_rapport_budget():
             donnees = service.generer_donnees_rapport_budget(periode)
             
             # Résumé financier
-            st.info("ðŸ’µ **RÃ‰SUMÃ‰ FINANCIER**")
+            st.info("📅 **RÃ‰SUMÃ‰ FINANCIER**")
             col1, col2, col3 = st.columns(3)
             
             with col1:
@@ -325,7 +325,7 @@ def render_rapport_budget():
             filename = f"rapport_budget_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
             
             st.download_button(
-                label="ðŸ“¥ Télécharger le PDF",
+                label="👶 Télécharger le PDF",
                 data=pdf.getvalue(),
                 file_name=filename,
                 mime="application/pdf",
@@ -348,7 +348,7 @@ def render_analyse_gaspillage():
     
     service = get_rapports_service()
     
-    st.subheader("ðŸ—‘ï¸ Analyse Gaspillage")
+    st.subheader("🎯¸ Analyse Gaspillage")
     
     st.markdown("""
     Identifiez et réduisez le gaspillage:
@@ -372,11 +372,11 @@ def render_analyse_gaspillage():
         )[0]
     
     with col2:
-        if st.button("ðŸ‘ï¸ Aperçu", key="btn_preview_gaspillage", use_container_width=True):
+        if st.button("🧹 Aperçu", key="btn_preview_gaspillage", use_container_width=True):
             st.session_state.preview_gaspillage = True
     
     with col3:
-        if st.button("ðŸ“¥ Télécharger PDF", key="btn_download_gaspillage", use_container_width=True):
+        if st.button("👶 Télécharger PDF", key="btn_download_gaspillage", use_container_width=True):
             st.session_state.download_gaspillage = True
     
     # Aperçu
@@ -401,7 +401,7 @@ def render_analyse_gaspillage():
             
             # Recommandations
             if analyse.recommandations:
-                st.subheader("ðŸ’¡ Recommandations")
+                st.subheader("💰 Recommandations")
                 for rec in analyse.recommandations:
                     st.info(rec)
             
@@ -458,7 +458,7 @@ def render_analyse_gaspillage():
             filename = f"analyse_gaspillage_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
             
             st.download_button(
-                label="ðŸ“¥ Télécharger le PDF",
+                label="👶 Télécharger le PDF",
                 data=pdf.getvalue(),
                 file_name=filename,
                 mime="application/pdf",
@@ -479,7 +479,7 @@ def render_analyse_gaspillage():
 def render_historique():
     """Historique rapports générés"""
     
-    st.subheader("ðŸ“ˆ Historique & Planification")
+    st.subheader("🗑️ Historique & Planification")
     
     st.markdown("""
     Planifiez la génération automatique de rapports.
@@ -489,7 +489,7 @@ def render_historique():
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("ðŸ“… Rapports Hebdomadaires")
+        st.subheader("📋 Rapports Hebdomadaires")
         
         st.markdown("""
         âœ… Rapport stocks - chaque lundi
@@ -514,7 +514,7 @@ def render_historique():
     
     # Guide
     st.divider()
-    st.subheader("ðŸ“š Guide d'utilisation")
+    st.subheader("🍽️ Guide d'utilisation")
     
     with st.expander("â„¹ï¸ Comment utiliser les rapports"):
         st.markdown("""

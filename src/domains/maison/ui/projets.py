@@ -198,7 +198,7 @@ def marquer_projet_done(project_id: int, db=None) -> bool:
 
 def app():
     """Point d'entrée module Projets"""
-    st.title("ðŸ—ï¸ Projets Maison")
+    st.title("👶 Projets Maison")
     st.caption("Gestion et priorisation intelligente des projets")
     
     service = get_projets_service()
@@ -213,9 +213,9 @@ def app():
         st.warning(f"âš ï¸ **{len(urgents)} projet(s) nécessitent attention**")
         for urgent in urgents[:3]:
             if urgent["type"] == "RETARD":
-                st.error(f"ðŸ”´ **{urgent['projet']}** : {urgent['message']}")
+                st.error(f"❌ **{urgent['projet']}** : {urgent['message']}")
             else:
-                st.warning(f"ðŸŸ¡ **{urgent['projet']}** : {urgent['message']}")
+                st.warning(f"🗑️ **{urgent['projet']}** : {urgent['message']}")
         st.markdown("---")
     
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -245,7 +245,7 @@ def app():
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     tab1, tab2, tab3, tab4 = st.tabs(
-        ["ðŸ“‹ En cours", "– Assistant IA", "âž• Nouveau", "[CHART] Tableau"]
+        ["🎯 En cours", "– Assistant IA", "âž• Nouveau", "[CHART] Tableau"]
     )
     
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -277,18 +277,18 @@ def app():
                     col_a, col_b = st.columns(2)
                     
                     with col_a:
-                        badge = "ðŸ”´" if projet['priorite'] == "urgente" else "ðŸŸ " if projet['priorite'] == "haute" else "ðŸŸ¡"
+                        badge = "❌" if projet['priorite'] == "urgente" else "🧹 if projet['priorite'] == "haute" else "💡
                         st.caption(f"{badge} {projet['priorite'].upper()}")
                     
                     with col_b:
                         if projet['jours_restants'] is not None:
                             jours = projet['jours_restants']
                             if jours < 0:
-                                st.caption(f"ðŸ“… **En retard de {-jours}j**")
+                                st.caption(f"📋 **En retard de {-jours}j**")
                             elif jours == 0:
-                                st.caption("ðŸ“… **Ã€ livrer aujourd'hui!**")
+                                st.caption("📋 **Ã€ livrer aujourd'hui!**")
                             else:
-                                st.caption(f"ðŸ“… {jours}j restants")
+                                st.caption(f"📋 {jours}j restants")
                 
                 with col2:
                     if st.button("âœ… Terminer", key=f"done_{projet['id']}", use_container_width=True):
@@ -336,7 +336,7 @@ def app():
         
         # Suggérer tÃ¢ches
         with col_ia1:
-            st.markdown("#### ðŸ“‹ Suggérer des tÃ¢ches")
+            st.markdown("#### 🎯 Suggérer des tÃ¢ches")
             
             projet_nom_ia = st.text_input("Nom du projet", placeholder="Ex: Rénover cuisine")
             projet_desc_ia = st.text_area(
@@ -345,7 +345,7 @@ def app():
                 height=100
             )
             
-            if st.button("ðŸ’¡ Générer tÃ¢ches", key="ia_taches", use_container_width=True):
+            if st.button("🍽️ Générer tÃ¢ches", key="ia_taches", use_container_width=True):
                 if projet_nom_ia:
                     with st.spinner("IA analyse le projet..."):
                         try:
@@ -367,7 +367,7 @@ def app():
                 key="complex"
             )
             
-            if st.button("ðŸ”® Estimer durée", key="ia_duree", use_container_width=True):
+            if st.button("💰 Estimer durée", key="ia_duree", use_container_width=True):
                 if projet_nom_dur:
                     with st.spinner("Estimation en cours..."):
                         try:
@@ -389,7 +389,7 @@ def app():
             projet_risque = st.text_input("Nom du projet", placeholder="Ex: Installer piscine")
         
         with col_r2:
-            if st.button("ðŸ” Identifier risques", use_container_width=True):
+            if st.button("📍Identifier risques", use_container_width=True):
                 if projet_risque:
                     with st.spinner("Analyse des risques..."):
                         try:
@@ -424,7 +424,7 @@ def app():
             with col_p2:
                 date_fin = st.date_input("Date d'échéance (optionnel)", value=None)
             
-            submitted = st.form_submit_button("ðŸ’¾ Créer le projet", type="primary")
+            submitted = st.form_submit_button("📅 Créer le projet", type="primary")
             
             if submitted:
                 if not nom:
@@ -439,7 +439,7 @@ def app():
         st.markdown("---")
         
         # Templates
-        st.markdown("### ðŸ“‹ Templates rapides")
+        st.markdown("### 🎯 Templates rapides")
         
         templates = [
             {
@@ -457,7 +457,7 @@ def app():
         ]
         
         for templ in templates:
-            if st.button(f"ðŸ“‹ {templ['nom']}", use_container_width=True):
+            if st.button(f"🎯 {templ['nom']}", use_container_width=True):
                 p_id = creer_projet(templ["nom"], "", "Général", "moyenne")
                 if p_id:
                     for tache in templ["taches"]:

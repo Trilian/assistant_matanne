@@ -143,7 +143,7 @@ def ajouter_entree(child_id: int, humeur: str, sommeil: float, activite: str, no
 def app():
     """Module Suivi Jules avec IA intégrée"""
 
-    st.title("ðŸ‘¶ Suivi de Jules")
+    st.title("🗑️ Suivi de Jules")
     st.caption("Développement et conseils adaptés avec l'IA")
 
     # Récupérer l'agent IA
@@ -162,7 +162,7 @@ def app():
     col_info1, col_info2, col_info3 = st.columns([2, 1, 1])
 
     with col_info1:
-        st.markdown(f"### ðŸ‘¶ {jules.name}")
+        st.markdown(f"### 🗑️ {jules.name}")
         st.caption(f"Né le {jules.birth_date.strftime('%d/%m/%Y')}")
 
         if jules.notes:
@@ -193,7 +193,7 @@ def app():
     # ===================================
 
     tab1, tab2, tab3, tab4 = st.tabs(
-        ["[CHART] Tableau de bord", "– Conseils IA", "ðŸ“ Journal", "ðŸ“ˆ Statistiques"]
+        ["[CHART] Tableau de bord", "– Conseils IA", "📥 Journal", "👧 Statistiques"]
     )
 
     # ===================================
@@ -204,7 +204,7 @@ def app():
         st.subheader("Développement actuel")
 
         # Ã‰tapes du développement
-        st.markdown("### ðŸŽ¯ Ã‰tapes clés du développement")
+        st.markdown("### 🎯 Ã‰tapes clés du développement")
 
         etapes = get_etapes_developpement(age["mois"])
 
@@ -214,7 +214,7 @@ def app():
         st.markdown("---")
 
         # Dernières entrées
-        st.markdown("### ðŸ“‹ Dernières observations")
+        st.markdown("### 👶 Dernières observations")
 
         df = charger_entrees_bien_etre(jules.id, limit=7)
 
@@ -225,14 +225,14 @@ def app():
             col_graph1, col_graph2 = st.columns(2)
 
             with col_graph1:
-                st.markdown("**ðŸ˜´ Sommeil (7 derniers jours)**")
+                st.markdown("**💰 Sommeil (7 derniers jours)**")
                 if not df["sommeil"].isnull().all():
                     st.line_chart(df.set_index("date")["sommeil"])
                 else:
                     st.caption("Pas de données de sommeil")
 
             with col_graph2:
-                st.markdown("**ðŸ˜Š Humeur**")
+                st.markdown("**📋 Humeur**")
                 humeur_counts = df["humeur"].value_counts()
                 st.bar_chart(humeur_counts)
 
@@ -257,7 +257,7 @@ def app():
             col_q1, col_q2, col_q3 = st.columns(3)
 
             with col_q1:
-                humeur = st.selectbox("Humeur", ["ðŸ˜Š Bien", "ðŸ˜ Moyen", "ðŸ˜ž Mal"])
+                humeur = st.selectbox("Humeur", ["📋 Bien", "📷 Moyen", "📷ž Mal"])
 
             with col_q2:
                 sommeil = st.number_input("Heures de sommeil", 0.0, 24.0, 10.0, 0.5)
@@ -285,7 +285,7 @@ def app():
         if not agent:
             st.error("Agent IA non disponible")
         else:
-            st.info(f"ðŸ’¡ Conseils adaptés à l'Ã¢ge de Jules ({age['mois']} mois)")
+            st.info(f"🔔 Conseils adaptés à l'Ã¢ge de Jules ({age['mois']} mois)")
 
             # Options
             col_c1, col_c2 = st.columns(2)
@@ -349,15 +349,15 @@ def app():
 
                 # Conseils
                 if "conseils" in conseils:
-                    st.markdown("### ðŸ’¡ Conseils")
+                    st.markdown("### 🔔 Conseils")
                     for conseil in conseils["conseils"]:
                         st.success(f"âœ… {conseil}")
 
                 # Activités
                 if "activites" in conseils:
-                    st.markdown("### ðŸŽ¨ Activités suggérées")
+                    st.markdown("### 🎨 Activités suggérées")
                     for activite in conseils["activites"]:
-                        st.info(f"ðŸŽ¯ {activite}")
+                        st.info(f"🎯 {activite}")
 
                 # Alertes
                 if "alertes" in conseils and conseils["alertes"]:
@@ -366,13 +366,13 @@ def app():
                         st.warning(f"âš ï¸ {alerte}")
 
                 # Bouton pour sauvegarder
-                if st.button("ðŸ’¾ Sauvegarder ces conseils dans le journal"):
+                if st.button("🎯 Sauvegarder ces conseils dans le journal"):
                     notes_conseil = f"Conseils IA ({domaine}):\n"
                     notes_conseil += "\n".join([f"- {c}" for c in conseils.get("conseils", [])])
 
                     ajouter_entree(
                         jules.id,
-                        humeur="ðŸ˜Š Bien",
+                        humeur="📋 Bien",
                         sommeil=0.0,
                         activite="Conseils IA",
                         notes=notes_conseil,
@@ -383,17 +383,17 @@ def app():
 
             # Raccourcis conseils
             st.markdown("---")
-            st.markdown("### ðŸš€ Conseils rapides")
+            st.markdown("### 📤 Conseils rapides")
 
             col_r1, col_r2, col_r3 = st.columns(3)
 
             raccourcis = [
-                ("ðŸ˜´ Sommeil", "Sommeil"),
-                ("ðŸ¼ Alimentation", "Alimentation"),
+                ("💰 Sommeil", "Sommeil"),
+                ("📱 Alimentation", "Alimentation"),
                 ("¸ Motricité", "Développement moteur"),
-                ("ðŸ§  Cognitif", "Développement cognitif"),
-                ("ðŸ‘¥ Social", "Socialisation"),
-                ("ðŸ“š Lecture", "Général"),
+                ("🍽️ Cognitif", "Développement cognitif"),
+                ("💡 Social", "Socialisation"),
+                ("🎨 Lecture", "Général"),
             ]
 
             for i, (label, dom) in enumerate(raccourcis):
@@ -408,7 +408,7 @@ def app():
     # ===================================
 
     with tab3:
-        st.subheader("ðŸ“ Journal de bord")
+        st.subheader("📥 Journal de bord")
 
         # Formulaire détaillé
         with st.form("form_journal"):
@@ -418,7 +418,7 @@ def app():
 
             with col_j1:
                 _date_entry = st.date_input("Date", value=date.today())
-                humeur = st.selectbox("Humeur", ["ðŸ˜Š Bien", "ðŸ˜ Moyen", "ðŸ˜ž Mal"])
+                humeur = st.selectbox("Humeur", ["📋 Bien", "📷 Moyen", "📷ž Mal"])
                 sommeil = st.number_input("Heures de sommeil", 0.0, 24.0, 10.0, 0.5)
 
             with col_j2:
@@ -443,7 +443,7 @@ def app():
                 placeholder="Décris la journée, les progrès, les moments marquants...",
             )
 
-            submitted = st.form_submit_button("ðŸ’¾ Enregistrer", type="primary")
+            submitted = st.form_submit_button("🎯 Enregistrer", type="primary")
 
             if submitted:
                 notes_complete = notes
@@ -458,7 +458,7 @@ def app():
         st.markdown("---")
 
         # Liste complète du journal
-        st.markdown("### ðŸ“– Historique complet")
+        st.markdown("### 📅 Historique complet")
 
         df_journal = charger_entrees_bien_etre(jules.id, limit=100)
 
@@ -468,7 +468,7 @@ def app():
 
             with col_f1:
                 filtre_humeur = st.multiselect(
-                    "Filtrer par humeur", ["ðŸ˜Š Bien", "ðŸ˜ Moyen", "ðŸ˜ž Mal"]
+                    "Filtrer par humeur", ["📋 Bien", "📷 Moyen", "📷ž Mal"]
                 )
 
             with col_f2:
@@ -502,7 +502,7 @@ def app():
 
             # Export
             st.markdown("---")
-            if st.button("ðŸ“¤ Exporter le journal (CSV)"):
+            if st.button("🧹 Exporter le journal (CSV)"):
                 csv = df_filtre.to_csv(index=False)
                 st.download_button(
                     "Télécharger",
@@ -518,7 +518,7 @@ def app():
     # ===================================
 
     with tab4:
-        st.subheader("ðŸ“ˆ Statistiques et analyses")
+        st.subheader("👧 Statistiques et analyses")
 
         df_stats = charger_entrees_bien_etre(jules.id, limit=90)
 
@@ -536,7 +536,7 @@ def app():
                 st.metric("Sommeil moyen", f"{format_quantity(avg_sleep)}h")
 
             with col_m3:
-                humeur_bien = len(df_stats[df_stats["humeur"] == "ðŸ˜Š Bien"])
+                humeur_bien = len(df_stats[df_stats["humeur"] == "📋 Bien"])
                 pct_bien = (humeur_bien / len(df_stats)) * 100
                 st.metric('Jours "Bien"', f"{pct_bien:.0f}%")
 
@@ -550,17 +550,17 @@ def app():
             col_g1, col_g2 = st.columns(2)
 
             with col_g1:
-                st.markdown("### ðŸ˜´ Ã‰volution du sommeil")
+                st.markdown("### 💰 Ã‰volution du sommeil")
                 st.line_chart(df_stats.set_index("date")["sommeil"])
 
             with col_g2:
-                st.markdown("### ðŸ˜Š Répartition humeur")
+                st.markdown("### 📋 Répartition humeur")
                 humeur_counts = df_stats["humeur"].value_counts()
                 st.bar_chart(humeur_counts)
 
             # Activités les plus fréquentes
             st.markdown("---")
-            st.markdown("### ðŸŽ¯ Activités favorites")
+            st.markdown("### 🎯 Activités favorites")
 
             top_activites = df_stats["activite"].value_counts().head(10)
 

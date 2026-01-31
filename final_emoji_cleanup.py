@@ -9,20 +9,20 @@ file_path = "src/domains/cuisine/ui/inventaire.py"
 with open(file_path, 'r', encoding='utf-8') as f:
     content = f.read()
 
-print(f"Before: {content.count('ðŸ')} mojibake chars")
+print(f"Before: {content.count('📱 mojibake chars")
 
 # Replace mojibake with clean emojis
 replacements = [
-    (r'ðŸ"´', u'❌'),    # Critical
-    (r'ðŸ""', u'⏰'),    # Time
-    (r'ðŸ" ', u'📍'),    # Location
-    (r'ðŸ"„', u'🔄'),    # Refresh
-    (r'ðŸ"¥', u'📥'),    # Import
-    (r'ðŸ"¤', u'📤'),    # Export
-    (r'ðŸ›\'', u'💡'),    # Suggestions
-    (r'ðŸ\'€', u'👁'),   # View
-    (r'ðŸ—\'', u'❌'),    # Delete  
-    (r'ðŸ"¬', u'🔔'),    # Notifications
+    (r'🎯´', u'❌'),    # Critical
+    (r'🎯"', u'⏰'),    # Time
+    (r'🎯 ', u'📍'),    # Location
+    (r'🎯„', u'🔄'),    # Refresh
+    (r'🎯¥', u'📥'),    # Import
+    (r'📅, u'📤'),    # Export
+    (r'💡', u'💡'),    # Suggestions
+    (r'📋', u'👁'),   # View
+    (r'👶', u'❌'),    # Delete  
+    (r'🎯¬', u'🔔'),    # Notifications
 ]
 
 for pattern, replacement in replacements:
@@ -31,5 +31,5 @@ for pattern, replacement in replacements:
 with open(file_path, 'w', encoding='utf-8') as f:
     f.write(content)
 
-print(f"After: {content.count('ðŸ')} mojibake chars")
+print(f"After: {content.count('📱 mojibake chars")
 print("✅ Done!")

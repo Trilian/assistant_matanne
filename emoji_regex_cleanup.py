@@ -7,16 +7,16 @@ with open(file_path, 'r', encoding='utf-8') as f:
     content = f.read()
 
 # Map of mojibake patterns to better emojis
-# These patterns include the ðŸ prefix and the next character
+# These patterns include the 👶 prefix and the next character
 
 import re
 
-# Replace all "ðŸ?? " patterns where ?? is any 2 chars
+# Replace all "🎯 " patterns where ?? is any 2 chars
 def replace_mojibake_icon(match):
     """Replace mojibake emoji icons with their meaning"""
     full = match.group(0)
     
-    # Extract the 2 chars after ðŸ
+    # Extract the 2 chars after 👶
     suffix = full[2:4] if len(full) > 3 else ""
     
     #Map suffix to real emoji
@@ -41,10 +41,10 @@ def replace_mojibake_icon(match):
     return replacement
 
 # Find and replace all patterns
-# Look for: ðŸ followed by any 2 characters then a space or quote
-content_before = content.count('ðŸ')
-content = re.sub(r'ðŸ..(?=[\s"\'])', replace_mojibake_icon, content)
-content_after = content.count('ðŸ')
+# Look for: 👶 followed by any 2 characters then a space or quote
+content_before = content.count('💡
+content = re.sub(r'📅?=[\s"\'])', replace_mojibake_icon, content)
+content_after = content.count('💡
 
 with open(file_path, 'w', encoding='utf-8') as f:
     f.write(content)

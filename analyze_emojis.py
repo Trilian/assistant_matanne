@@ -12,7 +12,7 @@ with open(file_path, 'rb') as f:
 # We need to find and replace these byte sequences
 
 # Shopping cart emoji 🛒 = U+1F6D2 = F0 9F 9B 92 in UTF-8
-# When misinterpreted as latin-1: ðŸ›'
+# When misinterpreted as latin-1: 🎯
 # Original latin-1 bytes: D0 9F 9B 92
 
 # Let me check what's actually in the file
@@ -30,7 +30,7 @@ if b"Suggestions IA" in data:
 # 9B = ' ' + control, becomes '›' (U+203A)
 # 92 = ' ' + control, becomes ''' (U+2019)
 
-# So the byte sequence is: [0xd0, 0x9f, 0x9b, 0x92] = "ðŸ›'"
+# So the byte sequence is: [0xd0, 0x9f, 0x9b, 0x92] = "📅
 
 # But we need the actual bytes from the file
 import re

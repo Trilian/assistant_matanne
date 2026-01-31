@@ -42,7 +42,7 @@ def app():
 
     # Tabs - Ajout des nouvelles fonctionnalités
     tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(
-        ["ðŸ‘¨â€ðŸ‘©â€ðŸ‘§â€ðŸ‘¦ Foyer", "– IA", "ðŸ’¾ Base de Données", "ðŸ—„ï¸ Cache", "ðŸ“± Affichage", "ðŸ’° Budget", "â„¹ï¸ Ã€ Propos"]
+        ["👶€📉€⚫€📷 Foyer", "– IA", "👧 Base de Données", "💡¸ Cache", "🔔 Affichage", "🟢 Budget", "â„¹ï¸ Ã€ Propos"]
     )
 
     with tab1:
@@ -75,7 +75,7 @@ def app():
 def render_foyer_config():
     """Configuration du foyer"""
 
-    st.markdown("### ðŸ‘¨â€ðŸ‘©â€ðŸ‘§â€ðŸ‘¦ Configuration Foyer")
+    st.markdown("### 👶€📉€⚫€📷 Configuration Foyer")
     st.caption("Configure les informations de ton foyer")
 
     # Ã‰tat actuel
@@ -115,7 +115,7 @@ def render_foyer_config():
             )
 
             a_bebe = st.checkbox(
-                "ðŸ‘¶ Présence d'un jeune enfant (< 24 mois)", value=config.get("a_bebe", False)
+                "👶 Présence d'un jeune enfant (< 24 mois)", value=config.get("a_bebe", False)
             )
 
         st.markdown("#### Préférences Alimentaires")
@@ -145,7 +145,7 @@ def render_foyer_config():
         st.markdown("---")
 
         submitted = st.form_submit_button(
-            "ðŸ’¾ Sauvegarder", type="primary", use_container_width=True
+            "👧 Sauvegarder", type="primary", use_container_width=True
         )
 
         if submitted:
@@ -169,7 +169,7 @@ def render_foyer_config():
             st.rerun()
 
     # Afficher config actuelle
-    with st.expander("ðŸ“‹ Configuration Actuelle"):
+    with st.expander("📥 Configuration Actuelle"):
         st.json(config)
 
 
@@ -239,7 +239,7 @@ def render_ia_config():
     st.markdown("---")
 
     # Cache Sémantique
-    st.markdown("#### ðŸ§  Cache Sémantique")
+    st.markdown("#### 🎯 Cache Sémantique")
 
     cache_stats = SemanticCache.obtenir_statistiques()
 
@@ -258,7 +258,7 @@ def render_ia_config():
     with col9:
         st.metric("Appels Ã‰conomisés", cache_stats.get("saved_api_calls", 0))
 
-    mode = "ðŸ§  Sémantique" if cache_stats.get("embeddings_available", False) else "ðŸ”¤ MD5"
+    mode = "🎯 Sémantique" if cache_stats.get("embeddings_available", False) else "📤 MD5"
     st.info(f"**Mode:** {mode}")
     if cache_stats.get("embeddings_available", False):
         st.success("âœ… Embeddings actifs (similarité sémantique)")
@@ -269,7 +269,7 @@ def render_ia_config():
     col10, col11 = st.columns(2)
 
     with col10:
-        if st.button("ðŸ—‘ï¸ Vider Cache IA", key="btn_clear_semantic_cache", use_container_width=True):
+        if st.button("📋¸ Vider Cache IA", key="btn_clear_semantic_cache", use_container_width=True):
             SemanticCache.invalider_tout()
             show_success("Cache IA vidé !")
             st.rerun()
@@ -288,7 +288,7 @@ def render_ia_config():
 def render_database_config():
     """Configuration base de données"""
 
-    st.markdown("### ðŸ’¾ Base de Données")
+    st.markdown("### 👧 Base de Données")
     st.caption("Informations et maintenance de la base de données")
 
     # Infos DB
@@ -315,9 +315,9 @@ def render_database_config():
     st.markdown("---")
 
     # Health Check
-    st.markdown("#### ðŸ¥ Health Check")
+    st.markdown("#### 📅 Health Check")
 
-    if st.button("ðŸ” Vérifier l'état", key="btn_check_db_status", use_container_width=True):
+    if st.button("📍Vérifier l'état", key="btn_check_db_status", use_container_width=True):
         with smart_spinner("Vérification en cours...", estimated_seconds=2):
             health = health_check()
 
@@ -338,7 +338,7 @@ def render_database_config():
     st.markdown("---")
 
     # Migrations
-    st.markdown("#### ðŸ”„ Migrations")
+    st.markdown("#### 🔄 Migrations")
 
     current_version = MigrationManager.obtenir_version_courante()
     st.info(f"**Version du schéma:** v{current_version}")
@@ -346,7 +346,7 @@ def render_database_config():
     col5, col6 = st.columns(2)
 
     with col5:
-        if st.button("ðŸ”„ Exécuter Migrations", key="btn_run_migrations", use_container_width=True):
+        if st.button("🔄 Exécuter Migrations", key="btn_run_migrations", use_container_width=True):
             with smart_spinner("Exécution des migrations...", estimated_seconds=5):
                 try:
                     MigrationManager.executer_migrations()
@@ -362,14 +362,14 @@ def render_database_config():
     st.markdown("---")
 
     # Maintenance
-    st.markdown("#### ðŸ§¹ Maintenance")
+    st.markdown("#### 🧹 Maintenance")
 
     st.warning("âš ï¸ Ces opérations peuvent être longues")
 
     col7, col8 = st.columns(2)
 
     with col7:
-        if st.button("ðŸ§¹ Optimiser (VACUUM)", key="btn_optimize_db", use_container_width=True):
+        if st.button("🧹 Optimiser (VACUUM)", key="btn_optimize_db", use_container_width=True):
             modal = Modal("vacuum_db")
 
             if not modal.is_showing():
@@ -389,7 +389,7 @@ def render_database_config():
                 modal.cancel("âŒ Annuler")
 
     with col8:
-        if st.button("ðŸ’¾ Backup (TODO)", key="btn_backup_db", use_container_width=True):
+        if st.button("👧 Backup (TODO)", key="btn_backup_db", use_container_width=True):
             st.info("Fonctionnalité à implémenter")
 
 
@@ -401,7 +401,7 @@ def render_database_config():
 def render_cache_config():
     """Configuration cache"""
 
-    st.markdown("### ðŸ—„ï¸ Gestion du Cache")
+    st.markdown("### 💡¸ Gestion du Cache")
     st.caption("Cache applicatif et cache IA")
 
     # Cache applicatif
@@ -423,7 +423,7 @@ def render_cache_config():
 
                 st.metric("Taux de Hit", f"{hit_rate:.1f}%")
 
-        if st.button("ðŸ—‘ï¸ Vider Cache Applicatif", key="btn_clear_cache_app", use_container_width=True):
+        if st.button("📋¸ Vider Cache Applicatif", key="btn_clear_cache_app", use_container_width=True):
             Cache.clear_all()
             show_success("Cache applicatif vidé !")
             st.rerun()
@@ -449,7 +449,7 @@ def render_cache_config():
     with col5:
         st.metric("Misses", 0)
 
-    if st.button("ðŸ—‘ï¸ Vider Cache IA", key="btn_clear_cache_ia", use_container_width=True):
+    if st.button("📋¸ Vider Cache IA", key="btn_clear_cache_ia", use_container_width=True):
         SemanticCache.invalider_tout()
         show_success("Cache IA vidé !")
         st.rerun()
@@ -457,9 +457,9 @@ def render_cache_config():
     st.markdown("---")
 
     # Actions groupées
-    st.markdown("#### ðŸ§¹ Actions Groupées")
+    st.markdown("#### 🧹 Actions Groupées")
 
-    if st.button("ðŸ—‘ï¸ TOUT Vider (Cache App + IA)", key="btn_clear_all", type="primary", use_container_width=True):
+    if st.button("📋¸ TOUT Vider (Cache App + IA)", key="btn_clear_all", type="primary", use_container_width=True):
         Cache.clear_all()
         SemanticCache.invalider_tout()
         show_success("âœ… Tous les caches vidés !")
@@ -487,10 +487,10 @@ def render_about():
     
     **Description:**  
     Assistant familial intelligent pour gérer :
-    - ðŸ½ï¸ Recettes et planning repas
+    - 💰 Recettes et planning repas
     - [PKG] Inventaire alimentaire
-    - ðŸ›’ Liste de courses
-    - ðŸ“… Planning hebdomadaire
+    - 🍽️ Liste de courses
+    - 🧹 Planning hebdomadaire
     
     **Technologies:**
     - Frontend: Streamlit
@@ -503,7 +503,7 @@ def render_about():
     st.markdown("---")
 
     # Environnement
-    st.markdown("#### ðŸ”§ Environnement")
+    st.markdown("#### 🚀 Environnement")
 
     col1, col2 = st.columns(2)
 
@@ -534,21 +534,21 @@ def render_about():
     st.markdown("---")
 
     # Support
-    st.markdown("#### ðŸ’¬ Support")
+    st.markdown("#### 📋 Support")
 
     st.info(
         """
     **Besoin d'aide ?**
     - [WATER] Contact: support@example.com
-    - ðŸ› Bugs: GitHub Issues
-    - ðŸ“š Documentation: /docs
+    - 🍽️ Bugs: GitHub Issues
+    - 🤖 Documentation: /docs
     """
     )
 
     st.markdown("---")
 
     # Ã‰tat système
-    st.markdown("#### ðŸ–¥ï¸ Ã‰tat Système")
+    st.markdown("#### 🟡¸ Ã‰tat Système")
 
     state_summary = StateManager.get_state_summary()
 
@@ -563,7 +563,7 @@ def render_about():
 def render_display_config():
     """Configuration de l'affichage et mode tablette."""
     
-    st.markdown("### ðŸ“± Configuration Affichage")
+    st.markdown("### 🔔 Configuration Affichage")
     st.caption("Personnalise l'interface selon ton appareil")
     
     try:
@@ -576,9 +576,9 @@ def render_display_config():
         st.markdown("#### Mode d'affichage")
         
         mode_options = {
-            TabletMode.NORMAL: ("ðŸ–¥ï¸ Normal", "Interface standard pour ordinateur"),
-            TabletMode.TABLET: ("ðŸ“± Tablette", "Boutons plus grands, interface tactile"),
-            TabletMode.KITCHEN: ("ðŸ‘¨â€ðŸ³ Cuisine", "Mode cuisine avec navigation par étapes"),
+            TabletMode.NORMAL: ("🟡¸ Normal", "Interface standard pour ordinateur"),
+            TabletMode.TABLET: ("🔔 Tablette", "Boutons plus grands, interface tactile"),
+            TabletMode.KITCHEN: ("👶€💰 Cuisine", "Mode cuisine avec navigation par étapes"),
         }
         
         for mode, (label, description) in mode_options.items():
@@ -601,11 +601,11 @@ def render_display_config():
         st.markdown("#### Prévisualisation")
         
         if current_mode == TabletMode.NORMAL:
-            st.info("ðŸ–¥ï¸ Mode normal actif - Interface optimisée pour ordinateur")
+            st.info("🟡¸ Mode normal actif - Interface optimisée pour ordinateur")
         elif current_mode == TabletMode.TABLET:
-            st.warning("ðŸ“± Mode tablette actif - Boutons et textes agrandis")
+            st.warning("🔔 Mode tablette actif - Boutons et textes agrandis")
         else:
-            st.success("ðŸ‘¨â€ðŸ³ Mode cuisine actif - Interface simplifiée pour cuisiner")
+            st.success("👶€💰 Mode cuisine actif - Interface simplifiée pour cuisiner")
         
     except ImportError:
         st.error("Module tablet_mode non disponible")
@@ -619,10 +619,10 @@ def render_display_config():
 def render_budget_config():
     """Configuration du budget et backup."""
     
-    st.markdown("### ðŸ’° Budget & Sauvegarde")
+    st.markdown("### 🟢 Budget & Sauvegarde")
     
     # Section Budget
-    st.markdown("#### ðŸ’µ Configuration Budget")
+    st.markdown("#### 📤 Configuration Budget")
     
     try:
         from src.services.budget import CategorieDepense
@@ -635,24 +635,24 @@ def render_budget_config():
         for i, cat in enumerate(categories):
             with cols[i % 3]:
                 emoji_map = {
-                    "alimentation": "ðŸŽ",
-                    "transport": "ðŸš—",
-                    "logement": "ðŸ ",
-                    "sante": "ðŸ’Š",
-                    "loisirs": "ðŸŽ®",
-                    "vetements": "ðŸ‘•",
-                    "education": "ðŸ“š",
-                    "cadeaux": "ðŸŽ",
-                    "abonnements": "ðŸ“º",
-                    "restaurant": "ðŸ½ï¸",
+                    "alimentation": "🎨
+                    "transport": "📈,
+                    "logement": "🌿
+                    "sante": "📱,
+                    "loisirs": "🧹,
+                    "vetements": "🎯,
+                    "education": "🤖",
+                    "cadeaux": "🎨
+                    "abonnements": "📅,
+                    "restaurant": "💰",
                     "vacances": "âœˆï¸",
-                    "bebe": "ðŸ‘¶",
+                    "bebe": "👶",
                     "autre": "[PKG]",
                 }
                 emoji = emoji_map.get(cat.value, "[PKG]")
                 st.checkbox(f"{emoji} {cat.value.capitalize()}", value=True, disabled=True)
         
-        st.info("ðŸ’¡ Accède au module Budget dans le menu Famille pour gérer tes dépenses")
+        st.info("🗑️ Accède au module Budget dans le menu Famille pour gérer tes dépenses")
         
     except ImportError:
         st.warning("Module budget non disponible")
@@ -660,7 +660,7 @@ def render_budget_config():
     st.markdown("---")
     
     # Section Backup
-    st.markdown("#### ðŸ’¾ Sauvegarde des données")
+    st.markdown("#### 👧 Sauvegarde des données")
     
     try:
         from src.services.backup import get_backup_service, render_backup_ui
@@ -670,7 +670,7 @@ def render_budget_config():
         col1, col2 = st.columns(2)
         
         with col1:
-            if st.button("ðŸ“¥ Créer une sauvegarde", type="primary", use_container_width=True):
+            if st.button("🔔 Créer une sauvegarde", type="primary", use_container_width=True):
                 with smart_spinner("Sauvegarde en cours..."):
                     result = backup_service.create_backup()
                     if result.success:
@@ -679,11 +679,11 @@ def render_budget_config():
                         show_error(f"âŒ {result.message}")
         
         with col2:
-            if st.button("ðŸ“‹ Voir les sauvegardes", use_container_width=True):
+            if st.button("📥 Voir les sauvegardes", use_container_width=True):
                 backups = backup_service.list_backups()
                 if backups:
                     for b in backups[:5]:
-                        st.text(f"ðŸ“„ {b.filename} ({b.size_bytes // 1024} KB)")
+                        st.text(f"📷 {b.filename} ({b.size_bytes // 1024} KB)")
                 else:
                     st.info("Aucune sauvegarde trouvée")
         
@@ -693,7 +693,7 @@ def render_budget_config():
     st.markdown("---")
     
     # Section Météo
-    st.markdown("#### ðŸŒ¤ï¸ Configuration Météo Jardin")
+    st.markdown("#### 🗑️¸ Configuration Météo Jardin")
     
     try:
         from src.services.weather import get_weather_garden_service
@@ -712,7 +712,7 @@ def render_budget_config():
             with col3:
                 notif_pluie = st.checkbox("Alertes pluie", value=True)
             
-            if st.form_submit_button("ðŸ’¾ Sauvegarder", use_container_width=True):
+            if st.form_submit_button("👧 Sauvegarder", use_container_width=True):
                 if weather.set_location_from_city(ville):
                     st.session_state.meteo_config = {
                         "ville": ville,

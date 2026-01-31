@@ -395,9 +395,9 @@ def app():
     # TAB 4: NUTRITION
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     with tabs[3]:
-        st.header("ðŸŽ Nutrition")
+        st.header("📅 Nutrition")
         
-        st.info("ðŸ’¡ Principes généraux pour une bonne santé:")
+        st.info("🍽️ Principes généraux pour une bonne santé:")
         
         col1, col2 = st.columns(2)
         
@@ -432,7 +432,7 @@ def app():
         col1, col2 = st.columns(2)
         
         with col1:
-            st.subheader("ðŸ¥— Exemple menu healthy")
+            st.subheader("🗑️ Exemple menu healthy")
             st.write("""
             **Petit-déjeuner:**
             - Oeufs brouillés + pain complet
@@ -454,13 +454,13 @@ def app():
             """)
         
         with col2:
-            st.subheader("ðŸ“‹ Bonnes pratiques")
+            st.subheader("💡 Bonnes pratiques")
             practices = [
-                ("ðŸ´", "Manger lentement et bien mastiquer"),
+                ("🧹 "Manger lentement et bien mastiquer"),
                 ("â°", "3 repas réguliers + 2 collations"),
-                ("ðŸ¥¤", "Boire de l'eau entre les repas"),
-                ("ðŸŒ™", "Dîner 2-3h avant le coucher"),
-                ("ðŸ›’", "Préparer ses courses à l'avance"),
+                ("💰, "Boire de l'eau entre les repas"),
+                ("👶, "Dîner 2-3h avant le coucher"),
+                ("🎯, "Préparer ses courses à l'avance"),
                 ("[CHART]", "Varier les aliments et couleurs"),
             ]
             for emoji, practice in practices:

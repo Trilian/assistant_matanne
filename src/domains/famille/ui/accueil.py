@@ -107,7 +107,7 @@ def get_notifications():
                 if days_since < 7:
                     notifications.append({
                         "type": "success",
-                        "emoji": "ðŸŽ‰",
+                        "emoji": "🎯,
                         "titre": "Nouveau jalon!",
                         "message": f"{recent['titre']} ({days_since}j ago)"
                     })
@@ -134,7 +134,7 @@ def get_notifications():
             if total > 500:
                 notifications.append({
                     "type": "info",
-                    "emoji": "ðŸ’°",
+                    "emoji": "📋",
                     "titre": "Budget élevé cette semaine",
                     "message": f"{total:.2f}â‚¬ dépensés (cette semaine)"
                 })
@@ -144,7 +144,7 @@ def get_notifications():
         if len(activites) > 5:
             notifications.append({
                 "type": "info",
-                "emoji": "ðŸ“…",
+                "emoji": "📱…",
                 "titre": "Semaine chargée!",
                 "message": f"{len(activites)} activités planifiées"
             })
@@ -165,10 +165,10 @@ def get_notifications():
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def app():
-    st.set_page_config(page_title="Accueil Famille", page_icon="ðŸ ", layout="wide")
+    st.set_page_config(page_title="Accueil Famille", page_icon="🗑️", layout="wide")
     
     # Header
-    st.title("ðŸ  Bienvenue dans le Hub Famille")
+    st.title("🗑️ Bienvenue dans le Hub Famille")
     st.markdown("---")
     
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -178,7 +178,7 @@ def app():
     notifications = get_notifications()
     
     if notifications:
-        st.subheader("ðŸ“¢ Notifications")
+        st.subheader("👶 Notifications")
         
         for notif in notifications:
             if notif["type"] == "success":
@@ -199,16 +199,16 @@ def app():
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.subheader("ðŸ‘¶ Jules - 19 mois")
+        st.subheader("🍽️ Jules - 19 mois")
         
         try:
             age_info = calculer_julius()
             if age_info:
-                st.metric("ðŸ“… Ã‚ge", f"{age_info['mois']}m {age_info['jours']}j")
-                st.metric("ðŸ“ Jours depuis naissance", age_info['jours_total'])
+                st.metric("📱… Ã‚ge", f"{age_info['mois']}m {age_info['jours']}j")
+                st.metric("📱 Jours depuis naissance", age_info['jours_total'])
                 
                 # Anniversaire
-                st.caption(f"ðŸŽ‚ Anniversaire: 22 Juin 2025")
+                st.caption(f"🔔 Anniversaire: 22 Juin 2025")
         except Exception as e:
             st.error(f"âŒ {e}")
         
@@ -224,7 +224,7 @@ def app():
             st.warning(f"âš ï¸ {e}")
     
     with col2:
-        st.subheader("ðŸŽ¯ Objectifs Santé")
+        st.subheader("🎯 Objectifs Santé")
         
         try:
             objectifs = get_objectives_actifs()
@@ -257,10 +257,10 @@ def app():
             stats = get_stats_santé_semaine()
             
             if stats and stats.get("nb_seances", 0) > 0:
-                st.metric("ðŸ’ª Séances", stats.get("nb_seances", 0))
+                st.metric("📥 Séances", stats.get("nb_seances", 0))
                 st.metric("â±ï¸ Minutes totales", int(stats.get("total_minutes", 0)))
                 st.metric("âš¡ Ã‰nergie moyenne", f"{stats.get('energie_moyenne', 0):.1f}/10")
-                st.metric("ðŸ˜Š Moral moyen", f"{stats.get('moral_moyen', 0):.1f}/10")
+                st.metric("🧹 Moral moyen", f"{stats.get('moral_moyen', 0):.1f}/10")
             
             else:
                 st.info("â„¹ï¸ Aucune activité cette semaine")
@@ -274,7 +274,7 @@ def app():
     # SECTION 3: ACTIVITÃ‰S SEMAINE
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
-    st.subheader("ðŸ“… Activités cette semaine")
+    st.subheader("📱… Activités cette semaine")
     
     try:
         activites = get_activites_semaine()
@@ -309,21 +309,21 @@ def app():
             col1, col2 = st.columns([2, 1])
             
             with col1:
-                st.markdown("### ðŸ“‹ Détail")
+                st.markdown("### 💰 Détail")
                 for activity in activites:
-                    with st.expander(f"ðŸ“Œ {activity.titre} - {activity.date_prevue}"):
-                        st.write(f"ðŸ·ï¸ **Type**: {activity.type_activite}")
-                        st.write(f"ðŸ“ **Lieu**: {activity.lieu}")
+                    with st.expander(f"📅 {activity.titre} - {activity.date_prevue}"):
+                        st.write(f"🎨 **Type**: {activity.type_activite}")
+                        st.write(f"📱 **Lieu**: {activity.lieu}")
                         st.write(f"â±ï¸ **Durée**: {activity.duree_heures}h")
                         
                         if activity.cost_estime > 0:
-                            st.write(f"ðŸ’° **Coût estimé**: {activity.cout_estime:.2f}â‚¬")
+                            st.write(f"📋 **Coût estimé**: {activity.cout_estime:.2f}â‚¬")
                         
                         if activity.qui_participe:
-                            st.write(f"ðŸ‘¥ **Participants**: {', '.join(activity.qui_participe)}")
+                            st.write(f"💡 **Participants**: {', '.join(activity.qui_participe)}")
             
             with col2:
-                st.markdown("### ðŸ’° Budget activités")
+                st.markdown("### 📋 Budget activités")
                 
                 total_cost = sum(a.cout_estime or 0 for a in activites)
                 st.metric("Total estimé", f"{total_cost:.2f}â‚¬")
@@ -351,7 +351,7 @@ def app():
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("ðŸ’° Budget cette semaine")
+        st.subheader("📋 Budget cette semaine")
         
         try:
             budget_semaine = get_budget_par_period(7)
@@ -375,7 +375,7 @@ def app():
                 st.plotly_chart(fig, use_container_width=True)
                 
                 total = budget_semaine.get("TOTAL", 0)
-                st.metric("ðŸ’¸ Total", f"{total:.2f}â‚¬")
+                st.metric("👧 Total", f"{total:.2f}â‚¬")
             
             else:
                 st.info("â„¹ï¸ Aucune dépense cette semaine")
@@ -384,7 +384,7 @@ def app():
             st.error(f"âŒ {e}")
     
     with col2:
-        st.subheader("ðŸ’° Budget ce mois")
+        st.subheader("📋 Budget ce mois")
         
         try:
             budget_mois = get_budget_par_period(30)
@@ -435,13 +435,13 @@ def app():
             st.write("Allez à Santé â†’ Objectifs")
     
     with col4:
-        if st.button("ðŸ“‹ Shopping", use_container_width=True):
+        if st.button("💰 Shopping", use_container_width=True):
             st.write("Allez à Shopping")
     
     st.markdown("---")
     
     # Footer
-    st.caption("ðŸ  Hub Famille - Toutes les infos en un coup d'oeil")
+    st.caption("🗑️ Hub Famille - Toutes les infos en un coup d'oeil")
 
 
 if __name__ == "__main__":

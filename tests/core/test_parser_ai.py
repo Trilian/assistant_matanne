@@ -375,13 +375,13 @@ class TestEdgeCases:
     def test_parse_unicode_characters(self):
         """Teste le parsing avec caractères unicode."""
         json_str = json.dumps({
-            "nom": "Ã‰pée Royale ðŸ—¡ï¸",
+            "nom": "Ã‰pée Royale 📅¸",
             "valeur": 999
         })
         result = AnalyseurIA.analyser(json_str, SimpleModel)
         
         assert "Ã‰pée" in result.nom
-        assert "ðŸ—¡ï¸" in result.nom
+        assert "📅¸" in result.nom
     
     def test_parse_very_long_json(self):
         """Teste le parsing d'un JSON très long."""

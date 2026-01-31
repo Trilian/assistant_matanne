@@ -6,24 +6,24 @@ file_path = r"src/domains/cuisine/ui/inventaire.py"
 with open(file_path, 'r', encoding='utf-8') as f:
     content = f.read()
 
-before_count = content.count('ðŸ')
+before_count = content.count('👶
 
 # Direct replacements for remaining patterns
 remaining = [
-    ('ðŸ" Emplacement', '📍 Emplacement'),
-    ('ðŸ" {sugg.rayon}', '📍 {sugg.rayon}'),
-    ('ðŸ—\'ï¸  Supprimer', '❌ Supprimer'),
-    ('ðŸ"¥💭 Import/Export', '📥 Import/Export'),
-    ('ðŸ"¥💭 Import/Export Avancé', '📥 Import/Export Avancé'),
-    ('ðŸ" Analyse globale', '📍 Analyse globale'),
-    ('ðŸ—\'ï¸', '❌'),
+    ('📅 Emplacement', '📍 Emplacement'),
+    ('📅 {sugg.rayon}', '📍 {sugg.rayon}'),
+    ('🎯ï¸  Supprimer', '❌ Supprimer'),
+    ('📅¥💭 Import/Export', '📥 Import/Export'),
+    ('📅¥💭 Import/Export Avancé', '📥 Import/Export Avancé'),
+    ('📅 Analyse globale', '📍 Analyse globale'),
+    ('🎯ï¸', '❌'),
 ]
 
 for old, new in remaining:
     if old in content:
         content = content.replace(old, new)
 
-after_count = content.count('ðŸ')
+after_count = content.count('👶
 
 with open(file_path, 'w', encoding='utf-8') as f:
     f.write(content)

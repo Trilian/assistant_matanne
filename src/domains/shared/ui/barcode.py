@@ -44,7 +44,7 @@ def app():
     """Point d'entrée module scanner barcode"""
     
     st.markdown(
-        "<h1 style='text-align: center;'>ðŸ“± Scanner Code-Barres/QR</h1>",
+        "<h1 style='text-align: center;'>💰± Scanner Code-Barres/QR</h1>",
         unsafe_allow_html=True,
     )
     
@@ -53,11 +53,11 @@ def app():
     
     # Onglets
     tab1, tab2, tab3, tab4, tab5 = st.tabs([
-        "ðŸ“· Scanner",
+        "👶 Scanner",
         "âž• Ajout rapide",
         "âœ… Vérifier stock",
         "[CHART] Gestion",
-        "ðŸ“¥ Import/Export"
+        "💰¥ Import/Export"
     ])
     
     with tab1:
@@ -86,7 +86,7 @@ def render_scanner():
     
     service = get_barcode_service()
     
-    st.subheader("ðŸ“· Scanner Code")
+    st.subheader("👶 Scanner Code")
     
     col1, col2 = st.columns([3, 1])
     
@@ -100,7 +100,7 @@ def render_scanner():
     
     with col2:
         scanner_button = st.button(
-            "ðŸ” Scanner",
+            "📍Scanner",
             use_container_width=True,
             key="btn_scanner"
         )
@@ -158,7 +158,7 @@ def render_scanner():
                         st.switch_page("pages/0_accueil.py")
                 
                 with col3:
-                    if st.button("ðŸ—‘ï¸ Supprimer", key="btn_delete_article"):
+                    if st.button("🎯¸ Supprimer", key="btn_delete_article"):
                         st.warning("Action non disponible ici")
             
             else:
@@ -172,7 +172,7 @@ def render_scanner():
     
     # Info
     st.info("""
-    ðŸ“š **Formats supportés:**
+    💰š **Formats supportés:**
     - EAN-13 (13 chiffres)
     - EAN-8 (8 chiffres)
     - UPC (12 chiffres)
@@ -278,7 +278,7 @@ def render_ajout_rapide():
             
             # Afficher résumé
             st.info(f"""
-            ðŸ“ **Article créé:**
+            💰 **Article créé:**
             - Code: {barcode}
             - Nom: {nom}
             - Stock: {quantite} {unite}
@@ -318,7 +318,7 @@ def render_verifier_stock():
         )
     
     with col2:
-        if st.button("ðŸ” Vérifier", key="btn_check_stock", use_container_width=True):
+        if st.button("📍Vérifier", key="btn_check_stock", use_container_width=True):
             check_clicked = True
         else:
             check_clicked = False
@@ -347,7 +347,7 @@ def render_verifier_stock():
                 elif etat == "FAIBLE":
                     st.metric("Ã‰tat", "âš ï¸ FAIBLE", delta="Ã€ renouveler")
                 else:
-                    st.metric("Ã‰tat", "ðŸ”´ CRITIQUE", delta="Urgent!")
+                    st.metric("Ã‰tat", "❌ CRITIQUE", delta="Urgent!")
             
             # Détails
             st.divider()
@@ -421,7 +421,7 @@ def render_gestion_barcodes():
             
             # Ã‰dition
             st.divider()
-            st.subheader("ðŸ”„ Mettre à jour code-barres")
+            st.subheader("🔄 Mettre à jour code-barres")
             
             col1, col2, col3 = st.columns([2, 2, 1])
             
@@ -469,19 +469,19 @@ def render_import_export():
     
     service = get_barcode_service()
     
-    st.subheader("ðŸ“¥ðŸ“¤ Import/Export")
+    st.subheader("📅Ÿ“¤ Import/Export")
     
     col1, col2 = st.columns(2)
     
     # EXPORT
     with col1:
-        st.subheader("ðŸ“¤ Exporter")
+        st.subheader("💡 Exporter")
         
         if st.button("â¬‡ï¸ Télécharger CSV", key="btn_export_barcode"):
             try:
                 csv_data = service.exporter_barcodes()
                 st.download_button(
-                    label="ðŸ“¥ Télécharger codes-barres.csv",
+                    label="💰¥ Télécharger codes-barres.csv",
                     data=csv_data,
                     file_name=f"codes_barres_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                     mime="text/csv",
@@ -493,7 +493,7 @@ def render_import_export():
     
     # IMPORT
     with col2:
-        st.subheader("ðŸ“¥ Importer")
+        st.subheader("💰¥ Importer")
         
         uploaded_file = st.file_uploader(
             "Choisir fichier CSV",

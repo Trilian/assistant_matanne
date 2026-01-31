@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 JULIUS_BIRTHDAY = date(2023, 10, 26)  # Date de naissance de Julius
 
 NOTIFICATION_TYPES = {
-    "critique": {"emoji": "ðŸš¨", "color": "red"},
+    "critique": {"emoji": "🔔, "color": "red"},
     "alerte": {"emoji": "âš ï¸", "color": "orange"},
     "info": {"emoji": "â„¹ï¸", "color": "blue"},
     "succes": {"emoji": "âœ…", "color": "green"},
@@ -640,7 +640,7 @@ def generer_suggestions_actions(
         evt_aujourd_hui = [e for e in planning if _parse_date_evenement(e) == today]
         if evt_aujourd_hui:
             suggestions.append({
-                "titre": "ðŸ“… Ã‰vénements aujourd'hui",
+                "titre": "🗑️ Ã‰vénements aujourd'hui",
                 "description": f"{len(evt_aujourd_hui)} événement(s) prévu(s)",
                 "priorite": 2,
                 "action": "planning",
@@ -718,16 +718,16 @@ def formater_activite_recente(activite: dict) -> dict:
     type_activite = activite.get("type", "autre")
     
     icones = {
-        "recette": "ðŸ³",
-        "courses": "ðŸ›’",
+        "recette": "👶,
+        "courses": "📅,
         "inventaire": "[PKG]",
-        "planning": "ðŸ“…",
-        "famille": "ðŸ‘¨â€ðŸ‘©â€ðŸ‘¦",
-        "autre": "ðŸ“",
+        "planning": "🗑️",
+        "famille": "🎯€🧹€💡,
+        "autre": "📱
     }
     
     return {
-        "icone": icones.get(type_activite, "ðŸ“"),
+        "icone": icones.get(type_activite, "💰,
         "titre": activite.get("titre", "Activité"),
         "description": activite.get("description", ""),
         "timestamp": activite.get("timestamp"),
@@ -895,12 +895,12 @@ def generer_cartes_metriques(metriques: dict) -> list[dict]:
         formater_metrique_card(
             "Julius",
             f"{julius.get('mois', 0)}m {julius.get('jours', 0)}j",
-            icone="ðŸ‘¶"
+            icone="🍽️
         ),
         formater_metrique_card(
             "Recettes",
             recettes.get("total", 0),
-            icone="ðŸ³"
+            icone="👶
         ),
         formater_metrique_card(
             "Stock alertes",
@@ -910,7 +910,7 @@ def generer_cartes_metriques(metriques: dict) -> list[dict]:
         formater_metrique_card(
             "Ã€ acheter",
             courses.get("articles_a_acheter", 0),
-            icone="ðŸ›’"
+            icone="📅
         ),
     ]
 

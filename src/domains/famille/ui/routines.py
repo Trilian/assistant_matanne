@@ -200,7 +200,7 @@ def app():
     # ===================================
 
     now = datetime.now()
-    st.info(f"ðŸ• **{now.strftime('%H:%M')}** â€” {now.strftime('%A %d %B %Y')}")
+    st.info(f"👶 **{now.strftime('%H:%M')}** â€” {now.strftime('%A %d %B %Y')}")
 
     # TÃ¢ches en retard
     taches_retard = get_taches_en_retard()
@@ -227,7 +227,7 @@ def app():
     # ===================================
 
     tab1, tab2, tab3, tab4 = st.tabs(
-        ["ðŸ“‹ Mes Routines", "– Rappels IA", "âž• Créer Routine", "[CHART] Suivi"]
+        ["🎯 Mes Routines", "– Rappels IA", "âž• Créer Routine", "[CHART] Suivi"]
     )
 
     # ===================================
@@ -241,11 +241,11 @@ def app():
         col_a1, col_a2 = st.columns([2, 1])
 
         with col_a1:
-            if st.button("ðŸ”„ Rafraîchir", use_container_width=True):
+            if st.button("🔄 Rafraîchir", use_container_width=True):
                 st.rerun()
 
         with col_a2:
-            if st.button("ðŸ”„ Réinitialiser jour", use_container_width=True):
+            if st.button("🔄 Réinitialiser jour", use_container_width=True):
                 reinitialiser_taches_jour()
                 st.success("TÃ¢ches réinitialisées")
                 st.rerun()
@@ -265,7 +265,7 @@ def app():
                     expanded=True,
                 ):
                     st.caption(routine["description"])
-                    st.caption(f"ðŸ“… Fréquence : {routine['frequence']}")
+                    st.caption(f"📋 Fréquence : {routine['frequence']}")
 
                     # Charger les tÃ¢ches
                     df_taches = charger_taches_routine(routine["id"])
@@ -347,7 +347,7 @@ def app():
 
                     with col_act2:
                         if st.button(
-                            "ðŸ—‘ï¸ Supprimer",
+                            "💡¸ Supprimer",
                             key=f"del_{routine['id']}",
                             type="secondary",
                             use_container_width=True,
@@ -366,7 +366,7 @@ def app():
         if not agent:
             st.error("Agent IA non disponible")
         else:
-            st.info("ðŸ’¡ L'IA analyse tes routines et te rappelle les tÃ¢ches importantes")
+            st.info("💰 L'IA analyse tes routines et te rappelle les tÃ¢ches importantes")
 
             heure_actuelle = datetime.now().strftime("%H:%M")
 
@@ -413,21 +413,21 @@ def app():
                     st.success("âœ… Aucune routine urgente ! Tout est sous contrôle.")
                 else:
                     st.markdown("---")
-                    st.markdown("### ðŸ”” Rappels à l'instant")
+                    st.markdown("### ⏰ Rappels à l'instant")
 
                     for rappel in rappels:
                         priorite = rappel.get("priorite", "moyenne")
 
                         if priorite == "haute":
-                            st.error(f"ðŸ”´ **{rappel['routine']}** : {rappel['message']}")
+                            st.error(f"❌ **{rappel['routine']}** : {rappel['message']}")
                         elif priorite == "moyenne":
-                            st.warning(f"ðŸŸ¡ **{rappel['routine']}** : {rappel['message']}")
+                            st.warning(f"🗑️ **{rappel['routine']}** : {rappel['message']}")
                         else:
-                            st.info(f"ðŸŸ¢ **{rappel['routine']}** : {rappel['message']}")
+                            st.info(f"🍽️ **{rappel['routine']}** : {rappel['message']}")
 
             # Suggestions de routines
             st.markdown("---")
-            st.markdown("### ðŸ’¡ Routines suggérées par l'IA")
+            st.markdown("### 💰 Routines suggérées par l'IA")
 
             suggestions_base = [
                 {
@@ -519,7 +519,7 @@ def app():
                         }
                     )
 
-            submitted = st.form_submit_button("ðŸ’¾ Créer la routine", type="primary")
+            submitted = st.form_submit_button("📅 Créer la routine", type="primary")
 
             if submitted:
                 if not nom:
@@ -580,7 +580,7 @@ def app():
             st.markdown("---")
 
             # Statistiques par routine
-            st.markdown("### ðŸ“ˆ Détails par routine")
+            st.markdown("### 🧹 Détails par routine")
 
             for _, routine in df_all.iterrows():
                 df_taches = charger_taches_routine(routine["id"])
@@ -603,7 +603,7 @@ def app():
 
             # Historique (mock pour demo)
             st.markdown("---")
-            st.markdown("### ðŸ“… Historique de la semaine")
+            st.markdown("### 📋 Historique de la semaine")
 
             st.info("Fonctionnalité en développement : graphique d'historique sur 7 jours")
 

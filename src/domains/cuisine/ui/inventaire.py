@@ -312,7 +312,7 @@ def render_stock():
 
         with col2:
 
-            color = "ðŸ”´" if stock_critique > 0 else "✅"
+            color = "❌" if stock_critique > 0 else "✅"
 
             st.metric(f"{color} Critique", stock_critique)
 
@@ -324,7 +324,7 @@ def render_stock():
 
         with col4:
 
-            color = "ðŸ””" if peremption > 0 else "✅"
+            color = "⏰" if peremption > 0 else "✅"
 
             st.metric(f"{color} Péremption", peremption)
 
@@ -350,7 +350,7 @@ def render_stock():
 
             selected_emplacements = st.multiselect(
 
-                "ðŸ“ Emplacement",
+                "📈 Emplacement",
 
                 options=emplacements,
 
@@ -478,7 +478,7 @@ def render_stock():
 
         with col_btn2:
 
-            if st.button("ðŸ”„ Rafraîchir", use_container_width=True):
+            if st.button("🔄 Rafraîchir", use_container_width=True):
 
                 st.session_state.refresh_counter += 1
 
@@ -488,7 +488,7 @@ def render_stock():
 
         with col_btn3:
 
-            if st.button("ðŸ“¥ Importer CSV", use_container_width=True):
+            if st.button("📷 Importer CSV", use_container_width=True):
 
                 st.session_state.show_import = True
 
@@ -534,13 +534,13 @@ def render_notifications_widget():
 
     with col1:
 
-        st.metric("ðŸ”” Notifications", len(notifs), delta="À traiter")
+        st.metric("⏰ Notifications", len(notifs), delta="À traiter")
 
     
 
     with col2:
 
-        if st.button("ðŸ”„ Actualiser", key="refresh_notifs", use_container_width=True):
+        if st.button("🔄 Actualiser", key="refresh_notifs", use_container_width=True):
 
             st.rerun()
 
@@ -670,7 +670,7 @@ def render_alertes():
 
         if alertes["critique"]:
 
-            st.error(f"ðŸ”´ {len(alertes['critique'])} articles en stock critique")
+            st.error(f"❌ {len(alertes['critique'])} articles en stock critique")
 
             df = _prepare_alert_dataframe(alertes["critique"])
 
@@ -710,7 +710,7 @@ def render_alertes():
 
         if alertes["peremption_proche"]:
 
-            st.warning(f"ðŸ”” {len(alertes['peremption_proche'])} articles proche péremption")
+            st.warning(f"⏰ {len(alertes['peremption_proche'])} articles proche péremption")
 
             df = _prepare_alert_dataframe(alertes["peremption_proche"])
 
@@ -846,7 +846,7 @@ def render_suggestions_ia():
 
     
 
-    if st.button("ðŸ›’ Générer les suggestions", use_container_width=True):
+    if st.button("🗑️ Générer les suggestions", use_container_width=True):
 
         try:
 
@@ -884,7 +884,7 @@ def render_suggestions_ia():
 
                     if priority in by_priority:
 
-                        icon = "ðŸ”´" if priority == "haute" else " " if priority == "moyenne" else "✅"
+                        icon = "❌" if priority == "haute" else " " if priority == "moyenne" else "✅"
 
                         with st.expander(f"{icon} Priorité {priority.upper()} ({len(by_priority[priority])})"):
 
@@ -902,7 +902,7 @@ def render_suggestions_ia():
 
                                 with col3:
 
-                                    st.write(f"ðŸ“ {sugg.rayon}")
+                                    st.write(f"📈 {sugg.rayon}")
 
                                 with col4:
 
@@ -974,7 +974,7 @@ def render_photos():
 
     # Onglets upload/gestion
 
-    tab_upload, tab_view = st.tabs(["ðŸ“¤ Ajouter/Remplacer", "ðŸ‘€ Afficher"])
+    tab_upload, tab_view = st.tabs(["🍽️ Ajouter/Remplacer", "👁️ Afficher"])
 
     
 
@@ -1060,7 +1060,7 @@ def render_photos():
 
             st.divider()
 
-            if st.button("ðŸ—‘ï¸  Supprimer la photo", key="delete_photo"):
+            if st.button("🧹¸  Supprimer la photo", key="delete_photo"):
 
                 try:
 
@@ -1140,7 +1140,7 @@ def render_notifications():
 
     
 
-    st.subheader("ðŸ”” Notifications et Alertes")
+    st.subheader("⏰ Notifications et Alertes")
 
     
 
@@ -1152,7 +1152,7 @@ def render_notifications():
 
     # Onglets
 
-    tab_center, tab_config = st.tabs(["ðŸ“¬ Centre de notifications", "⚙️ Configuration"])
+    tab_center, tab_config = st.tabs(["👧 Centre de notifications", "⚙️ Configuration"])
 
     
 
@@ -1166,7 +1166,7 @@ def render_notifications():
 
         with col1:
 
-            if st.button("ðŸ”„ Actualiser les alertes", use_container_width=True, key="refresh_all_alerts"):
+            if st.button("🔄 Actualiser les alertes", use_container_width=True, key="refresh_all_alerts"):
 
                 try:
 
@@ -1174,7 +1174,7 @@ def render_notifications():
 
                     total = sum(len(v) for v in stats.values())
 
-                    st.toast(f"✨ {total} alertes détectées", icon="ðŸ””")
+                    st.toast(f"✨ {total} alertes détectées", icon="⏰")
 
                 except Exception as e:
 
@@ -1186,7 +1186,7 @@ def render_notifications():
 
             stats_notifs = service_notifs.obtenir_stats()
 
-            st.metric("ðŸ“¬ Non lues", stats_notifs["non_lues"])
+            st.metric("👧 Non lues", stats_notifs["non_lues"])
 
         
 
@@ -1288,7 +1288,7 @@ def render_notifications():
 
                             st.write(notif.message)
 
-                            st.caption(f"{'✨ Lue' if notif.lue else 'ðŸ†• Non lue'} ê€✅ {notif.date_creation.strftime('%d/%m %H:%M')}")
+                            st.caption(f"{'✨ Lue' if notif.lue else '📌 Non lue'} ê€✅ {notif.date_creation.strftime('%d/%m %H:%M')}")
 
                         with col2:
 
@@ -1330,7 +1330,7 @@ def render_notifications():
 
                             st.write(notif.message)
 
-                            st.caption(f"{'✨ Lue' if notif.lue else 'ðŸ†• Non lue'} ê€✅ {notif.date_creation.strftime('%d/%m %H:%M')}")
+                            st.caption(f"{'✨ Lue' if notif.lue else '📌 Non lue'} ê€✅ {notif.date_creation.strftime('%d/%m %H:%M')}")
 
                         with col2:
 
@@ -1372,7 +1372,7 @@ def render_notifications():
 
         with col1:
 
-            st.markdown("### ðŸ”” Alertes actives")
+            st.markdown("### ⏰ Alertes actives")
 
             enable_stock = st.checkbox("Stock critique", value=True, key="alert_stock_crit")
 
@@ -1400,7 +1400,7 @@ def render_notifications():
 
         # Bouton pour générer les alertes
 
-        if st.button("ðŸ”„ Générer les alertes maintenant", use_container_width=True, type="primary"):
+        if st.button("🔄 Générer les alertes maintenant", use_container_width=True, type="primary"):
 
             try:
 
@@ -1412,7 +1412,7 @@ def render_notifications():
 
                 with col1:
 
-                    st.metric("ðŸ”´ Critique", len(stats["stock_critique"]))
+                    st.metric("❌ Critique", len(stats["stock_critique"]))
 
                 with col2:
 
@@ -1420,7 +1420,7 @@ def render_notifications():
 
                 with col3:
 
-                    st.metric("ðŸ”” Péremption", len(stats["peremption_proche"]))
+                    st.metric("⏰ Péremption", len(stats["peremption_proche"]))
 
                 with col4:
 
@@ -1428,7 +1428,7 @@ def render_notifications():
 
                 
 
-                st.toast(f"✨ {sum(len(v) for v in stats.values())} alertes créées", icon="ðŸ””")
+                st.toast(f"✨ {sum(len(v) for v in stats.values())} alertes créées", icon="⏰")
 
             except Exception as e:
 
@@ -1442,11 +1442,11 @@ def render_tools():
 
     """Outils utilitaires pour l'inventaire"""
 
-    st.subheader("ðŸ”§ Outils d'administration")
+    st.subheader("📥 Outils d'administration")
 
     
 
-    tab_import_export, tab_stats = st.tabs(["ðŸ“¥ðŸ“¤ Import/Export", "[CHART] Statistiques"])
+    tab_import_export, tab_stats = st.tabs(["📅Ÿ“¤ Import/Export", "[CHART] Statistiques"])
 
     
 
@@ -1506,7 +1506,7 @@ def render_tools():
 
                 # Graphiques
 
-                st.subheader("ðŸ“ˆ Répartition")
+                st.subheader("📤 Répartition")
 
                 
 
@@ -1562,11 +1562,11 @@ def render_import_export():
 
     
 
-    st.subheader("ðŸ“¥ðŸ“¤ Import/Export Avancé")
+    st.subheader("📅Ÿ“¤ Import/Export Avancé")
 
     
 
-    tab_import, tab_export = st.tabs(["ðŸ“¥ Importer", "ðŸ“¤ Exporter"])
+    tab_import, tab_export = st.tabs(["📷 Importer", "🍽️ Exporter"])
 
     
 
@@ -1760,7 +1760,7 @@ def render_import_export():
 
         with col1:
 
-            if st.button("ðŸ“¥ Télécharger CSV", use_container_width=True):
+            if st.button("📷 Télécharger CSV", use_container_width=True):
 
                 try:
 
@@ -1768,7 +1768,7 @@ def render_import_export():
 
                     st.download_button(
 
-                        label="ðŸ’¾ Télécharger CSV",
+                        label="🎯 Télécharger CSV",
 
                         data=csv_content,
 
@@ -1788,7 +1788,7 @@ def render_import_export():
 
         with col2:
 
-            if st.button("ðŸ“¥ Télécharger JSON", use_container_width=True):
+            if st.button("📷 Télécharger JSON", use_container_width=True):
 
                 try:
 
@@ -1796,7 +1796,7 @@ def render_import_export():
 
                     st.download_button(
 
-                        label="ðŸ’¾ Télécharger JSON",
+                        label="🎯 Télécharger JSON",
 
                         data=json_content,
 
@@ -1842,7 +1842,7 @@ def render_predictions():
 
     """Affiche les prédictions et recommandations ML"""
 
-    st.subheader("ðŸ”® Prévisions et Recommandations")
+    st.subheader("📱 Prévisions et Recommandations")
 
     
 
@@ -1884,7 +1884,7 @@ def render_predictions():
 
         with col1:
 
-            if st.button("ðŸ”„ Générer les prédictions", use_container_width=True, key="btn_generate_predictions"):
+            if st.button("🔄 Générer les prédictions", use_container_width=True, key="btn_generate_predictions"):
 
                 st.session_state.predictions_generated = True
 
@@ -1910,7 +1910,7 @@ def render_predictions():
 
         with col3:
 
-            st.metric("ðŸ“š Articles", len(articles))
+            st.metric("🚀 Articles", len(articles))
 
         
 
@@ -1974,11 +1974,11 @@ def render_predictions():
 
                 "[CHART] Prédictions",
 
-                "ðŸ“ˆ Tendances",
+                "📤 Tendances",
 
-                "ðŸ’¡ Recommandations",
+                "🔔 Recommandations",
 
-                "ðŸ” Analyse globale"
+                "📍Analyse globale"
 
             ])
 
@@ -2008,7 +2008,7 @@ def render_predictions():
 
                         "Confiance": f"{pred.confiance:.0%}",
 
-                        "Risque rupture": "ðŸ”´ OUI" if pred.risque_rupture else "✅ Non",
+                        "Risque rupture": "❌ OUI" if pred.risque_rupture else "✅ Non",
 
                         "Jours avant rupture": pred.jours_avant_rupture if pred.jours_avant_rupture else "-"
 
@@ -2082,7 +2082,7 @@ def render_predictions():
 
                     for pred in filtered_pred[:5]:  # Affiche les 5 premiers
 
-                        with st.expander(f"ðŸ“Œ {pred.nom} - {pred.tendance.upper()}"):
+                        with st.expander(f"💡 {pred.nom} - {pred.tendance.upper()}"):
 
                             col1, col2, col3 = st.columns(3)
 
@@ -2142,7 +2142,7 @@ def render_predictions():
 
                 with col1:
 
-                    st.metric("ðŸ“ˆ Croissante", len(tendances["croissante"]))
+                    st.metric("📤 Croissante", len(tendances["croissante"]))
 
                     if tendances["croissante"]:
 
@@ -2156,7 +2156,7 @@ def render_predictions():
 
                 with col2:
 
-                    st.metric("ðŸ“‰ Décroissante", len(tendances["décroissante"]))
+                    st.metric("🎨 Décroissante", len(tendances["décroissante"]))
 
                     if tendances["décroissante"]:
 
@@ -2234,7 +2234,7 @@ def render_predictions():
 
                         if priority in by_priority:
 
-                            icon = "ðŸ”´" if priority == "CRITIQUE" else " " if priority == "HAUTE" else "¡"
+                            icon = "❌" if priority == "CRITIQUE" else " " if priority == "HAUTE" else "¡"
 
                             count = len(by_priority[priority])
 
@@ -2272,7 +2272,7 @@ def render_predictions():
 
                                         if st.button("✨ Ajouter", key=f"add_rec_{rec.nom}", use_container_width=True):
 
-                                            st.toast(f"✨ {rec.nom} ajouté", icon="ðŸ›’")
+                                            st.toast(f"✨ {rec.nom} ajouté", icon="👶)
 
                 else:
 
@@ -2300,7 +2300,7 @@ def render_predictions():
 
                     articles_risque = len([p for p in predictions if p.risque_rupture])
 
-                    st.metric("ðŸ”´ En risque", articles_risque)
+                    st.metric("❌ En risque", articles_risque)
 
                 
 
@@ -2308,7 +2308,7 @@ def render_predictions():
 
                     articles_croissance = len([p for p in predictions if p.tendance == "croissante"])
 
-                    st.metric("ðŸ“ˆ Croissance", articles_croissance)
+                    st.metric("📤 Croissance", articles_croissance)
 
                 
 
@@ -2332,13 +2332,13 @@ def render_predictions():
 
                     if analyse.tendance_globale == "croissante":
 
-                        st.write("ðŸ“ˆ **Consommation en augmentation**")
+                        st.write("📤 **Consommation en augmentation**")
 
                         st.info("La consommation générale augmente. Préparez-vous à augmenter vos achats.")
 
                     elif analyse.tendance_globale == "décroissante":
 
-                        st.write("ðŸ“‰ **Consommation en diminution**")
+                        st.write("🎨 **Consommation en diminution**")
 
                         st.info("La consommation générale diminue. Vous pouvez réduire légèrement vos achats.")
 
@@ -2414,11 +2414,11 @@ def _prepare_inventory_dataframe(inventaire: list[dict[str, Any]]) -> pd.DataFra
 
         statut_icon = {
 
-            "critique": "ðŸ”´",
+            "critique": "❌",
 
             "stock_bas": " ",
 
-            "peremption_proche": "ðŸ””",
+            "peremption_proche": "⏰",
 
             "ok": "✅"
 
@@ -2464,11 +2464,11 @@ def _prepare_alert_dataframe(articles: list[dict[str, Any]]) -> pd.DataFrame:
 
         statut_icon = {
 
-            "critique": "ðŸ”´",
+            "critique": "❌",
 
             "stock_bas": " ",
 
-            "peremption_proche": "ðŸ””",
+            "peremption_proche": "⏰",
 
         }.get(article["statut"], "ê“")
 
@@ -2520,7 +2520,7 @@ def render_historique():
 
     
 
-    st.subheader("ðŸ“œ Historique des Modifications")
+    st.subheader("💰 Historique des Modifications")
 
     
 
@@ -2574,7 +2574,7 @@ def render_historique():
 
         if not historique:
 
-            st.info("ðŸ“­ Aucune modification enregistrée dans cette période")
+            st.info("📋 Aucune modification enregistrée dans cette période")
 
             return
 
@@ -2612,7 +2612,7 @@ def render_historique():
 
                 "modification": "êœï¸",
 
-                "suppression": "ðŸ—‘ï¸"
+                "suppression": "🧹¸"
 
             }.get(h["type"], "ê“")
 

@@ -343,7 +343,7 @@ def formater_parametre_affichage(cle: str, valeur: Any) -> str:
         symboles = {"EUR": "â‚¬", "USD": "$", "GBP": "Â£", "CHF": "CHF"}
         return f"{valeur} ({symboles.get(valeur, '')})"
     elif cle == "langue":
-        langues = {"fr": "ðŸ‡«ðŸ‡· Français", "en": "ðŸ‡¬ðŸ‡§ Anglais", "es": "ðŸ‡ªðŸ‡¸ Espagnol", "de": "ðŸ‡©ðŸ‡ª Allemand"}
+        langues = {"fr": "📅Ÿ‡· Français", "en": "👶Ÿ‡§ Anglais", "es": "💡Ÿ‡¸ Espagnol", "de": "🎯Ÿ‡ª Allemand"}
         return langues.get(valeur, valeur)
     else:
         return str(valeur)

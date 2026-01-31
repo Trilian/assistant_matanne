@@ -197,7 +197,7 @@ def analyser_humeurs(entrees: List[Dict[str, Any]], jours: int = 7) -> Dict[str,
             date_entree = datetime.fromisoformat(date_entree).date()
         
         if date_entree >= date_limite:
-            humeur = entree.get("humeur", "ðŸ˜ Neutre")
+            humeur = entree.get("humeur", "💰 Neutre")
             compteur[humeur] = compteur.get(humeur, 0) + 1
     
     # Humeur dominante
@@ -223,15 +223,15 @@ def generer_recommandations(scores: Dict[str, float]) -> List[str]:
     for categorie, score in scores.items():
         if score < 5:
             if categorie == "Sommeil":
-                recommandations.append("ðŸ’¤ Améliorer la qualité du sommeil (routine, horaires réguliers)")
+                recommandations.append("🗑️ Améliorer la qualité du sommeil (routine, horaires réguliers)")
             elif categorie == "Nutrition":
-                recommandations.append("ðŸŽ Ã‰quilibrer l'alimentation (fruits, légumes, hydratation)")
+                recommandations.append("📅 Ã‰quilibrer l'alimentation (fruits, légumes, hydratation)")
             elif categorie == "Activité physique":
-                recommandations.append("ðŸƒ Augmenter l'activité physique (30min/jour minimum)")
+                recommandations.append("💡 Augmenter l'activité physique (30min/jour minimum)")
             elif categorie == "Mental":
-                recommandations.append("ðŸ§˜ Prendre du temps pour soi (méditation, relaxation)")
+                recommandations.append("🧹 Prendre du temps pour soi (méditation, relaxation)")
             elif categorie == "Social":
-                recommandations.append("ðŸ‘¥ Renforcer les liens sociaux (famille, amis)")
+                recommandations.append("🎯 Renforcer les liens sociaux (famille, amis)")
     
     return recommandations
 
@@ -268,9 +268,9 @@ def valider_entree_bien_etre(data: Dict[str, Any]) -> tuple[bool, List[str]]:
 def formater_evolution(evolution: float) -> str:
     """Formate une évolution en pourcentage."""
     if evolution > 0:
-        return f"ðŸ“ˆ +{evolution:.1f}%"
+        return f"👶 +{evolution:.1f}%"
     elif evolution < 0:
-        return f"ðŸ“‰ {evolution:.1f}%"
+        return f"🍽️ {evolution:.1f}%"
     else:
         return "âž¡ï¸ Stable"
 

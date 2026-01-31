@@ -27,7 +27,7 @@ from src.domains.maison.logic.helpers import (
 
 def app():
     """Point d'entrée principal du module Maison"""
-    st.title("ðŸ  Maison")
+    st.title("🎯 Maison")
     st.caption("Gestion complète : Projets, Jardin, Entretien")
     
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -40,7 +40,7 @@ def app():
     urgents = get_projets_urgents()
     with col1:
         if urgents:
-            st.error(f"ðŸ”´ {len(urgents)} projet(s) urgent(s)")
+            st.error(f"❌ {len(urgents)} projet(s) urgent(s)")
         else:
             st.success("âœ… Projets OK")
     
@@ -48,7 +48,7 @@ def app():
     plantes = get_plantes_a_arroser()
     with col2:
         if plantes:
-            st.warning(f"ðŸ’§ {len(plantes)} plante(s) à arroser")
+            st.warning(f"🍽️ {len(plantes)} plante(s) à arroser")
         else:
             st.success("âœ… Jardin OK")
     
@@ -74,7 +74,7 @@ def app():
     with col_stat1:
         stats_proj = get_stats_projets()
         st.metric(
-            "ðŸ—ï¸ Projets",
+            "💡 Projets",
             stats_proj["en_cours"],
             f"{stats_proj['avg_progress']:.0f}% progression"
         )
@@ -83,7 +83,7 @@ def app():
     with col_stat2:
         stats_jard = get_stats_jardin()
         st.metric(
-            "ðŸŒ¿ Jardin",
+            "👶 Jardin",
             stats_jard["total_plantes"],
             f"{stats_jard['a_arroser']} à arroser"
         )
@@ -91,7 +91,7 @@ def app():
     # Entretien
     with col_stat3:
         st.metric(
-            "ðŸ§¹ Entretien",
+            "🧹 Entretien",
             stats_entretien["routines_actives"],
             f"{stats_entretien['taches_today']} faites aujourd'hui"
         )
@@ -102,22 +102,22 @@ def app():
     # NAVIGATION
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
-    st.subheader("ðŸš€ Accès rapide")
+    st.subheader("📅 Accès rapide")
     
     col_nav1, col_nav2, col_nav3 = st.columns(3)
     
     with col_nav1:
-        if st.button("ðŸ—ï¸ Projets", use_container_width=True, key="nav_projets"):
+        if st.button("💡 Projets", use_container_width=True, key="nav_projets"):
             st.session_state.current_page = "Projets"
             st.rerun()
     
     with col_nav2:
-        if st.button("ðŸŒ¿ Jardin", use_container_width=True, key="nav_jardin"):
+        if st.button("👶 Jardin", use_container_width=True, key="nav_jardin"):
             st.session_state.current_page = "Jardin"
             st.rerun()
     
     with col_nav3:
-        if st.button("ðŸ§¹ Entretien", use_container_width=True, key="nav_entretien"):
+        if st.button("🧹 Entretien", use_container_width=True, key="nav_entretien"):
             st.session_state.current_page = "Entretien"
             st.rerun()
     
@@ -131,15 +131,15 @@ def app():
         st.markdown("### âš ï¸ Projets nécessitant attention")
         for urgent in urgents[:5]:
             if urgent["type"] == "RETARD":
-                st.error(f"ðŸ”´ **{urgent['projet']}** - {urgent['message']}")
+                st.error(f"❌ **{urgent['projet']}** - {urgent['message']}")
             else:
-                st.warning(f"ðŸŸ¡ **{urgent['projet']}** - {urgent['message']}")
+                st.warning(f"🧹 **{urgent['projet']}** - {urgent['message']}")
         st.markdown("---")
     
     if plantes:
-        st.markdown("### ðŸ’§ Plantes à arroser aujourd'hui")
+        st.markdown("### 🍽️ Plantes à arroser aujourd'hui")
         for p in plantes[:5]:
-            st.caption(f"â€¢ {p['nom']} ðŸ“ {p['location']}")
+            st.caption(f"â€¢ {p['nom']} 🗑️ {p['location']}")
         st.markdown("---")
     
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -147,7 +147,7 @@ def app():
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     st.info("""
-    ðŸ’¡ **Besoin d'aide?**
+    💰 **Besoin d'aide?**
     
     Chaque module (Projets, Jardin, Entretien) intègre l'IA pour:
     - Générateurs de tÃ¢ches & routines

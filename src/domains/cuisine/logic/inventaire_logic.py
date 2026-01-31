@@ -35,11 +35,11 @@ CATEGORIES = [
 ]
 
 STATUS_CONFIG = {
-    "critique": {"color": "red", "emoji": "ðŸ”´", "label": "Critique"},
-    "stock_bas": {"color": "orange", "emoji": "ðŸŸ ", "label": "Stock bas"},
-    "ok": {"color": "green", "emoji": "ðŸŸ¢", "label": "OK"},
+    "critique": {"color": "red", "emoji": "❌", "label": "Critique"},
+    "stock_bas": {"color": "orange", "emoji": "🎯, "label": "Stock bas"},
+    "ok": {"color": "green", "emoji": "💡, "label": "OK"},
     "perime": {"color": "black", "emoji": "âš«", "label": "Périmé"},
-    "bientot_perime": {"color": "yellow", "emoji": "ðŸŸ¡", "label": "Bientôt périmé"},
+    "bientot_perime": {"color": "yellow", "emoji": "📅, "label": "Bientôt périmé"},
 }
 
 
@@ -597,7 +597,7 @@ def formater_inventaire_rapport(articles: list[dict]) -> str:
         lignes.append("-" * 20)
         
         for article in alertes.get("critique", []):
-            lignes.append(f"  ðŸ”´ {article.get('ingredient_nom')} - Stock critique")
+            lignes.append(f"  ❌ {article.get('ingredient_nom')} - Stock critique")
         
         for article in alertes.get("perime", []):
             lignes.append(f"  âš« {article.get('ingredient_nom')} - PÃ‰RIMÃ‰")

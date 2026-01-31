@@ -32,7 +32,7 @@ def afficher_actions_prioritaires(alertes_semaine: list) -> None:
         st.success("âœ… Semaine bien équilibrée - Aucune action urgente")
         return
 
-    st.markdown("### ðŸŽ¯ Actions à Prendre")
+    st.markdown("### 🎯 Actions à Prendre")
 
     for alerte in alertes_semaine:
         # Parser l'alerte pour extraire emoji et message
@@ -46,11 +46,11 @@ def afficher_actions_prioritaires(alertes_semaine: list) -> None:
             st.warning(message, icon=emoji)
 
         with col_action:
-            if "ðŸ‘¶" in emoji:
+            if "🎯 in emoji:
                 if st.button("â†’ Activités", key=f"alerte_{alerte[:20]}", use_container_width=True):
                     st.session_state.planning_view = "activites"
 
-            elif "ðŸ’°" in emoji:
+            elif "🍽️" in emoji:
                 if st.button("â†’ Budget", key=f"alerte_{alerte[:20]}", use_container_width=True):
                     st.session_state.planning_view = "budget"
 
@@ -66,28 +66,28 @@ def afficher_metriques_cles(stats: dict, charge_globale: str) -> None:
     col_m1, col_m2, col_m3, col_m4, col_m5 = st.columns(5)
 
     with col_m1:
-        st.metric("ðŸ½ï¸ Repas", stats.get("total_repas", 0))
+        st.metric("🧹 Repas", stats.get("total_repas", 0))
 
     with col_m2:
-        st.metric("ðŸŽ¨ Activités", stats.get("total_activites", 0))
+        st.metric("🎨 Activités", stats.get("total_activites", 0))
 
     with col_m3:
-        st.metric("ðŸ‘¶ Pour Jules", stats.get("activites_jules", 0))
+        st.metric("💡 Pour Jules", stats.get("activites_jules", 0))
 
     with col_m4:
-        st.metric("ðŸ—ï¸ Projets", stats.get("total_projets", 0))
+        st.metric("💰 Projets", stats.get("total_projets", 0))
 
     with col_m5:
         budget = stats.get("budget_total", 0)
-        st.metric("ðŸ’° Budget", f"{budget:.0f}â‚¬")
+        st.metric("🍽️ Budget", f"{budget:.0f}â‚¬")
 
     st.markdown("---")
 
     # Charge globale
     charge_emoji = {
-        "faible": "ðŸŸ¢",
-        "normal": "ðŸŸ¡",
-        "intense": "ðŸ”´",
+        "faible": "🚀,
+        "normal": "👶,
+        "intense": "❌",
     }.get(charge_globale, "âšª")
 
     st.markdown(f"### {charge_emoji} Charge Globale: **{charge_globale.upper()}**")
@@ -105,7 +105,7 @@ def afficher_metriques_cles(stats: dict, charge_globale: str) -> None:
 
 def afficher_synthese_jours(jours: dict) -> None:
     """Affiche synthèse visuelle des jours"""
-    st.markdown("### ðŸ“… Synthèse par jour")
+    st.markdown("### 📱 Synthèse par jour")
 
     jours_noms = ["lun", "mar", "mer", "jeu", "ven", "sam", "dim"]
     jours_list = list(jours.values())
@@ -119,9 +119,9 @@ def afficher_synthese_jours(jours: dict) -> None:
 
             # Badge avec charge
             charge_emoji = {
-                "faible": "ðŸŸ¢",
-                "normal": "ðŸŸ¡",
-                "intense": "ðŸ”´",
+                "faible": "🚀,
+                "normal": "👶,
+                "intense": "❌",
             }.get(jour.charge, "âšª")
 
             st.markdown(
@@ -131,7 +131,7 @@ def afficher_synthese_jours(jours: dict) -> None:
                     <p style="margin: 5px 0; font-size: 12px;"><strong>{jour_nom.upper()}</strong></p>
                     <p style="margin: 5px 0; font-size: 11px;">{jour.charge_score}/100</p>
                     <p style="margin: 5px 0; font-size: 11px;">
-                        ðŸ½ï¸{len(jour.repas)} ðŸŽ¨{len(jour.activites)}
+                        🧹{len(jour.repas)} 🎨{len(jour.activites)}
                     </p>
                 </div>
                 """,
@@ -141,7 +141,7 @@ def afficher_synthese_jours(jours: dict) -> None:
 
 def afficher_opportunities(semaine_data: dict) -> None:
     """Suggère automatiquement des améliorations"""
-    st.markdown("### ðŸ’¡ Suggestions d'Amélioration")
+    st.markdown("### 🗑️ Suggestions d'Amélioration")
 
     suggestions = []
 
@@ -149,12 +149,12 @@ def afficher_opportunities(semaine_data: dict) -> None:
     activites_jules = semaine_data.get("activites_jules", 0)
     if activites_jules == 0:
         suggestions.append(
-            ("ðŸ‘¶ Aucune activité pour Jules", 
+            ("💡 Aucune activité pour Jules", 
              "Planifier au moins 2-3 activités adaptées à 19m par semaine")
         )
     elif activites_jules < 2:
         suggestions.append(
-            ("ðŸ‘¶ Peu d'activités pour Jules",
+            ("💡 Peu d'activités pour Jules",
              f"Actuellement {activites_jules} - Recommandé: 3+")
         )
 
@@ -163,14 +163,14 @@ def afficher_opportunities(semaine_data: dict) -> None:
     budget_limite = 500  # Ã€ adapter à votre budget
     if budget_total > budget_limite:
         suggestions.append(
-            ("ðŸ’° Budget elevé",
+            ("🍽️ Budget elevé",
              f"{budget_total:.0f}â‚¬ > {budget_limite}â‚¬ - Revoir les dépenses")
         )
 
     # Pas de repas
     if semaine_data.get("total_repas", 0) == 0:
         suggestions.append(
-            ("ðŸ½ï¸ Aucun repas planifié",
+            ("🧹 Aucun repas planifié",
              "Prévoir le planning culinaire de la semaine")
         )
 
@@ -179,7 +179,7 @@ def afficher_opportunities(semaine_data: dict) -> None:
             with st.container():
                 col1, col2 = st.columns([1, 4])
                 with col1:
-                    st.write("ðŸ’¡")
+                    st.write("🗑️")
                 with col2:
                     st.write(f"**{emoji_title}**: {description}")
     else:
@@ -194,7 +194,7 @@ def afficher_opportunities(semaine_data: dict) -> None:
 def app():
     """Module Vue d'Ensemble - Actions prioritaires"""
 
-    st.title("ðŸŽ¯ Vue d'Ensemble Planning")
+    st.title("🎯 Vue d'Ensemble Planning")
     st.caption("Actions prioritaires et suggestions intelligentes pour la semaine")
 
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -243,7 +243,7 @@ def app():
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     if semaine.alertes_semaine:
-        st.markdown("### ðŸš¨ Actions Critiques")
+        st.markdown("### 📷 Actions Critiques")
         afficher_actions_prioritaires(semaine.alertes_semaine)
         st.markdown("---")
 
@@ -273,13 +273,13 @@ def app():
     # ONGLETS DÃ‰TAILS
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-    tab1, tab2, tab3 = st.tabs(["ðŸ”„ Rééquilibrer", "– Optimiser avec IA", "ðŸ“‹ Détails"])
+    tab1, tab2, tab3 = st.tabs(["🔄 Rééquilibrer", "– Optimiser avec IA", "📅 Détails"])
 
     with tab1:
-        st.subheader("ðŸ”„ Rééquilibrer la semaine")
+        st.subheader("🔄 Rééquilibrer la semaine")
 
         st.info(
-            "ðŸ’¡ Les jours très chargés peuvent être rééquilibrés en déplaçant certaines activités"
+            "🗑️ Les jours très chargés peuvent être rééquilibrés en déplaçant certaines activités"
         )
 
         # Identifier jours chargés
@@ -293,11 +293,11 @@ def app():
                 jour_names = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
                 jour_nom = jour_names[idx]
 
-                with st.expander(f"ðŸ”´ {jour_nom} - Surchargé ({jour_charge.charge_score}/100)"):
+                with st.expander(f"❌ {jour_nom} - Surchargé ({jour_charge.charge_score}/100)"):
                     st.write(f"Activités: {len(jour_charge.activites)} | Repas: {len(jour_charge.repas)}")
 
                     if st.button(f"Proposer répartition", key=f"reequilibrer_{idx}"):
-                        st.info("ðŸ’¡ Suggestion: Déplacer 1-2 activités vers jour plus calme")
+                        st.info("🗑️ Suggestion: Déplacer 1-2 activités vers jour plus calme")
 
         else:
             st.success("âœ… Semaine bien équilibrée - Aucun rééquilibrage nécessaire")
@@ -325,7 +325,7 @@ def app():
                     default=["Activités Jules"],
                 )
 
-            submitted = st.form_submit_button("ðŸš€ Générer optimisation", type="primary")
+            submitted = st.form_submit_button("🔔 Générer optimisation", type="primary")
 
             if submitted:
                 with st.spinner("– L'IA analyse..."):
@@ -350,12 +350,12 @@ def app():
                             for raison in result.raisons:
                                 st.write(f"â€¢ {raison}")
 
-                        st.info("ðŸ’¡ Vous pouvez créer ces éléments dans votre planning")
+                        st.info("🗑️ Vous pouvez créer ces éléments dans votre planning")
                     else:
                         st.error("âŒ Erreur génération")
 
     with tab3:
-        st.subheader("ðŸ“‹ Détails Semaine")
+        st.subheader("📅 Détails Semaine")
 
         jours_semaine = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
 
@@ -376,9 +376,9 @@ def app():
 
             with col_d1:
                 charge_emoji = {
-                    "faible": "ðŸŸ¢",
-                    "normal": "ðŸŸ¡",
-                    "intense": "ðŸ”´",
+                    "faible": "🚀,
+                    "normal": "👶,
+                    "intense": "❌",
                 }.get(jour_data_dict["charge"], "âšª")
                 st.metric("Charge", f"{charge_emoji} {jour_data_dict['charge_score']}/100")
 

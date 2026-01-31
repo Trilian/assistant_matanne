@@ -78,15 +78,15 @@ SUGGESTIONS_ACTIVITES = {
 
 def app():
     """Interface principale du module Activités"""
-    st.title("ðŸŽ¨ Activités Familiales")
+    st.title("🎨 Activités Familiales")
     
-    tabs = st.tabs(["ðŸ“… Planning Semaine", "ðŸ’¡ Idées Activités", "ðŸ’° Budget"])
+    tabs = st.tabs(["📱 Planning Semaine", "👶 Idées Activités", "💡 Budget"])
     
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TAB 1: PLANNING SEMAINE
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     with tabs[0]:
-        st.header("ðŸ“… Planning de la Semaine")
+        st.header("📱 Planning de la Semaine")
         
         col1, col2 = st.columns([2, 1])
         
@@ -114,8 +114,8 @@ def app():
                                 st.write(f"**{act['titre']}**")
                                 st.caption(f"{act['type']} â€¢ {act.get('lieu', 'TBD')}")
                                 if act.get('participants'):
-                                    st.caption(f"ðŸ‘¥ {', '.join(act['participants'])}")
-                                st.caption(f"ðŸ’° {act.get('cout_estime', 0):.2f}â‚¬")
+                                    st.caption(f"📅 {', '.join(act['participants'])}")
+                                st.caption(f"💡 {act.get('cout_estime', 0):.2f}â‚¬")
                 else:
                     st.info("Aucune activité cette semaine. Planifiez une activité!")
             
@@ -143,7 +143,7 @@ def app():
     # TAB 2: IDÃ‰ES ACTIVITÃ‰S
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     with tabs[1]:
-        st.header("ðŸ’¡ Idées d'Activités")
+        st.header("👶 Idées d'Activités")
         
         st.subheader("Suggestions par type")
         
@@ -154,7 +154,7 @@ def app():
         
         for i, type_key in enumerate(type_keys[:3]):
             with cols[i]:
-                emoji = "ðŸŽª" if type_key == "parc" else "ðŸ›ï¸" if type_key == "musée" else "ðŸ’§" if type_key == "eau" else "ðŸŽ®" if type_key == "jeu_maison" else "âš½" if type_key == "sport" else "ðŸ½ï¸"
+                emoji = "💰 if type_key == "parc" else "🧹" if type_key == "musée" else "📋 if type_key == "eau" else "🎯 if type_key == "jeu_maison" else "âš½" if type_key == "sport" else "🍽️"
                 title = type_key.replace("_", " ").title()
                 
                 st.subheader(f"{emoji} {title}")
@@ -168,7 +168,7 @@ def app():
         
         for i, type_key in enumerate(type_keys[3:]):
             with cols2[i]:
-                emoji = "ðŸŽª" if type_key == "parc" else "ðŸ›ï¸" if type_key == "musée" else "ðŸ’§" if type_key == "eau" else "ðŸŽ®" if type_key == "jeu_maison" else "âš½" if type_key == "sport" else "ðŸ½ï¸"
+                emoji = "💰 if type_key == "parc" else "🧹" if type_key == "musée" else "📋 if type_key == "eau" else "🎯 if type_key == "jeu_maison" else "âš½" if type_key == "sport" else "🍽️"
                 title = type_key.replace("_", " ").title()
                 
                 st.subheader(f"{emoji} {title}")
@@ -181,7 +181,7 @@ def app():
     # TAB 3: BUDGET
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     with tabs[2]:
-        st.header("ðŸ’° Budget Activités")
+        st.header("💡 Budget Activités")
         
         # Stats
         col1, col2, col3 = st.columns(3)
@@ -191,11 +191,11 @@ def app():
             budget_semaine = get_budget_par_period("week").get("Activités", 0)
             
             with col1:
-                st.metric("ðŸ’° Ce mois", f"{budget_mois:.2f}â‚¬")
+                st.metric("💡 Ce mois", f"{budget_mois:.2f}â‚¬")
             with col2:
                 st.metric("[CHART] Cette semaine", f"{budget_semaine:.2f}â‚¬")
             with col3:
-                st.metric("ðŸ“ˆ Budget moyen", f"{budget_mois / 4:.2f}â‚¬ par semaine")
+                st.metric("🗑️ Budget moyen", f"{budget_mois / 4:.2f}â‚¬ par semaine")
         
         except Exception as e:
             st.error(f"âŒ Erreur budget: {str(e)}")
@@ -203,7 +203,7 @@ def app():
         st.divider()
         
         # Graphique timeline
-        st.subheader("ðŸ“ˆ Graphique Dépenses")
+        st.subheader("🗑️ Graphique Dépenses")
         
         try:
             with get_session() as session:

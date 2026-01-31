@@ -13,32 +13,32 @@ with open(file_path, 'r', encoding='utf-8-sig') as f:
 
 patterns = [
     # Pattern: mojibake + "Stock"
-    (r'ðŸ[^\w]*Stock', '📊 Stock'),
+    (r'📅w]*Stock', '📊 Stock'),
     # Pattern: mojibake + "Alertes"
-    (r'ðŸ[^\w]*Alertes', '⚠️ Alertes'),
+    (r'📅w]*Alertes', '⚠️ Alertes'),
     # Pattern: mojibake + "Catégories"
-    (r'ðŸ[^\w]*Catégories', '🏷️ Catégories'),
+    (r'📅w]*Catégories', '🏷️ Catégories'),
     # Pattern: mojibake + "Suggestions"
-    (r'ðŸ[^\w]*Suggestions', '🛒 Suggestions'),
+    (r'📅w]*Suggestions', '🛒 Suggestions'),
     # Pattern: mojibake + "Historique"
-    (r'ðŸ[^\w]*Historique', '📋 Historique'),
+    (r'📅w]*Historique', '📋 Historique'),
     # Pattern: mojibake + "Photos"
-    (r'ðŸ[^\w]*Photos', '📷 Photos'),
+    (r'📅w]*Photos', '📷 Photos'),
     # Pattern: mojibake + "Notifications"
-    (r'ðŸ[^\w]*Notifications', '📢 Notifications'),
+    (r'📅w]*Notifications', '📢 Notifications'),
     # Pattern: mojibake + "Prévisions"
-    (r'ðŸ[^\w]*Prévisions', '🔮 Prévisions'),
+    (r'📅w]*Prévisions', '🔮 Prévisions'),
     # Pattern: mojibake + "Outils"
-    (r'ðŸ[^\w]*Outils', '🔧 Outils'),
+    (r'📅w]*Outils', '🔧 Outils'),
     # Pattern: mojibake + "péremption" / "proche"
-    (r'ðŸ""[^\w]*', '📅 '),
+    (r'💡^\w]*', '📅 '),
     # Pattern: mojibake + "Importer"
-    (r'ðŸ"¥[^\w]*Importer', '📥 Importer'),
+    (r'👶^\w]*Importer', '📥 Importer'),
     # Pattern: mojibake + "Exporter"
-    (r'ðŸ"¤[^\w]*Exporter', '📤 Exporter'),
+    (r'💰^\w]*Exporter', '📤 Exporter'),
 ]
 
-print("Before:", content.count('ðŸ'))
+print("Before:", content.count('🎯
 
 for pattern, replacement in patterns:
     count = len(re.findall(pattern, content))
@@ -46,7 +46,7 @@ for pattern, replacement in patterns:
         content = re.sub(pattern, replacement, content)
         print(f"  Replaced {count}x: {pattern[:30]}")
 
-print("After:", content.count('ðŸ'))
+print("After:", content.count('🎯
 
 with open(file_path, 'w', encoding='utf-8') as f:
     f.write(content)

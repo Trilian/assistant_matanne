@@ -33,19 +33,19 @@ def afficher_jour_expandable(jour: date, jour_complet: dict, jour_nom: str) -> N
 
     # Header avec badge charge
     charge_emoji = {
-        "faible": "ðŸŸ¢",
-        "normal": "ðŸŸ¡",
-        "intense": "ðŸ”´",
+        "faible": "🔔,
+        "normal": "💰,
+        "intense": "❌",
     }.get(jour_complet.get("charge", "normal"), "âšª")
 
     header = f"{charge_emoji} {jour_nom} {jour.strftime('%d/%m')}"
     if is_today:
-        header = f"ðŸ”µ {header}"
+        header = f"📥 {header}"
 
     with st.expander(header, expanded=is_today):
         # Colonnes pour meilleure organisation
         if jour_complet.get("repas"):
-            st.markdown("##### ðŸ½ï¸ Repas")
+            st.markdown("##### 📷 Repas")
             for repas in jour_complet["repas"]:
                 col1, col2 = st.columns([3, 1])
                 with col1:
@@ -54,35 +54,35 @@ def afficher_jour_expandable(jour: date, jour_complet: dict, jour_nom: str) -> N
                     st.caption(f"{repas['portions']} portions")
 
         if jour_complet.get("activites"):
-            st.markdown("##### ðŸŽ¨ Activités")
+            st.markdown("##### 🎨 Activités")
             for act in jour_complet["activites"]:
                 col1, col2 = st.columns([3, 1])
                 with col1:
-                    label = "ðŸ‘¶" if act.get("pour_jules") else "ðŸ‘¨â€ðŸ‘©â€ðŸ‘§"
+                    label = "👶 if act.get("pour_jules") else "📅€🧹€💡
                     st.write(f"{label} **{act['titre']}** ({act['type']})")
                 with col2:
                     if act.get("budget"):
                         st.caption(f"{act['budget']:.0f}â‚¬")
 
         if jour_complet.get("projets"):
-            st.markdown("##### ðŸ—ï¸ Projets")
+            st.markdown("##### 🗑️ Projets")
             for proj in jour_complet["projets"]:
                 priorite_color = {
-                    "basse": "ðŸŸ¢",
-                    "moyenne": "ðŸŸ¡",
-                    "haute": "ðŸ”´",
+                    "basse": "🔔,
+                    "moyenne": "💰,
+                    "haute": "❌",
                 }.get(proj.get("priorite", "moyenne"), "âšª")
                 st.write(f"{priorite_color} **{proj['nom']}** - {proj['statut']}")
 
         if jour_complet.get("events"):
-            st.markdown("##### ðŸ“… Ã‰vénements")
+            st.markdown("##### 📋… Ã‰vénements")
             for event in jour_complet["events"]:
                 debut = event["debut"].strftime("%H:%M") if isinstance(event["debut"], datetime) else "â€”"
                 col1, col2 = st.columns([3, 1])
                 with col1:
                     st.write(f"â° **{event['titre']}**")
                     if event.get("lieu"):
-                        st.caption(f"ðŸ“ {event['lieu']}")
+                        st.caption(f"📋 {event['lieu']}")
                 with col2:
                     st.caption(debut)
 
@@ -125,7 +125,7 @@ def afficher_jour_expandable(jour: date, jour_complet: dict, jour_nom: str) -> N
 def app():
     """Module Calendrier unifié"""
 
-    st.title("ðŸ“… Calendrier Familial")
+    st.title("📋… Calendrier Familial")
     st.caption("Vue intégrée de tous les événements familiaux")
 
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -179,20 +179,20 @@ def app():
 
     stats = semaine.stats_semaine
     with cols_stats[0]:
-        st.metric("ðŸ½ï¸ Repas", stats.get("total_repas", 0))
+        st.metric("📷 Repas", stats.get("total_repas", 0))
 
     with cols_stats[1]:
-        st.metric("ðŸŽ¨ Activités", stats.get("total_activites", 0))
+        st.metric("🎨 Activités", stats.get("total_activites", 0))
 
     with cols_stats[2]:
-        st.metric("ðŸ‘¶ Pour Jules", stats.get("activites_jules", 0))
+        st.metric("🍽️ Pour Jules", stats.get("activites_jules", 0))
 
     with cols_stats[3]:
-        st.metric("ðŸ—ï¸ Projets", stats.get("total_projets", 0))
+        st.metric("🗑️ Projets", stats.get("total_projets", 0))
 
     with cols_stats[4]:
         budget = stats.get("budget_total", 0)
-        st.metric(f"ðŸ’° Budget", f"{budget:.0f}â‚¬")
+        st.metric(f"📱 Budget", f"{budget:.0f}â‚¬")
 
     st.markdown("---")
 
@@ -211,9 +211,9 @@ def app():
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     charge_color = {
-        "faible": "ðŸŸ¢",
-        "normal": "ðŸŸ¡",
-        "intense": "ðŸ”´",
+        "faible": "🔔,
+        "normal": "💰,
+        "intense": "❌",
     }
     charge_emoji = charge_color.get(semaine.charge_globale, "âšª")
 
@@ -226,7 +226,7 @@ def app():
     # VUE JOURS DÃ‰TAILLÃ‰E
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-    st.markdown("### ðŸ“… Détail par jour")
+    st.markdown("### 📋… Détail par jour")
 
     jours_semaine = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
 
@@ -244,7 +244,7 @@ def app():
     # ONGLETS ACTIONS
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-    tab1, tab2, tab3 = st.tabs(["âž• Nouvel événement", "– Générer avec IA", "ðŸ“… Vue mois"])
+    tab1, tab2, tab3 = st.tabs(["âž• Nouvel événement", "– Générer avec IA", "📋… Vue mois"])
 
     with tab1:
         st.subheader("âž• Ajouter un événement")
@@ -267,7 +267,7 @@ def app():
 
             description = st.text_area("Description (optionnel)")
 
-            submitted = st.form_submit_button("ðŸ’¾ Créer l'événement", type="primary")
+            submitted = st.form_submit_button("🎯 Créer l'événement", type="primary")
 
             if submitted:
                 if not titre:
@@ -290,7 +290,7 @@ def app():
         st.subheader("– Générer semaine avec IA")
 
         st.info(
-            "ðŸ’¡ L'IA peut générer une semaine complète équilibrée basée sur vos contraintes et objectifs familiaux"
+            "🚀 L'IA peut générer une semaine complète équilibrée basée sur vos contraintes et objectifs familiaux"
         )
 
         with st.form("form_gen_ia"):
@@ -301,7 +301,7 @@ def app():
                 ["Cardio", "Yoga", "Detente", "Temps en famille", "Sommeil"],
             )
 
-            gen_submitted = st.form_submit_button("ðŸš€ Générer une semaine équilibrée", type="primary")
+            gen_submitted = st.form_submit_button("📤 Générer une semaine équilibrée", type="primary")
 
             if gen_submitted:
                 with st.spinner("– L'IA réfléchit..."):
@@ -321,7 +321,7 @@ def app():
                         st.error("âŒ Erreur lors de la génération")
 
     with tab3:
-        st.subheader("ðŸ“… Vue mensuelle")
+        st.subheader("📋… Vue mensuelle")
 
         col_m1, col_m2 = st.columns([2, 1])
 
@@ -353,8 +353,8 @@ def app():
                     date_jour = date(annee, mois_num, jour)
                     is_today = date_jour == date.today()
 
-                    style = "ðŸ”µ" if is_today else ""
+                    style = "👧 if is_today else ""
                     cols[i].write(f"{style} **{jour}**")
 
-        st.caption("ðŸ”µ = Aujourd'hui")
+        st.caption("📥 = Aujourd'hui")
 

@@ -2,7 +2,7 @@
 Module Planning - Centre de Coordination Familiale
 
 Agrège TOUS les événements familiaux en une vision unifiée:
-- ðŸ“… Calendrier: Tous les événements intégrés
+- 📅 Calendrier: Tous les événements intégrés
 - [CHART] Vue Semaine: Analyse charge et répartition
 - 🎯 Vue d'Ensemble: Actions prioritaires et suggestions
 
@@ -19,7 +19,7 @@ __all__ = ["calendrier", "vue_semaine", "vue_ensemble"]
 
 # Enregistrement automatique pour OptimizedRouter
 SUBMODULES = {
-    "ðŸ“… Calendrier Familial": calendrier,
+    "📅 Calendrier Familial": calendrier,
     "[CHART] Vue Semaine": vue_semaine,
     "🎯 Vue d'Ensemble": vue_ensemble,
 }
@@ -31,7 +31,7 @@ def app():
     import streamlit as st
 
     # Menu de sélection
-    st.sidebar.markdown("### ðŸ“… Planning")
+    st.sidebar.markdown("### 📅 Planning")
 
     view = st.sidebar.radio(
         "Sélectionner une vue",
