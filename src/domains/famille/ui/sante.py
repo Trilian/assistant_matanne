@@ -456,12 +456,12 @@ def app():
         with col2:
             st.subheader("💡 Bonnes pratiques")
             practices = [
-                ("🧹 "Manger lentement et bien mastiquer"),
-                ("â°", "3 repas réguliers + 2 collations"),
-                ("💰, "Boire de l'eau entre les repas"),
-                ("👶, "Dîner 2-3h avant le coucher"),
-                ("🎯, "Préparer ses courses à l'avance"),
-                ("[CHART]", "Varier les aliments et couleurs"),
+                ("🧹", "Manger lentement et bien mastiquer"),
+                ("🌙", "3 repas réguliers + 2 collations"),
+                ("💰", "Boire de l'eau entre les repas"),
+                ("👶", "Dîner 2-3h avant le coucher"),
+                ("🎯", "Préparer ses courses à l'avance"),
+                ("🍽️", "Varier les aliments et couleurs"),
             ]
             for emoji, practice in practices:
                 st.write(f"{emoji} {practice}")

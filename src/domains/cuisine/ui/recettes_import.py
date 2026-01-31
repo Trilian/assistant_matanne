@@ -3,6 +3,7 @@ Module pour l'import de recettes
 """
 
 import streamlit as st
+import time
 from src.utils.recipe_importer import RecipeImporter
 from src.services.recettes import get_recette_service
 from src.core.models import Recette, RecetteIngredient, Ingredient, EtapeRecette
@@ -384,7 +385,8 @@ def _save_imported_recipe(
             
             st.success(f"✅ Recette '{nom}' importée avec succès!")
             st.balloons()
-            # Rester sur l'onglet import (pas de rerun)
+            # Courte pause pour afficher le succès, puis effacer les controls pour rester sur import
+            time.sleep(0.5)
             
     except Exception as e:
         st.error(f"❌ Erreur sauvegarde: {str(e)}")

@@ -954,7 +954,7 @@ def render_photos():
 
     with col1:
 
-        article_names = [f"{a['nom']} ({a['quantite']} {a['unite']})" for a in articles_data]
+        article_names = [f"{a['ingredient_nom']} ({a['quantite']} {a['unite']})" for a in articles_data]
 
         selected_idx = st.selectbox("Sélectionne un article", range(len(article_names)), format_func=lambda i: article_names[i], key="select_photo_article")
 

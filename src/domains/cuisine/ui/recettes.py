@@ -502,7 +502,9 @@ def render_detail_recette(recette):
         for ri in recette.ingredients:
             ingredient_cols = st.columns([2, 1, 1])
             ingredient_cols[0].write(f"{ri.ingredient.nom}")
-            ingredient_cols[1].write(f"{ri.quantite}")
+            # Formater la quantité: afficher 1 au lieu de 1.0
+            quantite_display = int(ri.quantite) if ri.quantite == int(ri.quantite) else ri.quantite
+            ingredient_cols[1].write(f"{quantite_display}")
             ingredient_cols[2].write(f"{ri.unite}")
     
     # Étapes de préparation
