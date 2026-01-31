@@ -43,11 +43,11 @@ UNSPLASH_API_KEY = _get_api_key('UNSPLASH_API_KEY')  # Gratuit: https://unsplash
 # Debug logging pour Streamlit Cloud
 # Utiliser print() en plus de logger pour être visible dans Streamlit logs
 print("\n" + "="*60)
-print("🖼️  IMAGE GENERATOR INITIALIZED")
+print("IMAGE GENERATOR INITIALIZED")
 print("="*60)
-print(f"✅ Unsplash:  {'CONFIGURED' if UNSPLASH_API_KEY else 'NOT SET'} {UNSPLASH_API_KEY[:10] if UNSPLASH_API_KEY else ''}...")
-print(f"✅ Pexels:    {'CONFIGURED' if PEXELS_API_KEY else 'NOT SET'} {PEXELS_API_KEY[:10] if PEXELS_API_KEY else ''}...")
-print(f"✅ Pixabay:   {'CONFIGURED' if PIXABAY_API_KEY else 'NOT SET'} {PIXABAY_API_KEY[:10] if PIXABAY_API_KEY else ''}...")
+print(f"Unsplash:  {'CONFIGURED' if UNSPLASH_API_KEY else 'NOT SET'} {UNSPLASH_API_KEY[:10] if UNSPLASH_API_KEY else ''}...")
+print(f"Pexels:    {'CONFIGURED' if PEXELS_API_KEY else 'NOT SET'} {PEXELS_API_KEY[:10] if PEXELS_API_KEY else ''}...")
+print(f"Pixabay:   {'CONFIGURED' if PIXABAY_API_KEY else 'NOT SET'} {PIXABAY_API_KEY[:10] if PIXABAY_API_KEY else ''}...")
 print("="*60 + "\n")
 
 if UNSPLASH_API_KEY:
@@ -60,10 +60,12 @@ def generer_image_recette(nom_recette: str, description: str = "", ingredients_l
     """
     Génère une image pour une recette avec meilleure pertinence.
     
-    Essaie plusieurs sources dans cet ordre:
-    1. Unsplash (meilleure qualité, bonne spécificité)
-    2. Recherche dans des banques d'images réelles (Pexels, Pixabay)
-    3. Génération avec API IA (Pollinations.ai, Replicate)
+    Stratégie optimisée (priorité):
+    1. Leonardo.AI (meilleur pour la cuisine, gratuit avec compte)
+    2. Hugging Face Stable Diffusion XL (gratuit, très bon)
+    3. Recherche optimisée dans banques d'images (Unsplash > Pexels > Pixabay)
+    4. Pollinations.ai (génération rapide)
+    5. Replicate SDXL (très haute qualité mais plus lent)
     
     Args:
         nom_recette: Nom de la recette
@@ -80,7 +82,25 @@ def generer_image_recette(nom_recette: str, description: str = "", ingredients_l
     # Construire une requête optimisée basée sur la recette
     search_query = _construire_query_optimisee(nom_recette, ingredients_list, type_plat)
     
-    # Priorité 1: Unsplash (meilleur pour les recettes)
+    # Priorité 1: Leonardo.AI (meilleur pour la cuisine)
+    try:
+        url = _generer_via_leonardo(nom_recette, description, ingredients_list, type_plat)
+        if url:
+            logger.info(f"✅ Image générée via Leonardo.AI pour '{nom_recette}'")
+            return url
+    except Exception as e:
+        logger.debug(f"Leonardo.AI failed: {e}")
+    
+    # Priorité 2: Hugging Face Stable Diffusion XL (très bon, gratuit)
+    try:
+        url = _generer_via_huggingface(nom_recette, description, ingredients_list, type_plat)
+        if url:
+            logger.info(f"✅ Image générée via Hugging Face pour '{nom_recette}'")
+            return url
+    except Exception as e:
+        logger.debug(f"HuggingFace failed: {e}")
+    
+    # Priorité 3: Unsplash (meilleur pour les images réelles)
     if UNSPLASH_API_KEY:
         try:
             url = _rechercher_image_unsplash(nom_recette, search_query)
@@ -88,9 +108,9 @@ def generer_image_recette(nom_recette: str, description: str = "", ingredients_l
                 logger.info(f"✅ Image trouvée via Unsplash pour '{nom_recette}'")
                 return url
         except Exception as e:
-            logger.warning(f"Unsplash API échouée: {e}")
+            logger.debug(f"Unsplash API failed: {e}")
     
-    # Priorité 2: Pexels
+    # Priorité 4: Pexels
     if PEXELS_API_KEY:
         try:
             url = _rechercher_image_pexels(nom_recette, search_query)
@@ -98,9 +118,9 @@ def generer_image_recette(nom_recette: str, description: str = "", ingredients_l
                 logger.info(f"✅ Image trouvée via Pexels pour '{nom_recette}'")
                 return url
         except Exception as e:
-            logger.warning(f"Pexels API échouée: {e}")
+            logger.debug(f"Pexels API failed: {e}")
     
-    # Priorité 3: Pixabay
+    # Priorité 5: Pixabay
     if PIXABAY_API_KEY:
         try:
             url = _rechercher_image_pixabay(nom_recette, search_query)
@@ -108,25 +128,25 @@ def generer_image_recette(nom_recette: str, description: str = "", ingredients_l
                 logger.info(f"✅ Image trouvée via Pixabay pour '{nom_recette}'")
                 return url
         except Exception as e:
-            logger.warning(f"Pixabay API échouée: {e}")
+            logger.debug(f"Pixabay API failed: {e}")
     
-    # Fallback: Essayer Pollinations.ai (génération IA rapide, pas de clé requise)
-    logger.info(f"Tentative génération IA via Pollinations pour: {nom_recette}")
+    # Priorité 6: Pollinations.ai (génération rapide, pas de clé)
+    logger.info(f"Génération IA via Pollinations pour: {nom_recette}")
     try:
         result = _generer_via_pollinations(nom_recette, description, ingredients_list, type_plat)
         if result:
             return result
     except Exception as e:
-        logger.warning(f"Pollinations API échouée: {e}")
+        logger.debug(f"Pollinations API failed: {e}")
     
-    # Essayer Replicate API (meilleure qualité IA)
-    logger.info(f"Tentative génération IA via Replicate pour: {nom_recette}")
+    # Priorité 7: Replicate API (très haute qualité mais plus lent)
+    logger.info(f"Génération IA via Replicate pour: {nom_recette}")
     try:
         result = _generer_via_replicate(nom_recette, description, ingredients_list, type_plat)
         if result:
             return result
     except Exception as e:
-        logger.warning(f"Replicate API échouée: {e}")
+        logger.debug(f"Replicate API failed: {e}")
     
     logger.error(f"❌ Impossible de générer une image pour '{nom_recette}'")
     return None
@@ -347,7 +367,17 @@ def _rechercher_image_unsplash(nom_recette: str, search_query: str = "") -> Opti
     return None
 
 
-    """Construit un prompt plus détaillé pour la génération d'images"""
+def _construire_prompt_detaille(nom_recette: str, description: str, ingredients_list: list = None, type_plat: str = "") -> str:
+    """
+    Construit un prompt TRÈS détaillé pour une meilleure génération d'images culinaires.
+    
+    Éléments clés pour de belles images de recettes:
+    - Style culinaire (gourmet, rustique, moderne, fusion, etc.)
+    - Présentation (plating, décoration, contexte)
+    - Ingrédients visibles et attrayants
+    - Qualité (4K, professional, restaurant-quality)
+    - Ambiance (lumière naturelle, mood, texture)
+    """
     
     # Ingrédients clés à mentionner
     ingredients_mentions = ""
@@ -361,27 +391,91 @@ def _rechercher_image_unsplash(nom_recette: str, search_query: str = "") -> Opti
                 ingredient_names.append(ing.lower())
         
         if ingredient_names:
-            ingredients_mentions = f"with {', '.join(ingredient_names)}"
+            ingredients_mentions = f"featuring {', '.join(ingredient_names)}"
     
-    # Type de plat en français
-    type_map = {
-        "petit_déjeuner": "breakfast, morning meal",
-        "déjeuner": "lunch, main course",
-        "dîner": "dinner, evening meal",
-        "goûter": "snack, afternoon treat",
-        "apéritif": "appetizer, starter",
-        "dessert": "dessert, sweet dish"
+    # Déterminer le style culinaire basé sur le type de plat
+    style_map = {
+        "petit_déjeuner": "gourmet breakfast, elegant morning presentation, beautifully arranged",
+        "déjeuner": "refined lunch dish, restaurant plating, sophisticated and appetizing",
+        "dîner": "fine dining presentation, gourmet plating, elegant and professional",
+        "goûter": "charming afternoon snack, beautiful presentation, artfully arranged",
+        "apéritif": "elegant appetizer, sophisticated presentation, gourmet and refined",
+        "dessert": "beautiful plated dessert, artistic presentation, decorated with garnish and artistic touch"
     }
     
-    type_phrase = type_map.get(type_plat, "cuisine")
+    style_phrase = style_map.get(type_plat, "beautifully plated culinary creation, gourmet presentation")
     
-    # Construire le prompt final - très descriptif pour une meilleure génération
-    if description:
-        prompt = f"Professional food photography of {nom_recette} {ingredients_mentions}. {description}. {type_phrase}. Appetizing, vibrant colors, well-plated, restaurant quality, high quality, 4K, professional lighting, mouth-watering"
-    else:
-        prompt = f"Professional food photography of {nom_recette} {ingredients_mentions}. {type_phrase}. Beautiful presentation, appetizing, vibrant colors, well-plated, restaurant quality, high quality, 4K, professional lighting, mouth-watering"
+    # Construire le prompt TRÈS détaillé - c'est crucial pour une bonne génération
+    prompt = f"""Professional food photography of {nom_recette}"""
+    
+    if ingredients_mentions:
+        prompt += f" {ingredients_mentions}"
+    
+    prompt += f""".
+{style_phrase}.
+Captured with professional photography lighting and equipment.
+Restaurant quality presentation, appetizing, vibrant natural colors.
+Artistic plating with subtle garnishes and careful food styling.
+Fresh ingredients, gourmet appearance, mouth-watering look.
+Shot on elegant minimalist background, shallow depth of field, bokeh.
+Cinematic lighting with soft shadows, warm natural tones.
+4K ultra HD resolution, magazine quality professional photography.
+Luxury dining aesthetics, haute cuisine presentation."""
+    
+    # Ajouter la description si disponible
+    if description and description.strip():
+        prompt += f"\nAdditional style: {description}"
     
     return prompt
+
+
+def _generer_via_leonardo(nom_recette: str, description: str, ingredients_list: list = None, type_plat: str = "") -> Optional[str]:
+    """
+    Génère une image via Leonardo.AI (meilleur pour la cuisine, gratuit avec compte).
+    Leonardo.AI est spécialisé dans la génération d'images culinaires de haute qualité.
+    
+    Nécessite : LEONARDO_API_KEY et LEONARDO_MODEL_ID dans .env ou st.secrets
+    Obtenir une clé gratuitement sur: https://app.leonardo.ai
+    """
+    api_key = os.getenv('LEONARDO_API_KEY') or os.getenv('LEONARDO_TOKEN')
+    if not api_key:
+        logger.debug("LEONARDO_API_KEY not configured, skipping Leonardo.AI")
+        return None
+    
+    prompt = _construire_prompt_detaille(nom_recette, description, ingredients_list, type_plat)
+    
+    try:
+        # Utiliser le modèle Leonardo Diffusion XL pour des images culinaires de haute qualité
+        url = "https://api.leonardo.ai/v1/generations"
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+        
+        payload = {
+            "prompt": prompt,
+            "num_images": 1,
+            "guidance_scale": 7.5,
+            "width": 1024,
+            "height": 768,
+            "model_id": "6b645e3a-d64f-4341-a6d8-7a3690fbf042"  # Leonardo Diffusion XL
+        }
+        
+        response = requests.post(url, headers=headers, json=payload, timeout=60)
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("generations") and len(data["generations"]) > 0:
+                image_id = data["generations"][0]["id"]
+                image_url = f"https://cdn.leonardo.ai/{image_id}.jpg"
+                logger.info(f"✅ Image générée via Leonardo.AI pour '{nom_recette}': {image_url}")
+                return image_url
+        else:
+            logger.debug(f"Leonardo.AI API error: {response.status_code} - {response.text}")
+    except Exception as e:
+        logger.debug(f"Leonardo.AI generation error: {e}")
+    
+    return None
 
 
 def _generer_via_pollinations(nom_recette: str, description: str, ingredients_list: list = None, type_plat: str = "") -> Optional[str]:

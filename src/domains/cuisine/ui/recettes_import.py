@@ -4,6 +4,7 @@ Module pour l'import de recettes
 
 import streamlit as st
 import time
+from datetime import datetime
 from src.utils.recipe_importer import RecipeImporter
 from src.services.recettes import get_recette_service
 from src.core.models import Recette, RecetteIngredient, Ingredient, EtapeRecette
@@ -17,6 +18,9 @@ from src.domains.cuisine.logic.recettes_logic import (
 
 def render_importer():
     """Interface pour importer une recette"""
+    # Marquer cet onglet comme actif
+    st.session_state.recettes_selected_tab = 2
+    
     st.subheader("📥 Importer une recette")
     st.write("Importez une recette depuis un site web, un PDF ou du texte")
     
@@ -367,7 +371,8 @@ def _save_imported_recipe(
                 temps_cuisson=temps_cuisson,
                 portions=portions,
                 difficulte=difficulte,
-                url_image=image_path  # Ajouter l'image
+                url_image=image_path,  # Ajouter l'image
+                updated_at=datetime.utcnow()  # Ajouter la date de modification
             )
             
             with obtenir_contexte_db() as db:
