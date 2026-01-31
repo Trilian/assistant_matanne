@@ -464,7 +464,8 @@ def render_suggestions_ia():
                                 
                                 st.success(f"✅ {count} articles ajoutés!")
                                 st.session_state.courses_refresh += 1
-                                st.rerun()
+                                # Pas de rerun pour rester sur cet onglet
+                                time.sleep(0.5)
                             except Exception as e:
                                 st.error(f"❌ Erreur sauvegarde: {str(e)}")
                     else:
@@ -543,14 +544,15 @@ def render_suggestions_ia():
                                                     "quantite_necessaire": ing_quantite,
                                                     "priorite": "moyenne",
                                                     "rayon_magasin": "Autre",
-                                                    "notes": f"Pour {recette.get('nom', 'recette')}"
+                                                    "notes": f"Pour {recette.nom}"
                                                 }
                                                 service.create(data)
                                                 count_added += 1
                                         
                                         st.success(f"✅ {count_added} ingrédient(s) ajouté(s) à la liste!")
                                         st.session_state.courses_refresh += 1
-                                        st.rerun()
+                                        # Pas de rerun pour rester sur cet onglet
+                                        time.sleep(0.5)
                                 except Exception as e:
                                     st.error(f"❌ Erreur: {str(e)}")
                                     logger.error(f"Erreur ajout ingrédients recette: {e}")
@@ -622,11 +624,11 @@ def render_historique():
         
         st.dataframe(df, use_container_width=True)
         
-        # Export CSV
-        if st.button("📥 Télécharger en CSV"):
+        # Export CSV - directement, sans button wrapper
+        if df is not None and not df.empty:
             csv = df.to_csv(index=False)
             st.download_button(
-                label="💾 Télécharger CSV",
+                label="📥 Télécharger en CSV",
                 data=csv,
                 file_name=f"historique_courses_{date_debut}_{date_fin}.csv",
                 mime="text/csv"
@@ -882,7 +884,7 @@ def render_outils():
             service = get_courses_service()
             liste = service.get_liste_courses(achetes=False)
             
-            if liste and st.button("📥 Télécharger liste (CSV)"):
+            if liste:
                 df = pd.DataFrame([{
                     "Article": a.get('ingredient_nom'),
                     "Quantité": a.get('quantite_necessaire'),
@@ -894,7 +896,7 @@ def render_outils():
                 
                 csv = df.to_csv(index=False)
                 st.download_button(
-                    label="💾 Télécharger CSV",
+                    label="📥 Télécharger liste (CSV)",
                     data=csv,
                     file_name=f"liste_courses_{datetime.now().strftime('%Y%m%d')}.csv",
                     mime="text/csv"

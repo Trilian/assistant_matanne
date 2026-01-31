@@ -255,50 +255,54 @@ def _show_import_preview(recipe_data: dict):
         submitted = st.form_submit_button("✅ Importer cette recette", use_container_width=True)
         
         if submitted:
+            # Afficher un container pour les messages
+            validation_ok = True
+            
             if not nom:
                 st.error("❌ Le nom est obligatoire")
-                return
+                validation_ok = False
             
             if not edited_ingredients:
                 st.error("❌ Au moins un ingrédient est obligatoire")
-                return
+                validation_ok = False
             
             if not edited_etapes:
                 st.error("❌ Au moins une étape est obligatoire")
-                return
+                validation_ok = False
             
-            # Traiter l'image
-            image_path = None
-            if uploaded_image:
-                # Traiter le fichier uploadé (même logique que la création manuelle)
-                import uuid
-                import os
+            if validation_ok:
+                # Traiter l'image
+                image_path = None
+                if uploaded_image:
+                    # Traiter le fichier uploadé (même logique que la création manuelle)
+                    import uuid
+                    import os
+                    
+                    image_dir = "data/recettes_images"
+                    os.makedirs(image_dir, exist_ok=True)
+                    
+                    file_ext = uploaded_image.name.split('.')[-1].lower()
+                    image_name = f"{uuid.uuid4()}.{file_ext}"
+                    image_path = f"{image_dir}/{image_name}"
+                    
+                    with open(image_path, 'wb') as f:
+                        f.write(uploaded_image.getbuffer())
+                elif image_url_input:
+                    # Utiliser l'URL extraite ou modifiée
+                    image_path = image_url_input
                 
-                image_dir = "data/recettes_images"
-                os.makedirs(image_dir, exist_ok=True)
-                
-                file_ext = uploaded_image.name.split('.')[-1].lower()
-                image_name = f"{uuid.uuid4()}.{file_ext}"
-                image_path = f"{image_dir}/{image_name}"
-                
-                with open(image_path, 'wb') as f:
-                    f.write(uploaded_image.getbuffer())
-            elif image_url_input:
-                # Utiliser l'URL extraite ou modifiée
-                image_path = image_url_input
-            
-            _save_imported_recipe(
-                nom=nom,
-                type_repas=type_repas,
-                description=description,
-                temps_preparation=temps_prep,
-                temps_cuisson=temps_cuisson,
-                portions=portions,
-                difficulte=difficulte,
-                ingredients=edited_ingredients,
-                etapes=edited_etapes,
-                image_path=image_path
-            )
+                _save_imported_recipe(
+                    nom=nom,
+                    type_repas=type_repas,
+                    description=description,
+                    temps_preparation=temps_prep,
+                    temps_cuisson=temps_cuisson,
+                    portions=portions,
+                    difficulte=difficulte,
+                    ingredients=edited_ingredients,
+                    etapes=edited_etapes,
+                    image_path=image_path
+                )
 
 
 def _save_imported_recipe(
@@ -315,9 +319,14 @@ def _save_imported_recipe(
 ):
     """Sauvegarde la recette importée"""
     try:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"🔄 Tentative sauvegarde recette: {nom}")
+        
         service = get_recette_service()
         if not service:
             st.error("❌ Service indisponible")
+            logger.error("Service recette indisponible")
             return
         
         with st.spinner("💾 Sauvegarde en cours..."):
@@ -384,6 +393,7 @@ def _save_imported_recipe(
                 db.commit()
             
             st.success(f"✅ Recette '{nom}' importée avec succès!")
+            logger.info(f"✅ Recette '{nom}' importée avec succès")
             st.balloons()
             # Courte pause pour afficher le succès, puis effacer les controls pour rester sur import
             time.sleep(0.5)
@@ -391,4 +401,5 @@ def _save_imported_recipe(
     except Exception as e:
         st.error(f"❌ Erreur sauvegarde: {str(e)}")
         import logging
-        logging.error(f"Erreur import recette: {e}")
+        logger = logging.getLogger(__name__)
+        logger.error(f"Erreur import recette: {e}", exc_info=True)

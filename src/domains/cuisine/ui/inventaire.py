@@ -928,7 +928,7 @@ def render_photos():
 
     """Gestion des photos pour les articles de l'inventaire"""
 
-    st.subheader("[CAMERA] Gestion des photos")
+    st.subheader("📷 Gestion des photos")
 
     
 
@@ -968,7 +968,7 @@ def render_photos():
 
     with col2:
 
-        st.metric("État", "[CAMERA] Photo" if selected_article.get("photo_url") else "❌ Pas photo")
+        st.metric("État", "📷 Photo" if selected_article.get("photo_url") else "❌ Pas photo")
 
     
 
@@ -1044,7 +1044,7 @@ def render_photos():
 
                         st.success("✨ Photo ajoutée avec succès!")
 
-                        st.toast("Photo mise à jour", icon="[CAMERA]")
+                        st.toast("Photo mise à jour", icon="📷")
 
                         st.rerun()
 
@@ -1078,7 +1078,7 @@ def render_photos():
 
     with tab_view:
 
-        st.write(f"**Photo de {selected_article['nom']}**")
+        st.write(f"**Photo de {selected_article['ingredient_nom']}**")
 
         
 
