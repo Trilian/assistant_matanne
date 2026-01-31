@@ -4,11 +4,11 @@ Module Maison - Hub de gestion domestique
 Structure:
 - jardin.py: Gestion du jardin, plantes, récoltes avec conseils IA
 - projets.py: Projets maison (rénovation, aménagement) avec priorisation IA
-- entretien.py: Routines ménagères et tÃ¢ches quotidiennes avec optimisation IA
+- entretien.py: Routines ménagères et tâches quotidiennes avec optimisation IA
 - helpers.py: Fonctions partagées pour les 3 modules
 
 Hub principal affichant:
-- Alertes urgentes (projets en retard, plantes à arroser, tÃ¢ches ménage)
+- Alertes urgentes (projets en retard, plantes à arroser, tâches ménage)
 - Statistiques clés
 - Raccourcis vers chaque sous-module
 """
@@ -42,7 +42,7 @@ def app():
         if urgents:
             st.error(f"❌ {len(urgents)} projet(s) urgent(s)")
         else:
-            st.success("âœ… Projets OK")
+            st.success("✅ Projets OK")
     
     # Plantes à arroser
     plantes = get_plantes_a_arroser()
@@ -50,15 +50,15 @@ def app():
         if plantes:
             st.warning(f"🍽️ {len(plantes)} plante(s) à arroser")
         else:
-            st.success("âœ… Jardin OK")
+            st.success("✅ Jardin OK")
     
-    # TÃ¢ches ménage
+    # Tâches ménage
     stats_entretien = get_stats_entretien()
     with col3:
         if stats_entretien["completion_today"] < 100:
-            st.info(f"â³ {100 - stats_entretien['completion_today']:.0f}% tÃ¢ches restantes")
+            st.info(f"⏳ {100 - stats_entretien['completion_today']:.0f}% tâches restantes")
         else:
-            st.success("âœ… Ménage complet!")
+            st.success("✅ Ménage complet!")
     
     st.markdown("---")
     
@@ -124,7 +124,7 @@ def app():
     st.markdown("---")
     
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    # ALERTES DÃ‰TAILLÃ‰ES
+    # ALERTES DÉTAILLÉES
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     if urgents:
@@ -139,7 +139,7 @@ def app():
     if plantes:
         st.markdown("### 🍽️ Plantes à arroser aujourd'hui")
         for p in plantes[:5]:
-            st.caption(f"â€¢ {p['nom']} 🗑️ {p['location']}")
+            st.caption(f"• {p['nom']} 🗑️ {p['location']}")
         st.markdown("---")
     
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -150,7 +150,7 @@ def app():
     💰 **Besoin d'aide?**
     
     Chaque module (Projets, Jardin, Entretien) intègre l'IA pour:
-    - Générateurs de tÃ¢ches & routines
+    - Générateurs de tâches & routines
     - Estimations de durée & planning
     - Conseils & astuces d'optimisation
     - Priorisation intelligente

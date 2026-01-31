@@ -92,7 +92,7 @@ def get_mois_suivant(annee: int, mois: int) -> Tuple[int, int]:
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# Ã‰VÃ‰NEMENTS CALENDRIER
+# ÉVÉNEMENTS CALENDRIER
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def filtrer_evenements_jour(evenements: List[Dict[str, Any]], jour: date) -> List[Dict[str, Any]]:

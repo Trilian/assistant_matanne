@@ -45,7 +45,7 @@ def analyser_charge_globale(evenements: List[Dict[str, Any]], taches: List[Dict[
     elif charge_totale <= 15:
         niveau = "Moyen"
     elif charge_totale <= 25:
-        niveau = "Ã‰levé"
+        niveau = "Élevé"
     else:
         niveau = "Très élevé"
     
@@ -61,7 +61,7 @@ def analyser_charge_globale(evenements: List[Dict[str, Any]], taches: List[Dict[
 
 
 def est_en_retard(tache: Dict[str, Any]) -> bool:
-    """Vérifie si une tÃ¢che est en retard."""
+    """Vérifie si une tâche est en retard."""
     if tache.get("complete", False):
         return False
     
@@ -76,7 +76,7 @@ def est_en_retard(tache: Dict[str, Any]) -> bool:
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TENDANCES ET PRÃ‰VISIONS
+# TENDANCES ET PRÉVISIONS
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def analyser_tendances(historique: List[Dict[str, Any]], jours: int = 30) -> Dict[str, Any]:
@@ -152,7 +152,7 @@ def prevoir_charge_prochaine_semaine(evenements: List[Dict[str, Any]], taches: L
     debut_semaine = date.today() + timedelta(days=7 - date.today().weekday())
     fin_semaine = debut_semaine + timedelta(days=6)
     
-    # Ã‰vénements prévus
+    # Événements prévus
     evt_semaine = []
     for evt in evenements:
         date_evt = evt.get("date")
@@ -162,7 +162,7 @@ def prevoir_charge_prochaine_semaine(evenements: List[Dict[str, Any]], taches: L
         if debut_semaine <= date_evt <= fin_semaine:
             evt_semaine.append(evt)
     
-    # TÃ¢ches à échéance
+    # Tâches à échéance
     taches_semaine = []
     for tache in taches:
         if tache.get("complete"):
@@ -198,11 +198,11 @@ def prevoir_charge_prochaine_semaine(evenements: List[Dict[str, Any]], taches: L
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# PRIORITÃ‰S ET ALERTES
+# PRIORITÉS ET ALERTES
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def identifier_taches_urgentes(taches: List[Dict[str, Any]], jours_seuil: int = 3) -> List[Dict[str, Any]]:
-    """Identifie les tÃ¢ches urgentes."""
+    """Identifie les tâches urgentes."""
     date_seuil = date.today() + timedelta(days=jours_seuil)
     
     urgentes = []
@@ -227,23 +227,23 @@ def generer_alertes(evenements: List[Dict[str, Any]], taches: List[Dict[str, Any
     """Génère les alertes pour la vue d'ensemble."""
     alertes = []
     
-    # TÃ¢ches en retard
+    # Tâches en retard
     en_retard = [t for t in taches if est_en_retard(t)]
     if en_retard:
         alertes.append({
             "type": "danger",
-            "message": f"âš ï¸ {len(en_retard)} tÃ¢che(s) en retard"
+            "message": f"âš ï¸ {len(en_retard)} tâche(s) en retard"
         })
     
-    # TÃ¢ches urgentes
+    # Tâches urgentes
     urgentes = identifier_taches_urgentes(taches, 3)
     if urgentes:
         alertes.append({
             "type": "warning",
-            "message": f"⏰ {len(urgentes)} tÃ¢che(s) urgente(s) (< 3 jours)"
+            "message": f"⏰ {len(urgentes)} tâche(s) urgente(s) (< 3 jours)"
         })
     
-    # Ã‰vénements aujourd'hui
+    # Événements aujourd'hui
     evt_aujourdhui = []
     for evt in evenements:
         date_evt = evt.get("date")
@@ -263,7 +263,7 @@ def generer_alertes(evenements: List[Dict[str, Any]], taches: List[Dict[str, Any
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# STATISTIQUES PÃ‰RIODIQUES
+# STATISTIQUES PÉRIODIQUES
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def calculer_statistiques_periode(items: List[Dict[str, Any]], periode: str = "Semaine") -> Dict[str, Any]:
@@ -306,7 +306,7 @@ def formater_niveau_charge(niveau: str) -> str:
         "Libre": "😌",
         "Léger": "🙂",
         "Moyen": "😐",
-        "Ã‰levé": "😐°",
+        "Élevé": "😐°",
         "Très élevé": "📥"
     }
     emoji = emojis.get(niveau, "")

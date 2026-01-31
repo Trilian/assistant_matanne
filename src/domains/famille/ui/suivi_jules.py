@@ -1,6 +1,6 @@
 ﻿"""
 Module Suivi Jules avec Agent IA intégré
-Suivi du développement avec conseils adaptés à l'Ã¢ge
+Suivi du développement avec conseils adaptés à l'âge
 """
 
 import asyncio
@@ -48,7 +48,7 @@ def get_child_profile() -> ChildProfile:
 
 
 def calculer_age(birth_date: date) -> dict:
-    """Calcule l'Ã¢ge en jours, semaines, mois"""
+    """Calcule l'âge en jours, semaines, mois"""
     today = date.today()
     delta = today - birth_date
 
@@ -64,7 +64,7 @@ def calculer_age(birth_date: date) -> dict:
 
 
 def get_etapes_developpement(age_mois: int) -> list[dict]:
-    """Retourne les étapes clés du développement selon l'Ã¢ge"""
+    """Retourne les étapes clés du développement selon l'âge"""
     etapes = {
         0: [
             "Réflexes primitifs (succion, préhension)",
@@ -203,13 +203,13 @@ def app():
     with tab1:
         st.subheader("Développement actuel")
 
-        # Ã‰tapes du développement
-        st.markdown("### 🎯 Ã‰tapes clés du développement")
+        # Étapes du développement
+        st.markdown("### 🎯 Étapes clés du développement")
 
         etapes = get_etapes_developpement(age["mois"])
 
         for etape in etapes:
-            st.success(f"âœ… {etape}")
+            st.success(f"✅ {etape}")
 
         st.markdown("---")
 
@@ -271,7 +271,7 @@ def app():
 
             if submitted:
                 ajouter_entree(jules.id, humeur, sommeil, activite, notes)
-                st.success("âœ… Observation ajoutée")
+                st.success("✅ Observation ajoutée")
                 st.balloons()
                 st.rerun()
 
@@ -285,7 +285,7 @@ def app():
         if not agent:
             st.error("Agent IA non disponible")
         else:
-            st.info(f"🔔 Conseils adaptés à l'Ã¢ge de Jules ({age['mois']} mois)")
+            st.info(f"🔔 Conseils adaptés à l'âge de Jules ({age['mois']} mois)")
 
             # Options
             col_c1, col_c2 = st.columns(2)
@@ -336,7 +336,7 @@ def app():
                             loop.close()
 
                         st.session_state["conseils_jules"] = conseils
-                        st.success("âœ… Conseils générés !")
+                        st.success("✅ Conseils générés !")
 
                     except Exception as e:
                         st.error(f"Erreur IA : {e}")
@@ -351,7 +351,7 @@ def app():
                 if "conseils" in conseils:
                     st.markdown("### 🔔 Conseils")
                     for conseil in conseils["conseils"]:
-                        st.success(f"âœ… {conseil}")
+                        st.success(f"✅ {conseil}")
 
                 # Activités
                 if "activites" in conseils:
@@ -378,7 +378,7 @@ def app():
                         notes=notes_conseil,
                     )
 
-                    st.success("âœ… Conseils sauvegardés dans le journal")
+                    st.success("✅ Conseils sauvegardés dans le journal")
                     del st.session_state["conseils_jules"]
 
             # Raccourcis conseils
@@ -451,7 +451,7 @@ def app():
                     notes_complete += f"\n\nCatégories: {', '.join(categories)}"
 
                 ajouter_entree(jules.id, humeur, sommeil, activite, notes_complete)
-                st.success("âœ… Entrée enregistrée dans le journal")
+                st.success("✅ Entrée enregistrée dans le journal")
                 st.balloons()
                 st.rerun()
 
@@ -550,7 +550,7 @@ def app():
             col_g1, col_g2 = st.columns(2)
 
             with col_g1:
-                st.markdown("### 💰 Ã‰volution du sommeil")
+                st.markdown("### 💰 Évolution du sommeil")
                 st.line_chart(df_stats.set_index("date")["sommeil"])
 
             with col_g2:
@@ -565,7 +565,7 @@ def app():
             top_activites = df_stats["activite"].value_counts().head(10)
 
             for activite, count in top_activites.items():
-                st.write(f"â€¢ **{activite}** : {count} fois")
+                st.write(f"• **{activite}** : {count} fois")
 
             # Demander analyse IA
             st.markdown("---")
@@ -597,7 +597,7 @@ def app():
                             loop.close()
 
                         # Afficher résultats
-                        st.success("âœ… Analyse terminée")
+                        st.success("✅ Analyse terminée")
 
                         if "tendances" in analyse:
                             st.info(f"**Tendances :** {analyse['tendances']}")
@@ -605,7 +605,7 @@ def app():
                         if "recommandations" in analyse:
                             st.markdown("**Recommandations :**")
                             for reco in analyse["recommandations"]:
-                                st.write(f"â€¢ {reco}")
+                                st.write(f"• {reco}")
 
                         if "score_bien_etre" in analyse:
                             st.metric("Score bien-être", f"{analyse['score_bien_etre']}/100")

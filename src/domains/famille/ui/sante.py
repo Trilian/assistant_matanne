@@ -31,7 +31,7 @@ def charger_routines_santé():
         routines = get_routines_actives()
         return routines
     except Exception as e:
-        st.error(f"âŒ Erreur chargement routines: {str(e)}")
+        st.error(f"❌ Erreur chargement routines: {str(e)}")
         return []
 
 
@@ -53,11 +53,11 @@ def ajouter_routine_santé(nom: str, type_routine: str, frequence: str, duree_mi
             )
             session.add(routine)
             session.commit()
-            st.success(f"âœ… Routine '{nom}' créée!")
+            st.success(f"✅ Routine '{nom}' créée!")
             clear_famille_cache()
             return True
     except Exception as e:
-        st.error(f"âŒ Erreur ajout routine: {str(e)}")
+        st.error(f"❌ Erreur ajout routine: {str(e)}")
         return False
 
 
@@ -67,7 +67,7 @@ def charger_objectifs():
         objectives = get_objectives_actifs()
         return objectives
     except Exception as e:
-        st.error(f"âŒ Erreur chargement objectifs: {str(e)}")
+        st.error(f"❌ Erreur chargement objectifs: {str(e)}")
         return []
 
 
@@ -88,11 +88,11 @@ def ajouter_objectif(titre: str, categorie: str, valeur_cible: float, unite: str
             )
             session.add(objective)
             session.commit()
-            st.success(f"âœ… Objectif '{titre}' créé!")
+            st.success(f"✅ Objectif '{titre}' créé!")
             clear_famille_cache()
             return True
     except Exception as e:
-        st.error(f"âŒ Erreur ajout objectif: {str(e)}")
+        st.error(f"❌ Erreur ajout objectif: {str(e)}")
         return False
 
 
@@ -118,7 +118,7 @@ def charger_entrees_recentes(jours: int = 30):
                 for e in entries
             ]
     except Exception as e:
-        st.error(f"âŒ Erreur chargement entrées: {str(e)}")
+        st.error(f"❌ Erreur chargement entrées: {str(e)}")
         return []
 
 
@@ -139,11 +139,11 @@ def ajouter_entree_santé(type_activite: str, duree_minutes: int, intensite: str
             )
             session.add(entry)
             session.commit()
-            st.success(f"âœ… Entrée '{type_activite}' enregistrée!")
+            st.success(f"✅ Entrée '{type_activite}' enregistrée!")
             clear_famille_cache()
             return True
     except Exception as e:
-        st.error(f"âŒ Erreur ajout entrée: {str(e)}")
+        st.error(f"❌ Erreur ajout entrée: {str(e)}")
         return False
 
 
@@ -157,11 +157,11 @@ def update_objectif_progression(objective_id: int, nouvelle_valeur: float):
                 if nouvelle_valeur >= objective.valeur_cible:
                     objective.statut = "atteint"
                 session.commit()
-                st.success("âœ… Progression mise à jour!")
+                st.success("✅ Progression mise à jour!")
                 clear_famille_cache()
                 return True
     except Exception as e:
-        st.error(f"âŒ Erreur mise à jour: {str(e)}")
+        st.error(f"❌ Erreur mise à jour: {str(e)}")
         return False
 
 
@@ -263,7 +263,7 @@ def app():
                                                  obj['valeur_actuelle'] or 0.0)
             with col3:
                 st.write("")  # Spacing
-                if st.button("âœ… Mettre à jour", use_container_width=True):
+                if st.button("✅ Mettre à jour", use_container_width=True):
                     update_objectif_progression(obj['id'], nouvelle_valeur)
         else:
             st.info("Aucun objectif créé")
@@ -309,13 +309,13 @@ def app():
                 
                 col_notes = st.columns(2)
                 with col_notes[0]:
-                    energie = st.slider("Ã‰nergie", 1, 10, 7)
+                    energie = st.slider("Énergie", 1, 10, 7)
                 with col_notes[1]:
                     moral = st.slider("Moral", 1, 10, 7)
                 
                 ressenti = st.text_area("Ressenti", height=60, placeholder="Comment tu te sens?")
                 
-                if st.form_submit_button("âœ… Enregistrer", use_container_width=True):
+                if st.form_submit_button("✅ Enregistrer", use_container_width=True):
                     ajouter_entree_santé(type_activite, duree, intensite, calories, energie, moral, ressenti)
         
         with col2:
@@ -326,7 +326,7 @@ def app():
             st.metric("🏃 Séances", stats['nb_seances'])
             st.metric("â±ï¸ Temps", f"{stats['total_minutes']} min")
             st.metric("🔥 Calories", f"{stats['total_calories']:.0f}")
-            st.metric("âš¡ Ã‰nergie", f"{stats['energie_moyenne']:.1f}/10")
+            st.metric("âš¡ Énergie", f"{stats['energie_moyenne']:.1f}/10")
             st.metric("😊 Moral", f"{stats['moral_moyen']:.1f}/10")
         
         st.divider()
@@ -365,12 +365,12 @@ def app():
             )
             st.plotly_chart(fig1, use_container_width=True)
             
-            # Graphique 2: Ã‰nergie et moral
+            # Graphique 2: Énergie et moral
             fig2 = go.Figure()
             fig2.add_trace(go.Scatter(
                 x=df['date'],
                 y=df['energie'],
-                name='Ã‰nergie',
+                name='Énergie',
                 line_color='green',
                 mode='lines+markers'
             ))
@@ -383,7 +383,7 @@ def app():
             ))
             
             fig2.update_layout(
-                title="Ã‰nergie & Moral",
+                title="Énergie & Moral",
                 xaxis_title="Date",
                 yaxis_title="Score (1-10)",
                 height=400,
@@ -402,11 +402,11 @@ def app():
         col1, col2 = st.columns(2)
         
         with col1:
-            st.subheader("âœ… Ã€ privilégier")
+            st.subheader("✅ Ã€ privilégier")
             points = [
                 "Fruits et légumes frais (5 portions/jour)",
                 "Protéines maigres (poulet, poisson, Å“ufs)",
-                "Féculents complets (riz brun, pÃ¢tes complètes)",
+                "Féculents complets (riz brun, pâtes complètes)",
                 "Produits laitiers ou substituts",
                 "Huiles saines (olive, tournesol)",
                 "Hydratation (1.5-2L eau/jour)"
@@ -415,7 +415,7 @@ def app():
                 st.write(f"âœ“ {point}")
         
         with col2:
-            st.subheader("âŒ Ã€ limiter")
+            st.subheader("❌ Ã€ limiter")
             points = [
                 "Sucres raffinés et sodas",
                 "Graisses saturées (beurre, fritures)",

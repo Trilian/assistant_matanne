@@ -40,11 +40,11 @@ def ajouter_activite(titre: str, type_activite: str, date_prevue: date,
             )
             session.add(activity)
             session.commit()
-            st.success(f"âœ… Activité '{titre}' créée!")
+            st.success(f"✅ Activité '{titre}' créée!")
             clear_famille_cache()
             return True
     except Exception as e:
-        st.error(f"âŒ Erreur ajout activité: {str(e)}")
+        st.error(f"❌ Erreur ajout activité: {str(e)}")
         return False
 
 
@@ -58,11 +58,11 @@ def marquer_terminee(activity_id: int, cout_reel: float = None, notes: str = "")
                 if cout_reel is not None:
                     activity.cout_reel = cout_reel
                 session.commit()
-                st.success("âœ… Activité marquée comme terminée!")
+                st.success("✅ Activité marquée comme terminée!")
                 clear_famille_cache()
                 return True
     except Exception as e:
-        st.error(f"âŒ Erreur mise à jour: {str(e)}")
+        st.error(f"❌ Erreur mise à jour: {str(e)}")
         return False
 
 
@@ -71,7 +71,7 @@ SUGGESTIONS_ACTIVITES = {
     "musée": ["Musée enfants", "Exposition interactive", "Aquarium"],
     "eau": ["Piscine", "Plage", "Parc aquatique bébé"],
     "jeu_maison": ["Jeux intérieurs", "Chasse au trésor", "Soirée jeux de société"],
-    "sport": ["Cours de gym douce", "Ã‰quitation enfant", "Skating"],
+    "sport": ["Cours de gym douce", "Équitation enfant", "Skating"],
     "sortie": ["Restaurant enfant-friendly", "Cinéma familial", "Zoo"]
 }
 
@@ -112,15 +112,15 @@ def app():
                             
                             with col_info:
                                 st.write(f"**{act['titre']}**")
-                                st.caption(f"{act['type']} â€¢ {act.get('lieu', 'TBD')}")
+                                st.caption(f"{act['type']} • {act.get('lieu', 'TBD')}")
                                 if act.get('participants'):
                                     st.caption(f"📅 {', '.join(act['participants'])}")
-                                st.caption(f"💡 {act.get('cout_estime', 0):.2f}â‚¬")
+                                st.caption(f"💡 {act.get('cout_estime', 0):.2f}€")
                 else:
                     st.info("Aucune activité cette semaine. Planifiez une activité!")
             
             except Exception as e:
-                st.error(f"âŒ Erreur chargement: {str(e)}")
+                st.error(f"❌ Erreur chargement: {str(e)}")
         
         with col2:
             st.subheader("âž• Ajouter Activité")
@@ -132,15 +132,15 @@ def app():
                 date_act = st.date_input("Date")
                 duree = st.number_input("Durée (h)", 0.5, 8.0, 2.0)
                 lieu = st.text_input("Lieu")
-                cout = st.number_input("Coût estimé (â‚¬)", 0.0, 500.0, 0.0)
+                cout = st.number_input("Coût estimé (€)", 0.0, 500.0, 0.0)
                 
-                if st.form_submit_button("âœ… Ajouter", use_container_width=True):
+                if st.form_submit_button("✅ Ajouter", use_container_width=True):
                     if titre and type_act:
                         ajouter_activite(titre, type_act, date_act, duree, lieu, 
                                        ["Famille"], cout)
     
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    # TAB 2: IDÃ‰ES ACTIVITÃ‰S
+    # TAB 2: IDÉES ACTIVITÉS
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     with tabs[1]:
         st.header("👶 Idées d'Activités")
@@ -191,14 +191,14 @@ def app():
             budget_semaine = get_budget_par_period("week").get("Activités", 0)
             
             with col1:
-                st.metric("💡 Ce mois", f"{budget_mois:.2f}â‚¬")
+                st.metric("💡 Ce mois", f"{budget_mois:.2f}€")
             with col2:
-                st.metric("[CHART] Cette semaine", f"{budget_semaine:.2f}â‚¬")
+                st.metric("[CHART] Cette semaine", f"{budget_semaine:.2f}€")
             with col3:
-                st.metric("🗑️ Budget moyen", f"{budget_mois / 4:.2f}â‚¬ par semaine")
+                st.metric("🗑️ Budget moyen", f"{budget_mois / 4:.2f}€ par semaine")
         
         except Exception as e:
-            st.error(f"âŒ Erreur budget: {str(e)}")
+            st.error(f"❌ Erreur budget: {str(e)}")
         
         st.divider()
         
@@ -248,7 +248,7 @@ def app():
                     fig1.update_layout(
                         title="Dépenses par Date",
                         xaxis_title="Date",
-                        yaxis_title="Montant (â‚¬)",
+                        yaxis_title="Montant (€)",
                         height=400,
                         hovermode="x unified"
                     )
@@ -265,7 +265,7 @@ def app():
                     fig2.update_layout(
                         title="Budget par Type d'Activité",
                         xaxis_title="Type",
-                        yaxis_title="Budget (â‚¬)",
+                        yaxis_title="Budget (€)",
                         height=400
                     )
                     st.plotly_chart(fig2, use_container_width=True)
@@ -273,7 +273,7 @@ def app():
                     st.info("Aucune activité sur 30 jours")
         
         except Exception as e:
-            st.error(f"âŒ Erreur graphiques: {str(e)}")
+            st.error(f"❌ Erreur graphiques: {str(e)}")
 
 
 if __name__ == "__main__":

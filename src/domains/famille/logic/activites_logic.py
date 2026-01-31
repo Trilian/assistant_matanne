@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 TYPES_ACTIVITE = ["Sport", "Culture", "Sortie", "Atelier", "Rendez-vous", "Jeu", "Autre"]
-LIEUX = ["Maison", "Parc", "Centre culturel", "Ã‰cole", "Bibliothèque", "Piscine", "Autre"]
+LIEUX = ["Maison", "Parc", "Centre culturel", "École", "Bibliothèque", "Piscine", "Autre"]
 CATEGORIES_AGE = ["0-1 an", "1-2 ans", "2-3 ans", "3-5 ans", "5+ ans", "Famille"]
 
 
@@ -118,7 +118,7 @@ def calculer_frequence_hebdomadaire(activites: List[Dict[str, Any]], semaines: i
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def suggerer_activites_age(age_mois: int) -> List[Dict[str, str]]:
-    """Suggère des activités adaptées à l'Ã¢ge."""
+    """Suggère des activités adaptées à l'âge."""
     suggestions = []
     
     if age_mois < 12:
@@ -141,7 +141,7 @@ def suggerer_activites_age(age_mois: int) -> List[Dict[str, str]]:
         ]
     else:
         suggestions = [
-            {"type": "Atelier", "titre": "Activités créatives", "description": "Peinture, pÃ¢te à modeler"},
+            {"type": "Atelier", "titre": "Activités créatives", "description": "Peinture, pâte à modeler"},
             {"type": "Sport", "titre": "Sport collectif", "description": "Football, natation"},
             {"type": "Culture", "titre": "Sorties culturelles", "description": "Musées, spectacles"}
         ]

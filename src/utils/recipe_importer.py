@@ -136,9 +136,10 @@ class RecipeImporter:
     def _extract_from_html(soup, url: str) -> Optional[Dict[str, Any]]:
         """
         Extrait les infos de recette depuis du HTML
-        Optimisé pour Marmiton, RecettesTin, CuisineAZ, etc.
+        Optimisé pour JSON-LD (schema.org) - Marmiton, RecettesTin, CuisineAZ, etc.
         """
         from bs4 import BeautifulSoup
+        import json
         
         recipe = {
             'nom': '',
@@ -148,72 +149,142 @@ class RecipeImporter:
             'temps_preparation': 0,
             'temps_cuisson': 0,
             'portions': 4,
-            'source_url': url
+            'source_url': url,
+            'image_url': ''  # Nouvelle clé pour l'image
         }
         
-        # Chercher le titre (h1, h2, ou property og:title)
-        title = soup.find('h1')
-        if title:
-            recipe['nom'] = title.get_text(strip=True)
-        else:
-            og_title = soup.find('meta', property='og:title')
-            if og_title:
-                recipe['nom'] = og_title.get('content', '')
+        # D'abord essayer JSON-LD (schema.org) - BEAUCOUP plus fiable!
+        scripts = soup.find_all('script', type='application/ld+json')
+        for script in scripts:
+            try:
+                data = json.loads(script.string)
+                
+                # Vérifier si c'est une recette
+                if data.get('@type') == 'Recipe' or 'recipe' in str(data).lower():
+                    # Récupérer le nom
+                    if 'name' in data:
+                        recipe['nom'] = data.get('name', '')
+                    
+                    # Récupérer la description
+                    if 'description' in data:
+                        recipe['description'] = data.get('description', '')
+                    
+                    # Récupérer les ingrédients
+                    if 'recipeIngredient' in data:
+                        ingredients = data.get('recipeIngredient', [])
+                        if isinstance(ingredients, list):
+                            recipe['ingredients'] = ingredients
+                    
+                    # Récupérer les étapes
+                    if 'recipeInstructions' in data:
+                        instructions = data.get('recipeInstructions', [])
+                        if isinstance(instructions, list):
+                            recipe['etapes'] = []
+                            for idx, inst in enumerate(instructions, 1):
+                                if isinstance(inst, dict):
+                                    # Format HowToStep
+                                    text = inst.get('text', '')
+                                elif isinstance(inst, str):
+                                    text = inst
+                                else:
+                                    continue
+                                
+                                if text:
+                                    recipe['etapes'].append(f"{idx}. {text}")
+                    
+                    # Récupérer les temps
+                    if 'prepTime' in data:
+                        recipe['temps_preparation'] = RecipeImporter._parse_duration(data.get('prepTime', ''))
+                    if 'cookTime' in data:
+                        recipe['temps_cuisson'] = RecipeImporter._parse_duration(data.get('cookTime', ''))
+                    
+                    # Récupérer les portions
+                    if 'recipeYield' in data:
+                        yield_val = data.get('recipeYield', 4)
+                        if isinstance(yield_val, list):
+                            yield_val = yield_val[0] if yield_val else 4
+                        try:
+                            recipe['portions'] = int(str(yield_val).split()[0])
+                        except:
+                            recipe['portions'] = 4
+                    
+                    # Récupérer l'image
+                    if 'image' in data:
+                        image = data.get('image', '')
+                        if isinstance(image, list):
+                            image = image[0] if image else ''
+                        if isinstance(image, dict):
+                            image = image.get('url', '')
+                        recipe['image_url'] = image
+                    
+                    # Si on a un nom, on a trouvé la recette!
+                    if recipe['nom']:
+                        return recipe
+            except:
+                pass  # Continuer si erreur JSON
+        
+        # Fallback: chercher le titre (h1, h2, ou property og:title)
+        if not recipe['nom']:
+            title = soup.find('h1')
+            if title:
+                recipe['nom'] = title.get_text(strip=True)
+            else:
+                og_title = soup.find('meta', property='og:title')
+                if og_title:
+                    recipe['nom'] = og_title.get('content', '')
         
         # Chercher la description
-        desc = soup.find('meta', property='og:description')
-        if desc:
-            recipe['description'] = desc.get('content', '')
-        else:
-            desc_elem = soup.find('p', class_=re.compile('description', re.I))
-            if desc_elem:
-                recipe['description'] = desc_elem.get_text(strip=True)
+        if not recipe['description']:
+            desc = soup.find('meta', property='og:description')
+            if desc:
+                recipe['description'] = desc.get('content', '')
+            else:
+                desc_elem = soup.find('p', class_=re.compile('description', re.I))
+                if desc_elem:
+                    recipe['description'] = desc_elem.get_text(strip=True)
         
-        # MARMITON - Extraction spécifique des ingrédients
-        marmiton_ingredients = soup.find_all(re.compile('^li$', re.I), class_=re.compile('ingredient', re.I))
-        if marmiton_ingredients:
-            for li in marmiton_ingredients:
-                text = li.get_text(strip=True)
-                if text and len(text) > 2:
-                    recipe['ingredients'].append(text)
+        # EXTRAIT IMAGE - Chercher les images de recette
+        if not recipe['image_url']:
+            # Priorité: og:image > twitter:image > img tags
+            image_url = soup.find('meta', property='og:image')
+            if image_url:
+                recipe['image_url'] = image_url.get('content', '')
+            else:
+                twitter_image = soup.find('meta', {'name': 'twitter:image'})
+                if twitter_image:
+                    recipe['image_url'] = twitter_image.get('content', '')
+                else:
+                    # Chercher la première image grande dans le contenu
+                    img = soup.find('img', class_=re.compile('recipe|dish|food|ingredient', re.I))
+                    if img and img.get('src'):
+                        recipe['image_url'] = img.get('src', '')
         
-        # MARMITON - Extraction spécifique des étapes
-        marmiton_etapes = soup.find_all(re.compile('^li$', re.I), class_=re.compile('recipe-step', re.I))
-        if marmiton_etapes:
-            for idx, li in enumerate(marmiton_etapes, 1):
-                text = li.get_text(strip=True)
-                if text and len(text) > 2:
-                    recipe['etapes'].append(f"{idx}. {text}")
+        # S'assurer que l'URL est absolue
+        if recipe['image_url'] and not recipe['image_url'].startswith('http'):
+            from urllib.parse import urljoin
+            recipe['image_url'] = urljoin(url, recipe['image_url'])
         
-        # Si pas trouvé avec Marmiton, chercher les listes génériques
+        # Fallback pour les ingrédients si JSON-LD n'avait pas
         if not recipe['ingredients']:
-            # Chercher des listes <ul> ou <ol> contenant des ingrédients
-            for ul in soup.find_all(['ul', 'ol']):
-                section_name = ul.find_previous(['h2', 'h3', 'h4', 'div'])
-                if section_name:
-                    section_text = section_name.get_text().lower()
-                    if 'ingrédient' in section_text or 'ingredient' in section_text:
-                        for li in ul.find_all('li', recursive=False):
-                            text = li.get_text(strip=True)
-                            if text and len(text) > 2:
-                                recipe['ingredients'].append(text)
-                        break
-        
-        # Si pas trouvé, chercher avec des classes communes
-        if not recipe['ingredients']:
-            ingredient_classes = ['ingredients', 'ingredient-list', 'ingredient', 'ingredient-item']
-            for ing_class in ingredient_classes:
-                ing_list = soup.find('div', class_=re.compile(ing_class, re.I))
-                if ing_list:
-                    for li in ing_list.find_all('li'):
-                        text = li.get_text(strip=True)
-                        if text and len(text) > 2:
+            # Chercher MARMITON spécifiquement - div avec mrtn-recette_ingredients-items
+            ing_container = soup.find('div', class_='mrtn-recette_ingredients-items')
+            if ing_container:
+                # Chercher tous les spans ou divs contenant les ingredients
+                ing_divs = ing_container.find_all(['div', 'span'], recursive=True)
+                for ing_div in ing_divs:
+                    text = ing_div.get_text(strip=True)
+                    # Éviter les vides et les trop courts
+                    if text and len(text) > 3 and not text.isnumeric():
+                        # Vérifier que ce n'est pas un bouton ou UI element
+                        if not any(word in text.lower() for word in ['voir', 'moins', 'filtre', 'version']):
                             recipe['ingredients'].append(text)
-                    if recipe['ingredients']:
-                        break
+                
+                # Deduplicer
+                recipe['ingredients'] = list(dict.fromkeys(recipe['ingredients']))
         
-        # Si pas trouvé les étapes, chercher les listes génériques
+        # Fallback pour les étapes si JSON-LD n'avait pas
         if not recipe['etapes']:
+            # Chercher les listes génériques
             for ol in soup.find_all(['ol', 'ul']):
                 section_name = ol.find_previous(['h2', 'h3', 'h4', 'div'])
                 if section_name:
@@ -224,62 +295,6 @@ class RecipeImporter:
                             if text and len(text) > 2:
                                 recipe['etapes'].append(f"{idx}. {text}")
                         break
-        
-        # Si pas trouvé, chercher avec des classes communes
-        if not recipe['etapes']:
-            etape_classes = ['steps', 'instructions', 'etapes', 'directions', 'preparation']
-            for etape_class in etape_classes:
-                etape_list = soup.find('div', class_=re.compile(etape_class, re.I))
-                if etape_list:
-                    for idx, li in enumerate(etape_list.find_all('li'), 1):
-                        text = li.get_text(strip=True)
-                        if text and len(text) > 2:
-                            recipe['etapes'].append(f"{idx}. {text}")
-                    if recipe['etapes']:
-                        break
-        
-        # Chercher le temps de préparation/cuisson (schema.org)
-        time_elem = soup.find(re.compile('^meta$', re.I), {'property': 'recipe:prep_time'})
-        if time_elem:
-            time_str = time_elem.get('content', '0')
-            recipe['temps_preparation'] = RecipeImporter._parse_duration(time_str)
-        
-        # Si pas trouvé avec schema.org, chercher avec itemprop
-        if recipe['temps_preparation'] == 0:
-            prep_time = soup.find(re.compile('^[^>]*$', re.I), {'itemprop': 'prepTime'})
-            if prep_time:
-                time_str = prep_time.get('content', '0')
-                recipe['temps_preparation'] = RecipeImporter._parse_duration(time_str)
-        
-        cook_time = soup.find(re.compile('^meta$', re.I), {'property': 'recipe:cook_time'})
-        if cook_time:
-            time_str = cook_time.get('content', '0')
-            recipe['temps_cuisson'] = RecipeImporter._parse_duration(time_str)
-        
-        # Si pas trouvé, chercher avec itemprop
-        if recipe['temps_cuisson'] == 0:
-            cook_time_elem = soup.find(re.compile('^[^>]*$', re.I), {'itemprop': 'cookTime'})
-            if cook_time_elem:
-                time_str = cook_time_elem.get('content', '0')
-                recipe['temps_cuisson'] = RecipeImporter._parse_duration(time_str)
-        
-        # Chercher les portions
-        yield_elem = soup.find(re.compile('^meta$', re.I), {'property': 'recipe:yield'})
-        if yield_elem:
-            yield_str = yield_elem.get('content', '4')
-            try:
-                recipe['portions'] = int(re.search(r'\d+', yield_str).group())
-            except:
-                recipe['portions'] = 4
-        
-        # Si pas trouvé, chercher avec itemprop
-        if recipe['portions'] == 4:
-            yield_elem = soup.find(re.compile('^[^>]*$', re.I), {'itemprop': 'recipeYield'})
-            if yield_elem:
-                try:
-                    recipe['portions'] = int(re.search(r'\d+', yield_elem.get_text()).group())
-                except:
-                    recipe['portions'] = 4
         
         return recipe if recipe['nom'] else None
     
@@ -350,17 +365,45 @@ class RecipeImporter:
     def _parse_duration(duration_str: str) -> int:
         """
         Parse une durée ISO 8601 (PT30M, PT1H30M, etc.)
+        + formats textuels français (1h 30, 1h30min, 30min, 1 heure, etc.)
         """
         try:
-            # Format ISO 8601: PT[n]H[n]M[n]S
-            hours = re.search(r'(\d+)H', duration_str)
-            minutes = re.search(r'(\d+)M', duration_str)
+            if not duration_str:
+                return 0
             
+            duration_str = str(duration_str).strip()
+            
+            # Format ISO 8601: PT[n]H[n]M[n]S
+            if duration_str.startswith('PT'):
+                hours = re.search(r'(\d+)H', duration_str)
+                minutes = re.search(r'(\d+)M', duration_str)
+                
+                total_minutes = 0
+                if hours:
+                    total_minutes += int(hours.group(1)) * 60
+                if minutes:
+                    total_minutes += int(minutes.group(1))
+                
+                return total_minutes
+            
+            # Formats français: "1h 30", "1h30min", "1h", "30min", "1 heure 30 minutes", etc.
             total_minutes = 0
-            if hours:
-                total_minutes += int(hours.group(1)) * 60
-            if minutes:
-                total_minutes += int(minutes.group(1))
+            
+            # Chercher les heures
+            hours_match = re.search(r'(\d+)\s*(?:h|heure)', duration_str, re.IGNORECASE)
+            if hours_match:
+                total_minutes += int(hours_match.group(1)) * 60
+            
+            # Chercher les minutes
+            minutes_match = re.search(r'(\d+)\s*(?:min|m(?:inute)?)', duration_str, re.IGNORECASE)
+            if minutes_match:
+                total_minutes += int(minutes_match.group(1))
+            
+            # Si rien trouvé, chercher juste un nombre
+            if total_minutes == 0:
+                number_match = re.search(r'(\d+)', duration_str)
+                if number_match:
+                    total_minutes = int(number_match.group(1))
             
             return total_minutes
         except:

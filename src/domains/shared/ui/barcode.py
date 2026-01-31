@@ -1,10 +1,10 @@
 ﻿"""
 Module Scanner Barcode/QR - Interface Streamlit
 
-âœ… Scanner codes-barres
-âœ… Ajout rapide articles
-âœ… Vérification stock
-âœ… Import/Export
+✅ Scanner codes-barres
+✅ Ajout rapide articles
+✅ Vérification stock
+✅ Import/Export
 """
 
 import streamlit as st
@@ -55,7 +55,7 @@ def app():
     tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "👶 Scanner",
         "âž• Ajout rapide",
-        "âœ… Vérifier stock",
+        "✅ Vérifier stock",
         "[CHART] Gestion",
         "💰¥ Import/Export"
     ])
@@ -111,13 +111,13 @@ def render_scanner():
             valide, type_code = service.valider_barcode(code_input)
             
             if not valide:
-                st.error(f"âŒ Code invalide: {type_code}")
+                st.error(f"❌ Code invalide: {type_code}")
                 return
             
             # Scanner
             resultat = service.scanner_code(code_input)
             
-            st.success("âœ… Scan réussi!")
+            st.success("✅ Scan réussi!")
             
             # Afficher résultats
             col1, col2 = st.columns(2)
@@ -153,7 +153,7 @@ def render_scanner():
                         st.switch_page("pages/0_accueil.py")
                 
                 with col2:
-                    if st.button("âœï¸ Ã‰diter article", key="btn_edit_article"):
+                    if st.button("âœï¸ Éditer article", key="btn_edit_article"):
                         st.session_state.article_id_to_edit = details["id"]
                         st.switch_page("pages/0_accueil.py")
                 
@@ -168,7 +168,7 @@ def render_scanner():
                     st.rerun()
         
         except Exception as e:
-            st.error(f"âŒ Erreur: {str(e)}")
+            st.error(f"❌ Erreur: {str(e)}")
     
     # Info
     st.info("""
@@ -227,7 +227,7 @@ def render_ajout_rapide():
                 "Catégorie",
                 [
                     "Légumes", "Fruits", "Féculents", "Protéines",
-                    "Laitier", "Ã‰pices & Condiments", "Conserves",
+                    "Laitier", "Épices & Condiments", "Conserves",
                     "Surgelés", "Autre"
                 ]
             )
@@ -239,7 +239,7 @@ def render_ajout_rapide():
         col1, col2 = st.columns(2)
         with col1:
             prix_unitaire = st.number_input(
-                "Prix unitaire â‚¬ (optionnel)",
+                "Prix unitaire € (optionnel)",
                 min_value=0.0,
                 value=0.0,
                 step=0.01
@@ -253,11 +253,11 @@ def render_ajout_rapide():
                 step=1
             )
         
-        submitted = st.form_submit_button("âœ… Ajouter article", use_container_width=True)
+        submitted = st.form_submit_button("✅ Ajouter article", use_container_width=True)
     
     if submitted:
         if not barcode or not nom:
-            st.error("âŒ Veuillez remplir les champs obligatoires (*)")
+            st.error("❌ Veuillez remplir les champs obligatoires (*)")
             return
         
         try:
@@ -273,7 +273,7 @@ def render_ajout_rapide():
                 emplacement=emplacement
             )
             
-            st.success(f"âœ… Article créé: {nom}")
+            st.success(f"✅ Article créé: {nom}")
             st.balloons()
             
             # Afficher résumé
@@ -289,13 +289,13 @@ def render_ajout_rapide():
             st.session_state.clear()
         
         except ErreurValidation as e:
-            st.error(f"âŒ Validation: {str(e)}")
+            st.error(f"❌ Validation: {str(e)}")
         except Exception as e:
-            st.error(f"âŒ Erreur: {str(e)}")
+            st.error(f"❌ Erreur: {str(e)}")
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# ONGLET 3: VÃ‰RIFIER STOCK
+# ONGLET 3: VÉRIFIER STOCK
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
@@ -304,7 +304,7 @@ def render_verifier_stock():
     
     service = get_barcode_service()
     
-    st.subheader("âœ… Vérifier Stock par Code")
+    st.subheader("✅ Vérifier Stock par Code")
     
     st.markdown("Scannez un code pour vérifier instantanément le stock")
     
@@ -343,11 +343,11 @@ def render_verifier_stock():
             with col4:
                 etat = info_stock["etat_stock"]
                 if etat == "OK":
-                    st.metric("Ã‰tat", "âœ… OK", delta="Normal")
+                    st.metric("État", "✅ OK", delta="Normal")
                 elif etat == "FAIBLE":
-                    st.metric("Ã‰tat", "âš ï¸ FAIBLE", delta="Ã€ renouveler")
+                    st.metric("État", "âš ï¸ FAIBLE", delta="Ã€ renouveler")
                 else:
-                    st.metric("Ã‰tat", "❌ CRITIQUE", delta="Urgent!")
+                    st.metric("État", "❌ CRITIQUE", delta="Urgent!")
             
             # Détails
             st.divider()
@@ -359,24 +359,24 @@ def render_verifier_stock():
             
             with col2:
                 if info_stock["prix_unitaire"]:
-                    st.metric("Prix unitaire", f"â‚¬{info_stock['prix_unitaire']:.2f}")
+                    st.metric("Prix unitaire", f"€{info_stock['prix_unitaire']:.2f}")
             
             with col3:
                 etat_perem = info_stock["peremption_etat"]
-                emoji = "âœ…" if etat_perem == "OK" else "âš ï¸"
+                emoji = "✅" if etat_perem == "OK" else "âš ï¸"
                 st.metric("Péremption", f"{emoji} {etat_perem}")
             
             # Actions
             if info_stock["etat_stock"] != "OK":
                 st.warning(f"[PKG] Stock faible - Considérer l'ajout de stock")
             
-            if info_stock["peremption_etat"] in ["URGENT", "PÃ‰RIMÃ‰"]:
-                st.error(f"âŒ Problème péremption - Action requise")
+            if info_stock["peremption_etat"] in ["URGENT", "PÉRIMÉ"]:
+                st.error(f"❌ Problème péremption - Action requise")
         
         except ErreurNonTrouve:
-            st.error("âŒ Code non trouvé dans la base")
+            st.error("❌ Code non trouvé dans la base")
         except Exception as e:
-            st.error(f"âŒ Erreur: {str(e)}")
+            st.error(f"❌ Erreur: {str(e)}")
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -419,7 +419,7 @@ def render_gestion_barcodes():
                 }
             )
             
-            # Ã‰dition
+            # Édition
             st.divider()
             st.subheader("🔄 Mettre à jour code-barres")
             
@@ -440,23 +440,23 @@ def render_gestion_barcodes():
                 )
             
             with col3:
-                if st.button("âœ… Mettre à jour", key="btn_update_barcode"):
+                if st.button("✅ Mettre à jour", key="btn_update_barcode"):
                     if nouveau_code and article_id:
                         try:
                             service.mettre_a_jour_barcode(
                                 article_id[0],
                                 nouveau_code
                             )
-                            st.success("âœ… Code-barres mis à jour")
+                            st.success("✅ Code-barres mis à jour")
                             st.rerun()
                         except Exception as e:
-                            st.error(f"âŒ Erreur: {str(e)}")
+                            st.error(f"❌ Erreur: {str(e)}")
         
         else:
             st.info("â„¹ï¸ Aucun article avec code-barres pour le moment")
     
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"❌ Erreur: {str(e)}")
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -487,9 +487,9 @@ def render_import_export():
                     mime="text/csv",
                     key="download_barcode_csv"
                 )
-                st.success("âœ… CSV généré")
+                st.success("✅ CSV généré")
             except Exception as e:
-                st.error(f"âŒ Erreur: {str(e)}")
+                st.error(f"❌ Erreur: {str(e)}")
     
     # IMPORT
     with col2:
@@ -504,18 +504,18 @@ def render_import_export():
         if uploaded_file:
             csv_content = uploaded_file.read().decode('utf-8')
             
-            if st.button("âœ… Importer", key="btn_import_barcode"):
+            if st.button("✅ Importer", key="btn_import_barcode"):
                 try:
                     resultats = service.importer_barcodes(csv_content)
                     
-                    st.success(f"âœ… {resultats['success']} articles importés")
+                    st.success(f"✅ {resultats['success']} articles importés")
                     
                     if resultats['errors']:
                         st.warning(f"âš ï¸ {len(resultats['errors'])} erreurs")
                         for err in resultats['errors'][:5]:
                             st.text(f"- {err['barcode']}: {err['erreur']}")
                 except Exception as e:
-                    st.error(f"âŒ Erreur import: {str(e)}")
+                    st.error(f"❌ Erreur import: {str(e)}")
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•

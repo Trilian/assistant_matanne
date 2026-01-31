@@ -179,7 +179,7 @@ def render_critical_alerts():
         alerts.append(
             {
                 "type": "warning",
-                "icon": "â³",
+                "icon": "⏳",
                 "title": f"{len(peremption)} article(s) périment bientôt",
                 "action": "Voir l'inventaire",
                 "module": "cuisine.inventaire",
@@ -202,7 +202,7 @@ def render_critical_alerts():
 
     # Afficher alertes
     if not alerts:
-        st.success("âœ… Tout est en ordre !")
+        st.success("✅ Tout est en ordre !")
         return
 
     st.markdown("### ⏰ Alertes")
@@ -311,7 +311,7 @@ def render_quick_actions():
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# RÃ‰SUMÃ‰S PAR MODULE
+# RÉSUMÉS PAR MODULE
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
@@ -429,7 +429,7 @@ def render_courses_summary():
             prioritaires = [a for a in liste if a.get("priorite") == "haute"]
 
             for art in prioritaires[:3]:
-                st.caption(f"â€¢ {art['nom']} ({art['quantite']} {art['unite']})")
+                st.caption(f"• {art['nom']} ({art['quantite']} {art['unite']})")
 
             if len(prioritaires) > 3:
                 st.caption(f"... et {len(prioritaires) - 3} autre(s)")
@@ -481,7 +481,7 @@ def render_planning_summary():
                 for repas in repas_aujourdhui[:2]:
                     type_repas = getattr(repas, 'type_repas', 'Repas')
                     nom_recette = getattr(repas, 'recette_nom', None) or "Non défini"
-                    st.caption(f"â€¢ {type_repas}: {nom_recette}")
+                    st.caption(f"• {type_repas}: {nom_recette}")
 
         else:
             st.info("Aucun planning cette semaine")

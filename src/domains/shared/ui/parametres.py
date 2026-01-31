@@ -78,7 +78,7 @@ def render_foyer_config():
     st.markdown("### 👶€📉€⚫€📷 Configuration Foyer")
     st.caption("Configure les informations de ton foyer")
 
-    # Ã‰tat actuel
+    # État actuel
     state = get_state()
 
     # Récupérer config existante
@@ -165,7 +165,7 @@ def render_foyer_config():
             # Mettre à jour state
             state.nom_utilisateur = nom_utilisateur
 
-            show_success("âœ… Configuration sauvegardée !")
+            show_success("✅ Configuration sauvegardée !")
             st.rerun()
 
     # Afficher config actuelle
@@ -202,7 +202,7 @@ def render_ia_config():
     st.markdown("---")
 
     # Rate Limiting
-    st.markdown("#### â³ Rate Limiting")
+    st.markdown("#### ⏳ Rate Limiting")
 
     col3, col4 = st.columns(2)
 
@@ -256,12 +256,12 @@ def render_ia_config():
         st.metric("Entrées Cachées", cache_stats.get("entrees_ia", 0))
 
     with col9:
-        st.metric("Appels Ã‰conomisés", cache_stats.get("saved_api_calls", 0))
+        st.metric("Appels Économisés", cache_stats.get("saved_api_calls", 0))
 
     mode = "🎯 Sémantique" if cache_stats.get("embeddings_available", False) else "📤 MD5"
     st.info(f"**Mode:** {mode}")
     if cache_stats.get("embeddings_available", False):
-        st.success("âœ… Embeddings actifs (similarité sémantique)")
+        st.success("✅ Embeddings actifs (similarité sémantique)")
     else:
         st.warning("âš ï¸ Embeddings indisponibles (fallback MD5)")
 
@@ -281,7 +281,7 @@ def render_ia_config():
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TAB 3: BASE DE DONNÃ‰ES
+# TAB 3: BASE DE DONNÉES
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
@@ -295,7 +295,7 @@ def render_database_config():
     db_info = get_db_info()
 
     if db_info.get("statut") == "connected":
-        st.success("âœ… Connexion active")
+        st.success("✅ Connexion active")
 
         col1, col2 = st.columns(2)
 
@@ -310,7 +310,7 @@ def render_database_config():
             st.info(f"**Schéma:** v{db_info.get('version_schema', 0)}")
 
     else:
-        st.error(f"âŒ Erreur: {db_info.get('erreur', 'Inconnue')}")
+        st.error(f"❌ Erreur: {db_info.get('erreur', 'Inconnue')}")
 
     st.markdown("---")
 
@@ -322,7 +322,7 @@ def render_database_config():
             health = health_check()
 
         if health.get("sain"):
-            st.success("âœ… Base de données en bonne santé")
+            st.success("✅ Base de données en bonne santé")
 
             col3, col4 = st.columns(2)
 
@@ -333,7 +333,7 @@ def render_database_config():
                 db_size_mb = health.get("taille_base_octets", 0) / 1024 / 1024
                 st.metric("Taille DB", f"{db_size_mb:.2f} MB")
         else:
-            st.error(f"âŒ Problème détecté: {health.get('erreur')}")
+            st.error(f"❌ Problème détecté: {health.get('erreur')}")
 
     st.markdown("---")
 
@@ -350,10 +350,10 @@ def render_database_config():
             with smart_spinner("Exécution des migrations...", estimated_seconds=5):
                 try:
                     MigrationManager.executer_migrations()
-                    show_success("âœ… Migrations exécutées !")
+                    show_success("✅ Migrations exécutées !")
                     st.rerun()
                 except Exception as e:
-                    show_error(f"âŒ Erreur: {str(e)}")
+                    show_error(f"❌ Erreur: {str(e)}")
 
     with col6:
         if st.button("â„¹ï¸ Voir Historique", key="btn_show_migration_history", use_container_width=True):
@@ -377,16 +377,16 @@ def render_database_config():
             else:
                 st.warning("Cela peut prendre plusieurs minutes. Continuer ?")
 
-                if modal.confirm("âœ… Optimiser"):
+                if modal.confirm("✅ Optimiser"):
                     with smart_spinner("Optimisation en cours...", estimated_seconds=10):
                         try:
                             vacuum_database()
-                            show_success("âœ… Optimisation terminée !")
+                            show_success("✅ Optimisation terminée !")
                             modal.close()
                         except Exception as e:
-                            show_error(f"âŒ Erreur: {str(e)}")
+                            show_error(f"❌ Erreur: {str(e)}")
 
-                modal.cancel("âŒ Annuler")
+                modal.cancel("❌ Annuler")
 
     with col8:
         if st.button("👧 Backup (TODO)", key="btn_backup_db", use_container_width=True):
@@ -462,7 +462,7 @@ def render_cache_config():
     if st.button("📋¸ TOUT Vider (Cache App + IA)", key="btn_clear_all", type="primary", use_container_width=True):
         Cache.clear_all()
         SemanticCache.invalider_tout()
-        show_success("âœ… Tous les caches vidés !")
+        show_success("✅ Tous les caches vidés !")
         st.rerun()
 
 
@@ -513,10 +513,10 @@ def render_about():
 
     with col2:
         db_configured = (
-            "âœ… Configurée" if settings._verifier_db_configuree() else "âŒ Non configurée"
+            "✅ Configurée" if settings._verifier_db_configuree() else "❌ Non configurée"
         )
         ai_configured = (
-            "âœ… Configurée" if settings._verifier_mistral_configure() else "âŒ Non configurée"
+            "✅ Configurée" if settings._verifier_mistral_configure() else "❌ Non configurée"
         )
 
         st.info(f"**Base de données:** {db_configured}")
@@ -547,12 +547,12 @@ def render_about():
 
     st.markdown("---")
 
-    # Ã‰tat système
-    st.markdown("#### 🟡¸ Ã‰tat Système")
+    # État système
+    st.markdown("#### 🟡¸ État Système")
 
     state_summary = StateManager.get_state_summary()
 
-    with st.expander("Ã‰tat de l'application"):
+    with st.expander("État de l'application"):
         st.json(state_summary)
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -674,9 +674,9 @@ def render_budget_config():
                 with smart_spinner("Sauvegarde en cours..."):
                     result = backup_service.create_backup()
                     if result.success:
-                        show_success(f"âœ… {result.message}")
+                        show_success(f"✅ {result.message}")
                     else:
-                        show_error(f"âŒ {result.message}")
+                        show_error(f"❌ {result.message}")
         
         with col2:
             if st.button("📥 Voir les sauvegardes", use_container_width=True):
@@ -721,7 +721,7 @@ def render_budget_config():
                         "notif_canicule": notif_canicule,
                         "notif_pluie": notif_pluie,
                     }
-                    show_success("âœ… Configuration météo sauvegardée")
+                    show_success("✅ Configuration météo sauvegardée")
                 else:
                     show_error("Ville non trouvée")
                     

@@ -61,7 +61,7 @@ def get_numero_semaine(date_ref: Optional[date] = None) -> int:
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# FILTRAGE Ã‰VÃ‰NEMENTS
+# FILTRAGE ÉVÉNEMENTS
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def filtrer_evenements_semaine(evenements: List[Dict[str, Any]], date_ref: Optional[date] = None) -> List[Dict[str, Any]]:

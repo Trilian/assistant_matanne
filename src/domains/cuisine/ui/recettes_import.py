@@ -39,12 +39,12 @@ def _render_import_url():
     
     url = st.text_input("URL du site", placeholder="https://www.marmiton.org/recettes/...")
     
-    if st.button("🔍 Analyser le site", use_container_width=True):
+    if st.button("� Extraire la recette du site", use_container_width=True, type="primary"):
         if not url:
             st.error("❌ Veuillez entrer une URL")
             return
         
-        with st.spinner("⏳ Extraction de la recette..."):
+        with st.spinner("⏳ Extraction du titre, image, ingrédients, étapes, temps..."):
             try:
                 recipe_data = RecipeImporter.from_url(url)
                 
@@ -142,15 +142,49 @@ def _show_import_preview(recipe_data: dict):
         with col1:
             nom = st.text_input("Nom de la recette *", value=recipe_data.get('nom', ''))
         with col2:
+            # Détecter automatiquement le type de repas à partir du nom
+            default_type = "dîner"  # Défaut le plus courant
+            nom_lower = (nom + " " + recipe_data.get('description', '')).lower()
+            
+            if any(word in nom_lower for word in ['petit déj', 'breakfast', 'œuf', 'pain', 'tartine', 'confiture']):
+                default_type = "petit_déjeuner"
+            elif any(word in nom_lower for word in ['gâteau', 'dessert', 'mousse', 'tarte', 'crème', 'flan']):
+                default_type = "dessert"
+            elif any(word in nom_lower for word in ['apéro', 'appetizer', 'canapé', 'amuse', 'entrée']):
+                default_type = "apéritif"
+            elif any(word in nom_lower for word in ['midi', 'déjeuner', 'lunch']):
+                default_type = "déjeuner"
+            
+            options = ["petit_déjeuner", "déjeuner", "dîner", "goûter", "apéritif", "dessert"]
+            default_idx = options.index(default_type) if default_type in options else 2
+            
             type_repas = st.selectbox(
                 "Type de repas *",
-                ["petit_déjeuner", "déjeuner", "dîner", "goûter", "apéritif", "dessert"]
+                options,
+                index=default_idx
             )
         
         description = st.text_area(
             "Description",
             value=recipe_data.get('description', ''),
             height=100
+        )
+        
+        # Image - D'abord essayer la URL extraite, sinon permet l'upload
+        st.markdown("#### 🖼️ Image de la recette")
+        extracted_image_url = recipe_data.get('image_url', '')
+        
+        image_url_input = st.text_input(
+            "URL de l'image extraite",
+            value=extracted_image_url,
+            help="URL automatiquement extraite du site, vous pouvez la modifier"
+        )
+        
+        st.markdown("**Ou télécharger une image:**")
+        uploaded_image = st.file_uploader(
+            "Choisissez une image",
+            type=['jpg', 'jpeg', 'png', 'webp'],
+            key="import_image_uploader"
         )
         
         # Temps et portions
@@ -232,6 +266,26 @@ def _show_import_preview(recipe_data: dict):
                 st.error("❌ Au moins une étape est obligatoire")
                 return
             
+            # Traiter l'image
+            image_path = None
+            if uploaded_image:
+                # Traiter le fichier uploadé (même logique que la création manuelle)
+                import uuid
+                import os
+                
+                image_dir = "data/recettes_images"
+                os.makedirs(image_dir, exist_ok=True)
+                
+                file_ext = uploaded_image.name.split('.')[-1].lower()
+                image_name = f"{uuid.uuid4()}.{file_ext}"
+                image_path = f"{image_dir}/{image_name}"
+                
+                with open(image_path, 'wb') as f:
+                    f.write(uploaded_image.getbuffer())
+            elif image_url_input:
+                # Utiliser l'URL extraite ou modifiée
+                image_path = image_url_input
+            
             _save_imported_recipe(
                 nom=nom,
                 type_repas=type_repas,
@@ -241,7 +295,8 @@ def _show_import_preview(recipe_data: dict):
                 portions=portions,
                 difficulte=difficulte,
                 ingredients=edited_ingredients,
-                etapes=edited_etapes
+                etapes=edited_etapes,
+                image_path=image_path
             )
 
 
@@ -254,7 +309,8 @@ def _save_imported_recipe(
     portions: int,
     difficulte: str,
     ingredients: list,
-    etapes: list
+    etapes: list,
+    image_path: str = None
 ):
     """Sauvegarde la recette importée"""
     try:
@@ -273,6 +329,7 @@ def _save_imported_recipe(
                 temps_cuisson=temps_cuisson,
                 portions=portions,
                 difficulte=difficulte,
+                url_image=image_path,  # Ajouter l'image
                 source="import"  # Marquer comme importée
             )
             
@@ -327,11 +384,7 @@ def _save_imported_recipe(
             
             st.success(f"✅ Recette '{nom}' importée avec succès!")
             st.balloons()
-            
-            # Réinitialiser le formulaire
-            import time
-            time.sleep(1)
-            st.rerun()
+            # Rester sur l'onglet import (pas de rerun)
             
     except Exception as e:
         st.error(f"❌ Erreur sauvegarde: {str(e)}")

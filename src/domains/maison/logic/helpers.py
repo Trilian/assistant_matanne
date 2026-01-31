@@ -199,7 +199,7 @@ def get_saison() -> str:
     if month in [3, 4, 5]:
         return "Printemps"
     elif month in [6, 7, 8]:
-        return "Ã‰té"
+        return "Été"
     elif month in [9, 10, 11]:
         return "Automne"
     else:
@@ -207,7 +207,7 @@ def get_saison() -> str:
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# ENTRETIEN / MÃ‰NAGE
+# ENTRETIEN / MÉNAGE
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
@@ -243,7 +243,7 @@ def charger_routines() -> pd.DataFrame:
 
 @st.cache_data(ttl=1800)
 def get_taches_today() -> list[dict]:
-    """Retourne les tÃ¢ches du jour à faire"""
+    """Retourne les tâches du jour à faire"""
     with get_db_context() as session:
         taches = session.query(RoutineTask).filter(
             RoutineTask.fait_le != date.today()

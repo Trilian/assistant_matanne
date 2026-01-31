@@ -128,7 +128,7 @@ def calculer_score_global(entrees_par_categorie: Dict[str, List[Dict[str, Any]]]
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# ANALYSES SPÃ‰CIFIQUES
+# ANALYSES SPÉCIFIQUES
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def analyser_sommeil(entrees: List[Dict[str, Any]], jours: int = 7) -> Dict[str, Any]:
@@ -225,7 +225,7 @@ def generer_recommandations(scores: Dict[str, float]) -> List[str]:
             if categorie == "Sommeil":
                 recommandations.append("🗑️ Améliorer la qualité du sommeil (routine, horaires réguliers)")
             elif categorie == "Nutrition":
-                recommandations.append("📅 Ã‰quilibrer l'alimentation (fruits, légumes, hydratation)")
+                recommandations.append("📅 Équilibrer l'alimentation (fruits, légumes, hydratation)")
             elif categorie == "Activité physique":
                 recommandations.append("💡 Augmenter l'activité physique (30min/jour minimum)")
             elif categorie == "Mental":

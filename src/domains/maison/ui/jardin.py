@@ -92,7 +92,7 @@ def get_jardin_service() -> JardinService:
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# HELPERS MÃ‰TIER
+# HELPERS MÉTIER
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
@@ -122,7 +122,7 @@ def ajouter_plante(
         clear_maison_cache()
         return True
     except Exception as e:
-        st.error(f"âŒ Erreur ajout plante: {e}")
+        st.error(f"❌ Erreur ajout plante: {e}")
         return False
 
 
@@ -141,7 +141,7 @@ def arroser_plante(item_id: int, notes: str = "", db=None) -> bool:
         clear_maison_cache()
         return True
     except Exception as e:
-        st.error(f"âŒ Erreur enregistrement: {e}")
+        st.error(f"❌ Erreur enregistrement: {e}")
         return False
 
 
@@ -160,7 +160,7 @@ def ajouter_log(item_id: int, action: str, notes: str = "", db=None) -> bool:
         clear_maison_cache()
         return True
     except Exception as e:
-        st.error(f"âŒ Erreur ajout log: {e}")
+        st.error(f"❌ Erreur ajout log: {e}")
         return False
 
 
@@ -187,13 +187,13 @@ def app():
     if plantes_arroser:
         st.warning(f"🔔 **{len(plantes_arroser)} plante(s) à arroser aujourd'hui!**")
         for plante in plantes_arroser[:3]:
-            st.caption(f"â€¢ {plante['nom']} ({plante['type']})")
+            st.caption(f"• {plante['nom']} ({plante['type']})")
     
     if recoltes:
         st.success(f"💡½ **{len(recoltes)} récolte(s) prévue(s) cette semaine!**")
         for r in recoltes[:3]:
             jours = (r["recolte"] - date.today()).days
-            st.caption(f"â€¢ {r['nom']} dans {jours} jour(s)")
+            st.caption(f"• {r['nom']} dans {jours} jour(s)")
     
     st.markdown("---")
     
@@ -236,9 +236,9 @@ def app():
                 col1, col2, col3 = st.columns([2, 1, 1])
                 
                 with col1:
-                    emoji = "📱 if row["a_arroser"] else "âœ…"
+                    emoji = "📱 if row["a_arroser"] else "✅"
                     st.markdown(f"### {emoji} {row['nom']}")
-                    st.caption(f"🍽️ {row['location']} â€¢ {row['type']}")
+                    st.caption(f"🍽️ {row['location']} • {row['type']}")
                     if row["notes"]:
                         st.caption(f"🍽️ {row['notes']}")
                 
@@ -372,7 +372,7 @@ def app():
             with col:
                 if st.button(f"{sugg['emoji']} {sugg['nom']}", use_container_width=True):
                     if ajouter_plante(sugg["nom"], sugg["type"], "Potager"):
-                        st.success(f"âœ… {sugg['nom']} ajouté!")
+                        st.success(f"✅ {sugg['nom']} ajouté!")
                         st.rerun()
     
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -449,7 +449,7 @@ def app():
             
             if st.button("🍽️ Enregistrer", use_container_width=True):
                 if ajouter_log(selected_id, action, notes_log):
-                    st.success("âœ… Enregistré!")
+                    st.success("✅ Enregistré!")
                     st.rerun()
             
             st.markdown("---")

@@ -62,7 +62,7 @@ def afficher_jour_expandable(jour: date, jour_complet: dict, jour_nom: str) -> N
                     st.write(f"{label} **{act['titre']}** ({act['type']})")
                 with col2:
                     if act.get("budget"):
-                        st.caption(f"{act['budget']:.0f}â‚¬")
+                        st.caption(f"{act['budget']:.0f}€")
 
         if jour_complet.get("projets"):
             st.markdown("##### 🗑️ Projets")
@@ -75,7 +75,7 @@ def afficher_jour_expandable(jour: date, jour_complet: dict, jour_nom: str) -> N
                 st.write(f"{priorite_color} **{proj['nom']}** - {proj['statut']}")
 
         if jour_complet.get("events"):
-            st.markdown("##### 📋… Ã‰vénements")
+            st.markdown("##### 📋… Événements")
             for event in jour_complet["events"]:
                 debut = event["debut"].strftime("%H:%M") if isinstance(event["debut"], datetime) else "â€”"
                 col1, col2 = st.columns([3, 1])
@@ -90,7 +90,7 @@ def afficher_jour_expandable(jour: date, jour_complet: dict, jour_nom: str) -> N
             st.markdown("##### â° Routines")
             for routine in jour_complet["routines"]:
                 heure = routine.get("heure", "â€”")
-                status = "âœ…" if routine.get("fait") else "â­•"
+                status = "✅" if routine.get("fait") else "◯"
                 st.write(f"{status} **{routine['nom']}** ({heure})")
 
         # Alertes du jour
@@ -159,14 +159,14 @@ def app():
     st.markdown("---")
 
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    # CHARGEMENT DONNÃ‰ES
+    # CHARGEMENT DONNÉES
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     service = get_planning_service()
     semaine = service.get_semaine_complete(st.session_state.planning_week_start)
 
     if not semaine:
-        st.error("âŒ Erreur lors du chargement de la semaine")
+        st.error("❌ Erreur lors du chargement de la semaine")
         return
 
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -192,7 +192,7 @@ def app():
 
     with cols_stats[4]:
         budget = stats.get("budget_total", 0)
-        st.metric(f"📱 Budget", f"{budget:.0f}â‚¬")
+        st.metric(f"📱 Budget", f"{budget:.0f}€")
 
     st.markdown("---")
 
@@ -223,7 +223,7 @@ def app():
     st.markdown("---")
 
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    # VUE JOURS DÃ‰TAILLÃ‰E
+    # VUE JOURS DÉTAILLÉE
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     st.markdown("### 📋… Détail par jour")
@@ -262,7 +262,7 @@ def app():
                 heure = st.time_input("Heure", value=datetime.now().time())
 
             with col_e2:
-                lieu = st.text_input("Lieu", placeholder="Ex: Parc du chÃ¢teau")
+                lieu = st.text_input("Lieu", placeholder="Ex: Parc du château")
                 couleur = st.selectbox("Couleur", ["bleu", "rouge", "vert", "jaune", "violet"])
 
             description = st.text_area("Description (optionnel)")
@@ -282,7 +282,7 @@ def app():
                         lieu=lieu,
                         couleur=couleur,
                     )
-                    st.success(f"âœ… Ã‰vénement '{titre}' créé!")
+                    st.success(f"✅ Événement '{titre}' créé!")
                     st.balloons()
                     st.rerun()
 
@@ -294,7 +294,7 @@ def app():
         )
 
         with st.form("form_gen_ia"):
-            budget = st.slider("Budget semaine (â‚¬)", 100, 1000, 400)
+            budget = st.slider("Budget semaine (€)", 100, 1000, 400)
             energie = st.selectbox("Niveau d'énergie famille", ["faible", "normal", "élevé"])
             objectifs = st.multiselect(
                 "Objectifs santé",
@@ -312,13 +312,13 @@ def app():
                     )
 
                     if result:
-                        st.success("âœ… Semaine générée!")
+                        st.success("✅ Semaine générée!")
                         st.markdown(f"**Harmonie**: {result.harmonie_description}")
                         with st.expander("Raisons de cette proposition"):
                             for raison in result.raisons:
-                                st.write(f"â€¢ {raison}")
+                                st.write(f"• {raison}")
                     else:
-                        st.error("âŒ Erreur lors de la génération")
+                        st.error("❌ Erreur lors de la génération")
 
     with tab3:
         st.subheader("📋… Vue mensuelle")

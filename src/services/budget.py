@@ -207,7 +207,7 @@ class BudgetService:
         
         depense.id = budget_entry.id
         
-        logger.info(f"Dépense ajoutée: {depense.montant}â‚¬ ({depense.categorie.value})")
+        logger.info(f"Dépense ajoutée: {depense.montant}€ ({depense.categorie.value})")
         
         # Vérifier si budget dépassé
         self._verifier_alertes_budget(depense.date.month, depense.date.year, db)
@@ -315,7 +315,7 @@ class BudgetService:
         
         st.session_state[key][categorie.value] = montant
         
-        logger.info(f"Budget défini: {categorie.value} = {montant}â‚¬ ({mois}/{annee})")
+        logger.info(f"Budget défini: {categorie.value} = {montant}€ ({mois}/{annee})")
     
     def get_budget(
         self,
@@ -572,7 +572,7 @@ class BudgetService:
                 alertes.append({
                     "type": "danger",
                     "categorie": cat.value,
-                    "message": f"Budget {cat.value} dépassé! ({depense:.0f}â‚¬ / {budget:.0f}â‚¬)",
+                    "message": f"Budget {cat.value} dépassé! ({depense:.0f}€ / {budget:.0f}€)",
                     "pourcentage": pourcentage,
                 })
             elif pourcentage >= 80:
@@ -731,7 +731,7 @@ def render_budget_dashboard():
                 with col_d2:
                     st.write(f"**{dep.categorie.value}** - {dep.description or 'Sans description'}")
                 with col_d3:
-                    st.write(f"**{dep.montant:.0f}â‚¬**")
+                    st.write(f"**{dep.montant:.0f}€**")
         else:
             st.info("Aucune dépense ce mois-ci")
     
@@ -743,7 +743,7 @@ def render_budget_dashboard():
             col_f1, col_f2 = st.columns(2)
             
             with col_f1:
-                montant = st.number_input("Montant (â‚¬)", min_value=0.0, step=1.0, key="expense_amount")
+                montant = st.number_input("Montant (€)", min_value=0.0, step=1.0, key="expense_amount")
                 categorie = st.selectbox(
                     "Catégorie",
                     options=list(CategorieDepense),
@@ -771,7 +771,7 @@ def render_budget_dashboard():
                     )
                     
                     service.ajouter_depense(depense)
-                    st.success(f"âœ… Dépense de {montant}â‚¬ ajoutée!")
+                    st.success(f"✅ Dépense de {montant}€ ajoutée!")
                     st.rerun()
                 else:
                     st.error("Le montant doit être supérieur à 0")
@@ -814,7 +814,7 @@ def render_budget_dashboard():
             fig_trend.update_layout(
                 title="Évolution des dépenses",
                 xaxis_title="Mois",
-                yaxis_title="Montant (â‚¬)",
+                yaxis_title="Montant (€)",
                 hovermode='x unified',
             )
             
@@ -829,14 +829,14 @@ def render_budget_dashboard():
         
         if previsions:
             total_prevu = sum(p.montant_prevu for p in previsions)
-            st.metric("Total prévu", f"{total_prevu:.0f}â‚¬")
+            st.metric("Total prévu", f"{total_prevu:.0f}€")
             
             for prev in previsions[:5]:
                 col_p1, col_p2, col_p3 = st.columns([2, 2, 1])
                 with col_p1:
                     st.write(f"**{prev.categorie.value.title()}**")
                 with col_p2:
-                    st.write(f"{prev.montant_prevu:.0f}â‚¬")
+                    st.write(f"{prev.montant_prevu:.0f}€")
                 with col_p3:
                     confiance_color = "🟢" if prev.confiance > 0.7 else "🟡" if prev.confiance > 0.4 else "🔴"
                     st.write(f"{confiance_color} {prev.confiance:.0%}")
@@ -869,6 +869,6 @@ def render_budget_dashboard():
                 for cat, montant in new_budgets.items():
                     service.definir_budget(cat, montant, mois, annee)
                 
-                st.success("âœ… Budgets mis à jour!")
+                st.success("✅ Budgets mis à jour!")
                 st.rerun()
 

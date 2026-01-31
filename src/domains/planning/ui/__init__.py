@@ -7,10 +7,10 @@ Agrège TOUS les événements familiaux en une vision unifiée:
 - 🎯 Vue d'Ensemble: Actions prioritaires et suggestions
 
 Utilise PlanningAIService pour:
-âœ… Agrégation optimisée avec cache intelligent
-âœ… Calcul charge familiale jour par jour
-âœ… Détection alertes intelligentes
-âœ… Génération IA de semaines équilibrées
+✅ Agrégation optimisée avec cache intelligent
+✅ Calcul charge familiale jour par jour
+✅ Détection alertes intelligentes
+✅ Génération IA de semaines équilibrées
 """
 
 from . import calendrier, vue_semaine, vue_ensemble

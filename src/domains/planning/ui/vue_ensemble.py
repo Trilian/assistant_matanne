@@ -29,7 +29,7 @@ logger = __import__("logging").getLogger(__name__)
 def afficher_actions_prioritaires(alertes_semaine: list) -> None:
     """Affiche les actions prioritaires en tableau"""
     if not alertes_semaine:
-        st.success("âœ… Semaine bien équilibrée - Aucune action urgente")
+        st.success("✅ Semaine bien équilibrée - Aucune action urgente")
         return
 
     st.markdown("### 🎯 Actions à Prendre")
@@ -79,7 +79,7 @@ def afficher_metriques_cles(stats: dict, charge_globale: str) -> None:
 
     with col_m5:
         budget = stats.get("budget_total", 0)
-        st.metric("🍽️ Budget", f"{budget:.0f}â‚¬")
+        st.metric("🍽️ Budget", f"{budget:.0f}€")
 
     st.markdown("---")
 
@@ -100,7 +100,7 @@ def afficher_metriques_cles(stats: dict, charge_globale: str) -> None:
     elif charge_score >= 70:
         st.info("â„¹ï¸ Charge normale - Veiller au repos et temps de qualité")
     else:
-        st.success("âœ… Charge faible - Bonne semaine équilibrée")
+        st.success("✅ Charge faible - Bonne semaine équilibrée")
 
 
 def afficher_synthese_jours(jours: dict) -> None:
@@ -164,7 +164,7 @@ def afficher_opportunities(semaine_data: dict) -> None:
     if budget_total > budget_limite:
         suggestions.append(
             ("🍽️ Budget elevé",
-             f"{budget_total:.0f}â‚¬ > {budget_limite}â‚¬ - Revoir les dépenses")
+             f"{budget_total:.0f}€ > {budget_limite}€ - Revoir les dépenses")
         )
 
     # Pas de repas
@@ -183,7 +183,7 @@ def afficher_opportunities(semaine_data: dict) -> None:
                 with col2:
                     st.write(f"**{emoji_title}**: {description}")
     else:
-        st.success("âœ… Semaine bien équilibrée - Aucune suggestion")
+        st.success("✅ Semaine bien équilibrée - Aucune suggestion")
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -228,14 +228,14 @@ def app():
     st.markdown("---")
 
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    # CHARGEMENT DONNÃ‰ES
+    # CHARGEMENT DONNÉES
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     service = get_planning_service()
     semaine = service.get_semaine_complete(st.session_state.ensemble_week_start)
 
     if not semaine:
-        st.error("âŒ Erreur lors du chargement de la semaine")
+        st.error("❌ Erreur lors du chargement de la semaine")
         return
 
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -248,7 +248,7 @@ def app():
         st.markdown("---")
 
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    # MÃ‰TRIQUES CLÃ‰S
+    # MÉTRIQUES CLÉS
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     afficher_metriques_cles(semaine.stats_semaine, semaine.charge_globale)
@@ -270,7 +270,7 @@ def app():
     st.markdown("---")
 
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    # ONGLETS DÃ‰TAILS
+    # ONGLETS DÉTAILS
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     tab1, tab2, tab3 = st.tabs(["🔄 Rééquilibrer", "– Optimiser avec IA", "📅 Détails"])
@@ -300,7 +300,7 @@ def app():
                         st.info("🗑️ Suggestion: Déplacer 1-2 activités vers jour plus calme")
 
         else:
-            st.success("âœ… Semaine bien équilibrée - Aucun rééquilibrage nécessaire")
+            st.success("✅ Semaine bien équilibrée - Aucun rééquilibrage nécessaire")
 
     with tab2:
         st.subheader("– Optimiser avec IA")
@@ -311,8 +311,8 @@ def app():
             col_o1, col_o2 = st.columns(2)
 
             with col_o1:
-                budget = st.number_input("Budget semaine (â‚¬)", 100, 1000, 400)
-                energie = st.selectbox("Ã‰nergie famille", ["faible", "normal", "élevée"])
+                budget = st.number_input("Budget semaine (€)", 100, 1000, 400)
+                energie = st.selectbox("Énergie famille", ["faible", "normal", "élevée"])
 
             with col_o2:
                 objectifs = st.multiselect(
@@ -343,16 +343,16 @@ def app():
                     )
 
                     if result:
-                        st.success("âœ… Optimisation générée!")
+                        st.success("✅ Optimisation générée!")
                         st.markdown(f"**Philosophie**: {result.harmonie_description}")
 
                         with st.expander("Pourquoi cette approche?"):
                             for raison in result.raisons:
-                                st.write(f"â€¢ {raison}")
+                                st.write(f"• {raison}")
 
                         st.info("🗑️ Vous pouvez créer ces éléments dans votre planning")
                     else:
-                        st.error("âŒ Erreur génération")
+                        st.error("❌ Erreur génération")
 
     with tab3:
         st.subheader("📅 Détails Semaine")
@@ -383,10 +383,10 @@ def app():
                 st.metric("Charge", f"{charge_emoji} {jour_data_dict['charge_score']}/100")
 
             with col_d2:
-                st.metric("Ã‰vénements", len(jour_data_dict["repas"]) + len(jour_data_dict["activites"]))
+                st.metric("Événements", len(jour_data_dict["repas"]) + len(jour_data_dict["activites"]))
 
             with col_d3:
-                st.metric("Budget", f"{jour_data_dict['budget_jour']:.0f}â‚¬")
+                st.metric("Budget", f"{jour_data_dict['budget_jour']:.0f}€")
 
             st.write(f"**Repas**: {len(jour_data_dict['repas'])}")
             st.write(f"**Activités**: {len(jour_data_dict['activites'])}")
@@ -395,5 +395,5 @@ def app():
             if jour_data_dict.get("alertes"):
                 st.warning("**Alertes du jour**:")
                 for alerte in jour_data_dict["alertes"]:
-                    st.write(f"â€¢ {alerte}")
+                    st.write(f"• {alerte}")
 

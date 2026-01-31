@@ -108,26 +108,36 @@ def render_liste():
     PAGE_SIZE = st.session_state.recettes_page_size
     
     # Filtres
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
     with col1:
+        nom_filter = st.text_input(
+            "Chercher par nom",
+            placeholder="ex: pâte, gâteau...",
+            key="filter_nom",
+            label_visibility="collapsed"
+        )
+    with col2:
         type_repas = st.selectbox(
             "Type de repas",
             ["Tous", "petit_déjeuner", "déjeuner", "dîner", "goûter"],
-            key="filter_type_repas"
+            key="filter_type_repas",
+            label_visibility="collapsed"
         )
-    with col2:
+    with col3:
         difficulte = st.selectbox(
             "Difficulté",
             ["Tous", "facile", "moyen", "difficile"],
-            key="filter_difficulte"
+            key="filter_difficulte",
+            label_visibility="collapsed"
         )
-    with col3:
+    with col4:
         temps_max = st.number_input(
             "Temps max (min)",
             min_value=0,
             max_value=300,
             value=60,
-            key="filter_temps"
+            key="filter_temps",
+            label_visibility="collapsed"
         )
     
     # Filtres supplémentaires avancés
@@ -171,6 +181,11 @@ def render_liste():
         temps_max=temps_max,
         limit=200,
     )
+    
+    # Filtre par nom (case-insensitive, partial match)
+    if nom_filter and nom_filter.strip():
+        nom_lower = nom_filter.strip().lower()
+        recettes = [r for r in recettes if nom_lower in r.nom.lower()]
     
     # Appliquer les filtres avancés
     if min_score_bio > 0:
@@ -823,6 +838,15 @@ def render_ajouter_manuel():
             key="form_type_repas"
         )
     
+    # Upload d'image
+    col_img, col_space = st.columns([2, 1])
+    with col_img:
+        image_file = st.file_uploader(
+            "📷 Photo de la recette (optionnel)",
+            type=["jpg", "jpeg", "png"],
+            key="form_image_upload"
+        )
+    
     description = st.text_area("Description", height=100, key="form_description")
     
     col1, col2, col3 = st.columns(3)
@@ -910,6 +934,27 @@ def render_ajouter_manuel():
                 st.error("❌ Service indisponible")
             else:
                 try:
+                    # Sauvegarder l'image si fournie
+                    url_image = None
+                    if image_file is not None:
+                        import io
+                        from pathlib import Path
+                        
+                        # Créer dossier images s'il n'existe pas
+                        images_dir = Path("data/recettes_images")
+                        images_dir.mkdir(parents=True, exist_ok=True)
+                        
+                        # Sauvegarder l'image avec un nom unique
+                        import uuid
+                        ext = image_file.name.split('.')[-1]
+                        unique_name = f"recette_{uuid.uuid4().hex[:8]}.{ext}"
+                        image_path = images_dir / unique_name
+                        
+                        with open(image_path, 'wb') as f:
+                            f.write(image_file.getbuffer())
+                        
+                        url_image = str(image_path)
+                    
                     data = {
                         "nom": nom,
                         "description": description,
@@ -921,6 +966,7 @@ def render_ajouter_manuel():
                         "saison": saison,
                         "ingredients": ingredients,
                         "etapes": etapes,
+                        "url_image": url_image,
                     }
                     
                     recette = service.create_complete(data)
@@ -933,8 +979,11 @@ def render_ajouter_manuel():
                             del st.session_state[key]
                     
                     st.success(f"✅ Recette '{recette.nom}' créée avec succès!")
+                    if image_file:
+                        st.caption(f"📷 Image sauvegardée: {image_file.name}")
                     st.balloons()
-                    st.rerun()
+                    time.sleep(1)
+                    # Ne PAS rerun() pour rester sur cet onglet
                     
                 except ErreurValidation as e:
                     st.error(f"❌ Erreur validation: {e}")

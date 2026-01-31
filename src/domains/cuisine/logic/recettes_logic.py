@@ -64,7 +64,7 @@ def get_recettes_favorites(db: Optional[Session] = None) -> List[Recette]:
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# LOGIQUE RECETTES - CRÃ‰ATION/MODIFICATION
+# LOGIQUE RECETTES - CRÉATION/MODIFICATION
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def creer_recette(

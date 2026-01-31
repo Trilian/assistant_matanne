@@ -76,7 +76,7 @@ def valider_checksum_ean13(code: str) -> bool:
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# DÃ‰TECTION TYPE CODE-BARRES
+# DÉTECTION TYPE CODE-BARRES
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def detecter_type_code_barres(code: str) -> str:
@@ -160,13 +160,13 @@ def detecter_pays_origine(code: str) -> Optional[str]:
         ("618",): "Côte d'Ivoire",
         ("619",): "Tunisie",
         ("621",): "Syrie",
-        ("622",): "Ã‰gypte",
+        ("622",): "Égypte",
         ("624",): "Libye",
         ("625",): "Jordanie",
         ("626",): "Iran",
         ("627",): "Koweït",
         ("628",): "Arabie saoudite",
-        ("629",): "Ã‰mirats arabes unis",
+        ("629",): "Émirats arabes unis",
         ("640", "649"): "Finlande",
         ("690", "699"): "Chine",
         ("700", "709"): "Norvège",
@@ -190,7 +190,7 @@ def detecter_pays_origine(code: str) -> Optional[str]:
         ("778", "779"): "Argentine",
         ("780",): "Chili",
         ("784",): "Paraguay",
-        ("786",): "Ã‰quateur",
+        ("786",): "Équateur",
         ("789", "790"): "Brésil",
         ("800", "839"): "Italie",
         ("840", "849"): "Espagne",

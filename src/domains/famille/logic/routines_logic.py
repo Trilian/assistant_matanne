@@ -203,7 +203,7 @@ def analyser_regularite(historique: List[Dict[str, Any]], routine_id: int, jours
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def suggerer_routines_age(age_mois: int) -> List[Dict[str, Any]]:
-    """Suggère des routines adaptées à l'Ã¢ge."""
+    """Suggère des routines adaptées à l'âge."""
     suggestions = []
     
     # Routines communes

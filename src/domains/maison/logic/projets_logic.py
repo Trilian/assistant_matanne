@@ -20,7 +20,7 @@ CATEGORIES_PROJET = ["Rénovation", "Décoration", "Réparation", "Amélioration
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# CALCUL DES PRIORITÃ‰S ET URGENCES
+# CALCUL DES PRIORITÉS ET URGENCES
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def calculer_urgence_projet(projet: Dict[str, Any]) -> str:
@@ -247,7 +247,7 @@ def calculer_progression(projet: Dict[str, Any]) -> float:
     if statut == "Terminé":
         return 100.0
     elif statut == "En cours":
-        # Si des tÃ¢ches sont définies, calculer basé sur elles
+        # Si des tâches sont définies, calculer basé sur elles
         if "taches" in projet:
             taches = projet["taches"]
             if taches:

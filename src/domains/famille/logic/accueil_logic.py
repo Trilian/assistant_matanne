@@ -17,10 +17,10 @@ logger = logging.getLogger(__name__)
 JULIUS_BIRTHDAY = date(2023, 10, 26)  # Date de naissance de Julius
 
 NOTIFICATION_TYPES = {
-    "critique": {"emoji": "🔔, "color": "red"},
+    "critique": {"emoji": "🔔", "color": "red"},
     "alerte": {"emoji": "âš ï¸", "color": "orange"},
-    "info": {"emoji": "â„¹ï¸", "color": "blue"},
-    "succes": {"emoji": "âœ…", "color": "green"},
+    "info": {"emoji": "ℹ️", "color": "blue"},
+    "succes": {"emoji": "✅", "color": "green"},
 }
 
 DASHBOARD_SECTIONS = [
@@ -38,7 +38,7 @@ DASHBOARD_SECTIONS = [
 
 def calculer_age_julius(date_reference: Optional[date] = None) -> dict:
     """
-    Calcule l'Ã¢ge de Julius en mois et jours.
+    Calcule l'âge de Julius en mois et jours.
     
     Args:
         date_reference: Date de référence (par défaut aujourd'hui)
@@ -88,7 +88,7 @@ def calculer_age_julius(date_reference: Optional[date] = None) -> dict:
 
 def calculer_semaines_julius(date_reference: Optional[date] = None) -> int:
     """
-    Calcule l'Ã¢ge de Julius en semaines.
+    Calcule l'âge de Julius en semaines.
     
     Args:
         date_reference: Date de référence (par défaut aujourd'hui)
@@ -103,7 +103,7 @@ def calculer_semaines_julius(date_reference: Optional[date] = None) -> int:
 
 def formater_age_julius(date_reference: Optional[date] = None) -> str:
     """
-    Formate l'Ã¢ge de Julius de manière lisible.
+    Formate l'âge de Julius de manière lisible.
     
     Args:
         date_reference: Date de référence
@@ -122,7 +122,7 @@ def formater_age_julius(date_reference: Optional[date] = None) -> str:
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# MÃ‰TRIQUES DASHBOARD
+# MÉTRIQUES DASHBOARD
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def calculer_metriques_recettes(recettes: list[dict]) -> dict:
@@ -640,7 +640,7 @@ def generer_suggestions_actions(
         evt_aujourd_hui = [e for e in planning if _parse_date_evenement(e) == today]
         if evt_aujourd_hui:
             suggestions.append({
-                "titre": "🗑️ Ã‰vénements aujourd'hui",
+                "titre": "🗑️ Événements aujourd'hui",
                 "description": f"{len(evt_aujourd_hui)} événement(s) prévu(s)",
                 "priorite": 2,
                 "action": "planning",
@@ -702,7 +702,7 @@ def filtrer_notifications(notifications: list[dict], type_filtre: Optional[str] 
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# ACTIVITÃ‰S RÃ‰CENTES
+# ACTIVITÉS RÉCENTES
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def formater_activite_recente(activite: dict) -> dict:
@@ -718,16 +718,16 @@ def formater_activite_recente(activite: dict) -> dict:
     type_activite = activite.get("type", "autre")
     
     icones = {
-        "recette": "👶,
-        "courses": "📅,
+        "recette": "👶",
+        "courses": "📅",
         "inventaire": "[PKG]",
         "planning": "🗑️",
-        "famille": "🎯€🧹€💡,
-        "autre": "📱
+        "famille": "🎯€🧹€💡",
+        "autre": "📱"
     }
     
     return {
-        "icone": icones.get(type_activite, "💰,
+        "icone": icones.get(type_activite, "💰"),
         "titre": activite.get("titre", "Activité"),
         "description": activite.get("description", ""),
         "timestamp": activite.get("timestamp"),
@@ -895,22 +895,22 @@ def generer_cartes_metriques(metriques: dict) -> list[dict]:
         formater_metrique_card(
             "Julius",
             f"{julius.get('mois', 0)}m {julius.get('jours', 0)}j",
-            icone="🍽️
+            icone="🍽️"
         ),
         formater_metrique_card(
             "Recettes",
             recettes.get("total", 0),
-            icone="👶
+            icone="👶"
         ),
         formater_metrique_card(
             "Stock alertes",
             inventaire.get("alertes", 0),
-            icone="âš ï¸"
+            icone="⚠️"
         ),
         formater_metrique_card(
-            "Ã€ acheter",
+            "À acheter",
             courses.get("articles_a_acheter", 0),
-            icone="📅
+            icone="📅"
         ),
     ]
 

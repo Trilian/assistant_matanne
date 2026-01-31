@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 CATEGORIES_PLANTES = ["Légumes", "Fruits", "Herbes", "Fleurs", "Arbres"]
-SAISONS = ["Printemps", "Ã‰té", "Automne", "Hiver"]
+SAISONS = ["Printemps", "Été", "Automne", "Hiver"]
 STATUS_PLANTES = ["Semis", "Pousse", "Mature", "Récolte", "Dormant"]
 
 
@@ -36,7 +36,7 @@ def get_saison_actuelle() -> str:
     if mois in [3, 4, 5]:
         return "Printemps"
     elif mois in [6, 7, 8]:
-        return "Ã‰té"
+        return "Été"
     elif mois in [9, 10, 11]:
         return "Automne"
     else:
@@ -93,7 +93,7 @@ def calculer_jours_avant_recolte(plante: Dict[str, Any]) -> Optional[int]:
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# ALERTES ET PRIORITÃ‰S
+# ALERTES ET PRIORITÉS
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def get_plantes_a_arroser(plantes: List[Dict[str, Any]], jours_avance: int = 1) -> List[Dict[str, Any]]:

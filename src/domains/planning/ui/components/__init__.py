@@ -90,7 +90,7 @@ def selecteur_semaine(key_prefix: str = "semaine") -> tuple[date, date]:
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# CARTES & AFFICHAGE Ã‰VÃ‰NEMENTS
+# CARTES & AFFICHAGE ÉVÉNEMENTS
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
@@ -124,7 +124,7 @@ def carte_activite(activite: dict) -> None:
 
         with col2:
             if activite.get("budget"):
-                st.metric("Budget", f"{activite['budget']:.0f}â‚¬")
+                st.metric("Budget", f"{activite['budget']:.0f}€")
 
 
 def carte_projet(projet: dict) -> None:
@@ -140,7 +140,7 @@ def carte_projet(projet: dict) -> None:
         st.caption(f"Statut: {projet.get('statut', 'N/A')}")
 
         if projet.get("echéance"):
-            st.caption(f"Ã‰chéance: {projet['echéance'].strftime('%d/%m')}")
+            st.caption(f"Échéance: {projet['echéance'].strftime('%d/%m')}")
 
 
 def carte_event(event: dict) -> None:
@@ -173,9 +173,9 @@ def afficher_alerte(alerte: str, type_alerte: str = "warning") -> None:
     if type_alerte == "warning":
         st.warning(alerte, icon="âš ï¸")
     elif type_alerte == "error":
-        st.error(alerte, icon="âŒ")
+        st.error(alerte, icon="❌")
     elif type_alerte == "success":
-        st.success(alerte, icon="âœ…")
+        st.success(alerte, icon="✅")
     else:
         st.info(alerte, icon="â„¹ï¸")
 
@@ -213,5 +213,5 @@ def afficher_stats_semaine(stats: dict) -> None:
 
     with col5:
         budget = stats.get("budget_total", 0)
-        st.metric("📱 Budget", f"{budget:.0f}â‚¬")
+        st.metric("📱 Budget", f"{budget:.0f}€")
 

@@ -27,7 +27,7 @@ CATEGORIES = [
     "Fruits & Légumes",
     "Viandes & Poissons",
     "Produits laitiers",
-    "Ã‰picerie",
+    "Épicerie",
     "Surgelés",
     "Boissons",
     "Condiments",
@@ -36,10 +36,10 @@ CATEGORIES = [
 
 STATUS_CONFIG = {
     "critique": {"color": "red", "emoji": "❌", "label": "Critique"},
-    "stock_bas": {"color": "orange", "emoji": "🎯, "label": "Stock bas"},
-    "ok": {"color": "green", "emoji": "💡, "label": "OK"},
-    "perime": {"color": "black", "emoji": "âš«", "label": "Périmé"},
-    "bientot_perime": {"color": "yellow", "emoji": "📅, "label": "Bientôt périmé"},
+    "stock_bas": {"color": "orange", "emoji": "🎯", "label": "Stock bas"},
+    "ok": {"color": "green", "emoji": "💡", "label": "OK"},
+    "perime": {"color": "black", "emoji": "⚫", "label": "Périmé"},
+    "bientot_perime": {"color": "yellow", "emoji": "📅", "label": "Bientôt périmé"},
 }
 
 
@@ -582,12 +582,12 @@ def formater_inventaire_rapport(articles: list[dict]) -> str:
         "=" * 40,
         f"Date: {datetime.now().strftime('%d/%m/%Y %H:%M')}",
         "",
-        "[CHART] RÃ‰SUMÃ‰",
+        "[CHART] RÉSUMÉ",
         "-" * 20,
         f"Total articles: {stats['total_articles']}",
         f"Articles OK: {stats['articles_ok']} ({stats['pct_ok']:.1f}%)",
         f"Alertes: {stats['articles_alerte']}",
-        f"Valeur totale: {stats['valeur_totale']:.2f}â‚¬",
+        f"Valeur totale: {stats['valeur_totale']:.2f}€",
         "",
     ]
     
@@ -600,7 +600,7 @@ def formater_inventaire_rapport(articles: list[dict]) -> str:
             lignes.append(f"  ❌ {article.get('ingredient_nom')} - Stock critique")
         
         for article in alertes.get("perime", []):
-            lignes.append(f"  âš« {article.get('ingredient_nom')} - PÃ‰RIMÃ‰")
+            lignes.append(f"  ⚫ {article.get('ingredient_nom')} - PÉRIMÉ")
         
         lignes.append("")
     

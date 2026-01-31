@@ -32,7 +32,7 @@ CATEGORIES_MILESTONES = ["Motricité", "Langage", "Social", "Cognitif"]
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def calculer_age_mois(date_naissance: date, date_reference: Optional[date] = None) -> int:
-    """Calcule l'Ã¢ge en mois."""
+    """Calcule l'âge en mois."""
     if date_reference is None:
         date_reference = date.today()
     
@@ -55,7 +55,7 @@ def calculer_age_mois(date_naissance: date, date_reference: Optional[date] = Non
 
 
 def calculer_age_annees_mois(date_naissance: date, date_reference: Optional[date] = None) -> Dict[str, int]:
-    """Calcule l'Ã¢ge en années et mois."""
+    """Calcule l'âge en années et mois."""
     mois_total = calculer_age_mois(date_naissance, date_reference)
     
     annees = mois_total // 12
@@ -69,7 +69,7 @@ def calculer_age_annees_mois(date_naissance: date, date_reference: Optional[date
 
 
 def formater_age(date_naissance: date, date_reference: Optional[date] = None) -> str:
-    """Formate l'Ã¢ge de manière lisible."""
+    """Formate l'âge de manière lisible."""
     age = calculer_age_annees_mois(date_naissance, date_reference)
     
     if age["annees"] == 0:
@@ -82,11 +82,11 @@ def formater_age(date_naissance: date, date_reference: Optional[date] = None) ->
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# Ã‰TAPES DE DÃ‰VELOPPEMENT
+# ÉTAPES DE DÉVELOPPEMENT
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def get_tranche_age(age_mois: int) -> str:
-    """Retourne la tranche d'Ã¢ge."""
+    """Retourne la tranche d'âge."""
     if age_mois < 3:
         return "0-3"
     elif age_mois < 6:
@@ -106,7 +106,7 @@ def get_tranche_age(age_mois: int) -> str:
 
 
 def get_etapes_attendues(age_mois: int) -> List[str]:
-    """Retourne les étapes attendues pour l'Ã¢ge."""
+    """Retourne les étapes attendues pour l'âge."""
     tranche = get_tranche_age(age_mois)
     return ETAPES_DEVELOPPEMENT.get(tranche, [])
 
@@ -184,7 +184,7 @@ def analyser_courbe_croissance(mesures: List[Dict[str, Any]], type_mesure: str =
         else:
             tendance = "stable"
         
-        # Ã‰volution en %
+        # Évolution en %
         evolution = (diff / valeurs[-2] * 100) if valeurs[-2] > 0 else 0
     else:
         tendance = "stable"
@@ -239,7 +239,7 @@ def calculer_percentile_indicatif(valeur: float, age_mois: int, type_mesure: str
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# ANALYSE SANTÃ‰ ET BIEN-ÃŠTRE
+# ANALYSE SANTÉ ET BIEN-ÃŠTRE
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def analyser_sommeil(entrees: List[Dict[str, Any]], jours: int = 7) -> Dict[str, Any]:
@@ -267,7 +267,7 @@ def analyser_sommeil(entrees: List[Dict[str, Any]], jours: int = 7) -> Dict[str,
     
     moyenne = sum(heures_par_jour) / len(heures_par_jour)
     
-    # Recommandations par Ã¢ge (pour un jeune enfant)
+    # Recommandations par âge (pour un jeune enfant)
     if moyenne >= 12:
         qualite = "Excellent"
         recommandation = "Sommeil suffisant pour le développement"
@@ -344,7 +344,7 @@ def valider_mesure(data: Dict[str, Any]) -> tuple[bool, List[str]]:
 
 def formater_milestone(milestone: Dict[str, Any]) -> str:
     """Formate un milestone."""
-    nom = milestone.get("nom", "Ã‰tape")
+    nom = milestone.get("nom", "Étape")
     categorie = milestone.get("categorie", "")
     
     if categorie:

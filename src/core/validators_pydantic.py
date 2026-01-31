@@ -56,7 +56,7 @@ class EtapeInput(BaseModel):
     ordre: Optional[int] = Field(None, ge=1, description="Ordre de l'étape (alias de numero)")
     description: str = Field(
         ...,
-        min_length=5,
+        min_length=1,
         max_length=1000,
         description="Description de l'étape",
     )
@@ -116,6 +116,9 @@ class RecetteInput(BaseModel):
     )
     saison: Optional[str] = Field(
         None, description="Saison (printemps, été, automne, hiver)"
+    )
+    url_image: Optional[str] = Field(
+        None, max_length=500, description="URL ou chemin de l'image"
     )
 
     @field_validator("nom")

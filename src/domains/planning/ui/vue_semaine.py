@@ -71,7 +71,7 @@ def afficher_graphique_charge_semaine(jours: dict) -> None:
 
 def afficher_graphique_repartition_activites(stats: dict) -> None:
     """Pie chart répartition activités"""
-    labels = ["Repas", "Activités", "Projets", "Ã‰vénements"]
+    labels = ["Repas", "Activités", "Projets", "Événements"]
     values = [
         stats.get("total_repas", 0),
         stats.get("total_activites", 0),
@@ -109,19 +109,19 @@ def afficher_timeline_jour(jour_complet: dict, jour: date) -> None:
 
     with col3:
         budget = jour_complet.get("budget_jour", 0)
-        st.metric("Budget", f"{budget:.0f}â‚¬")
+        st.metric("Budget", f"{budget:.0f}€")
 
     st.markdown("---")
 
-    # Ã‰vénements triés par type
-    st.markdown("#### 🎯 Ã‰vénements du jour")
+    # Événements triés par type
+    st.markdown("#### 🎯 Événements du jour")
 
     events_grouped = {
         "📷 Repas": jour_complet.get("repas", []),
         "🎨 Activités": jour_complet.get("activites", []),
         "🧹 Projets": jour_complet.get("projets", []),
         "â° Routines": jour_complet.get("routines", []),
-        "📱… Ã‰vénements": jour_complet.get("events", []),
+        "📱… Événements": jour_complet.get("events", []),
     }
 
     for groupe_nom, events in events_grouped.items():
@@ -137,7 +137,7 @@ def afficher_timeline_jour(jour_complet: dict, jour: date) -> None:
                         label = "👶 if event.get("pour_jules") else "📅€🗑️€💡
                         st.write(f"{label} **{event['titre']}** ({event['type']})")
                         if event.get("budget"):
-                            st.caption(f"📋 {event['budget']:.0f}â‚¬")
+                            st.caption(f"📋 {event['budget']:.0f}€")
 
                     elif groupe_nom == "🧹 Projets":
                         priorite_emoji = {
@@ -147,7 +147,7 @@ def afficher_timeline_jour(jour_complet: dict, jour: date) -> None:
                         }.get(event.get("priorite", "moyenne"), "âšª")
                         st.write(f"{priorite_emoji} **{event['nom']}** ({event['statut']})")
 
-                    elif groupe_nom == "📱… Ã‰vénements":
+                    elif groupe_nom == "📱… Événements":
                         debut = (
                             event["debut"].strftime("%H:%M")
                             if isinstance(event["debut"], datetime)
@@ -158,7 +158,7 @@ def afficher_timeline_jour(jour_complet: dict, jour: date) -> None:
                             st.caption(f"📱 {event['lieu']}")
 
                     elif groupe_nom == "â° Routines":
-                        status = "âœ…" if event.get("fait") else "â­•"
+                        status = "✅" if event.get("fait") else "◯"
                         st.write(f"{status} **{event['nom']}** ({event.get('heure', 'â€”')})")
 
     # Alertes jour
@@ -212,14 +212,14 @@ def app():
     st.markdown("---")
 
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    # CHARGEMENT DONNÃ‰ES
+    # CHARGEMENT DONNÉES
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     service = get_planning_service()
     semaine = service.get_semaine_complete(st.session_state.semaine_view_start)
 
     if not semaine:
-        st.error("âŒ Erreur lors du chargement de la semaine")
+        st.error("❌ Erreur lors du chargement de la semaine")
         return
 
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -265,7 +265,7 @@ def app():
         )
 
         # Budget
-        st.write(f"📋 **Budget semaine**: {stats.get('budget_total', 0):.0f}â‚¬")
+        st.write(f"📋 **Budget semaine**: {stats.get('budget_total', 0):.0f}€")
 
     with tab2:
         st.subheader("🎯 Répartition des événements")
@@ -281,7 +281,7 @@ def app():
             st.metric("📷 Repas planifiés", stats.get("total_repas", 0))
             st.metric("🎨 Activités", stats.get("total_activites", 0))
             st.metric("🧹 Projets", stats.get("total_projets", 0))
-            st.metric("📱… Ã‰vénements", stats.get("total_events", 0))
+            st.metric("📱… Événements", stats.get("total_events", 0))
 
     with tab3:
         st.subheader("📱… Détail par jour")

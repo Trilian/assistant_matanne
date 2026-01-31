@@ -1,6 +1,6 @@
 ﻿"""
 Module Entretien - Gestion du ménage et routines domestiques
-Suivi des tÃ¢ches quotidiennes, planification hebdomadaire, IA d'optimisation
+Suivi des tâches quotidiennes, planification hebdomadaire, IA d'optimisation
 """
 
 from datetime import date, timedelta
@@ -48,10 +48,10 @@ class EntretienService(BaseAIService):
         )
     
     async def creer_routine(self, nom: str, description: str = "") -> str:
-        """Crée une routine avec tÃ¢ches suggérées"""
+        """Crée une routine avec tâches suggérées"""
         prompt = f"""Pour la routine "{nom}" {description},
-suggère 5-8 tÃ¢ches pratiques et dans un ordre logique.
-Format: "- TÃ¢che : description courte"."""
+suggère 5-8 tâches pratiques et dans un ordre logique.
+Format: "- Tâche : description courte"."""
         
         return await self.call_with_cache(
             prompt=prompt,
@@ -60,8 +60,8 @@ Format: "- TÃ¢che : description courte"."""
         )
     
     async def optimiser_semaine(self, types_taches: str) -> str:
-        """Optimise la distribution des tÃ¢ches sur la semaine"""
-        prompt = f"""Propose une répartition optimale pour ces tÃ¢ches ménagères:
+        """Optimise la distribution des tâches sur la semaine"""
+        prompt = f"""Propose une répartition optimale pour ces tâches ménagères:
 {types_taches}
 
 Organise par jour (Lun-Dim) pour équilibrer la charge et ne pas surcharger un jour."""
@@ -73,8 +73,8 @@ Organise par jour (Lun-Dim) pour équilibrer la charge et ne pas surcharger un j
         )
     
     async def conseil_temps_estime(self, tache: str) -> str:
-        """Estime le temps pour une tÃ¢che ménagère"""
-        prompt = f"""Pour la tÃ¢che ménagère "{tache}",
+        """Estime le temps pour une tâche ménagère"""
+        prompt = f"""Pour la tâche ménagère "{tache}",
 estime le temps nécessaire (min/max), la fréquence idéale et des astuces."""
         
         return await self.call_with_cache(
@@ -101,7 +101,7 @@ def get_entretien_service() -> EntretienService:
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# HELPERS MÃ‰TIER
+# HELPERS MÉTIER
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
@@ -128,7 +128,7 @@ def creer_routine(
         clear_maison_cache()
         return routine.id
     except Exception as e:
-        st.error(f"âŒ Erreur création routine: {e}")
+        st.error(f"❌ Erreur création routine: {e}")
         return None
 
 
@@ -142,7 +142,7 @@ def ajouter_tache_routine(
     ordre: int = 1,
     db=None
 ) -> bool:
-    """Ajoute une tÃ¢che à une routine"""
+    """Ajoute une tâche à une routine"""
     try:
         tache = RoutineTask(
             routine_id=routine_id,
@@ -156,13 +156,13 @@ def ajouter_tache_routine(
         clear_maison_cache()
         return True
     except Exception as e:
-        st.error(f"âŒ Erreur ajout tÃ¢che: {e}")
+        st.error(f"❌ Erreur ajout tâche: {e}")
         return False
 
 
 @with_db_session
 def marquer_tache_faite(task_id: int, db=None) -> bool:
-    """Marque une tÃ¢che comme faite aujourd'hui"""
+    """Marque une tâche comme faite aujourd'hui"""
     try:
         tache = db.query(RoutineTask).get(task_id)
         if tache:
@@ -171,7 +171,7 @@ def marquer_tache_faite(task_id: int, db=None) -> bool:
             clear_maison_cache()
             return True
     except Exception as e:
-        st.error(f"âŒ Erreur: {e}")
+        st.error(f"❌ Erreur: {e}")
     return False
 
 
@@ -186,7 +186,7 @@ def desactiver_routine(routine_id: int, db=None) -> bool:
             clear_maison_cache()
             return True
     except Exception as e:
-        st.error(f"âŒ Erreur: {e}")
+        st.error(f"❌ Erreur: {e}")
     return False
 
 
@@ -198,7 +198,7 @@ def desactiver_routine(routine_id: int, db=None) -> bool:
 def app():
     """Point d'entrée module Entretien"""
     st.title("🧹 Entretien & Ménage")
-    st.caption("Gestion des routines et tÃ¢ches ménagères avec IA")
+    st.caption("Gestion des routines et tâches ménagères avec IA")
     
     service = get_entretien_service()
     
@@ -214,7 +214,7 @@ def app():
         st.metric("Routines actives", stats["routines_actives"])
     
     with col2:
-        st.metric("TÃ¢ches total", stats["total_taches"])
+        st.metric("Tâches total", stats["total_taches"])
     
     with col3:
         st.metric("Faites aujourd'hui", stats["taches_today"])
@@ -242,7 +242,7 @@ def app():
         taches = get_taches_today()
         
         if not taches:
-            st.success("âœ¨ Aucune tÃ¢che pour aujourd'hui!")
+            st.success("âœ¨ Aucune tâche pour aujourd'hui!")
         else:
             # Tri par heure
             taches_triees = sorted(taches, key=lambda x: x.get("heure", ""))
@@ -252,7 +252,7 @@ def app():
             progression = (faites / len(taches) * 100) if taches else 0
             
             st.progress(progression / 100)
-            st.caption(f"âœ… {faites}/{len(taches)} tÃ¢ches faites ({progression:.0f}%)")
+            st.caption(f"✅ {faites}/{len(taches)} tâches faites ({progression:.0f}%)")
             
             st.markdown("---")
             
@@ -261,7 +261,7 @@ def app():
                 col1, col2, col3 = st.columns([3, 1, 1])
                 
                 with col1:
-                    emoji = "âœ…" if tache["fait"] else "â³"
+                    emoji = "✅" if tache["fait"] else "⏳"
                     st.markdown(f"### {emoji} {tache['nom']}")
                     
                     if tache.get("description"):
@@ -274,12 +274,12 @@ def app():
                     if not tache["fait"]:
                         if st.button("âœ“ Fait", key=f"check_{tache['id']}", use_container_width=True):
                             if marquer_tache_faite(tache["id"]):
-                                st.success("âœ… TÃ¢che marquée!")
+                                st.success("✅ Tâche marquée!")
                                 st.rerun()
                 
                 with col3:
                     if tache["fait"]:
-                        st.success("âœ…")
+                        st.success("✅")
                 
                 st.divider()
     
@@ -311,8 +311,8 @@ def app():
                     # Barre de progression
                     st.progress(routine['completion'] / 100)
                     st.caption(
-                        f"[CHART] {routine['completion']:.0f}% â€¢ "
-                        f"{routine['tasks_aujourd_hui']}/{routine['tasks_count']} tÃ¢ches â€¢ "
+                        f"[CHART] {routine['completion']:.0f}% • "
+                        f"{routine['tasks_aujourd_hui']}/{routine['tasks_count']} tâches • "
                         f"Fréquence: {routine['frequence']}"
                     )
                     
@@ -325,21 +325,21 @@ def app():
                             st.info("Routine désactivée")
                             st.rerun()
                 
-                # TÃ¢ches
-                with st.expander("Voir tÃ¢ches"):
+                # Tâches
+                with st.expander("Voir tâches"):
                     with get_db_context() as session:
                         taches_routine = session.query(RoutineTask).filter_by(
                             routine_id=routine['id']
                         ).all()
                         
                         if not taches_routine:
-                            st.caption("Aucune tÃ¢che")
+                            st.caption("Aucune tâche")
                         else:
                             for t in taches_routine:
                                 col_t1, col_t2 = st.columns([4, 1])
                                 
                                 with col_t1:
-                                    emoji = "âœ…" if t.fait_le == date.today() else "â³"
+                                    emoji = "✅" if t.fait_le == date.today() else "⏳"
                                     st.caption(f"{emoji} {t.nom}")
                                     if t.heure_prevue:
                                         st.caption(f"🎯 {t.heure_prevue}")
@@ -376,7 +376,7 @@ def app():
                 ["quotidien", "hebdomadaire", "mensuel", "hebdomadaire 2x"]
             )
         
-        if st.button("👶 Générer tÃ¢ches", use_container_width=True):
+        if st.button("👶 Générer tâches", use_container_width=True):
             if routine_nom:
                 with st.spinner("IA crée la routine..."):
                     try:
@@ -386,7 +386,7 @@ def app():
                             st.success(taches)
                             
                             # Proposer de créer
-                            if st.button("âœ… Créer cette routine", use_container_width=True):
+                            if st.button("✅ Créer cette routine", use_container_width=True):
                                 r_id = creer_routine(routine_nom, "Général", routine_freq)
                                 if r_id:
                                     st.success("Routine créée!")
@@ -399,7 +399,7 @@ def app():
         st.markdown("#### 🧹¸ Optimiser la semaine")
         
         types = st.text_area(
-            "Lister les tÃ¢ches (une par ligne)",
+            "Lister les tâches (une par ligne)",
             placeholder="Nettoyage salle de bain\nLessive\nVaisselle\n...",
             height=120
         )
@@ -433,10 +433,10 @@ def app():
         st.markdown("---")
         
         # Estimer temps
-        st.markdown("#### â±ï¸ Estimer temps d'une tÃ¢che")
+        st.markdown("#### â±ï¸ Estimer temps d'une tâche")
         
         tache_temps = st.text_input(
-            "Nom de la tÃ¢che",
+            "Nom de la tâche",
             placeholder="Ex: Nettoyer la salle de bain"
         )
         
@@ -452,7 +452,7 @@ def app():
                         st.warning(f"âš ï¸ IA indisponible: {e}")
     
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    # TAB 4: CRÃ‰ER ROUTINE
+    # TAB 4: CRÉER ROUTINE
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     with tab4:
@@ -481,9 +481,9 @@ def app():
                 height=80
             )
             
-            nb_taches = st.number_input("Nombre de tÃ¢ches à ajouter", 1, 10, 3)
+            nb_taches = st.number_input("Nombre de tâches à ajouter", 1, 10, 3)
             
-            submitted = st.form_submit_button("âœ… Créer routine", type="primary")
+            submitted = st.form_submit_button("✅ Créer routine", type="primary")
             
             if submitted:
                 if not nom_r:
@@ -491,7 +491,7 @@ def app():
                 else:
                     r_id = creer_routine(nom_r, categorie_r, frequence_r, desc_r)
                     if r_id:
-                        st.success(f"âœ… Routine '{nom_r}' créée!")
+                        st.success(f"✅ Routine '{nom_r}' créée!")
                         st.rerun()
         
         st.markdown("---")
@@ -526,7 +526,7 @@ def app():
                 if r_id:
                     for ordre, tache_nom in enumerate(templ["taches"], 1):
                         ajouter_tache_routine(r_id, tache_nom, ordre=ordre)
-                    st.success("âœ… Routine créée!")
+                    st.success("✅ Routine créée!")
                     st.rerun()
 
 

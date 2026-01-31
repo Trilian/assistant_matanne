@@ -199,7 +199,7 @@ def app():
                 )
             else:
                 st.info(
-                    f"â„¹ï¸ **{alerte['personne']}** : {alerte['message']}\n\n🟢 {alerte['action']}"
+                    f"ℹ️ **{alerte['personne']}** : {alerte['message']}\n\n🟢 {alerte['action']}"
                 )
 
         st.markdown("---")
@@ -280,7 +280,7 @@ def app():
                 st.info("Aucune donnée pour cette période")
 
     # ===================================
-    # TAB 2 : AJOUTER ENTRÃ‰E
+    # TAB 2 : AJOUTER ENTRÉE
     # ===================================
 
     with tab2:
@@ -323,7 +323,7 @@ def app():
                     st.error("Le prénom est obligatoire")
                 else:
                     ajouter_entree_adulte(personne, humeur, sommeil, activite, notes_complete)
-                    st.success(f"âœ… Entrée enregistrée pour {personne}")
+                    st.success(f"✅ Entrée enregistrée pour {personne}")
                     st.balloons()
                     st.rerun()
 
@@ -398,7 +398,7 @@ def app():
                                 loop.close()
 
                             st.session_state["analyse_bien_etre"] = analyse
-                            st.success("âœ… Analyse terminée")
+                            st.success("✅ Analyse terminée")
 
                         except Exception as e:
                             st.error(f"Erreur IA : {e}")
@@ -490,8 +490,8 @@ def app():
 
             st.markdown("---")
 
-            # Ã‰volution du sommeil
-            st.markdown("### 🗑️´ Ã‰volution du sommeil (90 jours)")
+            # Évolution du sommeil
+            st.markdown("### 🗑️´ Évolution du sommeil (90 jours)")
 
             # Par personne
             for personne in df_tendances["personne"].unique():
@@ -519,7 +519,7 @@ def app():
                     total = len(df_p)
                     pct = (bien / total) * 100 if total > 0 else 0
 
-                    st.write(f"â€¢ **{personne}** : {pct:.0f}% bien")
+                    st.write(f"• **{personne}** : {pct:.0f}% bien")
 
             # Export
             st.markdown("---")

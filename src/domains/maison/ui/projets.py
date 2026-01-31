@@ -48,9 +48,9 @@ class ProjetsService(BaseAIService):
         )
     
     async def suggerer_taches(self, nom_projet: str, description: str) -> str:
-        """Suggère des tÃ¢ches pour un projet"""
+        """Suggère des tâches pour un projet"""
         prompt = f"""Pour le projet "{nom_projet}" : {description}
-Suggère 5-7 tÃ¢ches concrètes et numérotées. Ordonne par ordre logique."""
+Suggère 5-7 tâches concrètes et numérotées. Ordonne par ordre logique."""
         
         return await self.call_with_cache(
             prompt=prompt,
@@ -70,8 +70,8 @@ estime la durée totale et le temps par phase (préparation, exécution, finitio
         )
     
     async def prioriser_taches(self, nom_projet: str, taches_texte: str) -> str:
-        """Priorise les tÃ¢ches pour un projet"""
-        prompt = f"""Pour le projet "{nom_projet}", réordonne ces tÃ¢ches par priorité:
+        """Priorise les tâches pour un projet"""
+        prompt = f"""Pour le projet "{nom_projet}", réordonne ces tâches par priorité:
 {taches_texte}
 
 Explique brièvement l'ordre."""
@@ -100,7 +100,7 @@ def get_projets_service() -> ProjetsService:
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# HELPERS MÃ‰TIER
+# HELPERS MÉTIER
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
@@ -128,7 +128,7 @@ def creer_projet(
         clear_maison_cache()
         return projet.id
     except Exception as e:
-        st.error(f"âŒ Erreur création projet: {e}")
+        st.error(f"❌ Erreur création projet: {e}")
         return None
 
 
@@ -141,7 +141,7 @@ def ajouter_tache(
     date_echéance: date = None,
     db=None
 ) -> bool:
-    """Ajoute une tÃ¢che à un projet"""
+    """Ajoute une tâche à un projet"""
     try:
         tache = ProjectTask(
             project_id=project_id,
@@ -156,13 +156,13 @@ def ajouter_tache(
         clear_maison_cache()
         return True
     except Exception as e:
-        st.error(f"âŒ Erreur ajout tÃ¢che: {e}")
+        st.error(f"❌ Erreur ajout tâche: {e}")
         return False
 
 
 @with_db_session
 def marquer_tache_done(task_id: int, db=None) -> bool:
-    """Marque une tÃ¢che comme terminée"""
+    """Marque une tâche comme terminée"""
     try:
         tache = db.query(ProjectTask).get(task_id)
         if tache:
@@ -171,7 +171,7 @@ def marquer_tache_done(task_id: int, db=None) -> bool:
             clear_maison_cache()
             return True
     except Exception as e:
-        st.error(f"âŒ Erreur mise à jour: {e}")
+        st.error(f"❌ Erreur mise à jour: {e}")
     return False
 
 
@@ -187,7 +187,7 @@ def marquer_projet_done(project_id: int, db=None) -> bool:
             clear_maison_cache()
             return True
     except Exception as e:
-        st.error(f"âŒ Erreur: {e}")
+        st.error(f"❌ Erreur: {e}")
     return False
 
 
@@ -268,7 +268,7 @@ def app():
                     
                     # Barre de progression
                     st.progress(projet['progress'] / 100)
-                    st.caption(f"âœ… {projet['progress']:.0f}% â€¢ {projet['taches_count']} tÃ¢ches")
+                    st.caption(f"✅ {projet['progress']:.0f}% • {projet['taches_count']} tâches")
                     
                     if projet['description']:
                         st.caption(projet['description'][:100] + "...")
@@ -291,26 +291,26 @@ def app():
                                 st.caption(f"📋 {jours}j restants")
                 
                 with col2:
-                    if st.button("âœ… Terminer", key=f"done_{projet['id']}", use_container_width=True):
+                    if st.button("✅ Terminer", key=f"done_{projet['id']}", use_container_width=True):
                         if marquer_projet_done(projet['id']):
                             st.success("Projet marqué comme terminé!")
                             st.rerun()
                 
-                # Afficher les tÃ¢ches
-                with st.expander("Voir tÃ¢ches"):
+                # Afficher les tâches
+                with st.expander("Voir tâches"):
                     with get_db_context() as session:
                         taches = session.query(ProjectTask).filter_by(
                             project_id=projet['id']
                         ).all()
                         
                         if not taches:
-                            st.caption("Aucune tÃ¢che")
+                            st.caption("Aucune tâche")
                         else:
                             for t in taches:
                                 col_t1, col_t2, col_t3 = st.columns([3, 1, 1])
                                 
                                 with col_t1:
-                                    emoji = "âœ…" if t.statut == "terminé" else "â³"
+                                    emoji = "✅" if t.statut == "terminé" else "⏳"
                                     st.caption(f"{emoji} {t.nom}")
                                 
                                 with col_t2:
@@ -334,9 +334,9 @@ def app():
         
         col_ia1, col_ia2 = st.columns(2)
         
-        # Suggérer tÃ¢ches
+        # Suggérer tâches
         with col_ia1:
-            st.markdown("#### 🎯 Suggérer des tÃ¢ches")
+            st.markdown("#### 🎯 Suggérer des tâches")
             
             projet_nom_ia = st.text_input("Nom du projet", placeholder="Ex: Rénover cuisine")
             projet_desc_ia = st.text_area(
@@ -345,7 +345,7 @@ def app():
                 height=100
             )
             
-            if st.button("🍽️ Générer tÃ¢ches", key="ia_taches", use_container_width=True):
+            if st.button("🍽️ Générer tâches", key="ia_taches", use_container_width=True):
                 if projet_nom_ia:
                     with st.spinner("IA analyse le projet..."):
                         try:
@@ -401,7 +401,7 @@ def app():
                             st.warning(f"âš ï¸ IA indisponible: {e}")
     
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    # TAB 3: CRÃ‰ER NOUVEAU PROJET
+    # TAB 3: CRÉER NOUVEAU PROJET
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     with tab3:
@@ -432,7 +432,7 @@ def app():
                 else:
                     project_id = creer_projet(nom, description, "Général", priorite, date_fin)
                     if project_id:
-                        st.success(f"âœ… Projet '{nom}' créé!")
+                        st.success(f"✅ Projet '{nom}' créé!")
                         st.balloons()
                         st.rerun()
         
@@ -462,7 +462,7 @@ def app():
                 if p_id:
                     for tache in templ["taches"]:
                         ajouter_tache(p_id, tache)
-                    st.success("âœ… Projet template créé avec tÃ¢ches!")
+                    st.success("✅ Projet template créé avec tâches!")
                     st.rerun()
     
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•

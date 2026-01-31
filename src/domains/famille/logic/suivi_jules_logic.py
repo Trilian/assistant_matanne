@@ -24,7 +24,7 @@ CATEGORIES_MILESTONE = ["Motricité", "Langage", "Social", "Cognitif", "Autonomi
 
 def calculer_age(date_naissance: date) -> Dict[str, int]:
     """
-    Calcule l'Ã¢ge détaillé depuis la date de naissance.
+    Calcule l'âge détaillé depuis la date de naissance.
     
     Args:
         date_naissance: Date de naissance
@@ -76,10 +76,10 @@ def calculer_age(date_naissance: date) -> Dict[str, int]:
 
 def formater_age(age_dict: Dict[str, int]) -> str:
     """
-    Formate l'Ã¢ge de manière lisible.
+    Formate l'âge de manière lisible.
     
     Args:
-        age_dict: Dictionnaire d'Ã¢ge de calculer_age()
+        age_dict: Dictionnaire d'âge de calculer_age()
         
     Returns:
         Chaîne formatée
@@ -103,7 +103,7 @@ def formater_age(age_dict: Dict[str, int]) -> str:
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# Ã‰TAPES DE DÃ‰VELOPPEMENT
+# ÉTAPES DE DÉVELOPPEMENT
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 ETAPES_DEVELOPPEMENT = {
@@ -132,7 +132,7 @@ ETAPES_DEVELOPPEMENT = {
 
 def get_etapes_age(age_mois: int) -> List[Dict[str, str]]:
     """
-    Retourne les étapes de développement attendues pour un Ã¢ge.
+    Retourne les étapes de développement attendues pour un âge.
     
     Args:
         age_mois: Ã‚ge en mois
@@ -140,7 +140,7 @@ def get_etapes_age(age_mois: int) -> List[Dict[str, str]]:
     Returns:
         Liste des étapes
     """
-    # Trouver la tranche d'Ã¢ge la plus proche
+    # Trouver la tranche d'âge la plus proche
     tranches = sorted(ETAPES_DEVELOPPEMENT.keys())
     
     for tranche in reversed(tranches):

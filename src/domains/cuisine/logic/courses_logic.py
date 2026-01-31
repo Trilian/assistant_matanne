@@ -418,7 +418,7 @@ def formater_liste_impression(articles: list[dict]) -> str:
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# GÃ‰NÃ‰RATION DE SUGGESTIONS
+# GÉNÉRATION DE SUGGESTIONS
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def generer_suggestions_depuis_stock_bas(alertes: dict) -> list[dict]:

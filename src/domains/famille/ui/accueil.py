@@ -2,7 +2,7 @@
 Module Accueil - Dashboard principal Famille
 
 Hub affichant:
-- Profil Jules (Ã¢ge, prochains jalons)
+- Profil Jules (âge, prochains jalons)
 - Objectifs santé et progression
 - Activités cette semaine
 - Budget semaine/mois
@@ -70,12 +70,12 @@ def get_dashboard_metrics():
         }
         return metrics
     except Exception as e:
-        st.error(f"âŒ Erreur dashboard: {e}")
+        st.error(f"❌ Erreur dashboard: {e}")
         return {}
 
 
 def calculer_julius():
-    """Alias pour get_or_create_jules puis calculer l'Ã¢ge"""
+    """Alias pour get_or_create_jules puis calculer l'âge"""
     try:
         child_id = get_or_create_jules()
         return calculer_age_jules(child_id)
@@ -136,7 +136,7 @@ def get_notifications():
                     "type": "info",
                     "emoji": "📋",
                     "titre": "Budget élevé cette semaine",
-                    "message": f"{total:.2f}â‚¬ dépensés (cette semaine)"
+                    "message": f"{total:.2f}€ dépensés (cette semaine)"
                 })
         
         # Notification 4: Activités
@@ -152,7 +152,7 @@ def get_notifications():
     except Exception as e:
         notifications.append({
             "type": "error",
-            "emoji": "âŒ",
+            "emoji": "❌",
             "titre": "Erreur chargement",
             "message": str(e)
         })
@@ -210,7 +210,7 @@ def app():
                 # Anniversaire
                 st.caption(f"🔔 Anniversaire: 22 Juin 2025")
         except Exception as e:
-            st.error(f"âŒ {e}")
+            st.error(f"❌ {e}")
         
         # Jalons par catégorie
         try:
@@ -219,7 +219,7 @@ def app():
             if milestones_count:
                 st.markdown("### Jalons par catégorie")
                 for cat, count in sorted(milestones_count.items()):
-                    st.write(f"â€¢ {cat.capitalize()}: **{count}**")
+                    st.write(f"• {cat.capitalize()}: **{count}**")
         except Exception as e:
             st.warning(f"âš ï¸ {e}")
     
@@ -245,10 +245,10 @@ def app():
                     st.caption(f"... et {len(objectifs) - 3} autres objectifs")
             
             else:
-                st.info("â„¹ï¸ Aucun objectif actif")
+                st.info("ℹ️ Aucun objectif actif")
         
         except Exception as e:
-            st.error(f"âŒ {e}")
+            st.error(f"❌ {e}")
     
     with col3:
         st.subheader("[CHART] Stats Santé (7j)")
@@ -259,19 +259,19 @@ def app():
             if stats and stats.get("nb_seances", 0) > 0:
                 st.metric("📥 Séances", stats.get("nb_seances", 0))
                 st.metric("â±ï¸ Minutes totales", int(stats.get("total_minutes", 0)))
-                st.metric("âš¡ Ã‰nergie moyenne", f"{stats.get('energie_moyenne', 0):.1f}/10")
+                st.metric("âš¡ Énergie moyenne", f"{stats.get('energie_moyenne', 0):.1f}/10")
                 st.metric("🧹 Moral moyen", f"{stats.get('moral_moyen', 0):.1f}/10")
             
             else:
-                st.info("â„¹ï¸ Aucune activité cette semaine")
+                st.info("ℹ️ Aucune activité cette semaine")
         
         except Exception as e:
-            st.error(f"âŒ {e}")
+            st.error(f"❌ {e}")
     
     st.markdown("---")
     
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    # SECTION 3: ACTIVITÃ‰S SEMAINE
+    # SECTION 3: ACTIVITÉS SEMAINE
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     st.subheader("📱… Activités cette semaine")
@@ -317,7 +317,7 @@ def app():
                         st.write(f"â±ï¸ **Durée**: {activity.duree_heures}h")
                         
                         if activity.cost_estime > 0:
-                            st.write(f"📋 **Coût estimé**: {activity.cout_estime:.2f}â‚¬")
+                            st.write(f"📋 **Coût estimé**: {activity.cout_estime:.2f}€")
                         
                         if activity.qui_participe:
                             st.write(f"💡 **Participants**: {', '.join(activity.qui_participe)}")
@@ -326,7 +326,7 @@ def app():
                 st.markdown("### 📋 Budget activités")
                 
                 total_cost = sum(a.cout_estime or 0 for a in activites)
-                st.metric("Total estimé", f"{total_cost:.2f}â‚¬")
+                st.metric("Total estimé", f"{total_cost:.2f}€")
                 
                 # Par type
                 types_count = {}
@@ -334,13 +334,13 @@ def app():
                     types_count[a.type_activite] = types_count.get(a.type_activite, 0) + 1
                 
                 for activity_type, count in types_count.items():
-                    st.write(f"â€¢ {activity_type.capitalize()}: {count}")
+                    st.write(f"• {activity_type.capitalize()}: {count}")
         
         else:
-            st.info("â„¹ï¸ Aucune activité prévue cette semaine")
+            st.info("ℹ️ Aucune activité prévue cette semaine")
     
     except Exception as e:
-        st.error(f"âŒ Erreur activités: {e}")
+        st.error(f"❌ Erreur activités: {e}")
     
     st.markdown("---")
     
@@ -375,13 +375,13 @@ def app():
                 st.plotly_chart(fig, use_container_width=True)
                 
                 total = budget_semaine.get("TOTAL", 0)
-                st.metric("👧 Total", f"{total:.2f}â‚¬")
+                st.metric("👧 Total", f"{total:.2f}€")
             
             else:
-                st.info("â„¹ï¸ Aucune dépense cette semaine")
+                st.info("ℹ️ Aucune dépense cette semaine")
         
         except Exception as e:
-            st.error(f"âŒ {e}")
+            st.error(f"❌ {e}")
     
     with col2:
         st.subheader("📋 Budget ce mois")
@@ -402,15 +402,15 @@ def app():
                 
                 col_a, col_b = st.columns(2)
                 with col_a:
-                    st.metric("Réel (mois)", f"{total_mois:.2f}â‚¬")
+                    st.metric("Réel (mois)", f"{total_mois:.2f}€")
                 with col_b:
-                    st.metric("Montant moyen par catégorie", f"{total_mois / max(len(budget_data), 1):.2f}â‚¬")
+                    st.metric("Montant moyen par catégorie", f"{total_mois / max(len(budget_data), 1):.2f}€")
             
             else:
-                st.info("â„¹ï¸ Aucune dépense ce mois")
+                st.info("ℹ️ Aucune dépense ce mois")
         
         except Exception as e:
-            st.error(f"âŒ {e}")
+            st.error(f"❌ {e}")
     
     st.markdown("---")
     

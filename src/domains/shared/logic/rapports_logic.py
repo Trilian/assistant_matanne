@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# GÃ‰NÃ‰RATION RAPPORTS
+# GÉNÉRATION RAPPORTS
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def generer_rapport_synthese(data: Dict[str, Any], periode: str = "mois") -> Dict[str, Any]:
@@ -232,12 +232,12 @@ def formater_rapport_texte(rapport: Dict[str, Any]) -> str:
     
     stats = rapport.get("statistiques", {})
     for cle, valeur in stats.items():
-        lignes.append(f"  â€¢ {cle.capitalize()}: {valeur}")
+        lignes.append(f"  • {cle.capitalize()}: {valeur}")
     
     # Sections
     if rapport.get("sections"):
         lignes.append("")
-        lignes.append("DÃ‰TAILS PAR SECTION:")
+        lignes.append("DÉTAILS PAR SECTION:")
         lignes.append("â”€" * 60)
         
         for section in rapport["sections"]:

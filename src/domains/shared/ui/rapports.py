@@ -1,10 +1,10 @@
 ﻿"""
 Module Rapports PDF - Interface Streamlit
 
-âœ… Rapport hebdo stocks
-âœ… Rapport budget/dépenses  
-âœ… Analyse gaspillage
-âœ… Export professionnel
+✅ Rapport hebdo stocks
+✅ Rapport budget/dépenses  
+✅ Analyse gaspillage
+✅ Export professionnel
 """
 
 import streamlit as st
@@ -115,14 +115,14 @@ def render_rapport_stocks():
             donnees = service.generer_donnees_rapport_stocks(periode)
             
             # Résumé général
-            st.info("📍**RÃ‰SUMÃ‰ GÃ‰NÃ‰RAL**")
+            st.info("📍**RÉSUMÉ GÉNÉRAL**")
             col1, col2, col3, col4 = st.columns(4)
             
             with col1:
                 st.metric("Total articles", donnees.articles_total)
             
             with col2:
-                st.metric("Valeur stock", f"â‚¬{donnees.valeur_stock_total:.2f}")
+                st.metric("Valeur stock", f"€{donnees.valeur_stock_total:.2f}")
             
             with col3:
                 st.metric("Faible stock", len(donnees.articles_faible_stock))
@@ -148,7 +148,7 @@ def render_rapport_stocks():
             
             # Articles périmés
             if donnees.articles_perimes:
-                st.subheader("âŒ Articles périmés")
+                st.subheader("❌ Articles périmés")
                 df_perimes = pd.DataFrame(donnees.articles_perimes)
                 df_perimes["date_peremption"] = pd.to_datetime(df_perimes["date_peremption"]).dt.strftime('%d/%m/%Y')
                 st.dataframe(
@@ -172,7 +172,7 @@ def render_rapport_stocks():
                         "Catégorie": cat,
                         "Articles": data["articles"],
                         "Quantité": data["quantite"],
-                        "Valeur â‚¬": data["valeur"]
+                        "Valeur €": data["valeur"]
                     })
                 df_cat = pd.DataFrame(cat_data)
                 st.dataframe(
@@ -182,7 +182,7 @@ def render_rapport_stocks():
                 )
         
         except Exception as e:
-            st.error(f"âŒ Erreur: {str(e)}")
+            st.error(f"❌ Erreur: {str(e)}")
     
     # Téléchargement
     if st.session_state.get("download_stocks"):
@@ -197,11 +197,11 @@ def render_rapport_stocks():
                 mime="application/pdf",
                 key="download_button_stocks"
             )
-            st.success("âœ… PDF généré - Cliquez sur le bouton pour télécharger")
+            st.success("✅ PDF généré - Cliquez sur le bouton pour télécharger")
             st.session_state.download_stocks = False
         
         except Exception as e:
-            st.error(f"âŒ Erreur: {str(e)}")
+            st.error(f"❌ Erreur: {str(e)}")
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -220,7 +220,7 @@ def render_rapport_budget():
     Analysez vos dépenses alimentaires:
     - Dépenses totales et par catégorie
     - Articles les plus coûteux
-    - Ã‰volution des dépenses
+    - Évolution des dépenses
     - Budget par catégorie
     """)
     
@@ -251,16 +251,16 @@ def render_rapport_budget():
             donnees = service.generer_donnees_rapport_budget(periode)
             
             # Résumé financier
-            st.info("📅 **RÃ‰SUMÃ‰ FINANCIER**")
+            st.info("📅 **RÉSUMÉ FINANCIER**")
             col1, col2, col3 = st.columns(3)
             
             with col1:
-                st.metric("Dépenses totales", f"â‚¬{donnees.depenses_total:.2f}")
+                st.metric("Dépenses totales", f"€{donnees.depenses_total:.2f}")
             
             with col2:
                 if donnees.periode_jours > 0:
                     moy_jour = donnees.depenses_total / donnees.periode_jours
-                    st.metric("Moyenne par jour", f"â‚¬{moy_jour:.2f}")
+                    st.metric("Moyenne par jour", f"€{moy_jour:.2f}")
             
             with col3:
                 st.metric("Période", f"{donnees.periode_jours} jours")
@@ -274,7 +274,7 @@ def render_rapport_budget():
                     pct = (montant / donnees.depenses_total * 100) if donnees.depenses_total > 0 else 0
                     cat_data.append({
                         "Catégorie": cat,
-                        "Montant â‚¬": f"{montant:.2f}",
+                        "Montant €": f"{montant:.2f}",
                         "% du total": f"{pct:.1f}%"
                     })
                 
@@ -304,19 +304,19 @@ def render_rapport_budget():
                         "categorie": "Catégorie",
                         "quantite": "Quantité",
                         "unite": "Unité",
-                        "prix_unitaire": "Prix unitaire â‚¬",
-                        "cout_total": "Coût total â‚¬"
+                        "prix_unitaire": "Prix unitaire €",
+                        "cout_total": "Coût total €"
                     }),
                     use_container_width=True,
                     hide_index=True,
                     column_config={
-                        "Prix unitaire â‚¬": st.column_config.NumberColumn(format="â‚¬%.2f"),
-                        "Coût total â‚¬": st.column_config.NumberColumn(format="â‚¬%.2f")
+                        "Prix unitaire €": st.column_config.NumberColumn(format="€%.2f"),
+                        "Coût total €": st.column_config.NumberColumn(format="€%.2f")
                     }
                 )
         
         except Exception as e:
-            st.error(f"âŒ Erreur: {str(e)}")
+            st.error(f"❌ Erreur: {str(e)}")
     
     # Téléchargement
     if st.session_state.get("download_budget"):
@@ -331,11 +331,11 @@ def render_rapport_budget():
                 mime="application/pdf",
                 key="download_button_budget"
             )
-            st.success("âœ… PDF généré - Cliquez sur le bouton pour télécharger")
+            st.success("✅ PDF généré - Cliquez sur le bouton pour télécharger")
             st.session_state.download_budget = False
         
         except Exception as e:
-            st.error(f"âŒ Erreur: {str(e)}")
+            st.error(f"❌ Erreur: {str(e)}")
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -385,19 +385,19 @@ def render_analyse_gaspillage():
             analyse = service.generer_analyse_gaspillage(periode)
             
             # Résumé
-            st.warning("âš ï¸ **RÃ‰SUMÃ‰ GASPILLAGE**")
+            st.warning("âš ï¸ **RÉSUMÉ GASPILLAGE**")
             col1, col2, col3 = st.columns(3)
             
             with col1:
                 st.metric("Articles périmés", analyse.articles_perimes_total)
             
             with col2:
-                st.metric("Valeur perdue", f"â‚¬{analyse.valeur_perdue:.2f}")
+                st.metric("Valeur perdue", f"€{analyse.valeur_perdue:.2f}")
             
             with col3:
                 if analyse.articles_perimes_total > 0:
                     moy_perte = analyse.valeur_perdue / analyse.articles_perimes_total
-                    st.metric("Moyenne perte", f"â‚¬{moy_perte:.2f}")
+                    st.metric("Moyenne perte", f"€{moy_perte:.2f}")
             
             # Recommandations
             if analyse.recommandations:
@@ -418,7 +418,7 @@ def render_analyse_gaspillage():
                     cat_data.append({
                         "Catégorie": cat,
                         "Articles": data["articles"],
-                        "Valeur perdue â‚¬": f"{data['valeur']:.2f}"
+                        "Valeur perdue €": f"{data['valeur']:.2f}"
                     })
                 
                 df_cat = pd.DataFrame(cat_data)
@@ -430,7 +430,7 @@ def render_analyse_gaspillage():
             
             # Articles détail
             if analyse.articles_perimes_detail:
-                st.subheader("âŒ Articles périmés (détail)")
+                st.subheader("❌ Articles périmés (détail)")
                 df_detail = pd.DataFrame(analyse.articles_perimes_detail)
                 st.dataframe(
                     df_detail.rename(columns={
@@ -439,17 +439,17 @@ def render_analyse_gaspillage():
                         "jours_perime": "Jours écart",
                         "quantite": "Quantité",
                         "unite": "Unité",
-                        "valeur_perdue": "Valeur perdue â‚¬"
+                        "valeur_perdue": "Valeur perdue €"
                     }),
                     use_container_width=True,
                     hide_index=True,
                     column_config={
-                        "Valeur perdue â‚¬": st.column_config.NumberColumn(format="â‚¬%.2f")
+                        "Valeur perdue €": st.column_config.NumberColumn(format="€%.2f")
                     }
                 )
         
         except Exception as e:
-            st.error(f"âŒ Erreur: {str(e)}")
+            st.error(f"❌ Erreur: {str(e)}")
     
     # Téléchargement
     if st.session_state.get("download_gaspillage"):
@@ -464,11 +464,11 @@ def render_analyse_gaspillage():
                 mime="application/pdf",
                 key="download_button_gaspillage"
             )
-            st.success("âœ… PDF généré - Cliquez sur le bouton pour télécharger")
+            st.success("✅ PDF généré - Cliquez sur le bouton pour télécharger")
             st.session_state.download_gaspillage = False
         
         except Exception as e:
-            st.error(f"âŒ Erreur: {str(e)}")
+            st.error(f"❌ Erreur: {str(e)}")
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -492,9 +492,9 @@ def render_historique():
         st.subheader("📋 Rapports Hebdomadaires")
         
         st.markdown("""
-        âœ… Rapport stocks - chaque lundi
-        âœ… Rapport budget - chaque dimanche
-        âœ… Analyse gaspillage - chaque vendredi
+        ✅ Rapport stocks - chaque lundi
+        ✅ Rapport budget - chaque dimanche
+        ✅ Analyse gaspillage - chaque vendredi
         """)
         
         if st.button("âš™ï¸ Configurer planification", key="btn_schedule"):
@@ -510,7 +510,7 @@ def render_historique():
         
         st.metric("Rapports générés ce mois", 12)
         st.metric("Articles analysés", 47)
-        st.metric("Valeur stock totale", "â‚¬1,234.56")
+        st.metric("Valeur stock totale", "€1,234.56")
     
     # Guide
     st.divider()

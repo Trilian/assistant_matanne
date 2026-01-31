@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 # CONSTANTES
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-CATEGORIES_SHOPPING = ["Vêtements", "Chaussures", "Jouets", "Livres", "Ã‰lectronique", "Maison", "Puériculture", "Autre"]
+CATEGORIES_SHOPPING = ["Vêtements", "Chaussures", "Jouets", "Livres", "Électronique", "Maison", "Puériculture", "Autre"]
 LISTES = ["Jules", "Nous", "Maison"]
 PRIORITES = ["Haute", "Moyenne", "Basse"]
 
@@ -241,9 +241,9 @@ def formater_article_label(article: Dict[str, Any]) -> str:
     prix = article.get("prix_estime", 0.0)
     
     if qty > 1:
-        return f"{titre} (x{qty}) - {prix * qty:.2f}â‚¬"
+        return f"{titre} (x{qty}) - {prix * qty:.2f}€"
     else:
-        return f"{titre} - {prix:.2f}â‚¬"
+        return f"{titre} - {prix:.2f}€"
 
 
 def grouper_par_magasin(articles: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:

@@ -38,16 +38,16 @@ def get_or_create_jules() -> int:
                 )
                 session.add(child)
                 session.commit()
-                st.success("âœ… Profil Jules créé !")
+                st.success("✅ Profil Jules créé !")
             
             return child.id
     except Exception as e:
-        st.error(f"âŒ Erreur création Jules: {str(e)}")
+        st.error(f"❌ Erreur création Jules: {str(e)}")
         raise
 
 
 def calculer_age_jules() -> dict:
-    """Calcule l'Ã¢ge de Jules en jours, semaines, mois"""
+    """Calcule l'âge de Jules en jours, semaines, mois"""
     try:
         with get_session() as session:
             child = session.query(ChildProfile).filter_by(name="Jules").first()
@@ -71,7 +71,7 @@ def calculer_age_jules() -> dict:
                 "date_naissance": child.date_of_birth
             }
     except Exception as e:
-        st.error(f"âŒ Erreur calcul Ã¢ge: {str(e)}")
+        st.error(f"❌ Erreur calcul âge: {str(e)}")
         return {"jours": 0, "semaines": 0, "mois": 0, "ans": 0}
 
 
@@ -102,7 +102,7 @@ def get_milestones_by_category(child_id: int) -> dict:
             
             return result
     except Exception as e:
-        st.error(f"âŒ Erreur lecture jalons: {str(e)}")
+        st.error(f"❌ Erreur lecture jalons: {str(e)}")
         return {}
 
 
@@ -117,7 +117,7 @@ def count_milestones_by_category(child_id: int) -> dict:
             
             return {cat: count for cat, count in result}
     except Exception as e:
-        st.error(f"âŒ Erreur comptage jalons: {str(e)}")
+        st.error(f"❌ Erreur comptage jalons: {str(e)}")
         return {}
 
 
@@ -162,7 +162,7 @@ def get_objectives_actifs() -> list:
             
             return sorted(result, key=lambda x: x["priorite"] == "haute", reverse=True)
     except Exception as e:
-        st.error(f"âŒ Erreur lecture objectifs: {str(e)}")
+        st.error(f"❌ Erreur lecture objectifs: {str(e)}")
         return []
 
 
@@ -205,7 +205,7 @@ def get_budget_par_period(period: str = "month") -> dict:
             result["TOTAL"] = total
             return result
     except Exception as e:
-        st.error(f"âŒ Erreur lecture budget: {str(e)}")
+        st.error(f"❌ Erreur lecture budget: {str(e)}")
         return {}
 
 
@@ -232,7 +232,7 @@ def get_budget_mois_dernier() -> float:
             
             return float(total)
     except Exception as e:
-        st.error(f"âŒ Erreur calcul budget mois dernier: {str(e)}")
+        st.error(f"❌ Erreur calcul budget mois dernier: {str(e)}")
         return 0.0
 
 
@@ -271,7 +271,7 @@ def get_activites_semaine() -> list:
                 for act in activities
             ]
     except Exception as e:
-        st.error(f"âŒ Erreur lecture activités: {str(e)}")
+        st.error(f"❌ Erreur lecture activités: {str(e)}")
         return []
 
 
@@ -295,7 +295,7 @@ def get_budget_activites_mois() -> float:
             
             return float(total)
     except Exception as e:
-        st.error(f"âŒ Erreur budget activités: {str(e)}")
+        st.error(f"❌ Erreur budget activités: {str(e)}")
         return 0.0
 
 
@@ -348,7 +348,7 @@ def get_stats_sante_semaine() -> dict:
             
             return stats
     except Exception as e:
-        st.error(f"âŒ Erreur stats santé: {str(e)}")
+        st.error(f"❌ Erreur stats santé: {str(e)}")
         return {
             "nb_seances": 0,
             "total_minutes": 0,

@@ -25,11 +25,11 @@ PIECES = ["Cuisine", "Salon", "Chambre", "Salle de bain", "Bureau", "Extérieur"
 
 def calculer_prochaine_occurrence(derniere_execution: date, frequence: str) -> date:
     """
-    Calcule la prochaine date d'exécution d'une tÃ¢che.
+    Calcule la prochaine date d'exécution d'une tâche.
     
     Args:
         derniere_execution: Date de la dernière exécution
-        frequence: Fréquence de la tÃ¢che
+        frequence: Fréquence de la tâche
         
     Returns:
         Date de la prochaine occurrence
@@ -54,7 +54,7 @@ def calculer_jours_avant_tache(tache: Dict[str, Any]) -> Optional[int]:
     Calcule combien de jours avant la prochaine occurrence.
     
     Args:
-        tache: Données de la tÃ¢che
+        tache: Données de la tâche
         
     Returns:
         Nombre de jours (négatif si retard)
@@ -76,18 +76,18 @@ def calculer_jours_avant_tache(tache: Dict[str, Any]) -> Optional[int]:
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# ALERTES ET PRIORITÃ‰S
+# ALERTES ET PRIORITÉS
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def get_taches_aujourd_hui(taches: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
-    Retourne les tÃ¢ches à faire aujourd'hui.
+    Retourne les tâches à faire aujourd'hui.
     
     Args:
-        taches: Liste des tÃ¢ches
+        taches: Liste des tâches
         
     Returns:
-        Liste des tÃ¢ches du jour
+        Liste des tâches du jour
     """
     resultat = []
     
@@ -104,13 +104,13 @@ def get_taches_aujourd_hui(taches: List[Dict[str, Any]]) -> List[Dict[str, Any]]
 
 def get_taches_semaine(taches: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
-    Retourne les tÃ¢ches de la semaine.
+    Retourne les tâches de la semaine.
     
     Args:
-        taches: Liste des tÃ¢ches
+        taches: Liste des tâches
         
     Returns:
-        Liste des tÃ¢ches de la semaine
+        Liste des tâches de la semaine
     """
     resultat = []
     
@@ -127,13 +127,13 @@ def get_taches_semaine(taches: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
 def get_taches_en_retard(taches: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
-    Retourne les tÃ¢ches en retard.
+    Retourne les tâches en retard.
     
     Args:
-        taches: Liste des tÃ¢ches
+        taches: Liste des tâches
         
     Returns:
-        Liste des tÃ¢ches en retard
+        Liste des tâches en retard
     """
     resultat = []
     
@@ -153,17 +153,17 @@ def get_taches_en_retard(taches: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def filtrer_par_categorie(taches: List[Dict[str, Any]], categorie: str) -> List[Dict[str, Any]]:
-    """Filtre les tÃ¢ches par catégorie."""
+    """Filtre les tâches par catégorie."""
     return [t for t in taches if t.get("categorie") == categorie]
 
 
 def filtrer_par_piece(taches: List[Dict[str, Any]], piece: str) -> List[Dict[str, Any]]:
-    """Filtre les tÃ¢ches par pièce."""
+    """Filtre les tâches par pièce."""
     return [t for t in taches if t.get("piece") == piece]
 
 
 def filtrer_par_frequence(taches: List[Dict[str, Any]], frequence: str) -> List[Dict[str, Any]]:
-    """Filtre les tÃ¢ches par fréquence."""
+    """Filtre les tâches par fréquence."""
     return [t for t in taches if t.get("frequence") == frequence]
 
 
@@ -176,7 +176,7 @@ def calculer_statistiques_entretien(taches: List[Dict[str, Any]]) -> Dict[str, A
     Calcule les statistiques d'entretien.
     
     Args:
-        taches: Liste des tÃ¢ches
+        taches: Liste des tâches
         
     Returns:
         Dictionnaire de statistiques
@@ -212,10 +212,10 @@ def calculer_statistiques_entretien(taches: List[Dict[str, Any]]) -> Dict[str, A
 
 def calculer_taux_completion(taches: List[Dict[str, Any]], periode_jours: int = 30) -> float:
     """
-    Calcule le taux de complétion des tÃ¢ches.
+    Calcule le taux de complétion des tâches.
     
     Args:
-        taches: Liste des tÃ¢ches
+        taches: Liste des tâches
         periode_jours: Période de calcul en jours
         
     Returns:
@@ -226,7 +226,7 @@ def calculer_taux_completion(taches: List[Dict[str, Any]], periode_jours: int = 
     
     date_debut = date.today() - timedelta(days=periode_jours)
     
-    # Compter tÃ¢ches attendues vs complétées
+    # Compter tâches attendues vs complétées
     attendues = 0
     completees = 0
     
@@ -264,10 +264,10 @@ def calculer_taux_completion(taches: List[Dict[str, Any]], periode_jours: int = 
 
 def valider_tache(data: Dict[str, Any]) -> tuple[bool, List[str]]:
     """
-    Valide les données d'une tÃ¢che.
+    Valide les données d'une tâche.
     
     Args:
-        data: Données de la tÃ¢che
+        data: Données de la tâche
         
     Returns:
         (est_valide, liste_erreurs)
@@ -288,10 +288,10 @@ def valider_tache(data: Dict[str, Any]) -> tuple[bool, List[str]]:
 
 def grouper_par_piece(taches: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
     """
-    Groupe les tÃ¢ches par pièce.
+    Groupe les tâches par pièce.
     
     Args:
-        taches: Liste des tÃ¢ches
+        taches: Liste des tâches
         
     Returns:
         Dictionnaire {piece: [taches]}
