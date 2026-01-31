@@ -125,7 +125,7 @@ def render_graphiques_enrichis():
         fig = graphique_inventaire_categories(inventaire)
         if fig:
             st.markdown("**📦 Stock par Catégorie**")
-            st.plotly_chart(fig, use_container_width=True, key="chart_inventaire")
+            st.plotly_chart(fig, width='stretch', key="chart_inventaire")
         else:
             st.info("Pas de données d'inventaire")
     
@@ -140,7 +140,7 @@ def render_graphiques_enrichis():
             fig = graphique_repartition_repas(repas_data)
             if fig:
                 st.markdown("**💡 Répartition des Repas**")
-                st.plotly_chart(fig, use_container_width=True, key="chart_repas")
+                st.plotly_chart(fig, width='stretch', key="chart_repas")
             else:
                 st.info("Pas de planning cette semaine")
         else:
@@ -221,7 +221,7 @@ def render_critical_alerts():
 
             with col2:
                 if st.button(
-                    alert["action"], key=f"alert_{alert['module']}", use_container_width=True
+                    alert["action"], key=f"alert_{alert['module']}", width='stretch'
                 ):
                     StateManager.navigate_to(alert["module"])
                     st.rerun()
@@ -235,7 +235,7 @@ def render_critical_alerts():
 def render_global_stats():
     """Stats globales de l'application"""
 
-    st.markdown("### [CHART] Vue d'Ensemble")
+    st.markdown("### 📊 Vue d'Ensemble")
 
     # Charger stats
     stats_recettes = get_recette_service().get_stats()
@@ -256,7 +256,7 @@ def render_global_stats():
         stock_bas = len([a for a in inventaire if a.get("statut") in ["critique", "sous_seuil"]])
 
         st.metric(
-            "[PKG] Inventaire",
+            "📦 Inventaire",
             total_inventaire,
             delta=f"-{stock_bas} stock bas" if stock_bas > 0 else None,
             delta_color="inverse",
@@ -282,30 +282,30 @@ def render_global_stats():
 def render_quick_actions():
     """Raccourcis d'actions rapides"""
 
-    st.markdown("### âš¡ Actions Rapides")
+    st.markdown("### ⚡ Actions Rapides")
 
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
         if st.button(
-            "âž• Ajouter Recette", key="quick_add_recette", use_container_width=True, type="primary"
+            "➕ Ajouter Recette", key="quick_add_recette", width='stretch', type="primary"
         ):
             StateManager.navigate_to("cuisine.recettes")
             st.session_state.show_add_form = True
             st.rerun()
 
     with col2:
-        if st.button("📅 Voir Courses", key="quick_view_courses", use_container_width=True):
+        if st.button("📅 Voir Courses", key="quick_view_courses", width='stretch'):
             StateManager.navigate_to("cuisine.courses")
             st.rerun()
 
     with col3:
-        if st.button("[PKG] Gérer Inventaire", key="quick_view_inventaire", use_container_width=True):
+        if st.button("📦 Gérer Inventaire", key="quick_view_inventaire", width='stretch'):
             StateManager.navigate_to("cuisine.inventaire")
             st.rerun()
 
     with col4:
-        if st.button("🧹 Planning Semaine", key="quick_view_planning", use_container_width=True):
+        if st.button("🧹 Planning Semaine", key="quick_view_planning", width='stretch'):
             StateManager.navigate_to("cuisine.planning_semaine")
             st.rerun()
 
@@ -340,12 +340,12 @@ def render_cuisine_summary():
             st.metric("Total", stats.get("total", 0))
 
         with col2:
-            st.metric("âš¡ Rapides", stats.get("rapides", 0))
+            st.metric("⚡ Rapides", stats.get("rapides", 0))
 
         with col3:
             st.metric("🎯 Bébé", stats.get("bebe", 0))
 
-        if st.button("👶 Voir les recettes", key="nav_recettes", use_container_width=True):
+        if st.button("👶 Voir les recettes", key="nav_recettes", width='stretch'):
             StateManager.navigate_to("cuisine.recettes")
             st.rerun()
 
@@ -362,7 +362,7 @@ def render_inventaire_summary():
             unsafe_allow_html=True,
         )
 
-        st.markdown("### [PKG] Inventaire")
+        st.markdown("### 📦 Inventaire")
 
         inventaire = get_inventaire_service().get_inventaire_complet()
 
@@ -376,7 +376,7 @@ def render_inventaire_summary():
             st.metric("Articles", len(inventaire))
 
         with col2:
-            st.metric("âš ï¸ Stock Bas", stock_bas, delta=None if stock_bas == 0 else "Ã€ commander")
+            st.metric("⚠️ Stock Bas", stock_bas, delta=None if stock_bas == 0 else "À commander")
 
         with col3:
             st.metric("❌ Critiques", critiques, delta=None if critiques == 0 else "Urgent")
@@ -389,7 +389,7 @@ def render_inventaire_summary():
 
             stock_alert(articles_alert[:3], key="home_inventory_alert")  # Max 3
 
-        if st.button("[PKG] Gérer l'inventaire", key="nav_inventaire", use_container_width=True):
+        if st.button("📦 Gérer l'inventaire", key="nav_inventaire", width='stretch'):
             StateManager.navigate_to("cuisine.inventaire")
             st.rerun()
 
@@ -425,16 +425,16 @@ def render_courses_summary():
 
         # Top priorités
         if haute > 0:
-            st.markdown("**Ã€ acheter en priorité:**")
+            st.markdown("**À acheter en priorité:**")
             prioritaires = [a for a in liste if a.get("priorite") == "haute"]
 
             for art in prioritaires[:3]:
-                st.caption(f"• {art['nom']} ({art['quantite']} {art['unite']})")
+                st.caption(f"• {art.get('ingredient_nom', 'Article')} ({art.get('quantite_necessaire', 0)} {art.get('unite', '')})")
 
             if len(prioritaires) > 3:
                 st.caption(f"... et {len(prioritaires) - 3} autre(s)")
 
-        if st.button("📅 Voir la liste", key="nav_courses", use_container_width=True):
+        if st.button("📅 Voir la liste", key="nav_courses", width='stretch'):
             StateManager.navigate_to("cuisine.courses")
             st.rerun()
 
@@ -486,7 +486,7 @@ def render_planning_summary():
         else:
             st.info("Aucun planning cette semaine")
 
-        if st.button("🧹 Voir le planning", key="nav_planning", use_container_width=True):
+        if st.button("🧹 Voir le planning", key="nav_planning", width='stretch'):
             StateManager.navigate_to("cuisine.planning_semaine")
             st.rerun()
 

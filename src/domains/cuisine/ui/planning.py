@@ -150,8 +150,8 @@ def render_planning():
                                     if repas_db:
                                         repas_db.recette_id = recettes_dict[new_recette]
                                         db.commit()
+                                        st.session_state['planning_updated'] = True  # Flag sans rerun
                                 st.success(f"✨ Recette mise à jour")
-                                st.rerun()
                             except Exception as e:
                                 st.error(f"❌ Erreur: {str(e)}")
                     
@@ -170,7 +170,7 @@ def render_planning():
                                     if repas_db:
                                         repas_db.prepare = prepared
                                         db.commit()
-                                st.rerun()
+                                        st.session_state['planning_updated'] = True  # Flag sans rerun
                             except Exception as e:
                                 st.error(f"❌ Erreur: {str(e)}")
                     
@@ -197,8 +197,11 @@ def render_planning():
                                             repas_db.notes = notes if notes else None
                                             db.commit()
                                     st.session_state[f"editing_notes_{repas.id}"] = False
+                                    st.session_state['planning_updated'] = True
                                     st.success("✨ Notes sauvegardées")
-                                    st.rerun()
+                                    st.rerun()  # ← Rerun uniquement après sauvegarde
+                                except Exception as e:
+                                    st.error(f"❌ Erreur: {str(e)}")
                                 except Exception as e:
                                     st.error(f"❌ Erreur: {str(e)}")
                         with col_b:
@@ -213,7 +216,7 @@ def render_planning():
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            if st.button("✨ Marquer tout préparé", use_container_width=True):
+            if st.button("✨ Marquer tout préparé", width='stretch'):
                 try:
                     from src.core.models import Repas as RepasModel
                     with obtenir_contexte_db() as db:
@@ -225,7 +228,7 @@ def render_planning():
                     st.error(f"❌ Erreur: {str(e)}")
         
         with col2:
-            if st.button("🔄 Dupliquer (semaine suiv.)", use_container_width=True):
+            if st.button("🔄 Dupliquer (semaine suiv.)", width='stretch'):
                 try:
                     from src.core.models import Planning as PlanningModel, Repas as RepasModel
                     

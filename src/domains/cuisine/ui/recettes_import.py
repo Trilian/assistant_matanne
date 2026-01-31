@@ -38,9 +38,13 @@ def _render_import_url():
     st.markdown("### 🌐 Importer depuis une URL")
     st.info("Entrez l'URL d'un site contenant une recette (recipetin, marmiton, cuisineaz, etc.)")
     
+    # État pour stocker les données extraites
+    if "extracted_recipe" not in st.session_state:
+        st.session_state.extracted_recipe = None
+    
     url = st.text_input("URL du site", placeholder="https://www.marmiton.org/recettes/...")
     
-    if st.button("📥 Extraire la recette du site", use_container_width=True, type="primary"):
+    if st.button("📥 Extraire la recette du site", width='stretch', type="primary"):
         if not url:
             st.error("❌ Veuillez entrer une URL")
             return
@@ -50,13 +54,19 @@ def _render_import_url():
                 recipe_data = RecipeImporter.from_url(url)
                 
                 if recipe_data:
+                    # Stocker les données dans session_state pour persistence
+                    st.session_state.extracted_recipe = recipe_data
                     st.success("✅ Recette extraite!")
-                    _show_import_preview(recipe_data)
+                    st.rerun()  # Rafraîchir pour afficher le formulaire
                 else:
                     st.error("❌ Impossible d'extraire la recette. Vérifiez l'URL.")
                     
             except Exception as e:
                 st.error(f"❌ Erreur: {str(e)}")
+    
+    # Si une recette a été extraite, afficher le formulaire d'édition
+    if st.session_state.extracted_recipe:
+        _show_import_preview(st.session_state.extracted_recipe)
 
 
 def _render_import_pdf():
@@ -412,6 +422,8 @@ def _save_imported_recipe(
             
             # Stocker le succès dans session_state pour affichage persistant
             st.session_state.last_imported_recipe_name = nom
+            # Effacer les données extraites
+            st.session_state.extracted_recipe = None
             
             st.success(f"✅ Recette '{nom}' importée avec succès!")
             logger.info(f"✅ Recette '{nom}' importée avec succès")

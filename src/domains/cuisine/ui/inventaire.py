@@ -842,86 +842,57 @@ def render_suggestions_ia():
 
     
 
-    st.info("🤖 Suggestions IA basées sur l'état de votre inventaire")
-
     
-
-    if st.button("🗑️ Générer les suggestions", use_container_width=True):
-
+    st.info("🤖 Suggestions IA basées sur l'état de votre inventaire")
+    
+    # Initialiser l'état
+    if "suggestions_data" not in st.session_state:
+        st.session_state.suggestions_data = None
+    
+    if st.button("🗑️ Générer les suggestions", width='stretch'):
         try:
-
             with st.spinner("Génération des suggestions..."):
-
                 suggestions = service.suggerer_courses_ia()
-
             
-
-            if suggestions:
-
-                st.success(f"✨ {len(suggestions)} suggestions générées")
-
-                
-
-                # Grouper par priorité
-
-                by_priority = {}
-
-                for sugg in suggestions:
-
-                    p = sugg.priorite
-
-                    if p not in by_priority:
-
-                        by_priority[p] = []
-
-                    by_priority[p].append(sugg)
-
-                
-
-                # Afficher par priorité
-
-                for priority in ["haute", "moyenne", "basse"]:
-
-                    if priority in by_priority:
-
-                        icon = "❌" if priority == "haute" else " " if priority == "moyenne" else "✅"
-
-                        with st.expander(f"{icon} Priorité {priority.upper()} ({len(by_priority[priority])})"):
-
-                            for sugg in by_priority[priority]:
-
-                                col1, col2, col3, col4 = st.columns(4)
-
-                                with col1:
-
-                                    st.write(f"**{sugg.nom}**")
-
-                                with col2:
-
-                                    st.write(f"{sugg.quantite} {sugg.unite}")
-
-                                with col3:
-
-                                    st.write(f"📈 {sugg.rayon}")
-
-                                with col4:
-
-                                    if st.button("✨ Ajouter", key=f"add_{sugg.nom}"):
-
-                                        st.success(f"✨ {sugg.nom} ajouté aux courses")
-
-            else:
-
-                st.warning("Aucune suggestion générée")
-
+            st.session_state.suggestions_data = suggestions
+            st.rerun()
         
-
         except Exception as e:
-
             st.error(f"❌ Erreur: {str(e)}")
-
-
-
+    
+    # Afficher les suggestions stockées
+    if st.session_state.get("suggestions_data"):
+        suggestions = st.session_state.suggestions_data
+        
+        if suggestions:
+            st.success(f"✨ {len(suggestions)} suggestions générées")
+            
+            # Grouper par priorité
+            by_priority = {}
+            for sugg in suggestions:
+                p = sugg.priorite
+                if p not in by_priority:
+                    by_priority[p] = []
+                by_priority[p].append(sugg)
+            
+            # Afficher par priorité
+            for priority in ["haute", "moyenne", "basse"]:
+                if priority in by_priority:
+                    icon = "❌" if priority == "haute" else "⚠️" if priority == "moyenne" else "✅"
+                    with st.expander(f"{icon} Priorité {priority.upper()} ({len(by_priority[priority])})"):
+                        for sugg in by_priority[priority]:
+                            col1, col2, col3, col4 = st.columns(4)
+                            with col1:
+                                st.write(f"**{sugg.nom}**")
+                            with col2:
+                                st.write(f"{sugg.quantite} {sugg.unite}")
+                            with col3:
+                                st.write(f"📈 {sugg.rayon}")
+                            with col4:
+                                if st.button("✨ Ajouter", key=f"add_{sugg.nom}"):
+                                    st.success(f"✨ {sugg.nom} ajouté aux courses")
+        else:
+            st.warning("Aucune suggestion générée")
 
 
 def render_photos():
@@ -1886,11 +1857,13 @@ def render_predictions():
 
         with col1:
 
-            if st.button("🔄 Générer les prédictions", use_container_width=True, key="btn_generate_predictions"):
+            if st.button("🔄 Générer les prédictions", width='stretch', key="btn_generate_predictions"):
 
                 st.session_state.predictions_generated = True
 
                 st.session_state.predictions_data = None
+
+                st.rerun()
 
         
 

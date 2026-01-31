@@ -764,10 +764,11 @@ def render_detail_recette(recette):
             st.rerun()
     
     with action_cols[1]:
-        if st.button("📋 Dupliquer", use_container_width=True, key="btn_dupliquer_recette"):
+        if st.button("📋 Dupliquer", width='stretch', key="btn_dupliquer_recette"):
             if service:
                 try:
                     with st.spinner("Duplication en cours..."):
+                        from datetime import datetime
                         # Créer une copie de la recette
                         recette_dict = {
                             "nom": f"{recette.nom} (copie)",
@@ -783,6 +784,7 @@ def render_detail_recette(recette):
                             "proteines": recette.proteines,
                             "lipides": recette.lipides,
                             "glucides": recette.glucides,
+                            "updated_at": datetime.utcnow(),  # ← Requis par le trigger PostgreSQL
                         }
                         nouvelle_recette = service.create(recette_dict)
                         st.success("✅ Recette dupliquée!")
