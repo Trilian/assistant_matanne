@@ -14,11 +14,11 @@ import streamlit as st
 def afficher_badge_charge(charge_score: int, taille: str = "normal") -> None:
     """Affiche badge visuel de charge"""
     if charge_score < 35:
-        emoji = "🔔
+        emoji = "🔔"
         label = "Faible"
         couleur = "#00AA00"
     elif charge_score < 70:
-        emoji = "💰
+        emoji = "💰"
         label = "Normal"
         couleur = "#FFAA00"
     else:
@@ -35,12 +35,12 @@ def afficher_badge_charge(charge_score: int, taille: str = "normal") -> None:
 def afficher_badge_priorite(priorite: str) -> None:
     """Affiche badge de priorité (basse, moyenne, haute)"""
     priorite_emoji = {
-        "basse": ("🔔, "Basse"),
-        "moyenne": ("💰, "Moyenne"),
+        "basse": ("🔔", "Basse"),
+        "moyenne": ("💰", "Moyenne"),
         "haute": ("❌", "Haute"),
     }
 
-    emoji, label = priorite_emoji.get(priorite.lower(), ("âšª", "Autre"))
+    emoji, label = priorite_emoji.get(priorite.lower(), ("⚫", "Autre"))
     st.write(f"{emoji} {label}")
 
 
@@ -49,7 +49,7 @@ def afficher_badge_activite_jules(adapte: bool) -> None:
     if adapte:
         st.write("👶 Adapté Jules (19m)")
     else:
-        st.write("📅€🧹€🎯 Activité famille")
+        st.write("📅 Activité famille")
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -74,7 +74,7 @@ def selecteur_semaine(key_prefix: str = "semaine") -> tuple[date, date]:
         week_start = st.session_state[f"{key_prefix}_start"]
         week_end = week_start + __import__("datetime").timedelta(days=6)
         st.markdown(
-            f"<h3 style='text-align: center;'>{week_start.strftime('%d/%m')} â€” {week_end.strftime('%d/%m/%Y')}</h3>",
+            f"<h3 style='text-align: center;'>{week_start.strftime('%d/%m')} – {week_end.strftime('%d/%m/%Y')}</h3>",
             unsafe_allow_html=True,
         )
 
@@ -115,7 +115,7 @@ def carte_repas(repas: dict) -> None:
 def carte_activite(activite: dict) -> None:
     """Carte pour afficher une activité"""
     with st.container():
-        label = "👶" if activite.get("pour_jules") else "📅€🧹€🎯"
+        label = "👶" if activite.get("pour_jules") else "📅"
         col1, col2 = st.columns([3, 1])
 
         with col1:
@@ -130,10 +130,10 @@ def carte_activite(activite: dict) -> None:
 def carte_projet(projet: dict) -> None:
     """Carte pour afficher un projet"""
     priorite_emoji = {
-        "basse": "🔔,
-        "moyenne": "💰,
+        "basse": "🔔",
+        "moyenne": "💰",
         "haute": "❌",
-    }.get(projet.get("priorite", "moyenne"), "âšª")
+    }.get(projet.get("priorite", "moyenne"), "⚫")
 
     with st.container():
         st.write(f"{priorite_emoji} **{projet['nom']}**")
@@ -149,7 +149,7 @@ def carte_event(event: dict) -> None:
         debut = (
             event["debut"].strftime("%H:%M")
             if isinstance(event["debut"], datetime)
-            else "â€”"
+            else "–"
         )
 
         col1, col2 = st.columns([3, 1])

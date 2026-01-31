@@ -965,10 +965,11 @@ def render_photos():
     
 
     # Affiche la photo actuelle
-
     with col2:
 
-        st.metric("État", "📷 Photo" if selected_article.get("photo_url") else "❌ Pas photo")
+        photo_status = "✅ Avec photo" if selected_article.get("photo_url") else "ℹ️ Pas de photo"
+
+        st.info(f"État: {photo_status}")
 
     
 

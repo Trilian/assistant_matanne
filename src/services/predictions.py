@@ -183,7 +183,7 @@ class PredictionService:
         for article in articles:
             article_id = article["id"]
             ingredient_id = article["ingredient_id"]
-            nom = article["nom"]
+            nom = article["ingredient_nom"]
             quantite_actuelle = article["quantite"]
             quantite_min = article["quantite_min"]
 

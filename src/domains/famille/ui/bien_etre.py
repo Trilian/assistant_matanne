@@ -427,8 +427,8 @@ def app():
                                 msg = "Correct"
                             else:
                                 _color = "red"
-                                emoji = "💰
-                                msg = "Ã€ améliorer"
+                                emoji = "❌"
+                                msg = "À améliorer"
 
                             st.markdown(
                                 f"""

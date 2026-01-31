@@ -33,14 +33,14 @@ def afficher_jour_expandable(jour: date, jour_complet: dict, jour_nom: str) -> N
 
     # Header avec badge charge
     charge_emoji = {
-        "faible": "🔔,
-        "normal": "💰,
-        "intense": "❌",
-    }.get(jour_complet.get("charge", "normal"), "âšª")
+        "faible": "🔔",
+        "normal": "💪",
+        "intense": "⚡",
+    }.get(jour_complet.get("charge", "normal"), "⚫")
 
     header = f"{charge_emoji} {jour_nom} {jour.strftime('%d/%m')}"
     if is_today:
-        header = f"📥 {header}"
+        header = f"⭐ {header}"
 
     with st.expander(header, expanded=is_today):
         # Colonnes pour meilleure organisation
@@ -58,7 +58,7 @@ def afficher_jour_expandable(jour: date, jour_complet: dict, jour_nom: str) -> N
             for act in jour_complet["activites"]:
                 col1, col2 = st.columns([3, 1])
                 with col1:
-                    label = "👶 if act.get("pour_jules") else "📅€🧹€💡
+                    label = "👶" if act.get("pour_jules") else "📅"
                     st.write(f"{label} **{act['titre']}** ({act['type']})")
                 with col2:
                     if act.get("budget"):
@@ -68,28 +68,28 @@ def afficher_jour_expandable(jour: date, jour_complet: dict, jour_nom: str) -> N
             st.markdown("##### 🗑️ Projets")
             for proj in jour_complet["projets"]:
                 priorite_color = {
-                    "basse": "🔔,
-                    "moyenne": "💰,
-                    "haute": "❌",
-                }.get(proj.get("priorite", "moyenne"), "âšª")
+                    "basse": "🔔",
+                    "moyenne": "💪",
+                    "haute": "⚡",
+                }.get(proj.get("priorite", "moyenne"), "⚫")
                 st.write(f"{priorite_color} **{proj['nom']}** - {proj['statut']}")
 
         if jour_complet.get("events"):
-            st.markdown("##### 📋… Événements")
+            st.markdown("##### 📋 Événements")
             for event in jour_complet["events"]:
-                debut = event["debut"].strftime("%H:%M") if isinstance(event["debut"], datetime) else "â€”"
+                debut = event["debut"].strftime("%H:%M") if isinstance(event["debut"], datetime) else "???"
                 col1, col2 = st.columns([3, 1])
                 with col1:
-                    st.write(f"â° **{event['titre']}**")
+                    st.write(f"⏰ **{event['titre']}**")
                     if event.get("lieu"):
                         st.caption(f"📋 {event['lieu']}")
                 with col2:
                     st.caption(debut)
 
         if jour_complet.get("routines"):
-            st.markdown("##### â° Routines")
+            st.markdown("##### ⏰ Routines")
             for routine in jour_complet["routines"]:
-                heure = routine.get("heure", "â€”")
+                heure = routine.get("heure", "–")
                 status = "✅" if routine.get("fait") else "◯"
                 st.write(f"{status} **{routine['nom']}** ({heure})")
 
@@ -208,21 +208,21 @@ def app():
 
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # CHARGE GLOBALE SEMAINE
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
     charge_color = {
-        "faible": "🔔,
-        "normal": "💰,
-        "intense": "❌",
+        "faible": "🔔",
+        "normal": "💪",
+        "intense": "⚡",
     }
-    charge_emoji = charge_color.get(semaine.charge_globale, "âšª")
+    charge_emoji = charge_color.get(semaine.charge_globale, "⚫")
 
     st.markdown(f"### {charge_emoji} Charge semaine globale: **{semaine.charge_globale.upper()}**")
     st.progress(min(stats.get("charge_moyenne", 50) / 100, 1.0))
 
     st.markdown("---")
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
     # VUE JOURS DÉTAILLÉE
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
@@ -353,8 +353,8 @@ def app():
                     date_jour = date(annee, mois_num, jour)
                     is_today = date_jour == date.today()
 
-                    style = "👧 if is_today else ""
-                    cols[i].write(f"{style} **{jour}**")
+                    style = "⭐ " if is_today else ""
+                    cols[i].write(f"{style}**{jour}**")
 
-        st.caption("📥 = Aujourd'hui")
+        st.caption("⭐ = Aujourd'hui")
 

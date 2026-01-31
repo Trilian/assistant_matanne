@@ -97,7 +97,7 @@ def afficher_timeline_jour(jour_complet: dict, jour: date) -> None:
     # Charge du jour
     charge = jour_complet.get("charge_score", 0)
     charge_label = jour_complet.get("charge", "normal")
-    charge_emoji = {"faible": "🎨", "normal": "💰, "intense": "❌"}.get(charge_label, "âšª")
+    charge_emoji = {"faible": "🎨", "normal": "💰", "intense": "❌"}.get(charge_label, "⚫")
 
     col1, col2, col3 = st.columns([2, 1, 2])
 
@@ -120,7 +120,7 @@ def afficher_timeline_jour(jour_complet: dict, jour: date) -> None:
         "📷 Repas": jour_complet.get("repas", []),
         "🎨 Activités": jour_complet.get("activites", []),
         "🧹 Projets": jour_complet.get("projets", []),
-        "â° Routines": jour_complet.get("routines", []),
+        "⏰ Routines": jour_complet.get("routines", []),
         "📱… Événements": jour_complet.get("events", []),
     }
 
@@ -134,7 +134,7 @@ def afficher_timeline_jour(jour_complet: dict, jour: date) -> None:
                         st.caption(f"{event['portions']} portions | {event.get('temps_total', 0)} min")
 
                     elif groupe_nom == "🎨 Activités":
-                        label = "👶 if event.get("pour_jules") else "📅€🗑️€💡
+                        label = "👶" if event.get("pour_jules") else "📅"
                         st.write(f"{label} **{event['titre']}** ({event['type']})")
                         if event.get("budget"):
                             st.caption(f"📋 {event['budget']:.0f}€")
@@ -142,24 +142,24 @@ def afficher_timeline_jour(jour_complet: dict, jour: date) -> None:
                     elif groupe_nom == "🧹 Projets":
                         priorite_emoji = {
                             "basse": "🎨",
-                            "moyenne": "💰,
+                            "moyenne": "💰",
                             "haute": "❌",
-                        }.get(event.get("priorite", "moyenne"), "âšª")
+                        }.get(event.get("priorite", "moyenne"), "⚫")
                         st.write(f"{priorite_emoji} **{event['nom']}** ({event['statut']})")
 
                     elif groupe_nom == "📱… Événements":
                         debut = (
                             event["debut"].strftime("%H:%M")
                             if isinstance(event["debut"], datetime)
-                            else "â€”"
+                            else "–"
                         )
-                        st.write(f"â° **{event['titre']}** ({debut})")
+                        st.write(f"⏰ **{event['titre']}** ({debut})")
                         if event.get("lieu"):
                             st.caption(f"📱 {event['lieu']}")
 
-                    elif groupe_nom == "â° Routines":
+                    elif groupe_nom == "⏰ Routines":
                         status = "✅" if event.get("fait") else "◯"
-                        st.write(f"{status} **{event['nom']}** ({event.get('heure', 'â€”')})")
+                        st.write(f"{status} **{event['nom']}** ({event.get('heure', '–')})")
 
     # Alertes jour
     if jour_complet.get("alertes"):

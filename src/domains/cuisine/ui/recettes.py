@@ -262,25 +262,25 @@ def render_liste():
                 # Échapper le nom pour éviter les problèmes d'encodage
                 import html
                 nom_echappé = html.escape(recette.nom, quote=True)
-                st.markdown(f"<h4 style='margin: 6px 0; line-height: 1.3; font-size: 15px; height: 2.6em; min-height: 2.6em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: break-word;'>{difficulty_emoji} {nom_echappé}</h4>", unsafe_allow_html=True)
+                st.markdown(f"<h4 style='margin: 6px 0; line-height: 1.3; font-size: 15px; min-height: 3.9em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; word-break: break-word;'>{difficulty_emoji} {nom_echappé}</h4>", unsafe_allow_html=True)
                 
                 # Description sur hauteur fixe pour éviter décalage
                 if recette.description:
-                    # Limiter à ~150 caractères pour laisser la CSS faire le clamp sur 2 lignes
+                    # Limiter à ~250 caractères pour laisser la CSS faire le clamp sur 3 lignes
                     desc = recette.description
                     # Tronquer à limite mais sans couper mid-word
-                    if len(desc) > 150:
-                        # Trouver le dernier espace avant 150 caractères
-                        truncated = desc[:150]
+                    if len(desc) > 250:
+                        # Trouver le dernier espace avant 250 caractères
+                        truncated = desc[:250]
                         last_space = truncated.rfind(' ')
-                        if last_space > 100:  # Au moins 100 caractères
+                        if last_space > 150:  # Au moins 150 caractères
                             desc = truncated[:last_space] + "..."
                         else:
                             desc = truncated + "..."
-                    st.markdown(f"<p style='margin: 4px 0; font-size: 11px; opacity: 0.7; height: 2.2em; min-height: 2.2em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;'>{desc}</p>", unsafe_allow_html=True)
+                    st.markdown(f"<p style='margin: 4px 0; font-size: 11px; opacity: 0.7; min-height: 3.3em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;'>{desc}</p>", unsafe_allow_html=True)
                 else:
                     # Espaceur pour maintenir la hauteur même sans description
-                    st.markdown(f"<p style='margin: 4px 0; font-size: 11px; opacity: 0; height: 2.2em; min-height: 2.2em;'>&nbsp;</p>", unsafe_allow_html=True)
+                    st.markdown(f"<p style='margin: 4px 0; font-size: 11px; opacity: 0; min-height: 3.3em;'>&nbsp;</p>", unsafe_allow_html=True)
                 
                 # Badges et robots sur la même ligne
                 badge_definitions = {
@@ -790,32 +790,26 @@ def render_detail_recette(recette):
                     st.error(f"❌ Erreur: {str(e)}")
     
     with action_cols[2]:
-        if st.button("🗑️ Supprimer", use_container_width=True, key="btn_supprimer_recette"):
-            st.session_state.show_delete_confirmation = True
-    
-    # Afficher confirmation de suppression si activée
-    if st.session_state.get("show_delete_confirmation"):
-        st.warning(f"Êtes-vous sûr de vouloir supprimer la recette '{recette.nom}' ?")
-        col_oui, col_non = st.columns(2)
-        with col_oui:
-            if st.button("✅ Oui, supprimer", use_container_width=True, key="btn_confirmer_suppression"):
-                if service:
-                    try:
-                        with st.spinner("Suppression en cours..."):
-                            if service.delete(recette.id):
-                                st.success("✅ Recette supprimée!")
-                                st.session_state.detail_recette_id = None
-                                st.session_state.show_delete_confirmation = False
-                                time.sleep(1)
-                                st.rerun()
-                            else:
-                                st.error("❌ Impossible de supprimer la recette")
-                    except Exception as e:
-                        st.error(f"❌ Erreur lors de la suppression: {str(e)}")
-        with col_non:
-            if st.button("❌ Annuler", use_container_width=True, key="btn_annuler_suppression"):
-                st.session_state.show_delete_confirmation = False
-                st.rerun()
+        with st.popover("🗑️ Supprimer", use_container_width=True):
+            st.warning(f"⚠️ Êtes-vous sûr de vouloir supprimer:\n\n**{recette.nom}** ?")
+            col_oui, col_non = st.columns(2)
+            with col_oui:
+                if st.button("✅ Oui, supprimer", use_container_width=True, key="btn_confirmer_suppression"):
+                    if service:
+                        try:
+                            with st.spinner("Suppression en cours..."):
+                                if service.delete(recette.id):
+                                    st.success("✅ Recette supprimée!")
+                                    st.session_state.detail_recette_id = None
+                                    time.sleep(1)
+                                    st.rerun()
+                                else:
+                                    st.error("❌ Impossible de supprimer la recette")
+                        except Exception as e:
+                            st.error(f"❌ Erreur lors de la suppression: {str(e)}")
+            with col_non:
+                if st.button("❌ Annuler", use_container_width=True, key="btn_annuler_suppression"):
+                    st.rerun()
 
 
 

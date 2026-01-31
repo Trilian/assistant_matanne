@@ -168,7 +168,7 @@ def app():
         
         for i, type_key in enumerate(type_keys[3:]):
             with cols2[i]:
-                emoji = "💰 if type_key == "parc" else "🧹" if type_key == "musée" else "📋 if type_key == "eau" else "🎯 if type_key == "jeu_maison" else "âš½" if type_key == "sport" else "🍽️"
+                emoji = "💰" if type_key == "parc" else "🧹" if type_key == "musée" else "📋" if type_key == "eau" else "🎯" if type_key == "jeu_maison" else "⚽" if type_key == "sport" else "🍽️"
                 title = type_key.replace("_", " ").title()
                 
                 st.subheader(f"{emoji} {title}")

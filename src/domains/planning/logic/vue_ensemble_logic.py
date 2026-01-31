@@ -316,9 +316,9 @@ def formater_niveau_charge(niveau: str) -> str:
 def formater_evolution(evolution: str) -> str:
     """Formate l'évolution avec emoji."""
     emojis = {
-        "hausse": "📅,
-        "baisse": "💡,
-        "stable": "âž¡ï¸"
+        "hausse": "�",
+        "baisse": "📉",
+        "stable": "➡️"
     }
     emoji = emojis.get(evolution, "")
     return f"{emoji} {evolution.capitalize()}"

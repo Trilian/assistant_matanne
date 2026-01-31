@@ -40,7 +40,7 @@ def _render_import_url():
     
     url = st.text_input("URL du site", placeholder="https://www.marmiton.org/recettes/...")
     
-    if st.button("� Extraire la recette du site", use_container_width=True, type="primary"):
+    if st.button("📥 Extraire la recette du site", use_container_width=True, type="primary"):
         if not url:
             st.error("❌ Veuillez entrer une URL")
             return
@@ -134,6 +134,24 @@ Ingrédients:
 
 def _show_import_preview(recipe_data: dict):
     """Affiche l'aperçu et permet de modifier avant import"""
+    # Initialiser l'état de dernière recette importée
+    if "last_imported_recipe_name" not in st.session_state:
+        st.session_state.last_imported_recipe_name = None
+    
+    # Si une recette vient d'être importée, afficher un message de succès persistant
+    if st.session_state.last_imported_recipe_name:
+        col_success, col_action = st.columns([2, 1])
+        with col_success:
+            st.success(f"✅ Recette '{st.session_state.last_imported_recipe_name}' importée avec succès!")
+        with col_action:
+            if st.button("✨ Voir la recette", use_container_width=True):
+                from src.domains.cuisine.ui.recettes import app as recettes_app
+                st.session_state.recettes_selected_tab = 0  # Retour à la liste
+                st.rerun()
+        st.divider()
+        # Réinitialiser le message après l'affichage
+        st.session_state.last_imported_recipe_name = None
+    
     st.markdown("### 📋 Aperçu et modification")
     
     # Formulaire d'édition
@@ -392,11 +410,17 @@ def _save_imported_recipe(
                 
                 db.commit()
             
+            # Stocker le succès dans session_state pour affichage persistant
+            st.session_state.last_imported_recipe_name = nom
+            
             st.success(f"✅ Recette '{nom}' importée avec succès!")
             logger.info(f"✅ Recette '{nom}' importée avec succès")
             st.balloons()
-            # Courte pause pour afficher le succès, puis effacer les controls pour rester sur import
+            
+            # Assurer que le tab import reste sélectionné
+            st.session_state.recettes_selected_tab = 2
             time.sleep(0.5)
+            st.rerun()
             
     except Exception as e:
         st.error(f"❌ Erreur sauvegarde: {str(e)}")

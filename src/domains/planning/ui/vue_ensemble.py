@@ -37,7 +37,7 @@ def afficher_actions_prioritaires(alertes_semaine: list) -> None:
     for alerte in alertes_semaine:
         # Parser l'alerte pour extraire emoji et message
         parts = alerte.split(" - ") if " - " in alerte else [alerte]
-        emoji = parts[0] if len(parts) > 1 else "âš ï¸"
+        emoji = parts[0] if len(parts) > 1 else "⚠️"
         message = parts[-1]
 
         col_msg, col_action = st.columns([3, 1])
@@ -46,8 +46,8 @@ def afficher_actions_prioritaires(alertes_semaine: list) -> None:
             st.warning(message, icon=emoji)
 
         with col_action:
-            if "🎯 in emoji:
-                if st.button("â†’ Activités", key=f"alerte_{alerte[:20]}", use_container_width=True):
+            if "🎯" in emoji:
+                if st.button("→ Activités", key=f"alerte_{alerte[:20]}", use_container_width=True):
                     st.session_state.planning_view = "activites"
 
             elif "🍽️" in emoji:
@@ -85,10 +85,10 @@ def afficher_metriques_cles(stats: dict, charge_globale: str) -> None:
 
     # Charge globale
     charge_emoji = {
-        "faible": "🚀,
-        "normal": "👶,
+        "faible": "🚀",
+        "normal": "👶",
         "intense": "❌",
-    }.get(charge_globale, "âšª")
+    }.get(charge_globale, "⚫")
 
     st.markdown(f"### {charge_emoji} Charge Globale: **{charge_globale.upper()}**")
 
@@ -119,10 +119,10 @@ def afficher_synthese_jours(jours: dict) -> None:
 
             # Badge avec charge
             charge_emoji = {
-                "faible": "🚀,
-                "normal": "👶,
+                "faible": "🚀",
+                "normal": "👶",
                 "intense": "❌",
-            }.get(jour.charge, "âšª")
+            }.get(jour.charge, "⚫")
 
             st.markdown(
                 f"""
@@ -376,10 +376,10 @@ def app():
 
             with col_d1:
                 charge_emoji = {
-                    "faible": "🚀,
-                    "normal": "👶,
+                    "faible": "🚀",
+                    "normal": "👶",
                     "intense": "❌",
-                }.get(jour_data_dict["charge"], "âšª")
+                }.get(jour_data_dict["charge"], "⚫")
                 st.metric("Charge", f"{charge_emoji} {jour_data_dict['charge_score']}/100")
 
             with col_d2:
