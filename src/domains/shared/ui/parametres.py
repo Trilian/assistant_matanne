@@ -424,9 +424,9 @@ def render_cache_config():
                 st.metric("Taux de Hit", f"{hit_rate:.1f}%")
 
             if st.button("🗑️ Vider Cache Applicatif", key="btn_clear_cache_app", use_container_width=True):
-            Cache.clear_all()
-            show_success("Cache applicatif vidé !")
-            st.rerun()
+                Cache.clear_all()
+                show_success("Cache applicatif vidé !")
+                st.rerun()
 
     else:
         st.info("Cache vide")
