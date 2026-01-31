@@ -165,7 +165,7 @@ def render_critical_alerts():
         alerts.append(
             {
                 "type": "warning",
-                "icon": "âš ï¸",
+                "icon": "⚠️",
                 "title": f"{len(critiques)} article(s) en stock bas",
                 "action": "Voir l'inventaire",
                 "module": "cuisine.inventaire",
@@ -193,7 +193,7 @@ def render_critical_alerts():
         alerts.append(
             {
                 "type": "info",
-                "icon": "💰,
+                "icon": "�",
                 "title": "Aucun planning pour cette semaine",
                 "action": "Créer un planning",
                 "module": "cuisine.planning_semaine",

@@ -16,9 +16,18 @@ from src.core.ai import ClientIA
 
 # Logique métier pure
 from src.domains.maison.logic.entretien_logic import (
-    calculer_frequence_tache,
-    determiner_urgence_tache,
-    suggerer_horaire_optimal
+    calculer_prochaine_occurrence,
+    calculer_jours_avant_tache,
+    get_taches_aujourd_hui,
+    get_taches_semaine,
+    get_taches_en_retard,
+    filtrer_par_categorie,
+    filtrer_par_piece,
+    filtrer_par_frequence,
+    calculer_statistiques_entretien,
+    calculer_taux_completion,
+    valider_tache,
+    grouper_par_piece
 )
 
 from src.domains.maison.logic.helpers import (

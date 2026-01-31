@@ -345,26 +345,27 @@ def render_liste():
                     st.session_state.detail_recette_id = recette.id
                     st.rerun()
                 
-                # Bouton supprimer avec confirmation
-                if st.button(
-                    "🗑️ Supprimer",
-                    use_container_width=True,
-                    key=f"delete_{recette.id}",
-                    help="Supprimer cette recette",
-                ):
-                    # Confirmation avec dialog
-                    if st.session_state.get(f"confirm_delete_{recette.id}"):
-                        try:
-                            service.delete(recette.id)
-                            st.session_state.pop(f"confirm_delete_{recette.id}", None)
-                            st.success(f"✅ Recette supprimée!")
+                # Bouton supprimer avec popover confirmation
+                with st.popover("🗑️ Supprimer", width='stretch'):
+                    st.warning(f"⚠️ Êtes-vous sûr de vouloir supprimer:\n\n**{recette.nom}** ?")
+                    col_del_oui, col_del_non = st.columns(2)
+                    with col_del_oui:
+                        if st.button("✅ Oui, supprimer", width='stretch', key=f"btn_del_oui_{recette.id}"):
+                            if service:
+                                try:
+                                    with st.spinner("Suppression en cours..."):
+                                        if service.delete(recette.id):
+                                            st.success("✅ Recette supprimée!")
+                                            st.session_state.detail_recette_id = None
+                                            time.sleep(1)
+                                            st.rerun()
+                                        else:
+                                            st.error("❌ Impossible de supprimer la recette")
+                                except Exception as e:
+                                    st.error(f"❌ Erreur lors de la suppression: {str(e)}")
+                    with col_del_non:
+                        if st.button("❌ Annuler", width='stretch', key=f"btn_del_non_{recette.id}"):
                             st.rerun()
-                        except Exception as e:
-                            st.error(f"❌ Erreur: {str(e)}")
-                    else:
-                        st.session_state[f"confirm_delete_{recette.id}"] = True
-                        st.warning(f"⚠️ Cliquez à nouveau pour confirmer")
-                    st.rerun()
     
     # Pagination controls
     st.divider()

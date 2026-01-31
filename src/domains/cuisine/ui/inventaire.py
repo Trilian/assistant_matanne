@@ -216,7 +216,7 @@ def render_add_article_form():
         col1, col2 = st.columns([1, 4])
         
         with col1:
-            if st.button("✨ Ajouter", use_container_width=True, type="primary"):
+            if st.button("✨ Ajouter", width='stretch', type="primary"):
                 if not ingredient_nom:
                     st.error("❌ Le nom est obligatoire")
                 else:
@@ -243,7 +243,7 @@ def render_add_article_form():
                         logger.error(f"Erreur ajouter_article: {e}")
         
         with col2:
-            if st.button("❌ Annuler", use_container_width=True):
+            if st.button("❌ Annuler", width='stretch'):
                 st.session_state.show_form = False
                 st.rerun()
     
@@ -308,7 +308,7 @@ def render_stock():
 
         with col1:
 
-            st.metric("[PKG] Articles", len(inventaire), delta=None)
+            st.metric("📦 Articles", len(inventaire), delta=None)
 
         with col2:
 
@@ -468,7 +468,7 @@ def render_stock():
 
         with col_btn1:
 
-            if st.button("➕ Ajouter un article", use_container_width=True):
+            if st.button("➕ Ajouter un article", width='stretch'):
 
                 st.session_state.show_form = True
 
@@ -478,7 +478,7 @@ def render_stock():
 
         with col_btn2:
 
-            if st.button("🔄 Rafraîchir", use_container_width=True):
+            if st.button("🔄 Rafraîchir", width='stretch'):
 
                 st.session_state.refresh_counter += 1
 
@@ -488,7 +488,7 @@ def render_stock():
 
         with col_btn3:
 
-            if st.button("📷 Importer CSV", use_container_width=True):
+            if st.button("📷 Importer CSV", width='stretch'):
 
                 st.session_state.show_import = True
 
@@ -674,7 +674,7 @@ def render_alertes():
 
             df = _prepare_alert_dataframe(alertes["critique"])
 
-            st.dataframe(df, use_container_width=True, hide_index=True)
+            st.dataframe(df, width='stretch', hide_index=True)
 
         
 
@@ -1930,9 +1930,9 @@ def render_predictions():
 
                     predictions = service_pred.generer_predictions(articles, historique_complet)
 
-                    analyse_globale = service_pred.obtenir_analyse_globale()
+                    analyse_globale = service_pred.obtenir_analyse_globale(predictions)
 
-                    recommandations = service_pred.generer_recommandations()
+                    recommandations = service_pred.generer_recommandations(predictions)
 
                     
 

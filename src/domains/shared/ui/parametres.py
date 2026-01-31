@@ -635,19 +635,19 @@ def render_budget_config():
         for i, cat in enumerate(categories):
             with cols[i % 3]:
                 emoji_map = {
-                    "alimentation": "🎨
-                    "transport": "📈,
-                    "logement": "🌿
-                    "sante": "📱,
-                    "loisirs": "🧹,
-                    "vetements": "🎯,
-                    "education": "🤖",
-                    "cadeaux": "🎨
-                    "abonnements": "📅,
-                    "restaurant": "💰",
-                    "vacances": "âœˆï¸",
+                    "alimentation": "�️",
+                    "transport": "🚗",
+                    "logement": "🏠",
+                    "sante": "⚕️",
+                    "loisirs": "🎮",
+                    "vetements": "👕",
+                    "education": "📚",
+                    "cadeaux": "🎁",
+                    "abonnements": "📦",
+                    "restaurant": "🍴",
+                    "vacances": "✈️",
                     "bebe": "👶",
-                    "autre": "[PKG]",
+                    "autre": "📋",
                 }
                 emoji = emoji_map.get(cat.value, "[PKG]")
                 st.checkbox(f"{emoji} {cat.value.capitalize()}", value=True, disabled=True)

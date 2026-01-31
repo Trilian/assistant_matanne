@@ -236,11 +236,11 @@ def app():
                 col1, col2, col3 = st.columns([2, 1, 1])
                 
                 with col1:
-                    emoji = "📱 if row["a_arroser"] else "✅"
+                    emoji = "�" if row["a_arroser"] else "✅"
                     st.markdown(f"### {emoji} {row['nom']}")
-                    st.caption(f"🍽️ {row['location']} • {row['type']}")
+                    st.caption(f"📍 {row['location']} • {row['type']}")
                     if row["notes"]:
-                        st.caption(f"🍽️ {row['notes']}")
+                        st.caption(f"📝 {row['notes']}")
                 
                 with col2:
                     if row["jours_depuis_arrosage"] is not None:
@@ -357,13 +357,13 @@ def app():
         st.markdown("---")
         
         # Suggestions rapides
-        st.markdown("### âš¡ Ajouts rapides")
+        st.markdown("### ⚡ Ajouts rapides")
         
         suggestions = [
-            {"nom": "Tomates cerises", "type": "Fruit", "emoji": "📷,
-            {"nom": "Basilic", "type": "Herbe aromatique", "emoji": "📅},
-            {"nom": "Fraises", "type": "Fruit", "emoji": "👶,
-            {"nom": "Courgettes", "type": "Légume", "emoji": "🎯},
+            {"nom": "Tomates cerises", "type": "Fruit", "emoji": "🍅"},
+            {"nom": "Basilic", "type": "Herbe aromatique", "emoji": "🌿"},
+            {"nom": "Fraises", "type": "Fruit", "emoji": "🍓"},
+            {"nom": "Courgettes", "type": "Légume", "emoji": "🥒"},
         ]
         
         cols = st.columns(2)

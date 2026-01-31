@@ -417,10 +417,8 @@ def _save_imported_recipe(
             logger.info(f"✅ Recette '{nom}' importée avec succès")
             st.balloons()
             
-            # Assurer que le tab import reste sélectionné
-            st.session_state.recettes_selected_tab = 2
-            time.sleep(0.5)
-            st.rerun()
+            # Le succès persiste via session_state.last_imported_recipe_name
+            # Pas de rerun ici - laisser le formulaire s'afficher avec le message de succès
             
     except Exception as e:
         st.error(f"❌ Erreur sauvegarde: {str(e)}")

@@ -277,7 +277,7 @@ def app():
                     col_a, col_b = st.columns(2)
                     
                     with col_a:
-                        badge = "❌" if projet['priorite'] == "urgente" else "🧹 if projet['priorite'] == "haute" else "💡
+                        badge = "❌" if projet['priorite'] == "urgente" else "🧹" if projet['priorite'] == "haute" else "💡"
                         st.caption(f"{badge} {projet['priorite'].upper()}")
                     
                     with col_b:
