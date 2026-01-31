@@ -169,7 +169,7 @@ def app():
     """Interface principale du module Santé"""
     st.title("💪 Santé & Sport")
     
-    tabs = st.tabs(["🏃 Routines", "🎯 Objectifs", "[CHART] Tracking", "🍎 Nutrition"])
+    tabs = st.tabs(["🏃 Routines", "🎯 Objectifs", "📊 Tracking", "🍎 Nutrition"])
     
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TAB 1: ROUTINES
@@ -283,7 +283,7 @@ def app():
             
             notes = st.text_area("Notes")
             
-            if st.form_submit_button("âž• Créer objectif", use_container_width=True):
+            if st.form_submit_button("➕ Créer objectif", use_container_width=True):
                 if titre and valeur_cible and date_cible:
                     ajouter_objectif(titre, categorie, valeur_cible, unite, date_cible, priorite, notes)
     
@@ -321,12 +321,12 @@ def app():
         with col2:
             # Stats de la semaine
             st.subheader("Semaine en cours")
-            stats = get_stats_santé_semaine()
+            stats = get_stats_sante_semaine()
             
             st.metric("🏃 Séances", stats['nb_seances'])
-            st.metric("â±ï¸ Temps", f"{stats['total_minutes']} min")
+            st.metric("⏱️ Temps", f"{stats['total_minutes']} min")
             st.metric("🔥 Calories", f"{stats['total_calories']:.0f}")
-            st.metric("âš¡ Énergie", f"{stats['energie_moyenne']:.1f}/10")
+            st.metric("⚡ Énergie", f"{stats['energie_moyenne']:.1f}/10")
             st.metric("😊 Moral", f"{stats['moral_moyen']:.1f}/10")
         
         st.divider()

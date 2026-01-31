@@ -10,6 +10,17 @@ from typing import Optional
 import base64
 from urllib.parse import quote, urlencode
 import random
+from pathlib import Path
+
+# Charger les variables d'environnement depuis .env.local et .env
+try:
+    from dotenv import load_dotenv
+    # Chercher .env.local et .env depuis la racine du projet
+    project_root = Path(__file__).parent.parent.parent
+    load_dotenv(project_root / ".env.local")
+    load_dotenv(project_root / ".env")
+except ImportError:
+    pass
 
 logger = logging.getLogger(__name__)
 
@@ -51,9 +62,9 @@ print(f"Pixabay:   {'CONFIGURED' if PIXABAY_API_KEY else 'NOT SET'} {PIXABAY_API
 print("="*60 + "\n")
 
 if UNSPLASH_API_KEY:
-    logger.info(f"✅ Clé Unsplash chargée (premiers caractères: {UNSPLASH_API_KEY[:10]}...)")
+    logger.info(f"Clé Unsplash chargée (premiers caractères: {UNSPLASH_API_KEY[:10]}...)")
 else:
-    logger.warning("⚠️ Clé Unsplash non trouvée - vérifiez st.secrets['unsplash']['api_key'] ou UNSPLASH_API_KEY")
+    logger.warning("Clé Unsplash non trouvée - vérifiez st.secrets['unsplash']['api_key'] ou UNSPLASH_API_KEY")
 
 
 def generer_image_recette(nom_recette: str, description: str = "", ingredients_list: list = None, type_plat: str = "") -> Optional[str]:
@@ -82,23 +93,18 @@ def generer_image_recette(nom_recette: str, description: str = "", ingredients_l
     # Construire une requête optimisée basée sur la recette
     search_query = _construire_query_optimisee(nom_recette, ingredients_list, type_plat)
     
-    # Priorité 1: Leonardo.AI (meilleur pour la cuisine)
-    try:
-        url = _generer_via_leonardo(nom_recette, description, ingredients_list, type_plat)
-        if url:
-            logger.info(f"✅ Image générée via Leonardo.AI pour '{nom_recette}'")
-            return url
-    except Exception as e:
-        logger.debug(f"Leonardo.AI failed: {e}")
-    
-    # Priorité 2: Hugging Face Stable Diffusion XL (très bon, gratuit)
-    try:
-        url = _generer_via_huggingface(nom_recette, description, ingredients_list, type_plat)
-        if url:
-            logger.info(f"✅ Image générée via Hugging Face pour '{nom_recette}'")
-            return url
-    except Exception as e:
-        logger.debug(f"HuggingFace failed: {e}")
+    # Priorité 1: Hugging Face Stable Diffusion XL (gratuit si clé configurée)
+    hf_key = os.getenv('HUGGINGFACE_API_KEY')
+    if hf_key:
+        try:
+            url = _generer_via_huggingface(nom_recette, description, ingredients_list, type_plat)
+            if url:
+                logger.info(f"✅ Image générée via Hugging Face pour '{nom_recette}'")
+                return url
+        except Exception as e:
+            logger.debug(f"HuggingFace failed: {e}")
+    else:
+        logger.debug("HUGGINGFACE_API_KEY non configurée, passage au fallback")
     
     # Priorité 3: Unsplash (meilleur pour les images réelles)
     if UNSPLASH_API_KEY:

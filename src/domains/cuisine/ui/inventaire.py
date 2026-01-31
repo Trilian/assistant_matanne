@@ -432,7 +432,7 @@ def render_stock():
 
                 df,
 
-                use_container_width=True,
+                width='stretch',
 
                 hide_index=True,
 
@@ -540,7 +540,7 @@ def render_notifications_widget():
 
     with col2:
 
-        if st.button("🔄 Actualiser", key="refresh_notifs", use_container_width=True):
+        if st.button("🔄 Actualiser", key="refresh_notifs", width='stretch'):
 
             st.rerun()
 
@@ -548,7 +548,7 @@ def render_notifications_widget():
 
     with col3:
 
-        if st.button("✨ Tout lire", key="mark_all_read", use_container_width=True):
+        if st.button("✨ Tout lire", key="mark_all_read", width='stretch'):
 
             for notif in notifs:
 
@@ -694,7 +694,7 @@ def render_alertes():
 
             df = _prepare_alert_dataframe(alertes["stock_bas"])
 
-            st.dataframe(df, use_container_width=True, hide_index=True)
+            st.dataframe(df, width='stretch', hide_index=True)
 
         
 
@@ -714,7 +714,7 @@ def render_alertes():
 
             df = _prepare_alert_dataframe(alertes["peremption_proche"])
 
-            st.dataframe(df, use_container_width=True, hide_index=True)
+            st.dataframe(df, width='stretch', hide_index=True)
 
     
 
@@ -814,7 +814,7 @@ def render_categories():
 
                 df = _prepare_inventory_dataframe(articles)
 
-                st.dataframe(df, use_container_width=True, hide_index=True)
+                st.dataframe(df, width='stretch', hide_index=True)
 
     
 
@@ -854,11 +854,15 @@ def render_suggestions_ia():
             with st.spinner("Génération des suggestions..."):
                 suggestions = service.suggerer_courses_ia()
             
-            st.session_state.suggestions_data = suggestions
-            st.rerun()
+            if not suggestions:
+                st.warning("⚠️ Aucune suggestion générée. Vérifiez votre inventaire.")
+            else:
+                st.session_state.suggestions_data = suggestions
+                st.rerun()
         
         except Exception as e:
             st.error(f"❌ Erreur: {str(e)}")
+            logger.error(f"Erreur suggestions IA: {e}", exc_info=True)
     
     # Afficher les suggestions stockées
     if st.session_state.get("suggestions_data"):
@@ -1138,7 +1142,7 @@ def render_notifications():
 
         with col1:
 
-            if st.button("🔄 Actualiser les alertes", use_container_width=True, key="refresh_all_alerts"):
+            if st.button("🔄 Actualiser les alertes", width='stretch', key="refresh_all_alerts"):
 
                 try:
 
@@ -1164,7 +1168,7 @@ def render_notifications():
 
         with col3:
 
-            if st.button("✨ Tout marquer comme lu", use_container_width=True):
+            if st.button("✨ Tout marquer comme lu", width='stretch'):
 
                 service_notifs.effacer_toutes_lues()
 
@@ -1226,7 +1230,7 @@ def render_notifications():
 
                             with col_a:
 
-                                if st.button("êœ“", key=f"mark_{notif.id}", help="Marquer comme lu", use_container_width=True):
+                                if st.button("êœ“", key=f"mark_{notif.id}", help="Marquer comme lu", width='stretch'):
 
                                     service_notifs.marquer_lue(notif.id)
 
@@ -1234,7 +1238,7 @@ def render_notifications():
 
                             with col_b:
 
-                                if st.button("êœ•", key=f"delete_{notif.id}", help="Supprimer", use_container_width=True):
+                                if st.button("🗑️", key=f"delete_{notif.id}", help="Supprimer", width='stretch'):
 
                                     service_notifs.supprimer_notification(notif.id)
 
@@ -1268,7 +1272,7 @@ def render_notifications():
 
                             with col_a:
 
-                                if st.button("êœ“", key=f"mark_{notif.id}", help="Marquer comme lu", use_container_width=True):
+                                if st.button("êœ“", key=f"mark_{notif.id}", help="Marquer comme lu", width='stretch'):
 
                                     service_notifs.marquer_lue(notif.id)
 
@@ -1276,7 +1280,7 @@ def render_notifications():
 
                             with col_b:
 
-                                if st.button("êœ•", key=f"delete_{notif.id}", help="Supprimer", use_container_width=True):
+                                if st.button("🗑️", key=f"delete_{notif.id}", help="Supprimer", width='stretch'):
 
                                     service_notifs.supprimer_notification(notif.id)
 
@@ -1310,7 +1314,7 @@ def render_notifications():
 
                             with col_a:
 
-                                if st.button("êœ“", key=f"mark_{notif.id}", help="Marquer comme lu", use_container_width=True):
+                                if st.button("êœ“", key=f"mark_{notif.id}", help="Marquer comme lu", width='stretch'):
 
                                     service_notifs.marquer_lue(notif.id)
 
@@ -1318,7 +1322,7 @@ def render_notifications():
 
                             with col_b:
 
-                                if st.button("êœ•", key=f"delete_{notif.id}", help="Supprimer", use_container_width=True):
+                                if st.button("🗑️", key=f"delete_{notif.id}", help="Supprimer", width='stretch'):
 
                                     service_notifs.supprimer_notification(notif.id)
 
@@ -1372,7 +1376,7 @@ def render_notifications():
 
         # Bouton pour générer les alertes
 
-        if st.button("🔄 Générer les alertes maintenant", use_container_width=True, type="primary"):
+        if st.button("🔄 Générer les alertes maintenant", width='stretch', type="primary"):
 
             try:
 
@@ -1588,13 +1592,13 @@ def render_import_export():
 
                 # Affiche un aperçu
 
-                st.dataframe(df.head(5), use_container_width=True)
+                st.dataframe(df.head(5), width='stretch')
 
                 
 
                 # Valide les données
 
-                if st.button("✨ Valider & Importer", type="primary", use_container_width=True):
+                if st.button("✨ Valider & Importer", type="primary", width='stretch'):
 
                     try:
 
@@ -1678,7 +1682,7 @@ def render_import_export():
 
                         if rapport["valides"] > 0:
 
-                            if st.button("🚀 Importer les articles valides", use_container_width=True):
+                            if st.button("🚀 Importer les articles valides", width='stretch'):
 
                                 resultats = service.importer_articles(articles_list)
 
@@ -1732,7 +1736,7 @@ def render_import_export():
 
         with col1:
 
-            if st.button("📷 Télécharger CSV", use_container_width=True):
+            if st.button("📷 Télécharger CSV", width='stretch'):
 
                 try:
 
@@ -1760,7 +1764,7 @@ def render_import_export():
 
         with col2:
 
-            if st.button("📷 Télécharger JSON", use_container_width=True):
+            if st.button("📷 Télécharger JSON", width='stretch'):
 
                 try:
 
@@ -1993,7 +1997,7 @@ def render_predictions():
 
                 df_display = pd.DataFrame(df_pred)
 
-                st.dataframe(df_display, use_container_width=True, hide_index=True)
+                st.dataframe(df_display, width='stretch', hide_index=True)
 
                 
 
@@ -2145,7 +2149,7 @@ def render_predictions():
 
                 with col3:
 
-                    st.metric("êž¡ï¸ Stable", len(tendances["stable"]))
+                    st.metric("▶️ Stable", len(tendances["stable"]))
 
                     if tendances["stable"]:
 
@@ -2175,7 +2179,7 @@ def render_predictions():
 
                     chart_df = pd.DataFrame(chart_data)
 
-                    st.bar_chart(chart_df.set_index("Article"), use_container_width=True)
+                    st.bar_chart(chart_df.set_index("Article"), width='stretch')
 
             
 
@@ -2245,7 +2249,7 @@ def render_predictions():
 
                                     with col4:
 
-                                        if st.button("✨ Ajouter", key=f"add_rec_{rec.nom}", use_container_width=True):
+                                        if st.button("✨ Ajouter", key=f"add_rec_{rec.nom}", width='stretch'):
 
                                             st.toast(f"✨ {rec.nom} ajouté", icon="👶")
 
@@ -2319,7 +2323,7 @@ def render_predictions():
 
                     else:
 
-                        st.write("êž¡ï¸ **Consommation stable**")
+                        st.write("▶️ **Consommation stable**")
 
                         st.info("La consommation est stable. Maintenez votre rythme d'achat actuel.")
 
@@ -2631,7 +2635,7 @@ def render_historique():
 
         df = pd.DataFrame(data)
 
-        st.dataframe(df, use_container_width=True, hide_index=True)
+        st.dataframe(df, width='stretch', hide_index=True)
 
         
 

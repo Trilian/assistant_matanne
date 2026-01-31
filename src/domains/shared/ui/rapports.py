@@ -41,7 +41,7 @@ def app():
     """Point d'entrée module rapports PDF"""
     
     st.markdown(
-        "<h1 style='text-align: center;'>[CHART] Rapports PDF</h1>",
+        "<h1 style='text-align: center;'>📊 Rapports PDF</h1>",
         unsafe_allow_html=True,
     )
     
@@ -165,7 +165,7 @@ def render_rapport_stocks():
             
             # Catégories
             if donnees.categories_resumee:
-                st.subheader("[CHART] Stock par catégorie")
+                st.subheader("📊 Stock par catégorie")
                 cat_data = []
                 for cat, data in donnees.categories_resumee.items():
                     cat_data.append({
@@ -267,7 +267,7 @@ def render_rapport_budget():
             
             # Dépenses par catégorie
             if donnees.depenses_par_categorie:
-                st.subheader("[CHART] Dépenses par catégorie")
+                st.subheader("📊 Dépenses par catégorie")
                 
                 cat_data = []
                 for cat, montant in donnees.depenses_par_categorie.items():
@@ -407,7 +407,7 @@ def render_analyse_gaspillage():
             
             # Gaspillage par catégorie
             if analyse.categories_gaspillage:
-                st.subheader("[CHART] Gaspillage par catégorie")
+                st.subheader("📊 Gaspillage par catégorie")
                 
                 cat_data = []
                 for cat, data in sorted(
@@ -506,7 +506,7 @@ def render_historique():
             """)
     
     with col2:
-        st.subheader("[CHART] Statistiques")
+        st.subheader("📊 Statistiques")
         
         st.metric("Rapports générés ce mois", 12)
         st.metric("Articles analysés", 47)

@@ -106,7 +106,7 @@ def carte_repas(repas: dict) -> None:
             st.caption(f"{repas['portions']} portions")
 
         if repas.get("temps_total"):
-            st.caption(f"â±ï¸ {repas['temps_total']} min")
+            st.caption(f"⏱️ {repas['temps_total']} min")
 
         if repas.get("notes"):
             st.caption(f"🗑️ {repas['notes']}")

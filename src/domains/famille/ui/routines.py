@@ -227,7 +227,7 @@ def app():
     # ===================================
 
     tab1, tab2, tab3, tab4 = st.tabs(
-        ["🎯 Mes Routines", "– Rappels IA", "âž• Créer Routine", "[CHART] Suivi"]
+        ["🎯 Mes Routines", "– Rappels IA", "➕ Créer Routine", "📊 Suivi"]
     )
 
     # ===================================
@@ -299,7 +299,7 @@ def app():
 
                             with col_t3:
                                 if st.button(
-                                    "âž• Tâche", key=f"add_{routine['id']}", use_container_width=True
+                                    "➕ Tâche", key=f"add_{routine['id']}", use_container_width=True
                                 ):
                                     st.session_state["adding_task_to"] = routine["id"]
 
@@ -454,7 +454,7 @@ def app():
                     for tache in sugg["taches"]:
                         st.write(f"• {tache}")
 
-                    if st.button("âž• Créer cette routine", key=f"create_{sugg['nom']}"):
+                    if st.button("➕ Créer cette routine", key=f"create_{sugg['nom']}"):
                         routine_id = creer_routine(
                             sugg["nom"], "Routine suggérée par l'IA", "Famille", "quotidien"
                         )
@@ -470,7 +470,7 @@ def app():
     # ===================================
 
     with tab3:
-        st.subheader("âž• Créer une nouvelle routine")
+        st.subheader("➕ Créer une nouvelle routine")
 
         with st.form("form_create_routine"):
             nom = st.text_input("Nom de la routine *", placeholder="Ex: Routine du soir")
@@ -543,7 +543,7 @@ def app():
     # ===================================
 
     with tab4:
-        st.subheader("[CHART] Suivi des routines")
+        st.subheader("📊 Suivi des routines")
 
         df_all = charger_routines(actives_uniquement=False)
 

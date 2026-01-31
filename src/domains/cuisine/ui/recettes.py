@@ -19,8 +19,15 @@ from src.domains.cuisine.logic.recettes_logic import (
 logger = logging.getLogger(__name__)
 
 
-def formater_quantite(quantite: float | int) -> str:
+def formater_quantite(quantite: float | int | str) -> str:
     """Formate une quantité: affiche 2 au lieu de 2.0"""
+    # Convertir en nombre si c'est une chaîne
+    if isinstance(quantite, str):
+        try:
+            quantite = float(quantite)
+        except (ValueError, TypeError):
+            return str(quantite)
+    
     if isinstance(quantite, (int, float)):
         if quantite == int(quantite):
             return str(int(quantite))
@@ -978,7 +985,10 @@ def render_ajouter_manuel():
                         "url_image": url_image,
                     }
                     
-                    recette = service.create_complete(data)
+                    # Créer la recette avec session BD
+                    from src.core.database import get_db_context
+                    with get_db_context() as db:
+                        recette = service.create_complete(data, db=db)
                     
                     # Réinitialiser le formulaire
                     st.session_state.form_num_ingredients = 3
@@ -1109,21 +1119,25 @@ def render_generer_ia():
                             with col_btn1:
                                 if st.button("➕ Ajouter aux recettes", key=f"add_variant_{idx}", use_container_width=True):
                                     try:
-                                        recette_obj = service.create_complete({
-                                            "nom": suggestion.nom,
-                                            "description": suggestion.description,
-                                            "temps_preparation": suggestion.temps_preparation,
-                                            "temps_cuisson": suggestion.temps_cuisson,
-                                            "portions": suggestion.portions,
-                                            "difficulte": suggestion.difficulte,
-                                            "type_repas": suggestion.type_repas,
-                                            "ingredients": suggestion.ingredients if isinstance(suggestion.ingredients, list) else [],
-                                            "etapes": suggestion.etapes if isinstance(suggestion.etapes, list) else [],
-                                        }, session=None)
+                                        # Créer la recette avec gestion de session
+                                        from src.core.database import get_db_context
+                                        with get_db_context() as db:
+                                            recette_obj = service.create_complete({
+                                                "nom": suggestion.nom,
+                                                "description": suggestion.description,
+                                                "temps_preparation": suggestion.temps_preparation,
+                                                "temps_cuisson": suggestion.temps_cuisson,
+                                                "portions": suggestion.portions,
+                                                "difficulte": suggestion.difficulte,
+                                                "type_repas": suggestion.type_repas,
+                                                "ingredients": suggestion.ingredients if isinstance(suggestion.ingredients, list) else [],
+                                                "etapes": suggestion.etapes if isinstance(suggestion.etapes, list) else [],
+                                            }, db=db)
                                         st.success(f"✅ {suggestion.nom} ajoutée aux recettes!")
                                         st.session_state.courses_refresh += 1
                                     except Exception as e:
                                         st.error(f"❌ Erreur: {str(e)}")
+                                        logger.error(f"Error adding recipe: {e}", exc_info=True)
                             with col_btn2:
                                 st.button("❤️", key=f"like_variant_{idx}", use_container_width=True)
                     
@@ -1272,7 +1286,10 @@ def render_generer_ia():
                                             "etapes": suggestion.etapes or [],
                                         }
                                         
-                                        recette = service.create_complete(data)
+                                        # Créer la recette avec session BD
+                                        from src.core.database import get_db_context
+                                        with get_db_context() as db:
+                                            recette = service.create_complete(data, db=db)
                                         st.success(f"✅ '{recette.nom}' ajoutée à vos recettes!")
                                         st.toast(f"🎉 {recette.nom} sauvegardée!", icon="✅")
                                         # NE PAS appeler st.rerun() pour rester sur cet onglet

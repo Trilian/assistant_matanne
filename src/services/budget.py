@@ -657,7 +657,7 @@ def render_budget_dashboard():
     
     with col2:
         st.metric(
-            "[CHART] Budget Total",
+            "📊 Budget Total",
             f"{resume.total_budget:.0f}€"
         )
     
@@ -672,14 +672,14 @@ def render_budget_dashboard():
     
     with col4:
         st.metric(
-            "[CHART] Moyenne 6 mois",
+            "📊 Moyenne 6 mois",
             f"{resume.moyenne_6_mois:.0f}€"
         )
     
     st.markdown("---")
     
     # Tabs
-    tab1, tab2, tab3, tab4 = st.tabs(["[CHART] Vue d'ensemble", "[+] Ajouter", "[CHART] Tendances", "[GEAR] Budgets"])
+    tab1, tab2, tab3, tab4 = st.tabs(["📊 Vue d'ensemble", "➕ Ajouter", "📊 Tendances", "⚙️ Budgets"])
     
     with tab1:
         # Graphique dépenses par catégorie
@@ -720,7 +720,7 @@ def render_budget_dashboard():
                 st.plotly_chart(fig_bar, use_container_width=True)
         
         # Liste des dépenses récentes
-        st.markdown("### [CHART] Dernières dépenses")
+        st.markdown("### 📊 Dernières dépenses")
         depenses = service.get_depenses_mois(mois, annee)
         
         if depenses:
@@ -737,7 +737,7 @@ def render_budget_dashboard():
     
     with tab2:
         # Formulaire d'ajout de dépense
-        st.markdown("### âž• Nouvelle dépense")
+        st.markdown("### ➕ Nouvelle dépense")
         
         with st.form("add_expense_form"):
             col_f1, col_f2 = st.columns(2)
@@ -778,7 +778,7 @@ def render_budget_dashboard():
     
     with tab3:
         # Graphique de tendances
-        st.markdown("### [CHART] Évolution sur 6 mois")
+        st.markdown("### 📊 Évolution sur 6 mois")
         
         tendances = service.get_tendances(nb_mois=6)
         

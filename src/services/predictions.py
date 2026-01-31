@@ -37,6 +37,11 @@ class AnalysePrediction(BaseModel):
     articles_croissance: list[str]
     articles_decroissance: list[str]
     consommation_moyenne_globale: float
+    consommation_min: float = 0.0
+    consommation_max: float = 0.0
+    nb_articles_croissance: int = 0
+    nb_articles_decroissance: int = 0
+    nb_articles_stables: int = 0
     tendance_globale: str
 
 
@@ -257,6 +262,7 @@ class PredictionService:
         tendances = [p.tendance for p in predictions]
         croissantes = len([t for t in tendances if t == "croissante"])
         decroissantes = len([t for t in tendances if t == "decroissante"])
+        stables = len(predictions) - croissantes - decroissantes
 
         if croissantes > decroissantes * 1.5:
             tendance_globale = "croissante"
@@ -265,12 +271,22 @@ class PredictionService:
         else:
             tendance_globale = "stable"
 
+        # Consommations min/max
+        taux_consommation = [p.taux_consommation for p in predictions if p.taux_consommation > 0]
+        consommation_min = min(taux_consommation) if taux_consommation else 0.0
+        consommation_max = max(taux_consommation) if taux_consommation else 0.0
+
         return AnalysePrediction(
             nombre_articles=len(predictions),
             articles_en_rupture_risque=articles_rupture,
             articles_croissance=articles_croissance,
             articles_decroissance=articles_decroissance,
             consommation_moyenne_globale=consommation_globale,
+            consommation_min=consommation_min,
+            consommation_max=consommation_max,
+            nb_articles_croissance=croissantes,
+            nb_articles_decroissance=decroissantes,
+            nb_articles_stables=stables,
             tendance_globale=tendance_globale,
         )
 

@@ -44,7 +44,7 @@ def app():
     """Point d'entrée module scanner barcode"""
     
     st.markdown(
-        "<h1 style='text-align: center;'>💰± Scanner Code-Barres/QR</h1>",
+        "<h1 style='text-align: center;'>💰 Scanner Code-Barres/QR</h1>",
         unsafe_allow_html=True,
     )
     
@@ -54,9 +54,9 @@ def app():
     # Onglets
     tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "👶 Scanner",
-        "âž• Ajout rapide",
+        "➕ Ajout rapide",
         "✅ Vérifier stock",
-        "[CHART] Gestion",
+        "📊 Gestion",
         "💰¥ Import/Export"
     ])
     
@@ -147,7 +147,7 @@ def render_scanner():
                 col1, col2, col3 = st.columns(3)
                 
                 with col1:
-                    if st.button("âž• Ajouter quantité", key="btn_add_qty"):
+                    if st.button("➕ Ajouter quantité", key="btn_add_qty"):
                         st.session_state.article_id_to_add = details["id"]
                         st.session_state.article_name_to_add = details["nom"]
                         st.switch_page("pages/0_accueil.py")
@@ -163,7 +163,7 @@ def render_scanner():
             
             else:
                 st.warning("âš ï¸ Code non reconnu - doit être ajouté dans le système")
-                if st.button("âž• Ajouter ce code", key="btn_add_new_barcode"):
+                if st.button("➕ Ajouter ce code", key="btn_add_new_barcode"):
                     st.session_state.new_barcode_to_add = code_input
                     st.rerun()
         
@@ -192,7 +192,7 @@ def render_ajout_rapide():
     service = get_barcode_service()
     inventaire_service = InventaireService()
     
-    st.subheader("âž• Ajouter Article Rapide")
+    st.subheader("➕ Ajouter Article Rapide")
     
     st.markdown("""
     Créez un nouvel article avec code-barres en quelques secondes.
@@ -389,7 +389,7 @@ def render_gestion_barcodes():
     
     service = get_barcode_service()
     
-    st.subheader("[CHART] Gestion Codes-Barres")
+    st.subheader("📊 Gestion Codes-Barres")
     
     # Lister articles avec barcode
     try:

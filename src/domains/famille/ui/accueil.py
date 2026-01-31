@@ -239,7 +239,7 @@ def app():
                     
                     if obj.get('date_cible'):
                         days = (obj['date_cible'] - date.today()).days
-                        st.caption(f"â±ï¸ {days} jours restants")
+                        st.caption(f"⏱️ {days} jours restants")
                 
                 if len(objectifs) > 3:
                     st.caption(f"... et {len(objectifs) - 3} autres objectifs")
@@ -258,7 +258,7 @@ def app():
             
             if stats and stats.get("nb_seances", 0) > 0:
                 st.metric("📥 Séances", stats.get("nb_seances", 0))
-                st.metric("â±ï¸ Minutes totales", int(stats.get("total_minutes", 0)))
+                st.metric("⏱️ Minutes totales", int(stats.get("total_minutes", 0)))
                 st.metric("âš¡ Énergie moyenne", f"{stats.get('energie_moyenne', 0):.1f}/10")
                 st.metric("🧹 Moral moyen", f"{stats.get('moral_moyen', 0):.1f}/10")
             
@@ -314,7 +314,7 @@ def app():
                     with st.expander(f"📅 {activity.titre} - {activity.date_prevue}"):
                         st.write(f"🎨 **Type**: {activity.type_activite}")
                         st.write(f"📱 **Lieu**: {activity.lieu}")
-                        st.write(f"â±ï¸ **Durée**: {activity.duree_heures}h")
+                        st.write(f"⏱️ **Durée**: {activity.duree_heures}h")
                         
                         if activity.cost_estime > 0:
                             st.write(f"📋 **Coût estimé**: {activity.cout_estime:.2f}€")
@@ -423,15 +423,15 @@ def app():
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        if st.button("âž• Ajouter jalon", use_container_width=True):
+        if st.button("➕ Ajouter jalon", use_container_width=True):
             st.write("Allez à Jules â†’ Jalons")
     
     with col2:
-        if st.button("âž• Nouvelle activité", use_container_width=True):
+        if st.button("➕ Nouvelle activité", use_container_width=True):
             st.write("Allez à Activités â†’ Planning")
     
     with col3:
-        if st.button("âž• Nouvel objectif", use_container_width=True):
+        if st.button("➕ Nouvel objectif", use_container_width=True):
             st.write("Allez à Santé â†’ Objectifs")
     
     with col4:

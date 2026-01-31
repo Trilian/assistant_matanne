@@ -209,7 +209,7 @@ def app():
     # ===================================
 
     tab1, tab2, tab3, tab4 = st.tabs(
-        ["[CHART] Vue d'ensemble", "âž• Ajouter une entrée", "– Analyse IA", "👧 Tendances"]
+        ["📊 Vue d'ensemble", "➕ Ajouter une entrée", "– Analyse IA", "👧 Tendances"]
     )
 
     # ===================================
@@ -284,7 +284,7 @@ def app():
     # ===================================
 
     with tab2:
-        st.subheader("âž• Ajouter une entrée de bien-être")
+        st.subheader("➕ Ajouter une entrée de bien-être")
 
         with st.form("form_bien_etre"):
             col_a1, col_a2 = st.columns(2)
@@ -408,7 +408,7 @@ def app():
                     analyse = st.session_state["analyse_bien_etre"]
 
                     st.markdown("---")
-                    st.markdown("### [CHART] Résultats de l'analyse")
+                    st.markdown("### 📊 Résultats de l'analyse")
 
                     # Score
                     if "score_bien_etre" in analyse:

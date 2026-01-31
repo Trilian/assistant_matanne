@@ -275,8 +275,8 @@ def render_ia_config():
             st.rerun()
 
     with col11:
-        if st.button("[CHART] Détails Cache", key="btn_cache_details", use_container_width=True):
-            with st.expander("[CHART] Statistiques Détaillées", expanded=True):
+        if st.button("📊 Détails Cache", key="btn_cache_details", use_container_width=True):
+            with st.expander("📊 Statistiques Détaillées", expanded=True):
                 st.json(cache_stats)
 
 

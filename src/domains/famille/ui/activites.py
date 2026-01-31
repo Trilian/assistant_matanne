@@ -123,7 +123,7 @@ def app():
                 st.error(f"❌ Erreur chargement: {str(e)}")
         
         with col2:
-            st.subheader("âž• Ajouter Activité")
+            st.subheader("➕ Ajouter Activité")
             
             with st.form("form_activite"):
                 titre = st.text_input("Nom")
@@ -193,7 +193,7 @@ def app():
             with col1:
                 st.metric("💡 Ce mois", f"{budget_mois:.2f}€")
             with col2:
-                st.metric("[CHART] Cette semaine", f"{budget_semaine:.2f}€")
+                st.metric("📊 Cette semaine", f"{budget_semaine:.2f}€")
             with col3:
                 st.metric("🗑️ Budget moyen", f"{budget_mois / 4:.2f}€ par semaine")
         

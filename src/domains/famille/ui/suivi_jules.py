@@ -193,7 +193,7 @@ def app():
     # ===================================
 
     tab1, tab2, tab3, tab4 = st.tabs(
-        ["[CHART] Tableau de bord", "– Conseils IA", "📥 Journal", "👧 Statistiques"]
+        ["📊 Tableau de bord", "– Conseils IA", "📥 Journal", "👧 Statistiques"]
     )
 
     # ===================================
@@ -251,7 +251,7 @@ def app():
 
         # Ajout rapide
         st.markdown("---")
-        st.markdown("### âš¡ Ajouter une observation rapide")
+        st.markdown("### ⚡ Ajouter une observation rapide")
 
         with st.form("form_quick_entry"):
             col_q1, col_q2, col_q3 = st.columns(3)
@@ -267,7 +267,7 @@ def app():
 
             notes = st.text_area("Notes (optionnel)", placeholder="Observations...")
 
-            submitted = st.form_submit_button("âž• Ajouter", type="primary")
+            submitted = st.form_submit_button("➕ Ajouter", type="primary")
 
             if submitted:
                 ajouter_entree(jules.id, humeur, sommeil, activite, notes)
@@ -412,7 +412,7 @@ def app():
 
         # Formulaire détaillé
         with st.form("form_journal"):
-            st.markdown("### âž• Nouvelle entrée")
+            st.markdown("### ➕ Nouvelle entrée")
 
             col_j1, col_j2 = st.columns(2)
 

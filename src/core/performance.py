@@ -526,7 +526,7 @@ def render_performance_panel():
     summary = PerformanceDashboard.get_summary()
     score, status = PerformanceDashboard.get_health_score()
     
-    with st.expander(f"[CHART] Performance {status} {score}/100"):
+    with st.expander(f"📊 Performance {status} {score}/100"):
         
         # Tabs pour différentes métriques
         tab1, tab2, tab3 = st.tabs(["⚡ Général", "🧠 Mémoire", "🗃️ SQL"])
