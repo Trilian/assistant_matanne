@@ -125,7 +125,7 @@ def afficher_jour_expandable(jour: date, jour_complet: dict, jour_nom: str) -> N
 def app():
     """Module Calendrier unifié"""
 
-    st.title("📋… Calendrier Familial")
+    st.title("📋 Calendrier Familial")
     st.caption("Vue intégrée de tous les événements familiaux")
 
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -139,7 +139,7 @@ def app():
     col_nav1, col_nav2, col_nav3 = st.columns([1, 2, 1])
 
     with col_nav1:
-        if st.button("â¬…ï¸ Semaine précédente", use_container_width=True):
+        if st.button("⬅️ Semaine précédente", use_container_width=True):
             st.session_state.planning_week_start -= timedelta(days=7)
             st.rerun()
 
@@ -226,7 +226,7 @@ def app():
     # VUE JOURS DÉTAILLÉE
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-    st.markdown("### 📋… Détail par jour")
+    st.markdown("### 📋 Détail par jour")
 
     jours_semaine = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
 
@@ -244,7 +244,7 @@ def app():
     # ONGLETS ACTIONS
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-    tab1, tab2, tab3 = st.tabs(["➕ Nouvel événement", "– Générer avec IA", "📋 Vue mois"])
+    tab1, tab2, tab3 = st.tabs(["➕ Nouvel événement", "🤖 Générer avec IA", "📋 Vue mois"])
 
     with tab1:
         st.subheader("➕ Ajouter un événement")
@@ -287,7 +287,7 @@ def app():
                     st.rerun()
 
     with tab2:
-        st.subheader("– Générer semaine avec IA")
+        st.subheader("🤖 Générer semaine avec IA")
 
         st.info(
             "🚀 L'IA peut générer une semaine complète équilibrée basée sur vos contraintes et objectifs familiaux"
@@ -304,7 +304,7 @@ def app():
             gen_submitted = st.form_submit_button("📤 Générer une semaine équilibrée", type="primary")
 
             if gen_submitted:
-                with st.spinner("– L'IA réfléchit..."):
+                with st.spinner("🤖 L'IA réfléchit..."):
                     result = service.generer_semaine_ia(
                         date_debut=st.session_state.planning_week_start,
                         contraintes={"budget": budget, "energie": energie},
@@ -321,7 +321,7 @@ def app():
                         st.error("❌ Erreur lors de la génération")
 
     with tab3:
-        st.subheader("📋… Vue mensuelle")
+        st.subheader("📋 Vue mensuelle")
 
         col_m1, col_m2 = st.columns([2, 1])
 

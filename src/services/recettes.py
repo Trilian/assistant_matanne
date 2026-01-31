@@ -224,11 +224,38 @@ class RecetteService(BaseService[Recette], BaseAIService, RecipeAIMixin):
             Recette créée avec relations
         """
         from datetime import datetime
+        from src.core.validation import IngredientInput, EtapeInput
+        
+        # Conversion des ingrédients en IngredientInput objects si ce sont des dicts
+        ingredients_data = data.get("ingredients") or []
+        if ingredients_data and isinstance(ingredients_data[0], dict):
+            data["ingredients"] = [
+                IngredientInput(
+                    nom=ing.get("nom", ""),
+                    quantite=ing.get("quantite", 1.0),
+                    unite=ing.get("unite", ""),
+                    optionnel=ing.get("optionnel", False)
+                )
+                for ing in ingredients_data
+            ]
+        
+        # Conversion des étapes en EtapeInput objects si ce sont des dicts
+        etapes_data = data.get("etapes") or []
+        if etapes_data and isinstance(etapes_data[0], dict):
+            data["etapes"] = [
+                EtapeInput(
+                    ordre=idx + 1,
+                    description=etape.get("description", ""),
+                    duree=etape.get("duree")
+                )
+                for idx, etape in enumerate(etapes_data)
+            ]
         
         # Validation avec Pydantic
         try:
             validated = RecetteInput(**data)
         except Exception as e:
+            logger.error(f"Validation error: {e} - Data: {data}")
             raise ErreurValidation(f"Données invalides: {str(e)}")
         
         # Créer recette avec updated_at

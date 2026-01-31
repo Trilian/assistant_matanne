@@ -38,7 +38,7 @@ from src.ui.feedback import show_error, show_success, smart_spinner
 def app():
     """Point d'entrée module paramètres"""
 
-    st.title("âš™ï¸ Paramètres")
+    st.title("⚙️ Paramètres")
 
     # Tabs - Ajout des nouvelles fonctionnalités
     tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(
@@ -269,7 +269,7 @@ def render_ia_config():
     col10, col11 = st.columns(2)
 
     with col10:
-        if st.button("📋¸ Vider Cache IA", key="btn_clear_semantic_cache", use_container_width=True):
+        if st.button("📋 Vider Cache IA", key="btn_clear_semantic_cache", use_container_width=True):
             SemanticCache.invalider_tout()
             show_success("Cache IA vidé !")
             st.rerun()
@@ -434,7 +434,7 @@ def render_cache_config():
     st.markdown("---")
 
     # Cache IA
-    st.markdown("#### – Cache IA")
+    st.markdown("#### 🤖 Cache IA")
 
     cache_stats = SemanticCache.obtenir_statistiques()
 
@@ -449,7 +449,7 @@ def render_cache_config():
     with col5:
         st.metric("Misses", 0)
 
-    if st.button("📋¸ Vider Cache IA", key="btn_clear_cache_ia", use_container_width=True):
+    if st.button("📋 Vider Cache IA", key="btn_clear_cache_ia", use_container_width=True):
         SemanticCache.invalider_tout()
         show_success("Cache IA vidé !")
         st.rerun()
@@ -525,7 +525,7 @@ def render_about():
     st.markdown("---")
 
     # Configuration sécurisée (sans secrets)
-    st.markdown("#### âš™ï¸ Configuration")
+    st.markdown("#### ⚙️ Configuration")
 
     with st.expander("Voir la configuration (sans secrets)"):
         safe_config = settings.obtenir_config_publique()
@@ -702,7 +702,7 @@ def render_budget_config():
         
         with st.form("meteo_config"):
             ville = st.text_input("Ville", value="Paris")
-            surface = st.number_input("Surface jardin (mÂ²)", min_value=1, max_value=1000, value=50)
+            surface = st.number_input("Surface jardin (m²)", min_value=1, max_value=1000, value=50)
             
             col1, col2, col3 = st.columns(3)
             with col1:

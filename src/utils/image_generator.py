@@ -47,6 +47,7 @@ def _get_api_key(key_name: str) -> Optional[str]:
     return os.getenv(key_name)
 
 # APIs configurables
+LEONARDO_API_KEY = _get_api_key('LEONARDO_API_KEY')  # Gratuit: https://app.leonardo.ai
 PEXELS_API_KEY = _get_api_key('PEXELS_API_KEY')  # Gratuit: https://www.pexels.com/api/
 PIXABAY_API_KEY = _get_api_key('PIXABAY_API_KEY')  # Gratuit: https://pixabay.com/api/
 UNSPLASH_API_KEY = _get_api_key('UNSPLASH_API_KEY')  # Gratuit: https://unsplash.com/oauth/applications
@@ -56,6 +57,7 @@ UNSPLASH_API_KEY = _get_api_key('UNSPLASH_API_KEY')  # Gratuit: https://unsplash
 print("\n" + "="*60)
 print("IMAGE GENERATOR INITIALIZED")
 print("="*60)
+print(f"Leonardo:  {'CONFIGURED' if LEONARDO_API_KEY else 'NOT SET'} {LEONARDO_API_KEY[:10] if LEONARDO_API_KEY else ''}...")
 print(f"Unsplash:  {'CONFIGURED' if UNSPLASH_API_KEY else 'NOT SET'} {UNSPLASH_API_KEY[:10] if UNSPLASH_API_KEY else ''}...")
 print(f"Pexels:    {'CONFIGURED' if PEXELS_API_KEY else 'NOT SET'} {PEXELS_API_KEY[:10] if PEXELS_API_KEY else ''}...")
 print(f"Pixabay:   {'CONFIGURED' if PIXABAY_API_KEY else 'NOT SET'} {PIXABAY_API_KEY[:10] if PIXABAY_API_KEY else ''}...")
@@ -105,6 +107,16 @@ def generer_image_recette(nom_recette: str, description: str = "", ingredients_l
             logger.debug(f"HuggingFace failed: {e}")
     else:
         logger.debug("HUGGINGFACE_API_KEY non configurée, passage au fallback")
+    
+    # Priorité 2: Leonardo.AI (spécialisé en culinaire, gratuit avec compte)
+    if LEONARDO_API_KEY:
+        try:
+            url = _generer_via_leonardo(nom_recette, description, ingredients_list, type_plat)
+            if url:
+                logger.info(f"✅ Image générée via Leonardo.AI pour '{nom_recette}'")
+                return url
+        except Exception as e:
+            logger.debug(f"Leonardo.AI failed: {e}")
     
     # Priorité 3: Unsplash (meilleur pour les images réelles)
     if UNSPLASH_API_KEY:

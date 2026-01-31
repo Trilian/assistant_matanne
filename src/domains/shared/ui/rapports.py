@@ -348,7 +348,7 @@ def render_analyse_gaspillage():
     
     service = get_rapports_service()
     
-    st.subheader("🎯¸ Analyse Gaspillage")
+    st.subheader("🎯 Analyse Gaspillage")
     
     st.markdown("""
     Identifiez et réduisez le gaspillage:
@@ -497,7 +497,7 @@ def render_historique():
         ✅ Analyse gaspillage - chaque vendredi
         """)
         
-        if st.button("âš™ï¸ Configurer planification", key="btn_schedule"):
+        if st.button("⚙️ Configurer planification", key="btn_schedule"):
             st.info("""
             Pour configurer les rapports automatiques:
             1. Utilisez le menu Paramètres

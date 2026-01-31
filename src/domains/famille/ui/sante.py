@@ -412,7 +412,7 @@ def app():
                 "Hydratation (1.5-2L eau/jour)"
             ]
             for point in points:
-                st.write(f"âœ“ {point}")
+                st.write(f"✅ {point}")
         
         with col2:
             st.subheader("❌ À limiter")
@@ -425,7 +425,7 @@ def app():
                 "Repas trop lourds le soir"
             ]
             for point in points:
-                st.write(f"âœ— {point}")
+                st.write(f"❌ {point}"
         
         st.divider()
         

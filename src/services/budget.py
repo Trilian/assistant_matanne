@@ -843,7 +843,7 @@ def render_budget_dashboard():
     
     with tab4:
         # Configuration des budgets
-        st.markdown("### âš™ï¸ Définir les budgets mensuels")
+        st.markdown("### ⚙️ Définir les budgets mensuels")
         
         budgets_actuels = service.get_tous_budgets(mois, annee)
         

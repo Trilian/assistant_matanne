@@ -205,19 +205,25 @@ class PlanningService(BaseService[Planning], BaseAIService, PlanningAIMixin):
 
         semaine_fin = semaine_debut + timedelta(days=6)
 
-        # Construire prompt
-        prompt = self.build_json_prompt(
-            context=context,
-            task="Generate a complete weekly meal plan (Monday to Sunday)",
-            json_schema='[{"jour": str, "dejeuner": str, "diner": str}]',
-            constraints=[
-                "One meal per type (lunch, dinner) per day",
-                "Balanced and varied throughout the week",
-                "Adapt to household configuration",
-                "Consider seasonal ingredients",
-                "Family-friendly recipes",
-            ],
-        )
+        # Construire prompt ultra-direct (comme pour recettes)
+        prompt = f"""GENERATE A 7-DAY MEAL PLAN (MONDAY-SUNDAY) IN JSON FORMAT ONLY.
+
+CONTEXT:
+{context}
+
+OUTPUT ONLY THIS JSON STRUCTURE (no other text, no markdown, no code blocks):
+{{"items": [
+  {{"jour": "Lundi", "dejeuner": "Pâtes carbonara", "diner": "Salade niçoise"}},
+  {{"jour": "Mardi", "dejeuner": "Riz et poulet", "diner": "Soupe de légumes"}}
+]}}
+
+RULES:
+1. Return ONLY valid JSON array with exactly 7 items (one per day)
+2. jour values: Lundi, Mardi, Mercredi, Jeudi, Vendredi, Samedi, Dimanche
+3. dejeuner and diner: recipe names or meal descriptions (3-50 chars)
+4. Ensure variety throughout the week
+5. Adapt to family preferences and dietary restrictions
+6. No explanations, no text, ONLY JSON"""
 
         logger.info(f"🤖 Generating AI weekly plan starting {semaine_debut}")
 
@@ -225,22 +231,10 @@ class PlanningService(BaseService[Planning], BaseAIService, PlanningAIMixin):
         planning_data = self.call_with_list_parsing_sync(
             prompt=prompt,
             item_model=JourPlanning,
-            system_prompt=self.build_system_prompt(
-                role="Family meal planner",
-                expertise=[
-                    "Meal organization",
-                    "Nutritional balance",
-                    "Seasonal cooking",
-                    "Family preferences",
-                ],
-                rules=[
-                    "Respect dietary restrictions",
-                    "Balance flavors across week",
-                    "Minimize repeated meals",
-                    "Consider preparation time",
-                ],
-            ),
+            system_prompt="Return ONLY valid JSON. No text before or after JSON. Never use markdown code blocks.",
             max_items=7,
+            temperature=0.5,
+            max_tokens=2000,
         )
 
         # Log de debug pour voir la réponse
