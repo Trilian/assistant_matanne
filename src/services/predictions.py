@@ -190,18 +190,22 @@ class PredictionService:
             ingredient_id = article["ingredient_id"]
             nom = article["ingredient_nom"]
             quantite_actuelle = article["quantite"]
-            quantite_min = article["quantite_min"]
+            quantite_min = article.get("quantite_min", 0) or 0
 
             # Analyse historique
             analyse = self.analyser_historique_article(article_id, historique_complet)
 
-            if not analyse:
-                # Pas assez d'historique, skip
-                continue
-
-            taux = analyse["taux_consommation_moyen"]
-            tendance = analyse["tendance"]
-            confiance = analyse["confiance"]
+            if analyse:
+                # Historique disponible
+                taux = analyse["taux_consommation_moyen"]
+                tendance = analyse["tendance"]
+                confiance = analyse["confiance"]
+            else:
+                # Pas d'historique - utiliser valeurs par défaut
+                # Assumer consommation modérée
+                taux = max(0.5, quantite_min * 0.1) if quantite_min > 0 else 0.5
+                tendance = "stable"
+                confiance = 0.3
 
             # Prédictions
             qty_semaine = self.predire_quantite(quantite_actuelle, taux, 7)

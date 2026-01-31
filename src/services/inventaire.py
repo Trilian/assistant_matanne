@@ -218,19 +218,34 @@ class InventaireService(BaseService[ArticleInventaire], BaseAIService, Inventory
         # Utilisation du Mixin pour résumé inventaire
         context = self.build_inventory_summary(inventaire)
 
-        # Construire prompt
-        prompt = self.build_json_prompt(
-            context=context,
-            task="Suggest 15 priority items to buy",
-            json_schema='[{"nom": str, "quantite": float, "unite": str, "priorite": str, "rayon": str}]',
-            constraints=[
-                "Priority: haute/moyenne/basse",
-                "Store sections for organization",
-                "Realistic quantities",
-                "Focus on critical items first",
-                "Respect budget constraints",
-            ],
-        )
+        # Construire prompt - FORCE JSON STRICT
+        prompt = f'''You are a smart shopping assistant. Based on the inventory status below, suggest 15 priority items to buy.
+
+INVENTORY CONTEXT:
+{context}
+
+STRICT REQUIREMENTS:
+- Return ONLY valid JSON, nothing else
+- No markdown, no code blocks, no explanations
+- Use exactly this structure:
+{{"items": [{{"nom": "Item Name", "quantite": 2, "unite": "kg", "priorite": "haute", "rayon": "Fruits & Légumes"}}]}}
+
+KEY FIELDS:
+- nom: Item name (string)
+- quantite: Quantity (number, realistic amount)
+- unite: Unit (kg, L, pcs, etc.)
+- priorite: Priority level - MUST BE: haute, moyenne, or basse
+- rayon: Store section (Fruits & Légumes, Laitier, Viande, Épicerie, Surgelé, etc.)
+
+CONSTRAINTS:
+- Suggest 15 critical items based on inventory alerts
+- Priority: haute for critical/nearly empty items
+- Priority: moyenne for low stock items  
+- Priority: basse for nice-to-have items
+- Focus on items that are needed now
+- Organize by store section
+- Include realistic quantities for typical family use
+- Return ONLY the JSON object with "items" array, no other text'''
 
         logger.info("🤖 Generating shopping suggestions with AI")
 
@@ -238,22 +253,10 @@ class InventaireService(BaseService[ArticleInventaire], BaseAIService, Inventory
         suggestions = self.call_with_list_parsing_sync(
             prompt=prompt,
             item_model=SuggestionCourses,
-            system_prompt=self.build_system_prompt(
-                role="Smart shopping assistant",
-                expertise=[
-                    "Stock management",
-                    "Inventory optimization",
-                    "Budget-aware purchasing",
-                    "Seasonal availability",
-                ],
-                rules=[
-                    "Prioritize critical items",
-                    "Suggest realistic quantities",
-                    "Consider seasonal items",
-                    "Group by store section",
-                ],
-            ),
+            system_prompt="You are a smart shopping assistant. Return ONLY valid JSON for shopping suggestions, no explanations or markdown. Always use the exact structure requested.",
             max_items=15,
+            temperature=0.7,
+            max_tokens=2000,
         )
 
         logger.info(f"✅ Generated {len(suggestions)} shopping suggestions")

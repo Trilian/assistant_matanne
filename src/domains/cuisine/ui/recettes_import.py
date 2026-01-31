@@ -408,8 +408,7 @@ def _save_imported_recipe(
                         recette_id=recette.id,
                         ingredient_id=ingredient.id,
                         quantite=quantite,
-                        unite=unite,
-                        ordre=idx
+                        unite=unite
                     )
                     db.add(ri)
                 

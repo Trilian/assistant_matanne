@@ -366,34 +366,37 @@ class RecetteService(BaseService[Recette], BaseAIService, RecipeAIMixin):
             nb_recettes=nb_recettes,
         )
 
-        # Prompt avec instructions JSON
-        prompt = self.build_json_prompt(
-            context=context,
-            task=f"Generate {nb_recettes} complete recipes",
-            json_schema='''{
-    "items": [
-        {
-            "nom": "string (recipe name)",
-            "description": "string (short description)",
-            "temps_preparation": "integer (minutes)",
-            "temps_cuisson": "integer (minutes)",
-            "portions": "integer",
-            "difficulte": "string (facile|moyen|difficile)",
-            "type_repas": "string (meal type)",
-            "saison": "string (season)",
-            "ingredients": [{"nom": "string", "quantite": "number", "unite": "string"}],
-            "etapes": [{"description": "string"}]
-        }
-    ]
-}''',
-            constraints=[
-                "Each recipe must be complete with all ingredients",
-                "Include precise quantities and units",
-                "Detail all preparation steps",
-                "Respect season constraints",
-                "Return EXACTLY this JSON structure with 'items' key containing the recipes array",
-            ],
-        )
+        # Prompt avec instructions JSON STRICTES
+        prompt = f'''You are an expert chef and nutritionist. Generate EXACTLY {nb_recettes} complete recipes.
+
+CONTEXT:
+{context}
+
+STRICT REQUIREMENTS:
+- Return ONLY valid JSON, nothing else
+- No markdown, no code blocks, no explanations
+- Use exactly this structure:
+{{"items": [{{"nom": "Recipe Name", "description": "Short description", "temps_preparation": 30, "temps_cuisson": 20, "portions": 4, "difficulte": "facile", "type_repas": "lunch", "saison": "spring", "ingredients": [{{"nom": "ingredient", "quantite": 1.5, "unite": "cup"}}], "etapes": [{{"description": "Step 1"}}]}}]}}
+
+KEY FIELDS:
+- nom: Recipe name (string, 3-200 chars)
+- description: Short description (string, 10+ chars)
+- temps_preparation: Prep time in minutes (1-300)
+- temps_cuisson: Cook time in minutes (0-300)
+- portions: Servings (1-20)
+- difficulte: Difficulty: facile, moyen, or difficile
+- type_repas: Meal type (petit-dejeuner, dejeuner, diner, snack)
+- saison: Season (printemps, ete, automne, hiver, toute_année)
+- ingredients: Array of {{"nom": string, "quantite": number, "unite": string}}
+- etapes: Array of {{"description": string}}
+
+CONSTRAINTS:
+- Each recipe must be complete with all ingredients
+- Include precise quantities and units  
+- Detail all preparation steps
+- Respect season constraints
+- Generate {nb_recettes} different recipes
+- Return ONLY the JSON object, no other text'''
 
         logger.info(f"🤖 Generating {nb_recettes} recipe suggestions")
 
@@ -401,21 +404,10 @@ class RecetteService(BaseService[Recette], BaseAIService, RecipeAIMixin):
         recettes = self.call_with_list_parsing_sync(
             prompt=prompt,
             item_model=RecetteSuggestion,
-            system_prompt=self.build_system_prompt(
-                role="Expert chef and nutritionist",
-                expertise=[
-                    "French and international cuisine",
-                    "Nutritional balance",
-                    "Seasonal adaptation",
-                    "Culinary creativity",
-                ],
-                rules=[
-                    "Prioritize seasonal ingredients",
-                    "Respect preparation times",
-                    "Propose achievable recipes",
-                ],
-            ),
+            system_prompt="You are an expert French chef and nutritionist. Return ONLY valid JSON for recipe generation, no explanations or markdown. Always use the exact structure requested.",
             max_items=nb_recettes,
+            temperature=0.7,
+            max_tokens=3000,
         )
 
         logger.info(f"✅ Generated {len(recettes)} recipe suggestions")
