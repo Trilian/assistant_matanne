@@ -425,7 +425,7 @@ def app():
                 "Repas trop lourds le soir"
             ]
             for point in points:
-                st.write(f"❌ {point}"
+                st.write(f"❌ {point}")
         
         st.divider()
         
