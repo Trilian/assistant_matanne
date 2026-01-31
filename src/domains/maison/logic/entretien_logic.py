@@ -63,7 +63,7 @@ def calculer_jours_avant_tache(tache: Dict[str, Any]) -> Optional[int]:
     frequence = tache.get("frequence", "Hebdomadaire")
     
     if not derniere:
-        return 0  # Ã€ faire immédiatement
+        return 0  # À faire immédiatement
     
     if isinstance(derniere, str):
         from datetime import datetime

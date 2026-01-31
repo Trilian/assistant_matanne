@@ -251,7 +251,7 @@ def app():
         taches = get_taches_today()
         
         if not taches:
-            st.success("âœ¨ Aucune tâche pour aujourd'hui!")
+            st.success("✨ Aucune tâche pour aujourd'hui!")
         else:
             # Tri par heure
             taches_triees = sorted(taches, key=lambda x: x.get("heure", ""))
@@ -281,7 +281,7 @@ def app():
                 
                 with col2:
                     if not tache["fait"]:
-                        if st.button("âœ“ Fait", key=f"check_{tache['id']}", use_container_width=True):
+                        if st.button("✅ Fait", key=f"check_{tache['id']}", use_container_width=True):
                             if marquer_tache_faite(tache["id"]):
                                 st.success("✅ Tâche marquée!")
                                 st.rerun()
@@ -355,7 +355,7 @@ def app():
                                 
                                 with col_t2:
                                     if t.fait_le != date.today():
-                                        if st.button("âœ“", key=f"tache_{t.id}", use_container_width=True):
+                                        if st.button("✅", key=f"tache_{t.id}", use_container_width=True):
                                             if marquer_tache_faite(t.id):
                                                 st.rerun()
                 
@@ -405,7 +405,7 @@ def app():
         st.markdown("---")
         
         # Optimiser semaine
-        st.markdown("#### 🧹¸ Optimiser la semaine")
+        st.markdown("#### 🧹️ Optimiser la semaine")
         
         types = st.text_area(
             "Lister les tâches (une par ligne)",

@@ -218,34 +218,23 @@ class InventaireService(BaseService[ArticleInventaire], BaseAIService, Inventory
         # Utilisation du Mixin pour résumé inventaire
         context = self.build_inventory_summary(inventaire)
 
-        # Construire prompt - FORCE JSON STRICT
-        prompt = f'''You are a smart shopping assistant. Based on the inventory status below, suggest 15 priority items to buy.
+        # Construire prompt - FORCE JSON STRICT ET CLAIR
+        prompt = f'''GENERATE 15 SHOPPING ITEMS IN JSON FORMAT ONLY.
 
-INVENTORY CONTEXT:
 {context}
 
-STRICT REQUIREMENTS:
-- Return ONLY valid JSON, nothing else
-- No markdown, no code blocks, no explanations
-- Use exactly this structure:
-{{"items": [{{"nom": "Item Name", "quantite": 2, "unite": "kg", "priorite": "haute", "rayon": "Fruits & Légumes"}}]}}
+OUTPUT ONLY THIS JSON (no other text, no markdown, no code blocks):
 
-KEY FIELDS:
-- nom: Item name (string)
-- quantite: Quantity (number, realistic amount)
-- unite: Unit (kg, L, pcs, etc.)
-- priorite: Priority level - MUST BE: haute, moyenne, or basse
-- rayon: Store section (Fruits & Légumes, Laitier, Viande, Épicerie, Surgelé, etc.)
+{{"items": [{{"nom": "Milk", "quantite": 2, "unite": "L", "priorite": "haute", "rayon": "Laitier"}}, {{"nom": "Eggs", "quantite": 1, "unite": "box", "priorite": "haute", "rayon": "Laitier"}}]}}
 
-CONSTRAINTS:
-- Suggest 15 critical items based on inventory alerts
-- Priority: haute for critical/nearly empty items
-- Priority: moyenne for low stock items  
-- Priority: basse for nice-to-have items
-- Focus on items that are needed now
-- Organize by store section
-- Include realistic quantities for typical family use
-- Return ONLY the JSON object with "items" array, no other text'''
+RULES:
+1. Return ONLY valid JSON - nothing before or after
+2. Generate 15 shopping items based on inventory alerts
+3. All fields required: nom, quantite, unite, priorite, rayon
+4. priorite must be: haute, moyenne, or basse (haute for critical items)
+5. rayon: Fruits & Légumes, Laitier, Viande, Épicerie, Surgelé, Boulangerie, Hygiène
+6. quantite: realistic amounts for family use
+7. No explanations, no text, ONLY JSON'''
 
         logger.info("🤖 Generating shopping suggestions with AI")
 
@@ -253,10 +242,10 @@ CONSTRAINTS:
         suggestions = self.call_with_list_parsing_sync(
             prompt=prompt,
             item_model=SuggestionCourses,
-            system_prompt="You are a smart shopping assistant. Return ONLY valid JSON for shopping suggestions, no explanations or markdown. Always use the exact structure requested.",
+            system_prompt="Return ONLY valid JSON. No text before or after JSON.",
             max_items=15,
-            temperature=0.7,
-            max_tokens=2000,
+            temperature=0.5,
+            max_tokens=2500,
         )
 
         logger.info(f"✅ Generated {len(suggestions)} shopping suggestions")

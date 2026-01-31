@@ -201,7 +201,7 @@ def app():
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     if semaine.alertes_semaine:
-        st.markdown("### âš ï¸ Alertes Semaine")
+        st.markdown("### ⚠️ Alertes Semaine")
         for alerte in semaine.alertes_semaine:
             st.warning(alerte, icon="âš ï¸")
         st.markdown("---")

@@ -402,7 +402,7 @@ def app():
         col1, col2 = st.columns(2)
         
         with col1:
-            st.subheader("✅ Ã€ privilégier")
+            st.subheader("✅ À privilégier")
             points = [
                 "Fruits et légumes frais (5 portions/jour)",
                 "Protéines maigres (poulet, poisson, Å“ufs)",
@@ -415,7 +415,7 @@ def app():
                 st.write(f"âœ“ {point}")
         
         with col2:
-            st.subheader("❌ Ã€ limiter")
+            st.subheader("❌ À limiter")
             points = [
                 "Sucres raffinés et sodas",
                 "Graisses saturées (beurre, fritures)",

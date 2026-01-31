@@ -276,7 +276,7 @@ class PredictionService:
             tendance_globale = "stable"
 
         # Consommations min/max
-        taux_consommation = [p.taux_consommation for p in predictions if p.taux_consommation > 0]
+        taux_consommation = [p.taux_consommation_moyen for p in predictions if p.taux_consommation_moyen > 0]
         consommation_min = min(taux_consommation) if taux_consommation else 0.0
         consommation_max = max(taux_consommation) if taux_consommation else 0.0
 

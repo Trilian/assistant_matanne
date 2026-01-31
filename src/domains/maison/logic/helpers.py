@@ -131,7 +131,7 @@ def charger_plantes() -> pd.DataFrame:
                 jours_depuis_arrosage = (date.today() - derniers_logs[0].date).days
             
             # Déterminer la fréquence d'arrosage (mock pour démo)
-            freq_arrosage = 2  # Ã€ adapter selon modèle BD
+            freq_arrosage = 2  # À adapter selon modèle BD
             a_arroser = (
                 jours_depuis_arrosage is None or 
                 jours_depuis_arrosage >= freq_arrosage

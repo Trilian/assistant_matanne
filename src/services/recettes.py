@@ -366,37 +366,23 @@ class RecetteService(BaseService[Recette], BaseAIService, RecipeAIMixin):
             nb_recettes=nb_recettes,
         )
 
-        # Prompt avec instructions JSON STRICTES
-        prompt = f'''You are an expert chef and nutritionist. Generate EXACTLY {nb_recettes} complete recipes.
+        # Prompt avec instructions JSON ULTRA-STRICTES
+        prompt = f'''GENERATE {nb_recettes} RECIPES IN JSON FORMAT ONLY.
 
-CONTEXT:
 {context}
 
-STRICT REQUIREMENTS:
-- Return ONLY valid JSON, nothing else
-- No markdown, no code blocks, no explanations
-- Use exactly this structure:
-{{"items": [{{"nom": "Recipe Name", "description": "Short description", "temps_preparation": 30, "temps_cuisson": 20, "portions": 4, "difficulte": "facile", "type_repas": "lunch", "saison": "spring", "ingredients": [{{"nom": "ingredient", "quantite": 1.5, "unite": "cup"}}], "etapes": [{{"description": "Step 1"}}]}}]}}
+OUTPUT ONLY THIS JSON (no other text, no markdown, no code blocks):
 
-KEY FIELDS:
-- nom: Recipe name (string, 3-200 chars)
-- description: Short description (string, 10+ chars)
-- temps_preparation: Prep time in minutes (1-300)
-- temps_cuisson: Cook time in minutes (0-300)
-- portions: Servings (1-20)
-- difficulte: Difficulty: facile, moyen, or difficile
-- type_repas: Meal type (petit-dejeuner, dejeuner, diner, snack)
-- saison: Season (printemps, ete, automne, hiver, toute_année)
-- ingredients: Array of {{"nom": string, "quantite": number, "unite": string}}
-- etapes: Array of {{"description": string}}
+{{"items": [{{"nom": "Poulet Rôti", "description": "Tender roasted chicken with herbs", "temps_preparation": 15, "temps_cuisson": 60, "portions": 4, "difficulte": "facile", "type_repas": "diner", "saison": "toute_année", "ingredients": [{{"nom": "chicken", "quantite": 1.5, "unite": "kg"}}, {{"nom": "olive oil", "quantite": 3, "unite": "tbsp"}}], "etapes": [{{"description": "Prepare chicken"}}, {{"description": "Season and roast"}}]}}]}}
 
-CONSTRAINTS:
-- Each recipe must be complete with all ingredients
-- Include precise quantities and units  
-- Detail all preparation steps
-- Respect season constraints
-- Generate {nb_recettes} different recipes
-- Return ONLY the JSON object, no other text'''
+RULES:
+1. Return ONLY valid JSON - nothing before or after
+2. Generate {nb_recettes} different recipes
+3. All fields required: nom, description, temps_preparation, temps_cuisson, portions, difficulte, type_repas, saison, ingredients, etapes
+4. ingredients: array of {{nom, quantite, unite}}
+5. etapes: array of {{description}}
+6. difficulte values: facile, moyen, difficile
+7. No explanations, no text, ONLY JSON'''
 
         logger.info(f"🤖 Generating {nb_recettes} recipe suggestions")
 
@@ -404,10 +390,10 @@ CONSTRAINTS:
         recettes = self.call_with_list_parsing_sync(
             prompt=prompt,
             item_model=RecetteSuggestion,
-            system_prompt="You are an expert French chef and nutritionist. Return ONLY valid JSON for recipe generation, no explanations or markdown. Always use the exact structure requested.",
+            system_prompt="Return ONLY valid JSON. No text before or after JSON.",
             max_items=nb_recettes,
-            temperature=0.7,
-            max_tokens=3000,
+            temperature=0.5,
+            max_tokens=4000,
         )
 
         logger.info(f"✅ Generated {len(recettes)} recipe suggestions")

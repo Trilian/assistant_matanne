@@ -516,7 +516,7 @@ def render_historique():
     st.divider()
     st.subheader("🍽️ Guide d'utilisation")
     
-    with st.expander("â„¹ï¸ Comment utiliser les rapports"):
+    with st.expander("ℹ️ Comment utiliser les rapports"):
         st.markdown("""
         **Rapport Stocks:**
         - Généré chaque semaine

@@ -449,7 +449,7 @@ def app():
             ]
 
             for sugg in suggestions_base[:2]:
-                with st.expander(f"âœ¨ {sugg['nom']}", expanded=False):
+                with st.expander(f"✨ {sugg['nom']}", expanded=False):
                     st.write("**Tâches suggérées :**")
                     for tache in sugg["taches"]:
                         st.write(f"• {tache}")

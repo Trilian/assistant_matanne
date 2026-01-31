@@ -286,7 +286,7 @@ def app():
                             if jours < 0:
                                 st.caption(f"📋 **En retard de {-jours}j**")
                             elif jours == 0:
-                                st.caption("📋 **Ã€ livrer aujourd'hui!**")
+                                st.caption("📋 **À livrer aujourd'hui!**")
                             else:
                                 st.caption(f"📋 {jours}j restants")
                 
@@ -319,7 +319,7 @@ def app():
                                 
                                 with col_t3:
                                     if t.statut != "terminé":
-                                        if st.button("âœ“", key=f"task_{t.id}", use_container_width=True):
+                                        if st.button("✅", key=f"task_{t.id}", use_container_width=True):
                                             if marquer_tache_done(t.id):
                                                 st.rerun()
                 

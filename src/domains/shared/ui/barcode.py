@@ -153,7 +153,7 @@ def render_scanner():
                         st.switch_page("pages/0_accueil.py")
                 
                 with col2:
-                    if st.button("âœï¸ Éditer article", key="btn_edit_article"):
+                    if st.button("✏️ Éditer article", key="btn_edit_article"):
                         st.session_state.article_id_to_edit = details["id"]
                         st.switch_page("pages/0_accueil.py")
                 
@@ -345,7 +345,7 @@ def render_verifier_stock():
                 if etat == "OK":
                     st.metric("État", "✅ OK", delta="Normal")
                 elif etat == "FAIBLE":
-                    st.metric("État", "âš ï¸ FAIBLE", delta="Ã€ renouveler")
+                    st.metric("État", "⚠️ FAIBLE", delta="À renouveler")
                 else:
                     st.metric("État", "❌ CRITIQUE", delta="Urgent!")
             
@@ -453,7 +453,7 @@ def render_gestion_barcodes():
                             st.error(f"❌ Erreur: {str(e)}")
         
         else:
-            st.info("â„¹ï¸ Aucun article avec code-barres pour le moment")
+            st.info("ℹ️ Aucun article avec code-barres pour le moment")
     
     except Exception as e:
         st.error(f"❌ Erreur: {str(e)}")

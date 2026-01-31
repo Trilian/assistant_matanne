@@ -96,9 +96,9 @@ def afficher_metriques_cles(stats: dict, charge_globale: str) -> None:
     st.progress(min(charge_score / 100, 1.0))
 
     if charge_score >= 80:
-        st.warning("âš ï¸ Charge familiale très élevée - Ã€ prendre en compte pour le bien-être")
+        st.warning("⚠️ Charge familiale très élevée - À prendre en compte pour le bien-être")
     elif charge_score >= 70:
-        st.info("â„¹ï¸ Charge normale - Veiller au repos et temps de qualité")
+        st.info("ℹ️ Charge normale - Veiller au repos et temps de qualité")
     else:
         st.success("✅ Charge faible - Bonne semaine équilibrée")
 
@@ -160,7 +160,7 @@ def afficher_opportunities(semaine_data: dict) -> None:
 
     # Budget
     budget_total = semaine_data.get("budget_total", 0)
-    budget_limite = 500  # Ã€ adapter à votre budget
+    budget_limite = 500  # À adapter à votre budget
     if budget_total > budget_limite:
         suggestions.append(
             ("🍽️ Budget elevé",

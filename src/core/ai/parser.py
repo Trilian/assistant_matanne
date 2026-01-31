@@ -231,6 +231,7 @@ def analyser_liste_reponse(
     try:
         json_str = AnalyseurIA._extraire_objet_json(reponse)
         items_data = json.loads(json_str)
+        logger.debug(f"[S1] JSON parsed successfully: {type(items_data)}")
         
         # Si c'est une liste directe
         if isinstance(items_data, list):
@@ -242,12 +243,32 @@ def analyser_liste_reponse(
             items_list = items_data[cle_liste]
             if isinstance(items_list, list):
                 logger.info(f"✅ Parser liste avec clé '{cle_liste}' pour {modele_item.__name__}")
-                return [modele_item(**item) for item in items_list]
+                result = [modele_item(**item) for item in items_list]
+                logger.info(f"✅ Successfully parsed {len(result)} items")
+                return result
     except Exception as e:
         logger.debug(f"Stratégie 1 échouée: {str(e)[:100]}")
         pass
 
-    # Stratégie 2: Utiliser 'items' hardcoded comme fallback
+    # Stratégie 2: Chercher [{ json objects }] pattern directement
+    try:
+        import re
+        # Chercher pattern: [ { ... }, { ... } ]
+        pattern = r'\[\s*\{.*?\}\s*\]'
+        match = re.search(pattern, reponse, re.DOTALL)
+        if match:
+            json_str = match.group(0)
+            items_list = json.loads(json_str)
+            if isinstance(items_list, list):
+                logger.info(f"✅ Regex array pattern found for {modele_item.__name__}")
+                result = [modele_item(**item) for item in items_list]
+                logger.info(f"✅ Successfully parsed {len(result)} items from regex")
+                return result
+    except Exception as e:
+        logger.debug(f"Stratégie 2 (regex) échouée: {str(e)[:100]}")
+        pass
+
+    # Stratégie 3: Utiliser 'items' hardcoded comme fallback
     try:
         class EnvelopeListe(BaseModel):
             items: list[modele_item]
@@ -255,9 +276,11 @@ def analyser_liste_reponse(
         donnees_enveloppe = AnalyseurIA.analyser(
             reponse, EnvelopeListe, valeur_secours={"items": items_secours or []}, strict=False
         )
+        if donnees_enveloppe.items:
+            logger.info(f"✅ Envelope parser successful: {len(donnees_enveloppe.items)} items")
         return donnees_enveloppe.items
     except Exception as e:
-        logger.warning(f"Stratégie 2 échouée: {e}")
+        logger.warning(f"Stratégie 3 (envelope) échouée: {e}")
 
     # Fallback final: retourner items_secours
     if items_secours:

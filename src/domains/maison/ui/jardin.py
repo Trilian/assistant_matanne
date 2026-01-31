@@ -390,7 +390,7 @@ def app():
             st.metric("Plantes totales", stats["total_plantes"])
         
         with col2:
-            st.metric("Ã€ arroser", stats["a_arroser"])
+            st.metric("À arroser", stats["a_arroser"])
         
         with col3:
             st.metric("Récoltes proches", stats["recoltes_proches"])

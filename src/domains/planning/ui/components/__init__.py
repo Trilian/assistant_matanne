@@ -177,7 +177,7 @@ def afficher_alerte(alerte: str, type_alerte: str = "warning") -> None:
     elif type_alerte == "success":
         st.success(alerte, icon="✅")
     else:
-        st.info(alerte, icon="â„¹ï¸")
+        st.info(alerte, icon="ℹ️")
 
 
 def afficher_liste_alertes(alertes: list[str]) -> None:

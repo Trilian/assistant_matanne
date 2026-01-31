@@ -791,10 +791,9 @@ def render_categories():
                     st.metric("Articles", len(articles))
 
                 with col2:
-
+                    from src.domains.cuisine.ui.recettes import formater_quantite
                     total_qty = sum(a["quantite"] for a in articles)
-
-                    st.metric("Quantité totale", f"{total_qty:.1f}")
+                    st.metric("Quantité totale", formater_quantite(total_qty))
 
                 with col3:
 
@@ -1036,7 +1035,7 @@ def render_photos():
 
             st.divider()
 
-            if st.button("🧹¸  Supprimer la photo", key="delete_photo"):
+            if st.button("🗑️ Supprimer la photo", key="delete_photo"):
 
                 try:
 
@@ -2591,7 +2590,7 @@ def render_historique():
 
                 "modification": "êœï¸",
 
-                "suppression": "🧹¸"
+                "suppression": "🗑️"
 
             }.get(h["type"], "ê“")
 

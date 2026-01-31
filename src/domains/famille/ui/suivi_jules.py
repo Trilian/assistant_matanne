@@ -307,7 +307,7 @@ def app():
                 st.write("")
                 st.write("")
                 generer = st.button(
-                    "âœ¨ Demander conseil à l'IA", type="primary", use_container_width=True
+                    "✨ Demander conseil à l'IA", type="primary", use_container_width=True
                 )
 
             if generer:

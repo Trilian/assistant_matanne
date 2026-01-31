@@ -42,7 +42,7 @@ def app():
 
     # Tabs - Ajout des nouvelles fonctionnalités
     tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(
-        ["👶€📉€⚫€📷 Foyer", "– IA", "👧 Base de Données", "💡¸ Cache", "🔔 Affichage", "🟢 Budget", "â„¹ï¸ Ã€ Propos"]
+        ["👶📉⚫📷 Foyer", "– IA", "👧 Base de Données", "💡 Cache", "🔔 Affichage", "🟢 Budget", "ℹ️ À Propos"]
     )
 
     with tab1:
@@ -75,7 +75,7 @@ def app():
 def render_foyer_config():
     """Configuration du foyer"""
 
-    st.markdown("### 👶€📉€⚫€📷 Configuration Foyer")
+    st.markdown("### 👶 📊 📺 📸 Configuration Foyer")
     st.caption("Configure les informations de ton foyer")
 
     # État actuel
@@ -356,7 +356,7 @@ def render_database_config():
                     show_error(f"❌ Erreur: {str(e)}")
 
     with col6:
-        if st.button("â„¹ï¸ Voir Historique", key="btn_show_migration_history", use_container_width=True):
+        if st.button("ℹ️ Voir Historique", key="btn_show_migration_history", use_container_width=True):
             st.session_state.show_migrations_history = True
 
     st.markdown("---")
@@ -423,7 +423,7 @@ def render_cache_config():
 
                 st.metric("Taux de Hit", f"{hit_rate:.1f}%")
 
-        if st.button("📋¸ Vider Cache Applicatif", key="btn_clear_cache_app", use_container_width=True):
+            if st.button("🗑️ Vider Cache Applicatif", key="btn_clear_cache_app", use_container_width=True):
             Cache.clear_all()
             show_success("Cache applicatif vidé !")
             st.rerun()
@@ -467,7 +467,7 @@ def render_cache_config():
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TAB 5: Ã€ PROPOS
+# TAB 5: À PROPOS
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
@@ -476,7 +476,7 @@ def render_about():
 
     settings = get_settings()
 
-    st.markdown("### â„¹ï¸ Ã€ Propos")
+    st.markdown("### ℹ️ À Propos")
 
     # Infos app
     st.markdown(

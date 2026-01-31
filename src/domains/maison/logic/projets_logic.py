@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 # CONSTANTES
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-STATUTS_PROJET = ["Ã€ faire", "En cours", "Terminé", "En pause"]
+STATUTS_PROJET = ["À faire", "En cours", "Terminé", "En pause"]
 PRIORITES = ["Basse", "Moyenne", "Haute", "Urgente"]
 CATEGORIES_PROJET = ["Rénovation", "Décoration", "Réparation", "Amélioration", "Autre"]
 
@@ -128,7 +128,7 @@ def get_projets_en_cours(projets: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
 def get_projets_a_faire(projets: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Retourne les projets à faire."""
-    return filtrer_par_statut(projets, "Ã€ faire")
+    return filtrer_par_statut(projets, "À faire")
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -242,7 +242,7 @@ def calculer_progression(projet: Dict[str, Any]) -> float:
     Returns:
         Pourcentage (0-100)
     """
-    statut = projet.get("statut", "Ã€ faire")
+    statut = projet.get("statut", "À faire")
     
     if statut == "Terminé":
         return 100.0
