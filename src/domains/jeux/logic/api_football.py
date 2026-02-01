@@ -25,19 +25,25 @@ API_KEY = None  # À configurer dans .env
 CHAMP_MAPPING = {
     "Ligue 1": "FL1",
     "Premier League": "PL",
-    "La Liga": "SA",
-    "Serie A": "IT",
+    "La Liga": "PD",      # PD = Primera Division
+    "Serie A": "SA",      # SA = Serie A (Italy)
     "Bundesliga": "BL1",
 }
 
-# IDs des compétitions Football-Data (API gratuite v4 - 5 grands championnats)
+# IDs des compétitions Football-Data (API v4 - TIER_ONE = gratuit)
+# Source: GET /competitions - vérifiés le 2025-02-01
 COMP_IDS = {
-    "FL1": 445,      # Ligue 1
-    "PL": 39,        # Premier League
-    "SA": 141,       # La Liga (Spain)
-    "IT": 135,       # Serie A (Italy)
-    "BL1": 25,       # Bundesliga
-    # Note: CL (8) et EL non disponibles avec API gratuite
+    "FL1": 2015,     # Ligue 1 (France)
+    "PL": 2021,      # Premier League (England)
+    "PD": 2014,      # Primera Division / La Liga (Spain)
+    "SA": 2019,      # Serie A (Italy)
+    "BL1": 2002,     # Bundesliga (Germany)
+    # Autres disponibles gratuit:
+    # "CL": 2001,    # UEFA Champions League
+    # "ELC": 2016,   # Championship (England 2nd)
+    # "DED": 2003,   # Eredivisie (Netherlands)
+    # "PPL": 2017,   # Primeira Liga (Portugal)
+    # "BSA": 2013,   # Brasileirão Série A
 }
 
 

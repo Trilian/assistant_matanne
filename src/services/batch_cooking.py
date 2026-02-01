@@ -562,7 +562,7 @@ class BatchCookingService(BaseService[SessionBatchCooking], BaseAIService):
     # SECTION 5: GÉNÉRATION IA
     # ═══════════════════════════════════════════════════════════
 
-    @with_cache(ttl=3600, key_func=lambda self, recettes_ids, robots, avec_jules: 
+    @with_cache(ttl=3600, key_func=lambda self, recettes_ids, robots_disponibles, avec_jules=False: 
                 f"batch_plan_{'-'.join(map(str, recettes_ids))}_{avec_jules}")
     @with_error_handling(default_return=None)
     @with_db_session

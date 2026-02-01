@@ -864,24 +864,26 @@ def app():
                     st.error(f"❌ Erreur: {e}")
         
         with col_refresh2:
-            if st.button("📥 Sync Équipes", help="Charge toutes les équipes depuis l'API", disabled=True):
+            if st.button("📥 Sync Équipes", help="Charge toutes les équipes depuis Football-Data API"):
                 st.info("⏳ Synchronisation en cours...")
                 try:
-                    with st.spinner("Synchronisation..."):
+                    with st.spinner("Synchronisation des 5 grands championnats..."):
                         logger.info("🔘 Bouton SYNC cliqué!")
                         resultats = sync_tous_championnats()
                         logger.info(f"📊 Résultats sync: {resultats}")
                         total = sum(resultats.values())
                         if total == 0:
-                            st.warning("⚠️ 0 équipes synchronisées - API en révision")
+                            st.warning("⚠️ 0 équipes synchronisées - vérifiez la clé API")
                         else:
                             st.success(f"✅ {total} équipes synchronisées!")
+                            # Détail par championnat
+                            for champ, count in resultats.items():
+                                if count > 0:
+                                    st.caption(f"  • {champ}: {count} équipes")
                         st.rerun()
                 except Exception as e:
                     logger.error(f"❌ Erreur sync: {e}", exc_info=True)
                     st.error(f"❌ Erreur: {e}")
-            
-            st.caption("💡 Ajoutez manuellement les équipes pour le moment")
         
         with col_filtre:
             championnats = ["Tous"] + CHAMPIONNATS
