@@ -89,12 +89,24 @@ def faire_requete(endpoint: str, params: Dict[str, Any] = None) -> Optional[Dict
     try:
         logger.info(f"📡 Appel API: {endpoint}")
         response = requests.get(url, headers=headers, params=params, timeout=10)
+        
+        # Log la réponse même en cas d'erreur
+        if response.status_code != 200:
+            logger.warning(f"⚠️ Statut HTTP {response.status_code} pour {endpoint}")
+            try:
+                error_detail = response.json()
+                logger.debug(f"   Détail erreur API: {error_detail}")
+            except:
+                logger.debug(f"   Réponse brute: {response.text[:200]}")
+        
         response.raise_for_status()
-        logger.info(f"✅ Réponse API OK ({len(response.json().get('matches', []))} matchs)")
+        logger.info(f"✅ Réponse API OK")
         return response.json()
     except requests.exceptions.HTTPError as e:
         if e.response.status_code == 429:
             logger.warning("⚠️ Limite de requêtes API dépassée (10/min)")
+        elif e.response.status_code == 404:
+            logger.error(f"❌ Endpoint non trouvé (404): {endpoint}")
         else:
             logger.error(f"❌ Erreur API Football-Data: {e.response.status_code}")
         return None
