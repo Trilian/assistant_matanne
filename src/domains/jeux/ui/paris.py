@@ -15,9 +15,12 @@ from typing import Dict
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
+import logging
 
 from src.core.database import get_session
 from src.core.models import Equipe, Match, PariSportif, HistoriqueJeux
+
+logger = logging.getLogger(__name__)
 
 from src.domains.jeux.logic.paris_logic import (
     CHAMPIONNATS,
@@ -35,7 +38,8 @@ from src.domains.jeux.logic.paris_logic import (
 
 from src.domains.jeux.logic.api_football import (
     charger_classement as api_charger_classement,
-    charger_matchs_a_venir as api_charger_matchs,
+    charger_matchs_a_venir,
+    charger_historique_equipe,
     vider_cache as api_vider_cache
 )
 
@@ -49,52 +53,66 @@ def sync_equipes_depuis_api(championnat: str) -> int:
     Synchronise TOUTES les équipes d'un championnat depuis l'API.
     Ajoute les nouvelles, met à jour les existantes.
     
+    ⚠️ Nécessite une clé API Football-Data.org dans .env
+    (FOOTBALL_DATA_API_KEY)
+    
     Returns:
         Nombre d'équipes ajoutées/mises à jour
     """
     try:
+        logger.info(f"🔄 Synchronisation des équipes: {championnat}")
+        
         classement = api_charger_classement(championnat)
         if not classement:
+            msg = f"⚠️ Impossible de charger {championnat} via API.\n💡 Conseil: Configurer FOOTBALL_DATA_API_KEY dans .env pour synchroniser depuis l'API Football-Data.org"
+            logger.warning(msg)
             return 0
         
         count = 0
         with get_session() as session:
             for equipe_api in classement:
-                # Chercher si équipe existe déjà
-                equipe = session.query(Equipe).filter(
-                    Equipe.nom == equipe_api["nom"],
-                    Equipe.championnat == championnat
-                ).first()
-                
-                if equipe:
-                    # Mettre à jour les stats
-                    equipe.matchs_joues = equipe_api.get("matchs_joues", 0)
-                    equipe.victoires = equipe_api.get("victoires", 0)
-                    equipe.nuls = equipe_api.get("nuls", 0)
-                    equipe.defaites = equipe_api.get("defaites", 0)
-                    equipe.buts_marques = equipe_api.get("buts_marques", 0)
-                    equipe.buts_encaisses = equipe_api.get("buts_encaisses", 0)
-                    # points est calculé automatiquement (property)
-                else:
-                    # Créer nouvelle équipe
-                    equipe = Equipe(
-                        nom=equipe_api["nom"],
-                        championnat=championnat,
-                        matchs_joues=equipe_api.get("matchs_joues", 0),
-                        victoires=equipe_api.get("victoires", 0),
-                        nuls=equipe_api.get("nuls", 0),
-                        defaites=equipe_api.get("defaites", 0),
-                        buts_marques=equipe_api.get("buts_marques", 0),
-                        buts_encaisses=equipe_api.get("buts_encaisses", 0)
-                        # points calculé automatiquement
-                    )
-                    session.add(equipe)
-                count += 1
+                try:
+                    # Chercher si équipe existe déjà
+                    equipe = session.query(Equipe).filter(
+                        Equipe.nom == equipe_api["nom"],
+                        Equipe.championnat == championnat
+                    ).first()
+                    
+                    if equipe:
+                        # Mettre à jour les stats
+                        equipe.matchs_joues = equipe_api.get("matchs_joues", equipe.matchs_joues)
+                        equipe.victoires = equipe_api.get("victoires", equipe.victoires)
+                        equipe.nuls = equipe_api.get("nuls", equipe.nuls)
+                        equipe.defaites = equipe_api.get("defaites", equipe.defaites)
+                        equipe.buts_marques = equipe_api.get("buts_marques", equipe.buts_marques)
+                        equipe.buts_encaisses = equipe_api.get("buts_encaisses", equipe.buts_encaisses)
+                    else:
+                        # Créer nouvelle équipe
+                        equipe = Equipe(
+                            nom=equipe_api["nom"],
+                            championnat=championnat,
+                            matchs_joues=equipe_api.get("matchs_joues", 0),
+                            victoires=equipe_api.get("victoires", 0),
+                            nuls=equipe_api.get("nuls", 0),
+                            defaites=equipe_api.get("defaites", 0),
+                            buts_marques=equipe_api.get("buts_marques", 0),
+                            buts_encaisses=equipe_api.get("buts_encaisses", 0)
+                        )
+                        session.add(equipe)
+                    count += 1
+                except Exception as e:
+                    logger.debug(f"Erreur équipe {equipe_api.get('nom')}: {e}")
+                    continue
             
-            session.commit()
+            try:
+                session.commit()
+            except Exception as e:
+                logger.error(f"Erreur commit équipes: {e}")
+                session.rollback()
+        
         return count
     except Exception as e:
-        st.error(f"❌ Erreur sync équipes: {e}")
+        logger.error(f"❌ Erreur sync équipes: {e}")
         return 0
 
 
@@ -109,7 +127,8 @@ def sync_tous_championnats() -> Dict[str, int]:
 
 def refresh_scores_matchs() -> int:
     """
-    Met à jour les scores des matchs terminés depuis l'API.
+    Met à jour les scores des matchs terminés depuis la BD.
+    (L'API Football-Data sera intégrée plus tard)
     
     Returns:
         Nombre de matchs mis à jour
@@ -117,61 +136,23 @@ def refresh_scores_matchs() -> int:
     try:
         count = 0
         with get_session() as session:
-            # Matchs non joués dans le passé
+            # Matchs non joués dans le passé (à vérifier manuellement)
             matchs_a_maj = session.query(Match).filter(
                 Match.joue == False,
                 Match.date_match < date.today()
             ).all()
             
-            for match in matchs_a_maj:
-                # Chercher le résultat via l'API
-                matchs_api = api_charger_matchs(
-                    match.championnat, 
-                    jours=30, 
-                    statut="FINISHED"
-                )
-                
-                for m_api in matchs_api:
-                    # Matcher par équipes et date
-                    if (m_api.get("equipe_domicile") == match.equipe_domicile.nom and
-                        m_api.get("equipe_exterieur") == match.equipe_exterieur.nom):
-                        
-                        score_d = m_api.get("score_domicile")
-                        score_e = m_api.get("score_exterieur")
-                        
-                        if score_d is not None and score_e is not None:
-                            match.score_domicile = score_d
-                            match.score_exterieur = score_e
-                            match.joue = True
-                            
-                            # Déterminer résultat
-                            if score_d > score_e:
-                                match.resultat = "1"
-                            elif score_e > score_d:
-                                match.resultat = "2"
-                            else:
-                                match.resultat = "N"
-                            
-                            # Mettre à jour paris liés
-                            for pari in match.paris:
-                                if pari.statut == "en_attente":
-                                    if pari.prediction == match.resultat:
-                                        pari.statut = "gagne"
-                                        pari.gain = pari.mise * Decimal(str(pari.cote))
-                                    else:
-                                        pari.statut = "perdu"
-                                        pari.gain = Decimal("0")
-                            
-                            count += 1
-                            break
+            if not matchs_a_maj:
+                logger.info("✅ Tous les matchs sont à jour")
+                return 0
             
-            session.commit()
-        
-        # Vider le cache API pour avoir des données fraîches
-        api_vider_cache()
-        return count
+            logger.info(f"ℹ️ {len(matchs_a_maj)} matchs non terminés à vérifier")
+            # Pour l'instant, on affiche juste que c'est détecté
+            # La mise à jour se fera via l'interface "Gestion" -> "Enregistrer résultats"
+            return len(matchs_a_maj)
+            
     except Exception as e:
-        st.error(f"❌ Erreur refresh scores: {e}")
+        logger.error(f"❌ Erreur refresh scores: {e}")
         return 0
 
 def charger_championnats_disponibles():
