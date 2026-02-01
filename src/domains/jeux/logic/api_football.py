@@ -60,8 +60,9 @@ def obtenir_cle_api() -> Optional[str]:
     # Essayer depuis les paramètres
     try:
         from src.core.config import obtenir_parametres
-        return obtenir_parametres().get("FOOTBALL_DATA_API_KEY")
-    except:
+        return obtenir_parametres().FOOTBALL_DATA_API_KEY
+    except Exception as e:
+        logger.debug(f"Erreur récupération clé API: {e}")
         return None
 
 
