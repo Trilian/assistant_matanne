@@ -986,8 +986,8 @@ def render_ajouter_manuel():
                     }
                     
                     # Créer la recette avec session BD
-                    from src.core.database import get_db_context
-                    with get_db_context() as db:
+                    from src.core.database import obtenir_contexte_db
+                    with obtenir_contexte_db() as db:
                         recette = service.create_complete(data, db=db)
                     
                     # Réinitialiser le formulaire
@@ -1120,8 +1120,8 @@ def render_generer_ia():
                                 if st.button("➕ Ajouter aux recettes", key=f"add_variant_{idx}", use_container_width=True):
                                     try:
                                         # Créer la recette avec gestion de session
-                                        from src.core.database import get_db_context
-                                        with get_db_context() as db:
+                                        from src.core.database import obtenir_contexte_db
+                                        with obtenir_contexte_db() as db:
                                             recette_obj = service.create_complete({
                                                 "nom": suggestion.nom,
                                                 "description": suggestion.description,
@@ -1287,8 +1287,8 @@ def render_generer_ia():
                                         }
                                         
                                         # Créer la recette avec session BD
-                                        from src.core.database import get_db_context
-                                        with get_db_context() as db:
+                                        from src.core.database import obtenir_contexte_db
+                                        with obtenir_contexte_db() as db:
                                             recette = service.create_complete(data, db=db)
                                         st.success(f"✅ '{recette.nom}' ajoutée à vos recettes!")
                                         st.toast(f"🎉 {recette.nom} sauvegardée!", icon="✅")

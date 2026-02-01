@@ -108,6 +108,12 @@ class RecetteInput(BaseModel):
     portions: int = Field(
         default=4, ge=1, le=50, description="Nombre de portions"
     )
+    difficulte: str = Field(
+        default="moyen", description="Niveau de difficulté"
+    )
+    type_repas: str = Field(
+        ..., description="Type de repas"
+    )
     ingredients: list[IngredientInput] = Field(
         ..., min_length=1, max_length=50, description="Liste des ingrédients"
     )
@@ -132,6 +138,28 @@ class RecetteInput(BaseModel):
         if len(cleaned) < 2:
             raise ValueError("Le nom doit contenir au moins 2 caractères")
         return cleaned
+
+    @field_validator("difficulte")
+    @classmethod
+    def valider_difficulte(cls, v: str) -> str:
+        """Valide la difficulté"""
+        difficultes_valides = {"facile", "moyen", "difficile"}
+        if v.lower() not in difficultes_valides:
+            raise ValueError(
+                f"Difficulté invalide. Doit être parmi: {', '.join(difficultes_valides)}"
+            )
+        return v.lower()
+
+    @field_validator("type_repas")
+    @classmethod
+    def valider_type_repas(cls, v: str) -> str:
+        """Valide le type de repas"""
+        types_valides = {"petit_déjeuner", "déjeuner", "dîner", "goûter", "apéritif", "dessert"}
+        if v.lower() not in types_valides:
+            raise ValueError(
+                f"Type de repas invalide. Doit être parmi: {', '.join(types_valides)}"
+            )
+        return v.lower()
 
     @field_validator("saison")
     @classmethod

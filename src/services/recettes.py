@@ -224,7 +224,7 @@ class RecetteService(BaseService[Recette], BaseAIService, RecipeAIMixin):
             Recette créée avec relations
         """
         from datetime import datetime
-        from src.core.validation import IngredientInput, EtapeInput
+        from src.core.validators_pydantic import IngredientInput, EtapeInput
         
         # Conversion des ingrédients en IngredientInput objects si ce sont des dicts
         ingredients_data = data.get("ingredients") or []
@@ -234,7 +234,6 @@ class RecetteService(BaseService[Recette], BaseAIService, RecipeAIMixin):
                     nom=ing.get("nom", ""),
                     quantite=ing.get("quantite", 1.0),
                     unite=ing.get("unite", ""),
-                    optionnel=ing.get("optionnel", False)
                 )
                 for ing in ingredients_data
             ]
