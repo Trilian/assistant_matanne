@@ -26,13 +26,13 @@ CHAMP_MAPPING = {
     "Ligue 1": "FL1",
     "Premier League": "PL",
     "La Liga": "SA",
-    "Serie A": "SA",
+    "Serie A": "IT",
     "Bundesliga": "BL1",
     "Champions League": "CL",
     "Europa League": "EL"
 }
 
-# IDs des compétitions Football-Data
+# IDs des compétitions Football-Data (API v4)
 COMP_IDS = {
     "FL1": 445,      # Ligue 1
     "PL": 39,        # Premier League
@@ -40,7 +40,7 @@ COMP_IDS = {
     "IT": 135,       # Serie A (Italy)
     "BL1": 25,       # Bundesliga
     "CL": 8,         # Champions League
-    "EL": 19         # Europa League
+    "EL": 61         # Europa League
 }
 
 
