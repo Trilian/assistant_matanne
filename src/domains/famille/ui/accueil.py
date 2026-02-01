@@ -303,9 +303,7 @@ def app():
             )
             
             fig.update_layout(height=400, hovermode="closest")
-            st.plotly_chart(fig, use_container_width=True)
-            
-            # Liste détaillée
+            st.plotly_chart(fig, width="stretch", key="family_activities_timeline")
             col1, col2 = st.columns([2, 1])
             
             with col1:
@@ -372,9 +370,7 @@ def app():
                     title="Répartition budget (7 jours)"
                 )
                 
-                st.plotly_chart(fig, use_container_width=True)
-                
-                total = budget_semaine.get("TOTAL", 0)
+                st.plotly_chart(fig, width="stretch", key="family_budget_pie")
                 st.metric("👧 Total", f"{total:.2f}€")
             
             else:

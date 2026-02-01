@@ -252,7 +252,7 @@ def app():
                         height=400,
                         hovermode="x unified"
                     )
-                    st.plotly_chart(fig1, use_container_width=True)
+                    st.plotly_chart(fig1, width="stretch", key="activities_budget_timeline")
                     
                     # Graphique 2: Par type d'activité
                     type_budget = df.groupby("type")["cout_estime"].sum().reset_index()
@@ -268,7 +268,7 @@ def app():
                         yaxis_title="Budget (€)",
                         height=400
                     )
-                    st.plotly_chart(fig2, use_container_width=True)
+                    st.plotly_chart(fig2, width="stretch", key="activities_budget_by_type")
                 else:
                     st.info("Aucune activité sur 30 jours")
         

@@ -491,7 +491,7 @@ def app():
                 title="Progression des projets (%)",
                 height=400
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch", key="projects_progress_chart")
             
             # Tableau
             st.dataframe(

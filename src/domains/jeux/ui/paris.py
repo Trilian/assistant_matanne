@@ -685,9 +685,7 @@ def afficher_prediction_match(match: dict):
                 showlegend=False,
                 yaxis=dict(range=[0, 100])
             )
-            st.plotly_chart(fig, width="stretch")
-        
-        with col_over:
+            st.plotly_chart(fig, width="stretch", key="paris_proba_chart")
             # Over/Under et BTTS
             stats = analyse.get("stats", {})
             moy_buts = stats.get("moy_buts_match", 2.5)
@@ -856,9 +854,7 @@ def afficher_dashboard_performance():
                          title="📈 Évolution du profit cumulé")
             fig.update_layout(height=300)
             fig.add_hline(y=0, line_dash="dash", line_color="gray")
-            st.plotly_chart(fig, width="stretch")
-    
-    # Liste des derniers paris
+            st.plotly_chart(fig, width="stretch", key="paris_profit_chart")
     st.subheader("📋 Derniers paris")
     
     for pari in paris[:10]:

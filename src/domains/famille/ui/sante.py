@@ -363,7 +363,7 @@ def app():
                 height=400,
                 hovermode='x unified'
             )
-            st.plotly_chart(fig1, use_container_width=True)
+            st.plotly_chart(fig1, width="stretch", key="health_calories_duration")
             
             # Graphique 2: Énergie et moral
             fig2 = go.Figure()
@@ -389,7 +389,7 @@ def app():
                 height=400,
                 hovermode='x'
             )
-            st.plotly_chart(fig2, use_container_width=True)
+            st.plotly_chart(fig2, width="stretch", key="health_energy_mood")
     
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TAB 4: NUTRITION

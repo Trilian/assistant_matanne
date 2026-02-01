@@ -695,7 +695,7 @@ def render_budget_dashboard():
                     hole=0.4,
                 )
                 fig_pie.update_traces(textposition='inside', textinfo='percent+label')
-                st.plotly_chart(fig_pie, use_container_width=True)
+                st.plotly_chart(fig_pie, width="stretch", key="budget_expenses_pie")
             
             with col_chart2:
                 # Barres budget vs dépenses
@@ -717,7 +717,7 @@ def render_budget_dashboard():
                     barmode='group',
                     xaxis_tickangle=-45
                 )
-                st.plotly_chart(fig_bar, use_container_width=True)
+                st.plotly_chart(fig_bar, width="stretch", key="budget_vs_expenses_bar")
         
         # Liste des dépenses récentes
         st.markdown("### 📊 Dernières dépenses")
@@ -818,7 +818,7 @@ def render_budget_dashboard():
                 hovermode='x unified',
             )
             
-            st.plotly_chart(fig_trend, use_container_width=True)
+            st.plotly_chart(fig_trend, width="stretch", key="budget_expenses_trend")
         
         # Prévisions
         st.markdown("### [FORECAST] Prévisions mois prochain")

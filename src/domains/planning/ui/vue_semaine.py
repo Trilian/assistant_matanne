@@ -66,7 +66,7 @@ def afficher_graphique_charge_semaine(jours: dict) -> None:
         showlegend=False,
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch", key="planning_charge_daily")
 
 
 def afficher_graphique_repartition_activites(stats: dict) -> None:
@@ -83,7 +83,7 @@ def afficher_graphique_repartition_activites(stats: dict) -> None:
 
     fig.update_layout(title="🎯 Répartition des événements", height=400)
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch", key="planning_repartition_events")
 
 
 def afficher_timeline_jour(jour_complet: dict, jour: date) -> None:

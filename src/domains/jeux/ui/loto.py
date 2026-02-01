@@ -409,7 +409,7 @@ def afficher_statistiques_frequences(tirages: list):
         margin=dict(l=20, r=20, t=20, b=40)
     )
     
-    st.plotly_chart(fig, width="stretch")
+    st.plotly_chart(fig, width="stretch", key="loto_freq_chart")
     
     # Avertissement
     st.warning(
@@ -657,14 +657,7 @@ def afficher_simulation():
         )
         fig.add_hline(y=0, line_dash="dash", line_color="gray")
         
-        st.plotly_chart(fig, width="stretch")
-        
-        # Conclusion
-        st.info(
-            "💡 **Conclusion**: Les résultats varient aléatoirement d'une simulation à l'autre. "
-            "Sur le long terme, aucune stratégie ne bat la probabilité mathématique. "
-            "Le Loto reste un jeu de hasard avec une espérance négative."
-        )
+        st.plotly_chart(fig, width="stretch", key="loto_roi_chart")
 
 
 def afficher_gestion_tirages():
