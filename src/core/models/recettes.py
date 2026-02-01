@@ -134,9 +134,13 @@ class Recette(Base):
     # Flags - Tags système
     est_rapide: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     est_equilibre: Mapped[bool] = mapped_column(Boolean, default=False)
+    est_vegetarien: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     compatible_bebe: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     compatible_batch: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     congelable: Mapped[bool] = mapped_column(Boolean, default=False)
+    
+    # Types de protéines (pour équilibre semaine)
+    type_proteines: Mapped[str | None] = mapped_column(String(100))  # poisson, viande, volaille, vegetarien
 
     # Bio & Local
     est_bio: Mapped[bool] = mapped_column(Boolean, default=False, index=True)

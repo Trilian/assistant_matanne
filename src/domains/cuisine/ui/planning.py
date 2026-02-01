@@ -42,7 +42,7 @@ def app():
     st.set_page_config(page_title="Planning", layout="wide")
     st.title("📅 Planning Hebdomadaire")
     
-    tabs = st.tabs(["🍽️ Planning Actif", "🤖 Générer avec IA", "📚 Historique"])
+    tabs = st.tabs(["🍽️ Planning Actif", "🤖 Générer avec IA", "⚖️ Créateur Équilibré", "📚 Historique"])
     
     with tabs[0]:
         render_planning()
@@ -51,6 +51,9 @@ def app():
         render_generer()
     
     with tabs[2]:
+        render_createur_equilibre()
+    
+    with tabs[3]:
         render_historique()
 
 
@@ -416,7 +419,317 @@ def render_generer():
 
 
 # ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
-# SECTION 3: HISTORIQUE PLANNINGS
+# SECTION 3: CRÉATEUR ÉQUILIBRÉ - CHOIX INTELLIGENT DE RECETTES
+# ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
+
+def render_createur_equilibre():
+    """Workflow progressif: paramètres → suggestions → validation"""
+    service = get_planning_service()
+    
+    if service is None:
+        st.error("❌ Service planning indisponible")
+        return
+    
+    st.subheader("⚖️ Créateur Équilibré - Avec Suggestions Intelligentes")
+    st.markdown("""
+    Construis une semaine équilibrée en poisson, viande, végé et féculents.
+    Tu choisis les recettes entre nos suggestions.
+    """)
+    
+    # Initialiser session state
+    if "equilibre_step" not in st.session_state:
+        st.session_state.equilibre_step = 1
+        st.session_state.equilibre_params = {
+            "poisson_jours": ["lundi", "jeudi"],
+            "viande_rouge_jours": ["mardi"],
+            "vegetarien_jours": ["mercredi"],
+            "pates_riz_count": 3,
+            "ingredients_exclus": [],
+        }
+        st.session_state.equilibre_recettes_selection = {}
+        st.session_state.equilibre_suggestions = []
+        st.session_state.equilibre_semaine_debut = date.today() + timedelta(days=(7 - date.today().weekday()) % 7)
+    
+    # ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
+    # ÉTAPE 1: PARAMÈTRES D'ÉQUILIBRE
+    # ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
+    
+    if st.session_state.equilibre_step == 1:
+        st.markdown("### 📋 Étape 1: Paramètres d'Équilibre")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("#### 🐟 Protéines par jour")
+            
+            poisson_jours = st.multiselect(
+                "Jours avec du poisson",
+                ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"],
+                default=st.session_state.equilibre_params["poisson_jours"],
+                key="ms_poisson_eq",
+            )
+            st.session_state.equilibre_params["poisson_jours"] = poisson_jours
+            
+            viande_jours = st.multiselect(
+                "Jours avec viande rouge",
+                ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"],
+                default=st.session_state.equilibre_params["viande_rouge_jours"],
+                key="ms_viande_eq",
+            )
+            st.session_state.equilibre_params["viande_rouge_jours"] = viande_jours
+            
+            vege_jours = st.multiselect(
+                "Jours végétariens",
+                ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"],
+                default=st.session_state.equilibre_params["vegetarien_jours"],
+                key="ms_vege_eq",
+            )
+            st.session_state.equilibre_params["vegetarien_jours"] = vege_jours
+        
+        with col2:
+            st.markdown("#### 🍝 Féculents & Restrictions")
+            
+            pates_count = st.slider(
+                "Nombre de fois pâtes/riz par semaine",
+                1, 6, 
+                value=st.session_state.equilibre_params["pates_riz_count"],
+                key="slider_pates_eq",
+            )
+            st.session_state.equilibre_params["pates_riz_count"] = pates_count
+            
+            ingredients_txt = st.text_area(
+                "Ingrédients à éviter (allergies)",
+                value=", ".join(st.session_state.equilibre_params["ingredients_exclus"]),
+                height=60,
+                placeholder="Ex: miel, cacahuète, ail",
+                key="ta_exclus_eq",
+            )
+            st.session_state.equilibre_params["ingredients_exclus"] = [
+                i.strip() for i in ingredients_txt.split(",") if i.strip()
+            ]
+        
+        st.markdown("---")
+        
+        col1, col2 = st.columns([2, 1])
+        with col1:
+            semaine_debut = st.date_input(
+                "Semaine à partir du (doit être un lundi)",
+                value=st.session_state.equilibre_semaine_debut,
+                key="di_semaine_eq",
+            )
+            if semaine_debut.weekday() != 0:
+                st.warning("⚠️ Veuillez sélectionner un lundi")
+                semaine_debut = semaine_debut - timedelta(days=semaine_debut.weekday())
+            st.session_state.equilibre_semaine_debut = semaine_debut
+        
+        # Vérifier équilibre
+        st.markdown("---")
+        st.markdown("#### 📊 Récapitulatif")
+        
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("🐟 Poisson", len(poisson_jours) if poisson_jours else "—")
+        with col2:
+            st.metric("🥩 Viande rouge", len(viande_jours) if viande_jours else "—")
+        with col3:
+            st.metric("🥬 Végétarien", len(vege_jours) if vege_jours else "—")
+        with col4:
+            st.metric("🍝 Pâtes/Riz", f"{pates_count}×")
+        
+        if st.button("📊 Voir suggestions", use_container_width=True, type="primary"):
+            st.session_state.equilibre_step = 2
+            st.rerun()
+    
+    # ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
+    # ÉTAPE 2: REVIEW DES SUGGESTIONS
+    # ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
+    
+    elif st.session_state.equilibre_step == 2:
+        st.markdown("### 🍽️ Étape 2: Choisir les Recettes")
+        st.markdown("Sélectionne une recette pour chaque jour parmi nos suggestions équilibrées.")
+        
+        # Charger les suggestions si pas déjà fait
+        if not st.session_state.equilibre_suggestions:
+            with st.spinner("🤖 Génération des suggestions..."):
+                try:
+                    from src.services.planning import ParametresEquilibre
+                    
+                    params = ParametresEquilibre(
+                        poisson_jours=st.session_state.equilibre_params["poisson_jours"],
+                        viande_rouge_jours=st.session_state.equilibre_params["viande_rouge_jours"],
+                        vegetarien_jours=st.session_state.equilibre_params["vegetarien_jours"],
+                        pates_riz_count=st.session_state.equilibre_params["pates_riz_count"],
+                        ingredients_exclus=st.session_state.equilibre_params["ingredients_exclus"],
+                    )
+                    
+                    suggestions = service.suggerer_recettes_equilibrees(
+                        semaine_debut=st.session_state.equilibre_semaine_debut,
+                        parametres=params,
+                    )
+                    st.session_state.equilibre_suggestions = suggestions or []
+                    
+                    if not suggestions:
+                        st.error("❌ Pas de suggestions générées")
+                        return
+                    
+                except Exception as e:
+                    st.error(f"❌ Erreur: {str(e)}")
+                    logger.error(f"Erreur suggestions: {e}")
+                    return
+        
+        # Afficher statut équilibre
+        if st.session_state.equilibre_suggestions:
+            stats = {
+                "🐟 Poisson": 0,
+                "🥩 Viande rouge": 0,
+                "🍗 Volaille": 0,
+                "🥬 Végétarien": 0,
+            }
+            
+            for jour_info in st.session_state.equilibre_suggestions:
+                raison = jour_info.get("raison_jour", "")
+                if "poisson" in raison.lower():
+                    stats["🐟 Poisson"] += 1
+                elif "viande" in raison.lower():
+                    stats["🥩 Viande rouge"] += 1
+                elif "végé" in raison.lower():
+                    stats["🥬 Végétarien"] += 1
+                else:
+                    stats["🍗 Volaille"] += 1
+            
+            cols = st.columns(4)
+            for idx, (label, count) in enumerate(stats.items()):
+                with cols[idx]:
+                    st.metric(label, f"{count}×" if count > 0 else "—")
+        
+        st.markdown("---")
+        
+        # Afficher chaque jour avec ses suggestions
+        for jour_info in st.session_state.equilibre_suggestions:
+            jour_name = jour_info["jour"]
+            jour_idx = jour_info["jour_index"]
+            raison = jour_info["raison_jour"]
+            suggestions_jour = jour_info["suggestions"]
+            
+            with st.container(border=True):
+                col1, col2 = st.columns([1, 4])
+                with col1:
+                    st.markdown(f"### {jour_name}")
+                with col2:
+                    st.markdown(f"**{raison}** · {jour_info['date']}")
+                
+                if suggestions_jour:
+                    jour_key = f"jour_{jour_idx}"
+                    
+                    # Créer les radio buttons
+                    options_text = []
+                    options_ids = []
+                    
+                    for sugg in suggestions_jour:
+                        texte = f"🍽️ **{sugg['nom']}** ({sugg['temps_total']}min)"
+                        options_text.append(texte)
+                        options_ids.append(sugg["id"])
+                    
+                    # Radio buttons
+                    choix_idx = st.radio(
+                        "Choisir une recette:",
+                        range(len(options_text)),
+                        format_func=lambda i: options_text[i],
+                        key=f"radio_{jour_key}",
+                        horizontal=False,
+                    )
+                    
+                    st.session_state.equilibre_recettes_selection[jour_key] = options_ids[choix_idx]
+                    
+                    # Afficher description
+                    recette_sel = suggestions_jour[choix_idx]
+                    with st.expander(f"📖 Détails"):
+                        st.write(recette_sel["description"])
+                        st.caption(f"🥘 Type: {recette_sel.get('type_proteines', 'mixte')} · ⏱️ {recette_sel['temps_total']} min")
+                else:
+                    st.warning(f"❌ Pas de suggestions pour {jour_name}")
+        
+        st.markdown("---")
+        
+        # Boutons navigation
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            if st.button("◀️ Retour", key="btn_etape1_back", use_container_width=True):
+                st.session_state.equilibre_step = 1
+                st.rerun()
+        
+        with col3:
+            if len(st.session_state.equilibre_recettes_selection) == 7:
+                if st.button("✅ Récapitulatif", key="btn_etape3", use_container_width=True, type="primary"):
+                    st.session_state.equilibre_step = 3
+                    st.rerun()
+            else:
+                st.button(f"⏳ Choisir une recette par jour ({len(st.session_state.equilibre_recettes_selection)}/7)", 
+                         key="btn_etape3_disabled", disabled=True, use_container_width=True)
+    
+    # ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
+    # ÉTAPE 3: RÉCAPITULATIF & VALIDATION
+    # ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
+    
+    elif st.session_state.equilibre_step == 3:
+        st.markdown("### ✨ Étape 3: Récapitulatif & Validation")
+        
+        # Créer le planning avec les choix
+        with st.spinner("💾 Création du planning..."):
+            try:
+                planning = service.creer_planning_avec_choix(
+                    semaine_debut=st.session_state.equilibre_semaine_debut,
+                    recettes_selection=st.session_state.equilibre_recettes_selection,
+                )
+                
+                if planning:
+                    st.success(f"✅ Planning créé: **{planning.nom}**")
+                else:
+                    st.error("❌ Erreur lors de la création du planning")
+                    return
+            except Exception as e:
+                st.error(f"❌ Erreur: {str(e)}")
+                logger.error(f"Erreur création planning: {e}")
+                return
+        
+        # Afficher le planning créé
+        st.markdown("#### 📅 Votre Semaine Équilibrée")
+        
+        for jour_info in st.session_state.equilibre_suggestions:
+            jour_name = jour_info["jour"]
+            jour_idx = jour_info["jour_index"]
+            jour_key = f"jour_{jour_idx}"
+            raison = jour_info["raison_jour"]
+            
+            recette_id = st.session_state.equilibre_recettes_selection.get(jour_key)
+            if recette_id:
+                for sugg in jour_info["suggestions"]:
+                    if sugg["id"] == recette_id:
+                        col1, col2 = st.columns([3, 1])
+                        with col1:
+                            st.markdown(f"**{jour_name}** · {raison} · 🍽️ {sugg['nom']}")
+                        with col2:
+                            st.caption(f"⏱️ {sugg['temps_total']}min")
+                        break
+        
+        st.markdown("---")
+        st.success("🎉 Planning sauvegardé! Retrouvez-le dans l'onglet 'Planning Actif'")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("◀️ Retour", use_container_width=True):
+                st.session_state.equilibre_step = 2
+                st.rerun()
+        with col2:
+            if st.button("➕ Créer un autre planning", use_container_width=True, type="primary"):
+                # Reset
+                st.session_state.equilibre_step = 1
+                st.session_state.equilibre_recettes_selection = {}
+                st.session_state.equilibre_suggestions = []
+                st.rerun()
+
+# ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
+# SECTION 4: HISTORIQUE PLANNINGS
 # ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 def render_historique():

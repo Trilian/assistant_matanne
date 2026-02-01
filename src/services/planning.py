@@ -36,6 +36,23 @@ class JourPlanning(BaseModel):
     diner: str = Field(..., min_length=3)
 
 
+class SuggestionRecettesDay(BaseModel):
+    """Suggestions de recettes pour un jour (3 options)"""
+    jour_name: str  # Lundi, Mardi, etc.
+    type_repas: str  # déjeuner, dîner
+    suggestions: list[dict] = Field(..., min_items=1, max_items=3)  # [{nom, description, type_proteines}]
+
+
+class ParametresEquilibre(BaseModel):
+    """Paramètres pour l'équilibre de la semaine"""
+    poisson_jours: list[str] = Field(default_factory=lambda: ["lundi", "jeudi"])  # Jours avec poisson
+    viande_rouge_jours: list[str] = Field(default_factory=lambda: ["mardi"])  # Jours avec viande rouge
+    vegetarien_jours: list[str] = Field(default_factory=lambda: ["mercredi"])  # Jours végé
+    pates_riz_count: int = Field(default=3, ge=1, le=5)  # Combien de fois pâtes/riz
+    ingredients_exclus: list[str] = Field(default_factory=list)  # Allergies, phobies
+    preferences_extras: dict = Field(default_factory=dict)  # Autres contraintes
+
+
 # ═══════════════════════════════════════════════════════════
 # SERVICE PLANNING UNIFIÉ
 # ═══════════════════════════════════════════════════════════
@@ -167,6 +184,186 @@ class PlanningService(BaseService[Planning], BaseAIService, PlanningAIMixin):
 
         logger.info(f"✅ Retrieved planning {planning_id} with {len(repas_par_jour)} days")
         return result
+
+    # ═══════════════════════════════════════════════════════════
+    # SECTION 2: SUGGESTIONS ÉQUILIBRÉES (NOUVEAU)
+    # ═══════════════════════════════════════════════════════════
+
+    @with_error_handling(default_return=[])
+    @with_db_session
+    def suggerer_recettes_equilibrees(
+        self,
+        semaine_debut: date,
+        parametres: ParametresEquilibre,
+        db: Session | None = None,
+    ) -> list[dict]:
+        """Suggère des recettes équilibrées pour chaque jour.
+        
+        Retourne 3 options par jour avec score d'équilibre.
+        
+        Args:
+            semaine_debut: Date de début de semaine
+            parametres: Contraintes d'équilibre
+            db: Database session
+            
+        Returns:
+            List de dicts {jour, type_repas, suggestions: [{nom, description, raison}]}
+        """
+        from src.core.models import Recette
+        
+        jours_semaine = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
+        suggestions_globales = []
+        
+        for idx, jour_name in enumerate(jours_semaine):
+            jour_lower = jour_name.lower()
+            date_jour = semaine_debut + timedelta(days=idx)
+            
+            # Déterminer le type de protéine pour ce jour
+            type_proteine = "autre"
+            raison_jour = ""
+            
+            if jour_lower in parametres.poisson_jours:
+                type_proteine = "poisson"
+                raison_jour = "🐟 Jour poisson"
+            elif jour_lower in parametres.viande_rouge_jours:
+                type_proteine = "viande_rouge"
+                raison_jour = "🥩 Jour viande rouge"
+            elif jour_lower in parametres.vegetarien_jours:
+                type_proteine = "vegetarien"
+                raison_jour = "🥬 Jour végétarien"
+            else:
+                type_proteine = "volaille"
+                raison_jour = "🍗 Jour volaille"
+            
+            # Requête base pour récupérer 3 recettes de ce type
+            query = db.query(Recette).filter(Recette.est_equilibre == True)
+            
+            # Filtrer par type de protéine
+            if type_proteine == "poisson":
+                query = query.filter(Recette.type_proteines.ilike("%poisson%"))
+            elif type_proteine == "viande_rouge":
+                query = query.filter(Recette.type_proteines.ilike("%viande%"))
+            elif type_proteine == "vegetarien":
+                query = query.filter(Recette.est_vegetarien == True)
+            
+            # Exclure les ingrédients interdits
+            for ingredient_exc in parametres.ingredients_exclus:
+                # Filtre basique (devrait utiliser une vraie relation en prod)
+                query = query.filter(~Recette.description.ilike(f"%{ingredient_exc}%"))
+            
+            # Récupérer 3 suggestions
+            recettes = query.limit(3).all()
+            
+            suggestions_jour = []
+            for recette in recettes:
+                suggestions_jour.append({
+                    "id": recette.id,
+                    "nom": recette.nom,
+                    "description": recette.description,
+                    "temps_total": (recette.temps_preparation or 0) + (recette.temps_cuisson or 0),
+                    "type_repas": "déjeuner" if idx % 2 == 0 else "dîner",
+                    "raison": raison_jour,
+                    "type_proteines": recette.type_proteines,
+                })
+            
+            # Si pas assez, ajouter des recettes équilibrées quelconques
+            if len(suggestions_jour) < 3:
+                autres = db.query(Recette).filter(
+                    Recette.id.notin_([s["id"] for s in suggestions_jour])
+                ).limit(3 - len(suggestions_jour)).all()
+                
+                for recette in autres:
+                    suggestions_jour.append({
+                        "id": recette.id,
+                        "nom": recette.nom,
+                        "description": recette.description,
+                        "temps_total": (recette.temps_preparation or 0) + (recette.temps_cuisson or 0),
+                        "type_repas": "déjeuner" if idx % 2 == 0 else "dîner",
+                        "raison": "📝 Alternative équilibrée",
+                        "type_proteines": getattr(recette, 'type_proteines', 'mixte'),
+                    })
+            
+            suggestions_globales.append({
+                "jour": jour_name,
+                "jour_index": idx,
+                "date": date_jour.isoformat(),
+                "raison_jour": raison_jour,
+                "suggestions": suggestions_jour[:3],
+            })
+        
+        logger.info(f"✅ Generated {len(suggestions_globales)} days of balanced suggestions")
+        return suggestions_globales
+
+    # ═══════════════════════════════════════════════════════════
+    # SECTION 3: GÉNÉRATION AVEC CHOIX (NOUVEAU)
+    # ═══════════════════════════════════════════════════════════
+
+    @with_error_handling(default_return=None)
+    @with_db_session
+    def creer_planning_avec_choix(
+        self,
+        semaine_debut: date,
+        recettes_selection: dict[str, int],  # {jour_index: recette_id}
+        enfants_adaptes: list[int] | None = None,
+        db: Session | None = None,
+    ) -> Planning | None:
+        """Crée un planning à partir des choix de l'utilisateur.
+        
+        Args:
+            semaine_debut: Date de début
+            recettes_selection: Mapping jour → recette_id choisi
+            enfants_adaptes: IDs des enfants pour adapter (Jules, etc.)
+            db: Database session
+            
+        Returns:
+            Planning créé avec tous les repas
+        """
+        from src.core.models import Recette
+        
+        semaine_fin = semaine_debut + timedelta(days=6)
+        
+        planning = Planning(
+            nom=f"Planning {semaine_debut.strftime('%d/%m')}",
+            semaine_debut=semaine_debut,
+            semaine_fin=semaine_fin,
+            actif=True,
+            genere_par_ia=False,
+        )
+        db.add(planning)
+        db.flush()
+        
+        jours_semaine = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
+        
+        for idx, jour_name in enumerate(jours_semaine):
+            date_jour = semaine_debut + timedelta(days=idx)
+            jour_key = f"jour_{idx}"
+            
+            # Récupérer la recette sélectionnée
+            recette_id = recettes_selection.get(jour_key)
+            if not recette_id:
+                logger.warning(f"⚠️ No recipe selected for {jour_name}")
+                continue
+            
+            recette = db.query(Recette).filter(Recette.id == recette_id).first()
+            if not recette:
+                logger.warning(f"⚠️ Recipe {recette_id} not found for {jour_name}")
+                continue
+            
+            # Créer repas (on crée juste le dîner pour simplifier en départ)
+            repas = Repas(
+                planning_id=planning.id,
+                recette_id=recette.id,
+                date_repas=date_jour,
+                type_repas="dîner",
+                notes=f"Repas du {jour_name}",
+            )
+            db.add(repas)
+        
+        db.commit()
+        db.refresh(planning)
+        
+        logger.info(f"✅ Created custom planning for {semaine_debut}")
+        return planning
 
     # ═══════════════════════════════════════════════════════════
     # SECTION 2: GÉNÉRATION IA (REFACTORED)
