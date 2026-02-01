@@ -236,6 +236,10 @@ def afficher_sidebar():
                 "🗓️ Calendrier": "planning.calendrier",
                 "🌐 Vue Ensemble": "planning.vue_ensemble",
             },
+            "🎲 Jeux": {
+                "⚽ Paris Sportifs": "jeux.paris",
+                "🎰 Loto": "jeux.loto",
+            },
             "🔧 Outils": {
                 "📱 Code-barres": "barcode",
                 "📊 Rapports": "rapports",

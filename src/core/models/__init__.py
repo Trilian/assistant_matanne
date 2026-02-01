@@ -107,6 +107,22 @@ from .nouveaux import (
     SyncDirection,
 )
 
+# Jeux (Paris sportifs & Loto)
+from .jeux import (
+    Equipe,
+    Match,
+    PariSportif,
+    TirageLoto,
+    GrilleLoto,
+    StatistiquesLoto,
+    HistoriqueJeux,
+    # Enums
+    ResultatMatchEnum,
+    StatutPariEnum,
+    TypePariEnum,
+    ChampionnatEnum,
+)
+
 
 # Export explicite de tous les symboles
 __all__ = [
@@ -173,4 +189,16 @@ __all__ = [
     "TypeAlerteMeteo",
     "CalendarProvider",
     "SyncDirection",
+    # Jeux
+    "Equipe",
+    "Match",
+    "PariSportif",
+    "TirageLoto",
+    "GrilleLoto",
+    "StatistiquesLoto",
+    "HistoriqueJeux",
+    "ResultatMatchEnum",
+    "StatutPariEnum",
+    "TypePariEnum",
+    "ChampionnatEnum",
 ]

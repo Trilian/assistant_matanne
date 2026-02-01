@@ -215,6 +215,9 @@ class OptimizedRouter:
         # [OK] DOMAINE PLANNING
         "planning.calendrier": {"path": "src.domains.planning.ui.calendrier", "type": "simple"},
         "planning.vue_ensemble": {"path": "src.domains.planning.ui.vue_ensemble", "type": "simple"},
+        # [OK] DOMAINE JEUX (Paris sportifs & Loto)
+        "jeux.paris": {"path": "src.domains.jeux.ui.paris", "type": "simple"},
+        "jeux.loto": {"path": "src.domains.jeux.ui.loto", "type": "simple"},
         # Paramètres
         "parametres": {"path": "src.domains.shared.ui.parametres", "type": "simple"},
     }
