@@ -356,30 +356,7 @@ def afficher_footer():
 def main():
     """Fonction principale"""
     try:
-        # ✅ VÉRIFICATION AUTHENTIFICATION EN PREMIER
-        from src.services.auth import get_auth_service, render_login_form
-        
-        auth = get_auth_service()
-        user = auth.get_current_user()
-        
-        # Si pas authentifié, afficher le formulaire de connexion
-        if not user:
-            col_empty1, col_form, col_empty2 = st.columns([1, 2, 1])
-            with col_form:
-                st.markdown("---")
-                st.markdown("### 🔐 Authentification requise")
-                st.info("📌 Mode démo activé - Utilisez:\n\n"
-                        "👤 **Email:** anne@matanne.fr\n\n"
-                        "🔑 **Mot de passe:** password123\n\n"
-                        "*(Aussi disponible: demo@test.fr / password123)*")
-                st.markdown("---")
-                render_login_form(redirect_on_success=True)
-            return
-        
-        # ✅ UTILISATEUR CONNECTÉ - Afficher l'app
-        # Afficher le menu utilisateur en sidebar
-        from src.services.auth import render_user_menu
-        render_user_menu()
+        # ✅ AUTHENTIFICATION DÉSACTIVÉE POUR LE MOMENT
         
         # Header
         afficher_header()
