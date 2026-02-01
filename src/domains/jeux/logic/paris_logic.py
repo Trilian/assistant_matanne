@@ -29,14 +29,7 @@ CHAMPIONNATS = [
     "La Liga",
     "Serie A",
     "Bundesliga",
-    "Champions League",
-    "Europa League"
-]
-
-# Pondération pour la forme récente (match le plus récent = plus de poids)
-POIDS_FORME = [1.0, 0.85, 0.70, 0.55, 0.40]  # 5 derniers matchs
-
-# Avantage domicile moyen (basé sur stats historiques)
+    # Note: Champions League et Europa League non disponibles avec l'API gratuite
 AVANTAGE_DOMICILE = 0.12  # +12% de chances de victoire à domicile
 
 # Seuils de confiance pour les prédictions

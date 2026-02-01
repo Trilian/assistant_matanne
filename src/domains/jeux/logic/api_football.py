@@ -21,26 +21,23 @@ logger = logging.getLogger(__name__)
 API_BASE_URL = "https://api.football-data.org/v4"
 API_KEY = None  # À configurer dans .env
 
-# Mapping des championnats FDJ/notre base vers Football-Data codes
+# Mapping des championnats vers Football-Data codes
 CHAMP_MAPPING = {
     "Ligue 1": "FL1",
     "Premier League": "PL",
     "La Liga": "SA",
     "Serie A": "IT",
     "Bundesliga": "BL1",
-    "Champions League": "CL",
-    "Europa League": "EL"
 }
 
-# IDs des compétitions Football-Data (API v4)
+# IDs des compétitions Football-Data (API gratuite v4 - 5 grands championnats)
 COMP_IDS = {
     "FL1": 445,      # Ligue 1
     "PL": 39,        # Premier League
     "SA": 141,       # La Liga (Spain)
     "IT": 135,       # Serie A (Italy)
     "BL1": 25,       # Bundesliga
-    "CL": 8,         # Champions League
-    "EL": 61         # Europa League
+    # Note: CL (8) et EL non disponibles avec API gratuite
 }
 
 
