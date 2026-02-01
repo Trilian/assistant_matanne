@@ -834,21 +834,39 @@ def app():
         col_refresh1, col_refresh2, col_filtre, col_jours = st.columns([1, 1, 2, 1])
         with col_refresh1:
             if st.button("🔄 Refresh Scores", help="Met à jour les scores depuis l'API"):
-                with st.spinner("Mise à jour des scores..."):
-                    count = refresh_scores_matchs()
-                    if count > 0:
-                        st.success(f"✅ {count} matchs mis à jour!")
-                    else:
-                        st.info("Aucun nouveau score disponible")
-                    st.rerun()
+                st.info("🔄 Actualisation en cours...")
+                try:
+                    with st.spinner("Mise à jour des scores..."):
+                        logger.info("🔘 Bouton REFRESH cliqué!")
+                        count = refresh_scores_matchs()
+                        logger.info(f"📊 Résultat refresh: {count} matchs")
+                        if count > 0:
+                            st.success(f"✅ {count} matchs mis à jour!")
+                        else:
+                            st.info("✅ Tous les matchs sont à jour")
+                        st.rerun()
+                except Exception as e:
+                    logger.error(f"❌ Erreur refresh: {e}", exc_info=True)
+                    st.error(f"❌ Erreur: {e}")
         
         with col_refresh2:
             if st.button("📥 Sync Équipes", help="Charge toutes les équipes depuis l'API"):
-                with st.spinner("Synchronisation..."):
-                    resultats = sync_tous_championnats()
-                    total = sum(resultats.values())
-                    st.success(f"✅ {total} équipes synchronisées!")
-                    st.rerun()
+                st.info("🔄 Synchronisation en cours...")
+                try:
+                    with st.spinner("Synchronisation..."):
+                        logger.info("🔘 Bouton SYNC cliqué!")
+                        resultats = sync_tous_championnats()
+                        logger.info(f"📊 Résultats sync: {resultats}")
+                        total = sum(resultats.values())
+                        if total == 0:
+                            st.warning("⚠️ 0 équipes synchronisées - Vérifier la clé API Football-Data")
+                            st.info("💡 Voir le diagnostic: python test_final.py")
+                        else:
+                            st.success(f"✅ {total} équipes synchronisées!")
+                        st.rerun()
+                except Exception as e:
+                    logger.error(f"❌ Erreur sync: {e}", exc_info=True)
+                    st.error(f"❌ Erreur: {e}")
         
         with col_filtre:
             championnats = ["Tous"] + CHAMPIONNATS
