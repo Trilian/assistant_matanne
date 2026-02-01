@@ -338,6 +338,68 @@ def chercher_equipe(nom: str) -> Optional[Dict[str, Any]]:
 
 
 # ═══════════════════════════════════════════════════════════
+# MATCHS TERMINÉS (pour refresh scores)
+# ═══════════════════════════════════════════════════════════
+
+def charger_matchs_termines(
+    championnat: str,
+    jours: int = 7
+) -> List[Dict[str, Any]]:
+    """
+    Charge les matchs terminés des derniers jours d'un championnat.
+    Utilisé pour mettre à jour les scores.
+    
+    Args:
+        championnat: Nom du championnat
+        jours: Nombre de jours en arrière
+        
+    Returns:
+        Liste des matchs avec scores
+    """
+    code_champ = CHAMP_MAPPING.get(championnat)
+    if not code_champ:
+        logger.warning(f"Championnat non supporté: {championnat}")
+        return []
+    
+    comp_id = COMP_IDS.get(code_champ)
+    if not comp_id:
+        return []
+    
+    # Paramètres: matchs terminés des X derniers jours
+    fin = date.today()
+    debut = fin - timedelta(days=jours)
+    
+    params = {
+        "status": "FINISHED",
+        "dateFrom": debut.isoformat(),
+        "dateTo": fin.isoformat(),
+    }
+    
+    data = faire_requete(f"/competitions/{comp_id}/matches", params)
+    
+    if not data:
+        return []
+    
+    matchs = []
+    for m in data.get("matches", []):
+        try:
+            score = m.get("score", {}).get("fullTime", {})
+            matchs.append({
+                "date": m.get("utcDate", "").split("T")[0],
+                "equipe_domicile": m.get("homeTeam", {}).get("name"),
+                "equipe_exterieur": m.get("awayTeam", {}).get("name"),
+                "score_domicile": score.get("home"),
+                "score_exterieur": score.get("away"),
+            })
+        except Exception as e:
+            logger.debug(f"Erreur parsing match terminé: {e}")
+            continue
+    
+    logger.info(f"✅ {len(matchs)} matchs terminés chargés pour {championnat}")
+    return matchs
+
+
+# ═══════════════════════════════════════════════════════════
 # CACHE (éviter trop de requêtes)
 # ═══════════════════════════════════════════════════════════
 

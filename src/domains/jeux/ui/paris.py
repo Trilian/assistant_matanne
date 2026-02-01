@@ -38,8 +38,9 @@ from src.domains.jeux.logic.paris_logic import (
 
 from src.domains.jeux.logic.api_football import (
     charger_classement as api_charger_classement,
-    charger_matchs_a_venir,
+    charger_matchs_a_venir as api_charger_matchs_a_venir,
     charger_historique_equipe,
+    charger_matchs_termines,
     vider_cache as api_vider_cache
 )
 
@@ -125,10 +126,104 @@ def sync_tous_championnats() -> Dict[str, int]:
     return resultats
 
 
+def sync_matchs_a_venir(jours: int = 7) -> Dict[str, int]:
+    """
+    Synchronise les matchs à venir depuis l'API Football-Data.
+    Ajoute les nouveaux matchs en BD avec prédictions IA.
+    
+    Args:
+        jours: Nombre de jours à récupérer
+        
+    Returns:
+        Dict avec nb matchs par championnat
+    """
+    resultats = {}
+    
+    try:
+        with get_session() as session:
+            for champ in CHAMPIONNATS:
+                count = 0
+                
+                # Récupérer les matchs depuis l'API
+                matchs_api = api_charger_matchs_a_venir(champ, jours=jours)
+                logger.info(f"📡 {champ}: {len(matchs_api)} matchs trouvés dans l'API")
+                
+                for match_api in matchs_api:
+                    try:
+                        dom_nom = match_api.get("equipe_domicile", "")
+                        ext_nom = match_api.get("equipe_exterieur", "")
+                        date_match = match_api.get("date")
+                        heure = match_api.get("heure")
+                        
+                        if not dom_nom or not ext_nom or not date_match:
+                            continue
+                        
+                        # Chercher ou créer les équipes
+                        equipe_dom = session.query(Equipe).filter(
+                            Equipe.nom.ilike(f"%{dom_nom[:15]}%"),
+                            Equipe.championnat == champ
+                        ).first()
+                        
+                        equipe_ext = session.query(Equipe).filter(
+                            Equipe.nom.ilike(f"%{ext_nom[:15]}%"),
+                            Equipe.championnat == champ
+                        ).first()
+                        
+                        # Si équipes pas trouvées, les créer
+                        if not equipe_dom:
+                            equipe_dom = Equipe(nom=dom_nom, championnat=champ)
+                            session.add(equipe_dom)
+                            session.flush()
+                        
+                        if not equipe_ext:
+                            equipe_ext = Equipe(nom=ext_nom, championnat=champ)
+                            session.add(equipe_ext)
+                            session.flush()
+                        
+                        # Vérifier si match existe déjà
+                        match_existant = session.query(Match).filter(
+                            Match.equipe_domicile_id == equipe_dom.id,
+                            Match.equipe_exterieur_id == equipe_ext.id,
+                            Match.date_match == date_match
+                        ).first()
+                        
+                        if match_existant:
+                            continue  # Match déjà en BD
+                        
+                        # Créer le match
+                        nouveau_match = Match(
+                            equipe_domicile_id=equipe_dom.id,
+                            equipe_exterieur_id=equipe_ext.id,
+                            championnat=champ,
+                            date_match=date_match,
+                            heure=heure,
+                            joue=False
+                        )
+                        session.add(nouveau_match)
+                        count += 1
+                        logger.debug(f"  ➕ {dom_nom} vs {ext_nom} ({date_match})")
+                        
+                    except Exception as e:
+                        logger.debug(f"Erreur match {match_api}: {e}")
+                        continue
+                
+                resultats[champ] = count
+                
+            session.commit()
+            total = sum(resultats.values())
+            logger.info(f"✅ {total} nouveaux matchs synchronisés")
+            
+    except Exception as e:
+        logger.error(f"❌ Erreur sync matchs: {e}")
+    
+    return resultats
+
+
 def refresh_scores_matchs() -> int:
     """
-    Met à jour les scores des matchs terminés depuis la BD.
-    (L'API Football-Data sera intégrée plus tard)
+    Met à jour les scores des matchs terminés depuis l'API Football-Data.
+    Cherche les matchs en BD qui sont passés et non joués,
+    puis récupère les scores depuis l'API.
     
     Returns:
         Nombre de matchs mis à jour
@@ -136,7 +231,7 @@ def refresh_scores_matchs() -> int:
     try:
         count = 0
         with get_session() as session:
-            # Matchs non joués dans le passé (à vérifier manuellement)
+            # Matchs non joués dans le passé
             matchs_a_maj = session.query(Match).filter(
                 Match.joue == False,
                 Match.date_match < date.today()
@@ -147,9 +242,50 @@ def refresh_scores_matchs() -> int:
                 return 0
             
             logger.info(f"ℹ️ {len(matchs_a_maj)} matchs non terminés à vérifier")
-            # Pour l'instant, on affiche juste que c'est détecté
-            # La mise à jour se fera via l'interface "Gestion" -> "Enregistrer résultats"
-            return len(matchs_a_maj)
+            
+            # Récupérer les scores depuis l'API pour chaque championnat
+            for champ in CHAMPIONNATS:
+                try:
+                    matchs_api = charger_matchs_termines(champ, jours=14)
+                    
+                    for match_bd in matchs_a_maj:
+                        if match_bd.championnat != champ:
+                            continue
+                        
+                        # Chercher le match correspondant dans l'API
+                        dom_nom = match_bd.equipe_domicile.nom if match_bd.equipe_domicile else ""
+                        ext_nom = match_bd.equipe_exterieur.nom if match_bd.equipe_exterieur else ""
+                        
+                        for match_api in matchs_api:
+                            # Matching par noms d'équipes (approximatif)
+                            api_dom = match_api.get("equipe_domicile", "")
+                            api_ext = match_api.get("equipe_exterieur", "")
+                            
+                            if (dom_nom.lower() in api_dom.lower() or api_dom.lower() in dom_nom.lower()) and \
+                               (ext_nom.lower() in api_ext.lower() or api_ext.lower() in ext_nom.lower()):
+                                # Match trouvé! Mettre à jour
+                                score_d = match_api.get("score_domicile")
+                                score_e = match_api.get("score_exterieur")
+                                
+                                if score_d is not None and score_e is not None:
+                                    match_bd.score_domicile = score_d
+                                    match_bd.score_exterieur = score_e
+                                    match_bd.joue = True
+                                    count += 1
+                                    logger.info(f"✅ {dom_nom} vs {ext_nom}: {score_d}-{score_e}")
+                                break
+                                
+                except Exception as e:
+                    logger.debug(f"Erreur API {champ}: {e}")
+                    continue
+            
+            if count > 0:
+                session.commit()
+                logger.info(f"✅ {count} matchs mis à jour avec scores")
+            else:
+                logger.info("ℹ️ Aucun score trouvé dans l'API")
+            
+            return count
             
     except Exception as e:
         logger.error(f"❌ Erreur refresh scores: {e}")
@@ -379,6 +515,37 @@ def enregistrer_resultat_match(match_id: int, score_dom: int, score_ext: int):
                 return True
     except Exception as e:
         st.error(f"❌ Erreur enregistrement résultat: {e}")
+        return False
+
+
+def supprimer_match(match_id: int) -> bool:
+    """
+    Supprime un match et ses paris associés.
+    
+    Args:
+        match_id: ID du match à supprimer
+        
+    Returns:
+        True si suppression réussie
+    """
+    try:
+        with get_session() as session:
+            match = session.query(Match).get(match_id)
+            if match:
+                # Supprimer d'abord les paris liés
+                for pari in match.paris:
+                    session.delete(pari)
+                
+                # Puis le match
+                session.delete(match)
+                session.commit()
+                logger.info(f"🗑️ Match {match_id} supprimé")
+                return True
+            else:
+                logger.warning(f"Match {match_id} non trouvé")
+                return False
+    except Exception as e:
+        logger.error(f"❌ Erreur suppression match: {e}")
         return False
 
 
@@ -721,7 +888,7 @@ def afficher_dashboard_performance():
 def afficher_gestion_donnees():
     """Interface pour gérer les équipes et matchs"""
     
-    tab1, tab2, tab3 = st.tabs(["➕ Ajouter Équipe", "➕ Ajouter Match", "📝 Résultats"])
+    tab1, tab2, tab3, tab4 = st.tabs(["➕ Ajouter Équipe", "➕ Ajouter Match", "📝 Résultats", "🗑️ Supprimer"])
     
     with tab1:
         st.subheader("Ajouter une équipe")
@@ -804,6 +971,54 @@ def afficher_gestion_donnees():
                     st.info("Aucun match en attente de résultat")
         except Exception as e:
             st.error(f"Erreur: {e}")
+    
+    with tab4:
+        st.subheader("🗑️ Supprimer des matchs")
+        st.caption("Supprime un match et tous les paris associés")
+        
+        # Charger tous les matchs
+        try:
+            with get_session() as session:
+                tous_matchs = session.query(Match).order_by(Match.date_match.desc()).limit(50).all()
+                
+                if tous_matchs:
+                    # Filtre par championnat
+                    champ_filter = st.selectbox(
+                        "Filtrer par championnat", 
+                        ["Tous"] + CHAMPIONNATS,
+                        key="del_champ_filter"
+                    )
+                    
+                    matchs_affiches = [
+                        m for m in tous_matchs 
+                        if champ_filter == "Tous" or m.championnat == champ_filter
+                    ]
+                    
+                    if matchs_affiches:
+                        for m in matchs_affiches:
+                            dom = m.equipe_domicile.nom if m.equipe_domicile else "?"
+                            ext = m.equipe_exterieur.nom if m.equipe_exterieur else "?"
+                            statut = "✅ Joué" if m.joue else "⏳ À venir"
+                            score = f"({m.score_domicile}-{m.score_exterieur})" if m.joue else ""
+                            
+                            col1, col2 = st.columns([4, 1])
+                            with col1:
+                                st.write(f"**{dom}** vs **{ext}** {score}")
+                                st.caption(f"{m.date_match} | {m.championnat} | {statut}")
+                            with col2:
+                                if st.button("🗑️", key=f"del_{m.id}", help="Supprimer ce match"):
+                                    if supprimer_match(m.id):
+                                        st.success("Match supprimé!")
+                                        st.rerun()
+                                    else:
+                                        st.error("Erreur lors de la suppression")
+                            st.divider()
+                    else:
+                        st.info(f"Aucun match pour {champ_filter}")
+                else:
+                    st.info("Aucun match enregistré")
+        except Exception as e:
+            st.error(f"Erreur: {e}")
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -833,21 +1048,22 @@ def app():
         # Boutons Refresh
         col_refresh1, col_refresh2, col_filtre, col_jours = st.columns([1, 1, 2, 1])
         
-        with st.expander("ℹ️ À propos de la synchronisation"):
+        with st.expander("ℹ️ Comment ça marche"):
             st.markdown("""
-            **Synchronisation des équipes**: Actuellement en révision
+            **🔄 Refresh Scores**: Met à jour les scores des matchs terminés depuis l'API
             
-            Pour l'instant, veuillez:
-            1. Ajouter les équipes manuellement dans l'onglet "Gestion"
-            2. Créer des matchs entre ces équipes
-            3. L'IA prédira ensuite les résultats basés sur la forme
+            **📥 Sync Équipes**: Charge les équipes des 5 championnats depuis l'API
             
-            La synchronisation API sera disponible bientôt! 🚀
+            **📅 Sync Matchs**: Charge les matchs à venir avec prédictions IA automatiques
+            
+            💡 **Conseil**: Faites d'abord "Sync Équipes" puis "Sync Matchs" pour tout automatiser!
             """)
         
-        col_refresh1, col_refresh2, col_filtre, col_jours = st.columns([1, 1, 2, 1])
-        with col_refresh1:
-            if st.button("🔄 Refresh Scores", help="Met à jour les scores depuis l'API"):
+        # Ligne de boutons de synchronisation
+        col_btn1, col_btn2, col_btn3 = st.columns(3)
+        
+        with col_btn1:
+            if st.button("🔄 Refresh Scores", help="Met à jour les scores depuis l'API", width="stretch"):
                 st.info("🔄 Actualisation en cours...")
                 try:
                     with st.spinner("Mise à jour des scores..."):
@@ -863,12 +1079,12 @@ def app():
                     logger.error(f"❌ Erreur refresh: {e}", exc_info=True)
                     st.error(f"❌ Erreur: {e}")
         
-        with col_refresh2:
-            if st.button("📥 Sync Équipes", help="Charge toutes les équipes depuis Football-Data API"):
+        with col_btn2:
+            if st.button("📥 Sync Équipes", help="Charge toutes les équipes depuis Football-Data API", width="stretch"):
                 st.info("⏳ Synchronisation en cours...")
                 try:
                     with st.spinner("Synchronisation des 5 grands championnats..."):
-                        logger.info("🔘 Bouton SYNC cliqué!")
+                        logger.info("🔘 Bouton SYNC ÉQUIPES cliqué!")
                         resultats = sync_tous_championnats()
                         logger.info(f"📊 Résultats sync: {resultats}")
                         total = sum(resultats.values())
@@ -885,6 +1101,29 @@ def app():
                     logger.error(f"❌ Erreur sync: {e}", exc_info=True)
                     st.error(f"❌ Erreur: {e}")
         
+        with col_btn3:
+            if st.button("📅 Sync Matchs", help="Charge les matchs à venir depuis l'API", width="stretch"):
+                st.info("📅 Chargement des matchs...")
+                try:
+                    with st.spinner("Récupération des matchs des 5 championnats..."):
+                        logger.info("🔘 Bouton SYNC MATCHS cliqué!")
+                        resultats = sync_matchs_a_venir(jours=14)
+                        logger.info(f"📊 Résultats sync matchs: {resultats}")
+                        total = sum(resultats.values())
+                        if total == 0:
+                            st.info("✅ Tous les matchs sont déjà synchronisés")
+                        else:
+                            st.success(f"✅ {total} nouveaux matchs ajoutés!")
+                            for champ, count in resultats.items():
+                                if count > 0:
+                                    st.caption(f"  • {champ}: {count} matchs")
+                        st.rerun()
+                except Exception as e:
+                    logger.error(f"❌ Erreur sync matchs: {e}", exc_info=True)
+                    st.error(f"❌ Erreur: {e}")
+        
+        # Filtres
+        col_filtre, col_jours = st.columns([3, 2])
         with col_filtre:
             championnats = ["Tous"] + CHAMPIONNATS
             filtre_champ = st.selectbox("Championnat", championnats)

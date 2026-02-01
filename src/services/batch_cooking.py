@@ -64,9 +64,9 @@ class EtapeBatchIA(BaseModel):
 
 class SessionBatchIA(BaseModel):
     """Session batch cooking générée par l'IA."""
-    recettes: list[str] = Field(..., min_items=1, max_items=10)
-    duree_totale_estimee: int = Field(..., ge=30, le=480)
-    etapes: list[EtapeBatchIA] = Field(..., min_items=1)
+    recettes: list[str] = Field(..., min_length=1)
+    duree_totale_estimee: int = Field(..., ge=5, le=480)
+    etapes: list[EtapeBatchIA] = Field(..., min_length=1)
     conseils_jules: list[str] = Field(default_factory=list)
     ordre_optimal: str = Field(default="")
 
