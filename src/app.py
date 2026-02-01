@@ -217,6 +217,7 @@ def afficher_sidebar():
                 "📚 Recettes": "cuisine.recettes",
                 "🥫 Inventaire": "cuisine.inventaire",
                 "🗓️ Planning": "cuisine.planning_semaine",
+                "🍳 Batch Cooking": "cuisine.batch_cooking",
                 "🛒 Courses": "cuisine.courses",
             },
             "👨‍👩‍👧‍👦 Famille": {

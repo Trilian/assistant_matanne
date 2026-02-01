@@ -123,6 +123,19 @@ from .jeux import (
     ChampionnatEnum,
 )
 
+# Batch Cooking
+from .batch_cooking import (
+    ConfigBatchCooking,
+    SessionBatchCooking,
+    EtapeBatchCooking,
+    PreparationBatch,
+    # Enums
+    StatutSessionEnum,
+    StatutEtapeEnum,
+    TypeRobotEnum,
+    LocalisationStockageEnum,
+)
+
 
 # Export explicite de tous les symboles
 __all__ = [
@@ -201,4 +214,13 @@ __all__ = [
     "StatutPariEnum",
     "TypePariEnum",
     "ChampionnatEnum",
+    # Batch Cooking
+    "ConfigBatchCooking",
+    "SessionBatchCooking",
+    "EtapeBatchCooking",
+    "PreparationBatch",
+    "StatutSessionEnum",
+    "StatutEtapeEnum",
+    "TypeRobotEnum",
+    "LocalisationStockageEnum",
 ]

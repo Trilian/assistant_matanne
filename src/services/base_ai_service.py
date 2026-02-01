@@ -358,6 +358,124 @@ class BaseAIService:
             )
         )
 
+    @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=None)
+    async def call_with_json_parsing(
+        self,
+        prompt: str,
+        response_model: type[BaseModel],
+        system_prompt: str = "",
+        temperature: float | None = None,
+        max_tokens: int = 2000,
+        use_cache: bool = True,
+    ) -> BaseModel | None:
+        """
+        Appel IA avec parsing direct vers un modèle Pydantic unique.
+        
+        Args:
+            prompt: Prompt utilisateur
+            response_model: Modèle Pydantic attendu en réponse
+            system_prompt: Instructions système
+            temperature: Température (None = default)
+            max_tokens: Tokens max
+            use_cache: Utiliser le cache
+            
+        Returns:
+            Instance du modèle Pydantic ou None si erreur
+        """
+        response = await self.call_with_cache(
+            prompt=prompt,
+            system_prompt=system_prompt or "Retourne uniquement du JSON valide, pas de markdown ni de texte.",
+            temperature=temperature,
+            max_tokens=max_tokens,
+            use_cache=use_cache,
+        )
+
+        if not response:
+            return None
+
+        # Parser JSON vers modèle Pydantic
+        try:
+            import json
+            import re
+            
+            # Nettoyer la réponse des markdown code blocks
+            cleaned = response.strip()
+            if cleaned.startswith("```json"):
+                cleaned = cleaned[7:]
+            elif cleaned.startswith("```"):
+                cleaned = cleaned[3:]
+            if cleaned.endswith("```"):
+                cleaned = cleaned[:-3]
+            cleaned = cleaned.strip()
+            
+            # Parser JSON
+            data = json.loads(cleaned)
+            
+            # Valider avec Pydantic
+            result = response_model(**data)
+            logger.info(f"✅ JSON parsé vers {response_model.__name__}")
+            return result
+
+        except json.JSONDecodeError as e:
+            logger.error(f"❌ Erreur parsing JSON: {e}")
+            logger.debug(f"Réponse brute: {response[:500]}")
+            return None
+        except ValidationError as e:
+            logger.error(f"❌ Erreur validation Pydantic: {e}")
+            return None
+        except Exception as e:
+            logger.error(f"❌ Erreur parsing inattendue: {e}")
+            return None
+
+    def call_with_json_parsing_sync(
+        self,
+        prompt: str,
+        response_model: type[BaseModel],
+        system_prompt: str = "",
+        temperature: float | None = None,
+        max_tokens: int = 2000,
+        use_cache: bool = True,
+    ) -> BaseModel | None:
+        """
+        Version synchrone de call_with_json_parsing.
+        
+        Wraps the async call_with_json_parsing in asyncio.run() for use from sync contexts
+        like Streamlit.
+        """
+        # Essayer d'obtenir la boucle courante
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = None
+
+        if loop is not None:
+            # Si une boucle d'événements est en cours, utiliser un thread
+            logger.warning("Event loop is running, trying to execute coroutine in thread...")
+            with concurrent.futures.ThreadPoolExecutor() as pool:
+                future = pool.submit(asyncio.run, 
+                    self.call_with_json_parsing(
+                        prompt=prompt,
+                        response_model=response_model,
+                        system_prompt=system_prompt,
+                        temperature=temperature,
+                        max_tokens=max_tokens,
+                        use_cache=use_cache,
+                    )
+                )
+                return future.result()
+        
+        # Pas de boucle d'événements, créer une nouvelle et exécuter
+        return asyncio.run(
+            self.call_with_json_parsing(
+                prompt=prompt,
+                response_model=response_model,
+                system_prompt=system_prompt,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                use_cache=use_cache,
+            )
+        )
+
     # ═══════════════════════════════════════════════════════════
     # HELPERS PROMPTS STRUCTURÉS
     # ═══════════════════════════════════════════════════════════

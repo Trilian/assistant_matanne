@@ -195,6 +195,10 @@ class OptimizedRouter:
             "path": "src.domains.cuisine.ui.planning",
             "type": "simple",
         },
+        "cuisine.batch_cooking": {
+            "path": "src.domains.cuisine.ui.batch_cooking",
+            "type": "simple",
+        },
         "cuisine.courses": {
             "path": "src.domains.cuisine.ui.courses",
             "type": "simple",
