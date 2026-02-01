@@ -409,7 +409,7 @@ def afficher_statistiques_frequences(tirages: list):
         margin=dict(l=20, r=20, t=20, b=40)
     )
     
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
     
     # Avertissement
     st.warning(
@@ -468,7 +468,7 @@ def afficher_generateur_grilles(tirages: list):
             }
     else:
         with col2:
-            if st.button("🎲 Générer!", type="primary", use_container_width=True):
+            if st.button("🎲 Générer!", type="primary", width="stretch"):
                 if strategie[1] == "aleatoire":
                     grille_generee = generer_grille_aleatoire()
                 elif strategie[1] == "eviter_populaires":
@@ -513,7 +513,7 @@ def afficher_generateur_grilles(tirages: list):
             # Bouton enregistrer
             col_save, col_empty = st.columns([1, 2])
             with col_save:
-                if st.button("💾 Enregistrer (virtuel)", use_container_width=True):
+                if st.button("💾 Enregistrer (virtuel)", width="stretch"):
                     enregistrer_grille(
                         grille_generee["numeros"],
                         grille_generee["numero_chance"],
@@ -636,7 +636,7 @@ def afficher_simulation():
             for strat, res in resultats.items()
         ])
         
-        st.dataframe(df_res, hide_index=True, use_container_width=True)
+        st.dataframe(df_res, hide_index=True, width="stretch")
         
         # Graphique comparatif
         fig = go.Figure(data=[
@@ -657,7 +657,7 @@ def afficher_simulation():
         )
         fig.add_hline(y=0, line_dash="dash", line_color="gray")
         
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
         
         # Conclusion
         st.info(
@@ -738,7 +738,7 @@ def afficher_gestion_tirages():
             }
             for t in tirages
         ])
-        st.dataframe(df, hide_index=True, use_container_width=True)
+        st.dataframe(df, hide_index=True, width="stretch")
     else:
         st.info("Aucun tirage enregistré")
 
@@ -772,7 +772,7 @@ def afficher_esperance():
         for rang, proba in esp["probabilites"].items()
     ])
     
-    st.dataframe(df_probas, hide_index=True, use_container_width=True)
+    st.dataframe(df_probas, hide_index=True, width="stretch")
     
     st.warning(
         "⚠️ **Rappel**: Vous avez plus de chances de mourir d'une chute de météorite (1/700 000) "

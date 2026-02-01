@@ -518,7 +518,7 @@ def afficher_prediction_match(match: dict):
                 showlegend=False,
                 yaxis=dict(range=[0, 100])
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
         
         with col_over:
             # Over/Under et BTTS
@@ -689,7 +689,7 @@ def afficher_dashboard_performance():
                          title="📈 Évolution du profit cumulé")
             fig.update_layout(height=300)
             fig.add_hline(y=0, line_dash="dash", line_color="gray")
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
     
     # Liste des derniers paris
     st.subheader("📋 Derniers paris")
@@ -956,7 +956,7 @@ def app():
             st.dataframe(
                 df[["#", "Équipe", "J", "V", "N", "D", "BP", "BC", "Diff", "Pts"]],
                 hide_index=True,
-                use_container_width=True
+                width="stretch"
             )
         else:
             st.info(f"Aucune équipe enregistrée pour {champ_classe}")
