@@ -42,18 +42,24 @@ def app():
     st.set_page_config(page_title="Planning", layout="wide")
     st.title("📅 Planning Hebdomadaire")
     
-    tabs = st.tabs(["🍽️ Planning Actif", "🤖 Générer avec IA", "⚖️ Créateur Équilibré", "📚 Historique"])
+    tabs = st.tabs(["🍽️ Planning Actif", "🛒 Courses", "👶 Jules", "🤖 Générer avec IA", "⚖️ Créateur Équilibré", "📚 Historique"])
     
     with tabs[0]:
         render_planning()
     
     with tabs[1]:
-        render_generer()
+        render_courses_aggregees()
     
     with tabs[2]:
-        render_createur_equilibre()
+        render_versions_jules()
     
     with tabs[3]:
+        render_generer()
+    
+    with tabs[4]:
+        render_createur_equilibre()
+    
+    with tabs[5]:
         render_historique()
 
 
@@ -288,7 +294,291 @@ def render_planning():
 
 
 # ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
-# SECTION 2: GÉNÉRER PLANNING AVEC IA
+# SECTION 2: COURSES AGRÉGÉES
+# ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
+
+def render_courses_aggregees():
+    """Affiche et gère la liste de courses agrégée du planning actif"""
+    service = get_planning_service()
+    
+    if service is None:
+        st.error("❌ Service planning indisponible")
+        return
+    
+    st.subheader("🛒 Liste de Courses - Agrégée")
+    st.markdown("Ingrédients de tous les repas de la semaine, regroupés par rayon.")
+    
+    try:
+        # Récupérer planning actif
+        planning = service.get_planning()
+        
+        if not planning:
+            st.warning("⚠️ Aucun planning actif pour cette semaine")
+            return
+        
+        st.info(f"📅 Courses pour la semaine du **{planning.semaine_debut.strftime('%d/%m')}**")
+        
+        # Agréger les courses
+        with st.spinner("📦 Agrégation des ingrédients..."):
+            courses = service.agréger_courses_pour_planning(planning_id=planning.id)
+        
+        if not courses:
+            st.info("ℹ️ Aucun ingrédient à acheter (planning vide ou sans recettes)")
+            return
+        
+        # Afficher par rayon
+        rayons = {}
+        for course in courses:
+            rayon = course["rayon"]
+            if rayon not in rayons:
+                rayons[rayon] = []
+            rayons[rayon].append(course)
+        
+        # Créer un dataframe pour affichage
+        st.markdown("---")
+        
+        # Checkboxes pour sélectionner
+        st.markdown("#### 📋 Ingrédients à acheter")
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            if st.button("✅ Tout cocher", use_container_width=True):
+                if "courses_selection" not in st.session_state:
+                    st.session_state.courses_selection = {}
+                for course in courses:
+                    st.session_state.courses_selection[f"course_{course['nom']}"] = True
+                st.rerun()
+        
+        with col2:
+            if st.button("☐ Tout décocher", use_container_width=True):
+                if "courses_selection" not in st.session_state:
+                    st.session_state.courses_selection = {}
+                for course in courses:
+                    st.session_state.courses_selection[f"course_{course['nom']}"] = False
+                st.rerun()
+        
+        with col3:
+            format_export = st.radio("Exporter en:", ["PDF", "CSV", "Texte"], horizontal=True)
+        
+        st.markdown("---")
+        
+        # Afficher par rayon avec checkboxes
+        for rayon in sorted(rayons.keys()):
+            articles = rayons[rayon]
+            
+            with st.expander(f"🏪 {rayon.capitalize()} ({len(articles)} article{'s' if len(articles) > 1 else ''})"):
+                for course in articles:
+                    col1, col2, col3, col4 = st.columns([0.5, 2, 1, 0.5])
+                    
+                    with col1:
+                        checked = st.checkbox(
+                            "✓",
+                            value=st.session_state.get(f"course_{course['nom']}", False),
+                            key=f"course_{course['nom']}",
+                            label_visibility="collapsed"
+                        )
+                    
+                    with col2:
+                        article_text = f"🛒 **{course['nom']}**"
+                        if checked:
+                            article_text = f"~~{article_text}~~"
+                        st.markdown(article_text)
+                    
+                    with col3:
+                        quantite_text = f"{course['quantite']:.1f} {course['unite']}"
+                        st.caption(quantite_text)
+                    
+                    with col4:
+                        st.caption(f"×{course.get('repas_count', 1)}")
+        
+        st.markdown("---")
+        
+        # Statistiques
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("📦 Total articles", len(courses))
+        with col2:
+            st.metric("🏪 Rayons", len(rayons))
+        with col3:
+            selected_count = sum(1 for c in courses if st.session_state.get(f"course_{c['nom']}", False))
+            st.metric("✅ Cochés", selected_count)
+        
+        st.markdown("---")
+        
+        # Export
+        if st.button("📥 Exporter liste", use_container_width=True, type="primary"):
+            if format_export == "PDF":
+                st.info("💡 Export PDF: À implémenter")
+            elif format_export == "CSV":
+                import csv
+                from io import StringIO
+                
+                output = StringIO()
+                writer = csv.writer(output)
+                writer.writerow(["Rayon", "Article", "Quantité", "Unité", "Repas"])
+                
+                for course in courses:
+                    writer.writerow([
+                        course["rayon"],
+                        course["nom"],
+                        course["quantite"],
+                        course["unite"],
+                        course.get("repas_count", 1)
+                    ])
+                
+                st.download_button(
+                    label="Télécharger CSV",
+                    data=output.getvalue(),
+                    file_name=f"courses_{planning.semaine_debut.strftime('%Y%m%d')}.csv",
+                    mime="text/csv"
+                )
+            else:  # Texte
+                texte = "📋 LISTE DE COURSES\n"
+                texte += f"Semaine du {planning.semaine_debut.strftime('%d/%m/%Y')}\n\n"
+                
+                for rayon in sorted(rayons.keys()):
+                    texte += f"🏪 {rayon.upper()}\n"
+                    for course in rayons[rayon]:
+                        texte += f"  ☐ {course['nom']} ({course['quantite']:.1f} {course['unite']})\n"
+                    texte += "\n"
+                
+                st.text_area("Copier-coller:", value=texte, height=400)
+    
+    except Exception as e:
+        st.error(f"❌ Erreur: {str(e)}")
+        logger.error(f"Erreur render_courses: {e}")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
+# SECTION 3: VERSIONS JULES (19 MOIS)
+# ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
+
+def render_versions_jules():
+    """Affiche et gère les versions adaptées pour Jules (19 mois)"""
+    service = get_planning_service()
+    recette_service = get_recette_service()
+    
+    if service is None or recette_service is None:
+        st.error("❌ Services indisponibles")
+        return
+    
+    st.subheader("👶 Repas Adaptés pour Jules (19 mois)")
+    st.markdown("Versions des recettes adaptées à l'âge de Jules: moins salé, textures appropriées, allergènes évitées.")
+    
+    try:
+        # Récupérer planning actif
+        planning = service.get_planning()
+        
+        if not planning:
+            st.warning("⚠️ Aucun planning actif pour cette semaine")
+            return
+        
+        if not planning.repas:
+            st.info("ℹ️ Planning sans repas")
+            return
+        
+        st.info(f"📅 Semaine du **{planning.semaine_debut.strftime('%d/%m')}**")
+        st.markdown("---")
+        
+        # Afficher une version Jules par jour
+        jours_semaine = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
+        
+        for idx, jour_offset in enumerate(range(7)):
+            jour_date = planning.semaine_debut + timedelta(days=jour_offset)
+            jour_name = jours_semaine[idx]
+            jour_key = jour_date.strftime("%Y-%m-%d")
+            
+            # Récupérer repas du jour
+            repas_jour = [r for r in planning.repas if r.date_repas.strftime("%Y-%m-%d") == jour_key]
+            
+            if not repas_jour:
+                st.info(f"**{jour_name} ({jour_date.strftime('%d/%m')})** - Pas de repas planifiés")
+                continue
+            
+            with st.expander(f"👶 **{jour_name}** - {jour_date.strftime('%d/%m')}", expanded=(idx == 0)):
+                for repas in repas_jour:
+                    if not repas.recette_id:
+                        st.info(f"{repas.type_repas}: Repas non défini")
+                        continue
+                    
+                    recette = repas.recette
+                    if not recette:
+                        st.warning(f"{repas.type_repas}: Recette non trouvée")
+                        continue
+                    
+                    st.markdown(f"#### 🍽️ {recette.nom}")
+                    
+                    # Vérifier si version Jules existe
+                    has_version = recette.versions and any(v.type_version == "bebe" for v in recette.versions)
+                    
+                    if has_version:
+                        version = next(v for v in recette.versions if v.type_version == "bebe")
+                        
+                        col1, col2 = st.columns(2)
+                        
+                        with col1:
+                            st.markdown("**Modifications Jules:**")
+                            modifications = version.notes_bebe or "Pas de modifications spécifiées"
+                            st.write(modifications)
+                        
+                        with col2:
+                            st.markdown("**Conseils:**")
+                            st.info("""
+                            ✅ À 19 mois:
+                            - Sans sel ou très peu
+                            - Textures molles, faciles à mâcher
+                            - Morceaux petits (risque d'étouffement)
+                            - Pas d'allergènes courants
+                            """)
+                    
+                    else:
+                        # Proposer de générer une version
+                        st.warning(f"⚠️ Pas de version Jules pour '{recette.nom}'")
+                        
+                        if st.button(f"🤖 Générer version Jules", key=f"gen_jules_{repas.id}"):
+                            with st.spinner("Génération en cours..."):
+                                try:
+                                    version_bebe = recette_service.generer_version_bebe(
+                                        recette_id=recette.id
+                                    )
+                                    if version_bebe:
+                                        st.success(f"✅ Version Jules générée pour '{recette.nom}'")
+                                        st.rerun()
+                                    else:
+                                        st.error("❌ Erreur lors de la génération")
+                                except Exception as e:
+                                    st.error(f"❌ Erreur: {str(e)}")
+                                    logger.error(f"Erreur genération version Jules: {e}")
+                        
+                        # Afficher les conseils génériques
+                        with st.expander("📖 Conseils génériques pour Jules"):
+                            st.markdown("""
+                            ### Adaptation pour bébé 19 mois:
+                            
+                            **Sécurité:**
+                            - Éviter: Sel, sucre, miel (botulisme), épices fortes
+                            - Couper en petits morceaux pour éviter l'étouffement
+                            
+                            **Texture:**
+                            - Molles et facilement écrasables
+                            - Plutôt mixées ou très cuites
+                            
+                            **Portions:**
+                            - 1/3 à 1/2 des portions adulte
+                            
+                            **Protéines:**
+                            - Viandes cuites et hachées
+                            - Poisson sans arêtes
+                            - Œufs bien cuits
+                            """)
+    
+    except Exception as e:
+        st.error(f"❌ Erreur: {str(e)}")
+        logger.error(f"Erreur render_versions_jules: {e}")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
+# SECTION 4: GÉNÉRER PLANNING AVEC IA
 # ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 def render_generer():
@@ -419,7 +709,7 @@ def render_generer():
 
 
 # ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
-# SECTION 3: CRÉATEUR ÉQUILIBRÉ - CHOIX INTELLIGENT DE RECETTES
+# SECTION 5: CRÉATEUR ÉQUILIBRÉ - CHOIX INTELLIGENT DE RECETTES
 # ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 def render_createur_equilibre():
@@ -729,7 +1019,7 @@ def render_createur_equilibre():
                 st.rerun()
 
 # ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
-# SECTION 4: HISTORIQUE PLANNINGS
+# SECTION 6: HISTORIQUE PLANNINGS
 # ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 def render_historique():

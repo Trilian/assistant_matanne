@@ -366,7 +366,97 @@ class PlanningService(BaseService[Planning], BaseAIService, PlanningAIMixin):
         return planning
 
     # ═══════════════════════════════════════════════════════════
-    # SECTION 2: GÉNÉRATION IA (REFACTORED)
+    # SECTION 3: AGRÉGATION COURSES (NOUVEAU)
+    # ═══════════════════════════════════════════════════════════
+
+    @with_error_handling(default_return=[])
+    @with_db_session
+    def agréger_courses_pour_planning(
+        self,
+        planning_id: int,
+        db: Session | None = None,
+    ) -> list[dict]:
+        """Agrège les ingrédients de toutes les recettes du planning.
+        
+        Retourne une liste d'ingrédients uniques avec quantités totales.
+        
+        Args:
+            planning_id: ID du planning
+            db: Database session
+            
+        Returns:
+            List de dicts {ingredient, quantite, unite, rayon, priorite}
+        """
+        from src.core.models import (
+            Planning, Repas, Recette, RecetteIngredient, Ingredient
+        )
+        
+        # Récupérer le planning avec tous ses repas et recettes
+        planning = (
+            db.query(Planning)
+            .filter(Planning.id == planning_id)
+            .first()
+        )
+        
+        if not planning or not planning.repas:
+            logger.warning(f"⚠️ Planning {planning_id} pas trouvé ou pas de repas")
+            return []
+        
+        # Agréger les ingrédients
+        ingredients_aggregated = {}  # {nom: {quantite: 0, unite, rayon, priorite}}
+        
+        for repas in planning.repas:
+            if not repas.recette_id:
+                continue
+            
+            # Charger la recette avec ses ingrédients
+            recette = (
+                db.query(Recette)
+                .filter(Recette.id == repas.recette_id)
+                .first()
+            )
+            
+            if not recette or not recette.ingredients:
+                continue
+            
+            # Parcourir les ingrédients de cette recette
+            for recette_ingredient in recette.ingredients:
+                ingredient = recette_ingredient.ingredient
+                if not ingredient:
+                    continue
+                
+                nom = ingredient.nom
+                quantite = recette_ingredient.quantite or 1
+                unite = recette_ingredient.unite or ingredient.unite or "pcs"
+                rayon = ingredient.categorie or "autre"
+                
+                # Agréger
+                if nom not in ingredients_aggregated:
+                    ingredients_aggregated[nom] = {
+                        "nom": nom,
+                        "quantite": quantite,
+                        "unite": unite,
+                        "rayon": rayon,
+                        "priorite": "moyenne",  # Par défaut
+                        "repas_count": 1,
+                    }
+                else:
+                    # Augmenter la quantité (même unité supposée)
+                    if ingredients_aggregated[nom]["unite"] == unite:
+                        ingredients_aggregated[nom]["quantite"] += quantite
+                    ingredients_aggregated[nom]["repas_count"] += 1
+        
+        # Trier par priorité (rayon) et quantité
+        courses_list = sorted(
+            ingredients_aggregated.values(),
+            key=lambda x: (x["rayon"], -x["quantite"])
+        )
+        
+        logger.info(f"✅ Agrégé {len(courses_list)} ingrédients pour planning {planning_id}")
+        return courses_list
+
+    # ═══════════════════════════════════════════════════════════
+    # SECTION 4: GÉNÉRATION IA (REFACTORED)
     # ═══════════════════════════════════════════════════════════
 
     @with_cache(
