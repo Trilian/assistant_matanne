@@ -6,6 +6,7 @@ Tout harmonisé en français
 import logging
 import os
 from pathlib import Path
+from typing import Optional
 
 def _reload_env_files():
     """Recharge les fichiers .env (appelé à chaque accès config pour Streamlit)"""
@@ -304,6 +305,39 @@ class Parametres(BaseSettings):
 
     MISTRAL_BASE_URL: str = "https://api.mistral.ai/v1"
     """URL de base API Mistral."""
+
+    # ═══════════════════════════════════════════════════════════
+    # APIS EXTERNES - FOOTBALL
+    # ═══════════════════════════════════════════════════════════
+
+    @property
+    def FOOTBALL_DATA_API_KEY(self) -> Optional[str]:
+        """
+        Clé API Football-Data.org avec fallbacks.
+
+        Ordre de priorité:
+        1. Variable d'environnement FOOTBALL_DATA_API_KEY
+        2. st.secrets["FOOTBALL_DATA_API_KEY"] (Streamlit Cloud)
+        3. None (optionnel, le système fonctionne sans)
+
+        Returns:
+            Clé API ou None si non configurée
+        """
+        # 1. Variable d'environnement directe (dev local depuis .env.local)
+        cle = os.getenv("FOOTBALL_DATA_API_KEY")
+        if cle and cle.strip():
+            return cle
+
+        # 2. Secrets Streamlit (Streamlit Cloud)
+        try:
+            cle = st.secrets.get("FOOTBALL_DATA_API_KEY")
+            if cle and cle.strip():
+                return cle
+        except Exception:
+            pass
+
+        # 3. Pas de clé - c'est OK, c'est optionnel
+        return None
 
     # ═══════════════════════════════════════════════════════════
     # RATE LIMITING
