@@ -30,6 +30,8 @@ CHAMPIONNATS = [
     "Serie A",
     "Bundesliga",
     # Note: Champions League et Europa League non disponibles avec l'API gratuite
+]
+
 AVANTAGE_DOMICILE = 0.12  # +12% de chances de victoire à domicile
 
 # Seuils de confiance pour les prédictions

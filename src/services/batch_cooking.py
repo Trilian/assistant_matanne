@@ -463,7 +463,7 @@ class BatchCookingService(BaseService[SessionBatchCooking], BaseAIService):
     # SECTION 4: PRÉPARATIONS STOCKÉES
     # ═══════════════════════════════════════════════════════════
 
-    @with_cache(ttl=600, key_func=lambda self, consommees=False: f"preparations_{consommees}")
+    @with_cache(ttl=600, key_func=lambda self, consommees=False, localisation=None: f"preparations_{consommees}_{localisation}")
     @with_error_handling(default_return=[])
     @with_db_session
     def get_preparations(
