@@ -236,11 +236,14 @@ def charger_classement(championnat: str) -> List[Dict[str, Any]]:
     """
     Charge le classement d'un championnat
     
+    Note: L'endpoint /standings n'existe pas en version gratuite.
+    On essaie /teams en fallback.
+    
     Args:
         championnat: Nom du championnat
         
     Returns:
-        Liste des équipes avec classement
+        Liste des équipes avec classement (ou juste équipes si pas de standings)
     """
     code_champ = CHAMP_MAPPING.get(championnat)
     if not code_champ:
@@ -250,30 +253,55 @@ def charger_classement(championnat: str) -> List[Dict[str, Any]]:
     if not comp_id:
         return []
     
+    # Essayer d'abord les standings
+    logger.info(f"📡 Tentative standings pour {championnat} (ID: {comp_id})")
     data = faire_requete(f"/competitions/{comp_id}/standings")
     
-    if not data:
-        return []
+    if data and data.get("standings"):
+        equipes = []
+        standings = data.get("standings", [])
+        
+        if standings:
+            for table in standings:
+                for i, equipe in enumerate(table.get("table", []), 1):
+                    equipes.append({
+                        "position": i,
+                        "nom": equipe.get("team", {}).get("name"),
+                        "matchs_joues": equipe.get("playedGames"),
+                        "victoires": equipe.get("won"),
+                        "nuls": equipe.get("draw"),
+                        "defaites": equipe.get("lost"),
+                        "buts_marques": equipe.get("goalsFor"),
+                        "buts_encaisses": equipe.get("goalsAgainst"),
+                        "points": equipe.get("points")
+                    })
+        
+        return equipes
     
-    equipes = []
-    standings = data.get("standings", [])
+    # Fallback: charger juste les équipes sans standings
+    logger.info(f"📡 Fallback /teams pour {championnat}")
+    data = faire_requete(f"/competitions/{comp_id}/teams")
     
-    if standings:
-        for table in standings:
-            for i, equipe in enumerate(table.get("table", []), 1):
-                equipes.append({
-                    "position": i,
-                    "nom": equipe.get("team", {}).get("name"),
-                    "matchs_joues": equipe.get("playedGames"),
-                    "victoires": equipe.get("won"),
-                    "nuls": equipe.get("draw"),
-                    "defaites": equipe.get("lost"),
-                    "buts_marques": equipe.get("goalsFor"),
-                    "buts_encaisses": equipe.get("goalsAgainst"),
-                    "points": equipe.get("points")
-                })
+    if data and data.get("teams"):
+        equipes = []
+        for i, equipe in enumerate(data.get("teams", []), 1):
+            equipes.append({
+                "position": i,
+                "nom": equipe.get("name"),
+                "matchs_joues": 0,
+                "victoires": 0,
+                "nuls": 0,
+                "defaites": 0,
+                "buts_marques": 0,
+                "buts_encaisses": 0,
+                "points": 0
+            })
+        
+        logger.info(f"✅ {len(equipes)} équipes chargées pour {championnat}")
+        return equipes
     
-    return equipes
+    logger.warning(f"❌ Pas de données pour {championnat}")
+    return []
 
 
 def chercher_equipe(nom: str) -> Optional[Dict[str, Any]]:
