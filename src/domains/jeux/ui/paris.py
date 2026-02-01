@@ -556,6 +556,10 @@ def supprimer_match(match_id: int) -> bool:
 def afficher_prediction_match(match: dict):
     """Affiche la carte de prédiction intelligente pour un match"""
     
+    # Générer une clé unique pour ce match (pour éviter les doublons)
+    match_id = match.get("id", f"{match.get('equipe_domicile', 'X')}_{match.get('equipe_exterieur', 'X')}_{match.get('date', '')}")
+    match_key_prefix = f"match_{match_id}"
+    
     # Charger données pour prédiction
     matchs_dom = charger_matchs_recents(match["equipe_domicile_id"])
     matchs_ext = charger_matchs_recents(match["equipe_exterieur_id"])
@@ -685,7 +689,7 @@ def afficher_prediction_match(match: dict):
                 showlegend=False,
                 yaxis=dict(range=[0, 100])
             )
-            st.plotly_chart(fig, width="stretch", key="paris_proba_chart")
+            st.plotly_chart(fig, width="stretch", key=f"{match_key_prefix}_proba")
             # Over/Under et BTTS
             stats = analyse.get("stats", {})
             moy_buts = stats.get("moy_buts_match", 2.5)
