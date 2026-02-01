@@ -317,8 +317,9 @@ class Parametres(BaseSettings):
 
         Ordre de priorité:
         1. Variable d'environnement FOOTBALL_DATA_API_KEY
-        2. st.secrets["FOOTBALL_DATA_API_KEY"] (Streamlit Cloud)
-        3. None (optionnel, le système fonctionne sans)
+        2. st.secrets["FOOTBALL_DATA_API_KEY"] (format plat)
+        3. st.secrets["football_data"]["api_key"] (format structuré)
+        4. None (optionnel, le système fonctionne sans)
 
         Returns:
             Clé API ou None si non configurée
@@ -328,7 +329,7 @@ class Parametres(BaseSettings):
         if cle and cle.strip():
             return cle
 
-        # 2. Secrets Streamlit (Streamlit Cloud)
+        # 2. Secrets Streamlit - format plat (Streamlit Cloud recommandé)
         try:
             cle = st.secrets.get("FOOTBALL_DATA_API_KEY")
             if cle and cle.strip():
@@ -336,7 +337,15 @@ class Parametres(BaseSettings):
         except Exception:
             pass
 
-        # 3. Pas de clé - c'est OK, c'est optionnel
+        # 3. Secrets Streamlit - format structuré [football_data] api_key
+        try:
+            cle = st.secrets.get("football_data", {}).get("api_key")
+            if cle and cle.strip():
+                return cle
+        except Exception:
+            pass
+
+        # 4. Pas de clé - c'est OK, c'est optionnel
         return None
 
     # ═══════════════════════════════════════════════════════════

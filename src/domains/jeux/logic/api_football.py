@@ -78,6 +78,10 @@ def faire_requete(endpoint: str, params: Dict[str, Any] = None) -> Optional[Dict
         JSON ou None si erreur
     """
     api_key = obtenir_cle_api()
+    
+    # DEBUG: Log ce qu'on trouve
+    logger.info(f"🔑 faire_requete: api_key présente = {bool(api_key)}")
+    
     if not api_key:
         logger.warning("⚠️ Clé API Football-Data non configurée")
         return None
@@ -86,8 +90,10 @@ def faire_requete(endpoint: str, params: Dict[str, Any] = None) -> Optional[Dict
     headers = {"X-Auth-Token": api_key}
     
     try:
+        logger.info(f"📡 Appel API: {endpoint}")
         response = requests.get(url, headers=headers, params=params, timeout=10)
         response.raise_for_status()
+        logger.info(f"✅ Réponse API OK ({len(response.json().get('matches', []))} matchs)")
         return response.json()
     except requests.exceptions.HTTPError as e:
         if e.response.status_code == 429:
