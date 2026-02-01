@@ -832,6 +832,20 @@ def app():
         
         # Boutons Refresh
         col_refresh1, col_refresh2, col_filtre, col_jours = st.columns([1, 1, 2, 1])
+        
+        with st.expander("ℹ️ À propos de la synchronisation"):
+            st.markdown("""
+            **Synchronisation des équipes**: Actuellement en révision
+            
+            Pour l'instant, veuillez:
+            1. Ajouter les équipes manuellement dans l'onglet "Gestion"
+            2. Créer des matchs entre ces équipes
+            3. L'IA prédira ensuite les résultats basés sur la forme
+            
+            La synchronisation API sera disponible bientôt! 🚀
+            """)
+        
+        col_refresh1, col_refresh2, col_filtre, col_jours = st.columns([1, 1, 2, 1])
         with col_refresh1:
             if st.button("🔄 Refresh Scores", help="Met à jour les scores depuis l'API"):
                 st.info("🔄 Actualisation en cours...")
@@ -850,8 +864,8 @@ def app():
                     st.error(f"❌ Erreur: {e}")
         
         with col_refresh2:
-            if st.button("📥 Sync Équipes", help="Charge toutes les équipes depuis l'API"):
-                st.info("🔄 Synchronisation en cours...")
+            if st.button("📥 Sync Équipes", help="Charge toutes les équipes depuis l'API", disabled=True):
+                st.info("⏳ Synchronisation en cours...")
                 try:
                     with st.spinner("Synchronisation..."):
                         logger.info("🔘 Bouton SYNC cliqué!")
@@ -859,14 +873,15 @@ def app():
                         logger.info(f"📊 Résultats sync: {resultats}")
                         total = sum(resultats.values())
                         if total == 0:
-                            st.warning("⚠️ 0 équipes synchronisées - Vérifier la clé API Football-Data")
-                            st.info("💡 Voir le diagnostic: python test_final.py")
+                            st.warning("⚠️ 0 équipes synchronisées - API en révision")
                         else:
                             st.success(f"✅ {total} équipes synchronisées!")
                         st.rerun()
                 except Exception as e:
                     logger.error(f"❌ Erreur sync: {e}", exc_info=True)
                     st.error(f"❌ Erreur: {e}")
+            
+            st.caption("💡 Ajoutez manuellement les équipes pour le moment")
         
         with col_filtre:
             championnats = ["Tous"] + CHAMPIONNATS
