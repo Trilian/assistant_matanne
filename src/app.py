@@ -228,13 +228,13 @@ def afficher_sidebar():
                 "📊 Planning (ancien)": "cuisine.planning_semaine",  # Ancien planning
             },
             
-            # Famille
+            # Famille - NOUVEAU HUB
             "👨‍👩‍👧‍👦 Famille": {
-                "🏠 Hub Famille": "famille.accueil",
-                "👶 Jules (19m)": "famille.jules",
-                "💪 Santé & Sport": "famille.sante",
-                "🎨 Activités": "famille.activites",
-                "🛍️ Shopping": "famille.shopping",
+                "🏠 Hub Famille": "famille.hub",  # Nouveau hub avec cards
+                "👶 Jules": "famille.jules_nouveau",
+                "💪 Mon Suivi": "famille.suivi_perso",
+                "🎉 Weekend": "famille.weekend",
+                "🛍️ Achats": "famille.achats_famille",
             },
             
             # Maison

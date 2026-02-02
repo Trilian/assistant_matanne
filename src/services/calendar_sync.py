@@ -533,7 +533,8 @@ class CalendarSyncService:
         if not client_id:
             raise ValueError("GOOGLE_CLIENT_ID non configuré")
         
-        scope = "https://www.googleapis.com/auth/calendar.readonly"
+        # Scope pour lecture ET écriture du calendrier
+        scope = "https://www.googleapis.com/auth/calendar"
         
         auth_url = (
             f"https://accounts.google.com/o/oauth2/v2/auth?"
@@ -607,7 +608,15 @@ class CalendarSyncService:
             return None
     
     def sync_google_calendar(self, config: ExternalCalendarConfig) -> SyncResult:
-        """Synchronise avec Google Calendar."""
+        """
+        Synchronise avec Google Calendar (import + export bidirectionnel).
+        
+        Args:
+            config: Configuration du calendrier Google
+            
+        Returns:
+            Résultat de la synchronisation
+        """
         if config.provider != CalendarProvider.GOOGLE:
             return SyncResult(success=False, message="Pas un calendrier Google")
         
@@ -615,60 +624,293 @@ class CalendarSyncService:
         if config.token_expiry and config.token_expiry < datetime.now():
             self._refresh_google_token(config)
         
+        start_time = datetime.now()
+        events_imported = 0
+        events_exported = 0
+        errors = []
+        
         try:
-            # Récupérer les événements
             headers = {"Authorization": f"Bearer {config.access_token}"}
             
-            time_min = datetime.now().isoformat() + "Z"
-            time_max = (datetime.now() + timedelta(days=30)).isoformat() + "Z"
+            # ════════════════════════════════════════════════
+            # 1. IMPORT: Google → App (si autorisé)
+            # ════════════════════════════════════════════════
+            if config.sync_direction in [SyncDirection.IMPORT_ONLY, SyncDirection.BIDIRECTIONAL]:
+                events_imported = self._import_from_google(config, headers)
             
-            response = self.http_client.get(
-                f"https://www.googleapis.com/calendar/v3/calendars/primary/events",
-                headers=headers,
-                params={
-                    "timeMin": time_min,
-                    "timeMax": time_max,
-                    "singleEvents": "true",
-                    "orderBy": "startTime",
-                }
-            )
-            response.raise_for_status()
-            data = response.json()
-            
-            events = []
-            for item in data.get("items", []):
-                start = item.get("start", {})
-                end = item.get("end", {})
-                
-                start_dt = start.get("dateTime") or start.get("date")
-                end_dt = end.get("dateTime") or end.get("date")
-                
-                if start_dt:
-                    events.append(CalendarEventExternal(
-                        external_id=item["id"],
-                        title=item.get("summary", "Sans titre"),
-                        description=item.get("description", ""),
-                        start_time=datetime.fromisoformat(start_dt.replace("Z", "+00:00")),
-                        end_time=datetime.fromisoformat(end_dt.replace("Z", "+00:00")) if end_dt else datetime.now(),
-                        all_day="date" in start,
-                        location=item.get("location", ""),
-                    ))
-            
-            # Importer les événements dans la base locale
-            imported = self._import_events_to_db(events)
+            # ════════════════════════════════════════════════
+            # 2. EXPORT: App → Google (si autorisé)
+            # ════════════════════════════════════════════════
+            if config.sync_direction in [SyncDirection.EXPORT_ONLY, SyncDirection.BIDIRECTIONAL]:
+                events_exported = self._export_to_google(config, headers)
             
             config.last_sync = datetime.now()
             self._save_config_to_db(config)
             
+            duration = (datetime.now() - start_time).total_seconds()
+            
             return SyncResult(
                 success=True,
-                message=f"Synchronisation Google réussie",
-                events_imported=imported,
+                message=f"Sync Google réussie: {events_imported} importés, {events_exported} exportés",
+                events_imported=events_imported,
+                events_exported=events_exported,
+                duration_seconds=duration,
             )
             
         except Exception as e:
             logger.error(f"Erreur sync Google: {e}")
             return SyncResult(success=False, message=str(e), errors=[str(e)])
+    
+    def _import_from_google(self, config: ExternalCalendarConfig, headers: dict) -> int:
+        """Importe les événements depuis Google Calendar."""
+        time_min = datetime.now().isoformat() + "Z"
+        time_max = (datetime.now() + timedelta(days=30)).isoformat() + "Z"
+        
+        response = self.http_client.get(
+            "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+            headers=headers,
+            params={
+                "timeMin": time_min,
+                "timeMax": time_max,
+                "singleEvents": "true",
+                "orderBy": "startTime",
+            }
+        )
+        response.raise_for_status()
+        data = response.json()
+        
+        events = []
+        for item in data.get("items", []):
+            start = item.get("start", {})
+            end = item.get("end", {})
+            
+            start_dt = start.get("dateTime") or start.get("date")
+            end_dt = end.get("dateTime") or end.get("date")
+            
+            if start_dt:
+                events.append(CalendarEventExternal(
+                    external_id=item["id"],
+                    title=item.get("summary", "Sans titre"),
+                    description=item.get("description", ""),
+                    start_time=datetime.fromisoformat(start_dt.replace("Z", "+00:00")),
+                    end_time=datetime.fromisoformat(end_dt.replace("Z", "+00:00")) if end_dt else datetime.now(),
+                    all_day="date" in start,
+                    location=item.get("location", ""),
+                ))
+        
+        return self._import_events_to_db(events)
+    
+    def _export_to_google(self, config: ExternalCalendarConfig, headers: dict) -> int:
+        """
+        Exporte les repas et activités vers Google Calendar.
+        
+        Crée ou met à jour les événements dans le calendrier Google de l'utilisateur.
+        """
+        exported_count = 0
+        
+        with obtenir_contexte_db() as db:
+            # Récupérer les repas des 30 prochains jours
+            start = date.today()
+            end = date.today() + timedelta(days=30)
+            
+            repas_list = db.query(Repas).join(Planning).filter(
+                Repas.date_repas >= start,
+                Repas.date_repas <= end,
+            ).all()
+            
+            for repas in repas_list:
+                try:
+                    event_id = self._export_meal_to_google(repas, config, headers, db)
+                    if event_id:
+                        exported_count += 1
+                except Exception as e:
+                    logger.warning(f"Erreur export repas {repas.id}: {e}")
+            
+            # Récupérer les activités
+            activities = db.query(FamilyActivity).filter(
+                FamilyActivity.date_prevue >= start,
+                FamilyActivity.date_prevue <= end,
+                FamilyActivity.statut != "annulé",
+            ).all()
+            
+            for activity in activities:
+                try:
+                    event_id = self._export_activity_to_google(activity, config, headers, db)
+                    if event_id:
+                        exported_count += 1
+                except Exception as e:
+                    logger.warning(f"Erreur export activité {activity.id}: {e}")
+        
+        logger.info(f"✅ Exporté {exported_count} événements vers Google Calendar")
+        return exported_count
+    
+    def _export_meal_to_google(
+        self, 
+        repas: Repas, 
+        config: ExternalCalendarConfig, 
+        headers: dict,
+        db: Session
+    ) -> str | None:
+        """Exporte un repas vers Google Calendar."""
+        # Déterminer l'heure selon le type de repas
+        meal_hours = {
+            "petit_déjeuner": 8,
+            "déjeuner": 12,
+            "goûter": 16,
+            "dîner": 19,
+        }
+        hour = meal_hours.get(repas.type_repas, 12)
+        
+        start_time = datetime.combine(repas.date_repas, datetime.min.time().replace(hour=hour))
+        end_time = start_time + timedelta(hours=1)
+        
+        title = f"🍽️ {repas.type_repas.replace('_', ' ').title()}"
+        if repas.recette:
+            title += f": {repas.recette.nom}"
+        
+        description = repas.notes or ""
+        if repas.recette and repas.recette.description:
+            description += f"\n\n{repas.recette.description}"
+        
+        # ID unique pour éviter les doublons
+        matanne_event_id = f"matanne-meal-{repas.id}"
+        
+        event_body = {
+            "summary": title,
+            "description": description,
+            "start": {"dateTime": start_time.isoformat(), "timeZone": "Europe/Paris"},
+            "end": {"dateTime": end_time.isoformat(), "timeZone": "Europe/Paris"},
+            "extendedProperties": {
+                "private": {
+                    "matanne_type": "meal",
+                    "matanne_id": str(repas.id),
+                }
+            }
+        }
+        
+        # Vérifier si l'événement existe déjà
+        existing = self._find_google_event_by_matanne_id(matanne_event_id, headers)
+        
+        if existing:
+            # Mettre à jour
+            response = self.http_client.patch(
+                f"https://www.googleapis.com/calendar/v3/calendars/primary/events/{existing['id']}",
+                headers={**headers, "Content-Type": "application/json"},
+                json=event_body,
+            )
+        else:
+            # Créer
+            response = self.http_client.post(
+                "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+                headers={**headers, "Content-Type": "application/json"},
+                json=event_body,
+            )
+        
+        response.raise_for_status()
+        return response.json().get("id")
+    
+    def _export_activity_to_google(
+        self, 
+        activity: FamilyActivity, 
+        config: ExternalCalendarConfig, 
+        headers: dict,
+        db: Session
+    ) -> str | None:
+        """Exporte une activité vers Google Calendar."""
+        start_time = datetime.combine(activity.date_prevue, datetime.min.time().replace(hour=10))
+        duration_hours = activity.duree_heures or 2
+        end_time = start_time + timedelta(hours=duration_hours)
+        
+        event_body = {
+            "summary": f"👨‍👩‍👧 {activity.titre}",
+            "description": activity.description or "",
+            "location": activity.lieu or "",
+            "start": {"dateTime": start_time.isoformat(), "timeZone": "Europe/Paris"},
+            "end": {"dateTime": end_time.isoformat(), "timeZone": "Europe/Paris"},
+            "colorId": "9",  # Bleu pour les activités
+            "extendedProperties": {
+                "private": {
+                    "matanne_type": "activity",
+                    "matanne_id": str(activity.id),
+                }
+            }
+        }
+        
+        matanne_event_id = f"matanne-activity-{activity.id}"
+        existing = self._find_google_event_by_matanne_id(matanne_event_id, headers)
+        
+        if existing:
+            response = self.http_client.patch(
+                f"https://www.googleapis.com/calendar/v3/calendars/primary/events/{existing['id']}",
+                headers={**headers, "Content-Type": "application/json"},
+                json=event_body,
+            )
+        else:
+            response = self.http_client.post(
+                "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+                headers={**headers, "Content-Type": "application/json"},
+                json=event_body,
+            )
+        
+        response.raise_for_status()
+        return response.json().get("id")
+    
+    def _find_google_event_by_matanne_id(self, matanne_id: str, headers: dict) -> dict | None:
+        """Recherche un événement Google par son ID Matanne."""
+        try:
+            # Recherche par propriété étendue
+            response = self.http_client.get(
+                "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+                headers=headers,
+                params={
+                    "privateExtendedProperty": f"matanne_id={matanne_id.split('-')[-1]}",
+                    "maxResults": 1,
+                }
+            )
+            response.raise_for_status()
+            items = response.json().get("items", [])
+            return items[0] if items else None
+        except Exception:
+            return None
+    
+    def export_planning_to_google(
+        self,
+        user_id: str,
+        config: ExternalCalendarConfig,
+        start_date: date | None = None,
+        end_date: date | None = None,
+    ) -> SyncResult:
+        """
+        Export complet du planning vers Google Calendar.
+        
+        Args:
+            user_id: ID utilisateur
+            config: Configuration Google Calendar
+            start_date: Date de début (défaut: aujourd'hui)
+            end_date: Date de fin (défaut: +30 jours)
+            
+        Returns:
+            Résultat de l'export
+        """
+        if config.provider != CalendarProvider.GOOGLE:
+            return SyncResult(success=False, message="Pas un calendrier Google")
+        
+        # Vérifier/rafraîchir le token
+        if config.token_expiry and config.token_expiry < datetime.now():
+            self._refresh_google_token(config)
+        
+        headers = {"Authorization": f"Bearer {config.access_token}"}
+        
+        start_time = datetime.now()
+        exported_count = self._export_to_google(config, headers)
+        duration = (datetime.now() - start_time).total_seconds()
+        
+        return SyncResult(
+            success=True,
+            message=f"{exported_count} événements exportés vers Google Calendar",
+            events_exported=exported_count,
+            duration_seconds=duration,
+        )
     
     def _refresh_google_token(self, config: ExternalCalendarConfig):
         """Rafraîchit le token Google."""

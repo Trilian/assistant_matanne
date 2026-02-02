@@ -133,7 +133,7 @@ class FeedbackRecette:
     recette_id: int
     recette_nom: str
     feedback: str  # "like", "dislike", "neutral"
-    date_feedback: date = field(default_factory=date.today)
+    date_feedback: Optional[date] = field(default_factory=date.today)
     contexte: Optional[str] = None  # "trop long", "jules n'a pas aimé", etc.
     
     @property

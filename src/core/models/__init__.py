@@ -146,6 +146,21 @@ from .user_preferences import (
     CalendarProvider as CalendarProviderNew,
 )
 
+# Utilisateurs et Garmin (NOUVEAU)
+from .users import (
+    UserProfile,
+    GarminToken,
+    GarminActivity,
+    GarminDailySummary,
+    FoodLog,
+    WeekendActivity,
+    FamilyPurchase,
+    # Enums
+    GarminActivityType,
+    PurchaseCategory,
+    PurchasePriority,
+)
+
 
 # Export explicite de tous les symboles
 __all__ = [
@@ -233,10 +248,21 @@ __all__ = [
     "StatutEtapeEnum",
     "TypeRobotEnum",
     "LocalisationStockageEnum",
-    # Préférences utilisateur (NOUVEAU)
+    # Préférences utilisateur
     "UserPreference",
     "RecipeFeedback",
     "OpenFoodFactsCache",
     "ExternalCalendarConfig",
     "FeedbackType",
+    # Utilisateurs et Garmin (NOUVEAU)
+    "UserProfile",
+    "GarminToken",
+    "GarminActivity",
+    "GarminDailySummary",
+    "FoodLog",
+    "WeekendActivity",
+    "FamilyPurchase",
+    "GarminActivityType",
+    "PurchaseCategory",
+    "PurchasePriority",
 ]

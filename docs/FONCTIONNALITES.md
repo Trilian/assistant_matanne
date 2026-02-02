@@ -193,12 +193,12 @@ GOOGLE_CLIENT_SECRET=votre_client_secret
 
 ### Fonctionnalités
 
-| Fonctionnalité        | Statut              |
-| --------------------- | ------------------- |
-| OAuth2                | ✅ Implémenté       |
-| Import événements     | ✅ Fonctionnel      |
-| Export planning       | 🚧 En développement |
-| Sync bidirectionnelle | 🚧 Planifié         |
+| Fonctionnalité        | Statut         |
+| --------------------- | -------------- |
+| OAuth2                | ✅ Implémenté  |
+| Import événements     | ✅ Fonctionnel |
+| Export planning       | ✅ Fonctionnel |
+| Sync bidirectionnelle | ✅ Fonctionnel |
 
 ### Utilisation
 
@@ -213,9 +213,25 @@ auth_url = service.get_google_auth_url(user_id, redirect_uri)
 # 2. Après callback OAuth
 config = service.handle_google_callback(user_id, code, redirect_uri)
 
-# 3. Synchroniser
+# 3. Synchroniser (import + export bidirectionnel)
 result = service.sync_google_calendar(config)
+# result.events_imported = nombre importés de Google
+# result.events_exported = nombre exportés vers Google
+
+# 4. Export uniquement vers Google
+result = service.export_planning_to_google(user_id, config)
 ```
+
+### Export vers Google Calendar
+
+Les repas et activités sont automatiquement exportés:
+
+| Type     | Format                   | Couleur  |
+| -------- | ------------------------ | -------- |
+| Repas    | 🍽️ Déjeuner: Poulet rôti | Standard |
+| Activité | 👨‍👩‍👧 Sortie parc           | Bleu     |
+
+Les événements utilisent `extendedProperties` pour éviter les doublons lors des syncs répétées.
 
 ### UI de configuration
 

@@ -4,6 +4,7 @@ Module Planning - Gestion du planning hebdomadaire
 - Vue semaine avec édition en ligne
 - Génération IA planning
 - Historique et gestion plannings
+- Activités weekend intégrées
 """
 
 import streamlit as st
@@ -36,12 +37,23 @@ REGIMES = ["Omnivore", "Végétarien", "Végan", "Sans gluten"]
 TEMPS_CUISINE = ["Rapide (< 30 min)", "Moyen (30-60 min)", "Long (> 60 min)"]
 BUDGETS = ["Bas (< 20€)", "Moyen (20-40€)", "Haut (> 40€)"]
 
+TYPES_ACTIVITES_WEEKEND = {
+    "parc": {"emoji": "🌳", "label": "Parc / Nature"},
+    "musee": {"emoji": "🏛️", "label": "Musée / Expo"},
+    "piscine": {"emoji": "🏊", "label": "Piscine"},
+    "zoo": {"emoji": "🦁", "label": "Zoo / Ferme"},
+    "restaurant": {"emoji": "🍽️", "label": "Restaurant"},
+    "famille": {"emoji": "👨‍👩‍👧", "label": "Visite famille"},
+    "maison": {"emoji": "🏠", "label": "Maison"},
+    "autre": {"emoji": "✨", "label": "Autre"},
+}
+
 
 def app():
     """Point d'entrée module planning"""
     st.title("📅 Planning Hebdomadaire")
     
-    tabs = st.tabs(["🍽️ Planning Actif", "🛒 Courses", "👶 Jules", "🤖 Générer avec IA", "⚖️ Créateur Équilibré", "📚 Historique"])
+    tabs = st.tabs(["🍽️ Planning Actif", "🛒 Courses", "🎉 Weekend", "👶 Jules", "🤖 Générer avec IA", "⚖️ Créateur Équilibré", "📚 Historique"])
     
     with tabs[0]:
         render_planning()
@@ -50,15 +62,18 @@ def app():
         render_courses_aggregees()
     
     with tabs[2]:
-        render_versions_jules()
+        render_weekend_activities()
     
     with tabs[3]:
-        render_generer()
+        render_versions_jules()
     
     with tabs[4]:
-        render_createur_equilibre()
+        render_generer()
     
     with tabs[5]:
+        render_createur_equilibre()
+    
+    with tabs[6]:
         render_historique()
 
 
@@ -449,7 +464,127 @@ def render_courses_aggregees():
 
 
 # ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
-# SECTION 3: VERSIONS JULES (19 MOIS)
+# SECTION 3: ACTIVITÉS WEEKEND
+# ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
+
+def render_weekend_activities():
+    """Affiche et gère les activités du weekend dans le planning global"""
+    st.subheader("🎉 Activités Weekend")
+    st.markdown("Planifiez vos sorties et activités du weekend.")
+    
+    try:
+        # Import du modèle WeekendActivity
+        from src.core.models import WeekendActivity
+        
+        # Calculer les dates du weekend actuel
+        today = date.today()
+        days_until_saturday = (5 - today.weekday()) % 7
+        if days_until_saturday == 0 and today.weekday() != 5:
+            days_until_saturday = 7
+        samedi = today + timedelta(days=days_until_saturday)
+        dimanche = samedi + timedelta(days=1)
+        
+        st.info(f"📅 Weekend du **{samedi.strftime('%d/%m')}** au **{dimanche.strftime('%d/%m')}**")
+        
+        # Récupérer activités weekend
+        with obtenir_contexte_db() as db:
+            activites_samedi = db.query(WeekendActivity).filter(
+                WeekendActivity.activity_date == samedi
+            ).order_by(WeekendActivity.time_slot).all()
+            
+            activites_dimanche = db.query(WeekendActivity).filter(
+                WeekendActivity.activity_date == dimanche
+            ).order_by(WeekendActivity.time_slot).all()
+        
+        # Layout 2 colonnes
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown(f"### 🔴 Samedi {samedi.strftime('%d/%m')}")
+            if activites_samedi:
+                for act in activites_samedi:
+                    type_info = TYPES_ACTIVITES_WEEKEND.get(act.activity_type, {"emoji": "✨", "label": act.activity_type})
+                    with st.container(border=True):
+                        st.markdown(f"**{type_info['emoji']} {act.title}**")
+                        if act.location:
+                            st.caption(f"📍 {act.location}")
+                        if act.estimated_cost and act.estimated_cost > 0:
+                            st.caption(f"💰 ~{act.estimated_cost:.0f}€")
+                        if act.adapte_jules:
+                            st.caption("👶 Adapté Jules")
+            else:
+                st.info("Pas d'activité planifiée")
+        
+        with col2:
+            st.markdown(f"### 🟢 Dimanche {dimanche.strftime('%d/%m')}")
+            if activites_dimanche:
+                for act in activites_dimanche:
+                    type_info = TYPES_ACTIVITES_WEEKEND.get(act.activity_type, {"emoji": "✨", "label": act.activity_type})
+                    with st.container(border=True):
+                        st.markdown(f"**{type_info['emoji']} {act.title}**")
+                        if act.location:
+                            st.caption(f"📍 {act.location}")
+                        if act.estimated_cost and act.estimated_cost > 0:
+                            st.caption(f"💰 ~{act.estimated_cost:.0f}€")
+                        if act.adapte_jules:
+                            st.caption("👶 Adapté Jules")
+            else:
+                st.info("Pas d'activité planifiée")
+        
+        st.divider()
+        
+        # Formulaire ajout rapide
+        with st.expander("➕ Ajouter une activité"):
+            with st.form("form_weekend_activity"):
+                col_a, col_b = st.columns(2)
+                
+                with col_a:
+                    titre = st.text_input("Titre*")
+                    type_act = st.selectbox("Type", list(TYPES_ACTIVITES_WEEKEND.keys()), 
+                                           format_func=lambda x: f"{TYPES_ACTIVITES_WEEKEND[x]['emoji']} {TYPES_ACTIVITES_WEEKEND[x]['label']}")
+                    jour = st.selectbox("Jour", ["Samedi", "Dimanche"])
+                
+                with col_b:
+                    lieu = st.text_input("Lieu")
+                    cout = st.number_input("Coût estimé (€)", 0.0, 500.0, 0.0, step=5.0)
+                    adapte_jules = st.checkbox("Adapté à Jules", value=True)
+                
+                if st.form_submit_button("✅ Ajouter", use_container_width=True):
+                    if titre:
+                        try:
+                            with obtenir_contexte_db() as db:
+                                nouvelle = WeekendActivity(
+                                    activity_date=samedi if jour == "Samedi" else dimanche,
+                                    activity_type=type_act,
+                                    title=titre,
+                                    location=lieu if lieu else None,
+                                    estimated_cost=cout if cout > 0 else None,
+                                    adapte_jules=adapte_jules,
+                                    time_slot="matin",
+                                    source="manuel"
+                                )
+                                db.add(nouvelle)
+                                db.commit()
+                            st.success(f"✅ '{titre}' ajouté!")
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"❌ Erreur: {str(e)}")
+                    else:
+                        st.warning("⚠️ Titre requis")
+        
+        # Lien vers module weekend complet
+        st.markdown("---")
+        st.markdown("🔗 Pour plus d'options (suggestions IA, lieux testés...), allez dans **Famille > Weekend**")
+    
+    except ImportError:
+        st.warning("⚠️ Module WeekendActivity non disponible. Exécutez la migration SQL.")
+    except Exception as e:
+        st.error(f"❌ Erreur: {str(e)}")
+        logger.error(f"Erreur render_weekend_activities: {e}")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
+# SECTION 4: VERSIONS JULES (19 MOIS)
 # ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 def render_versions_jules():

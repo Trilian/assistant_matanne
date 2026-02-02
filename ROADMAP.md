@@ -1,25 +1,62 @@
 # 🗺️ ROADMAP - Assistant Matanne
 
-> Dernière mise à jour: 28 janvier 2026
+> Dernière mise à jour: 2 février 2026
 
 ---
 
-## ✅ Terminé (Session 28 janvier)
+## ✅ Terminé (Session 2 février)
 
-### Tests & Couverture
-- [x] Créer 11 fichiers de tests pour modules 0% couverture (~315 tests)
+### 🎉 REFONTE MODULE FAMILLE (Nouveau!)
+
+Refonte complète du module Famille avec navigation par cartes et intégration Garmin.
+
+#### Nouveaux fichiers créés
+
+| Fichier                                    | Description                                                                                                    |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| `src/core/models/users.py`                 | Modèles UserProfile, GarminToken, GarminActivity, GarminDailySummary, FoodLog, WeekendActivity, FamilyPurchase |
+| `src/services/garmin_sync.py`              | Service OAuth 1.0a Garmin Connect (sync activités + sommeil + stress)                                          |
+| `src/domains/famille/ui/hub_famille.py`    | Hub avec cartes cliquables (Jules, Weekend, Anne, Mathieu, Achats)                                             |
+| `src/domains/famille/ui/jules_nouveau.py`  | Module Jules: activités adaptées âge, shopping, conseils IA                                                    |
+| `src/domains/famille/ui/suivi_perso.py`    | Suivi perso: switch Anne/Mathieu, Garmin, alimentation                                                         |
+| `src/domains/famille/ui/weekend.py`        | Planning weekend + suggestions IA                                                                              |
+| `src/domains/famille/ui/achats_famille.py` | Wishlist famille par catégorie                                                                                 |
+| `sql/015_famille_refonte.sql`              | Migration SQL pour 7 nouvelles tables                                                                          |
+
+#### Nouvelles tables SQL
+
+- `user_profiles` - Profils Anne/Mathieu avec objectifs fitness
+- `garmin_tokens` - Tokens OAuth Garmin
+- `garmin_activities` - Activités synchronisées
+- `garmin_daily_summaries` - Résumés quotidiens (pas, sommeil, stress)
+- `food_logs` - Journal alimentaire
+- `weekend_activities` - Planning sorties weekend
+- `family_purchases` - Wishlist achats famille
+
+#### Configuration Garmin requise
+
+```bash
+# À ajouter dans .env.local
+GARMIN_CONSUMER_KEY=xxx    # Depuis developer.garmin.com
+GARMIN_CONSUMER_SECRET=xxx
+```
+
+### Google Calendar & Services DB
+
+- [x] Export planning vers Google Calendar (repas + activités)
+- [x] Synchronisation bidirectionnelle Google (import + export)
+- [x] Scope OAuth étendu (lecture + écriture)
+- [x] Service `weather.py` utilise modèles DB (`AlerteMeteo`, `ConfigMeteo`)
+- [x] Service `backup.py` utilise modèle DB (`Backup`)
+- [x] Service `calendar_sync.py` utilise modèle DB (`ExternalCalendarConfig`)
+- [x] Service `UserPreferenceService` pour persistance préférences
+- [x] Planificateur repas connecté à DB (préférences + feedbacks)
+
+### Session 28 janvier
+
+- [x] Créer 11 fichiers de tests (~315 tests)
 - [x] Corriger tests alignés avec vraie structure services
-- [x] Corriger bug Pydantic v2 dans `budget.py` (`date: date` → `date_type`)
 - [x] Couverture passée de 26% à **28.32%** (+1.80%)
-- [x] Tests: **1491 passés**, 37 skippés, 1 échec mineur (TTL cache)
-
-### Session 26 janvier
-- [x] Modèles SQLAlchemy pour nouvelles tables (`nouveaux.py`)
-- [x] Mise à jour `FamilyBudget` (ajout `magasin`, `est_recurrent`)
-- [x] Correction `budget.py` attributs manquants
-- [x] Script SQL complet (`SUPABASE_COMPLET_V3.sql`)
-- [x] Nettoyage 52 fichiers .md obsolètes
-- [x] Création `README.md` unifié + `docs/ARCHITECTURE.md`
 
 ---
 
@@ -28,6 +65,7 @@
 ### 1. Configuration & Secrets (1-2h)
 
 #### Variables d'environnement manquantes
+
 ```bash
 # À ajouter dans .env.local
 VAPID_PRIVATE_KEY=xxx          # Pour push notifications
@@ -37,11 +75,13 @@ GOOGLE_CALENDAR_CLIENT_ID=xxx  # Pour sync calendrier (optionnel)
 ```
 
 **Générer clés VAPID:**
+
 ```bash
 npx web-push generate-vapid-keys
 ```
 
 #### Fichier `.env.example` à créer
+
 ```env
 # Base de données
 DATABASE_URL=postgresql://user:password@host:5432/database
@@ -68,17 +108,18 @@ OPENWEATHER_API_KEY=
 4. Exécuter
 5. Vérifier: `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';`
 
-### 3. Connecter services aux nouveaux modèles (2-3h)
+### 3. Connecter services aux nouveaux modèles ✅ FAIT
 
-| Service | Action |
-|---------|--------|
-| `weather.py` | Remplacer `AlerteMeteo` Pydantic par modèle DB |
-| `backup.py` | Utiliser modèle `Backup` pour historique |
-| `calendar_sync.py` | Utiliser `CalendrierExterne`, `EvenementCalendrier` |
-| `push_notifications.py` | Utiliser `PushSubscription`, `NotificationPreference` |
-| `budget.py` | Migrer vers nouveau modèle `Depense` |
+| Service                 | Statut                                                       |
+| ----------------------- | ------------------------------------------------------------ |
+| `weather.py`            | ✅ Utilise `AlerteMeteo`, `ConfigMeteo` (DB)                 |
+| `backup.py`             | ✅ Utilise modèle `Backup` pour historique                   |
+| `calendar_sync.py`      | ✅ Utilise `CalendrierExterne`, `EvenementCalendrier`        |
+| `push_notifications.py` | ✅ Utilise `PushSubscription`, `NotificationPreference` (DB) |
+| `budget.py`             | ✅ Utilise `BudgetMensuelDB` pour budgets par catégorie      |
 
 **Exemple migration weather.py:**
+
 ```python
 # Avant (Pydantic local)
 class AlerteMeteo(BaseModel):
@@ -108,6 +149,7 @@ python manage.py test_coverage
 ```
 
 **Fichiers tests créés:**
+
 - [x] `tests/test_budget.py` - 26 tests pour modèles Depense
 - [x] `tests/test_notifications.py` - 20 tests
 - [x] `tests/test_predictions.py` - 24 tests
@@ -117,6 +159,7 @@ python manage.py test_coverage
 - [x] `tests/test_redis_multi_tenant.py` - 22 tests
 
 **Fichiers tests à créer:**
+
 - [ ] `tests/test_weather.py` - Service météo
 - [ ] `tests/test_backup.py` - Service backup
 - [ ] `tests/test_calendar_sync.py` - Sync calendrier
@@ -167,14 +210,14 @@ streamlit run src/app.py
 
 ## 📊 Métriques projet
 
-| Métrique | Actuel | Objectif | Status |
-|----------|--------|----------|--------|
-| Couverture tests | **28.32%** | 70% | 🟡 En cours |
-| Tests passés | **1491** | 2000+ | 🟢 |
-| Temps démarrage | ~2s | <1.5s | 🟡 |
-| Tables SQL | 35 | ✅ | ✅ |
-| Services | 25 | ✅ | ✅ |
-| Fichiers .md | 3 | ✅ | ✅ (était 52) |
+| Métrique         | Actuel     | Objectif | Status        |
+| ---------------- | ---------- | -------- | ------------- |
+| Couverture tests | **28.32%** | 70%      | 🟡 En cours   |
+| Tests passés     | **1491**   | 2000+    | 🟢            |
+| Temps démarrage  | ~2s        | <1.5s    | 🟡            |
+| Tables SQL       | 35         | ✅       | ✅            |
+| Services         | 25         | ✅       | ✅            |
+| Fichiers .md     | 3          | ✅       | ✅ (était 52) |
 
 ---
 
@@ -191,4 +234,4 @@ streamlit run src/app.py
 
 ---
 
-*Note: Cette roadmap remplace tous les fichiers TODO/PLANNING précédents.*
+_Note: Cette roadmap remplace tous les fichiers TODO/PLANNING précédents._

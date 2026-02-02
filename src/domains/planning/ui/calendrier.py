@@ -10,7 +10,7 @@ from datetime import date, datetime, timedelta
 
 import streamlit as st
 
-from src.services.planning_unified import get_planning_service
+from src.services.planning_unified import get_planning_unified_service
 
 # Logique métier pure
 from src.domains.planning.logic.calendrier_logic import (
@@ -158,11 +158,11 @@ def app():
 
     st.markdown("---")
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # CHARGEMENT DONNÉES
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
-    service = get_planning_service()
+    service = get_planning_unified_service()
     semaine = service.get_semaine_complete(st.session_state.planning_week_start)
 
     if not semaine:

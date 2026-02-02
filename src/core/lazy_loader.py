@@ -225,12 +225,17 @@ class OptimizedRouter:
         # Outils transversaux
         "barcode": {"path": "src.domains.shared.ui.barcode", "type": "simple"},
         "rapports": {"path": "src.domains.shared.ui.rapports", "type": "simple"},
-        # [OK] DOMAINE FAMILLE
-        "famille.accueil": {"path": "src.domains.famille.ui.accueil", "type": "simple"},
-        "famille.jules": {"path": "src.domains.famille.ui.jules", "type": "simple"},
-        "famille.sante": {"path": "src.domains.famille.ui.sante", "type": "simple"},
+        
+        # [OK] DOMAINE FAMILLE - NOUVEAU HUB
+        "famille.hub": {"path": "src.domains.famille.ui.hub_famille", "type": "simple"},
+        "famille.jules_nouveau": {"path": "src.domains.famille.ui.jules_nouveau", "type": "simple"},
+        "famille.suivi_perso": {"path": "src.domains.famille.ui.suivi_perso", "type": "simple"},
+        "famille.weekend": {"path": "src.domains.famille.ui.weekend", "type": "simple"},
+        "famille.achats_famille": {"path": "src.domains.famille.ui.achats_famille", "type": "simple"},
+        # Modules famille conservés
         "famille.activites": {"path": "src.domains.famille.ui.activites", "type": "simple"},
-        "famille.shopping": {"path": "src.domains.famille.ui.shopping", "type": "simple"},
+        "famille.routines": {"path": "src.domains.famille.ui.routines", "type": "simple"},
+        
         # [OK] DOMAINE MAISON
         "maison.projets": {"path": "src.domains.maison.ui.projets", "type": "simple"},
         "maison.jardin": {"path": "src.domains.maison.ui.jardin", "type": "simple"},

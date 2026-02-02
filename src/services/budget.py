@@ -3,7 +3,7 @@ Service de suivi du budget familial.
 
 Fonctionnalités:
 - Suivi des dépenses par catégorie
-- Budget mensuel avec alertes
+- Budget mensuel avec alertes (persisté en DB)
 - Analyse des tendances
 - Prévisions basées sur l'historique
 - Rapports et graphiques
@@ -15,6 +15,7 @@ from datetime import datetime, date as date_type, timedelta
 from decimal import Decimal
 from enum import Enum
 from typing import Any
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 from sqlalchemy import func, extract
@@ -22,9 +23,12 @@ from sqlalchemy.orm import Session
 
 from src.core.database import obtenir_contexte_db
 from src.core.decorators import with_db_session, with_cache
-from src.core.models import FamilyBudget
+from src.core.models import FamilyBudget, BudgetMensuelDB
 
 logger = logging.getLogger(__name__)
+
+# ID utilisateur par défaut (famille Matanne)
+DEFAULT_USER_ID = "matanne"
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -283,79 +287,164 @@ class BudgetService:
             for e in entries
         ]
     
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    # GESTION DES BUDGETS
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
+    # GESTION DES BUDGETS (PERSISTÉ EN DB)
+    # ═══════════════════════════════════════════════════════════
     
+    @with_db_session
     def definir_budget(
         self,
         categorie: CategorieDepense,
         montant: float,
         mois: int | None = None,
         annee: int | None = None,
+        user_id: str = DEFAULT_USER_ID,
+        db: Session = None,
     ):
         """
-        Définit le budget pour une catégorie.
+        Définit le budget pour une catégorie (persisté en DB).
         
         Args:
             categorie: Catégorie de dépense
             montant: Budget mensuel
             mois: Mois spécifique (optionnel, défaut = mois courant)
             annee: Année spécifique (optionnel, défaut = année courante)
+            user_id: ID utilisateur
+            db: Session DB
         """
         mois = mois or date_type.today().month
         annee = annee or date_type.today().year
         
-        # Stocker en session (pour persistance simple)
-        import streamlit as st
+        # Date du premier jour du mois
+        date_mois = date_type(annee, mois, 1)
         
-        key = f"budget_{annee}_{mois}"
-        if key not in st.session_state:
-            st.session_state[key] = {}
+        # Chercher ou créer le budget mensuel
+        budget_db = db.query(BudgetMensuelDB).filter(
+            BudgetMensuelDB.mois == date_mois,
+            BudgetMensuelDB.user_id == user_id,
+        ).first()
         
-        st.session_state[key][categorie.value] = montant
+        if not budget_db:
+            budget_db = BudgetMensuelDB(
+                mois=date_mois,
+                user_id=user_id,
+                budgets_par_categorie={},
+            )
+            db.add(budget_db)
         
-        logger.info(f"Budget défini: {categorie.value} = {montant}€ ({mois}/{annee})")
+        # Mettre à jour le budget de la catégorie
+        budgets = budget_db.budgets_par_categorie or {}
+        budgets[categorie.value] = montant
+        budget_db.budgets_par_categorie = budgets
+        
+        # Recalculer le total
+        budget_db.budget_total = Decimal(str(sum(budgets.values())))
+        
+        db.commit()
+        logger.info(f"✅ Budget défini: {categorie.value} = {montant}€ ({mois}/{annee})")
     
+    @with_db_session
     def get_budget(
         self,
         categorie: CategorieDepense,
         mois: int | None = None,
         annee: int | None = None,
+        user_id: str = DEFAULT_USER_ID,
+        db: Session = None,
     ) -> float:
-        """Récupère le budget d'une catégorie."""
+        """Récupère le budget d'une catégorie depuis la DB."""
         mois = mois or date_type.today().month
         annee = annee or date_type.today().year
+        date_mois = date_type(annee, mois, 1)
         
-        import streamlit as st
+        budget_db = db.query(BudgetMensuelDB).filter(
+            BudgetMensuelDB.mois == date_mois,
+            BudgetMensuelDB.user_id == user_id,
+        ).first()
         
-        key = f"budget_{annee}_{mois}"
-        budgets = st.session_state.get(key, {})
+        if budget_db and budget_db.budgets_par_categorie:
+            return budget_db.budgets_par_categorie.get(
+                categorie.value, 
+                self.BUDGETS_DEFAUT.get(categorie, 0)
+            )
         
-        return budgets.get(categorie.value, self.BUDGETS_DEFAUT.get(categorie, 0))
+        return self.BUDGETS_DEFAUT.get(categorie, 0)
     
+    @with_db_session
     def get_tous_budgets(
         self,
         mois: int | None = None,
         annee: int | None = None,
+        user_id: str = DEFAULT_USER_ID,
+        db: Session = None,
     ) -> dict[CategorieDepense, float]:
-        """Récupère tous les budgets du mois."""
+        """Récupère tous les budgets du mois depuis la DB."""
         mois = mois or date_type.today().month
         annee = annee or date_type.today().year
+        date_mois = date_type(annee, mois, 1)
         
-        import streamlit as st
+        budget_db = db.query(BudgetMensuelDB).filter(
+            BudgetMensuelDB.mois == date_mois,
+            BudgetMensuelDB.user_id == user_id,
+        ).first()
         
-        key = f"budget_{annee}_{mois}"
-        budgets_session = st.session_state.get(key, {})
+        budgets_db = budget_db.budgets_par_categorie if budget_db else {}
         
         result = {}
         for cat in CategorieDepense:
-            if cat.value in budgets_session:
-                result[cat] = budgets_session[cat.value]
+            if budgets_db and cat.value in budgets_db:
+                result[cat] = budgets_db[cat.value]
             elif cat in self.BUDGETS_DEFAUT:
                 result[cat] = self.BUDGETS_DEFAUT[cat]
         
         return result
+    
+    @with_db_session
+    def definir_budgets_batch(
+        self,
+        budgets: dict[CategorieDepense, float],
+        mois: int | None = None,
+        annee: int | None = None,
+        user_id: str = DEFAULT_USER_ID,
+        db: Session = None,
+    ):
+        """
+        Définit plusieurs budgets en une fois.
+        
+        Args:
+            budgets: Dict catégorie → montant
+            mois: Mois
+            annee: Année
+            user_id: ID utilisateur
+            db: Session DB
+        """
+        mois = mois or date_type.today().month
+        annee = annee or date_type.today().year
+        date_mois = date_type(annee, mois, 1)
+        
+        budget_db = db.query(BudgetMensuelDB).filter(
+            BudgetMensuelDB.mois == date_mois,
+            BudgetMensuelDB.user_id == user_id,
+        ).first()
+        
+        if not budget_db:
+            budget_db = BudgetMensuelDB(
+                mois=date_mois,
+                user_id=user_id,
+                budgets_par_categorie={},
+            )
+            db.add(budget_db)
+        
+        # Mettre à jour tous les budgets
+        budgets_dict = budget_db.budgets_par_categorie or {}
+        for cat, montant in budgets.items():
+            budgets_dict[cat.value] = montant
+        
+        budget_db.budgets_par_categorie = budgets_dict
+        budget_db.budget_total = Decimal(str(sum(budgets_dict.values())))
+        
+        db.commit()
+        logger.info(f"✅ {len(budgets)} budgets définis pour {mois}/{annee}")
     
     # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # STATISTIQUES ET ANALYSES
@@ -396,7 +485,7 @@ class BudgetService:
                 resume.depenses_par_categorie.get(cat_key, 0) + dep.montant
         
         # Budgets
-        budgets = self.get_tous_budgets(mois, annee)
+        budgets = self.get_tous_budgets(mois, annee, db=db)
         for cat, budget_montant in budgets.items():
             depense_cat = resume.depenses_par_categorie.get(cat.value, 0)
             
@@ -554,7 +643,7 @@ class BudgetService:
         """Vérifie et génère les alertes de budget."""
         import streamlit as st
         
-        budgets = self.get_tous_budgets(mois, annee)
+        budgets = self.get_tous_budgets(mois, annee, db=db)
         depenses = self.get_depenses_mois(mois, annee, db=db)
         
         # Calculer les totaux par catégorie

@@ -96,18 +96,18 @@ class UserPreference(Base):
     temps_semaine: Mapped[str] = mapped_column(String(20), default="normal")
     temps_weekend: Mapped[str] = mapped_column(String(20), default="long")
     
-    # Préférences alimentaires (JSONB)
-    aliments_exclus: Mapped[dict[str, Any]] = mapped_column(JSONB, default=list)
-    aliments_favoris: Mapped[dict[str, Any]] = mapped_column(JSONB, default=list)
+    # Préférences alimentaires (JSONB - stocke des listes)
+    aliments_exclus: Mapped[list[str]] = mapped_column(JSONB, default=list)
+    aliments_favoris: Mapped[list[str]] = mapped_column(JSONB, default=list)
     
     # Équilibre souhaité
     poisson_par_semaine: Mapped[int] = mapped_column(Integer, default=2)
     vegetarien_par_semaine: Mapped[int] = mapped_column(Integer, default=1)
     viande_rouge_max: Mapped[int] = mapped_column(Integer, default=2)
     
-    # Équipements et magasins (JSONB)
-    robots: Mapped[dict[str, Any]] = mapped_column(JSONB, default=list)
-    magasins_preferes: Mapped[dict[str, Any]] = mapped_column(JSONB, default=list)
+    # Équipements et magasins (JSONB - stocke des listes)
+    robots: Mapped[list[str]] = mapped_column(JSONB, default=list)
+    magasins_preferes: Mapped[list[str]] = mapped_column(JSONB, default=list)
     
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
