@@ -1,16 +1,20 @@
-﻿"""Domaine Cuisine - Gestion recettes, planning repas, inventaire et courses."""
+﻿"""Domaine Cuisine - Gestion recettes, planning repas, inventaire et courses.
 
-# UI
-from .ui import recettes, planning, inventaire, courses, recettes_import
+Modules disponibles (chargement différé via OptimizedRouter):
+- recettes: Gestion des recettes
+- inventaire: Gestion du stock
+- planificateur_repas: Planning hebdomadaire intelligent
+- courses: Liste de courses
+- recettes_import: Import de recettes
 
-# Logic
-from .logic import recettes_logic, planning_logic, inventaire_logic, courses_logic
+Pour éviter les imports circulaires, les modules sont chargés à la demande.
+"""
 
-# Exports principaux
+# Exports principaux - imports différés via __getattr__
 __all__ = [
     # UI
     "recettes",
-    "planning",
+    "planificateur_repas",
     "inventaire", 
     "courses",
     "recettes_import",
@@ -20,4 +24,15 @@ __all__ = [
     "inventaire_logic",
     "courses_logic",
 ]
+
+
+def __getattr__(name: str):
+    """Import différé pour éviter les imports circulaires."""
+    if name in ("recettes", "inventaire", "courses", "recettes_import", "planificateur_repas"):
+        from . import ui
+        return getattr(ui, name)
+    elif name in ("recettes_logic", "planning_logic", "inventaire_logic", "courses_logic"):
+        from . import logic
+        return getattr(logic, name)
+    raise AttributeError(f"module 'src.domains.cuisine' has no attribute '{name}'")
 

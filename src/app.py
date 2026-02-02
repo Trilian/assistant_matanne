@@ -243,6 +243,7 @@ def afficher_sidebar():
                 "🏠 Hub Maison": "maison",
                 "🌳 Zones Jardin": "maison.jardin_zones",
                 "🔋 Énergie": "maison.energie",  # Dashboard énergie
+                "📸 Scan Factures": "maison.scan_factures",  # OCR factures
                 "🧹 Entretien": "maison.entretien",
                 "🛋️ Meubles": "maison.meubles",
                 "💰 Dépenses": "maison.depenses",
@@ -259,6 +260,7 @@ def afficher_sidebar():
             "🔧 Outils": {
                 "📱 Code-barres": "barcode",
                 "📊 Rapports": "rapports",
+                "🔔 Notifications": "notifications_push",
             },
             "⚙️ Paramètres": "parametres",
         }

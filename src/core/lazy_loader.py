@@ -239,11 +239,13 @@ class OptimizedRouter:
         "maison.eco": {"path": "src.domains.maison.ui.eco_tips", "type": "simple"},
         "maison.depenses": {"path": "src.domains.maison.ui.depenses", "type": "simple"},
         "maison.energie": {"path": "src.domains.maison.ui.energie", "type": "simple"},  # Dashboard énergie
+        "maison.scan_factures": {"path": "src.domains.maison.ui.scan_factures", "type": "simple"},  # OCR factures
         # [OK] DOMAINE JEUX (Paris sportifs & Loto)
         "jeux.paris": {"path": "src.domains.jeux.ui.paris", "type": "simple"},
         "jeux.loto": {"path": "src.domains.jeux.ui.loto", "type": "simple"},
         # Paramètres
         "parametres": {"path": "src.domains.utils.ui.parametres", "type": "simple"},
+        "notifications_push": {"path": "src.domains.utils.ui.notifications_push", "type": "simple"},  # Alertes push
     }
 
     @staticmethod
