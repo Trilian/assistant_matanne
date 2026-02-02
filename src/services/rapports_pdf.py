@@ -877,7 +877,20 @@ class RapportsPDFService(BaseService[ArticleInventaire]):
         Returns:
             Données structurées du rapport
         """
-        planning = session.query(Planning).filter_by(id=planning_id).first()
+        from sqlalchemy.orm import selectinload
+        
+        # Eager loading pour éviter N+1 queries
+        planning = (
+            session.query(Planning)
+            .options(
+                selectinload(Planning.repas)
+                .selectinload(Repas.recette)
+                .selectinload(Recette.ingredients)
+                .selectinload(RecetteIngredient.ingredient)
+            )
+            .filter_by(id=planning_id)
+            .first()
+        )
         
         if not planning:
             raise ErreurNonTrouve(f"Planning {planning_id} non trouvé")
