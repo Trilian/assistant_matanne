@@ -46,8 +46,6 @@ logger = logging.getLogger(__name__)
 
 def app():
     """Point d'entrée module courses"""
-    st.set_page_config(page_title="🛍 Courses", layout="wide")
-    
     st.title("🛍 Courses")
     st.caption("Gestion de votre liste de courses")
 

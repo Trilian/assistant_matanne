@@ -39,7 +39,6 @@ BUDGETS = ["Bas (< 20€)", "Moyen (20-40€)", "Haut (> 40€)"]
 
 def app():
     """Point d'entrée module planning"""
-    st.set_page_config(page_title="Planning", layout="wide")
     st.title("📅 Planning Hebdomadaire")
     
     tabs = st.tabs(["🍽️ Planning Actif", "🛒 Courses", "👶 Jules", "🤖 Générer avec IA", "⚖️ Créateur Équilibré", "📚 Historique"])

@@ -47,7 +47,19 @@ from .io_service import IOService
 from .planning import (
     # Services CRUD
     PlanningService,
+    get_planning_service,
     planning_service,
+    # Schémas
+    JourPlanning,
+    ParametresEquilibre,
+)
+from .planning_unified import (
+    # Service Unifié (repas + activités + projets + routines)
+    PlanningAIService,
+    get_planning_unified_service,
+    # Schémas
+    JourCompletSchema,
+    SemaineCompleSchema,
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -110,8 +122,17 @@ __all__ = [
     # ═══════════════════════════════════════════════════════════
     # Classes
     "PlanningService",
+    "PlanningAIService",
+    # Factories
+    "get_planning_service",
+    "get_planning_unified_service",
     # Instances
     "planning_service",
+    # Schémas
+    "JourPlanning",
+    "ParametresEquilibre",
+    "JourCompletSchema",
+    "SemaineCompleSchema",
 ]
 
 

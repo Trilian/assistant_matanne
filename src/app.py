@@ -208,39 +208,55 @@ def afficher_sidebar():
             st.markdown("---")
 
         # ═══════════════════════════════════════════════════════
-        # MODULES
+        # MODULES - ORGANISÉS PAR WORKFLOW FAMILIAL
         # ═══════════════════════════════════════════════════════
 
         MODULES_MENU = {
             "🏠 Accueil": "accueil",
+            
+            # Calendrier unifié - VUE CENTRALE
+            "📅 Calendrier Familial": "planning.calendrier_unifie",
+            
+            # Cuisine - Workflow: Plan → Batch → Courses
             "🍳 Cuisine": {
+                "🍽️ Planifier Repas": "cuisine.planificateur_repas",  # Nouveau: Jow-like
+                "🍳 Batch Cooking": "cuisine.batch_cooking_detaille",  # Nouveau: Instructions détaillées
+                "🛒 Courses": "cuisine.courses",
+                "───────────": None,  # Séparateur
                 "📚 Recettes": "cuisine.recettes",
                 "🥫 Inventaire": "cuisine.inventaire",
-                "🗓️ Planning": "cuisine.planning_semaine",
-                "🍳 Batch Cooking": "cuisine.batch_cooking",
-                "🛒 Courses": "cuisine.courses",
+                "📊 Planning (ancien)": "cuisine.planning_semaine",  # Ancien planning
             },
+            
+            # Famille
             "👨‍👩‍👧‍👦 Famille": {
                 "🏠 Hub Famille": "famille.accueil",
                 "👶 Jules (19m)": "famille.jules",
                 "💪 Santé & Sport": "famille.sante",
                 "🎨 Activités": "famille.activites",
                 "🛍️ Shopping": "famille.shopping",
-
             },
+            
+            # Maison
             "🏠 Maison": {
                 "📋 Projets": "maison.projets",
                 "🌱 Jardin": "maison.jardin",
                 "🧹 Entretien": "maison.entretien",
             },
-            "📅 Planning": {
+            
+            # Planning (ancien - à migrer vers calendrier unifié)
+            "📅 Planning (ancien)": {
                 "🗓️ Calendrier": "planning.calendrier",
                 "🌐 Vue Ensemble": "planning.vue_ensemble",
             },
+            
+            # Jeux
             "🎲 Jeux": {
                 "⚽ Paris Sportifs": "jeux.paris",
                 "🎰 Loto": "jeux.loto",
             },
+            
+            # Outils & Config
             "🔧 Outils": {
                 "📱 Code-barres": "barcode",
                 "📊 Rapports": "rapports",

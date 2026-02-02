@@ -32,6 +32,7 @@ from .base import Base
 
 if TYPE_CHECKING:
     from .inventaire import ArticleInventaire
+    from .user_preferences import RecipeFeedback
 
 
 # ═══════════════════════════════════════════════════════════
@@ -185,6 +186,10 @@ class Recette(Base):
         back_populates="recette_base", cascade="all, delete-orphan"
     )
     historique: Mapped[list["HistoriqueRecette"]] = relationship(
+        back_populates="recette", cascade="all, delete-orphan"
+    )
+    # Feedbacks utilisateurs pour apprentissage IA
+    feedbacks: Mapped[list["RecipeFeedback"]] = relationship(
         back_populates="recette", cascade="all, delete-orphan"
     )
 

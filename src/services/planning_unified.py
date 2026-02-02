@@ -597,6 +597,10 @@ class PlanningAIService(BaseService[CalendarEvent], BaseAIService, PlanningAIMix
 # ═══════════════════════════════════════════════════════════
 
 
-def get_planning_service() -> PlanningAIService:
-    """Factory pour obtenir le service de planning"""
+def get_planning_unified_service() -> PlanningAIService:
+    """Factory pour obtenir le service de planning unifié (repas + activités + projets)"""
     return PlanningAIService()
+
+
+# Alias pour rétro-compatibilité si importé directement
+get_unified_planning_service = get_planning_unified_service

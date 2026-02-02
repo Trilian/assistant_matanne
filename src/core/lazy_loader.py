@@ -182,6 +182,13 @@ class OptimizedRouter:
 
     MODULE_REGISTRY = {
         "accueil": {"path": "src.domains.shared.ui.accueil", "type": "simple"},
+        
+        # [NEW] CALENDRIER UNIFIÉ - VUE CENTRALE
+        "planning.calendrier_unifie": {
+            "path": "src.domains.planning.ui.calendrier_unifie",
+            "type": "simple",
+        },
+        
         # [OK] DOMAINE CUISINE
         "cuisine.recettes": {
             "path": "src.domains.cuisine.ui.recettes",
@@ -191,23 +198,35 @@ class OptimizedRouter:
             "path": "src.domains.cuisine.ui.inventaire",
             "type": "simple",
         },
+        # [UNIFIÉ] Planning → utilise le nouveau planificateur intelligent
         "cuisine.planning_semaine": {
-            "path": "src.domains.cuisine.ui.planning",
+            "path": "src.domains.cuisine.ui.planificateur_repas",
             "type": "simple",
         },
+        # [UNIFIÉ] Batch Cooking → utilise le nouveau module détaillé
         "cuisine.batch_cooking": {
-            "path": "src.domains.cuisine.ui.batch_cooking",
+            "path": "src.domains.cuisine.ui.batch_cooking_detaille",
             "type": "simple",
         },
         "cuisine.courses": {
             "path": "src.domains.cuisine.ui.courses",
             "type": "simple",
         },
+        # [LEGACY] Anciens modules conservés pour compatibilité
+        "cuisine.planning_legacy": {
+            "path": "src.domains.cuisine.ui.planning",
+            "type": "simple",
+        },
+        "cuisine.batch_cooking_legacy": {
+            "path": "src.domains.cuisine.ui.batch_cooking",
+            "type": "simple",
+        },
+        
         # Outils transversaux
         "barcode": {"path": "src.domains.shared.ui.barcode", "type": "simple"},
         "rapports": {"path": "src.domains.shared.ui.rapports", "type": "simple"},
         # [OK] DOMAINE FAMILLE
-        "famille.accueil": {"path": "src.domains.famille.ui.jules", "type": "simple"},
+        "famille.accueil": {"path": "src.domains.famille.ui.accueil", "type": "simple"},
         "famille.jules": {"path": "src.domains.famille.ui.jules", "type": "simple"},
         "famille.sante": {"path": "src.domains.famille.ui.sante", "type": "simple"},
         "famille.activites": {"path": "src.domains.famille.ui.activites", "type": "simple"},

@@ -73,13 +73,7 @@ from src.domains.cuisine.logic.inventaire_logic import (
 
 
 def app():
-
     """Point d'entrée module inventaire"""
-
-    st.set_page_config(page_title="📦 Inventaire", layout="wide")
-
-    
-
     st.title("📦 Inventaire")
 
     st.caption("Gestion complète de votre stock d'ingrédients")

@@ -136,6 +136,16 @@ from .batch_cooking import (
     LocalisationStockageEnum,
 )
 
+# Préférences utilisateur et apprentissage IA (NOUVEAU)
+from .user_preferences import (
+    UserPreference,
+    RecipeFeedback,
+    OpenFoodFactsCache,
+    ExternalCalendarConfig,
+    FeedbackType,
+    CalendarProvider as CalendarProviderNew,
+)
+
 
 # Export explicite de tous les symboles
 __all__ = [
@@ -223,4 +233,10 @@ __all__ = [
     "StatutEtapeEnum",
     "TypeRobotEnum",
     "LocalisationStockageEnum",
+    # Préférences utilisateur (NOUVEAU)
+    "UserPreference",
+    "RecipeFeedback",
+    "OpenFoodFactsCache",
+    "ExternalCalendarConfig",
+    "FeedbackType",
 ]
