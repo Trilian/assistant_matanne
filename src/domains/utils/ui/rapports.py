@@ -15,7 +15,7 @@ from src.core.state import StateManager, get_state
 from src.services.rapports_pdf import RapportsPDFService
 
 # Logique métier pure
-from src.domains.shared.logic.rapports_logic import (
+from src.domains.utils.logic.rapports_logic import (
     generer_rapport_synthese,
     calculer_statistiques_periode
 )

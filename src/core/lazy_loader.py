@@ -181,7 +181,7 @@ class OptimizedRouter:
     # ═══════════════════════════════════════════════════════
 
     MODULE_REGISTRY = {
-        "accueil": {"path": "src.domains.shared.ui.accueil", "type": "simple"},
+        "accueil": {"path": "src.domains.utils.ui.accueil", "type": "simple"},
         
         # [NEW] CALENDRIER UNIFIÉ - VUE CENTRALE
         "planning.calendrier_unifie": {
@@ -223,8 +223,8 @@ class OptimizedRouter:
         },
         
         # Outils transversaux
-        "barcode": {"path": "src.domains.shared.ui.barcode", "type": "simple"},
-        "rapports": {"path": "src.domains.shared.ui.rapports", "type": "simple"},
+        "barcode": {"path": "src.domains.utils.ui.barcode", "type": "simple"},
+        "rapports": {"path": "src.domains.utils.ui.rapports", "type": "simple"},
         
         # [OK] DOMAINE FAMILLE - NOUVEAU HUB
         "famille.hub": {"path": "src.domains.famille.ui.hub_famille", "type": "simple"},
@@ -240,6 +240,7 @@ class OptimizedRouter:
         "maison": {"path": "src.domains.maison.ui", "type": "hub"},  # Hub Maison avec cards
         "maison.projets": {"path": "src.domains.maison.ui.projets", "type": "simple"},
         "maison.jardin": {"path": "src.domains.maison.ui.jardin", "type": "simple"},
+        "maison.jardin_zones": {"path": "src.domains.maison.ui.jardin_zones", "type": "simple"},  # Dashboard zones 2600m²
         "maison.entretien": {"path": "src.domains.maison.ui.entretien", "type": "simple"},
         "maison.meubles": {"path": "src.domains.maison.ui.meubles", "type": "simple"},
         "maison.eco": {"path": "src.domains.maison.ui.eco_tips", "type": "simple"},
@@ -248,7 +249,7 @@ class OptimizedRouter:
         "jeux.paris": {"path": "src.domains.jeux.ui.paris", "type": "simple"},
         "jeux.loto": {"path": "src.domains.jeux.ui.loto", "type": "simple"},
         # Paramètres
-        "parametres": {"path": "src.domains.shared.ui.parametres", "type": "simple"},
+        "parametres": {"path": "src.domains.utils.ui.parametres", "type": "simple"},
     }
 
     @staticmethod

@@ -42,8 +42,10 @@ from .inventaire import (
 from .io_service import IOService
 
 # ═══════════════════════════════════════════════════════════
-# 📅 PLANNING (3 fichiers)
+# 📅 PLANNING (2 services distincts)
 # ═══════════════════════════════════════════════════════════
+# PlanningService: Gestion repas hebdomadaires + génération IA menus
+# PlanningAIService: Vue unifiée (repas + activités + projets + routines)
 from .planning import (
     # Services CRUD
     PlanningService,

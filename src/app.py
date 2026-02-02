@@ -237,8 +237,15 @@ def afficher_sidebar():
                 "🛍️ Achats": "famille.achats_famille",
             },
             
-            # Maison
-            "🏠 Maison": "maison",  # Hub avec cards
+            # Maison - Avec sous-menus jardin et entretien
+            "🏠 Maison": {
+                "🏠 Hub Maison": "maison",
+                "🌳 Zones Jardin": "maison.jardin_zones",
+                "🧹 Entretien": "maison.entretien",
+                "🛋️ Meubles": "maison.meubles",
+                "💰 Dépenses": "maison.depenses",
+                "🌱 Éco-Tips": "maison.eco",
+            },
             
             # Jeux
             "🎲 Jeux": {

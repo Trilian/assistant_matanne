@@ -18,7 +18,7 @@ from src.services.planning import get_planning_service
 from src.services.recettes import get_recette_service
 
 # Logique métier pure
-from src.domains.shared.logic.accueil_logic import (
+from src.domains.utils.logic.accueil_logic import (
     calculer_metriques_dashboard,
     compter_alertes_critiques,
     generer_notifications,

@@ -21,7 +21,7 @@ from src.core.state import StateManager, get_state
 from src.ui.components import Modal
 
 # Logique métier pure
-from src.domains.shared.logic.parametres_logic import (
+from src.domains.utils.logic.parametres_logic import (
     valider_parametres,
     generer_config_defaut,
     verifier_sante_config

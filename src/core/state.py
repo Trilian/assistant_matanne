@@ -156,6 +156,7 @@ class GestionnaireEtat:
             "maison": "Hub Maison",
             "maison.projets": "Projets",
             "maison.jardin": "Jardin",
+            "maison.jardin_zones": "Zones Jardin",
             "maison.entretien": "Entretien",
             "maison.meubles": "Meubles",
             "maison.eco": "Éco-Tips",

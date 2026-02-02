@@ -50,6 +50,15 @@ class CategorieDepense(str, Enum):
     SERVICES = "services"
     IMPOTS = "impôts"
     EPARGNE = "épargne"
+    # Factures maison (avec consommation)
+    GAZ = "gaz"
+    ELECTRICITE = "electricite"
+    EAU = "eau"
+    INTERNET = "internet"
+    LOYER = "loyer"
+    ASSURANCE = "assurance"
+    TAXE_FONCIERE = "taxe_fonciere"
+    CRECHE = "creche"
     AUTRE = "autre"
 
 
@@ -83,6 +92,36 @@ class Depense(BaseModel):
     rembourse: bool = False
     
     cree_le: datetime = Field(default_factory=datetime.now)
+
+
+class FactureMaison(BaseModel):
+    """Facture maison avec suivi consommation (gaz, eau, électricité)."""
+    
+    id: int | None = None
+    categorie: CategorieDepense  # GAZ, ELECTRICITE, EAU, etc.
+    montant: float
+    consommation: float | None = None  # kWh pour élec, m³ pour gaz/eau
+    unite_consommation: str = ""  # "kWh", "m³"
+    mois: int  # 1-12
+    annee: int
+    date_facture: date_type | None = None
+    fournisseur: str = ""
+    numero_facture: str = ""
+    note: str = ""
+    
+    @property
+    def prix_unitaire(self) -> float | None:
+        """Calcule le prix par unité de consommation."""
+        if self.consommation and self.consommation > 0:
+            return round(self.montant / self.consommation, 4)
+        return None
+    
+    @property
+    def periode(self) -> str:
+        """Retourne la période formatée (ex: 'Janvier 2026')."""
+        mois_noms = ["", "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+                     "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"]
+        return f"{mois_noms[self.mois]} {self.annee}"
 
 
 class BudgetMensuel(BaseModel):
@@ -674,6 +713,158 @@ class BudgetService:
         
         if alertes:
             st.session_state["budget_alertes"] = alertes
+
+    # ═══════════════════════════════════════════════════════════
+    # GESTION DES FACTURES MAISON (gaz, eau, électricité)
+    # ═══════════════════════════════════════════════════════════
+    
+    @with_db_session
+    def ajouter_facture_maison(self, facture: FactureMaison, db: Session = None) -> FactureMaison:
+        """
+        Ajoute une facture maison avec suivi consommation.
+        Utilise la table house_expenses si disponible, sinon FamilyBudget.
+        
+        Args:
+            facture: Facture à ajouter
+            db: Session DB
+            
+        Returns:
+            Facture créée avec ID
+        """
+        try:
+            # Essayer d'utiliser house_expenses (table dédiée factures)
+            from src.core.models import HouseExpense
+            
+            entry = HouseExpense(
+                categorie=facture.categorie.value,
+                montant=facture.montant,
+                consommation=facture.consommation,
+                mois=facture.mois,
+                annee=facture.annee,
+                date_facture=facture.date_facture,
+                fournisseur=facture.fournisseur,
+                numero_facture=facture.numero_facture,
+                note=facture.note,
+            )
+            db.add(entry)
+            db.commit()
+            db.refresh(entry)
+            
+            facture.id = entry.id
+            logger.info(f"✅ Facture {facture.categorie.value} ajoutée: {facture.montant}€")
+            return facture
+            
+        except Exception as e:
+            logger.warning(f"Table house_expenses indisponible, fallback vers FamilyBudget: {e}")
+            
+            # Fallback: utiliser FamilyBudget
+            date_facture = facture.date_facture or date_type(facture.annee, facture.mois, 1)
+            
+            entry = FamilyBudget(
+                date=date_facture,
+                montant=facture.montant,
+                categorie=facture.categorie.value,
+                description=f"Facture {facture.fournisseur} - {facture.consommation} {facture.unite_consommation}",
+                est_recurrent=True,
+                frequence_recurrence=FrequenceRecurrence.MENSUEL.value,
+            )
+            db.add(entry)
+            db.commit()
+            
+            facture.id = entry.id
+            return facture
+    
+    @with_cache(ttl=300)
+    @with_db_session
+    def get_factures_maison(
+        self,
+        categorie: CategorieDepense | None = None,
+        annee: int | None = None,
+        db: Session = None,
+    ) -> list[FactureMaison]:
+        """
+        Récupère les factures maison avec consommation.
+        
+        Args:
+            categorie: Filtrer par catégorie (GAZ, ELECTRICITE, EAU...)
+            annee: Filtrer par année
+            db: Session DB
+            
+        Returns:
+            Liste des factures
+        """
+        try:
+            from src.core.models import HouseExpense
+            
+            query = db.query(HouseExpense)
+            
+            if categorie:
+                query = query.filter(HouseExpense.categorie == categorie.value)
+            if annee:
+                query = query.filter(HouseExpense.annee == annee)
+            
+            entries = query.order_by(
+                HouseExpense.annee.desc(),
+                HouseExpense.mois.desc()
+            ).all()
+            
+            return [
+                FactureMaison(
+                    id=e.id,
+                    categorie=CategorieDepense(e.categorie),
+                    montant=float(e.montant),
+                    consommation=float(e.consommation) if e.consommation else None,
+                    unite_consommation="kWh" if e.categorie == "electricite" else "m³",
+                    mois=e.mois,
+                    annee=e.annee,
+                    date_facture=e.date_facture,
+                    fournisseur=e.fournisseur or "",
+                    numero_facture=e.numero_facture or "",
+                    note=e.note or "",
+                )
+                for e in entries
+            ]
+            
+        except Exception as e:
+            logger.warning(f"Table house_expenses indisponible: {e}")
+            return []
+    
+    def get_evolution_consommation(
+        self,
+        categorie: CategorieDepense,
+        nb_mois: int = 12,
+    ) -> list[dict]:
+        """
+        Retourne l'évolution de la consommation sur les derniers mois.
+        Utile pour les graphiques.
+        
+        Args:
+            categorie: GAZ, ELECTRICITE, ou EAU
+            nb_mois: Nombre de mois à afficher
+            
+        Returns:
+            Liste de {mois, annee, consommation, montant, prix_unitaire}
+        """
+        factures = self.get_factures_maison(categorie=categorie)
+        
+        # Trier par date et limiter
+        factures_triees = sorted(
+            factures,
+            key=lambda f: (f.annee, f.mois),
+            reverse=True
+        )[:nb_mois]
+        
+        return [
+            {
+                "periode": f.periode,
+                "mois": f.mois,
+                "annee": f.annee,
+                "consommation": f.consommation,
+                "montant": f.montant,
+                "prix_unitaire": f.prix_unitaire,
+            }
+            for f in reversed(factures_triees)  # Ordre chronologique
+        ]
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•

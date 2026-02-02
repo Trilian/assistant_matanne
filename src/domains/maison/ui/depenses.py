@@ -2,7 +2,10 @@
 Module Dépenses Maison - Suivi des factures (gaz, eau, électricité, etc.)
 
 Focus sur les dépenses récurrentes de la maison avec consommation.
-Pour le budget général famille, voir le module Budget (src/services/budget.py).
+Utilise le service Budget unifié (src/services/budget.py) pour:
+- Ajouter/modifier les factures
+- Obtenir l'évolution de consommation
+- Analyser les tendances
 
 NOTE: Ce module track spécifiquement les FACTURES avec consommation (kWh, m³).
 Le service Budget général gère les dépenses courantes par catégories.
@@ -17,6 +20,11 @@ import calendar
 from src.core.database import get_db_context
 from src.core.models import HouseExpense
 from src.core.models.maison_extended import ExpenseCategory
+from src.services.budget import (
+    get_budget_service,
+    FactureMaison,
+    CategorieDepense,
+)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -36,6 +44,9 @@ CATEGORY_LABELS = {
     "autre": "📦 Autre"
 }
 
+# Catégories avec suivi consommation
+CATEGORIES_AVEC_CONSO = {"gaz", "electricite", "eau"}
+
 MOIS_FR = [
     "", "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
     "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
@@ -43,34 +54,61 @@ MOIS_FR = [
 
 
 # ═══════════════════════════════════════════════════════════
-# CRUD FUNCTIONS
+# CRUD FUNCTIONS (via service budget si possible)
 # ═══════════════════════════════════════════════════════════
 
 def get_depenses_mois(mois: int, annee: int) -> List[HouseExpense]:
     """Récupère les dépenses d'un mois"""
-    with get_db_context() as db:
-        return db.query(HouseExpense).filter(
-            HouseExpense.mois == mois,
-            HouseExpense.annee == annee
-        ).order_by(HouseExpense.categorie).all()
+    try:
+        with get_db_context() as db:
+            return db.query(HouseExpense).filter(
+                HouseExpense.mois == mois,
+                HouseExpense.annee == annee
+            ).order_by(HouseExpense.categorie).all()
+    except Exception:
+        return []
 
 
 def get_depenses_annee(annee: int) -> List[HouseExpense]:
     """Récupère toutes les dépenses d'une année"""
-    with get_db_context() as db:
-        return db.query(HouseExpense).filter(
-            HouseExpense.annee == annee
-        ).order_by(HouseExpense.mois, HouseExpense.categorie).all()
+    try:
+        with get_db_context() as db:
+            return db.query(HouseExpense).filter(
+                HouseExpense.annee == annee
+            ).order_by(HouseExpense.mois, HouseExpense.categorie).all()
+    except Exception:
+        return []
 
 
 def get_depense_by_id(depense_id: int) -> Optional[HouseExpense]:
     """Récupère une dépense par ID"""
-    with get_db_context() as db:
-        return db.query(HouseExpense).filter(HouseExpense.id == depense_id).first()
+    try:
+        with get_db_context() as db:
+            return db.query(HouseExpense).filter(HouseExpense.id == depense_id).first()
+    except Exception:
+        return None
 
 
 def create_depense(data: dict) -> HouseExpense:
-    """Crée une nouvelle dépense"""
+    """Crée une nouvelle dépense - utilise le service budget si catégorie énergie."""
+    # Pour gaz/elec/eau, passer par le service budget unifié
+    if data.get("categorie") in CATEGORIES_AVEC_CONSO:
+        service = get_budget_service()
+        facture = FactureMaison(
+            categorie=CategorieDepense(data["categorie"]),
+            montant=data["montant"],
+            consommation=data.get("consommation"),
+            unite_consommation=data.get("unite", ""),
+            mois=data["mois"],
+            annee=data["annee"],
+            date_facture=data.get("date_facture"),
+            fournisseur=data.get("fournisseur", ""),
+            numero_facture=data.get("numero_facture", ""),
+            note=data.get("note", ""),
+        )
+        service.ajouter_facture_maison(facture)
+    
+    # Toujours créer aussi dans HouseExpense pour compatibilité
     with get_db_context() as db:
         depense = HouseExpense(**data)
         db.add(depense)

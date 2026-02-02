@@ -17,7 +17,7 @@ from src.services.inventaire import InventaireService
 from src.core.errors_base import ErreurValidation, ErreurNonTrouve
 
 # Logique métier pure
-from src.domains.shared.logic.barcode_logic import (
+from src.domains.utils.logic.barcode_logic import (
     valider_code_barres,
     detecter_type_code_barres,
     extraire_infos_produit

@@ -9,9 +9,12 @@ Affiche l'état des zones du jardin avec:
 """
 
 from datetime import date
+from typing import Any, Optional
+
 import streamlit as st
 import plotly.graph_objects as go
 import plotly.express as px
+from sqlalchemy.orm import Session
 
 from src.core.database import obtenir_contexte_db
 from src.core.decorators import with_db_session
@@ -62,7 +65,7 @@ LABEL_ETAT = {
 
 
 @st.cache_data(ttl=300)
-def charger_zones() -> list[dict]:
+def charger_zones() -> list[dict[str, Any]]:
     """Charge toutes les zones du jardin."""
     try:
         with obtenir_contexte_db() as db:
@@ -74,12 +77,12 @@ def charger_zones() -> list[dict]:
                     "type_zone": z.type_zone,
                     "surface_m2": z.surface_m2 or 0,
                     "etat_note": z.etat_note or 3,
-                    "description": z.description or "",
+                    "etat_description": z.etat_description or "",
                     "objectif": z.objectif or "",
                     "prochaine_action": z.prochaine_action or "",
-                    "date_derniere_action": z.date_derniere_action,
+                    "date_prochaine_action": z.date_prochaine_action,
                     "photos_url": z.photos_url or [],
-                    "notes": z.notes or "",
+                    "budget_estime": float(z.budget_estime) if z.budget_estime else 0,
                 }
                 for z in zones
             ]
@@ -89,7 +92,7 @@ def charger_zones() -> list[dict]:
 
 
 @with_db_session
-def mettre_a_jour_zone(zone_id: int, champs: dict, db=None) -> bool:
+def mettre_a_jour_zone(zone_id: int, champs: dict[str, Any], db: Optional[Session] = None) -> bool:
     """Met à jour une zone du jardin."""
     try:
         zone = db.query(GardenZone).filter_by(id=zone_id).first()
@@ -109,7 +112,7 @@ def mettre_a_jour_zone(zone_id: int, champs: dict, db=None) -> bool:
 
 
 @with_db_session
-def ajouter_photo_zone(zone_id: int, photo_url: str, est_avant: bool = True, db=None) -> bool:
+def ajouter_photo_zone(zone_id: int, photo_url: str, est_avant: bool = True, db: Optional[Session] = None) -> bool:
     """Ajoute une photo à une zone."""
     try:
         zone = db.query(GardenZone).filter_by(id=zone_id).first()
@@ -135,7 +138,7 @@ def ajouter_photo_zone(zone_id: int, photo_url: str, est_avant: bool = True, db=
 # ═══════════════════════════════════════════════════════════
 
 
-def render_carte_zone(zone: dict):
+def render_carte_zone(zone: dict[str, Any]):
     """Affiche une carte pour une zone du jardin."""
     emoji = EMOJI_ZONE.get(zone["type_zone"], "📍")
     etat = zone["etat_note"]
@@ -153,9 +156,9 @@ def render_carte_zone(zone: dict):
         # Surface
         st.caption(f"📐 {zone['surface_m2']}m²")
         
-        # Description
-        if zone["description"]:
-            st.markdown(zone["description"][:100])
+        # Description de l'état
+        if zone["etat_description"]:
+            st.markdown(zone["etat_description"][:100])
         
         # Barre de progression état
         st.progress(etat / 5, text=f"État: {etat}/5")
@@ -238,7 +241,7 @@ def render_vue_ensemble():
             st.markdown(f"- {emoji} **{z['nom']}**: {action}")
 
 
-def render_detail_zone(zone: dict):
+def render_detail_zone(zone: dict[str, Any]):
     """Affiche le détail d'une zone avec formulaire d'édition."""
     emoji = EMOJI_ZONE.get(zone["type_zone"], "📍")
     
@@ -253,9 +256,9 @@ def render_detail_zone(zone: dict):
         st.markdown(f"**État:** {LABEL_ETAT.get(zone['etat_note'], '?')}")
         st.progress(zone["etat_note"] / 5)
         
-        if zone["description"]:
-            st.markdown("**Description:**")
-            st.info(zone["description"])
+        if zone["etat_description"]:
+            st.markdown("**Description de l'état:**")
+            st.info(zone["etat_description"])
         
         if zone["objectif"]:
             st.markdown("**Objectif:**")
@@ -322,14 +325,14 @@ def render_detail_zone(zone: dict):
         
         with col_f2:
             nouvelle_description = st.text_area(
-                "Description",
-                value=zone["description"],
+                "Description de l'état",
+                value=zone["etat_description"],
                 height=100
             )
             
-            nouvelles_notes = st.text_area(
-                "Notes",
-                value=zone["notes"],
+            nouvel_objectif = st.text_area(
+                "Objectif",
+                value=zone["objectif"],
                 height=100
             )
         
@@ -337,9 +340,8 @@ def render_detail_zone(zone: dict):
             if mettre_a_jour_zone(zone["id"], {
                 "etat_note": nouvel_etat,
                 "prochaine_action": nouvelle_action,
-                "description": nouvelle_description,
-                "notes": nouvelles_notes,
-                "date_derniere_action": date.today(),
+                "etat_description": nouvelle_description,
+                "objectif": nouvel_objectif,
             }):
                 st.success("✅ Zone mise à jour!")
                 st.rerun()
