@@ -1,13 +1,23 @@
 ﻿"""
-Package Famille - Hub de vie familiale (Jules, santé, activités, shopping)
+Package Famille - Hub de vie familiale (refonte 2026-02)
 
-Structure:
-- jules.py: Jalons, apprentissages et activités adaptées à Jules (19 mois)
-- sante.py: Sport, alimentation saine et objectifs santé
-- activites.py: Planning activités familiales et sorties
-- shopping.py: Achats centralisés (Jules, Nous, Maison)
-- routines.py: Routines quotidiennes (legacy, sera fusionné)
-- bien_etre.py: Suivi bien-être (legacy, peut être fusionné)
-- suivi_jules.py: Suivi développement (legacy, remplacé par jules.py)
+Nouveaux modules:
+- hub_famille.py: Dashboard avec cards cliquables (Jules, Weekend, Anne, Mathieu, Achats)
+- jules_nouveau.py: Activités adaptées âge + shopping Jules + conseils IA
+- suivi_perso.py: Suivi Anne/Mathieu avec Garmin + alimentation
+- weekend.py: Planning sorties weekend + suggestions IA
+- achats_famille.py: Wishlist famille par catégorie
+
+Modules conservés:
+- activites.py: Planning activités générales
+- routines.py: Routines quotidiennes
 """
+
+from . import hub_famille, jules_nouveau, suivi_perso, weekend, achats_famille
+from . import activites, routines
+
+__all__ = [
+    "hub_famille", "jules_nouveau", "suivi_perso", "weekend", "achats_famille",
+    "activites", "routines",
+]
 

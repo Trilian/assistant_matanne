@@ -1,19 +1,32 @@
-﻿"""Domaine Famille - Gestion famille (Jules, santé, activités, shopping)."""
+﻿"""Domaine Famille - Gestion famille (Jules, santé, activités, shopping).
 
-# UI
-from .ui import jules, sante, activites, bien_etre, shopping, routines, suivi_jules
+Nouveaux modules (refonte 2026-02):
+- hub_famille.py: Dashboard avec cards cliquables
+- jules_nouveau.py: Activités adaptées âge + shopping + conseils IA
+- suivi_perso.py: Anne & Mathieu, Garmin, alimentation
+- weekend.py: Planning weekend + suggestions IA
+- achats_famille.py: Wishlist famille par catégorie
 
-# Logic
+Modules conservés:
+- activites.py: Planning activités générales
+- routines.py: Routines quotidiennes
+"""
+
+# UI - Nouveaux modules
+from .ui import hub_famille, jules_nouveau, suivi_perso, weekend, achats_famille
+from .ui import activites, routines
+
+# Logic - conservés
 from .logic import (
-    jules_logic, sante_logic, activites_logic, bien_etre_logic, 
-    shopping_logic, routines_logic, suivi_jules_logic, helpers
+    activites_logic, routines_logic, helpers
 )
 
 __all__ = [
-    # UI
-    "jules", "sante", "activites", "bien_etre", "shopping", "routines", "suivi_jules",
+    # UI - Nouveau hub
+    "hub_famille", "jules_nouveau", "suivi_perso", "weekend", "achats_famille",
+    # UI - Conservés
+    "activites", "routines",
     # Logic
-    "jules_logic", "sante_logic", "activites_logic", "bien_etre_logic",
-    "shopping_logic", "routines_logic", "suivi_jules_logic", "helpers",
+    "activites_logic", "routines_logic", "helpers",
 ]
 
