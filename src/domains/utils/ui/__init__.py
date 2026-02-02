@@ -1,4 +1,4 @@
-﻿"""UI Shared - Modules partagés."""
+﻿"""UI Utils - Modules utilitaires (accueil, paramètres, rapports, barcode)."""
 
 from . import accueil, parametres, rapports, barcode
 

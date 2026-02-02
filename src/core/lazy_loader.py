@@ -212,15 +212,7 @@ class OptimizedRouter:
             "path": "src.domains.cuisine.ui.courses",
             "type": "simple",
         },
-        # [LEGACY] Anciens modules conservés pour compatibilité
-        "cuisine.planning_legacy": {
-            "path": "src.domains.cuisine.ui.planning",
-            "type": "simple",
-        },
-        "cuisine.batch_cooking_legacy": {
-            "path": "src.domains.cuisine.ui.batch_cooking",
-            "type": "simple",
-        },
+        # [SUPPRIMÉ] Anciens modules planning.py et batch_cooking.py (legacy)
         
         # Outils transversaux
         "barcode": {"path": "src.domains.utils.ui.barcode", "type": "simple"},
@@ -229,6 +221,7 @@ class OptimizedRouter:
         # [OK] DOMAINE FAMILLE - NOUVEAU HUB
         "famille.hub": {"path": "src.domains.famille.ui.hub_famille", "type": "simple"},
         "famille.jules": {"path": "src.domains.famille.ui.jules", "type": "simple"},
+        "famille.jules_planning": {"path": "src.domains.famille.ui.jules_planning", "type": "simple"},  # Planning activités éveil
         "famille.suivi_perso": {"path": "src.domains.famille.ui.suivi_perso", "type": "simple"},
         "famille.weekend": {"path": "src.domains.famille.ui.weekend", "type": "simple"},
         "famille.achats_famille": {"path": "src.domains.famille.ui.achats_famille", "type": "simple"},
@@ -245,6 +238,7 @@ class OptimizedRouter:
         "maison.meubles": {"path": "src.domains.maison.ui.meubles", "type": "simple"},
         "maison.eco": {"path": "src.domains.maison.ui.eco_tips", "type": "simple"},
         "maison.depenses": {"path": "src.domains.maison.ui.depenses", "type": "simple"},
+        "maison.energie": {"path": "src.domains.maison.ui.energie", "type": "simple"},  # Dashboard énergie
         # [OK] DOMAINE JEUX (Paris sportifs & Loto)
         "jeux.paris": {"path": "src.domains.jeux.ui.paris", "type": "simple"},
         "jeux.loto": {"path": "src.domains.jeux.ui.loto", "type": "simple"},

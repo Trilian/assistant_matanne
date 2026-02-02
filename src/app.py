@@ -230,8 +230,9 @@ def afficher_sidebar():
             
             # Famille - NOUVEAU HUB
             "👨‍👩‍👧‍👦 Famille": {
-                "🏠 Hub Famille": "famille.hub",  # Nouveau hub avec cards
+                "🏠 Hub Famille": "famille.hub",
                 "👶 Jules": "famille.jules",
+                "📅 Planning Jules": "famille.jules_planning",  # Planning activités éveil
                 "💪 Mon Suivi": "famille.suivi_perso",
                 "🎉 Weekend": "famille.weekend",
                 "🛍️ Achats": "famille.achats_famille",
@@ -241,6 +242,7 @@ def afficher_sidebar():
             "🏠 Maison": {
                 "🏠 Hub Maison": "maison",
                 "🌳 Zones Jardin": "maison.jardin_zones",
+                "🔋 Énergie": "maison.energie",  # Dashboard énergie
                 "🧹 Entretien": "maison.entretien",
                 "🛋️ Meubles": "maison.meubles",
                 "💰 Dépenses": "maison.depenses",
