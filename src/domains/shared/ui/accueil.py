@@ -200,6 +200,39 @@ def render_critical_alerts():
             }
         )
 
+    # Tâches ménage en retard
+    try:
+        from src.core.database import obtenir_contexte_db
+        from src.core.models import MaintenanceTask
+        
+        with obtenir_contexte_db() as db:
+            taches_retard = db.query(MaintenanceTask).filter(
+                MaintenanceTask.prochaine_fois < date.today(),
+                MaintenanceTask.fait == False
+            ).limit(10).all()
+            
+            if taches_retard:
+                alerts.append({
+                    "type": "warning",
+                    "icon": "🧹",
+                    "title": f"{len(taches_retard)} tâche(s) ménage en retard!",
+                    "action": "Voir Maison",
+                    "module": "maison.entretien",
+                })
+                
+                # Détail des tâches critiques
+                for t in taches_retard[:3]:
+                    jours_retard = (date.today() - t.prochaine_fois).days
+                    alerts.append({
+                        "type": "error" if jours_retard > 7 else "warning",
+                        "icon": "⚠️",
+                        "title": f"{t.nom} ({jours_retard}j de retard)",
+                        "action": "Marquer fait",
+                        "module": "maison.entretien",
+                    })
+    except Exception:
+        pass  # Table pas encore créée
+
     # Afficher alertes
     if not alerts:
         st.success("✅ Tout est en ordre !")

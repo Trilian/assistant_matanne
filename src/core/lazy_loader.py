@@ -237,12 +237,13 @@ class OptimizedRouter:
         "famille.routines": {"path": "src.domains.famille.ui.routines", "type": "simple"},
         
         # [OK] DOMAINE MAISON
+        "maison": {"path": "src.domains.maison.ui", "type": "hub"},  # Hub Maison avec cards
         "maison.projets": {"path": "src.domains.maison.ui.projets", "type": "simple"},
         "maison.jardin": {"path": "src.domains.maison.ui.jardin", "type": "simple"},
         "maison.entretien": {"path": "src.domains.maison.ui.entretien", "type": "simple"},
-        # [OK] DOMAINE PLANNING
-        "planning.calendrier": {"path": "src.domains.planning.ui.calendrier", "type": "simple"},
-        "planning.vue_ensemble": {"path": "src.domains.planning.ui.vue_ensemble", "type": "simple"},
+        "maison.meubles": {"path": "src.domains.maison.ui.meubles", "type": "simple"},
+        "maison.eco": {"path": "src.domains.maison.ui.eco_tips", "type": "simple"},
+        "maison.depenses": {"path": "src.domains.maison.ui.depenses", "type": "simple"},
         # [OK] DOMAINE JEUX (Paris sportifs & Loto)
         "jeux.paris": {"path": "src.domains.jeux.ui.paris", "type": "simple"},
         "jeux.loto": {"path": "src.domains.jeux.ui.loto", "type": "simple"},

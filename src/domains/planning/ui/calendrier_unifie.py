@@ -57,7 +57,7 @@ def charger_donnees_semaine(date_debut: date) -> dict:
     Charge toutes les données nécessaires pour une semaine.
     
     Returns:
-        Dict avec repas, sessions_batch, activites, events
+        Dict avec repas, sessions_batch, activites, events, taches_menage
     """
     lundi = get_debut_semaine(date_debut)
     dimanche = lundi + timedelta(days=6)
@@ -68,6 +68,7 @@ def charger_donnees_semaine(date_debut: date) -> dict:
         "activites": [],
         "events": [],
         "courses_planifiees": [],
+        "taches_menage": [],  # Nouveau: tâches ménage intégrées au planning
     }
     
     try:
@@ -105,6 +106,16 @@ def charger_donnees_semaine(date_debut: date) -> dict:
                 FamilyActivity.date_prevue <= dimanche
             ).all()
             donnees["activites"] = activites
+            
+            # Tâches ménage intégrées au planning
+            try:
+                from src.core.models import MaintenanceTask
+                taches = db.query(MaintenanceTask).filter(
+                    MaintenanceTask.integrer_planning == True
+                ).all()
+                donnees["taches_menage"] = taches
+            except Exception as e:
+                logger.warning(f"Table maintenance_tasks non disponible: {e}")
             
             # Événements calendrier
             events = db.query(CalendarEvent).filter(
@@ -223,6 +234,12 @@ def render_jour_calendrier(jour: JourCalendrier):
             emoji = "🏥" if rdv.type == TypeEvenement.RDV_MEDICAL else "📅"
             lieu_str = f" @ {rdv.lieu}" if rdv.lieu else ""
             st.warning(f"{emoji} {rdv.titre} {rdv.heure_str}{lieu_str}")
+        
+        # Tâches ménage
+        for tache in jour.taches_menage:
+            en_retard = "⚠️ " if tache.notes and "RETARD" in tache.notes else ""
+            duree_str = f" ({tache.description.split('•')[0].strip()})" if tache.description else ""
+            st.markdown(f"{tache.emoji} {en_retard}{tache.titre}{duree_str}")
         
         # Autres événements
         for evt in jour.autres_evenements:
@@ -471,7 +488,7 @@ def app():
     """Point d'entrée du module Calendrier Familial Unifié."""
     
     st.title("📅 Calendrier Familial")
-    st.caption("Vue unifiée de toute votre semaine: repas, batch, courses, activités, RDV")
+    st.caption("Vue unifiée de toute votre semaine: repas, batch, courses, activités, ménage, RDV")
     
     # Navigation
     render_navigation_semaine()
@@ -489,6 +506,7 @@ def app():
             activites=donnees["activites"],
             events=donnees["events"],
             courses_planifiees=donnees["courses_planifiees"],
+            taches_menage=donnees["taches_menage"],  # Intégration ménage
         )
     
     # Stats en haut
@@ -521,12 +539,13 @@ def app():
     
     # Légende
     with st.expander("📖 Légende"):
-        cols = st.columns(5)
+        cols = st.columns(6)
         legendes = [
             ("🌞 Midi", "🌙 Soir", "🍰 Goûter"),
             ("🍳 Batch", "🛒 Courses"),
             ("🎨 Activité", "🏥 RDV médical"),
             ("📅 RDV", "👶 Pour Jules"),
+            ("🧹 Ménage", "🌱 Jardin"),
             ("⭐ Aujourd'hui",),
         ]
         for i, col in enumerate(cols):

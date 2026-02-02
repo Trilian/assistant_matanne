@@ -3,8 +3,9 @@ Tests pour les nouveaux services ajoutés.
 
 Services testés:
 - OpenFoodFactsService
-- CoursesOrganisationService
 - Planning exports
+
+Note: CoursesOrganisationService a été supprimé (legacy)
 """
 
 import pytest

@@ -13,7 +13,7 @@ Utilise PlanningAIService pour:
 ✅ Génération IA de semaines équilibrées
 """
 
-from . import calendrier, vue_semaine, vue_ensemble
+from . import calendrier_unifie as calendrier, vue_semaine, vue_ensemble
 
 __all__ = ["calendrier", "vue_semaine", "vue_ensemble"]
 

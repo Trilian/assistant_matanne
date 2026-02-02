@@ -40,6 +40,9 @@ class TypeEvenement(str, Enum):
     RDV_MEDICAL = "rdv_medical"
     RDV_AUTRE = "rdv_autre"
     ROUTINE = "routine"
+    MENAGE = "menage"           # 🧹 Tâches ménage
+    JARDIN = "jardin"           # 🌱 Tâches jardin
+    ENTRETIEN = "entretien"     # 🔧 Entretien maison
     EVENEMENT = "evenement"
 
 
@@ -54,6 +57,9 @@ EMOJI_TYPE = {
     TypeEvenement.RDV_MEDICAL: "🏥",
     TypeEvenement.RDV_AUTRE: "📅",
     TypeEvenement.ROUTINE: "⏰",
+    TypeEvenement.MENAGE: "🧹",
+    TypeEvenement.JARDIN: "🌱",
+    TypeEvenement.ENTRETIEN: "🔧",
     TypeEvenement.EVENEMENT: "📌",
 }
 
@@ -68,6 +74,9 @@ COULEUR_TYPE = {
     TypeEvenement.RDV_MEDICAL: "#E57373", # Rouge clair
     TypeEvenement.RDV_AUTRE: "#90A4AE",   # Gris
     TypeEvenement.ROUTINE: "#A1887F",     # Marron
+    TypeEvenement.MENAGE: "#FFCC80",      # Orange pâle
+    TypeEvenement.JARDIN: "#A5D6A7",      # Vert pâle
+    TypeEvenement.ENTRETIEN: "#BCAAA4",   # Marron clair
     TypeEvenement.EVENEMENT: "#64B5F6",   # Bleu
 }
 
@@ -173,12 +182,24 @@ class JourCalendrier:
                 if evt.type in (TypeEvenement.RDV_MEDICAL, TypeEvenement.RDV_AUTRE)]
     
     @property
+    def taches_menage(self) -> List[EvenementCalendrier]:
+        """Tâches ménage du jour."""
+        return [evt for evt in self.evenements 
+                if evt.type in (TypeEvenement.MENAGE, TypeEvenement.ENTRETIEN)]
+    
+    @property
+    def taches_jardin(self) -> List[EvenementCalendrier]:
+        """Tâches jardin du jour."""
+        return [evt for evt in self.evenements if evt.type == TypeEvenement.JARDIN]
+    
+    @property
     def autres_evenements(self) -> List[EvenementCalendrier]:
         types_principaux = {
             TypeEvenement.REPAS_MIDI, TypeEvenement.REPAS_SOIR, 
             TypeEvenement.GOUTER, TypeEvenement.BATCH_COOKING,
             TypeEvenement.COURSES, TypeEvenement.ACTIVITE,
-            TypeEvenement.RDV_MEDICAL, TypeEvenement.RDV_AUTRE
+            TypeEvenement.RDV_MEDICAL, TypeEvenement.RDV_AUTRE,
+            TypeEvenement.MENAGE, TypeEvenement.JARDIN, TypeEvenement.ENTRETIEN,
         }
         return [evt for evt in self.evenements if evt.type not in types_principaux]
     
@@ -403,6 +424,112 @@ def convertir_event_calendrier_en_evenement(event: Any) -> Optional[EvenementCal
         return None
 
 
+def convertir_tache_menage_en_evenement(tache: Any) -> Optional[EvenementCalendrier]:
+    """
+    Convertit une MaintenanceTask (tâche ménage/entretien) en EvenementCalendrier.
+    
+    Args:
+        tache: Objet MaintenanceTask SQLAlchemy
+        
+    Returns:
+        EvenementCalendrier ou None si erreur
+    """
+    if not tache:
+        return None
+    
+    try:
+        # Déterminer le type selon la catégorie
+        categorie = getattr(tache, 'categorie', 'menage')
+        if categorie in ('menage', 'nettoyage', 'rangement'):
+            type_evt = TypeEvenement.MENAGE
+        elif categorie in ('jardin', 'exterieur', 'pelouse'):
+            type_evt = TypeEvenement.JARDIN
+        else:
+            type_evt = TypeEvenement.ENTRETIEN
+        
+        # Récupérer la date de prochaine exécution
+        date_jour = getattr(tache, 'prochaine_fois', None) or date.today()
+        
+        # Construire le titre avec responsable si présent
+        titre = getattr(tache, 'nom', 'Tâche')
+        responsable = getattr(tache, 'responsable', None)
+        if responsable:
+            titre = f"{titre} ({responsable})"
+        
+        # Durée en description
+        duree = getattr(tache, 'duree_minutes', None)
+        description = getattr(tache, 'description', '')
+        if duree:
+            description = f"~{duree}min • {description}"
+        
+        # Calculer si en retard
+        est_en_retard = False
+        prochaine = getattr(tache, 'prochaine_fois', None)
+        if prochaine and prochaine < date.today():
+            est_en_retard = True
+        
+        return EvenementCalendrier(
+            id=f"menage_{tache.id}",
+            type=type_evt,
+            titre=titre,
+            date_jour=date_jour,
+            description=description,
+            terminé=getattr(tache, 'fait', False),
+            notes=f"⚠️ EN RETARD!" if est_en_retard else getattr(tache, 'notes', None),
+        )
+    except Exception as e:
+        logger.error(f"Erreur conversion tâche ménage: {e}")
+        return None
+
+
+def generer_taches_menage_semaine(
+    taches: List[Any],
+    date_debut: date,
+    date_fin: date
+) -> Dict[date, List[EvenementCalendrier]]:
+    """
+    Génère les événements ménage pour une semaine en se basant sur frequence_jours.
+    
+    Logique:
+    - Si prochaine_fois dans la semaine → afficher ce jour
+    - Si frequence_jours défini → calculer les occurrences dans la semaine
+    - Sinon → afficher uniquement si prochaine_fois dans la semaine
+    
+    Returns:
+        Dict[date, List[EvenementCalendrier]] pour chaque jour de la semaine
+    """
+    taches_par_jour: Dict[date, List[EvenementCalendrier]] = {}
+    
+    for tache in taches:
+        if not getattr(tache, 'integrer_planning', False):
+            continue  # Ne pas afficher les tâches non intégrées au planning
+        
+        prochaine = getattr(tache, 'prochaine_fois', None)
+        frequence = getattr(tache, 'frequence_jours', None)
+        
+        # Cas 1: Tâche avec prochaine_fois dans la semaine
+        if prochaine and date_debut <= prochaine <= date_fin:
+            evt = convertir_tache_menage_en_evenement(tache)
+            if evt:
+                if prochaine not in taches_par_jour:
+                    taches_par_jour[prochaine] = []
+                taches_par_jour[prochaine].append(evt)
+        
+        # Cas 2: Tâche récurrente sans prochaine_fois → générer par jour de semaine
+        elif frequence and frequence <= 7:
+            # Tâches hebdomadaires: on les met sur des jours fixes basés sur leur ID
+            # Pour éviter tout le ménage le même jour!
+            jour_offset = (tache.id or 0) % 7  # Distribuer sur la semaine
+            jour_cible = date_debut + timedelta(days=jour_offset)
+            
+            evt = convertir_tache_menage_en_evenement(tache)
+            if evt:
+                evt.date_jour = jour_cible
+                if jour_cible not in taches_par_jour:
+                    taches_par_jour[jour_cible] = []
+                taches_par_jour[jour_cible].append(evt)
+    
+    return taches_par_jour
 def creer_evenement_courses(
     date_jour: date,
     magasin: str,
@@ -427,6 +554,7 @@ def agreger_evenements_jour(
     activites: List[Any] = None,
     events: List[Any] = None,
     courses_planifiees: List[Dict] = None,
+    taches_menage: List[EvenementCalendrier] = None,
 ) -> JourCalendrier:
     """
     Agrège tous les événements d'un jour dans une structure unifiée.
@@ -438,6 +566,7 @@ def agreger_evenements_jour(
         activites: Liste des FamilyActivity
         events: Liste des CalendarEvent
         courses_planifiees: Liste de dicts {magasin, heure}
+        taches_menage: Liste d'EvenementCalendrier déjà convertis pour ce jour
     
     Returns:
         JourCalendrier avec tous les événements
@@ -485,7 +614,11 @@ def agreger_evenements_jour(
                 )
                 evenements.append(evt)
     
-    # Trier par heure
+    # Ajouter les tâches ménage (déjà converties)
+    if taches_menage:
+        evenements.extend(taches_menage)
+    
+    # Trier par heure puis par type
     evenements.sort(key=lambda e: (e.heure_debut or time(23, 59), e.type.value))
     
     return JourCalendrier(date_jour=date_jour, evenements=evenements)
@@ -498,6 +631,7 @@ def construire_semaine_calendrier(
     activites: List[Any] = None,
     events: List[Any] = None,
     courses_planifiees: List[Dict] = None,
+    taches_menage: List[Any] = None,
 ) -> SemaineCalendrier:
     """
     Construit une semaine complète de calendrier.
@@ -506,12 +640,19 @@ def construire_semaine_calendrier(
         date_debut: Date de début (sera alignée sur le lundi)
         repas, sessions_batch, activites, events: Données brutes
         courses_planifiees: Liste de {date, magasin, heure}
+        taches_menage: Liste des MaintenanceTask à intégrer
     
     Returns:
         SemaineCalendrier avec les 7 jours
     """
     lundi = get_debut_semaine(date_debut)
+    dimanche = lundi + timedelta(days=6)
     jours = []
+    
+    # Pré-traiter les tâches ménage pour toute la semaine
+    taches_par_jour: Dict[date, List[EvenementCalendrier]] = {}
+    if taches_menage:
+        taches_par_jour = generer_taches_menage_semaine(taches_menage, lundi, dimanche)
     
     for i in range(7):
         jour_date = lundi + timedelta(days=i)
@@ -522,6 +663,7 @@ def construire_semaine_calendrier(
             activites=activites,
             events=events,
             courses_planifiees=courses_planifiees,
+            taches_menage=taches_par_jour.get(jour_date, []),
         )
         jours.append(jour)
     

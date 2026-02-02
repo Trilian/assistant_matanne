@@ -238,17 +238,7 @@ def afficher_sidebar():
             },
             
             # Maison
-            "🏠 Maison": {
-                "📋 Projets": "maison.projets",
-                "🌱 Jardin": "maison.jardin",
-                "🧹 Entretien": "maison.entretien",
-            },
-            
-            # Planning (ancien - à migrer vers calendrier unifié)
-            "📅 Planning (ancien)": {
-                "🗓️ Calendrier": "planning.calendrier",
-                "🌐 Vue Ensemble": "planning.vue_ensemble",
-            },
+            "🏠 Maison": "maison",  # Hub avec cards
             
             # Jeux
             "🎲 Jeux": {

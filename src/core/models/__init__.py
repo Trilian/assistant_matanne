@@ -161,6 +161,23 @@ from .users import (
     PurchasePriority,
 )
 
+# Maison étendu (meubles, dépenses, éco, jardin zones) (NOUVEAU)
+from .maison_extended import (
+    Furniture,
+    HouseExpense,
+    EcoAction,
+    GardenZone,
+    MaintenanceTask,
+    HouseStock,
+    # Enums
+    FurnitureStatus,
+    FurniturePriority,
+    ExpenseCategory,
+    GardenZoneType,
+    EcoActionType,
+    RoomType,
+)
+
 
 # Export explicite de tous les symboles
 __all__ = [
@@ -265,4 +282,17 @@ __all__ = [
     "GarminActivityType",
     "PurchaseCategory",
     "PurchasePriority",
+    # Maison étendu (NOUVEAU)
+    "Furniture",
+    "HouseExpense",
+    "EcoAction",
+    "GardenZone",
+    "MaintenanceTask",
+    "HouseStock",
+    "FurnitureStatus",
+    "FurniturePriority",
+    "ExpenseCategory",
+    "GardenZoneType",
+    "EcoActionType",
+    "RoomType",
 ]
