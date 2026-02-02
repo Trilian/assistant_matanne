@@ -198,13 +198,23 @@ class OptimizedRouter:
             "path": "src.domains.cuisine.ui.inventaire",
             "type": "simple",
         },
-        # [UNIFIÉ] Planning → utilise le nouveau planificateur intelligent
+        # [UNIFIÉ] Planificateur repas intelligent (Jow-like)
+        "cuisine.planificateur_repas": {
+            "path": "src.domains.cuisine.ui.planificateur_repas",
+            "type": "simple",
+        },
+        # [LEGACY] Ancien planning semaine → redirige vers planificateur
         "cuisine.planning_semaine": {
             "path": "src.domains.cuisine.ui.planificateur_repas",
             "type": "simple",
         },
         # [UNIFIÉ] Batch Cooking → utilise le nouveau module détaillé
         "cuisine.batch_cooking": {
+            "path": "src.domains.cuisine.ui.batch_cooking_detaille",
+            "type": "simple",
+        },
+        # [NEW] Batch Cooking détaillé (alias direct)
+        "cuisine.batch_cooking_detaille": {
             "path": "src.domains.cuisine.ui.batch_cooking_detaille",
             "type": "simple",
         },
