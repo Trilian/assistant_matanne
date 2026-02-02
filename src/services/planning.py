@@ -92,20 +92,23 @@ class PlanningService(BaseService[Planning], BaseAIService, PlanningAIMixin):
     @with_error_handling(default_return=None)
     @with_db_session
     def get_planning(self, planning_id: int | None = None, db: Session | None = None) -> Planning | None:
-        """Get the active or specified planning with eager loading of meals.
+        """Get the active or specified planning with eager loading of meals and recettes.
 
         Args:
             planning_id: Specific planning ID, or None to get active planning
             db: Database session (injected by @with_db_session)
 
         Returns:
-            Planning object with repas eagerly loaded, or None if not found
+            Planning object with repas and recettes eagerly loaded, or None if not found
         """
+        from sqlalchemy.orm import selectinload
+        from src.core.models import Recette, VersionRecette
+        
         if planning_id:
             planning = (
                 db.query(Planning)
                 .options(
-                    joinedload(Planning.repas).joinedload(Repas.recette)
+                    selectinload(Planning.repas).selectinload(Repas.recette).selectinload(Recette.versions)
                 )
                 .filter(Planning.id == planning_id)
                 .first()
@@ -114,7 +117,7 @@ class PlanningService(BaseService[Planning], BaseAIService, PlanningAIMixin):
             planning = (
                 db.query(Planning)
                 .options(
-                    joinedload(Planning.repas).joinedload(Repas.recette)
+                    selectinload(Planning.repas).selectinload(Repas.recette).selectinload(Recette.versions)
                 )
                 .filter(Planning.actif == True)
                 .first()
