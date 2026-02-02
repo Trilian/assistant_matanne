@@ -281,7 +281,7 @@ class TestRedisCache:
         """Test statistiques cache."""
         cache = RedisCache()
         
-        stats = cache.get_stats()
+        stats = cache.stats()  # C'est une méthode
         
         assert isinstance(stats, dict)
         assert "hits" in stats or "type" in stats

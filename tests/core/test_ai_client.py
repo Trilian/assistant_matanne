@@ -117,8 +117,8 @@ class TestClientIAAppels:
         # Créer le client et appeler
         client = ClientIA()
         
-        with patch('src.core.ai.client.LimiteDebit.peut_appeler', return_value=(True, "")):
-            with patch('src.core.ai.client.LimiteDebit.enregistrer_appel'):
+        with patch('src.core.cache.LimiteDebit.peut_appeler', return_value=(True, "")):
+            with patch('src.core.cache.LimiteDebit.enregistrer_appel'):
                 with patch('src.core.ai.client.CacheIA.obtenir', return_value=None):
                     with patch('src.core.ai.client.CacheIA.definir'):
                         reponse = await client.appeler(
@@ -141,7 +141,7 @@ class TestClientIAAppels:
         
         client = ClientIA()
         
-        with patch('src.core.ai.client.LimiteDebit.peut_appeler', 
+        with patch('src.core.cache.LimiteDebit.peut_appeler', 
                    return_value=(False, "Rate limit dépassé")):
             with pytest.raises(ErreurLimiteDebit):
                 await client.appeler(prompt="Test")
@@ -181,8 +181,8 @@ class TestClientIAAppels:
         client = ClientIA()
         
         with patch('src.core.ai.client.asyncio.sleep', new_callable=AsyncMock):
-            with patch('src.core.ai.client.LimiteDebit.peut_appeler', return_value=(True, "")):
-                with patch('src.core.ai.client.LimiteDebit.enregistrer_appel'):
+            with patch('src.core.cache.LimiteDebit.peut_appeler', return_value=(True, "")):
+                with patch('src.core.cache.LimiteDebit.enregistrer_appel'):
                     with patch('src.core.ai.client.CacheIA.obtenir', return_value=None):
                         with patch('src.core.ai.client.CacheIA.definir'):
                             reponse = await client.appeler(
@@ -215,7 +215,7 @@ class TestClientIACache:
         
         client = ClientIA()
         
-        with patch('src.core.ai.client.LimiteDebit.peut_appeler', return_value=(True, "")):
+        with patch('src.core.cache.LimiteDebit.peut_appeler', return_value=(True, "")):
             with patch('src.core.ai.client.CacheIA.obtenir', return_value="Réponse en cache"):
                 reponse = await client.appeler(
                     prompt="Test",
@@ -237,12 +237,12 @@ class TestClientIACache:
         
         client = ClientIA()
         
-        with patch('src.core.ai.client.LimiteDebit.peut_appeler', return_value=(True, "")):
+        with patch('src.core.cache.LimiteDebit.peut_appeler', return_value=(True, "")):
             with patch('src.core.ai.client.CacheIA.obtenir', return_value=None) as mock_cache:
                 with patch.object(client, '_effectuer_appel', 
                                  new_callable=AsyncMock, 
                                  return_value="Réponse fraîche"):
-                    with patch('src.core.ai.client.LimiteDebit.enregistrer_appel'):
+                    with patch('src.core.cache.LimiteDebit.enregistrer_appel'):
                         reponse = await client.appeler(
                             prompt="Test",
                             utiliser_cache=False,
@@ -358,13 +358,13 @@ class TestClientIAIntegration:
         client = ClientIA()
         
         # Workflow: cache miss → appel API → cache store
-        with patch('src.core.ai.client.LimiteDebit.peut_appeler', return_value=(True, "")):
+        with patch('src.core.cache.LimiteDebit.peut_appeler', return_value=(True, "")):
             with patch('src.core.ai.client.CacheIA.obtenir', return_value=None):
                 with patch('src.core.ai.client.CacheIA.definir') as mock_cache_store:
                     with patch.object(client, '_effectuer_appel',
                                      new_callable=AsyncMock,
                                      return_value="Réponse API"):
-                        with patch('src.core.ai.client.LimiteDebit.enregistrer_appel'):
+                        with patch('src.core.cache.LimiteDebit.enregistrer_appel'):
                             reponse = await client.appeler(
                                 prompt="Question?",
                                 utiliser_cache=True,

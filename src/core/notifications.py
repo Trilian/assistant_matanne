@@ -78,18 +78,20 @@ class Notification:
         """Retourne l'âge formaté."""
         delta = datetime.now() - self.created_at
         
-        if delta.seconds < 60:
-            return "À l'instant"
-        elif delta.seconds < 3600:
-            minutes = delta.seconds // 60
-            return f"Il y a {minutes} min"
-        elif delta.days == 0:
-            heures = delta.seconds // 3600
-            return f"Il y a {heures}h"
+        # Vérifier d'abord les jours
+        if delta.days >= 2:
+            return f"Il y a {delta.days} jours"
         elif delta.days == 1:
             return "Hier"
+        # Ensuite les heures/minutes pour le même jour
+        elif delta.seconds >= 3600:
+            heures = delta.seconds // 3600
+            return f"Il y a {heures}h"
+        elif delta.seconds >= 60:
+            minutes = delta.seconds // 60
+            return f"Il y a {minutes} min"
         else:
-            return f"Il y a {delta.days} jours"
+            return "À l'instant"
     
     def to_dict(self) -> dict:
         """Convertit en dictionnaire."""
@@ -101,16 +103,25 @@ class Notification:
             "category": self.category.value,
             "icone": self.icone,
             "created_at": self.created_at.isoformat(),
+            "expires_at": self.expires_at.isoformat() if self.expires_at else None,
             "read": self.read,
             "dismissed": self.dismissed,
             "action_label": self.action_label,
             "action_module": self.action_module,
+            "action_data": self.action_data,
             "priority": self.priority,
         }
     
     @classmethod
     def from_dict(cls, data: dict) -> "Notification":
         """Crée depuis un dictionnaire."""
+        expires_at = None
+        if data.get("expires_at"):
+            try:
+                expires_at = datetime.fromisoformat(data["expires_at"])
+            except Exception:
+                pass
+        
         return cls(
             id=data.get("id", str(uuid4())[:8]),
             titre=data.get("titre", ""),
@@ -119,10 +130,12 @@ class Notification:
             category=NotificationCategory(data.get("category", "systeme")),
             icone=data.get("icone", "ℹ️"),
             created_at=datetime.fromisoformat(data["created_at"]) if "created_at" in data else datetime.now(),
+            expires_at=expires_at,
             read=data.get("read", False),
             dismissed=data.get("dismissed", False),
             action_label=data.get("action_label"),
             action_module=data.get("action_module"),
+            action_data=data.get("action_data"),
             priority=data.get("priority", 0),
         )
 
@@ -189,9 +202,9 @@ class NotificationManager:
         if icone is None:
             icones = {
                 NotificationType.INFO: "ℹ️",
-                NotificationType.SUCCESS: "[OK]",
-                NotificationType.WARNING: "[!]",
-                NotificationType.ERROR: "[ERROR]",
+                NotificationType.SUCCESS: "✅",
+                NotificationType.WARNING: "⚠️",
+                NotificationType.ERROR: "❌",
                 NotificationType.ALERT: "🔔",
             }
             icone = icones.get(type, "ℹ️")

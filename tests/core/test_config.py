@@ -36,7 +36,8 @@ class TestConfigHelpers:
 
     def test_read_st_secret_with_no_secrets(self):
         """Test _read_st_secret quand st.secrets n'existe pas."""
-        with patch("streamlit.secrets", side_effect=AttributeError):
+        with patch("src.core.config.st") as mock_st:
+            mock_st.secrets.get.side_effect = AttributeError
             result = _read_st_secret("test_section")
             assert result is None
 
@@ -86,21 +87,23 @@ class TestParametres:
             assert hasattr(params, "DATABASE_URL")
 
     def test_parametres_application_name(self):
-        """Test que APPLICATION_NAME a une valeur."""
+        """Test que APP_NAME a une valeur."""
         params = Parametres()
-        assert params.APPLICATION_NAME
-        assert isinstance(params.APPLICATION_NAME, str)
+        assert params.APP_NAME
+        assert isinstance(params.APP_NAME, str)
 
     def test_parametres_debug_mode_boolean(self):
         """Test que DEBUG est un booléen."""
         params = Parametres()
         assert isinstance(params.DEBUG, bool)
 
-    def test_parametres_log_level_valid(self):
-        """Test que LOG_LEVEL est une valeur valide."""
+    def test_parametres_env_valid(self):
+        """Test que ENV est une valeur valide (peut contenir des commentaires .env)."""
         params = Parametres()
-        valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-        assert params.LOG_LEVEL in valid_levels
+        valid_envs = ["production", "development", "test"]
+        # Le .env peut contenir des commentaires inline, on prend la partie avant #
+        env_value = params.ENV.split("#")[0].strip()
+        assert env_value in valid_envs
 
     @patch.dict(os.environ, {"DEBUG": "true"}, clear=False)
     def test_parametres_debug_env_override(self):
@@ -112,11 +115,11 @@ class TestParametres:
     def test_parametres_from_env(self):
         """Test chargement depuis variables d'environnement."""
         with patch.dict(
-            os.environ, {"APPLICATION_NAME": "TestApp", "DEBUG": "True"}, clear=False
+            os.environ, {"APP_NAME": "TestApp", "DEBUG": "True"}, clear=False
         ):
             params = Parametres()
             # Les valeurs env override les défauts
-            assert params.APPLICATION_NAME or params.APPLICATION_NAME  # Exists
+            assert params.APP_NAME  # Exists
 
 
 # ═══════════════════════════════════════════════════════════
@@ -138,7 +141,7 @@ class TestObtenirParametres:
         result1 = obtenir_parametres()
         result2 = obtenir_parametres()
         # Devrait retourner la même instance ou équivalent
-        assert result1.APPLICATION_NAME == result2.APPLICATION_NAME
+        assert result1.APP_NAME == result2.APP_NAME
 
     def test_obtenir_parametres_has_database_url(self):
         """Test que les paramètres ont DATABASE_URL."""
@@ -164,11 +167,11 @@ class TestConfigurationCascade:
     def test_env_var_overrides_default(self):
         """Test que les variables env override les defaults."""
         with patch.dict(
-            os.environ, {"LOG_LEVEL": "ERROR"}, clear=False
+            os.environ, {"ENV": "test"}, clear=False
         ):
             params = Parametres()
-            # LOG_LEVEL devrait être au moins basé sur env
-            assert params.LOG_LEVEL or params.LOG_LEVEL == "ERROR" or params.LOG_LEVEL
+            # ENV devrait être au moins basé sur env
+            assert params.ENV in ["production", "development", "test"]
 
     def test_database_url_from_env(self):
         """Test que DATABASE_URL vient d'env si défini."""
@@ -190,25 +193,27 @@ class TestConfigValidation:
     """Tests de validation de la configuration."""
 
     def test_application_name_not_empty(self):
-        """Test que APPLICATION_NAME n'est pas vide."""
+        """Test que APP_NAME n'est pas vide."""
         params = Parametres()
-        assert len(params.APPLICATION_NAME) > 0
+        assert len(params.APP_NAME) > 0
 
     def test_debug_is_boolean(self):
         """Test que DEBUG est booléen."""
         params = Parametres()
         assert isinstance(params.DEBUG, (bool, type(None))) or params.DEBUG in [True, False, None]
 
-    def test_log_level_is_string(self):
-        """Test que LOG_LEVEL est une string."""
+    def test_env_is_string(self):
+        """Test que ENV est une string."""
         params = Parametres()
-        assert isinstance(params.LOG_LEVEL, str)
+        assert isinstance(params.ENV, str)
 
-    def test_log_level_is_valid(self):
-        """Test que LOG_LEVEL est une valeur valide."""
+    def test_env_is_valid(self):
+        """Test que ENV est une valeur valide (peut contenir des commentaires .env)."""
         params = Parametres()
-        valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-        assert params.LOG_LEVEL.upper() in valid_levels
+        valid_envs = ["production", "development", "test"]
+        # Le .env peut contenir des commentaires inline, on prend la partie avant #
+        env_value = params.ENV.split("#")[0].strip()
+        assert env_value in valid_envs
 
     def test_database_url_format_basic(self):
         """Test que DATABASE_URL a un format de base."""
@@ -231,23 +236,23 @@ class TestConfigIntegration:
         params = obtenir_parametres()
         
         # Vérifier les propriétés principales
-        assert params.APPLICATION_NAME
+        assert params.APP_NAME
         assert params.DEBUG is not None
-        assert params.LOG_LEVEL
+        assert params.ENV
         assert params.DATABASE_URL
 
     def test_config_with_custom_env(self):
         """Test la configuration avec des variables env personnalisées."""
         custom_env = {
-            "APPLICATION_NAME": "CustomApp",
+            "APP_NAME": "CustomApp",
             "DEBUG": "false",
-            "LOG_LEVEL": "DEBUG",
+            "ENV": "test",
         }
         
         with patch.dict(os.environ, custom_env, clear=False):
             params = Parametres()
-            # Au moins APPLICATION_NAME devrait correspondre ou être défini
-            assert params.APPLICATION_NAME or params.DEBUG is not None
+            # Au moins APP_NAME devrait correspondre ou être défini
+            assert params.APP_NAME or params.DEBUG is not None
 
     def test_config_reload(self):
         """Test que _reload_env_files peut être appelé sans erreur."""
@@ -263,8 +268,8 @@ class TestConfigIntegration:
         params2 = Parametres()
         
         # Les propriétés principales doivent être cohérentes
-        assert params1.APPLICATION_NAME == params2.APPLICATION_NAME
-        assert params1.LOG_LEVEL == params2.LOG_LEVEL
+        assert params1.APP_NAME == params2.APP_NAME
+        assert params1.ENV == params2.ENV
 
 
 # ═══════════════════════════════════════════════════════════

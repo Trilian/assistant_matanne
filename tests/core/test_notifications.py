@@ -345,9 +345,12 @@ class TestNotificationManager:
         notif1 = NotificationManager.add(titre="Test 1")
         notif2 = NotificationManager.add(titre="Test 2")
         
-        # Marquer comme lue
+        # Marquer notif1 comme lue via son ID
         store = NotificationManager._get_store()
-        store[0]["read"] = True
+        for item in store:
+            if item.get("titre") == "Test 1":
+                item["read"] = True
+                break
         NotificationManager._set_store(store)
         
         unread = NotificationManager.get_all(include_read=False)
@@ -456,8 +459,8 @@ class TestNotificationManager:
         
         assert len(store) == 2
         
-        # Nettoyer
-        NotificationManager.clear_expired()
+        # Nettoyer (méthode correcte: cleanup_expired)
+        NotificationManager.cleanup_expired()
         
         store = NotificationManager._get_store()
         assert len(store) == 1
