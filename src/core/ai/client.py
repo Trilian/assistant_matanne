@@ -347,8 +347,81 @@ class ClientIA:
         )
 
     # ═══════════════════════════════════════════════════════════
-    # HELPERS
+    # HELPERS SYNCHRONES
     # ═══════════════════════════════════════════════════════════
+
+    def generer_json(
+        self,
+        prompt: str,
+        system_prompt: str = "Réponds UNIQUEMENT en JSON valide.",
+        temperature: float = 0.3,
+        max_tokens: int = 2000,
+    ) -> dict | str | None:
+        """
+        Génère une réponse JSON de manière synchrone.
+        
+        Wrapper sync autour de appeler() pour les contextes UI.
+        
+        Args:
+            prompt: Prompt utilisateur
+            system_prompt: Instructions système (défaut: JSON uniquement)
+            temperature: Température (défaut: 0.3 pour plus de précision)
+            max_tokens: Tokens max
+            
+        Returns:
+            Dictionnaire parsé, string JSON brut, ou None si erreur
+        """
+        import concurrent.futures
+        import json
+        
+        # Exécuter async dans un thread pour éviter les conflits de boucle
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = None
+        
+        async def _call():
+            return await self.appeler(
+                prompt=prompt,
+                prompt_systeme=system_prompt,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                utiliser_cache=True,
+            )
+        
+        try:
+            if loop is not None:
+                # Boucle d'événements active - utiliser un thread
+                with concurrent.futures.ThreadPoolExecutor() as pool:
+                    future = pool.submit(asyncio.run, _call())
+                    response = future.result(timeout=60)
+            else:
+                # Pas de boucle - exécuter directement
+                response = asyncio.run(_call())
+            
+            if not response:
+                return None
+            
+            # Nettoyer et parser JSON
+            cleaned = response.strip()
+            if cleaned.startswith("```json"):
+                cleaned = cleaned[7:]
+            elif cleaned.startswith("```"):
+                cleaned = cleaned[3:]
+            if cleaned.endswith("```"):
+                cleaned = cleaned[:-3]
+            cleaned = cleaned.strip()
+            
+            return json.loads(cleaned)
+            
+        except json.JSONDecodeError:
+            # Retourner la réponse brute si pas du JSON valide
+            logger.warning("Réponse non-JSON, retour brut")
+            return response if 'response' in dir() else None
+            
+        except Exception as e:
+            logger.error(f"Erreur generer_json: {e}")
+            return None
 
     def obtenir_infos_modele(self) -> dict[str, Any]:
         """Retourne infos sur le modèle"""

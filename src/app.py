@@ -19,14 +19,20 @@ import os as _os
 # Load .env.local from project root
 project_root = Path(__file__).parent.parent
 env_file = project_root / '.env.local'
+
+# Charger les variables d'environnement (silencieux si absents)
+env_loaded = False
 if env_file.exists():
-    result = load_dotenv(env_file, override=True)
+    load_dotenv(env_file, override=True)
+    env_loaded = True
+elif (project_root / '.env').exists():
+    load_dotenv(project_root / '.env', override=True)
+    env_loaded = True
+
+# Log uniquement en mode debug
+if _os.getenv("DEBUG", "").lower() == "true":
     mistral_key = _os.getenv("MISTRAL_API_KEY")
-    print(f"Loaded environment from {env_file}")
-    print(f"   MISTRAL_API_KEY: {mistral_key[:10] if mistral_key else 'MISSING'}...")
-else:
-    print(f"WARNING: {env_file} not found, trying fallback")
-    load_dotenv('.env.local', override=True)
+    print(f"[DEBUG] Env loaded: {env_loaded}, MISTRAL_API_KEY: {'OK' if mistral_key else 'MISSING'}")
 
 import streamlit as st
 
