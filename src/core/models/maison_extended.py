@@ -15,13 +15,13 @@ from enum import Enum
 from typing import Optional
 
 from sqlalchemy import (
-    ARRAY,
     Boolean,
     Date,
     DateTime,
     Float,
     ForeignKey,
     Integer,
+    JSON,
     Numeric,
     String,
     Text,
@@ -278,7 +278,7 @@ class GardenZone(Base):
     date_prochaine_action: Mapped[Optional[date]] = mapped_column(Date)
     
     # Photos (JSON array: ["avant:url1", "apres:url2"])
-    photos_url: Mapped[Optional[list[str]]] = mapped_column(ARRAY(String), default=list)
+    photos_url: Mapped[Optional[list[str]]] = mapped_column(JSON, default=list)
     
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

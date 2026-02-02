@@ -27,6 +27,7 @@ from src.core.models import (
     ArticleInventaire,
     Planning,
     Repas,
+    RecetteIngredient,
 )
 
 logger = logging.getLogger(__name__)
@@ -292,13 +293,21 @@ class SuggestionsIAService:
         Returns:
             Liste de suggestions scorées
         """
+        from sqlalchemy.orm import selectinload
+        
         if contexte is None:
             contexte = self.construire_contexte(session=session)
         
         profil = self.analyser_profil_culinaire(session=session)
         
-        # Récupérer toutes les recettes
-        recettes = session.query(Recette).all()
+        # Récupérer toutes les recettes avec eager loading
+        recettes = (
+            session.query(Recette)
+            .options(
+                selectinload(Recette.ingredients).selectinload(RecetteIngredient.ingredient)
+            )
+            .all()
+        )
         
         if not recettes:
             return []

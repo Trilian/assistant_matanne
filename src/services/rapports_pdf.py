@@ -25,7 +25,7 @@ from src.core.cache import Cache
 from src.core.database import obtenir_contexte_db
 from src.core.decorators import with_db_session, with_cache, with_error_handling
 from src.core.errors_base import ErreurValidation, ErreurNonTrouve
-from src.core.models import ArticleInventaire, Recette, HistoriqueRecette, HistoriqueInventaire, Planning, Repas
+from src.core.models import ArticleInventaire, Recette, HistoriqueRecette, HistoriqueInventaire, Planning, Repas, RecetteIngredient
 from src.services.types import BaseService
 
 logger = logging.getLogger(__name__)
