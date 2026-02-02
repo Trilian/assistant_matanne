@@ -12,21 +12,18 @@ Modules conservés:
 - routines.py: Routines quotidiennes
 """
 
-# UI - Nouveaux modules
-from .ui import hub_famille, jules, suivi_perso, weekend, achats_famille
-from .ui import activites, routines
+# Import paresseux des modules pour faciliter les tests
+# Les modules UI dépendent de pandas/plotly et ne sont pas requis pour les tests de logique
 
-# Logic - conservés
-from .logic import (
-    activites_logic, routines_logic, helpers
-)
 
-__all__ = [
-    # UI - Nouveau hub
-    "hub_famille", "jules", "suivi_perso", "weekend", "achats_famille",
-    # UI - Conservés
-    "activites", "routines",
-    # Logic
-    "activites_logic", "routines_logic", "helpers",
-]
+def __getattr__(name):
+    """Chargement paresseux des modules pour optimiser les tests et le démarrage."""
+    if name in ("hub_famille", "jules", "suivi_perso", "weekend", "achats_famille", 
+                "activites", "routines"):
+        from . import ui
+        return getattr(ui, name)
+    elif name in ("activites_logic", "routines_logic", "helpers"):
+        from . import logic
+        return getattr(logic, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
