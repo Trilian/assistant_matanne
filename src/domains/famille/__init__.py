@@ -13,7 +13,7 @@ Modules conservés:
 """
 
 # UI - Nouveaux modules
-from .ui import hub_famille, jules_nouveau, suivi_perso, weekend, achats_famille
+from .ui import hub_famille, jules, suivi_perso, weekend, achats_famille
 from .ui import activites, routines
 
 # Logic - conservés
@@ -23,7 +23,7 @@ from .logic import (
 
 __all__ = [
     # UI - Nouveau hub
-    "hub_famille", "jules_nouveau", "suivi_perso", "weekend", "achats_famille",
+    "hub_famille", "jules", "suivi_perso", "weekend", "achats_famille",
     # UI - Conservés
     "activites", "routines",
     # Logic

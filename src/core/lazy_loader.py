@@ -228,7 +228,7 @@ class OptimizedRouter:
         
         # [OK] DOMAINE FAMILLE - NOUVEAU HUB
         "famille.hub": {"path": "src.domains.famille.ui.hub_famille", "type": "simple"},
-        "famille.jules_nouveau": {"path": "src.domains.famille.ui.jules_nouveau", "type": "simple"},
+        "famille.jules": {"path": "src.domains.famille.ui.jules", "type": "simple"},
         "famille.suivi_perso": {"path": "src.domains.famille.ui.suivi_perso", "type": "simple"},
         "famille.weekend": {"path": "src.domains.famille.ui.weekend", "type": "simple"},
         "famille.achats_famille": {"path": "src.domains.famille.ui.achats_famille", "type": "simple"},

@@ -231,7 +231,7 @@ def afficher_sidebar():
             # Famille - NOUVEAU HUB
             "👨‍👩‍👧‍👦 Famille": {
                 "🏠 Hub Famille": "famille.hub",  # Nouveau hub avec cards
-                "👶 Jules": "famille.jules_nouveau",
+                "👶 Jules": "famille.jules",
                 "💪 Mon Suivi": "famille.suivi_perso",
                 "🎉 Weekend": "famille.weekend",
                 "🛍️ Achats": "famille.achats_famille",

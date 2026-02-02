@@ -13,11 +13,11 @@ Modules conservés:
 - routines.py: Routines quotidiennes
 """
 
-from . import hub_famille, jules_nouveau, suivi_perso, weekend, achats_famille
+from . import hub_famille, jules, suivi_perso, weekend, achats_famille
 from . import activites, routines
 
 __all__ = [
-    "hub_famille", "jules_nouveau", "suivi_perso", "weekend", "achats_famille",
+    "hub_famille", "jules", "suivi_perso", "weekend", "achats_famille",
     "activites", "routines",
 ]
 

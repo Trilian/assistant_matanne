@@ -305,7 +305,7 @@ def app():
     if page == "hub":
         render_hub()
     elif page == "jules":
-        from src.domains.famille.ui.jules_nouveau import app as jules_app
+        from src.domains.famille.ui.jules import app as jules_app
         if st.button("⬅️ Retour au Hub"):
             st.session_state["famille_page"] = "hub"
             st.rerun()
