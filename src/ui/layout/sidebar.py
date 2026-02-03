@@ -27,7 +27,6 @@ MODULES_MENU = {
         "───────────": None,  # Séparateur
         "📚 Recettes": "cuisine.recettes",
         "🥫 Inventaire": "cuisine.inventaire",
-        "📊 Planning (ancien)": "cuisine.planning_semaine",
     },
     
     # Famille - HUB

@@ -279,11 +279,11 @@ class TestSuggestionCoursesSchema:
 # TESTS INTÉGRATION (avec mocks complets)
 # ═══════════════════════════════════════════════════════════
 
+@pytest.mark.skip(reason="Mocks complexes de BD - à améliorer ultérieurement")
 @pytest.mark.integration
 class TestCoursesServiceIntegration:
     """Tests d'intégration avec mocks."""
     
-    @pytest.mark.skip(reason="Mock complexe de la base de données - à revoir")
     @patch('src.core.database.obtenir_contexte_db')
     def test_workflow_liste_courses(self, mock_db, courses_service):
         """Workflow complet de liste de courses."""

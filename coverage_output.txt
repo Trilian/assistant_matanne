@@ -1,0 +1,323 @@
+﻿============================= test session starts =============================
+collected 1737 items
+
+tests\core\test_action_history.py ........................               [  1%]
+tests\core\test_ai_agent.py ......................                       [  2%]
+tests\core\test_ai_agent_sync.py ..............                          [  3%]
+tests\core\test_ai_cache.py ................                             [  4%]
+tests\core\test_ai_client.py ..............                              [  5%]
+tests\core\test_ai_parser_extended.py .......................            [  6%]
+tests\core\test_ai_rate_limit.py ............                            [  7%]
+tests\core\test_cache.py ............................                    [  8%]
+tests\core\test_cache_multi.py ..ss......ss..sssssssss.....              [ 10%]
+tests\core\test_config.py ..............................                 [ 12%]
+tests\core\test_config_extended.py ...............                       [ 13%]
+tests\core\test_constants.py ........................................... [ 15%]
+...                                                                      [ 15%]
+tests\core\test_database.py ...................................          [ 17%]
+tests\core\test_database_extended.py ..........                          [ 18%]
+tests\core\test_decorators.py ...........                                [ 18%]
+tests\core\test_decorators_extended.py ............                      [ 19%]
+tests\core\test_errors.py ....................................           [ 21%]
+tests\core\test_errors_base.py ......................................... [ 24%]
+......                                                                   [ 24%]
+tests\core\test_lazy_loader.py .....                                     [ 24%]
+tests\core\test_lazy_loader_extended.py ..................               [ 25%]
+tests\core\test_logging.py ...............................               [ 27%]
+tests\core\test_models_recettes.py .......................               [ 28%]
+tests\core\test_multi_tenant.py .................................        [ 30%]
+tests\core\test_notifications.py ....................................... [ 32%]
+....                                                                     [ 33%]
+tests\core\test_parser_ai.py ......................                      [ 34%]
+tests\core\test_performance_optimizations.py ........................... [ 35%]
+..............                                                           [ 36%]
+tests\core\test_redis_cache.py .......................................   [ 39%]
+tests\core\test_state.py ..................................              [ 40%]
+tests\core\test_validation.py .......................................... [ 43%]
+                                                                         [ 43%]
+tests\core\test_validators_pydantic.py .....................             [ 44%]
+tests\domains\cuisine\test_batch_cooking_logic.py ...................... [ 45%]
+.....................                                                    [ 47%]
+tests\domains\cuisine\test_courses_logic.py ............................ [ 48%]
+.....................                                                    [ 49%]
+tests\domains\cuisine\test_inventaire_logic.py ......................... [ 51%]
+................................                                         [ 53%]
+tests\domains\cuisine\test_planificateur_repas_logic.py ................ [ 54%]
+...........                                                              [ 54%]
+tests\domains\cuisine\test_planning_logic.py ........................    [ 56%]
+tests\domains\cuisine\test_recettes_logic.py ............                [ 56%]
+tests\domains\cuisine\test_schemas.py ...................                [ 57%]
+tests\domains\famille\test_activites_logic.py .......................... [ 59%]
+...........                                                              [ 60%]
+tests\domains\famille\test_routines_logic.py ........................... [ 61%]
+...................                                                      [ 62%]
+tests\domains\jeux\test_loto_logic.py .................                  [ 63%]
+tests\domains\maison\test_entretien_logic.py ........................... [ 65%]
+....                                                                     [ 65%]
+tests\domains\maison\test_jardin_logic.py .............................  [ 67%]
+tests\domains\maison\test_projets_logic.py ............................. [ 68%]
+.                                                                        [ 68%]
+tests\domains\planning\test_calendrier_unifie_logic.py ................. [ 69%]
+....................                                                     [ 70%]
+tests\domains\planning\test_vue_ensemble_logic.py ...................... [ 72%]
+..                                                                       [ 72%]
+tests\domains\planning\test_vue_semaine_logic.py ......................  [ 73%]
+tests\domains\ui\test_ui_helpers.py ........................             [ 75%]
+tests\domains\utils\test_accueil_logic.py ...........................    [ 76%]
+tests\domains\utils\test_barcode_logic.py ........................       [ 77%]
+tests\domains\utils\test_parametres_logic.py ........................... [ 79%]
+................                                                         [ 80%]
+tests\domains\utils\test_rapports_logic.py ............................. [ 82%]
+.....                                                                    [ 82%]
+tests\e2e\test_domains_e2e.py ..........                                 [ 82%]
+tests\services\test_backup_service.py ..........                         [ 83%]
+tests\services\test_base_ai_service.py ..........                        [ 84%]
+tests\services\test_base_service.py ...........                          [ 84%]
+tests\services\test_courses_service.py .....s......ss..........s         [ 86%]
+tests\services\test_factures_ocr.py ...............                      [ 87%]
+tests\services\test_inventaire_service.py .................              [ 88%]
+tests\services\test_openfoodfacts.py .........                           [ 88%]
+tests\services\test_planning_service.py ..........                       [ 89%]
+tests\services\test_predictions_service.py ..........                    [ 89%]
+tests\services\test_recettes_service.py ....................             [ 90%]
+tests\test_app_main.py .......................                           [ 92%]
+tests\test_jeux_apis.py ...                                              [ 92%]
+tests\utils\test_helpers_data.py ........................                [ 93%]
+tests\utils\test_helpers_dates.py ....................                   [ 94%]
+tests\utils\test_helpers_strings.py .......................              [ 96%]
+tests\utils\test_validators_common.py .............................      [ 97%]
+tests\utils\test_validators_dates.py ......................              [ 99%]
+tests\utils\test_validators_food.py ...............                      [100%]
+
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.11.8-final-0 _______________
+
+Name                                                     Stmts   Miss Branch BrPart   Cover
+-------------------------------------------------------------------------------------------
+src\api\__init__.py                                          2      2      0      0   0.00%
+src\api\main.py                                            338    338     38      0   0.00%
+src\api\rate_limiting.py                                   192    192     56      0   0.00%
+src\app.py                                                  45     19     12      3  50.88%
+src\core\__init__.py                                        47      0      0      0 100.00%
+src\core\ai\__init__.py                                     12      0      0      0 100.00%
+src\core\ai\cache.py                                        67     21      6      0  65.75%
+src\core\ai\client.py                                      152     57     44      7  60.20%
+src\core\ai\parser.py                                      174     27     52     10  81.86%
+src\core\ai\rate_limit.py                                   58      5     14      1  91.67%
+src\core\ai_agent.py                                        37      0      4      0 100.00%
+src\core\cache.py                                          208     34     64      8  83.09%
+src\core\cache_multi.py                                    337    163     92      8  46.62%
+src\core\config.py                                         193     90     50      8  50.62%
+src\core\constants.py                                      214      6      0      0  97.20%
+src\core\database.py                                       200     66     18      2  65.14%
+src\core\decorators.py                                     102     41     30      3  53.03%
+src\core\errors.py                                         131     62     60      9  46.07%
+src\core\errors_base.py                                     40      0      8      0 100.00%
+src\core\lazy_loader.py                                    116     61     24      0  45.00%
+src\core\logging.py                                         95      0     24      3  97.48%
+src\core\models\__init__.py                                 15      0      0      0 100.00%
+src\core\models\base.py                                     28      1      0      0  96.43%
+src\core\models\batch_cooking.py                           141     14      4      0  87.59%
+src\core\models\courses.py                                  51      1      2      1  96.23%
+src\core\models\famille.py                                  82      0      0      0 100.00%
+src\core\models\inventaire.py                               49      3      2      1  92.16%
+src\core\models\jeux.py                                    177     13      4      0  90.61%
+src\core\models\maison.py                                   72      0      0      0 100.00%
+src\core\models\maison_extended.py                         163      0      0      0 100.00%
+src\core\models\nouveaux.py                                171      1      0      0  99.42%
+src\core\models\planning.py                                 43      1      2      1  95.56%
+src\core\models\recettes.py                                156     31     24      1  70.00%
+src\core\models\sante.py                                    54      0      0      0 100.00%
+src\core\models\user_preferences.py                         80      2      2      1  96.34%
+src\core\models\users.py                                   188      8      2      0  94.74%
+src\core\multi_tenant.py                                   162     70     42      1  51.47%
+src\core\notifications.py                                  257     96     84      6  58.94%
+src\core\offline.py                                        269    186     62      0  25.08%
+src\core\performance.py                                    299    209     54      0  25.50%
+src\core\performance_optimizations.py                      249     67     74     11  68.42%
+src\core\redis_cache.py                                    262    141     68      8  44.55%
+src\core\sql_optimizer.py                                  245    167     80      0  24.00%
+src\core\state.py                                          189     20     34     10  86.55%
+src\core\validation.py                                     255    105    106      9  51.80%
+src\core\validators_pydantic.py                            176     28     30      3  79.13%
+src\domains\__init__.py                                     21     19     12      0   6.06%
+src\domains\cuisine\__init__.py                              9      7      4      0  15.38%
+src\domains\cuisine\logic\__init__.py                        5      0      0      0 100.00%
+src\domains\cuisine\logic\batch_cooking_logic.py           184     57     84      2  69.03%
+src\domains\cuisine\logic\courses_logic.py                 158      1     62      2  98.64%
+src\domains\cuisine\logic\inventaire_logic.py              238     57    110     11  75.29%
+src\domains\cuisine\logic\planificateur_repas_logic.py     203     57     90     12  65.53%
+src\domains\cuisine\logic\planning_logic.py                105     17     44      6  81.88%
+src\domains\cuisine\logic\recettes_logic.py                113     71     42      0  38.71%
+src\domains\cuisine\logic\schemas.py                        33      0      0      0 100.00%
+src\domains\cuisine\ui\__init__.py                          18     16     10      0   7.14%
+src\domains\cuisine\ui\batch_cooking_detaille.py           327    327    146      0   0.00%
+src\domains\cuisine\ui\courses.py                          659    659    192      0   0.00%
+src\domains\cuisine\ui\inventaire.py                       825    789    262      0   3.86%
+src\domains\cuisine\ui\planificateur_repas.py              375    375    122      0   0.00%
+src\domains\cuisine\ui\recettes.py                         825    801    344      1   2.48%
+src\domains\cuisine\ui\recettes_import.py                  222    208     74      0   4.73%
+src\domains\famille\__init__.py                              8      7      4      0   8.33%
+src\domains\famille\logic\__init__.py                        2      0      0      0 100.00%
+src\domains\famille\logic\activites_logic.py               110      0     52      1  99.38%
+src\domains\famille\logic\helpers.py                       170    143     26      0  13.78%
+src\domains\famille\logic\routines_logic.py                159      8     82      7  93.78%
+src\domains\famille\ui\__init__.py                           3      3      0      0   0.00%
+src\domains\famille\ui\achats_famille.py                   234    234     68      0   0.00%
+src\domains\famille\ui\activites.py                        140    140     32      0   0.00%
+src\domains\famille\ui\hub_famille.py                      204    204     60      0   0.00%
+src\domains\famille\ui\jules.py                            228    228     52      0   0.00%
+src\domains\famille\ui\jules_planning.py                   163    163     46      0   0.00%
+src\domains\famille\ui\routines.py                         271    271     90      0   0.00%
+src\domains\famille\ui\suivi_perso.py                      275    275     68      0   0.00%
+src\domains\famille\ui\weekend.py                          249    249     54      0   0.00%
+src\domains\jeux\__init__.py                                 3      0      0      0 100.00%
+src\domains\jeux\integration.py                             15     15      2      0   0.00%
+src\domains\jeux\logic\__init__.py                           2      0      0      0 100.00%
+src\domains\jeux\logic\api_football.py                     157     88     52     11  41.15%
+src\domains\jeux\logic\api_service.py                       83     61     14      0  24.74%
+src\domains\jeux\logic\loto_logic.py                       204    141     82      1  28.67%
+src\domains\jeux\logic\paris_logic.py                      500    465    234      0   4.77%
+src\domains\jeux\logic\scraper_loto.py                     133     71     44      2  40.68%
+src\domains\jeux\logic\ui_helpers.py                       135     92     24      4  29.56%
+src\domains\jeux\setup.py                                   76     76     10      0   0.00%
+src\domains\jeux\ui\__init__.py                              2      0      0      0 100.00%
+src\domains\jeux\ui\loto.py                                371    344     86      0   5.91%
+src\domains\jeux\ui\paris.py                               622    590    172      0   4.03%
+src\domains\maison\__init__.py                               9      7      4      0  15.38%
+src\domains\maison\logic\__init__.py                         2      0      0      0 100.00%
+src\domains\maison\logic\entretien_logic.py                112      2     56      2  97.62%
+src\domains\maison\logic\helpers.py                        119     90     34      0  18.95%
+src\domains\maison\logic\jardin_logic.py                    81     14     34      3  78.26%
+src\domains\maison\logic\projets_logic.py                   93     23     40      0  69.17%
+src\domains\maison\ui\__init__.py                            2      0      0      0 100.00%
+src\domains\maison\ui\depenses.py                          271    271     60      0   0.00%
+src\domains\maison\ui\eco_tips.py                          189    189     58      0   0.00%
+src\domains\maison\ui\energie.py                           165    165     24      0   0.00%
+src\domains\maison\ui\entretien.py                         253    253     86      0   0.00%
+src\domains\maison\ui\hub_maison.py                        194    172     52      0   8.94%
+src\domains\maison\ui\jardin.py                            217    217     64      0   0.00%
+src\domains\maison\ui\jardin_zones.py                      205    205     54      0   0.00%
+src\domains\maison\ui\meubles.py                           207    207     64      0   0.00%
+src\domains\maison\ui\projets.py                           237    237     76      0   0.00%
+src\domains\maison\ui\scan_factures.py                     158    140     44      0   8.91%
+src\domains\planning\__init__.py                             3      0      0      0 100.00%
+src\domains\planning\logic\__init__.py                       2      0      0      0 100.00%
+src\domains\planning\logic\calendrier_unifie_logic.py      373    212    162      1  33.64%
+src\domains\planning\logic\vue_ensemble_logic.py           159     65     90     12  53.01%
+src\domains\planning\logic\vue_semaine_logic.py            155     58     64      8  61.64%
+src\domains\planning\ui\__init__.py                          9      5      0      0  44.44%
+src\domains\planning\ui\calendrier_unifie.py               247    229     92      0   5.31%
+src\domains\planning\ui\components\__init__.py             110    110     34      0   0.00%
+src\domains\planning\ui\vue_ensemble.py                    184    173     64      0   4.44%
+src\domains\planning\ui\vue_semaine.py                     134    124     38      0   5.81%
+src\domains\utils\__init__.py                                3      0      0      0 100.00%
+src\domains\utils\logic\__init__.py                          2      0      0      0 100.00%
+src\domains\utils\logic\accueil_logic.py                    41      2     20      2  93.44%
+src\domains\utils\logic\barcode_logic.py                    85     30     44      1  63.57%
+src\domains\utils\logic\parametres_logic.py                132     43     84      0  65.28%
+src\domains\utils\logic\rapports_logic.py                  117     31     50      0  70.66%
+src\domains\utils\ui\__init__.py                             2      0      0      0 100.00%
+src\domains\utils\ui\accueil.py                            235    214     60      0   7.12%
+src\domains\utils\ui\barcode.py                            221    206     50      0   5.54%
+src\domains\utils\ui\notifications_push.py                 150    138     30      0   6.67%
+src\domains\utils\ui\parametres.py                         339    319     62      0   4.99%
+src\domains\utils\ui\rapports.py                           201    189     56      0   4.67%
+src\services\__init__.py                                    12      1      0      0  91.67%
+src\services\action_history.py                             237    141     40      0  34.66%
+src\services\auth.py                                       381    381    112      0   0.00%
+src\services\backup.py                                     319    247     74      0  18.32%
+src\services\barcode.py                                    184    119     56      0  27.08%
+src\services\base_ai_service.py                            222    183     66      0  13.54%
+src\services\base_service.py                               168    127     74      0  16.94%
+src\services\batch_cooking.py                              303    303     84      0   0.00%
+src\services\budget.py                                     470    332    106      0  23.96%
+src\services\calendar_sync.py                              481    481    120      0   0.00%
+src\services\courses.py                                    145     89     42      3  34.76%
+src\services\courses_intelligentes.py                      149     77     38      1  43.32%
+src\services\facture_ocr.py                                 95     28     18      1  69.03%
+src\services\garmin_sync.py                                228    228     38      0   0.00%
+src\services\inventaire.py                                 349    239     98      1  27.52%
+src\services\io_service.py                                 110     87     42      0  15.13%
+src\services\notifications.py                              126    126     36      0   0.00%
+src\services\notifications_push.py                         142     73     28      1  41.18%
+src\services\openfoodfacts.py                              123     32     16      3  70.50%
+src\services\pdf_export.py                                 168    168     32      0   0.00%
+src\services\planning.py                                   207    146     62      0  23.42%
+src\services\planning_unified.py                           198    130     50      0  27.42%
+src\services\predictions.py                                132     65     34      2  47.59%
+src\services\push_notifications.py                         331    331     70      0   0.00%
+src\services\pwa.py                                         49     49      0      0   0.00%
+src\services\rapports_pdf.py                               359    288     98      0  15.54%
+src\services\realtime_sync.py                              249    249     50      0   0.00%
+src\services\recettes.py                                   323    208     58      2  31.76%
+src\services\recipe_import.py                              483    483    258      0   0.00%
+src\services\suggestions_ia.py                             228    228     96      0   0.00%
+src\services\types.py                                      204    163     88      0  14.04%
+src\services\user_preferences.py                           118     88     14      0  22.73%
+src\services\weather.py                                    371    371    146      0   0.00%
+src\ui\__init__.py                                           4      0      0      0 100.00%
+src\ui\components\__init__.py                                6      0      0      0 100.00%
+src\ui\components\atoms.py                                  23     16      8      0  22.58%
+src\ui\components\camera_scanner.py                        182    182     62      0   0.00%
+src\ui\components\dashboard_widgets.py                     137    120     38      0   9.71%
+src\ui\components\data.py                                   59     51     26      0   9.41%
+src\ui\components\dynamic.py                                91     69     28      0  18.49%
+src\ui\components\forms.py                                  44     37     26      0  10.00%
+src\ui\components\google_calendar_sync.py                   87     87     40      0   0.00%
+src\ui\components\layouts.py                                56     49     26      0   8.54%
+src\ui\core\__init__.py                                      4      0      0      0 100.00%
+src\ui\core\base_form.py                                   101     82     38      0  13.67%
+src\ui\core\base_io.py                                      45     26     12      0  33.33%
+src\ui\core\base_module.py                                 192    146     70      0  17.56%
+src\ui\domain.py                                            13     10      8      0  14.29%
+src\ui\feedback\__init__.py                                  4      0      0      0 100.00%
+src\ui\feedback\progress.py                                104     86     24      0  14.06%
+src\ui\feedback\spinners.py                                 22     15      8      0  23.33%
+src\ui\feedback\toasts.py                                   35     21      6      0  34.15%
+src\ui\layout\__init__.py                                    6      0      0      0 100.00%
+src\ui\layout\footer.py                                     15     12      4      0  15.79%
+src\ui\layout\header.py                                     18     13      6      0  20.83%
+src\ui\layout\init.py                                       24      5      4      2  75.00%
+src\ui\layout\sidebar.py                                    47     40     20      0  10.45%
+src\ui\layout\styles.py                                      3      0      0      0 100.00%
+src\ui\tablet_mode.py                                      162    162     66      0   0.00%
+src\utils\__init__.py                                        6      0      0      0 100.00%
+src\utils\constants.py                                      20      0      0      0 100.00%
+src\utils\formatters\__init__.py                             5      0      0      0 100.00%
+src\utils\formatters\dates.py                               83     77     54      0   4.38%
+src\utils\formatters\numbers.py                             90     81     28      0   7.63%
+src\utils\formatters\text.py                                31     25     12      0  13.95%
+src\utils\formatters\units.py                               23     20      8      0   9.68%
+src\utils\helpers\__init__.py                                6      0      0      0 100.00%
+src\utils\helpers\data.py                                   50      7     20      1  85.71%
+src\utils\helpers\dates.py                                  29      1      6      0  97.14%
+src\utils\helpers\food.py                                   21     10      0      0  52.38%
+src\utils\helpers\helpers.py                               102    102     36      0   0.00%
+src\utils\helpers\stats.py                                  48     38     18      0  15.15%
+src\utils\helpers\strings.py                                37     14     12      0  51.02%
+src\utils\image_generator.py                               312    312    104      0   0.00%
+src\utils\media.py                                          68     37     16      0  36.90%
+src\utils\recipe_importer.py                               235    216    140      0   5.07%
+src\utils\validators\__init__.py                             4      0      0      0 100.00%
+src\utils\validators\common.py                              41     12     18      2  66.10%
+src\utils\validators\dates.py                               26      3     10      1  83.33%
+src\utils\validators\food.py                               107     52     72      9  52.51%
+-------------------------------------------------------------------------------------------
+TOTAL                                                    31342  22514   9192    233  25.27%
+
+1 empty file skipped.
+=========================== short test summary info ===========================
+SKIPPED [1] tests\core\test_cache_multi.py:82: Test flaky en CI - timing dÚpendant
+SKIPPED [1] tests\core\test_cache_multi.py:99: Test flaky en CI - timing dÚpendant
+SKIPPED [1] tests\core\test_cache_multi.py:216: Test flaky en CI - timing dÚpendant
+SKIPPED [1] tests\core\test_cache_multi.py:230: Test flaky - invalidation fichier non fiable en CI
+SKIPPED [6] tests\core\test_cache_multi.py: Tests flaky - dÚpendance sur singleton et Útat partagÚ
+SKIPPED [1] tests\core\test_cache_multi.py:388: Test flaky en CI - singleton partagÚ
+SKIPPED [1] tests\core\test_cache_multi.py:420: Test flaky en CI - singleton partagÚ
+SKIPPED [1] tests\core\test_cache_multi.py:438: Test flaky en CI - singleton partagÚ
+SKIPPED [1] tests\services\test_courses_service.py:80: Mock complexe - Ó revoir
+SKIPPED [1] tests\services\test_courses_service.py:150: Mock complexe sur les caches - Ó revoir
+SKIPPED [1] tests\services\test_courses_service.py:159: Mock complexe sur les caches - Ó revoir
+SKIPPED [1] tests\services\test_courses_service.py: Mocks complexes de BD - Ó amÚliorer ultÚrieurement
+=============== 1720 passed, 17 skipped, 11 warnings in 53.71s ================
