@@ -5,8 +5,8 @@ Tests for expense tracking, budget analysis, and financial reporting
 import pytest
 from datetime import date, timedelta
 from sqlalchemy.orm import Session
-from src.services.budget import BudgetService
-from src.core.models.maison_extended import Depense, Budget, CategorieDepense
+from src.services.budget import BudgetService, CategorieDepense
+from src.core.models.maison_extended import HouseExpense
 from src.core.errors import ErreurBaseDeDonnees
 
 
@@ -17,7 +17,7 @@ class TestBudgetCreation:
         """Create a monthly budget"""
         service = BudgetService(db)
         
-        budget = Budget(
+        budget = HouseExpense(
             nom="Budget Février 2026",
             date_debut=date(2026, 2, 1),
             date_fin=date(2026, 2, 28),
@@ -33,7 +33,7 @@ class TestBudgetCreation:
         """Create budget with spending categories"""
         service = BudgetService(db)
         
-        budget = Budget(
+        budget = HouseExpense(
             nom="Budget familial",
             date_debut=date(2026, 2, 1),
             date_fin=date(2026, 2, 28),
@@ -62,7 +62,7 @@ class TestExpenseTracking:
         """Record an expense"""
         service = BudgetService(db)
         
-        budget = Budget(
+        budget = HouseExpense(
             nom="Budget test",
             date_debut=date(2026, 2, 1),
             date_fin=date(2026, 2, 28),
@@ -71,7 +71,7 @@ class TestExpenseTracking:
         db.add(budget)
         db.commit()
         
-        expense = Depense(
+        expense = HouseExpense(
             budget_id=budget.id,
             nom="Courses supermarché",
             categorie="Alimentation",
@@ -89,7 +89,7 @@ class TestExpenseTracking:
         """Record multiple expenses"""
         service = BudgetService(db)
         
-        budget = Budget(
+        budget = HouseExpense(
             nom="Budget",
             date_debut=date(2026, 2, 1),
             date_fin=date(2026, 2, 28),
@@ -99,11 +99,11 @@ class TestExpenseTracking:
         db.commit()
         
         expenses = [
-            Depense(budget_id=budget.id, nom="Courses 1", montant=100, 
+            HouseExpense(budget_id=budget.id, nom="Courses 1", montant=100, 
                    categorie="Alimentation", date=date.today()),
-            Depense(budget_id=budget.id, nom="Courses 2", montant=80, 
+            HouseExpense(budget_id=budget.id, nom="Courses 2", montant=80, 
                    categorie="Alimentation", date=date.today()),
-            Depense(budget_id=budget.id, nom="Essence", montant=60, 
+            HouseExpense(budget_id=budget.id, nom="Essence", montant=60, 
                    categorie="Transport", date=date.today()),
         ]
         db.add_all(expenses)
@@ -116,7 +116,7 @@ class TestExpenseTracking:
         """Record expense with tags for filtering"""
         service = BudgetService(db)
         
-        budget = Budget(
+        budget = HouseExpense(
             nom="Budget",
             date_debut=date(2026, 2, 1),
             date_fin=date(2026, 2, 28),
@@ -125,7 +125,7 @@ class TestExpenseTracking:
         db.add(budget)
         db.commit()
         
-        expense = Depense(
+        expense = HouseExpense(
             budget_id=budget.id,
             nom="Courses bio",
             montant=50,
@@ -146,7 +146,7 @@ class TestBudgetAnalysis:
         """Calculate total spent in period"""
         service = BudgetService(db)
         
-        budget = Budget(
+        budget = HouseExpense(
             nom="Budget",
             date_debut=date(2026, 2, 1),
             date_fin=date(2026, 2, 28),
@@ -155,7 +155,7 @@ class TestBudgetAnalysis:
         db.add(budget)
         
         for i in range(5):
-            Depense(
+            HouseExpense(
                 budget_id=budget.id,
                 nom=f"Dépense {i}",
                 montant=100,
@@ -172,7 +172,7 @@ class TestBudgetAnalysis:
         """Calculate remaining budget"""
         service = BudgetService(db)
         
-        budget = Budget(
+        budget = HouseExpense(
             nom="Budget",
             date_debut=date(2026, 2, 1),
             date_fin=date(2026, 2, 28),
@@ -180,7 +180,7 @@ class TestBudgetAnalysis:
         )
         db.add(budget)
         
-        Depense(
+        HouseExpense(
             budget_id=budget.id,
             nom="Courses",
             montant=300,
@@ -197,7 +197,7 @@ class TestBudgetAnalysis:
         """Calculate percentage of budget spent"""
         service = BudgetService(db)
         
-        budget = Budget(
+        budget = HouseExpense(
             nom="Budget",
             date_debut=date(2026, 2, 1),
             date_fin=date(2026, 2, 28),
@@ -205,7 +205,7 @@ class TestBudgetAnalysis:
         )
         db.add(budget)
         
-        Depense(
+        HouseExpense(
             budget_id=budget.id,
             nom="Dépense",
             montant=250,
@@ -222,7 +222,7 @@ class TestBudgetAnalysis:
         """Get expenses grouped by category"""
         service = BudgetService(db)
         
-        budget = Budget(
+        budget = HouseExpense(
             nom="Budget",
             date_debut=date(2026, 2, 1),
             date_fin=date(2026, 2, 28),
@@ -231,11 +231,11 @@ class TestBudgetAnalysis:
         db.add(budget)
         
         # Add expenses in different categories
-        Depense(budget_id=budget.id, nom="Courses", montant=200, 
+        HouseExpense(budget_id=budget.id, nom="Courses", montant=200, 
                categorie="Alimentation", date=date.today()).save(db)
-        Depense(budget_id=budget.id, nom="Essence", montant=100, 
+        HouseExpense(budget_id=budget.id, nom="Essence", montant=100, 
                categorie="Transport", date=date.today()).save(db)
-        Depense(budget_id=budget.id, nom="Fruits", montant=50, 
+        HouseExpense(budget_id=budget.id, nom="Fruits", montant=50, 
                categorie="Alimentation", date=date.today()).save(db)
         db.commit()
         
@@ -252,7 +252,7 @@ class TestBudgetAlerts:
         """Alert when budget is exceeded"""
         service = BudgetService(db)
         
-        budget = Budget(
+        budget = HouseExpense(
             nom="Budget",
             date_debut=date(2026, 2, 1),
             date_fin=date(2026, 2, 28),
@@ -261,7 +261,7 @@ class TestBudgetAlerts:
         db.add(budget)
         
         # Spend more than budget
-        Depense(
+        HouseExpense(
             budget_id=budget.id,
             nom="Dépense",
             montant=600,
@@ -279,7 +279,7 @@ class TestBudgetAlerts:
         """Alert when category budget exceeded"""
         service = BudgetService(db)
         
-        budget = Budget(
+        budget = HouseExpense(
             nom="Budget",
             date_debut=date(2026, 2, 1),
             date_fin=date(2026, 2, 28),
@@ -296,7 +296,7 @@ class TestBudgetAlerts:
         db.add(category)
         
         # Exceed category
-        Depense(
+        HouseExpense(
             budget_id=budget.id,
             nom="Courses",
             montant=250,
@@ -313,7 +313,7 @@ class TestBudgetAlerts:
         """Alert when approaching budget limit"""
         service = BudgetService(db)
         
-        budget = Budget(
+        budget = HouseExpense(
             nom="Budget",
             date_debut=date(2026, 2, 1),
             date_fin=date(2026, 2, 28),
@@ -322,7 +322,7 @@ class TestBudgetAlerts:
         db.add(budget)
         
         # Spend 85% of budget
-        Depense(
+        HouseExpense(
             budget_id=budget.id,
             nom="Dépense",
             montant=850,
@@ -344,7 +344,7 @@ class TestBudgetForecasting:
         """Forecast remaining spending based on trend"""
         service = BudgetService(db)
         
-        budget = Budget(
+        budget = HouseExpense(
             nom="Budget",
             date_debut=date(2026, 2, 1),
             date_fin=date(2026, 2, 28),
@@ -354,7 +354,7 @@ class TestBudgetForecasting:
         
         # Add expenses for first 10 days
         for i in range(10):
-            Depense(
+            HouseExpense(
                 budget_id=budget.id,
                 nom=f"Dépense {i}",
                 montant=100,
@@ -374,7 +374,7 @@ class TestBudgetForecasting:
         
         # Create budgets for different months
         for month in range(1, 3):
-            budget = Budget(
+            budget = HouseExpense(
                 nom=f"Budget mois {month}",
                 date_debut=date(2026, month, 1),
                 date_fin=date(2026, month, 28),
@@ -383,7 +383,7 @@ class TestBudgetForecasting:
             db.add(budget)
             
             # Add expenses
-            Depense(
+            HouseExpense(
                 budget_id=budget.id,
                 nom="Courses",
                 montant=300,
@@ -407,7 +407,7 @@ class TestBudgetExport:
         """Export budget to CSV"""
         service = BudgetService(db)
         
-        budget = Budget(
+        budget = HouseExpense(
             nom="Budget",
             date_debut=date(2026, 2, 1),
             date_fin=date(2026, 2, 28),
@@ -415,7 +415,7 @@ class TestBudgetExport:
         )
         db.add(budget)
         
-        Depense(
+        HouseExpense(
             budget_id=budget.id,
             nom="Courses",
             montant=100,
@@ -433,7 +433,7 @@ class TestBudgetExport:
         """Generate budget report"""
         service = BudgetService(db)
         
-        budget = Budget(
+        budget = HouseExpense(
             nom="Budget",
             date_debut=date(2026, 2, 1),
             date_fin=date(2026, 2, 28),
@@ -455,7 +455,7 @@ class TestBudgetValidation:
         """Validate expense amounts are positive"""
         service = BudgetService(db)
         
-        budget = Budget(
+        budget = HouseExpense(
             nom="Budget",
             date_debut=date(2026, 2, 1),
             date_fin=date(2026, 2, 28),
@@ -466,7 +466,7 @@ class TestBudgetValidation:
         
         # Negative expense should fail
         with pytest.raises((ValueError, ErreurBaseDeDonnees)):
-            Depense(
+            HouseExpense(
                 budget_id=budget.id,
                 nom="Invalid",
                 montant=-100,
@@ -480,7 +480,7 @@ class TestBudgetValidation:
         
         # End date before start date
         with pytest.raises((ValueError, ErreurBaseDeDonnees)):
-            Budget(
+            HouseExpense(
                 nom="Budget",
                 date_debut=date(2026, 2, 28),
                 date_fin=date(2026, 2, 1),
@@ -492,7 +492,7 @@ class TestBudgetValidation:
         service = BudgetService(db)
         
         with pytest.raises((ValueError, ErreurBaseDeDonnees)):
-            Budget(
+            HouseExpense(
                 nom="Budget",
                 date_debut=date(2026, 2, 1),
                 date_fin=date(2026, 2, 28),
@@ -507,7 +507,7 @@ class TestBudgetRecurring:
         """Create recurring monthly budget"""
         service = BudgetService(db)
         
-        budget = Budget(
+        budget = HouseExpense(
             nom="Budget mensuel",
             date_debut=date(2026, 2, 1),
             date_fin=date(2026, 2, 28),
@@ -524,7 +524,7 @@ class TestBudgetRecurring:
         """Clone budget to next period"""
         service = BudgetService(db)
         
-        original = Budget(
+        original = HouseExpense(
             nom="Budget Février",
             date_debut=date(2026, 2, 1),
             date_fin=date(2026, 2, 28),

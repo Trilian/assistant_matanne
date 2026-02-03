@@ -9,6 +9,7 @@
 ### ✅ COMPLÉTÉ!
 
 #### Documents Supprimés (10 fichiers):
+
 ```
 ❌ PHASE_1_WEEKLY_PLAN.md              → Planning initial (obsolète)
 ❌ PHASE_1_COMPLETION_REPORT.md        → Rapport PHASE 1 seule
@@ -23,6 +24,7 @@
 ```
 
 #### Documents Archivés (8 fichiers → docs/archived/):
+
 ```
 📦 COVERAGE_REPORT.md                  → Rapport baseline couverture
 📦 COVERAGE_EXECUTIVE_SUMMARY.md       → Résumé initial couverture
@@ -34,6 +36,7 @@
 ```
 
 #### Documents Gardés (6 actuels):
+
 ```
 ✅ README.md                           → Documentation projet
 ✅ ROADMAP.md                          → Feuille de route
@@ -44,6 +47,7 @@
 ```
 
 #### Nouveaux Documents Créés (4):
+
 ```
 🆕 ANALYSE_COUVERTURE_REELLE.md        → Pourquoi 55%? Décomposition
 🆕 PHASES_6_7_8_9_PLAN.md              → Plan détaillé Phase 6-9
@@ -61,18 +65,19 @@
 
 **25 points de pourcentage manquent** à cause de 5 facteurs:
 
-| # | Raison | Détail | Perte |
-|---|--------|--------|--------|
-| 1 | **9 fichiers tests CASSÉS** | Erreurs de collection pytest | 8% |
-| 2 | **3 fichiers UI massifs (0%)** | planificateur (375), jules (163), components (110) | 6.5% |
-| 3 | **Services faibles (<30%)** | planning (23%), inventaire (18%), maison (12%) | 7.5% |
-| 4 | **Pas d'intégration cross-domain** | Workflows multi-modules non testés | 2% |
-| 5 | **Workflows complets manquants** | Performance, concurrence, edge cases | 1% |
-| | **TOTAL** | | **25%** |
+| #   | Raison                             | Détail                                             | Perte   |
+| --- | ---------------------------------- | -------------------------------------------------- | ------- |
+| 1   | **9 fichiers tests CASSÉS**        | Erreurs de collection pytest                       | 8%      |
+| 2   | **3 fichiers UI massifs (0%)**     | planificateur (375), jules (163), components (110) | 6.5%    |
+| 3   | **Services faibles (<30%)**        | planning (23%), inventaire (18%), maison (12%)     | 7.5%    |
+| 4   | **Pas d'intégration cross-domain** | Workflows multi-modules non testés                 | 2%      |
+| 5   | **Workflows complets manquants**   | Performance, concurrence, edge cases               | 1%      |
+|     | **TOTAL**                          |                                                    | **25%** |
 
 ### 🔍 Détail Problème #1: 9 Fichiers Cassés (-8%)
 
 Ces fichiers causent des **ERREURS DE COLLECTION**:
+
 ```
 ❌ tests/test_parametres.py
 ❌ tests/test_rapports.py
@@ -99,27 +104,28 @@ collected 2499 items / 9 errors  ❌ ← Collection échoue!
 
 Trois fichiers représentent **648 lignes de code** NON TESTÉES:
 
-| Fichier | Lignes | % Cible | Gain si testé |
-|---------|--------|--------|-------|
-| `src/domains/cuisine/ui/planificateur_repas.py` | **375** | 0% → 75% | +3.75% |
-| `src/domains/famille/ui/jules_planning.py` | **163** | 0% → 75% | +1.63% |
-| `src/domains/planning/ui/components/__init__.py` | **110** | 0% → 75% | +1.10% |
-| **TOTAL** | **648** | | **-6.48%** |
+| Fichier                                          | Lignes  | % Cible  | Gain si testé |
+| ------------------------------------------------ | ------- | -------- | ------------- |
+| `src/domains/cuisine/ui/planificateur_repas.py`  | **375** | 0% → 75% | +3.75%        |
+| `src/domains/famille/ui/jules_planning.py`       | **163** | 0% → 75% | +1.63%        |
+| `src/domains/planning/ui/components/__init__.py` | **110** | 0% → 75% | +1.10%        |
+| **TOTAL**                                        | **648** |          | **-6.48%**    |
 
 ### 🔍 Détail Problème #3: Services Critiques Faibles (-7.5%)
 
 Services sous 30% de couverture:
 
-| Service | Lignes | Couverture | Perte |
-|---------|--------|-----------|--------|
-| `src/services/planning.py` | 250+ | 23% | -5.2% |
-| `src/services/inventaire.py` | 200+ | 18% | -5.7% |
-| `src/services/maison.py` | 300+ | 12% | -5.8% |
-| | **750+** | **~18%** | **-16.7%** (mais nous comptabilisons -7.5% du gap) |
+| Service                      | Lignes   | Couverture | Perte                                              |
+| ---------------------------- | -------- | ---------- | -------------------------------------------------- |
+| `src/services/planning.py`   | 250+     | 23%        | -5.2%                                              |
+| `src/services/inventaire.py` | 200+     | 18%        | -5.7%                                              |
+| `src/services/maison.py`     | 300+     | 12%        | -5.8%                                              |
+|                              | **750+** | **~18%**   | **-16.7%** (mais nous comptabilisons -7.5% du gap) |
 
 ### 🔍 Problème #4 & #5: Manque tests intégration (-3%)
 
 Manquent:
+
 - Tests multi-domaine (recipe → shopping → maison)
 - Tests Jules workflow complet
 - Tests data consistency
@@ -135,6 +141,7 @@ Manquent:
 ### Comment?
 
 #### PHASE 6: Corriger Erreurs Collection (2-3h)
+
 ```
 ✅ Corriger 9 fichiers tests cassés
 ✅ Vérifier pytest --co -q fonctionne (0 erreurs)
@@ -143,6 +150,7 @@ Manquent:
 ```
 
 #### PHASE 7: Couvrir Fichiers UI Massifs (4-5h)
+
 ```
 ✅ Tester planificateur_repas.py (375 lignes → 50 tests)
 ✅ Tester jules_planning.py (163 lignes → 30 tests)
@@ -152,6 +160,7 @@ Manquent:
 ```
 
 #### PHASE 8: Couvrir Services Critiques (5-6h)
+
 ```
 ✅ Étoffer planning.py: 23% → 75% (60 tests)
 ✅ Étoffer inventaire.py: 18% → 75% (45 tests)
@@ -161,6 +170,7 @@ Manquent:
 ```
 
 #### PHASE 9: Tests Intégration Cross-Domain (6-7h)
+
 ```
 ✅ Workflow kitchen→shopping→inventory (15 tests)
 ✅ Workflow famille Jules complet (10 tests)
@@ -209,6 +219,7 @@ JOUR 3: 5-7h
 ## 📁 Question 4: "Quel fichier?"
 
 ### Pour PHASE 6: Corriger Ces 9 Fichiers
+
 ```
 1. tests/test_parametres.py                    ← ⭐ À COMMENCER
 2. tests/test_rapports.py
@@ -222,6 +233,7 @@ JOUR 3: 5-7h
 ```
 
 ### Pour PHASE 7: Tester Ces 3 Fichiers UI
+
 ```
 1. src/domains/cuisine/ui/planificateur_repas.py     (375 lignes) ← PRIORITÉ
 2. src/domains/famille/ui/jules_planning.py          (163 lignes)
@@ -229,6 +241,7 @@ JOUR 3: 5-7h
 ```
 
 ### Pour PHASE 8: Améliorer Ces 3 Services
+
 ```
 1. src/services/planning.py       (250+ lignes, 23% → 75%) ← PRIORITÉ
 2. src/services/inventaire.py     (200+ lignes, 18% → 75%)
@@ -236,6 +249,7 @@ JOUR 3: 5-7h
 ```
 
 ### Pour PHASE 9: Tester Ces Workflows
+
 ```
 ├─ kitchen → shopping → inventory sync
 ├─ famille Jules complete tracking
@@ -256,6 +270,7 @@ JOUR 3: 5-7h
 **Temps**: 2-3 heures
 
 **Fichiers à corriger**:
+
 ```
 ① tests/test_parametres.py      ← COMMENCER ICI
 ② tests/test_rapports.py
@@ -265,6 +280,7 @@ JOUR 3: 5-7h
 ```
 
 **Commandes à exécuter**:
+
 ```bash
 # Tester chaque fichier individuellement
 pytest tests/test_parametres.py -v --tb=short
@@ -281,6 +297,7 @@ python manage.py test_coverage
 ### Ensuite: PHASE 7 (Fichiers UI)
 
 **Les 3 fichiers à tester**:
+
 ```
 planificateur_repas.py (375 lignes) → 50 tests
 jules_planning.py (163 lignes)      → 30 tests
@@ -288,6 +305,7 @@ components/__init__.py (110 lignes) → 20 tests
 ```
 
 **Patterns à utiliser** (voir PHASE 1-5):
+
 ```python
 @patch('streamlit.title')
 @patch('streamlit.columns')
@@ -301,12 +319,14 @@ def test_display(mock_btn, mock_col, mock_title):
 ## 📚 Fichiers de Référence
 
 ### À LIRE EN PREMIER:
+
 1. **[ANALYSE_COUVERTURE_REELLE.md](ANALYSE_COUVERTURE_REELLE.md)** ⭐
    - Explication complète des 25%
    - Décomposition par problème
    - Chiffres détaillés
 
 ### POUR AGIR:
+
 2. **[PHASES_6_7_8_9_PLAN.md](PHASES_6_7_8_9_PLAN.md)** ⭐
    - Plan détaillé pour chaque phase
    - Fichiers spécifiques
@@ -314,11 +334,13 @@ def test_display(mock_btn, mock_col, mock_title):
    - Commandes à exécuter
 
 ### POUR HISTORIQUE:
+
 3. **[NETTOYAGE_DOC.md](NETTOYAGE_DOC.md)**
    - Documentation du ménage
    - Ce qui a été supprimé/archivé
 
 ### POUR CONTEXTE GLOBAL:
+
 4. **[RESUME_FINAL_COUVERTURE_55_POUR_80.md](RESUME_FINAL_COUVERTURE_55_POUR_80.md)**
    - Résumé exécutif complet
    - Toutes les infos en un seul endroit
@@ -388,12 +410,14 @@ TOTAL POUR 80%: ~17-21 heures de travail intensif
 ## ✨ RÉSUMÉ FINAL
 
 ### ✅ Ménage Documentation:
+
 - Supprimé: 10 fichiers obsolètes
 - Archivé: 8 fichiers historique
 - Garder: 6 fichiers actifs
 - Créé: 4 nouveaux documents
 
 ### ✅ Pourquoi 55% et pas 80%:
+
 - 9 fichiers cassés bloquent couverture
 - 648 lignes UI not testées (6.5%)
 - 750+ lignes services faibles (7.5%)
@@ -401,16 +425,19 @@ TOTAL POUR 80%: ~17-21 heures de travail intensif
 - Workflows manquants (1%)
 
 ### ✅ Peux-tu atteindre 80%?
+
 - OUI, **absolument!**
 - 17-21 heures pour +25%
 - 2-3 jours de travail
 
 ### 📁 Fichiers à Couvrir:
+
 - **PHASE 6**: Corriger 9 fichiers tests
 - **PHASE 7**: Tester 3 fichiers UI massifs
 - **PHASE 8**: Améliorer 3 services critiques
 - **PHASE 9**: Tests intégration cross-domain
 
 ### 📚 Documentation:
+
 Voir **[PHASES_6_7_8_9_PLAN.md](PHASES_6_7_8_9_PLAN.md)** pour plan détaillé
 Voir **[ANALYSE_COUVERTURE_REELLE.md](ANALYSE_COUVERTURE_REELLE.md)** pour explication complète

@@ -6,7 +6,7 @@ import pytest
 from datetime import date, timedelta
 from sqlalchemy.orm import Session
 from src.services.inventaire import InventaireService
-from src.core.models.inventaire import Article, StockAlerte, HistoriqueConsommation
+from src.core.models.inventaire import ArticleInventaire, HistoriqueInventaire
 from src.core.errors import ErreurBaseDeDonnees
 
 
@@ -17,7 +17,7 @@ class TestInventoryCreation:
         """Create complete inventory article"""
         service = InventaireService(db)
         
-        article = Article(
+        article = ArticleInventaire(
             nom="Riz Basmati",
             categorie="céréales",
             quantite_actuelle=5,
@@ -47,7 +47,7 @@ class TestInventoryCreation:
         ]
         
         for data in articles_data:
-            article = Article(**data)
+            article = ArticleInventaire(**data)
             db.add(article)
         db.commit()
         
@@ -63,7 +63,7 @@ class TestInventoryAlerts:
         """Generate alert when stock below minimum"""
         service = InventaireService(db)
         
-        article = Article(
+        article = ArticleInventaire(
             nom="Farine",
             quantite_actuelle=0.5,  # Below minimum
             quantite_min=1,
@@ -82,7 +82,7 @@ class TestInventoryAlerts:
         """Generate alert for items expiring soon"""
         service = InventaireService(db)
         
-        article = Article(
+        article = ArticleInventaire(
             nom="Yaourt",
             quantite_actuelle=2,
             unite="pot",
@@ -100,7 +100,7 @@ class TestInventoryAlerts:
         """No alert for items in good condition"""
         service = InventaireService(db)
         
-        article = Article(
+        article = ArticleInventaire(
             nom="Pâtes",
             quantite_actuelle=5,
             quantite_min=1,
@@ -118,7 +118,7 @@ class TestInventoryAlerts:
         """Alert when stock exceeds maximum"""
         service = InventaireService(db)
         
-        article = Article(
+        article = ArticleInventaire(
             nom="Lait",
             quantite_actuelle=15,  # Above maximum
             quantite_max=10,
@@ -135,11 +135,11 @@ class TestInventoryAlerts:
 class TestInventoryConsumption:
     """Test consumption tracking"""
 
-    def test_consume_article(self, db: Session):
+    def test_consume_ArticleInventaire(self, db: Session):
         """Consume from inventory"""
         service = InventaireService(db)
         
-        article = Article(
+        article = ArticleInventaire(
             nom="Huile",
             quantite_actuelle=3,
             unite="L"
@@ -157,7 +157,7 @@ class TestInventoryConsumption:
         """Consumption is recorded in history"""
         service = InventaireService(db)
         
-        article = Article(
+        article = ArticleInventaire(
             nom="Sucre",
             quantite_actuelle=5,
             unite="kg"
@@ -180,7 +180,7 @@ class TestInventoryConsumption:
         """Prevent consuming more than available"""
         service = InventaireService(db)
         
-        article = Article(
+        article = ArticleInventaire(
             nom="Sel",
             quantite_actuelle=1,
             unite="kg"
@@ -196,7 +196,7 @@ class TestInventoryConsumption:
         """Consuming causes alert if below minimum"""
         service = InventaireService(db)
         
-        article = Article(
+        article = ArticleInventaire(
             nom="Farine",
             quantite_actuelle=2,
             quantite_min=1,
@@ -215,11 +215,11 @@ class TestInventoryConsumption:
 class TestInventoryRestocking:
     """Test restocking operations"""
 
-    def test_restock_article(self, db: Session):
+    def test_restock_ArticleInventaire(self, db: Session):
         """Add stock to inventory"""
         service = InventaireService(db)
         
-        article = Article(
+        article = ArticleInventaire(
             nom="Riz",
             quantite_actuelle=2,
             unite="kg"
@@ -237,7 +237,7 @@ class TestInventoryRestocking:
         """Restocking respects maximum quantity"""
         service = InventaireService(db)
         
-        article = Article(
+        article = ArticleInventaire(
             nom="Lait",
             quantite_actuelle=8,
             quantite_max=10,
@@ -254,7 +254,7 @@ class TestInventoryRestocking:
         """Restocking clears low stock alert"""
         service = InventaireService(db)
         
-        article = Article(
+        article = ArticleInventaire(
             nom="Pâtes",
             quantite_actuelle=0.5,
             quantite_min=1,
@@ -283,9 +283,9 @@ class TestInventoryCategories:
         service = InventaireService(db)
         
         # Create articles in different categories
-        Article(nom="Pâtes", categorie="céréales", quantite_actuelle=2).save(db)
-        Article(nom="Riz", categorie="céréales", quantite_actuelle=3).save(db)
-        Article(nom="Tomate", categorie="légumes", quantite_actuelle=5).save(db)
+        ArticleInventaire(nom="Pâtes", categorie="céréales", quantite_actuelle=2).save(db)
+        ArticleInventaire(nom="Riz", categorie="céréales", quantite_actuelle=3).save(db)
+        ArticleInventaire(nom="Tomate", categorie="légumes", quantite_actuelle=5).save(db)
         db.commit()
         
         # Filter
@@ -300,7 +300,7 @@ class TestInventoryCategories:
         
         # Create diverse inventory
         for i in range(3):
-            Article(
+            ArticleInventaire(
                 nom=f"Céréale {i}",
                 categorie="céréales",
                 quantite_actuelle=i+1,
@@ -320,13 +320,13 @@ class TestInventoryExpiration:
         """List items that have expired"""
         service = InventaireService(db)
         
-        Article(
+        ArticleInventaire(
             nom="Yaourt expiré",
             quantite_actuelle=1,
             date_expiration=date.today() - timedelta(days=5)
         ).save(db)
         
-        Article(
+        ArticleInventaire(
             nom="Yaourt frais",
             quantite_actuelle=1,
             date_expiration=date.today() + timedelta(days=5)
@@ -344,7 +344,7 @@ class TestInventoryExpiration:
         """Warn about items expiring soon"""
         service = InventaireService(db)
         
-        Article(
+        ArticleInventaire(
             nom="Lait expire in 3 days",
             quantite_actuelle=2,
             date_expiration=date.today() + timedelta(days=3)
@@ -361,7 +361,7 @@ class TestInventoryExpiration:
         """Automatically remove expired items from active inventory"""
         service = InventaireService(db)
         
-        article = Article(
+        article = ArticleInventaire(
             nom="Produit expiré",
             quantite_actuelle=1,
             date_expiration=date.today() - timedelta(days=1)
@@ -383,8 +383,8 @@ class TestInventoryCalculations:
         """Calculate total inventory value"""
         service = InventaireService(db)
         
-        Article(nom="Riz", quantite_actuelle=2, prix_unitaire=1.50).save(db)
-        Article(nom="Huile", quantite_actuelle=1, prix_unitaire=5.00).save(db)
+        ArticleInventaire(nom="Riz", quantite_actuelle=2, prix_unitaire=1.50).save(db)
+        ArticleInventaire(nom="Huile", quantite_actuelle=1, prix_unitaire=5.00).save(db)
         db.commit()
         
         total_value = service.calcul_valeur_totale()
@@ -396,7 +396,7 @@ class TestInventoryCalculations:
         """Calculate average consumption per category"""
         service = InventaireService(db)
         
-        article = Article(nom="Pâtes", categorie="céréales", quantite_actuelle=10)
+        article = ArticleInventaire(nom="Pâtes", categorie="céréales", quantite_actuelle=10)
         db.add(article)
         db.commit()
         
@@ -442,7 +442,7 @@ class TestInventoryEdgeCases:
         """Handle articles with zero quantity"""
         service = InventaireService(db)
         
-        article = Article(
+        article = ArticleInventaire(
             nom="Stock épuisé",
             quantite_actuelle=0,
             unite="kg"
@@ -459,7 +459,7 @@ class TestInventoryEdgeCases:
         """Prevent negative quantities"""
         service = InventaireService(db)
         
-        article = Article(
+        article = ArticleInventaire(
             nom="Article",
             quantite_actuelle=1,
             unite="kg"
@@ -475,7 +475,7 @@ class TestInventoryEdgeCases:
         """Support fractional quantities"""
         service = InventaireService(db)
         
-        article = Article(
+        article = ArticleInventaire(
             nom="Huile",
             quantite_actuelle=0.5,
             unite="L"

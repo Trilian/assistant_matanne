@@ -13,8 +13,9 @@ from src.services.budget import BudgetService
 from src.core.models.planning import Planning
 from src.core.models.recettes import Recette
 from src.core.models.courses import ArticleCourses
-from src.core.models.inventaire import Article
-from src.core.models.maison_extended import Depense, Budget
+from src.core.models.inventaire import ArticleInventaire
+from src.core.models.maison_extended import HouseExpense
+from src.services.budget import CategorieDepense
 from src.core.errors import ErreurBaseDeDonnees
 
 
@@ -55,7 +56,7 @@ class TestComplexWorkflows:
         assert cost > 0
         
         # 5. Create budget
-        budget = Budget(
+        budget = HouseExpense(
             nom="Budget week",
             date_debut=date(2026, 2, 1),
             date_fin=date(2026, 2, 7),
@@ -85,7 +86,7 @@ class TestComplexWorkflows:
         db.commit()
         
         # 2. Add to inventory
-        inventory_item = Article(
+        inventory_item = ArticleInventaire(
             nom=article.nom,
             categorie=article.categorie,
             quantite_actuelle=article.quantite,
@@ -109,7 +110,7 @@ class TestComplexWorkflows:
         shopping_service = CoursesService(db)
         
         # 1. Create low stock item
-        article = Article(
+        article = ArticleInventaire(
             nom="Riz",
             quantite_actuelle=0.5,
             quantite_min=1,
@@ -154,7 +155,7 @@ class TestErrorHandling:
         """Handle gracefully when budget exceeded"""
         budget_service = BudgetService(db)
         
-        budget = Budget(
+        budget = HouseExpense(
             nom="Budget",
             date_debut=date(2026, 2, 1),
             date_fin=date(2026, 2, 28),
@@ -163,7 +164,7 @@ class TestErrorHandling:
         db.add(budget)
         
         # Create large expense
-        Depense(
+        HouseExpense(
             budget_id=budget.id,
             nom="Large expense",
             montant=150,
@@ -179,7 +180,7 @@ class TestErrorHandling:
         """Handle duplicate expense entries"""
         budget_service = BudgetService(db)
         
-        budget = Budget(
+        budget = HouseExpense(
             nom="Budget",
             date_debut=date(2026, 2, 1),
             date_fin=date(2026, 2, 28),
@@ -189,7 +190,7 @@ class TestErrorHandling:
         db.commit()
         
         # Create duplicate
-        expense = Depense(
+        expense = HouseExpense(
             budget_id=budget.id,
             nom="Courses",
             montant=50,
@@ -218,7 +219,7 @@ class TestDataConsistency:
         shopping_service = CoursesService(db)
         
         # Create article
-        article = Article(
+        article = ArticleInventaire(
             nom="Lait",
             quantite_actuelle=2,
             unite="L"
@@ -263,7 +264,7 @@ class TestDataConsistency:
         """Verify budget totals match expense sum"""
         budget_service = BudgetService(db)
         
-        budget = Budget(
+        budget = HouseExpense(
             nom="Budget",
             date_debut=date(2026, 2, 1),
             date_fin=date(2026, 2, 28),
@@ -273,7 +274,7 @@ class TestDataConsistency:
         
         expenses = [100, 150, 75, 50]
         for amount in expenses:
-            Depense(
+            HouseExpense(
                 budget_id=budget.id,
                 nom=f"Expense {amount}",
                 montant=amount,
@@ -295,7 +296,7 @@ class TestPerformance:
         
         # Create many items
         for i in range(100):  # Reduced from 1000 for test speed
-            Article(
+            ArticleInventaire(
                 nom=f"Item {i}",
                 quantite_actuelle=i+1,
                 unite="units"
@@ -328,7 +329,7 @@ class TestPerformance:
         """Handle 1000+ expenses in budget"""
         budget_service = BudgetService(db)
         
-        budget = Budget(
+        budget = HouseExpense(
             nom="Budget",
             date_debut=date(2026, 1, 1),
             date_fin=date(2026, 12, 31),
@@ -339,7 +340,7 @@ class TestPerformance:
         
         # Add 100 expenses (reduced from 1000)
         for i in range(100):
-            Depense(
+            HouseExpense(
                 budget_id=budget.id,
                 nom=f"Expense {i}",
                 montant=10 + (i % 50),
@@ -360,7 +361,7 @@ class TestConcurrency:
         """Handle concurrent consumption of same item"""
         inventory_service = InventaireService(db)
         
-        article = Article(
+        article = ArticleInventaire(
             nom="Shared Item",
             quantite_actuelle=10,
             unite="units"
@@ -378,7 +379,7 @@ class TestConcurrency:
         """Handle concurrent budget entries"""
         budget_service = BudgetService(db)
         
-        budget = Budget(
+        budget = HouseExpense(
             nom="Budget",
             date_debut=date(2026, 2, 1),
             date_fin=date(2026, 2, 28),
@@ -389,7 +390,7 @@ class TestConcurrency:
         
         # Add multiple expenses
         for i in range(5):
-            Depense(
+            HouseExpense(
                 budget_id=budget.id,
                 nom=f"Expense {i}",
                 montant=100,
@@ -423,7 +424,7 @@ class TestDataValidation:
         
         # Negative budget should fail
         with pytest.raises((ValueError, ErreurBaseDeDonnees)):
-            Budget(
+            HouseExpense(
                 nom="Invalid",
                 date_debut=date(2026, 2, 1),
                 date_fin=date(2026, 2, 28),
@@ -511,7 +512,7 @@ class TestRecoveryMechanisms:
         """Rollback transaction on failure"""
         budget_service = BudgetService(db)
         
-        budget = Budget(
+        budget = HouseExpense(
             nom="Budget",
             date_debut=date(2026, 2, 1),
             date_fin=date(2026, 2, 28),
@@ -525,7 +526,7 @@ class TestRecoveryMechanisms:
         try:
             # Try to add invalid expense
             with pytest.raises((ValueError, ErreurBaseDeDonnees)):
-                Depense(
+                HouseExpense(
                     budget_id=budget.id,
                     nom="Invalid",
                     montant=-100,
