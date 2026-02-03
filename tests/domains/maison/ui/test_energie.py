@@ -1,0 +1,6 @@
+import importlib
+import pytest
+
+def test_import_energie():
+    module = importlib.import_module("src.domains.maison.ui.energie")
+    assert module is not None
