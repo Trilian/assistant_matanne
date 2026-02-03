@@ -3,6 +3,13 @@ Tests unitaires pour lazy_loader.py (Chargement différé des modules)
 """
 
 import pytest
+from src.core import lazy_loader
+
+@pytest.mark.unit
+def test_import_lazy_loader():
+    """Vérifie que le module lazy_loader s'importe sans erreur."""
+    assert hasattr(lazy_loader, "OptimizedRouter") or hasattr(lazy_loader, "LazyModuleLoader")
+
 from unittest.mock import MagicMock, patch
 
 # Import direct du module à tester

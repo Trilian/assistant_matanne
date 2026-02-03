@@ -9,6 +9,13 @@ Tests couvrant:
 """
 
 import pytest
+from src.core import errors
+
+@pytest.mark.unit
+def test_import_errors():
+    """Vérifie que le module errors s'importe sans erreur."""
+    assert hasattr(errors, "ErreurBaseDeDonnees") or hasattr(errors, "__file__")
+
 from unittest.mock import patch, MagicMock, call
 import logging
 

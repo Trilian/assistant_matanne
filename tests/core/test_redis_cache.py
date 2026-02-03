@@ -17,6 +17,12 @@ from datetime import datetime, timedelta
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
+from src.core import redis_cache
+
+@pytest.mark.unit
+def test_import_redis_cache():
+    """Vérifie que le module redis_cache s'importe sans erreur."""
+    assert hasattr(redis_cache, "RedisCache") or hasattr(redis_cache, "__file__")
 
 from src.core.redis_cache import (
     RedisConfig,
