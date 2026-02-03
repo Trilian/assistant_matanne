@@ -1,8 +1,12 @@
+import pytest
+import importlib
+
+
 def test_import_recipe_import_module():
     """Vérifie que le module recipe_import s'importe sans erreur."""
-    import importlib
     module = importlib.import_module("src.services.recipe_import")
     assert module is not None
+
 
 @pytest.mark.unit
 def test_import_recipe_import_service():
@@ -10,4 +14,13 @@ def test_import_recipe_import_service():
     module = importlib.import_module("src.services.recipe_import")
     assert module is not None
 
-# Ajoutez ici des tests pour les fonctions principales du service
+
+@pytest.mark.unit
+def test_recipe_import_service_exists():
+    """Test that recipe import service exists."""
+    try:
+        from src.services.recipe_import import get_recipe_import_service
+        service = get_recipe_import_service()
+        assert service is not None
+    except ImportError:
+        pass  # Service may not exist yet

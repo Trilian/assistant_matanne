@@ -1,0 +1,438 @@
+{
+  "total_files": 209,
+  "tested_files": 66,
+  "files_over_80": 60,
+  "average_coverage": 46.55775119617223,
+  "critical_files": [
+    {
+      "path": "src/api/rate_limiting.py",
+      "coverage": 24.19
+    },
+    {
+      "path": "src/core/offline.py",
+      "coverage": 25.08
+    },
+    {
+      "path": "src/core/performance.py",
+      "coverage": 25.5
+    },
+    {
+      "path": "src/core/sql_optimizer.py",
+      "coverage": 24.0
+    },
+    {
+      "path": "src/domains/__init__.py",
+      "coverage": 6.06
+    },
+    {
+      "path": "src/domains/cuisine/__init__.py",
+      "coverage": 15.38
+    },
+    {
+      "path": "src/domains/cuisine/ui/__init__.py",
+      "coverage": 7.14
+    },
+    {
+      "path": "src/domains/cuisine/ui/batch_cooking_detaille.py",
+      "coverage": 4.65
+    },
+    {
+      "path": "src/domains/cuisine/ui/courses.py",
+      "coverage": 3.06
+    },
+    {
+      "path": "src/domains/cuisine/ui/inventaire.py",
+      "coverage": 3.86
+    },
+    {
+      "path": "src/domains/cuisine/ui/planificateur_repas.py",
+      "coverage": 0.0
+    },
+    {
+      "path": "src/domains/cuisine/ui/recettes.py",
+      "coverage": 2.48
+    },
+    {
+      "path": "src/domains/cuisine/ui/recettes_import.py",
+      "coverage": 4.73
+    },
+    {
+      "path": "src/domains/famille/__init__.py",
+      "coverage": 8.33
+    },
+    {
+      "path": "src/domains/famille/logic/helpers.py",
+      "coverage": 13.78
+    },
+    {
+      "path": "src/domains/famille/ui/achats_famille.py",
+      "coverage": 6.62
+    },
+    {
+      "path": "src/domains/famille/ui/activites.py",
+      "coverage": 6.98
+    },
+    {
+      "path": "src/domains/famille/ui/hub_famille.py",
+      "coverage": 7.95
+    },
+    {
+      "path": "src/domains/famille/ui/jules.py",
+      "coverage": 9.29
+    },
+    {
+      "path": "src/domains/famille/ui/jules_planning.py",
+      "coverage": 0.0
+    },
+    {
+      "path": "src/domains/famille/ui/routines.py",
+      "coverage": 4.71
+    },
+    {
+      "path": "src/domains/famille/ui/suivi_perso.py",
+      "coverage": 6.12
+    },
+    {
+      "path": "src/domains/famille/ui/weekend.py",
+      "coverage": 8.58
+    },
+    {
+      "path": "src/domains/jeux/integration.py",
+      "coverage": 0.0
+    },
+    {
+      "path": "src/domains/jeux/logic/api_service.py",
+      "coverage": 24.74
+    },
+    {
+      "path": "src/domains/jeux/logic/loto_logic.py",
+      "coverage": 28.67
+    },
+    {
+      "path": "src/domains/jeux/logic/paris_logic.py",
+      "coverage": 4.77
+    },
+    {
+      "path": "src/domains/jeux/logic/ui_helpers.py",
+      "coverage": 29.56
+    },
+    {
+      "path": "src/domains/jeux/setup.py",
+      "coverage": 0.0
+    },
+    {
+      "path": "src/domains/jeux/ui/loto.py",
+      "coverage": 5.91
+    },
+    {
+      "path": "src/domains/jeux/ui/paris.py",
+      "coverage": 4.03
+    },
+    {
+      "path": "src/domains/maison/__init__.py",
+      "coverage": 15.38
+    },
+    {
+      "path": "src/domains/maison/logic/helpers.py",
+      "coverage": 18.95
+    },
+    {
+      "path": "src/domains/maison/ui/depenses.py",
+      "coverage": 0.0
+    },
+    {
+      "path": "src/domains/maison/ui/eco_tips.py",
+      "coverage": 8.91
+    },
+    {
+      "path": "src/domains/maison/ui/energie.py",
+      "coverage": 10.58
+    },
+    {
+      "path": "src/domains/maison/ui/entretien.py",
+      "coverage": 8.26
+    },
+    {
+      "path": "src/domains/maison/ui/hub_maison.py",
+      "coverage": 8.94
+    },
+    {
+      "path": "src/domains/maison/ui/jardin.py",
+      "coverage": 8.54
+    },
+    {
+      "path": "src/domains/maison/ui/jardin_zones.py",
+      "coverage": 9.65
+    },
+    {
+      "path": "src/domains/maison/ui/meubles.py",
+      "coverage": 8.86
+    },
+    {
+      "path": "src/domains/maison/ui/projets.py",
+      "coverage": 8.63
+    },
+    {
+      "path": "src/domains/maison/ui/scan_factures.py",
+      "coverage": 8.91
+    },
+    {
+      "path": "src/domains/planning/ui/calendrier_unifie.py",
+      "coverage": 5.31
+    },
+    {
+      "path": "src/domains/planning/ui/components/__init__.py",
+      "coverage": 0.0
+    },
+    {
+      "path": "src/domains/planning/ui/vue_ensemble.py",
+      "coverage": 4.44
+    },
+    {
+      "path": "src/domains/planning/ui/vue_semaine.py",
+      "coverage": 5.81
+    },
+    {
+      "path": "src/domains/utils/ui/accueil.py",
+      "coverage": 7.12
+    },
+    {
+      "path": "src/domains/utils/ui/barcode.py",
+      "coverage": 5.54
+    },
+    {
+      "path": "src/domains/utils/ui/notifications_push.py",
+      "coverage": 6.67
+    },
+    {
+      "path": "src/domains/utils/ui/parametres.py",
+      "coverage": 4.99
+    },
+    {
+      "path": "src/domains/utils/ui/rapports.py",
+      "coverage": 4.67
+    },
+    {
+      "path": "src/services/auth.py",
+      "coverage": 19.27
+    },
+    {
+      "path": "src/services/backup.py",
+      "coverage": 18.32
+    },
+    {
+      "path": "src/services/barcode.py",
+      "coverage": 27.08
+    },
+    {
+      "path": "src/services/base_ai_service.py",
+      "coverage": 13.54
+    },
+    {
+      "path": "src/services/base_service.py",
+      "coverage": 16.94
+    },
+    {
+      "path": "src/services/batch_cooking.py",
+      "coverage": 27.39
+    },
+    {
+      "path": "src/services/budget.py",
+      "coverage": 23.96
+    },
+    {
+      "path": "src/services/calendar_sync.py",
+      "coverage": 16.97
+    },
+    {
+      "path": "src/services/garmin_sync.py",
+      "coverage": 17.67
+    },
+    {
+      "path": "src/services/inventaire.py",
+      "coverage": 27.52
+    },
+    {
+      "path": "src/services/io_service.py",
+      "coverage": 15.13
+    },
+    {
+      "path": "src/services/notifications.py",
+      "coverage": 25.31
+    },
+    {
+      "path": "src/services/pdf_export.py",
+      "coverage": 25.5
+    },
+    {
+      "path": "src/services/planning.py",
+      "coverage": 23.42
+    },
+    {
+      "path": "src/services/planning_unified.py",
+      "coverage": 27.42
+    },
+    {
+      "path": "src/services/push_notifications.py",
+      "coverage": 25.44
+    },
+    {
+      "path": "src/services/rapports_pdf.py",
+      "coverage": 15.54
+    },
+    {
+      "path": "src/services/realtime_sync.py",
+      "coverage": 25.08
+    },
+    {
+      "path": "src/services/recipe_import.py",
+      "coverage": 9.45
+    },
+    {
+      "path": "src/services/suggestions_ia.py",
+      "coverage": 17.59
+    },
+    {
+      "path": "src/services/types.py",
+      "coverage": 14.04
+    },
+    {
+      "path": "src/services/user_preferences.py",
+      "coverage": 22.73
+    },
+    {
+      "path": "src/services/weather.py",
+      "coverage": 18.76
+    },
+    {
+      "path": "src/ui/components/atoms.py",
+      "coverage": 22.58
+    },
+    {
+      "path": "src/ui/components/camera_scanner.py",
+      "coverage": 6.56
+    },
+    {
+      "path": "src/ui/components/dashboard_widgets.py",
+      "coverage": 9.71
+    },
+    {
+      "path": "src/ui/components/data.py",
+      "coverage": 9.41
+    },
+    {
+      "path": "src/ui/components/dynamic.py",
+      "coverage": 18.49
+    },
+    {
+      "path": "src/ui/components/forms.py",
+      "coverage": 10.0
+    },
+    {
+      "path": "src/ui/components/google_calendar_sync.py",
+      "coverage": 9.45
+    },
+    {
+      "path": "src/ui/components/layouts.py",
+      "coverage": 8.54
+    },
+    {
+      "path": "src/ui/core/base_form.py",
+      "coverage": 13.67
+    },
+    {
+      "path": "src/ui/core/base_module.py",
+      "coverage": 17.56
+    },
+    {
+      "path": "src/ui/domain.py",
+      "coverage": 14.29
+    },
+    {
+      "path": "src/ui/feedback/progress.py",
+      "coverage": 14.06
+    },
+    {
+      "path": "src/ui/feedback/spinners.py",
+      "coverage": 23.33
+    },
+    {
+      "path": "src/ui/layout/footer.py",
+      "coverage": 15.79
+    },
+    {
+      "path": "src/ui/layout/header.py",
+      "coverage": 20.83
+    },
+    {
+      "path": "src/ui/layout/sidebar.py",
+      "coverage": 10.45
+    },
+    {
+      "path": "src/ui/tablet_mode.py",
+      "coverage": 8.33
+    },
+    {
+      "path": "src/utils/formatters/dates.py",
+      "coverage": 4.38
+    },
+    {
+      "path": "src/utils/formatters/numbers.py",
+      "coverage": 7.63
+    },
+    {
+      "path": "src/utils/formatters/text.py",
+      "coverage": 13.95
+    },
+    {
+      "path": "src/utils/formatters/units.py",
+      "coverage": 9.68
+    },
+    {
+      "path": "src/utils/helpers/helpers.py",
+      "coverage": 0.0
+    },
+    {
+      "path": "src/utils/helpers/stats.py",
+      "coverage": 15.15
+    },
+    {
+      "path": "src/utils/image_generator.py",
+      "coverage": 0.0
+    },
+    {
+      "path": "src/utils/recipe_importer.py",
+      "coverage": 5.07
+    }
+  ],
+  "modules": {
+    "api": {
+      "coverage": 66.30666666666667,
+      "count": 3
+    },
+    "app.py": {
+      "coverage": 50.88,
+      "count": 1
+    },
+    "core": {
+      "coverage": 76.64500000000001,
+      "count": 42
+    },
+    "domains": {
+      "coverage": 38.70313253012049,
+      "count": 83
+    },
+    "services": {
+      "coverage": 30.086060606060602,
+      "count": 33
+    },
+    "ui": {
+      "coverage": 37.52038461538462,
+      "count": 26
+    },
+    "utils": {
+      "coverage": 51.47380952380953,
+      "count": 21
+    }
+  }
+}

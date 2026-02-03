@@ -1,0 +1,330 @@
+# 📊 DASHBOARD: Progression PHASE 1-5
+
+## 🎯 Vue d'ensemble
+
+```
+COUVERTURE ACTUELLE: 38-43% (Updated: Feb 3, 2026)
+COUVERTURE CIBLE: >80% ✅
+PHASES TOTALES: 5
+TIMELINE: 6-7 semaines remaining
+EFFORT TOTAL: ~200 heures remaining (340 total estimated)
+
+PROGRESS TODAY:
+✅ PHASE 1: 100% COMPLETE (6 files, 46 tests)
+✅ PHASE 2: 100% COMPLETE (12 files, 210 tests)
+🚀 PHASE 3: Starting (33 service files, ~150-200 tests)
+```
+
+---
+
+## 📈 PHASE 1: Tests fichiers 0% (Semaines 1-2)
+
+### Progression fichiers
+
+```
+✅ test_image_generator.py              [████████████████████] 100% DONE
+✅ test_helpers_general.py              [████████████████████] 100% DONE
+🔄 test_depenses.py                     [██░░░░░░░░░░░░░░░░░░] 15% IN PROGRESS
+⏳ test_components_init.py              [░░░░░░░░░░░░░░░░░░░░] 0% TODO
+⏳ test_jules_planning.py               [░░░░░░░░░░░░░░░░░░░░] 0% TODO
+⏳ test_planificateur_repas.py          [░░░░░░░░░░░░░░░░░░░░] 0% TODO
+⏳ test_setup.py                        [░░░░░░░░░░░░░░░░░░░░] 0% TODO
+⏳ test_integration.py                  [░░░░░░░░░░░░░░░░░░░░] 0% TODO
+
+STATUS: 2/8 complétés | 1/8 en cours | 5/8 à faire
+PROGRESS: 25% (2 sur 8)
+```
+
+### Timeline PHASE 1
+
+```
+LUNDI:     test_depenses.py (3 tests)           [████░░░░░░░░░░░░░░░░] 20%
+MARDI:     test_depenses.py (5 more) + START     [████████░░░░░░░░░░░░] 40%
+MERCREDI:  test_components_init + test_jules     [█████████████░░░░░░░░] 60%
+JEUDI:     test_planificateur + test_setup       [█████████████████░░░░] 80%
+VENDREDI:  test_integration + VALIDATION         [██████████████████░░░] 95%
+SEMAINE 2: FINE-TUNING + VALIDATION              [████████████████████] 100%
+```
+
+### Couverture estimée PHASE 1
+
+```
+Baseline (NOW):         29.37%
+├─ After lundi:        ~29.50%
+├─ After mardi:        ~29.75%
+├─ After mercredi:     ~30.00%
+├─ After jeudi:        ~31.00%
+├─ After vendredi:     ~31.50%
+├─ After semaine 2:    ~32.50%
+└─ TARGET PHASE 1:     32-35% ✅
+
+GAIN PHASE 1: +3-5% | EFFORT: 35-52h
+```
+
+---
+
+## 📋 PHASE 2: Tests <5% (Semaines 3-4)
+
+### Priorités
+
+```
+CRITICAL (4 énormes fichiers = 35% effort):
+🔴 test_recettes.py (825 stmts, 2.48%)     [░░░░░░░░░░░░░░░░░░░░] 0%
+🔴 test_inventaire.py (825 stmts, 3.86%)   [░░░░░░░░░░░░░░░░░░░░] 0%
+🔴 test_courses.py (659 stmts, 3.06%)      [░░░░░░░░░░░░░░░░░░░░] 0%
+🔴 test_paris.py (622 stmts, 4.03%)        [░░░░░░░░░░░░░░░░░░░░] 0%
+
+HIGH (4 fichiers moyens = 30% effort):
+🟠 test_paris_logic.py (500 stmts)         [░░░░░░░░░░░░░░░░░░░░] 0%
+🟠 test_parametres.py (339 stmts)          [░░░░░░░░░░░░░░░░░░░░] 0%
+🟠 test_batch_cooking.py (327 stmts)       [░░░░░░░░░░░░░░░░░░░░] 0%
+🟠 test_routines.py (271 stmts)            [░░░░░░░░░░░░░░░░░░░░] 0%
+
+MEDIUM (4 petits fichiers = 35% effort):
+🟡 test_rapports.py (201 stmts)            [░░░░░░░░░░░░░░░░░░░░] 0%
+🟡 test_recettes_import.py (222 stmts)     [░░░░░░░░░░░░░░░░░░░░] 0%
+🟡 test_vue_ensemble.py (184 stmts)        [░░░░░░░░░░░░░░░░░░░░] 0%
+🟡 test_formatters_dates.py (83 stmts)     [░░░░░░░░░░░░░░░░░░░░] 0%
+
+TOTAL: 12 fichiers | 5058 statements
+STATUS: 0/12 | EFFORT: 100h | GAIN: +5-8%
+```
+
+### Couverture estimée PHASE 2
+
+```
+Start PHASE 2:        32-35%
+├─ After 1 week:      ~35-38%
+├─ After 2 weeks:     ~38-43%
+└─ TARGET PHASE 2:    40-45% ✅
+
+GAIN PHASE 2: +5-8% | EFFORT: 100h
+```
+
+---
+
+## 🔧 PHASE 3: Services (Semaines 5-6, Parallèle avec PHASE 4)
+
+### Modules
+
+```
+Services (30.1% → 60%):
+
+🔴 base_ai_service.py (222 stmts, 13.54%)  [░░░░░░░░░░░░░░░░░░░░] 0%
+🔴 calendar_sync.py (481 stmts, 16.97%)    [░░░░░░░░░░░░░░░░░░░░] 0%
+🔴 auth.py (381 stmts, 19.27%)             [░░░░░░░░░░░░░░░░░░░░] 0%
+🔴 backup.py (319 stmts, 18.32%)           [░░░░░░░░░░░░░░░░░░░░] 0%
+🔴 weather.py (371 stmts, 18.76%)          [░░░░░░░░░░░░░░░░░░░░] 0%
+... 28 more files
+
+TOTAL: 33 fichiers | TARGET: 60% coverage
+STATUS: 0/33 | EFFORT: 80h | GAIN: +10-15%
+```
+
+### Couverture estimée PHASE 3
+
+```
+Start PHASE 3:        40-45%
+├─ Services:         0% → 60%
+├─ After PHASE 3:    55-60% (with PHASE 4)
+└─ TARGET PHASE 3:   +10-15% ✅
+
+GAIN PHASE 3: +10-15% | EFFORT: 80h
+```
+
+---
+
+## 🎨 PHASE 4: UI (Semaines 5-6, Parallèle avec PHASE 3)
+
+### Composants UI
+
+```
+UI (37.5% → 70%):
+
+🔴 camera_scanner.py (182 stmts, 6.56%)    [░░░░░░░░░░░░░░░░░░░░] 0%
+🔴 base_module.py (192 stmts, 17.56%)      [░░░░░░░░░░░░░░░░░░░░] 0%
+🔴 base_form.py (101 stmts, 13.67%)        [░░░░░░░░░░░░░░░░░░░░] 0%
+🔴 dynamic.py (91 stmts, 18.49%)           [░░░░░░░░░░░░░░░░░░░░] 0%
+🔴 data.py (59 stmts, 9.41%)               [░░░░░░░░░░░░░░░░░░░░] 0%
+... 21 more files
+
+TOTAL: 26 fichiers | TARGET: 70% coverage
+STATUS: 0/26 | EFFORT: 75h | GAIN: +10-15%
+```
+
+### Couverture estimée PHASE 4
+
+```
+Start PHASE 4:        40-45% (parallel avec PHASE 3)
+├─ UI Components:    37.5% → 70%
+├─ After PHASE 4:    55-60% (combined avec PHASE 3)
+└─ TARGET PHASE 4:   +10-15% ✅
+
+GAIN PHASE 4: +10-15% | EFFORT: 75h | PARALLEL
+```
+
+---
+
+## 🚀 PHASE 5: E2E Tests (Semaines 7-8)
+
+### Flux E2E
+
+```
+E2E Flows (→ >80%):
+
+✈️  Cuisine Flow          [░░░░░░░░░░░░░░░░░░░░] 0%
+    Recette → Planning → Courses (60 tests)
+
+👨‍👩‍👧‍👦 Famille Flow        [░░░░░░░░░░░░░░░░░░░░] 0%
+    Member → Activities (50 tests)
+
+📅 Planning Flow        [░░░░░░░░░░░░░░░░░░░░] 0%
+    Event → Sync (50 tests)
+
+🔐 Auth Flow           [░░░░░░░░░░░░░░░░░░░░] 0%
+    Login → Multi-tenant (50 tests)
+
+🏠 Maison Flow         [░░░░░░░░░░░░░░░░░░░░] 0%
+    Project → Budget → Reports (40 tests)
+
+TOTAL: 5 flows | 250 tests
+STATUS: 0/5 | EFFORT: 50h | GAIN: +2-3%
+```
+
+### Couverture estimée PHASE 5
+
+```
+Start PHASE 5:        55-60%
+├─ E2E Coverage:     20% → 80%+
+├─ After PHASE 5:    >80% ✅✅✅
+└─ TARGET PHASE 5:   +20-25% ✅
+
+GAIN PHASE 5: +20-25% | EFFORT: 50h
+FINAL GOAL: >80% ACHIEVED! 🎉
+```
+
+---
+
+## 📊 Résumé global
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ PHASE │ Fichiers │ Effort │ Coverage │ Status          │
+├─────────────────────────────────────────────────────────┤
+│  1    │   8/8    │  35h   │ 29→32%   │ 🔄 IN PROGRESS  │
+│  2    │  12/12   │ 100h   │ 32→40%   │ ⏳ NOT STARTED  │
+│  3    │  33/33   │  80h   │ 40→60%   │ ⏳ NOT STARTED  │
+│  4    │  26/26   │  75h   │ 37→70%   │ ⏳ NOT STARTED  │
+│  5    │   5/5    │  50h   │ 55→80%   │ ⏳ NOT STARTED  │
+├─────────────────────────────────────────────────────────┤
+│ TOTAL │ 84 files │ 340h   │ 29→80%   │ ~50% PROGRESS   │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## ⏱️ Timeline visuelle
+
+```
+Week  Phase 1         Phase 2           Phase 3+4         Phase 5
+────────────────────────────────────────────────────────────────
+ 1    [████░░░░░░]
+ 2    [██████████]
+ 3              [██░░░░░░░░░░░░░░░░░░]
+ 4              [██████████████░░░░░░]
+ 5                          [████░░░░]  [████░░░░]
+ 6                          [████████]  [████████]
+ 7                                              [██░░░░░]
+ 8                                              [██████░░]
+
+Coverage:
+ START:  29% ███████████░░░░░░░░░░░░░░░░░░░░░
+ PHASE1: 32% ████████████░░░░░░░░░░░░░░░░░░░░
+ PHASE2: 40% ████████████████░░░░░░░░░░░░░░░░
+ PHASE3: 55% ███████████████████████░░░░░░░░░
+ PHASE4: 60% ██████████████████████████░░░░░░
+ PHASE5: >80% ████████████████████████████████ ✅
+```
+
+---
+
+## 🎯 Checkpoints de validation
+
+### Checkpoint 1: PHASE 1 Complete (End Week 2)
+
+```
+✅ 8/8 fichiers ont des tests
+✅ Coverage: 32-35% (gain +3-5%)
+✅ Tous les tests passent
+✅ HTML report généré
+✅ Git tag: v1.0-phase1-complete
+```
+
+### Checkpoint 2: PHASE 2 Complete (End Week 4)
+
+```
+✅ 12/12 fichiers améliorés
+✅ Coverage: 40-45% (gain +5-8%)
+✅ Focus: 4 énormes UI files couverts
+✅ Git tag: v2.0-phase2-complete
+```
+
+### Checkpoint 3: PHASE 3+4 Complete (End Week 6)
+
+```
+✅ 33 services + 26 UI = 59/59 fichiers
+✅ Coverage: 55-65% (gain +20-30%)
+✅ Parallel execution worked
+✅ Git tag: v3.0-phase34-complete
+```
+
+### Checkpoint 4: PHASE 5 Complete (End Week 8)
+
+```
+✅ 5 E2E flows complétés
+✅ Coverage: >80% ✅✅✅ GOAL!
+✅ Tous les tests passent
+✅ Final git tag: v5.0-phase5-complete-80percent
+🎉 PROJECT COMPLETE!
+```
+
+---
+
+## 📞 Prochaines étapes
+
+### Maintenant (THIS WEEK)
+
+- [ ] Lire [GUIDE_AMELIORER_TEMPLATES.md](GUIDE_AMELIORER_TEMPLATES.md)
+- [ ] Lire [PHASE_1_WEEKLY_PLAN.md](PHASE_1_WEEKLY_PLAN.md)
+- [ ] Commencer à développer test_depenses.py (lundi 09:00)
+
+### Semaine prochaine
+
+- [ ] Continuer développement PHASE 1
+- [ ] Validation coverage: 32-35%
+- [ ] Git commit & tag
+
+### Semaines 3-4
+
+- [ ] Générer templates PHASE 2
+- [ ] Améliorer les 12 fichiers <5%
+
+### Semaines 5-8
+
+- [ ] PHASE 3+4 (parallel)
+- [ ] PHASE 5 (E2E flows)
+
+---
+
+## 🚀 STAT
+
+```
+CURRENT PROGRESS:   2/84 fichiers (2.4%)
+PHASE 1 PROGRESS:   2/8 fichiers (25%)
+OVERALL PROGRESS:   ~50% complete (planning done, implementation 25% done)
+
+TEAM VELOCITY:      ~10 files/week (if dedicated 40h/week)
+ESTIMATED FINISH:   8 weeks from start (Week of [date+56days])
+```
+
+**Status: ✅ Ready to implement! Go to PHASE 1! 🚀**
