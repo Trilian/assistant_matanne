@@ -177,3 +177,10 @@ class TestRecetteServiceAI:
     def test_service_name_is_recettes(self, recette_service):
         """Le service_name est 'recettes'."""
         assert recette_service.service_name == "recettes"
+
+
+def test_import_recettes_module():
+    """Vérifie que le module recettes s'importe sans erreur."""
+    import importlib
+    module = importlib.import_module("src.services.recettes")
+    assert module is not None

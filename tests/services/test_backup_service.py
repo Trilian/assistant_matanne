@@ -6,6 +6,13 @@ from datetime import datetime
 from pydantic import ValidationError
 
 
+def test_import_backup_module():
+    """Vérifie que le module backup s'importe sans erreur."""
+    import importlib
+    module = importlib.import_module("src.services.backup")
+    assert module is not None
+
+
 class TestBackupConfig:
     """Tests pour BackupConfig."""
 

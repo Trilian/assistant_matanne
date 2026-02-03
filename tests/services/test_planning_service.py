@@ -6,6 +6,12 @@ import pytest
 from unittest.mock import Mock, patch, MagicMock
 
 from src.services.planning import PlanningService, get_planning_service
+import importlib
+
+def test_import_planning_module():
+    """Vérifie que le module planning s'importe sans erreur."""
+    module = importlib.import_module("src.services.planning")
+    assert module is not None
 
 
 # ═══════════════════════════════════════════════════════════

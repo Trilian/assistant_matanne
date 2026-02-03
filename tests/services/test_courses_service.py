@@ -317,3 +317,10 @@ class TestCoursesServiceIntegration:
         
         # Vérifier
         assert isinstance(result, list)
+
+
+def test_import_courses_module():
+    """Vérifie que le module courses s'importe sans erreur."""
+    import importlib
+    module = importlib.import_module("src.services.courses")
+    assert module is not None

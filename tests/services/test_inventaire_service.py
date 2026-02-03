@@ -6,6 +6,13 @@ from datetime import date, timedelta
 from unittest.mock import Mock, MagicMock, patch
 
 
+def test_import_inventaire_module():
+    """Vérifie que le module inventaire s'importe sans erreur."""
+    import importlib
+    module = importlib.import_module("src.services.inventaire")
+    assert module is not None
+
+
 class TestCalculerStatut:
     """Tests pour _calculer_statut (méthode privée)."""
 
