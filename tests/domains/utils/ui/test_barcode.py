@@ -1,3 +1,5 @@
+def test_import_barcode_ui():
+    import src.domains.utils.ui.barcode
 import importlib
 import pytest
 

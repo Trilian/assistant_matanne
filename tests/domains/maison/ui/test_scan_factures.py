@@ -1,3 +1,5 @@
+def test_import_scan_factures_ui():
+    import src.domains.maison.ui.scan_factures
 import importlib
 import pytest
 

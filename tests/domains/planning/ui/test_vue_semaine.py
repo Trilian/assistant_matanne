@@ -1,3 +1,5 @@
+def test_import_vue_semaine_ui():
+    import src.domains.planning.ui.vue_semaine
 import importlib
 import pytest
 

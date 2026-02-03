@@ -8,7 +8,14 @@ This module provides:
 - Mock clients (IA, cache)
 """
 
+import sys, os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
+
+import sys
 import os
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+
 import pytest
 from datetime import date, timedelta
 from sqlalchemy import create_engine, event

@@ -1,3 +1,5 @@
+def test_import_parametres_ui():
+    import src.domains.utils.ui.parametres
 import importlib
 import pytest
 

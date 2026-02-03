@@ -1,3 +1,5 @@
+def test_import_notifications_push_ui():
+    import src.domains.utils.ui.notifications_push
 import importlib
 import pytest
 

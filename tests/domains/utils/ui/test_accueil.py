@@ -1,3 +1,5 @@
+def test_import_accueil_ui():
+    import src.domains.utils.ui.accueil
 import importlib
 import pytest
 

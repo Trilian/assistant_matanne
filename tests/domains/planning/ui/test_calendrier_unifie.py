@@ -1,3 +1,5 @@
+def test_import_calendrier_unifie_ui():
+    import src.domains.planning.ui.calendrier_unifie
 import importlib
 import pytest
 

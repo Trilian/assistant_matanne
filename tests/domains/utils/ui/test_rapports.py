@@ -1,3 +1,5 @@
+def test_import_rapports_ui():
+    import src.domains.utils.ui.rapports
 import importlib
 import pytest
 

@@ -1,3 +1,5 @@
+def test_import_projets_ui():
+    import src.domains.maison.ui.projets
 import importlib
 import pytest
 

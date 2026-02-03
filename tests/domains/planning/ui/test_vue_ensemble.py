@@ -1,3 +1,5 @@
+def test_import_vue_ensemble_ui():
+    import src.domains.planning.ui.vue_ensemble
 import importlib
 import pytest
 

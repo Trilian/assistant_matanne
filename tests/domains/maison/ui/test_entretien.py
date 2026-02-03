@@ -1,3 +1,5 @@
+def test_import_entretien_ui():
+    import src.domains.maison.ui.entretien
 import importlib
 import pytest
 

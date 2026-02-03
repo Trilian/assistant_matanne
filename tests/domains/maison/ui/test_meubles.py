@@ -1,3 +1,5 @@
+def test_import_meubles_ui():
+    import src.domains.maison.ui.meubles
 import importlib
 import pytest
 
