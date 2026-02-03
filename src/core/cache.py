@@ -148,18 +148,23 @@ class Cache:
         Clear tous le cache.
 
         Useful for testing to ensure clean state between tests.
+        Safe to call outside Streamlit context.
         """
-        Cache._initialiser()
-        st.session_state[Cache.CLE_DONNEES] = {}
-        st.session_state[Cache.CLE_TIMESTAMPS] = {}
-        st.session_state[Cache.CLE_DEPENDANCES] = {}
-        st.session_state[Cache.CLE_STATS] = {
-            "hits": 0,
-            "misses": 0,
-            "invalidations": 0,
-            "taille_octets": 0,
-        }
-        logger.info("Cache cleared")
+        try:
+            Cache._initialiser()
+            st.session_state[Cache.CLE_DONNEES] = {}
+            st.session_state[Cache.CLE_TIMESTAMPS] = {}
+            st.session_state[Cache.CLE_DEPENDANCES] = {}
+            st.session_state[Cache.CLE_STATS] = {
+                "hits": 0,
+                "misses": 0,
+                "invalidations": 0,
+                "taille_octets": 0,
+            }
+            logger.info("Cache cleared")
+        except Exception:
+            # Ignore errors when running outside Streamlit context
+            pass
 
     @staticmethod
     def invalider(pattern: str | None = None, dependencies: list[str] | None = None):

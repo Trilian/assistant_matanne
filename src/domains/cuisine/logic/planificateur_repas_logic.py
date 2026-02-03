@@ -324,8 +324,11 @@ def filtrer_recettes_eligibles(
         
         # Vérifier type de repas
         if hasattr(recette, 'type_repas'):
-            if recette.type_repas and type_repas not in recette.type_repas:
-                continue
+            if recette.type_repas:
+                # Gérer les types multiples séparés par virgule
+                types_valides = [t.strip() for t in recette.type_repas.split(',')]
+                if type_repas not in types_valides:
+                    continue
         
         eligibles.append(recette)
     

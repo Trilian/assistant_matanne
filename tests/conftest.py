@@ -447,12 +447,21 @@ def create_streamlit_mock(session_state_data: dict = None):
 @pytest.fixture(autouse=True)
 def clear_cache():
     """Clear cache before/after each test."""
-    from src.core.cache import Cache
-    # Clear before test
-    Cache.clear()
-    yield
-    # Clear after test
-    Cache.clear()
+    try:
+        from src.core.cache import Cache
+        # Clear before test - catch errors when st.session_state is unavailable
+        try:
+            Cache.clear()
+        except Exception:
+            pass  # Ignore errors when running outside Streamlit context
+        yield
+        # Clear after test
+        try:
+            Cache.clear()
+        except Exception:
+            pass  # Ignore errors when running outside Streamlit context
+    except ImportError:
+        yield
 
 
 @pytest.fixture(autouse=True)

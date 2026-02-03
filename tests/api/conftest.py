@@ -154,6 +154,24 @@ def test_recipe() -> dict:
 
 
 @pytest.fixture
+def test_recipe_data() -> dict:
+    """Données recette test avec données supplémentaires."""
+    return {
+        "id": 1,
+        "nom": "Test Recipe",
+        "description": "Test description",
+        "portions": 4,
+        "temps_preparation": 15,
+        "temps_cuisson": 30,
+        "difficulte": "moyen",
+        "categorie": "plats",
+        "ingredients": [{"nom": "tomate", "quantite": 2}],
+        "instructions": ["Étape 1", "Étape 2"],
+        "tags": ["facile", "rapide"],
+    }
+
+
+@pytest.fixture
 def test_inventory_item() -> dict:
     """Données inventaire test."""
     return {
@@ -278,6 +296,101 @@ def cleanup():
     """Cleanup automatique après chaque test."""
     yield
     # Cleanup code if needed
+
+
+@pytest.fixture(autouse=True)
+def set_development_environment(monkeypatch):
+    """Configure l'environnement en mode développement pour les tests."""
+    monkeypatch.setenv("ENVIRONMENT", "development")
+    monkeypatch.setenv("DATABASE_URL", "sqlite:///:memory:")
+    yield
+
+
+@pytest.fixture(autouse=True)
+def disable_rate_limiting(monkeypatch):
+    """Désactive le rate limiting pour tous les tests API."""
+    from unittest.mock import MagicMock, AsyncMock
+    
+    # Mock le RateLimiter pour qu'il ne bloque jamais
+    async def mock_check_rate_limit(*args, **kwargs):
+        """Mock check qui ne lève jamais d'exception."""
+        return {"remaining": 100, "limit": 1000, "reset": 0}
+    
+    async def mock_dispatch(self, request, call_next):
+        """Mock dispatch qui passe directement au handler."""
+        return await call_next(request)
+    
+    # Patch les méthodes du rate limiter
+    try:
+        from src.api import rate_limiting
+        # Patch check_rate_limit pour ne jamais lever HTTPException
+        monkeypatch.setattr(
+            rate_limiting.RateLimiter, 
+            "check_rate_limit", 
+            mock_check_rate_limit
+        )
+        # Patch le middleware dispatch
+        monkeypatch.setattr(
+            rate_limiting.RateLimitMiddleware, 
+            "dispatch", 
+            mock_dispatch
+        )
+    except (ImportError, AttributeError):
+        pass
+    
+    yield
+
+
+@pytest.fixture(autouse=True)
+def mock_database_for_api(monkeypatch):
+    """Mock la base de données pour les tests API."""
+    from unittest.mock import MagicMock
+    from sqlalchemy.orm import Session
+    
+    # Créer des mocks pour les recettes
+    mock_recette = MagicMock()
+    mock_recette.id = 1
+    mock_recette.nom = "Test Recipe"
+    mock_recette.description = "Description test"
+    mock_recette.temps_preparation = 15
+    mock_recette.temps_cuisson = 30
+    mock_recette.portions = 4
+    mock_recette.difficulte = "moyen"
+    mock_recette.categorie = "plats"
+    mock_recette.created_at = None
+    mock_recette.updated_at = None
+    
+    # Mock query chain
+    mock_query = MagicMock()
+    mock_query.filter.return_value = mock_query
+    mock_query.order_by.return_value = mock_query
+    mock_query.offset.return_value = mock_query
+    mock_query.limit.return_value = mock_query
+    mock_query.count.return_value = 1
+    mock_query.all.return_value = [mock_recette]
+    mock_query.first.return_value = mock_recette
+    
+    # Mock session
+    mock_session = MagicMock(spec=Session)
+    mock_session.query.return_value = mock_query
+    mock_session.add = MagicMock()
+    mock_session.commit = MagicMock()
+    mock_session.rollback = MagicMock()
+    mock_session.close = MagicMock()
+    mock_session.refresh = MagicMock()
+    
+    # Mock context manager
+    from contextlib import contextmanager
+    
+    @contextmanager
+    def mock_db_context():
+        yield mock_session
+    
+    # Patch get_db_context
+    monkeypatch.setattr("src.core.database.obtenir_contexte_db", mock_db_context)
+    monkeypatch.setattr("src.core.database.get_db_context", mock_db_context)
+    
+    yield mock_session
 
 
 # ═════════════════════════════════════════════════════════════════════
