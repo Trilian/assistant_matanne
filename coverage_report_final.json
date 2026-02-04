@@ -1,0 +1,29 @@
+{
+  "metrics": {
+    "tests_collected": 3451,
+    "tests_failed": 42,
+    "pass_rate_percent": 98.78,
+    "global_coverage_percent": 70.7
+  },
+  "coverage_by_module": {
+    "core": 88,
+    "services": 76,
+    "domains": 62,
+    "ui": 71,
+    "utils": 68,
+    "api": 64,
+    "modules": 55
+  },
+  "status": {
+    "coverage_target_80_ok": false,
+    "pass_rate_target_95_ok": true
+  },
+  "modules_below_80": {
+    "services": 76,
+    "domains": 62,
+    "ui": 71,
+    "utils": 68,
+    "api": 64,
+    "modules": 55
+  }
+}
