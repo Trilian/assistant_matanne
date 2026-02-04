@@ -45,15 +45,49 @@ def pytest_configure(config):
 # ═════════════════════════════════════════════════════════════════════
 
 @pytest.fixture
-def app():
-    """Fixture app FastAPI pour tests."""
-    from src.api.main import app
-    return app
+def app(monkeypatch, db):
+    """Fixture app FastAPI pour tests avec DB override."""
+    # Patch JSONB AVANT d'importer l'app
+    from sqlalchemy.dialects.sqlite.base import SQLiteTypeCompiler
+    
+    original_process = SQLiteTypeCompiler.process
+    
+    def patched_process(self, type_, **kw):
+        """Patch JSONB to JSON for SQLite."""
+        from sqlalchemy.dialects.postgresql import JSONB
+        
+        if isinstance(type_, JSONB):
+            return "JSON"
+        return original_process(self, type_, **kw)
+    
+    monkeypatch.setattr(SQLiteTypeCompiler, "process", patched_process)
+    
+    # Maintenant import l'app
+    from src.api.main import app as fastapi_app
+    
+    # Override get_db_context pour utiliser la DB de test fournie par conftest principal
+    def mock_get_db_context():
+        """Context manager pour la session de test."""
+        class MockContext:
+            def __enter__(self):
+                return db
+            def __exit__(self, *args):
+                pass  # DB est gérée par le fixture
+        return MockContext()
+    
+    # Patch global de get_db_context
+    monkeypatch.setattr(
+        "src.core.database.get_db_context",
+        mock_get_db_context
+    )
+    
+    yield fastapi_app
 
 
 @pytest.fixture
-def client(app) -> TestClient:
-    """Fixture TestClient standard."""
+def client(app, db) -> TestClient:
+    """Fixture TestClient standard avec DB de test."""
+    # La DB est déjà propre par le fixture conftest principal
     return TestClient(app)
 
 

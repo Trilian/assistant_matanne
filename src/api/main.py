@@ -711,15 +711,15 @@ async def get_planning_semaine(
         with get_db_context() as session:
             repas = (
                 session.query(Repas)
-                .filter(Repas.date >= start, Repas.date < end)
-                .order_by(Repas.date, Repas.type_repas)
+                .filter(Repas.date_repas >= start, Repas.date_repas < end)
+                .order_by(Repas.date_repas, Repas.type_repas)
                 .all()
             )
             
             # Organiser par jour
             planning = {}
             for r in repas:
-                jour = r.date.strftime("%A %d/%m")
+                jour = r.date_repas.strftime("%A %d/%m")
                 if jour not in planning:
                     planning[jour] = []
                 planning[jour].append({
