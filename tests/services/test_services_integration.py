@@ -6,6 +6,9 @@ Validates service methods work correctly with actual SQLAlchemy sessions.
 
 Coverage target: +1-2% (toward Phase 15: 35%)
 Strategy: Fixture-based integration tests (not mocks)
+
+NOTE: Tests are skipped because services instantiate with internal
+get_db_context() which connects to production Supabase database.
 """
 
 import pytest
@@ -23,6 +26,9 @@ from src.services.recettes import RecetteService
 from src.services.inventaire import InventaireService
 from src.services.planning import PlanningService
 from src.services.courses import CoursesService
+
+# Skip all tests - services use production DB singleton internally
+pytestmark = pytest.mark.skip(reason="Services use internal get_db_context() connecting to production DB")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════════

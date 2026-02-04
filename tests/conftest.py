@@ -34,6 +34,16 @@ from src.core.models import (
     Planning,
     Repas,
     ArticleCourses,
+    ListeCourses,
+    ChildProfile,
+    WellbeingEntry,
+    Milestone,
+    FamilyActivity,
+    CalendarEvent,
+    HealthRoutine,
+    HealthObjective,
+    HealthEntry,
+    BatchMeal,
 )
 from src.services.recettes import RecetteService
 from src.services.inventaire import InventaireService
