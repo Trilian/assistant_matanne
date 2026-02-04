@@ -8,13 +8,14 @@ This module provides:
 - Mock clients (IA, cache)
 """
 
-import sys, os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
-
 import sys
 import os
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+
+# Configurer le chemin pour les imports
+workspace_root = Path(__file__).parent.parent
+if str(workspace_root) not in sys.path:
+    sys.path.insert(0, str(workspace_root))
 
 import pytest
 from datetime import date, timedelta
