@@ -1,0 +1,203 @@
+# 📊 INDEX - RAPPORT DE COUVERTURE ET PLAN D'OPTIMISATION
+
+## 📋 FICHIERS GÉNÉRÉS (Lisez dans cet ordre)
+
+### 1. **SYNTHESIS.txt** ← COMMENCEZ ICI ⭐
+   - Synthèse exécutive ultra-concise
+   - Tâches accomplies
+   - Prochaines étapes prioritaires
+   - FAQ rapide
+   - **Temps de lecture**: 5-10 min
+
+### 2. **RESUME_EXECUTIF.txt** ← IMPORTANT 🔴
+   - État actuel détaillé (11.3% coverage)
+   - Tableau des 7 domaines
+   - Plan d'action 4 phases
+   - Métriques de succès
+   - **Temps de lecture**: 15-20 min
+
+### 3. **RAPPORT_COUVERTURE_DETAILLE.txt** ← COMPLET 📖
+   - Analyse approfondie par module
+   - Points forts et faibles
+   - Stratégie d'exécution détaillée
+   - Checklist complète
+   - **Temps de lecture**: 30-45 min
+
+### 4. **htmlcov/index.html** ← INTERACTIF 🌐
+   - Rapport HTML interactif
+   - Visualisation de la couverture
+   - Détails fichier par fichier
+   - Accessibilité browser: OUI
+   - **Temps de lecture**: 10-15 min
+
+---
+
+## 🎯 PARCOURS RECOMMANDÉ
+
+```
+Pour comprendre rapidement:
+  1. Lire SYNTHESIS.txt (5 min) ⭐
+  2. Ouvrir htmlcov/index.html (5 min)
+  3. Lire RESUME_EXECUTIF.txt (20 min)
+
+Pour comprendre en détail:
+  1. Lire tout en haut → bas
+  2. Consulter htmlcov/index.html au besoin
+  3. Utiliser scripts d'extraction pour analyse
+
+Pour commencer travail:
+  1. SYNTHESIS.txt
+  2. RESUME_EXECUTIF.txt (section "PHASE 1")
+  3. Commencer Phase 1 (2-3h)
+```
+
+---
+
+## 📊 ÉTAT ACTUEL EN CHIFFRES
+
+| Métrique | Valeur | Status |
+|----------|--------|--------|
+| Couverture globale | 11.3% | ❌ |
+| Lignes couvertes | 3,563 / 31,434 | ⚠️ |
+| Tests créés (Phase 1-2) | 208 | ✅ |
+| Tests PASSING | 2,596 | ✅ |
+| Tests FAILED | 121 | ⚠️ |
+| Gap pour 80% | +68.7% | 📊 |
+| Effort estimé | 14-25h | ⏱️ |
+
+---
+
+## 🚀 LES 4 PHASES
+
+| Phase | Domaine | Actuel | Cible | Effort | Impact |
+|-------|---------|--------|-------|--------|--------|
+| 1 | core | 45.6% | 80% | 2-3h | 🔴 HAUTE |
+| 2 | api | 33.4% | 80% | 2-4h | 🔴 HAUTE |
+| 3 | services | 6.1% | 80% | 4-6h | 🟡 MOY |
+| 4 | domains | 1.0% | 80% | 6-8h | 🟡 MOY |
+
+---
+
+## 🔧 SCRIPTS DISPONIBLES
+
+- `extract_report_coverage.py` - Extrait analyse depuis JSON
+- `fix_tests_phase1.py` - Template pour Phase 1
+- `report_coverage.py` - Analyse couverture (test)
+
+**Commandes utiles**:
+```bash
+# Générer rapport HTML
+pytest tests/ --cov=src --cov-report=html
+
+# Exécuter tests par domaine
+pytest tests/core --cov=src/core
+pytest tests/api --cov=src/api
+
+# Voir résumé couverture
+python extract_report_coverage.py
+```
+
+---
+
+## 💾 FICHIERS CRÉÉS CETTE SESSION
+
+### Rapports
+- ✅ `htmlcov/index.html` (rapport interactif)
+- ✅ `SYNTHESIS.txt` (ce guide)
+- ✅ `RESUME_EXECUTIF.txt` (vue d'ensemble)
+- ✅ `RAPPORT_COUVERTURE_DETAILLE.txt` (détails)
+
+### Scripts
+- ✅ `extract_report_coverage.py` (extraction)
+- ✅ `fix_tests_phase1.py` (template correction)
+- ✅ `report_coverage.py` (analyse)
+
+### Données
+- ✅ `htmlcov/status.json` (données brutes)
+- ✅ `coverage.json` (coverage data)
+
+---
+
+## ⏰ TIMELINE RECOMMANDÉE
+
+```
+Jour 1 (2-3h):
+├─ Lire SYNTHESIS + RESUME
+└─ Exécuter PHASE 1 (core → 80%)
+
+Jour 2 (2-4h):
+└─ Exécuter PHASE 2 (api → 80%)
+
+Jour 3-4 (4-6h):
+└─ Exécuter PHASE 3 (services → 80%)
+
+Jour 5-6 (6-8h):
+└─ Exécuter PHASE 4 (domains → 80%)
+
+TOTAL: 1 semaine pour 80%+
+```
+
+---
+
+## ✅ CHECKLIST PRÊT À COMMENCER
+
+- [ ] Lire SYNTHESIS.txt
+- [ ] Ouvrir htmlcov/index.html
+- [ ] Lire RESUME_EXECUTIF.txt
+- [ ] Lire RAPPORT_COUVERTURE_DETAILLE.txt
+- [ ] Comprendre les 4 phases
+- [ ] Planifier timeline
+- [ ] Commencer PHASE 1
+
+---
+
+## 📞 QUESTIONS RAPIDES
+
+**Où commencer?**
+→ SYNTHESIS.txt
+
+**Combien de temps?**
+→ 14-25 heures total
+
+**Quoi faire en priorité?**
+→ PHASE 1 (core 45.6% → 80%)
+
+**Comment vérifier?**
+→ htmlcov/index.html ou pytest
+
+**Est-ce possible?**
+→ Oui, plan très structuré et réaliste
+
+---
+
+## 🎓 STRUCTURE DES FICHIERS
+
+```
+Rapports (lisez):
+├─ SYNTHESIS.txt (⭐ START HERE)
+├─ RESUME_EXECUTIF.txt (Vue d'ensemble)
+├─ RAPPORT_COUVERTURE_DETAILLE.txt (Détails)
+└─ htmlcov/index.html (Interactif)
+
+Scripts (exécutez):
+├─ extract_report_coverage.py
+├─ fix_tests_phase1.py
+└─ report_coverage.py
+
+Données (consultez):
+├─ htmlcov/status.json
+└─ coverage.json
+```
+
+---
+
+**🎯 OBJECTIF**: Atteindre **80%+ de couverture** en **1-2 semaines**
+
+**📅 STATUS**: Analyse complète ✅, Plan validé ✅, Prêt à exécuter ✅
+
+**🚀 PROCHAINE ÉTAPE**: Lire SYNTHESIS.txt puis commencer PHASE 1
+
+---
+
+*Généré le 2026-02-04*  
+*Rapport complet et prêt pour exécution*

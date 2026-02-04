@@ -1,4 +1,4 @@
-"""Tests simples pour couvrir les gaps - Modules métier."""
+"""Tests simples pour couvrir les gaps - Modules métier (réorganisé depuis tests/modules/)."""
 
 import pytest
 
@@ -11,8 +11,8 @@ class TestModulesMetier:
         """Tester import des modules métier."""
         # Juste vérifier que les modules existent
         try:
-            from src import modules
-            assert modules is not None
+            from src import domains
+            assert domains is not None
         except (ImportError, AttributeError):
             pytest.skip("Module non disponible")
     
