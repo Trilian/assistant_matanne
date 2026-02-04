@@ -247,10 +247,9 @@ class TestRecetteDetailEndpoint:
 class TestRecetteCreateEndpoint:
     """Tests pour POST /api/v1/recettes."""
     
-    def test_create_recette_requires_auth(self, client):
+    def test_create_recette_requires_auth(self, client, minimal_recipe_data):
         """POST /api/v1/recettes sans auth doit être rejeté."""
-        data = {"nom": "Test", "portions": 4}
-        resp = client.post("/api/v1/recettes", json=data)
+        resp = client.post("/api/v1/recettes", json=minimal_recipe_data)
         # Dev mode peut permettre, prod non
         assert resp.status_code in [200, 201, 401]
     
@@ -262,10 +261,9 @@ class TestRecetteCreateEndpoint:
         )
         assert resp.status_code in [200, 201]
     
-    def test_create_recette_minimal_data(self, authenticated_client):
+    def test_create_recette_minimal_data(self, authenticated_client, minimal_recipe_data):
         """POST /api/v1/recettes avec données minimales."""
-        data = {"nom": "Minimal Recipe"}
-        resp = authenticated_client.post("/api/v1/recettes", json=data)
+        resp = authenticated_client.post("/api/v1/recettes", json=minimal_recipe_data)
         assert resp.status_code in [200, 201]
     
     def test_create_recette_full_data(self, authenticated_client, test_recipe_data):

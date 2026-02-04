@@ -63,7 +63,7 @@ def app(monkeypatch, db):
     monkeypatch.setattr(SQLiteTypeCompiler, "process", patched_process)
     
     # Maintenant import l'app
-    from src.api.main import app as fastapi_app
+    from src.api.main import app as fastapi_app, get_current_user
     
     # Override get_db_context pour utiliser la DB de test fournie par conftest principal
     def mock_get_db_context():
@@ -81,7 +81,22 @@ def app(monkeypatch, db):
         mock_get_db_context
     )
     
+    # Override FastAPI dependency pour get_current_user
+    def mock_get_current_user():
+        return {
+            "id": "test-user",
+            "email": "test@test.com",
+            "role": "admin",
+            "nom": "Test",
+            "prenom": "User",
+        }
+    
+    fastapi_app.dependency_overrides[get_current_user] = mock_get_current_user
+    
     yield fastapi_app
+    
+    # Cleanup
+    fastapi_app.dependency_overrides.clear()
 
 
 @pytest.fixture
@@ -202,6 +217,17 @@ def test_recipe_data() -> dict:
         "ingredients": [{"nom": "tomate", "quantite": 2}],
         "instructions": ["Étape 1", "Étape 2"],
         "tags": ["facile", "rapide"],
+    }
+
+
+@pytest.fixture
+def minimal_recipe_data() -> dict:
+    """Données recette minimales pour création - avec tous les required fields."""
+    return {
+        "nom": "Recette Test",
+        "temps_preparation": 15,  # REQUIRED
+        "temps_cuisson": 20,  # REQUIRED
+        "portions": 4,  # Peut être optionnel mais recommandé
     }
 
 

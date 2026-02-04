@@ -116,6 +116,12 @@ def db(engine):
 
 
 @pytest.fixture
+def test_db(db):
+    """Alias for db fixture - backwards compatibility."""
+    return db
+
+
+@pytest.fixture
 def mock_session(db):
     """Alias for db fixture - backwards compatibility with older tests."""
     return db

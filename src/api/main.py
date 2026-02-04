@@ -14,10 +14,10 @@ import logging
 from datetime import datetime
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException, Depends, Query, Security
+from fastapi import FastAPI, HTTPException, Depends, Query, Security, Path
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 logger = logging.getLogger(__name__)
 
@@ -69,11 +69,19 @@ class RecetteBase(BaseModel):
     """Schéma de base pour une recette."""
     nom: str
     description: str | None = None
-    temps_preparation: int | None = Field(None, description="Minutes")
-    temps_cuisson: int | None = Field(None, description="Minutes")
-    portions: int = 4
+    temps_preparation: int = Field(15, description="Minutes", ge=0)
+    temps_cuisson: int = Field(0, description="Minutes", ge=0)
+    portions: int = Field(4, ge=1)
     difficulte: str = "moyen"
     categorie: str | None = None
+    
+    @field_validator("nom")
+    @classmethod
+    def validate_nom(cls, v: str) -> str:
+        """Valide que le nom n'est pas vide."""
+        if not v or not v.strip():
+            raise ValueError("Le nom ne peut pas être vide")
+        return v.strip()
 
 
 class RecetteCreate(RecetteBase):
@@ -327,7 +335,7 @@ async def list_recettes(
 
 
 @app.get("/api/v1/recettes/{recette_id}", response_model=RecetteResponse, tags=["Recettes"])
-async def get_recette(recette_id: int, user: dict = Depends(get_current_user)):
+async def get_recette(recette_id: int = Path(..., gt=0), user: dict = Depends(get_current_user)):
     """Récupère une recette par son ID."""
     try:
         from src.core.database import get_db_context
@@ -378,8 +386,8 @@ async def create_recette(data: RecetteCreate, user: dict = Depends(require_auth)
 
 @app.put("/api/v1/recettes/{recette_id}", response_model=RecetteResponse, tags=["Recettes"])
 async def update_recette(
-    recette_id: int,
     data: RecetteCreate,
+    recette_id: int = Path(..., gt=0),
     user: dict = Depends(require_auth)
 ):
     """Met à jour une recette existante."""
@@ -410,7 +418,7 @@ async def update_recette(
 
 
 @app.delete("/api/v1/recettes/{recette_id}", tags=["Recettes"])
-async def delete_recette(recette_id: int, user: dict = Depends(require_auth)):
+async def delete_recette(recette_id: int = Path(..., gt=0), user: dict = Depends(require_auth)):
     """Supprime une recette."""
     try:
         from src.core.database import get_db_context
@@ -647,8 +655,8 @@ async def create_liste_courses(
 
 @app.post("/api/v1/courses/{liste_id}/items", tags=["Courses"])
 async def add_course_item(
-    liste_id: int,
     item: CourseItemBase,
+    liste_id: int = Path(..., gt=0),
     user: dict = Depends(require_auth)
 ):
     """Ajoute un article à une liste de courses."""
