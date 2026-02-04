@@ -1,0 +1,376 @@
+# -*- coding: utf-8 -*-
+"""
+Tests pour performance.py - amélioration de la couverture
+
+Cible:
+- PerformanceMetric dataclass
+- FunctionStats dataclass
+- FunctionProfiler class
+- profile decorator
+- measure_time context manager
+- MemoryMonitor class
+- SQLOptimizer class
+"""
+import pytest
+import time
+import gc
+from datetime import datetime
+from unittest.mock import MagicMock, patch
+
+
+class TestPerformanceMetric:
+    """Tests pour PerformanceMetric dataclass."""
+    
+    def test_default_values(self):
+        """Valeurs par défaut correctes."""
+        from src.core.performance import PerformanceMetric
+        
+        metric = PerformanceMetric(name="test", duration_ms=50.0)
+        
+        assert metric.name == "test"
+        assert metric.duration_ms == 50.0
+        assert metric.memory_delta_kb == 0
+        assert metric.metadata == {}
+        assert metric.timestamp is not None
+    
+    def test_with_all_fields(self):
+        """Création avec tous les champs."""
+        from src.core.performance import PerformanceMetric
+        
+        metric = PerformanceMetric(
+            name="complex_op",
+            duration_ms=125.5,
+            memory_delta_kb=1024,
+            metadata={"table": "users"},
+        )
+        
+        assert metric.memory_delta_kb == 1024
+        assert metric.metadata == {"table": "users"}
+
+
+class TestFunctionStats:
+    """Tests pour FunctionStats dataclass."""
+    
+    def test_default_values(self):
+        """Valeurs par défaut correctes."""
+        from src.core.performance import FunctionStats
+        
+        stats = FunctionStats()
+        
+        assert stats.call_count == 0
+        assert stats.total_time_ms == 0
+        assert stats.min_time_ms == float('inf')
+        assert stats.max_time_ms == 0
+        assert stats.avg_time_ms == 0
+        assert stats.last_call is None
+        assert stats.errors == 0
+
+
+class TestFunctionProfiler:
+    """Tests pour FunctionProfiler."""
+    
+    @pytest.fixture(autouse=True)
+    def mock_streamlit(self):
+        """Mock streamlit session_state."""
+        with patch('src.core.performance.st') as mock_st:
+            mock_st.session_state = {}
+            yield mock_st
+    
+    def test_record_first_call(self, mock_streamlit):
+        """record crée les stats pour nouvelle fonction."""
+        from src.core.performance import FunctionProfiler
+        
+        FunctionProfiler.record("my_function", 50.0)
+        
+        stats = FunctionProfiler.get_all_stats()
+        assert "my_function" in stats
+        assert stats["my_function"].call_count == 1
+        assert stats["my_function"].total_time_ms == 50.0
+    
+    def test_record_multiple_calls(self, mock_streamlit):
+        """record accumule les stats."""
+        from src.core.performance import FunctionProfiler
+        
+        FunctionProfiler.record("func", 10.0)
+        FunctionProfiler.record("func", 20.0)
+        FunctionProfiler.record("func", 30.0)
+        
+        stats = FunctionProfiler.get_all_stats()["func"]
+        
+        assert stats.call_count == 3
+        assert stats.total_time_ms == 60.0
+        assert stats.avg_time_ms == 20.0
+        assert stats.min_time_ms == 10.0
+        assert stats.max_time_ms == 30.0
+    
+    def test_record_with_error(self, mock_streamlit):
+        """record compte les erreurs."""
+        from src.core.performance import FunctionProfiler
+        
+        FunctionProfiler.record("func", 10.0, error=True)
+        FunctionProfiler.record("func", 20.0, error=False)
+        
+        stats = FunctionProfiler.get_all_stats()["func"]
+        assert stats.errors == 1
+    
+    def test_get_slowest(self, mock_streamlit):
+        """get_slowest retourne les plus lentes."""
+        from src.core.performance import FunctionProfiler
+        
+        FunctionProfiler.record("fast", 10.0)
+        FunctionProfiler.record("medium", 50.0)
+        FunctionProfiler.record("slow", 100.0)
+        
+        slowest = FunctionProfiler.get_slowest(n=2)
+        
+        assert len(slowest) == 2
+        assert slowest[0][0] == "slow"
+        assert slowest[1][0] == "medium"
+    
+    def test_get_most_called(self, mock_streamlit):
+        """get_most_called retourne les plus appelées."""
+        from src.core.performance import FunctionProfiler
+        
+        FunctionProfiler.record("rare", 10.0)
+        for _ in range(5):
+            FunctionProfiler.record("common", 10.0)
+        for _ in range(10):
+            FunctionProfiler.record("very_common", 10.0)
+        
+        most_called = FunctionProfiler.get_most_called(n=2)
+        
+        assert len(most_called) == 2
+        assert most_called[0][0] == "very_common"
+        assert most_called[1][0] == "common"
+    
+    def test_clear(self, mock_streamlit):
+        """clear réinitialise les stats."""
+        from src.core.performance import FunctionProfiler
+        
+        FunctionProfiler.record("func", 10.0)
+        FunctionProfiler.clear()
+        
+        stats = FunctionProfiler.get_all_stats()
+        assert stats == {}
+
+
+class TestProfileDecorator:
+    """Tests pour le décorateur @profile."""
+    
+    @pytest.fixture(autouse=True)
+    def mock_streamlit(self):
+        """Mock streamlit session_state."""
+        with patch('src.core.performance.st') as mock_st:
+            mock_st.session_state = {}
+            yield mock_st
+    
+    def test_profile_records_execution(self, mock_streamlit):
+        """@profile enregistre l'exécution."""
+        from src.core.performance import profile, FunctionProfiler
+        
+        @profile
+        def my_func():
+            return "result"
+        
+        result = my_func()
+        
+        assert result == "result"
+        stats = FunctionProfiler.get_all_stats()
+        # Le nom contient le module et la fonction
+        assert any("my_func" in k for k in stats.keys())
+    
+    def test_profile_with_custom_name(self, mock_streamlit):
+        """@profile avec nom personnalisé."""
+        from src.core.performance import profile, FunctionProfiler
+        
+        @profile(name="custom_name")
+        def some_func():
+            return 42
+        
+        some_func()
+        
+        stats = FunctionProfiler.get_all_stats()
+        assert "custom_name" in stats
+    
+    def test_profile_records_errors(self, mock_streamlit):
+        """@profile enregistre les erreurs."""
+        from src.core.performance import profile, FunctionProfiler
+        
+        @profile(name="error_func")
+        def failing_func():
+            raise ValueError("Error!")
+        
+        with pytest.raises(ValueError):
+            failing_func()
+        
+        stats = FunctionProfiler.get_all_stats()["error_func"]
+        assert stats.errors == 1
+
+
+class TestMeasureTimeContextManager:
+    """Tests pour measure_time context manager."""
+    
+    @pytest.fixture(autouse=True)
+    def mock_streamlit(self):
+        """Mock streamlit session_state."""
+        with patch('src.core.performance.st') as mock_st:
+            mock_st.session_state = {}
+            yield mock_st
+    
+    def test_measure_time_records(self, mock_streamlit):
+        """measure_time enregistre le temps."""
+        from src.core.performance import measure_time, FunctionProfiler
+        
+        with measure_time("test_block"):
+            time.sleep(0.01)  # 10ms
+        
+        stats = FunctionProfiler.get_all_stats()
+        assert "test_block" in stats
+        assert stats["test_block"].total_time_ms >= 10
+    
+    def test_measure_time_records_errors(self, mock_streamlit):
+        """measure_time enregistre les erreurs."""
+        from src.core.performance import measure_time, FunctionProfiler
+        
+        with pytest.raises(RuntimeError):
+            with measure_time("error_block"):
+                raise RuntimeError("Test error")
+        
+        stats = FunctionProfiler.get_all_stats()
+        assert stats["error_block"].errors == 1
+
+
+class TestMemoryMonitor:
+    """Tests pour MemoryMonitor."""
+    
+    @pytest.fixture(autouse=True)
+    def mock_streamlit(self):
+        """Mock streamlit session_state."""
+        with patch('src.core.performance.st') as mock_st:
+            mock_st.session_state = {}
+            yield mock_st
+    
+    def test_start_tracking(self, mock_streamlit):
+        """start_tracking démarre tracemalloc."""
+        from src.core.performance import MemoryMonitor
+        
+        MemoryMonitor._tracking_active = False
+        
+        with patch('src.core.performance.tracemalloc') as mock_trace:
+            MemoryMonitor.start_tracking()
+            
+            mock_trace.start.assert_called_once()
+            assert MemoryMonitor._tracking_active is True
+    
+    def test_start_tracking_already_active(self, mock_streamlit):
+        """start_tracking ne redémarre pas si déjà actif."""
+        from src.core.performance import MemoryMonitor
+        
+        MemoryMonitor._tracking_active = True
+        
+        with patch('src.core.performance.tracemalloc') as mock_trace:
+            MemoryMonitor.start_tracking()
+            
+            mock_trace.start.assert_not_called()
+    
+    def test_stop_tracking(self, mock_streamlit):
+        """stop_tracking arrête tracemalloc."""
+        from src.core.performance import MemoryMonitor
+        
+        MemoryMonitor._tracking_active = True
+        
+        with patch('src.core.performance.tracemalloc') as mock_trace:
+            MemoryMonitor.stop_tracking()
+            
+            mock_trace.stop.assert_called_once()
+            assert MemoryMonitor._tracking_active is False
+    
+    def test_get_current_usage(self, mock_streamlit):
+        """get_current_usage retourne les infos mémoire."""
+        from src.core.performance import MemoryMonitor
+        
+        MemoryMonitor._tracking_active = False
+        
+        usage = MemoryMonitor.get_current_usage()
+        
+        assert "current_mb" in usage
+        assert "peak_mb" in usage
+        assert "total_objects" in usage
+        assert "top_types" in usage
+    
+    def test_get_current_usage_with_tracking(self, mock_streamlit):
+        """get_current_usage avec tracking actif."""
+        from src.core.performance import MemoryMonitor
+        
+        MemoryMonitor._tracking_active = True
+        
+        with patch('src.core.performance.tracemalloc') as mock_trace:
+            mock_trace.get_traced_memory.return_value = (1024*1024, 2*1024*1024)
+            
+            usage = MemoryMonitor.get_current_usage()
+            
+            assert usage["current_mb"] == 1.0
+            assert usage["peak_mb"] == 2.0
+    
+    def test_take_snapshot(self, mock_streamlit):
+        """take_snapshot prend un snapshot."""
+        from src.core.performance import MemoryMonitor
+        
+        MemoryMonitor._tracking_active = False
+        
+        snapshot = MemoryMonitor.take_snapshot(label="test_snap")
+        
+        assert snapshot["label"] == "test_snap"
+        assert "timestamp" in snapshot
+        
+        snapshots = MemoryMonitor.get_snapshots()
+        assert len(snapshots) == 1
+    
+    def test_take_snapshot_limits_count(self, mock_streamlit):
+        """take_snapshot garde seulement 20 derniers."""
+        from src.core.performance import MemoryMonitor
+        
+        MemoryMonitor._tracking_active = False
+        
+        for i in range(25):
+            MemoryMonitor.take_snapshot(label=f"snap_{i}")
+        
+        snapshots = MemoryMonitor.get_snapshots()
+        assert len(snapshots) <= 20
+    
+    def test_force_cleanup(self, mock_streamlit):
+        """force_cleanup déclenche gc."""
+        from src.core.performance import MemoryMonitor
+        
+        MemoryMonitor._tracking_active = False
+        
+        with patch('src.core.performance.gc') as mock_gc:
+            mock_gc.collect.return_value = 100
+            mock_gc.get_objects.return_value = []
+            
+            result = MemoryMonitor.force_cleanup()
+            
+            mock_gc.collect.assert_called_once()
+            assert result["objects_collected"] == 100
+
+
+class TestSQLOptimizer:
+    """Tests pour SQLOptimizer."""
+    
+    @pytest.fixture(autouse=True)
+    def mock_streamlit(self):
+        """Mock streamlit session_state."""
+        with patch('src.core.performance.st') as mock_st:
+            mock_st.session_state = {}
+            yield mock_st
+    
+    def test_get_stats_empty(self, mock_streamlit):
+        """_get_stats retourne structure vide par défaut."""
+        from src.core.performance import SQLOptimizer
+        
+        stats = SQLOptimizer._get_stats()
+        
+        assert "queries" in stats
+        assert "slow_queries" in stats
+        assert "total_count" in stats
+        assert stats["total_count"] == 0
