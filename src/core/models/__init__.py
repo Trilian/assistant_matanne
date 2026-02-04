@@ -48,6 +48,7 @@ from .inventaire import (
 
 # Courses
 from .courses import (
+    ListeCourses,
     ArticleCourses,
     ModeleCourses,
     ArticleModele,

@@ -703,12 +703,25 @@ class TestPlanningAddRepasEndpoint:
         )
         assert resp.status_code in [200, 201]
     
-    def test_add_repas_with_recette(self, authenticated_client):
+    def test_add_repas_with_recette(self, authenticated_client, db):
         """POST /api/v1/planning/repas avec recette_id."""
+        # Créer une recette d'abord
+        from src.core.models import Recette
+        recette = Recette(
+            nom="Test Recette",
+            description="Test",
+            temps_preparation=30,
+            temps_cuisson=20,
+            portions=4
+        )
+        db.add(recette)
+        db.commit()
+        db.refresh(recette)
+        
         repas_data = {
             "type_repas": "dejeuner",
             "date": datetime.now().isoformat(),
-            "recette_id": 1
+            "recette_id": recette.id
         }
         resp = authenticated_client.post(
             "/api/v1/planning/repas",

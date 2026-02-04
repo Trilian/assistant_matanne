@@ -125,7 +125,7 @@ class SuggestionsIAService:
         # Analyser l'historique des recettes
         historique = (
             session.query(HistoriqueRecette)
-            .filter(HistoriqueRecette.date_consultation >= date_limite)
+            .filter(HistoriqueRecette.date_cuisson >= date_limite)
             .all()
         )
         
@@ -193,11 +193,11 @@ class SuggestionsIAService:
             dernier = (
                 session.query(HistoriqueRecette)
                 .filter_by(recette_id=rid)
-                .order_by(HistoriqueRecette.date_consultation.desc())
+                .order_by(HistoriqueRecette.date_cuisson.desc())
                 .first()
             )
             if dernier:
-                jours = (datetime.now() - dernier.date_consultation).days
+                jours = (datetime.now().date() - dernier.date_cuisson).days
                 profil.jours_depuis_derniere_recette[rid] = jours
         
         logger.info(f"Profil culinaire analysé: {len(profil.categories_preferees)} catégories préférées")

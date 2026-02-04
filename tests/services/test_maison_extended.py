@@ -13,13 +13,14 @@ from sqlalchemy.orm import Session
 from src.services.budget import get_budget_service
 from src.core.models import Depense
 
-pytestmark = pytest.mark.skip(reason="Tests avec signatures incorrectes - À corriger")
+# Mark all tests in this file as expected to fail (test signatures don't match service)
+pytestmark = pytest.mark.xfail(reason="Tests avec signatures incorrectes - À corriger")
 
 
 @pytest.fixture
-def budget_service(db: Session):
+def budget_service():
     """Create budget service instance"""
-    return get_budget_service(db)
+    return get_budget_service()
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -32,11 +33,10 @@ class TestBudgetInit:
     def test_service_initialized(self, budget_service):
         """Verify service initializes"""
         assert budget_service is not None
-        assert budget_service.db is not None
     
-    def test_factory_returns_service(self, db):
+    def test_factory_returns_service(self):
         """Verify factory function"""
-        service = get_budget_service(db)
+        service = get_budget_service()
         assert service is not None
 
 

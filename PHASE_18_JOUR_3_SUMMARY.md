@@ -30,7 +30,7 @@ class RecetteBase(BaseModel):
     temps_preparation: int = Field(15, description="Minutes", ge=0)  # Default + ge constraint
     temps_cuisson: int = Field(0, description="Minutes", ge=0)  # Default + ge constraint
     portions: int = Field(4, ge=1)  # Add ge constraint
-    
+
     @field_validator("nom")
     @classmethod
     def validate_nom(cls, v: str) -> str:
@@ -40,7 +40,8 @@ class RecetteBase(BaseModel):
         return v.strip()
 ```
 
-**Impact**: 
+**Impact**:
+
 - Prevents 500 errors from NULL constraint violations
 - Empty names now return 422 instead of being silently accepted
 - **Fixed 1 test**: `test_create_recette_empty_name_rejected`
@@ -50,6 +51,7 @@ class RecetteBase(BaseModel):
 **File**: [src/api/main.py](src/api/main.py#L19)
 
 Added `Path` import from FastAPI:
+
 ```python
 from fastapi import FastAPI, HTTPException, Depends, Query, Security, Path
 ```
@@ -57,6 +59,7 @@ from fastapi import FastAPI, HTTPException, Depends, Query, Security, Path
 Updated endpoints to use path validation:
 
 **GET /api/v1/recettes/{recette_id}**:
+
 ```python
 async def get_recette(
     recette_id: int = Path(..., gt=0),  # Must be > 0
@@ -65,6 +68,7 @@ async def get_recette(
 ```
 
 **PUT /api/v1/recettes/{recette_id}**:
+
 ```python
 async def update_recette(
     data: RecetteCreate,  # Reordered: body params first
@@ -74,6 +78,7 @@ async def update_recette(
 ```
 
 **DELETE /api/v1/recettes/{recette_id}**:
+
 ```python
 async def delete_recette(
     recette_id: int = Path(..., gt=0),
@@ -82,6 +87,7 @@ async def delete_recette(
 ```
 
 **POST /api/v1/courses/{liste_id}/items**:
+
 ```python
 async def add_course_item(
     item: CourseItemBase,
@@ -91,35 +97,39 @@ async def add_course_item(
 ```
 
 **Impact**:
+
 - Negative IDs (-1) now return 422 instead of 404
 - Zero IDs now return 422 instead of 404
 - **Fixed 3 tests**: ID validation tests across Recettes endpoint
 
 ### 3. Field Defaults & Constraints
 
-| Field | Old | New | Rationale |
-|-------|-----|-----|-----------|
+| Field               | Old                  | New                     | Rationale                                          |
+| ------------------- | -------------------- | ----------------------- | -------------------------------------------------- |
 | `temps_preparation` | `int \| None = None` | `int = Field(15, ge=0)` | DB requires NOT NULL; 15 min is reasonable default |
-| `temps_cuisson` | `int \| None = None` | `int = Field(0, ge=0)` | DB requires NOT NULL; 0 is safe default |
-| `portions` | `int = 4` | `int = Field(4, ge=1)` | Add constraint: must be ≥ 1 |
+| `temps_cuisson`     | `int \| None = None` | `int = Field(0, ge=0)`  | DB requires NOT NULL; 0 is safe default            |
+| `portions`          | `int = 4`            | `int = Field(4, ge=1)`  | Add constraint: must be ≥ 1                        |
 
 ---
 
 ## Test Results
 
 ### Before Jour 3
+
 ```
 36 passed, 60 failed
 Pass rate: 37.5%
 ```
 
 ### After Jour 3
+
 ```
 186 passed, 50 failed
 Pass rate: 78.8%
 ```
 
 ### Tests Fixed
+
 - ✅ `test_create_recette_empty_name_rejected`
 - ✅ `test_get_recette_negative_id`
 - ✅ `test_get_recette_id_zero`
@@ -129,6 +139,7 @@ Pass rate: 78.8%
 ### Remaining Failures (50)
 
 **Categories**:
+
 1. **Inventaire endpoints** (12 tests) - Not yet implemented
 2. **Courses endpoints** (10 tests) - Partial implementation
 3. **Planning endpoints** (8 tests) - Partial implementation
@@ -141,15 +152,18 @@ Pass rate: 78.8%
 ## Technical Improvements
 
 ### 1. FastAPI Best Practices
+
 - ✅ Path parameter validation using `Path(..., gt=0)` for ID constraints
 - ✅ Proper 422 status codes for validation errors (not 404)
 - ✅ Pydantic `@field_validator` for custom validation
 
 ### 2. Error Handling Standardization
+
 - **Before**: Empty names → 200 OK (silently ignored)
 - **After**: Empty names → 422 Unprocessable Entity (clear error)
 
 ### 3. Database Constraint Alignment
+
 - Pydantic schema defaults now match database NOT NULL constraints
 - Prevents RuntimeError exceptions during ORM save
 
@@ -167,21 +181,25 @@ Pass rate: 78.8%
 ## Next Steps (Jour 4-5 Plan)
 
 ### Priority 1: Quick Wins (High Impact, Low Effort)
+
 1. Implement Inventaire endpoints (CRUD operations) - ~30 min
 2. Fix Courses endpoints validation - ~20 min
 3. Implement Planning endpoints - ~25 min
 
 ### Priority 2: Integration & Edge Cases
+
 1. Fix CORS and security tests
 2. Implement rate limiting tests
 3. Handle API performance benchmarks
 
 ### Priority 3: Coverage & Polish
+
 1. Add error handling for edge cases
 2. Implement fallback behavior for IA suggestions
 3. Polish response schemas
 
 ### Estimated Impact
+
 - Jour 4: 205+ passed tests (15 more)
 - Jour 5: 215+ passed tests (10 more)
 - **Final target**: 90%+ pass rate
@@ -218,13 +236,13 @@ Phase 18 Jour 3: +10 tests fixed (186 passed, 50 failed) - API validation & Path
 
 ## Performance Metrics
 
-| Metric | Value |
-|--------|-------|
-| Tests Fixed | +10 |
-| Tests Remaining | 50 |
-| Pass Rate | 78.8% |
+| Metric             | Value                                       |
+| ------------------ | ------------------------------------------- |
+| Tests Fixed        | +10                                         |
+| Tests Remaining    | 50                                          |
+| Pass Rate          | 78.8%                                       |
 | Success Trajectory | +10/session (on track for Day 5 completion) |
-| Token Usage | ~35% of daily budget |
+| Token Usage        | ~35% of daily budget                        |
 
 ---
 

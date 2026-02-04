@@ -107,6 +107,24 @@ class InventaireItemBase(BaseModel):
     unite: str | None = None
     categorie: str | None = None
     date_peremption: datetime | None = None
+    
+    @field_validator("nom")
+    @classmethod
+    def validate_nom(cls, v: str) -> str:
+        """Valide que le nom n'est pas vide."""
+        if not v or not v.strip():
+            raise ValueError("Le nom ne peut pas être vide")
+        return v.strip()
+    
+    @field_validator("quantite")
+    @classmethod
+    def validate_quantite(cls, v: float) -> float:
+        """Valide que la quantité est positive."""
+        if v < 0:
+            raise ValueError("La quantité ne peut pas être négative")
+        if v == 0:
+            raise ValueError("La quantité doit être supérieure à 0")
+        return v
 
 
 class InventaireItemCreate(InventaireItemBase):
@@ -137,6 +155,15 @@ class RepasBase(BaseModel):
     date: datetime
     recette_id: int | None = None
     notes: str | None = None
+    
+    @field_validator("type_repas")
+    @classmethod
+    def validate_type_repas(cls, v: str) -> str:
+        """Valide que le type de repas est valide."""
+        valid_types = ["petit_déjeuner", "petit_dejeuner", "déjeuner", "dejeuner", "dîner", "diner", "goûter", "gouter"]
+        if v not in valid_types:
+            raise ValueError(f"Type de repas invalide. Doit être parmi: {', '.join(valid_types)}")
+        return v
 
 
 class CourseItemBase(BaseModel):
@@ -146,6 +173,22 @@ class CourseItemBase(BaseModel):
     unite: str | None = None
     categorie: str | None = None
     coche: bool = False
+    
+    @field_validator("nom")
+    @classmethod
+    def validate_nom(cls, v: str) -> str:
+        """Valide que le nom n'est pas vide."""
+        if not v or not v.strip():
+            raise ValueError("Le nom ne peut pas être vide")
+        return v.strip()
+    
+    @field_validator("quantite")
+    @classmethod
+    def validate_quantite(cls, v: float) -> float:
+        """Valide que la quantité est positive."""
+        if v < 0:
+            raise ValueError("La quantité ne peut pas être négative")
+        return v
 
 
 class ListeCoursesResponse(BaseModel):
@@ -154,6 +197,32 @@ class ListeCoursesResponse(BaseModel):
     nom: str
     items: list[CourseItemBase]
     created_at: datetime | None = None
+
+
+class CourseListCreate(BaseModel):
+    """Schéma pour créer une liste de courses."""
+    nom: str = Field("Liste de courses", min_length=1)
+    
+    @field_validator("nom")
+    @classmethod
+    def validate_nom(cls, v: str) -> str:
+        """Valide que le nom n'est pas vide."""
+        if not v or not v.strip():
+            raise ValueError("Le nom ne peut pas être vide")
+        return v.strip()
+
+
+class RepasCreate(RepasBase):
+    """Schéma pour créer un repas."""
+    pass
+
+
+class RepasResponse(RepasBase):
+    """Schéma de réponse pour un repas."""
+    id: int
+    created_at: datetime | None = None
+    
+    model_config = {"from_attributes": True}
 
 
 class PaginatedResponse(BaseModel):
@@ -463,9 +532,6 @@ async def list_inventaire(
     categorie: str | None = None,
     expiring_soon: bool = False,
     user: dict = Depends(get_current_user),
-    session_override: object = Depends(get_session_override),
-    model_override: object = Depends(get_model_override),
-    response_model_override: object = Depends(get_response_model_override),
 ):
     """
     Liste les articles de l'inventaire.
@@ -476,59 +542,49 @@ async def list_inventaire(
         from src.core.database import get_db_context
         from src.core.models import ArticleInventaire
         from datetime import timedelta
+        from sqlalchemy.orm import joinedload
 
-        session = session_override if session_override else get_db_context().__enter__()
-        model = model_override if model_override else ArticleInventaire
-        # Si le mock injecté est une classe, instancie pour éviter l'erreur
-        if isinstance(model, type):
-            def model_instance():
-                return model()
-        else:
-            def model_instance():
-                return model
-        response_model = response_model_override if response_model_override else InventaireItemResponse
+        with get_db_context() as session:
+            query = session.query(ArticleInventaire).options(joinedload(ArticleInventaire.ingredient))
 
-        # Utilise model_instance pour garantir une instance en test
-        query = session.query(model_instance)
+            if categorie:
+                query = query.filter(ArticleInventaire.ingredient.has(categorie=categorie))
 
-        if categorie:
-            query = query.filter(model.categorie == categorie)
+            if expiring_soon:
+                limit_date = datetime.now() + timedelta(days=7)
+                query = query.filter(
+                    ArticleInventaire.date_peremption != None,
+                    ArticleInventaire.date_peremption <= limit_date
+                )
 
-        if expiring_soon:
-            limit_date = datetime.now() + timedelta(days=7)
-            query = query.filter(
-                model.date_peremption != None,
-                model.date_peremption <= limit_date
+            total = query.count()
+
+            items = (
+                query
+                .offset((page - 1) * page_size)
+                .limit(page_size)
+                .all()
             )
 
-        total = query.count()
+            def format_item(item):
+                return {
+                    "id": item.id,
+                    "nom": item.ingredient.nom if item.ingredient else "",
+                    "quantite": item.quantite,
+                    "unite": item.ingredient.unite if item.ingredient else None,
+                    "categorie": item.ingredient.categorie if item.ingredient else None,
+                    "date_peremption": item.date_peremption,
+                    "code_barres": item.code_barres,
+                    "created_at": item.derniere_maj,
+                }
 
-        items = (
-            query
-            .order_by(model.nom)
-            .offset((page - 1) * page_size)
-            .limit(page_size)
-            .all()
-        )
-
-        def safe_getattr(obj, attr, default=None):
-            try:
-                return getattr(obj, attr)
-            except AttributeError:
-                return default
-
-        def build_response(item):
-            data = {k: safe_getattr(item, k, None) for k in response_model.__annotations__.keys()}
-            validated = response_model.model_validate(data)
-            return validated.model_dump() if hasattr(validated, 'model_dump') else validated
-
-        return {
-            "items": [build_response(i) for i in items],
-            "total": total,
-            "page": page,
-            "page_size": page_size,
-            "pages": (total + page_size - 1) // page_size
-        }
+            return {
+                "items": [format_item(i) for i in items],
+                "total": total,
+                "page": page,
+                "page_size": page_size,
+                "pages": (total + page_size - 1) // page_size
+            }
 
     except Exception as e:
         logger.error(f"Erreur liste inventaire: {e}")
@@ -543,14 +599,25 @@ async def create_inventaire_item(
     """Ajoute un article à l'inventaire."""
     try:
         from src.core.database import get_db_context
-        from src.core.models import ArticleInventaire
+        from src.core.models import ArticleInventaire, Ingredient
         
         with get_db_context() as session:
+            # Créer ou récupérer l'ingrédient
+            ingredient = session.query(Ingredient).filter(Ingredient.nom == data.nom).first()
+            if not ingredient:
+                ingredient = Ingredient(
+                    nom=data.nom,
+                    categorie=data.categorie,
+                    unite=data.unite or "pcs"
+                )
+                session.add(ingredient)
+                session.flush()
+            
+            # Créer l'article d'inventaire
             item = ArticleInventaire(
-                nom=data.nom,
+                ingredient_id=ingredient.id,
                 quantite=data.quantite,
-                unite=data.unite,
-                categorie=data.categorie,
+                emplacement=data.emplacement,
                 date_peremption=data.date_peremption,
                 code_barres=data.code_barres,
             )
@@ -558,7 +625,17 @@ async def create_inventaire_item(
             session.commit()
             session.refresh(item)
             
-            return InventaireItemResponse.model_validate(item)
+            # Préparer la réponse
+            return {
+                "id": item.id,
+                "nom": ingredient.nom,
+                "quantite": item.quantite,
+                "unite": data.unite,
+                "categorie": ingredient.categorie,
+                "date_peremption": item.date_peremption,
+                "code_barres": item.code_barres,
+                "created_at": item.derniere_maj,
+            }
             
     except Exception as e:
         logger.error(f"Erreur création article: {e}")
@@ -751,13 +828,48 @@ async def get_planning_semaine(
 async def add_repas(repas: RepasBase, user: dict = Depends(require_auth)):
     """Ajoute un repas au planning."""
     try:
+        from datetime import date, timedelta
         from src.core.database import get_db_context
-        from src.core.models import Repas
+        from src.core.models import Repas, Planning, Recette
         
         with get_db_context() as session:
+            # Convertir la date du repas (datetime) en date
+            repas_date = repas.date.date() if isinstance(repas.date, datetime) else repas.date
+            
+            # Valider que la recette existe si recette_id est fourni
+            if repas.recette_id:
+                recette = session.query(Recette).filter(Recette.id == repas.recette_id).first()
+                if not recette:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Recette avec ID {repas.recette_id} n'existe pas"
+                    )
+            
+            # Calculer la semaine pour trouver/créer le Planning
+            # Trouve le lundi de la semaine
+            semaine_debut = repas_date - timedelta(days=repas_date.weekday())
+            semaine_fin = semaine_debut + timedelta(days=6)
+            
+            # Chercher ou créer le Planning pour cette semaine
+            planning = session.query(Planning).filter(
+                Planning.semaine_debut == semaine_debut,
+                Planning.semaine_fin == semaine_fin
+            ).first()
+            
+            if not planning:
+                planning = Planning(
+                    nom=f"Semaine du {semaine_debut.strftime('%d/%m/%Y')}",
+                    semaine_debut=semaine_debut,
+                    semaine_fin=semaine_fin,
+                    actif=True
+                )
+                session.add(planning)
+                session.flush()  # Flush pour obtenir l'ID
+            
             new_repas = Repas(
+                planning_id=planning.id,
                 type_repas=repas.type_repas,
-                date=repas.date,
+                date_repas=repas_date,
                 recette_id=repas.recette_id,
                 notes=repas.notes,
             )
@@ -766,6 +878,8 @@ async def add_repas(repas: RepasBase, user: dict = Depends(require_auth)):
             
             return {"message": "Repas ajouté", "id": new_repas.id}
             
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Erreur ajout repas: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -791,19 +905,19 @@ async def get_suggestions(
     - **temps_max**: Temps de préparation maximum en minutes
     """
     try:
-        from src.services.suggestions_ia import get_suggestions_service
+        from src.services.suggestions_ia import get_suggestions_ia_service
         
-        service = get_suggestions_service()
+        service = get_suggestions_ia_service()
         
         # Construire le contexte
         contexte = service.construire_contexte(
-            type_repas=type_repas,
-            nombre_personnes=personnes,
-            temps_disponible=temps_max
+            type_repas=type_repas or "dîner",
+            nb_personnes=personnes,
+            temps_minutes=temps_max or 60
         )
         
         # Obtenir les suggestions
-        suggestions = service.suggerer_recettes(contexte, limite=5)
+        suggestions = service.suggerer_recettes(contexte, nb_suggestions=5)
         
         return {
             "contexte": contexte.model_dump() if contexte else {},

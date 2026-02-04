@@ -34,6 +34,34 @@ if TYPE_CHECKING:
 # ═══════════════════════════════════════════════════════════
 
 
+class ListeCourses(Base):
+    """Liste de courses.
+    
+    Attributes:
+        nom: Nom de la liste
+        archivee: Si la liste est archivée
+        created_at: Date de création
+    """
+    
+    __tablename__ = "listes_courses"
+    
+    id: Mapped[int] = mapped_column(primary_key=True)
+    nom: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
+    archivee: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+    
+    # Relations
+    articles: Mapped[list["ArticleCourses"]] = relationship(
+        back_populates="liste", cascade="all, delete-orphan"
+    )
+    
+    def __repr__(self) -> str:
+        return f"<ListeCourses(id={self.id}, nom='{self.nom}')>"
+
+
 class ArticleCourses(Base):
     """Article dans la liste de courses.
     
@@ -51,6 +79,9 @@ class ArticleCourses(Base):
     __tablename__ = "liste_courses"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    liste_id: Mapped[int] = mapped_column(
+        ForeignKey("listes_courses.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     ingredient_id: Mapped[int] = mapped_column(
         ForeignKey("ingredients.id", ondelete="CASCADE"), nullable=False, index=True
     )
@@ -69,6 +100,7 @@ class ArticleCourses(Base):
     notes: Mapped[str | None] = mapped_column(Text)
 
     # Relations
+    liste: Mapped["ListeCourses"] = relationship(back_populates="articles")
     ingredient: Mapped["Ingredient"] = relationship("Ingredient", foreign_keys=[ingredient_id])
 
     __table_args__ = (
