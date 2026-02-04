@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapport de Couverture de Tests - Assistant Matanne</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .metric-card {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .metric-card.critical {
+            border-left-color: #dc3545;
+        }
+        
+        .metric-card.warning {
+            border-left-color: #ffc107;
+        }
+        
+        .metric-card.success {
+            border-left-color: #28a745;
+        }
+        
+        .metric-card h3 {
+            color: #667eea;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        
+        .metric-card .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .metric-card .unit {
+            font-size: 0.9em;
+            color: #666;
+            margin-left: 5px;
+        }
+        
+        section {
+            margin: 40px 0;
+        }
+        
+        section h2 {
+            color: #667eea;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .priority-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .priority-critical {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .priority-high {
+            background-color: #ffc107;
+            color: #333;
+        }
+        
+        .priority-medium {
+            background-color: #17a2b8;
+            color: white;
+        }
+        
+        .priority-low {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        th {
+            background-color: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        tr:hover {
+            background-color: #f1f3f5;
+        }
+        
+        .coverage-bar {
+            width: 100%;
+            max-width: 200px;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .coverage-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #dc3545, #ffc107, #28a745);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.75em;
+            font-weight: bold;
+        }
+        
+        .action-plan {
+            background: #f0f7ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        
+        .action-plan h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .action-plan ol {
+            margin-left: 20px;
+        }
+        
+        .action-plan li {
+            margin: 8px 0;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .chart-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .chart-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Rapport de Couverture de Tests</h1>
+            <p>Assistant Matanne - Réseau Familial</p>
+            <p style="margin-top: 10px; font-size: 0.95em;">Generated on 2025-02-04</p>
+        </div>
+        
+        <div class="content">
+            <!-- Summary Metrics -->
+            <section>
+                <h2>📈 Résumé Global</h2>
+                <div class="metrics">
+                    <div class="metric-card">
+                        <h3>Couverture Globale</h3>
+                        <div class="value">8.34<span class="unit">%</span></div>
+                        <p style="font-size: 0.9em; color: #666; margin-top: 5px;">Tests isolés (Phase 1+2)</p>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Tests Créés</h3>
+                        <div class="value">232<span class="unit">tests</span></div>
+                        <p style="font-size: 0.9em; color: #666; margin-top: 5px;">Phase 1: 141 + Phase 2: 91</p>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Tests Validés</h3>
+                        <div class="value">213<span class="unit">✅</span></div>
+                        <p style="font-size: 0.9em; color: #666; margin-top: 5px;">Pass Rate: 100%</p>
+                    </div>
+                    <div class="metric-card success">
+                        <h3>Fichiers Excellents</h3>
+                        <div class="value">11<span class="unit">files</span></div>
+                        <p style="font-size: 0.9em; color: #666; margin-top: 5px;">> 80% couverture</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Critical Files -->
+            <section>
+                <h2><span class="priority-badge priority-critical">CRITIQUE</span>Fichiers Critiques (&lt; 10%)</h2>
+                <p style="margin-bottom: 15px;"><strong>3 fichiers</strong> nécessitent une attention immédiate</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fichier</th>
+                            <th>Couverture</th>
+                            <th>Gap</th>
+                            <th>Tests estimés</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>src/core/ai/parser.py</strong></td>
+                            <td>8.4%</td>
+                            <td>71.6pp</td>
+                            <td>~107 tests</td>
+                        </tr>
+                        <tr>
+                            <td><strong>src/services/types.py</strong></td>
+                            <td>8.6%</td>
+                            <td>71.4pp</td>
+                            <td>~107 tests</td>
+                        </tr>
+                        <tr>
+                            <td><strong>src/core/ai/client.py</strong></td>
+                            <td>9.7%</td>
+                            <td>70.3pp</td>
+                            <td>~105 tests</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            
+            <!-- Very Low Coverage -->
+            <section>
+                <h2><span class="priority-badge priority-high">HAUTE</span>Couverture Très Faible (10-20%)</h2>
+                <p style="margin-bottom: 15px;"><strong>4 fichiers</strong> doivent être couverts rapidement</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fichier</th>
+                            <th>Couverture</th>
+                            <th>Gap</th>
+                            <th>Tests estimés</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>src/services/base_ai_service.py</strong></td>
+                            <td>11.8%</td>
+                            <td>68.2pp</td>
+                            <td>~102 tests</td>
+                        </tr>
+                        <tr>
+                            <td><strong>src/core/errors.py</strong></td>
+                            <td>13.6%</td>
+                            <td>66.4pp</td>
+                            <td>~99 tests</td>
+                        </tr>
+                        <tr>
+                            <td><strong>src/services/io_service.py</strong></td>
+                            <td>15.1%</td>
+                            <td>64.9pp</td>
+                            <td>~97 tests</td>
+                        </tr>
+                        <tr>
+                            <td><strong>src/services/inventaire.py</strong></td>
+                            <td>19.7%</td>
+                            <td>60.3pp</td>
+                            <td>~90 tests</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            
+            <!-- Low Coverage Files -->
+            <section>
+                <h2><span class="priority-badge priority-medium">MOYENNE</span>Couverture Faible (20-40%)</h2>
+                <p style="margin-bottom: 15px;"><strong>12 fichiers</strong> nécessitent une amélioration</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rang</th>
+                            <th>Fichier</th>
+                            <th>Couverture</th>
+                            <th>Gap</th>
+                            <th>Tests</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td><strong>src/services/planning.py</strong></td>
+                            <td>20.8%</td>
+                            <td>59.2pp</td>
+                            <td>~88</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td><strong>src/core/decorators.py</strong></td>
+                            <td>21.2%</td>
+                            <td>58.8pp</td>
+                            <td>~88</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td><strong>src/services/courses.py</strong></td>
+                            <td>21.9%</td>
+                            <td>58.1pp</td>
+                            <td>~87</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td><strong>src/services/user_preferences.py</strong></td>
+                            <td>22.7%</td>
+                            <td>57.3pp</td>
+                            <td>~85</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td><strong>src/core/database.py</strong></td>
+                            <td>22.9%</td>
+                            <td>57.1pp</td>
+                            <td>~85</td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td><strong>src/services/recettes.py</strong></td>
+                            <td>25.5%</td>
+                            <td>54.5pp</td>
+                            <td>~81</td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td><strong>src/core/validation.py</strong></td>
+                            <td>25.5%</td>
+                            <td>54.5pp</td>
+                            <td>~81</td>
+                        </tr>
+                        <tr>
+                            <td>8</td>
+                            <td><strong>src/services/planning_unified.py</strong></td>
+                            <td>26.2%</td>
+                            <td>53.8pp</td>
+                            <td>~80</td>
+                        </tr>
+                        <tr>
+                            <td>9</td>
+                            <td><strong>src/core/ai/rate_limit.py</strong></td>
+                            <td>27.8%</td>
+                            <td>52.2pp</td>
+                            <td>~78</td>
+                        </tr>
+                        <tr>
+                            <td>10</td>
+                            <td><strong>src/core/cache.py</strong></td>
+                            <td>28.7%</td>
+                            <td>51.3pp</td>
+                            <td>~76</td>
+                        </tr>
+                        <tr>
+                            <td>11</td>
+                            <td><strong>src/core/ai/cache.py</strong></td>
+                            <td>34.2%</td>
+                            <td>45.8pp</td>
+                            <td>~68</td>
+                        </tr>
+                        <tr>
+                            <td>12</td>
+                            <td><strong>src/core/config.py</strong></td>
+                            <td>34.6%</td>
+                            <td>45.4pp</td>
+                            <td>~68</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            
+            <!-- Excellent Coverage -->
+            <section>
+                <h2><span class="priority-badge priority-low">✅ EXCELLENT</span>Excellente Couverture (&gt; 80%)</h2>
+                <p style="margin-bottom: 15px;"><strong>11 fichiers</strong> ont déjà une excellente couverture</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fichier</th>
+                            <th>Couverture</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>src/core/models/nouveaux.py</strong></td>
+                            <td>99.4% ✅</td>
+                        </tr>
+                        <tr>
+                            <td><strong>src/core/constants.py</strong></td>
+                            <td>97.2% ✅</td>
+                        </tr>
+                        <tr>
+                            <td><strong>src/core/models/courses.py</strong></td>
+                            <td>96.8% ✅</td>
+                        </tr>
+                        <tr>
+                            <td><strong>src/core/models/base.py</strong></td>
+                            <td>96.4% ✅</td>
+                        </tr>
+                        <tr>
+                            <td><strong>src/core/models/user_preferences.py</strong></td>
+                            <td>96.3% ✅</td>
+                        </tr>
+                        <tr>
+                            <td><strong>src/core/models/planning.py</strong></td>
+                            <td>95.6% ✅</td>
+                        </tr>
+                        <tr>
+                            <td><strong>src/core/models/users.py</strong></td>
+                            <td>94.7% ✅</td>
+                        </tr>
+                        <tr>
+                            <td><strong>src/core/models/inventaire.py</strong></td>
+                            <td>92.2% ✅</td>
+                        </tr>
+                        <tr>
+                            <td><strong>src/core/models/schemas.py</strong></td>
+                            <td>90.9% ✅</td>
+                        </tr>
+                        <tr>
+                            <td><strong>src/core/models/jeux.py</strong></td>
+                            <td>90.6% ✅</td>
+                        </tr>
+                        <tr>
+                            <td><strong>src/core/models/batch_cooking.py</strong></td>
+                            <td>87.6% ✅</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            
+            <!-- Action Plan -->
+            <section>
+                <h2>📋 Plan d'Action Recommandé</h2>
+                
+                <div class="action-plan">
+                    <h3>✅ Phase 1 - CETTE SEMAINE (Priorité Critique)</h3>
+                    <ol>
+                        <li><strong>Couvrir les 3 fichiers critiques</strong> (&lt; 10%)
+                            <ul style="margin-top: 5px; margin-left: 20px;">
+                                <li>src/core/ai/parser.py (8.4% → 80%): ~107 tests</li>
+                                <li>src/services/types.py (8.6% → 80%): ~107 tests</li>
+                                <li>src/core/ai/client.py (9.7% → 80%): ~105 tests</li>
+                            </ul>
+                        </li>
+                        <li style="margin-top: 15px;"><strong>Estimation totale</strong>: ~319 tests</li>
+                        <li style="margin-top: 15px;"><strong>Impact estimé</strong>: +10-15% de couverture globale</li>
+                    </ol>
+                </div>
+                
+                <div class="action-plan">
+                    <h3>🔶 Phase 2 - CETTE SEMAINE (Priorité Haute)</h3>
+                    <ol>
+                        <li><strong>Améliorer la couverture très faible</strong> (10-20%)
+                            <ul style="margin-top: 5px; margin-left: 20px;">
+                                <li>src/services/base_ai_service.py (11.8% → 80%): ~102 tests</li>
+                                <li>src/core/errors.py (13.6% → 80%): ~99 tests</li>
+                                <li>src/services/io_service.py (15.1% → 80%): ~97 tests</li>
+                                <li>src/services/inventaire.py (19.7% → 80%): ~90 tests</li>
+                            </ul>
+                        </li>
+                        <li style="margin-top: 15px;"><strong>Estimation totale</strong>: ~388 tests</li>
+                        <li style="margin-top: 15px;"><strong>Impact estimé</strong>: +15-20% de couverture globale</li>
+                    </ol>
+                </div>
+                
+                <div class="action-plan">
+                    <h3>🟡 Phase 3 - PROCHAINE SEMAINE (Priorité Moyenne)</h3>
+                    <ol>
+                        <li><strong>Couvrir les fichiers 20-40%</strong>
+                            <ul style="margin-top: 5px; margin-left: 20px;">
+                                <li>12 fichiers identifiés</li>
+                                <li>Estimation: ~1000+ tests</li>
+                            </ul>
+                        </li>
+                        <li style="margin-top: 15px;"><strong>Objectif final</strong>: Atteindre 80%+ de couverture globale</li>
+                    </ol>
+                </div>
+            </section>
+            
+            <!-- Statistics -->
+            <section>
+                <h2>📊 Statistiques Détaillées</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Métrique</th>
+                            <th>Valeur</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Fichiers analysés</strong></td>
+                            <td>35</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Fichiers &lt; 80%</strong></td>
+                            <td>24 (68%)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Fichiers ≥ 80%</strong></td>
+                            <td>11 (32%)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Couverture moyenne</strong></td>
+                            <td>48.8%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tests créés (Phase 1)</strong></td>
+                            <td>141 ✅</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tests créés (Phase 2)</strong></td>
+                            <td>91 ✅</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Total tests validés</strong></td>
+                            <td>213 (100% pass rate)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tests estimés pour 80%</strong></td>
+                            <td>~2000-2500 tests</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            
+            <!-- Recommendations -->
+            <section>
+                <h2>💡 Recommandations</h2>
+                <div style="background: #f0f7ff; border-left: 4px solid #667eea; padding: 20px; border-radius: 5px; margin: 20px 0;">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">Stratégie d'Amélioration Recommandée</h3>
+                    <ul style="margin-left: 20px;">
+                        <li><strong>Semaine 1</strong>: Créer ~320 tests pour couvrir les fichiers critiques (Phase 1 + Phase 2)</li>
+                        <li><strong>Semaine 2</strong>: Créer ~400 tests pour couvrir les fichiers 20-40%</li>
+                        <li><strong>Semaine 3</strong>: Créer tests supplémentaires pour atteindre 80% global</li>
+                        <li><strong>Parallèle</strong>: Optimiser les tests existants (3451 tests) qui causent des blocages en pytest</li>
+                        <li><strong>Approche</strong>: Garder le pattern de tests simples et déterministes (100% pass rate prouvé)</li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Assistant Matanne</strong> - Rapport généré automatiquement | Dernière mise à jour: 2025-02-04</p>
+            <p style="margin-top: 10px;">Pour plus de détails: Voir RAPPORT_COUVERTURE_DETAILLE.md</p>
+        </div>
+    </div>
+</body>
+</html>
