@@ -39,9 +39,8 @@ from src.services.inventaire import InventaireService
 from src.services.planning import PlanningService
 from src.services.courses import CoursesService
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# DATABASE SETUP - SQLite JSON compatibility
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+# ==================== DATABASE SETUP - SQLite JSON compatibility ====================
 
 def adapt_jsonb_for_sqlite(connection, record):
     """Adapt JSONB types for SQLite compatibility."""
@@ -301,7 +300,7 @@ def sample_ingredients(ingredient_factory):
     return {
         "poulet": ingredient_factory.create("Poulet", "kg", "Protéines"),
         "citron": ingredient_factory.create("Citron", "pcs", "Fruits"),
-        "thym": ingredient_factory.create("Thym", "g", "Ã‰pices & Condiments"),
+        "thym": ingredient_factory.create("Thym", "g", "Epices & Condiments"),
     }
 
 
