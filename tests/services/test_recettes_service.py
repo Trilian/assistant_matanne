@@ -1,16 +1,13 @@
 """
 Tests pour RecetteService - Tests des méthodes réelles du service
 
-NOTE: Tests marked skip because get_recette_service() uses production DB singleton.
+Uses patch_db_context fixture to use test SQLite DB instead of production.
 """
 
 import pytest
 from unittest.mock import Mock, patch, MagicMock
 
 from src.services.recettes import RecetteService, get_recette_service
-
-# Skip all tests - service uses production DB singleton
-pytestmark = pytest.mark.skip(reason="get_recette_service() uses production DB singleton")
 
 
 # ═══════════════════════════════════════════════════════════
@@ -20,19 +17,19 @@ pytestmark = pytest.mark.skip(reason="get_recette_service() uses production DB s
 class TestRecetteServiceFactory:
     """Tests pour la factory et l'instanciation."""
     
-    def test_get_recette_service_returns_instance(self):
+    def test_get_recette_service_returns_instance(self, patch_db_context):
         """La factory retourne une instance de RecetteService."""
         service = get_recette_service()
         assert service is not None
         assert isinstance(service, RecetteService)
     
-    def test_service_has_model(self):
+    def test_service_has_model(self, patch_db_context):
         """Le service a le modèle Recette configuré."""
         service = get_recette_service()
         assert hasattr(service, 'model')
         assert service.model.__name__ == 'Recette'
     
-    def test_service_inherits_base_service(self):
+    def test_service_inherits_base_service(self, patch_db_context):
         """Le service hérite de BaseService."""
         service = get_recette_service()
         assert hasattr(service, 'create')

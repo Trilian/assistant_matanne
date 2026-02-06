@@ -2,7 +2,7 @@
 PHASE 10: Budget Service - Real Business Logic Tests
 Tests for expense tracking, budget analysis, and financial reporting
 
-NOTE: All tests marked as skip because BudgetService singleton uses production DB.
+Uses patch_db_context fixture for test DB.
 """
 import pytest
 from datetime import date, timedelta
@@ -11,8 +11,12 @@ from src.services.budget import BudgetService, CategorieDepense
 from src.core.models.maison_extended import HouseExpense
 from src.core.errors import ErreurBaseDeDonnees
 
-# Skip all tests - service uses production DB singleton  
-pytestmark = pytest.mark.skip(reason="BudgetService singleton uses production DB")
+
+# Mark all tests to use patch_db_context
+@pytest.fixture(autouse=True)
+def auto_patch_db(patch_db_context):
+    """Auto-use patch_db_context for all tests in this module."""
+    pass
 
 
 class TestBudgetCreation:
@@ -60,7 +64,6 @@ class TestBudgetCreation:
         assert len(budget.categories) == 4
 
 
-@pytest.mark.skip(reason="BudgetService singleton uses production DB")
 class TestExpenseTracking:
     """Test expense creation and tracking"""
 
@@ -251,7 +254,6 @@ class TestBudgetAnalysis:
         assert by_category["Transport"] == 100
 
 
-@pytest.mark.skip(reason="BudgetService singleton uses production DB")
 class TestBudgetAlerts:
     """Test budget alert system"""
 
@@ -344,7 +346,6 @@ class TestBudgetAlerts:
         assert any("approche" in str(a).lower() for a in alerts)
 
 
-@pytest.mark.skip(reason="BudgetService singleton uses production DB")
 class TestBudgetForecasting:
     """Test budget forecasting"""
 
@@ -408,7 +409,6 @@ class TestBudgetForecasting:
         assert comparison is not None
 
 
-@pytest.mark.skip(reason="BudgetService singleton uses production DB")
 class TestBudgetExport:
     """Test budget data export"""
 
@@ -457,7 +457,6 @@ class TestBudgetExport:
         assert "budget" in str(report).lower()
 
 
-@pytest.mark.skip(reason="BudgetService singleton uses production DB")
 class TestBudgetValidation:
     """Test budget validation"""
 
@@ -510,7 +509,6 @@ class TestBudgetValidation:
             )
 
 
-@pytest.mark.skip(reason="BudgetService singleton uses production DB")
 class TestBudgetRecurring:
     """Test recurring budget templates"""
 
@@ -554,3 +552,4 @@ class TestBudgetRecurring:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+

@@ -2,7 +2,7 @@
 Tests pour CoursesService - Service critique
 Tests complets pour la gestion des listes de courses
 
-NOTE: Tests marked skip because get_courses_service() uses production DB singleton.
+Uses patch_db_context fixture for test DB.
 """
 
 import pytest
@@ -10,9 +10,6 @@ from datetime import date
 from unittest.mock import Mock, patch, MagicMock
 
 from src.services.courses import CoursesService, get_courses_service
-
-# Skip all tests - service uses production DB singleton
-pytestmark = pytest.mark.skip(reason="get_courses_service() uses production DB singleton")
 
 
 # ═══════════════════════════════════════════════════════════

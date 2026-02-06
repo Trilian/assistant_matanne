@@ -1,7 +1,7 @@
 """
 Tests pour PlanningService - Tests des méthodes réelles du service
 
-NOTE: Tests marked skip because get_planning_service() uses production DB singleton.
+Uses patch_db_context fixture to use test SQLite DB instead of production.
 """
 
 import pytest
@@ -9,9 +9,6 @@ from unittest.mock import Mock, patch, MagicMock
 
 from src.services.planning import PlanningService, get_planning_service
 import importlib
-
-# Skip all tests - service uses production DB singleton
-pytestmark = pytest.mark.skip(reason="get_planning_service() uses production DB singleton")
 
 
 def test_import_planning_module():
@@ -27,19 +24,19 @@ def test_import_planning_module():
 class TestPlanningServiceFactory:
     """Tests pour la factory et l'instanciation."""
     
-    def test_get_planning_service_returns_instance(self):
+    def test_get_planning_service_returns_instance(self, patch_db_context):
         """La factory retourne une instance de PlanningService."""
         service = get_planning_service()
         assert service is not None
         assert isinstance(service, PlanningService)
     
-    def test_service_has_model(self):
+    def test_service_has_model(self, patch_db_context):
         """Le service a le modèle Planning configuré."""
         service = get_planning_service()
         assert hasattr(service, 'model')
         assert service.model.__name__ == 'Planning'
     
-    def test_service_inherits_base_service(self):
+    def test_service_inherits_base_service(self, patch_db_context):
         """Le service hérite de BaseService."""
         service = get_planning_service()
         assert hasattr(service, 'create')

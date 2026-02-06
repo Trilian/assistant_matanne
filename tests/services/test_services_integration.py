@@ -7,8 +7,7 @@ Validates service methods work correctly with actual SQLAlchemy sessions.
 Coverage target: +1-2% (toward Phase 15: 35%)
 Strategy: Fixture-based integration tests (not mocks)
 
-NOTE: Tests are skipped because services instantiate with internal
-get_db_context() which connects to production Supabase database.
+Uses patch_db_context fixture for test DB.
 """
 
 import pytest
@@ -27,8 +26,12 @@ from src.services.inventaire import InventaireService
 from src.services.planning import PlanningService
 from src.services.courses import CoursesService
 
-# Skip all tests - services use production DB singleton internally
-pytestmark = pytest.mark.skip(reason="Services use internal get_db_context() connecting to production DB")
+
+# Mark all tests to use patch_db_context
+@pytest.fixture(autouse=True)
+def auto_patch_db(patch_db_context):
+    """Auto-use patch_db_context for all tests in this module."""
+    pass
 
 
 # ═══════════════════════════════════════════════════════════════════════════════════

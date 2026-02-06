@@ -155,14 +155,14 @@ def inventaire_service():
 
 
 @pytest.fixture
-def planning_service():
-    """PlanningService instance for testing."""
+def planning_service(patch_db_context):
+    """PlanningService instance for testing with test DB."""
     return PlanningService()
 
 
 @pytest.fixture
-def courses_service():
-    """CoursesService instance for testing."""
+def courses_service(patch_db_context):
+    """CoursesService instance for testing with test DB."""
     return CoursesService()
 
 
@@ -485,6 +485,34 @@ def clear_cache():
             pass  # Ignore errors when running outside Streamlit context
     except ImportError:
         yield
+
+
+@pytest.fixture
+def patch_db_context(db):
+    """
+    Fixture that patches get_db_context and obtenir_contexte_db to use test session.
+    
+    This allows services that use @with_db_session to work with the test database
+    instead of the production database.
+    
+    Usage:
+        def test_service_method(patch_db_context, recette_service):
+            # recette_service methods will now use test DB
+            result = recette_service.lister_recettes()
+            assert result is not None
+    """
+    from unittest.mock import patch
+    from contextlib import contextmanager
+    
+    @contextmanager
+    def mock_db_context():
+        """Returns the test session instead of production."""
+        yield db
+    
+    # Patch both French and English function names
+    with patch("src.core.database.get_db_context", mock_db_context):
+        with patch("src.core.database.obtenir_contexte_db", mock_db_context):
+            yield db
 
 
 @pytest.fixture(autouse=True)
