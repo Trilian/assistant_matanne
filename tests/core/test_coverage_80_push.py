@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+ # -*- coding: utf-8 -*-
 """
 Tests additionnels pour pousser la couverture de core au-delà de 80%.
 
