@@ -158,7 +158,7 @@ class TestConnectionManager:
         """check_connection met ONLINE si connexion OK."""
         from src.core.offline import ConnectionManager, ConnectionStatus
         
-        with patch('src.core.offline.verifier_connexion') as mock_verify:
+        with patch('src.core.database.verifier_connexion') as mock_verify:
             mock_verify.return_value = True
             
             result = ConnectionManager.check_connection(force=True)
@@ -170,7 +170,7 @@ class TestConnectionManager:
         """check_connection met OFFLINE si connexion KO."""
         from src.core.offline import ConnectionManager, ConnectionStatus
         
-        with patch('src.core.offline.verifier_connexion') as mock_verify:
+        with patch('src.core.database.verifier_connexion') as mock_verify:
             mock_verify.return_value = False
             
             result = ConnectionManager.check_connection(force=True)
@@ -182,7 +182,7 @@ class TestConnectionManager:
         """check_connection met ERROR si exception."""
         from src.core.offline import ConnectionManager, ConnectionStatus
         
-        with patch('src.core.offline.verifier_connexion') as mock_verify:
+        with patch('src.core.database.verifier_connexion') as mock_verify:
             mock_verify.side_effect = Exception("DB error")
             
             result = ConnectionManager.check_connection(force=True)
@@ -198,7 +198,7 @@ class TestConnectionManager:
         mock_streamlit.session_state["_connection_status"] = ConnectionStatus.ONLINE
         mock_streamlit.session_state["_connection_last_check"] = time.time()
         
-        with patch('src.core.offline.verifier_connexion') as mock_verify:
+        with patch('src.core.database.verifier_connexion') as mock_verify:
             result = ConnectionManager.check_connection(force=False)
             
             # Ne doit pas appeler verifier_connexion
