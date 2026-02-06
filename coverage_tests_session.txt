@@ -1,0 +1,60 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.11.8, pytest-9.0.2, pluggy-1.6.0
+rootdir: D:\Projet_streamlit\assistant_matanne
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, asyncio-1.3.0, cov-7.0.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collected 270 items
+
+tests\services\test_services_coverage_80_part6.py ...................... [  8%]
+...........................................................              [ 30%]
+tests\services\test_services_coverage_80_part7.py ...................... [ 38%]
+................................                                         [ 50%]
+tests\services\test_services_coverage_80_part8.py ...................... [ 58%]
+..................................                                       [ 70%]
+tests\services\test_services_coverage_80_part9.py ...................... [ 78%]
+...........................                                              [ 88%]
+tests\services\test_services_coverage_80_part10.py ..................... [ 96%]
+.........                                                                [100%]
+
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.11.8-final-0 _______________
+
+Name                                    Stmts   Miss Branch BrPart   Cover
+--------------------------------------------------------------------------
+src\services\__init__.py                   12      1      0      0  91.67%
+src\services\action_history.py            237    142     40      0  34.30%
+src\services\auth.py                      381    306    112      0  15.62%
+src\services\backup.py                    319    247     74      0  18.32%
+src\services\barcode.py                   184    119     56      0  27.08%
+src\services\base_ai_service.py           222    183     66      0  13.54%
+src\services\base_service.py              168    126     74      0  17.36%
+src\services\batch_cooking.py             303    197     84      0  27.39%
+src\services\budget.py                    470    332    106      0  23.96%
+src\services\calendar_sync.py             481    379    120      0  16.97%
+src\services\courses.py                   145     85     42      4  38.50%
+src\services\courses_intelligentes.py     149     95     38      0  28.88%
+src\services\facture_ocr.py                95     55     18      0  35.40%
+src\services\garmin_sync.py               228    176     38      0  19.55%
+src\services\inventaire.py                349    256     98      1  21.03%
+src\services\io_service.py                110      4     42      1  96.71%
+src\services\notifications.py             126     53     36      0  51.23%
+src\services\notifications_push.py        142     82     28      0  35.29%
+src\services\openfoodfacts.py             123     69     16      0  38.85%
+src\services\pdf_export.py                168    117     32      0  25.50%
+src\services\planning.py                  207    146     62      1  23.05%
+src\services\planning_unified.py          198    133     50      0  26.21%
+src\services\predictions.py               132     90     34      0  25.30%
+src\services\push_notifications.py        331    229     70      0  25.44%
+src\services\pwa.py                        49     30      0      0  38.78%
+src\services\rapports_pdf.py              359    288     98      0  15.54%
+src\services\realtime_sync.py             249    174     50      0  25.08%
+src\services\recettes.py                  323    211     58      3  31.23%
+src\services\recipe_import.py             483    326    258      9  27.26%
+src\services\suggestions_ia.py            228    171     96      0  17.59%
+src\services\types.py                     204    176     88      0   9.59%
+src\services\user_preferences.py          118     88     14      0  22.73%
+src\services\weather.py                   371    274    146      0  18.76%
+--------------------------------------------------------------------------
+TOTAL                                    7664   5360   2144     19  24.70%
+======================= 270 passed, 5 warnings in 7.83s =======================
