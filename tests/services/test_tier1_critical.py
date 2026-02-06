@@ -2,18 +2,13 @@
 TIER 1 CRITICAL: Tests for files with 0% coverage (budget, auth, base_ai_service)
 Focus on maximum ROI to reach 80% coverage target (Option B aggressive push)
 
-NOTE: Ces tests ont été générés automatiquement et utilisent des signatures incorrectes.
-Ils sont skippés pour Phase 18. À revoir et corriger ultérieurement.
+Tests corrigés pour utiliser les vraies signatures du service.
 """
 
 import pytest
 from unittest.mock import Mock, patch, MagicMock
-from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 import json
-
-# Skip all tests - auto-generated with incorrect signatures
-pytestmark = pytest.mark.skip(reason="Tests générés automatiquement avec signatures incorrectes")
 
 # ==============================================================================
 # BUDGET SERVICE TESTS (470 lines, 0% coverage) - TIER 1 CRITICAL
@@ -27,12 +22,11 @@ class TestBudgetServiceCore:
         from src.services.budget import BudgetService
         assert BudgetService is not None
     
-    def test_budget_service_initialization(self, test_db: Session):
+    def test_budget_service_initialization(self):
         """Test budget service can be initialized"""
         from src.services.budget import BudgetService
-        service = BudgetService(test_db)
+        service = BudgetService()
         assert service is not None
-        assert service.db is test_db
     
     def test_get_budget_service_factory(self):
         """Test factory function for budget service"""
@@ -40,58 +34,59 @@ class TestBudgetServiceCore:
         service = get_budget_service()
         assert service is not None
     
-    @patch('src.services.budget.BudgetService.obtenir_depenses_actuelles')
-    def test_budget_monthly_summary(self, mock_get, test_db: Session):
-        """Test budget monthly summary generation"""
-        from src.services.budget import BudgetService
-        mock_get.return_value = []
-        service = BudgetService(test_db)
-        result = mock_get()
-        assert result == []
+    def test_budget_depense_model(self):
+        """Test Depense model creation"""
+        from src.services.budget import Depense, CategorieDepense
+        depense = Depense(
+            description="Test expense",
+            montant=100.00,
+            categorie=CategorieDepense.ALIMENTATION,
+            date=datetime.now().date()
+        )
+        assert depense.montant == 100.00
     
-    def test_budget_create_expense(self, test_db: Session):
+    def test_budget_create_expense(self):
         """Test creating a budget expense"""
-        from src.services.budget import BudgetService
-        from src.core.models.maison_extended import HouseExpense
+        from src.services.budget import get_budget_service, Depense, CategorieDepense
         
-        service = BudgetService(test_db)
-        expense_data = {
-            'description': 'Test expense',
-            'montant': 100.00,
-            'categorie': 'Alimentaire',
-            'date_depense': datetime.now(),
-            'locataire_id': 1
-        }
+        service = get_budget_service()
+        depense = Depense(
+            description='Test expense',
+            montant=100.00,
+            categorie=CategorieDepense.ALIMENTATION,
+            date=datetime.now().date()
+        )
         
-        # Should not raise an error
-        assert service is not None
+        result = service.ajouter_depense(depense)
+        assert result is not None
 
 
 class TestBudgetAnalysis:
     """Budget analysis and reporting"""
     
-    def test_budget_categories_exist(self, test_db: Session):
+    def test_budget_categories_enum(self):
         """Test that budget categories are defined"""
-        from src.services.budget import BudgetService
-        service = BudgetService(test_db)
-        # Categories should be retrievable
-        assert service is not None
+        from src.services.budget import CategorieDepense
+        assert CategorieDepense.ALIMENTATION is not None
+        assert CategorieDepense.COURSES is not None
+        assert CategorieDepense.MAISON is not None
     
-    @patch('src.services.budget.BudgetService.analyser_tendances')
-    def test_budget_trend_analysis(self, mock_analyze, test_db: Session):
-        """Test budget trend analysis"""
-        from src.services.budget import BudgetService
-        mock_analyze.return_value = {'trend': 'stable'}
-        service = BudgetService(test_db)
-        result = mock_analyze()
-        assert result == {'trend': 'stable'}
+    def test_budget_get_depenses_mois(self):
+        """Test getting expenses for a month"""
+        from src.services.budget import get_budget_service
+        service = get_budget_service()
+        today = datetime.now()
+        result = service.get_depenses_mois(today.month, today.year)
+        assert isinstance(result, list)
     
-    def test_budget_alerts_generation(self, test_db: Session):
-        """Test budget alert generation"""
-        from src.services.budget import BudgetService
-        service = BudgetService(test_db)
-        # Should be callable without errors
-        assert service is not None
+    def test_budget_service_has_methods(self):
+        """Test budget service has required methods"""
+        from src.services.budget import get_budget_service
+        service = get_budget_service()
+        assert hasattr(service, 'ajouter_depense')
+        assert hasattr(service, 'modifier_depense')
+        assert hasattr(service, 'supprimer_depense')
+        assert hasattr(service, 'get_depenses_mois')
 
 
 # ==============================================================================
@@ -106,12 +101,11 @@ class TestAuthServiceCore:
         from src.services.auth import AuthService
         assert AuthService is not None
     
-    def test_auth_service_initialization(self, test_db: Session):
+    def test_auth_service_initialization(self):
         """Test auth service can be initialized"""
         from src.services.auth import AuthService
-        service = AuthService(test_db)
+        service = AuthService()
         assert service is not None
-        assert service.db is test_db
     
     def test_get_auth_service_factory(self):
         """Test factory function for auth service"""
@@ -119,48 +113,46 @@ class TestAuthServiceCore:
         service = get_auth_service()
         assert service is not None
     
-    @patch('src.services.auth.AuthService.valider_token')
-    def test_auth_token_validation(self, mock_validate, test_db: Session):
-        """Test token validation"""
-        from src.services.auth import AuthService
-        mock_validate.return_value = True
-        service = AuthService(test_db)
-        result = mock_validate("test_token")
-        assert result is True
+    def test_auth_roles_exist(self):
+        """Test role enum exists"""
+        from src.services.auth import Role
+        assert Role.ADMIN is not None
+        assert Role.MEMBRE is not None
+        assert Role.INVITE is not None
     
-    def test_auth_user_roles(self, test_db: Session):
-        """Test user role handling"""
-        from src.services.auth import AuthService
-        service = AuthService(test_db)
-        # Roles should be manageable
-        assert service is not None
+    def test_auth_permissions_exist(self):
+        """Test permissions enum exists"""
+        from src.services.auth import Permission
+        assert Permission.READ_RECIPES is not None
+        assert Permission.WRITE_RECIPES is not None
 
 
 class TestAuthSecurity:
     """Authentication security features"""
     
-    @patch('src.services.auth.AuthService.hasher')
-    def test_auth_password_hashing(self, mock_hasher, test_db: Session):
-        """Test password hashing"""
-        from src.services.auth import AuthService
-        mock_hasher.hash = Mock(return_value="hashed_pwd")
-        service = AuthService(test_db)
-        # Should support password operations
-        assert service is not None
+    def test_auth_user_profile_model(self):
+        """Test UserProfile model"""
+        from src.services.auth import UserProfile, Role
+        profile = UserProfile(
+            email="test@test.com",
+            nom="Test",
+            prenom="User",
+            role=Role.MEMBRE
+        )
+        assert profile.email == "test@test.com"
     
-    def test_auth_session_management(self, test_db: Session):
-        """Test session management"""
-        from src.services.auth import AuthService
-        service = AuthService(test_db)
-        # Should handle sessions
-        assert service is not None
+    def test_auth_user_permission_check(self):
+        """Test user has_permission method"""
+        from src.services.auth import UserProfile, Role, Permission
+        profile = UserProfile(role=Role.MEMBRE)
+        assert profile.has_permission(Permission.READ_RECIPES) is True
     
-    def test_auth_permission_checks(self, test_db: Session):
-        """Test permission checking"""
-        from src.services.auth import AuthService
-        service = AuthService(test_db)
-        # Should check permissions
-        assert service is not None
+    def test_auth_service_is_configured(self):
+        """Test is_configured property"""
+        from src.services.auth import get_auth_service
+        service = get_auth_service()
+        # May or may not be configured depending on env
+        assert isinstance(service.is_configured, bool)
 
 
 # ==============================================================================
@@ -245,10 +237,10 @@ class TestBackupServiceCore:
         from src.services.backup import BackupService
         assert BackupService is not None
     
-    def test_backup_service_initialization(self, test_db: Session):
-        """Test backup service init"""
-        from src.services.backup import BackupService
-        service = BackupService(test_db)
+    def test_get_backup_service_factory(self):
+        """Test backup service factory"""
+        from src.services.backup import get_backup_service
+        service = get_backup_service()
         assert service is not None
 
 
@@ -257,13 +249,13 @@ class TestWeatherServiceCore:
     
     def test_weather_service_import(self):
         """Test weather service imports"""
-        from src.services.weather import WeatherService
-        assert WeatherService is not None
+        from src.services.weather import WeatherGardenService
+        assert WeatherGardenService is not None
     
-    def test_weather_service_initialization(self, test_db: Session):
-        """Test weather service init"""
-        from src.services.weather import WeatherService
-        service = WeatherService(test_db)
+    def test_get_weather_service_factory(self):
+        """Test weather service factory"""
+        from src.services.weather import get_weather_garden_service
+        service = get_weather_garden_service()
         assert service is not None
 
 
@@ -275,10 +267,10 @@ class TestPredictionsServiceCore:
         from src.services.predictions import PredictionsService
         assert PredictionsService is not None
     
-    def test_predictions_service_initialization(self, test_db: Session):
+    def test_predictions_service_initialization(self):
         """Test predictions service init"""
         from src.services.predictions import PredictionsService
-        service = PredictionsService(test_db)
+        service = PredictionsService()
         assert service is not None
 
 
@@ -290,10 +282,10 @@ class TestBarcodeServiceCore:
         from src.services.barcode import BarcodeService
         assert BarcodeService is not None
     
-    def test_barcode_service_initialization(self, test_db: Session):
+    def test_barcode_service_initialization(self):
         """Test barcode service init"""
         from src.services.barcode import BarcodeService
-        service = BarcodeService(test_db)
+        service = BarcodeService()
         assert service is not None
 
 
@@ -306,13 +298,13 @@ class TestRecipeServiceExpanded:
     
     def test_recipe_service_import(self):
         """Test recipe service imports"""
-        from src.services.recettes import RecipeService
-        assert RecipeService is not None
+        from src.services.recettes import RecetteService
+        assert RecetteService is not None
     
-    def test_recipe_service_initialization(self, test_db: Session):
-        """Test recipe service init"""
-        from src.services.recettes import RecipeService
-        service = RecipeService(test_db)
+    def test_get_recipe_service_factory(self):
+        """Test recipe service factory"""
+        from src.services.recettes import get_recette_service
+        service = get_recette_service()
         assert service is not None
 
 
@@ -321,13 +313,13 @@ class TestInventoryServiceExpanded:
     
     def test_inventory_service_import(self):
         """Test inventory service imports"""
-        from src.services.inventaire import InventoryService
-        assert InventoryService is not None
+        from src.services.inventaire import InventaireService
+        assert InventaireService is not None
     
-    def test_inventory_service_initialization(self, test_db: Session):
-        """Test inventory service init"""
-        from src.services.inventaire import InventoryService
-        service = InventoryService(test_db)
+    def test_get_inventory_service_factory(self):
+        """Test inventory service factory"""
+        from src.services.inventaire import get_inventaire_service
+        service = get_inventaire_service()
         assert service is not None
 
 
@@ -339,10 +331,10 @@ class TestPlanningServiceExpanded:
         from src.services.planning import PlanningService
         assert PlanningService is not None
     
-    def test_planning_service_initialization(self, test_db: Session):
-        """Test planning service init"""
-        from src.services.planning import PlanningService
-        service = PlanningService(test_db)
+    def test_get_planning_service_factory(self):
+        """Test planning service factory"""
+        from src.services.planning import get_planning_service
+        service = get_planning_service()
         assert service is not None
 
 
