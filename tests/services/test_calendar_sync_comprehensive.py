@@ -427,16 +427,20 @@ class TestCalendarSyncService:
         assert id1 != id2
         assert len(service._configs) == 2
 
-    def test_remove_calendar(self, service, sample_config):
+    @patch.object(CalendarSyncService, '_remove_config_from_db')
+    def test_remove_calendar(self, mock_remove_db, service, sample_config):
         service._configs[sample_config.id] = sample_config
         
         service.remove_calendar(sample_config.id)
         
         assert sample_config.id not in service._configs
+        mock_remove_db.assert_called_once_with(sample_config.id)
 
-    def test_remove_nonexistent_calendar(self, service):
+    @patch.object(CalendarSyncService, '_remove_config_from_db')
+    def test_remove_nonexistent_calendar(self, mock_remove_db, service):
         # Should not raise
         service.remove_calendar("nonexistent_id")
+        mock_remove_db.assert_called_once_with("nonexistent_id")
 
     def test_get_user_calendars(self, service):
         config1 = ExternalCalendarConfig(user_id="user1", provider=CalendarProvider.GOOGLE)
@@ -474,8 +478,14 @@ class TestCalendarSyncService:
         assert "BEGIN:VCALENDAR" in ical
         assert "END:VCALENDAR" in ical
 
-    @patch('httpx.Client.get')
-    def test_import_from_ical_url_success(self, mock_get, service, sample_config):
+    @patch('src.services.calendar_sync.CalendarEvent')
+    @patch('src.services.calendar_sync.obtenir_contexte_db')
+    def test_import_from_ical_url_success(self, mock_db, mock_calendar_event, service, sample_config):
+        mock_session = MagicMock()
+        mock_db.return_value.__enter__ = Mock(return_value=mock_session)
+        mock_db.return_value.__exit__ = Mock(return_value=False)
+        mock_session.query.return_value.filter.return_value.first.return_value = None
+        
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.text = """BEGIN:VCALENDAR
@@ -487,35 +497,38 @@ DTSTART:20260206T100000
 DTEND:20260206T110000
 END:VEVENT
 END:VCALENDAR"""
-        mock_get.return_value = mock_response
+        mock_response.raise_for_status = Mock()
+        service.http_client.get = Mock(return_value=mock_response)
         
-        service._configs[sample_config.id] = sample_config
-        
-        with patch.object(service, '_save_imported_events', return_value=1):
-            result = service.import_from_ical_url(sample_config)
+        result = service.import_from_ical_url(
+            user_id="test_user",
+            ical_url=sample_config.ical_url,
+            calendar_name=sample_config.name,
+        )
         
         assert result.success is True
         assert result.events_imported == 1
 
-    @patch('httpx.Client.get')
-    def test_import_from_ical_url_network_error(self, mock_get, service, sample_config):
-        mock_get.side_effect = Exception("Network error")
-        service._configs[sample_config.id] = sample_config
+    def test_import_from_ical_url_network_error(self, service, sample_config):
+        service.http_client.get = Mock(side_effect=Exception("Network error"))
         
-        result = service.import_from_ical_url(sample_config)
+        result = service.import_from_ical_url(
+            user_id="test_user",
+            ical_url=sample_config.ical_url,
+        )
         
         assert result.success is False
         assert len(result.errors) > 0
 
-    @patch('httpx.Client.get')
-    def test_import_from_ical_url_http_error(self, mock_get, service, sample_config):
+    def test_import_from_ical_url_http_error(self, service, sample_config):
         mock_response = Mock()
-        mock_response.status_code = 404
-        mock_get.return_value = mock_response
+        mock_response.raise_for_status = Mock(side_effect=Exception("404 Not Found"))
+        service.http_client.get = Mock(return_value=mock_response)
         
-        service._configs[sample_config.id] = sample_config
-        
-        result = service.import_from_ical_url(sample_config)
+        result = service.import_from_ical_url(
+            user_id="test_user",
+            ical_url=sample_config.ical_url,
+        )
         
         assert result.success is False
 
@@ -528,18 +541,19 @@ class TestGoogleCalendarIntegration:
         return CalendarSyncService()
 
     def test_get_google_auth_url(self, service):
-        with patch('src.services.calendar_sync.obtenir_parametres') as mock_params:
-            mock_params.return_value.GOOGLE_CLIENT_ID = "test_client_id"
-            
+        mock_params = MagicMock()
+        mock_params.GOOGLE_CLIENT_ID = "test_client_id"
+        
+        with patch('src.core.config.obtenir_parametres', return_value=mock_params):
             url = service.get_google_auth_url(
                 user_id="test_user",
                 redirect_uri="http://localhost:8501/callback"
             )
             
-            assert "accounts.google.com" in url or url == ""  # Depends on config
+            assert "accounts.google.com" in url
+            assert "test_client_id" in url
 
-    @patch('httpx.Client.post')
-    def test_handle_google_callback_success(self, mock_post, service):
+    def test_handle_google_callback_success(self, service):
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {
@@ -547,12 +561,14 @@ class TestGoogleCalendarIntegration:
             "refresh_token": "new_refresh_token",
             "expires_in": 3600,
         }
-        mock_post.return_value = mock_response
+        mock_response.raise_for_status = Mock()
+        service.http_client.post = Mock(return_value=mock_response)
         
-        with patch('src.services.calendar_sync.obtenir_parametres') as mock_params:
-            mock_params.return_value.GOOGLE_CLIENT_ID = "test_id"
-            mock_params.return_value.GOOGLE_CLIENT_SECRET = "test_secret"
-            
+        mock_params = MagicMock()
+        mock_params.GOOGLE_CLIENT_ID = "test_id"
+        mock_params.GOOGLE_CLIENT_SECRET = "test_secret"
+        
+        with patch('src.core.config.obtenir_parametres', return_value=mock_params):
             with patch.object(service, '_save_config_to_db'):
                 result = service.handle_google_callback(
                     code="auth_code",
@@ -593,7 +609,8 @@ class TestCalendarSyncIntegration:
         
         assert len(imported_events) == 1
         assert imported_events[0].title == "Roundtrip Event"
-        assert imported_events[0].external_id == "roundtrip1"
+        # Le UID iCal contient @assistant-matanne comme suffixe de domaine
+        assert imported_events[0].external_id.startswith("roundtrip1")
 
     def test_sync_config_serialization(self):
         """Test sérialisation de la configuration."""
