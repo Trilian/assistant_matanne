@@ -234,7 +234,7 @@ class OpenFoodFactsService:
             confiance=confiance,
         )
     
-    @with_error_handling
+    @with_error_handling(default_return=[])
     def rechercher_par_nom(self, terme: str, limite: int = 10) -> list[ProduitOpenFoodFacts]:
         """
         Recherche des produits par nom/terme.
