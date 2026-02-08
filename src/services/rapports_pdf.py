@@ -1143,3 +1143,19 @@ class RapportsPDFService(BaseService[ArticleInventaire]):
         pdf = self.generer_pdf_rapport_planning(planning_id)
         filename = f"planning_semaine_{now.strftime('%Y%m%d_%H%M%S')}.pdf"
         return pdf, filename
+
+
+# Factory function (singleton pattern)
+_rapports_pdf_service_instance = None
+
+def get_rapports_pdf_service() -> RapportsPDFService:
+    """
+    Retourne une instance singleton du service de rapports PDF.
+    
+    Returns:
+        Instance de RapportsPDFService
+    """
+    global _rapports_pdf_service_instance
+    if _rapports_pdf_service_instance is None:
+        _rapports_pdf_service_instance = RapportsPDFService()
+    return _rapports_pdf_service_instance

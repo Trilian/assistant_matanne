@@ -107,7 +107,7 @@ class PDFExportService:
             leftIndent=20
         ))
 
-    @with_error_handling
+    @with_error_handling()
     def exporter_recette(self, recette_id: int) -> BytesIO:
         """
         Exporte une recette en PDF.
@@ -214,7 +214,7 @@ class PDFExportService:
         buffer.seek(0)
         return buffer
 
-    @with_error_handling
+    @with_error_handling()
     def exporter_planning_semaine(self, planning_id: int, date_debut: datetime = None) -> BytesIO:
         """
         Exporte un planning de semaine en PDF.
@@ -319,7 +319,7 @@ class PDFExportService:
         buffer.seek(0)
         return buffer
 
-    @with_error_handling  
+    @with_error_handling()
     def exporter_liste_courses(self) -> BytesIO:
         """
         Exporte la liste de courses actuelle en PDF.
