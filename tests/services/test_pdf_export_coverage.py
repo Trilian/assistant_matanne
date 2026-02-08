@@ -761,3 +761,4 @@ class TestEdgeCases:
         result = service._generer_pdf_planning(data, "")
         
         assert isinstance(result, BytesIO)
+

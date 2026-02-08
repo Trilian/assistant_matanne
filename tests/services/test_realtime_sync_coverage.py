@@ -945,3 +945,543 @@ class TestStateProperty:
         
         assert state is not None
         assert mock_st.session_state[RealtimeSyncService.STATE_KEY] is not None
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS INIT CLIENT EXCEPTIONS
+# ═══════════════════════════════════════════════════════════
+
+
+@pytest.mark.unit
+class TestInitClientExceptions:
+    """Tests pour les exceptions lors de l'initialisation du client."""
+
+    @patch('src.services.realtime_sync.st')
+    def test_init_client_import_error(self, mock_st):
+        """Test initialisation avec ImportError."""
+        from src.services.realtime_sync import RealtimeSyncService
+        
+        mock_st.session_state = {}
+        
+        # Simuler l'erreur d'import en patchant create_client
+        with patch.dict('sys.modules', {'supabase': None}):
+            # Créer le service - _init_client sera appelé
+            service = RealtimeSyncService()
+            
+            # Doit échouer gracieusement
+            assert service._client is None
+
+    @patch('src.services.realtime_sync.st')
+    @patch('src.core.config.obtenir_parametres')
+    def test_init_client_generic_exception(self, mock_params, mock_st):
+        """Test initialisation avec exception générique."""
+        from src.services.realtime_sync import RealtimeSyncService
+        
+        mock_st.session_state = {}
+        mock_params.side_effect = Exception("Unknown error")
+        
+        service = RealtimeSyncService()
+        
+        assert service._client is None
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS LEAVE LIST EXCEPTION
+# ═══════════════════════════════════════════════════════════
+
+
+@pytest.mark.unit
+class TestLeaveListException:
+    """Tests pour les exceptions lors de leave_list."""
+
+    @patch('src.services.realtime_sync.st')
+    @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
+    def test_leave_list_with_exception(self, mock_init, mock_st):
+        """Test leave_list gère les exceptions."""
+        from src.services.realtime_sync import RealtimeSyncService, SyncState
+        
+        state = SyncState(liste_id=1)
+        mock_st.session_state = {RealtimeSyncService.STATE_KEY: state}
+        
+        service = RealtimeSyncService()
+        
+        mock_channel = MagicMock()
+        mock_channel.unsubscribe.side_effect = Exception("Unsubscribe failed")
+        service._channel = mock_channel
+        
+        # Mock _get_current_user_id et _get_current_user_name
+        service._get_current_user_id = Mock(return_value="u")
+        service._get_current_user_name = Mock(return_value="U")
+        
+        # Ne doit pas lever d'exception
+        service.leave_list()
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS SYNC PENDING EVENTS SUCCESS
+# ═══════════════════════════════════════════════════════════
+
+
+@pytest.mark.unit
+class TestSyncPendingEventsSuccess:
+    """Tests pour sync_pending_events avec succès."""
+
+    @patch('src.services.realtime_sync.st')
+    @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
+    def test_sync_pending_events_success(self, mock_init, mock_st):
+        """Test sync avec événements."""
+        from src.services.realtime_sync import RealtimeSyncService, SyncState, SyncEvent, SyncEventType
+        
+        event = SyncEvent(
+            event_type=SyncEventType.ITEM_ADDED,
+            liste_id=1,
+            user_id="u",
+            user_name="U"
+        )
+        
+        state = SyncState()
+        state.pending_events = [event]
+        mock_st.session_state = {RealtimeSyncService.STATE_KEY: state}
+        
+        service = RealtimeSyncService()
+        
+        mock_channel = MagicMock()
+        service._channel = mock_channel
+        
+        service.sync_pending_events()
+        
+        mock_channel.send_broadcast.assert_called_once()
+        assert len(state.pending_events) == 0
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS RENDER PRESENCE INDICATOR
+# ═══════════════════════════════════════════════════════════
+
+
+@pytest.mark.unit
+class TestRenderPresenceIndicatorUI:
+    """Tests pour render_presence_indicator."""
+
+    @patch('src.services.realtime_sync.st')
+    @patch('src.services.realtime_sync.get_realtime_sync_service')
+    def test_render_presence_no_users(self, mock_service, mock_st):
+        """Test render_presence_indicator sans utilisateurs."""
+        from src.services.realtime_sync import render_presence_indicator
+        
+        mock_service.return_value.get_connected_users.return_value = []
+        
+        render_presence_indicator()
+        
+        # st.markdown ne doit pas être appelé avec "Connectés"
+        mock_st.markdown.assert_not_called()
+
+    @patch('src.services.realtime_sync.st')
+    @patch('src.services.realtime_sync.get_realtime_sync_service')
+    def test_render_presence_with_users(self, mock_service, mock_st):
+        """Test render_presence_indicator avec utilisateurs."""
+        from src.services.realtime_sync import render_presence_indicator, PresenceInfo
+        
+        users = [
+            PresenceInfo(user_id="u1", user_name="Alice"),
+            PresenceInfo(user_id="u2", user_name="Bob")
+        ]
+        mock_service.return_value.get_connected_users.return_value = users
+        
+        mock_cols = [MagicMock(), MagicMock()]
+        mock_st.columns.return_value = mock_cols
+        
+        render_presence_indicator()
+        
+        mock_st.markdown.assert_called()
+        mock_st.columns.assert_called_once()
+
+    @patch('src.services.realtime_sync.st')
+    @patch('src.services.realtime_sync.get_realtime_sync_service')
+    def test_render_presence_more_than_5_users(self, mock_service, mock_st):
+        """Test render_presence_indicator avec plus de 5 utilisateurs."""
+        from src.services.realtime_sync import render_presence_indicator, PresenceInfo
+        
+        users = [
+            PresenceInfo(user_id=f"u{i}", user_name=f"User {i}")
+            for i in range(7)
+        ]
+        mock_service.return_value.get_connected_users.return_value = users
+        
+        mock_cols = [MagicMock() for _ in range(5)]
+        mock_st.columns.return_value = mock_cols
+        
+        render_presence_indicator()
+        
+        # Doit afficher le caption "... et X autre(s)"
+        mock_st.caption.assert_called()
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS RENDER TYPING INDICATOR
+# ═══════════════════════════════════════════════════════════
+
+
+@pytest.mark.unit
+class TestRenderTypingIndicatorUI:
+    """Tests pour render_typing_indicator."""
+
+    @patch('src.services.realtime_sync.st')
+    @patch('src.services.realtime_sync.get_realtime_sync_service')
+    def test_render_typing_no_typing(self, mock_service, mock_st):
+        """Test render_typing_indicator sans utilisateurs qui tapent."""
+        from src.services.realtime_sync import render_typing_indicator, PresenceInfo
+        
+        users = [
+            PresenceInfo(user_id="u1", user_name="Alice", is_typing=False)
+        ]
+        mock_service.return_value.get_connected_users.return_value = users
+        mock_service.return_value._get_current_user_id.return_value = "me"
+        
+        render_typing_indicator()
+        
+        mock_st.caption.assert_not_called()
+
+    @patch('src.services.realtime_sync.st')
+    @patch('src.services.realtime_sync.get_realtime_sync_service')
+    def test_render_typing_with_typing_user(self, mock_service, mock_st):
+        """Test render_typing_indicator avec utilisateur qui tape."""
+        from src.services.realtime_sync import render_typing_indicator, PresenceInfo
+        
+        users = [
+            PresenceInfo(user_id="u1", user_name="Alice", is_typing=True)
+        ]
+        mock_service.return_value.get_connected_users.return_value = users
+        mock_service.return_value._get_current_user_id.return_value = "me"
+        
+        render_typing_indicator()
+        
+        mock_st.caption.assert_called_once()
+
+    @patch('src.services.realtime_sync.st')
+    @patch('src.services.realtime_sync.get_realtime_sync_service')
+    def test_render_typing_ignores_self(self, mock_service, mock_st):
+        """Test render_typing_indicator ignore l'utilisateur courant."""
+        from src.services.realtime_sync import render_typing_indicator, PresenceInfo
+        
+        users = [
+            PresenceInfo(user_id="me", user_name="Me", is_typing=True)
+        ]
+        mock_service.return_value.get_connected_users.return_value = users
+        mock_service.return_value._get_current_user_id.return_value = "me"
+        
+        render_typing_indicator()
+        
+        mock_st.caption.assert_not_called()
+
+    @patch('src.services.realtime_sync.st')
+    @patch('src.services.realtime_sync.get_realtime_sync_service')
+    def test_render_typing_multiple_users(self, mock_service, mock_st):
+        """Test render_typing_indicator avec plusieurs utilisateurs."""
+        from src.services.realtime_sync import render_typing_indicator, PresenceInfo
+        
+        users = [
+            PresenceInfo(user_id="u1", user_name="Alice", is_typing=True),
+            PresenceInfo(user_id="u2", user_name="Bob", is_typing=True)
+        ]
+        mock_service.return_value.get_connected_users.return_value = users
+        mock_service.return_value._get_current_user_id.return_value = "me"
+        
+        render_typing_indicator()
+        
+        mock_st.caption.assert_called_once()
+        # Vérifier que le message contient "écrivent" pour le pluriel
+        call_arg = mock_st.caption.call_args[0][0]
+        assert "écrivent" in call_arg
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS RENDER SYNC STATUS
+# ═══════════════════════════════════════════════════════════
+
+
+@pytest.mark.unit
+class TestRenderSyncStatusUI:
+    """Tests pour render_sync_status."""
+
+    @patch('src.services.realtime_sync.st')
+    @patch('src.services.realtime_sync.get_realtime_sync_service')
+    def test_render_sync_status_connected(self, mock_service, mock_st):
+        """Test render_sync_status quand connecté."""
+        from src.services.realtime_sync import render_sync_status
+        
+        mock_state = Mock()
+        mock_state.connected = True
+        mock_state.pending_events = []
+        
+        mock_service.return_value.state = mock_state
+        mock_service.return_value.get_connected_users.return_value = [Mock(), Mock()]
+        
+        render_sync_status()
+        
+        mock_st.success.assert_called_once()
+
+    @patch('src.services.realtime_sync.st')
+    @patch('src.services.realtime_sync.get_realtime_sync_service')
+    def test_render_sync_status_pending(self, mock_service, mock_st):
+        """Test render_sync_status avec événements en attente."""
+        from src.services.realtime_sync import render_sync_status
+        
+        mock_state = Mock()
+        mock_state.connected = False
+        mock_state.pending_events = [Mock(), Mock()]
+        
+        mock_service.return_value.state = mock_state
+        
+        render_sync_status()
+        
+        mock_st.warning.assert_called_once()
+
+    @patch('src.services.realtime_sync.st')
+    @patch('src.services.realtime_sync.get_realtime_sync_service')
+    def test_render_sync_status_offline(self, mock_service, mock_st):
+        """Test render_sync_status en mode hors ligne."""
+        from src.services.realtime_sync import render_sync_status
+        
+        mock_state = Mock()
+        mock_state.connected = False
+        mock_state.pending_events = []
+        
+        mock_service.return_value.state = mock_state
+        
+        render_sync_status()
+        
+        mock_st.info.assert_called_once()
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS FACTORY
+# ═══════════════════════════════════════════════════════════
+
+
+@pytest.mark.unit
+class TestGetRealtimeSyncService:
+    """Tests pour get_realtime_sync_service factory."""
+
+    @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
+    def test_get_service_creates_instance(self, mock_init):
+        """Test création d'instance."""
+        import src.services.realtime_sync as module
+        from src.services.realtime_sync import get_realtime_sync_service, RealtimeSyncService
+        
+        # Reset singleton
+        module._sync_service = None
+        
+        service = get_realtime_sync_service()
+        
+        assert isinstance(service, RealtimeSyncService)
+
+    @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
+    def test_get_service_singleton(self, mock_init):
+        """Test singleton pattern."""
+        import src.services.realtime_sync as module
+        from src.services.realtime_sync import get_realtime_sync_service
+        
+        # Reset singleton
+        module._sync_service = None
+        
+        service1 = get_realtime_sync_service()
+        service2 = get_realtime_sync_service()
+        
+        assert service1 is service2
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS HANDLE BROADCAST EXCEPTIONS
+# ═══════════════════════════════════════════════════════════
+
+
+@pytest.mark.unit
+class TestHandleBroadcastExceptions:
+    """Tests pour _handle_broadcast avec exceptions."""
+
+    @patch('src.services.realtime_sync.st')
+    @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
+    def test_handle_broadcast_invalid_payload(self, mock_init, mock_st):
+        """Test _handle_broadcast avec payload invalide."""
+        from src.services.realtime_sync import RealtimeSyncService
+        
+        mock_st.session_state = {}
+        
+        service = RealtimeSyncService()
+        
+        invalid_payload = {"invalid": "data"}
+        
+        # Ne doit pas lever d'exception
+        service._handle_broadcast(invalid_payload)
+
+    @patch('src.services.realtime_sync.st')
+    @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
+    def test_handle_broadcast_callback_exception(self, mock_init, mock_st):
+        """Test _handle_broadcast gère les exceptions des callbacks."""
+        from src.services.realtime_sync import RealtimeSyncService, SyncState, SyncEventType
+        
+        state = SyncState()
+        mock_st.session_state = {RealtimeSyncService.STATE_KEY: state}
+        mock_st.rerun = Mock()
+        
+        service = RealtimeSyncService()
+        
+        # Mock _get_current_user_id
+        service._get_current_user_id = Mock(return_value="me")
+        
+        # Callback qui échoue
+        bad_callback = Mock(side_effect=Exception("Callback error"))
+        service._callbacks[SyncEventType.ITEM_ADDED] = [bad_callback]
+        
+        payload = {
+            "event_type": "item_added",
+            "liste_id": 1,
+            "user_id": "other",
+            "user_name": "Other",
+            "timestamp": datetime.now().isoformat(),
+            "data": {}
+        }
+        
+        # Ne doit pas lever d'exception
+        service._handle_broadcast(payload)
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS PRESENCE HANDLERS EXCEPTIONS
+# ═══════════════════════════════════════════════════════════
+
+
+@pytest.mark.unit
+class TestPresenceHandlersExceptions:
+    """Tests pour les handlers de présence avec exceptions."""
+
+    @patch('src.services.realtime_sync.st')
+    @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
+    def test_handle_presence_sync_exception(self, mock_init, mock_st):
+        """Test _handle_presence_sync gère les exceptions."""
+        from src.services.realtime_sync import RealtimeSyncService
+        
+        mock_st.session_state = {}
+        
+        service = RealtimeSyncService()
+        
+        # Payload None devrait être géré gracieusement
+        service._handle_presence_sync(None)
+
+    @patch('src.services.realtime_sync.st')
+    @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
+    def test_handle_presence_join_exception(self, mock_init, mock_st):
+        """Test _handle_presence_join gère les exceptions."""
+        from src.services.realtime_sync import RealtimeSyncService
+        
+        mock_st.session_state = {}
+        
+        service = RealtimeSyncService()
+        
+        # Payload None devrait être géré gracieusement
+        service._handle_presence_join(None)
+
+    @patch('src.services.realtime_sync.st')
+    @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
+    def test_handle_presence_leave_exception(self, mock_init, mock_st):
+        """Test _handle_presence_leave gère les exceptions."""
+        from src.services.realtime_sync import RealtimeSyncService
+        
+        mock_st.session_state = {}
+        
+        service = RealtimeSyncService()
+        
+        # Payload None devrait être géré gracieusement
+        service._handle_presence_leave(None)
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS BROADCAST EVENT WITH CHANNEL
+# ═══════════════════════════════════════════════════════════
+
+
+@pytest.mark.unit
+class TestBroadcastEventWithChannel:
+    """Tests pour broadcast_event avec channel."""
+
+    @patch('src.services.realtime_sync.st')
+    @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
+    def test_broadcast_event_with_channel_success(self, mock_init, mock_st):
+        """Test broadcast_event avec channel envoie le message."""
+        from src.services.realtime_sync import RealtimeSyncService, SyncState, SyncEvent, SyncEventType
+        
+        state = SyncState()
+        mock_st.session_state = {RealtimeSyncService.STATE_KEY: state}
+        
+        service = RealtimeSyncService()
+        
+        mock_channel = MagicMock()
+        service._channel = mock_channel
+        
+        event = SyncEvent(
+            event_type=SyncEventType.ITEM_ADDED,
+            liste_id=1,
+            user_id="u",
+            user_name="U"
+        )
+        
+        service.broadcast_event(event)
+        
+        mock_channel.send_broadcast.assert_called_once()
+
+    @patch('src.services.realtime_sync.st')
+    @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
+    def test_broadcast_event_with_channel_exception(self, mock_init, mock_st):
+        """Test broadcast_event gère exception et stocke localement."""
+        from src.services.realtime_sync import RealtimeSyncService, SyncState, SyncEvent, SyncEventType
+        
+        state = SyncState()
+        mock_st.session_state = {RealtimeSyncService.STATE_KEY: state}
+        
+        service = RealtimeSyncService()
+        
+        mock_channel = MagicMock()
+        mock_channel.send_broadcast.side_effect = Exception("Broadcast failed")
+        service._channel = mock_channel
+        
+        event = SyncEvent(
+            event_type=SyncEventType.ITEM_ADDED,
+            liste_id=1,
+            user_id="u",
+            user_name="U"
+        )
+        
+        service.broadcast_event(event)
+        
+        # L'événement doit être stocké localement
+        assert len(state.pending_events) == 1
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS JOIN LIST EXCEPTION
+# ═══════════════════════════════════════════════════════════
+
+
+@pytest.mark.unit
+class TestJoinListException:
+    """Tests pour join_list avec exception."""
+
+    @patch('src.services.realtime_sync.st')
+    @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
+    def test_join_list_exception(self, mock_init, mock_st):
+        """Test join_list gère les exceptions."""
+        from src.services.realtime_sync import RealtimeSyncService, SyncState
+        
+        state = SyncState()
+        mock_st.session_state = {RealtimeSyncService.STATE_KEY: state}
+        
+        service = RealtimeSyncService()
+        
+        mock_client = MagicMock()
+        mock_client.channel.side_effect = Exception("Connection failed")
+        service._client = mock_client
+        
+        result = service.join_list(1, "user1", "User")
+        
+        assert result is False
