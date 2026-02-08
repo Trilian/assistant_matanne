@@ -30,6 +30,23 @@ from src.core.models import (
     NiveauAlerte as NiveauAlerteEnum,
 )
 
+# Import des fonctions utilitaires pures
+from src.services.weather_utils import (
+    direction_from_degrees,
+    weathercode_to_condition,
+    weathercode_to_icon,
+    calculate_average_temperature,
+    detect_gel_alert,
+    detect_canicule_alert,
+    detect_pluie_forte_alert,
+    detect_vent_fort_alert,
+    detect_uv_alert,
+    calculate_watering_need,
+    get_season,
+    get_gardening_advice_for_weather,
+    validate_coordinates,
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -234,12 +251,12 @@ class WeatherGardenService:
                     precipitation_mm=daily["precipitation_sum"][i] or 0,
                     probabilite_pluie=daily["precipitation_probability_max"][i] or 0,
                     vent_km_h=daily["wind_speed_10m_max"][i] or 0,
-                    direction_vent=self._direction_from_degrees(daily["wind_direction_10m_dominant"][i]),
+                    direction_vent=direction_from_degrees(daily["wind_direction_10m_dominant"][i]),
                     uv_index=daily["uv_index_max"][i] or 0,
                     lever_soleil=daily["sunrise"][i].split("T")[1] if daily.get("sunrise") else "",
                     coucher_soleil=daily["sunset"][i].split("T")[1] if daily.get("sunset") else "",
-                    condition=self._weathercode_to_condition(daily["weathercode"][i]),
-                    icone=self._weathercode_to_icon(daily["weathercode"][i]),
+                    condition=weathercode_to_condition(daily["weathercode"][i]),
+                    icone=weathercode_to_icon(daily["weathercode"][i]),
                 ))
             
             return previsions
@@ -249,66 +266,16 @@ class WeatherGardenService:
             return None
     
     def _direction_from_degrees(self, degrees: float | None) -> str:
-        """Convertit des degrés en direction cardinale."""
-        if degrees is None:
-            return ""
-        
-        directions = ["N", "NE", "E", "SE", "S", "SO", "O", "NO"]
-        index = round(degrees / 45) % 8
-        return directions[index]
+        """Convertit des degrés en direction cardinale. Délègue à weather_utils."""
+        return direction_from_degrees(degrees)
     
     def _weathercode_to_condition(self, code: int | None) -> str:
-        """Convertit le code météo en description."""
-        if code is None:
-            return "Inconnu"
-        
-        codes = {
-            0: "Ensoleillé",
-            1: "Peu nuageux",
-            2: "Partiellement nuageux",
-            3: "Couvert",
-            45: "Brouillard",
-            48: "Brouillard givrant",
-            51: "Bruine légère",
-            53: "Bruine",
-            55: "Bruine forte",
-            61: "Pluie légère",
-            63: "Pluie modérée",
-            65: "Pluie forte",
-            71: "Neige légère",
-            73: "Neige modérée",
-            75: "Neige forte",
-            80: "Averses légères",
-            81: "Averses",
-            82: "Averses violentes",
-            95: "Orage",
-            96: "Orage avec grêle légère",
-            99: "Orage avec grêle",
-        }
-        
-        return codes.get(code, "Inconnu")
+        """Convertit le code météo en description. Délègue à weather_utils."""
+        return weathercode_to_condition(code)
     
     def _weathercode_to_icon(self, code: int | None) -> str:
-        """Convertit le code météo en emoji."""
-        if code is None:
-            return "❓"
-        
-        if code == 0:
-            return "☀️"
-        elif code in [1, 2]:
-            return "🌤️"
-        elif code == 3:
-            return "☁️"
-        elif code in [45, 48]:
-            return "🌫️"
-        elif code in [51, 53, 55, 61, 63, 65, 80, 81, 82]:
-            return "🌧️"
-        elif code in [71, 73, 75]:
-            return "❄️"
-        elif code in [95, 96, 99]:
-            return "⛈️"
-        else:
-            return "🌡️"
+        """Convertit le code météo en emoji. Délègue à weather_utils."""
+        return weathercode_to_icon(code)
     
     # ═══════════════════════════════════════════════════════════
     # ALERTES

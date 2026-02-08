@@ -33,6 +33,33 @@ from src.core.models import (
 )
 from src.core.config import obtenir_parametres
 
+# Import des fonctions utilitaires pures
+from src.services.garmin_sync_utils import (
+    parse_garmin_timestamp,
+    parse_garmin_date,
+    parse_activity_data,
+    parse_daily_summary,
+    translate_activity_type,
+    get_activity_icon,
+    format_duration,
+    format_distance,
+    format_pace,
+    format_speed,
+    calculate_daily_stats,
+    calculate_activity_stats,
+    calculate_streak,
+    get_streak_badge,
+    calculate_goal_progress,
+    estimate_calories_burned,
+    calculate_weekly_summary,
+    validate_oauth_config,
+    validate_garmin_token,
+    is_sync_needed,
+    get_sync_date_range,
+    date_to_garmin_timestamp,
+    build_api_params,
+)
+
 logger = logging.getLogger(__name__)
 
 

@@ -30,6 +30,31 @@ from src.core.models import (
     RecetteIngredient,
 )
 
+# Import des fonctions utilitaires pures
+from src.services.suggestions_ia_utils import (
+    get_current_season,
+    get_seasonal_ingredients,
+    is_ingredient_in_season,
+    analyze_categories,
+    analyze_frequent_ingredients,
+    calculate_average_difficulty,
+    calculate_average_time,
+    calculate_average_portions,
+    identify_favorites,
+    days_since_last_preparation,
+    calculate_recipe_score,
+    rank_recipes,
+    generate_suggestion_reason,
+    detect_protein_type,
+    calculate_week_protein_balance,
+    is_week_balanced,
+    calculate_variety_score,
+    get_least_prepared_recipes,
+    format_suggestion,
+    format_profile_summary,
+    filter_by_constraints,
+)
+
 logger = logging.getLogger(__name__)
 
 
