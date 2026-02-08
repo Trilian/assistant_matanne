@@ -25,6 +25,20 @@ from sqlalchemy.orm import Session
 
 from src.core.database import obtenir_contexte_db
 from src.core.decorators import with_db_session
+from src.services.push_notifications_utils import (
+    check_notification_type_enabled,
+    is_quiet_hours,
+    can_send_during_quiet_hours,
+    should_send_notification,
+    build_push_payload,
+    build_subscription_info,
+    generate_count_key,
+    validate_subscription,
+    validate_preferences,
+    create_stock_notification,
+    create_expiration_notification,
+    create_meal_reminder_notification,
+)
 from src.core.models import (
     PushSubscription as PushSubscriptionModel,
     NotificationPreference as NotificationPreferenceModel,
@@ -240,49 +254,37 @@ class PushNotificationService:
         - Préférences utilisateur
         - Heures de silence
         - Limite par heure
+        
+        Utilise les fonctions pures de push_notifications_utils.
         """
         prefs = self.get_preferences(user_id)
         now = datetime.now()
         
-        # Vérifier le type de notification
-        type_enabled = {
-            NotificationType.STOCK_LOW: prefs.stock_alerts,
-            NotificationType.EXPIRATION_WARNING: prefs.expiration_alerts,
-            NotificationType.EXPIRATION_CRITICAL: prefs.expiration_alerts,
-            NotificationType.MEAL_REMINDER: prefs.meal_reminders,
-            NotificationType.ACTIVITY_REMINDER: prefs.activity_reminders,
-            NotificationType.SHOPPING_LIST_SHARED: prefs.shopping_updates,
-            NotificationType.SHOPPING_LIST_UPDATED: prefs.shopping_updates,
-            NotificationType.MILESTONE_REMINDER: prefs.family_reminders,
-            NotificationType.HEALTH_CHECK_REMINDER: prefs.family_reminders,
-            NotificationType.SYSTEM_UPDATE: prefs.system_updates,
-            NotificationType.SYNC_COMPLETE: prefs.system_updates,
+        # Convertir prefs en dict pour les utilitaires
+        prefs_dict = {
+            "stock_alerts": prefs.stock_alerts,
+            "expiration_alerts": prefs.expiration_alerts,
+            "meal_reminders": prefs.meal_reminders,
+            "activity_reminders": prefs.activity_reminders,
+            "shopping_updates": prefs.shopping_updates,
+            "family_reminders": prefs.family_reminders,
+            "system_updates": prefs.system_updates,
+            "quiet_hours_enabled": bool(prefs.quiet_hours_start and prefs.quiet_hours_end),
+            "quiet_hours_start": prefs.quiet_hours_start,
+            "quiet_hours_end": prefs.quiet_hours_end,
+            "max_per_hour": prefs.max_per_hour,
         }
         
-        if not type_enabled.get(notification_type, True):
-            return False
-        
-        # Vérifier les heures de silence
-        if prefs.quiet_hours_start and prefs.quiet_hours_end:
-            hour = now.hour
-            if prefs.quiet_hours_start > prefs.quiet_hours_end:
-                # Ex: 22h -> 7h (passe par minuit)
-                if hour >= prefs.quiet_hours_start or hour < prefs.quiet_hours_end:
-                    # Exception pour les alertes critiques
-                    if notification_type != NotificationType.EXPIRATION_CRITICAL:
-                        return False
-            else:
-                if prefs.quiet_hours_start <= hour < prefs.quiet_hours_end:
-                    if notification_type != NotificationType.EXPIRATION_CRITICAL:
-                        return False
-        
-        # Vérifier la limite par heure
-        count_key = f"{user_id}_{now.strftime('%Y%m%d%H')}"
+        # Utiliser should_send_notification de push_notifications_utils
+        count_key = generate_count_key(user_id, now)
         current_count = self._sent_count.get(count_key, 0)
-        if current_count >= prefs.max_per_hour:
-            return False
         
-        return True
+        return should_send_notification(
+            notification_type=notification_type,
+            preferences=prefs_dict,
+            current_count=current_count,
+            current_hour=now.hour
+        )
     
     # ═══════════════════════════════════════════════════════════
     # ENVOI DE NOTIFICATIONS

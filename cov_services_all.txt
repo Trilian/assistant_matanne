@@ -1,0 +1,437 @@
+﻿============================= test session starts =============================
+collected 3563 items
+
+tests\services\test_85_coverage.py ..............                        [  0%]
+tests\services\test_action_history_coverage.py ......................... [  1%]
+............................                                             [  1%]
+tests\services\test_action_history_service.py .....                      [  2%]
+tests\services\test_additional_services.py sssssssssss.........          [  2%]
+tests\services\test_auth_comprehensive.py .............................. [  3%]
+....................                                                     [  3%]
+tests\services\test_auth_coverage.py ................................... [  4%]
+...............                                                          [  5%]
+tests\services\test_auth_service.py .                                    [  5%]
+tests\services\test_backup_coverage.py .......................           [  6%]
+tests\services\test_backup_service.py ...........                        [  6%]
+tests\services\test_backup_utils.py .................................... [  7%]
+..................                                                       [  7%]
+tests\services\test_barcode_coverage.py ...............s..........s..s.. [  8%]
+s.......s.s.s..                                                          [  9%]
+tests\services\test_barcode_service.py .                                 [  9%]
+tests\services\test_base_ai_service.py ..........                        [  9%]
+tests\services\test_base_ai_service_coverage.py ........................ [ 10%]
+.............                                                            [ 10%]
+tests\services\test_base_service.py ...........                          [ 10%]
+tests\services\test_base_service_coverage.py ........................... [ 11%]
+..................s........ss....s.s.                                    [ 12%]
+tests\services\test_batch_cooking_full_coverage.py ..................... [ 13%]
+.....................................sssssssssssssssssssss               [ 14%]
+tests\services\test_batch_cooking_service.py .                           [ 14%]
+tests\services\test_batch_cooking_utils.py ............................. [ 15%]
+.........................................................                [ 17%]
+tests\services\test_budget_comprehensive.py ............................ [ 18%]
+.....................                                                    [ 18%]
+tests\services\test_budget_coverage.py ................................. [ 19%]
+..............                                                           [ 20%]
+tests\services\test_budget_service.py .                                  [ 20%]
+tests\services\test_budget_utils.py .................................... [ 21%]
+....................................                                     [ 22%]
+tests\services\test_calendar_sync_comprehensive.py ..................... [ 22%]
+..........................                                               [ 23%]
+tests\services\test_calendar_sync_coverage.py .......................... [ 24%]
+...................                                                      [ 24%]
+tests\services\test_calendar_sync_service.py .                           [ 24%]
+tests\services\test_courses_intelligentes_coverage.py .................. [ 25%]
+..........................                                               [ 25%]
+tests\services\test_courses_intelligentes_service.py .                   [ 25%]
+tests\services\test_courses_service.py .....s.....ss..........s......... [ 26%]
+...................                                                      [ 27%]
+tests\services\test_critical_services.py ssssssssssssssssssssss          [ 28%]
+tests\services\test_direct_methods.py sssssssssssssssssssssss            [ 28%]
+tests\services\test_domains_coverage.py ssssssssssssssssssssssssssssssss [ 29%]
+ssssssssssssssssssssssssssssssssssss                                     [ 30%]
+tests\services\test_existing_services.py ............................... [ 31%]
+......                                                                   [ 31%]
+tests\services\test_extended_services.py ...........                     [ 31%]
+tests\services\test_facture_ocr_coverage.py ............................ [ 32%]
+.................                                                        [ 33%]
+tests\services\test_factures_ocr.py ...............                      [ 33%]
+tests\services\test_garmin_sync.py .                                     [ 33%]
+tests\services\test_garmin_sync_coverage.py ............................ [ 34%]
+..................                                                       [ 34%]
+tests\services\test_imports_services.py .............................    [ 35%]
+tests\services\test_inventaire_extended.py sssssssssssssssssssssssssssss [ 36%]
+sss                                                                      [ 36%]
+tests\services\test_inventaire_service.py ..................             [ 37%]
+tests\services\test_io_service.py .                                      [ 37%]
+tests\services\test_io_service_coverage.py ............................. [ 37%]
+........................                                                 [ 38%]
+tests\services\test_maison_extended.py sssssssssssssssssssssssssssssssss [ 39%]
+sss                                                                      [ 39%]
+tests\services\test_notifications_coverage.py .......................... [ 40%]
+..........................                                               [ 41%]
+tests\services\test_notifications_push_coverage.py ...................ss [ 41%]
+ss.........................                                              [ 42%]
+tests\services\test_notifications_push_service.py ..                     [ 42%]
+tests\services\test_notifications_service.py ..                          [ 42%]
+tests\services\test_openfoodfacts.py .........                           [ 42%]
+tests\services\test_openfoodfacts_coverage.py .......................... [ 43%]
+............                                                             [ 43%]
+tests\services\test_pdf_export_coverage.py ...............ss...ss......s [ 44%]
+s.............                                                           [ 45%]
+tests\services\test_pdf_export_service.py ...                            [ 45%]
+tests\services\test_phase10_budget_real.py sssssssssssssssssssss         [ 45%]
+tests\services\test_phase10_inventory_real.py ssssssssssssssssssssssss   [ 46%]
+tests\services\test_phase10_planning_real.py F...............            [ 46%]
+tests\services\test_phase11_recipes_shopping.py sssssssssssssssssssssss  [ 47%]
+tests\services\test_phase12_edge_cases.py sssssssssssssssssssssss        [ 48%]
+tests\services\test_phase1_barcode.py ............                       [ 48%]
+tests\services\test_phase1_courses.py ............................       [ 49%]
+tests\services\test_phase1_inventaire.py ..................              [ 49%]
+tests\services\test_phase1_planning.py ........................          [ 50%]
+tests\services\test_phase1_recettes.py ................................. [ 51%]
+..                                                                       [ 51%]
+tests\services\test_planning_coverage.py ............ssss............... [ 52%]
+.                                                                        [ 52%]
+tests\services\test_planning_extended.py sssssssssssssssssssssssssss     [ 53%]
+tests\services\test_planning_service.py ...........                      [ 53%]
+tests\services\test_planning_unified_coverage.py ....................... [ 54%]
+....................s..sss..ss.....                                      [ 55%]
+tests\services\test_planning_unified_service.py ..                       [ 55%]
+tests\services\test_planning_utils.py .................................. [ 56%]
+.......................                                                  [ 56%]
+tests\services\test_predictions_coverage.py ............................ [ 57%]
+........                                                                 [ 57%]
+tests\services\test_predictions_service.py ..........                    [ 58%]
+tests\services\test_push_notifications.py .............................. [ 58%]
+.........                                                                [ 59%]
+tests\services\test_push_notifications_utils.py ........................ [ 59%]
+..............................                                           [ 60%]
+tests\services\test_pwa.py ...............................               [ 61%]
+tests\services\test_realtime_sync_coverage.py .......................... [ 62%]
+...........................................                              [ 63%]
+tests\services\test_recettes_coverage.py .............................   [ 64%]
+tests\services\test_recettes_service.py .....................            [ 64%]
+tests\services\test_recettes_utils.py .................................. [ 65%]
+..........................                                               [ 66%]
+tests\services\test_recipe_import_service.py ...                         [ 66%]
+tests\services\test_services_basic.py ............                       [ 66%]
+tests\services\test_services_comprehensive.py .......................... [ 67%]
+................................                                         [ 68%]
+tests\services\test_services_coverage_80.py ............................ [ 69%]
+........................................................                 [ 70%]
+tests\services\test_services_coverage_80_part11.py ..................... [ 71%]
+.                                                                        [ 71%]
+tests\services\test_services_coverage_80_part12.py ..................... [ 72%]
+....................................                                     [ 73%]
+tests\services\test_services_coverage_80_part13.py ..................... [ 73%]
+...................                                                      [ 74%]
+tests\services\test_services_coverage_80_part14.py ..................... [ 74%]
+................                                                         [ 75%]
+tests\services\test_services_coverage_80_part15.py ..................... [ 75%]
+                                                                         [ 75%]
+tests\services\test_services_coverage_80_part16.py ..................... [ 76%]
+.....                                                                    [ 76%]
+tests\services\test_services_coverage_80_part17.py ..................... [ 77%]
+....                                                                     [ 77%]
+tests\services\test_services_coverage_80_part2.py ...................... [ 77%]
+............................s..............                              [ 79%]
+tests\services\test_services_coverage_80_part3.py ...................... [ 79%]
+...........................                                              [ 80%]
+tests\services\test_services_coverage_80_part4.py ...................... [ 81%]
+...................................................                      [ 82%]
+tests\services\test_services_coverage_80_part5.py ...................... [ 83%]
+..........................                                               [ 83%]
+tests\services\test_services_coverage_80_part6.py ...................... [ 84%]
+...........................................................              [ 86%]
+tests\services\test_services_coverage_80_part7.py ...................... [ 86%]
+................................                                         [ 87%]
+tests\services\test_services_coverage_80_part8.py ...................... [ 88%]
+.................................................                        [ 89%]
+tests\services\test_services_coverage_80_push.py ....................... [ 90%]
+.........................................................                [ 91%]
+tests\services\test_services_coverage_boost.py ......................... [ 92%]
+...........                                                              [ 92%]
+tests\services\test_services_deep.py ................................... [ 93%]
+......                                                                   [ 94%]
+tests\services\test_services_integration.py ...........s.ss.s.           [ 94%]
+tests\services\test_simple_coverage.py ................................  [ 95%]
+tests\services\test_suggestions_ia_coverage.py ......................... [ 96%]
+.....                                                                    [ 96%]
+tests\services\test_suggestions_ia_service.py .                          [ 96%]
+tests\services\test_tier1_critical.py ....s.s........................... [ 97%]
+.....                                                                    [ 97%]
+tests\services\test_types_coverage.py .................................. [ 98%]
+..............                                                           [ 98%]
+tests\services\test_types_service.py .                                   [ 98%]
+tests\services\test_user_preferences_coverage.py ....................... [ 99%]
+..............                                                           [ 99%]
+tests\services\test_user_preferences_service.py ...                      [ 99%]
+tests\services\test_weather_service.py .                                 [100%]
+
+================================== FAILURES ===================================
+______________ TestPlanningCreation.test_create_planning_via_ia _______________
+tests\services\test_phase10_planning_real.py:48: in test_create_planning_via_ia
+    assert planning is not None
+E   assert None is not None
+---------------------------- Captured stdout setup ----------------------------
+[32mINFO[0m | src.core.cache            | Cache cleared
+---------------------------- Captured stderr setup ----------------------------
+2026-02-08 12:11:19.086 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.086 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.086 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.086 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.087 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.087 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.087 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.087 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.087 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.087 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.087 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.088 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+----------------------------- Captured log setup ------------------------------
+INFO     src.core.cache:cache.py:164 Cache cleared
+---------------------------- Captured stdout call -----------------------------
+\x1b[32mINFO\x1b[0m | src.services.planning     | \U0001f916 Generating AI weekly plan starting 2026-02-01\n\x1b[31mERROR\x1b[0m | src.core.decorators       | Erreur dans generer_planning_ia: object MagicMock can't be used in 'await' expression
+---------------------------- Captured stderr call -----------------------------
+2026-02-08 12:11:19.152 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.158 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.159 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.159 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.160 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.160 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.164 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.164 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.164 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.165 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.165 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.165 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.166 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.166 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.166 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.167 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.167 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.167 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.168 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.173 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.173 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.173 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.173 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.174 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.174 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.175 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:19.175 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+------------------------------ Captured log call ------------------------------
+INFO     src.services.planning:planning.py:524 \U0001f916 Generating AI weekly plan starting 2026-02-01\nERROR    src.core.decorators:decorators.py:219 Erreur dans generer_planning_ia: object MagicMock can't be used in 'await' expression
+-------------------------- Captured stdout teardown ---------------------------
+[32mINFO[0m | src.core.cache            | Cache cleared
+-------------------------- Captured stderr teardown ---------------------------
+2026-02-08 12:11:20.369 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:20.371 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:20.372 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:20.372 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:20.373 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:20.373 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:20.374 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:20.374 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:20.375 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:20.375 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:20.375 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-08 12:11:20.376 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+---------------------------- Captured log teardown ----------------------------
+INFO     src.core.cache:cache.py:164 Cache cleared
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.11.8-final-0 _______________
+
+Name                                       Stmts   Miss Branch BrPart   Cover
+-----------------------------------------------------------------------------
+src\services\__init__.py                      12      1      0      0  91.67%
+src\services\action_history.py               237     34     40      1  82.31%
+src\services\auth.py                         381     57    112     16  80.32%
+src\services\backup.py                       313    227     68      1  22.83%
+src\services\backup_utils.py                 131      7     60      8  92.15%
+src\services\barcode.py                      184     32     56      8  82.50%
+src\services\base_ai_service.py              222     36     66      6  84.03%
+src\services\base_service.py                 168     16     74      9  85.54%
+src\services\batch_cooking.py                303    192     84      0  29.20%
+src\services\batch_cooking_utils.py          123      4     46      4  95.27%
+src\services\budget.py                       470    249    106      7  43.40%
+src\services\budget_utils.py                 108      2     36      1  97.92%
+src\services\calendar_sync.py                481     78    120     12  81.36%
+src\services\courses.py                      145     23     42      5  82.89%
+src\services\courses_intelligentes.py        149      8     38      4  93.58%
+src\services\facture_ocr.py                   95      2     18      0  98.23%
+src\services\garmin_sync.py                  228      6     38      2  96.99%
+src\services\inventaire.py                   349    236     98      1  28.64%
+src\services\io_service.py                   110      4     42      0  97.37%
+src\services\notifications.py                126      0     36      0 100.00%
+src\services\notifications_push.py           142      8     28      0  95.29%
+src\services\openfoodfacts.py                123      0     16      1  99.28%
+src\services\pdf_export.py                   168     34     32      0  75.00%
+src\services\planning.py                     196     30     56      6  80.95%
+src\services\planning_unified.py             198     30     50      7  81.05%
+src\services\planning_utils.py               148      2     70      6  96.33%
+src\services\predictions.py                  132      1     34      1  98.80%
+src\services\push_notifications.py           319    200     54      0  33.51%
+src\services\push_notifications_utils.py     141      9     52      7  91.71%
+src\services\pwa.py                           49      0      0      0 100.00%
+src\services\rapports_pdf.py                 359    239     98      8  29.32%
+src\services\realtime_sync.py                249      4     50      6  96.66%
+src\services\recettes.py                     323    198     58      1  36.22%
+src\services\recettes_utils.py               161      6     70      9  91.77%
+src\services\recipe_import.py                483    350    258      3  22.67%
+src\services\suggestions_ia.py               228     25     96     27  80.86%
+src\services\types.py                        204      7     88     11  93.15%
+src\services\user_preferences.py             118      0     14      0 100.00%
+src\services\weather.py                      371    266    146      1  20.50%
+-----------------------------------------------------------------------------
+TOTAL                                       8447   2623   2450    179  65.42%
+=========================== short test summary info ===========================
+FAILED tests/services/test_phase10_planning_real.py::TestPlanningCreation::test_create_planning_via_ia
+SKIPPED [1] tests\services\test_additional_services.py:23: WeatherService non disponible
+SKIPPED [1] tests\services\test_additional_services.py:32: Impossible d'initialiser: cannot import name 'WeatherService' from 'src.services.weather' (D:\Projet_streamlit\assistant_matanne\src\services\weather.py)
+SKIPPED [1] tests\services\test_additional_services.py:48: WeatherService non disponible
+SKIPPED [1] tests\services\test_additional_services.py:64: WeatherService non disponible
+SKIPPED [1] tests\services\test_additional_services.py:77: PushNotificationsService non disponible
+SKIPPED [1] tests\services\test_additional_services.py:86: Impossible d'initialiser: cannot import name 'PushNotificationsService' from 'src.services.push_notifications' (D:\Projet_streamlit\assistant_matanne\src\services\push_notifications.py)
+SKIPPED [1] tests\services\test_additional_services.py:104: Service non disponible
+SKIPPED [1] tests\services\test_additional_services.py:120: Service non disponible
+SKIPPED [1] tests\services\test_additional_services.py:133: GarminSyncService non disponible
+SKIPPED [1] tests\services\test_additional_services.py:142: Impossible d'initialiser: cannot import name 'GarminSyncService' from 'src.services.garmin_sync' (D:\Projet_streamlit\assistant_matanne\src\services\garmin_sync.py)
+SKIPPED [1] tests\services\test_additional_services.py:156: Service non disponible
+SKIPPED [1] tests\services\test_barcode_coverage.py:231: QR pattern matches before CODE128
+SKIPPED [1] tests\services\test_barcode_coverage.py:347: Decorator catches exception - DB connection
+SKIPPED [1] tests\services\test_barcode_coverage.py:414: Decorator catches exception
+SKIPPED [1] tests\services\test_barcode_coverage.py:469: Service missing cache attribute
+SKIPPED [1] tests\services\test_barcode_coverage.py:683: Decorator catches exception
+SKIPPED [1] tests\services\test_barcode_coverage.py:711: Service missing cache attribute
+SKIPPED [1] tests\services\test_barcode_coverage.py:776: Decorator catches exception
+SKIPPED [1] tests\services\test_base_service_coverage.py:697: SQLAlchemy validates ORDER BY expressions even with mocks
+SKIPPED [1] tests\services\test_base_service_coverage.py:793: SQLAlchemy validates filter expressions even with mocks
+SKIPPED [1] tests\services\test_base_service_coverage.py:798: SQLAlchemy validates ORDER BY expressions even with mocks
+SKIPPED [1] tests\services\test_base_service_coverage.py:885: SQLAlchemy validates GROUP BY expressions even with mocks
+SKIPPED [1] tests\services\test_base_service_coverage.py:903: SQLAlchemy validates GROUP BY expressions even with mocks
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1019: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1033: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1046: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1059: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1072: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1085: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1098: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1111: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1128: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1141: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1154: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1167: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1180: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1193: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1206: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1227: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1253: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1271: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1287: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1310: Requires real DB connection - generer_plan_ia uses decorators
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1330: Requires real DB connection - suggerer_recettes_batch uses decorators
+SKIPPED [1] tests\services\test_courses_service.py:82: Mock complexe - Ó revoir
+SKIPPED [1] tests\services\test_courses_service.py:152: Mock complexe sur les caches - Ó revoir
+SKIPPED [1] tests\services\test_courses_service.py:161: Mock complexe sur les caches - Ó revoir
+SKIPPED [1] tests\services\test_courses_service.py: Mocks complexes de BD - Ó amÚliorer ultÚrieurement
+SKIPPED [22] tests\services\test_critical_services.py: get_xxx_service() takes 0 arguments but test passes db
+SKIPPED [23] tests\services\test_direct_methods.py: Models require temps_preparation and other fields
+SKIPPED [68] tests\services\test_domains_coverage.py: Wrong class names: SuggestionIA, PlanningJour, UserPreferences
+SKIPPED [32] tests\services\test_inventaire_extended.py: InventaireService() doesn't accept db parameter
+SKIPPED [1] tests\services\test_maison_extended.py:34: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:38: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:51: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:64: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:83: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:98: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:114: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:130: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:152: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:167: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:190: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:204: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:224: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:236: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:261: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:280: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:302: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:320: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:346: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:359: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:372: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:385: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:406: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:428: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:446: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:476: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:490: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:504: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:516: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:528: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:539: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:554: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:568: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:577: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:582: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_maison_extended.py:587: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_notifications_push_coverage.py:384: Requires database connection - tested via integration tests
+SKIPPED [1] tests\services\test_notifications_push_coverage.py:393: Requires database connection
+SKIPPED [1] tests\services\test_notifications_push_coverage.py:402: Requires database connection
+SKIPPED [1] tests\services\test_notifications_push_coverage.py:411: Requires database connection
+SKIPPED [1] tests\services\test_pdf_export_coverage.py:312: Decorator @with_error_handling breaks mocking
+SKIPPED [1] tests\services\test_pdf_export_coverage.py:318: Decorator @with_error_handling breaks mocking
+SKIPPED [1] tests\services\test_pdf_export_coverage.py:413: Decorator @with_error_handling breaks mocking
+SKIPPED [1] tests\services\test_pdf_export_coverage.py:419: Decorator @with_error_handling breaks mocking
+SKIPPED [1] tests\services\test_pdf_export_coverage.py:574: Decorator @with_error_handling breaks mocking
+SKIPPED [1] tests\services\test_pdf_export_coverage.py:580: Decorator @with_error_handling breaks mocking
+SKIPPED [21] tests\services\test_phase10_budget_real.py: Tests for unimplemented budget features (Service(db) constructor doesn't exist)
+SKIPPED [24] tests\services\test_phase10_inventory_real.py: Tests for unimplemented inventory features (Service(db) constructor doesn't exist)
+SKIPPED [23] tests\services\test_phase11_recipes_shopping.py: Tests for unimplemented recipe/shopping features (Service(db) constructor doesn't exist)
+SKIPPED [23] tests\services\test_phase12_edge_cases.py: Tests for unimplemented cross-domain features (Service(db) constructor doesn't exist)
+SKIPPED [1] tests\services\test_planning_coverage.py:194: Requires real DB session due to @with_cache decorator
+SKIPPED [1] tests\services\test_planning_coverage.py:222: Requires real DB session due to @with_cache decorator
+SKIPPED [1] tests\services\test_planning_coverage.py:246: Requires real DB session due to @with_cache decorator
+SKIPPED [1] tests\services\test_planning_coverage.py:284: Requires real DB session due to @with_cache decorator
+SKIPPED [1] tests\services\test_planning_extended.py:38: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:42: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:47: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:63: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:76: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:92: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:114: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:132: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:137: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:154: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:179: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:196: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:214: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:228: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:243: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:257: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:276: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:292: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:315: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:339: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:363: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:391: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:416: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:432: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:444: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:463: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:468: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_unified_coverage.py:941: Requires real DB session due to @with_cache decorator
+SKIPPED [1] tests\services\test_planning_unified_coverage.py:1015: Requires real DB session due to @with_cache decorator
+SKIPPED [1] tests\services\test_planning_unified_coverage.py:1042: Requires real DB session due to @with_cache decorator
+SKIPPED [1] tests\services\test_planning_unified_coverage.py:1060: Requires real DB session due to @with_cache decorator
+SKIPPED [1] tests\services\test_planning_unified_coverage.py:1124: Requires real DB session due to @with_cache decorator
+SKIPPED [1] tests\services\test_planning_unified_coverage.py:1149: Requires real DB session due to @with_cache decorator
+SKIPPED [1] tests\services\test_services_coverage_80_part2.py:502: model_name attribute not set correctly in RapportsPDFService - needs investigation
+SKIPPED [1] tests\services\test_services_integration.py:158: FK constraint issues with ArticleInventaire.ingredient_id in test DB
+SKIPPED [1] tests\services\test_services_integration.py:195: FK constraint issues with ArticleCourses.ingredient_id in test DB
+SKIPPED [1] tests\services\test_services_integration.py:213: FK constraint issues with ArticleCourses.ingredient_id in test DB
+SKIPPED [1] tests\services\test_services_integration.py:261: FK constraint issues with ArticleCourses.ingredient_id in test DB
+SKIPPED [1] tests\services\test_tier1_critical.py:48: Requires database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_tier1_critical.py:75: Requires database connection - use mocked tests instead
+===== 1 failed, 3188 passed, 374 skipped, 8 warnings in 186.69s (0:03:06) =====

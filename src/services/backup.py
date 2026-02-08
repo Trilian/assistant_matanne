@@ -26,6 +26,18 @@ from sqlalchemy.orm import Session
 
 from src.core.database import obtenir_contexte_db
 from src.core.decorators import with_db_session, with_error_handling
+from src.services.backup_utils import (
+    generate_backup_id,
+    calculate_checksum,
+    model_to_dict,
+    get_restore_order,
+    filter_and_order_tables,
+    is_compressed_file,
+    get_backup_filename,
+    validate_backup_structure,
+    format_file_size,
+    get_backups_to_rotate,
+)
 from src.core.models import (
     Recette,
     Ingredient,
@@ -161,27 +173,21 @@ class BackupService:
         backup_path = Path(self.config.backup_dir)
         backup_path.mkdir(parents=True, exist_ok=True)
     
-    def _model_to_dict(self, obj: Any) -> dict:
+    # Méthodes utilitaires déléguées à backup_utils
+    @staticmethod
+    def _model_to_dict(obj: Any) -> dict:
         """Convertit un objet SQLAlchemy en dictionnaire."""
-        result = {}
-        for column in obj.__table__.columns:
-            value = getattr(obj, column.name)
-            # Conversion des types non-sérialisables
-            if isinstance(value, datetime):
-                value = value.isoformat()
-            elif hasattr(value, 'isoformat'):  # date
-                value = value.isoformat()
-            result[column.name] = value
-        return result
+        return model_to_dict(obj)
     
-    def _generate_backup_id(self) -> str:
+    @staticmethod
+    def _generate_backup_id() -> str:
         """Génère un ID unique pour le backup."""
-        return datetime.now().strftime("%Y%m%d_%H%M%S")
+        return generate_backup_id()
     
-    def _calculate_checksum(self, data: str) -> str:
+    @staticmethod
+    def _calculate_checksum(data: str) -> str:
         """Calcule le checksum MD5 des données."""
-        import hashlib
-        return hashlib.md5(data.encode()).hexdigest()
+        return calculate_checksum(data)
     
     # ═══════════════════════════════════════════════════════════
     # EXPORT / BACKUP
@@ -368,36 +374,8 @@ class BackupService:
         total_records = 0
         errors = []
         
-        # Ordre de restauration (respecter les FK)
-        restore_order = [
-            "ingredients",
-            "recettes",
-            "recette_ingredients",
-            "etapes_recette",
-            "versions_recette",
-            "articles_inventaire",
-            "plannings",
-            "repas",
-            "articles_courses",
-            "child_profiles",
-            "milestones",
-            "wellbeing_entries",
-            "family_activities",
-            "family_budgets",
-            "health_routines",
-            "health_objectives",
-            "health_entries",
-            "projects",
-            "project_tasks",
-            "routines",
-            "routine_tasks",
-            "garden_items",
-            "garden_logs",
-            "calendar_events",
-        ]
-        
-        # Filtrer et ordonner
-        ordered_tables = [t for t in restore_order if t in tables_to_restore]
+        # Utiliser l'ordre de restauration défini dans backup_utils (respecter les FK)
+        ordered_tables = filter_and_order_tables(tables_to_restore)
         
         for table_name in ordered_tables:
             if table_name not in self.MODELS_TO_BACKUP:

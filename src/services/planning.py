@@ -22,6 +22,19 @@ from src.core.errors_base import ErreurNonTrouve
 from src.core.models import Planning, Repas
 from src.services.base_ai_service import BaseAIService, PlanningAIMixin
 from src.services.types import BaseService
+from src.services.planning_utils import (
+    get_weekday_names,
+    get_weekday_name,
+    calculate_week_dates,
+    get_monday_of_week,
+    determine_protein_type,
+    calculate_week_balance,
+    is_balanced_week,
+    format_meal_for_display,
+    aggregate_ingredients,
+    validate_planning_dates,
+    parse_ai_planning_response,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -203,6 +216,7 @@ class PlanningService(BaseService[Planning], BaseAIService, PlanningAIMixin):
         """Suggère des recettes équilibrées pour chaque jour.
         
         Retourne 3 options par jour avec score d'équilibre.
+        Utilise les fonctions pures de planning_utils.
         
         Args:
             semaine_debut: Date de début de semaine
@@ -214,29 +228,21 @@ class PlanningService(BaseService[Planning], BaseAIService, PlanningAIMixin):
         """
         from src.core.models import Recette
         
-        jours_semaine = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
+        # Utiliser planning_utils pour les jours de la semaine
+        jours_semaine = get_weekday_names()
         suggestions_globales = []
         
         for idx, jour_name in enumerate(jours_semaine):
             jour_lower = jour_name.lower()
             date_jour = semaine_debut + timedelta(days=idx)
             
-            # Déterminer le type de protéine pour ce jour
-            type_proteine = "autre"
-            raison_jour = ""
-            
-            if jour_lower in parametres.poisson_jours:
-                type_proteine = "poisson"
-                raison_jour = "🐟 Jour poisson"
-            elif jour_lower in parametres.viande_rouge_jours:
-                type_proteine = "viande_rouge"
-                raison_jour = "🥩 Jour viande rouge"
-            elif jour_lower in parametres.vegetarien_jours:
-                type_proteine = "vegetarien"
-                raison_jour = "🥬 Jour végétarien"
-            else:
-                type_proteine = "volaille"
-                raison_jour = "🍗 Jour volaille"
+            # Utiliser planning_utils pour déterminer le type de protéine
+            type_proteine, raison_jour = determine_protein_type(
+                jour_lower,
+                poisson_jours=parametres.poisson_jours,
+                viande_rouge_jours=parametres.viande_rouge_jours,
+                vegetarien_jours=parametres.vegetarien_jours
+            )
             
             # Requête base pour récupérer 3 recettes de ce type
             query = db.query(Recette).filter(Recette.est_equilibre == True)
