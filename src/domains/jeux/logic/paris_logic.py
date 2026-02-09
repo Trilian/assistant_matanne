@@ -42,6 +42,9 @@ SEUIL_CONFIANCE_MOYENNE = 50
 SEUIL_SERIE_SANS_NUL = 5  # Après 5 matchs sans nul, proba augmente
 BONUS_NUL_PAR_MATCH = 0.03  # +3% par match supplémentaire sans nul
 
+# Poids pour les 5 derniers matchs (du plus récent au plus ancien)
+POIDS_FORME = [1.0, 0.85, 0.7, 0.55, 0.4]
+
 
 # ═══════════════════════════════════════════════════════════════════
 # CALCUL DE FORME
