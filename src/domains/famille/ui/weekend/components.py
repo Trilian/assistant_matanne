@@ -1,195 +1,18 @@
 """
-Module Sorties Weekend - Planning et suggestions IA.
-
-Fonctionnalités:
-- 📅 Planning weekend (samedi/dimanche)
-- 💡 Idées IA (selon météo + âge Jules + budget)
-- 🗺️ Lieux testés & notés
-- 💰 Budget sorties
+Module Sorties Weekend - Composants UI
 """
 
-import streamlit as st
-from datetime import date, timedelta
-from typing import Optional
+from ._common import (
+    st, date,
+    get_db_context, WeekendActivity,
+    TYPES_ACTIVITES, METEO_OPTIONS
+)
+from .helpers import (
+    get_next_weekend, get_weekend_activities, get_budget_weekend,
+    get_lieux_testes, get_age_jules_mois, mark_activity_done
+)
+from .ai_service import WeekendAIService
 
-from src.core.database import get_db_context
-from src.core.models import WeekendActivity, ChildProfile
-from src.services.base_ai_service import BaseAIService
-from src.core.ai import ClientIA
-
-
-# ═══════════════════════════════════════════════════════════
-# CONSTANTES
-# ═══════════════════════════════════════════════════════════
-
-TYPES_ACTIVITES = {
-    "parc": {"emoji": "🌳", "label": "Parc / Nature"},
-    "musee": {"emoji": "🏛️", "label": "Musée / Expo"},
-    "piscine": {"emoji": "🏊", "label": "Piscine / Aquatique"},
-    "zoo": {"emoji": "🦁", "label": "Zoo / Ferme"},
-    "restaurant": {"emoji": "🍽️", "label": "Restaurant"},
-    "cinema": {"emoji": "🎬", "label": "Cinéma"},
-    "sport": {"emoji": "⚽", "label": "Sport / Loisir"},
-    "shopping": {"emoji": "🛍️", "label": "Shopping"},
-    "famille": {"emoji": "👨‍👩‍👧", "label": "Visite famille"},
-    "maison": {"emoji": "🏠", "label": "Activité maison"},
-    "autre": {"emoji": "✨", "label": "Autre"},
-}
-
-METEO_OPTIONS = ["ensoleillé", "nuageux", "pluvieux", "intérieur"]
-
-
-# ═══════════════════════════════════════════════════════════
-# SERVICE IA WEEKEND
-# ═══════════════════════════════════════════════════════════
-
-class WeekendAIService(BaseAIService):
-    """Service IA pour suggestions weekend"""
-    
-    def __init__(self):
-        super().__init__(
-            client=ClientIA(),
-            cache_prefix="weekend",
-            default_ttl=3600,
-            service_name="weekend_ai"
-        )
-    
-    async def suggerer_activites(
-        self, 
-        meteo: str = "variable",
-        age_enfant_mois: int = 19,
-        budget: int = 50,
-        region: str = "Île-de-France",
-        nb_suggestions: int = 3
-    ) -> str:
-        """Suggère des activités weekend"""
-        
-        prompt = f"""Suggère {nb_suggestions} activités pour un weekend en famille avec:
-- Enfant de {age_enfant_mois} mois
-- Météo prévue: {meteo}
-- Budget max: {budget}€
-- Région: {region}
-
-Pour chaque activité:
-🎯 [Nom de l'activité]
-📍 Type de lieu: [parc/musée/piscine/etc.]
-⏱️ Durée recommandée: X heures
-💰 Budget estimé: X€
-👶 Adapté à l'âge: Oui/Non + explications
-🌤️ Météo requise: intérieur/extérieur
-📝 Description: 2-3 phrases sur pourquoi c'est bien
-
-Privilégie les activités:
-- Adaptées à un enfant de {age_enfant_mois} mois
-- Dans le budget
-- Selon la météo ({meteo})"""
-        
-        return await self.call_with_cache(
-            prompt=prompt,
-            system_prompt="Tu es expert en sorties familiales avec jeunes enfants en France. Réponds en français.",
-            max_tokens=800
-        )
-    
-    async def details_lieu(self, nom_lieu: str, type_activite: str) -> str:
-        """Donne des détails sur un lieu"""
-        prompt = f"""Donne des informations pratiques sur {nom_lieu} ({type_activite}):
-
-- Horaires habituels
-- Tarifs (adulte, enfant, gratuit?)
-- Équipements bébé (poussette, change, etc.)
-- Conseils pour y aller avec un enfant de 18-24 mois
-- Meilleur moment pour y aller
-- Ce qu'il faut apporter"""
-        
-        return await self.call_with_cache(
-            prompt=prompt,
-            system_prompt="Tu es guide touristique spécialisé familles avec jeunes enfants.",
-            max_tokens=500
-        )
-
-
-# ═══════════════════════════════════════════════════════════
-# HELPERS
-# ═══════════════════════════════════════════════════════════
-
-def get_next_weekend() -> tuple[date, date]:
-    """Retourne les dates du prochain weekend"""
-    today = date.today()
-    days_until_saturday = (5 - today.weekday()) % 7
-    
-    if today.weekday() == 5:  # Samedi
-        saturday = today
-    elif today.weekday() == 6:  # Dimanche
-        saturday = today + timedelta(days=6)  # Prochain samedi
-    else:
-        if days_until_saturday == 0:
-            days_until_saturday = 7
-        saturday = today + timedelta(days=days_until_saturday)
-    
-    sunday = saturday + timedelta(days=1)
-    return saturday, sunday
-
-
-def get_weekend_activities(saturday: date, sunday: date) -> dict:
-    """Récupère les activités du weekend"""
-    try:
-        with get_db_context() as db:
-            activities = db.query(WeekendActivity).filter(
-                WeekendActivity.date_prevue.in_([saturday, sunday])
-            ).order_by(WeekendActivity.heure_debut).all()
-            
-            return {
-                "saturday": [a for a in activities if a.date_prevue == saturday],
-                "sunday": [a for a in activities if a.date_prevue == sunday],
-            }
-    except:
-        return {"saturday": [], "sunday": []}
-
-
-def get_budget_weekend(saturday: date, sunday: date) -> dict:
-    """Calcule le budget du weekend"""
-    try:
-        with get_db_context() as db:
-            activities = db.query(WeekendActivity).filter(
-                WeekendActivity.date_prevue.in_([saturday, sunday])
-            ).all()
-            
-            estime = sum(a.cout_estime or 0 for a in activities)
-            reel = sum(a.cout_reel or 0 for a in activities if a.statut == "terminé")
-            
-            return {"estime": estime, "reel": reel}
-    except:
-        return {"estime": 0, "reel": 0}
-
-
-def get_lieux_testes() -> list:
-    """Récupère les lieux déjà testés"""
-    try:
-        with get_db_context() as db:
-            return db.query(WeekendActivity).filter(
-                WeekendActivity.statut == "terminé",
-                WeekendActivity.note_lieu.isnot(None)
-            ).order_by(WeekendActivity.note_lieu.desc()).all()
-    except:
-        return []
-
-
-def get_age_jules_mois() -> int:
-    """Récupère l'âge de Jules en mois"""
-    try:
-        with get_db_context() as db:
-            jules = db.query(ChildProfile).filter_by(name="Jules", actif=True).first()
-            if jules and jules.date_of_birth:
-                delta = date.today() - jules.date_of_birth
-                return delta.days // 30
-    except:
-        pass
-    return 19  # Valeur par défaut
-
-
-# ═══════════════════════════════════════════════════════════
-# UI COMPONENTS
-# ═══════════════════════════════════════════════════════════
 
 def render_planning():
     """Affiche le planning du weekend"""
@@ -252,18 +75,6 @@ def render_day_activities(day: date, activities: list):
                         st.write("⭐" * act.note_lieu)
                     else:
                         st.caption("✅ Fait")
-
-
-def mark_activity_done(activity_id: int):
-    """Marque une activité comme terminée"""
-    try:
-        with get_db_context() as db:
-            act = db.get(WeekendActivity, activity_id)
-            if act:
-                act.statut = "terminé"
-                db.commit()
-    except:
-        pass
 
 
 def render_suggestions():
@@ -465,33 +276,3 @@ def render_noter_sortie():
     
     except Exception as e:
         st.error(f"Erreur: {e}")
-
-
-# ═══════════════════════════════════════════════════════════
-# PAGE PRINCIPALE
-# ═══════════════════════════════════════════════════════════
-
-def app():
-    """Point d'entrée du module Weekend"""
-    st.title("🎉 Sorties Weekend")
-    
-    saturday, sunday = get_next_weekend()
-    st.caption(f"📅 {saturday.strftime('%d/%m')} - {sunday.strftime('%d/%m')}")
-    
-    # Tabs
-    tabs = st.tabs(["📅 Planning", "💡 Suggestions IA", "🗺️ Lieux testés", "➕ Ajouter", "⭐ Noter"])
-    
-    with tabs[0]:
-        render_planning()
-    
-    with tabs[1]:
-        render_suggestions()
-    
-    with tabs[2]:
-        render_lieux_testes()
-    
-    with tabs[3]:
-        render_add_activity()
-    
-    with tabs[4]:
-        render_noter_sortie()

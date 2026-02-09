@@ -1,138 +1,14 @@
 """
-Module Calendrier Familial Unifié - Vue centrale de TOUT
-
-Affiche dans une seule vue:
-- 🍽️ Repas (midi, soir, goûters)
-- 🍳 Sessions batch cooking
-- 🛒 Courses planifiées
-- 🎨 Activités famille
-- 🏥 RDV médicaux
-- 📅 Événements divers
-
-Fonctionnalités:
-- Vue semaine avec impression
-- Ajout rapide d'événements
-- Navigation semaine par semaine
-- Export pour le frigo
+Module Calendrier Familial Unifié - Composants UI
 """
 
-import streamlit as st
-from datetime import date, datetime, time, timedelta
-import logging
-
-from src.core.database import obtenir_contexte_db
-from src.core.models import (
-    Planning, Repas, Recette,
-    SessionBatchCooking,
-    FamilyActivity,
-    CalendarEvent,
+from ._common import (
+    st, date, datetime, time, timedelta,
+    obtenir_contexte_db, FamilyActivity, CalendarEvent,
+    TypeEvenement, JourCalendrier, SemaineCalendrier,
+    get_debut_semaine, get_semaine_precedente, get_semaine_suivante,
+    generer_texte_semaine_pour_impression
 )
-
-# Logique métier pure
-from src.domains.planning.logic.calendrier_unifie_logic import (
-    TypeEvenement,
-    EvenementCalendrier,
-    JourCalendrier,
-    SemaineCalendrier,
-    JOURS_SEMAINE,
-    EMOJI_TYPE,
-    COULEUR_TYPE,
-    get_debut_semaine,
-    get_semaine_precedente,
-    get_semaine_suivante,
-    construire_semaine_calendrier,
-    generer_texte_semaine_pour_impression,
-)
-
-logger = logging.getLogger(__name__)
-
-
-# ═══════════════════════════════════════════════════════════
-# CHARGEMENT DES DONNÉES
-# ═══════════════════════════════════════════════════════════
-
-
-def charger_donnees_semaine(date_debut: date) -> dict:
-    """
-    Charge toutes les données nécessaires pour une semaine.
-    
-    Returns:
-        Dict avec repas, sessions_batch, activites, events, taches_menage
-    """
-    lundi = get_debut_semaine(date_debut)
-    dimanche = lundi + timedelta(days=6)
-    
-    donnees = {
-        "repas": [],
-        "sessions_batch": [],
-        "activites": [],
-        "events": [],
-        "courses_planifiees": [],
-        "taches_menage": [],  # Nouveau: tâches ménage intégrées au planning
-    }
-    
-    try:
-        with obtenir_contexte_db() as db:
-            # Charger le planning actif et ses repas
-            planning = db.query(Planning).filter(
-                Planning.semaine_debut <= dimanche,
-                Planning.semaine_fin >= lundi
-            ).first()
-            
-            if planning:
-                repas = db.query(Repas).filter(
-                    Repas.planning_id == planning.id,
-                    Repas.date_repas >= lundi,
-                    Repas.date_repas <= dimanche
-                ).all()
-                
-                # Charger les recettes associées
-                for r in repas:
-                    if r.recette_id:
-                        r.recette = db.query(Recette).filter_by(id=r.recette_id).first()
-                
-                donnees["repas"] = repas
-            
-            # Sessions batch cooking
-            sessions = db.query(SessionBatchCooking).filter(
-                SessionBatchCooking.date_session >= lundi,
-                SessionBatchCooking.date_session <= dimanche
-            ).all()
-            donnees["sessions_batch"] = sessions
-            
-            # Activités famille
-            activites = db.query(FamilyActivity).filter(
-                FamilyActivity.date_prevue >= lundi,
-                FamilyActivity.date_prevue <= dimanche
-            ).all()
-            donnees["activites"] = activites
-            
-            # Tâches ménage intégrées au planning
-            try:
-                from src.core.models import MaintenanceTask
-                taches = db.query(MaintenanceTask).filter(
-                    MaintenanceTask.integrer_planning == True
-                ).all()
-                donnees["taches_menage"] = taches
-            except Exception as e:
-                logger.warning(f"Table maintenance_tasks non disponible: {e}")
-            
-            # Événements calendrier
-            events = db.query(CalendarEvent).filter(
-                CalendarEvent.date_debut >= datetime.combine(lundi, time.min),
-                CalendarEvent.date_debut <= datetime.combine(dimanche, time.max)
-            ).all()
-            donnees["events"] = events
-            
-    except Exception as e:
-        logger.error(f"Erreur chargement données semaine: {e}")
-    
-    return donnees
-
-
-# ═══════════════════════════════════════════════════════════
-# COMPOSANTS UI
-# ═══════════════════════════════════════════════════════════
 
 
 def render_navigation_semaine():
@@ -269,9 +145,6 @@ def render_vue_semaine_grille(semaine: SemaineCalendrier):
 
 def render_cellule_jour(jour: JourCalendrier):
     """Affiche une cellule de jour dans la grille."""
-    
-    # Container stylisé
-    style = "background: #e3f2fd; border-radius: 8px; padding: 5px;" if jour.est_aujourdhui else ""
     
     # Date
     st.markdown(f"**{jour.date_jour.strftime('%d')}**")
@@ -479,65 +352,8 @@ def render_formulaire_ajout_event():
                         st.error(f"❌ Erreur: {str(e)}")
 
 
-# ═══════════════════════════════════════════════════════════
-# POINT D'ENTRÉE PRINCIPAL
-# ═══════════════════════════════════════════════════════════
-
-
-def app():
-    """Point d'entrée du module Calendrier Familial Unifié."""
-    
-    st.title("📅 Calendrier Familial")
-    st.caption("Vue unifiée de toute votre semaine: repas, batch, courses, activités, ménage, RDV")
-    
-    # Navigation
-    render_navigation_semaine()
-    
-    st.divider()
-    
-    # Charger les données
-    with st.spinner("Chargement..."):
-        donnees = charger_donnees_semaine(st.session_state.cal_semaine_debut)
-        
-        semaine = construire_semaine_calendrier(
-            date_debut=st.session_state.cal_semaine_debut,
-            repas=donnees["repas"],
-            sessions_batch=donnees["sessions_batch"],
-            activites=donnees["activites"],
-            events=donnees["events"],
-            courses_planifiees=donnees["courses_planifiees"],
-            taches_menage=donnees["taches_menage"],  # Intégration ménage
-        )
-    
-    # Stats en haut
-    render_stats_semaine(semaine)
-    
-    st.divider()
-    
-    # Actions rapides
-    render_actions_rapides(semaine)
-    
-    st.divider()
-    
-    # Mode d'affichage
-    mode = st.radio(
-        "Vue",
-        ["📋 Liste détaillée", "📊 Grille"],
-        horizontal=True,
-        label_visibility="collapsed",
-    )
-    
-    # Affichage principal
-    if mode == "📋 Liste détaillée":
-        render_vue_semaine_liste(semaine)
-    else:
-        render_vue_semaine_grille(semaine)
-    
-    # Modals
-    render_modal_impression(semaine)
-    render_formulaire_ajout_event()
-    
-    # Légende
+def render_legende():
+    """Affiche la légende du calendrier."""
     with st.expander("📖 Légende"):
         cols = st.columns(6)
         legendes = [

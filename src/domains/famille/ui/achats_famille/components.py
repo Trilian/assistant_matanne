@@ -1,139 +1,17 @@
 """
-Module Achats Famille - Wishlist centralisée.
-
-Catégories:
-- 👶 Jules (vêtements, jouets, équipement)
-- 👨‍👩‍👧 Nous (jeux, loisirs, équipement)
-- 📋 Wishlist & priorités
+Module Achats Famille - Composants UI
 """
 
-import streamlit as st
-from datetime import date
-from typing import Optional
+from ._common import (
+    st, date,
+    get_db_context, FamilyPurchase,
+    CATEGORIES, PRIORITES
+)
+from .helpers import (
+    get_all_purchases, get_purchases_by_groupe, get_stats,
+    mark_as_bought, delete_purchase
+)
 
-from src.core.database import get_db_context
-from src.core.models import FamilyPurchase
-
-
-# ═══════════════════════════════════════════════════════════
-# CONSTANTES
-# ═══════════════════════════════════════════════════════════
-
-CATEGORIES = {
-    "jules_vetements": {"emoji": "👕", "label": "Jules - Vêtements", "groupe": "jules"},
-    "jules_jouets": {"emoji": "🧸", "label": "Jules - Jouets", "groupe": "jules"},
-    "jules_equipement": {"emoji": "🛠️", "label": "Jules - Équipement", "groupe": "jules"},
-    "nous_jeux": {"emoji": "🎲", "label": "Nous - Jeux", "groupe": "nous"},
-    "nous_loisirs": {"emoji": "🎨", "label": "Nous - Loisirs", "groupe": "nous"},
-    "nous_equipement": {"emoji": "🏠", "label": "Nous - Équipement", "groupe": "nous"},
-    "maison": {"emoji": "🏡", "label": "Maison", "groupe": "maison"},
-}
-
-PRIORITES = {
-    "urgent": {"emoji": "🔴", "label": "Urgent", "order": 1},
-    "haute": {"emoji": "🟠", "label": "Haute", "order": 2},
-    "moyenne": {"emoji": "🟡", "label": "Moyenne", "order": 3},
-    "basse": {"emoji": "🟢", "label": "Basse", "order": 4},
-    "optionnel": {"emoji": "⚪", "label": "Optionnel", "order": 5},
-}
-
-
-# ═══════════════════════════════════════════════════════════
-# HELPERS
-# ═══════════════════════════════════════════════════════════
-
-def get_all_purchases(achete: bool = False) -> list:
-    """Récupère tous les achats"""
-    try:
-        with get_db_context() as db:
-            return db.query(FamilyPurchase).filter_by(achete=achete).all()
-    except:
-        return []
-
-
-def get_purchases_by_category(categorie: str, achete: bool = False) -> list:
-    """Récupère les achats par catégorie"""
-    try:
-        with get_db_context() as db:
-            return db.query(FamilyPurchase).filter(
-                FamilyPurchase.categorie == categorie,
-                FamilyPurchase.achete == achete
-            ).order_by(FamilyPurchase.priorite).all()
-    except:
-        return []
-
-
-def get_purchases_by_groupe(groupe: str, achete: bool = False) -> list:
-    """Récupère les achats par groupe (jules, nous, maison)"""
-    categories = [k for k, v in CATEGORIES.items() if v["groupe"] == groupe]
-    try:
-        with get_db_context() as db:
-            return db.query(FamilyPurchase).filter(
-                FamilyPurchase.categorie.in_(categories),
-                FamilyPurchase.achete == achete
-            ).order_by(FamilyPurchase.priorite).all()
-    except:
-        return []
-
-
-def get_stats() -> dict:
-    """Calcule les statistiques des achats"""
-    try:
-        with get_db_context() as db:
-            en_attente = db.query(FamilyPurchase).filter_by(achete=False).all()
-            achetes = db.query(FamilyPurchase).filter_by(achete=True).all()
-            
-            total_estime = sum(p.prix_estime or 0 for p in en_attente)
-            total_depense = sum(p.prix_reel or p.prix_estime or 0 for p in achetes)
-            urgents = len([p for p in en_attente if p.priorite in ["urgent", "haute"]])
-            
-            return {
-                "en_attente": len(en_attente),
-                "achetes": len(achetes),
-                "total_estime": total_estime,
-                "total_depense": total_depense,
-                "urgents": urgents,
-            }
-    except:
-        return {
-            "en_attente": 0,
-            "achetes": 0,
-            "total_estime": 0,
-            "total_depense": 0,
-            "urgents": 0,
-        }
-
-
-def mark_as_bought(purchase_id: int, prix_reel: float = None):
-    """Marque un achat comme effectué"""
-    try:
-        with get_db_context() as db:
-            purchase = db.get(FamilyPurchase, purchase_id)
-            if purchase:
-                purchase.achete = True
-                purchase.date_achat = date.today()
-                if prix_reel:
-                    purchase.prix_reel = prix_reel
-                db.commit()
-    except:
-        pass
-
-
-def delete_purchase(purchase_id: int):
-    """Supprime un achat"""
-    try:
-        with get_db_context() as db:
-            purchase = db.get(FamilyPurchase, purchase_id)
-            if purchase:
-                db.delete(purchase)
-                db.commit()
-    except:
-        pass
-
-
-# ═══════════════════════════════════════════════════════════
-# UI COMPONENTS
-# ═══════════════════════════════════════════════════════════
 
 def render_dashboard():
     """Affiche le dashboard des achats"""
@@ -404,43 +282,3 @@ def render_par_magasin():
         with st.expander(f"❓ **Sans magasin** ({len(sans_magasin)} articles)"):
             for achat in sans_magasin:
                 st.write(f"• {achat.nom}")
-
-
-# ═══════════════════════════════════════════════════════════
-# PAGE PRINCIPALE
-# ═══════════════════════════════════════════════════════════
-
-def app():
-    """Point d'entrée du module Achats Famille"""
-    st.title("🛍️ Achats Famille")
-    
-    stats = get_stats()
-    st.caption(f"📋 {stats['en_attente']} en attente • 💰 ~{stats['total_estime']:.0f}€")
-    
-    # Tabs
-    tabs = st.tabs([
-        "📊 Dashboard", 
-        "👶 Jules", 
-        "👨‍👩‍👧 Nous", 
-        "🏪 Par magasin",
-        "➕ Ajouter",
-        "📜 Historique"
-    ])
-    
-    with tabs[0]:
-        render_dashboard()
-    
-    with tabs[1]:
-        render_liste_groupe("jules", "👶 Achats pour Jules")
-    
-    with tabs[2]:
-        render_liste_groupe("nous", "👨‍👩‍👧 Achats pour nous")
-    
-    with tabs[3]:
-        render_par_magasin()
-    
-    with tabs[4]:
-        render_add_form()
-    
-    with tabs[5]:
-        render_historique()
