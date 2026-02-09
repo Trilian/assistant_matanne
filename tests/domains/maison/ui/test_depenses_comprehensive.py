@@ -22,33 +22,37 @@ from typing import List
 class TestGetDepensesMois:
     """Tests pour get_depenses_mois."""
 
-    @patch('src.domains.maison.ui.depenses.obtenir_contexte_db')
+    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
     def test_get_depenses_mois_success(self, mock_db):
         from src.domains.maison.ui.depenses import get_depenses_mois
         
         mock_session = MagicMock()
-        mock_db.return_value.__enter__ = Mock(return_value=mock_session)
-        mock_db.return_value.__exit__ = Mock(return_value=False)
+        mock_context = MagicMock()
+        mock_context.__enter__ = MagicMock(return_value=mock_session)
+        mock_context.__exit__ = MagicMock(return_value=False)
+        mock_db.return_value = mock_context
         
         mock_depenses = [
             MagicMock(id=1, montant=100.0, categorie="alimentation"),
             MagicMock(id=2, montant=50.0, categorie="transport"),
         ]
-        mock_session.query.return_value.filter.return_value.all.return_value = mock_depenses
+        mock_session.query.return_value.filter.return_value.order_by.return_value.all.return_value = mock_depenses
         
         result = get_depenses_mois(mois=2, annee=2026)
         
         assert len(result) == 2
 
-    @patch('src.domains.maison.ui.depenses.obtenir_contexte_db')
+    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
     def test_get_depenses_mois_vide(self, mock_db):
         from src.domains.maison.ui.depenses import get_depenses_mois
         
         mock_session = MagicMock()
-        mock_db.return_value.__enter__ = Mock(return_value=mock_session)
-        mock_db.return_value.__exit__ = Mock(return_value=False)
+        mock_context = MagicMock()
+        mock_context.__enter__ = MagicMock(return_value=mock_session)
+        mock_context.__exit__ = MagicMock(return_value=False)
+        mock_db.return_value = mock_context
         
-        mock_session.query.return_value.filter.return_value.all.return_value = []
+        mock_session.query.return_value.filter.return_value.order_by.return_value.all.return_value = []
         
         result = get_depenses_mois(mois=1, annee=2026)
         
@@ -58,16 +62,18 @@ class TestGetDepensesMois:
 class TestGetDepensesAnnee:
     """Tests pour get_depenses_annee."""
 
-    @patch('src.domains.maison.ui.depenses.obtenir_contexte_db')
+    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
     def test_get_depenses_annee_success(self, mock_db):
         from src.domains.maison.ui.depenses import get_depenses_annee
         
         mock_session = MagicMock()
-        mock_db.return_value.__enter__ = Mock(return_value=mock_session)
-        mock_db.return_value.__exit__ = Mock(return_value=False)
+        mock_context = MagicMock()
+        mock_context.__enter__ = MagicMock(return_value=mock_session)
+        mock_context.__exit__ = MagicMock(return_value=False)
+        mock_db.return_value = mock_context
         
         mock_depenses = [MagicMock() for _ in range(12)]
-        mock_session.query.return_value.filter.return_value.all.return_value = mock_depenses
+        mock_session.query.return_value.filter.return_value.order_by.return_value.all.return_value = mock_depenses
         
         result = get_depenses_annee(annee=2026)
         
@@ -77,13 +83,15 @@ class TestGetDepensesAnnee:
 class TestGetDepenseById:
     """Tests pour get_depense_by_id."""
 
-    @patch('src.domains.maison.ui.depenses.obtenir_contexte_db')
+    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
     def test_get_depense_by_id_found(self, mock_db):
         from src.domains.maison.ui.depenses import get_depense_by_id
         
         mock_session = MagicMock()
-        mock_db.return_value.__enter__ = Mock(return_value=mock_session)
-        mock_db.return_value.__exit__ = Mock(return_value=False)
+        mock_context = MagicMock()
+        mock_context.__enter__ = MagicMock(return_value=mock_session)
+        mock_context.__exit__ = MagicMock(return_value=False)
+        mock_db.return_value = mock_context
         
         mock_depense = MagicMock(id=1, montant=100.0)
         mock_session.query.return_value.filter.return_value.first.return_value = mock_depense
@@ -93,13 +101,15 @@ class TestGetDepenseById:
         assert result is not None
         assert result.id == 1
 
-    @patch('src.domains.maison.ui.depenses.obtenir_contexte_db')
+    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
     def test_get_depense_by_id_not_found(self, mock_db):
         from src.domains.maison.ui.depenses import get_depense_by_id
         
         mock_session = MagicMock()
-        mock_db.return_value.__enter__ = Mock(return_value=mock_session)
-        mock_db.return_value.__exit__ = Mock(return_value=False)
+        mock_context = MagicMock()
+        mock_context.__enter__ = MagicMock(return_value=mock_session)
+        mock_context.__exit__ = MagicMock(return_value=False)
+        mock_db.return_value = mock_context
         
         mock_session.query.return_value.filter.return_value.first.return_value = None
         
@@ -111,19 +121,21 @@ class TestGetDepenseById:
 class TestCreateDepense:
     """Tests pour create_depense."""
 
-    @patch('src.domains.maison.ui.depenses.obtenir_contexte_db')
+    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
     def test_create_depense_success(self, mock_db):
         from src.domains.maison.ui.depenses import create_depense
         
         mock_session = MagicMock()
-        mock_db.return_value.__enter__ = Mock(return_value=mock_session)
-        mock_db.return_value.__exit__ = Mock(return_value=False)
+        mock_context = MagicMock()
+        mock_context.__enter__ = MagicMock(return_value=mock_session)
+        mock_context.__exit__ = MagicMock(return_value=False)
+        mock_db.return_value = mock_context
         
         data = {
-            "nom": "Courses",
             "montant": 150.0,
             "categorie": "alimentation",
-            "date": date(2026, 2, 6),
+            "mois": 2,
+            "annee": 2026,
         }
         
         result = create_depense(data)
@@ -131,13 +143,15 @@ class TestCreateDepense:
         mock_session.add.assert_called()
         mock_session.commit.assert_called()
 
-    @patch('src.domains.maison.ui.depenses.obtenir_contexte_db')
+    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
     def test_create_depense_minimal(self, mock_db):
         from src.domains.maison.ui.depenses import create_depense
         
         mock_session = MagicMock()
-        mock_db.return_value.__enter__ = Mock(return_value=mock_session)
-        mock_db.return_value.__exit__ = Mock(return_value=False)
+        mock_context = MagicMock()
+        mock_context.__enter__ = MagicMock(return_value=mock_session)
+        mock_context.__exit__ = MagicMock(return_value=False)
+        mock_db.return_value = mock_context
         
         data = {
             "montant": 50.0,
@@ -152,13 +166,15 @@ class TestCreateDepense:
 class TestUpdateDepense:
     """Tests pour update_depense."""
 
-    @patch('src.domains.maison.ui.depenses.obtenir_contexte_db')
+    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
     def test_update_depense_success(self, mock_db):
         from src.domains.maison.ui.depenses import update_depense
         
         mock_session = MagicMock()
-        mock_db.return_value.__enter__ = Mock(return_value=mock_session)
-        mock_db.return_value.__exit__ = Mock(return_value=False)
+        mock_context = MagicMock()
+        mock_context.__enter__ = MagicMock(return_value=mock_session)
+        mock_context.__exit__ = MagicMock(return_value=False)
+        mock_db.return_value = mock_context
         
         mock_depense = MagicMock(id=1, montant=100.0)
         mock_session.query.return_value.filter.return_value.first.return_value = mock_depense
@@ -168,13 +184,15 @@ class TestUpdateDepense:
         assert result is not None
         mock_session.commit.assert_called()
 
-    @patch('src.domains.maison.ui.depenses.obtenir_contexte_db')
+    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
     def test_update_depense_not_found(self, mock_db):
         from src.domains.maison.ui.depenses import update_depense
         
         mock_session = MagicMock()
-        mock_db.return_value.__enter__ = Mock(return_value=mock_session)
-        mock_db.return_value.__exit__ = Mock(return_value=False)
+        mock_context = MagicMock()
+        mock_context.__enter__ = MagicMock(return_value=mock_session)
+        mock_context.__exit__ = MagicMock(return_value=False)
+        mock_db.return_value = mock_context
         
         mock_session.query.return_value.filter.return_value.first.return_value = None
         
@@ -186,13 +204,15 @@ class TestUpdateDepense:
 class TestDeleteDepense:
     """Tests pour delete_depense."""
 
-    @patch('src.domains.maison.ui.depenses.obtenir_contexte_db')
+    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
     def test_delete_depense_success(self, mock_db):
         from src.domains.maison.ui.depenses import delete_depense
         
         mock_session = MagicMock()
-        mock_db.return_value.__enter__ = Mock(return_value=mock_session)
-        mock_db.return_value.__exit__ = Mock(return_value=False)
+        mock_context = MagicMock()
+        mock_context.__enter__ = MagicMock(return_value=mock_session)
+        mock_context.__exit__ = MagicMock(return_value=False)
+        mock_db.return_value = mock_context
         
         mock_depense = MagicMock(id=1)
         mock_session.query.return_value.filter.return_value.first.return_value = mock_depense
@@ -203,13 +223,15 @@ class TestDeleteDepense:
         mock_session.delete.assert_called_with(mock_depense)
         mock_session.commit.assert_called()
 
-    @patch('src.domains.maison.ui.depenses.obtenir_contexte_db')
+    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
     def test_delete_depense_not_found(self, mock_db):
         from src.domains.maison.ui.depenses import delete_depense
         
         mock_session = MagicMock()
-        mock_db.return_value.__enter__ = Mock(return_value=mock_session)
-        mock_db.return_value.__exit__ = Mock(return_value=False)
+        mock_context = MagicMock()
+        mock_context.__enter__ = MagicMock(return_value=mock_session)
+        mock_context.__exit__ = MagicMock(return_value=False)
+        mock_db.return_value = mock_context
         
         mock_session.query.return_value.filter.return_value.first.return_value = None
         
@@ -226,13 +248,15 @@ class TestDeleteDepense:
 class TestGetStatsGlobales:
     """Tests pour get_stats_globales."""
 
-    @patch('src.domains.maison.ui.depenses.obtenir_contexte_db')
+    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
     def test_get_stats_globales(self, mock_db):
         from src.domains.maison.ui.depenses import get_stats_globales
         
         mock_session = MagicMock()
-        mock_db.return_value.__enter__ = Mock(return_value=mock_session)
-        mock_db.return_value.__exit__ = Mock(return_value=False)
+        mock_context = MagicMock()
+        mock_context.__enter__ = MagicMock(return_value=mock_session)
+        mock_context.__exit__ = MagicMock(return_value=False)
+        mock_db.return_value = mock_context
         
         # Mock total
         mock_session.query.return_value.scalar.return_value = 1500.0
@@ -241,13 +265,15 @@ class TestGetStatsGlobales:
         
         assert isinstance(result, dict)
 
-    @patch('src.domains.maison.ui.depenses.obtenir_contexte_db')
+    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
     def test_get_stats_globales_empty(self, mock_db):
         from src.domains.maison.ui.depenses import get_stats_globales
         
         mock_session = MagicMock()
-        mock_db.return_value.__enter__ = Mock(return_value=mock_session)
-        mock_db.return_value.__exit__ = Mock(return_value=False)
+        mock_context = MagicMock()
+        mock_context.__enter__ = MagicMock(return_value=mock_session)
+        mock_context.__exit__ = MagicMock(return_value=False)
+        mock_db.return_value = mock_context
         
         mock_session.query.return_value.scalar.return_value = None
         
@@ -259,13 +285,15 @@ class TestGetStatsGlobales:
 class TestGetHistoriqueCategorie:
     """Tests pour get_historique_categorie."""
 
-    @patch('src.domains.maison.ui.depenses.obtenir_contexte_db')
+    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
     def test_get_historique_categorie(self, mock_db):
         from src.domains.maison.ui.depenses import get_historique_categorie
         
         mock_session = MagicMock()
-        mock_db.return_value.__enter__ = Mock(return_value=mock_session)
-        mock_db.return_value.__exit__ = Mock(return_value=False)
+        mock_context = MagicMock()
+        mock_context.__enter__ = MagicMock(return_value=mock_session)
+        mock_context.__exit__ = MagicMock(return_value=False)
+        mock_db.return_value = mock_context
         
         mock_session.query.return_value.filter.return_value.all.return_value = []
         
@@ -273,13 +301,15 @@ class TestGetHistoriqueCategorie:
         
         assert isinstance(result, list)
 
-    @patch('src.domains.maison.ui.depenses.obtenir_contexte_db')
+    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
     def test_get_historique_categorie_12_mois(self, mock_db):
         from src.domains.maison.ui.depenses import get_historique_categorie
         
         mock_session = MagicMock()
-        mock_db.return_value.__enter__ = Mock(return_value=mock_session)
-        mock_db.return_value.__exit__ = Mock(return_value=False)
+        mock_context = MagicMock()
+        mock_context.__enter__ = MagicMock(return_value=mock_session)
+        mock_context.__exit__ = MagicMock(return_value=False)
+        mock_db.return_value = mock_context
         
         mock_session.query.return_value.filter.return_value.all.return_value = []
         
@@ -325,10 +355,10 @@ class TestRenderDepenseCard:
         
         depense = MagicMock(
             id=1,
-            nom="Courses",
             montant=150.0,
             categorie="alimentation",
-            date=date(2026, 2, 6),
+            mois=2,
+            annee=2026,
         )
         
         # Should not raise
@@ -370,10 +400,10 @@ class TestRenderFormulaire:
         mock_submit.return_value = False
         
         depense = MagicMock(
-            nom="Courses",
             montant=150.0,
             categorie="alimentation",
-            date=date(2026, 2, 6),
+            mois=2,
+            annee=2026,
         )
         
         # Should not raise
@@ -472,13 +502,15 @@ class TestAppFunction:
 class TestEdgeCases:
     """Tests pour les cas limites."""
 
-    @patch('src.domains.maison.ui.depenses.obtenir_contexte_db')
+    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
     def test_create_depense_montant_zero(self, mock_db):
         from src.domains.maison.ui.depenses import create_depense
         
         mock_session = MagicMock()
-        mock_db.return_value.__enter__ = Mock(return_value=mock_session)
-        mock_db.return_value.__exit__ = Mock(return_value=False)
+        mock_context = MagicMock()
+        mock_context.__enter__ = MagicMock(return_value=mock_session)
+        mock_context.__exit__ = MagicMock(return_value=False)
+        mock_db.return_value = mock_context
         
         data = {"montant": 0.0, "categorie": "autre"}
         
@@ -487,13 +519,15 @@ class TestEdgeCases:
         # Should handle zero amount
         assert result is not None
 
-    @patch('src.domains.maison.ui.depenses.obtenir_contexte_db')
+    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
     def test_create_depense_montant_negatif(self, mock_db):
         from src.domains.maison.ui.depenses import create_depense
         
         mock_session = MagicMock()
-        mock_db.return_value.__enter__ = Mock(return_value=mock_session)
-        mock_db.return_value.__exit__ = Mock(return_value=False)
+        mock_context = MagicMock()
+        mock_context.__enter__ = MagicMock(return_value=mock_session)
+        mock_context.__exit__ = MagicMock(return_value=False)
+        mock_db.return_value = mock_context
         
         # Remboursement
         data = {"montant": -50.0, "categorie": "remboursement"}
@@ -503,13 +537,15 @@ class TestEdgeCases:
         # Should handle negative amount (remboursement)
         assert result is not None
 
-    @patch('src.domains.maison.ui.depenses.obtenir_contexte_db')
+    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
     def test_get_historique_categorie_inconnue(self, mock_db):
         from src.domains.maison.ui.depenses import get_historique_categorie
         
         mock_session = MagicMock()
-        mock_db.return_value.__enter__ = Mock(return_value=mock_session)
-        mock_db.return_value.__exit__ = Mock(return_value=False)
+        mock_context = MagicMock()
+        mock_context.__enter__ = MagicMock(return_value=mock_session)
+        mock_context.__exit__ = MagicMock(return_value=False)
+        mock_db.return_value = mock_context
         
         mock_session.query.return_value.filter.return_value.all.return_value = []
         
