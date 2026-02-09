@@ -1,0 +1,881 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.11.8, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\Nemo\AppData\Local\Programs\Python\Python311\python.exe
+cachedir: .pytest_cache
+rootdir: D:\Projet_streamlit\assistant_matanne
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, asyncio-1.3.0, cov-7.0.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... collected 85 items
+
+tests/services/test_push_notifications.py::TestConfiguration::test_vapid_public_key_exists PASSED [  1%]
+tests/services/test_push_notifications.py::TestConfiguration::test_vapid_email_format PASSED [  2%]
+tests/services/test_push_notifications.py::TestNotificationType::test_stock_low PASSED [  3%]
+tests/services/test_push_notifications.py::TestNotificationType::test_expiration_warning PASSED [  4%]
+tests/services/test_push_notifications.py::TestNotificationType::test_expiration_critical PASSED [  5%]
+tests/services/test_push_notifications.py::TestNotificationType::test_meal_reminder PASSED [  7%]
+tests/services/test_push_notifications.py::TestNotificationType::test_activity_reminder PASSED [  8%]
+tests/services/test_push_notifications.py::TestNotificationType::test_shopping_list_shared PASSED [  9%]
+tests/services/test_push_notifications.py::TestNotificationType::test_shopping_list_updated PASSED [ 10%]
+tests/services/test_push_notifications.py::TestNotificationType::test_milestone_reminder PASSED [ 11%]
+tests/services/test_push_notifications.py::TestNotificationType::test_health_check_reminder PASSED [ 12%]
+tests/services/test_push_notifications.py::TestNotificationType::test_system_update PASSED [ 14%]
+tests/services/test_push_notifications.py::TestNotificationType::test_sync_complete PASSED [ 15%]
+tests/services/test_push_notifications.py::TestPushSubscription::test_create_subscription PASSED [ 16%]
+tests/services/test_push_notifications.py::TestPushSubscription::test_subscription_defaults PASSED [ 17%]
+tests/services/test_push_notifications.py::TestPushSubscription::test_subscription_with_user_agent PASSED [ 18%]
+tests/services/test_push_notifications.py::TestPushSubscription::test_subscription_inactive PASSED [ 20%]
+tests/services/test_push_notifications.py::TestPushNotification::test_create_notification PASSED [ 21%]
+tests/services/test_push_notifications.py::TestPushNotification::test_notification_defaults PASSED [ 22%]
+tests/services/test_push_notifications.py::TestPushNotification::test_notification_with_type PASSED [ 23%]
+tests/services/test_push_notifications.py::TestPushNotification::test_notification_with_custom_vibrate PASSED [ 24%]
+tests/services/test_push_notifications.py::TestPushNotification::test_notification_with_actions PASSED [ 25%]
+tests/services/test_push_notifications.py::TestPushNotification::test_notification_with_data PASSED [ 27%]
+tests/services/test_push_notifications.py::TestPushNotification::test_notification_silent_mode PASSED [ 28%]
+tests/services/test_push_notifications.py::TestNotificationPreferences::test_create_preferences PASSED [ 29%]
+tests/services/test_push_notifications.py::TestNotificationPreferences::test_preferences_defaults PASSED [ 30%]
+tests/services/test_push_notifications.py::TestNotificationPreferences::test_preferences_quiet_hours PASSED [ 31%]
+tests/services/test_push_notifications.py::TestNotificationPreferences::test_preferences_custom_quiet_hours PASSED [ 32%]
+tests/services/test_push_notifications.py::TestNotificationPreferences::test_preferences_max_per_hour PASSED [ 34%]
+tests/services/test_push_notifications.py::TestNotificationPreferences::test_preferences_digest_mode PASSED [ 35%]
+tests/services/test_push_notifications.py::TestNotificationPreferences::test_preferences_all_disabled PASSED [ 36%]
+tests/services/test_push_notifications.py::TestPushNotificationService::test_init PASSED [ 37%]
+tests/services/test_push_notifications.py::TestPushNotificationService::test_save_subscription PASSED [ 38%]
+tests/services/test_push_notifications.py::TestPushNotificationService::test_save_subscription_duplicate PASSED [ 40%]
+tests/services/test_push_notifications.py::TestPushNotificationService::test_remove_subscription PASSED [ 41%]
+tests/services/test_push_notifications.py::TestPushNotificationService::test_remove_subscription_nonexistent_user PASSED [ 42%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceMethods::test_has_subscriptions_internal PASSED [ 43%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceMethods::test_has_preferences_internal PASSED [ 44%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceMethods::test_has_sent_count_internal PASSED [ 45%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceMethods::test_get_user_subscriptions_from_cache PASSED [ 47%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceMethods::test_get_user_subscriptions_from_db PASSED [ 48%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceMethods::test_get_preferences_creates_default PASSED [ 49%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceMethods::test_get_preferences_from_cache PASSED [ 50%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceMethods::test_update_preferences PASSED [ 51%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceMethods::test_should_send_returns_true PASSED [ 52%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceMethods::test_should_send_returns_false_disabled PASSED [ 54%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceNotifications::test_send_notification_no_subscriptions PASSED [ 55%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceNotifications::test_send_notification_preference_blocked PASSED [ 56%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceNotifications::test_send_notification_success PASSED [ 57%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceNotifications::test_send_notification_updates_count PASSED [ 58%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceNotifications::test_send_notification_handles_web_push_error PASSED [ 60%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceNotifications::test_send_notification_deactivates_on_410 PASSED [ 61%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceNotifications::test_send_to_all_users PASSED [ 62%]
+tests/services/test_push_notifications.py::TestPushNotificationServicePredefinedNotifications::test_notify_stock_low PASSED [ 63%]
+tests/services/test_push_notifications.py::TestPushNotificationServicePredefinedNotifications::test_notify_expiration_expired PASSED [ 64%]
+tests/services/test_push_notifications.py::TestPushNotificationServicePredefinedNotifications::test_notify_expiration_tomorrow PASSED [ 65%]
+tests/services/test_push_notifications.py::TestPushNotificationServicePredefinedNotifications::test_notify_expiration_critical PASSED [ 67%]
+tests/services/test_push_notifications.py::TestPushNotificationServicePredefinedNotifications::test_notify_expiration_warning PASSED [ 68%]
+tests/services/test_push_notifications.py::TestPushNotificationServicePredefinedNotifications::test_notify_meal_reminder PASSED [ 69%]
+tests/services/test_push_notifications.py::TestPushNotificationServicePredefinedNotifications::test_notify_shopping_list_shared PASSED [ 70%]
+tests/services/test_push_notifications.py::TestWebPushSending::test_send_web_push_import_error FAILED [ 71%]
+tests/services/test_push_notifications.py::TestWebPushSending::test_send_web_push_success PASSED [ 72%]
+tests/services/test_push_notifications.py::TestSupabaseIntegration::test_get_supabase_client_not_configured PASSED [ 74%]
+tests/services/test_push_notifications.py::TestSupabaseIntegration::test_save_subscription_to_db_no_client PASSED [ 75%]
+tests/services/test_push_notifications.py::TestSupabaseIntegration::test_save_subscription_to_db_with_client PASSED [ 76%]
+tests/services/test_push_notifications.py::TestSupabaseIntegration::test_remove_subscription_from_db_no_client PASSED [ 77%]
+tests/services/test_push_notifications.py::TestSupabaseIntegration::test_remove_subscription_from_db_with_client PASSED [ 78%]
+tests/services/test_push_notifications.py::TestSupabaseIntegration::test_load_subscriptions_from_db_no_client PASSED [ 80%]
+tests/services/test_push_notifications.py::TestSupabaseIntegration::test_load_subscriptions_from_db_with_client PASSED [ 81%]
+tests/services/test_push_notifications.py::TestSupabaseIntegration::test_load_subscriptions_from_db_error PASSED [ 82%]
+tests/services/test_push_notifications.py::TestSupabaseIntegration::test_save_preferences_to_db_no_client PASSED [ 83%]
+tests/services/test_push_notifications.py::TestSupabaseIntegration::test_save_preferences_to_db_with_client PASSED [ 84%]
+tests/services/test_push_notifications.py::TestSupabaseIntegration::test_save_preferences_to_db_error PASSED [ 85%]
+tests/services/test_push_notifications.py::TestSQLAlchemyMethods::test_sauvegarder_abonnement_db_nouveau FAILED [ 87%]
+tests/services/test_push_notifications.py::TestSQLAlchemyMethods::test_sauvegarder_abonnement_db_update_existant FAILED [ 88%]
+tests/services/test_push_notifications.py::TestSQLAlchemyMethods::test_lister_abonnements_utilisateur FAILED [ 89%]
+tests/services/test_push_notifications.py::TestSQLAlchemyMethods::test_lister_abonnements_utilisateur_vide PASSED [ 90%]
+tests/services/test_push_notifications.py::TestSQLAlchemyMethods::test_supprimer_abonnement_db FAILED [ 91%]
+tests/services/test_push_notifications.py::TestSQLAlchemyMethods::test_supprimer_abonnement_db_inexistant PASSED [ 92%]
+tests/services/test_push_notifications.py::TestSQLAlchemyMethods::test_obtenir_preferences_db FAILED [ 94%]
+tests/services/test_push_notifications.py::TestSQLAlchemyMethods::test_obtenir_preferences_db_inexistant PASSED [ 95%]
+tests/services/test_push_notifications.py::TestSQLAlchemyMethods::test_sauvegarder_preferences_db_nouveau FAILED [ 96%]
+tests/services/test_push_notifications.py::TestSQLAlchemyMethods::test_sauvegarder_preferences_db_update FAILED [ 97%]
+tests/services/test_push_notifications.py::TestFactory::test_get_push_notification_service PASSED [ 98%]
+tests/services/test_push_notifications.py::TestFactory::test_get_push_notification_service_singleton PASSED [100%]
+
+================================== FAILURES ===================================
+_____________ TestWebPushSending.test_send_web_push_import_error ______________
+tests\services\test_push_notifications.py:663: in test_send_web_push_import_error
+    original_import = __builtins__.__dict__.get('__import__')
+                      ^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'dict' object has no attribute '__dict__'
+---------------------------- Captured stdout setup ----------------------------
+[32mINFO[0m | src.core.cache            | Cache cleared
+---------------------------- Captured stderr setup ----------------------------
+2026-02-09 07:36:57.373 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.373 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.374 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.374 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.374 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.374 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.374 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.374 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.374 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.375 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.375 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.375 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+----------------------------- Captured log setup ------------------------------
+INFO     src.core.cache:cache.py:164 Cache cleared
+-------------------------- Captured stdout teardown ---------------------------
+[32mINFO[0m | src.core.cache            | Cache cleared
+-------------------------- Captured stderr teardown ---------------------------
+2026-02-09 07:36:57.580 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.581 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.581 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.581 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.581 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.581 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.581 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.581 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.581 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.581 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.581 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.581 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+---------------------------- Captured log teardown ----------------------------
+INFO     src.core.cache:cache.py:164 Cache cleared
+________ TestSQLAlchemyMethods.test_sauvegarder_abonnement_db_nouveau _________
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlite3.IntegrityError: NOT NULL constraint failed: push_subscriptions.id
+
+The above exception was the direct cause of the following exception:
+tests\services\test_push_notifications.py:866: in test_sauvegarder_abonnement_db_nouveau
+    result = service.sauvegarder_abonnement_db(
+src\core\decorators.py:60: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+src\services\push_notifications.py:661: in sauvegarder_abonnement_db
+    db.commit()
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:2030: in commit
+    trans.commit(_to_root=True)
+<string>:2: in commit
+    ???
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:1311: in commit
+    self._prepare_impl()
+<string>:2: in _prepare_impl
+    ???
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:1286: in _prepare_impl
+    self.session.flush()
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:4331: in flush
+    self._flush(objects)
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:4466: in _flush
+    with util.safe_reraise():
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\util\langhelpers.py:224: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:4427: in _flush
+    flush_context.execute()
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\unitofwork.py:466: in execute
+    rec.execute(self)
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\unitofwork.py:642: in execute
+    util.preloaded.orm_persistence.save_obj(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\persistence.py:93: in save_obj
+    _emit_insert_statements(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\persistence.py:1233: in _emit_insert_statements
+    result = connection.execute(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\sql\elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1846: in _execute_context
+    return self._exec_single_context(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:2363: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: push_subscriptions.id
+E   [SQL: INSERT INTO push_subscriptions (endpoint, p256dh_key, auth_key, device_info, user_id, created_at, last_used) VALUES (?, ?, ?, ?, ?, ?, ?)]
+E   [parameters: ('https://push.test.com/new', 'p256dh_key_test', 'auth_key_test', '{"browser": "Chrome"}', '1b4996bdce2a4fdfac5f929e6ffdcc89', '2026-02-09 06:36:57.992847', '2026-02-09 06:36:57.992847')]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)
+---------------------------- Captured stdout setup ----------------------------
+[32mINFO[0m | src.core.cache            | Cache cleared
+---------------------------- Captured stderr setup ----------------------------
+2026-02-09 07:36:57.810 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.811 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.811 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.811 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.811 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.811 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.811 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.811 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.811 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.811 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.811 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:57.812 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+----------------------------- Captured log setup ------------------------------
+INFO     src.core.cache:cache.py:164 Cache cleared
+-------------------------- Captured stdout teardown ---------------------------
+[32mINFO[0m | src.core.cache            | Cache cleared
+-------------------------- Captured stderr teardown ---------------------------
+2026-02-09 07:36:59.307 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:59.307 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:59.307 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:59.307 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:59.307 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:59.308 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:59.308 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:59.308 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:59.308 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:59.308 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:59.308 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:59.308 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+---------------------------- Captured log teardown ----------------------------
+INFO     src.core.cache:cache.py:164 Cache cleared
+____ TestSQLAlchemyMethods.test_sauvegarder_abonnement_db_update_existant _____
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlite3.IntegrityError: NOT NULL constraint failed: push_subscriptions.id
+
+The above exception was the direct cause of the following exception:
+tests\services\test_push_notifications.py:889: in test_sauvegarder_abonnement_db_update_existant
+    first = service.sauvegarder_abonnement_db(
+src\core\decorators.py:60: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+src\services\push_notifications.py:661: in sauvegarder_abonnement_db
+    db.commit()
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:2030: in commit
+    trans.commit(_to_root=True)
+<string>:2: in commit
+    ???
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:1311: in commit
+    self._prepare_impl()
+<string>:2: in _prepare_impl
+    ???
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:1286: in _prepare_impl
+    self.session.flush()
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:4331: in flush
+    self._flush(objects)
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:4466: in _flush
+    with util.safe_reraise():
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\util\langhelpers.py:224: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:4427: in _flush
+    flush_context.execute()
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\unitofwork.py:466: in execute
+    rec.execute(self)
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\unitofwork.py:642: in execute
+    util.preloaded.orm_persistence.save_obj(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\persistence.py:93: in save_obj
+    _emit_insert_statements(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\persistence.py:1233: in _emit_insert_statements
+    result = connection.execute(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\sql\elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1846: in _execute_context
+    return self._exec_single_context(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:2363: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: push_subscriptions.id
+E   [SQL: INSERT INTO push_subscriptions (endpoint, p256dh_key, auth_key, device_info, user_id, created_at, last_used) VALUES (?, ?, ?, ?, ?, ?, ?)]
+E   [parameters: ('https://push.test.com/update', 'old_key', 'old_auth', '{}', '953f8477546b447fa8ce45fe71c0ff94', '2026-02-09 06:36:59.351380', '2026-02-09 06:36:59.351380')]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)
+---------------------------- Captured stdout setup ----------------------------
+[32mINFO[0m | src.core.cache            | Cache cleared
+---------------------------- Captured stderr setup ----------------------------
+2026-02-09 07:36:59.334 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:59.334 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:59.335 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:59.335 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:59.336 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:59.336 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:59.337 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:59.338 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:59.338 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:59.339 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:59.339 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:36:59.340 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+----------------------------- Captured log setup ------------------------------
+INFO     src.core.cache:cache.py:164 Cache cleared
+-------------------------- Captured stdout teardown ---------------------------
+[32mINFO[0m | src.core.cache            | Cache cleared
+-------------------------- Captured stderr teardown ---------------------------
+2026-02-09 07:37:00.592 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:00.593 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:00.593 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:00.593 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:00.593 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:00.593 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:00.593 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:00.593 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:00.593 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:00.593 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:00.594 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:00.594 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+---------------------------- Captured log teardown ----------------------------
+INFO     src.core.cache:cache.py:164 Cache cleared
+__________ TestSQLAlchemyMethods.test_lister_abonnements_utilisateur __________
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlite3.IntegrityError: NOT NULL constraint failed: push_subscriptions.id
+
+The above exception was the direct cause of the following exception:
+tests\services\test_push_notifications.py:916: in test_lister_abonnements_utilisateur
+    service.sauvegarder_abonnement_db(
+src\core\decorators.py:60: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+src\services\push_notifications.py:661: in sauvegarder_abonnement_db
+    db.commit()
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:2030: in commit
+    trans.commit(_to_root=True)
+<string>:2: in commit
+    ???
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:1311: in commit
+    self._prepare_impl()
+<string>:2: in _prepare_impl
+    ???
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:1286: in _prepare_impl
+    self.session.flush()
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:4331: in flush
+    self._flush(objects)
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:4466: in _flush
+    with util.safe_reraise():
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\util\langhelpers.py:224: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:4427: in _flush
+    flush_context.execute()
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\unitofwork.py:466: in execute
+    rec.execute(self)
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\unitofwork.py:642: in execute
+    util.preloaded.orm_persistence.save_obj(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\persistence.py:93: in save_obj
+    _emit_insert_statements(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\persistence.py:1233: in _emit_insert_statements
+    result = connection.execute(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\sql\elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1846: in _execute_context
+    return self._exec_single_context(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:2363: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: push_subscriptions.id
+E   [SQL: INSERT INTO push_subscriptions (endpoint, p256dh_key, auth_key, device_info, user_id, created_at, last_used) VALUES (?, ?, ?, ?, ?, ?, ?)]
+E   [parameters: ('https://push.test.com/1', 'key1', 'auth1', '{}', '64f99bc7f8754c5890c2ac42db7916f1', '2026-02-09 06:37:00.611398', '2026-02-09 06:37:00.611398')]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)
+---------------------------- Captured stdout setup ----------------------------
+[32mINFO[0m | src.core.cache            | Cache cleared
+---------------------------- Captured stderr setup ----------------------------
+2026-02-09 07:37:00.595 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:00.605 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:00.605 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:00.605 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:00.605 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:00.605 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:00.605 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:00.605 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:00.605 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:00.605 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:00.606 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:00.606 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+----------------------------- Captured log setup ------------------------------
+INFO     src.core.cache:cache.py:164 Cache cleared
+-------------------------- Captured stdout teardown ---------------------------
+[32mINFO[0m | src.core.cache            | Cache cleared
+-------------------------- Captured stderr teardown ---------------------------
+2026-02-09 07:37:01.708 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:01.708 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:01.708 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:01.708 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:01.708 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:01.708 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:01.708 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:01.708 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:01.709 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:01.709 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:01.709 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:01.709 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+---------------------------- Captured log teardown ----------------------------
+INFO     src.core.cache:cache.py:164 Cache cleared
+_____________ TestSQLAlchemyMethods.test_supprimer_abonnement_db ______________
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlite3.IntegrityError: NOT NULL constraint failed: push_subscriptions.id
+
+The above exception was the direct cause of the following exception:
+tests\services\test_push_notifications.py:951: in test_supprimer_abonnement_db
+    service.sauvegarder_abonnement_db(
+src\core\decorators.py:60: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+src\services\push_notifications.py:661: in sauvegarder_abonnement_db
+    db.commit()
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:2030: in commit
+    trans.commit(_to_root=True)
+<string>:2: in commit
+    ???
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:1311: in commit
+    self._prepare_impl()
+<string>:2: in _prepare_impl
+    ???
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:1286: in _prepare_impl
+    self.session.flush()
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:4331: in flush
+    self._flush(objects)
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:4466: in _flush
+    with util.safe_reraise():
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\util\langhelpers.py:224: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:4427: in _flush
+    flush_context.execute()
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\unitofwork.py:466: in execute
+    rec.execute(self)
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\unitofwork.py:642: in execute
+    util.preloaded.orm_persistence.save_obj(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\persistence.py:93: in save_obj
+    _emit_insert_statements(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\persistence.py:1233: in _emit_insert_statements
+    result = connection.execute(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\sql\elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1846: in _execute_context
+    return self._exec_single_context(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:2363: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: push_subscriptions.id
+E   [SQL: INSERT INTO push_subscriptions (endpoint, p256dh_key, auth_key, device_info, user_id, created_at, last_used) VALUES (?, ?, ?, ?, ?, ?, ?)]
+E   [parameters: ('https://push.test.com/to_delete', 'key', 'auth', '{}', '134a7e7c1ab5445fb35504fd7fb57de2', '2026-02-09 06:37:01.729885', '2026-02-09 06:37:01.729885')]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)
+---------------------------- Captured stdout setup ----------------------------
+[32mINFO[0m | src.core.cache            | Cache cleared
+---------------------------- Captured stderr setup ----------------------------
+2026-02-09 07:37:01.722 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:01.722 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:01.722 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:01.722 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:01.722 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:01.722 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:01.722 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:01.722 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:01.722 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:01.722 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:01.723 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:01.723 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+----------------------------- Captured log setup ------------------------------
+INFO     src.core.cache:cache.py:164 Cache cleared
+-------------------------- Captured stdout teardown ---------------------------
+[32mINFO[0m | src.core.cache            | Cache cleared
+-------------------------- Captured stderr teardown ---------------------------
+2026-02-09 07:37:02.897 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:02.899 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:02.899 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:02.899 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:02.899 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:02.899 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:02.900 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:02.900 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:02.900 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:02.900 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:02.900 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:02.900 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+---------------------------- Captured log teardown ----------------------------
+INFO     src.core.cache:cache.py:164 Cache cleared
+______________ TestSQLAlchemyMethods.test_obtenir_preferences_db ______________
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlite3.IntegrityError: NOT NULL constraint failed: notification_preferences.id
+
+The above exception was the direct cause of the following exception:
+tests\services\test_push_notifications.py:985: in test_obtenir_preferences_db
+    service.sauvegarder_preferences_db(
+src\core\decorators.py:60: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+src\services\push_notifications.py:778: in sauvegarder_preferences_db
+    db.commit()
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:2030: in commit
+    trans.commit(_to_root=True)
+<string>:2: in commit
+    ???
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:1311: in commit
+    self._prepare_impl()
+<string>:2: in _prepare_impl
+    ???
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:1286: in _prepare_impl
+    self.session.flush()
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:4331: in flush
+    self._flush(objects)
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:4466: in _flush
+    with util.safe_reraise():
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\util\langhelpers.py:224: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:4427: in _flush
+    flush_context.execute()
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\unitofwork.py:466: in execute
+    rec.execute(self)
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\unitofwork.py:642: in execute
+    util.preloaded.orm_persistence.save_obj(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\persistence.py:93: in save_obj
+    _emit_insert_statements(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\persistence.py:1233: in _emit_insert_statements
+    result = connection.execute(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\sql\elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1846: in _execute_context
+    return self._exec_single_context(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:2363: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: notification_preferences.id
+E   [SQL: INSERT INTO notification_preferences (courses_rappel, repas_suggestion, stock_alerte, meteo_alerte, budget_alerte, quiet_hours_start, quiet_hours_end, user_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+E   [parameters: (0, 1, 1, 0, 1, '22:00:00.000000', '07:00:00.000000', '02d9d5014ff3479c925b01d14acf16a7', '2026-02-09 06:37:02.922995', '2026-02-09 06:37:02.922995')]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)
+---------------------------- Captured stdout setup ----------------------------
+[32mINFO[0m | src.core.cache            | Cache cleared
+---------------------------- Captured stderr setup ----------------------------
+2026-02-09 07:37:02.912 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:02.913 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:02.913 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:02.913 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:02.913 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:02.913 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:02.913 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:02.913 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:02.913 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:02.914 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:02.914 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:02.914 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+----------------------------- Captured log setup ------------------------------
+INFO     src.core.cache:cache.py:164 Cache cleared
+-------------------------- Captured stdout teardown ---------------------------
+[32mINFO[0m | src.core.cache            | Cache cleared
+-------------------------- Captured stderr teardown ---------------------------
+2026-02-09 07:37:04.011 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:04.011 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:04.011 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:04.012 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:04.012 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:04.012 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:04.012 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:04.012 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:04.012 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:04.012 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:04.012 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:04.012 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+---------------------------- Captured log teardown ----------------------------
+INFO     src.core.cache:cache.py:164 Cache cleared
+________ TestSQLAlchemyMethods.test_sauvegarder_preferences_db_nouveau ________
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlite3.IntegrityError: NOT NULL constraint failed: notification_preferences.id
+
+The above exception was the direct cause of the following exception:
+tests\services\test_push_notifications.py:1016: in test_sauvegarder_preferences_db_nouveau
+    result = service.sauvegarder_preferences_db(
+src\core\decorators.py:60: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+src\services\push_notifications.py:778: in sauvegarder_preferences_db
+    db.commit()
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:2030: in commit
+    trans.commit(_to_root=True)
+<string>:2: in commit
+    ???
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:1311: in commit
+    self._prepare_impl()
+<string>:2: in _prepare_impl
+    ???
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:1286: in _prepare_impl
+    self.session.flush()
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:4331: in flush
+    self._flush(objects)
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:4466: in _flush
+    with util.safe_reraise():
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\util\langhelpers.py:224: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:4427: in _flush
+    flush_context.execute()
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\unitofwork.py:466: in execute
+    rec.execute(self)
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\unitofwork.py:642: in execute
+    util.preloaded.orm_persistence.save_obj(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\persistence.py:93: in save_obj
+    _emit_insert_statements(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\persistence.py:1233: in _emit_insert_statements
+    result = connection.execute(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\sql\elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1846: in _execute_context
+    return self._exec_single_context(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:2363: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: notification_preferences.id
+E   [SQL: INSERT INTO notification_preferences (courses_rappel, repas_suggestion, stock_alerte, meteo_alerte, budget_alerte, quiet_hours_start, quiet_hours_end, user_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+E   [parameters: (1, 0, 1, 1, 0, '22:00:00.000000', '07:00:00.000000', 'c5b4f601a49d4c5397eff0fd31b88756', '2026-02-09 06:37:04.030391', '2026-02-09 06:37:04.030391')]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)
+---------------------------- Captured stdout setup ----------------------------
+[32mINFO[0m | src.core.cache            | Cache cleared
+---------------------------- Captured stderr setup ----------------------------
+2026-02-09 07:37:04.023 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:04.023 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:04.024 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:04.024 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:04.024 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:04.024 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:04.024 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:04.024 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:04.024 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:04.024 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:04.024 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:04.024 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+----------------------------- Captured log setup ------------------------------
+INFO     src.core.cache:cache.py:164 Cache cleared
+-------------------------- Captured stdout teardown ---------------------------
+[32mINFO[0m | src.core.cache            | Cache cleared
+-------------------------- Captured stderr teardown ---------------------------
+2026-02-09 07:37:05.184 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:05.184 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:05.184 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:05.184 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:05.184 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:05.184 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:05.185 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:05.185 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:05.185 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:05.185 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:05.185 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:05.185 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+---------------------------- Captured log teardown ----------------------------
+INFO     src.core.cache:cache.py:164 Cache cleared
+________ TestSQLAlchemyMethods.test_sauvegarder_preferences_db_update _________
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlite3.IntegrityError: NOT NULL constraint failed: notification_preferences.id
+
+The above exception was the direct cause of the following exception:
+tests\services\test_push_notifications.py:1040: in test_sauvegarder_preferences_db_update
+    first = service.sauvegarder_preferences_db(
+src\core\decorators.py:60: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+src\services\push_notifications.py:778: in sauvegarder_preferences_db
+    db.commit()
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:2030: in commit
+    trans.commit(_to_root=True)
+<string>:2: in commit
+    ???
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:1311: in commit
+    self._prepare_impl()
+<string>:2: in _prepare_impl
+    ???
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:1286: in _prepare_impl
+    self.session.flush()
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:4331: in flush
+    self._flush(objects)
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:4466: in _flush
+    with util.safe_reraise():
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\util\langhelpers.py:224: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:4427: in _flush
+    flush_context.execute()
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\unitofwork.py:466: in execute
+    rec.execute(self)
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\unitofwork.py:642: in execute
+    util.preloaded.orm_persistence.save_obj(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\persistence.py:93: in save_obj
+    _emit_insert_statements(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\persistence.py:1233: in _emit_insert_statements
+    result = connection.execute(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\sql\elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1846: in _execute_context
+    return self._exec_single_context(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:2363: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: notification_preferences.id
+E   [SQL: INSERT INTO notification_preferences (courses_rappel, repas_suggestion, stock_alerte, meteo_alerte, budget_alerte, quiet_hours_start, quiet_hours_end, user_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+E   [parameters: (1, 1, 1, 1, 1, '22:00:00.000000', '07:00:00.000000', '04a45e72ac424bf39e03e6e76a14e16e', '2026-02-09 06:37:05.194349', '2026-02-09 06:37:05.194349')]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)
+---------------------------- Captured stdout setup ----------------------------
+[32mINFO[0m | src.core.cache            | Cache cleared
+---------------------------- Captured stderr setup ----------------------------
+2026-02-09 07:37:05.188 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:05.188 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:05.188 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:05.188 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:05.188 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:05.189 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:05.189 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:05.189 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:05.189 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:05.189 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:05.189 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:05.189 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+----------------------------- Captured log setup ------------------------------
+INFO     src.core.cache:cache.py:164 Cache cleared
+-------------------------- Captured stdout teardown ---------------------------
+[32mINFO[0m | src.core.cache            | Cache cleared
+-------------------------- Captured stderr teardown ---------------------------
+2026-02-09 07:37:06.358 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:06.359 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:06.359 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:06.359 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:06.359 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:06.359 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:06.359 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:06.359 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:06.359 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:06.359 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:06.359 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:37:06.359 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+---------------------------- Captured log teardown ----------------------------
+INFO     src.core.cache:cache.py:164 Cache cleared
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.11.8-final-0 _______________
+
+Name                                 Stmts   Miss Branch BrPart   Cover   Missing
+---------------------------------------------------------------------------------
+src\services\push_notifications.py     320     66     54      4  80.21%   348->347, 390-394, 494-501, 532-533, 548-549, 645-651, 662-663, 705-707, 764->768, 779-780, 792-886, 891-962
+---------------------------------------------------------------------------------
+TOTAL                                  320     66     54      4  80.21%
+=========================== short test summary info ===========================
+FAILED tests/services/test_push_notifications.py::TestWebPushSending::test_send_web_push_import_error - AttributeError: 'dict' object has no attribute '__dict__'
+FAILED tests/services/test_push_notifications.py::TestSQLAlchemyMethods::test_sauvegarder_abonnement_db_nouveau - sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: push_subscriptions.id
+[SQL: INSERT INTO push_subscriptions (endpoint, p256dh_key, auth_key, device_info, user_id, created_at, last_used) VALUES (?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('https://push.test.com/new', 'p256dh_key_test', 'auth_key_test', '{"browser": "Chrome"}', '1b4996bdce2a4fdfac5f929e6ffdcc89', '2026-02-09 06:36:57.992847', '2026-02-09 06:36:57.992847')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+FAILED tests/services/test_push_notifications.py::TestSQLAlchemyMethods::test_sauvegarder_abonnement_db_update_existant - sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: push_subscriptions.id
+[SQL: INSERT INTO push_subscriptions (endpoint, p256dh_key, auth_key, device_info, user_id, created_at, last_used) VALUES (?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('https://push.test.com/update', 'old_key', 'old_auth', '{}', '953f8477546b447fa8ce45fe71c0ff94', '2026-02-09 06:36:59.351380', '2026-02-09 06:36:59.351380')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+FAILED tests/services/test_push_notifications.py::TestSQLAlchemyMethods::test_lister_abonnements_utilisateur - sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: push_subscriptions.id
+[SQL: INSERT INTO push_subscriptions (endpoint, p256dh_key, auth_key, device_info, user_id, created_at, last_used) VALUES (?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('https://push.test.com/1', 'key1', 'auth1', '{}', '64f99bc7f8754c5890c2ac42db7916f1', '2026-02-09 06:37:00.611398', '2026-02-09 06:37:00.611398')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+FAILED tests/services/test_push_notifications.py::TestSQLAlchemyMethods::test_supprimer_abonnement_db - sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: push_subscriptions.id
+[SQL: INSERT INTO push_subscriptions (endpoint, p256dh_key, auth_key, device_info, user_id, created_at, last_used) VALUES (?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('https://push.test.com/to_delete', 'key', 'auth', '{}', '134a7e7c1ab5445fb35504fd7fb57de2', '2026-02-09 06:37:01.729885', '2026-02-09 06:37:01.729885')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+FAILED tests/services/test_push_notifications.py::TestSQLAlchemyMethods::test_obtenir_preferences_db - sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: notification_preferences.id
+[SQL: INSERT INTO notification_preferences (courses_rappel, repas_suggestion, stock_alerte, meteo_alerte, budget_alerte, quiet_hours_start, quiet_hours_end, user_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: (0, 1, 1, 0, 1, '22:00:00.000000', '07:00:00.000000', '02d9d5014ff3479c925b01d14acf16a7', '2026-02-09 06:37:02.922995', '2026-02-09 06:37:02.922995')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+FAILED tests/services/test_push_notifications.py::TestSQLAlchemyMethods::test_sauvegarder_preferences_db_nouveau - sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: notification_preferences.id
+[SQL: INSERT INTO notification_preferences (courses_rappel, repas_suggestion, stock_alerte, meteo_alerte, budget_alerte, quiet_hours_start, quiet_hours_end, user_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: (1, 0, 1, 1, 0, '22:00:00.000000', '07:00:00.000000', 'c5b4f601a49d4c5397eff0fd31b88756', '2026-02-09 06:37:04.030391', '2026-02-09 06:37:04.030391')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+FAILED tests/services/test_push_notifications.py::TestSQLAlchemyMethods::test_sauvegarder_preferences_db_update - sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: notification_preferences.id
+[SQL: INSERT INTO notification_preferences (courses_rappel, repas_suggestion, stock_alerte, meteo_alerte, budget_alerte, quiet_hours_start, quiet_hours_end, user_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: (1, 1, 1, 1, 1, '22:00:00.000000', '07:00:00.000000', '04a45e72ac424bf39e03e6e76a14e16e', '2026-02-09 06:37:05.194349', '2026-02-09 06:37:05.194349')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+================= 8 failed, 77 passed, 12 warnings in 10.25s ==================

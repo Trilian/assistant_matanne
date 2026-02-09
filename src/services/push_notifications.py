@@ -279,12 +279,13 @@ class PushNotificationService:
         count_key = generate_count_key(user_id, now)
         current_count = self._sent_count.get(count_key, 0)
         
-        return should_send_notification(
+        result, _ = should_send_notification(
             notification_type=notification_type,
             preferences=prefs_dict,
-            current_count=current_count,
+            sent_count_this_hour=current_count,
             current_hour=now.hour
         )
+        return result
     
     # ═══════════════════════════════════════════════════════════
     # ENVOI DE NOTIFICATIONS

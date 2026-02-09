@@ -1,0 +1,259 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.11.8, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\Nemo\AppData\Local\Programs\Python\Python311\python.exe
+cachedir: .pytest_cache
+rootdir: D:\Projet_streamlit\assistant_matanne
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, asyncio-1.3.0, cov-7.0.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... collected 75 items
+
+tests/services/test_push_notifications.py::TestConfiguration::test_vapid_public_key_exists PASSED [  1%]
+tests/services/test_push_notifications.py::TestConfiguration::test_vapid_email_format PASSED [  2%]
+tests/services/test_push_notifications.py::TestNotificationType::test_stock_low PASSED [  4%]
+tests/services/test_push_notifications.py::TestNotificationType::test_expiration_warning PASSED [  5%]
+tests/services/test_push_notifications.py::TestNotificationType::test_expiration_critical PASSED [  6%]
+tests/services/test_push_notifications.py::TestNotificationType::test_meal_reminder PASSED [  8%]
+tests/services/test_push_notifications.py::TestNotificationType::test_activity_reminder PASSED [  9%]
+tests/services/test_push_notifications.py::TestNotificationType::test_shopping_list_shared PASSED [ 10%]
+tests/services/test_push_notifications.py::TestNotificationType::test_shopping_list_updated PASSED [ 12%]
+tests/services/test_push_notifications.py::TestNotificationType::test_milestone_reminder PASSED [ 13%]
+tests/services/test_push_notifications.py::TestNotificationType::test_health_check_reminder PASSED [ 14%]
+tests/services/test_push_notifications.py::TestNotificationType::test_system_update PASSED [ 16%]
+tests/services/test_push_notifications.py::TestNotificationType::test_sync_complete PASSED [ 17%]
+tests/services/test_push_notifications.py::TestPushSubscription::test_create_subscription PASSED [ 18%]
+tests/services/test_push_notifications.py::TestPushSubscription::test_subscription_defaults PASSED [ 20%]
+tests/services/test_push_notifications.py::TestPushSubscription::test_subscription_with_user_agent PASSED [ 21%]
+tests/services/test_push_notifications.py::TestPushSubscription::test_subscription_inactive PASSED [ 22%]
+tests/services/test_push_notifications.py::TestPushNotification::test_create_notification PASSED [ 24%]
+tests/services/test_push_notifications.py::TestPushNotification::test_notification_defaults PASSED [ 25%]
+tests/services/test_push_notifications.py::TestPushNotification::test_notification_with_type PASSED [ 26%]
+tests/services/test_push_notifications.py::TestPushNotification::test_notification_with_custom_vibrate PASSED [ 28%]
+tests/services/test_push_notifications.py::TestPushNotification::test_notification_with_actions PASSED [ 29%]
+tests/services/test_push_notifications.py::TestPushNotification::test_notification_with_data PASSED [ 30%]
+tests/services/test_push_notifications.py::TestPushNotification::test_notification_silent_mode PASSED [ 32%]
+tests/services/test_push_notifications.py::TestNotificationPreferences::test_create_preferences PASSED [ 33%]
+tests/services/test_push_notifications.py::TestNotificationPreferences::test_preferences_defaults PASSED [ 34%]
+tests/services/test_push_notifications.py::TestNotificationPreferences::test_preferences_quiet_hours PASSED [ 36%]
+tests/services/test_push_notifications.py::TestNotificationPreferences::test_preferences_custom_quiet_hours PASSED [ 37%]
+tests/services/test_push_notifications.py::TestNotificationPreferences::test_preferences_max_per_hour PASSED [ 38%]
+tests/services/test_push_notifications.py::TestNotificationPreferences::test_preferences_digest_mode PASSED [ 40%]
+tests/services/test_push_notifications.py::TestNotificationPreferences::test_preferences_all_disabled PASSED [ 41%]
+tests/services/test_push_notifications.py::TestPushNotificationService::test_init PASSED [ 42%]
+tests/services/test_push_notifications.py::TestPushNotificationService::test_save_subscription PASSED [ 44%]
+tests/services/test_push_notifications.py::TestPushNotificationService::test_save_subscription_duplicate PASSED [ 45%]
+tests/services/test_push_notifications.py::TestPushNotificationService::test_remove_subscription PASSED [ 46%]
+tests/services/test_push_notifications.py::TestPushNotificationService::test_remove_subscription_nonexistent_user PASSED [ 48%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceMethods::test_has_subscriptions_internal PASSED [ 49%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceMethods::test_has_preferences_internal PASSED [ 50%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceMethods::test_has_sent_count_internal PASSED [ 52%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceMethods::test_get_user_subscriptions_from_cache PASSED [ 53%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceMethods::test_get_user_subscriptions_from_db PASSED [ 54%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceMethods::test_get_preferences_creates_default PASSED [ 56%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceMethods::test_get_preferences_from_cache PASSED [ 57%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceMethods::test_update_preferences PASSED [ 58%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceMethods::test_should_send_returns_true FAILED [ 60%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceMethods::test_should_send_returns_false_disabled FAILED [ 61%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceNotifications::test_send_notification_no_subscriptions PASSED [ 62%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceNotifications::test_send_notification_preference_blocked PASSED [ 64%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceNotifications::test_send_notification_success PASSED [ 65%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceNotifications::test_send_notification_updates_count PASSED [ 66%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceNotifications::test_send_notification_handles_web_push_error PASSED [ 68%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceNotifications::test_send_notification_deactivates_on_410 PASSED [ 69%]
+tests/services/test_push_notifications.py::TestPushNotificationServiceNotifications::test_send_to_all_users PASSED [ 70%]
+tests/services/test_push_notifications.py::TestPushNotificationServicePredefinedNotifications::test_notify_stock_low PASSED [ 72%]
+tests/services/test_push_notifications.py::TestPushNotificationServicePredefinedNotifications::test_notify_expiration_expired PASSED [ 73%]
+tests/services/test_push_notifications.py::TestPushNotificationServicePredefinedNotifications::test_notify_expiration_tomorrow PASSED [ 74%]
+tests/services/test_push_notifications.py::TestPushNotificationServicePredefinedNotifications::test_notify_expiration_critical PASSED [ 76%]
+tests/services/test_push_notifications.py::TestPushNotificationServicePredefinedNotifications::test_notify_expiration_warning PASSED [ 77%]
+tests/services/test_push_notifications.py::TestPushNotificationServicePredefinedNotifications::test_notify_meal_reminder PASSED [ 78%]
+tests/services/test_push_notifications.py::TestPushNotificationServicePredefinedNotifications::test_notify_shopping_list_shared PASSED [ 80%]
+tests/services/test_push_notifications.py::TestWebPushSending::test_send_web_push_pywebpush_not_installed FAILED [ 81%]
+tests/services/test_push_notifications.py::TestWebPushSending::test_send_web_push_success PASSED [ 82%]
+tests/services/test_push_notifications.py::TestSupabaseIntegration::test_get_supabase_client_not_configured PASSED [ 84%]
+tests/services/test_push_notifications.py::TestSupabaseIntegration::test_save_subscription_to_db_no_client PASSED [ 85%]
+tests/services/test_push_notifications.py::TestSupabaseIntegration::test_save_subscription_to_db_with_client PASSED [ 86%]
+tests/services/test_push_notifications.py::TestSupabaseIntegration::test_remove_subscription_from_db_no_client PASSED [ 88%]
+tests/services/test_push_notifications.py::TestSupabaseIntegration::test_remove_subscription_from_db_with_client PASSED [ 89%]
+tests/services/test_push_notifications.py::TestSupabaseIntegration::test_load_subscriptions_from_db_no_client PASSED [ 90%]
+tests/services/test_push_notifications.py::TestSupabaseIntegration::test_load_subscriptions_from_db_with_client PASSED [ 92%]
+tests/services/test_push_notifications.py::TestSupabaseIntegration::test_load_subscriptions_from_db_error PASSED [ 93%]
+tests/services/test_push_notifications.py::TestSupabaseIntegration::test_save_preferences_to_db_no_client PASSED [ 94%]
+tests/services/test_push_notifications.py::TestSupabaseIntegration::test_save_preferences_to_db_with_client PASSED [ 96%]
+tests/services/test_push_notifications.py::TestSupabaseIntegration::test_save_preferences_to_db_error PASSED [ 97%]
+tests/services/test_push_notifications.py::TestFactory::test_get_push_notification_service PASSED [ 98%]
+tests/services/test_push_notifications.py::TestFactory::test_get_push_notification_service_singleton PASSED [100%]
+
+================================== FAILURES ===================================
+______ TestPushNotificationServiceMethods.test_should_send_returns_true _______
+tests\services\test_push_notifications.py:436: in test_should_send_returns_true
+    result = service.should_send("user", NotificationType.STOCK_LOW)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\services\push_notifications.py:282: in should_send
+    return should_send_notification(
+E   TypeError: should_send_notification() got an unexpected keyword argument 'current_count'
+---------------------------- Captured stdout setup ----------------------------
+[32mINFO[0m | src.core.cache            | Cache cleared
+---------------------------- Captured stderr setup ----------------------------
+2026-02-09 07:34:57.876 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:57.876 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:57.876 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:57.876 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:57.876 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:57.876 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:57.876 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:57.876 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:57.876 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:57.876 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:57.876 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:57.877 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+----------------------------- Captured log setup ------------------------------
+INFO     src.core.cache:cache.py:164 Cache cleared
+-------------------------- Captured stdout teardown ---------------------------
+[32mINFO[0m | src.core.cache            | Cache cleared
+-------------------------- Captured stderr teardown ---------------------------
+2026-02-09 07:34:58.095 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.095 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.095 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.095 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.095 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.095 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.096 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.096 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.096 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.096 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.096 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.096 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+---------------------------- Captured log teardown ----------------------------
+INFO     src.core.cache:cache.py:164 Cache cleared
+_ TestPushNotificationServiceMethods.test_should_send_returns_false_disabled __
+tests\services\test_push_notifications.py:447: in test_should_send_returns_false_disabled
+    result = service.should_send("user", NotificationType.STOCK_LOW)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\services\push_notifications.py:282: in should_send
+    return should_send_notification(
+E   TypeError: should_send_notification() got an unexpected keyword argument 'current_count'
+---------------------------- Captured stdout setup ----------------------------
+[32mINFO[0m | src.core.cache            | Cache cleared
+---------------------------- Captured stderr setup ----------------------------
+2026-02-09 07:34:58.097 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.098 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.098 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.098 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.098 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.098 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.098 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.098 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.098 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.098 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.098 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.098 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+----------------------------- Captured log setup ------------------------------
+INFO     src.core.cache:cache.py:164 Cache cleared
+-------------------------- Captured stdout teardown ---------------------------
+[32mINFO[0m | src.core.cache            | Cache cleared
+-------------------------- Captured stderr teardown ---------------------------
+2026-02-09 07:34:58.201 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.201 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.201 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.201 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.201 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.201 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.202 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.202 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.202 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.202 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.202 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.202 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+---------------------------- Captured log teardown ----------------------------
+INFO     src.core.cache:cache.py:164 Cache cleared
+________ TestWebPushSending.test_send_web_push_pywebpush_not_installed ________
+tests\services\test_push_notifications.py:657: in test_send_web_push_pywebpush_not_installed
+    service._send_web_push(subscription, notif)
+src\services\push_notifications.py:390: in _send_web_push
+    logger.warning("pywebpush non installÚ: pip install pywebpush")
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\logging\__init__.py:1501: in warning
+    self._log(WARNING, msg, args, **kwargs)
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\logging\__init__.py:1634: in _log
+    self.handle(record)
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\logging\__init__.py:1644: in handle
+    self.callHandlers(record)
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\logging\__init__.py:1706: in callHandlers
+    hdlr.handle(record)
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\logging\__init__.py:974: in handle
+    rv = self.filter(record)
+         ^^^^^^^^^^^^^^^^^^^
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\logging\__init__.py:830: in filter
+    result = f.filter(record)
+             ^^^^^^^^^^^^^^^^
+src\core\logging.py:106: in filter
+    message = re.sub(pattern, replacement, message, flags=re.IGNORECASE)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\re\__init__.py:185: in sub
+    return _compile(pattern, flags).sub(repl, string, count)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py:1124: in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py:1128: in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py:1183: in _execute_mock_call
+    raise effect
+src\services\push_notifications.py:354: in _send_web_push
+    from pywebpush import webpush, WebPushException
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py:1124: in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py:1128: in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py:1183: in _execute_mock_call
+    raise effect
+E   ImportError: No module
+---------------------------- Captured stdout setup ----------------------------
+[32mINFO[0m | src.core.cache            | Cache cleared
+---------------------------- Captured stderr setup ----------------------------
+2026-02-09 07:34:58.331 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.332 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.332 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.332 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.332 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.332 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.332 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.332 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.332 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.332 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.333 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:58.333 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+----------------------------- Captured log setup ------------------------------
+INFO     src.core.cache:cache.py:164 Cache cleared
+-------------------------- Captured stdout teardown ---------------------------
+[32mINFO[0m | src.core.cache            | Cache cleared
+-------------------------- Captured stderr teardown ---------------------------
+2026-02-09 07:34:59.398 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:59.398 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:59.398 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:59.398 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:59.398 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:59.399 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:59.399 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:59.399 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:59.399 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:59.399 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:59.399 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-09 07:34:59.399 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+---------------------------- Captured log teardown ----------------------------
+INFO     src.core.cache:cache.py:164 Cache cleared
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.11.8-final-0 _______________
+
+Name                                 Stmts   Miss Branch BrPart   Cover   Missing
+---------------------------------------------------------------------------------
+src\services\push_notifications.py     319     88     54      1  72.39%   347->346, 391-393, 493-500, 531-532, 547-548, 639-662, 680, 700-707, 725, 759-779, 791-885, 890-961
+---------------------------------------------------------------------------------
+TOTAL                                  319     88     54      1  72.39%
+=========================== short test summary info ===========================
+FAILED tests/services/test_push_notifications.py::TestPushNotificationServiceMethods::test_should_send_returns_true - TypeError: should_send_notification() got an unexpected keyword argument 'current_count'
+FAILED tests/services/test_push_notifications.py::TestPushNotificationServiceMethods::test_should_send_returns_false_disabled - TypeError: should_send_notification() got an unexpected keyword argument 'current_count'
+FAILED tests/services/test_push_notifications.py::TestWebPushSending::test_send_web_push_pywebpush_not_installed - ImportError: No module
+================== 3 failed, 72 passed, 5 warnings in 2.51s ===================
