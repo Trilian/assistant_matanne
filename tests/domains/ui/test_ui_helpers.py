@@ -74,7 +74,7 @@ class TestPrepareInventoryDataframe:
 
     def test_prepare_empty_dataframe(self, mock_streamlit):
         """Dataframe vide si pas d'inventaire."""
-        from src.domains.cuisine.ui.inventaire import _prepare_inventory_dataframe
+        from src.domains.cuisine.ui.inventaire.helpers import _prepare_inventory_dataframe
         
         result = _prepare_inventory_dataframe([])
         
@@ -83,7 +83,7 @@ class TestPrepareInventoryDataframe:
 
     def test_prepare_dataframe_with_data(self, mock_streamlit):
         """Dataframe avec données."""
-        from src.domains.cuisine.ui.inventaire import _prepare_inventory_dataframe
+        from src.domains.cuisine.ui.inventaire.helpers import _prepare_inventory_dataframe
         
         inventaire = [
             {
@@ -106,7 +106,7 @@ class TestPrepareInventoryDataframe:
 
     def test_prepare_dataframe_colonnes(self, mock_streamlit):
         """Vérifier les colonnes du dataframe."""
-        from src.domains.cuisine.ui.inventaire import _prepare_inventory_dataframe
+        from src.domains.cuisine.ui.inventaire.helpers import _prepare_inventory_dataframe
         
         inventaire = [
             {
@@ -134,7 +134,7 @@ class TestPrepareAlertDataframe:
 
     def test_prepare_alert_dataframe_empty(self, mock_streamlit):
         """Dataframe alertes vide."""
-        from src.domains.cuisine.ui.inventaire import _prepare_alert_dataframe
+        from src.domains.cuisine.ui.inventaire.helpers import _prepare_alert_dataframe
         
         result = _prepare_alert_dataframe([])
         
@@ -143,7 +143,7 @@ class TestPrepareAlertDataframe:
 
     def test_prepare_alert_dataframe_critique(self, mock_streamlit):
         """Dataframe alertes avec article critique."""
-        from src.domains.cuisine.ui.inventaire import _prepare_alert_dataframe
+        from src.domains.cuisine.ui.inventaire.helpers import _prepare_alert_dataframe
         
         articles = [
             {
@@ -166,7 +166,7 @@ class TestPrepareAlertDataframe:
 
     def test_prepare_alert_dataframe_peremption(self, mock_streamlit):
         """Dataframe alertes avec péremption proche."""
-        from src.domains.cuisine.ui.inventaire import _prepare_alert_dataframe
+        from src.domains.cuisine.ui.inventaire.helpers import _prepare_alert_dataframe
         
         articles = [
             {
@@ -189,7 +189,7 @@ class TestPrepareAlertDataframe:
 
     def test_prepare_alert_dataframe_colonnes(self, mock_streamlit):
         """Vérifier les colonnes du dataframe alertes."""
-        from src.domains.cuisine.ui.inventaire import _prepare_alert_dataframe
+        from src.domains.cuisine.ui.inventaire.helpers import _prepare_alert_dataframe
         
         articles = [
             {

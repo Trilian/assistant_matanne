@@ -547,11 +547,14 @@ class TestEdgeCases:
         mock_context.__exit__ = MagicMock(return_value=False)
         mock_db.return_value = mock_context
         
-        mock_session.query.return_value.filter.return_value.all.return_value = []
+        # La fonction utilise .first() pas .all()
+        mock_session.query.return_value.filter.return_value.first.return_value = None
         
         result = get_historique_categorie("categorie_inexistante")
         
-        assert result == []
+        # La fonction retourne toujours 12 mois, avec montants à 0 si pas de données
+        assert len(result) == 12
+        assert all(r["montant"] == 0 for r in result)
 
     def test_depenses_date_future(self):
         from datetime import timedelta
