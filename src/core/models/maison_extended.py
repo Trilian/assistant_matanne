@@ -243,6 +243,17 @@ class EcoAction(Base):
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
+    # Propriété de compatibilité (UI utilise cout_initial)
+    @property
+    def cout_initial(self) -> Optional[Decimal]:
+        """Alias pour cout_nouveau_initial (compatibilité UI)."""
+        return self.cout_nouveau_initial
+    
+    @cout_initial.setter
+    def cout_initial(self, value: Optional[Decimal]) -> None:
+        """Setter pour cout_nouveau_initial via alias."""
+        self.cout_nouveau_initial = value
+
     def __repr__(self) -> str:
         return f"<EcoAction(id={self.id}, nom='{self.nom}', type='{self.type_action}')>"
 

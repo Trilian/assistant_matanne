@@ -11,7 +11,7 @@ Ces tests couvrent:
 import pytest
 from unittest.mock import patch, MagicMock, call
 
-pytestmark = pytest.mark.skip(reason="module 'src.services' attribute errors")
+# Tests placeholder - implémentation future en Phase 17+
 
 
 class TestAccueilModule:
@@ -83,6 +83,7 @@ class TestFamilleModule:
         # Placeholder: implementation en Phase 17+
         assert True
     
+    @pytest.mark.skip(reason="src.services.famille n'existe pas")
     @patch('src.services.famille.FamilleService')
     def test_famille_load_members(self, mock_service):
         """Le module Famille charge les membres de la famille."""
@@ -91,6 +92,7 @@ class TestFamilleModule:
         # Placeholder: implementation en Phase 17+
         assert True
     
+    @pytest.mark.skip(reason="src.services.famille n'existe pas")
     @patch('src.services.famille.FamilleService')
     def test_famille_display_child_info(self, mock_service):
         """Le module Famille affiche les infos de l'enfant."""
@@ -103,6 +105,7 @@ class TestFamilleModule:
 class TestPlanningModule:
     """Tests pour module Planning."""
     
+    @pytest.mark.skip(reason="streamlit.calendar n'existe pas")
     @patch('streamlit.calendar')
     @patch('src.services.planning.PlanningService')
     def test_planning_initialization(self, mock_service, mock_calendar):

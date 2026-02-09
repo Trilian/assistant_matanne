@@ -3,7 +3,7 @@ Tests pour les logiques de domaines manquants.
 
 Couvre: cuisine, famille, jeux, maison, planning.
 
-NOTE: Tests skipped - models created without required fields (temps_preparation, etc.)
+NOTE: Certains tests peuvent échouer si les modèles ont des champs requis non fournis.
 """
 
 import pytest
@@ -12,9 +12,6 @@ from datetime import datetime, date, timedelta
 from sqlalchemy.orm import Session
 
 from src.core.models import Recette, Planning, Repas
-
-# Skip all tests - models missing required fields
-pytestmark = pytest.mark.skip(reason="Models created without required fields")
 
 
 @pytest.mark.unit

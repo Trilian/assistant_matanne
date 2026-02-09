@@ -1,7 +1,7 @@
 import importlib
 import pytest
 
-pytestmark = pytest.mark.skip(reason="EcoAction model doesn't have cout_initial field")
+# Tests ré-activés - EcoAction.cout_initial est maintenant une propriété compatible
 
 def test_import_eco_tips_ui():
     import src.domains.maison.ui.eco_tips
@@ -89,7 +89,7 @@ def test_render_action_card(monkeypatch, fake_action_dict):
     # Patch tous les widgets Streamlit utilisés
     action = EcoAction(**fake_action_dict)
     monkeypatch.setattr(eco_tips.st, "container", lambda border: MagicMock(__enter__=lambda s: None, __exit__=lambda s, a, b, c: None))
-    monkeypatch.setattr(eco_tips.st, "columns", lambda n: [MagicMock() for _ in range(n)])
+    monkeypatch.setattr(eco_tips.st, "columns", lambda n: [MagicMock() for _ in range(len(n) if isinstance(n, list) else n)])
     monkeypatch.setattr(eco_tips.st, "markdown", lambda *a, **k: None)
     monkeypatch.setattr(eco_tips.st, "caption", lambda *a, **k: None)
     monkeypatch.setattr(eco_tips.st, "metric", lambda *a, **k: None)
@@ -106,7 +106,7 @@ def test_render_formulaire(monkeypatch, fake_action_dict):
     # Patch tous les widgets Streamlit utilisés
     action = EcoAction(**fake_action_dict)
     monkeypatch.setattr(eco_tips.st, "form", lambda key: MagicMock(__enter__=lambda s: None, __exit__=lambda s, a, b, c: None))
-    monkeypatch.setattr(eco_tips.st, "columns", lambda n: [MagicMock() for _ in range(n)])
+    monkeypatch.setattr(eco_tips.st, "columns", lambda n: [MagicMock() for _ in range(len(n) if isinstance(n, list) else n)])
     monkeypatch.setattr(eco_tips.st, "text_input", lambda *a, **k: action.nom)
     monkeypatch.setattr(eco_tips.st, "selectbox", lambda *a, **k: action.type_action)
     monkeypatch.setattr(eco_tips.st, "text_area", lambda *a, **k: action.description)
@@ -123,7 +123,7 @@ def test_render_idees(monkeypatch):
     monkeypatch.setattr(eco_tips.st, "subheader", lambda *a, **k: None)
     monkeypatch.setattr(eco_tips.st, "caption", lambda *a, **k: None)
     monkeypatch.setattr(eco_tips.st, "container", lambda border: MagicMock(__enter__=lambda s: None, __exit__=lambda s, a, b, c: None))
-    monkeypatch.setattr(eco_tips.st, "columns", lambda n: [MagicMock() for _ in range(n)])
+    monkeypatch.setattr(eco_tips.st, "columns", lambda n: [MagicMock() for _ in range(len(n) if isinstance(n, list) else n)])
     monkeypatch.setattr(eco_tips.st, "markdown", lambda *a, **k: None)
     monkeypatch.setattr(eco_tips.st, "button", lambda *a, **k: False)
     monkeypatch.setattr(eco_tips.st, "success", lambda *a, **k: None)

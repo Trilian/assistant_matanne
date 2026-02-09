@@ -4,7 +4,7 @@ from unittest.mock import patch, MagicMock
 from datetime import date
 from decimal import Decimal
 
-pytestmark = pytest.mark.skip(reason="MockQuery object issues with filter/first")
+# Tests réactivés - vérification MockQuery
 
 import src.domains.maison.ui.jardin as jardin
 from src.core.models import GardenItem, GardenLog
@@ -60,6 +60,7 @@ def test_import_jardin():
     module = importlib.import_module("src.domains.maison.ui.jardin")
     assert module is not None
 
+@pytest.mark.skip(reason="app() nécessite mock complet de JardinService et tabs context managers")
 def test_render_app(monkeypatch):
     monkeypatch.setattr(jardin.st, "title", lambda *a, **k: None)
     monkeypatch.setattr(jardin.st, "caption", lambda *a, **k: None)
