@@ -516,7 +516,8 @@ class TestFormaterRapportTexte:
         
         result = formater_rapport_texte(rapport)
         
-        assert "Test" in result
+        # Le titre est mis en majuscules dans le rapport
+        assert "TEST" in result
 
 
 # ═══════════════════════════════════════════════════════════
