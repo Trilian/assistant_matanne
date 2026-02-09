@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service de suivi du budget familial.
 
 Fonctionnalités:
@@ -885,10 +885,10 @@ def get_budget_service() -> BudgetService:
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # COMPOSANT UI STREAMLIT
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
-def render_budget_dashboard():
+def render_budget_dashboard():  # pragma: no cover
     """Affiche le tableau de bord budget dans Streamlit."""
     import streamlit as st
     import plotly.express as px

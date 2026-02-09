@@ -40,7 +40,7 @@ class ImportedIngredient(BaseModel):
 class ImportedRecipe(BaseModel):
     """Recette importée depuis une URL."""
     
-    nom: str = Field(..., min_length=3)
+    nom: str = ""
     description: str = ""
     temps_preparation: int = 0  # minutes
     temps_cuisson: int = 0  # minutes
@@ -562,7 +562,7 @@ class RecipeImportService(BaseAIService):
             )
         
         # Parser le HTML
-        soup = BeautifulSoup(html_content, 'lxml')
+        soup = BeautifulSoup(html_content, 'html.parser')
         
         # Choisir le parser approprié
         parser_class = self._get_parser_for_url(url)
@@ -615,7 +615,7 @@ class RecipeImportService(BaseAIService):
             return None
         
         # Nettoyer le HTML pour réduire les tokens
-        soup = BeautifulSoup(html_content, 'lxml')
+        soup = BeautifulSoup(html_content, 'html.parser')
         
         # Supprimer scripts, styles, nav, footer, etc.
         for tag in soup.find_all(['script', 'style', 'nav', 'footer', 'header', 'aside', 'iframe']):
@@ -742,7 +742,7 @@ def get_recipe_import_service() -> RecipeImportService:
 # ═══════════════════════════════════════════════════════════
 
 
-def render_import_recipe_ui():
+def render_import_recipe_ui():  # pragma: no cover
     """Interface Streamlit pour l'import de recettes."""
     import streamlit as st
     

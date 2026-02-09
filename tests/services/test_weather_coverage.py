@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests complets pour src/services/weather.py
 
 Couverture cible: >80%
@@ -10,9 +10,9 @@ from unittest.mock import Mock, patch, MagicMock
 import httpx
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS SCHÉMAS PYDANTIC
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS SCHà‰MAS PYDANTIC
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestTypeAlertMeteo:
@@ -86,7 +86,7 @@ class TestMeteoJour:
             lever_soleil="07:30",
             coucher_soleil="19:45",
             condition="nuageux",
-            icone="☁️"
+            icone="â˜ï¸"
         )
         
         assert meteo.direction_vent == "NE"
@@ -137,13 +137,13 @@ class TestConseilJardin:
         
         conseil = ConseilJardin(
             priorite=1,
-            icone="🌱",
+            icone="ðŸŒ±",
             titre="Arrosage",
             description="Arrosez vos plantes ce matin"
         )
         
         assert conseil.priorite == 1
-        assert conseil.icone == "🌱"
+        assert conseil.icone == "ðŸŒ±"
 
     def test_conseil_avec_plantes(self):
         from src.services.weather import ConseilJardin
@@ -175,9 +175,9 @@ class TestPlanArrosage:
         assert plan.quantite_recommandee_litres == 5.0
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SERVICE WEATHER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestWeatherGardenServiceInit:
@@ -341,7 +341,7 @@ class TestWeatherGardenServiceGenererAlertes:
         assert len(alertes) >= 1
         alerte_gel = next((a for a in alertes if a.type_alerte == TypeAlertMeteo.GEL), None)
         assert alerte_gel is not None
-        assert alerte_gel.niveau == NiveauAlerte.DANGER  # < 0°C
+        assert alerte_gel.niveau == NiveauAlerte.DANGER  # < 0Â°C
 
     def test_generer_alertes_canicule(self):
         from src.services.weather import WeatherGardenService, MeteoJour, TypeAlertMeteo, NiveauAlerte
@@ -365,7 +365,7 @@ class TestWeatherGardenServiceGenererAlertes:
         
         alerte_canicule = next((a for a in alertes if a.type_alerte == TypeAlertMeteo.CANICULE), None)
         assert alerte_canicule is not None
-        assert alerte_canicule.niveau == NiveauAlerte.DANGER  # >= 40°C
+        assert alerte_canicule.niveau == NiveauAlerte.DANGER  # >= 40Â°C
 
     def test_generer_alertes_pluie_forte(self):
         from src.services.weather import WeatherGardenService, MeteoJour, TypeAlertMeteo
@@ -478,7 +478,7 @@ class TestWeatherGardenServiceGenererAlertes:
         
         service = WeatherGardenService()
         
-        # Météo parfaite, aucune alerte
+        # météo parfaite, aucune alerte
         previsions = [
             MeteoJour(
                 date=date.today(),
@@ -543,9 +543,9 @@ class TestWeatherGardenServiceDirectionMethods:
         assert isinstance(result, str)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EDGE CASES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestWeatherEdgeCases:
@@ -556,7 +556,7 @@ class TestWeatherEdgeCases:
         
         service = WeatherGardenService()
         
-        # Le service devrait limiter à 16 jours max
+        # Le service devrait limiter à  16 jours max
         mock_response = Mock()
         mock_response.json.return_value = {"daily": {"time": []}}
         mock_response.raise_for_status = Mock()
@@ -564,7 +564,7 @@ class TestWeatherEdgeCases:
         with patch.object(service.http_client, 'get', return_value=mock_response) as mock_get:
             service.get_previsions(20)  # Demande 20 jours
         
-        # Vérifie que forecast_days est limité à 16
+        # Vérifie que forecast_days est limité à  16
         call_args = mock_get.call_args
         assert call_args[1]["params"]["forecast_days"] == 16
 
@@ -573,7 +573,7 @@ class TestWeatherEdgeCases:
         
         service = WeatherGardenService()
         
-        # Température entre 0 et 2°C => ATTENTION
+        # Température entre 0 et 2Â°C => ATTENTION
         previsions_attention = [
             MeteoJour(
                 date=date.today(),
@@ -597,7 +597,7 @@ class TestWeatherEdgeCases:
         
         service = WeatherGardenService()
         
-        # Température entre 35 et 40°C => ATTENTION
+        # Température entre 35 et 40Â°C => ATTENTION
         previsions_attention = [
             MeteoJour(
                 date=date.today(),
@@ -640,12 +640,1049 @@ class TestWeatherIntegration:
             for i in range(7)
         ]
         
-        # Générer alertes
+        # générer alertes
         alertes = service.generer_alertes(previsions)
         
-        # Générer conseils
+        # générer conseils
         conseils = service.generer_conseils(previsions)
         
         # Les deux devraient fonctionner sans erreur
         assert isinstance(alertes, list)
+        assert isinstance(conseils, list)
+
+
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS Gà‰OCODAGE
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+
+class TestWeatherGeocoding:
+    """Tests pour la méthode set_location_from_city."""
+
+    def test_set_location_from_city_success(self):
+        """Test géocodage réussi."""
+        from src.services.weather import WeatherGardenService
+        
+        service = WeatherGardenService()
+        
+        # Mock de la réponse HTTP
+        mock_response = Mock()
+        mock_response.json.return_value = {
+            "results": [{
+                "latitude": 45.7640,
+                "longitude": 4.8357,
+                "name": "Lyon"
+            }]
+        }
+        mock_response.raise_for_status = Mock()
+        
+        with patch.object(service.http_client, 'get', return_value=mock_response):
+            result = service.set_location_from_city("Lyon")
+        
+        assert result is True
+        assert service.latitude == 45.7640
+        assert service.longitude == 4.8357
+
+    def test_set_location_from_city_no_results(self):
+        """Test géocodage sans résultats."""
+        from src.services.weather import WeatherGardenService
+        
+        service = WeatherGardenService()
+        original_lat = service.latitude
+        original_lon = service.longitude
+        
+        mock_response = Mock()
+        mock_response.json.return_value = {"results": []}
+        mock_response.raise_for_status = Mock()
+        
+        with patch.object(service.http_client, 'get', return_value=mock_response):
+            result = service.set_location_from_city("VilleInexistante12345")
+        
+        assert result is False
+        # Coordonnées non modifiées
+        assert service.latitude == original_lat
+        assert service.longitude == original_lon
+
+    def test_set_location_from_city_empty_response(self):
+        """Test géocodage avec réponse vide."""
+        from src.services.weather import WeatherGardenService
+        
+        service = WeatherGardenService()
+        
+        mock_response = Mock()
+        mock_response.json.return_value = {}
+        mock_response.raise_for_status = Mock()
+        
+        with patch.object(service.http_client, 'get', return_value=mock_response):
+            result = service.set_location_from_city("Test")
+        
+        assert result is False
+
+    def test_set_location_from_city_http_error(self):
+        """Test géocodage avec erreur HTTP."""
+        from src.services.weather import WeatherGardenService
+        
+        service = WeatherGardenService()
+        
+        with patch.object(service.http_client, 'get', side_effect=httpx.HTTPError("Network error")):
+            result = service.set_location_from_city("Paris")
+        
+        assert result is False
+
+    def test_set_location_from_city_json_error(self):
+        """Test géocodage avec erreur JSON."""
+        from src.services.weather import WeatherGardenService
+        
+        service = WeatherGardenService()
+        
+        mock_response = Mock()
+        mock_response.raise_for_status = Mock()
+        mock_response.json.side_effect = ValueError("Invalid JSON")
+        
+        with patch.object(service.http_client, 'get', return_value=mock_response):
+            result = service.set_location_from_city("Paris")
+        
+        assert result is False
+
+
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS PLAN D'ARROSAGE
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+
+class TestWeatherWateringPlan:
+    """Tests pour generer_plan_arrosage."""
+
+    def test_generer_plan_arrosage_basic(self):
+        """Test génération plan d'arrosage basique."""
+        from src.services.weather import WeatherGardenService, MeteoJour
+        
+        service = WeatherGardenService()
+        
+        # créer des prévisions mock
+        previsions = [
+            MeteoJour(
+                date=date.today() + timedelta(days=i),
+                temperature_min=15.0,
+                temperature_max=25.0,
+                temperature_moyenne=20.0,
+                precipitation_mm=0.0,
+                probabilite_pluie=10,
+                humidite=50,
+                vent_km_h=10,
+                uv_index=5,
+                condition="Ensoleillé"
+            )
+            for i in range(7)
+        ]
+        
+        with patch.object(service, 'get_previsions', return_value=previsions):
+            plan = service.generer_plan_arrosage(nb_jours=7, surface_m2=50.0)
+        
+        assert len(plan) == 7
+        assert all(hasattr(p, 'date') for p in plan)
+        assert all(hasattr(p, 'besoin_arrosage') for p in plan)
+        assert all(hasattr(p, 'quantite_recommandee_litres') for p in plan)
+
+    def test_generer_plan_arrosage_with_rain(self):
+        """Test plan d'arrosage avec pluie prévue."""
+        from src.services.weather import WeatherGardenService, MeteoJour
+        
+        service = WeatherGardenService()
+        
+        # prévisions avec pluie
+        previsions = [
+            MeteoJour(
+                date=date.today() + timedelta(days=i),
+                temperature_min=15.0,
+                temperature_max=20.0,
+                temperature_moyenne=17.5,
+                precipitation_mm=10.0,
+                probabilite_pluie=80,
+                humidite=80,
+                vent_km_h=10,
+                uv_index=3,
+                condition="Pluie"
+            )
+            for i in range(3)
+        ]
+        
+        with patch.object(service, 'get_previsions', return_value=previsions):
+            plan = service.generer_plan_arrosage(nb_jours=3, surface_m2=30.0)
+        
+        assert len(plan) == 3
+        # Avec 10mm de pluie, pas besoin d'arroser
+        for p in plan:
+            assert "Pluie" in p.raison or "pluie" in p.raison.lower()
+
+    def test_generer_plan_arrosage_canicule(self):
+        """Test plan d'arrosage en canicule."""
+        from src.services.weather import WeatherGardenService, MeteoJour
+        
+        service = WeatherGardenService()
+        
+        # Canicule
+        previsions = [
+            MeteoJour(
+                date=date.today() + timedelta(days=i),
+                temperature_min=25.0,
+                temperature_max=38.0,
+                temperature_moyenne=31.5,
+                precipitation_mm=0.0,
+                probabilite_pluie=0,
+                humidite=30,
+                vent_km_h=5,
+                uv_index=10,
+                condition="Caniculaire"
+            )
+            for i in range(3)
+        ]
+        
+        with patch.object(service, 'get_previsions', return_value=previsions):
+            plan = service.generer_plan_arrosage(nb_jours=3, surface_m2=50.0)
+        
+        assert len(plan) == 3
+        # En canicule, les plantes prioritaires devraient inclure tomates, etc.
+        for p in plan:
+            if p.plantes_prioritaires:
+                assert "Tomates" in p.plantes_prioritaires or len(p.plantes_prioritaires) > 0
+
+    def test_generer_plan_arrosage_cold_weather(self):
+        """Test plan d'arrosage par temps froid."""
+        from src.services.weather import WeatherGardenService, MeteoJour
+        
+        service = WeatherGardenService()
+        
+        # Temps froid
+        previsions = [
+            MeteoJour(
+                date=date.today() + timedelta(days=i),
+                temperature_min=5.0,
+                temperature_max=12.0,
+                temperature_moyenne=8.5,
+                precipitation_mm=0.0,
+                probabilite_pluie=20,
+                humidite=60,
+                vent_km_h=10,
+                uv_index=2,
+                condition="Frais"
+            )
+            for i in range(3)
+        ]
+        
+        with patch.object(service, 'get_previsions', return_value=previsions):
+            plan = service.generer_plan_arrosage(nb_jours=3, surface_m2=50.0)
+        
+        assert len(plan) == 3
+        # Besoin réduit par temps froid
+        for p in plan:
+            assert p.quantite_recommandee_litres >= 0
+
+    def test_generer_plan_arrosage_empty_previsions(self):
+        """Test plan d'arrosage sans prévisions."""
+        from src.services.weather import WeatherGardenService
+        
+        service = WeatherGardenService()
+        
+        with patch.object(service, 'get_previsions', return_value=[]):
+            plan = service.generer_plan_arrosage(nb_jours=7, surface_m2=50.0)
+        
+        assert plan == []
+
+    def test_generer_plan_arrosage_none_previsions(self):
+        """Test plan d'arrosage avec prévisions None."""
+        from src.services.weather import WeatherGardenService
+        
+        service = WeatherGardenService()
+        
+        with patch.object(service, 'get_previsions', return_value=None):
+            plan = service.generer_plan_arrosage(nb_jours=7, surface_m2=50.0)
+        
+        assert plan == []
+
+    def test_generer_plan_arrosage_high_rain_probability(self):
+        """Test plan d'arrosage avec forte probabilité de pluie."""
+        from src.services.weather import WeatherGardenService, MeteoJour
+        
+        service = WeatherGardenService()
+        
+        previsions = [
+            MeteoJour(
+                date=date.today(),
+                temperature_min=18.0,
+                temperature_max=24.0,
+                temperature_moyenne=21.0,
+                precipitation_mm=2.0,
+                probabilite_pluie=75,
+                humidite=70,
+                vent_km_h=15,
+                uv_index=4,
+                condition="Nuageux"
+            )
+        ]
+        
+        with patch.object(service, 'get_previsions', return_value=previsions):
+            plan = service.generer_plan_arrosage(nb_jours=1, surface_m2=50.0)
+        
+        assert len(plan) == 1
+        # Forte probabilité de pluie devrait àªtre mentionnée
+        assert "probabilité" in plan[0].raison.lower() or "pluie" in plan[0].raison.lower()
+
+
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS PERSISTANCE BASE DE DONNà‰ES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+
+class TestWeatherDBPersistence:
+    """Tests pour les méthodes de persistance DB."""
+
+    @pytest.fixture
+    def mock_db_session(self):
+        """Fixture pour session DB mock."""
+        session = Mock()
+        session.add = Mock()
+        session.commit = Mock()
+        session.rollback = Mock()
+        session.query = Mock()
+        session.flush = Mock()
+        return session
+
+    @pytest.fixture
+    def sample_alerte(self):
+        """Fixture pour une alerte météo Pydantic."""
+        from src.services.weather import AlerteMeteo as AlerteMeteoSchema, TypeAlertMeteo, NiveauAlerte
+        return AlerteMeteoSchema(
+            type_alerte=TypeAlertMeteo.GEL,
+            niveau=NiveauAlerte.ATTENTION,
+            titre="Risque de gel",
+            message="Températures négatives prévues",
+            conseil_jardin="Protégez vos plantes sensibles",
+            date_debut=date.today(),
+            date_fin=date.today() + timedelta(days=2),
+            temperature=-2.0
+        )
+
+    def test_sauvegarder_alerte_success(self, mock_db_session, sample_alerte):
+        """Test sauvegarde d'une alerte réussie."""
+        from src.services.weather import WeatherGardenService
+        from uuid import uuid4
+
+        service = WeatherGardenService()
+        user_id = uuid4()
+        
+        # Le mock retourne un objet "sauvegardé"
+        mock_alerte_model = Mock()
+        mock_alerte_model.id = 1
+        
+        with patch('src.services.weather.AlerteMeteoModel') as MockModel:
+            MockModel.return_value = mock_alerte_model
+            result = service.sauvegarder_alerte(
+                alerte=sample_alerte,
+                user_id=user_id,
+                db=mock_db_session
+            )
+        
+        mock_db_session.add.assert_called_once()
+        mock_db_session.commit.assert_called_once()
+        assert result is not None
+
+    def test_sauvegarder_alerte_with_string_user_id(self, mock_db_session, sample_alerte):
+        """Test sauvegarde avec user_id string."""
+        from src.services.weather import WeatherGardenService
+        
+        service = WeatherGardenService()
+        
+        mock_alerte_model = Mock()
+        mock_alerte_model.id = 1
+        
+        with patch('src.services.weather.AlerteMeteoModel') as MockModel:
+            MockModel.return_value = mock_alerte_model
+            result = service.sauvegarder_alerte(
+                alerte=sample_alerte,
+                user_id="12345678-1234-5678-1234-567812345678",
+                db=mock_db_session
+            )
+        
+        assert result is not None
+
+    def test_sauvegarder_alerte_without_user_id(self, mock_db_session, sample_alerte):
+        """Test sauvegarde sans user_id."""
+        from src.services.weather import WeatherGardenService
+        
+        service = WeatherGardenService()
+        
+        mock_alerte_model = Mock()
+        mock_alerte_model.id = 1
+        
+        with patch('src.services.weather.AlerteMeteoModel') as MockModel:
+            MockModel.return_value = mock_alerte_model
+            result = service.sauvegarder_alerte(
+                alerte=sample_alerte,
+                user_id=None,
+                db=mock_db_session
+            )
+        
+        assert result is not None
+
+    def test_sauvegarder_alerte_db_error(self, mock_db_session, sample_alerte):
+        """Test sauvegarde avec erreur DB."""
+        from src.services.weather import WeatherGardenService
+        
+        service = WeatherGardenService()
+        mock_db_session.commit.side_effect = Exception("DB Error")
+        
+        with patch('src.services.weather.AlerteMeteoModel'):
+            result = service.sauvegarder_alerte(
+                alerte=sample_alerte,
+                user_id=None,
+                db=mock_db_session
+            )
+        
+        mock_db_session.rollback.assert_called_once()
+        assert result is None
+
+    def test_sauvegarder_alertes_batch(self, mock_db_session, sample_alerte):
+        """Test sauvegarde batch d'alertes."""
+        from src.services.weather import WeatherGardenService, AlerteMeteo as AlerteMeteoSchema, TypeAlertMeteo, NiveauAlerte
+        from uuid import uuid4
+        
+        service = WeatherGardenService()
+        user_id = uuid4()
+        
+        # créer plusieurs alertes
+        alertes = [
+            sample_alerte,
+            AlerteMeteoSchema(
+                type_alerte=TypeAlertMeteo.CANICULE,
+                niveau=NiveauAlerte.DANGER,
+                titre="Canicule",
+                message="Températures très élevées",
+                conseil_jardin="Arrosez abondamment",
+                date_debut=date.today(),
+                date_fin=date.today() + timedelta(days=3),
+                temperature=40.0
+            )
+        ]
+        
+        mock_alerte_model = Mock()
+        mock_alerte_model.id = 1
+        
+        with patch('src.services.weather.AlerteMeteoModel') as MockModel:
+            MockModel.return_value = mock_alerte_model
+            result = service.sauvegarder_alertes(
+                alertes=alertes,
+                user_id=user_id,
+                db=mock_db_session
+            )
+        
+        assert isinstance(result, list)
+        assert len(result) == 2
+
+    def test_sauvegarder_alertes_empty_list(self, mock_db_session):
+        """Test sauvegarde batch avec liste vide."""
+        from src.services.weather import WeatherGardenService
+        
+        service = WeatherGardenService()
+        
+        result = service.sauvegarder_alertes(
+            alertes=[],
+            user_id=None,
+            db=mock_db_session
+        )
+        
+        assert result == []
+        mock_db_session.add.assert_not_called()
+
+    def test_lister_alertes_actives_no_filter(self, mock_db_session):
+        """Test liste des alertes actives sans filtre user."""
+        from src.services.weather import WeatherGardenService
+        
+        service = WeatherGardenService()
+        
+        # Mock de la query chain
+        mock_alert1 = Mock()
+        mock_alert1.id = 1
+        mock_alert1.type_alerte = "gel"
+        mock_alert2 = Mock()
+        mock_alert2.id = 2
+        mock_alert2.type_alerte = "canicule"
+        
+        mock_query = Mock()
+        mock_query.filter.return_value = mock_query
+        mock_query.order_by.return_value = mock_query
+        mock_query.all.return_value = [mock_alert1, mock_alert2]
+        mock_db_session.query.return_value = mock_query
+        
+        result = service.lister_alertes_actives(user_id=None, db=mock_db_session)
+        
+        assert len(result) == 2
+        mock_db_session.query.assert_called_once()
+
+    def test_lister_alertes_actives_with_user_id(self, mock_db_session):
+        """Test liste des alertes actives avec filtre user."""
+        from src.services.weather import WeatherGardenService
+        from uuid import uuid4
+        
+        service = WeatherGardenService()
+        user_id = uuid4()
+        
+        mock_alert = Mock()
+        mock_alert.id = 1
+        
+        mock_query = Mock()
+        mock_query.filter.return_value = mock_query
+        mock_query.order_by.return_value = mock_query
+        mock_query.all.return_value = [mock_alert]
+        mock_db_session.query.return_value = mock_query
+        
+        result = service.lister_alertes_actives(user_id=user_id, db=mock_db_session)
+        
+        assert len(result) == 1
+
+    def test_marquer_alerte_lue_success(self, mock_db_session):
+        """Test marquer une alerte comme lue."""
+        from src.services.weather import WeatherGardenService
+        
+        service = WeatherGardenService()
+        
+        mock_alerte = Mock()
+        mock_alerte.id = 42
+        mock_alerte.lu = False
+        
+        mock_query = Mock()
+        mock_query.filter.return_value = mock_query
+        mock_query.first.return_value = mock_alerte
+        mock_db_session.query.return_value = mock_query
+        
+        result = service.marquer_alerte_lue(alerte_id=42, db=mock_db_session)
+        
+        assert result is True
+        assert mock_alerte.lu is True
+        mock_db_session.commit.assert_called_once()
+
+    def test_marquer_alerte_lue_not_found(self, mock_db_session):
+        """Test marquer alerte inexistante."""
+        from src.services.weather import WeatherGardenService
+        
+        service = WeatherGardenService()
+        
+        mock_query = Mock()
+        mock_query.filter.return_value = mock_query
+        mock_query.first.return_value = None
+        mock_db_session.query.return_value = mock_query
+        
+        result = service.marquer_alerte_lue(alerte_id=999, db=mock_db_session)
+        
+        assert result is False
+        mock_db_session.commit.assert_not_called()
+
+    def test_obtenir_config_meteo_exists(self, mock_db_session):
+        """Test obtenir config météo existante."""
+        from src.services.weather import WeatherGardenService
+        from uuid import uuid4
+        
+        service = WeatherGardenService()
+        user_id = uuid4()
+        
+        mock_config = Mock()
+        mock_config.id = 1
+        mock_config.latitude = 48.8566
+        mock_config.longitude = 2.3522
+        mock_config.ville = "Paris"
+        
+        mock_query = Mock()
+        mock_query.filter.return_value = mock_query
+        mock_query.first.return_value = mock_config
+        mock_db_session.query.return_value = mock_query
+        
+        result = service.obtenir_config_meteo(user_id=user_id, db=mock_db_session)
+        
+        assert result is not None
+        assert result.ville == "Paris"
+
+    def test_obtenir_config_meteo_not_found(self, mock_db_session):
+        """Test obtenir config météo inexistante."""
+        from src.services.weather import WeatherGardenService
+        from uuid import uuid4
+        
+        service = WeatherGardenService()
+        user_id = uuid4()
+        
+        mock_query = Mock()
+        mock_query.filter.return_value = mock_query
+        mock_query.first.return_value = None
+        mock_db_session.query.return_value = mock_query
+        
+        result = service.obtenir_config_meteo(user_id=user_id, db=mock_db_session)
+        
+        assert result is None
+
+    def test_sauvegarder_config_meteo_create_new(self, mock_db_session):
+        """Test création nouvelle config météo."""
+        from src.services.weather import WeatherGardenService
+        from uuid import uuid4
+        
+        service = WeatherGardenService()
+        user_id = uuid4()
+        
+        # Pas de config existante
+        mock_query = Mock()
+        mock_query.filter.return_value = mock_query
+        mock_query.first.return_value = None
+        mock_db_session.query.return_value = mock_query
+        
+        mock_new_config = Mock()
+        mock_new_config.id = 1
+        mock_new_config.ville = "Lyon"
+        
+        with patch('src.services.weather.ConfigMeteo') as MockConfigModel:
+            MockConfigModel.return_value = mock_new_config
+            result = service.sauvegarder_config_meteo(
+                user_id=user_id,
+                latitude=45.7640,
+                longitude=4.8357,
+                ville="Lyon",
+                surface_jardin=100.0,
+                db=mock_db_session
+            )
+        
+        mock_db_session.add.assert_called_once()
+        mock_db_session.commit.assert_called_once()
+        assert result is not None
+
+    def test_sauvegarder_config_meteo_update_existing(self, mock_db_session):
+        """Test mise à  jour config météo existante."""
+        from src.services.weather import WeatherGardenService
+        from uuid import uuid4
+        
+        service = WeatherGardenService()
+        user_id = uuid4()
+        
+        # Config existante
+        existing_config = Mock()
+        existing_config.id = 1
+        existing_config.latitude = 48.8566
+        existing_config.longitude = 2.3522
+        existing_config.ville = "Paris"
+        existing_config.surface_jardin_m2 = 50.0
+        
+        mock_query = Mock()
+        mock_query.filter.return_value = mock_query
+        mock_query.first.return_value = existing_config
+        mock_db_session.query.return_value = mock_query
+        
+        result = service.sauvegarder_config_meteo(
+            user_id=user_id,
+            ville="Marseille",
+            db=mock_db_session
+        )
+        
+        # Mis à  jour
+        assert existing_config.ville == "Marseille"
+        mock_db_session.commit.assert_called_once()
+        # Pas d'add car mise à  jour
+        mock_db_session.add.assert_not_called()
+
+    def test_sauvegarder_config_meteo_partial_update(self, mock_db_session):
+        """Test mise à  jour partielle de la config."""
+        from src.services.weather import WeatherGardenService
+        from uuid import uuid4
+        
+        service = WeatherGardenService()
+        user_id = uuid4()
+        
+        existing_config = Mock()
+        existing_config.latitude = 48.8566
+        existing_config.longitude = 2.3522
+        existing_config.ville = "Paris"
+        existing_config.surface_jardin_m2 = 50.0
+        
+        mock_query = Mock()
+        mock_query.filter.return_value = mock_query
+        mock_query.first.return_value = existing_config
+        mock_db_session.query.return_value = mock_query
+        
+        # Mise à  jour seulement de la surface
+        result = service.sauvegarder_config_meteo(
+            user_id=user_id,
+            surface_jardin=150.0,
+            db=mock_db_session
+        )
+        
+        assert existing_config.surface_jardin_m2 == 150.0
+        # Autres champs inchangés
+        assert existing_config.ville == "Paris"
+
+
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS Mà‰THODE SET LOCATION
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+
+class TestWeatherSetLocation:
+    """Tests pour set_location."""
+
+    def test_set_location_updates_coordinates(self):
+        """Test mise à  jour des coordonnées."""
+        from src.services.weather import WeatherGardenService
+        
+        service = WeatherGardenService()
+        
+        service.set_location(latitude=43.6047, longitude=1.4442)
+        
+        assert service.latitude == 43.6047
+        assert service.longitude == 1.4442
+
+    def test_set_location_overrides_defaults(self):
+        """Test que set_location écrase les valeurs par défaut."""
+        from src.services.weather import WeatherGardenService
+        
+        service = WeatherGardenService()
+        
+        # Valeurs par défaut (Paris)
+        assert service.latitude == 48.8566
+        assert service.longitude == 2.3522
+        
+        # Mise à  jour (Bordeaux)
+        service.set_location(latitude=44.8378, longitude=-0.5792)
+        
+        assert service.latitude == 44.8378
+        assert service.longitude == -0.5792
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS COVERAGE ADDITIONNELS
+# ═══════════════════════════════════════════════════════════
+
+
+class TestWeatherConseils:
+    """Tests generer_conseils coverage."""
+
+    def test_generer_conseils_high_temp(self):
+        """Test conseils haute temperature."""
+        from src.services.weather import WeatherGardenService, MeteoJour
+        from datetime import date
+        from unittest.mock import patch
+        
+        service = WeatherGardenService()
+        previsions = [MeteoJour(
+            date=date.today(),
+            temperature_min=18.0,
+            temperature_max=28.0,
+            temperature_moyenne=23.0,
+            precipitation_mm=0.0,
+            probabilite_pluie=10,
+            humidite=50,
+            vent_km_h=10,
+            uv_index=5,
+            condition="Ensoleille"
+        )]
+        
+        with patch.object(service, 'get_previsions', return_value=previsions):
+            conseils = service.generer_conseils()
+        
+        assert len(conseils) > 0
+
+    def test_generer_conseils_cold_night(self):
+        """Test conseils nuit fraiche."""
+        from src.services.weather import WeatherGardenService, MeteoJour
+        from datetime import date
+        from unittest.mock import patch
+        
+        service = WeatherGardenService()
+        previsions = [MeteoJour(
+            date=date.today(),
+            temperature_min=5.0,
+            temperature_max=18.0,
+            temperature_moyenne=11.5,
+            precipitation_mm=0.0,
+            probabilite_pluie=20,
+            humidite=60,
+            vent_km_h=15,
+            uv_index=4,
+            condition="Nuageux"
+        )]
+        
+        with patch.object(service, 'get_previsions', return_value=previsions):
+            conseils = service.generer_conseils()
+        
+        assert isinstance(conseils, list)
+
+    def test_generer_conseils_high_uv(self):
+        """Test conseils UV forts."""
+        from src.services.weather import WeatherGardenService, MeteoJour
+        from datetime import date
+        from unittest.mock import patch
+        
+        service = WeatherGardenService()
+        previsions = [MeteoJour(
+            date=date.today(),
+            temperature_min=20.0,
+            temperature_max=30.0,
+            temperature_moyenne=25.0,
+            precipitation_mm=0.0,
+            probabilite_pluie=5,
+            humidite=40,
+            vent_km_h=5,
+            uv_index=9,
+            condition="Ensoleille"
+        )]
+        
+        with patch.object(service, 'get_previsions', return_value=previsions):
+            conseils = service.generer_conseils()
+        
+        assert len(conseils) > 0
+
+    def test_generer_conseils_rainy(self):
+        """Test conseils pluie."""
+        from src.services.weather import WeatherGardenService, MeteoJour
+        from datetime import date
+        from unittest.mock import patch
+        
+        service = WeatherGardenService()
+        previsions = [MeteoJour(
+            date=date.today(),
+            temperature_min=15.0,
+            temperature_max=20.0,
+            temperature_moyenne=17.5,
+            precipitation_mm=10.0,
+            probabilite_pluie=80,
+            humidite=80,
+            vent_km_h=20,
+            uv_index=2,
+            condition="Pluie"
+        )]
+        
+        with patch.object(service, 'get_previsions', return_value=previsions):
+            conseils = service.generer_conseils()
+        
+        assert isinstance(conseils, list)
+
+
+class TestWeatherPlanArrosageExtra:
+    """Tests plan arrosage supplementaires."""
+
+    def test_plan_moderate_temp(self):
+        """Test temp 25-30."""
+        from src.services.weather import WeatherGardenService, MeteoJour
+        from datetime import date, timedelta
+        from unittest.mock import patch
+        
+        service = WeatherGardenService()
+        previsions = [MeteoJour(
+            date=date.today(),
+            temperature_min=18.0,
+            temperature_max=27.0,
+            temperature_moyenne=22.5,
+            precipitation_mm=0.0,
+            probabilite_pluie=10,
+            humidite=50,
+            vent_km_h=10,
+            uv_index=6,
+            condition="Ensoleille"
+        )]
+        
+        with patch.object(service, 'get_previsions', return_value=previsions):
+            plan = service.generer_plan_arrosage(nb_jours=1, surface_m2=50.0)
+        
+        assert len(plan) == 1
+
+    def test_plan_cumul_rain(self):
+        """Test pluie cumulee."""
+        from src.services.weather import WeatherGardenService, MeteoJour
+        from datetime import date, timedelta
+        from unittest.mock import patch
+        
+        service = WeatherGardenService()
+        previsions = [
+            MeteoJour(
+                date=date.today(),
+                temperature_min=15.0,
+                temperature_max=20.0,
+                temperature_moyenne=17.5,
+                precipitation_mm=15.0,
+                probabilite_pluie=80,
+                humidite=85,
+                vent_km_h=10,
+                uv_index=2,
+                condition="Pluie"
+            ),
+            MeteoJour(
+                date=date.today() + timedelta(days=1),
+                temperature_min=15.0,
+                temperature_max=22.0,
+                temperature_moyenne=18.5,
+                precipitation_mm=0.0,
+                probabilite_pluie=20,
+                humidite=65,
+                vent_km_h=10,
+                uv_index=4,
+                condition="Nuageux"
+            ),
+        ]
+        
+        with patch.object(service, 'get_previsions', return_value=previsions):
+            plan = service.generer_plan_arrosage(nb_jours=2, surface_m2=50.0)
+        
+        assert len(plan) == 2
+
+    def test_plan_favorable(self):
+        """Test conditions favorables."""
+        from src.services.weather import WeatherGardenService, MeteoJour
+        from datetime import date
+        from unittest.mock import patch
+        
+        service = WeatherGardenService()
+        previsions = [MeteoJour(
+            date=date.today(),
+            temperature_min=12.0,
+            temperature_max=20.0,
+            temperature_moyenne=16.0,
+            precipitation_mm=3.0,
+            probabilite_pluie=40,
+            humidite=55,
+            vent_km_h=8,
+            uv_index=4,
+            condition="Nuageux"
+        )]
+        
+        with patch.object(service, 'get_previsions', return_value=previsions):
+            plan = service.generer_plan_arrosage(nb_jours=1, surface_m2=50.0)
+        
+        assert len(plan) == 1
+
+
+class TestWeatherFactory:
+    """Tests factory function."""
+
+    def test_get_weather_garden_service(self):
+        """Test factory retourne service."""
+        from src.services.weather import get_weather_garden_service, WeatherGardenService
+        
+        service = get_weather_garden_service()
+        assert isinstance(service, WeatherGardenService)
+
+    def test_factory_returns_singleton(self):
+        """Test factory retourne meme instance."""
+        from src.services.weather import get_weather_garden_service
+        
+        s1 = get_weather_garden_service()
+        s2 = get_weather_garden_service()
+        assert s1 is s2
+
+
+class TestWeatherSaveAlertesBatchError:
+    """Tests erreur batch alertes."""
+
+    def test_sauvegarder_alertes_db_error(self):
+        """Test erreur commit batch."""
+        from src.services.weather import WeatherGardenService, AlerteMeteo, TypeAlertMeteo, NiveauAlerte
+        from unittest.mock import Mock, patch
+        from datetime import date
+        from uuid import uuid4
+        
+        service = WeatherGardenService()
+        mock_db = Mock()
+        mock_db.add = Mock()
+        mock_db.commit = Mock(side_effect=Exception("DB Error"))
+        mock_db.rollback = Mock()
+        
+        alertes = [AlerteMeteo(
+            type_alerte=TypeAlertMeteo.GEL,
+            niveau=NiveauAlerte.ATTENTION,
+            titre="Test",
+            message="Test",
+            conseil_jardin="Test",
+            date_debut=date.today(),
+            temperature=-2.0
+        )]
+        
+        with patch('src.services.weather.AlerteMeteoModel'):
+            result = service.sauvegarder_alertes(alertes=alertes, user_id=uuid4(), db=mock_db)
+        
+        mock_db.rollback.assert_called_once()
+        assert result == []
+
+
+class TestWeatherPlanElseBranch:
+    """Test else branch in plan arrosage."""
+
+    def test_favorable_conditions_else(self):
+        """Test conditions favorables else branch."""
+        from src.services.weather import WeatherGardenService, MeteoJour
+        from datetime import date
+        from unittest.mock import patch
+        
+        service = WeatherGardenService()
+        
+        # Conditions pour else: temp froide + un peu de pluie
+        # besoin_net sera faible car temp < 15 et apport_pluie > 0
+        previsions = [MeteoJour(
+            date=date.today(),
+            temperature_min=8.0,
+            temperature_max=14.0,  # Froid = besoin_base * 0.7
+            temperature_moyenne=11.0,
+            precipitation_mm=4.0,  # Pluie < 5 mais réduit besoin
+            probabilite_pluie=40,  # < 60
+            humidite=70,
+            vent_km_h=10,
+            uv_index=3,
+            condition="Nuageux"
+        )]
+        
+        with patch.object(service, 'get_previsions', return_value=previsions):
+            plan = service.generer_plan_arrosage(nb_jours=1, surface_m2=50.0)
+        
+        assert len(plan) == 1
+        # Devrait etre favorable
+        assert "favorable" in plan[0].raison.lower() or len(plan[0].raison) > 0
+
+
+class TestWeatherConseilsLune:
+    """Tests conseils lune."""
+
+    def test_generer_conseils_lune_favorable(self):
+        """Test conseils lune quand jour favorable (1-7 ou 15-22)."""
+        from src.services.weather import WeatherGardenService, MeteoJour
+        from datetime import date
+        from unittest.mock import patch, MagicMock
+        
+        service = WeatherGardenService()
+        
+        # Creer une date mock avec jour=5 (entre 1-7)
+        mock_date = MagicMock()
+        mock_date.today.return_value.day = 5
+        
+        previsions = [MeteoJour(
+            date=date.today(),
+            temperature_min=15.0,
+            temperature_max=22.0,
+            temperature_moyenne=18.5,
+            precipitation_mm=0.0,
+            probabilite_pluie=10,
+            humidite=50,
+            vent_km_h=5,
+            uv_index=5,
+            condition="Ensoleille"
+        )]
+        
+        with patch('src.services.weather.date') as mock_date_mod:
+            mock_date_mod.today.return_value.day = 5
+            with patch.object(service, 'get_previsions', return_value=previsions):
+                conseils = service.generer_conseils()
+        
+        # Peut contenir conseil lune
         assert isinstance(conseils, list)

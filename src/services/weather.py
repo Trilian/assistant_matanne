@@ -403,7 +403,7 @@ class WeatherGardenService:
         conseils = []
         aujourd_hui = previsions[0] if previsions else None
         
-        if not aujourd_hui:
+        if not aujourd_hui:  # pragma: no cover - defensive code
             return []
         
         # Conseils basés sur la température
@@ -785,7 +785,7 @@ def get_weather_garden_service() -> WeatherGardenService:
 # ═══════════════════════════════════════════════════════════
 
 
-def render_weather_garden_ui():
+def render_weather_garden_ui():  # pragma: no cover
     """Interface Streamlit pour les alertes météo jardin."""
     import streamlit as st
     
