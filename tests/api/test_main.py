@@ -192,7 +192,6 @@ def test_list_recettes_endpoint():
     assert "items" in response.json()
 
 @pytest.mark.integration
-@pytest.mark.asyncio
 def test_list_inventaire_endpoint():
     from src.api.main import app
     from fastapi.testclient import TestClient

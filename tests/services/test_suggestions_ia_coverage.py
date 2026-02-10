@@ -774,7 +774,6 @@ class TestSuggererRecettes:
 class TestSuggererAvecIA:
     """Tests pour suggerer_avec_ia()."""
 
-    @pytest.mark.asyncio
     @patch('src.core.database.get_db_context')
     @patch('src.services.suggestions_ia.get_cache')
     @patch('src.services.suggestions_ia.AnalyseurIA')

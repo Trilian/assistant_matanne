@@ -1,0 +1,475 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.11.8, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\Nemo\AppData\Local\Programs\Python\Python311\python.exe
+cachedir: .pytest_cache
+rootdir: D:\Projet_streamlit\assistant_matanne
+configfile: pytest.ini
+plugins: anyio-4.12.1, asyncio-1.3.0, cov-7.0.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... collected 370 items
+
+tests/domains/maison/ui/test_depenses_comprehensive.py::TestGetDepensesMois::test_get_depenses_mois_success PASSED [  0%]
+tests/domains/maison/ui/test_depenses_comprehensive.py::TestGetDepensesMois::test_get_depenses_mois_vide PASSED [  0%]
+tests/domains/maison/ui/test_depenses_comprehensive.py::TestGetDepensesAnnee::test_get_depenses_annee_success PASSED [  0%]
+tests/domains/maison/ui/test_depenses_comprehensive.py::TestGetDepenseById::test_get_depense_by_id_found PASSED [  1%]
+tests/domains/maison/ui/test_depenses_comprehensive.py::TestGetDepenseById::test_get_depense_by_id_not_found PASSED [  1%]
+tests/domains/maison/ui/test_depenses_comprehensive.py::TestCreateDepense::test_create_depense_success PASSED [  1%]
+tests/domains/maison/ui/test_depenses_comprehensive.py::TestCreateDepense::test_create_depense_minimal PASSED [  1%]
+tests/domains/maison/ui/test_depenses_comprehensive.py::TestUpdateDepense::test_update_depense_success PASSED [  2%]
+tests/domains/maison/ui/test_depenses_comprehensive.py::TestUpdateDepense::test_update_depense_not_found PASSED [  2%]
+tests/domains/maison/ui/test_depenses_comprehensive.py::TestDeleteDepense::test_delete_depense_success PASSED [  2%]
+tests/domains/maison/ui/test_depenses_comprehensive.py::TestDeleteDepense::test_delete_depense_not_found PASSED [  2%]
+tests/domains/maison/ui/test_depenses_comprehensive.py::TestGetStatsGlobales::test_get_stats_globales PASSED [  3%]
+tests/domains/maison/ui/test_depenses_comprehensive.py::TestGetStatsGlobales::test_get_stats_globales_empty PASSED [  3%]
+tests/domains/maison/ui/test_depenses_comprehensive.py::TestGetHistoriqueCategorie::test_get_historique_categorie PASSED [  3%]
+tests/domains/maison/ui/test_depenses_comprehensive.py::TestGetHistoriqueCategorie::test_get_historique_categorie_12_mois PASSED [  4%]
+tests/domains/maison/ui/test_depenses_comprehensive.py::TestRenderStatsDashboard::test_render_stats_dashboard PASSED [  4%]
+tests/domains/maison/ui/test_depenses_comprehensive.py::TestRenderDepenseCard::test_render_depense_card PASSED [  4%]
+tests/domains/maison/ui/test_depenses_comprehensive.py::TestRenderFormulaire::test_render_formulaire_nouveau PASSED [  4%]
+tests/domains/maison/ui/test_depenses_comprehensive.py::TestRenderFormulaire::test_render_formulaire_edition PASSED [  5%]
+tests/domains/maison/ui/test_depenses_comprehensive.py::TestRenderGraphiqueEvolution::test_render_graphique_evolution PASSED [  5%]
+tests/domains/maison/ui/test_depenses_comprehensive.py::TestRenderComparaisonMois::test_render_comparaison_mois PASSED [  5%]
+tests/domains/maison/ui/test_depenses_comprehensive.py::TestRenderOnglets::test_render_onglet_mois PASSED [  5%]
+tests/domains/maison/ui/test_depenses_comprehensive.py::TestRenderOnglets::test_render_onglet_ajouter PASSED [  6%]
+tests/domains/maison/ui/test_depenses_comprehensive.py::TestRenderOnglets::test_render_onglet_analyse PASSED [  6%]
+tests/domains/maison/ui/test_depenses_comprehensive.py::TestAppFunction::test_app_main_entry PASSED [  6%]
+tests/domains/maison/ui/test_depenses_comprehensive.py::TestEdgeCases::test_create_depense_montant_zero PASSED [  7%]
+tests/domains/maison/ui/test_depenses_comprehensive.py::TestEdgeCases::test_create_depense_montant_negatif PASSED [  7%]
+tests/domains/maison/ui/test_depenses_comprehensive.py::TestEdgeCases::test_get_historique_categorie_inconnue PASSED [  7%]
+tests/domains/maison/ui/test_depenses_comprehensive.py::TestEdgeCases::test_depenses_date_future PASSED [  7%]
+tests/services/test_barcode_coverage.py::TestBarcodeData::test_barcode_data_valid PASSED [  8%]
+tests/services/test_barcode_coverage.py::TestBarcodeData::test_barcode_data_custom_values PASSED [  8%]
+tests/services/test_barcode_coverage.py::TestBarcodeData::test_barcode_data_code_too_short PASSED [  8%]
+tests/services/test_barcode_coverage.py::TestBarcodeArticle::test_barcode_article_defaults PASSED [  8%]
+tests/services/test_barcode_coverage.py::TestBarcodeArticle::test_barcode_article_custom PASSED [  9%]
+tests/services/test_barcode_coverage.py::TestBarcodeRecette::test_barcode_recette_basic PASSED [  9%]
+tests/services/test_barcode_coverage.py::TestScanResultat::test_scan_resultat_article PASSED [  9%]
+tests/services/test_barcode_coverage.py::TestScanResultat::test_scan_resultat_inconnu PASSED [ 10%]
+tests/services/test_barcode_coverage.py::TestBarcodeValidation::test_valider_barcode_ean13_valid PASSED [ 10%]
+tests/services/test_barcode_coverage.py::TestBarcodeValidation::test_valider_barcode_ean13_invalid_checksum PASSED [ 10%]
+tests/services/test_barcode_coverage.py::TestBarcodeValidation::test_valider_barcode_ean8_valid PASSED [ 10%]
+tests/services/test_barcode_coverage.py::TestBarcodeValidation::test_valider_barcode_ean8_invalid PASSED [ 11%]
+tests/services/test_barcode_coverage.py::TestBarcodeValidation::test_valider_barcode_upc_valid PASSED [ 11%]
+tests/services/test_barcode_coverage.py::TestBarcodeValidation::test_valider_barcode_upc_invalid PASSED [ 11%]
+tests/services/test_barcode_coverage.py::TestBarcodeValidation::test_valider_barcode_qr PASSED [ 11%]
+tests/services/test_barcode_coverage.py::TestBarcodeValidation::test_valider_barcode_code128 SKIPPED [ 12%]
+tests/services/test_barcode_coverage.py::TestBarcodeValidation::test_valider_barcode_code39 PASSED [ 12%]
+tests/services/test_barcode_coverage.py::TestBarcodeValidation::test_valider_barcode_unknown_format PASSED [ 12%]
+tests/services/test_barcode_coverage.py::TestChecksumValidation::test_checksum_ean13_true PASSED [ 12%]
+tests/services/test_barcode_coverage.py::TestChecksumValidation::test_checksum_ean13_false_wrong_length PASSED [ 13%]
+tests/services/test_barcode_coverage.py::TestChecksumValidation::test_checksum_ean13_false_not_digits PASSED [ 13%]
+tests/services/test_barcode_coverage.py::TestChecksumValidation::test_checksum_ean8_false_wrong_length PASSED [ 13%]
+tests/services/test_barcode_coverage.py::TestChecksumValidation::test_checksum_ean8_false_not_digits PASSED [ 14%]
+tests/services/test_barcode_coverage.py::TestChecksumValidation::test_checksum_upc_false_wrong_length PASSED [ 14%]
+tests/services/test_barcode_coverage.py::TestChecksumValidation::test_checksum_upc_false_not_digits PASSED [ 14%]
+tests/services/test_barcode_coverage.py::TestBarcodeServiceInit::test_service_init PASSED [ 14%]
+tests/services/test_barcode_coverage.py::TestBarcodeServiceScan::test_scanner_code_invalid_barcode SKIPPED [ 15%]
+tests/services/test_barcode_coverage.py::TestBarcodeServiceScan::test_scanner_code_article_found PASSED [ 15%]
+tests/services/test_barcode_coverage.py::TestBarcodeServiceScan::test_scanner_code_not_found PASSED [ 15%]
+tests/services/test_barcode_coverage.py::TestBarcodeServiceArticleOperations::test_ajouter_article_par_barcode_invalid_code SKIPPED [ 15%]
+tests/services/test_barcode_coverage.py::TestBarcodeServiceArticleOperations::test_ajouter_article_par_barcode_exists PASSED [ 16%]
+tests/services/test_barcode_coverage.py::TestBarcodeServiceArticleOperations::test_incrementer_stock_barcode_not_found PASSED [ 16%]
+tests/services/test_barcode_coverage.py::TestBarcodeServiceArticleOperations::test_incrementer_stock_barcode_success SKIPPED [ 16%]
+tests/services/test_barcode_coverage.py::TestBarcodeServiceStockVerification::test_verifier_stock_barcode_not_found PASSED [ 17%]
+tests/services/test_barcode_coverage.py::TestBarcodeServiceStockVerification::test_verifier_stock_barcode_critique PASSED [ 17%]
+tests/services/test_barcode_coverage.py::TestBarcodeServiceStockVerification::test_verifier_stock_barcode_faible PASSED [ 17%]
+tests/services/test_barcode_coverage.py::TestBarcodeServiceStockVerification::test_verifier_stock_barcode_ok PASSED [ 17%]
+tests/services/test_barcode_coverage.py::TestBarcodeServiceStockVerification::test_verifier_stock_barcode_peremption_urgent PASSED [ 18%]
+tests/services/test_barcode_coverage.py::TestBarcodeServiceStockVerification::test_verifier_stock_barcode_perime PASSED [ 18%]
+tests/services/test_barcode_coverage.py::TestBarcodeServiceStockVerification::test_verifier_stock_barcode_peremption_bientot PASSED [ 18%]
+tests/services/test_barcode_coverage.py::TestBarcodeServiceMappings::test_mettre_a_jour_barcode_invalid_code SKIPPED [ 18%]
+tests/services/test_barcode_coverage.py::TestBarcodeServiceMappings::test_mettre_a_jour_barcode_not_found PASSED [ 19%]
+tests/services/test_barcode_coverage.py::TestBarcodeServiceMappings::test_mettre_a_jour_barcode_success SKIPPED [ 19%]
+tests/services/test_barcode_coverage.py::TestBarcodeServiceMappings::test_lister_articles_avec_barcode PASSED [ 19%]
+tests/services/test_barcode_coverage.py::TestBarcodeServiceExportImport::test_exporter_barcodes SKIPPED [ 20%]
+tests/services/test_barcode_coverage.py::TestBarcodeServiceExportImport::test_importer_barcodes_success PASSED [ 20%]
+tests/services/test_barcode_coverage.py::TestBarcodeServiceExportImport::test_importer_barcodes_with_error PASSED [ 20%]
+tests/services/test_inventaire_sqlite_int.py::TestGetInventaireComplet::test_inventaire_vide PASSED [ 20%]
+tests/services/test_inventaire_sqlite_int.py::TestGetInventaireComplet::test_inventaire_avec_articles PASSED [ 21%]
+tests/services/test_inventaire_sqlite_int.py::TestGetInventaireComplet::test_filtrer_par_emplacement PASSED [ 21%]
+tests/services/test_inventaire_sqlite_int.py::TestGetInventaireComplet::test_filtrer_par_categorie PASSED [ 21%]
+tests/services/test_inventaire_sqlite_int.py::TestGetInventaireComplet::test_exclude_ok PASSED [ 21%]
+tests/services/test_inventaire_sqlite_int.py::TestGetInventaireComplet::test_contient_champs_requis PASSED [ 22%]
+tests/services/test_inventaire_sqlite_int.py::TestGetAlertes::test_alertes_structure PASSED [ 22%]
+tests/services/test_inventaire_sqlite_int.py::TestGetAlertes::test_alertes_groupees_par_type PASSED [ 22%]
+tests/services/test_inventaire_sqlite_int.py::TestAjouterArticle::test_ajouter_article_succes PASSED [ 22%]
+tests/services/test_inventaire_sqlite_int.py::TestAjouterArticle::test_ajouter_article_ingredient_inexistant PASSED [ 23%]
+tests/services/test_inventaire_sqlite_int.py::TestAjouterArticle::test_ajouter_article_deja_existant PASSED [ 23%]
+tests/services/test_inventaire_sqlite_int.py::TestAjouterArticle::test_ajouter_article_avec_date_peremption PASSED [ 23%]
+tests/services/test_inventaire_sqlite_int.py::TestMettreAJourArticle::test_maj_quantite PASSED [ 24%]
+tests/services/test_inventaire_sqlite_int.py::TestMettreAJourArticle::test_maj_emplacement PASSED [ 24%]
+tests/services/test_inventaire_sqlite_int.py::TestMettreAJourArticle::test_maj_date_peremption PASSED [ 24%]
+tests/services/test_inventaire_sqlite_int.py::TestMettreAJourArticle::test_maj_article_inexistant PASSED [ 24%]
+tests/services/test_inventaire_sqlite_int.py::TestMettreAJourArticle::test_maj_quantite_min PASSED [ 25%]
+tests/services/test_inventaire_sqlite_int.py::TestSupprimerArticle::test_supprimer_article_succes PASSED [ 25%]
+tests/services/test_inventaire_sqlite_int.py::TestSupprimerArticle::test_supprimer_article_inexistant PASSED [ 25%]
+tests/services/test_inventaire_sqlite_int.py::TestStatistiques::test_get_statistiques_vide PASSED [ 25%]
+tests/services/test_inventaire_sqlite_int.py::TestStatistiques::test_get_statistiques_avec_articles PASSED [ 26%]
+tests/services/test_inventaire_sqlite_int.py::TestStatistiques::test_get_stats_par_categorie PASSED [ 26%]
+tests/services/test_inventaire_sqlite_int.py::TestArticlesAPrelever::test_articles_a_prelever_vide PASSED [ 26%]
+tests/services/test_inventaire_sqlite_int.py::TestArticlesAPrelever::test_articles_a_prelever_avec_peremption PASSED [ 27%]
+tests/services/test_inventaire_sqlite_int.py::TestPhotos::test_ajouter_photo_article_inexistant PASSED [ 27%]
+tests/services/test_inventaire_sqlite_int.py::TestPhotos::test_supprimer_photo_article_inexistant PASSED [ 27%]
+tests/services/test_inventaire_sqlite_int.py::TestPhotos::test_obtenir_photo_article_inexistant PASSED [ 27%]
+tests/services/test_inventaire_sqlite_int.py::TestPhotos::test_ajouter_photo_succes PASSED [ 28%]
+tests/services/test_inventaire_sqlite_int.py::TestPhotos::test_supprimer_photo_succes PASSED [ 28%]
+tests/services/test_inventaire_sqlite_int.py::TestPhotos::test_supprimer_photo_sans_photo PASSED [ 28%]
+tests/services/test_inventaire_sqlite_int.py::TestNotifications::test_generer_notifications_alertes PASSED [ 28%]
+tests/services/test_inventaire_sqlite_int.py::TestNotifications::test_obtenir_alertes_actives PASSED [ 29%]
+tests/services/test_inventaire_sqlite_int.py::TestCalculerStatut::test_statut_ok_sans_peremption PASSED [ 29%]
+tests/services/test_inventaire_sqlite_int.py::TestCalculerStatut::test_statut_critique PASSED [ 29%]
+tests/services/test_inventaire_sqlite_int.py::TestCalculerStatut::test_statut_stock_bas PASSED [ 30%]
+tests/services/test_inventaire_sqlite_int.py::TestCalculerStatut::test_statut_peremption_proche PASSED [ 30%]
+tests/services/test_inventaire_sqlite_int.py::TestCalculerStatut::test_peremption_priorite_sur_stock PASSED [ 30%]
+tests/services/test_inventaire_sqlite_int.py::TestJoursAvantPeremption::test_sans_date PASSED [ 30%]
+tests/services/test_inventaire_sqlite_int.py::TestJoursAvantPeremption::test_date_future PASSED [ 31%]
+tests/services/test_inventaire_sqlite_int.py::TestJoursAvantPeremption::test_date_passee PASSED [ 31%]
+tests/services/test_inventaire_sqlite_int.py::TestHistorique::test_get_historique_vide PASSED [ 31%]
+tests/services/test_inventaire_sqlite_int.py::TestHistorique::test_get_historique_avec_limit PASSED [ 31%]
+tests/services/test_inventaire_sqlite_int.py::TestHistorique::test_get_historique_avec_article_id PASSED [ 32%]
+tests/services/test_recipe_import_integration.py::TestImportedIngredient::test_creation_valide PASSED [ 32%]
+tests/services/test_recipe_import_integration.py::TestImportedIngredient::test_avec_quantite PASSED [ 32%]
+tests/services/test_recipe_import_integration.py::TestImportedIngredient::test_quantite_decimal PASSED [ 32%]
+tests/services/test_recipe_import_integration.py::TestImportedIngredient::test_unite_vide_par_defaut PASSED [ 33%]
+tests/services/test_recipe_import_integration.py::TestImportedRecipe::test_creation_minimale PASSED [ 33%]
+tests/services/test_recipe_import_integration.py::TestImportedRecipe::test_creation_complete PASSED [ 33%]
+tests/services/test_recipe_import_integration.py::TestImportedRecipe::test_ingredients_liste_vide_par_defaut PASSED [ 34%]
+tests/services/test_recipe_import_integration.py::TestImportedRecipe::test_etapes_liste_vide_par_defaut PASSED [ 34%]
+tests/services/test_recipe_import_integration.py::TestImportedRecipe::test_avec_ingredients PASSED [ 34%]
+tests/services/test_recipe_import_integration.py::TestImportedRecipe::test_validation_nom_min_length FAILED [ 34%]
+tests/services/test_recipe_import_integration.py::TestImportResult::test_creation_par_defaut PASSED [ 35%]
+tests/services/test_recipe_import_integration.py::TestImportResult::test_result_succes PASSED [ 35%]
+tests/services/test_recipe_import_integration.py::TestImportResult::test_result_echec PASSED [ 35%]
+tests/services/test_recipe_import_integration.py::TestRecipeParserCleanText::test_clean_text_none PASSED [ 35%]
+tests/services/test_recipe_import_integration.py::TestRecipeParserCleanText::test_clean_text_empty PASSED [ 36%]
+tests/services/test_recipe_import_integration.py::TestRecipeParserCleanText::test_clean_text_whitespace PASSED [ 36%]
+tests/services/test_recipe_import_integration.py::TestRecipeParserCleanText::test_clean_text_newlines PASSED [ 36%]
+tests/services/test_recipe_import_integration.py::TestRecipeParserParseDuration::test_parse_duration_empty PASSED [ 37%]
+tests/services/test_recipe_import_integration.py::TestRecipeParserParseDuration::test_parse_duration_minutes PASSED [ 37%]
+tests/services/test_recipe_import_integration.py::TestRecipeParserParseDuration::test_parse_duration_hours PASSED [ 37%]
+tests/services/test_recipe_import_integration.py::TestRecipeParserParseDuration::test_parse_duration_hours_and_minutes PASSED [ 37%]
+tests/services/test_recipe_import_integration.py::TestRecipeParserParseDuration::test_parse_duration_just_number PASSED [ 38%]
+tests/services/test_recipe_import_integration.py::TestRecipeParserParseDuration::test_parse_duration_minutes_variant PASSED [ 38%]
+tests/services/test_recipe_import_integration.py::TestRecipeParserParseDuration::test_parse_duration_m_shortcut PASSED [ 38%]
+tests/services/test_recipe_import_integration.py::TestRecipeParserParsePortions::test_parse_portions_empty PASSED [ 38%]
+tests/services/test_recipe_import_integration.py::TestRecipeParserParsePortions::test_parse_portions_number PASSED [ 39%]
+tests/services/test_recipe_import_integration.py::TestRecipeParserParsePortions::test_parse_portions_min PASSED [ 39%]
+tests/services/test_recipe_import_integration.py::TestRecipeParserParsePortions::test_parse_portions_max PASSED [ 39%]
+tests/services/test_recipe_import_integration.py::TestRecipeParserParsePortions::test_parse_portions_just_number PASSED [ 40%]
+tests/services/test_recipe_import_integration.py::TestRecipeParserParseIngredient::test_parse_ingredient_empty PASSED [ 40%]
+tests/services/test_recipe_import_integration.py::TestRecipeParserParseIngredient::test_parse_ingredient_simple PASSED [ 40%]
+tests/services/test_recipe_import_integration.py::TestRecipeParserParseIngredient::test_parse_ingredient_avec_quantite_unite PASSED [ 40%]
+tests/services/test_recipe_import_integration.py::TestRecipeParserParseIngredient::test_parse_ingredient_nombre_et_nom PASSED [ 41%]
+tests/services/test_recipe_import_integration.py::TestRecipeParserParseIngredient::test_parse_ingredient_decimal PASSED [ 41%]
+tests/services/test_recipe_import_integration.py::TestMarmitonParser::test_parse_with_title_in_html PASSED [ 41%]
+tests/services/test_recipe_import_integration.py::TestMarmitonParser::test_calculate_confidence_empty PASSED [ 41%]
+tests/services/test_recipe_import_integration.py::TestCuisineAZParser::test_parse_attempts_extraction PASSED [ 42%]
+tests/services/test_recipe_import_integration.py::TestCuisineAZParser::test_calculate_confidence_empty PASSED [ 42%]
+tests/services/test_recipe_import_integration.py::TestGenericRecipeParser::test_parse_attempts_extraction PASSED [ 42%]
+tests/services/test_recipe_import_integration.py::TestGenericRecipeParser::test_calculate_confidence_with_ingredients PASSED [ 42%]
+tests/services/test_recipe_import_integration.py::TestRecipeImportService::test_service_init PASSED [ 43%]
+tests/services/test_recipe_import_integration.py::TestRecipeImportService::test_factory_function PASSED [ 43%]
+tests/services/test_recipe_import_integration.py::TestRecipeImportService::test_get_parser_for_marmiton PASSED [ 43%]
+tests/services/test_recipe_import_integration.py::TestRecipeImportService::test_get_parser_for_cuisineaz PASSED [ 44%]
+tests/services/test_recipe_import_integration.py::TestRecipeImportService::test_get_parser_for_unknown PASSED [ 44%]
+tests/services/test_recipe_import_integration.py::TestRecipeImportService::test_has_import_from_url PASSED [ 44%]
+tests/services/test_recipe_import_integration.py::TestRecipeImportService::test_has_import_batch PASSED [ 44%]
+tests/services/test_recipe_import_integration.py::TestImportFromUrlMocked::test_import_returns_import_result PASSED [ 45%]
+tests/services/test_recipe_import_integration.py::TestImportFromUrlMocked::test_import_with_invalid_url PASSED [ 45%]
+tests/services/test_recipe_import_integration.py::TestServiceUtilities::test_service_has_parsers PASSED [ 45%]
+tests/services/test_recipe_import_integration.py::TestServiceUtilities::test_service_inherits_from_base PASSED [ 45%]
+tests/services/test_services_comprehensive.py::TestRapportsSchemas::test_rapport_stocks_creation_complete PASSED [ 46%]
+tests/services/test_services_comprehensive.py::TestRapportsSchemas::test_rapport_stocks_defaults PASSED [ 46%]
+tests/services/test_services_comprehensive.py::TestRapportsSchemas::test_rapport_budget_creation_complete PASSED [ 46%]
+tests/services/test_services_comprehensive.py::TestRapportsSchemas::test_rapport_budget_defaults PASSED [ 47%]
+tests/services/test_services_comprehensive.py::TestRapportsSchemas::test_analyse_gaspillage_creation PASSED [ 47%]
+tests/services/test_services_comprehensive.py::TestRapportsSchemas::test_rapport_planning_creation PASSED [ 47%]
+tests/services/test_services_comprehensive.py::TestRapportsPDFServiceInit::test_service_init PASSED [ 47%]
+tests/services/test_services_comprehensive.py::TestRapportsPDFServiceInit::test_service_has_methods PASSED [ 48%]
+tests/services/test_services_comprehensive.py::TestRapportsPDFServiceWithDB::test_generer_donnees_rapport_stocks_empty PASSED [ 48%]
+tests/services/test_services_comprehensive.py::TestRapportsPDFServiceWithDB::test_generer_donnees_rapport_budget_empty PASSED [ 48%]
+tests/services/test_services_comprehensive.py::TestRapportsPDFServiceWithDB::test_generer_analyse_gaspillage_empty PASSED [ 48%]
+tests/services/test_services_comprehensive.py::TestSuggestionsIASchemas::test_profil_culinaire_creation PASSED [ 49%]
+tests/services/test_services_comprehensive.py::TestSuggestionsIASchemas::test_profil_culinaire_defaults PASSED [ 49%]
+tests/services/test_services_comprehensive.py::TestSuggestionsIASchemas::test_contexte_suggestion_creation PASSED [ 49%]
+tests/services/test_services_comprehensive.py::TestSuggestionsIASchemas::test_contexte_suggestion_defaults PASSED [ 50%]
+tests/services/test_services_comprehensive.py::TestSuggestionsIASchemas::test_suggestion_recette_creation PASSED [ 50%]
+tests/services/test_services_comprehensive.py::TestSuggestionsIASchemas::test_suggestion_recette_defaults PASSED [ 50%]
+tests/services/test_services_comprehensive.py::TestSuggestionsIAServiceInit::test_service_init PASSED [ 50%]
+tests/services/test_services_comprehensive.py::TestSuggestionsIAServiceInit::test_service_has_methods PASSED [ 51%]
+tests/services/test_services_comprehensive.py::TestSuggestionsIAServiceWithDB::test_analyser_profil_culinaire_empty PASSED [ 51%]
+tests/services/test_services_comprehensive.py::TestBackupSchemasComplete::test_backup_config_all_fields PASSED [ 51%]
+tests/services/test_services_comprehensive.py::TestBackupSchemasComplete::test_backup_metadata_all_fields PASSED [ 51%]
+tests/services/test_services_comprehensive.py::TestBackupServiceInit::test_service_init PASSED [ 52%]
+tests/services/test_services_comprehensive.py::TestBackupServiceInit::test_service_has_backup_methods PASSED [ 52%]
+tests/services/test_services_comprehensive.py::TestWeatherSchemas::test_type_alerte_meteo_enum PASSED [ 52%]
+tests/services/test_services_comprehensive.py::TestWeatherSchemas::test_niveau_alerte_enum PASSED [ 52%]
+tests/services/test_services_comprehensive.py::TestWeatherSchemas::test_meteo_jour_creation PASSED [ 53%]
+tests/services/test_services_comprehensive.py::TestWeatherGardenServiceInit::test_service_init PASSED [ 53%]
+tests/services/test_services_comprehensive.py::TestWeatherGardenServiceInit::test_service_has_weather_methods PASSED [ 53%]
+tests/services/test_services_comprehensive.py::TestBarcodeServiceMethods::test_service_init PASSED [ 54%]
+tests/services/test_services_comprehensive.py::TestBarcodeServiceMethods::test_valider_barcode_valid_ean13 PASSED [ 54%]
+tests/services/test_services_comprehensive.py::TestBarcodeServiceMethods::test_scanner_code_method_exists PASSED [ 54%]
+tests/services/test_services_comprehensive.py::TestBatchCookingServiceMethods::test_service_init PASSED [ 54%]
+tests/services/test_services_comprehensive.py::TestBatchCookingServiceMethods::test_service_has_generer_session PASSED [ 55%]
+tests/services/test_services_comprehensive.py::TestInventaireServiceMethods::test_service_init PASSED [ 55%]
+tests/services/test_services_comprehensive.py::TestInventaireServiceMethods::test_lister_articles_empty PASSED [ 55%]
+tests/services/test_services_comprehensive.py::TestInventaireServiceWithData::test_ajouter_article PASSED [ 55%]
+tests/services/test_services_comprehensive.py::TestRecettesServiceMethods::test_service_init PASSED [ 56%]
+tests/services/test_services_comprehensive.py::TestRecettesServiceMethods::test_lister_recettes_empty PASSED [ 56%]
+tests/services/test_services_comprehensive.py::TestRecettesServiceWithData::test_creer_recette PASSED [ 56%]
+tests/services/test_services_comprehensive.py::TestPlanningServiceMethods::test_service_init PASSED [ 57%]
+tests/services/test_services_comprehensive.py::TestPlanningServiceMethods::test_lister_plannings_empty PASSED [ 57%]
+tests/services/test_services_comprehensive.py::TestCoursesServiceMethods::test_service_init PASSED [ 57%]
+tests/services/test_services_comprehensive.py::TestCoursesServiceMethods::test_lister_listes_empty PASSED [ 57%]
+tests/services/test_services_comprehensive.py::TestBudgetServiceMethods::test_service_init PASSED [ 58%]
+tests/services/test_services_comprehensive.py::TestBudgetServiceMethods::test_service_has_depense_methods PASSED [ 58%]
+tests/services/test_services_comprehensive.py::TestNotificationsServiceComplete::test_type_alerte_all_values PASSED [ 58%]
+tests/services/test_services_comprehensive.py::TestNotificationsServiceComplete::test_notification_all_fields PASSED [ 58%]
+tests/services/test_services_comprehensive.py::TestNotificationsServiceComplete::test_notification_service_creer_stock_critique PASSED [ 59%]
+tests/services/test_services_comprehensive.py::TestNotificationsServiceComplete::test_notification_service_creer_stock_bas PASSED [ 59%]
+tests/services/test_services_comprehensive.py::TestNotificationsServiceComplete::test_notification_service_lister_notifications PASSED [ 59%]
+tests/services/test_services_comprehensive.py::TestNotificationsServiceComplete::test_notification_service_marquer_lue PASSED [ 60%]
+tests/services/test_services_comprehensive.py::TestAuthServiceComplete::test_service_init PASSED [ 60%]
+tests/services/test_services_comprehensive.py::TestAuthServiceComplete::test_service_has_auth_methods PASSED [ 60%]
+tests/services/test_services_comprehensive.py::TestCalendarSyncServiceComplete::test_import_module PASSED [ 60%]
+tests/services/test_services_comprehensive.py::TestCalendarSyncServiceComplete::test_service_exists PASSED [ 61%]
+tests/services/test_services_comprehensive.py::TestPredictionsServiceComplete::test_service_init PASSED [ 61%]
+tests/services/test_services_comprehensive.py::TestPredictionsServiceComplete::test_service_has_prediction_methods PASSED [ 61%]
+tests/services/test_services_coverage_80_part15.py::TestRapportsPDFExecution::test_generer_donnees_rapport_stocks_empty PASSED [ 61%]
+tests/services/test_services_coverage_80_part15.py::TestRapportsPDFExecution::test_generer_donnees_rapport_stocks_with_items PASSED [ 62%]
+tests/services/test_services_coverage_80_part15.py::TestRapportBudgetExecution::test_rapport_budget_creation PASSED [ 62%]
+tests/services/test_services_coverage_80_part15.py::TestBudgetServiceExecution::test_budget_service_init PASSED [ 62%]
+tests/services/test_services_coverage_80_part15.py::TestBudgetServiceExecution::test_budget_service_method_exists PASSED [ 62%]
+tests/services/test_services_coverage_80_part15.py::TestInventaireServiceExecution::test_inventaire_service_init PASSED [ 63%]
+tests/services/test_services_coverage_80_part15.py::TestInventaireServiceExecution::test_inventaire_service_model PASSED [ 63%]
+tests/services/test_services_coverage_80_part15.py::TestPlanningServiceExecution::test_planning_service_init PASSED [ 63%]
+tests/services/test_services_coverage_80_part15.py::TestCoursesServiceExecution::test_courses_service_init PASSED [ 64%]
+tests/services/test_services_coverage_80_part15.py::TestNotificationsServiceExecution::test_notifications_service_init PASSED [ 64%]
+tests/services/test_services_coverage_80_part15.py::TestBarcodeServiceExecution::test_barcode_service_init PASSED [ 64%]
+tests/services/test_services_coverage_80_part15.py::TestActionHistoryExecution::test_action_history_service_init PASSED [ 64%]
+tests/services/test_services_coverage_80_part15.py::TestPredictionsServiceExecution::test_predictions_service_init PASSED [ 65%]
+tests/services/test_services_coverage_80_part15.py::TestBatchCookingExecution::test_batch_cooking_service_init PASSED [ 65%]
+tests/services/test_services_coverage_80_part15.py::TestPDFExportExecution::test_pdf_export_module_exists PASSED [ 65%]
+tests/services/test_services_coverage_80_part15.py::TestOpenfoodfactsExecution::test_openfoodfacts_service_init PASSED [ 65%]
+tests/services/test_services_coverage_80_part15.py::TestIOServiceExecution::test_io_service_init PASSED [ 66%]
+tests/services/test_services_coverage_80_part15.py::TestIOServiceExecution::test_io_service_format_json PASSED [ 66%]
+tests/services/test_services_coverage_80_part15.py::TestCalendarSyncExecution::test_sync_result_with_data PASSED [ 66%]
+tests/services/test_services_coverage_80_part15.py::TestCoursesIntelligentesExecution::test_courses_intelligentes_init PASSED [ 67%]
+tests/services/test_services_coverage_80_part15.py::TestFactureOCRExecution::test_facture_ocr_init PASSED [ 67%]
+tests/services/test_services_coverage_80_part16.py::TestBaseServiceMethodsCRUD::test_count_executes PASSED [ 67%]
+tests/services/test_services_coverage_80_part16.py::TestBaseServiceMethodsCRUD::test_delete_executes_success PASSED [ 67%]
+tests/services/test_services_coverage_80_part16.py::TestBaseServiceMethodsCRUD::test_delete_executes_not_found PASSED [ 68%]
+tests/services/test_services_coverage_80_part16.py::TestBaseServiceFiltersExecution::test_apply_filters_equal PASSED [ 68%]
+tests/services/test_services_coverage_80_part16.py::TestInventaireServiceMethods::test_inventaire_init PASSED [ 68%]
+tests/services/test_services_coverage_80_part16.py::TestInventaireServiceMethods::test_inventaire_model_is_article PASSED [ 68%]
+tests/services/test_services_coverage_80_part16.py::TestBudgetServiceMethods::test_budget_init PASSED [ 69%]
+tests/services/test_services_coverage_80_part16.py::TestBudgetServiceMethods::test_budget_has_ajouter_depense PASSED [ 69%]
+tests/services/test_services_coverage_80_part16.py::TestRapportsPDFMethodsAdvanced::test_rapports_pdf_service_model PASSED [ 69%]
+tests/services/test_services_coverage_80_part16.py::TestRapportsPDFMethodsAdvanced::test_rapports_pdf_has_generate_methods PASSED [ 70%]
+tests/services/test_services_coverage_80_part16.py::TestNotificationsServiceMethods::test_notifications_module_imports PASSED [ 70%]
+tests/services/test_services_coverage_80_part16.py::TestBarcodeServiceMethods::test_barcode_module_imports PASSED [ 70%]
+tests/services/test_services_coverage_80_part16.py::TestActionHistoryMethods::test_action_history_module PASSED [ 70%]
+tests/services/test_services_coverage_80_part16.py::TestCalendarSyncMethods::test_calendar_provider_values PASSED [ 71%]
+tests/services/test_services_coverage_80_part16.py::TestCalendarSyncMethods::test_sync_direction_values PASSED [ 71%]
+tests/services/test_services_coverage_80_part16.py::TestCalendarSyncMethods::test_external_calendar_config_creation PASSED [ 71%]
+tests/services/test_services_coverage_80_part16.py::TestGarminSyncMethods::test_garmin_config_values PASSED [ 71%]
+tests/services/test_services_coverage_80_part16.py::TestBackupServiceMethods::test_backup_config_values PASSED [ 72%]
+tests/services/test_services_coverage_80_part16.py::TestBackupServiceMethods::test_backup_metadata_creation PASSED [ 72%]
+tests/services/test_services_coverage_80_part16.py::TestAuthServiceMethods::test_role_permissions_mapping PASSED [ 72%]
+tests/services/test_services_coverage_80_part16.py::TestAuthServiceMethods::test_user_profile_display_name_full PASSED [ 72%]
+tests/services/test_services_coverage_80_part16.py::TestAuthServiceMethods::test_user_profile_display_name_email PASSED [ 73%]
+tests/services/test_services_coverage_80_part16.py::TestRecipeImportMethods::test_parse_duration_minutes PASSED [ 73%]
+tests/services/test_services_coverage_80_part16.py::TestRecipeImportMethods::test_parse_duration_hours PASSED [ 73%]
+tests/services/test_services_coverage_80_part16.py::TestTypesModels::test_base_service_generic PASSED [ 74%]
+tests/services/test_services_coverage_80_part16.py::TestOpenfoodfactsMethods::test_openfoodfacts_module PASSED [ 74%]
+tests/services/test_services_coverage_80_part2.py::TestOpenFoodFactsNutriscoreEmoji::test_nutriscore_a PASSED [ 74%]
+tests/services/test_services_coverage_80_part2.py::TestOpenFoodFactsNutriscoreEmoji::test_nutriscore_b PASSED [ 74%]
+tests/services/test_services_coverage_80_part2.py::TestOpenFoodFactsNutriscoreEmoji::test_nutriscore_c PASSED [ 75%]
+tests/services/test_services_coverage_80_part2.py::TestOpenFoodFactsNutriscoreEmoji::test_nutriscore_d PASSED [ 75%]
+tests/services/test_services_coverage_80_part2.py::TestOpenFoodFactsNutriscoreEmoji::test_nutriscore_e PASSED [ 75%]
+tests/services/test_services_coverage_80_part2.py::TestOpenFoodFactsNutriscoreEmoji::test_nutriscore_lowercase PASSED [ 75%]
+tests/services/test_services_coverage_80_part2.py::TestOpenFoodFactsNutriscoreEmoji::test_nutriscore_none PASSED [ 76%]
+tests/services/test_services_coverage_80_part2.py::TestOpenFoodFactsNutriscoreEmoji::test_nutriscore_invalid PASSED [ 76%]
+tests/services/test_services_coverage_80_part2.py::TestOpenFoodFactsNovaDescription::test_nova_group_1 PASSED [ 76%]
+tests/services/test_services_coverage_80_part2.py::TestOpenFoodFactsNovaDescription::test_nova_group_2 PASSED [ 77%]
+tests/services/test_services_coverage_80_part2.py::TestOpenFoodFactsNovaDescription::test_nova_group_3 PASSED [ 77%]
+tests/services/test_services_coverage_80_part2.py::TestOpenFoodFactsNovaDescription::test_nova_group_4 PASSED [ 77%]
+tests/services/test_services_coverage_80_part2.py::TestOpenFoodFactsNovaDescription::test_nova_group_none PASSED [ 77%]
+tests/services/test_services_coverage_80_part2.py::TestOpenFoodFactsNovaDescription::test_nova_group_invalid PASSED [ 78%]
+tests/services/test_services_coverage_80_part2.py::TestOpenFoodFactsParserFullData::test_parser_with_labels PASSED [ 78%]
+tests/services/test_services_coverage_80_part2.py::TestOpenFoodFactsParserFullData::test_parser_with_allergens PASSED [ 78%]
+tests/services/test_services_coverage_80_part2.py::TestOpenFoodFactsParserFullData::test_parser_with_traces PASSED [ 78%]
+tests/services/test_services_coverage_80_part2.py::TestOpenFoodFactsParserFullData::test_parser_with_completeness PASSED [ 79%]
+tests/services/test_services_coverage_80_part2.py::TestOpenFoodFactsParserFullData::test_parser_with_completeness_over_100 PASSED [ 79%]
+tests/services/test_services_coverage_80_part2.py::TestOpenFoodFactsParserFullData::test_parser_no_completeness PASSED [ 79%]
+tests/services/test_services_coverage_80_part2.py::TestOpenFoodFactsParserFullData::test_parser_with_images PASSED [ 80%]
+tests/services/test_services_coverage_80_part2.py::TestOpenFoodFactsParserFullData::test_parser_with_ingredients_text PASSED [ 80%]
+tests/services/test_services_coverage_80_part2.py::TestOpenFoodFactsParserFullData::test_parser_with_origin PASSED [ 80%]
+tests/services/test_services_coverage_80_part2.py::TestRecipeParserParsePortions::test_parse_portions_none PASSED [ 80%]
+tests/services/test_services_coverage_80_part2.py::TestRecipeParserParsePortions::test_parse_portions_empty PASSED [ 81%]
+tests/services/test_services_coverage_80_part2.py::TestRecipeParserParsePortions::test_parse_portions_simple PASSED [ 81%]
+tests/services/test_services_coverage_80_part2.py::TestRecipeParserParsePortions::test_parse_portions_with_text PASSED [ 81%]
+tests/services/test_services_coverage_80_part2.py::TestRecipeParserParsePortions::test_parse_portions_min_cap PASSED [ 81%]
+tests/services/test_services_coverage_80_part2.py::TestRecipeParserParsePortions::test_parse_portions_max_cap PASSED [ 82%]
+tests/services/test_services_coverage_80_part2.py::TestRecipeParserParsePortions::test_parse_portions_no_number PASSED [ 82%]
+tests/services/test_services_coverage_80_part2.py::TestRecipeParserParseIngredient::test_parse_ingredient_empty PASSED [ 82%]
+tests/services/test_services_coverage_80_part2.py::TestRecipeParserParseIngredient::test_parse_ingredient_simple PASSED [ 82%]
+tests/services/test_services_coverage_80_part2.py::TestRecipeParserParseIngredient::test_parse_ingredient_with_quantity_grams PASSED [ 83%]
+tests/services/test_services_coverage_80_part2.py::TestRecipeParserParseIngredient::test_parse_ingredient_with_quantity_ml PASSED [ 83%]
+tests/services/test_services_coverage_80_part2.py::TestRecipeParserParseIngredient::test_parse_ingredient_with_decimal_comma PASSED [ 83%]
+tests/services/test_services_coverage_80_part2.py::TestRecipeParserParseIngredient::test_parse_ingredient_with_decimal_dot PASSED [ 84%]
+tests/services/test_services_coverage_80_part2.py::TestRecipeParserParseIngredient::test_parse_ingredient_number_only PASSED [ 84%]
+tests/services/test_services_coverage_80_part2.py::TestRecipeParserDurationAdvanced::test_parse_duration_just_number PASSED [ 84%]
+tests/services/test_services_coverage_80_part2.py::TestRecipeParserDurationAdvanced::test_parse_duration_h_minutes_format PASSED [ 84%]
+tests/services/test_services_coverage_80_part2.py::TestRecipeParserDurationAdvanced::test_parse_duration_uppercase PASSED [ 85%]
+tests/services/test_services_coverage_80_part2.py::TestMarmitonParserConfidence::test_confidence_minimal PASSED [ 85%]
+tests/services/test_services_coverage_80_part2.py::TestMarmitonParserConfidence::test_confidence_good_name PASSED [ 85%]
+tests/services/test_services_coverage_80_part2.py::TestMarmitonParserConfidence::test_confidence_with_ingredients PASSED [ 85%]
+tests/services/test_services_coverage_80_part2.py::TestMarmitonParserConfidence::test_confidence_with_steps PASSED [ 86%]
+tests/services/test_services_coverage_80_part2.py::TestMarmitonParserConfidence::test_confidence_with_time PASSED [ 86%]
+tests/services/test_services_coverage_80_part2.py::TestMarmitonParserConfidence::test_confidence_with_image PASSED [ 86%]
+tests/services/test_services_coverage_80_part2.py::TestMarmitonParserConfidence::test_confidence_full_recipe PASSED [ 87%]
+tests/services/test_services_coverage_80_part2.py::TestBaseServiceApplyFilters::test_apply_filters_empty PASSED [ 87%]
+tests/services/test_services_coverage_80_part2.py::TestBaseServiceApplyFilters::test_apply_filters_unknown_field PASSED [ 87%]
+tests/services/test_services_coverage_80_part2.py::TestBaseServiceModelToDict::test_model_to_dict_basic PASSED [ 87%]
+tests/services/test_services_coverage_80_part2.py::TestRapportsPDFServiceInit::test_service_init SKIPPEDnvestigation) [ 88%]
+tests/services/test_services_coverage_80_part2.py::TestRapportStocksValidation::test_rapport_stocks_periode_min PASSED [ 88%]
+tests/services/test_services_coverage_80_part2.py::TestRapportStocksValidation::test_rapport_stocks_periode_max PASSED [ 88%]
+tests/services/test_services_coverage_80_part2.py::TestRapportBudgetValidation::test_rapport_budget_periode_min PASSED [ 88%]
+tests/services/test_services_coverage_80_part2.py::TestProduitOpenFoodFactsEdgeCases::test_default_source PASSED [ 89%]
+tests/services/test_services_coverage_80_part2.py::TestProduitOpenFoodFactsEdgeCases::test_default_date_recuperation PASSED [ 89%]
+tests/services/test_services_coverage_80_part2.py::TestProduitOpenFoodFactsEdgeCases::test_default_confiance PASSED [ 89%]
+tests/services/test_services_coverage_80_part2.py::TestNutritionInfoEdgeCases::test_all_fields_none PASSED [ 90%]
+tests/services/test_services_coverage_80_part2.py::TestNutritionInfoEdgeCases::test_full_nutrition_info PASSED [ 90%]
+tests/services/test_services_coverage_80_part2.py::TestImportedRecipeValidation::test_recipe_name_min_length FAILED [ 90%]
+tests/services/test_services_coverage_80_part2.py::TestImportedRecipeValidation::test_recipe_valid_minimal PASSED [ 90%]
+tests/services/test_services_coverage_80_part2.py::TestServiceImports::test_import_io_service_class PASSED [ 91%]
+tests/services/test_services_coverage_80_part2.py::TestServiceImports::test_import_openfoodfacts_service_class PASSED [ 91%]
+tests/services/test_services_coverage_80_part2.py::TestServiceImports::test_import_recipe_import_classes PASSED [ 91%]
+tests/services/test_services_coverage_80_part2.py::TestServiceImports::test_import_rapports_pdf_service PASSED [ 91%]
+tests/services/test_suggestions_ia_coverage.py::TestProfilCulinaireModel::test_profil_culinaire_defaults PASSED [ 92%]
+tests/services/test_suggestions_ia_coverage.py::TestProfilCulinaireModel::test_profil_culinaire_complete PASSED [ 92%]
+tests/services/test_suggestions_ia_coverage.py::TestContexteSuggestionModel::test_contexte_defaults PASSED [ 92%]
+tests/services/test_suggestions_ia_coverage.py::TestContexteSuggestionModel::test_contexte_complete PASSED [ 92%]
+tests/services/test_suggestions_ia_coverage.py::TestSuggestionRecetteModel::test_suggestion_defaults PASSED [ 93%]
+tests/services/test_suggestions_ia_coverage.py::TestSuggestionRecetteModel::test_suggestion_complete PASSED [ 93%]
+tests/services/test_suggestions_ia_coverage.py::TestSuggestionsIAServiceInit::test_init_success PASSED [ 93%]
+tests/services/test_suggestions_ia_coverage.py::TestAnalyserProfilCulinaire::test_analyser_profil_sans_historique PASSED [ 94%]
+tests/services/test_suggestions_ia_coverage.py::TestAnalyserProfilCulinaire::test_analyser_profil_avec_historique PASSED [ 94%]
+tests/services/test_suggestions_ia_coverage.py::TestConstruireContexte::test_construire_contexte_minimal PASSED [ 94%]
+tests/services/test_suggestions_ia_coverage.py::TestConstruireContexte::test_construire_contexte_avec_inventaire PASSED [ 94%]
+tests/services/test_suggestions_ia_coverage.py::TestConstruireContexte::test_construire_contexte_avec_peremption PASSED [ 95%]
+tests/services/test_suggestions_ia_coverage.py::TestCalculerScoreRecette::test_calculer_score_recette_nouvelle PASSED [ 95%]
+tests/services/test_suggestions_ia_coverage.py::TestCalculerScoreRecette::test_calculer_score_recette_recente PASSED [ 95%]
+tests/services/test_suggestions_ia_coverage.py::TestCalculerScoreRecette::test_calculer_score_temps_adapte PASSED [ 95%]
+tests/services/test_suggestions_ia_coverage.py::TestCalculerScoreRecette::test_calculer_score_temps_trop_long PASSED [ 96%]
+tests/services/test_suggestions_ia_coverage.py::TestCalculerScoreRecette::test_calculer_score_ingredients_disponibles PASSED [ 96%]
+tests/services/test_suggestions_ia_coverage.py::TestCalculerScoreRecette::test_calculer_score_ingredients_a_consommer PASSED [ 96%]
+tests/services/test_suggestions_ia_coverage.py::TestTrouverIngredientsManquants::test_trouver_pas_de_manquants PASSED [ 97%]
+tests/services/test_suggestions_ia_coverage.py::TestTrouverIngredientsManquants::test_trouver_avec_manquants PASSED [ 97%]
+tests/services/test_suggestions_ia_coverage.py::TestMixerSuggestions::test_mixer_suggestions_empty PASSED [ 97%]
+tests/services/test_suggestions_ia_coverage.py::TestMixerSuggestions::test_mixer_suggestions_with_items PASSED [ 97%]
+tests/services/test_suggestions_ia_coverage.py::TestSuggererRecettes::test_suggerer_recettes_sans_contexte PASSED [ 98%]
+tests/services/test_suggestions_ia_coverage.py::TestSuggererRecettes::test_suggerer_recettes_avec_recettes PASSED [ 98%]
+tests/services/test_suggestions_ia_coverage.py::TestSuggererRecettes::test_suggerer_recettes_pas_de_recettes PASSED [ 98%]
+tests/services/test_suggestions_ia_coverage.py::TestSuggererAvecIA::test_suggerer_avec_ia_reponse_vide PASSED [ 98%]
+tests/services/test_suggestions_ia_coverage.py::TestModuleExports::test_profil_culinaire_exported PASSED [ 99%]
+tests/services/test_suggestions_ia_coverage.py::TestModuleExports::test_contexte_suggestion_exported PASSED [ 99%]
+tests/services/test_suggestions_ia_coverage.py::TestModuleExports::test_suggestion_recette_exported PASSED [ 99%]
+tests/services/test_suggestions_ia_coverage.py::TestModuleExports::test_service_exported PASSED [100%]
+
+================================== FAILURES ===================================
+______________ TestImportedRecipe.test_validation_nom_min_length ______________
+tests\services\test_recipe_import_integration.py:125: in test_validation_nom_min_length
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE <class 'ValueError'>
+---------------------------- Captured stdout setup ----------------------------
+[32mINFO[0m | src.core.cache            | Cache cleared
+---------------------------- Captured stderr setup ----------------------------
+2026-02-10 09:23:57.860 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:23:57.860 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:23:57.860 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:23:57.860 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:23:57.860 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:23:57.860 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:23:57.860 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:23:57.860 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:23:57.860 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:23:57.860 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:23:57.860 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:23:57.860 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+----------------------------- Captured log setup ------------------------------
+INFO     src.core.cache:cache.py:164 Cache cleared
+-------------------------- Captured stdout teardown ---------------------------
+[32mINFO[0m | src.core.cache            | Cache cleared
+-------------------------- Captured stderr teardown ---------------------------
+2026-02-10 09:23:57.883 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:23:57.883 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:23:57.883 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:23:57.883 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:23:57.883 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:23:57.883 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:23:57.883 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:23:57.883 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:23:57.883 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:23:57.883 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:23:57.883 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:23:57.883 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+---------------------------- Captured log teardown ----------------------------
+INFO     src.core.cache:cache.py:164 Cache cleared
+__________ TestImportedRecipeValidation.test_recipe_name_min_length ___________
+tests\services\test_services_coverage_80_part2.py:617: in test_recipe_name_min_length
+    with pytest.raises(ValidationError):
+E   Failed: DID NOT RAISE <class 'pydantic_core._pydantic_core.ValidationError'>
+---------------------------- Captured stdout setup ----------------------------
+[32mINFO[0m | src.core.cache            | Cache cleared
+---------------------------- Captured stderr setup ----------------------------
+2026-02-10 09:24:09.811 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:24:09.811 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:24:09.811 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:24:09.811 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:24:09.811 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:24:09.811 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:24:09.811 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:24:09.811 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:24:09.811 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:24:09.811 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:24:09.811 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:24:09.811 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+----------------------------- Captured log setup ------------------------------
+INFO     src.core.cache:cache.py:164 Cache cleared
+-------------------------- Captured stdout teardown ---------------------------
+[32mINFO[0m | src.core.cache            | Cache cleared
+-------------------------- Captured stderr teardown ---------------------------
+2026-02-10 09:24:09.830 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:24:09.830 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:24:09.830 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:24:09.830 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:24:09.830 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:24:09.830 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:24:09.830 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:24:09.830 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:24:09.830 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:24:09.830 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:24:09.830 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-02-10 09:24:09.830 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+---------------------------- Captured log teardown ----------------------------
+INFO     src.core.cache:cache.py:164 Cache cleared
+============================== warnings summary ===============================
+tests/services/test_suggestions_ia_coverage.py::TestSuggererAvecIA::test_suggerer_avec_ia_reponse_vide
+  tests\services\test_suggestions_ia_coverage.py:777: PytestWarning: The test <Function test_suggerer_avec_ia_reponse_vide> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    @pytest.mark.asyncio
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/services/test_recipe_import_integration.py::TestImportedRecipe::test_validation_nom_min_length - Failed: DID NOT RAISE <class 'ValueError'>
+FAILED tests/services/test_services_coverage_80_part2.py::TestImportedRecipeValidation::test_recipe_name_min_length - Failed: DID NOT RAISE <class 'pydantic_core._pydantic_core.ValidationError'>
+SKIPPED [1] tests\services\test_barcode_coverage.py:231: QR pattern matches before CODE128
+SKIPPED [1] tests\services\test_barcode_coverage.py:347: Decorator catches exception - DB connection
+SKIPPED [1] tests\services\test_barcode_coverage.py:414: Decorator catches exception
+SKIPPED [1] tests\services\test_barcode_coverage.py:469: Service missing cache attribute
+SKIPPED [1] tests\services\test_barcode_coverage.py:683: Decorator catches exception
+SKIPPED [1] tests\services\test_barcode_coverage.py:711: Service missing cache attribute
+SKIPPED [1] tests\services\test_barcode_coverage.py:776: Decorator catches exception
+SKIPPED [1] tests\services\test_services_coverage_80_part2.py:502: model_name attribute not set correctly in RapportsPDFService - needs investigation
+======= 2 failed, 360 passed, 8 skipped, 1 warning in 227.44s (0:03:47) =======
