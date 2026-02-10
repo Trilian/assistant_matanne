@@ -297,11 +297,12 @@ def avec_validation(
 
 
 # ═══════════════════════════════════════════════════════════
-# ALIAS POUR COMPATIBILITÉ (À SUPPRIMER APRÈS MIGRATION)
+# EXPORTS PRINCIPAUX
 # ═══════════════════════════════════════════════════════════
 
-# Alias temporaires pour la migration
-with_db_session = avec_session_db
-with_cache = avec_cache
-with_error_handling = avec_gestion_erreurs
-with_validation = avec_validation
+__all__ = [
+    "avec_session_db",
+    "avec_cache",
+    "avec_gestion_erreurs",
+    "avec_validation",
+]

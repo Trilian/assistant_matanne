@@ -12,12 +12,12 @@ from src.core.cache import Cache
 
 # Core
 from src.core.config import obtenir_parametres as get_settings
-from src.core.database import GestionnaireMigrations as MigrationManager
+from src.core.database import GestionnaireMigrations as GestionnaireMigrations
 from src.core.database import obtenir_infos_db as get_db_info
 from src.core.database import verifier_sante as health_check
 
 # State
-from src.core.state import StateManager, get_state
+from src.core.state import GestionnaireEtat, obtenir_etat
 from src.ui.components import Modal
 
 # Logique métier pure
@@ -79,7 +79,7 @@ def render_foyer_config():
     st.caption("Configure les informations de ton foyer")
 
     # État actuel
-    state = get_state()
+    state = obtenir_etat()
 
     # Récupérer config existante
     config = st.session_state.get(
@@ -213,7 +213,7 @@ def render_ia_config():
         st.metric("Limite Horaire", f"{settings.RATE_LIMIT_HOURLY} appels/heure")
 
     # Utilisation actuelle
-    _state = get_state()
+    _state = obtenir_etat()
 
     if "rate_limit" in st.session_state:
         rate_info = st.session_state.rate_limit
@@ -340,7 +340,7 @@ def render_database_config():
     # Migrations
     st.markdown("#### 🔄 Migrations")
 
-    current_version = MigrationManager.obtenir_version_courante()
+    current_version = GestionnaireMigrations.obtenir_version_courante()
     st.info(f"**Version du schéma:** v{current_version}")
 
     col5, col6 = st.columns(2)
@@ -349,7 +349,7 @@ def render_database_config():
         if st.button("🔄 Exécuter Migrations", key="btn_run_migrations", use_container_width=True):
             with smart_spinner("Exécution des migrations...", estimated_seconds=5):
                 try:
-                    MigrationManager.executer_migrations()
+                    GestionnaireMigrations.executer_migrations()
                     show_success("✅ Migrations exécutées !")
                     st.rerun()
                 except Exception as e:
@@ -550,7 +550,7 @@ def render_about():
     # État système
     st.markdown("#### 🟡¸ État Système")
 
-    state_summary = StateManager.get_state_summary()
+    state_summary = GestionnaireEtat.obtenir_resume_etat()
 
     with st.expander("État de l'application"):
         st.json(state_summary)
@@ -727,3 +727,4 @@ def render_budget_config():
                     
     except ImportError:
         st.warning("Module météo non disponible")
+

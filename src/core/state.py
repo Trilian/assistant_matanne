@@ -323,23 +323,6 @@ class GestionnaireEtat:
 
 
 # ═══════════════════════════════════════════════════════════
-# ALIAS ANGLAIS
-# ═══════════════════════════════════════════════════════════
-
-AppState = EtatApp
-StateManager = GestionnaireEtat
-
-# Méthodes principales avec alias
-StateManager.init = GestionnaireEtat.initialiser
-StateManager.get = GestionnaireEtat.obtenir
-StateManager.navigate_to = GestionnaireEtat.naviguer_vers
-StateManager.go_back = GestionnaireEtat.revenir
-StateManager.get_navigation_breadcrumb = GestionnaireEtat.obtenir_fil_ariane_navigation
-StateManager.reset = GestionnaireEtat.reinitialiser
-StateManager.get_state_summary = GestionnaireEtat.obtenir_resume_etat
-
-
-# ═══════════════════════════════════════════════════════════
 # HELPERS RACCOURCIS
 # ═══════════════════════════════════════════════════════════
 
@@ -349,20 +332,10 @@ def obtenir_etat() -> EtatApp:
     return GestionnaireEtat.obtenir()
 
 
-def get_state() -> EtatApp:
-    """Alias anglais pour obtenir_etat"""
-    return GestionnaireEtat.obtenir()
-
-
 def naviguer(module: str):
     """Raccourci pour naviguer"""
     GestionnaireEtat.naviguer_vers(module)
     st.rerun()
-
-
-def navigate(module: str):
-    """Alias anglais pour naviguer"""
-    naviguer(module)
 
 
 def revenir():
@@ -371,19 +344,9 @@ def revenir():
     st.rerun()
 
 
-def go_back():
-    """Alias anglais pour revenir"""
-    revenir()
-
-
 def obtenir_fil_ariane() -> list[str]:
     """Raccourci pour fil d'Ariane"""
     return GestionnaireEtat.obtenir_fil_ariane_navigation()
-
-
-def get_breadcrumb() -> list[str]:
-    """Alias anglais pour obtenir_fil_ariane"""
-    return obtenir_fil_ariane()
 
 
 def est_mode_debug() -> bool:
@@ -392,16 +355,7 @@ def est_mode_debug() -> bool:
     return etat.mode_debug
 
 
-def is_debug_mode() -> bool:
-    """Alias anglais pour est_mode_debug"""
-    return est_mode_debug()
-
-
 def nettoyer_etats_ui():
     """Raccourci pour nettoyer états UI"""
     GestionnaireEtat.nettoyer_etats_ui()
 
-
-def clean_ui_states():
-    """Alias anglais pour nettoyer_etats_ui"""
-    nettoyer_etats_ui()

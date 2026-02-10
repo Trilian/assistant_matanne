@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service Courses Intelligentes - Génération de liste de courses depuis planning repas.
 
 Fonctionnalités:
@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field
 
 from src.core.ai import obtenir_client_ia
 from src.core.database import obtenir_contexte_db
-from src.core.decorators import with_db_session, with_error_handling
+from src.core.decorators import avec_session_db, avec_gestion_erreurs
 from src.core.models import Planning, Repas, Recette, Ingredient, RecetteIngredient, ArticleCourses, ArticleInventaire
 from src.services.base_ai_service import BaseAIService
 from src.services.courses import get_courses_service
@@ -158,8 +158,8 @@ class CoursesIntelligentesService(BaseAIService):
         """Détermine la priorité basée sur le rayon."""
         return PRIORITES.get(rayon, 3)
     
-    @with_error_handling(default_return=None)
-    @with_db_session
+    @avec_gestion_erreurs(default_return=None)
+    @avec_session_db
     def obtenir_planning_actif(self, db: Session | None = None) -> Optional[Planning]:
         """Récupère le planning actif avec ses repas et recettes."""
         planning = (
@@ -174,8 +174,8 @@ class CoursesIntelligentesService(BaseAIService):
         )
         return planning
     
-    @with_error_handling(default_return={})
-    @with_db_session
+    @avec_gestion_erreurs(default_return={})
+    @avec_session_db
     def obtenir_stock_actuel(self, db: Session | None = None) -> dict[str, float]:
         """Récupère le stock actuel sous forme de dictionnaire {nom: quantite}."""
         stocks = (
@@ -305,8 +305,8 @@ class CoursesIntelligentesService(BaseAIService):
             alertes=alertes
         )
     
-    @with_error_handling(default_return=[])
-    @with_db_session
+    @avec_gestion_erreurs(default_return=[])
+    @avec_session_db
     def ajouter_a_liste_courses(
         self, 
         articles: list[ArticleCourse],
@@ -426,3 +426,4 @@ Réponds UNIQUEMENT avec le JSON."""
 def get_courses_intelligentes_service() -> CoursesIntelligentesService:
     """Factory pour le service courses intelligentes."""
     return CoursesIntelligentesService()
+

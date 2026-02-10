@@ -19,7 +19,7 @@ from bs4 import BeautifulSoup
 from pydantic import BaseModel, Field, HttpUrl
 
 from src.core.ai import ClientIA, AnalyseurIA
-from src.core.decorators import with_error_handling
+from src.core.decorators import avec_gestion_erreurs
 from src.services.base_ai_service import BaseAIService
 
 logger = logging.getLogger(__name__)
@@ -518,7 +518,7 @@ class RecipeImportService(BaseAIService):
         
         return GenericRecipeParser
     
-    @with_error_handling(default_return=None, afficher_erreur=True)
+    @avec_gestion_erreurs(default_return=None, afficher_erreur=True)
     def import_from_url(self, url: str, use_ai_fallback: bool = True) -> ImportResult:
         """
         Importe une recette depuis une URL.
@@ -893,3 +893,4 @@ def render_import_recipe_ui():  # pragma: no cover
                     with st.expander(f"⚠️ {len(failures)} échecs"):
                         for r in failures:
                             st.warning(f"{r.message}")
+

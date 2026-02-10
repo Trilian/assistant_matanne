@@ -1,4 +1,4 @@
-"""
+﻿"""
 Module Suivi Perso - Imports et constantes partagés
 
 Dashboard santé/sport pour Anne et Mathieu:
@@ -15,7 +15,7 @@ from datetime import date, datetime, timedelta
 import plotly.graph_objects as go
 import plotly.express as px
 
-from src.core.database import get_db_context
+from src.core.database import obtenir_contexte_db
 from src.core.models import (
     UserProfile,
     GarminToken,
@@ -36,7 +36,7 @@ __all__ = [
     # Standard libs
     "st", "date", "datetime", "timedelta", "go", "px",
     # Database
-    "get_db_context",
+    "obtenir_contexte_db",
     # Models
     "UserProfile", "GarminToken", "GarminActivity", 
     "GarminDailySummary", "FoodLog", "HealthRoutine",
@@ -44,3 +44,4 @@ __all__ = [
     "GarminService", "get_garmin_service", 
     "get_or_create_user", "get_user_by_username",
 ]
+

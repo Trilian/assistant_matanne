@@ -1,4 +1,4 @@
-"""
+﻿"""
 Module Service pour Paris Sportifs avec intégration API Football-Data
 """
 
@@ -100,13 +100,13 @@ def synchroniser_matchs_api_vers_bd(championnat: str, jours: int = 7):
     À appeler régulièrement pour maintenir les données à jour
     """
     try:
-        from src.core.database import get_db_context
+        from src.core.database import obtenir_contexte_db
         from src.core.models import Equipe, Match
         from src.domains.jeux.logic.api_football import charger_matchs_a_venir
         
         matchs_api = charger_matchs_a_venir(championnat, jours)
         
-        with get_db_context() as session:
+        with obtenir_contexte_db() as session:
             for m_data in matchs_api:
                 # Chercher/créer les équipes
                 equipe_dom = session.query(Equipe).filter_by(
@@ -184,7 +184,7 @@ def synchroniser_resultats_matches_api(championnat: str):
     Met à jour les résultats des matchs joués
     """
     try:
-        from src.core.database import get_db_context
+        from src.core.database import obtenir_contexte_db
         from src.core.models import Match
         from src.domains.jeux.logic.api_football import charger_matchs_a_venir
         
@@ -195,7 +195,7 @@ def synchroniser_resultats_matches_api(championnat: str):
             statut="FINISHED"
         )
         
-        with get_db_context() as session:
+        with obtenir_contexte_db() as session:
             for m_data in matchs_api:
                 match = session.query(Match).filter_by(
                     api_id=m_data.get("id")
@@ -215,3 +215,4 @@ def synchroniser_resultats_matches_api(championnat: str):
     except Exception as e:
         logger.error(f"❌ Erreur mise à jour résultats: {e}")
         return False
+

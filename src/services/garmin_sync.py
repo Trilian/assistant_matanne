@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service Garmin - Synchronisation avec Garmin Connect API.
 
 Fonctionnalités:
@@ -23,8 +23,8 @@ import httpx
 from requests_oauthlib import OAuth1Session
 from sqlalchemy.orm import Session
 
-from src.core.database import get_db_context
-from src.core.decorators import with_db_session
+from src.core.database import obtenir_contexte_db
+from src.core.decorators import avec_session_db
 from src.core.models import (
     UserProfile,
     GarminToken,
@@ -150,7 +150,7 @@ class GarminService:
             logger.error(f"Erreur lors de l'obtention du request token: {e}")
             raise
     
-    @with_db_session
+    @avec_session_db
     def complete_authorization(
         self, 
         user_id: int, 
@@ -231,7 +231,7 @@ class GarminService:
     # SYNCHRONISATION
     # ───────────────────────────────────────────────────────
     
-    @with_db_session
+    @avec_session_db
     def sync_user_data(
         self, 
         user_id: int, 
@@ -422,7 +422,7 @@ class GarminService:
     # HELPERS
     # ───────────────────────────────────────────────────────
     
-    @with_db_session
+    @avec_session_db
     def disconnect_user(self, user_id: int, db: Session = None) -> bool:
         """Déconnecte Garmin pour un utilisateur"""
         user = db.get(UserProfile, user_id)
@@ -438,7 +438,7 @@ class GarminService:
         logger.info(f"Garmin déconnecté pour l'utilisateur {user_id}")
         return True
     
-    @with_db_session
+    @avec_session_db
     def get_user_stats(self, user_id: int, days: int = 7, db: Session = None) -> dict:
         """
         Récupère les statistiques agrégées d'un utilisateur.
@@ -541,7 +541,7 @@ def get_garmin_service() -> GarminService:
 # ═══════════════════════════════════════════════════════════
 
 
-@with_db_session
+@avec_session_db
 def get_or_create_user(username: str, display_name: str, db: Session = None) -> UserProfile:
     """Récupère ou crée un profil utilisateur"""
     user = db.query(UserProfile).filter_by(username=username).first()
@@ -559,7 +559,7 @@ def get_or_create_user(username: str, display_name: str, db: Session = None) -> 
     return user
 
 
-@with_db_session
+@avec_session_db
 def init_family_users(db: Session = None) -> tuple[UserProfile, UserProfile]:
     """Initialise les profils Anne et Mathieu"""
     anne = get_or_create_user("anne", "Anne", db=db)
@@ -567,13 +567,15 @@ def init_family_users(db: Session = None) -> tuple[UserProfile, UserProfile]:
     return anne, mathieu
 
 
-@with_db_session
+@avec_session_db
 def get_user_by_username(username: str, db: Session = None) -> UserProfile | None:
     """Récupère un utilisateur par son username"""
     return db.query(UserProfile).filter_by(username=username).first()
 
 
-@with_db_session  
+@avec_session_db  
 def list_all_users(db: Session = None) -> list[UserProfile]:
     """Liste tous les utilisateurs"""
     return db.query(UserProfile).all()
+
+

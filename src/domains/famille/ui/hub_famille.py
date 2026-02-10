@@ -1,4 +1,4 @@
-"""
+﻿"""
 Hub Famille - Dashboard principal avec cards cliquables.
 
 Structure:
@@ -19,7 +19,7 @@ import streamlit as st
 from datetime import date, timedelta
 from typing import Callable
 
-from src.core.database import get_db_context
+from src.core.database import obtenir_contexte_db
 from src.core.models import (
     UserProfile, 
     GarminDailySummary, 
@@ -106,7 +106,7 @@ CARD_STYLES = """
 def calculer_age_jules() -> dict:
     """Calcule l'âge de Jules"""
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             jules = db.query(ChildProfile).filter_by(name="Jules", actif=True).first()
             if not jules or not jules.date_of_birth:
                 # Valeurs par défaut si pas trouvé
@@ -129,7 +129,7 @@ def calculer_age_jules() -> dict:
 def get_user_streak(username: str) -> int:
     """Récupère le streak d'un utilisateur"""
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             user = db.query(UserProfile).filter_by(username=username).first()
             if not user:
                 return 0
@@ -167,7 +167,7 @@ def get_user_streak(username: str) -> int:
 def get_user_garmin_connected(username: str) -> bool:
     """Vérifie si Garmin est connecté"""
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             user = db.query(UserProfile).filter_by(username=username).first()
             return user.garmin_connected if user else False
     except:
@@ -177,7 +177,7 @@ def get_user_garmin_connected(username: str) -> bool:
 def count_weekend_activities() -> int:
     """Compte les activités weekend planifiées"""
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             today = date.today()
             # Prochain weekend
             days_until_saturday = (5 - today.weekday()) % 7
@@ -198,7 +198,7 @@ def count_weekend_activities() -> int:
 def count_pending_purchases() -> int:
     """Compte les achats en attente"""
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             return db.query(FamilyPurchase).filter_by(achete=False).count()
     except:
         return 0
@@ -207,7 +207,7 @@ def count_pending_purchases() -> int:
 def count_urgent_purchases() -> int:
     """Compte les achats urgents"""
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             return db.query(FamilyPurchase).filter(
                 FamilyPurchase.achete == False,
                 FamilyPurchase.priorite.in_(["urgent", "haute"])
@@ -402,7 +402,7 @@ def render_weekend_preview():
 def _render_day_activities(day: date):
     """Affiche les activités d'un jour"""
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             activities = db.query(WeekendActivity).filter(
                 WeekendActivity.date_prevue == day,
                 WeekendActivity.statut == "planifié"
@@ -420,3 +420,4 @@ def _render_day_activities(day: date):
                     st.rerun()
     except:
         st.caption("Rien de prévu")
+

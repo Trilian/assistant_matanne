@@ -1,4 +1,4 @@
-"""
+﻿"""
 Module Scan Factures - Interface pour scanner et extraire les données de factures.
 
 Fonctionnalités:
@@ -15,7 +15,7 @@ from typing import Any
 
 from src.services.facture_ocr import get_facture_ocr_service, DonneesFacture, ResultatOCR
 from src.services.budget import get_budget_service, FactureMaison, CategorieDepense
-from src.core.database import get_db_context
+from src.core.database import obtenir_contexte_db
 from src.core.models import HouseExpense
 
 
@@ -80,7 +80,7 @@ def sauvegarder_facture(donnees: DonneesFacture) -> bool:
         service.ajouter_facture_maison(facture)
         
         # Aussi dans HouseExpense pour compatibilité
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             expense = HouseExpense(
                 categorie=categorie,
                 montant=donnees.montant_ttc,
@@ -299,7 +299,7 @@ def render_historique():
     st.subheader("📋 Dernières factures importées")
     
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             factures = db.query(HouseExpense).filter(
                 HouseExpense.notes.like("%OCR%")
             ).order_by(HouseExpense.id.desc()).limit(5).all()
@@ -361,3 +361,4 @@ def app():
 
 if __name__ == "__main__":
     app()
+

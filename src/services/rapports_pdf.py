@@ -23,7 +23,7 @@ from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 
 from src.core.cache import Cache
 from src.core.database import obtenir_contexte_db
-from src.core.decorators import with_db_session, with_cache, with_error_handling
+from src.core.decorators import avec_session_db, avec_cache, avec_gestion_erreurs
 from src.core.errors_base import ErreurValidation, ErreurNonTrouve
 from src.core.models import ArticleInventaire, Recette, HistoriqueRecette, HistoriqueInventaire, Planning, Repas, RecetteIngredient
 from src.services.types import BaseService
@@ -104,7 +104,7 @@ class RapportsPDFService(BaseService[ArticleInventaire]):
     # RAPPORT STOCKS
     # ═══════════════════════════════════════════════════════════
 
-    @with_db_session
+    @avec_session_db
     def generer_donnees_rapport_stocks(
         self,
         periode_jours: int = 7,
@@ -187,7 +187,7 @@ class RapportsPDFService(BaseService[ArticleInventaire]):
         
         return rapport
 
-    @with_db_session
+    @avec_session_db
     def generer_pdf_rapport_stocks(
         self,
         periode_jours: int = 7,
@@ -375,7 +375,7 @@ class RapportsPDFService(BaseService[ArticleInventaire]):
     # RAPPORT BUDGET
     # ═══════════════════════════════════════════════════════════
 
-    @with_db_session
+    @avec_session_db
     def generer_donnees_rapport_budget(
         self,
         periode_jours: int = 30,
@@ -428,7 +428,7 @@ class RapportsPDFService(BaseService[ArticleInventaire]):
         
         return rapport
 
-    @with_db_session
+    @avec_session_db
     def generer_pdf_rapport_budget(
         self,
         periode_jours: int = 30,
@@ -584,7 +584,7 @@ class RapportsPDFService(BaseService[ArticleInventaire]):
     # ANALYSE GASPILLAGE
     # ═══════════════════════════════════════════════════════════
 
-    @with_db_session
+    @avec_session_db
     def generer_analyse_gaspillage(
         self,
         periode_jours: int = 30,
@@ -651,7 +651,7 @@ class RapportsPDFService(BaseService[ArticleInventaire]):
         
         return analyse
 
-    @with_db_session
+    @avec_session_db
     def generer_pdf_analyse_gaspillage(
         self,
         periode_jours: int = 30,
@@ -861,7 +861,7 @@ class RapportsPDFService(BaseService[ArticleInventaire]):
     # RAPPORT PLANNING REPAS
     # ═══════════════════════════════════════════════════════════
 
-    @with_db_session
+    @avec_session_db
     def generer_donnees_rapport_planning(
         self,
         planning_id: int,
@@ -940,7 +940,7 @@ class RapportsPDFService(BaseService[ArticleInventaire]):
         
         return rapport
 
-    @with_db_session
+    @avec_session_db
     def generer_pdf_rapport_planning(
         self,
         planning_id: int,
@@ -1159,3 +1159,4 @@ def get_rapports_pdf_service() -> RapportsPDFService:
     if _rapports_pdf_service_instance is None:
         _rapports_pdf_service_instance = RapportsPDFService()
     return _rapports_pdf_service_instance
+

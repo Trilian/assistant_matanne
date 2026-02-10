@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 
 from src.core.cache import Cache
 from src.core.database import obtenir_contexte_db
-from src.core.decorators import with_db_session, with_cache, with_error_handling
+from src.core.decorators import avec_session_db, avec_cache, avec_gestion_erreurs
 from src.core.errors_base import ErreurValidation, ErreurNonTrouve
 from src.core.models import ArticleInventaire, Recette
 from src.services.types import BaseService
@@ -170,8 +170,8 @@ class BarcodeService(BaseService[ArticleInventaire]):
     # SCAN ET DÉTECTION
     # ═══════════════════════════════════════════════════════════
 
-    @with_cache(ttl=3600)
-    @with_db_session
+    @avec_cache(ttl=3600)
+    @avec_session_db
     def scanner_code(self, code: str, session: Session = None) -> ScanResultat:
         """
         Scanne et identifie un code-barres.
@@ -220,7 +220,7 @@ class BarcodeService(BaseService[ArticleInventaire]):
     # GESTION ARTICLES PAR BARCODE
     # ═══════════════════════════════════════════════════════════
 
-    @with_db_session
+    @avec_session_db
     def ajouter_article_par_barcode(
         self,
         code: str,
@@ -287,7 +287,7 @@ class BarcodeService(BaseService[ArticleInventaire]):
         
         return article
 
-    @with_db_session
+    @avec_session_db
     def incrementer_stock_barcode(
         self,
         code: str,
@@ -320,7 +320,7 @@ class BarcodeService(BaseService[ArticleInventaire]):
         
         return article
 
-    @with_db_session
+    @avec_session_db
     def verifier_stock_barcode(
         self,
         code: str,
@@ -379,7 +379,7 @@ class BarcodeService(BaseService[ArticleInventaire]):
     # GESTION MAPPINGS BARCODE
     # ═══════════════════════════════════════════════════════════
 
-    @with_db_session
+    @avec_session_db
     def mettre_a_jour_barcode(
         self,
         article_id: int,
@@ -408,8 +408,8 @@ class BarcodeService(BaseService[ArticleInventaire]):
         
         return article
 
-    @with_cache(ttl=7200)
-    @with_db_session
+    @avec_cache(ttl=7200)
+    @avec_session_db
     def lister_articles_avec_barcode(
         self,
         session: Session = None
@@ -432,7 +432,7 @@ class BarcodeService(BaseService[ArticleInventaire]):
             for a in articles
         ]
 
-    @with_db_session
+    @avec_session_db
     def exporter_barcodes(
         self,
         session: Session = None
@@ -458,7 +458,7 @@ class BarcodeService(BaseService[ArticleInventaire]):
         
         return output.getvalue()
 
-    @with_db_session
+    @avec_session_db
     def importer_barcodes(
         self,
         csv_content: str,
@@ -498,3 +498,4 @@ class BarcodeService(BaseService[ArticleInventaire]):
                 })
         
         return resultats
+

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Module Dépenses Maison - Imports et constantes partagés
 
 Focus sur les dépenses récurrentes de la maison avec consommation.
@@ -11,7 +11,7 @@ from decimal import Decimal
 from typing import Optional, List
 import calendar
 
-from src.core.database import get_db_context
+from src.core.database import obtenir_contexte_db
 from src.core.models import HouseExpense
 from src.core.models.maison_extended import ExpenseCategory
 from src.services.budget import (
@@ -49,9 +49,10 @@ __all__ = [
     # Standard libs
     "st", "date", "timedelta", "Decimal", "Optional", "List", "calendar",
     # Database
-    "get_db_context", "HouseExpense", "ExpenseCategory",
+    "obtenir_contexte_db", "HouseExpense", "ExpenseCategory",
     # Budget service
     "get_budget_service", "FactureMaison", "CategorieDepense",
     # Constants
     "CATEGORY_LABELS", "CATEGORIES_AVEC_CONSO", "MOIS_FR",
 ]
+

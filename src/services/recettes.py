@@ -1,7 +1,7 @@
 ﻿"""
 Service Recettes Unifié (REFACTORING PHASE 2)
 
-✅ Utilise @with_db_session et @with_cache (Phase 1)
+✅ Utilise @avec_session_db et @avec_cache (Phase 1)
 ✅ Validation Pydantic centralisée (RecetteInput, etc.)
 ✅ Type hints complets pour meilleur IDE support
 ✅ Services testables sans Streamlit
@@ -25,7 +25,7 @@ from sqlalchemy.orm import Session, joinedload
 from src.core.ai import obtenir_client_ia
 from src.core.cache import Cache
 from src.core.database import obtenir_contexte_db
-from src.core.decorators import with_db_session, with_cache, with_error_handling
+from src.core.decorators import avec_session_db, avec_cache, avec_gestion_erreurs
 from src.core.errors_base import ErreurNonTrouve, ErreurValidation
 from src.core.models import (
     EtapeRecette,
@@ -165,8 +165,8 @@ class RecetteService(BaseService[Recette], BaseAIService, RecipeAIMixin):
     # SECTION 1 : CRUD OPTIMISÉ
     # ═══════════════════════════════════════════════════════════
 
-    @with_cache(ttl=3600, key_func=lambda self, recette_id: f"recette_full_{recette_id}")
-    @with_db_session
+    @avec_cache(ttl=3600, key_func=lambda self, recette_id: f"recette_full_{recette_id}")
+    @avec_session_db
     def get_by_id_full(self, recette_id: int, db: Session) -> Recette | None:
         """Récupère une recette avec toutes ses relations (avec cache)."""
         try:
@@ -196,7 +196,7 @@ class RecetteService(BaseService[Recette], BaseAIService, RecipeAIMixin):
             logger.error(f"Erreur récupération recette {recette_id}: {e}")
             return None
 
-    @with_db_session
+    @avec_session_db
     def get_by_type(self, type_repas: str, db: Session) -> list[Recette]:
         """Récupère les recettes d'un type donné."""
         try:
@@ -209,8 +209,8 @@ class RecetteService(BaseService[Recette], BaseAIService, RecipeAIMixin):
             logger.error(f"Erreur récupération recettes par type {type_repas}: {e}")
             return []
 
-    @with_error_handling(default_return=None, afficher_erreur=True)
-    @with_db_session
+    @avec_gestion_erreurs(default_return=None, afficher_erreur=True)
+    @avec_session_db
     def create_complete(self, data: dict, db: Session) -> Recette:
         """
         Crée une recette complète (recette + ingrédients + étapes).
@@ -294,7 +294,7 @@ class RecetteService(BaseService[Recette], BaseAIService, RecipeAIMixin):
         logger.info(f"✅ Recette créée : {recette.nom} (ID: {recette.id})")
         return recette
 
-    @with_db_session
+    @avec_session_db
     def search_advanced(
         self,
         term: str | None = None,
@@ -349,14 +349,14 @@ class RecetteService(BaseService[Recette], BaseAIService, RecipeAIMixin):
     # SECTION 2 : GÉNÉRATION IA (AVEC CACHE ET VALIDATION)
     # ═══════════════════════════════════════════════════════════
 
-    @with_cache(
+    @avec_cache(
         ttl=21600,
         key_func=lambda self, type_repas, saison, difficulte, ingredients_dispo, nb_recettes: (
             f"recettes_ia_{type_repas}_{saison}_{difficulte}_{nb_recettes}_"
             f"{hash(tuple(ingredients_dispo or []))}"
         ),
     )
-    @with_error_handling(default_return=[])
+    @avec_gestion_erreurs(default_return=[])
     def generer_recettes_ia(
         self,
         type_repas: str,
@@ -504,9 +504,9 @@ RULES:
         logger.info(f"✅ Generated {len(variations)} variations of '{nom_recette}'")
         return variations
 
-    @with_cache(ttl=3600, key_func=lambda self, rid: f"version_bebe_{rid}")
-    @with_error_handling(default_return=None)
-    @with_db_session
+    @avec_cache(ttl=3600, key_func=lambda self, rid: f"version_bebe_{rid}")
+    @avec_gestion_erreurs(default_return=None)
+    @avec_session_db
     def generer_version_bebe(self, recette_id: int, db: Session) -> VersionRecette | None:
         """Génère une version bébé sécurisée de la recette avec l'IA.
 
@@ -515,7 +515,7 @@ RULES:
 
         Args:
             recette_id: ID of recipe to adapt
-            db: Database session (injected by @with_db_session)
+            db: Database session (injected by @avec_session_db)
 
         Returns:
             VersionRecette object or None if generation fails
@@ -630,7 +630,7 @@ Steps:
         print(f"[generer_version_bebe] END: Returning version {version.id}")
         return version
 
-    @with_db_session
+    @avec_session_db
     def generer_version_batch_cooking(self, recette_id: int, db: Session) -> VersionRecette | None:
         """Génère une version batch cooking optimisée de la recette avec l'IA.
 
@@ -639,7 +639,7 @@ Steps:
 
         Args:
             recette_id: ID of recipe to adapt
-            db: Database session (injected by @with_db_session)
+            db: Database session (injected by @avec_session_db)
 
         Returns:
             VersionRecette object or None if generation fails
@@ -762,7 +762,7 @@ Difficulty: {recette.difficulte}"""
         logger.info(f"✅ Batch cooking version created for recipe {recette_id}")
         return version
 
-    @with_db_session
+    @avec_session_db
     def generer_version_robot(
         self, recette_id: int, robot_type: str, db: Session
     ) -> VersionRecette | None:
@@ -773,7 +773,7 @@ Difficulty: {recette.difficulte}"""
         Args:
             recette_id: ID of recipe to adapt
             robot_type: Type of robot (cookeo, monsieur_cuisine, airfryer, multicooker)
-            db: Database session (injected by @with_db_session)
+            db: Database session (injected by @avec_session_db)
 
         Returns:
             VersionRecette object or None if generation fails
@@ -965,7 +965,7 @@ Difficulty: {recette.difficulte}"""
     # SECTION 3 : HISTORIQUE & VERSIONS
     # ═══════════════════════════════════════════════════════════
 
-    @with_db_session
+    @avec_session_db
     def enregistrer_cuisson(
         self,
         recette_id: int,
@@ -1005,7 +1005,7 @@ Difficulty: {recette.difficulte}"""
             logger.error(f"Erreur enregistrement cuisson: {e}")
             return False
 
-    @with_db_session
+    @avec_session_db
     def get_historique(
         self,
         recette_id: int,
@@ -1036,7 +1036,7 @@ Difficulty: {recette.difficulte}"""
             logger.error(f"Erreur récupération historique: {e}")
             return []
 
-    @with_db_session
+    @avec_session_db
     def get_stats_recette(self, recette_id: int, db: Session | None = None) -> dict:
         """Récupère les statistiques d'utilisation d'une recette.
         
@@ -1080,7 +1080,7 @@ Difficulty: {recette.difficulte}"""
             logger.error(f"Erreur stats recette: {e}")
             return {}
 
-    @with_db_session
+    @avec_session_db
     def get_versions(self, recette_id: int, db: Session | None = None) -> list:
         """Récupère toutes les versions d'une recette.
         
@@ -1234,3 +1234,4 @@ __all__ = [
     "VersionRobotGeneree",
     "get_recette_service",
 ]
+

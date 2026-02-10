@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service de synchronisation avec calendriers externes.
 
 Fonctionnalités:
@@ -16,7 +16,7 @@ from uuid import uuid4, UUID
 import httpx
 from sqlalchemy.orm import Session
 
-from src.core.decorators import with_error_handling, with_db_session
+from src.core.decorators import avec_gestion_erreurs, avec_session_db
 from src.core.database import obtenir_contexte_db
 from src.core.models import (
     CalendarEvent,
@@ -88,7 +88,7 @@ class CalendarSyncService:
     # EXPORT VERS CALENDRIER EXTERNE
     # ═══════════════════════════════════════════════════════════
     
-    @with_error_handling(default_return=None, afficher_erreur=True)
+    @avec_gestion_erreurs(default_return=None, afficher_erreur=True)
     def export_to_ical(
         self,
         user_id: str,
@@ -200,7 +200,7 @@ class CalendarSyncService:
     # IMPORT DEPUIS CALENDRIER EXTERNE
     # ═══════════════════════════════════════════════════════════
     
-    @with_error_handling(default_return=None, afficher_erreur=True)
+    @avec_gestion_erreurs(default_return=None, afficher_erreur=True)
     def import_from_ical_url(
         self,
         user_id: str,
@@ -799,7 +799,7 @@ class CalendarSyncService:
                     db.delete(config)
                     db.commit()
 
-    @with_db_session
+    @avec_session_db
     def ajouter_calendrier_externe(
         self,
         user_id: UUID | str,
@@ -835,7 +835,7 @@ class CalendarSyncService:
         db.refresh(calendrier)
         return calendrier
 
-    @with_db_session
+    @avec_session_db
     def lister_calendriers_utilisateur(
         self,
         user_id: UUID | str,
@@ -856,7 +856,7 @@ class CalendarSyncService:
             CalendrierExterne.enabled == True,
         ).all()
 
-    @with_db_session
+    @avec_session_db
     def sauvegarder_evenement_calendrier(
         self,
         calendrier_id: int,
@@ -909,7 +909,7 @@ class CalendarSyncService:
         db.refresh(db_event)
         return db_event
 
-    @with_db_session
+    @avec_session_db
     def lister_evenements_calendrier(
         self,
         user_id: UUID | str,
@@ -959,3 +959,4 @@ def get_calendar_sync_service() -> CalendarSyncService:
     if _calendar_sync_service is None:
         _calendar_sync_service = CalendarSyncService()
     return _calendar_sync_service
+

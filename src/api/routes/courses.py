@@ -1,4 +1,4 @@
-"""
+﻿"""
 Routes API pour les courses.
 """
 
@@ -70,10 +70,10 @@ async def list_courses(
 ):
     """Liste les listes de courses."""
     try:
-        from src.core.database import get_db_context
+        from src.core.database import obtenir_contexte_db
         from src.core.models import ListeCourses
         
-        with get_db_context() as session:
+        with obtenir_contexte_db() as session:
             query = session.query(ListeCourses)
             
             if active_only:
@@ -112,10 +112,10 @@ async def list_courses(
 async def create_liste(data: CourseListCreate):
     """Crée une nouvelle liste de courses."""
     try:
-        from src.core.database import get_db_context
+        from src.core.database import obtenir_contexte_db
         from src.core.models import ListeCourses
         
-        with get_db_context() as session:
+        with obtenir_contexte_db() as session:
             liste = ListeCourses(nom=data.nom, archivee=False)
             session.add(liste)
             session.commit()
@@ -131,10 +131,10 @@ async def create_liste(data: CourseListCreate):
 async def add_item(liste_id: int, item: CourseItemBase):
     """Ajoute un article à une liste."""
     try:
-        from src.core.database import get_db_context
+        from src.core.database import obtenir_contexte_db
         from src.core.models import ListeCourses, ArticleCourses, Ingredient
         
-        with get_db_context() as session:
+        with obtenir_contexte_db() as session:
             liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
             
             if not liste:
@@ -163,3 +163,4 @@ async def add_item(liste_id: int, item: CourseItemBase):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+

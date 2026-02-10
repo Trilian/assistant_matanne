@@ -6,7 +6,7 @@ from typing import List, Dict, Any, Optional
 from datetime import date, datetime
 from sqlalchemy.orm import Session
 
-from src.core.database import get_db_context
+from src.core.database import obtenir_contexte_db
 from src.services.recettes import get_recette_service
 from src.core.models import Recette, Repas
 
@@ -17,14 +17,14 @@ from src.core.models import Recette, Repas
 
 def get_toutes_recettes(db: Optional[Session] = None) -> List[Recette]:
     """Récupère toutes les recettes."""
-    with get_db_context() as session:
+    with obtenir_contexte_db() as session:
         service = get_recette_service(session)
         return session.query(Recette).all()
 
 
 def get_recette_by_id(recette_id: int, db: Optional[Session] = None) -> Optional[Recette]:
     """Récupère une recette par son ID."""
-    with get_db_context() as session:
+    with obtenir_contexte_db() as session:
         return session.query(Recette).filter(Recette.id == recette_id).first()
 
 
@@ -36,7 +36,7 @@ def rechercher_recettes(
     db: Optional[Session] = None
 ) -> List[Recette]:
     """Recherche recettes avec filtres."""
-    with get_db_context() as session:
+    with obtenir_contexte_db() as session:
         q = session.query(Recette)
         
         if query:
@@ -53,13 +53,13 @@ def rechercher_recettes(
 
 def get_recettes_par_categorie(categorie: str, db: Optional[Session] = None) -> List[Recette]:
     """Récupère recettes d'une catégorie."""
-    with get_db_context() as session:
+    with obtenir_contexte_db() as session:
         return session.query(Recette).filter(Recette.categorie == categorie).all()
 
 
 def get_recettes_favorites(db: Optional[Session] = None) -> List[Recette]:
     """Récupère les recettes favorites."""
-    with get_db_context() as session:
+    with obtenir_contexte_db() as session:
         return session.query(Recette).filter(Recette.favorite == True).all()
 
 
@@ -79,7 +79,7 @@ def creer_recette(
     db: Optional[Session] = None
 ) -> Recette:
     """Crée une nouvelle recette."""
-    with get_db_context() as session:
+    with obtenir_contexte_db() as session:
         service = get_recette_service(session)
         
         recette = Recette(
@@ -105,7 +105,7 @@ def mettre_a_jour_recette(
     db: Optional[Session] = None
 ) -> Optional[Recette]:
     """Met à jour une recette existante."""
-    with get_db_context() as session:
+    with obtenir_contexte_db() as session:
         recette = session.query(Recette).filter(Recette.id == recette_id).first()
         
         if not recette:
@@ -122,7 +122,7 @@ def mettre_a_jour_recette(
 
 def supprimer_recette(recette_id: int, db: Optional[Session] = None) -> bool:
     """Supprime une recette."""
-    with get_db_context() as session:
+    with obtenir_contexte_db() as session:
         recette = session.query(Recette).filter(Recette.id == recette_id).first()
         
         if not recette:
@@ -135,7 +135,7 @@ def supprimer_recette(recette_id: int, db: Optional[Session] = None) -> bool:
 
 def toggle_favorite(recette_id: int, db: Optional[Session] = None) -> bool:
     """Toggle le statut favori d'une recette."""
-    with get_db_context() as session:
+    with obtenir_contexte_db() as session:
         recette = session.query(Recette).filter(Recette.id == recette_id).first()
         
         if not recette:
@@ -152,7 +152,7 @@ def toggle_favorite(recette_id: int, db: Optional[Session] = None) -> bool:
 
 def get_planning_semaine(date_debut: date, date_fin: date, db: Optional[Session] = None) -> List[Repas]:
     """Récupère le planning de repas pour une période."""
-    with get_db_context() as session:
+    with obtenir_contexte_db() as session:
         return session.query(Repas).filter(
             Repas.date_repas >= date_debut,
             Repas.date_repas <= date_fin
@@ -166,7 +166,7 @@ def ajouter_repas_planning(
     db: Optional[Session] = None
 ) -> Repas:
     """Ajoute un repas au planning."""
-    with get_db_context() as session:
+    with obtenir_contexte_db() as session:
         repas = Repas(
             recette_id=recette_id,
             date_repas=date_repas,
@@ -207,7 +207,7 @@ def calculer_calories_portion(recette: Recette) -> Optional[float]:
 
 def get_statistiques_recettes(db: Optional[Session] = None) -> Dict[str, Any]:
     """Calcule les statistiques sur les recettes."""
-    with get_db_context() as session:
+    with obtenir_contexte_db() as session:
         recettes = session.query(Recette).all()
         
         if not recettes:
@@ -258,3 +258,4 @@ def valider_recette(data: Dict[str, Any]) -> tuple[bool, Optional[str]]:
         return False, "Le nombre de portions doit être supérieur à 0"
     
     return True, None
+

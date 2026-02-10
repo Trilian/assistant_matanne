@@ -1,4 +1,4 @@
-"""
+﻿"""
 Routes API pour les recettes.
 """
 
@@ -62,10 +62,10 @@ async def list_recettes(
 ):
     """Liste les recettes avec pagination et filtres."""
     try:
-        from src.core.database import get_db_context
+        from src.core.database import obtenir_contexte_db
         from src.core.models import Recette
         
-        with get_db_context() as session:
+        with obtenir_contexte_db() as session:
             query = session.query(Recette)
             
             if categorie:
@@ -100,10 +100,10 @@ async def list_recettes(
 async def get_recette(recette_id: int):
     """Récupère une recette par son ID."""
     try:
-        from src.core.database import get_db_context
+        from src.core.database import obtenir_contexte_db
         from src.core.models import Recette
         
-        with get_db_context() as session:
+        with obtenir_contexte_db() as session:
             recette = session.query(Recette).filter(Recette.id == recette_id).first()
             
             if not recette:
@@ -121,10 +121,10 @@ async def get_recette(recette_id: int):
 async def create_recette(recette: RecetteCreate):
     """Crée une nouvelle recette."""
     try:
-        from src.core.database import get_db_context
+        from src.core.database import obtenir_contexte_db
         from src.core.models import Recette
         
-        with get_db_context() as session:
+        with obtenir_contexte_db() as session:
             db_recette = Recette(
                 nom=recette.nom,
                 description=recette.description,
@@ -148,10 +148,10 @@ async def create_recette(recette: RecetteCreate):
 async def update_recette(recette_id: int, recette: RecetteCreate):
     """Met à jour une recette."""
     try:
-        from src.core.database import get_db_context
+        from src.core.database import obtenir_contexte_db
         from src.core.models import Recette
         
-        with get_db_context() as session:
+        with obtenir_contexte_db() as session:
             db_recette = session.query(Recette).filter(Recette.id == recette_id).first()
             
             if not db_recette:
@@ -176,10 +176,10 @@ async def update_recette(recette_id: int, recette: RecetteCreate):
 async def delete_recette(recette_id: int):
     """Supprime une recette."""
     try:
-        from src.core.database import get_db_context
+        from src.core.database import obtenir_contexte_db
         from src.core.models import Recette
         
-        with get_db_context() as session:
+        with obtenir_contexte_db() as session:
             db_recette = session.query(Recette).filter(Recette.id == recette_id).first()
             
             if not db_recette:
@@ -194,3 +194,4 @@ async def delete_recette(recette_id: int):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+

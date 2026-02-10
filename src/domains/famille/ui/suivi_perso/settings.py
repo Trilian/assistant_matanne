@@ -1,9 +1,9 @@
-"""
+﻿"""
 Module Suivi Perso - Paramètres Garmin et objectifs
 """
 
 from ._common import (
-    st, get_db_context, UserProfile,
+    st, obtenir_contexte_db, UserProfile,
     get_garmin_service
 )
 
@@ -133,7 +133,7 @@ def render_objectifs(data: dict):
     
     if st.button("💾 Sauvegarder objectifs"):
         try:
-            with get_db_context() as db:
+            with obtenir_contexte_db() as db:
                 u = db.query(UserProfile).filter_by(id=user.id).first()
                 u.objectif_pas_quotidien = new_pas
                 u.objectif_calories_brulees = new_cal
@@ -143,3 +143,4 @@ def render_objectifs(data: dict):
                 st.rerun()
         except Exception as e:
             st.error(f"Erreur: {e}")
+

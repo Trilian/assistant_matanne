@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour les méthodes de PDFExportService qui utilisent la base de données.
 
 Ces tests ciblent les lignes non couvertes (121-151, 229-267, 330-354) en mockant
@@ -221,7 +221,7 @@ class TestExporterRecetteDB:
         
         with patch('src.services.pdf_export.obtenir_contexte_db', return_value=mock_context):
             service = PDFExportService()
-            # Le decorator @with_error_handling() attrape l'exception et retourne None
+            # Le decorator @avec_gestion_erreurs() attrape l'exception et retourne None
             result = service.exporter_recette(999)
             assert result is None
 
@@ -353,7 +353,7 @@ class TestExporterPlanningSemaineDB:
         
         with patch('src.services.pdf_export.obtenir_contexte_db', return_value=mock_context):
             service = PDFExportService()
-            # Le decorator @with_error_handling() attrape l'exception et retourne None
+            # Le decorator @avec_gestion_erreurs() attrape l'exception et retourne None
             result = service.exporter_planning_semaine(999)
             assert result is None
 
@@ -789,3 +789,4 @@ class TestExporterIntegration:
         result.seek(0)
         pdf_content = result.read()
         assert pdf_content[:4] == b'%PDF'
+

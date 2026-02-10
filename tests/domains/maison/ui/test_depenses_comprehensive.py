@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests complets pour le module maison/ui/depenses.
 
 Couvre:
@@ -22,7 +22,7 @@ from typing import List
 class TestGetDepensesMois:
     """Tests pour get_depenses_mois."""
 
-    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
+    @patch('src.domains.maison.ui.depenses.crud.obtenir_contexte_db')
     def test_get_depenses_mois_success(self, mock_db):
         from src.domains.maison.ui.depenses import get_depenses_mois
         
@@ -42,7 +42,7 @@ class TestGetDepensesMois:
         
         assert len(result) == 2
 
-    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
+    @patch('src.domains.maison.ui.depenses.crud.obtenir_contexte_db')
     def test_get_depenses_mois_vide(self, mock_db):
         from src.domains.maison.ui.depenses import get_depenses_mois
         
@@ -62,7 +62,7 @@ class TestGetDepensesMois:
 class TestGetDepensesAnnee:
     """Tests pour get_depenses_annee."""
 
-    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
+    @patch('src.domains.maison.ui.depenses.crud.obtenir_contexte_db')
     def test_get_depenses_annee_success(self, mock_db):
         from src.domains.maison.ui.depenses import get_depenses_annee
         
@@ -83,7 +83,7 @@ class TestGetDepensesAnnee:
 class TestGetDepenseById:
     """Tests pour get_depense_by_id."""
 
-    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
+    @patch('src.domains.maison.ui.depenses.crud.obtenir_contexte_db')
     def test_get_depense_by_id_found(self, mock_db):
         from src.domains.maison.ui.depenses import get_depense_by_id
         
@@ -101,7 +101,7 @@ class TestGetDepenseById:
         assert result is not None
         assert result.id == 1
 
-    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
+    @patch('src.domains.maison.ui.depenses.crud.obtenir_contexte_db')
     def test_get_depense_by_id_not_found(self, mock_db):
         from src.domains.maison.ui.depenses import get_depense_by_id
         
@@ -121,7 +121,7 @@ class TestGetDepenseById:
 class TestCreateDepense:
     """Tests pour create_depense."""
 
-    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
+    @patch('src.domains.maison.ui.depenses.crud.obtenir_contexte_db')
     def test_create_depense_success(self, mock_db):
         from src.domains.maison.ui.depenses import create_depense
         
@@ -143,7 +143,7 @@ class TestCreateDepense:
         mock_session.add.assert_called()
         mock_session.commit.assert_called()
 
-    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
+    @patch('src.domains.maison.ui.depenses.crud.obtenir_contexte_db')
     def test_create_depense_minimal(self, mock_db):
         from src.domains.maison.ui.depenses import create_depense
         
@@ -166,7 +166,7 @@ class TestCreateDepense:
 class TestUpdateDepense:
     """Tests pour update_depense."""
 
-    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
+    @patch('src.domains.maison.ui.depenses.crud.obtenir_contexte_db')
     def test_update_depense_success(self, mock_db):
         from src.domains.maison.ui.depenses import update_depense
         
@@ -184,7 +184,7 @@ class TestUpdateDepense:
         assert result is not None
         mock_session.commit.assert_called()
 
-    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
+    @patch('src.domains.maison.ui.depenses.crud.obtenir_contexte_db')
     def test_update_depense_not_found(self, mock_db):
         from src.domains.maison.ui.depenses import update_depense
         
@@ -204,7 +204,7 @@ class TestUpdateDepense:
 class TestDeleteDepense:
     """Tests pour delete_depense."""
 
-    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
+    @patch('src.domains.maison.ui.depenses.crud.obtenir_contexte_db')
     def test_delete_depense_success(self, mock_db):
         from src.domains.maison.ui.depenses import delete_depense
         
@@ -223,7 +223,7 @@ class TestDeleteDepense:
         mock_session.delete.assert_called_with(mock_depense)
         mock_session.commit.assert_called()
 
-    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
+    @patch('src.domains.maison.ui.depenses.crud.obtenir_contexte_db')
     def test_delete_depense_not_found(self, mock_db):
         from src.domains.maison.ui.depenses import delete_depense
         
@@ -248,7 +248,7 @@ class TestDeleteDepense:
 class TestGetStatsGlobales:
     """Tests pour get_stats_globales."""
 
-    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
+    @patch('src.domains.maison.ui.depenses.crud.obtenir_contexte_db')
     def test_get_stats_globales(self, mock_db):
         from src.domains.maison.ui.depenses import get_stats_globales
         
@@ -265,7 +265,7 @@ class TestGetStatsGlobales:
         
         assert isinstance(result, dict)
 
-    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
+    @patch('src.domains.maison.ui.depenses.crud.obtenir_contexte_db')
     def test_get_stats_globales_empty(self, mock_db):
         from src.domains.maison.ui.depenses import get_stats_globales
         
@@ -285,7 +285,7 @@ class TestGetStatsGlobales:
 class TestGetHistoriqueCategorie:
     """Tests pour get_historique_categorie."""
 
-    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
+    @patch('src.domains.maison.ui.depenses.crud.obtenir_contexte_db')
     def test_get_historique_categorie(self, mock_db):
         from src.domains.maison.ui.depenses import get_historique_categorie
         
@@ -301,7 +301,7 @@ class TestGetHistoriqueCategorie:
         
         assert isinstance(result, list)
 
-    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
+    @patch('src.domains.maison.ui.depenses.crud.obtenir_contexte_db')
     def test_get_historique_categorie_12_mois(self, mock_db):
         from src.domains.maison.ui.depenses import get_historique_categorie
         
@@ -505,7 +505,7 @@ class TestAppFunction:
 class TestEdgeCases:
     """Tests pour les cas limites."""
 
-    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
+    @patch('src.domains.maison.ui.depenses.crud.obtenir_contexte_db')
     def test_create_depense_montant_zero(self, mock_db):
         from src.domains.maison.ui.depenses import create_depense
         
@@ -522,7 +522,7 @@ class TestEdgeCases:
         # Should handle zero amount
         assert result is not None
 
-    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
+    @patch('src.domains.maison.ui.depenses.crud.obtenir_contexte_db')
     def test_create_depense_montant_negatif(self, mock_db):
         from src.domains.maison.ui.depenses import create_depense
         
@@ -540,7 +540,7 @@ class TestEdgeCases:
         # Should handle negative amount (remboursement)
         assert result is not None
 
-    @patch('src.domains.maison.ui.depenses.crud.get_db_context')
+    @patch('src.domains.maison.ui.depenses.crud.obtenir_contexte_db')
     def test_get_historique_categorie_inconnue(self, mock_db):
         from src.domains.maison.ui.depenses import get_historique_categorie
         
@@ -570,3 +570,4 @@ class TestEdgeCases:
         
         # Should be valid for future scheduled expenses
         assert data["date"] > date.today()
+

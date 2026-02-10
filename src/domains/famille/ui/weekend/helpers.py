@@ -1,10 +1,10 @@
-"""
+﻿"""
 Module Sorties Weekend - Fonctions helper
 """
 
 from ._common import (
     date, timedelta,
-    get_db_context, WeekendActivity, ChildProfile
+    obtenir_contexte_db, WeekendActivity, ChildProfile
 )
 
 
@@ -29,7 +29,7 @@ def get_next_weekend() -> tuple[date, date]:
 def get_weekend_activities(saturday: date, sunday: date) -> dict:
     """Récupère les activités du weekend"""
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             activities = db.query(WeekendActivity).filter(
                 WeekendActivity.date_prevue.in_([saturday, sunday])
             ).order_by(WeekendActivity.heure_debut).all()
@@ -45,7 +45,7 @@ def get_weekend_activities(saturday: date, sunday: date) -> dict:
 def get_budget_weekend(saturday: date, sunday: date) -> dict:
     """Calcule le budget du weekend"""
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             activities = db.query(WeekendActivity).filter(
                 WeekendActivity.date_prevue.in_([saturday, sunday])
             ).all()
@@ -61,7 +61,7 @@ def get_budget_weekend(saturday: date, sunday: date) -> dict:
 def get_lieux_testes() -> list:
     """Récupère les lieux déjà testés"""
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             return db.query(WeekendActivity).filter(
                 WeekendActivity.statut == "terminé",
                 WeekendActivity.note_lieu.isnot(None)
@@ -73,7 +73,7 @@ def get_lieux_testes() -> list:
 def get_age_jules_mois() -> int:
     """Récupère l'âge de Jules en mois"""
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             jules = db.query(ChildProfile).filter_by(name="Jules", actif=True).first()
             if jules and jules.date_of_birth:
                 delta = date.today() - jules.date_of_birth
@@ -86,10 +86,11 @@ def get_age_jules_mois() -> int:
 def mark_activity_done(activity_id: int):
     """Marque une activité comme terminée"""
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             act = db.get(WeekendActivity, activity_id)
             if act:
                 act.statut = "terminé"
                 db.commit()
     except:
         pass
+

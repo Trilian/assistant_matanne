@@ -1,4 +1,4 @@
-import pytest
+﻿import pytest
 from unittest.mock import Mock, MagicMock, patch, call
 from sqlalchemy.orm import Session
 from datetime import date
@@ -10,8 +10,8 @@ class TestDepensesUIDisplay:
     @pytest.fixture
     def db_session(self):
         """Fixture session base de données"""
-        from src.core.database import get_db_context
-        with get_db_context() as session:
+        from src.core.database import obtenir_contexte_db
+        with obtenir_contexte_db() as session:
             yield session
             session.rollback()
     
@@ -173,3 +173,4 @@ class TestDepensesUIActions:
         call_kwargs = mock_download.call_args[1]
         assert "Télécharger" in call_kwargs.get("label", "")
         assert "depenses.csv" in call_kwargs.get("file_name", "")
+

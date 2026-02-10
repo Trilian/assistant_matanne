@@ -25,7 +25,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from src.core.database import obtenir_contexte_db
-from src.core.decorators import with_db_session, with_error_handling
+from src.core.decorators import avec_session_db, avec_gestion_erreurs
 from src.services.backup_utils import (
     generate_backup_id,
     calculate_checksum,
@@ -193,8 +193,8 @@ class BackupService:
     # EXPORT / BACKUP
     # ═══════════════════════════════════════════════════════════
     
-    @with_error_handling(default_return=None, afficher_erreur=True)
-    @with_db_session
+    @avec_gestion_erreurs(default_return=None, afficher_erreur=True)
+    @avec_session_db
     def create_backup(
         self,
         tables: list[str] | None = None,
@@ -318,8 +318,8 @@ class BackupService:
     # IMPORT / RESTORE
     # ═══════════════════════════════════════════════════════════
     
-    @with_error_handling(default_return=None, afficher_erreur=True)
-    @with_db_session
+    @avec_gestion_erreurs(default_return=None, afficher_erreur=True)
+    @avec_session_db
     def restore_backup(
         self,
         file_path: str,
@@ -577,7 +577,7 @@ class BackupService:
     # PERSISTANCE BASE DE DONNÉES (HISTORIQUE)
     # ═══════════════════════════════════════════════════════════
 
-    @with_db_session
+    @avec_session_db
     def enregistrer_backup_historique(
         self,
         metadata: BackupMetadata,
@@ -618,7 +618,7 @@ class BackupService:
             db.rollback()
             return None
 
-    @with_db_session
+    @avec_session_db
     def lister_backups_historique(
         self,
         user_id: UUID | str | None = None,
@@ -643,7 +643,7 @@ class BackupService:
         
         return query.order_by(BackupModel.created_at.desc()).limit(limit).all()
 
-    @with_db_session
+    @avec_session_db
     def supprimer_backup_historique(
         self,
         backup_id: int,
@@ -777,3 +777,4 @@ def render_backup_ui():
             
             # Nettoyer le fichier temporaire
             temp_path.unlink(missing_ok=True)
+

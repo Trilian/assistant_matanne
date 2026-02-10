@@ -1,10 +1,10 @@
-"""
+﻿"""
 Module Dépenses Maison - Fonctions CRUD et statistiques
 """
 
 from ._common import (
     date, Decimal, Optional, List,
-    get_db_context, HouseExpense,
+    obtenir_contexte_db, HouseExpense,
     get_budget_service, FactureMaison, CategorieDepense,
     CATEGORIES_AVEC_CONSO, MOIS_FR
 )
@@ -13,7 +13,7 @@ from ._common import (
 def get_depenses_mois(mois: int, annee: int) -> List[HouseExpense]:
     """Récupère les dépenses d'un mois"""
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             return db.query(HouseExpense).filter(
                 HouseExpense.mois == mois,
                 HouseExpense.annee == annee
@@ -25,7 +25,7 @@ def get_depenses_mois(mois: int, annee: int) -> List[HouseExpense]:
 def get_depenses_annee(annee: int) -> List[HouseExpense]:
     """Récupère toutes les dépenses d'une année"""
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             return db.query(HouseExpense).filter(
                 HouseExpense.annee == annee
             ).order_by(HouseExpense.mois, HouseExpense.categorie).all()
@@ -36,7 +36,7 @@ def get_depenses_annee(annee: int) -> List[HouseExpense]:
 def get_depense_by_id(depense_id: int) -> Optional[HouseExpense]:
     """Récupère une dépense par ID"""
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             return db.query(HouseExpense).filter(HouseExpense.id == depense_id).first()
     except Exception:
         return None
@@ -62,7 +62,7 @@ def create_depense(data: dict) -> HouseExpense:
         service.ajouter_facture_maison(facture)
     
     # Toujours créer aussi dans HouseExpense pour compatibilité
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         depense = HouseExpense(**data)
         db.add(depense)
         db.commit()
@@ -72,7 +72,7 @@ def create_depense(data: dict) -> HouseExpense:
 
 def update_depense(depense_id: int, data: dict) -> Optional[HouseExpense]:
     """Met à jour une dépense"""
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         depense = db.query(HouseExpense).filter(HouseExpense.id == depense_id).first()
         if depense:
             for key, value in data.items():
@@ -84,7 +84,7 @@ def update_depense(depense_id: int, data: dict) -> Optional[HouseExpense]:
 
 def delete_depense(depense_id: int) -> bool:
     """Supprime une dépense"""
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         depense = db.query(HouseExpense).filter(HouseExpense.id == depense_id).first()
         if depense:
             db.delete(depense)
@@ -151,7 +151,7 @@ def get_historique_categorie(categorie: str, nb_mois: int = 12) -> List[dict]:
             mois += 12
             annee -= 1
         
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             depense = db.query(HouseExpense).filter(
                 HouseExpense.categorie == categorie,
                 HouseExpense.mois == mois,
@@ -167,3 +167,4 @@ def get_historique_categorie(categorie: str, nb_mois: int = 12) -> List[dict]:
         })
     
     return list(reversed(result))
+

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Mode Offline - Gestion de la connectivité et synchronisation.
 
 Fonctionnalités :
@@ -356,7 +356,7 @@ class SynchroniseurHorsLigne:
         Returns:
             True si succès
         """
-        from src.core.database import get_db_context
+        from src.core.database import obtenir_contexte_db
         
         # Mapping des modèles vers les services
         service_map = {
@@ -382,7 +382,7 @@ class SynchroniseurHorsLigne:
             return False
         
         # Exécuter l'opération
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             if op.operation_type == TypeOperation.CREATE:
                 result = service.create(op.data, db=db)
                 return result is not None

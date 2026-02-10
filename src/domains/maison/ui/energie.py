@@ -1,4 +1,4 @@
-"""
+﻿"""
 Dashboard Énergie - Suivi consommation gaz, électricité, eau.
 
 Visualisation des consommations avec:
@@ -15,7 +15,7 @@ from typing import Optional
 import plotly.graph_objects as go
 import plotly.express as px
 
-from src.core.database import get_db_context
+from src.core.database import obtenir_contexte_db
 from src.core.models import HouseExpense
 
 
@@ -69,7 +69,7 @@ def charger_historique_energie(energie: str, nb_mois: int = 24) -> list[dict]:
             annee -= 1
         
         try:
-            with get_db_context() as db:
+            with obtenir_contexte_db() as db:
                 depense = db.query(HouseExpense).filter(
                     HouseExpense.categorie == energie,
                     HouseExpense.mois == mois,
@@ -458,3 +458,4 @@ def app():
 
 if __name__ == "__main__":
     app()
+

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Routes API pour le planning.
 """
 
@@ -54,7 +54,7 @@ async def get_planning_semaine(
 ):
     """Récupère le planning de la semaine."""
     try:
-        from src.core.database import get_db_context
+        from src.core.database import obtenir_contexte_db
         from src.core.models import Repas
         
         if not date_debut:
@@ -63,7 +63,7 @@ async def get_planning_semaine(
         
         date_fin = date_debut + timedelta(days=7)
         
-        with get_db_context() as session:
+        with obtenir_contexte_db() as session:
             repas = session.query(Repas).filter(
                 Repas.date_repas >= date_debut,
                 Repas.date_repas < date_fin
@@ -94,10 +94,10 @@ async def get_planning_semaine(
 async def create_repas(repas: RepasCreate):
     """Planifie un repas."""
     try:
-        from src.core.database import get_db_context
+        from src.core.database import obtenir_contexte_db
         from src.core.models import Repas, Planning
         
-        with get_db_context() as session:
+        with obtenir_contexte_db() as session:
             # Récupérer ou créer un planning par défaut
             date_repas = repas.date.date() if hasattr(repas.date, 'date') else repas.date
             
@@ -150,3 +150,4 @@ async def create_repas(repas: RepasCreate):
             
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+

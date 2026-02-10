@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests d'intégration pour batch_cooking.py avec test_db fixture.
 
 Ces tests utilisent la fixture test_db pour passer directement une session DB,
@@ -228,12 +228,12 @@ from src.core.errors_base import ErreurNonTrouve, ErreurValidation
 
 @pytest.fixture
 def patched_db_context(test_db):
-    """Fixture qui patch get_db_context pour retourner test_db."""
+    """Fixture qui patch obtenir_contexte_db pour retourner test_db."""
     @contextmanager
     def mock_context():
         yield test_db
     
-    with patch('src.core.database.get_db_context', mock_context):
+    with patch('src.core.database.obtenir_contexte_db', mock_context):
         yield test_db
 
 

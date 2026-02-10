@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour CoursesService - Service critique
 Tests complets pour la gestion des listes de courses
 
@@ -93,7 +93,7 @@ class TestCoursesServiceListeCourses:
             mock_db.return_value.__exit__ = MagicMock(return_value=None)
             
             result = courses_service.get_liste_courses()
-            # Le décorateur @with_error_handling retourne [] par défaut
+            # Le décorateur @avec_gestion_erreurs retourne [] par défaut
             assert isinstance(result, list)
     
     def test_get_liste_courses_accepts_filters(self, courses_service):

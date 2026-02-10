@@ -1,10 +1,10 @@
-"""
+﻿"""
 Module Suivi Perso - Fonctions helper
 """
 
 from ._common import (
     st, date, datetime, timedelta,
-    get_db_context, UserProfile, GarminDailySummary, FoodLog,
+    obtenir_contexte_db, UserProfile, GarminDailySummary, FoodLog,
     get_or_create_user
 )
 
@@ -24,7 +24,7 @@ def get_user_data(username: str) -> dict:
     from ._common import GarminActivity
     
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             user = db.query(UserProfile).filter_by(username=username).first()
             
             if not user:
@@ -99,7 +99,7 @@ def _calculate_streak(user: UserProfile, summaries: list) -> int:
 def get_food_logs_today(username: str) -> list:
     """Récupère les logs alimentation du jour"""
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             user = db.query(UserProfile).filter_by(username=username).first()
             if not user:
                 return []
@@ -110,3 +110,4 @@ def get_food_logs_today(username: str) -> list:
             ).order_by(FoodLog.heure).all()
     except:
         return []
+

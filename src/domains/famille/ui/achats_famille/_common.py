@@ -1,4 +1,4 @@
-"""
+﻿"""
 Module Achats Famille - Imports et constantes partagés
 
 Catégories:
@@ -11,7 +11,7 @@ import streamlit as st
 from datetime import date
 from typing import Optional
 
-from src.core.database import get_db_context
+from src.core.database import obtenir_contexte_db
 from src.core.models import FamilyPurchase
 
 
@@ -40,7 +40,8 @@ __all__ = [
     # Standard libs
     "st", "date", "Optional",
     # Database
-    "get_db_context", "FamilyPurchase",
+    "obtenir_contexte_db", "FamilyPurchase",
     # Constants
     "CATEGORIES", "PRIORITES",
 ]
+

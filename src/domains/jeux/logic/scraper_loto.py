@@ -1,4 +1,4 @@
-"""
+﻿"""
 Chargeur de données Loto FDJ - Utilise les données publiques officielles
 
 Sources:
@@ -279,7 +279,7 @@ def inserer_tirages_en_bd(limite: int = 50):
     À appeler périodiquement (ex: cron job quotidien)
     """
     try:
-        from src.core.database import get_db_context
+        from src.core.database import obtenir_contexte_db
         from src.core.models import TirageLoto, StatistiquesLoto
         import json
         
@@ -287,7 +287,7 @@ def inserer_tirages_en_bd(limite: int = 50):
         tirages = scraper.charger_derniers_tirages(limite)
         stats = scraper.calculer_statistiques_historiques(tirages)
         
-        with get_db_context() as session:
+        with obtenir_contexte_db() as session:
             for tirage_data in tirages:
                 # Vérifier si le tirage existe déjà
                 existing = session.query(TirageLoto).filter(
@@ -317,3 +317,4 @@ def inserer_tirages_en_bd(limite: int = 50):
     except Exception as e:
         logger.error(f"❌ Erreur insertion BD: {e}")
         return False
+

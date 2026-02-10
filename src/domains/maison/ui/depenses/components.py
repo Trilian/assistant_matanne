@@ -1,10 +1,10 @@
-"""
+﻿"""
 Module Dépenses Maison - Composants UI
 """
 
 from ._common import (
     st, date, Decimal, Optional,
-    get_db_context, HouseExpense,
+    obtenir_contexte_db, HouseExpense,
     CATEGORY_LABELS, CATEGORIES_AVEC_CONSO, MOIS_FR
 )
 from .crud import (
@@ -301,3 +301,4 @@ def render_onglet_analyse():
     render_graphique_evolution()
     st.divider()
     render_comparaison_mois()
+

@@ -9,7 +9,7 @@ import streamlit as st
 
 # Cache
 # State
-from src.core.state import StateManager, get_state
+from src.core.state import GestionnaireEtat, obtenir_etat
 from src.services.courses import get_courses_service
 from src.services.inventaire import get_inventaire_service
 from src.services.planning import get_planning_service
@@ -53,7 +53,7 @@ def app():
     """Point d'entrée module accueil"""
 
     # Header
-    state = get_state()
+    state = obtenir_etat()
 
     st.markdown(
         f"<h1 style='text-align: center;'>🤖 Bienvenue {state.nom_utilisateur} !</h1>",
@@ -256,7 +256,7 @@ def render_critical_alerts():
                 if st.button(
                     alert["action"], key=f"alert_{alert['module']}", width='stretch'
                 ):
-                    StateManager.navigate_to(alert["module"])
+                    GestionnaireEtat.naviguer_vers(alert["module"])
                     st.rerun()
 
 
@@ -323,23 +323,23 @@ def render_quick_actions():
         if st.button(
             "➕ Ajouter Recette", key="quick_add_recette", width='stretch', type="primary"
         ):
-            StateManager.navigate_to("cuisine.recettes")
+            GestionnaireEtat.naviguer_vers("cuisine.recettes")
             st.session_state.show_add_form = True
             st.rerun()
 
     with col2:
         if st.button("📅 Voir Courses", key="quick_view_courses", width='stretch'):
-            StateManager.navigate_to("cuisine.courses")
+            GestionnaireEtat.naviguer_vers("cuisine.courses")
             st.rerun()
 
     with col3:
         if st.button("📦 Gérer Inventaire", key="quick_view_inventaire", width='stretch'):
-            StateManager.navigate_to("cuisine.inventaire")
+            GestionnaireEtat.naviguer_vers("cuisine.inventaire")
             st.rerun()
 
     with col4:
         if st.button("🧹 Planning Semaine", key="quick_view_planning", width='stretch'):
-            StateManager.navigate_to("cuisine.planning_semaine")
+            GestionnaireEtat.naviguer_vers("cuisine.planning_semaine")
             st.rerun()
 
 
@@ -379,7 +379,7 @@ def render_cuisine_summary():
             st.metric("🎯 Bébé", stats.get("bebe", 0))
 
         if st.button("👶 Voir les recettes", key="nav_recettes", width='stretch'):
-            StateManager.navigate_to("cuisine.recettes")
+            GestionnaireEtat.naviguer_vers("cuisine.recettes")
             st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
@@ -423,7 +423,7 @@ def render_inventaire_summary():
             stock_alert(articles_alert[:3], key="home_inventory_alert")  # Max 3
 
         if st.button("📦 Gérer l'inventaire", key="nav_inventaire", width='stretch'):
-            StateManager.navigate_to("cuisine.inventaire")
+            GestionnaireEtat.naviguer_vers("cuisine.inventaire")
             st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
@@ -468,7 +468,7 @@ def render_courses_summary():
                 st.caption(f"... et {len(prioritaires) - 3} autre(s)")
 
         if st.button("📅 Voir la liste", key="nav_courses", width='stretch'):
-            StateManager.navigate_to("cuisine.courses")
+            GestionnaireEtat.naviguer_vers("cuisine.courses")
             st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
@@ -520,7 +520,7 @@ def render_planning_summary():
             st.info("Aucun planning cette semaine")
 
         if st.button("🧹 Voir le planning", key="nav_planning", width='stretch'):
-            StateManager.navigate_to("cuisine.planning_semaine")
+            GestionnaireEtat.naviguer_vers("cuisine.planning_semaine")
             st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)

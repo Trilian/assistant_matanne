@@ -1,4 +1,4 @@
-"""
+﻿"""
 Module Planning Semaine Jules - Activités d'éveil organisées par jour.
 
 Pour un enfant de ~19 mois:
@@ -13,7 +13,7 @@ from datetime import date, timedelta
 from typing import Optional
 import random
 
-from src.core.database import get_db_context
+from src.core.database import obtenir_contexte_db
 from src.core.models import ChildProfile
 
 
@@ -117,7 +117,7 @@ JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "D
 def get_age_jules_mois() -> int:
     """Retourne l'âge de Jules en mois"""
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             jules = db.query(ChildProfile).filter_by(name="Jules", actif=True).first()
             if jules and jules.date_of_birth:
                 delta = date.today() - jules.date_of_birth
@@ -396,3 +396,4 @@ def app():
 
 if __name__ == "__main__":
     app()
+

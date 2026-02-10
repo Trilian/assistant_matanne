@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests complets pour src/domains/famille/ui/hub_famille.py
 """
 import pytest
@@ -39,7 +39,7 @@ class TestCalculerAgeJules:
         mock_session.__exit__ = MagicMock(return_value=False)
         mock_session.query.return_value.filter_by.return_value.first.return_value = None
         
-        with patch("src.domains.famille.ui.hub_famille.get_db_context", return_value=mock_session):
+        with patch("src.domains.famille.ui.hub_famille.obtenir_contexte_db", return_value=mock_session):
             result = hub_famille.calculer_age_jules()
             assert "mois" in result
             assert "texte" in result
@@ -57,14 +57,14 @@ class TestCalculerAgeJules:
         mock_session.__exit__ = MagicMock(return_value=False)
         mock_session.query.return_value.filter_by.return_value.first.return_value = mock_jules
         
-        with patch("src.domains.famille.ui.hub_famille.get_db_context", return_value=mock_session):
+        with patch("src.domains.famille.ui.hub_famille.obtenir_contexte_db", return_value=mock_session):
             result = hub_famille.calculer_age_jules()
             assert "mois" in result
             assert result["mois"] >= 1
 
     def test_calculer_age_jules_exception(self):
         """Test avec exception."""
-        with patch("src.domains.famille.ui.hub_famille.get_db_context", side_effect=Exception("DB Error")):
+        with patch("src.domains.famille.ui.hub_famille.obtenir_contexte_db", side_effect=Exception("DB Error")):
             result = hub_famille.calculer_age_jules()
             # Should return default values
             assert result["mois"] == 19
@@ -85,7 +85,7 @@ class TestGetUserStreak:
         mock_session.__exit__ = MagicMock(return_value=False)
         mock_session.query.return_value.filter_by.return_value.first.return_value = None
         
-        with patch("src.domains.famille.ui.hub_famille.get_db_context", return_value=mock_session):
+        with patch("src.domains.famille.ui.hub_famille.obtenir_contexte_db", return_value=mock_session):
             result = hub_famille.get_user_streak("unknown")
             assert result == 0
 
@@ -101,13 +101,13 @@ class TestGetUserStreak:
         mock_session.query.return_value.filter_by.return_value.first.return_value = mock_user
         mock_session.query.return_value.filter.return_value.order_by.return_value.all.return_value = []
         
-        with patch("src.domains.famille.ui.hub_famille.get_db_context", return_value=mock_session):
+        with patch("src.domains.famille.ui.hub_famille.obtenir_contexte_db", return_value=mock_session):
             result = hub_famille.get_user_streak("anne")
             assert result == 0
 
     def test_get_user_streak_exception(self):
         """Test avec exception."""
-        with patch("src.domains.famille.ui.hub_famille.get_db_context", side_effect=Exception("DB Error")):
+        with patch("src.domains.famille.ui.hub_famille.obtenir_contexte_db", side_effect=Exception("DB Error")):
             result = hub_famille.get_user_streak("anne")
             assert result == 0
 
@@ -130,7 +130,7 @@ class TestGetUserGarminConnected:
         mock_session.__exit__ = MagicMock(return_value=False)
         mock_session.query.return_value.filter_by.return_value.first.return_value = mock_user
         
-        with patch("src.domains.famille.ui.hub_famille.get_db_context", return_value=mock_session):
+        with patch("src.domains.famille.ui.hub_famille.obtenir_contexte_db", return_value=mock_session):
             result = hub_famille.get_user_garmin_connected("anne")
             assert result is True
 
@@ -144,7 +144,7 @@ class TestGetUserGarminConnected:
         mock_session.__exit__ = MagicMock(return_value=False)
         mock_session.query.return_value.filter_by.return_value.first.return_value = mock_user
         
-        with patch("src.domains.famille.ui.hub_famille.get_db_context", return_value=mock_session):
+        with patch("src.domains.famille.ui.hub_famille.obtenir_contexte_db", return_value=mock_session):
             result = hub_famille.get_user_garmin_connected("mathieu")
             assert result is False
 
@@ -155,13 +155,13 @@ class TestGetUserGarminConnected:
         mock_session.__exit__ = MagicMock(return_value=False)
         mock_session.query.return_value.filter_by.return_value.first.return_value = None
         
-        with patch("src.domains.famille.ui.hub_famille.get_db_context", return_value=mock_session):
+        with patch("src.domains.famille.ui.hub_famille.obtenir_contexte_db", return_value=mock_session):
             result = hub_famille.get_user_garmin_connected("unknown")
             assert result is False
 
     def test_garmin_exception(self):
         """Test avec exception."""
-        with patch("src.domains.famille.ui.hub_famille.get_db_context", side_effect=Exception("DB Error")):
+        with patch("src.domains.famille.ui.hub_famille.obtenir_contexte_db", side_effect=Exception("DB Error")):
             result = hub_famille.get_user_garmin_connected("anne")
             assert result is False
 
@@ -181,7 +181,7 @@ class TestCountWeekendActivities:
         mock_session.__exit__ = MagicMock(return_value=False)
         mock_session.query.return_value.filter.return_value.count.return_value = 0
         
-        with patch("src.domains.famille.ui.hub_famille.get_db_context", return_value=mock_session):
+        with patch("src.domains.famille.ui.hub_famille.obtenir_contexte_db", return_value=mock_session):
             result = hub_famille.count_weekend_activities()
             assert result == 0
 
@@ -192,13 +192,13 @@ class TestCountWeekendActivities:
         mock_session.__exit__ = MagicMock(return_value=False)
         mock_session.query.return_value.filter.return_value.count.return_value = 3
         
-        with patch("src.domains.famille.ui.hub_famille.get_db_context", return_value=mock_session):
+        with patch("src.domains.famille.ui.hub_famille.obtenir_contexte_db", return_value=mock_session):
             result = hub_famille.count_weekend_activities()
             assert result == 3
 
     def test_count_weekend_exception(self):
         """Test avec exception."""
-        with patch("src.domains.famille.ui.hub_famille.get_db_context", side_effect=Exception("DB Error")):
+        with patch("src.domains.famille.ui.hub_famille.obtenir_contexte_db", side_effect=Exception("DB Error")):
             result = hub_famille.count_weekend_activities()
             assert result == 0
 
@@ -218,7 +218,7 @@ class TestCountPendingPurchases:
         mock_session.__exit__ = MagicMock(return_value=False)
         mock_session.query.return_value.filter_by.return_value.count.return_value = 0
         
-        with patch("src.domains.famille.ui.hub_famille.get_db_context", return_value=mock_session):
+        with patch("src.domains.famille.ui.hub_famille.obtenir_contexte_db", return_value=mock_session):
             result = hub_famille.count_pending_purchases()
             assert result == 0
 
@@ -229,13 +229,13 @@ class TestCountPendingPurchases:
         mock_session.__exit__ = MagicMock(return_value=False)
         mock_session.query.return_value.filter_by.return_value.count.return_value = 5
         
-        with patch("src.domains.famille.ui.hub_famille.get_db_context", return_value=mock_session):
+        with patch("src.domains.famille.ui.hub_famille.obtenir_contexte_db", return_value=mock_session):
             result = hub_famille.count_pending_purchases()
             assert result == 5
 
     def test_count_pending_exception(self):
         """Test avec exception."""
-        with patch("src.domains.famille.ui.hub_famille.get_db_context", side_effect=Exception("DB Error")):
+        with patch("src.domains.famille.ui.hub_famille.obtenir_contexte_db", side_effect=Exception("DB Error")):
             result = hub_famille.count_pending_purchases()
             assert result == 0
 
@@ -255,7 +255,7 @@ class TestCountUrgentPurchases:
         mock_session.__exit__ = MagicMock(return_value=False)
         mock_session.query.return_value.filter.return_value.count.return_value = 0
         
-        with patch("src.domains.famille.ui.hub_famille.get_db_context", return_value=mock_session):
+        with patch("src.domains.famille.ui.hub_famille.obtenir_contexte_db", return_value=mock_session):
             result = hub_famille.count_urgent_purchases()
             assert result == 0
 
@@ -266,13 +266,13 @@ class TestCountUrgentPurchases:
         mock_session.__exit__ = MagicMock(return_value=False)
         mock_session.query.return_value.filter.return_value.count.return_value = 2
         
-        with patch("src.domains.famille.ui.hub_famille.get_db_context", return_value=mock_session):
+        with patch("src.domains.famille.ui.hub_famille.obtenir_contexte_db", return_value=mock_session):
             result = hub_famille.count_urgent_purchases()
             assert result == 2
 
     def test_count_urgent_exception(self):
         """Test avec exception."""
-        with patch("src.domains.famille.ui.hub_famille.get_db_context", side_effect=Exception("DB Error")):
+        with patch("src.domains.famille.ui.hub_famille.obtenir_contexte_db", side_effect=Exception("DB Error")):
             result = hub_famille.count_urgent_purchases()
             assert result == 0
 
@@ -432,7 +432,7 @@ class TestRenderDayActivities:
     @patch("streamlit.write")
     @patch("streamlit.caption")
     @patch("streamlit.button")
-    @patch("src.domains.famille.ui.hub_famille.get_db_context")
+    @patch("src.domains.famille.ui.hub_famille.obtenir_contexte_db")
     def test_render_day_activities_with_activities(self, mock_db, mock_button, mock_caption, mock_write):
         """Test avec des activités."""
         mock_activity = MagicMock()
@@ -450,7 +450,7 @@ class TestRenderDayActivities:
 
     @patch("streamlit.caption")
     @patch("streamlit.button", return_value=False)
-    @patch("src.domains.famille.ui.hub_famille.get_db_context")
+    @patch("src.domains.famille.ui.hub_famille.obtenir_contexte_db")
     def test_render_day_activities_no_activities(self, mock_db, mock_button, mock_caption):
         """Test sans activités."""
         mock_session = MagicMock()
@@ -463,8 +463,9 @@ class TestRenderDayActivities:
         mock_caption.assert_called_with("Rien de prévu")
 
     @patch("streamlit.caption")
-    @patch("src.domains.famille.ui.hub_famille.get_db_context", side_effect=Exception("DB Error"))
+    @patch("src.domains.famille.ui.hub_famille.obtenir_contexte_db", side_effect=Exception("DB Error"))
     def test_render_day_activities_exception(self, mock_db, mock_caption):
         """Test avec exception."""
         hub_famille._render_day_activities(date.today())
         mock_caption.assert_called_with("Rien de prévu")
+

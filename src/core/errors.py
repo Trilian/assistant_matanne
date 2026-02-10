@@ -35,7 +35,7 @@ from .errors_base import (
 logger = logging.getLogger(__name__)
 
 
-def _is_debug_mode() -> bool:
+def _est_mode_debug() -> bool:
     """
     Retourne l'état du mode debug de l'application.
 
@@ -149,7 +149,7 @@ def gerer_erreurs(
                     st.error("[ERROR] Une erreur inattendue s'est produite")
 
                     # Afficher stack trace en mode debug
-                    if _is_debug_mode():
+                    if _est_mode_debug():
                         with st.expander("🐛 Stack trace"):
                             st.code(traceback.format_exc())
 
@@ -345,7 +345,7 @@ def afficher_erreur_streamlit(erreur: Exception, contexte: str = "") -> None:
             st.error(f"[ERROR] {erreur.message_utilisateur}")
 
         # Afficher détails en mode debug
-        if _is_debug_mode() and getattr(erreur, "details", None):
+        if _est_mode_debug() and getattr(erreur, "details", None):
             with st.expander("[SEARCH] Détails"):
                 st.json(erreur.details)
     else:
@@ -356,7 +356,7 @@ def afficher_erreur_streamlit(erreur: Exception, contexte: str = "") -> None:
             st.caption(f"Contexte : {contexte}")
 
         # Stack trace en mode debug
-        if _is_debug_mode():
+        if _est_mode_debug():
             with st.expander("🐛 Stack trace"):
                 st.code(traceback.format_exc())
 

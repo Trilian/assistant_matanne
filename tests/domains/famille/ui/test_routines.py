@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests complets pour src/domains/famille/ui/routines.py
 Couvre les helpers, fonctions CRUD et logique métier
 """
@@ -130,7 +130,7 @@ class TestCreerRoutine:
             r.id = 1
         mock_session.add = mock_add
         
-        with patch("src.domains.famille.ui.routines.get_db_context", return_value=mock_session):
+        with patch("src.domains.famille.ui.routines.obtenir_contexte_db", return_value=mock_session):
             with patch("src.domains.famille.ui.routines.Routine") as MockRoutine:
                 instance = MagicMock()
                 instance.id = 1
@@ -149,7 +149,7 @@ class TestCreerRoutine:
         mock_session.__exit__ = MagicMock(return_value=False)
         mock_session.query.return_value.filter.return_value.first.return_value = mock_child
         
-        with patch("src.domains.famille.ui.routines.get_db_context", return_value=mock_session):
+        with patch("src.domains.famille.ui.routines.obtenir_contexte_db", return_value=mock_session):
             with patch("src.domains.famille.ui.routines.Routine") as MockRoutine:
                 instance = MagicMock()
                 instance.id = 2
@@ -172,7 +172,7 @@ class TestAjouterTache:
         mock_session.__enter__ = MagicMock(return_value=mock_session)
         mock_session.__exit__ = MagicMock(return_value=False)
         
-        with patch("src.domains.famille.ui.routines.get_db_context", return_value=mock_session):
+        with patch("src.domains.famille.ui.routines.obtenir_contexte_db", return_value=mock_session):
             with patch("src.domains.famille.ui.routines.RoutineTask"):
                 routines.ajouter_tache(1, "Se brosser les dents")
                 mock_session.add.assert_called_once()
@@ -184,7 +184,7 @@ class TestAjouterTache:
         mock_session.__enter__ = MagicMock(return_value=mock_session)
         mock_session.__exit__ = MagicMock(return_value=False)
         
-        with patch("src.domains.famille.ui.routines.get_db_context", return_value=mock_session):
+        with patch("src.domains.famille.ui.routines.obtenir_contexte_db", return_value=mock_session):
             with patch("src.domains.famille.ui.routines.RoutineTask"):
                 routines.ajouter_tache(1, "Petit déjeuner", "08:00")
                 mock_session.add.assert_called_once()
@@ -210,7 +210,7 @@ class TestMarquerComplete:
         mock_session.__exit__ = MagicMock(return_value=False)
         mock_session.query.return_value.filter.return_value.first.return_value = mock_task
         
-        with patch("src.domains.famille.ui.routines.get_db_context", return_value=mock_session):
+        with patch("src.domains.famille.ui.routines.obtenir_contexte_db", return_value=mock_session):
             routines.marquer_complete(1)
             assert mock_task.status == "terminé"
             assert mock_task.completed_at is not None
@@ -222,7 +222,7 @@ class TestMarquerComplete:
         mock_session.__exit__ = MagicMock(return_value=False)
         mock_session.query.return_value.filter.return_value.first.return_value = None
         
-        with patch("src.domains.famille.ui.routines.get_db_context", return_value=mock_session):
+        with patch("src.domains.famille.ui.routines.obtenir_contexte_db", return_value=mock_session):
             # Should not raise
             routines.marquer_complete(999)
 
@@ -264,7 +264,7 @@ class TestSupprimerRoutine:
         mock_session.__enter__ = MagicMock(return_value=mock_session)
         mock_session.__exit__ = MagicMock(return_value=False)
         
-        with patch("src.domains.famille.ui.routines.get_db_context", return_value=mock_session):
+        with patch("src.domains.famille.ui.routines.obtenir_contexte_db", return_value=mock_session):
             routines.supprimer_routine(1)
             mock_session.query.return_value.filter.return_value.delete.assert_called_once()
             mock_session.commit.assert_called_once()
@@ -350,3 +350,4 @@ class TestEdgeCases:
         mock_creer.return_value = 1
         result = mock_creer("", "", "Famille", "quotidien")
         assert result == 1
+

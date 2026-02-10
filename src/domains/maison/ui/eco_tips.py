@@ -1,4 +1,4 @@
-"""
+﻿"""
 Module Éco-Tips - Suivi des actions écologiques et économies.
 
 Gestion du passage aux produits réutilisables, suivi des économies mensuelles,
@@ -10,7 +10,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 from typing import Optional, List
 
-from src.core.database import get_db_context
+from src.core.database import obtenir_contexte_db
 from src.core.models import EcoAction
 from src.core.models.maison_extended import EcoActionType
 
@@ -108,7 +108,7 @@ IDEES_ACTIONS = [
 
 def get_all_actions(actif_only: bool = False) -> List[EcoAction]:
     """Récupère toutes les actions éco"""
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         query = db.query(EcoAction)
         if actif_only:
             query = query.filter(EcoAction.actif == True)
@@ -117,13 +117,13 @@ def get_all_actions(actif_only: bool = False) -> List[EcoAction]:
 
 def get_action_by_id(action_id: int) -> Optional[EcoAction]:
     """Récupère une action par son ID"""
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         return db.query(EcoAction).filter(EcoAction.id == action_id).first()
 
 
 def create_action(data: dict) -> EcoAction:
     """Crée une nouvelle action éco"""
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         action = EcoAction(**data)
         db.add(action)
         db.commit()
@@ -133,7 +133,7 @@ def create_action(data: dict) -> EcoAction:
 
 def update_action(action_id: int, data: dict) -> Optional[EcoAction]:
     """Met à jour une action éco"""
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         action = db.query(EcoAction).filter(EcoAction.id == action_id).first()
         if action:
             for key, value in data.items():
@@ -145,7 +145,7 @@ def update_action(action_id: int, data: dict) -> Optional[EcoAction]:
 
 def delete_action(action_id: int) -> bool:
     """Supprime une action éco"""
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         action = db.query(EcoAction).filter(EcoAction.id == action_id).first()
         if action:
             db.delete(action)
@@ -459,3 +459,4 @@ def app():
     
     with tab3:
         render_idees()
+

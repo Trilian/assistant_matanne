@@ -1,10 +1,10 @@
-"""
+﻿"""
 Module Sorties Weekend - Composants UI
 """
 
 from ._common import (
     st, date,
-    get_db_context, WeekendActivity,
+    obtenir_contexte_db, WeekendActivity,
     TYPES_ACTIVITES, METEO_OPTIONS
 )
 from .helpers import (
@@ -208,7 +208,7 @@ def render_add_activity():
                 st.error("Titre requis")
             else:
                 try:
-                    with get_db_context() as db:
+                    with obtenir_contexte_db() as db:
                         activity = WeekendActivity(
                             titre=titre,
                             type_activite=type_activite,
@@ -237,7 +237,7 @@ def render_noter_sortie():
     st.subheader("⭐ Noter une sortie")
     
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             # Activités terminées non notées
             activities = db.query(WeekendActivity).filter(
                 WeekendActivity.statut == "terminé",
@@ -276,3 +276,4 @@ def render_noter_sortie():
     
     except Exception as e:
         st.error(f"Erreur: {e}")
+

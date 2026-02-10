@@ -304,10 +304,10 @@ class ActionHistoryService:
         filters = filters or ActionFilter()
         
         try:
-            from src.core.database import get_db_context
+            from src.core.database import obtenir_contexte_db
             from src.core.models import ActionHistory
             
-            with get_db_context() as session:
+            with obtenir_contexte_db() as session:
                 query = session.query(ActionHistory)
                 
                 if filters.user_id:
@@ -385,11 +385,11 @@ class ActionHistoryService:
             Statistiques d'activité
         """
         try:
-            from src.core.database import get_db_context
+            from src.core.database import obtenir_contexte_db
             from src.core.models import ActionHistory
             from sqlalchemy import func
             
-            with get_db_context() as session:
+            with obtenir_contexte_db() as session:
                 now = datetime.now()
                 week_ago = now - timedelta(days=days)
                 today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -518,10 +518,10 @@ class ActionHistoryService:
     def _save_to_database(self, entry: ActionEntry):
         """Sauvegarde l'entrée en base de données."""
         try:
-            from src.core.database import get_db_context
+            from src.core.database import obtenir_contexte_db
             from src.core.models import ActionHistory
             
-            with get_db_context() as session:
+            with obtenir_contexte_db() as session:
                 db_entry = ActionHistory(
                     user_id=entry.user_id,
                     user_name=entry.user_name,
@@ -677,3 +677,4 @@ __all__ = [
     "render_user_activity",
     "render_activity_stats",
 ]
+

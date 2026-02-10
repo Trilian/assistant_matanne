@@ -554,15 +554,18 @@ def verifier_sante() -> dict:
 
 
 # ═══════════════════════════════════════════════════════════
-# ALIAS ANGLAIS (compatibilité)
+# EXPORTS PRINCIPAUX
 # ═══════════════════════════════════════════════════════════
 
-get_engine = obtenir_moteur
-get_db_context = obtenir_contexte_db
-get_session = obtenir_contexte_db  # Alias pour compatibilité
-get_db = obtenir_contexte_db  # Alias pour compatibilité
-get_safe_db = obtenir_db_securise
-check_connection = verifier_connexion
-get_db_info = obtenir_infos_db
-init_database = initialiser_database
-MigrationManager = GestionnaireMigrations
+# Nettoyage des exports - noms français uniquement
+__all__ = [
+    "obtenir_moteur",
+    "obtenir_moteur_securise",
+    "obtenir_contexte_db",
+    "obtenir_db_securise",
+    "verifier_connexion",
+    "obtenir_infos_db",
+    "initialiser_database",
+    "GestionnaireMigrations",
+]
+

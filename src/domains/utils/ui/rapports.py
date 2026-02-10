@@ -11,7 +11,7 @@ import streamlit as st
 from datetime import datetime, timedelta
 import pandas as pd
 
-from src.core.state import StateManager, get_state
+from src.core.state import GestionnaireEtat, obtenir_etat
 from src.services.rapports_pdf import RapportsPDFService
 
 # Logique métier pure

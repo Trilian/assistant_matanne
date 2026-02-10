@@ -9,7 +9,7 @@ from typing import Any, Callable, Optional
 from sqlalchemy.orm import Session
 
 from src.core.cache import cached
-from src.core.database import get_db_context
+from src.core.database import obtenir_contexte_db
 from src.core.models import Ingredient
 
 logger = logging.getLogger(__name__)
@@ -51,7 +51,7 @@ def find_or_create_ingredient(
     if db:
         return _execute(db)
 
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         return _execute(db)
 
 
@@ -99,7 +99,7 @@ def batch_find_or_create_ingredients(items: list[dict], db: Session | None = Non
     if db:
         return _execute(db)
 
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         return _execute(db)
 
 
@@ -114,7 +114,7 @@ def get_all_ingredients_cached() -> list[dict]:
     Example:
         ingredients = get_all_ingredients_cached()
     """
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         ingredients = db.query(Ingredient).all()
         return [
             {"id": ing.id, "nom": ing.nom, "unite": ing.unite, "categorie": ing.categorie}
@@ -182,7 +182,7 @@ def enrich_with_ingredient_info(
     if db:
         return _execute(db)
 
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         return _execute(db)
 
 
@@ -367,3 +367,4 @@ def suggest_ingredient_substitutes(ingredient: str) -> list[str]:
     }
 
     return substitutes_map.get(ingredient.lower(), [])
+

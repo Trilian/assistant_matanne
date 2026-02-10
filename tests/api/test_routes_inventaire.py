@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/api/routes/inventaire.py
 
 Tests unitaires avec vraies données pour les routes inventaire.
@@ -175,7 +175,7 @@ class TestRoutesInventaireAvecMock:
         mock_query.first.return_value = mock_article
         mock_session.query.return_value = mock_query
         
-        with patch("src.core.database.get_db_context", return_value=mock_context):
+        with patch("src.core.database.obtenir_contexte_db", return_value=mock_context):
             from src.api.main import app
             client = TestClient(app)
             
@@ -197,7 +197,7 @@ class TestRoutesInventaireAvecMock:
         mock_query.first.return_value = None
         mock_session.query.return_value = mock_query
         
-        with patch("src.core.database.get_db_context", return_value=mock_context):
+        with patch("src.core.database.obtenir_contexte_db", return_value=mock_context):
             from src.api.main import app
             client = TestClient(app)
             
@@ -317,3 +317,4 @@ class TestInventaireCreationDB:
         """GET /barcode/{code} retourne 404 si non trouvé."""
         response = client.get("/api/v1/inventaire/barcode/0000000000000")
         assert response.status_code == 404
+

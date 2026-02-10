@@ -310,8 +310,8 @@ def carte_metrique_avancee(
     
     if lien_module:
         if st.button(f"Voir {titre}", key=f"link_{lien_module}", use_container_width=True):
-            from src.core.state import StateManager
-            StateManager.navigate_to(lien_module)
+            from src.core.state import GestionnaireEtat
+            GestionnaireEtat.naviguer_vers(lien_module)
             st.rerun()
 
 

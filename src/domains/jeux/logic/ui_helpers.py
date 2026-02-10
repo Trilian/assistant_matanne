@@ -1,4 +1,4 @@
-"""
+﻿"""
 Utilitaires d'intégration pour les pages UI
 Fourni des wrappers simples avec fallback automatique BD <-> API
 """
@@ -43,13 +43,13 @@ def charger_matchs_avec_fallback(
     # Fallback à la BD
     if not matchs:
         try:
-            from src.core.database import get_db_context
+            from src.core.database import obtenir_contexte_db
             from src.core.models import Match
             
             debut = date.today()
             fin = debut + timedelta(days=jours)
             
-            with get_db_context() as session:
+            with obtenir_contexte_db() as session:
                 matches_bd = session.query(Match).filter(
                     Match.date_match >= debut,
                     Match.date_match <= fin,
@@ -100,10 +100,10 @@ def charger_classement_avec_fallback(championnat: str) -> tuple[List[Dict], str]
     
     # Fallback BD
     try:
-        from src.core.database import get_db_context
+        from src.core.database import obtenir_contexte_db
         from src.core.models import Equipe
         
-        with get_db_context() as session:
+        with obtenir_contexte_db() as session:
             equipes = session.query(Equipe).filter_by(
                 championnat=championnat
             ).order_by(Equipe.points.desc(), Equipe.buts_marques.desc()).all()
@@ -149,10 +149,10 @@ def charger_historique_equipe_avec_fallback(nom_equipe: str) -> tuple[List[Dict]
     
     # Fallback BD
     try:
-        from src.core.database import get_db_context
+        from src.core.database import obtenir_contexte_db
         from src.core.models import Match
         
-        with get_db_context() as session:
+        with obtenir_contexte_db() as session:
             matches = session.query(Match).filter(
                 (Match.equipe_domicile.has(nom=nom_equipe)) |
                 (Match.equipe_exterieur.has(nom=nom_equipe))
@@ -197,10 +197,10 @@ def charger_tirages_loto_avec_fallback(limite: int = 50) -> tuple[List[Dict], st
     
     # Fallback BD
     try:
-        from src.core.database import get_db_context
+        from src.core.database import obtenir_contexte_db
         from src.core.models import TirageLoto
         
-        with get_db_context() as session:
+        with obtenir_contexte_db() as session:
             tirages_bd = session.query(TirageLoto).order_by(
                 TirageLoto.date.desc()
             ).limit(limite).all()
@@ -241,11 +241,11 @@ def charger_stats_loto_avec_fallback(limite: int = 50) -> tuple[Dict, str]:
     
     # Fallback BD
     try:
-        from src.core.database import get_db_context
+        from src.core.database import obtenir_contexte_db
         from src.core.models import StatistiquesLoto
         import json
         
-        with get_db_context() as session:
+        with obtenir_contexte_db() as session:
             stat_entry = session.query(StatistiquesLoto).filter_by(
                 type_stat="frequences"
             ).order_by(StatistiquesLoto.id.desc()).first()
@@ -280,3 +280,4 @@ def message_source_donnees(source: str):
     emoji = "🌐" if source == "API" else "💾" if source == "BD" else "🕷️"
     couleur = "blue" if source == "API" else "gray" if source == "BD" else "orange"
     st.caption(f"{emoji} Données depuis: **{source}**")
+

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/domains/famille/ui/weekend/
 
 Couverture ciblée: 80%
@@ -31,7 +31,7 @@ def mock_st():
 
 @contextmanager
 def mock_db_context():
-    """Mock pour get_db_context."""
+    """Mock pour obtenir_contexte_db."""
     mock_db = MagicMock()
     mock_db.query.return_value.filter.return_value.order_by.return_value.all.return_value = []
     mock_db.query.return_value.filter_by.return_value.first.return_value = None
@@ -41,7 +41,7 @@ def mock_db_context():
     def context():
         yield mock_db
     
-    with patch("src.domains.famille.ui.weekend.helpers.get_db_context", context):
+    with patch("src.domains.famille.ui.weekend.helpers.obtenir_contexte_db", context):
         yield mock_db
 
 
@@ -175,7 +175,7 @@ class TestGetWeekendActivities:
         def context():
             yield mock_db
         
-        with patch("src.domains.famille.ui.weekend.helpers.get_db_context", context):
+        with patch("src.domains.famille.ui.weekend.helpers.obtenir_contexte_db", context):
             result = get_weekend_activities(saturday, sunday)
         
         assert len(result["saturday"]) == 1
@@ -185,7 +185,7 @@ class TestGetWeekendActivities:
         """Test avec erreur DB."""
         from src.domains.famille.ui.weekend.helpers import get_weekend_activities
         
-        with patch("src.domains.famille.ui.weekend.helpers.get_db_context",
+        with patch("src.domains.famille.ui.weekend.helpers.obtenir_contexte_db",
                    side_effect=Exception("DB Error")):
             result = get_weekend_activities(date.today(), date.today())
         
@@ -220,7 +220,7 @@ class TestGetBudgetWeekend:
         def context():
             yield mock_db
         
-        with patch("src.domains.famille.ui.weekend.helpers.get_db_context", context):
+        with patch("src.domains.famille.ui.weekend.helpers.obtenir_contexte_db", context):
             result = get_budget_weekend(date.today(), date.today())
         
         assert result["estime"] == 80  # 50 + 30
@@ -230,7 +230,7 @@ class TestGetBudgetWeekend:
         """Test avec erreur DB."""
         from src.domains.famille.ui.weekend.helpers import get_budget_weekend
         
-        with patch("src.domains.famille.ui.weekend.helpers.get_db_context",
+        with patch("src.domains.famille.ui.weekend.helpers.obtenir_contexte_db",
                    side_effect=Exception("DB Error")):
             result = get_budget_weekend(date.today(), date.today())
         
@@ -262,7 +262,7 @@ class TestGetLieuxTestes:
         def context():
             yield mock_db
         
-        with patch("src.domains.famille.ui.weekend.helpers.get_db_context", context):
+        with patch("src.domains.famille.ui.weekend.helpers.obtenir_contexte_db", context):
             result = get_lieux_testes()
         
         assert len(result) == 1
@@ -271,7 +271,7 @@ class TestGetLieuxTestes:
         """Test avec erreur DB."""
         from src.domains.famille.ui.weekend.helpers import get_lieux_testes
         
-        with patch("src.domains.famille.ui.weekend.helpers.get_db_context",
+        with patch("src.domains.famille.ui.weekend.helpers.obtenir_contexte_db",
                    side_effect=Exception("DB Error")):
             result = get_lieux_testes()
         
@@ -295,7 +295,7 @@ class TestGetAgeJulesMois:
         def context():
             yield mock_db
         
-        with patch("src.domains.famille.ui.weekend.helpers.get_db_context", context):
+        with patch("src.domains.famille.ui.weekend.helpers.obtenir_contexte_db", context):
             result = get_age_jules_mois()
         
         assert isinstance(result, int)
@@ -314,7 +314,7 @@ class TestGetAgeJulesMois:
         """Test avec erreur DB."""
         from src.domains.famille.ui.weekend.helpers import get_age_jules_mois
         
-        with patch("src.domains.famille.ui.weekend.helpers.get_db_context",
+        with patch("src.domains.famille.ui.weekend.helpers.obtenir_contexte_db",
                    side_effect=Exception("DB Error")):
             result = get_age_jules_mois()
         
@@ -336,7 +336,7 @@ class TestMarkActivityDone:
         def context():
             yield mock_db
         
-        with patch("src.domains.famille.ui.weekend.helpers.get_db_context", context):
+        with patch("src.domains.famille.ui.weekend.helpers.obtenir_contexte_db", context):
             mark_activity_done(1)
         
         assert mock_activity.statut == "terminé"
@@ -353,7 +353,7 @@ class TestMarkActivityDone:
         def context():
             yield mock_db
         
-        with patch("src.domains.famille.ui.weekend.helpers.get_db_context", context):
+        with patch("src.domains.famille.ui.weekend.helpers.obtenir_contexte_db", context):
             # Ne doit pas lever d'exception
             mark_activity_done(999)
         
@@ -363,7 +363,7 @@ class TestMarkActivityDone:
         """Test avec erreur DB."""
         from src.domains.famille.ui.weekend.helpers import mark_activity_done
         
-        with patch("src.domains.famille.ui.weekend.helpers.get_db_context",
+        with patch("src.domains.famille.ui.weekend.helpers.obtenir_contexte_db",
                    side_effect=Exception("DB Error")):
             # Ne doit pas lever d'exception
             mark_activity_done(1)
@@ -554,7 +554,7 @@ class TestWeekendComponentsAdvanced:
         
         with patch.object(components, "st", mock_st):
             with patch.object(components, "get_next_weekend", return_value=(saturday, sunday)):
-                with patch.object(components, "get_db_context", context):
+                with patch.object(components, "obtenir_contexte_db", context):
                     components.render_add_activity()
         
         mock_db.add.assert_called()
@@ -577,7 +577,7 @@ class TestWeekendComponentsAdvanced:
             yield mock_db
         
         with patch.object(components, "st", mock_st):
-            with patch.object(components, "get_db_context", context):
+            with patch.object(components, "obtenir_contexte_db", context):
                 components.render_noter_sortie()
         
         mock_st.subheader.assert_called()
@@ -594,7 +594,7 @@ class TestWeekendComponentsAdvanced:
             yield mock_db
         
         with patch.object(components, "st", mock_st):
-            with patch.object(components, "get_db_context", context):
+            with patch.object(components, "obtenir_contexte_db", context):
                 components.render_noter_sortie()
         
         mock_st.info.assert_called()
@@ -925,3 +925,4 @@ class TestWeekendApp:
                                     weekend.app()
         
         mock_st.title.assert_called()
+

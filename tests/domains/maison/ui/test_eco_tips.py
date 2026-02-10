@@ -1,4 +1,4 @@
-import importlib
+﻿import importlib
 import pytest
 
 # Tests ré-activés - EcoAction.cout_initial est maintenant une propriété compatible
@@ -39,7 +39,7 @@ def clean_db(db):
 
 def test_create_and_get_action(db, fake_action_dict):
     # Test création et récupération
-    with patch("src.domains.maison.ui.eco_tips.get_db_context", return_value=MagicMock(__enter__=lambda s: db, __exit__=lambda s, a, b, c: None)):
+    with patch("src.domains.maison.ui.eco_tips.obtenir_contexte_db", return_value=MagicMock(__enter__=lambda s: db, __exit__=lambda s, a, b, c: None)):
         action = eco_tips.create_action(fake_action_dict)
         assert action.id is not None
         actions = eco_tips.get_all_actions()
@@ -47,7 +47,7 @@ def test_create_and_get_action(db, fake_action_dict):
 
 
 def test_update_action(db, fake_action_dict):
-    with patch("src.domains.maison.ui.eco_tips.get_db_context", return_value=MagicMock(__enter__=lambda s: db, __exit__=lambda s, a, b, c: None)):
+    with patch("src.domains.maison.ui.eco_tips.obtenir_contexte_db", return_value=MagicMock(__enter__=lambda s: db, __exit__=lambda s, a, b, c: None)):
         action = eco_tips.create_action(fake_action_dict)
         eco_tips.update_action(action.id, {"nom": "Modifié"})
         updated = eco_tips.get_action_by_id(action.id)
@@ -55,7 +55,7 @@ def test_update_action(db, fake_action_dict):
 
 
 def test_delete_action(db, fake_action_dict):
-    with patch("src.domains.maison.ui.eco_tips.get_db_context", return_value=MagicMock(__enter__=lambda s: db, __exit__=lambda s, a, b, c: None)):
+    with patch("src.domains.maison.ui.eco_tips.obtenir_contexte_db", return_value=MagicMock(__enter__=lambda s: db, __exit__=lambda s, a, b, c: None)):
         action = eco_tips.create_action(fake_action_dict)
         ok = eco_tips.delete_action(action.id)
         assert ok
@@ -63,7 +63,7 @@ def test_delete_action(db, fake_action_dict):
 
 
 def test_calculate_stats(db, fake_action_dict):
-    with patch("src.domains.maison.ui.eco_tips.get_db_context", return_value=MagicMock(__enter__=lambda s: db, __exit__=lambda s, a, b, c: None)):
+    with patch("src.domains.maison.ui.eco_tips.obtenir_contexte_db", return_value=MagicMock(__enter__=lambda s: db, __exit__=lambda s, a, b, c: None)):
         eco_tips.create_action(fake_action_dict)
         stats = eco_tips.calculate_stats()
         assert stats["nb_actions"] >= 1
@@ -142,3 +142,4 @@ def test_app(monkeypatch):
     monkeypatch.setattr(eco_tips, "render_idees", lambda: None)
     monkeypatch.setattr(eco_tips.st, "session_state", {})
     eco_tips.app()
+

@@ -24,7 +24,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from src.core.database import obtenir_contexte_db
-from src.core.decorators import with_db_session
+from src.core.decorators import avec_session_db
 from src.services.push_notifications_utils import (
     check_notification_type_enabled,
     is_quiet_hours,
@@ -612,7 +612,7 @@ class PushNotificationService:
     # PERSISTANCE SQLALCHEMY (ALTERNATIVE)
     # ═══════════════════════════════════════════════════════════
 
-    @with_db_session
+    @avec_session_db
     def sauvegarder_abonnement_db(
         self,
         user_id: UUID | str,
@@ -662,7 +662,7 @@ class PushNotificationService:
         db.refresh(subscription)
         return subscription
 
-    @with_db_session
+    @avec_session_db
     def lister_abonnements_utilisateur(
         self,
         user_id: UUID | str,
@@ -682,7 +682,7 @@ class PushNotificationService:
             PushSubscriptionModel.user_id == UUID(str(user_id))
         ).all()
 
-    @with_db_session
+    @avec_session_db
     def supprimer_abonnement_db(
         self,
         endpoint: str,
@@ -707,7 +707,7 @@ class PushNotificationService:
             return True
         return False
 
-    @with_db_session
+    @avec_session_db
     def obtenir_preferences_db(
         self,
         user_id: UUID | str,
@@ -727,7 +727,7 @@ class PushNotificationService:
             NotificationPreferenceModel.user_id == UUID(str(user_id))
         ).first()
 
-    @with_db_session
+    @avec_session_db
     def sauvegarder_preferences_db(
         self,
         user_id: UUID | str,
@@ -988,3 +988,4 @@ __all__ = [
     "render_push_permission_request",
     "render_notification_preferences",
 ]
+

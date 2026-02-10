@@ -1,10 +1,10 @@
-"""
+﻿"""
 Module Achats Famille - Composants UI
 """
 
 from ._common import (
     st, date,
-    get_db_context, FamilyPurchase,
+    obtenir_contexte_db, FamilyPurchase,
     CATEGORIES, PRIORITES
 )
 from .helpers import (
@@ -38,7 +38,7 @@ def render_dashboard():
     st.markdown("**🔴 À acheter en priorité:**")
     
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             urgents = db.query(FamilyPurchase).filter(
                 FamilyPurchase.achete == False,
                 FamilyPurchase.priorite.in_(["urgent", "haute"])
@@ -180,7 +180,7 @@ def render_add_form():
                 st.error("Nom requis")
             else:
                 try:
-                    with get_db_context() as db:
+                    with obtenir_contexte_db() as db:
                         purchase = FamilyPurchase(
                             nom=nom,
                             categorie=categorie,
@@ -282,3 +282,4 @@ def render_par_magasin():
         with st.expander(f"❓ **Sans magasin** ({len(sans_magasin)} articles)"):
             for achat in sans_magasin:
                 st.write(f"• {achat.nom}")
+

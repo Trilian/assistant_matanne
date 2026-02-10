@@ -11,7 +11,7 @@ import streamlit as st
 from datetime import datetime
 from io import StringIO
 
-from src.core.state import StateManager, get_state
+from src.core.state import GestionnaireEtat, obtenir_etat
 from src.services.barcode import BarcodeService
 from src.services.inventaire import InventaireService
 from src.core.errors_base import ErreurValidation, ErreurNonTrouve

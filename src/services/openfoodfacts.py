@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service OpenFoodFacts - Enrichissement des produits par code-barres
 
 Récupère les informations nutritionnelles et descriptives depuis
@@ -13,7 +13,7 @@ from datetime import datetime
 import httpx
 
 from src.core.cache import Cache
-from src.core.decorators import with_error_handling
+from src.core.decorators import avec_gestion_erreurs
 
 logger = logging.getLogger(__name__)
 
@@ -234,7 +234,7 @@ class OpenFoodFactsService:
             confiance=confiance,
         )
     
-    @with_error_handling(default_return=[])
+    @avec_gestion_erreurs(default_return=[])
     def rechercher_par_nom(self, terme: str, limite: int = 10) -> list[ProduitOpenFoodFacts]:
         """
         Recherche des produits par nom/terme.
@@ -318,3 +318,4 @@ def get_openfoodfacts_service() -> OpenFoodFactsService:
     if _service_instance is None:
         _service_instance = OpenFoodFactsService()
     return _service_instance
+

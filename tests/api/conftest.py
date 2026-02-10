@@ -1,4 +1,4 @@
-"""
+﻿"""
 Pytest Configuration & Fixtures for API Tests
 ════════════════════════════════════════════════════════════════════
 
@@ -76,7 +76,7 @@ def app(monkeypatch, db):
     
     # Créer un VRAI context manager qui yield la DB de test
     @contextmanager
-    def mock_get_db_context():
+    def mock_obtenir_contexte_db():
         """Context manager qui utilise la session SQLite de test."""
         try:
             yield db
@@ -87,8 +87,8 @@ def app(monkeypatch, db):
         # PAS de close - géré par fixture
     
     # Patch global AVANT d'importer l'app
-    monkeypatch.setattr("src.core.database.get_db_context", mock_get_db_context)
-    monkeypatch.setattr("src.core.database.obtenir_contexte_db", mock_get_db_context)
+    monkeypatch.setattr("src.core.database.obtenir_contexte_db", mock_obtenir_contexte_db)
+    monkeypatch.setattr("src.core.database.obtenir_contexte_db", mock_obtenir_contexte_db)
     
     # Maintenant import l'app
     from src.api.main import app as fastapi_app, get_current_user
@@ -458,9 +458,9 @@ def mock_database_for_api(monkeypatch):
     def mock_db_context():
         yield mock_session
     
-    # Patch get_db_context
+    # Patch obtenir_contexte_db
     monkeypatch.setattr("src.core.database.obtenir_contexte_db", mock_db_context)
-    monkeypatch.setattr("src.core.database.get_db_context", mock_db_context)
+    monkeypatch.setattr("src.core.database.obtenir_contexte_db", mock_db_context)
     
     yield mock_session
 
@@ -477,3 +477,4 @@ def pytest_collection_modifyitems(config, items):
             if not any(m.name == "endpoint" for m in item.iter_markers()):
                 if not any(m.name in ["unit", "integration"] for m in item.iter_markers()):
                     item.add_marker(pytest.mark.unit)
+

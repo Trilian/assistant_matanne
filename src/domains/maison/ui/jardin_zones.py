@@ -1,4 +1,4 @@
-"""
+﻿"""
 Module Dashboard Zones Jardin - Vue 2600m² avec photos avant/après
 
 Affiche l'état des zones du jardin avec:
@@ -17,7 +17,7 @@ import plotly.express as px
 from sqlalchemy.orm import Session
 
 from src.core.database import obtenir_contexte_db
-from src.core.decorators import with_db_session
+from src.core.decorators import avec_session_db
 from src.core.models import GardenZone
 import logging
 
@@ -91,7 +91,7 @@ def charger_zones() -> list[dict[str, Any]]:
         return []
 
 
-@with_db_session
+@avec_session_db
 def mettre_a_jour_zone(zone_id: int, champs: dict[str, Any], db: Optional[Session] = None) -> bool:
     """Met à jour une zone du jardin."""
     try:
@@ -111,7 +111,7 @@ def mettre_a_jour_zone(zone_id: int, champs: dict[str, Any], db: Optional[Sessio
         return False
 
 
-@with_db_session
+@avec_session_db
 def ajouter_photo_zone(zone_id: int, photo_url: str, est_avant: bool = True, db: Optional[Session] = None) -> bool:
     """Ajoute une photo à une zone."""
     try:
@@ -467,3 +467,4 @@ def app():
 
 if __name__ == "__main__":
     app()
+

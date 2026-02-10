@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service Batch Cooking - Gestion des sessions de préparation de repas en lot.
 
 Ce service gère :
@@ -7,7 +7,7 @@ Ce service gère :
 - Génération IA des plans optimisés
 - Gestion des préparations stockées
 
-✅ Utilise @with_db_session et @with_cache
+✅ Utilise @avec_session_db et @avec_cache
 ✅ Validation Pydantic centralisée
 ✅ Intégration IA pour optimisation
 """
@@ -22,7 +22,7 @@ from sqlalchemy.orm import Session, joinedload
 from src.core.ai import obtenir_client_ia
 from src.core.cache import Cache
 from src.core.database import obtenir_contexte_db
-from src.core.decorators import with_db_session, with_cache, with_error_handling
+from src.core.decorators import avec_session_db, avec_cache, avec_gestion_erreurs
 from src.core.errors_base import ErreurValidation, ErreurNonTrouve
 from src.core.models import (
     ConfigBatchCooking,
@@ -132,9 +132,9 @@ class BatchCookingService(BaseService[SessionBatchCooking], BaseAIService):
     # SECTION 1: CONFIGURATION
     # ═══════════════════════════════════════════════════════════
 
-    @with_cache(ttl=3600, key_func=lambda self: "batch_config")
-    @with_error_handling(default_return=None)
-    @with_db_session
+    @avec_cache(ttl=3600, key_func=lambda self: "batch_config")
+    @avec_gestion_erreurs(default_return=None)
+    @avec_session_db
     def get_config(self, db: Session | None = None) -> ConfigBatchCooking | None:
         """Récupère la configuration batch cooking (singleton)."""
         config = db.query(ConfigBatchCooking).first()
@@ -153,8 +153,8 @@ class BatchCookingService(BaseService[SessionBatchCooking], BaseAIService):
             db.refresh(config)
         return config
 
-    @with_error_handling(default_return=None)
-    @with_db_session
+    @avec_gestion_erreurs(default_return=None)
+    @avec_session_db
     def update_config(
         self,
         jours_batch: list[int] | None = None,
@@ -197,9 +197,9 @@ class BatchCookingService(BaseService[SessionBatchCooking], BaseAIService):
     # SECTION 2: SESSIONS BATCH COOKING
     # ═══════════════════════════════════════════════════════════
 
-    @with_cache(ttl=600, key_func=lambda self, session_id: f"batch_session_{session_id}")
-    @with_error_handling(default_return=None)
-    @with_db_session
+    @avec_cache(ttl=600, key_func=lambda self, session_id: f"batch_session_{session_id}")
+    @avec_gestion_erreurs(default_return=None)
+    @avec_session_db
     def get_session(self, session_id: int, db: Session | None = None) -> SessionBatchCooking | None:
         """Récupère une session avec ses étapes et préparations."""
         return (
@@ -212,9 +212,9 @@ class BatchCookingService(BaseService[SessionBatchCooking], BaseAIService):
             .first()
         )
 
-    @with_cache(ttl=600, key_func=lambda self: "batch_session_active")
-    @with_error_handling(default_return=None)
-    @with_db_session
+    @avec_cache(ttl=600, key_func=lambda self: "batch_session_active")
+    @avec_gestion_erreurs(default_return=None)
+    @avec_session_db
     def get_session_active(self, db: Session | None = None) -> SessionBatchCooking | None:
         """Récupère la session en cours (si elle existe)."""
         return (
@@ -227,8 +227,8 @@ class BatchCookingService(BaseService[SessionBatchCooking], BaseAIService):
             .first()
         )
 
-    @with_error_handling(default_return=[])
-    @with_db_session
+    @avec_gestion_erreurs(default_return=[])
+    @avec_session_db
     def get_sessions_planifiees(
         self, 
         date_debut: date | None = None,
@@ -247,8 +247,8 @@ class BatchCookingService(BaseService[SessionBatchCooking], BaseAIService):
             
         return query.order_by(SessionBatchCooking.date_session).all()
 
-    @with_error_handling(default_return=None)
-    @with_db_session
+    @avec_gestion_erreurs(default_return=None)
+    @avec_session_db
     def creer_session(
         self,
         date_session: date,
@@ -290,8 +290,8 @@ class BatchCookingService(BaseService[SessionBatchCooking], BaseAIService):
         logger.info(f"✅ Session batch cooking créée: {session.id}")
         return session
 
-    @with_error_handling(default_return=None)
-    @with_db_session
+    @avec_gestion_erreurs(default_return=None)
+    @avec_session_db
     def demarrer_session(self, session_id: int, db: Session | None = None) -> SessionBatchCooking | None:
         """Démarre une session batch cooking."""
         session = db.query(SessionBatchCooking).filter_by(id=session_id).first()
@@ -313,8 +313,8 @@ class BatchCookingService(BaseService[SessionBatchCooking], BaseAIService):
         logger.info(f"✅ Session batch cooking démarrée: {session_id}")
         return session
 
-    @with_error_handling(default_return=None)
-    @with_db_session
+    @avec_gestion_erreurs(default_return=None)
+    @avec_session_db
     def terminer_session(
         self, 
         session_id: int, 
@@ -364,8 +364,8 @@ class BatchCookingService(BaseService[SessionBatchCooking], BaseAIService):
     # SECTION 3: GESTION DES ÉTAPES
     # ═══════════════════════════════════════════════════════════
 
-    @with_error_handling(default_return=None)
-    @with_db_session
+    @avec_gestion_erreurs(default_return=None)
+    @avec_session_db
     def ajouter_etapes(
         self,
         session_id: int,
@@ -402,8 +402,8 @@ class BatchCookingService(BaseService[SessionBatchCooking], BaseAIService):
         logger.info(f"✅ {len(etapes)} étapes ajoutées à la session {session_id}")
         return session
 
-    @with_error_handling(default_return=None)
-    @with_db_session
+    @avec_gestion_erreurs(default_return=None)
+    @avec_session_db
     def demarrer_etape(self, etape_id: int, db: Session | None = None) -> EtapeBatchCooking | None:
         """Démarre une étape (active le timer)."""
         etape = db.query(EtapeBatchCooking).filter_by(id=etape_id).first()
@@ -420,8 +420,8 @@ class BatchCookingService(BaseService[SessionBatchCooking], BaseAIService):
         logger.info(f"✅ Étape démarrée: {etape_id}")
         return etape
 
-    @with_error_handling(default_return=None)
-    @with_db_session
+    @avec_gestion_erreurs(default_return=None)
+    @avec_session_db
     def terminer_etape(self, etape_id: int, db: Session | None = None) -> EtapeBatchCooking | None:
         """Termine une étape."""
         etape = db.query(EtapeBatchCooking).filter_by(id=etape_id).first()
@@ -442,8 +442,8 @@ class BatchCookingService(BaseService[SessionBatchCooking], BaseAIService):
         logger.info(f"✅ Étape terminée: {etape_id}")
         return etape
 
-    @with_error_handling(default_return=None)
-    @with_db_session
+    @avec_gestion_erreurs(default_return=None)
+    @avec_session_db
     def passer_etape(self, etape_id: int, db: Session | None = None) -> EtapeBatchCooking | None:
         """Passe (saute) une étape."""
         etape = db.query(EtapeBatchCooking).filter_by(id=etape_id).first()
@@ -463,9 +463,9 @@ class BatchCookingService(BaseService[SessionBatchCooking], BaseAIService):
     # SECTION 4: PRÉPARATIONS STOCKÉES
     # ═══════════════════════════════════════════════════════════
 
-    @with_cache(ttl=600, key_func=lambda self, consommees=False, localisation=None: f"preparations_{consommees}_{localisation}")
-    @with_error_handling(default_return=[])
-    @with_db_session
+    @avec_cache(ttl=600, key_func=lambda self, consommees=False, localisation=None: f"preparations_{consommees}_{localisation}")
+    @avec_gestion_erreurs(default_return=[])
+    @avec_session_db
     def get_preparations(
         self,
         consommees: bool = False,
@@ -480,8 +480,8 @@ class BatchCookingService(BaseService[SessionBatchCooking], BaseAIService):
             
         return query.order_by(PreparationBatch.date_peremption).all()
 
-    @with_error_handling(default_return=[])
-    @with_db_session
+    @avec_gestion_erreurs(default_return=[])
+    @avec_session_db
     def get_preparations_alertes(self, db: Session | None = None) -> list[PreparationBatch]:
         """Récupère les préparations proches de la péremption."""
         limite = date.today() + timedelta(days=3)
@@ -495,8 +495,8 @@ class BatchCookingService(BaseService[SessionBatchCooking], BaseAIService):
             .all()
         )
 
-    @with_error_handling(default_return=None)
-    @with_db_session
+    @avec_gestion_erreurs(default_return=None)
+    @avec_session_db
     def creer_preparation(
         self,
         nom: str,
@@ -534,8 +534,8 @@ class BatchCookingService(BaseService[SessionBatchCooking], BaseAIService):
         logger.info(f"✅ Préparation créée: {preparation.id}")
         return preparation
 
-    @with_error_handling(default_return=None)
-    @with_db_session
+    @avec_gestion_erreurs(default_return=None)
+    @avec_session_db
     def consommer_preparation(
         self,
         preparation_id: int,
@@ -562,10 +562,10 @@ class BatchCookingService(BaseService[SessionBatchCooking], BaseAIService):
     # SECTION 5: GÉNÉRATION IA
     # ═══════════════════════════════════════════════════════════
 
-    @with_cache(ttl=3600, key_func=lambda self, recettes_ids, robots_disponibles, avec_jules=False: 
+    @avec_cache(ttl=3600, key_func=lambda self, recettes_ids, robots_disponibles, avec_jules=False: 
                 f"batch_plan_{'-'.join(map(str, recettes_ids))}_{avec_jules}")
-    @with_error_handling(default_return=None)
-    @with_db_session
+    @avec_gestion_erreurs(default_return=None)
+    @avec_session_db
     def generer_plan_ia(
         self,
         recettes_ids: list[int],
@@ -673,8 +673,8 @@ RÈGLES:
         
         return result
 
-    @with_error_handling(default_return=[])
-    @with_db_session
+    @avec_gestion_erreurs(default_return=[])
+    @avec_session_db
     def suggerer_recettes_batch(
         self,
         nb_recettes: int = 4,
@@ -711,8 +711,8 @@ RÈGLES:
     # SECTION 6: INTÉGRATION PLANNING
     # ═══════════════════════════════════════════════════════════
 
-    @with_error_handling(default_return=None)
-    @with_db_session
+    @avec_gestion_erreurs(default_return=None)
+    @avec_session_db
     def attribuer_preparations_planning(
         self,
         session_id: int,
@@ -792,3 +792,4 @@ __all__ = [
     "ROBOTS_DISPONIBLES",
     "JOURS_SEMAINE",
 ]
+

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/domains/famille/ui/achats_famille/
 
 Couverture ciblée: 80%
@@ -51,7 +51,7 @@ def fake_purchase():
 
 @contextmanager
 def mock_db_context(query_result=None):
-    """Mock pour get_db_context."""
+    """Mock pour obtenir_contexte_db."""
     mock_db = MagicMock()
     mock_db.query.return_value.filter_by.return_value.order_by.return_value.all.return_value = query_result or []
     mock_db.query.return_value.filter.return_value.order_by.return_value.all.return_value = query_result or []
@@ -63,7 +63,7 @@ def mock_db_context(query_result=None):
     def context():
         yield mock_db
     
-    with patch("src.domains.famille.ui.achats_famille.helpers.get_db_context", context):
+    with patch("src.domains.famille.ui.achats_famille.helpers.obtenir_contexte_db", context):
         yield mock_db
 
 
@@ -151,7 +151,7 @@ class TestGetAllPurchases:
         """Test avec erreur DB."""
         from src.domains.famille.ui.achats_famille.helpers import get_all_purchases
         
-        with patch("src.domains.famille.ui.achats_famille.helpers.get_db_context",
+        with patch("src.domains.famille.ui.achats_famille.helpers.obtenir_contexte_db",
                    side_effect=Exception("DB Error")):
             result = get_all_purchases()
         
@@ -183,7 +183,7 @@ class TestGetPurchasesByCategory:
         """Test avec erreur DB."""
         from src.domains.famille.ui.achats_famille.helpers import get_purchases_by_category
         
-        with patch("src.domains.famille.ui.achats_famille.helpers.get_db_context",
+        with patch("src.domains.famille.ui.achats_famille.helpers.obtenir_contexte_db",
                    side_effect=Exception("DB Error")):
             result = get_purchases_by_category("test")
         
@@ -218,7 +218,7 @@ class TestGetPurchasesByGroupe:
         """Test avec erreur DB."""
         from src.domains.famille.ui.achats_famille.helpers import get_purchases_by_groupe
         
-        with patch("src.domains.famille.ui.achats_famille.helpers.get_db_context",
+        with patch("src.domains.famille.ui.achats_famille.helpers.obtenir_contexte_db",
                    side_effect=Exception("DB Error")):
             result = get_purchases_by_groupe("jules")
         
@@ -252,7 +252,7 @@ class TestGetStats:
         def context():
             yield mock_db
         
-        with patch("src.domains.famille.ui.achats_famille.helpers.get_db_context", context):
+        with patch("src.domains.famille.ui.achats_famille.helpers.obtenir_contexte_db", context):
             result = get_stats()
         
         assert isinstance(result, dict)
@@ -263,7 +263,7 @@ class TestGetStats:
         """Test avec erreur DB."""
         from src.domains.famille.ui.achats_famille.helpers import get_stats
         
-        with patch("src.domains.famille.ui.achats_famille.helpers.get_db_context",
+        with patch("src.domains.famille.ui.achats_famille.helpers.obtenir_contexte_db",
                    side_effect=Exception("DB Error")):
             result = get_stats()
         
@@ -284,7 +284,7 @@ class TestMarkAsBought:
         def context():
             yield mock_db
         
-        with patch("src.domains.famille.ui.achats_famille.helpers.get_db_context", context):
+        with patch("src.domains.famille.ui.achats_famille.helpers.obtenir_contexte_db", context):
             mark_as_bought(1, prix_reel=180.0)
         
         assert fake_purchase.achete is True
@@ -302,7 +302,7 @@ class TestMarkAsBought:
         def context():
             yield mock_db
         
-        with patch("src.domains.famille.ui.achats_famille.helpers.get_db_context", context):
+        with patch("src.domains.famille.ui.achats_famille.helpers.obtenir_contexte_db", context):
             mark_as_bought(999, prix_reel=100.0)
         
         mock_db.commit.assert_not_called()
@@ -311,7 +311,7 @@ class TestMarkAsBought:
         """Test avec erreur DB."""
         from src.domains.famille.ui.achats_famille.helpers import mark_as_bought
         
-        with patch("src.domains.famille.ui.achats_famille.helpers.get_db_context",
+        with patch("src.domains.famille.ui.achats_famille.helpers.obtenir_contexte_db",
                    side_effect=Exception("DB Error")):
             # Ne doit pas lever d'exception
             mark_as_bought(1, prix_reel=50.0)
@@ -331,7 +331,7 @@ class TestDeletePurchase:
         def context():
             yield mock_db
         
-        with patch("src.domains.famille.ui.achats_famille.helpers.get_db_context", context):
+        with patch("src.domains.famille.ui.achats_famille.helpers.obtenir_contexte_db", context):
             delete_purchase(1)
         
         mock_db.delete.assert_called_once_with(fake_purchase)
@@ -348,7 +348,7 @@ class TestDeletePurchase:
         def context():
             yield mock_db
         
-        with patch("src.domains.famille.ui.achats_famille.helpers.get_db_context", context):
+        with patch("src.domains.famille.ui.achats_famille.helpers.obtenir_contexte_db", context):
             delete_purchase(999)
         
         mock_db.delete.assert_not_called()
@@ -357,7 +357,7 @@ class TestDeletePurchase:
         """Test avec erreur DB."""
         from src.domains.famille.ui.achats_famille.helpers import delete_purchase
         
-        with patch("src.domains.famille.ui.achats_famille.helpers.get_db_context",
+        with patch("src.domains.famille.ui.achats_famille.helpers.obtenir_contexte_db",
                    side_effect=Exception("DB Error")):
             # Ne doit pas lever d'exception
             delete_purchase(1)
@@ -443,7 +443,7 @@ class TestAchatsFamilleComponentsAdvanced:
             yield mock_db
         
         with patch.object(components, "st", mock_st):
-            with patch.object(components, "get_db_context", context):
+            with patch.object(components, "obtenir_contexte_db", context):
                 components.render_add_form()
         
         mock_db.add.assert_called()
@@ -590,3 +590,4 @@ class TestAchatsFamilleApp:
         
         mock_st.title.assert_called()
         assert mock_st.tabs.called
+

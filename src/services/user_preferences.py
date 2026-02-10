@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service Préférences Utilisateur - Persistance DB
 
 Gère:
@@ -15,7 +15,7 @@ from datetime import datetime, timezone, date
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 
-from src.core.decorators import with_db_session
+from src.core.decorators import avec_session_db
 from src.core.models import UserPreference, RecipeFeedback
 from src.domains.cuisine.logic.schemas import (
     PreferencesUtilisateur,
@@ -34,7 +34,7 @@ class UserPreferenceService:
     def __init__(self, user_id: str = DEFAULT_USER_ID):
         self.user_id = user_id
     
-    @with_db_session
+    @avec_session_db
     def charger_preferences(self, db: Optional[Session] = None) -> PreferencesUtilisateur:
         """
         Charge les préférences depuis la DB.
@@ -55,7 +55,7 @@ class UserPreferenceService:
         self.sauvegarder_preferences(default_prefs, db=db)
         return default_prefs
     
-    @with_db_session
+    @avec_session_db
     def sauvegarder_preferences(self, prefs: PreferencesUtilisateur, db: Optional[Session] = None) -> bool:
         """
         Sauvegarde les préférences en DB (insert ou update).
@@ -88,7 +88,7 @@ class UserPreferenceService:
             db.rollback()
             return False
     
-    @with_db_session
+    @avec_session_db
     def charger_feedbacks(self, db: Optional[Session] = None) -> list[FeedbackRecette]:
         """
         Charge tous les feedbacks de l'utilisateur.
@@ -116,7 +116,7 @@ class UserPreferenceService:
         logger.debug(f"Chargé {len(feedbacks)} feedbacks pour {self.user_id}")
         return feedbacks
     
-    @with_db_session
+    @avec_session_db
     def ajouter_feedback(
         self, 
         recette_id: int, 
@@ -171,7 +171,7 @@ class UserPreferenceService:
             db.rollback()
             return False
     
-    @with_db_session
+    @avec_session_db
     def supprimer_feedback(self, recette_id: int, db: Optional[Session] = None) -> bool:
         """Supprime un feedback."""
         try:
@@ -193,7 +193,7 @@ class UserPreferenceService:
             db.rollback()
             return False
     
-    @with_db_session
+    @avec_session_db
     def get_feedbacks_stats(self, db: Optional[Session] = None) -> dict[str, int]:
         """
         Retourne les statistiques des feedbacks.
@@ -296,3 +296,4 @@ def get_user_preference_service(user_id: str = DEFAULT_USER_ID) -> UserPreferenc
     if _preference_service is None or _preference_service.user_id != user_id:
         _preference_service = UserPreferenceService(user_id)
     return _preference_service
+

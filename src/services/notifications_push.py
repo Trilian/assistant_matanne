@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service Notifications Push - Alertes via ntfy.sh
 
 Fonctionnalités:
@@ -16,7 +16,7 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 from src.core.database import obtenir_contexte_db
-from src.core.decorators import with_db_session, with_error_handling
+from src.core.decorators import avec_session_db, avec_gestion_erreurs
 from src.core.config import obtenir_parametres
 from src.core.models import MaintenanceTask, ShoppingItem
 
@@ -147,8 +147,8 @@ class NotificationPushService:
         """Version synchrone de l'envoi."""
         return asyncio.run(self.envoyer(notification))
     
-    @with_error_handling(default_return=[])
-    @with_db_session
+    @avec_gestion_erreurs(default_return=[])
+    @avec_session_db
     def obtenir_taches_en_retard(self, db: Session = None) -> list[MaintenanceTask]:
         """Récupère les tâches ménage/jardin en retard."""
         today = date.today()
@@ -160,8 +160,8 @@ class NotificationPushService:
         
         return taches
     
-    @with_error_handling(default_return=[])
-    @with_db_session
+    @avec_gestion_erreurs(default_return=[])
+    @avec_session_db
     def obtenir_taches_du_jour(self, db: Session = None) -> list[MaintenanceTask]:
         """Récupère les tâches prévues pour aujourd'hui."""
         today = date.today()
@@ -173,8 +173,8 @@ class NotificationPushService:
         
         return taches
     
-    @with_error_handling(default_return=[])
-    @with_db_session
+    @avec_gestion_erreurs(default_return=[])
+    @avec_session_db
     def obtenir_courses_urgentes(self, db: Session = None) -> list[ShoppingItem]:
         """Récupère les articles de courses haute priorité."""
         articles = db.query(ShoppingItem).filter(
@@ -325,3 +325,4 @@ def get_notification_push_scheduler() -> NotificationPushScheduler:
     """Factory pour le scheduler de notifications push."""
     service = get_notification_push_service()
     return NotificationPushScheduler(service)
+

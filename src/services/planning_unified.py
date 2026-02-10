@@ -2,7 +2,7 @@
 Service Planning Unifié - Centre de Coordination Familiale
 
 ✅ Agrégation complète de TOUS les événements familiaux
-✅ Utilise @with_db_session, @with_cache, décorateurs unifiés
+✅ Utilise @avec_session_db, @avec_cache, décorateurs unifiés
 ✅ Cache agressif (TTL 30min) pour perfs
 ✅ IA intégrée pour générer semaines équilibrées
 ✅ Détection intelligente d'alertes (charge, couverture activités, budget)
@@ -25,7 +25,7 @@ from sqlalchemy.orm import Session, selectinload, joinedload
 from src.core.ai import obtenir_client_ia
 from src.core.cache import Cache
 from src.core.database import obtenir_contexte_db
-from src.core.decorators import with_db_session, with_cache, with_error_handling
+from src.core.decorators import avec_session_db, avec_cache, avec_gestion_erreurs
 from src.core.errors_base import ErreurNonTrouve
 from src.core.models import (
     CalendarEvent,
@@ -127,9 +127,9 @@ class PlanningAIService(BaseService[CalendarEvent], BaseAIService, PlanningAIMix
     # SECTION 1: AGRÉGATION COMPLÈTE SEMAINE
     # ═══════════════════════════════════════════════════════════
 
-    @with_cache(ttl=1800, key_func=lambda self, date_debut, **kw: f"semaine_complete_{date_debut.isoformat()}")
-    @with_error_handling(default_return=None)
-    @with_db_session
+    @avec_cache(ttl=1800, key_func=lambda self, date_debut, **kw: f"semaine_complete_{date_debut.isoformat()}")
+    @avec_gestion_erreurs(default_return=None)
+    @avec_session_db
     def get_semaine_complete(self, date_debut: date, db: Session | None = None) -> SemaineCompleSchema | None:
         """
         Retourne TOUS les événements familiaux agrégés par jour.
@@ -472,8 +472,8 @@ class PlanningAIService(BaseService[CalendarEvent], BaseAIService, PlanningAIMix
     # SECTION 4: GÉNÉRATION IA
     # ═══════════════════════════════════════════════════════════
 
-    @with_cache(ttl=1800, key_func=lambda self, date_debut, **kw: f"semaine_ia_{date_debut.isoformat()}")
-    @with_error_handling(default_return=None)
+    @avec_cache(ttl=1800, key_func=lambda self, date_debut, **kw: f"semaine_ia_{date_debut.isoformat()}")
+    @avec_gestion_erreurs(default_return=None)
     def generer_semaine_ia(
         self,
         date_debut: date,
@@ -547,7 +547,7 @@ class PlanningAIService(BaseService[CalendarEvent], BaseAIService, PlanningAIMix
     # SECTION 5: CRUD EVENTOS CALENDRIER
     # ═══════════════════════════════════════════════════════════
 
-    @with_db_session
+    @avec_session_db
     def creer_event(
         self,
         titre: str,
@@ -604,3 +604,4 @@ def get_planning_unified_service() -> PlanningAIService:
 
 # Alias pour rétro-compatibilité si importé directement
 get_unified_planning_service = get_planning_unified_service
+

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Module Jules - Imports et constantes partagés
 
 Activités adaptées, achats suggérés, conseils développement:
@@ -12,7 +12,7 @@ import streamlit as st
 from datetime import date, timedelta
 from typing import Optional
 
-from src.core.database import get_db_context
+from src.core.database import obtenir_contexte_db
 from src.core.models import ChildProfile, Milestone, FamilyPurchase
 from src.services.base_ai_service import BaseAIService
 from src.core.ai import ClientIA
@@ -61,9 +61,10 @@ __all__ = [
     # Standard libs
     "st", "date", "timedelta", "Optional",
     # Database
-    "get_db_context", "ChildProfile", "Milestone", "FamilyPurchase",
+    "obtenir_contexte_db", "ChildProfile", "Milestone", "FamilyPurchase",
     # AI
     "BaseAIService", "ClientIA",
     # Constants
     "ACTIVITES_PAR_AGE", "TAILLES_PAR_AGE", "CATEGORIES_CONSEILS",
 ]
+

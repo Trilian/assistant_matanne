@@ -1,4 +1,4 @@
-"""
+﻿"""
 API REST FastAPI pour l'Assistant Matanne - Version Refactorée.
 
 Point d'entrée principal de l'API avec les middlewares et routers.
@@ -140,9 +140,9 @@ async def health_check():
     db_status = "ok"
     
     try:
-        from src.core.database import get_db_context
+        from src.core.database import obtenir_contexte_db
         from sqlalchemy import text
-        with get_db_context() as session:
+        with obtenir_contexte_db() as session:
             session.execute(text("SELECT 1"))
     except Exception as e:
         db_status = f"error: {e}"
@@ -208,3 +208,4 @@ async def suggest_recettes(
     except Exception as e:
         logger.error(f"Erreur suggestions IA: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+

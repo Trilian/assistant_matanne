@@ -1,4 +1,4 @@
-"""
+﻿"""
 Script de mise en place du module Jeux (premier démarrage)
 
 Usage:
@@ -44,13 +44,13 @@ def setup_module():
     # Step 2: Créer les tables BD
     print("\n2️⃣  Vérification base de données...")
     try:
-        from src.core.database import get_db_context
+        from src.core.database import obtenir_contexte_db
         from src.core.models import (
             Equipe, Match, PariSportif,
             TirageLoto, GrilleLoto, StatistiquesLoto, HistoriqueJeux
         )
         
-        with get_db_context() as session:
+        with obtenir_contexte_db() as session:
             # Vérifier si au moins une table existe
             try:
                 count = session.query(Equipe).count()
@@ -66,10 +66,10 @@ def setup_module():
     # Step 3: Charger les données initiales
     print("\n3️⃣  Initialisation des données...")
     try:
-        from src.core.database import get_db_context
+        from src.core.database import obtenir_contexte_db
         from src.core.models import Equipe, TirageLoto
         
-        with get_db_context() as session:
+        with obtenir_contexte_db() as session:
             # Insérer quelques équipes populaires si vide
             count = session.query(Equipe).count()
             
@@ -166,3 +166,4 @@ if __name__ == "__main__":
         import traceback
         traceback.print_exc()
         sys.exit(1)
+

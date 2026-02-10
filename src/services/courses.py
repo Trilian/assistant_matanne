@@ -1,7 +1,7 @@
 ﻿"""
 Service Courses Unifié (REFACTORING PHASE 2)
 
-✅ Utilise @with_db_session et @with_cache (Phase 1)
+✅ Utilise @avec_session_db et @avec_cache (Phase 1)
 ✅ Validation Pydantic centralisée
 ✅ Type hints complets pour meilleur IDE support
 ✅ Services testables sans Streamlit
@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session, joinedload
 from src.core.ai import obtenir_client_ia
 from src.core.cache import Cache
 from src.core.database import obtenir_contexte_db
-from src.core.decorators import with_db_session, with_cache, with_error_handling
+from src.core.decorators import avec_session_db, avec_cache, avec_gestion_erreurs
 from src.core.models import ArticleCourses
 from src.services.base_ai_service import BaseAIService
 from src.services.types import BaseService
@@ -103,12 +103,12 @@ class CoursesService(BaseService[ArticleCourses], BaseAIService):
     # SECTION 1: CRUD & LISTE COURSES (REFACTORED)
     # ═══════════════════════════════════════════════════════════
 
-    @with_cache(
+    @avec_cache(
         ttl=1800,
         key_func=lambda self, achetes, priorite: f"courses_{achetes}_{priorite}",
     )
-    @with_error_handling(default_return=[])
-    @with_db_session
+    @avec_gestion_erreurs(default_return=[])
+    @avec_session_db
     def get_liste_courses(
         self,
         achetes: bool = False,
@@ -123,7 +123,7 @@ class CoursesService(BaseService[ArticleCourses], BaseAIService):
         Args:
             achetes: Include purchased items
             priorite: Filter by priority (haute, moyenne, basse)
-            db: Database session (injected by @with_db_session)
+            db: Database session (injected by @avec_session_db)
 
         Returns:
             List of dicts with article data organized by store section
@@ -168,8 +168,8 @@ class CoursesService(BaseService[ArticleCourses], BaseAIService):
     # SECTION 2: SUGGESTIONS IA (REFACTORED)
     # ═══════════════════════════════════════════════════════════
 
-    @with_cache(ttl=3600, key_func=lambda self: "suggestions_courses_ia")
-    @with_error_handling(default_return=[])
+    @avec_cache(ttl=3600, key_func=lambda self: "suggestions_courses_ia")
+    @avec_gestion_erreurs(default_return=[])
     def generer_suggestions_ia_depuis_inventaire(self) -> list[SuggestionCourses]:
         """Génère des suggestions de courses depuis l'inventaire via IA.
 
@@ -249,7 +249,7 @@ class CoursesService(BaseService[ArticleCourses], BaseAIService):
     # PHASE 2: MODÈLES PERSISTANTS
     # ═══════════════════════════════════════════════════════════
 
-    @with_db_session
+    @avec_session_db
     def get_modeles(self, utilisateur_id: str | None = None, db: Session | None = None) -> list[dict]:
         """Récupérer tous les modèles sauvegardés"""
         from src.core.models import ModeleCourses
@@ -283,7 +283,7 @@ class CoursesService(BaseService[ArticleCourses], BaseAIService):
             for m in modeles
         ]
 
-    @with_db_session
+    @avec_session_db
     def create_modele(self, nom: str, articles: list[dict], description: str | None = None, 
                      utilisateur_id: str | None = None, db: Session | None = None) -> int:
         """Créer un nouveau modèle de courses"""
@@ -321,7 +321,7 @@ class CoursesService(BaseService[ArticleCourses], BaseAIService):
         logger.info(f"✅ Modèle '{nom}' créé avec {len(articles)} articles")
         return modele.id
 
-    @with_db_session
+    @avec_session_db
     def delete_modele(self, modele_id: int, db: Session | None = None) -> bool:
         """Supprimer un modèle"""
         from src.core.models import ModeleCourses
@@ -335,7 +335,7 @@ class CoursesService(BaseService[ArticleCourses], BaseAIService):
         logger.info(f"✅ Modèle {modele_id} supprimé")
         return True
 
-    @with_db_session
+    @avec_session_db
     def appliquer_modele(self, modele_id: int, utilisateur_id: str | None = None, 
                         db: Session | None = None) -> list[int]:
         """Appliquer un modèle à la liste active (crée articles cours)"""
@@ -406,3 +406,4 @@ def get_courses_service() -> CoursesService:
 courses_service = None
 
 __all__ = ["CoursesService", "courses_service", "get_courses_service"]
+

@@ -1,14 +1,14 @@
-"""
+﻿"""
 Module Achats Famille - Fonctions helper
 """
 
-from ._common import date, get_db_context, FamilyPurchase, CATEGORIES
+from ._common import date, obtenir_contexte_db, FamilyPurchase, CATEGORIES
 
 
 def get_all_purchases(achete: bool = False) -> list:
     """Récupère tous les achats"""
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             return db.query(FamilyPurchase).filter_by(achete=achete).all()
     except:
         return []
@@ -17,7 +17,7 @@ def get_all_purchases(achete: bool = False) -> list:
 def get_purchases_by_category(categorie: str, achete: bool = False) -> list:
     """Récupère les achats par catégorie"""
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             return db.query(FamilyPurchase).filter(
                 FamilyPurchase.categorie == categorie,
                 FamilyPurchase.achete == achete
@@ -30,7 +30,7 @@ def get_purchases_by_groupe(groupe: str, achete: bool = False) -> list:
     """Récupère les achats par groupe (jules, nous, maison)"""
     categories = [k for k, v in CATEGORIES.items() if v["groupe"] == groupe]
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             return db.query(FamilyPurchase).filter(
                 FamilyPurchase.categorie.in_(categories),
                 FamilyPurchase.achete == achete
@@ -42,7 +42,7 @@ def get_purchases_by_groupe(groupe: str, achete: bool = False) -> list:
 def get_stats() -> dict:
     """Calcule les statistiques des achats"""
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             en_attente = db.query(FamilyPurchase).filter_by(achete=False).all()
             achetes = db.query(FamilyPurchase).filter_by(achete=True).all()
             
@@ -70,7 +70,7 @@ def get_stats() -> dict:
 def mark_as_bought(purchase_id: int, prix_reel: float = None):
     """Marque un achat comme effectué"""
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             purchase = db.get(FamilyPurchase, purchase_id)
             if purchase:
                 purchase.achete = True
@@ -85,10 +85,11 @@ def mark_as_bought(purchase_id: int, prix_reel: float = None):
 def delete_purchase(purchase_id: int):
     """Supprime un achat"""
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             purchase = db.get(FamilyPurchase, purchase_id)
             if purchase:
                 db.delete(purchase)
                 db.commit()
     except:
         pass
+

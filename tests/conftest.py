@@ -506,9 +506,9 @@ def clear_cache():
 @pytest.fixture
 def patch_db_context(db):
     """
-    Fixture that patches get_db_context and obtenir_contexte_db to use test session.
+    Fixture that patches obtenir_contexte_db and obtenir_contexte_db to use test session.
     
-    This allows services that use @with_db_session to work with the test database
+    This allows services that use @avec_session_db to work with the test database
     instead of the production database.
     
     Usage:
@@ -526,7 +526,7 @@ def patch_db_context(db):
         yield db
     
     # Patch both French and English function names
-    with patch("src.core.database.get_db_context", mock_db_context):
+    with patch("src.core.database.obtenir_contexte_db", mock_db_context):
         with patch("src.core.database.obtenir_contexte_db", mock_db_context):
             yield db
 
@@ -550,3 +550,5 @@ def mock_mistral_api(monkeypatch):
     with patch("src.core.ai.client.ClientIA", return_value=mock_client):
         with patch("src.core.ai.client.obtenir_client_ia", return_value=mock_client):
             yield mock_client
+
+

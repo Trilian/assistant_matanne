@@ -1,10 +1,10 @@
-"""
+﻿"""
 Module Jules - Composants UI
 """
 
 from ._common import (
     st, date,
-    get_db_context, FamilyPurchase,
+    obtenir_contexte_db, FamilyPurchase,
     CATEGORIES_CONSEILS
 )
 from .helpers import (
@@ -135,7 +135,7 @@ def render_shopping():
 def render_achats_categorie(categorie: str):
     """Affiche les achats d'une catégorie"""
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             achats = db.query(FamilyPurchase).filter(
                 FamilyPurchase.categorie == categorie,
                 FamilyPurchase.achete == False
@@ -202,7 +202,7 @@ def render_form_ajout_achat():
                 st.error("Nom requis")
             else:
                 try:
-                    with get_db_context() as db:
+                    with obtenir_contexte_db() as db:
                         achat = FamilyPurchase(
                             nom=nom,
                             categorie=categorie[0],
@@ -253,3 +253,4 @@ def render_conseils():
                 st.markdown(result)
             except Exception as e:
                 st.error(f"Erreur: {e}")
+

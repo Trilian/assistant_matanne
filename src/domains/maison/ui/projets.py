@@ -8,9 +8,9 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 
-from src.core.database import get_db_context
+from src.core.database import obtenir_contexte_db
 from src.core.models import Project, ProjectTask
-from src.core.decorators import with_db_session
+from src.core.decorators import avec_session_db
 from src.services.base_ai_service import BaseAIService
 from src.core.ai import ClientIA
 
@@ -104,7 +104,7 @@ def get_projets_service() -> ProjetsService:
 # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 
-@with_db_session
+@avec_session_db
 def creer_projet(
     nom: str,
     description: str,
@@ -132,7 +132,7 @@ def creer_projet(
         return None
 
 
-@with_db_session
+@avec_session_db
 def ajouter_tache(
     project_id: int,
     nom: str,
@@ -160,7 +160,7 @@ def ajouter_tache(
         return False
 
 
-@with_db_session
+@avec_session_db
 def marquer_tache_done(task_id: int, db=None) -> bool:
     """Marque une tâche comme terminée"""
     try:
@@ -175,7 +175,7 @@ def marquer_tache_done(task_id: int, db=None) -> bool:
     return False
 
 
-@with_db_session
+@avec_session_db
 def marquer_projet_done(project_id: int, db=None) -> bool:
     """Marque un projet comme terminé"""
     try:
@@ -298,7 +298,7 @@ def app():
                 
                 # Afficher les tâches
                 with st.expander("Voir tâches"):
-                    with get_db_context() as session:
+                    with obtenir_contexte_db() as session:
                         taches = session.query(ProjectTask).filter_by(
                             project_id=projet['id']
                         ).all()
@@ -503,3 +503,5 @@ def app():
 
 if __name__ == "__main__":
     app()
+
+

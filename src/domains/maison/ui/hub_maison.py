@@ -1,4 +1,4 @@
-"""
+﻿"""
 Hub Maison - Dashboard central avec cards cliquables.
 
 Structure:
@@ -17,7 +17,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 from typing import Optional
 
-from src.core.database import get_db_context
+from src.core.database import obtenir_contexte_db
 
 
 # ═══════════════════════════════════════════════════════════
@@ -88,7 +88,7 @@ def get_stats_projets() -> dict:
     """Récupère stats projets"""
     try:
         from src.core.models import Project
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             total = db.query(Project).count()
             en_cours = db.query(Project).filter(Project.statut == "en_cours").count()
             return {"total": total, "en_cours": en_cours}
@@ -100,7 +100,7 @@ def get_stats_jardin() -> dict:
     """Récupère stats zones jardin"""
     try:
         from src.core.models import GardenZone
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             zones = db.query(GardenZone).all()
             if not zones:
                 return {"zones": 0, "etat_moyen": 0, "surface": 2600}
@@ -116,7 +116,7 @@ def get_stats_menage() -> dict:
     try:
         from src.core.models import MaintenanceTask
         today = date.today()
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             total = db.query(MaintenanceTask).filter(MaintenanceTask.fait == False).count()
             urgentes = db.query(MaintenanceTask).filter(
                 MaintenanceTask.fait == False,
@@ -131,7 +131,7 @@ def get_stats_meubles() -> dict:
     """Récupère stats wishlist meubles"""
     try:
         from src.core.models import Furniture
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             total = db.query(Furniture).filter(Furniture.statut != "achete").count()
             budget = db.query(Furniture).filter(
                 Furniture.statut != "achete",
@@ -147,7 +147,7 @@ def get_stats_eco() -> dict:
     """Récupère stats actions éco"""
     try:
         from src.core.models import EcoAction
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             actions = db.query(EcoAction).filter(EcoAction.actif == True).all()
             economie_mensuelle = sum(float(a.economie_mensuelle or 0) for a in actions)
             return {"actions": len(actions), "economie_mensuelle": economie_mensuelle}
@@ -160,7 +160,7 @@ def get_stats_depenses() -> dict:
     try:
         from src.core.models import HouseExpense
         today = date.today()
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             depenses = db.query(HouseExpense).filter(
                 HouseExpense.mois == today.month,
                 HouseExpense.annee == today.year
@@ -389,3 +389,4 @@ def render_alertes():
 def app():
     """Point d'entrée module Hub Maison"""
     render_page_content()
+

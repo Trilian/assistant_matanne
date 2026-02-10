@@ -8,9 +8,9 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 
-from src.core.database import get_db_context
+from src.core.database import obtenir_contexte_db
 from src.core.models import Routine, RoutineTask
-from src.core.decorators import with_db_session
+from src.core.decorators import avec_session_db
 from src.services.base_ai_service import BaseAIService
 from src.core.ai import ClientIA
 
@@ -114,7 +114,7 @@ def get_entretien_service() -> EntretienService:
 # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 
-@with_db_session
+@avec_session_db
 def creer_routine(
     nom: str,
     categorie: str,
@@ -141,8 +141,8 @@ def creer_routine(
         return None
 
 
-@with_db_session
-@with_db_session
+@avec_session_db
+@avec_session_db
 def ajouter_tache_routine(
     routine_id: int,
     nom: str,
@@ -169,7 +169,7 @@ def ajouter_tache_routine(
         return False
 
 
-@with_db_session
+@avec_session_db
 def marquer_tache_faite(task_id: int, db=None) -> bool:
     """Marque une tâche comme faite aujourd'hui"""
     try:
@@ -184,7 +184,7 @@ def marquer_tache_faite(task_id: int, db=None) -> bool:
     return False
 
 
-@with_db_session
+@avec_session_db
 def desactiver_routine(routine_id: int, db=None) -> bool:
     """Désactive une routine"""
     try:
@@ -336,7 +336,7 @@ def app():
                 
                 # Tâches
                 with st.expander("Voir tâches"):
-                    with get_db_context() as session:
+                    with obtenir_contexte_db() as session:
                         taches_routine = session.query(RoutineTask).filter_by(
                             routine_id=routine['id']
                         ).all()
@@ -541,3 +541,5 @@ def app():
 
 if __name__ == "__main__":
     app()
+
+

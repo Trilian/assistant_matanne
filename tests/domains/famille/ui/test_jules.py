@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/domains/famille/ui/jules/
 
 Couverture ciblée: 80%
@@ -32,7 +32,7 @@ def mock_st():
 
 @contextmanager
 def mock_db_context(return_value=None):
-    """Mock pour get_db_context."""
+    """Mock pour obtenir_contexte_db."""
     mock_db = MagicMock()
     mock_db.query.return_value.filter_by.return_value.first.return_value = return_value
     mock_db.query.return_value.filter.return_value.order_by.return_value.all.return_value = []
@@ -41,7 +41,7 @@ def mock_db_context(return_value=None):
     def context():
         yield mock_db
     
-    with patch("src.domains.famille.ui.jules.helpers.get_db_context", context):
+    with patch("src.domains.famille.ui.jules.helpers.obtenir_contexte_db", context):
         yield mock_db
 
 
@@ -103,7 +103,7 @@ class TestJulesHelpers:
         """Test get_age_jules avec erreur DB."""
         from src.domains.famille.ui.jules.helpers import get_age_jules
         
-        with patch("src.domains.famille.ui.jules.helpers.get_db_context", 
+        with patch("src.domains.famille.ui.jules.helpers.obtenir_contexte_db", 
                    side_effect=Exception("DB Error")):
             result = get_age_jules()
         
@@ -201,7 +201,7 @@ class TestJulesHelpers:
         def context():
             yield mock_db
         
-        with patch("src.domains.famille.ui.jules.helpers.get_db_context", context):
+        with patch("src.domains.famille.ui.jules.helpers.obtenir_contexte_db", context):
             result = get_achats_jules_en_attente()
         
         assert len(result) == 2
@@ -210,7 +210,7 @@ class TestJulesHelpers:
         """Test get_achats_jules_en_attente avec erreur DB."""
         from src.domains.famille.ui.jules.helpers import get_achats_jules_en_attente
         
-        with patch("src.domains.famille.ui.jules.helpers.get_db_context", 
+        with patch("src.domains.famille.ui.jules.helpers.obtenir_contexte_db", 
                    side_effect=Exception("DB Error")):
             result = get_achats_jules_en_attente()
         
@@ -419,7 +419,7 @@ class TestJulesComponentsAdvanced:
             yield mock_db
         
         with patch.object(components, "st", mock_st):
-            with patch.object(components, "get_db_context", context):
+            with patch.object(components, "obtenir_contexte_db", context):
                 components.render_achats_categorie("jules_vetements")
         
         mock_st.caption.assert_called()
@@ -444,7 +444,7 @@ class TestJulesComponentsAdvanced:
             yield mock_db
         
         with patch.object(components, "st", mock_st):
-            with patch.object(components, "get_db_context", context):
+            with patch.object(components, "obtenir_contexte_db", context):
                 components.render_achats_categorie("jules_vetements")
         
         assert mock_st.container.called
@@ -455,7 +455,7 @@ class TestJulesComponentsAdvanced:
         from src.domains.famille.ui.jules import components
         
         with patch.object(components, "st", mock_st):
-            with patch.object(components, "get_db_context", side_effect=Exception("DB Error")):
+            with patch.object(components, "obtenir_contexte_db", side_effect=Exception("DB Error")):
                 components.render_achats_categorie("jules_vetements")
         
         mock_st.error.assert_called()
@@ -505,7 +505,7 @@ class TestJulesComponentsAdvanced:
             yield mock_db
         
         with patch.object(components, "st", mock_st):
-            with patch.object(components, "get_db_context", context):
+            with patch.object(components, "obtenir_contexte_db", context):
                 components.render_form_ajout_achat()
         
         # Vérifier que l'achat a été ajouté
@@ -580,3 +580,4 @@ class TestJulesConstants:
         for key, info in CATEGORIES_CONSEILS.items():
             assert "emoji" in info
             assert "titre" in info
+

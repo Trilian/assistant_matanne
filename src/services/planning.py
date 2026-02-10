@@ -1,7 +1,7 @@
 ﻿"""
 Service Planning Unifié (REFACTORING PHASE 2)
 
-✅ Utilise @with_db_session et @with_cache (Phase 1)
+✅ Utilise @avec_session_db et @avec_cache (Phase 1)
 ✅ Validation Pydantic centralisée
 ✅ Type hints complets pour meilleur IDE support
 ✅ Services testables sans Streamlit
@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session, joinedload
 from src.core.ai import obtenir_client_ia
 from src.core.cache import Cache
 from src.core.database import obtenir_contexte_db
-from src.core.decorators import with_db_session, with_cache, with_error_handling
+from src.core.decorators import avec_session_db, avec_cache, avec_gestion_erreurs
 from src.core.errors_base import ErreurNonTrouve
 from src.core.models import Planning, Repas
 from src.services.base_ai_service import BaseAIService, PlanningAIMixin
@@ -101,15 +101,15 @@ class PlanningService(BaseService[Planning], BaseAIService, PlanningAIMixin):
     # SECTION 1: CRUD & PLANNING (REFACTORED)
     # ═══════════════════════════════════════════════════════════
 
-    @with_cache(ttl=1800, key_func=lambda self, planning_id=None, **kw: f"planning_active")
-    @with_error_handling(default_return=None)
-    @with_db_session
+    @avec_cache(ttl=1800, key_func=lambda self, planning_id=None, **kw: f"planning_active")
+    @avec_gestion_erreurs(default_return=None)
+    @avec_session_db
     def get_planning(self, planning_id: int | None = None, db: Session | None = None) -> Planning | None:
         """Get the active or specified planning with eager loading of meals and recettes.
 
         Args:
             planning_id: Specific planning ID, or None to get active planning
-            db: Database session (injected by @with_db_session)
+            db: Database session (injected by @avec_session_db)
 
         Returns:
             Planning object with repas and recettes eagerly loaded, or None if not found
@@ -142,9 +142,9 @@ class PlanningService(BaseService[Planning], BaseAIService, PlanningAIMixin):
         
         return planning
 
-    @with_cache(ttl=1800, key_func=lambda self, planning_id, **kw: f"planning_full_{planning_id}")
-    @with_error_handling(default_return=None)
-    @with_db_session
+    @avec_cache(ttl=1800, key_func=lambda self, planning_id, **kw: f"planning_full_{planning_id}")
+    @avec_gestion_erreurs(default_return=None)
+    @avec_session_db
     def get_planning_complet(self, planning_id: int, db: Session | None = None) -> dict[str, Any] | None:
         """Récupère un planning avec tous ses repas.
 
@@ -153,7 +153,7 @@ class PlanningService(BaseService[Planning], BaseAIService, PlanningAIMixin):
 
         Args:
             planning_id: ID of the planning to retrieve
-            db: Database session (injected by @with_db_session)
+            db: Database session (injected by @avec_session_db)
 
         Returns:
             Dict with planning data and meals organized by date, or None if not found
@@ -205,8 +205,8 @@ class PlanningService(BaseService[Planning], BaseAIService, PlanningAIMixin):
     # SECTION 2: SUGGESTIONS ÉQUILIBRÉES (NOUVEAU)
     # ═══════════════════════════════════════════════════════════
 
-    @with_error_handling(default_return=[])
-    @with_db_session
+    @avec_gestion_erreurs(default_return=[])
+    @avec_session_db
     def suggerer_recettes_equilibrees(
         self,
         semaine_debut: date,
@@ -307,8 +307,8 @@ class PlanningService(BaseService[Planning], BaseAIService, PlanningAIMixin):
     # SECTION 3: GÉNÉRATION AVEC CHOIX (NOUVEAU)
     # ═══════════════════════════════════════════════════════════
 
-    @with_error_handling(default_return=None)
-    @with_db_session
+    @avec_gestion_erreurs(default_return=None)
+    @avec_session_db
     def creer_planning_avec_choix(
         self,
         semaine_debut: date,
@@ -378,8 +378,8 @@ class PlanningService(BaseService[Planning], BaseAIService, PlanningAIMixin):
     # SECTION 3: AGRÉGATION COURSES (NOUVEAU)
     # ═══════════════════════════════════════════════════════════
 
-    @with_error_handling(default_return=[])
-    @with_db_session
+    @avec_gestion_erreurs(default_return=[])
+    @avec_session_db
     def agréger_courses_pour_planning(
         self,
         planning_id: int,
@@ -468,12 +468,12 @@ class PlanningService(BaseService[Planning], BaseAIService, PlanningAIMixin):
     # SECTION 4: GÉNÉRATION IA (REFACTORED)
     # ═══════════════════════════════════════════════════════════
 
-    @with_cache(
+    @avec_cache(
         ttl=3600,
         key_func=lambda self, semaine_debut, preferences=None: f"planning_ia_{semaine_debut.isoformat()}",
     )
-    @with_error_handling(default_return=None)
-    @with_db_session
+    @avec_gestion_erreurs(default_return=None)
+    @avec_session_db
     def generer_planning_ia(
         self,
         semaine_debut: date,
@@ -488,7 +488,7 @@ class PlanningService(BaseService[Planning], BaseAIService, PlanningAIMixin):
         Args:
             semaine_debut: Start date of the week (Monday)
             preferences: Optional preferences dict for meal types, dietary restrictions, etc.
-            db: Database session (injected by @with_db_session)
+            db: Database session (injected by @avec_session_db)
 
         Returns:
             Planning object with generated meals, or None if generation fails
@@ -625,3 +625,4 @@ def get_planning_service() -> PlanningService:
 planning_service = None
 
 __all__ = ["PlanningService", "planning_service", "get_planning_service"]
+

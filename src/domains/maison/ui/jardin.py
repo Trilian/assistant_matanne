@@ -8,9 +8,9 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 
-from src.core.database import get_db_context
+from src.core.database import obtenir_contexte_db
 from src.core.models import GardenItem, GardenLog
-from src.core.decorators import with_db_session
+from src.core.decorators import avec_session_db
 from src.services.base_ai_service import BaseAIService
 from src.core.ai import ClientIA
 
@@ -96,7 +96,7 @@ def get_jardin_service() -> JardinService:
 # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 
-@with_db_session
+@avec_session_db
 def ajouter_plante(
     nom: str,
     type_plante: str,
@@ -126,7 +126,7 @@ def ajouter_plante(
         return False
 
 
-@with_db_session
+@avec_session_db
 def arroser_plante(item_id: int, notes: str = "", db=None) -> bool:
     """Enregistre un arrosage"""
     try:
@@ -145,7 +145,7 @@ def arroser_plante(item_id: int, notes: str = "", db=None) -> bool:
         return False
 
 
-@with_db_session
+@avec_session_db
 def ajouter_log(item_id: int, action: str, notes: str = "", db=None) -> bool:
     """Ajoute une entrée au journal du jardin"""
     try:
@@ -458,3 +458,5 @@ def app():
 
 if __name__ == "__main__":
     app()
+
+

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Module Meubles - Wishlist d'achats par pièce avec budget.
 
 Gestion des achats progressifs de meubles/équipements pour la maison.
@@ -10,7 +10,7 @@ from datetime import date
 from decimal import Decimal
 from typing import Optional, List
 
-from src.core.database import get_db_context
+from src.core.database import obtenir_contexte_db
 from src.core.models import Furniture
 from src.core.models.maison_extended import FurnitureStatus, FurniturePriority, RoomType
 
@@ -57,7 +57,7 @@ PRIORITES_LABELS = {
 
 def get_all_meubles(filtre_statut: Optional[str] = None, filtre_piece: Optional[str] = None) -> List[Furniture]:
     """Récupère tous les meubles avec filtres optionnels"""
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         query = db.query(Furniture)
         
         if filtre_statut:
@@ -70,13 +70,13 @@ def get_all_meubles(filtre_statut: Optional[str] = None, filtre_piece: Optional[
 
 def get_meuble_by_id(meuble_id: int) -> Optional[Furniture]:
     """Récupère un meuble par son ID"""
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         return db.query(Furniture).filter(Furniture.id == meuble_id).first()
 
 
 def create_meuble(data: dict) -> Furniture:
     """Crée un nouveau meuble"""
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         meuble = Furniture(**data)
         db.add(meuble)
         db.commit()
@@ -86,7 +86,7 @@ def create_meuble(data: dict) -> Furniture:
 
 def update_meuble(meuble_id: int, data: dict) -> Optional[Furniture]:
     """Met à jour un meuble"""
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         meuble = db.query(Furniture).filter(Furniture.id == meuble_id).first()
         if meuble:
             for key, value in data.items():
@@ -98,7 +98,7 @@ def update_meuble(meuble_id: int, data: dict) -> Optional[Furniture]:
 
 def delete_meuble(meuble_id: int) -> bool:
     """Supprime un meuble"""
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         meuble = db.query(Furniture).filter(Furniture.id == meuble_id).first()
         if meuble:
             db.delete(meuble)
@@ -109,7 +109,7 @@ def delete_meuble(meuble_id: int) -> bool:
 
 def get_budget_resume() -> dict:
     """Calcule le résumé du budget"""
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         meubles = db.query(Furniture).filter(Furniture.statut != "achete").all()
         
         budget_par_piece = {}
@@ -444,3 +444,4 @@ def app():
     
     with tab3:
         render_onglet_budget()
+

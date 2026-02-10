@@ -9,7 +9,7 @@ import pandas as pd
 import streamlit as st
 from sqlalchemy.orm import Session
 
-from src.core.database import get_db_context
+from src.core.database import obtenir_contexte_db
 from src.core.models import Project, ProjectTask, GardenItem, GardenLog, Routine, RoutineTask
 
 
@@ -21,7 +21,7 @@ from src.core.models import Project, ProjectTask, GardenItem, GardenLog, Routine
 @st.cache_data(ttl=1800)
 def charger_projets(statut: str = None) -> pd.DataFrame:
     """Charge les projets avec filtrage optionnel"""
-    with get_db_context() as session:
+    with obtenir_contexte_db() as session:
         query = session.query(Project)
         if statut:
             query = query.filter_by(statut=statut)
@@ -56,7 +56,7 @@ def charger_projets(statut: str = None) -> pd.DataFrame:
 @st.cache_data(ttl=1800)
 def get_projets_urgents() -> list[dict]:
     """Détecte les projets urgents ou en retard"""
-    with get_db_context() as session:
+    with obtenir_contexte_db() as session:
         projets = session.query(Project).filter_by(statut="en_cours").all()
         urgents = []
         
@@ -84,7 +84,7 @@ def get_projets_urgents() -> list[dict]:
 @st.cache_data(ttl=1800)
 def get_stats_projets() -> dict:
     """Récupère les statistiques des projets"""
-    with get_db_context() as session:
+    with obtenir_contexte_db() as session:
         total = session.query(Project).count()
         en_cours = session.query(Project).filter_by(statut="en_cours").count()
         termines = session.query(Project).filter_by(statut="terminé").count()
@@ -115,7 +115,7 @@ def get_stats_projets() -> dict:
 @st.cache_data(ttl=1800)
 def charger_plantes() -> pd.DataFrame:
     """Charge toutes les plantes du jardin"""
-    with get_db_context() as session:
+    with obtenir_contexte_db() as session:
         items = session.query(GardenItem).filter_by(statut="actif").all()
         
         data = []
@@ -214,7 +214,7 @@ def get_saison() -> str:
 @st.cache_data(ttl=1800)
 def charger_routines() -> pd.DataFrame:
     """Charge toutes les routines actives"""
-    with get_db_context() as session:
+    with obtenir_contexte_db() as session:
         routines = session.query(Routine).filter_by(actif=True).all()
         
         data = []
@@ -244,7 +244,7 @@ def charger_routines() -> pd.DataFrame:
 @st.cache_data(ttl=1800)
 def get_taches_today() -> list[dict]:
     """Retourne les tâches du jour à faire"""
-    with get_db_context() as session:
+    with obtenir_contexte_db() as session:
         taches = session.query(RoutineTask).filter(
             RoutineTask.fait_le != date.today()
         ).all()
@@ -265,7 +265,7 @@ def get_taches_today() -> list[dict]:
 @st.cache_data(ttl=1800)
 def get_stats_entretien() -> dict:
     """Récupère les statistiques d'entretien"""
-    with get_db_context() as session:
+    with obtenir_contexte_db() as session:
         total_routines = session.query(Routine).filter_by(actif=True).count()
         total_taches = session.query(RoutineTask).count()
         
@@ -290,3 +290,4 @@ def clear_maison_cache():
     """Invalide le cache Streamlit pour le module Maison"""
     st.cache_data.clear()
     st.rerun()
+

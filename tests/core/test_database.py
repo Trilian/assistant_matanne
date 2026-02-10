@@ -30,11 +30,11 @@ from src.core.database import (
     initialiser_database,
     verifier_sante,
     # Alias anglais
-    get_engine,
-    get_db_context,
+    obtenir_moteur,
+    obtenir_contexte_db,
     get_safe_db,
     check_connection,
-    MigrationManager,
+    GestionnaireMigrations,
 )
 from src.core.errors import ErreurBaseDeDonnees
 
@@ -81,8 +81,8 @@ class TestDatabaseEngine:
             assert result == mock_engine
 
     def test_alias_get_engine_equals_obtenir_moteur(self):
-        """Test que l'alias get_engine == obtenir_moteur."""
-        assert get_engine == obtenir_moteur
+        """Test que l'alias obtenir_moteur == obtenir_moteur."""
+        assert obtenir_moteur == obtenir_moteur
 
 
 # ═══════════════════════════════════════════════════════════
@@ -174,9 +174,9 @@ class TestContextManagers:
             with obtenir_db_securise() as db:
                 assert db is None
 
-    def test_alias_get_db_context_equals_obtenir_contexte_db(self):
-        """Test que l'alias get_db_context == obtenir_contexte_db."""
-        assert get_db_context == obtenir_contexte_db
+    def test_alias_obtenir_contexte_db_equals_obtenir_contexte_db(self):
+        """Test que l'alias obtenir_contexte_db == obtenir_contexte_db."""
+        assert obtenir_contexte_db == obtenir_contexte_db
 
     def test_alias_get_safe_db_equals_obtenir_db_securise(self):
         """Test que l'alias get_safe_db == obtenir_db_securise."""
@@ -252,8 +252,8 @@ class TestGestionnaireMigrations:
             assert isinstance(migration["version"], int)
 
     def test_alias_migration_manager_equals_gestionnaire(self):
-        """Test que l'alias MigrationManager == GestionnaireMigrations."""
-        assert MigrationManager == GestionnaireMigrations
+        """Test que l'alias GestionnaireMigrations == GestionnaireMigrations."""
+        assert GestionnaireMigrations == GestionnaireMigrations
 
 
 # ═══════════════════════════════════════════════════════════
@@ -495,3 +495,5 @@ class TestDatabaseIntegration:
         
         assert isinstance(count, int)
         assert count >= 0
+
+

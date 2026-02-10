@@ -1,10 +1,10 @@
-"""
+﻿"""
 Module Jules - Fonctions helper
 """
 
 from ._common import (
     date,
-    get_db_context, ChildProfile, FamilyPurchase,
+    obtenir_contexte_db, ChildProfile, FamilyPurchase,
     ACTIVITES_PAR_AGE, TAILLES_PAR_AGE
 )
 
@@ -12,7 +12,7 @@ from ._common import (
 def get_age_jules() -> dict:
     """Récupère l'âge de Jules"""
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             jules = db.query(ChildProfile).filter_by(name="Jules", actif=True).first()
             if jules and jules.date_of_birth:
                 today = date.today()
@@ -59,10 +59,11 @@ def get_taille_vetements(age_mois: int) -> dict:
 def get_achats_jules_en_attente() -> list:
     """Récupère les achats Jules en attente"""
     try:
-        with get_db_context() as db:
+        with obtenir_contexte_db() as db:
             return db.query(FamilyPurchase).filter(
                 FamilyPurchase.achete == False,
                 FamilyPurchase.categorie.in_(["jules_vetements", "jules_jouets", "jules_equipement"])
             ).order_by(FamilyPurchase.priorite).all()
     except:
         return []
+

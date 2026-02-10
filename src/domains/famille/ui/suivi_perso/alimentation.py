@@ -1,10 +1,10 @@
-"""
+﻿"""
 Module Suivi Perso - Log alimentation
 """
 
 from ._common import (
     st, date, datetime,
-    get_db_context, UserProfile, FoodLog,
+    obtenir_contexte_db, UserProfile, FoodLog,
     get_or_create_user
 )
 from .helpers import get_food_logs_today
@@ -73,7 +73,7 @@ def render_food_form(username: str):
                 st.error("Description requise")
             else:
                 try:
-                    with get_db_context() as db:
+                    with obtenir_contexte_db() as db:
                         user = db.query(UserProfile).filter_by(username=username).first()
                         if not user:
                             user = get_or_create_user(
@@ -98,3 +98,4 @@ def render_food_form(username: str):
                         st.rerun()
                 except Exception as e:
                     st.error(f"Erreur: {e}")
+

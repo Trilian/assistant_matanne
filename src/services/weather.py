@@ -20,7 +20,7 @@ import httpx
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from src.core.decorators import with_error_handling, with_cache, with_db_session
+from src.core.decorators import avec_gestion_erreurs, avec_cache, avec_session_db
 from src.core.database import obtenir_contexte_db
 from src.core.models import (
     GardenItem,
@@ -197,8 +197,8 @@ class WeatherGardenService:
     # RÉCUPÉRATION MÉTÉO
     # ═══════════════════════════════════════════════════════════
     
-    @with_cache(ttl=3600)  # Cache 1h
-    @with_error_handling(default_return=None, afficher_erreur=True)
+    @avec_cache(ttl=3600)  # Cache 1h
+    @avec_gestion_erreurs(default_return=None, afficher_erreur=True)
     def get_previsions(self, nb_jours: int = 7) -> list[MeteoJour] | None:
         """
         Récupère les prévisions météo.
@@ -564,7 +564,7 @@ class WeatherGardenService:
     # PERSISTANCE BASE DE DONNÉES
     # ═══════════════════════════════════════════════════════════
 
-    @with_db_session
+    @avec_session_db
     def sauvegarder_alerte(
         self,
         alerte: AlerteMeteo,
@@ -604,7 +604,7 @@ class WeatherGardenService:
             db.rollback()
             return None
 
-    @with_db_session
+    @avec_session_db
     def sauvegarder_alertes(
         self,
         alertes: list[AlerteMeteo],
@@ -650,7 +650,7 @@ class WeatherGardenService:
         
         return resultats
 
-    @with_db_session
+    @avec_session_db
     def lister_alertes_actives(
         self,
         user_id: UUID | str | None = None,
@@ -676,7 +676,7 @@ class WeatherGardenService:
         
         return query.order_by(AlerteMeteoModel.date_debut).all()
 
-    @with_db_session
+    @avec_session_db
     def marquer_alerte_lue(
         self,
         alerte_id: int,
@@ -699,7 +699,7 @@ class WeatherGardenService:
             return True
         return False
 
-    @with_db_session
+    @avec_session_db
     def obtenir_config_meteo(
         self,
         user_id: UUID | str,
@@ -719,7 +719,7 @@ class WeatherGardenService:
             ConfigMeteo.user_id == UUID(str(user_id))
         ).first()
 
-    @with_db_session
+    @avec_session_db
     def sauvegarder_config_meteo(
         self,
         user_id: UUID | str,
@@ -935,3 +935,4 @@ def render_weather_garden_ui():  # pragma: no cover
         
         df = pd.DataFrame(data)
         st.dataframe(df, use_container_width=True, hide_index=True)
+

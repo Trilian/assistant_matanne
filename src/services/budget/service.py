@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service de suivi du budget familial.
 
 Fonctionnalités:
@@ -17,7 +17,7 @@ from sqlalchemy import extract
 from sqlalchemy.orm import Session
 
 from src.core.database import obtenir_contexte_db
-from src.core.decorators import with_db_session, with_cache
+from src.core.decorators import avec_session_db, avec_cache
 from src.core.models import FamilyBudget, BudgetMensuelDB
 
 from .schemas import (
@@ -67,7 +67,7 @@ class BudgetService:
     # GESTION DES DÉPENSES
     # ═══════════════════════════════════════════════════════════
     
-    @with_db_session
+    @avec_session_db
     def ajouter_depense(self, depense: Depense, db: Session = None) -> Depense:
         """
         Ajoute une nouvelle dépense.
@@ -103,7 +103,7 @@ class BudgetService:
         
         return depense
     
-    @with_db_session
+    @avec_session_db
     def modifier_depense(self, depense_id: int, updates: dict, db: Session = None) -> bool:
         """Modifie une dépense existante."""
         entry = db.query(FamilyBudget).filter(FamilyBudget.id == depense_id).first()
@@ -118,7 +118,7 @@ class BudgetService:
         db.commit()
         return True
     
-    @with_db_session
+    @avec_session_db
     def supprimer_depense(self, depense_id: int, db: Session = None) -> bool:
         """Supprime une dépense."""
         entry = db.query(FamilyBudget).filter(FamilyBudget.id == depense_id).first()
@@ -130,8 +130,8 @@ class BudgetService:
         db.commit()
         return True
     
-    @with_cache(ttl=300)
-    @with_db_session
+    @avec_cache(ttl=300)
+    @avec_session_db
     def get_depenses_mois(
         self,
         mois: int,
@@ -176,7 +176,7 @@ class BudgetService:
     # GESTION DES BUDGETS (PERSISTÉ EN DB)
     # ═══════════════════════════════════════════════════════════
     
-    @with_db_session
+    @avec_session_db
     def definir_budget(
         self,
         categorie: CategorieDepense,
@@ -228,7 +228,7 @@ class BudgetService:
         db.commit()
         logger.info(f"✅ Budget défini: {categorie.value} = {montant}€ ({mois}/{annee})")
     
-    @with_db_session
+    @avec_session_db
     def get_budget(
         self,
         categorie: CategorieDepense,
@@ -255,7 +255,7 @@ class BudgetService:
         
         return self.BUDGETS_DEFAUT.get(categorie, 0)
     
-    @with_db_session
+    @avec_session_db
     def get_tous_budgets(
         self,
         mois: int | None = None,
@@ -284,7 +284,7 @@ class BudgetService:
         
         return result
     
-    @with_db_session
+    @avec_session_db
     def definir_budgets_batch(
         self,
         budgets: dict[CategorieDepense, float],
@@ -335,8 +335,8 @@ class BudgetService:
     # STATISTIQUES ET ANALYSES
     # ═══════════════════════════════════════════════════════════
     
-    @with_cache(ttl=600)
-    @with_db_session
+    @avec_cache(ttl=600)
+    @avec_session_db
     def get_resume_mensuel(
         self,
         mois: int | None = None,
@@ -413,7 +413,7 @@ class BudgetService:
         
         return resume
     
-    @with_db_session
+    @avec_session_db
     def get_tendances(
         self,
         nb_mois: int = 6,
@@ -563,7 +563,7 @@ class BudgetService:
     # GESTION DES FACTURES MAISON (gaz, eau, électricité)
     # ═══════════════════════════════════════════════════════════
     
-    @with_db_session
+    @avec_session_db
     def ajouter_facture_maison(self, facture: FactureMaison, db: Session = None) -> FactureMaison:
         """
         Ajoute une facture maison avec suivi consommation.
@@ -619,8 +619,8 @@ class BudgetService:
             facture.id = entry.id
             return facture
     
-    @with_cache(ttl=300)
-    @with_db_session
+    @avec_cache(ttl=300)
+    @avec_session_db
     def get_factures_maison(
         self,
         categorie: CategorieDepense | None = None,
@@ -726,3 +726,4 @@ def get_budget_service() -> BudgetService:
     if _budget_service is None:
         _budget_service = BudgetService()
     return _budget_service
+

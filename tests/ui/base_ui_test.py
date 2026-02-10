@@ -1,4 +1,4 @@
-"""
+﻿"""
 Classe de base pour les tests UI.
 
 Fournit des méthodes utilitaires et setup/teardown standardisés
@@ -123,7 +123,7 @@ class BaseUITest:
         def mock_context():
             yield mock_db
         
-        p1 = patch("src.core.database.get_db_context", mock_context)
+        p1 = patch("src.core.database.obtenir_contexte_db", mock_context)
         p2 = patch("src.core.database.obtenir_contexte_db", mock_context)
         
         p1.start()
@@ -239,6 +239,7 @@ class BaseUITestWithDB(BaseUITest):
         def mock_context():
             yield self.db
         
-        with patch("src.core.database.get_db_context", mock_context):
+        with patch("src.core.database.obtenir_contexte_db", mock_context):
             with patch("src.core.database.obtenir_contexte_db", mock_context):
                 yield self.db
+

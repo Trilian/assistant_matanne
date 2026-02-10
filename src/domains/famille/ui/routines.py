@@ -1,4 +1,4 @@
-"""
+﻿"""
 Module Routines avec Agent IA intégré
 Gestion des routines quotidiennes avec rappels intelligents
 """
@@ -10,7 +10,7 @@ import pandas as pd
 import streamlit as st
 
 from src.core.ai_agent import AgentIA
-from src.core.database import get_db_context
+from src.core.database import obtenir_contexte_db
 from src.core.models import ChildProfile, Routine, RoutineTask
 
 # Logique métier pure
@@ -32,7 +32,7 @@ from src.domains.famille.logic.routines_logic import (
 
 def charger_routines(actives_uniquement: bool = True) -> pd.DataFrame:
     """Charge toutes les routines"""
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         query = db.query(Routine)
 
         if actives_uniquement:
@@ -61,7 +61,7 @@ def charger_routines(actives_uniquement: bool = True) -> pd.DataFrame:
 
 def charger_taches_routine(routine_id: int) -> pd.DataFrame:
     """Charge les tâches d'une routine"""
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         tasks = (
             db.query(RoutineTask)
             .filter(RoutineTask.routine_id == routine_id)
@@ -85,7 +85,7 @@ def charger_taches_routine(routine_id: int) -> pd.DataFrame:
 
 def creer_routine(nom: str, description: str, pour_qui: str, frequence: str) -> int:
     """Crée une nouvelle routine"""
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         # Vérifier si c'est pour un enfant
         child_id = None
         if pour_qui != "Famille":
@@ -108,7 +108,7 @@ def creer_routine(nom: str, description: str, pour_qui: str, frequence: str) -> 
 
 def ajouter_tache(routine_id: int, nom: str, heure: str = None):
     """Ajoute une tâche à une routine"""
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         task = RoutineTask(
             routine_id=routine_id, task_name=nom, scheduled_time=heure, status="à faire"
         )
@@ -118,7 +118,7 @@ def ajouter_tache(routine_id: int, nom: str, heure: str = None):
 
 def marquer_complete(task_id: int):
     """Marque une tâche comme terminée"""
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         task = db.query(RoutineTask).filter(RoutineTask.id == task_id).first()
         if task:
             task.status = "terminé"
@@ -128,7 +128,7 @@ def marquer_complete(task_id: int):
 
 def reinitialiser_taches_jour():
     """Réinitialise les tâches du jour"""
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         tasks = db.query(RoutineTask).filter(RoutineTask.status == "terminé").all()
 
         for task in tasks:
@@ -140,7 +140,7 @@ def reinitialiser_taches_jour():
 
 def supprimer_routine(routine_id: int):
     """Supprime une routine"""
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         db.query(Routine).filter(Routine.id == routine_id).delete()
         db.commit()
 
@@ -150,7 +150,7 @@ def get_taches_en_retard() -> list[dict]:
     taches_retard = []
     now = datetime.now().time()
 
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         tasks = (
             db.query(RoutineTask, Routine)
             .join(Routine, RoutineTask.routine_id == Routine.id)
@@ -338,7 +338,7 @@ def app():
                             key=f"disable_{routine['id']}",
                             use_container_width=True,
                         ):
-                            with get_db_context() as db:
+                            with obtenir_contexte_db() as db:
                                 r = db.query(Routine).get(routine["id"])
                                 r.is_active = False
                                 db.commit()
@@ -374,7 +374,7 @@ def app():
                 with st.spinner("– Analyse des routines..."):
                     try:
                         # Récupérer toutes les tâches
-                        with get_db_context() as db:
+                        with obtenir_contexte_db() as db:
                             tasks = (
                                 db.query(RoutineTask, Routine)
                                 .join(Routine, RoutineTask.routine_id == Routine.id)
@@ -484,7 +484,7 @@ def app():
 
             with col_c2:
                 # Pour qui
-                with get_db_context() as db:
+                with obtenir_contexte_db() as db:
                     children = db.query(ChildProfile).all()
                     personnes = ["Famille"] + [c.name for c in children]
 
@@ -566,7 +566,7 @@ def app():
 
             with col_m4:
                 # Taux de complétion aujourd'hui
-                with get_db_context() as db:
+                with obtenir_contexte_db() as db:
                     tasks_today = (
                         db.query(RoutineTask)
                         .filter(
@@ -606,3 +606,4 @@ def app():
             st.markdown("### 📋 Historique de la semaine")
 
             st.info("Fonctionnalité en développement : graphique d'historique sur 7 jours")
+

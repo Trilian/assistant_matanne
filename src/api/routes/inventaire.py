@@ -1,4 +1,4 @@
-"""
+﻿"""
 Routes API pour l'inventaire.
 """
 
@@ -70,11 +70,11 @@ async def list_inventaire(
 ):
     """Liste les articles d'inventaire avec filtres."""
     try:
-        from src.core.database import get_db_context
+        from src.core.database import obtenir_contexte_db
         from src.core.models import ArticleInventaire
         from datetime import timedelta
         
-        with get_db_context() as session:
+        with obtenir_contexte_db() as session:
             query = session.query(ArticleInventaire)
             
             if categorie:
@@ -130,10 +130,10 @@ async def list_inventaire(
 async def create_inventaire_item(item: InventaireItemCreate):
     """Crée un nouvel article d'inventaire."""
     try:
-        from src.core.database import get_db_context
+        from src.core.database import obtenir_contexte_db
         from src.core.models import ArticleInventaire
         
-        with get_db_context() as session:
+        with obtenir_contexte_db() as session:
             db_item = ArticleInventaire(
                 nom=item.nom,
                 quantite=item.quantite,
@@ -157,10 +157,10 @@ async def create_inventaire_item(item: InventaireItemCreate):
 async def get_by_barcode(code: str):
     """Récupère un article par son code-barres."""
     try:
-        from src.core.database import get_db_context
+        from src.core.database import obtenir_contexte_db
         from src.core.models import ArticleInventaire
         
-        with get_db_context() as session:
+        with obtenir_contexte_db() as session:
             item = session.query(ArticleInventaire).filter(
                 ArticleInventaire.code_barres == code
             ).first()
@@ -174,3 +174,4 @@ async def get_by_barcode(code: str):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+

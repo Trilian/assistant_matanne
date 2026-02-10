@@ -22,7 +22,7 @@ from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 
 from src.core.database import obtenir_contexte_db
-from src.core.decorators import with_db_session, with_error_handling
+from src.core.decorators import avec_session_db, avec_gestion_erreurs
 from src.core.models import (
     Recette, RecetteIngredient, Ingredient, EtapeRecette,
     Planning, Repas, ArticleCourses
@@ -107,7 +107,7 @@ class PDFExportService:
             leftIndent=20
         ))
 
-    @with_error_handling()
+    @avec_gestion_erreurs()
     def exporter_recette(self, recette_id: int) -> BytesIO:
         """
         Exporte une recette en PDF.
@@ -214,7 +214,7 @@ class PDFExportService:
         buffer.seek(0)
         return buffer
 
-    @with_error_handling()
+    @avec_gestion_erreurs()
     def exporter_planning_semaine(self, planning_id: int, date_debut: datetime = None) -> BytesIO:
         """
         Exporte un planning de semaine en PDF.
@@ -319,7 +319,7 @@ class PDFExportService:
         buffer.seek(0)
         return buffer
 
-    @with_error_handling()
+    @avec_gestion_erreurs()
     def exporter_liste_courses(self) -> BytesIO:
         """
         Exporte la liste de courses actuelle en PDF.
@@ -421,3 +421,4 @@ def get_pdf_export_service() -> PDFExportService:
     if _pdf_export_service is None:
         _pdf_export_service = PDFExportService()
     return _pdf_export_service
+

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service de suggestions IA avec historique.
 
 Améliore les suggestions en utilisant:
@@ -20,7 +20,7 @@ from sqlalchemy.orm import Session
 from src.core.ai import ClientIA, AnalyseurIA
 from src.core.cache_multi import cached, obtenir_cache
 from src.core.database import obtenir_contexte_db
-from src.core.decorators import with_db_session
+from src.core.decorators import avec_session_db
 from src.core.models import (
     Recette,
     HistoriqueRecette,
@@ -128,7 +128,7 @@ class SuggestionsIAService:
     # ANALYSE DU PROFIL
     # ═══════════════════════════════════════════════════════════
     
-    @with_db_session
+    @avec_session_db
     def analyser_profil_culinaire(
         self,
         jours_historique: int = 90,
@@ -232,7 +232,7 @@ class SuggestionsIAService:
     # CONTEXTE INTELLIGENT
     # ═══════════════════════════════════════════════════════════
     
-    @with_db_session
+    @avec_session_db
     def construire_contexte(
         self,
         type_repas: str = "dîner",
@@ -298,7 +298,7 @@ class SuggestionsIAService:
     # GÉNÉRATION DE SUGGESTIONS
     # ═══════════════════════════════════════════════════════════
     
-    @with_db_session
+    @avec_session_db
     def suggerer_recettes(
         self,
         contexte: ContexteSuggestion | None = None,
@@ -527,7 +527,7 @@ class SuggestionsIAService:
     # SUGGESTIONS IA AVANCÉES
     # ═══════════════════════════════════════════════════════════
     
-    @with_db_session
+    @avec_session_db
     def suggerer_avec_ia(
         self,
         requete_utilisateur: str,
@@ -620,3 +620,4 @@ __all__ = [
     "ContexteSuggestion",
     "SuggestionRecette",
 ]
+

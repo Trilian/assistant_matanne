@@ -1,7 +1,7 @@
 ﻿"""
 Service Inventaire Unifié (REFACTORING PHASE 2)
 
-✅ Utilise @with_db_session et @with_cache (Phase 1)
+✅ Utilise @avec_session_db et @avec_cache (Phase 1)
 ✅ Validation Pydantic centralisée
 ✅ Type hints complets pour meilleur IDE support
 ✅ Services testables sans Streamlit
@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session, joinedload
 from src.core.ai import obtenir_client_ia
 from src.core.cache import Cache
 from src.core.database import obtenir_contexte_db
-from src.core.decorators import with_db_session, with_cache, with_error_handling
+from src.core.decorators import avec_session_db, avec_cache, avec_gestion_erreurs
 from src.core.errors_base import ErreurValidation
 from src.core.models import ArticleInventaire
 from src.services.base_ai_service import BaseAIService, InventoryAIMixin
@@ -102,14 +102,14 @@ class InventaireService(BaseService[ArticleInventaire], BaseAIService, Inventory
     # SECTION 1: CRUD & INVENTAIRE (REFACTORED)
     # ═══════════════════════════════════════════════════════════
 
-    @with_cache(
+    @avec_cache(
         ttl=1800,
         key_func=lambda self, emplacement, categorie, include_ok: (
             f"inventaire_{emplacement}_{categorie}_{include_ok}"
         ),
     )
-    @with_error_handling(default_return=[])
-    @with_db_session
+    @avec_gestion_erreurs(default_return=[])
+    @avec_session_db
     def get_inventaire_complet(
         self,
         emplacement: str | None = None,
@@ -126,7 +126,7 @@ class InventaireService(BaseService[ArticleInventaire], BaseAIService, Inventory
             emplacement: Optional location filter (Frigo, Congélateur, etc.)
             categorie: Optional category filter
             include_ok: Include items with OK status
-            db: Database session (injected by @with_db_session)
+            db: Database session (injected by @avec_session_db)
 
         Returns:
             List of dict with article data and calculated status
@@ -171,7 +171,7 @@ class InventaireService(BaseService[ArticleInventaire], BaseAIService, Inventory
         logger.info(f"✅ Retrieved complete inventory: {len(result)} items")
         return result
 
-    @with_error_handling(default_return={})
+    @avec_gestion_erreurs(default_return={})
     def get_alertes(self) -> dict[str, list[dict[str, Any]]]:
         """Récupère toutes les alertes d'inventaire.
 
@@ -200,8 +200,8 @@ class InventaireService(BaseService[ArticleInventaire], BaseAIService, Inventory
     # SECTION 2: SUGGESTIONS IA (REFACTORED)
     # ═══════════════════════════════════════════════════════════
 
-    @with_cache(ttl=3600, key_func=lambda self: "suggestions_courses_ia")
-    @with_error_handling(default_return=[])
+    @avec_cache(ttl=3600, key_func=lambda self: "suggestions_courses_ia")
+    @avec_gestion_erreurs(default_return=[])
     def suggerer_courses_ia(self) -> list[SuggestionCourses]:  # pragma: no cover
         """Suggère des articles à ajouter aux courses via IA.
 
@@ -298,8 +298,8 @@ RULES:
     # SECTION 4: HISTORIQUE (Tracking modifications)
     # ═══════════════════════════════════════════════════════════
 
-    @with_error_handling(default_return=True)
-    @with_db_session
+    @avec_gestion_erreurs(default_return=True)
+    @avec_session_db
     def _enregistrer_modification(
         self,
         article: ArticleInventaire,
@@ -351,8 +351,8 @@ RULES:
         logger.info(f"📝 Historique enregistré: {type_modification} article #{article.id}")
         return True
 
-    @with_error_handling(default_return=[])
-    @with_db_session
+    @avec_gestion_erreurs(default_return=[])
+    @avec_session_db
     def get_historique(
         self, 
         article_id: int | None = None,
@@ -410,8 +410,8 @@ RULES:
     # SECTION 5: GESTION ARTICLES (CREATE/UPDATE/DELETE)
     # ═══════════════════════════════════════════════════════════
 
-    @with_error_handling(default_return=None)
-    @with_db_session
+    @avec_gestion_erreurs(default_return=None)
+    @avec_session_db
     def ajouter_article(
         self,
         ingredient_nom: str,
@@ -478,8 +478,8 @@ RULES:
             "date_peremption": date_peremption,
         }
 
-    @with_error_handling(default_return=False)
-    @with_db_session
+    @avec_gestion_erreurs(default_return=False)
+    @avec_session_db
     def mettre_a_jour_article(
         self,
         article_id: int,
@@ -552,8 +552,8 @@ RULES:
 
         return True
 
-    @with_error_handling(default_return=False)
-    @with_db_session
+    @avec_gestion_erreurs(default_return=False)
+    @avec_session_db
     def supprimer_article(self, article_id: int, db: Session | None = None) -> bool:
         """Supprime un article de l'inventaire.
 
@@ -584,8 +584,8 @@ RULES:
     # SECTION 6: GESTION DES PHOTOS
     # ═══════════════════════════════════════════════════════════
 
-    @with_db_session
-    @with_error_handling(default_return={})
+    @avec_session_db
+    @avec_gestion_erreurs(default_return={})
     def ajouter_photo(
         self,
         article_id: int,
@@ -642,8 +642,8 @@ RULES:
             "ancien": old_photo,
         }
 
-    @with_db_session
-    @with_error_handling(default_return=False)
+    @avec_session_db
+    @avec_gestion_erreurs(default_return=False)
     def supprimer_photo(self, article_id: int, db: Session | None = None) -> bool:
         """Supprime la photo d'un article.
         
@@ -686,8 +686,8 @@ RULES:
 
         return True
 
-    @with_db_session
-    @with_error_handling(default_return=None)
+    @avec_session_db
+    @avec_gestion_erreurs(default_return=None)
     def obtenir_photo(self, article_id: int, db: Session | None = None) -> dict[str, Any] | None:
         """Récupère les info photo d'un article.
         
@@ -712,7 +712,7 @@ RULES:
     # SECTION 8: NOTIFICATIONS & ALERTES
     # ═══════════════════════════════════════════════════════════
 
-    @with_error_handling(default_return={})
+    @avec_gestion_erreurs(default_return={})
     def generer_notifications_alertes(self) -> dict[str, Any]:
         """Génère les notifications d'alertes selon l'état de l'inventaire.
         
@@ -772,7 +772,7 @@ RULES:
 
         return stats
 
-    @with_error_handling(default_return=[])
+    @avec_gestion_erreurs(default_return=[])
     def obtenir_alertes_actives(self) -> list[dict[str, Any]]:
         """Récupère les alertes actives pour l'utilisateur.
         
@@ -802,7 +802,7 @@ RULES:
     # SECTION 9: STATISTIQUES & RAPPORTS
     # ═══════════════════════════════════════════════════════════
 
-    @with_error_handling(default_return={})
+    @avec_gestion_erreurs(default_return={})
     def get_statistiques(self) -> dict[str, Any]:
         """Récupère statistiques complètes de l'inventaire.
 
@@ -827,7 +827,7 @@ RULES:
             "derniere_maj": max((a.get("derniere_maj") for a in inventaire), default=None),
         }
 
-    @with_error_handling(default_return={})
+    @avec_gestion_erreurs(default_return={})
     def get_stats_par_categorie(self) -> dict[str, dict[str, Any]]:
         """Récupère statistiques par catégorie.
 
@@ -861,7 +861,7 @@ RULES:
         logger.info(f"📊 Statistics for {len(categories)} categories")
         return categories
 
-    @with_error_handling(default_return=[])
+    @avec_gestion_erreurs(default_return=[])
     def get_articles_a_prelever(self, date_limite: date | None = None) -> list[dict[str, Any]]:
         """Récupère articles à utiliser en priorité.
 
@@ -892,7 +892,7 @@ RULES:
     # SECTION 10: IMPORT/EXPORT AVANCÉ
     # ═══════════════════════════════════════════════════════════
 
-    @with_error_handling(default_return=[])
+    @avec_gestion_erreurs(default_return=[])
     def importer_articles(  # pragma: no cover
         self,
         articles_data: list[dict[str, Any]],
@@ -964,7 +964,7 @@ RULES:
 
         return resultats
 
-    @with_error_handling(default_return=None)
+    @avec_gestion_erreurs(default_return=None)
     def exporter_inventaire(  # pragma: no cover
         self,
         format_export: str = "csv",
@@ -1094,3 +1094,4 @@ def get_inventaire_service() -> InventaireService:
 inventaire_service = None
 
 __all__ = ["InventaireService", "inventaire_service", "CATEGORIES", "EMPLACEMENTS", "get_inventaire_service"]
+
