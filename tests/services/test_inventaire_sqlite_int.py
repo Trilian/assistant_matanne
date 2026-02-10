@@ -37,7 +37,7 @@ def mock_cache():
 
 
 @pytest.fixture
-def inventaire_service():
+def inventaire_service(patch_db_context):
     """Crée une instance du service inventaire avec mock pour invalidate_cache."""
     service = InventaireService()
     # Le service appelle self.invalidate_cache() qui n'existe pas

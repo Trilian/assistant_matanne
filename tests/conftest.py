@@ -10,7 +10,13 @@ This module provides:
 
 import sys
 import os
+import warnings
 from pathlib import Path
+
+# Suppress Streamlit warnings when running tests outside Streamlit context
+warnings.filterwarnings("ignore", message=".*ScriptRunContext.*")
+warnings.filterwarnings("ignore", message=".*Session state does not function.*")
+warnings.filterwarnings("ignore", message=".*No runtime found.*")
 
 # Configurer le chemin pour les imports
 workspace_root = Path(__file__).parent.parent
@@ -112,12 +118,19 @@ def engine(test_db_url):
     Base.metadata.drop_all(engine)
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def db(engine):
-    """Create fresh database session for each test."""
+    """Create fresh database session for each test with proper isolation."""
     connection = engine.connect()
     transaction = connection.begin()
     session = sessionmaker(bind=connection)()
+    
+    # Ensure clean state
+    for table in reversed(Base.metadata.sorted_tables):
+        try:
+            session.execute(table.delete())
+        except Exception:
+            pass
     
     yield session
     

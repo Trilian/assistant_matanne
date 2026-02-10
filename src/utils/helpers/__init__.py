@@ -13,6 +13,19 @@ from .data import (
     partition,
     pick,
     safe_get,
+    trier_donnees,
+    # Alias français
+    obtenir_securise,
+    grouper_par,
+    compter_par,
+    dedupliquer,
+    deduplicater,
+    aplatir,
+    fusionner_listes,
+    partitionner,
+    fusionner_dicts,
+    extraire,
+    omettre,
 )
 
 # Dates
@@ -24,6 +37,16 @@ from .dates import (
     get_week_bounds,
     is_weekend,
     weeks_between,
+    est_aujourd_hui,
+    # Alias français
+    obtenir_debut_semaine,
+    obtenir_fin_semaine,
+    obtenir_bornes_semaine,
+    plage_dates,
+    obtenir_bornes_mois,
+    ajouter_jours_ouvres,
+    semaines_entre,
+    obtenir_trimestre,
 )
 
 # Food (métier cuisine)
@@ -38,6 +61,20 @@ from .food import (
     get_all_ingredients_cached,
     suggest_ingredient_substitutes,
     validate_stock_level,
+    convertir_unite,
+    multiplier_portion,
+    extraire_ingredient,
+    # Alias français
+    trouver_ou_creer_ingredients_batch,
+    calculer_cout_recette,
+    consolider_doublons,
+    enrichir_avec_info_ingredient,
+    trouver_ou_creer_ingredient,
+    formater_resume_inventaire,
+    formater_resume_recette,
+    obtenir_tous_ingredients_cache,
+    suggerer_substituts,
+    valider_niveau_stock,
 )
 
 # Stats
@@ -110,4 +147,41 @@ __all__ = [
     "format_inventory_summary",
     "calculate_recipe_cost",
     "suggest_ingredient_substitutes",
+    "convertir_unite",
+    "multiplier_portion",
+    "extraire_ingredient",
+    # Alias français - Data
+    "obtenir_securise",
+    "grouper_par",
+    "compter_par",
+    "dedupliquer",
+    "deduplicater",
+    "aplatir",
+    "fusionner_listes",
+    "partitionner",
+    "fusionner_dicts",
+    "extraire",
+    "omettre",
+    "trier_donnees",
+    # Alias français - Dates
+    "obtenir_debut_semaine",
+    "obtenir_fin_semaine",
+    "obtenir_bornes_semaine",
+    "plage_dates",
+    "obtenir_bornes_mois",
+    "ajouter_jours_ouvres",
+    "semaines_entre",
+    "est_aujourd_hui",
+    "obtenir_trimestre",
+    # Alias français - Food
+    "trouver_ou_creer_ingredients_batch",
+    "calculer_cout_recette",
+    "consolider_doublons",
+    "enrichir_avec_info_ingredient",
+    "trouver_ou_creer_ingredient",
+    "formater_resume_inventaire",
+    "formater_resume_recette",
+    "obtenir_tous_ingredients_cache",
+    "suggerer_substituts",
+    "valider_niveau_stock",
 ]

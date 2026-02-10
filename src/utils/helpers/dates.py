@@ -104,3 +104,38 @@ def get_quarter(d: date) -> int:
         3
     """
     return (d.month - 1) // 3 + 1
+
+
+def est_aujourd_hui(d: date) -> bool:
+    """
+    Vérifie si une date est aujourd'hui
+
+    Examples:
+        >>> from datetime import date
+        >>> est_aujourd_hui(date.today())
+        True
+    """
+    return d == date.today()
+
+
+# ═══════════════════════════════════════════════════════════
+# ALIAS FRANÇAIS (pour compatibilité)
+# ═══════════════════════════════════════════════════════════
+
+def obtenir_debut_semaine(d: date) -> date:
+    """Retourne le lundi de la semaine"""
+    return get_week_bounds(d)[0]
+
+
+def obtenir_fin_semaine(d: date) -> date:
+    """Retourne le dimanche de la semaine"""
+    return get_week_bounds(d)[1]
+
+
+obtenir_bornes_semaine = get_week_bounds
+plage_dates = date_range
+obtenir_bornes_mois = get_month_bounds
+ajouter_jours_ouvres = add_business_days
+semaines_entre = weeks_between
+est_weekend = is_weekend
+obtenir_trimestre = get_quarter

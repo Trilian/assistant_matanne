@@ -328,14 +328,17 @@ class TestRenderStatsDashboard:
 
     @patch('streamlit.columns')
     @patch('streamlit.metric')
-    @patch('src.domains.maison.ui.depenses.get_stats_globales')
+    @patch('src.domains.maison.ui.depenses.components.get_stats_globales')
     def test_render_stats_dashboard(self, mock_stats, mock_metric, mock_cols):
         from src.domains.maison.ui.depenses import render_stats_dashboard
         
         mock_stats.return_value = {
             "total_mois": 1500.0,
-            "nb_depenses": 25,
-            "moyenne": 60.0,
+            "total_prec": 1200.0,
+            "delta": 300.0,
+            "delta_pct": 25.0,
+            "moyenne_mensuelle": 60.0,
+            "nb_categories": 5,
         }
         mock_cols.return_value = [MagicMock() for _ in range(4)]
         

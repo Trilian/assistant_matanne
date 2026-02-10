@@ -104,3 +104,27 @@ def capitalize_first(text: str) -> str:
     if not text:
         return text
     return text[0].upper() + text[1:].lower() if len(text) > 0 else text
+
+
+def capitalize_words(text: str) -> str:
+    """
+    Capitalise chaque mot
+
+    Examples:
+        >>> capitalize_words("bonjour le monde")
+        "Bonjour Le Monde"
+    """
+    if not text:
+        return text
+    return " ".join(word.capitalize() for word in text.split())
+
+
+# ═══════════════════════════════════════════════════════════
+# ALIAS FRANÇAIS (pour compatibilité)
+# ═══════════════════════════════════════════════════════════
+
+tronquer = truncate
+nettoyer_texte = clean_text
+extraire_nombre = extract_number
+capitaliser_premier = capitalize_first
+capitaliser_mots = capitalize_words

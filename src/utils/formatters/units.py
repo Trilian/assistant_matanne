@@ -59,3 +59,35 @@ def format_volume(milliliters: int | float | None) -> str:
         return format_quantity_with_unit(liters, "L")
 
     return format_quantity_with_unit(ml, "mL")
+
+
+def format_temperature(celsius: int | float | None, unit: str = "C") -> str:
+    """
+    Formate une température
+
+    Examples:
+        >>> format_temperature(20)
+        "20°C"
+        >>> format_temperature(68, "F")
+        "68°F"
+    """
+    if celsius is None:
+        return "0°C"
+
+    try:
+        temp = float(celsius)
+    except (ValueError, TypeError):
+        return "0°C"
+
+    if unit == "F":
+        return f"{int(temp)}°F"
+    return f"{int(temp)}°C"
+
+
+# ═══════════════════════════════════════════════════════════
+# ALIAS FRANÇAIS (pour compatibilité)
+# ═══════════════════════════════════════════════════════════
+
+formater_poids = format_weight
+formater_volume = format_volume
+formater_temperature = format_temperature

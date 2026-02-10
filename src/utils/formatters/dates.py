@@ -181,3 +181,14 @@ def format_duration(seconds: int | float | None, short: bool = False) -> str:
             parts.append(f"{remaining_seconds} seconde" + ("s" if remaining_seconds > 1 else ""))
 
     return " ".join(parts) if parts else ("0s" if short else "0 seconde")
+
+
+# ═══════════════════════════════════════════════════════════
+# ALIAS FRANÇAIS (pour compatibilité)
+# ═══════════════════════════════════════════════════════════
+
+formater_date = format_date
+formater_datetime = format_datetime
+temps_ecoule = format_relative_date
+formater_temps = format_time
+formater_duree = format_duration

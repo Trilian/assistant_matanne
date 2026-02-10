@@ -193,3 +193,49 @@ def validate_meal(data: dict) -> tuple[bool, list[str]]:
             errors.append("portions doit être un nombre")
 
     return len(errors) == 0, errors
+
+
+# ═══════════════════════════════════════════════════════════════
+# ALIAS FRANÇAIS et FONCTIONS ADDITIONNELLES
+# ═══════════════════════════════════════════════════════════════
+
+def valider_quantite(quantite: float | int | str, min_val: float = 0, max_val: float = 10000) -> tuple[bool, str]:
+    """
+    Valide une quantité
+
+    Returns:
+        (is_valid, error_message)
+    """
+    try:
+        val = float(quantite)
+        if val < min_val:
+            return False, f"Quantité doit être >= {min_val}"
+        if val > max_val:
+            return False, f"Quantité doit être <= {max_val}"
+        return True, ""
+    except (ValueError, TypeError):
+        return False, "Quantité doit être un nombre"
+
+
+def valider_allergie(allergie: str) -> tuple[bool, str]:
+    """
+    Valide une allergie
+
+    Returns:
+        (is_valid, error_message)
+    """
+    if not allergie or not isinstance(allergie, str):
+        return False, "Allergie doit être un texte non vide"
+    if len(allergie) < 2:
+        return False, "Allergie doit faire au moins 2 caractères"
+    if len(allergie) > 100:
+        return False, "Allergie trop longue (max 100 caractères)"
+    return True, ""
+
+
+# Alias français
+valider_recette = validate_recipe
+valider_ingredient = validate_ingredient
+valider_article_inventaire = validate_inventory_item
+valider_article_courses = validate_shopping_item
+valider_repas = validate_meal

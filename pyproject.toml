@@ -51,26 +51,6 @@ target-version = "py311"
 select = ["E", "W", "F", "I", "B", "C4", "UP"]
 ignore = ["E501", "B008"]
 
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-pythonpath = ["."]
-python_files = ["test_*.py"]
-addopts = [
-    "--strict-markers",
-    "--cov=src",
-    "--cov-report=html",
-    "--cov-report=term-missing",
-    "--cov-branch",
-    "-v"
-]
-markers = [
-    "unit: Unit tests",
-    "integration: Integration tests",
-    "slow: Slow tests",
-]
-minversion = "7.0"
-console_output_style = "progress"
-
 [tool.coverage.run]
 source = ["src"]
 branch = true

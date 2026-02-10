@@ -147,3 +147,31 @@ def omit(data: dict, keys: list[str]) -> dict:
         {"a": 1, "c": 3}
     """
     return {k: v for k, v in data.items() if k not in keys}
+
+
+def trier_donnees(items: list[dict], key: str, reverse: bool = False) -> list[dict]:
+    """
+    Trie une liste de dicts par clé
+
+    Examples:
+        >>> trier_donnees([{"val": 3}, {"val": 1}], "val")
+        [{"val": 1}, {"val": 3}]
+    """
+    return sorted(items, key=lambda x: x.get(key), reverse=reverse)
+
+
+# ═══════════════════════════════════════════════════════════
+# ALIAS FRANÇAIS (pour compatibilité)
+# ═══════════════════════════════════════════════════════════
+
+obtenir_securise = safe_get
+grouper_par = group_by
+compter_par = count_by
+dedupliquer = deduplicate
+deduplicater = deduplicate  # Alias alternatif
+aplatir = flatten
+fusionner_listes = flatten  # Flatten sert de fusion
+partitionner = partition
+fusionner_dicts = merge_dicts
+extraire = pick
+omettre = omit

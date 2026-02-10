@@ -132,3 +132,31 @@ def validate_choice(
         return False, f"{field_name} doit être dans {allowed_values}"
 
     return True, ""
+
+
+def is_valid_url(url: str) -> bool:
+    """
+    Valide une URL
+
+    Examples:
+        >>> is_valid_url("https://example.com")
+        True
+        >>> is_valid_url("invalid")
+        False
+    """
+    pattern = r"^https?://[\w\.-]+\.[a-zA-Z]{2,}(/.*)?$"
+    return bool(re.match(pattern, url))
+
+
+# ═══════════════════════════════════════════════════════════
+# ALIAS FRANÇAIS (pour compatibilité)
+# ═══════════════════════════════════════════════════════════
+
+valider_email = is_valid_email
+valider_telephone = is_valid_phone
+valider_url = is_valid_url
+borner = clamp
+valider_plage = validate_range
+valider_longueur_texte = validate_string_length
+valider_champs_requis = validate_required_fields
+valider_choix = validate_choice

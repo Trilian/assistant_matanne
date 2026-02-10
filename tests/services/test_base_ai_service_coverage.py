@@ -12,13 +12,13 @@ from pydantic import BaseModel
 # ═══════════════════════════════════════════════════════════
 
 
-class TestResponseModel(BaseModel):
+class MockResponseModel(BaseModel):
     """Modèle de test pour parsing."""
     nom: str = ""
     valeur: int = 0
 
 
-class TestItemModel(BaseModel):
+class MockItemModel(BaseModel):
     """Modèle d'item pour listes."""
     id: int
     titre: str = ""
@@ -320,7 +320,7 @@ class TestCallWithParsingAsync:
         mock_cache.obtenir.return_value = '{"nom": "Test", "valeur": 42}'
         mock_rate.peut_appeler.return_value = (True, "OK")
         
-        parsed_model = TestResponseModel(nom="Test", valeur=42)
+        parsed_model = MockResponseModel(nom="Test", valeur=42)
         mock_analyseur.analyser.return_value = parsed_model
         
         mock_client = AsyncMock()
@@ -331,7 +331,7 @@ class TestCallWithParsingAsync:
         
         result = await service.call_with_parsing(
             prompt="test",
-            response_model=TestResponseModel,
+            response_model=MockResponseModel,
             system_prompt="system"
         )
         
@@ -353,7 +353,7 @@ class TestCallWithParsingAsync:
         
         result = await service.call_with_parsing(
             prompt="test",
-            response_model=TestResponseModel
+            response_model=MockResponseModel
         )
         
         assert result is None
@@ -370,7 +370,7 @@ class TestCallWithParsingAsync:
         
         # Simuler erreur de validation
         mock_analyseur.analyser.side_effect = ValidationError.from_exception_data(
-            "TestResponseModel", []
+            "MockResponseModel", []
         )
         
         mock_client = AsyncMock()
@@ -381,7 +381,7 @@ class TestCallWithParsingAsync:
         
         result = await service.call_with_parsing(
             prompt="test",
-            response_model=TestResponseModel,
+            response_model=MockResponseModel,
             fallback={"nom": "Fallback", "valeur": 0}
         )
         
@@ -401,7 +401,7 @@ class TestCallWithParsingAsync:
         
         # Simuler erreur de validation
         mock_analyseur.analyser.side_effect = ValidationError.from_exception_data(
-            "TestResponseModel", []
+            "MockResponseModel", []
         )
         
         mock_client = AsyncMock()
@@ -412,7 +412,7 @@ class TestCallWithParsingAsync:
         
         result = await service.call_with_parsing(
             prompt="test",
-            response_model=TestResponseModel
+            response_model=MockResponseModel
             # Pas de fallback
         )
         
@@ -438,7 +438,7 @@ class TestCallWithListParsingAsync:
         mock_cache.obtenir.return_value = '[{"id": 1, "titre": "Item1"}]'
         mock_rate.peut_appeler.return_value = (True, "OK")
         
-        items = [TestItemModel(id=1, titre="Item1")]
+        items = [MockItemModel(id=1, titre="Item1")]
         mock_parser.return_value = items
         
         mock_client = AsyncMock()
@@ -449,7 +449,7 @@ class TestCallWithListParsingAsync:
         
         result = await service.call_with_list_parsing(
             prompt="test",
-            item_model=TestItemModel,
+            item_model=MockItemModel,
             list_key="items"
         )
         
@@ -471,7 +471,7 @@ class TestCallWithListParsingAsync:
         
         result = await service.call_with_list_parsing(
             prompt="test",
-            item_model=TestItemModel
+            item_model=MockItemModel
         )
         
         assert result == []
@@ -484,7 +484,7 @@ class TestCallWithListParsingAsync:
         mock_cache.obtenir.return_value = '{"items": [...]}'
         mock_rate.peut_appeler.return_value = (True, "OK")
         
-        items = [TestItemModel(id=i, titre=f"Item{i}") for i in range(10)]
+        items = [MockItemModel(id=i, titre=f"Item{i}") for i in range(10)]
         mock_parser.return_value = items
         
         mock_client = AsyncMock()
@@ -495,7 +495,7 @@ class TestCallWithListParsingAsync:
         
         result = await service.call_with_list_parsing(
             prompt="test",
-            item_model=TestItemModel,
+            item_model=MockItemModel,
             max_items=5
         )
         
@@ -520,7 +520,7 @@ class TestCallWithListParsingAsync:
         
         result = await service.call_with_list_parsing(
             prompt="test",
-            item_model=TestItemModel
+            item_model=MockItemModel
         )
         
         # Retourne liste vide en cas d'erreur
@@ -552,7 +552,7 @@ class TestCallWithJsonParsingAsync:
         
         result = await service.call_with_json_parsing(
             prompt="test",
-            response_model=TestResponseModel
+            response_model=MockResponseModel
         )
         
         assert result is not None
@@ -574,7 +574,7 @@ class TestCallWithJsonParsingAsync:
         
         result = await service.call_with_json_parsing(
             prompt="test",
-            response_model=TestResponseModel
+            response_model=MockResponseModel
         )
         
         assert result is not None
@@ -596,7 +596,7 @@ class TestCallWithJsonParsingAsync:
         
         result = await service.call_with_json_parsing(
             prompt="test",
-            response_model=TestResponseModel
+            response_model=MockResponseModel
         )
         
         assert result is None
@@ -616,7 +616,7 @@ class TestCallWithJsonParsingAsync:
         
         result = await service.call_with_json_parsing(
             prompt="test",
-            response_model=TestResponseModel
+            response_model=MockResponseModel
         )
         
         assert result is None

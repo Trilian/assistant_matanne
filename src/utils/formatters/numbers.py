@@ -219,3 +219,19 @@ def smart_round(value: int | float, precision: int = 2) -> float:
         return round(float(value), precision)
     except (ValueError, TypeError):
         return 0.0
+
+
+# ═══════════════════════════════════════════════════════════
+# ALIAS FRANÇAIS (pour compatibilité)
+# ═══════════════════════════════════════════════════════════
+
+formater_quantite = format_quantity
+formater_quantite_unite = format_quantity_with_unit
+formater_prix = format_price
+formater_monnaie = format_currency
+formater_pourcentage = format_percentage
+formater_entier = format_number
+formater_nombre = format_number
+formater_taille_fichier = format_file_size
+formater_plage = format_range
+arrondir_intelligent = smart_round

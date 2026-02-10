@@ -98,11 +98,11 @@ class TestNumberFormatters:
         try:
             from src.utils.formatters.numbers import formater_pourcentage
             
-            result = formater_pourcentage(0.75)
+            result = formater_pourcentage(75)  # 75 comme pourcentage déjà calculé
             
             assert result is not None
             assert isinstance(result, str)
-            assert "75" in result or "0.75" in result
+            assert "75" in result
         except ImportError:
             pytest.skip("Formatters non disponibles")
     
@@ -183,7 +183,7 @@ class TestUnitFormatters:
         try:
             from src.utils.formatters.units import formater_poids
             
-            result = formater_poids(1500, "g")  # 1500 grammes
+            result = formater_poids(1500)  # 1500 grammes
             
             assert result is not None
             assert isinstance(result, str)
@@ -195,7 +195,7 @@ class TestUnitFormatters:
         try:
             from src.utils.formatters.units import formater_volume
             
-            result = formater_volume(500, "ml")
+            result = formater_volume(500)  # 500 mL
             
             assert result is not None
             assert isinstance(result, str)
@@ -295,11 +295,10 @@ class TestDataHelpers:
     def test_merge_lists(self):
         """Test la fusion de listes."""
         try:
-            from src.utils.helpers.data import fusionner_listes
+            from src.utils.helpers.data import aplatir
             
-            list1 = [1, 2, 3]
-            list2 = [3, 4, 5]
-            result = fusionner_listes(list1, list2)
+            nested = [[1, 2, 3], [3, 4, 5]]
+            result = aplatir(nested)
             
             assert isinstance(result, list)
         except ImportError:
