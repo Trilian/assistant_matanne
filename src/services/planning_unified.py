@@ -127,7 +127,7 @@ class PlanningAIService(BaseService[CalendarEvent], BaseAIService, PlanningAIMix
     # SECTION 1: AGRÉGATION COMPLÈTE SEMAINE
     # ═══════════════════════════════════════════════════════════
 
-    @with_cache(ttl=1800, key_func=lambda self, d: f"semaine_complete_{d.isoformat()}")
+    @with_cache(ttl=1800, key_func=lambda self, date_debut, **kw: f"semaine_complete_{date_debut.isoformat()}")
     @with_error_handling(default_return=None)
     @with_db_session
     def get_semaine_complete(self, date_debut: date, db: Session | None = None) -> SemaineCompleSchema | None:
@@ -472,7 +472,7 @@ class PlanningAIService(BaseService[CalendarEvent], BaseAIService, PlanningAIMix
     # SECTION 4: GÉNÉRATION IA
     # ═══════════════════════════════════════════════════════════
 
-    @with_cache(ttl=1800, key_func=lambda self, d, **kw: f"semaine_ia_{d.isoformat()}")
+    @with_cache(ttl=1800, key_func=lambda self, date_debut, **kw: f"semaine_ia_{date_debut.isoformat()}")
     @with_error_handling(default_return=None)
     def generer_semaine_ia(
         self,

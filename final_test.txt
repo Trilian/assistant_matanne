@@ -1,0 +1,729 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.11.8, pytest-9.0.2, pluggy-1.6.0
+rootdir: D:\Projet_streamlit\assistant_matanne
+configfile: pytest.ini
+plugins: anyio-4.12.1, asyncio-1.3.0, cov-7.0.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collected 10560 items
+
+tests\api\test_85_coverage.py .................                          [  0%]
+tests\api\test_api_coverage_80.py ...................................... [  0%]
+.............................s.......................................... [  1%]
+................................                                         [  1%]
+tests\api\test_api_deep.py ............................................. [  1%]
+....ss.s........s.....ss..s..sss...                                      [  2%]
+tests\api\test_extended_api.py ......................                    [  2%]
+tests\api\test_main.py sssss                                             [  2%]
+tests\api\test_rate_limiting.py ......                                   [  2%]
+tests\api\test_rate_limiting_comprehensive.py .......................... [  2%]
+....ssss...............ss                                                [  3%]
+tests\api\test_simple_extended.py .........                              [  3%]
+tests\benchmarks\test_perf_core_operations.py .........                  [  3%]
+tests\core\test_action_history.py ........................               [  3%]
+tests\core\test_ai_agent.py ......................                       [  3%]
+tests\core\test_ai_agent_sync.py ..............                          [  3%]
+tests\core\test_ai_cache.py ................                             [  3%]
+tests\core\test_ai_client.py ..............                              [  4%]
+tests\core\test_ai_modules.py ss........s                                [  4%]
+tests\core\test_ai_parser_extended.py .......................            [  4%]
+tests\core\test_ai_rate_limit.py ............                            [  4%]
+tests\core\test_app.py ...                                               [  4%]
+tests\core\test_app_coverage.py ........................................ [  4%]
+...............                                                          [  5%]
+tests\core\test_app_main.py .......................                      [  5%]
+tests\core\test_cache.py ............................                    [  5%]
+tests\core\test_cache_coverage.py .............................          [  5%]
+tests\core\test_cache_deep.py .....................................      [  6%]
+tests\core\test_cache_multi.py ..ss......ss..sssssssss.....              [  6%]
+tests\core\test_cache_multi_deep.py ...................ssssssss          [  6%]
+tests\core\test_config.py ..............................                 [  6%]
+tests\core\test_config_deep.py .............s..............              [  7%]
+tests\core\test_config_extended.py ...............                       [  7%]
+tests\core\test_constants.py ........................................... [  7%]
+...                                                                      [  7%]
+tests\core\test_core_deep.py ........................................... [  8%]
+...........................................                              [  8%]
+tests\core\test_core_utils.py ..sssssssss                                [  8%]
+tests\core\test_coverage_80_boost.py ......................              [  8%]
+tests\core\test_coverage_80_final.py ....................                [  9%]
+tests\core\test_coverage_80_push.py ........................             [  9%]
+tests\core\test_coverage_80_targeted.py ............................     [  9%]
+tests\core\test_coverage_boost.py ...................................... [  9%]
+.......                                                                  [ 10%]
+tests\core\test_database.py ..........s........................          [ 10%]
+tests\core\test_database_deep.py ..................................s.... [ 10%]
+                                                                         [ 10%]
+tests\core\test_database_extended.py .......s..                          [ 10%]
+tests\core\test_decorators.py ...........                                [ 10%]
+tests\core\test_decorators_basic.py .....................                [ 11%]
+tests\core\test_decorators_deep.py .....................                 [ 11%]
+tests\core\test_decorators_edge_cases.py .....................           [ 11%]
+tests\core\test_decorators_extended.py ............                      [ 11%]
+tests\core\test_errors.py .....................................          [ 12%]
+tests\core\test_errors_advanced.py ..................................... [ 12%]
+......                                                                   [ 12%]
+tests\core\test_errors_base.py ......................................... [ 12%]
+......                                                                   [ 12%]
+tests\core\test_errors_deep.py .......................................   [ 13%]
+tests\core\test_lazy_cache_advanced.py ................................  [ 13%]
+tests\core\test_lazy_loader.py ......                                    [ 13%]
+tests\core\test_lazy_loader_deep.py ..........................           [ 13%]
+tests\core\test_lazy_loader_extended.py ..................               [ 14%]
+tests\core\test_logging.py ...............................               [ 14%]
+tests\core\test_models_batch_cooking.py sssss                            [ 14%]
+tests\core\test_models_comprehensive.py sssssssss...ssss                 [ 14%]
+tests\core\test_models_recettes.py .......................               [ 14%]
+tests\core\test_multi_tenant.py .................................        [ 15%]
+tests\core\test_multi_tenant_deep.py ................................... [ 15%]
+...........                                                              [ 15%]
+tests\core\test_notifications.py ....................................... [ 15%]
+....                                                                     [ 15%]
+tests\core\test_notifications_deep.py .................................. [ 16%]
+..............                                                           [ 16%]
+tests\core\test_offline.py ...                                           [ 16%]
+tests\core\test_offline_deep.py ...........................              [ 16%]
+tests\core\test_parser_ai.py ......................                      [ 16%]
+tests\core\test_performance.py ..                                        [ 16%]
+tests\core\test_performance_deep.py .......................              [ 17%]
+tests\core\test_performance_optimizations.py ........................... [ 17%]
+..............                                                           [ 17%]
+tests\core\test_performance_optimizations_deep.py .ss................    [ 17%]
+tests\core\test_redis_cache.py ........................................  [ 18%]
+tests\core\test_redis_cache_deep.py .................................... [ 18%]
+.........                                                                [ 18%]
+tests\core\test_sql_optimizer.py .......s                                [ 18%]
+tests\core\test_sql_optimizer_deep.py .........................          [ 18%]
+tests\core\test_state.py ..................................              [ 19%]
+tests\core\test_validation.py .......................................... [ 19%]
+                                                                         [ 19%]
+tests\core\test_validation_pydantic.py ................................. [ 19%]
+.......                                                                  [ 19%]
+tests\core\test_validators_pydantic.py .....................             [ 20%]
+tests\core\test_validators_pydantic_deep.py ......................       [ 20%]
+tests\domains\cuisine\services\test_batch_cooking.py ................... [ 20%]
+...                                                                      [ 20%]
+tests\domains\cuisine\test_batch_cooking_detaille_ui.py .                [ 20%]
+tests\domains\cuisine\test_batch_cooking_logic.py ...................... [ 20%]
+.....................                                                    [ 20%]
+tests\domains\cuisine\test_batch_cooking_logic_coverage.py ............. [ 21%]
+...................                                                      [ 21%]
+tests\domains\cuisine\test_courses_logic.py ............................ [ 21%]
+.....................                                                    [ 21%]
+tests\domains\cuisine\test_courses_ui.py .                               [ 21%]
+tests\domains\cuisine\test_init.py .                                     [ 21%]
+tests\domains\cuisine\test_inventaire_logic.py ......................... [ 21%]
+................................                                         [ 22%]
+tests\domains\cuisine\test_inventaire_logic_coverage.py ................ [ 22%]
+.............................                                            [ 22%]
+tests\domains\cuisine\test_inventaire_ui.py .                            [ 22%]
+tests\domains\cuisine\test_phase2_meals.py ...............               [ 22%]
+tests\domains\cuisine\test_phase2_recipes.py ...............             [ 22%]
+tests\domains\cuisine\test_planificateur_repas_logic.py ................ [ 23%]
+...........                                                              [ 23%]
+tests\domains\cuisine\test_planificateur_repas_logic_coverage.py ....... [ 23%]
+.........................                                                [ 23%]
+tests\domains\cuisine\test_planning_logic.py ........................    [ 23%]
+tests\domains\cuisine\test_recettes_logic.py ............                [ 23%]
+tests\domains\cuisine\test_recettes_logic_coverage.py .................. [ 23%]
+................                                                         [ 24%]
+tests\domains\cuisine\test_schemas.py ...................                [ 24%]
+tests\domains\cuisine\ui\test_batch_cooking_detaille.py .                [ 24%]
+tests\domains\cuisine\ui\test_planificateur_repas.py .........           [ 24%]
+tests\domains\cuisine\ui\test_planificateur_repas_extended.py .......... [ 24%]
+.......................                                                  [ 24%]
+tests\domains\cuisine\ui\test_planificateur_repas_fixed.py ............. [ 24%]
+...............................                                          [ 25%]
+tests\domains\cuisine\ui\test_recettes.py .................              [ 25%]
+tests\domains\famille\test_achats_famille_ui.py .                        [ 25%]
+tests\domains\famille\test_activites_logic.py .......................... [ 25%]
+...........                                                              [ 25%]
+tests\domains\famille\test_init.py .                                     [ 25%]
+tests\domains\famille\test_phase2_profiles.py ..............             [ 25%]
+tests\domains\famille\test_phase2_tracking.py ..............             [ 25%]
+tests\domains\famille\test_routines_logic.py ........................... [ 26%]
+...................                                                      [ 26%]
+tests\domains\famille\ui\test_achats_famille.py ........................ [ 26%]
+............                                                             [ 26%]
+tests\domains\famille\ui\test_activites.py ......................        [ 26%]
+tests\domains\famille\ui\test_hub_famille.py ........................... [ 27%]
+........                                                                 [ 27%]
+tests\domains\famille\ui\test_jules.py ................................. [ 27%]
+....                                                                     [ 27%]
+tests\domains\famille\ui\test_jules_planning.py .........                [ 27%]
+tests\domains\famille\ui\test_jules_planning_extended.py ............... [ 27%]
+...............                                                          [ 27%]
+tests\domains\famille\ui\test_routines.py .........................      [ 28%]
+tests\domains\famille\ui\test_suivi_perso.py ........................... [ 28%]
+..............                                                           [ 28%]
+tests\domains\famille\ui\test_weekend.py ............................... [ 28%]
+....................                                                     [ 29%]
+tests\domains\jeux\test_api_football_coverage.py ....................... [ 29%]
+..............                                                           [ 29%]
+tests\domains\jeux\test_integration.py .....                             [ 29%]
+tests\domains\jeux\test_jeux_apis.py ...                                 [ 29%]
+tests\domains\jeux\test_loto_logic.py .................                  [ 29%]
+tests\domains\jeux\test_paris_logic_coverage.py ........................ [ 29%]
+.......................................                                  [ 30%]
+tests\domains\jeux\test_scraper_loto_coverage.py ....................... [ 30%]
+.........                                                                [ 30%]
+tests\domains\jeux\test_setup.py ......                                  [ 30%]
+tests\domains\jeux\ui\test_loto.py .                                     [ 30%]
+tests\domains\maison\services\test_inventaire.py ..                      [ 30%]
+tests\domains\maison\services\test_paris_logic.py ..................     [ 30%]
+tests\domains\maison\test_entretien_logic.py ........................... [ 31%]
+....                                                                     [ 31%]
+tests\domains\maison\test_init.py .                                      [ 31%]
+tests\domains\maison\test_jardin_logic.py .............................  [ 31%]
+tests\domains\maison\test_jardin_logic_coverage.py ..................    [ 31%]
+tests\domains\maison\test_projets_logic.py ............................. [ 31%]
+.                                                                        [ 31%]
+tests\domains\maison\test_projets_logic_coverage.py ...................  [ 32%]
+tests\domains\maison\ui\test_courses.py ..                               [ 32%]
+tests\domains\maison\ui\test_depenses.py .........                       [ 32%]
+tests\domains\maison\ui\test_depenses_comprehensive.py ................. [ 32%]
+............                                                             [ 32%]
+tests\domains\maison\ui\test_eco_tips.py ...........                     [ 32%]
+tests\domains\maison\ui\test_energie.py ..                               [ 32%]
+tests\domains\maison\ui\test_entretien.py ..                             [ 32%]
+tests\domains\maison\ui\test_hub_maison.py ..                            [ 32%]
+tests\domains\maison\ui\test_imports_maison_ui.py .........              [ 32%]
+tests\domains\maison\ui\test_jardin.py .....s                            [ 32%]
+tests\domains\maison\ui\test_jardin_zones.py ..........                  [ 32%]
+tests\domains\maison\ui\test_meubles.py ..                               [ 32%]
+tests\domains\maison\ui\test_paris.py ..                                 [ 32%]
+tests\domains\maison\ui\test_projets.py ..                               [ 32%]
+tests\domains\maison\ui\test_scan_factures.py ..                         [ 32%]
+tests\domains\planning\logic\test_calendrier_unifie_logic.py .           [ 32%]
+tests\domains\planning\test_calendrier_unifie_logic.py ................. [ 33%]
+....................                                                     [ 33%]
+tests\domains\planning\test_calendrier_unifie_logic_coverage.py ........ [ 33%]
+........................................................................ [ 34%]
+..................................                                       [ 34%]
+tests\domains\planning\test_phase2_events.py ........................... [ 34%]
+......                                                                   [ 34%]
+tests\domains\planning\test_vue_ensemble.py ..                           [ 34%]
+tests\domains\planning\test_vue_ensemble_logic.py ...................... [ 34%]
+..                                                                       [ 34%]
+tests\domains\planning\test_vue_ensemble_logic_coverage.py ............. [ 35%]
+....................                                                     [ 35%]
+tests\domains\planning\test_vue_semaine_logic.py ......................  [ 35%]
+tests\domains\planning\test_vue_semaine_logic_coverage.py .............. [ 35%]
+........                                                                 [ 35%]
+tests\domains\planning\ui\components\test_components_init.py .......     [ 35%]
+tests\domains\planning\ui\components\test_components_init_extended.py .. [ 35%]
+................................                                         [ 36%]
+tests\domains\planning\ui\components\test_init.py ..                     [ 36%]
+tests\domains\planning\ui\test_calendrier_unifie.py ..                   [ 36%]
+tests\domains\planning\ui\test_imports_planning_ui.py ...                [ 36%]
+tests\domains\planning\ui\test_vue_semaine.py ..                         [ 36%]
+tests\domains\test_85_coverage.py .....................                  [ 36%]
+tests\domains\test_core_workflows.py .......sss.......                   [ 36%]
+tests\domains\test_domains_coverage_80.py .............................. [ 36%]
+.......s..........                                                       [ 36%]
+tests\domains\test_domains_logic_coverage.py ........................... [ 37%]
+.................                                                        [ 37%]
+tests\domains\test_extended_domains.py ................................. [ 37%]
+.....                                                                    [ 37%]
+tests\domains\test_init.py .                                             [ 37%]
+tests\domains\test_modules_accueil.py ..........                         [ 37%]
+tests\domains\test_modules_barcode.py ........                           [ 37%]
+tests\domains\test_modules_cuisine.py ................                   [ 38%]
+tests\domains\test_modules_famille.py ............                       [ 38%]
+tests\domains\test_modules_logic.py .........                            [ 38%]
+tests\domains\test_modules_planning.py ............                      [ 38%]
+tests\domains\test_simple_extended.py .........                          [ 38%]
+tests\domains\ui\test_ui_helpers.py ........................             [ 38%]
+tests\domains\utils\test_accueil_logic.py ...........................    [ 38%]
+tests\domains\utils\test_barcode_logic.py ........................       [ 39%]
+tests\domains\utils\test_barcode_logic_coverage.py ..................... [ 39%]
+..............................                                           [ 39%]
+tests\domains\utils\test_parametres.py ..                                [ 39%]
+tests\domains\utils\test_parametres_logic.py ........................... [ 39%]
+................                                                         [ 40%]
+tests\domains\utils\test_parametres_logic_coverage.py .................. [ 40%]
+.......................................                                  [ 40%]
+tests\domains\utils\test_rapports.py ..                                  [ 40%]
+tests\domains\utils\test_rapports_logic.py ............................. [ 40%]
+.....                                                                    [ 40%]
+tests\domains\utils\test_rapports_logic_coverage.py .................... [ 41%]
+.................................                                        [ 41%]
+tests\domains\utils\ui\test_accueil.py ..                                [ 41%]
+tests\domains\utils\ui\test_barcode.py ..                                [ 41%]
+tests\domains\utils\ui\test_imports_utils_ui.py .....                    [ 41%]
+tests\domains\utils\ui\test_notifications_push.py ..                     [ 41%]
+tests\e2e\test_complete_flows.py ...........                             [ 41%]
+tests\e2e\test_critical_paths.py .............                           [ 41%]
+tests\e2e\test_domains_e2e.py ..........                                 [ 41%]
+tests\e2e\test_integration_workflows.py ................................ [ 42%]
+.......                                                                  [ 42%]
+tests\e2e\test_main_flows.py ..........                                  [ 42%]
+tests\edge_cases\test_edge_cases_models.py ..................            [ 42%]
+tests\models\test_models_basic.py ......................                 [ 42%]
+tests\property_tests\test_models_hypothesis.py s                         [ 42%]
+tests\services\test_85_coverage.py ..............                        [ 42%]
+tests\services\test_action_history_coverage.py ......................... [ 43%]
+............................                                             [ 43%]
+tests\services\test_action_history_service.py .....                      [ 43%]
+tests\services\test_auth_comprehensive.py .............................. [ 43%]
+....................                                                     [ 43%]
+tests\services\test_auth_coverage.py ................................... [ 44%]
+...............                                                          [ 44%]
+tests\services\test_auth_service.py .                                    [ 44%]
+tests\services\test_backup_coverage.py .......................           [ 44%]
+tests\services\test_backup_integration.py .............................. [ 44%]
+...........................................................              [ 45%]
+tests\services\test_backup_service.py ...........                        [ 45%]
+tests\services\test_backup_utils.py .................................... [ 45%]
+..................                                                       [ 46%]
+tests\services\test_barcode_coverage.py ...............s..........s..s.. [ 46%]
+s.......s.s.s..                                                          [ 46%]
+tests\services\test_barcode_coverage_deep.py ........................... [ 46%]
+......................                                                   [ 46%]
+tests\services\test_barcode_service.py .                                 [ 46%]
+tests\services\test_base_ai_service.py ..........                        [ 47%]
+tests\services\test_base_ai_service_coverage.py ........................ [ 47%]
+.............                                                            [ 47%]
+tests\services\test_base_service.py ...........                          [ 47%]
+tests\services\test_base_service_coverage.py ........................... [ 47%]
+..................s........ss....s.s.                                    [ 48%]
+tests\services\test_batch_cooking_coverage.py .......................... [ 48%]
+.                                                                        [ 48%]
+tests\services\test_batch_cooking_full_coverage.py ..................... [ 48%]
+.....................................sssssssssssssssssssss               [ 49%]
+tests\services\test_batch_cooking_integration.py ....................... [ 49%]
+.............................                                            [ 49%]
+tests\services\test_batch_cooking_service.py .                           [ 49%]
+tests\services\test_batch_cooking_utils.py ............................. [ 49%]
+.........................................................                [ 50%]
+tests\services\test_budget_comprehensive.py ............................ [ 50%]
+.....................                                                    [ 50%]
+tests\services\test_budget_coverage.py ................................. [ 51%]
+..............                                                           [ 51%]
+tests\services\test_budget_coverage_deep.py ............................ [ 51%]
+....                                                                     [ 51%]
+tests\services\test_budget_extra.py ...................                  [ 51%]
+tests\services\test_budget_integration.py .............................. [ 52%]
+.                                                                        [ 52%]
+tests\services\test_budget_methods.py ........................           [ 52%]
+tests\services\test_budget_service.py .                                  [ 52%]
+tests\services\test_budget_utils.py .................................... [ 52%]
+....................................                                     [ 53%]
+tests\services\test_calendar_sync_comprehensive.py ..................... [ 53%]
+..........................                                               [ 53%]
+tests\services\test_calendar_sync_coverage.py .......................... [ 53%]
+...................                                                      [ 53%]
+tests\services\test_calendar_sync_service.py .                           [ 53%]
+tests\services\test_courses_intelligentes_coverage.py .................. [ 54%]
+..........................                                               [ 54%]
+tests\services\test_courses_intelligentes_service.py .                   [ 54%]
+tests\services\test_courses_service.py .....s.....ss..........s......... [ 54%]
+...................                                                      [ 54%]
+tests\services\test_existing_services.py ............................... [ 55%]
+......                                                                   [ 55%]
+tests\services\test_extended_services.py ...........                     [ 55%]
+tests\services\test_facture_ocr_coverage.py ............................ [ 55%]
+.................                                                        [ 55%]
+tests\services\test_factures_ocr.py ...............                      [ 55%]
+tests\services\test_garmin_sync.py .                                     [ 55%]
+tests\services\test_garmin_sync_coverage.py ............................ [ 56%]
+..................                                                       [ 56%]
+tests\services\test_garmin_sync_utils.py ............................... [ 56%]
+..................................................                       [ 57%]
+tests\services\test_garmin_sync_utils_integration.py ................... [ 57%]
+............................................................             [ 57%]
+tests\services\test_imports_services.py .............................    [ 58%]
+tests\services\test_inventaire_coverage_deep.py ........................ [ 58%]
+.......                                                                  [ 58%]
+tests\services\test_inventaire_integration.py .......................... [ 58%]
+........                                                                 [ 58%]
+tests\services\test_inventaire_methods.py .............................. [ 58%]
+..                                                                       [ 58%]
+tests\services\test_inventaire_service.py ..................             [ 59%]
+tests\services\test_inventaire_sqlite_int.py ........................... [ 59%]
+................                                                         [ 59%]
+tests\services\test_io_service.py .                                      [ 59%]
+tests\services\test_io_service_coverage.py ............................. [ 59%]
+........................                                                 [ 60%]
+tests\services\test_notifications_coverage.py .......................... [ 60%]
+..........................                                               [ 60%]
+tests\services\test_notifications_push_coverage.py ...................ss [ 60%]
+ss.........................                                              [ 61%]
+tests\services\test_notifications_push_service.py ..                     [ 61%]
+tests\services\test_notifications_service.py ..                          [ 61%]
+tests\services\test_openfoodfacts.py .........                           [ 61%]
+tests\services\test_openfoodfacts_coverage.py .......................... [ 61%]
+............                                                             [ 61%]
+tests\services\test_pdf_export_coverage.py ...............ss...ss......s [ 61%]
+s.............                                                           [ 61%]
+tests\services\test_pdf_export_coverage_deep.py ........................ [ 62%]
+....                                                                     [ 62%]
+tests\services\test_pdf_export_db_methods.py ......................      [ 62%]
+tests\services\test_pdf_export_service.py ...                            [ 62%]
+tests\services\test_planning_coverage.py ............ssss............... [ 62%]
+.                                                                        [ 62%]
+tests\services\test_planning_extended.py sssssssssssssssssssssssssss     [ 62%]
+tests\services\test_planning_service.py ...........                      [ 63%]
+tests\services\test_planning_unified_coverage.py ....................... [ 63%]
+....................s..sss..ss.....                                      [ 63%]
+tests\services\test_planning_unified_service.py ..                       [ 63%]
+tests\services\test_planning_utils.py .................................. [ 63%]
+.......................                                                  [ 64%]
+tests\services\test_predictions_coverage.py ............................ [ 64%]
+........                                                                 [ 64%]
+tests\services\test_predictions_service.py ..........                    [ 64%]
+tests\services\test_push_notifications.py .............................. [ 64%]
+.......................................................                  [ 65%]
+tests\services\test_push_notifications_deep.py ......................... [ 65%]
+......                                                                   [ 65%]
+tests\services\test_push_notifications_utils.py ........................ [ 65%]
+..............................                                           [ 66%]
+tests\services\test_push_send_methods.py .....................           [ 66%]
+tests\services\test_pwa.py ...............................               [ 66%]
+tests\services\test_rapports_pdf_generation.py ......................... [ 66%]
+..........                                                               [ 67%]
+tests\services\test_rapports_pdf_service.py ............................ [ 67%]
+.............................                                            [ 67%]
+tests\services\test_realtime_sync_coverage.py .......................... [ 67%]
+...........................................                              [ 68%]
+tests\services\test_recettes_cov_boost.py ...................            [ 68%]
+tests\services\test_recettes_coverage.py .............................   [ 68%]
+tests\services\test_recettes_coverage_deep.py .........................  [ 68%]
+tests\services\test_recettes_import.py ..                                [ 68%]
+tests\services\test_recettes_integration.py ...................          [ 69%]
+tests\services\test_recettes_service.py .....................            [ 69%]
+tests\services\test_recettes_utils.py .................................. [ 69%]
+..........................                                               [ 69%]
+tests\services\test_recipe_import_extra.py ............................. [ 70%]
+........................                                                 [ 70%]
+tests\services\test_recipe_import_integration.py .........F............. [ 70%]
+............................                                             [ 70%]
+tests\services\test_recipe_import_service.py ........................... [ 71%]
+..............                                                           [ 71%]
+tests\services\test_services_basic.py ............                       [ 71%]
+tests\services\test_services_comprehensive.py .......................... [ 71%]
+................................                                         [ 71%]
+tests\services\test_services_coverage_80.py ............................ [ 72%]
+........................................................                 [ 72%]
+tests\services\test_services_coverage_80_part11.py ..................... [ 72%]
+.                                                                        [ 72%]
+tests\services\test_services_coverage_80_part12.py ..................... [ 73%]
+....................................                                     [ 73%]
+tests\services\test_services_coverage_80_part13.py ..................... [ 73%]
+...................                                                      [ 73%]
+tests\services\test_services_coverage_80_part14.py ..................... [ 74%]
+................                                                         [ 74%]
+tests\services\test_services_coverage_80_part15.py ..................... [ 74%]
+                                                                         [ 74%]
+tests\services\test_services_coverage_80_part16.py ..................... [ 74%]
+.....                                                                    [ 74%]
+tests\services\test_services_coverage_80_part17.py ..................... [ 74%]
+....                                                                     [ 74%]
+tests\services\test_services_coverage_80_part2.py ...................... [ 75%]
+............................s........F.....                              [ 75%]
+tests\services\test_services_coverage_80_part3.py ...................... [ 75%]
+...........................                                              [ 75%]
+tests\services\test_services_coverage_80_part4.py ...................... [ 76%]
+...................................................                      [ 76%]
+tests\services\test_services_coverage_80_part5.py ...................... [ 76%]
+..........................                                               [ 77%]
+tests\services\test_services_coverage_80_part6.py ...................... [ 77%]
+...........................................................              [ 77%]
+tests\services\test_services_coverage_80_part7.py ...................... [ 78%]
+................................                                         [ 78%]
+tests\services\test_services_coverage_80_part8.py ...................... [ 78%]
+.................................................                        [ 79%]
+tests\services\test_services_coverage_80_push.py ....................... [ 79%]
+.........................................................                [ 79%]
+tests\services\test_services_coverage_boost.py ......................... [ 80%]
+...........                                                              [ 80%]
+tests\services\test_services_deep.py ................................... [ 80%]
+......                                                                   [ 80%]
+tests\services\test_services_extended.py ssssssssssssssss                [ 80%]
+tests\services\test_services_integration.py ...........s.ss.s.           [ 80%]
+tests\services\test_simple_coverage.py ................................  [ 81%]
+tests\services\test_suggestions_ia_coverage.py ......................... [ 81%]
+.....                                                                    [ 81%]
+tests\services\test_suggestions_ia_service.py .                          [ 81%]
+tests\services\test_suggestions_ia_utils.py ............................ [ 81%]
+...........................................                              [ 82%]
+tests\services\test_suggestions_ia_utils_full.py ....................... [ 82%]
+........................................................................ [ 83%]
+..                                                                       [ 83%]
+tests\services\test_tier1_critical.py ....s.s........................... [ 83%]
+.....                                                                    [ 83%]
+tests\services\test_types_coverage.py .................................. [ 83%]
+..............                                                           [ 83%]
+tests\services\test_types_service.py .                                   [ 83%]
+tests\services\test_user_preferences_coverage.py ....................... [ 84%]
+..............                                                           [ 84%]
+tests\services\test_user_preferences_service.py ...                      [ 84%]
+tests\services\test_weather_coverage.py ................................ [ 84%]
+.............................................                            [ 85%]
+tests\services\test_weather_service.py ................................. [ 85%]
+................                                                         [ 85%]
+tests\services\test_weather_utils.py ................................... [ 85%]
+.........................................................                [ 86%]
+tests\services\test_weather_utils_full.py .............................. [ 86%]
+........................................................................ [ 87%]
+................                                                         [ 87%]
+tests\ui\test_atoms_component.py .                                       [ 87%]
+tests\ui\test_base_form_core.py .                                        [ 87%]
+tests\ui\test_base_io_core.py .                                          [ 87%]
+tests\ui\test_base_module_core.py .                                      [ 87%]
+tests\ui\test_camera_scanner_component.py .                              [ 87%]
+tests\ui\test_coverage_80_extended.py .................................. [ 87%]
+..............                                                           [ 87%]
+tests\ui\test_coverage_80_final.py ..................................... [ 88%]
+.....                                                                    [ 88%]
+tests\ui\test_coverage_80_widgets.py ................................... [ 88%]
+....                                                                     [ 88%]
+tests\ui\test_dashboard_widgets_component.py .                           [ 88%]
+tests\ui\test_data_component.py .                                        [ 88%]
+tests\ui\test_domain_ui.py .                                             [ 88%]
+tests\ui\test_dynamic_component.py .                                     [ 88%]
+tests\ui\test_feedback.py ......................                         [ 88%]
+tests\ui\test_footer_layout.py .                                         [ 88%]
+tests\ui\test_forms_component.py .                                       [ 88%]
+tests\ui\test_google_calendar_sync_component.py .                        [ 89%]
+tests\ui\test_header_layout.py .                                         [ 89%]
+tests\ui\test_imports_ui.py .....................                        [ 89%]
+tests\ui\test_layout_coverage.py ......................                  [ 89%]
+tests\ui\test_layouts_component.py .                                     [ 89%]
+tests\ui\test_progress_deep.py ............................              [ 89%]
+tests\ui\test_progress_feedback.py .                                     [ 89%]
+tests\ui\test_sidebar_layout.py .                                        [ 89%]
+tests\ui\test_spinners_feedback.py .                                     [ 89%]
+tests\ui\test_tablet_mode.py .                                           [ 89%]
+tests\ui\test_tablet_mode_deep.py .....................................  [ 90%]
+tests\ui\test_toasts_feedback.py .                                       [ 90%]
+tests\ui\test_ui_80_coverage.py ........................................ [ 90%]
+                                                                         [ 90%]
+tests\ui\test_ui_comprehensive_coverage.py ............................. [ 90%]
+...........                                                              [ 90%]
+tests\ui\test_ui_coverage_80_final.py .........................          [ 91%]
+tests\ui\test_ui_deep.py ............................................... [ 91%]
+....                                                                     [ 91%]
+tests\ui\test_ui_final_80.py ...........................                 [ 91%]
+tests\ui\test_ui_final_80_part2.py ...................................   [ 92%]
+tests\ui\test_ui_final_push.py .............                             [ 92%]
+tests\utils\test_85_coverage.py .............                            [ 92%]
+tests\utils\test_extended_utils.py ...............                       [ 92%]
+tests\utils\test_formatters_dates.py ......................              [ 92%]
+tests\utils\test_formatters_deep.py .................................... [ 93%]
+........................................................................ [ 93%]
+....................                                                     [ 93%]
+tests\utils\test_helpers_all_deep.py .........................           [ 94%]
+tests\utils\test_helpers_data.py ........................                [ 94%]
+tests\utils\test_helpers_dates.py ....................                   [ 94%]
+tests\utils\test_helpers_deep.py ....................................... [ 94%]
+........................................                                 [ 95%]
+tests\utils\test_helpers_extra_deep.py ................................. [ 95%]
+..................................................                       [ 96%]
+tests\utils\test_helpers_strings.py .......................              [ 96%]
+tests\utils\test_image_generator_deep_v2.py .......................      [ 96%]
+tests\utils\test_image_recipe_deep.py ..................F............... [ 96%]
+..................                                                       [ 97%]
+tests\utils\test_media_deep.py ...........................               [ 97%]
+tests\utils\test_simple_extended.py .............                        [ 97%]
+tests\utils\test_utilities_comprehensive.py ...........................  [ 97%]
+tests\utils\test_utilities_fixed.py .................................... [ 98%]
+......................................                                   [ 98%]
+tests\utils\test_utils_basic.py .................                        [ 98%]
+tests\utils\test_validators_common.py .............................      [ 98%]
+tests\utils\test_validators_dates.py ......................              [ 99%]
+tests\utils\test_validators_deep.py .................................... [ 99%]
+................................................                         [ 99%]
+tests\utils\test_validators_food.py ...............                      [100%]
+
+============================== warnings summary ===============================
+tests/api/test_api_deep.py::TestRateLimiter::test_limiter_check_limit_exceeded
+  D:\Projet_streamlit\assistant_matanne\tests\api\test_api_deep.py:589: RuntimeWarning: coroutine 'disable_rate_limiting.<locals>.mock_check_rate_limit' was never awaited
+    limiter.check_rate_limit(request)
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/core/test_models_recettes.py::TestIngredient::test_ingredient_unique_name
+  D:\Projet_streamlit\assistant_matanne\tests\conftest.py:138: SAWarning: transaction already deassociated from connection
+    transaction.rollback()
+
+tests/services/test_backup_integration.py::TestHistoriqueWithDB::test_enregistrer_backup_historique
+tests/services/test_backup_integration.py::TestHistoriqueFullWorkflow::test_enregistrer_et_lister
+tests/services/test_backup_integration.py::TestHistoriqueFullWorkflow::test_enregistrer_et_supprimer
+  D:\Projet_streamlit\assistant_matanne\tests\conftest.py:138: SAWarning:
+  
+  transaction already deassociated from connection
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/services/test_recipe_import_integration.py::TestImportedRecipe::test_validation_nom_min_length
+FAILED tests/services/test_services_coverage_80_part2.py::TestImportedRecipeValidation::test_recipe_name_min_length
+FAILED tests/utils/test_image_recipe_deep.py::TestGenererViaPollinations::test_pollinations_erreur
+SKIPPED [1] tests\api\test_api_coverage_80.py:758: PyJWT not installed
+SKIPPED [1] tests\api\test_api_deep.py:526: RateLimiter.check_rate_limit returns coroutine in some contexts
+SKIPPED [1] tests\api\test_api_deep.py:545: RateLimiter.check_rate_limit returns coroutine in some contexts
+SKIPPED [1] tests\api\test_api_deep.py:593: RateLimiter.check_rate_limit returns coroutine in some contexts
+SKIPPED [1] tests\api\test_api_deep.py:752: Requires PyJWT package
+SKIPPED [1] tests\api\test_api_deep.py:903: Requires full FastAPI context
+SKIPPED [1] tests\api\test_api_deep.py:924: Requires full FastAPI context
+SKIPPED [1] tests\api\test_api_deep.py:981: Requires specific DB context mock
+SKIPPED [1] tests\api\test_api_deep.py:1018: Requires AuthService integration
+SKIPPED [1] tests\api\test_api_deep.py:1045: Requires AuthService integration
+SKIPPED [1] tests\api\test_api_deep.py:1066: Requires AuthService integration
+SKIPPED [1] tests\api\test_main.py:14: API has DB connection issues - returns 500
+SKIPPED [1] tests\api\test_main.py:21: API has DB connection issues - returns 500
+SKIPPED [1] tests\api\test_main.py:38: API has DB connection issues - returns 500
+SKIPPED [1] tests\api\test_main.py:55: API has DB connection issues - returns 500
+SKIPPED [1] tests\api\test_main.py:80: API has DB connection issues - returns 500
+SKIPPED [1] tests\api\test_rate_limiting_comprehensive.py:240: RateLimiter method behaves differently in test context
+SKIPPED [1] tests\api\test_rate_limiting_comprehensive.py:247: RateLimiter method behaves differently in test context
+SKIPPED [1] tests\api\test_rate_limiting_comprehensive.py:253: RateLimiter method behaves differently in test context
+SKIPPED [1] tests\api\test_rate_limiting_comprehensive.py:263: RateLimiter method behaves differently in test context
+SKIPPED [1] tests\api\test_rate_limiting_comprehensive.py:473: Zero limits behavior needs investigation
+SKIPPED [1] tests\api\test_rate_limiting_comprehensive.py:498: RateLimiter integration needs full context
+SKIPPED [1] tests\core\test_ai_modules.py:31: Mock Mistral incompatible avec httpx-client actuel
+SKIPPED [1] tests\core\test_ai_modules.py:36: Mock Mistral incompatible avec httpx-client actuel
+SKIPPED [1] tests\core\test_ai_modules.py:166: API non disponible: 'ClientIA' object has no attribute 'obtenir_suggestions'
+SKIPPED [1] tests\core\test_cache_multi.py:82: Test flaky en CI - timing dÚpendant
+SKIPPED [1] tests\core\test_cache_multi.py:99: Test flaky en CI - timing dÚpendant
+SKIPPED [1] tests\core\test_cache_multi.py:216: Test flaky en CI - timing dÚpendant
+SKIPPED [1] tests\core\test_cache_multi.py:230: Test flaky - invalidation fichier non fiable en CI
+SKIPPED [6] tests\core\test_cache_multi.py: Tests flaky - dÚpendance sur singleton et Útat partagÚ
+SKIPPED [1] tests\core\test_cache_multi.py:388: Test flaky en CI - singleton partagÚ
+SKIPPED [1] tests\core\test_cache_multi.py:420: Test flaky en CI - singleton partagÚ
+SKIPPED [1] tests\core\test_cache_multi.py:438: Test flaky en CI - singleton partagÚ
+SKIPPED [1] tests\core\test_cache_multi_deep.py:253: L2SessionCache import streamlit localement - mock difficile
+SKIPPED [1] tests\core\test_cache_multi_deep.py:261: L2SessionCache import streamlit localement - mock difficile
+SKIPPED [1] tests\core\test_cache_multi_deep.py:275: L2SessionCache import streamlit localement - mock difficile
+SKIPPED [1] tests\core\test_cache_multi_deep.py:296: L2SessionCache import streamlit localement - mock difficile
+SKIPPED [1] tests\core\test_cache_multi_deep.py:308: L2SessionCache import streamlit localement - mock difficile
+SKIPPED [1] tests\core\test_cache_multi_deep.py:322: L2SessionCache import streamlit localement - mock difficile
+SKIPPED [1] tests\core\test_cache_multi_deep.py:334: L2SessionCache import streamlit localement - mock difficile
+SKIPPED [1] tests\core\test_cache_multi_deep.py:349: L2SessionCache import streamlit localement - mock difficile
+SKIPPED [1] tests\core\test_config_deep.py:220: DÚpendance complexe sur _get_mistral_api_key_from_secrets et st.secrets
+SKIPPED [1] tests\core\test_core_utils.py:35: ExceptionApp.__init__() doesn't accept extra_info kwarg
+SKIPPED [4] tests\core\test_core_utils.py: src.core.validators module does not exist
+SKIPPED [2] tests\core\test_core_utils.py: Some constants like MAX_BATCH_SIZE, TIMEOUT_SECONDES don't exist
+SKIPPED [2] tests\core\test_core_utils.py: src.core.utils module does not exist
+SKIPPED [1] tests\core\test_database.py:177: get_db_context is a lambda wrapper, not direct alias
+SKIPPED [1] tests\core\test_database_deep.py:575: Identity comparison fails when patch_db_context overwrites get_db_context
+SKIPPED [1] tests\core\test_database_extended.py: get_db_context is a lambda wrapper, not direct alias
+SKIPPED [1] tests\core\test_models_batch_cooking.py:18: Table batch_meals non crÚÚe dans le scope de la session de test
+SKIPPED [1] tests\core\test_models_batch_cooking.py:23: Recette.temps_preparation NOT NULL - test incomplet
+SKIPPED [1] tests\core\test_models_batch_cooking.py:28: Table batch_meals non crÚÚe dans le scope de la session de test
+SKIPPED [1] tests\core\test_models_batch_cooking.py:33: Table batch_meals non crÚÚe dans le scope de la session de test
+SKIPPED [1] tests\core\test_models_batch_cooking.py:38: Table batch_meals non crÚÚe dans le scope de la session de test
+SKIPPED [1] tests\core\test_models_comprehensive.py:25: NÚcessite crÚation Ingredient et ListeCourses d'abord
+SKIPPED [1] tests\core\test_models_comprehensive.py:31: NÚcessite crÚation Ingredient et ListeCourses d'abord
+SKIPPED [1] tests\core\test_models_comprehensive.py:36: NÚcessite crÚation Ingredient et ListeCourses d'abord
+SKIPPED [1] tests\core\test_models_comprehensive.py:41: NÚcessite crÚation Ingredient et ListeCourses d'abord
+SKIPPED [1] tests\core\test_models_comprehensive.py:51: NÚcessite crÚation Ingredient d'abord - FK obligatoire
+SKIPPED [1] tests\core\test_models_comprehensive.py:56: NÚcessite crÚation Ingredient d'abord - FK obligatoire
+SKIPPED [1] tests\core\test_models_comprehensive.py:61: NÚcessite crÚation Ingredient d'abord - FK obligatoire
+SKIPPED [1] tests\core\test_models_comprehensive.py:82: Table non crÚÚe dans le scope de la session de test
+SKIPPED [1] tests\core\test_models_comprehensive.py:87: Table non crÚÚe dans le scope de la session de test
+SKIPPED [1] tests\core\test_models_comprehensive.py:149: Table non crÚÚe dans le scope de la session de test
+SKIPPED [1] tests\core\test_models_comprehensive.py:154: Table non crÚÚe dans le scope de la session de test
+SKIPPED [1] tests\core\test_models_comprehensive.py:164: Table non crÚÚe dans le scope de la session de test
+SKIPPED [1] tests\core\test_models_comprehensive.py:169: Table non crÚÚe dans le scope de la session de test
+SKIPPED [1] tests\core\test_performance_optimizations_deep.py:33: Mock du package redis difficile - singleton dÚjÓ crÚÚ
+SKIPPED [1] tests\core\test_performance_optimizations_deep.py:48: Mock du singleton RedisCache difficile
+SKIPPED [1] tests\core\test_sql_optimizer.py:92: DummyModel n'a pas de relation 'rel' - test incomplet
+SKIPPED [1] tests\domains\maison\ui\test_jardin.py:63: app() nÚcessite mock complet de JardinService et tabs context managers
+SKIPPED [1] tests\domains\test_core_workflows.py:86: src.services.famille n'existe pas
+SKIPPED [1] tests\domains\test_core_workflows.py:95: src.services.famille n'existe pas
+SKIPPED [1] tests\domains\test_core_workflows.py:108: streamlit.calendar n'existe pas
+SKIPPED [1] tests\domains\test_domains_coverage_80.py:686: Function not available
+SKIPPED [1] tests\property_tests\test_models_hypothesis.py:19: Hypothesis not installed
+SKIPPED [1] tests\services\test_barcode_coverage.py:231: QR pattern matches before CODE128
+SKIPPED [1] tests\services\test_barcode_coverage.py:347: Decorator catches exception - DB connection
+SKIPPED [1] tests\services\test_barcode_coverage.py:414: Decorator catches exception
+SKIPPED [1] tests\services\test_barcode_coverage.py:469: Service missing cache attribute
+SKIPPED [1] tests\services\test_barcode_coverage.py:683: Decorator catches exception
+SKIPPED [1] tests\services\test_barcode_coverage.py:711: Service missing cache attribute
+SKIPPED [1] tests\services\test_barcode_coverage.py:776: Decorator catches exception
+SKIPPED [1] tests\services\test_base_service_coverage.py:697: SQLAlchemy validates ORDER BY expressions even with mocks
+SKIPPED [1] tests\services\test_base_service_coverage.py:793: SQLAlchemy validates filter expressions even with mocks
+SKIPPED [1] tests\services\test_base_service_coverage.py:798: SQLAlchemy validates ORDER BY expressions even with mocks
+SKIPPED [1] tests\services\test_base_service_coverage.py:885: SQLAlchemy validates GROUP BY expressions even with mocks
+SKIPPED [1] tests\services\test_base_service_coverage.py:903: SQLAlchemy validates GROUP BY expressions even with mocks
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1019: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1033: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1046: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1059: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1072: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1085: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1098: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1111: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1128: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1141: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1154: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1167: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1180: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1193: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1206: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1227: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1253: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1271: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1287: Requires real DB connection - decorators incompatible with mocking
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1310: Requires real DB connection - generer_plan_ia uses decorators
+SKIPPED [1] tests\services\test_batch_cooking_full_coverage.py:1330: Requires real DB connection - suggerer_recettes_batch uses decorators
+SKIPPED [1] tests\services\test_courses_service.py:82: Mock complexe - Ó revoir
+SKIPPED [1] tests\services\test_courses_service.py:152: Mock complexe sur les caches - Ó revoir
+SKIPPED [1] tests\services\test_courses_service.py:161: Mock complexe sur les caches - Ó revoir
+SKIPPED [1] tests\services\test_courses_service.py: Mocks complexes de BD - Ó amÚliorer ultÚrieurement
+SKIPPED [1] tests\services\test_notifications_push_coverage.py:384: Requires database connection - tested via integration tests
+SKIPPED [1] tests\services\test_notifications_push_coverage.py:393: Requires database connection
+SKIPPED [1] tests\services\test_notifications_push_coverage.py:402: Requires database connection
+SKIPPED [1] tests\services\test_notifications_push_coverage.py:411: Requires database connection
+SKIPPED [1] tests\services\test_pdf_export_coverage.py:312: Decorator @with_error_handling breaks mocking
+SKIPPED [1] tests\services\test_pdf_export_coverage.py:318: Decorator @with_error_handling breaks mocking
+SKIPPED [1] tests\services\test_pdf_export_coverage.py:413: Decorator @with_error_handling breaks mocking
+SKIPPED [1] tests\services\test_pdf_export_coverage.py:419: Decorator @with_error_handling breaks mocking
+SKIPPED [1] tests\services\test_pdf_export_coverage.py:574: Decorator @with_error_handling breaks mocking
+SKIPPED [1] tests\services\test_pdf_export_coverage.py:580: Decorator @with_error_handling breaks mocking
+SKIPPED [1] tests\services\test_planning_coverage.py:194: Requires real DB session due to @with_cache decorator
+SKIPPED [1] tests\services\test_planning_coverage.py:222: Requires real DB session due to @with_cache decorator
+SKIPPED [1] tests\services\test_planning_coverage.py:246: Requires real DB session due to @with_cache decorator
+SKIPPED [1] tests\services\test_planning_coverage.py:284: Requires real DB session due to @with_cache decorator
+SKIPPED [1] tests\services\test_planning_extended.py:38: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:42: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:47: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:63: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:76: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:92: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:114: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:132: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:137: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:154: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:179: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:196: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:214: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:228: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:243: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:257: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:276: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:292: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:315: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:339: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:363: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:391: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:416: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:432: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:444: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:463: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_extended.py:468: Tests require database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_planning_unified_coverage.py:941: Requires real DB session due to @with_cache decorator
+SKIPPED [1] tests\services\test_planning_unified_coverage.py:1015: Requires real DB session due to @with_cache decorator
+SKIPPED [1] tests\services\test_planning_unified_coverage.py:1042: Requires real DB session due to @with_cache decorator
+SKIPPED [1] tests\services\test_planning_unified_coverage.py:1060: Requires real DB session due to @with_cache decorator
+SKIPPED [1] tests\services\test_planning_unified_coverage.py:1124: Requires real DB session due to @with_cache decorator
+SKIPPED [1] tests\services\test_planning_unified_coverage.py:1149: Requires real DB session due to @with_cache decorator
+SKIPPED [1] tests\services\test_services_coverage_80_part2.py:502: model_name attribute not set correctly in RapportsPDFService - needs investigation
+SKIPPED [16] tests\services\test_services_extended.py: Service classes don't have 'db' attribute - use singleton pattern
+SKIPPED [1] tests\services\test_services_integration.py:158: FK constraint issues with ArticleInventaire.ingredient_id in test DB
+SKIPPED [1] tests\services\test_services_integration.py:195: FK constraint issues with ArticleCourses.ingredient_id in test DB
+SKIPPED [1] tests\services\test_services_integration.py:213: FK constraint issues with ArticleCourses.ingredient_id in test DB
+SKIPPED [1] tests\services\test_services_integration.py:261: FK constraint issues with ArticleCourses.ingredient_id in test DB
+SKIPPED [1] tests\services\test_tier1_critical.py:48: Requires database connection - use mocked tests instead
+SKIPPED [1] tests\services\test_tier1_critical.py:75: Requires database connection - use mocked tests instead
+==== 3 failed, 10364 passed, 193 skipped, 5 warnings in 603.37s (0:10:03) =====

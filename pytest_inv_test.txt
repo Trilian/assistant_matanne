@@ -1,0 +1,54 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.11.8, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\Nemo\AppData\Local\Programs\Python\Python311\python.exe
+cachedir: .pytest_cache
+rootdir: D:\Projet_streamlit\assistant_matanne
+configfile: pytest.ini
+plugins: anyio-4.12.1, asyncio-1.3.0, cov-7.0.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... collected 43 items
+
+tests/services/test_inventaire_sqlite_int.py::TestGetInventaireComplet::test_inventaire_vide PASSED [  2%]
+tests/services/test_inventaire_sqlite_int.py::TestGetInventaireComplet::test_inventaire_avec_articles PASSED [  4%]
+tests/services/test_inventaire_sqlite_int.py::TestGetInventaireComplet::test_filtrer_par_emplacement PASSED [  6%]
+tests/services/test_inventaire_sqlite_int.py::TestGetInventaireComplet::test_filtrer_par_categorie PASSED [  9%]
+tests/services/test_inventaire_sqlite_int.py::TestGetInventaireComplet::test_exclude_ok PASSED [ 11%]
+tests/services/test_inventaire_sqlite_int.py::TestGetInventaireComplet::test_contient_champs_requis PASSED [ 13%]
+tests/services/test_inventaire_sqlite_int.py::TestGetAlertes::test_alertes_structure PASSED [ 16%]
+tests/services/test_inventaire_sqlite_int.py::TestGetAlertes::test_alertes_groupees_par_type PASSED [ 18%]
+tests/services/test_inventaire_sqlite_int.py::TestAjouterArticle::test_ajouter_article_succes PASSED [ 20%]
+tests/services/test_inventaire_sqlite_int.py::TestAjouterArticle::test_ajouter_article_ingredient_inexistant PASSED [ 23%]
+tests/services/test_inventaire_sqlite_int.py::TestAjouterArticle::test_ajouter_article_deja_existant PASSED [ 25%]
+tests/services/test_inventaire_sqlite_int.py::TestAjouterArticle::test_ajouter_article_avec_date_peremption PASSED [ 27%]
+tests/services/test_inventaire_sqlite_int.py::TestMettreAJourArticle::test_maj_quantite PASSED [ 30%]
+tests/services/test_inventaire_sqlite_int.py::TestMettreAJourArticle::test_maj_emplacement PASSED [ 32%]
+tests/services/test_inventaire_sqlite_int.py::TestMettreAJourArticle::test_maj_date_peremption PASSED [ 34%]
+tests/services/test_inventaire_sqlite_int.py::TestMettreAJourArticle::test_maj_article_inexistant PASSED [ 37%]
+tests/services/test_inventaire_sqlite_int.py::TestMettreAJourArticle::test_maj_quantite_min PASSED [ 39%]
+tests/services/test_inventaire_sqlite_int.py::TestSupprimerArticle::test_supprimer_article_succes PASSED [ 41%]
+tests/services/test_inventaire_sqlite_int.py::TestSupprimerArticle::test_supprimer_article_inexistant PASSED [ 44%]
+tests/services/test_inventaire_sqlite_int.py::TestStatistiques::test_get_statistiques_vide PASSED [ 46%]
+tests/services/test_inventaire_sqlite_int.py::TestStatistiques::test_get_statistiques_avec_articles PASSED [ 48%]
+tests/services/test_inventaire_sqlite_int.py::TestStatistiques::test_get_stats_par_categorie PASSED [ 51%]
+tests/services/test_inventaire_sqlite_int.py::TestArticlesAPrelever::test_articles_a_prelever_vide PASSED [ 53%]
+tests/services/test_inventaire_sqlite_int.py::TestArticlesAPrelever::test_articles_a_prelever_avec_peremption PASSED [ 55%]
+tests/services/test_inventaire_sqlite_int.py::TestPhotos::test_ajouter_photo_article_inexistant PASSED [ 58%]
+tests/services/test_inventaire_sqlite_int.py::TestPhotos::test_supprimer_photo_article_inexistant PASSED [ 60%]
+tests/services/test_inventaire_sqlite_int.py::TestPhotos::test_obtenir_photo_article_inexistant PASSED [ 62%]
+tests/services/test_inventaire_sqlite_int.py::TestPhotos::test_ajouter_photo_succes PASSED [ 65%]
+tests/services/test_inventaire_sqlite_int.py::TestPhotos::test_supprimer_photo_succes PASSED [ 67%]
+tests/services/test_inventaire_sqlite_int.py::TestPhotos::test_supprimer_photo_sans_photo PASSED [ 69%]
+tests/services/test_inventaire_sqlite_int.py::TestNotifications::test_generer_notifications_alertes PASSED [ 72%]
+tests/services/test_inventaire_sqlite_int.py::TestNotifications::test_obtenir_alertes_actives PASSED [ 74%]
+tests/services/test_inventaire_sqlite_int.py::TestCalculerStatut::test_statut_ok_sans_peremption PASSED [ 76%]
+tests/services/test_inventaire_sqlite_int.py::TestCalculerStatut::test_statut_critique PASSED [ 79%]
+tests/services/test_inventaire_sqlite_int.py::TestCalculerStatut::test_statut_stock_bas PASSED [ 81%]
+tests/services/test_inventaire_sqlite_int.py::TestCalculerStatut::test_statut_peremption_proche PASSED [ 83%]
+tests/services/test_inventaire_sqlite_int.py::TestCalculerStatut::test_peremption_priorite_sur_stock PASSED [ 86%]
+tests/services/test_inventaire_sqlite_int.py::TestJoursAvantPeremption::test_sans_date PASSED [ 88%]
+tests/services/test_inventaire_sqlite_int.py::TestJoursAvantPeremption::test_date_future PASSED [ 90%]
+tests/services/test_inventaire_sqlite_int.py::TestJoursAvantPeremption::test_date_passee PASSED [ 93%]
+tests/services/test_inventaire_sqlite_int.py::TestHistorique::test_get_historique_vide PASSED [ 95%]
+tests/services/test_inventaire_sqlite_int.py::TestHistorique::test_get_historique_avec_limit PASSED [ 97%]
+tests/services/test_inventaire_sqlite_int.py::TestHistorique::test_get_historique_avec_article_id PASSED [100%]
+
+============================= 43 passed in 2.03s ==============================

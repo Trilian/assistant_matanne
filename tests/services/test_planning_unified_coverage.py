@@ -938,7 +938,6 @@ class TestPlanningAIServiceCreerEvent:
         mock_session.add.assert_called()
         mock_session.commit.assert_called()
     
-    @pytest.mark.skip(reason="Requires real DB session due to @with_cache decorator")
     def test_creer_event_with_all_params(self):
         """Test creating event with all parameters."""
         from src.services.planning_unified import PlanningAIService
@@ -1012,7 +1011,6 @@ class TestPlanningAIServiceInvaliderCacheSemaine:
 class TestPlanningAIServiceGenererSemaineIA:
     """Tests for generer_semaine_ia method."""
     
-    @pytest.mark.skip(reason="Requires real DB session due to @with_cache decorator")
     def test_generer_semaine_ia_success(self):
         """Test generating week with AI successfully."""
         from src.services.planning_unified import PlanningAIService
@@ -1039,7 +1037,6 @@ class TestPlanningAIServiceGenererSemaineIA:
         assert result is not None
         assert result.harmonie_description == "Semaine équilibrée"
     
-    @pytest.mark.skip(reason="Requires real DB session due to @with_cache decorator")
     def test_generer_semaine_ia_failure(self):
         """Test generating week with AI failure."""
         from src.services.planning_unified import PlanningAIService
@@ -1057,7 +1054,6 @@ class TestPlanningAIServiceGenererSemaineIA:
         
         assert result is None
     
-    @pytest.mark.skip(reason="Requires real DB session due to @with_cache decorator")
     def test_generer_semaine_ia_empty_response(self):
         """Test generating week with empty AI response."""
         from src.services.planning_unified import PlanningAIService
@@ -1121,7 +1117,6 @@ class TestPlanningAIServiceGenererSemaineIA:
 class TestPlanningAIServiceGetSemaineComplete:
     """Tests for get_semaine_complete method."""
     
-    @pytest.mark.skip(reason="Requires real DB session due to @with_cache decorator")
     def test_get_semaine_complete_mock(self):
         """Test get_semaine_complete with mocked data."""
         from src.services.planning_unified import PlanningAIService
@@ -1146,7 +1141,6 @@ class TestPlanningAIServiceGetSemaineComplete:
         assert result.semaine_fin == date(2026, 2, 8)
         assert len(result.jours) == 7
     
-    @pytest.mark.skip(reason="Requires real DB session due to @with_cache decorator")
     def test_get_semaine_complete_with_data(self):
         """Test get_semaine_complete with data."""
         from src.services.planning_unified import PlanningAIService
@@ -1213,3 +1207,4 @@ class TestModuleExports:
         
         assert get_planning_unified_service is not None
         assert get_unified_planning_service is not None
+

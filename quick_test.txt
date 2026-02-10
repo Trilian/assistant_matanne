@@ -1,0 +1,22 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.11.8, pytest-9.0.2, pluggy-1.6.0
+rootdir: D:\Projet_streamlit\assistant_matanne
+configfile: pytest.ini
+plugins: anyio-4.12.1, asyncio-1.3.0, cov-7.0.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collected 77 items
+
+tests\services\test_barcode_coverage.py ...............s..........s..s.. [ 41%]
+s.......s.s.s..                                                          [ 61%]
+tests\services\test_suggestions_ia_coverage.py ......................... [ 93%]
+.....                                                                    [100%]
+
+=========================== short test summary info ===========================
+SKIPPED [1] tests\services\test_barcode_coverage.py:231: QR pattern matches before CODE128
+SKIPPED [1] tests\services\test_barcode_coverage.py:347: Decorator catches exception - DB connection
+SKIPPED [1] tests\services\test_barcode_coverage.py:414: Decorator catches exception
+SKIPPED [1] tests\services\test_barcode_coverage.py:469: Service missing cache attribute
+SKIPPED [1] tests\services\test_barcode_coverage.py:683: Decorator catches exception
+SKIPPED [1] tests\services\test_barcode_coverage.py:711: Service missing cache attribute
+SKIPPED [1] tests\services\test_barcode_coverage.py:776: Decorator catches exception
+======================== 70 passed, 7 skipped in 1.00s ========================

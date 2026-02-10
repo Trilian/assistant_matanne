@@ -1016,7 +1016,6 @@ class TestEdgeCases:
 class TestBatchCookingIntegration:
     """Tests d'intégration utilisant la fixture patch_db_context."""
 
-    @pytest.mark.skip(reason="Requires real DB connection - decorators incompatible with mocking")
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_get_config_creates_default(self, mock_client, patch_db_context):
         """Test get_config crée une config par défaut si inexistante."""
@@ -1030,7 +1029,6 @@ class TestBatchCookingIntegration:
         # Peut créer une config par défaut ou retourner None en cas d'erreur
         assert result is None or hasattr(result, 'jours_batch')
 
-    @pytest.mark.skip(reason="Requires real DB connection - decorators incompatible with mocking")
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_update_config_integration(self, mock_client, patch_db_context):
         """Test update_config crée et met à jour la config."""
@@ -1043,7 +1041,6 @@ class TestBatchCookingIntegration:
         
         assert result is None or result.jours_batch == [5, 6]
 
-    @pytest.mark.skip(reason="Requires real DB connection - decorators incompatible with mocking")
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_get_session_not_found(self, mock_client, patch_db_context):
         """Test get_session retourne None si non trouvée."""
@@ -1056,7 +1053,6 @@ class TestBatchCookingIntegration:
         
         assert result is None
 
-    @pytest.mark.skip(reason="Requires real DB connection - decorators incompatible with mocking")
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_get_session_active_none(self, mock_client, patch_db_context):
         """Test get_session_active retourne None si pas de session."""
@@ -1069,7 +1065,6 @@ class TestBatchCookingIntegration:
         
         assert result is None
 
-    @pytest.mark.skip(reason="Requires real DB connection - decorators incompatible with mocking")
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_get_sessions_planifiees_empty(self, mock_client, patch_db_context):
         """Test get_sessions_planifiees retourne liste vide."""
@@ -1082,7 +1077,6 @@ class TestBatchCookingIntegration:
         
         assert result == [] or isinstance(result, list)
 
-    @pytest.mark.skip(reason="Requires real DB connection - decorators incompatible with mocking")
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_get_preparations_empty(self, mock_client, patch_db_context):
         """Test get_preparations retourne liste vide."""
@@ -1095,7 +1089,6 @@ class TestBatchCookingIntegration:
         
         assert result == [] or isinstance(result, list)
 
-    @pytest.mark.skip(reason="Requires real DB connection - decorators incompatible with mocking")
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_get_preparations_alertes_empty(self, mock_client, patch_db_context):
         """Test get_preparations_alertes retourne liste vide."""
@@ -1108,106 +1101,98 @@ class TestBatchCookingIntegration:
         
         assert result == [] or isinstance(result, list)
 
-    @pytest.mark.skip(reason="Requires real DB connection - decorators incompatible with mocking")
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_creer_session_empty_recettes(self, mock_client, patch_db_context):
-        """Test creer_session avec recettes vides."""
+        """Test creer_session avec recettes vides lève ErreurValidation."""
         from src.services.batch_cooking import BatchCookingService
+        from src.core.errors_base import ErreurValidation
         
         mock_client.return_value = Mock()
         
         service = BatchCookingService()
-        result = service.creer_session(
-            date_session=date.today() + timedelta(days=1),
-            recettes_ids=[]
-        )
-        
-        # Doit retourner None car recettes vides
-        assert result is None
+        with pytest.raises(ErreurValidation):
+            service.creer_session(
+                date_session=date.today() + timedelta(days=1),
+                recettes_ids=[]
+            )
 
-    @pytest.mark.skip(reason="Requires real DB connection - decorators incompatible with mocking")
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_demarrer_session_not_found(self, mock_client, patch_db_context):
-        """Test demarrer_session session inexistante."""
+        """Test demarrer_session session inexistante lève ErreurNonTrouve."""
         from src.services.batch_cooking import BatchCookingService
+        from src.core.errors_base import ErreurNonTrouve
         
         mock_client.return_value = Mock()
         
         service = BatchCookingService()
-        result = service.demarrer_session(9999)
-        
-        assert result is None
+        with pytest.raises(ErreurNonTrouve):
+            service.demarrer_session(9999)
 
-    @pytest.mark.skip(reason="Requires real DB connection - decorators incompatible with mocking")
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_terminer_session_not_found(self, mock_client, patch_db_context):
-        """Test terminer_session session inexistante."""
+        """Test terminer_session session inexistante lève ErreurNonTrouve."""
         from src.services.batch_cooking import BatchCookingService
+        from src.core.errors_base import ErreurNonTrouve
         
         mock_client.return_value = Mock()
         
         service = BatchCookingService()
-        result = service.terminer_session(9999)
-        
-        assert result is None
+        with pytest.raises(ErreurNonTrouve):
+            service.terminer_session(9999)
 
-    @pytest.mark.skip(reason="Requires real DB connection - decorators incompatible with mocking")
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_demarrer_etape_not_found(self, mock_client, patch_db_context):
-        """Test demarrer_etape étape inexistante."""
+        """Test demarrer_etape étape inexistante lève ErreurNonTrouve."""
         from src.services.batch_cooking import BatchCookingService
+        from src.core.errors_base import ErreurNonTrouve
         
         mock_client.return_value = Mock()
         
         service = BatchCookingService()
-        result = service.demarrer_etape(9999)
-        
-        assert result is None
+        with pytest.raises(ErreurNonTrouve):
+            service.demarrer_etape(9999)
 
-    @pytest.mark.skip(reason="Requires real DB connection - decorators incompatible with mocking")
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_terminer_etape_not_found(self, mock_client, patch_db_context):
-        """Test terminer_etape étape inexistante."""
+        """Test terminer_etape étape inexistante lève ErreurNonTrouve."""
         from src.services.batch_cooking import BatchCookingService
+        from src.core.errors_base import ErreurNonTrouve
         
         mock_client.return_value = Mock()
         
         service = BatchCookingService()
-        result = service.terminer_etape(9999)
-        
-        assert result is None
+        with pytest.raises(ErreurNonTrouve):
+            service.terminer_etape(9999)
 
-    @pytest.mark.skip(reason="Requires real DB connection - decorators incompatible with mocking")
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_passer_etape_not_found(self, mock_client, patch_db_context):
-        """Test passer_etape étape inexistante."""
+        """Test passer_etape étape inexistante lève ErreurNonTrouve."""
         from src.services.batch_cooking import BatchCookingService
+        from src.core.errors_base import ErreurNonTrouve
         
         mock_client.return_value = Mock()
         
         service = BatchCookingService()
-        result = service.passer_etape(9999)
-        
-        assert result is None
+        with pytest.raises(ErreurNonTrouve):
+            service.passer_etape(9999)
 
-    @pytest.mark.skip(reason="Requires real DB connection - decorators incompatible with mocking")
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_consommer_preparation_not_found(self, mock_client, patch_db_context):
-        """Test consommer_preparation préparation inexistante."""
+        """Test consommer_preparation préparation inexistante lève ErreurNonTrouve."""
         from src.services.batch_cooking import BatchCookingService
+        from src.core.errors_base import ErreurNonTrouve
         
         mock_client.return_value = Mock()
         
         service = BatchCookingService()
-        result = service.consommer_preparation(9999, 1)
-        
-        assert result is None
+        with pytest.raises(ErreurNonTrouve):
+            service.consommer_preparation(9999, 1)
 
-    @pytest.mark.skip(reason="Requires real DB connection - decorators incompatible with mocking")
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_ajouter_etapes_session_not_found(self, mock_client, patch_db_context):
-        """Test ajouter_etapes session inexistante."""
+        """Test ajouter_etapes session inexistante lève ErreurNonTrouve."""
         from src.services.batch_cooking import BatchCookingService, EtapeBatchIA
+        from src.core.errors_base import ErreurNonTrouve
         
         mock_client.return_value = Mock()
         
@@ -1220,11 +1205,9 @@ class TestBatchCookingIntegration:
             duree_minutes=10
         )
         
-        result = service.ajouter_etapes(9999, [etape])
-        
-        assert result is None or result == []
+        with pytest.raises(ErreurNonTrouve):
+            service.ajouter_etapes(9999, [etape])
 
-    @pytest.mark.skip(reason="Requires real DB connection - decorators incompatible with mocking")
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_attribuer_preparations_planning_not_found(self, mock_client, patch_db_context):
         """Test attribuer_preparations_planning planning inexistant."""
@@ -1250,7 +1233,6 @@ class TestBatchCookingIntegration:
 class TestBatchCookingWorkflow:
     """Tests du workflow complet batch cooking."""
 
-    @pytest.mark.skip(reason="Requires real DB connection - decorators incompatible with mocking")
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_creer_preparation_integration(self, mock_client, patch_db_context):
         """Test creer_preparation crée une préparation."""
@@ -1268,7 +1250,6 @@ class TestBatchCookingWorkflow:
         # Peut retourner None ou la préparation créée
         assert result is None or hasattr(result, 'nom')
 
-    @pytest.mark.skip(reason="Requires real DB connection - decorators incompatible with mocking")
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_get_sessions_planifiees_with_dates(self, mock_client, patch_db_context):
         """Test get_sessions_planifiees avec filtres de dates."""
@@ -1284,16 +1265,15 @@ class TestBatchCookingWorkflow:
         
         assert result == [] or isinstance(result, list)
 
-    @pytest.mark.skip(reason="Requires real DB connection - decorators incompatible with mocking")
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_get_preparations_with_filter(self, mock_client, patch_db_context):
-        """Test get_preparations avec filtre actives seulement."""
+        """Test get_preparations avec filtre consommees."""
         from src.services.batch_cooking import BatchCookingService
         
         mock_client.return_value = Mock()
         
         service = BatchCookingService()
-        result = service.get_preparations(actives_seulement=True)
+        result = service.get_preparations(consommees=False)
         
         assert result == [] or isinstance(result, list)
 
@@ -1307,41 +1287,37 @@ class TestBatchCookingWorkflow:
 class TestGenererPlanIAIntegration:
     """Tests pour generer_plan_ia avec mock IA."""
 
-    @pytest.mark.skip(reason="Requires real DB connection - generer_plan_ia uses decorators")
     @patch('src.services.batch_cooking.obtenir_client_ia')
-    def test_generer_plan_ia_empty_recettes(self, mock_client):
-        """Test generer_plan_ia avec recettes vides."""
+    def test_generer_plan_ia_empty_recettes(self, mock_client, patch_db_context):
+        """Test generer_plan_ia avec recettes vides lève ErreurValidation."""
         from src.services.batch_cooking import BatchCookingService
+        from src.core.errors_base import ErreurValidation
         
         mock_client.return_value = Mock()
         
         service = BatchCookingService()
         
-        # Mocker call_with_parsing_sync pour retourner None
-        service.call_with_parsing_sync = Mock(return_value=None)
-        
-        result = service.generer_plan_ia(
-            recettes=[],
-            robots=["four"]
-        )
-        
-        assert result is None
+        # Appel avec liste vide d'IDs devrait lever ErreurValidation (aucune recette trouvée)
+        with pytest.raises(ErreurValidation):
+            service.generer_plan_ia(
+                recettes_ids=[999999],  # ID inexistant
+                robots_disponibles=["four"]
+            )
 
-    @pytest.mark.skip(reason="Requires real DB connection - suggerer_recettes_batch uses decorators")
     @patch('src.services.batch_cooking.obtenir_client_ia')
-    def test_suggerer_recettes_batch_with_options(self, mock_client):
+    def test_suggerer_recettes_batch_with_options(self, mock_client, patch_db_context):
         """Test suggerer_recettes_batch avec options."""
         from src.services.batch_cooking import BatchCookingService
         
         mock_client.return_value = Mock()
         
         service = BatchCookingService()
-        service.call_with_list_parsing_sync = Mock(return_value=[])
         
         result = service.suggerer_recettes_batch(
             nb_recettes=4,
             avec_jules=True,
-            contraintes=["végétarien"]
+            robots_disponibles=["four", "cookeo"]
         )
         
         assert result == [] or isinstance(result, list)
+

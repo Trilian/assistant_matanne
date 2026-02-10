@@ -344,16 +344,16 @@ class TestBarcodeServiceInit:
 class TestBarcodeServiceScan:
     """Tests for scanner_code method."""
     
-    @pytest.mark.skip(reason="Decorator catches exception - DB connection")
     def test_scanner_code_invalid_barcode(self):
         """Test scanning invalid barcode raises error."""
         from src.services.barcode import BarcodeService
         from src.core.errors_base import ErreurValidation
         
         service = BarcodeService()
+        mock_session = Mock()
         
         with pytest.raises(ErreurValidation):
-            service.scanner_code("invalid!")
+            service.scanner_code("invalid!", session=mock_session)
     
     def test_scanner_code_article_found(self):
         """Test scanning barcode finds article."""
@@ -411,18 +411,19 @@ class TestBarcodeServiceScan:
 class TestBarcodeServiceArticleOperations:
     """Tests for article operations with barcodes."""
     
-    @pytest.mark.skip(reason="Decorator catches exception")
     def test_ajouter_article_par_barcode_invalid_code(self):
         """Test adding article with invalid barcode raises error."""
         from src.services.barcode import BarcodeService
         from src.core.errors_base import ErreurValidation
         
         service = BarcodeService()
+        mock_session = Mock()
         
         with pytest.raises(ErreurValidation):
             service.ajouter_article_par_barcode(
                 code="invalid!",
-                nom="Test"
+                nom="Test",
+                session=mock_session
             )
     
     def test_ajouter_article_par_barcode_exists(self):
@@ -680,16 +681,16 @@ class TestBarcodeServiceStockVerification:
 class TestBarcodeServiceMappings:
     """Tests for barcode mapping operations."""
     
-    @pytest.mark.skip(reason="Decorator catches exception")
     def test_mettre_a_jour_barcode_invalid_code(self):
         """Test updating to invalid barcode."""
         from src.services.barcode import BarcodeService
         from src.core.errors_base import ErreurValidation
         
         service = BarcodeService()
+        mock_session = Mock()
         
         with pytest.raises(ErreurValidation):
-            service.mettre_a_jour_barcode(1, "invalid!")
+            service.mettre_a_jour_barcode(1, "invalid!", session=mock_session)
     
     def test_mettre_a_jour_barcode_not_found(self):
         """Test updating barcode for non-existent article."""
