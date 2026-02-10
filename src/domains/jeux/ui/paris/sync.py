@@ -1,10 +1,10 @@
-"""
+﻿"""
 Fonctions de synchronisation avec l'API Football-Data.
 """
 
 from ._common import (
     date, Dict, logger,
-    get_session, Equipe, Match,
+    obtenir_contexte_db, Equipe, Match,
     CHAMPIONNATS,
     api_charger_classement, api_charger_matchs_a_venir, charger_matchs_termines,
 )
@@ -28,7 +28,7 @@ def sync_equipes_depuis_api(championnat: str) -> int:
             return 0
         
         count = 0
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             for equipe_api in classement:
                 try:
                     # Chercher si équipe existe déjà
@@ -94,7 +94,7 @@ def sync_matchs_a_venir(jours: int = 7) -> Dict[str, int]:
     resultats = {}
     
     try:
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             for champ in CHAMPIONNATS:
                 try:
                     matchs_api = api_charger_matchs_a_venir(champ, jours=jours)
@@ -173,7 +173,7 @@ def refresh_scores_matchs() -> int:
     """
     try:
         count = 0
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             # Matchs non joués dans le passé
             matchs_a_maj = session.query(Match).filter(
                 Match.joue == False,
@@ -238,3 +238,4 @@ __all__ = [
     "sync_matchs_a_venir",
     "refresh_scores_matchs",
 ]
+

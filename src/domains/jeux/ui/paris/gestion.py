@@ -1,10 +1,10 @@
-"""
+﻿"""
 Interface de gestion des équipes et matchs.
 """
 
 from ._common import (
     st, date, timedelta,
-    get_session, Match,
+    obtenir_contexte_db, Match,
     CHAMPIONNATS,
 )
 from .helpers import charger_equipes
@@ -68,7 +68,7 @@ def afficher_gestion_donnees():
         st.subheader("Enregistrer un résultat")
         
         try:
-            with get_session() as session:
+            with obtenir_contexte_db() as session:
                 matchs_passes = session.query(Match).filter(
                     Match.date_match <= date.today(),
                     Match.joue == False
@@ -100,7 +100,7 @@ def afficher_gestion_donnees():
         st.caption("Supprime un match et tous les paris associés")
         
         try:
-            with get_session() as session:
+            with obtenir_contexte_db() as session:
                 tous_matchs = session.query(Match).order_by(Match.date_match.desc()).limit(50).all()
                 
                 if tous_matchs:
@@ -143,3 +143,4 @@ def afficher_gestion_donnees():
 
 
 __all__ = ["afficher_gestion_donnees"]
+

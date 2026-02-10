@@ -1,4 +1,4 @@
-"""
+﻿"""
 Module Loto - Imports et constantes partagés
 
 ⚠️ DISCLAIMER: Le Loto est un jeu de hasard pur.
@@ -17,7 +17,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-from src.core.database import get_session
+from src.core.database import obtenir_contexte_db
 from src.core.models import TirageLoto, GrilleLoto, StatistiquesLoto
 
 from src.domains.jeux.logic.loto_logic import (
@@ -44,7 +44,7 @@ __all__ = [
     "st", "date", "timedelta", "datetime", "Decimal",
     "pd", "go", "px", "random", "logger",
     # Database
-    "get_session", "TirageLoto", "GrilleLoto", "StatistiquesLoto",
+    "obtenir_contexte_db", "TirageLoto", "GrilleLoto", "StatistiquesLoto",
     # Logic - constants
     "NUMERO_MIN", "NUMERO_MAX", "CHANCE_MIN", "CHANCE_MAX", "NB_NUMEROS",
     "COUT_GRILLE", "GAINS_PAR_RANG", "PROBA_JACKPOT",
@@ -57,3 +57,4 @@ __all__ = [
     # Scraper
     "charger_tirages_loto",
 ]
+

@@ -9,7 +9,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 
-from src.core.database import get_session
+from src.core.database import obtenir_contexte_db
 from src.core.models import FamilyActivity
 
 # Logique métier pure
@@ -26,7 +26,7 @@ def ajouter_activite(titre: str, type_activite: str, date_prevue: date,
                      cout_estime: float, notes: str = ""):
     """Ajoute une nouvelle activité familiale"""
     try:
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             activity = FamilyActivity(
                 titre=titre,
                 type_activite=type_activite,
@@ -51,7 +51,7 @@ def ajouter_activite(titre: str, type_activite: str, date_prevue: date,
 def marquer_terminee(activity_id: int, cout_reel: float = None, notes: str = ""):
     """Marque une activité comme terminée"""
     try:
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             activity = session.get(FamilyActivity, activity_id)
             if activity:
                 activity.statut = "terminé"
@@ -206,7 +206,7 @@ def app():
         st.subheader("🗑️ Graphique Dépenses")
         
         try:
-            with get_session() as session:
+            with obtenir_contexte_db() as session:
                 # Récupérer les 30 derniers jours
                 debut = date.today() - timedelta(days=30)
                 activites = session.query(FamilyActivity).filter(
@@ -278,3 +278,4 @@ def app():
 
 if __name__ == "__main__":
     main()
+

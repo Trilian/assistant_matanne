@@ -428,11 +428,11 @@ class TestSessionOperationsWithDB:
 
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_get_session_not_found(self, mock_client, test_db):
-        """get_session retourne None si non trouvée."""
+        """obtenir_contexte_db retourne None si non trouvée."""
         mock_client.return_value = Mock()
         
         service = BatchCookingService()
-        result = service.get_session(session_id=99999, db=test_db)
+        result = service.obtenir_contexte_db(session_id=99999, db=test_db)
         
         assert result is None
 
@@ -447,12 +447,12 @@ class TestSessionOperationsWithDB:
         assert result is None
 
     @patch('src.services.batch_cooking.obtenir_client_ia')
-    def test_get_sessions_planifiees_empty(self, mock_client, test_db):
-        """get_sessions_planifiees retourne liste vide."""
+    def test_obtenir_contexte_dbs_planifiees_empty(self, mock_client, test_db):
+        """obtenir_contexte_dbs_planifiees retourne liste vide."""
         mock_client.return_value = Mock()
         
         service = BatchCookingService()
-        result = service.get_sessions_planifiees(db=test_db)
+        result = service.obtenir_contexte_dbs_planifiees(db=test_db)
         
         assert result == []
 
@@ -631,7 +631,7 @@ class TestBatchCookingWorkflow:
     """Tests workflow complet batch cooking."""
 
     @patch('src.services.batch_cooking.obtenir_client_ia')
-    def test_create_and_get_session(self, mock_client, test_db):
+    def test_create_and_obtenir_contexte_db(self, mock_client, test_db):
         """Créer une session puis la récupérer - peut échouer à cause de l'isolation DB."""
         mock_client.return_value = Mock()
         
@@ -646,7 +646,7 @@ class TestBatchCookingWorkflow:
             )
             
             if created is not None:
-                retrieved = service.get_session(session_id=created.id, db=test_db)
+                retrieved = service.obtenir_contexte_db(session_id=created.id, db=test_db)
                 
                 assert retrieved is not None
                 assert retrieved.id == created.id
@@ -1139,3 +1139,4 @@ class TestPreparationsQueries:
         )
         
         assert isinstance(result, list)
+

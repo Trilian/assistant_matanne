@@ -1,14 +1,14 @@
-"""
+﻿"""
 Module Loto - Fonctions helper (DB queries)
 """
 
-from ._common import st, get_session, TirageLoto, GrilleLoto
+from ._common import st, obtenir_contexte_db, TirageLoto, GrilleLoto
 
 
 def charger_tirages(limite: int = 100):
     """Charge l'historique des tirages"""
     try:
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             tirages = session.query(TirageLoto).order_by(
                 TirageLoto.date_tirage.desc()
             ).limit(limite).all()
@@ -37,7 +37,7 @@ def charger_tirages(limite: int = 100):
 def charger_grilles_utilisateur():
     """Charge les grilles de l'utilisateur"""
     try:
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             grilles = session.query(GrilleLoto).order_by(
                 GrilleLoto.date_creation.desc()
             ).limit(50).all()
@@ -63,3 +63,4 @@ def charger_grilles_utilisateur():
     except Exception as e:
         st.error(f"❌ Erreur chargement grilles: {e}")
         return []
+

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests complets pour le service auth.
 
 Couvre:
@@ -532,7 +532,7 @@ class TestAuthServiceRefresh:
         # Mock st.session_state.get to return a session
         with patch('src.services.auth.st') as mock_st:
             mock_st.session_state.get.return_value = mock_session
-            service._client.auth.get_session.return_value = mock_session
+            service._client.auth.obtenir_contexte_db.return_value = mock_session
             
             result = service.refresh_session()
         
@@ -542,7 +542,7 @@ class TestAuthServiceRefresh:
         # Mock st.session_state.get to return a session
         with patch('src.services.auth.st') as mock_st:
             mock_st.session_state.get.return_value = MagicMock()
-            service._client.auth.get_session.side_effect = Exception("Session expired")
+            service._client.auth.obtenir_contexte_db.side_effect = Exception("Session expired")
             
             result = service.refresh_session()
         
@@ -610,3 +610,4 @@ class TestAuthServiceEdgeCases:
             for _ in range(3):
                 result = service.login("test@example.com", "Password123!")
                 assert result is not None
+

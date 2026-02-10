@@ -12,7 +12,7 @@ from src.core.models import (
     ChildProfile, Milestone, FamilyActivity, 
     HealthRoutine, HealthObjective, HealthEntry, FamilyBudget
 )
-from src.core.database import get_session
+from src.core.database import obtenir_contexte_db
 
 
 # ═══════════════════════════════════════════════════════════
@@ -24,7 +24,7 @@ from src.core.database import get_session
 def get_or_create_jules() -> int:
     """Récupère ou crée le profil Jules, retourne son ID"""
     try:
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             child = session.query(ChildProfile).filter_by(name="Jules", actif=True).first()
             
             if not child:
@@ -49,7 +49,7 @@ def get_or_create_jules() -> int:
 def calculer_age_jules() -> dict:
     """Calcule l'âge de Jules en jours, semaines, mois"""
     try:
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             child = session.query(ChildProfile).filter_by(name="Jules").first()
             
             if not child or not child.date_of_birth:
@@ -84,7 +84,7 @@ def calculer_age_jules() -> dict:
 def get_milestones_by_category(child_id: int) -> dict:
     """Récupère les jalons groupés par catégorie"""
     try:
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             milestones = session.query(Milestone).filter_by(child_id=child_id).all()
             
             result = {}
@@ -109,7 +109,7 @@ def get_milestones_by_category(child_id: int) -> dict:
 def count_milestones_by_category(child_id: int) -> dict:
     """Compte les jalons par catégorie"""
     try:
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             result = session.query(
                 Milestone.categorie,
                 func.count(Milestone.id).label("count")
@@ -142,7 +142,7 @@ def calculer_progression_objectif(objective: HealthObjective) -> float:
 def get_objectives_actifs() -> list:
     """Récupère tous les objectifs en cours avec progression"""
     try:
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             objectives = session.query(HealthObjective).filter_by(statut="en_cours").all()
             
             result = []
@@ -175,7 +175,7 @@ def get_objectives_actifs() -> list:
 def get_budget_par_period(period: str = "month") -> dict:
     """Récupère le budget par période (day, week, month)"""
     try:
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             if period == "day":
                 debut = date.today()
                 fin = date.today()
@@ -222,7 +222,7 @@ def get_budget_mois_dernier() -> float:
         mois_prochain = date(mois_dernier.year, mois_dernier.month, 1) + timedelta(days=32)
         mois_prochain = date(mois_prochain.year, mois_prochain.month, 1)
         
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             total = session.query(func.sum(FamilyBudget.montant)).filter(
                 and_(
                     FamilyBudget.date >= mois_dernier,
@@ -248,7 +248,7 @@ def get_activites_semaine() -> list:
         debut_semaine = date.today() - timedelta(days=date.today().weekday())
         fin_semaine = debut_semaine + timedelta(days=6)
         
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             activities = session.query(FamilyActivity).filter(
                 and_(
                     FamilyActivity.date_prevue >= debut_semaine,
@@ -284,7 +284,7 @@ def get_budget_activites_mois() -> float:
         else:
             fin_mois = date(date.today().year, date.today().month + 1, 1) - timedelta(days=1)
         
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             total = session.query(func.sum(FamilyActivity.cout_reel)).filter(
                 and_(
                     FamilyActivity.date_prevue >= debut_mois,
@@ -308,7 +308,7 @@ def get_budget_activites_mois() -> float:
 def get_routines_actives() -> list:
     """Récupère les routines de santé actives"""
     try:
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             routines = session.query(HealthRoutine).filter_by(actif=True).all()
             
             return [
@@ -333,7 +333,7 @@ def get_stats_sante_semaine() -> dict:
     try:
         debut_semaine = date.today() - timedelta(days=date.today().weekday())
         
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             entries = session.query(HealthEntry).filter(
                 HealthEntry.date >= debut_semaine
             ).all()
@@ -374,3 +374,4 @@ def format_date_fr(d: date) -> str:
     mois = ["jan", "fév", "mar", "avr", "mai", "jun", "jul", "aoû", "sep", "oct", "nov", "déc"]
     
     return f"{jours[d.weekday()]} {d.day} {mois[d.month-1]} {d.year}"
+

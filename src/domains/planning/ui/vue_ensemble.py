@@ -16,7 +16,7 @@ from src.domains.planning.logic.vue_ensemble_logic import (
     analyser_charge_globale,
     identifier_taches_urgentes
 )
-from src.core.state import get_state
+from src.core.state import obtenir_etat
 
 logger = __import__("logging").getLogger(__name__)
 

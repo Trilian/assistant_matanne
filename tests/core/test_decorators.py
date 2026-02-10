@@ -208,3 +208,4 @@ class TestDecoratorStacking:
         result2 = compute(instance, -1)
         assert result2 == 0
 
+

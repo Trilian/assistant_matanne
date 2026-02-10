@@ -493,7 +493,7 @@ class AuthService:
             
             if session:
                 # Vérifier et rafraîchir le token
-                response = self._client.auth.get_session()
+                response = self._client.auth.obtenir_contexte_db()
                 
                 if response:
                     return True
@@ -954,3 +954,4 @@ __all__ = [
     "require_authenticated",
     "require_role",
 ]
+

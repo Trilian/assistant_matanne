@@ -1,10 +1,10 @@
-"""
+﻿"""
 Fonctions CRUD pour les paris, équipes et matchs.
 """
 
 from ._common import (
     st, date, Decimal, logger,
-    get_session, Equipe, Match, PariSportif,
+    obtenir_contexte_db, Equipe, Match, PariSportif,
 )
 
 
@@ -12,7 +12,7 @@ def enregistrer_pari(match_id: int, prediction: str, cote: float,
                      mise: float = 0, est_virtuel: bool = True):
     """Enregistre un nouveau pari"""
     try:
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             pari = PariSportif(
                 match_id=match_id,
                 type_pari="1N2",
@@ -33,7 +33,7 @@ def enregistrer_pari(match_id: int, prediction: str, cote: float,
 def ajouter_equipe(nom: str, championnat: str):
     """Ajoute une nouvelle équipe"""
     try:
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             equipe = Equipe(
                 nom=nom,
                 championnat=championnat
@@ -51,7 +51,7 @@ def ajouter_match(equipe_dom_id: int, equipe_ext_id: int,
                   championnat: str, date_match: date, heure: str = None):
     """Ajoute un nouveau match"""
     try:
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             match = Match(
                 equipe_domicile_id=equipe_dom_id,
                 equipe_exterieur_id=equipe_ext_id,
@@ -72,7 +72,7 @@ def ajouter_match(equipe_dom_id: int, equipe_ext_id: int,
 def enregistrer_resultat_match(match_id: int, score_dom: int, score_ext: int):
     """Enregistre le résultat d'un match"""
     try:
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             match = session.query(Match).get(match_id)
             if match:
                 match.score_domicile = score_dom
@@ -116,7 +116,7 @@ def supprimer_match(match_id: int) -> bool:
         True si suppression réussie
     """
     try:
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             match = session.query(Match).get(match_id)
             if match:
                 # Supprimer d'abord les paris liés
@@ -143,3 +143,4 @@ __all__ = [
     "enregistrer_resultat_match",
     "supprimer_match",
 ]
+

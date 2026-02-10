@@ -1,9 +1,9 @@
-"""
+﻿"""
 Module Loto - Synchronisation des tirages
 """
 
 from ._common import (
-    datetime, logger, get_session, TirageLoto, charger_tirages_loto
+    datetime, logger, obtenir_contexte_db, TirageLoto, charger_tirages_loto
 )
 
 
@@ -28,7 +28,7 @@ def sync_tirages_loto(limite: int = 50) -> int:
             return 0
         
         count = 0
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             for tirage_api in tirages_api:
                 try:
                     # Vérifier si le tirage existe déjà
@@ -99,3 +99,4 @@ def sync_tirages_loto(limite: int = 50) -> int:
     except Exception as e:
         logger.error(f"❌ Erreur sync Loto: {e}")
         return 0
+

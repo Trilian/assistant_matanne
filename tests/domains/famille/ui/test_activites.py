@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests minimaux pour src/domains/famille/ui/activites.py
 """
 import pytest
@@ -36,7 +36,7 @@ def test_import_activites_ui():
     assert src.domains.famille.ui.activites.__name__ == "src.domains.famille.ui.activites"
 
 def test_ajouter_activite(db, fake_activity_dict):
-    with patch("src.domains.famille.ui.activites.get_session", return_value=MagicMock(__enter__=lambda s: db, __exit__=lambda s, a, b, c: None)):
+    with patch("src.domains.famille.ui.activites.obtenir_contexte_db", return_value=MagicMock(__enter__=lambda s: db, __exit__=lambda s, a, b, c: None)):
         ok = activites.ajouter_activite(
             "Sortie Parc", "parc", date.today(), 2.0, "Parc Central", ["Jules", "Anne"], 20.0, notes="Test",)
         assert ok
@@ -46,7 +46,7 @@ def test_marquer_terminee(db, fake_activity_dict):
     activity = FamilyActivity(**fake_activity_dict)
     db.add(activity)
     db.commit()
-    with patch("src.domains.famille.ui.activites.get_session", return_value=MagicMock(__enter__=lambda s: db, __exit__=lambda s, a, b, c: None)):
+    with patch("src.domains.famille.ui.activites.obtenir_contexte_db", return_value=MagicMock(__enter__=lambda s: db, __exit__=lambda s, a, b, c: None)):
         activites.marquer_terminee(activity.id, cout_reel=18.0, notes="Fait")
         db.refresh(activity)
         assert activity.statut == "terminé"
@@ -110,7 +110,7 @@ class TestAjouterActiviteErrorHandling:
         mock_session.__enter__ = MagicMock(side_effect=Exception("DB Error"))
         mock_session.__exit__ = MagicMock(return_value=False)
         
-        with patch("src.domains.famille.ui.activites.get_session", return_value=mock_session):
+        with patch("src.domains.famille.ui.activites.obtenir_contexte_db", return_value=mock_session):
             with patch("streamlit.error") as mock_error:
                 result = activites.ajouter_activite(
                     "Test", "parc", date.today(), 2.0, "Lieu", ["Jules"], 10.0
@@ -119,7 +119,7 @@ class TestAjouterActiviteErrorHandling:
 
     def test_ajouter_activite_empty_notes(self, db):
         """Test ajouter activité avec notes vides."""
-        with patch("src.domains.famille.ui.activites.get_session", 
+        with patch("src.domains.famille.ui.activites.obtenir_contexte_db", 
                    return_value=MagicMock(__enter__=lambda s: db, __exit__=lambda s, a, b, c: None)):
             with patch("src.domains.famille.ui.activites.clear_famille_cache"):
                 with patch("streamlit.success"):
@@ -135,7 +135,7 @@ class TestMarquerTermineeErrorHandling:
 
     def test_marquer_terminee_not_found(self, db):
         """Test marquer terminée avec ID inexistant."""
-        with patch("src.domains.famille.ui.activites.get_session", 
+        with patch("src.domains.famille.ui.activites.obtenir_contexte_db", 
                    return_value=MagicMock(__enter__=lambda s: db, __exit__=lambda s, a, b, c: None)):
             # Should handle gracefully when activity doesn't exist
             result = activites.marquer_terminee(99999)
@@ -147,7 +147,7 @@ class TestMarquerTermineeErrorHandling:
         mock_session.__enter__ = MagicMock(side_effect=Exception("DB Error"))
         mock_session.__exit__ = MagicMock(return_value=False)
         
-        with patch("src.domains.famille.ui.activites.get_session", return_value=mock_session):
+        with patch("src.domains.famille.ui.activites.obtenir_contexte_db", return_value=mock_session):
             with patch("streamlit.error"):
                 result = activites.marquer_terminee(1)
                 assert result is False
@@ -158,7 +158,7 @@ class TestMarquerTermineeErrorHandling:
         db.add(activity)
         db.commit()
         
-        with patch("src.domains.famille.ui.activites.get_session", 
+        with patch("src.domains.famille.ui.activites.obtenir_contexte_db", 
                    return_value=MagicMock(__enter__=lambda s: db, __exit__=lambda s, a, b, c: None)):
             with patch("src.domains.famille.ui.activites.clear_famille_cache"):
                 with patch("streamlit.success"):
@@ -187,7 +187,7 @@ class TestAppFunction:
     @patch("src.domains.famille.ui.activites.get_activites_semaine", return_value=[])
     @patch("src.domains.famille.ui.activites.get_budget_activites_mois", return_value=0.0)
     @patch("src.domains.famille.ui.activites.get_budget_par_period", return_value={})
-    @patch("src.domains.famille.ui.activites.get_session")
+    @patch("src.domains.famille.ui.activites.obtenir_contexte_db")
     def test_app_runs_without_error(self, mock_session, mock_budget_period, mock_budget_mois, 
                                     mock_activites_semaine, mock_header, mock_tabs, mock_title):
         """Test que app() s'exécute sans erreur."""
@@ -228,7 +228,7 @@ class TestEdgeCases:
 
     def test_ajouter_activite_cout_zero(self, db):
         """Test ajouter activité avec coût zéro."""
-        with patch("src.domains.famille.ui.activites.get_session", 
+        with patch("src.domains.famille.ui.activites.obtenir_contexte_db", 
                    return_value=MagicMock(__enter__=lambda s: db, __exit__=lambda s, a, b, c: None)):
             with patch("src.domains.famille.ui.activites.clear_famille_cache"):
                 with patch("streamlit.success"):
@@ -240,7 +240,7 @@ class TestEdgeCases:
 
     def test_ajouter_activite_participants_vide(self, db):
         """Test ajouter activité avec liste de participants vide."""
-        with patch("src.domains.famille.ui.activites.get_session", 
+        with patch("src.domains.famille.ui.activites.obtenir_contexte_db", 
                    return_value=MagicMock(__enter__=lambda s: db, __exit__=lambda s, a, b, c: None)):
             with patch("src.domains.famille.ui.activites.clear_famille_cache"):
                 with patch("streamlit.success"):
@@ -252,7 +252,7 @@ class TestEdgeCases:
 
     def test_ajouter_activite_longue_duree(self, db):
         """Test ajouter activité avec longue durée."""
-        with patch("src.domains.famille.ui.activites.get_session", 
+        with patch("src.domains.famille.ui.activites.obtenir_contexte_db", 
                    return_value=MagicMock(__enter__=lambda s: db, __exit__=lambda s, a, b, c: None)):
             with patch("src.domains.famille.ui.activites.clear_famille_cache"):
                 with patch("streamlit.success"):
@@ -261,3 +261,4 @@ class TestEdgeCases:
                         ["Famille"], 100.0
                     )
                     assert result is True
+

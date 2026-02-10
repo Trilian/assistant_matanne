@@ -29,12 +29,6 @@ from src.core.database import (
     obtenir_infos_db,
     initialiser_database,
     verifier_sante,
-    # Alias anglais
-    obtenir_moteur,
-    obtenir_contexte_db,
-    get_safe_db,
-    check_connection,
-    GestionnaireMigrations,
 )
 from src.core.errors import ErreurBaseDeDonnees
 
@@ -79,10 +73,6 @@ class TestDatabaseEngine:
             result = obtenir_moteur_securise()
             
             assert result == mock_engine
-
-    def test_alias_get_engine_equals_obtenir_moteur(self):
-        """Test que l'alias obtenir_moteur == obtenir_moteur."""
-        assert obtenir_moteur == obtenir_moteur
 
 
 # ═══════════════════════════════════════════════════════════
@@ -174,14 +164,6 @@ class TestContextManagers:
             with obtenir_db_securise() as db:
                 assert db is None
 
-    def test_alias_obtenir_contexte_db_equals_obtenir_contexte_db(self):
-        """Test que l'alias obtenir_contexte_db == obtenir_contexte_db."""
-        assert obtenir_contexte_db == obtenir_contexte_db
-
-    def test_alias_get_safe_db_equals_obtenir_db_securise(self):
-        """Test que l'alias get_safe_db == obtenir_db_securise."""
-        assert get_safe_db == obtenir_db_securise
-
 
 # ═══════════════════════════════════════════════════════════
 # SECTION 4: TESTS GESTIONNAIRE MIGRATIONS
@@ -251,13 +233,9 @@ class TestGestionnaireMigrations:
             assert "sql" in migration
             assert isinstance(migration["version"], int)
 
-    def test_alias_migration_manager_equals_gestionnaire(self):
-        """Test que l'alias GestionnaireMigrations == GestionnaireMigrations."""
-        assert GestionnaireMigrations == GestionnaireMigrations
-
 
 # ═══════════════════════════════════════════════════════════
-# SECTION 5: TESTS VÃ‰RIFICATIONS
+# SECTION 5: TESTS VÉRIFICATIONS
 # ═══════════════════════════════════════════════════════════
 
 
@@ -291,10 +269,6 @@ class TestDatabaseVerifications:
             # La fonction est cachée par Streamlit, donc on vérifie juste la signature
             # Le vrai test serait fait sans le cache
             assert callable(verifier_connexion)
-
-    def test_alias_check_connection_equals_verifier_connexion(self):
-        """Test que l'alias check_connection == verifier_connexion."""
-        assert check_connection == verifier_connexion
 
 
 # ═══════════════════════════════════════════════════════════

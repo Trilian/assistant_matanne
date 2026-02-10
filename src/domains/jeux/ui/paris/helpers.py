@@ -1,10 +1,10 @@
-"""
+﻿"""
 Fonctions helpers pour charger les données depuis la BD.
 """
 
 from ._common import (
     st, date, timedelta, logger,
-    get_session, Equipe, Match, PariSportif,
+    obtenir_contexte_db, Equipe, Match, PariSportif,
     CHAMPIONNATS,
 )
 
@@ -17,7 +17,7 @@ def charger_championnats_disponibles():
 def charger_equipes(championnat: str = None):
     """Charge les équipes, optionnellement filtrées par championnat"""
     try:
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             query = session.query(Equipe)
             if championnat:
                 query = query.filter(Equipe.championnat == championnat)
@@ -45,7 +45,7 @@ def charger_equipes(championnat: str = None):
 def charger_matchs_a_venir(jours: int = 7, championnat: str = None):
     """Charge les matchs à venir depuis la BD"""
     try:
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             date_limite = date.today() + timedelta(days=jours)
             
             query = session.query(Match).filter(
@@ -83,7 +83,7 @@ def charger_matchs_a_venir(jours: int = 7, championnat: str = None):
 def charger_matchs_recents(equipe_id: int, nb_matchs: int = 10):
     """Charge les derniers matchs joués par une équipe"""
     try:
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             matchs = session.query(Match).filter(
                 (Match.equipe_domicile_id == equipe_id) | 
                 (Match.equipe_exterieur_id == equipe_id),
@@ -109,7 +109,7 @@ def charger_matchs_recents(equipe_id: int, nb_matchs: int = 10):
 def charger_paris_utilisateur(statut: str = None):
     """Charge les paris de l'utilisateur"""
     try:
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             query = session.query(PariSportif)
             if statut:
                 query = query.filter(PariSportif.statut == statut)
@@ -143,3 +143,4 @@ __all__ = [
     "charger_matchs_recents",
     "charger_paris_utilisateur",
 ]
+

@@ -200,7 +200,7 @@ class BatchCookingService(BaseService[SessionBatchCooking], BaseAIService):
     @avec_cache(ttl=600, key_func=lambda self, session_id: f"batch_session_{session_id}")
     @avec_gestion_erreurs(default_return=None)
     @avec_session_db
-    def get_session(self, session_id: int, db: Session | None = None) -> SessionBatchCooking | None:
+    def obtenir_contexte_db(self, session_id: int, db: Session | None = None) -> SessionBatchCooking | None:
         """Récupère une session avec ses étapes et préparations."""
         return (
             db.query(SessionBatchCooking)
@@ -229,7 +229,7 @@ class BatchCookingService(BaseService[SessionBatchCooking], BaseAIService):
 
     @avec_gestion_erreurs(default_return=[])
     @avec_session_db
-    def get_sessions_planifiees(
+    def obtenir_contexte_dbs_planifiees(
         self, 
         date_debut: date | None = None,
         date_fin: date | None = None,
@@ -792,4 +792,5 @@ __all__ = [
     "ROBOTS_DISPONIBLES",
     "JOURS_SEMAINE",
 ]
+
 

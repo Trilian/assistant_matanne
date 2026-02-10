@@ -1,9 +1,9 @@
-"""
+﻿"""
 Module Loto - Opérations CRUD (création/mise à jour)
 """
 
 from ._common import (
-    st, date, get_session, TirageLoto, GrilleLoto,
+    st, date, obtenir_contexte_db, TirageLoto, GrilleLoto,
     COUT_GRILLE, verifier_grille
 )
 
@@ -17,7 +17,7 @@ def ajouter_tirage(date_t: date, numeros: list, chance: int, jackpot: int = None
         
         numeros = sorted(numeros)
         
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             tirage = TirageLoto(
                 date_tirage=date_t,
                 numero_1=numeros[0],
@@ -76,7 +76,7 @@ def enregistrer_grille(numeros: list, chance: int, source: str = "manuel",
         
         numeros = sorted(numeros)
         
-        with get_session() as session:
+        with obtenir_contexte_db() as session:
             grille = GrilleLoto(
                 numero_1=numeros[0],
                 numero_2=numeros[1],
@@ -96,3 +96,4 @@ def enregistrer_grille(numeros: list, chance: int, source: str = "manuel",
     except Exception as e:
         st.error(f"❌ Erreur enregistrement grille: {e}")
         return False
+
