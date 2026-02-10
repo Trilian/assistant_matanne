@@ -1,4 +1,4 @@
-﻿"""
+"""
 Logique métier du module Barcode (scan codes-barres) - Séparée de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
@@ -346,4 +346,3 @@ def suggerer_categorie_produit(code: str) -> Optional[str]:
         return "Produit français"
     
     return "Produit importé"
-

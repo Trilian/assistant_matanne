@@ -1,4 +1,4 @@
-﻿"""
+"""
 Unit tests for Phase 1 Decorators.
 
 Tests cover:
@@ -207,4 +207,3 @@ class TestDecoratorStacking:
         # Error case - should return fallback
         result2 = compute(instance, -1)
         assert result2 == 0
-

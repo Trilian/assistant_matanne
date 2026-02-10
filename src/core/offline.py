@@ -1,4 +1,4 @@
-﻿"""
+"""
 Mode Offline - Gestion de la connectivité et synchronisation.
 
 Fonctionnalités :
@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════════════════
 
 
-class ConnectionStatus(str, Enum):
+class StatutConnexion(str, Enum):
     """Statut de connexion."""
     ONLINE = "online"
     OFFLINE = "offline"
@@ -38,7 +38,7 @@ class ConnectionStatus(str, Enum):
     ERROR = "error"
 
 
-class OperationType(str, Enum):
+class TypeOperation(str, Enum):
     """Type d'opération en queue."""
     CREATE = "create"
     UPDATE = "update"
@@ -46,11 +46,11 @@ class OperationType(str, Enum):
 
 
 @dataclass
-class PendingOperation:
+class OperationEnAttente:
     """Opération en attente de synchronisation."""
     
     id: str = field(default_factory=lambda: str(uuid4())[:12])
-    operation_type: OperationType = OperationType.CREATE
+    operation_type: TypeOperation = TypeOperation.CREATE
     model_name: str = ""
     data: dict = field(default_factory=dict)
     created_at: datetime = field(default_factory=datetime.now)
@@ -69,10 +69,10 @@ class PendingOperation:
         }
     
     @classmethod
-    def from_dict(cls, data: dict) -> "PendingOperation":
+    def from_dict(cls, data: dict) -> "OperationEnAttente":
         return cls(
             id=data.get("id", str(uuid4())[:12]),
-            operation_type=OperationType(data.get("operation_type", "create")),
+            operation_type=TypeOperation(data.get("operation_type", "create")),
             model_name=data.get("model_name", ""),
             data=data.get("data", {}),
             created_at=datetime.fromisoformat(data["created_at"]) if "created_at" in data else datetime.now(),
@@ -86,7 +86,7 @@ class PendingOperation:
 # ═══════════════════════════════════════════════════════════
 
 
-class ConnectionManager:
+class GestionnaireConnexion:
     """
     Gestionnaire de l'état de connexion à la base de données.
     
@@ -98,22 +98,22 @@ class ConnectionManager:
     CHECK_INTERVAL = 30  # secondes
     
     @classmethod
-    def get_status(cls) -> ConnectionStatus:
+    def obtenir_statut(cls) -> StatutConnexion:
         """Retourne le statut de connexion actuel."""
-        return st.session_state.get(cls.SESSION_KEY, ConnectionStatus.ONLINE)
+        return st.session_state.get(cls.SESSION_KEY, StatutConnexion.ONLINE)
     
     @classmethod
-    def set_status(cls, status: ConnectionStatus) -> None:
+    def set_status(cls, status: StatutConnexion) -> None:
         """Met à jour le statut."""
         st.session_state[cls.SESSION_KEY] = status
     
     @classmethod
-    def is_online(cls) -> bool:
+    def est_en_ligne(cls) -> bool:
         """Vérifie si on est en ligne."""
-        return cls.get_status() == ConnectionStatus.ONLINE
+        return cls.obtenir_statut() == StatutConnexion.ONLINE
     
     @classmethod
-    def check_connection(cls, force: bool = False) -> bool:
+    def verifier_connexion(cls, force: bool = False) -> bool:
         """
         Vérifie la connexion à la base de données.
         
@@ -129,33 +129,33 @@ class ConnectionManager:
         
         if not force and last_check:
             if now - last_check < cls.CHECK_INTERVAL:
-                return cls.is_online()
+                return cls.est_en_ligne()
         
         # Effectuer la vérification
-        cls.set_status(ConnectionStatus.CONNECTING)
+        cls.set_status(StatutConnexion.CONNECTING)
         
         try:
             from src.core.database import verifier_connexion
             
             if verifier_connexion():
-                cls.set_status(ConnectionStatus.ONLINE)
+                cls.set_status(StatutConnexion.ONLINE)
                 st.session_state[cls.LAST_CHECK_KEY] = now
                 logger.debug("Connexion DB OK")
                 return True
             else:
-                cls.set_status(ConnectionStatus.OFFLINE)
+                cls.set_status(StatutConnexion.OFFLINE)
                 logger.warning("Connexion DB échouée")
                 return False
                 
         except Exception as e:
-            cls.set_status(ConnectionStatus.ERROR)
+            cls.set_status(StatutConnexion.ERROR)
             logger.error(f"Erreur vérification connexion: {e}")
             return False
     
     @classmethod
-    def handle_connection_error(cls, error: Exception) -> None:
+    def gerer_erreur_connexion(cls, error: Exception) -> None:
         """Gère une erreur de connexion."""
-        cls.set_status(ConnectionStatus.OFFLINE)
+        cls.set_status(StatutConnexion.OFFLINE)
         logger.error(f"Erreur de connexion: {error}")
 
 
@@ -164,7 +164,7 @@ class ConnectionManager:
 # ═══════════════════════════════════════════════════════════
 
 
-class OfflineQueue:
+class FileAttenteHorsLigne:
     """
     Queue d'opérations en attente de synchronisation.
     
@@ -222,10 +222,10 @@ class OfflineQueue:
     @classmethod
     def add(
         cls,
-        operation_type: OperationType,
+        operation_type: TypeOperation,
         model_name: str,
         data: dict,
-    ) -> PendingOperation:
+    ) -> OperationEnAttente:
         """
         Ajoute une opération à la queue.
         
@@ -237,7 +237,7 @@ class OfflineQueue:
         Returns:
             Opération créée
         """
-        op = PendingOperation(
+        op = OperationEnAttente(
             operation_type=operation_type,
             model_name=model_name,
             data=data,
@@ -251,13 +251,13 @@ class OfflineQueue:
         return op
     
     @classmethod
-    def get_pending(cls) -> list[PendingOperation]:
+    def obtenir_en_attente(cls) -> list[OperationEnAttente]:
         """Retourne les opérations en attente."""
         queue = cls._get_queue()
-        return [PendingOperation.from_dict(d) for d in queue]
+        return [OperationEnAttente.from_dict(d) for d in queue]
     
     @classmethod
-    def get_count(cls) -> int:
+    def obtenir_nombre(cls) -> int:
         """Compte les opérations en attente."""
         return len(cls._get_queue())
     
@@ -273,7 +273,7 @@ class OfflineQueue:
         return False
     
     @classmethod
-    def update_retry(cls, operation_id: str, error: str) -> None:
+    def mettre_a_jour_tentative(cls, operation_id: str, error: str) -> None:
         """Met à jour le compteur de retry."""
         queue = cls._get_queue()
         
@@ -288,7 +288,7 @@ class OfflineQueue:
     @classmethod
     def clear(cls) -> int:
         """Vide la queue."""
-        count = cls.get_count()
+        count = cls.obtenir_nombre()
         cls._set_queue([])
         return count
 
@@ -298,7 +298,7 @@ class OfflineQueue:
 # ═══════════════════════════════════════════════════════════
 
 
-class OfflineSynchronizer:
+class SynchroniseurHorsLigne:
     """
     Synchronise les opérations en attente avec la base de données.
     """
@@ -314,10 +314,10 @@ class OfflineSynchronizer:
         Returns:
             Dict avec résultats {success: int, failed: int, errors: list}
         """
-        if not ConnectionManager.is_online():
+        if not GestionnaireConnexion.est_en_ligne():
             return {"success": 0, "failed": 0, "errors": ["Pas de connexion"]}
         
-        operations = OfflineQueue.get_pending()
+        operations = FileAttenteHorsLigne.obtenir_en_attente()
         results = {"success": 0, "failed": 0, "errors": []}
         
         for i, op in enumerate(operations):
@@ -328,16 +328,16 @@ class OfflineSynchronizer:
                 success = cls._sync_operation(op)
                 
                 if success:
-                    OfflineQueue.remove(op.id)
+                    FileAttenteHorsLigne.remove(op.id)
                     results["success"] += 1
                 else:
-                    OfflineQueue.update_retry(op.id, "Échec synchronisation")
+                    FileAttenteHorsLigne.update_retry(op.id, "Échec synchronisation")
                     results["failed"] += 1
                     
             except Exception as e:
                 error_msg = f"{op.model_name}/{op.operation_type.value}: {str(e)}"
                 results["errors"].append(error_msg)
-                OfflineQueue.update_retry(op.id, str(e))
+                FileAttenteHorsLigne.update_retry(op.id, str(e))
                 results["failed"] += 1
                 
                 logger.error(f"Erreur sync opération {op.id}: {e}")
@@ -346,7 +346,7 @@ class OfflineSynchronizer:
         return results
     
     @classmethod
-    def _sync_operation(cls, op: PendingOperation) -> bool:
+    def _sync_operation(cls, op: OperationEnAttente) -> bool:
         """
         Synchronise une opération individuelle.
         
@@ -383,18 +383,18 @@ class OfflineSynchronizer:
         
         # Exécuter l'opération
         with get_db_context() as db:
-            if op.operation_type == OperationType.CREATE:
+            if op.operation_type == TypeOperation.CREATE:
                 result = service.create(op.data, db=db)
                 return result is not None
                 
-            elif op.operation_type == OperationType.UPDATE:
+            elif op.operation_type == TypeOperation.UPDATE:
                 item_id = op.data.pop("id", None)
                 if item_id:
                     result = service.update(item_id, op.data, db=db)
                     return result is not None
                 return False
                 
-            elif op.operation_type == OperationType.DELETE:
+            elif op.operation_type == TypeOperation.DELETE:
                 item_id = op.data.get("id")
                 if item_id:
                     return service.delete(item_id, db=db)
@@ -408,7 +408,7 @@ class OfflineSynchronizer:
 # ═══════════════════════════════════════════════════════════
 
 
-def offline_aware(model_name: str, operation_type: OperationType = OperationType.CREATE):
+def avec_mode_hors_ligne(model_name: str, operation_type: TypeOperation = TypeOperation.CREATE):
     """
     Décorateur qui gère automatiquement le mode offline.
     
@@ -420,7 +420,7 @@ def offline_aware(model_name: str, operation_type: OperationType = OperationType
         operation_type: Type d'opération
         
     Example:
-        >>> @offline_aware("recette", OperationType.CREATE)
+        >>> @avec_mode_hors_ligne("recette", TypeOperation.CREATE)
         >>> def creer_recette(data: dict, db: Session) -> Recette:
         >>>     return Recette(**data)
     """
@@ -430,19 +430,19 @@ def offline_aware(model_name: str, operation_type: OperationType = OperationType
         @wraps(func)
         def wrapper(*args, **kwargs):
             # Vérifier connexion
-            if ConnectionManager.is_online():
+            if GestionnaireConnexion.est_en_ligne():
                 try:
                     return func(*args, **kwargs)
                 except Exception as e:
                     # Si erreur de connexion, passer en offline
                     if "connection" in str(e).lower() or "timeout" in str(e).lower():
-                        ConnectionManager.handle_connection_error(e)
+                        GestionnaireConnexion.handle_connection_error(e)
                     else:
                         raise
             
             # Mode offline - mettre en queue
             data = kwargs.get("data", args[0] if args else {})
-            OfflineQueue.add(operation_type, model_name, data)
+            FileAttenteHorsLigne.add(operation_type, model_name, data)
             
             # Retourner un objet mock avec les données
             return {"_offline": True, **data}
@@ -456,17 +456,17 @@ def offline_aware(model_name: str, operation_type: OperationType = OperationType
 # ═══════════════════════════════════════════════════════════
 
 
-def render_connection_status():
+def afficher_statut_connexion():
     """Affiche l'indicateur de connexion."""
     
-    status = ConnectionManager.get_status()
-    pending = OfflineQueue.get_count()
+    status = GestionnaireConnexion.obtenir_statut()
+    pending = FileAttenteHorsLigne.obtenir_nombre()
     
     status_config = {
-        ConnectionStatus.ONLINE: ("🟢", "En ligne", "#4CAF50"),
-        ConnectionStatus.OFFLINE: ("🔴", "Hors ligne", "#F44336"),
-        ConnectionStatus.CONNECTING: ("🟡", "Connexion...", "#FF9800"),
-        ConnectionStatus.ERROR: ("🔴", "Erreur", "#F44336"),
+        StatutConnexion.ONLINE: ("🟢", "En ligne", "#4CAF50"),
+        StatutConnexion.OFFLINE: ("🔴", "Hors ligne", "#F44336"),
+        StatutConnexion.CONNECTING: ("🟡", "Connexion...", "#FF9800"),
+        StatutConnexion.ERROR: ("🔴", "Erreur", "#F44336"),
     }
     
     icon, label, color = status_config.get(status, ("⚪", "Inconnu", "#9E9E9E"))
@@ -487,10 +487,10 @@ def render_connection_status():
     )
 
 
-def render_sync_panel():
+def afficher_panneau_sync():
     """Affiche le panneau de synchronisation."""
     
-    pending = OfflineQueue.get_count()
+    pending = FileAttenteHorsLigne.obtenir_nombre()
     
     with st.expander(f"🔄 Synchronisation ({pending} en attente)", expanded=pending > 0):
         
@@ -501,7 +501,7 @@ def render_sync_panel():
         st.warning(f"[!] {pending} opération(s) en attente de synchronisation")
         
         # Liste des opérations
-        operations = OfflineQueue.get_pending()
+        operations = FileAttenteHorsLigne.obtenir_en_attente()
         for op in operations[:5]:
             col1, col2 = st.columns([3, 1])
             with col1:
@@ -510,7 +510,7 @@ def render_sync_panel():
                     st.caption(f"  ↳ {op.retry_count} tentative(s), erreur: {op.last_error}")
             with col2:
                 if st.button("🗑️", key=f"del_op_{op.id}", help="Annuler"):
-                    OfflineQueue.remove(op.id)
+                    FileAttenteHorsLigne.remove(op.id)
                     st.rerun()
         
         if len(operations) > 5:
@@ -521,9 +521,9 @@ def render_sync_panel():
         col1, col2 = st.columns(2)
         with col1:
             if st.button("🔄 Synchroniser", key="sync_now", use_container_width=True, type="primary"):
-                if ConnectionManager.check_connection(force=True):
+                if GestionnaireConnexion.verifier_connexion(force=True):
                     with st.spinner("Synchronisation en cours..."):
-                        results = OfflineSynchronizer.sync_all()
+                        results = SynchroniseurHorsLigne.sync_all()
                     
                     if results["success"] > 0:
                         st.success(f"[OK] {results['success']} opération(s) synchronisée(s)")
@@ -536,7 +536,7 @@ def render_sync_panel():
         
         with col2:
             if st.button("🗑️ Tout annuler", key="clear_queue", use_container_width=True):
-                OfflineQueue.clear()
+                FileAttenteHorsLigne.clear()
                 st.rerun()
 
 
@@ -546,17 +546,14 @@ def render_sync_panel():
 
 
 __all__ = [
-    "ConnectionStatus",
-    "ConnectionManager",
-    "OperationType",
-    "PendingOperation",
-    "OfflineQueue",
-    "OfflineSynchronizer",
+    "StatutConnexion",
+    "GestionnaireConnexion",
+    "TypeOperation",
+    "OperationEnAttente",
+    "FileAttenteHorsLigne",
+    "SynchroniseurHorsLigne",
     "OfflineSync",  # Alias pour compatibilité tests
-    "offline_aware",
-    "render_connection_status",
-    "render_sync_panel",
+    "avec_mode_hors_ligne",
+    "afficher_statut_connexion",
+    "afficher_panneau_sync",
 ]
-
-# Alias de compatibilité pour les tests
-OfflineSync = OfflineSynchronizer

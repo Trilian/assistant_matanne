@@ -1,4 +1,4 @@
-﻿"""
+"""
 Logique métier du module Rapports (génération rapports) - Séparée de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
@@ -376,4 +376,3 @@ def preparer_export_csv(data: List[Dict[str, Any]], colonnes: List[str]) -> str:
         lignes.append(";".join(valeurs))
     
     return "\n".join(lignes)
-

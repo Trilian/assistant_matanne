@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/core/cache.py - Système de cache avec mocks Streamlit.
 """
 
@@ -481,4 +481,3 @@ class TestCachedDecorator:
 
             # Vérifie qu'une clé a été créée (hash MD5)
             assert len(mock_session_state._mock_state["cache_donnees"]) == 1
-

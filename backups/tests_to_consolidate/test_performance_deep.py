@@ -3,13 +3,13 @@
 Tests pour performance.py - amélioration de la couverture
 
 Cible:
-- PerformanceMetric dataclass
-- FunctionStats dataclass
-- FunctionProfiler class
+- MetriquePerformance dataclass
+- StatistiquesFonction dataclass
+- ProfileurFonction class
 - profile decorator
 - measure_time context manager
-- MemoryMonitor class
-- SQLOptimizer class
+- MoniteurMemoire class
+- OptimiseurSQL class
 """
 import pytest
 import time
@@ -19,13 +19,13 @@ from unittest.mock import MagicMock, patch
 
 
 class TestPerformanceMetric:
-    """Tests pour PerformanceMetric dataclass."""
+    """Tests pour MetriquePerformance dataclass."""
     
     def test_default_values(self):
         """Valeurs par défaut correctes."""
-        from src.core.performance import PerformanceMetric
+        from src.core.performance import MetriquePerformance
         
-        metric = PerformanceMetric(name="test", duration_ms=50.0)
+        metric = MetriquePerformance(name="test", duration_ms=50.0)
         
         assert metric.name == "test"
         assert metric.duration_ms == 50.0
@@ -35,9 +35,9 @@ class TestPerformanceMetric:
     
     def test_with_all_fields(self):
         """Création avec tous les champs."""
-        from src.core.performance import PerformanceMetric
+        from src.core.performance import MetriquePerformance
         
-        metric = PerformanceMetric(
+        metric = MetriquePerformance(
             name="complex_op",
             duration_ms=125.5,
             memory_delta_kb=1024,
@@ -49,13 +49,13 @@ class TestPerformanceMetric:
 
 
 class TestFunctionStats:
-    """Tests pour FunctionStats dataclass."""
+    """Tests pour StatistiquesFonction dataclass."""
     
     def test_default_values(self):
         """Valeurs par défaut correctes."""
-        from src.core.performance import FunctionStats
+        from src.core.performance import StatistiquesFonction
         
-        stats = FunctionStats()
+        stats = StatistiquesFonction()
         
         assert stats.call_count == 0
         assert stats.total_time_ms == 0
@@ -67,7 +67,7 @@ class TestFunctionStats:
 
 
 class TestFunctionProfiler:
-    """Tests pour FunctionProfiler."""
+    """Tests pour ProfileurFonction."""
     
     @pytest.fixture(autouse=True)
     def mock_streamlit(self):
@@ -78,24 +78,24 @@ class TestFunctionProfiler:
     
     def test_record_first_call(self, mock_streamlit):
         """record crée les stats pour nouvelle fonction."""
-        from src.core.performance import FunctionProfiler
+        from src.core.performance import ProfileurFonction
         
-        FunctionProfiler.record("my_function", 50.0)
+        ProfileurFonction.record("my_function", 50.0)
         
-        stats = FunctionProfiler.get_all_stats()
+        stats = ProfileurFonction.get_all_stats()
         assert "my_function" in stats
         assert stats["my_function"].call_count == 1
         assert stats["my_function"].total_time_ms == 50.0
     
     def test_record_multiple_calls(self, mock_streamlit):
         """record accumule les stats."""
-        from src.core.performance import FunctionProfiler
+        from src.core.performance import ProfileurFonction
         
-        FunctionProfiler.record("func", 10.0)
-        FunctionProfiler.record("func", 20.0)
-        FunctionProfiler.record("func", 30.0)
+        ProfileurFonction.record("func", 10.0)
+        ProfileurFonction.record("func", 20.0)
+        ProfileurFonction.record("func", 30.0)
         
-        stats = FunctionProfiler.get_all_stats()["func"]
+        stats = ProfileurFonction.get_all_stats()["func"]
         
         assert stats.call_count == 3
         assert stats.total_time_ms == 60.0
@@ -105,23 +105,23 @@ class TestFunctionProfiler:
     
     def test_record_with_error(self, mock_streamlit):
         """record compte les erreurs."""
-        from src.core.performance import FunctionProfiler
+        from src.core.performance import ProfileurFonction
         
-        FunctionProfiler.record("func", 10.0, error=True)
-        FunctionProfiler.record("func", 20.0, error=False)
+        ProfileurFonction.record("func", 10.0, error=True)
+        ProfileurFonction.record("func", 20.0, error=False)
         
-        stats = FunctionProfiler.get_all_stats()["func"]
+        stats = ProfileurFonction.get_all_stats()["func"]
         assert stats.errors == 1
     
     def test_get_slowest(self, mock_streamlit):
         """get_slowest retourne les plus lentes."""
-        from src.core.performance import FunctionProfiler
+        from src.core.performance import ProfileurFonction
         
-        FunctionProfiler.record("fast", 10.0)
-        FunctionProfiler.record("medium", 50.0)
-        FunctionProfiler.record("slow", 100.0)
+        ProfileurFonction.record("fast", 10.0)
+        ProfileurFonction.record("medium", 50.0)
+        ProfileurFonction.record("slow", 100.0)
         
-        slowest = FunctionProfiler.get_slowest(n=2)
+        slowest = ProfileurFonction.get_slowest(n=2)
         
         assert len(slowest) == 2
         assert slowest[0][0] == "slow"
@@ -129,15 +129,15 @@ class TestFunctionProfiler:
     
     def test_get_most_called(self, mock_streamlit):
         """get_most_called retourne les plus appelées."""
-        from src.core.performance import FunctionProfiler
+        from src.core.performance import ProfileurFonction
         
-        FunctionProfiler.record("rare", 10.0)
+        ProfileurFonction.record("rare", 10.0)
         for _ in range(5):
-            FunctionProfiler.record("common", 10.0)
+            ProfileurFonction.record("common", 10.0)
         for _ in range(10):
-            FunctionProfiler.record("very_common", 10.0)
+            ProfileurFonction.record("very_common", 10.0)
         
-        most_called = FunctionProfiler.get_most_called(n=2)
+        most_called = ProfileurFonction.get_most_called(n=2)
         
         assert len(most_called) == 2
         assert most_called[0][0] == "very_common"
@@ -145,12 +145,12 @@ class TestFunctionProfiler:
     
     def test_clear(self, mock_streamlit):
         """clear réinitialise les stats."""
-        from src.core.performance import FunctionProfiler
+        from src.core.performance import ProfileurFonction
         
-        FunctionProfiler.record("func", 10.0)
-        FunctionProfiler.clear()
+        ProfileurFonction.record("func", 10.0)
+        ProfileurFonction.clear()
         
-        stats = FunctionProfiler.get_all_stats()
+        stats = ProfileurFonction.get_all_stats()
         assert stats == {}
 
 
@@ -166,7 +166,7 @@ class TestProfileDecorator:
     
     def test_profile_records_execution(self, mock_streamlit):
         """@profile enregistre l'exécution."""
-        from src.core.performance import profile, FunctionProfiler
+        from src.core.performance import profile, ProfileurFonction
         
         @profile
         def my_func():
@@ -175,13 +175,13 @@ class TestProfileDecorator:
         result = my_func()
         
         assert result == "result"
-        stats = FunctionProfiler.get_all_stats()
+        stats = ProfileurFonction.get_all_stats()
         # Le nom contient le module et la fonction
         assert any("my_func" in k for k in stats.keys())
     
     def test_profile_with_custom_name(self, mock_streamlit):
         """@profile avec nom personnalisé."""
-        from src.core.performance import profile, FunctionProfiler
+        from src.core.performance import profile, ProfileurFonction
         
         @profile(name="custom_name")
         def some_func():
@@ -189,12 +189,12 @@ class TestProfileDecorator:
         
         some_func()
         
-        stats = FunctionProfiler.get_all_stats()
+        stats = ProfileurFonction.get_all_stats()
         assert "custom_name" in stats
     
     def test_profile_records_errors(self, mock_streamlit):
         """@profile enregistre les erreurs."""
-        from src.core.performance import profile, FunctionProfiler
+        from src.core.performance import profile, ProfileurFonction
         
         @profile(name="error_func")
         def failing_func():
@@ -203,7 +203,7 @@ class TestProfileDecorator:
         with pytest.raises(ValueError):
             failing_func()
         
-        stats = FunctionProfiler.get_all_stats()["error_func"]
+        stats = ProfileurFonction.get_all_stats()["error_func"]
         assert stats.errors == 1
 
 
@@ -219,29 +219,29 @@ class TestMeasureTimeContextManager:
     
     def test_measure_time_records(self, mock_streamlit):
         """measure_time enregistre le temps."""
-        from src.core.performance import measure_time, FunctionProfiler
+        from src.core.performance import measure_time, ProfileurFonction
         
         with measure_time("test_block"):
             time.sleep(0.01)  # 10ms
         
-        stats = FunctionProfiler.get_all_stats()
+        stats = ProfileurFonction.get_all_stats()
         assert "test_block" in stats
         assert stats["test_block"].total_time_ms >= 10
     
     def test_measure_time_records_errors(self, mock_streamlit):
         """measure_time enregistre les erreurs."""
-        from src.core.performance import measure_time, FunctionProfiler
+        from src.core.performance import measure_time, ProfileurFonction
         
         with pytest.raises(RuntimeError):
             with measure_time("error_block"):
                 raise RuntimeError("Test error")
         
-        stats = FunctionProfiler.get_all_stats()
+        stats = ProfileurFonction.get_all_stats()
         assert stats["error_block"].errors == 1
 
 
 class TestMemoryMonitor:
-    """Tests pour MemoryMonitor."""
+    """Tests pour MoniteurMemoire."""
     
     @pytest.fixture(autouse=True)
     def mock_streamlit(self):
@@ -252,46 +252,46 @@ class TestMemoryMonitor:
     
     def test_start_tracking(self, mock_streamlit):
         """start_tracking démarre tracemalloc."""
-        from src.core.performance import MemoryMonitor
+        from src.core.performance import MoniteurMemoire
         
-        MemoryMonitor._tracking_active = False
+        MoniteurMemoire._tracking_active = False
         
         with patch('src.core.performance.tracemalloc') as mock_trace:
-            MemoryMonitor.start_tracking()
+            MoniteurMemoire.start_tracking()
             
             mock_trace.start.assert_called_once()
-            assert MemoryMonitor._tracking_active is True
+            assert MoniteurMemoire._tracking_active is True
     
     def test_start_tracking_already_active(self, mock_streamlit):
         """start_tracking ne redémarre pas si déjà actif."""
-        from src.core.performance import MemoryMonitor
+        from src.core.performance import MoniteurMemoire
         
-        MemoryMonitor._tracking_active = True
+        MoniteurMemoire._tracking_active = True
         
         with patch('src.core.performance.tracemalloc') as mock_trace:
-            MemoryMonitor.start_tracking()
+            MoniteurMemoire.start_tracking()
             
             mock_trace.start.assert_not_called()
     
     def test_stop_tracking(self, mock_streamlit):
         """stop_tracking arrête tracemalloc."""
-        from src.core.performance import MemoryMonitor
+        from src.core.performance import MoniteurMemoire
         
-        MemoryMonitor._tracking_active = True
+        MoniteurMemoire._tracking_active = True
         
         with patch('src.core.performance.tracemalloc') as mock_trace:
-            MemoryMonitor.stop_tracking()
+            MoniteurMemoire.stop_tracking()
             
             mock_trace.stop.assert_called_once()
-            assert MemoryMonitor._tracking_active is False
+            assert MoniteurMemoire._tracking_active is False
     
     def test_get_current_usage(self, mock_streamlit):
         """get_current_usage retourne les infos mémoire."""
-        from src.core.performance import MemoryMonitor
+        from src.core.performance import MoniteurMemoire
         
-        MemoryMonitor._tracking_active = False
+        MoniteurMemoire._tracking_active = False
         
-        usage = MemoryMonitor.get_current_usage()
+        usage = MoniteurMemoire.get_current_usage()
         
         assert "current_mb" in usage
         assert "peak_mb" in usage
@@ -300,62 +300,62 @@ class TestMemoryMonitor:
     
     def test_get_current_usage_with_tracking(self, mock_streamlit):
         """get_current_usage avec tracking actif."""
-        from src.core.performance import MemoryMonitor
+        from src.core.performance import MoniteurMemoire
         
-        MemoryMonitor._tracking_active = True
+        MoniteurMemoire._tracking_active = True
         
         with patch('src.core.performance.tracemalloc') as mock_trace:
             mock_trace.get_traced_memory.return_value = (1024*1024, 2*1024*1024)
             
-            usage = MemoryMonitor.get_current_usage()
+            usage = MoniteurMemoire.get_current_usage()
             
             assert usage["current_mb"] == 1.0
             assert usage["peak_mb"] == 2.0
     
     def test_take_snapshot(self, mock_streamlit):
         """take_snapshot prend un snapshot."""
-        from src.core.performance import MemoryMonitor
+        from src.core.performance import MoniteurMemoire
         
-        MemoryMonitor._tracking_active = False
+        MoniteurMemoire._tracking_active = False
         
-        snapshot = MemoryMonitor.take_snapshot(label="test_snap")
+        snapshot = MoniteurMemoire.take_snapshot(label="test_snap")
         
         assert snapshot["label"] == "test_snap"
         assert "timestamp" in snapshot
         
-        snapshots = MemoryMonitor.get_snapshots()
+        snapshots = MoniteurMemoire.get_snapshots()
         assert len(snapshots) == 1
     
     def test_take_snapshot_limits_count(self, mock_streamlit):
         """take_snapshot garde seulement 20 derniers."""
-        from src.core.performance import MemoryMonitor
+        from src.core.performance import MoniteurMemoire
         
-        MemoryMonitor._tracking_active = False
+        MoniteurMemoire._tracking_active = False
         
         for i in range(25):
-            MemoryMonitor.take_snapshot(label=f"snap_{i}")
+            MoniteurMemoire.take_snapshot(label=f"snap_{i}")
         
-        snapshots = MemoryMonitor.get_snapshots()
+        snapshots = MoniteurMemoire.get_snapshots()
         assert len(snapshots) <= 20
     
     def test_force_cleanup(self, mock_streamlit):
         """force_cleanup déclenche gc."""
-        from src.core.performance import MemoryMonitor
+        from src.core.performance import MoniteurMemoire
         
-        MemoryMonitor._tracking_active = False
+        MoniteurMemoire._tracking_active = False
         
         with patch('src.core.performance.gc') as mock_gc:
             mock_gc.collect.return_value = 100
             mock_gc.get_objects.return_value = []
             
-            result = MemoryMonitor.force_cleanup()
+            result = MoniteurMemoire.force_cleanup()
             
             mock_gc.collect.assert_called_once()
             assert result["objects_collected"] == 100
 
 
 class TestSQLOptimizer:
-    """Tests pour SQLOptimizer."""
+    """Tests pour OptimiseurSQL."""
     
     @pytest.fixture(autouse=True)
     def mock_streamlit(self):
@@ -366,9 +366,9 @@ class TestSQLOptimizer:
     
     def test_get_stats_empty(self, mock_streamlit):
         """_get_stats retourne structure vide par défaut."""
-        from src.core.performance import SQLOptimizer
+        from src.core.performance import OptimiseurSQL
         
-        stats = SQLOptimizer._get_stats()
+        stats = OptimiseurSQL._get_stats()
         
         assert "queries" in stats
         assert "slow_queries" in stats

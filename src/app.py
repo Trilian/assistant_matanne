@@ -52,7 +52,7 @@ logger = obtenir_logger(__name__)
 # ═══════════════════════════════════════════════════════════
 
 from src.core import Cache, GestionnaireEtat, obtenir_etat, obtenir_parametres
-from src.core.lazy_loader import OptimizedRouter
+from src.core.lazy_loader import RouteurOptimise
 
 # Layout modulaire
 from src.ui.layout import (
@@ -106,7 +106,7 @@ def main():
 
         # Router vers module actif
         etat = obtenir_etat()
-        OptimizedRouter.load_module(etat.module_actuel)
+        RouteurOptimise.load_module(etat.module_actuel)
 
         # Footer
         afficher_footer()

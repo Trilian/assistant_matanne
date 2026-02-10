@@ -9,72 +9,72 @@ from contextlib import contextmanager
 
 
 class TestUserContext:
-    """Tests pour la classe UserContext"""
+    """Tests pour la classe ContexteUtilisateur"""
     
     def teardown_method(self):
         """Nettoyer le contexte après chaque test"""
-        from src.core.multi_tenant import UserContext
-        UserContext.clear()
+        from src.core.multi_tenant import ContexteUtilisateur
+        ContexteUtilisateur.clear()
     
     def test_set_user(self):
         """Test définition de l'utilisateur"""
-        from src.core.multi_tenant import UserContext
+        from src.core.multi_tenant import ContexteUtilisateur
         
-        UserContext.set_user("user123")
+        ContexteUtilisateur.set_user("user123")
         
-        assert UserContext.get_user() == "user123"
+        assert ContexteUtilisateur.get_user() == "user123"
     
     def test_get_user_empty(self):
         """Test get_user sans utilisateur défini"""
-        from src.core.multi_tenant import UserContext
+        from src.core.multi_tenant import ContexteUtilisateur
         
-        UserContext.clear()
+        ContexteUtilisateur.clear()
         
-        assert UserContext.get_user() is None
+        assert ContexteUtilisateur.get_user() is None
     
     def test_clear(self):
         """Test nettoyage du contexte"""
-        from src.core.multi_tenant import UserContext
+        from src.core.multi_tenant import ContexteUtilisateur
         
-        UserContext.set_user("user123")
-        UserContext.clear()
+        ContexteUtilisateur.set_user("user123")
+        ContexteUtilisateur.clear()
         
-        assert UserContext.get_user() is None
+        assert ContexteUtilisateur.get_user() is None
     
     def test_set_bypass(self):
         """Test mode bypass"""
-        from src.core.multi_tenant import UserContext
+        from src.core.multi_tenant import ContexteUtilisateur
         
-        UserContext.set_bypass(True)
+        ContexteUtilisateur.set_bypass(True)
         
-        assert UserContext.is_bypassed() is True
+        assert ContexteUtilisateur.is_bypassed() is True
     
     def test_bypass_default_false(self):
         """Test bypass par défaut à False"""
-        from src.core.multi_tenant import UserContext
+        from src.core.multi_tenant import ContexteUtilisateur
         
-        UserContext.clear()
-        UserContext.set_bypass(False)
+        ContexteUtilisateur.clear()
+        ContexteUtilisateur.set_bypass(False)
         
-        assert UserContext.is_bypassed() is False
+        assert ContexteUtilisateur.is_bypassed() is False
     
     def test_set_multiple_users(self):
         """Test changement d'utilisateur"""
-        from src.core.multi_tenant import UserContext
+        from src.core.multi_tenant import ContexteUtilisateur
         
-        UserContext.set_user("user1")
-        assert UserContext.get_user() == "user1"
+        ContexteUtilisateur.set_user("user1")
+        assert ContexteUtilisateur.get_user() == "user1"
         
-        UserContext.set_user("user2")
-        assert UserContext.get_user() == "user2"
+        ContexteUtilisateur.set_user("user2")
+        assert ContexteUtilisateur.get_user() == "user2"
     
     def test_user_context_class_attributes(self):
-        """Test que UserContext utilise des attributs de classe"""
-        from src.core.multi_tenant import UserContext
+        """Test que ContexteUtilisateur utilise des attributs de classe"""
+        from src.core.multi_tenant import ContexteUtilisateur
         
-        # UserContext utilise des attributs de classe, pas thread local
-        assert hasattr(UserContext, '_current_user_id')
-        assert hasattr(UserContext, '_bypass_isolation')
+        # ContexteUtilisateur utilise des attributs de classe, pas thread local
+        assert hasattr(ContexteUtilisateur, '_current_user_id')
+        assert hasattr(ContexteUtilisateur, '_bypass_isolation')
 
 
 class TestUserContextManager:
@@ -82,46 +82,46 @@ class TestUserContextManager:
     
     def teardown_method(self):
         """Nettoyer le contexte après chaque test"""
-        from src.core.multi_tenant import UserContext
-        UserContext.clear()
+        from src.core.multi_tenant import ContexteUtilisateur
+        ContexteUtilisateur.clear()
     
     def test_user_context_basic(self):
         """Test context manager basique"""
-        from src.core.multi_tenant import user_context, UserContext
+        from src.core.multi_tenant import user_context, ContexteUtilisateur
         
         with user_context("temp_user"):
-            assert UserContext.get_user() == "temp_user"
+            assert ContexteUtilisateur.get_user() == "temp_user"
         
         # Après le context manager, devrait être restauré
-        assert UserContext.get_user() is None
+        assert ContexteUtilisateur.get_user() is None
     
     def test_user_context_nested(self):
         """Test context managers imbriqués"""
-        from src.core.multi_tenant import user_context, UserContext
+        from src.core.multi_tenant import user_context, ContexteUtilisateur
         
         with user_context("outer_user"):
-            assert UserContext.get_user() == "outer_user"
+            assert ContexteUtilisateur.get_user() == "outer_user"
             
             with user_context("inner_user"):
-                assert UserContext.get_user() == "inner_user"
+                assert ContexteUtilisateur.get_user() == "inner_user"
             
             # Retour à outer
-            assert UserContext.get_user() == "outer_user"
+            assert ContexteUtilisateur.get_user() == "outer_user"
     
     def test_user_context_restores_on_exception(self):
         """Test restauration après exception"""
-        from src.core.multi_tenant import user_context, UserContext
+        from src.core.multi_tenant import user_context, ContexteUtilisateur
         
-        UserContext.set_user("original")
+        ContexteUtilisateur.set_user("original")
         
         try:
             with user_context("temp"):
-                assert UserContext.get_user() == "temp"
+                assert ContexteUtilisateur.get_user() == "temp"
                 raise ValueError("Test error")
         except ValueError:
             pass
         
-        assert UserContext.get_user() == "original"
+        assert ContexteUtilisateur.get_user() == "original"
 
 
 class TestAdminContext:
@@ -129,60 +129,60 @@ class TestAdminContext:
     
     def teardown_method(self):
         """Nettoyer le contexte après chaque test"""
-        from src.core.multi_tenant import UserContext
-        UserContext.clear()
-        UserContext.set_bypass(False)
+        from src.core.multi_tenant import ContexteUtilisateur
+        ContexteUtilisateur.clear()
+        ContexteUtilisateur.set_bypass(False)
     
     def test_admin_context_enables_bypass(self):
         """Test que admin_context active le bypass"""
-        from src.core.multi_tenant import admin_context, UserContext
+        from src.core.multi_tenant import admin_context, ContexteUtilisateur
         
-        assert UserContext.is_bypassed() is False
+        assert ContexteUtilisateur.is_bypassed() is False
         
         with admin_context():
-            assert UserContext.is_bypassed() is True
+            assert ContexteUtilisateur.is_bypassed() is True
         
-        assert UserContext.is_bypassed() is False
+        assert ContexteUtilisateur.is_bypassed() is False
     
     def test_admin_context_restores_state(self):
         """Test restauration de l'état après admin_context"""
-        from src.core.multi_tenant import admin_context, UserContext
+        from src.core.multi_tenant import admin_context, ContexteUtilisateur
         
-        UserContext.set_bypass(True)
+        ContexteUtilisateur.set_bypass(True)
         
         with admin_context():
-            assert UserContext.is_bypassed() is True
+            assert ContexteUtilisateur.is_bypassed() is True
         
-        assert UserContext.is_bypassed() is True  # Était déjà True
+        assert ContexteUtilisateur.is_bypassed() is True  # Était déjà True
     
     def test_admin_context_with_user_operations(self):
         """Test opérations dans admin_context"""
-        from src.core.multi_tenant import admin_context, UserContext
+        from src.core.multi_tenant import admin_context, ContexteUtilisateur
         
-        UserContext.set_user("regular_user")
+        ContexteUtilisateur.set_user("regular_user")
         
         with admin_context():
             # En mode admin, pas de filtrage par user
-            assert UserContext.is_bypassed() is True
+            assert ContexteUtilisateur.is_bypassed() is True
             # L'utilisateur est toujours défini
-            assert UserContext.get_user() == "regular_user"
+            assert ContexteUtilisateur.get_user() == "regular_user"
 
 
 class TestWithUserIsolationDecorator:
-    """Tests pour le décorateur @with_user_isolation"""
+    """Tests pour le décorateur @avec_isolation_utilisateur"""
     
     def teardown_method(self):
         """Nettoyer le contexte après chaque test"""
-        from src.core.multi_tenant import UserContext
-        UserContext.clear()
+        from src.core.multi_tenant import ContexteUtilisateur
+        ContexteUtilisateur.clear()
     
     def test_with_user_isolation_injects_user_id(self):
         """Test que le décorateur injecte user_id dans kwargs"""
-        from src.core.multi_tenant import with_user_isolation, UserContext
+        from src.core.multi_tenant import avec_isolation_utilisateur, ContexteUtilisateur
         
-        UserContext.set_user("test_user")
+        ContexteUtilisateur.set_user("test_user")
         
-        @with_user_isolation()
+        @avec_isolation_utilisateur()
         def function_with_user_id(user_id=None):
             return user_id
         
@@ -192,11 +192,11 @@ class TestWithUserIsolationDecorator:
     
     def test_with_user_isolation_does_not_override(self):
         """Test que le décorateur ne remplace pas user_id fourni"""
-        from src.core.multi_tenant import with_user_isolation, UserContext
+        from src.core.multi_tenant import avec_isolation_utilisateur, ContexteUtilisateur
         
-        UserContext.set_user("context_user")
+        ContexteUtilisateur.set_user("context_user")
         
-        @with_user_isolation()
+        @avec_isolation_utilisateur()
         def function_with_user_id(user_id=None):
             return user_id
         
@@ -206,12 +206,12 @@ class TestWithUserIsolationDecorator:
     
     def test_with_user_isolation_bypassed(self):
         """Test décorateur en mode bypass"""
-        from src.core.multi_tenant import with_user_isolation, UserContext
+        from src.core.multi_tenant import avec_isolation_utilisateur, ContexteUtilisateur
         
-        UserContext.set_user("test_user")
-        UserContext.set_bypass(True)
+        ContexteUtilisateur.set_user("test_user")
+        ContexteUtilisateur.set_bypass(True)
         
-        @with_user_isolation()
+        @avec_isolation_utilisateur()
         def function_with_user_id(user_id=None):
             return user_id
         
@@ -220,24 +220,24 @@ class TestWithUserIsolationDecorator:
         # En mode bypass, user_id n'est pas injecté
         assert result is None
         
-        UserContext.set_bypass(False)
+        ContexteUtilisateur.set_bypass(False)
 
 
 class TestRequireUserDecorator:
-    """Tests pour le décorateur @require_user"""
+    """Tests pour le décorateur @exiger_utilisateur"""
     
     def teardown_method(self):
         """Nettoyer le contexte après chaque test"""
-        from src.core.multi_tenant import UserContext
-        UserContext.clear()
+        from src.core.multi_tenant import ContexteUtilisateur
+        ContexteUtilisateur.clear()
     
     def test_require_user_with_user(self):
         """Test avec utilisateur défini"""
-        from src.core.multi_tenant import require_user, UserContext
+        from src.core.multi_tenant import exiger_utilisateur, ContexteUtilisateur
         
-        UserContext.set_user("user123")
+        ContexteUtilisateur.set_user("user123")
         
-        @require_user()
+        @exiger_utilisateur()
         def protected_function():
             return "success"
         
@@ -247,11 +247,11 @@ class TestRequireUserDecorator:
     
     def test_require_user_without_user(self):
         """Test sans utilisateur défini"""
-        from src.core.multi_tenant import require_user, UserContext
+        from src.core.multi_tenant import exiger_utilisateur, ContexteUtilisateur
         
-        UserContext.clear()
+        ContexteUtilisateur.clear()
         
-        @require_user()
+        @exiger_utilisateur()
         def protected_function():
             return "success"
         
@@ -260,12 +260,12 @@ class TestRequireUserDecorator:
     
     def test_require_user_bypassed(self):
         """Test en mode bypass"""
-        from src.core.multi_tenant import require_user, UserContext
+        from src.core.multi_tenant import exiger_utilisateur, ContexteUtilisateur
         
-        UserContext.clear()
-        UserContext.set_bypass(True)
+        ContexteUtilisateur.clear()
+        ContexteUtilisateur.set_bypass(True)
         
-        @require_user()
+        @exiger_utilisateur()
         def protected_function():
             return "success"
         
@@ -274,94 +274,94 @@ class TestRequireUserDecorator:
         
         assert result == "success"
         
-        UserContext.set_bypass(False)
+        ContexteUtilisateur.set_bypass(False)
 
 
 class TestMultiTenantQuery:
-    """Tests pour la classe MultiTenantQuery"""
+    """Tests pour la classe RequeteMultiLocataire"""
     
     def teardown_method(self):
         """Nettoyer le contexte après chaque test"""
-        from src.core.multi_tenant import UserContext
-        UserContext.clear()
-        UserContext.set_bypass(False)
+        from src.core.multi_tenant import ContexteUtilisateur
+        ContexteUtilisateur.clear()
+        ContexteUtilisateur.set_bypass(False)
     
     def test_filter_by_user(self):
         """Test filtrage par utilisateur"""
-        from src.core.multi_tenant import MultiTenantQuery, UserContext
+        from src.core.multi_tenant import RequeteMultiLocataire, ContexteUtilisateur
         
-        UserContext.set_user("user123")
+        ContexteUtilisateur.set_user("user123")
         
         # Créer un mock de query et model
         mock_query = MagicMock()
         mock_model = MagicMock()
         mock_model.user_id = "user_id_column"
         
-        MultiTenantQuery.filter_by_user(mock_query, mock_model)
+        RequeteMultiLocataire.filter_by_user(mock_query, mock_model)
         
         # Devrait appeler filter
         mock_query.filter.assert_called()
     
     def test_filter_by_user_bypassed(self):
         """Test filtrage en mode bypass"""
-        from src.core.multi_tenant import MultiTenantQuery, UserContext
+        from src.core.multi_tenant import RequeteMultiLocataire, ContexteUtilisateur
         
-        UserContext.set_bypass(True)
+        ContexteUtilisateur.set_bypass(True)
         
         mock_query = MagicMock()
         mock_model = MagicMock()
         
-        result = MultiTenantQuery.filter_by_user(mock_query, mock_model)
+        result = RequeteMultiLocataire.filter_by_user(mock_query, mock_model)
         
         # En mode bypass, devrait retourner la query originale
         assert result is mock_query
     
     def test_filter_by_user_explicit_user_id(self):
         """Test filtrage avec user_id explicite"""
-        from src.core.multi_tenant import MultiTenantQuery, UserContext
+        from src.core.multi_tenant import RequeteMultiLocataire, ContexteUtilisateur
         
         mock_query = MagicMock()
         mock_model = MagicMock()
         mock_model.user_id = "column"
         
-        MultiTenantQuery.filter_by_user(mock_query, mock_model, user_id="explicit_user")
+        RequeteMultiLocataire.filter_by_user(mock_query, mock_model, user_id="explicit_user")
         
         mock_query.filter.assert_called()
     
     def test_get_user_filter(self):
         """Test get_user_filter"""
-        from src.core.multi_tenant import MultiTenantQuery, UserContext
+        from src.core.multi_tenant import RequeteMultiLocataire, ContexteUtilisateur
         
-        UserContext.set_user("user456")
+        ContexteUtilisateur.set_user("user456")
         
         mock_model = MagicMock()
         mock_model.user_id = "column"
         
-        condition = MultiTenantQuery.get_user_filter(mock_model)
+        condition = RequeteMultiLocataire.get_user_filter(mock_model)
         
         assert condition is not None
     
     def test_get_user_filter_bypassed(self):
         """Test get_user_filter en mode bypass"""
-        from src.core.multi_tenant import MultiTenantQuery, UserContext
+        from src.core.multi_tenant import RequeteMultiLocataire, ContexteUtilisateur
         
-        UserContext.set_bypass(True)
+        ContexteUtilisateur.set_bypass(True)
         
         mock_model = MagicMock()
         
-        condition = MultiTenantQuery.get_user_filter(mock_model)
+        condition = RequeteMultiLocataire.get_user_filter(mock_model)
         
         assert condition is True
 
 
 class TestMultiTenantService:
-    """Tests pour la classe MultiTenantService"""
+    """Tests pour la classe ServiceMultiLocataire"""
     
     def teardown_method(self):
         """Nettoyer le contexte après chaque test"""
-        from src.core.multi_tenant import UserContext
-        UserContext.clear()
-        UserContext.set_bypass(False)
+        from src.core.multi_tenant import ContexteUtilisateur
+        ContexteUtilisateur.clear()
+        ContexteUtilisateur.set_bypass(False)
     
     @pytest.fixture
     def mock_model(self):
@@ -379,29 +379,29 @@ class TestMultiTenantService:
     
     def test_service_init(self, mock_model):
         """Test initialisation du service"""
-        from src.core.multi_tenant import MultiTenantService
+        from src.core.multi_tenant import ServiceMultiLocataire
         
-        service = MultiTenantService(mock_model)
+        service = ServiceMultiLocataire(mock_model)
         
         assert service.model is mock_model
         assert service._has_user_id is True
     
     def test_service_init_without_user_id(self):
         """Test initialisation sans user_id"""
-        from src.core.multi_tenant import MultiTenantService
+        from src.core.multi_tenant import ServiceMultiLocataire
         
         model = MagicMock(spec=[])  # Pas d'attribut user_id
-        service = MultiTenantService(model)
+        service = ServiceMultiLocataire(model)
         
         assert service._has_user_id is False
     
     def test_apply_user_filter(self, mock_model, mock_db):
         """Test _apply_user_filter"""
-        from src.core.multi_tenant import MultiTenantService, UserContext
+        from src.core.multi_tenant import ServiceMultiLocataire, ContexteUtilisateur
         
-        UserContext.set_user("user123")
+        ContexteUtilisateur.set_user("user123")
         
-        service = MultiTenantService(mock_model)
+        service = ServiceMultiLocataire(mock_model)
         mock_query = MagicMock()
         
         service._apply_user_filter(mock_query)
@@ -410,11 +410,11 @@ class TestMultiTenantService:
     
     def test_apply_user_filter_bypassed(self, mock_model, mock_db):
         """Test _apply_user_filter en mode bypass"""
-        from src.core.multi_tenant import MultiTenantService, UserContext
+        from src.core.multi_tenant import ServiceMultiLocataire, ContexteUtilisateur
         
-        UserContext.set_bypass(True)
+        ContexteUtilisateur.set_bypass(True)
         
-        service = MultiTenantService(mock_model)
+        service = ServiceMultiLocataire(mock_model)
         mock_query = MagicMock()
         
         result = service._apply_user_filter(mock_query)
@@ -423,11 +423,11 @@ class TestMultiTenantService:
     
     def test_inject_user_id(self, mock_model):
         """Test _inject_user_id"""
-        from src.core.multi_tenant import MultiTenantService, UserContext
+        from src.core.multi_tenant import ServiceMultiLocataire, ContexteUtilisateur
         
-        UserContext.set_user("user123")
+        ContexteUtilisateur.set_user("user123")
         
-        service = MultiTenantService(mock_model)
+        service = ServiceMultiLocataire(mock_model)
         data = {"name": "test"}
         
         result = service._inject_user_id(data)
@@ -436,11 +436,11 @@ class TestMultiTenantService:
     
     def test_inject_user_id_already_present(self, mock_model):
         """Test _inject_user_id quand user_id existe déjà"""
-        from src.core.multi_tenant import MultiTenantService, UserContext
+        from src.core.multi_tenant import ServiceMultiLocataire, ContexteUtilisateur
         
-        UserContext.set_user("user123")
+        ContexteUtilisateur.set_user("user123")
         
-        service = MultiTenantService(mock_model)
+        service = ServiceMultiLocataire(mock_model)
         data = {"name": "test", "user_id": "existing_user"}
         
         result = service._inject_user_id(data)
@@ -449,11 +449,11 @@ class TestMultiTenantService:
     
     def test_inject_user_id_bypassed(self, mock_model):
         """Test _inject_user_id en mode bypass"""
-        from src.core.multi_tenant import MultiTenantService, UserContext
+        from src.core.multi_tenant import ServiceMultiLocataire, ContexteUtilisateur
         
-        UserContext.set_bypass(True)
+        ContexteUtilisateur.set_bypass(True)
         
-        service = MultiTenantService(mock_model)
+        service = ServiceMultiLocataire(mock_model)
         data = {"name": "test"}
         
         result = service._inject_user_id(data)
@@ -462,11 +462,11 @@ class TestMultiTenantService:
     
     def test_get_all(self, mock_model, mock_db):
         """Test get_all"""
-        from src.core.multi_tenant import MultiTenantService, UserContext
+        from src.core.multi_tenant import ServiceMultiLocataire, ContexteUtilisateur
         
-        UserContext.set_user("user123")
+        ContexteUtilisateur.set_user("user123")
         
-        service = MultiTenantService(mock_model)
+        service = ServiceMultiLocataire(mock_model)
         mock_db.query.return_value.filter.return_value.all.return_value = []
         
         result = service.get_all(mock_db)
@@ -475,12 +475,12 @@ class TestMultiTenantService:
     
     def test_get_all_with_filters(self, mock_model, mock_db):
         """Test get_all avec filtres additionnels"""
-        from src.core.multi_tenant import MultiTenantService, UserContext
+        from src.core.multi_tenant import ServiceMultiLocataire, ContexteUtilisateur
         
-        UserContext.set_user("user123")
+        ContexteUtilisateur.set_user("user123")
         mock_model.status = "status"
         
-        service = MultiTenantService(mock_model)
+        service = ServiceMultiLocataire(mock_model)
         mock_query = MagicMock()
         mock_db.query.return_value = mock_query
         mock_query.filter.return_value = mock_query
@@ -492,11 +492,11 @@ class TestMultiTenantService:
     
     def test_get_by_id(self, mock_model, mock_db):
         """Test get_by_id"""
-        from src.core.multi_tenant import MultiTenantService, UserContext
+        from src.core.multi_tenant import ServiceMultiLocataire, ContexteUtilisateur
         
-        UserContext.set_user("user123")
+        ContexteUtilisateur.set_user("user123")
         
-        service = MultiTenantService(mock_model)
+        service = ServiceMultiLocataire(mock_model)
         mock_query = MagicMock()
         mock_db.query.return_value = mock_query
         mock_query.filter.return_value = mock_query
@@ -508,11 +508,11 @@ class TestMultiTenantService:
     
     def test_create(self, mock_model, mock_db):
         """Test create"""
-        from src.core.multi_tenant import MultiTenantService, UserContext
+        from src.core.multi_tenant import ServiceMultiLocataire, ContexteUtilisateur
         
-        UserContext.set_user("user123")
+        ContexteUtilisateur.set_user("user123")
         
-        service = MultiTenantService(mock_model)
+        service = ServiceMultiLocataire(mock_model)
         mock_entity = MagicMock()
         mock_model.return_value = mock_entity
         
@@ -523,11 +523,11 @@ class TestMultiTenantService:
     
     def test_update(self, mock_model, mock_db):
         """Test update"""
-        from src.core.multi_tenant import MultiTenantService, UserContext
+        from src.core.multi_tenant import ServiceMultiLocataire, ContexteUtilisateur
         
-        UserContext.set_user("user123")
+        ContexteUtilisateur.set_user("user123")
         
-        service = MultiTenantService(mock_model)
+        service = ServiceMultiLocataire(mock_model)
         
         # Mock get_by_id
         mock_entity = MagicMock()
@@ -546,11 +546,11 @@ class TestMultiTenantService:
     
     def test_update_not_found(self, mock_model, mock_db):
         """Test update pour entité inexistante"""
-        from src.core.multi_tenant import MultiTenantService, UserContext
+        from src.core.multi_tenant import ServiceMultiLocataire, ContexteUtilisateur
         
-        UserContext.set_user("user123")
+        ContexteUtilisateur.set_user("user123")
         
-        service = MultiTenantService(mock_model)
+        service = ServiceMultiLocataire(mock_model)
         
         mock_query = MagicMock()
         mock_db.query.return_value = mock_query
@@ -563,11 +563,11 @@ class TestMultiTenantService:
     
     def test_delete(self, mock_model, mock_db):
         """Test delete"""
-        from src.core.multi_tenant import MultiTenantService, UserContext
+        from src.core.multi_tenant import ServiceMultiLocataire, ContexteUtilisateur
         
-        UserContext.set_user("user123")
+        ContexteUtilisateur.set_user("user123")
         
-        service = MultiTenantService(mock_model)
+        service = ServiceMultiLocataire(mock_model)
         
         mock_entity = MagicMock()
         mock_query = MagicMock()
@@ -583,11 +583,11 @@ class TestMultiTenantService:
     
     def test_delete_not_found(self, mock_model, mock_db):
         """Test delete pour entité inexistante"""
-        from src.core.multi_tenant import MultiTenantService, UserContext
+        from src.core.multi_tenant import ServiceMultiLocataire, ContexteUtilisateur
         
-        UserContext.set_user("user123")
+        ContexteUtilisateur.set_user("user123")
         
-        service = MultiTenantService(mock_model)
+        service = ServiceMultiLocataire(mock_model)
         
         mock_query = MagicMock()
         mock_db.query.return_value = mock_query
@@ -600,11 +600,11 @@ class TestMultiTenantService:
     
     def test_count(self, mock_model, mock_db):
         """Test count"""
-        from src.core.multi_tenant import MultiTenantService, UserContext
+        from src.core.multi_tenant import ServiceMultiLocataire, ContexteUtilisateur
         
-        UserContext.set_user("user123")
+        ContexteUtilisateur.set_user("user123")
         
-        service = MultiTenantService(mock_model)
+        service = ServiceMultiLocataire(mock_model)
         
         mock_query = MagicMock()
         mock_db.query.return_value = mock_query
@@ -617,89 +617,89 @@ class TestMultiTenantService:
 
 
 class TestInitUserContextStreamlit:
-    """Tests pour init_user_context_streamlit"""
+    """Tests pour initialiser_contexte_utilisateur_streamlit"""
     
     def teardown_method(self):
         """Nettoyer le contexte après chaque test"""
-        from src.core.multi_tenant import UserContext
-        UserContext.clear()
+        from src.core.multi_tenant import ContexteUtilisateur
+        ContexteUtilisateur.clear()
     
     def test_init_calls_set_user(self):
-        """Test que init_user_context_streamlit appelle set_user"""
-        from src.core.multi_tenant import init_user_context_streamlit, UserContext
+        """Test que initialiser_contexte_utilisateur_streamlit appelle set_user"""
+        from src.core.multi_tenant import initialiser_contexte_utilisateur_streamlit, ContexteUtilisateur
         
         # Importer streamlit pour le patcher
         with patch('streamlit.session_state', {"user_id": "session_user"}):
             # Cette fonction peut lever des erreurs si streamlit n'est pas configuré
             try:
-                init_user_context_streamlit()
+                initialiser_contexte_utilisateur_streamlit()
             except Exception:
                 pass  # Ignorer les erreurs de contexte Streamlit
     
     def test_init_clears_when_no_user(self):
         """Test que init efface le contexte sans utilisateur"""
-        from src.core.multi_tenant import init_user_context_streamlit, UserContext
+        from src.core.multi_tenant import initialiser_contexte_utilisateur_streamlit, ContexteUtilisateur
         
-        UserContext.set_user("existing")
+        ContexteUtilisateur.set_user("existing")
         
         with patch('streamlit.session_state', {}):
             try:
-                init_user_context_streamlit()
+                initialiser_contexte_utilisateur_streamlit()
             except Exception:
                 pass  # Ignorer les erreurs de contexte Streamlit
 
 
 class TestSetUserFromAuth:
-    """Tests pour set_user_from_auth"""
+    """Tests pour definir_utilisateur_from_auth"""
     
     def teardown_method(self):
         """Nettoyer le contexte après chaque test"""
-        from src.core.multi_tenant import UserContext
-        UserContext.clear()
+        from src.core.multi_tenant import ContexteUtilisateur
+        ContexteUtilisateur.clear()
     
     def test_set_user_from_auth_with_id(self):
         """Test avec données d'authentification"""
-        from src.core.multi_tenant import set_user_from_auth, UserContext
+        from src.core.multi_tenant import definir_utilisateur_from_auth, ContexteUtilisateur
         
         with patch('streamlit.session_state', {}):
             user_data = {"id": "auth_user", "email": "test@example.com"}
             try:
-                set_user_from_auth(user_data)
-                assert UserContext.get_user() == "auth_user"
+                definir_utilisateur_from_auth(user_data)
+                assert ContexteUtilisateur.get_user() == "auth_user"
             except Exception:
-                # Si streamlit n'est pas disponible, vérifie juste UserContext
-                UserContext.set_user(str(user_data['id']))
-                assert UserContext.get_user() == "auth_user"
+                # Si streamlit n'est pas disponible, vérifie juste ContexteUtilisateur
+                ContexteUtilisateur.set_user(str(user_data['id']))
+                assert ContexteUtilisateur.get_user() == "auth_user"
     
     def test_set_user_from_auth_without_id(self):
         """Test sans id dans les données"""
-        from src.core.multi_tenant import set_user_from_auth, UserContext
+        from src.core.multi_tenant import definir_utilisateur_from_auth, ContexteUtilisateur
         
         user_data = {"email": "test@example.com"}
-        set_user_from_auth(user_data)
+        definir_utilisateur_from_auth(user_data)
         
         # Ne devrait pas changer le contexte car pas de 'id'
-        assert UserContext.get_user() is None
+        assert ContexteUtilisateur.get_user() is None
     
     def test_set_user_from_auth_none(self):
         """Test avec données None"""
-        from src.core.multi_tenant import set_user_from_auth, UserContext
+        from src.core.multi_tenant import definir_utilisateur_from_auth, ContexteUtilisateur
         
-        set_user_from_auth(None)
+        definir_utilisateur_from_auth(None)
         
-        assert UserContext.get_user() is None
+        assert ContexteUtilisateur.get_user() is None
 
 
 class TestCreateMultiTenantService:
-    """Tests pour la factory create_multi_tenant_service"""
+    """Tests pour la factory creer_multi_tenant_service"""
     
     def test_create_service(self):
         """Test création de service via factory"""
-        from src.core.multi_tenant import create_multi_tenant_service, MultiTenantService
+        from src.core.multi_tenant import creer_multi_tenant_service, ServiceMultiLocataire
         
         mock_model = MagicMock()
         
-        service = create_multi_tenant_service(mock_model)
+        service = creer_multi_tenant_service(mock_model)
         
-        assert isinstance(service, MultiTenantService)
+        assert isinstance(service, ServiceMultiLocataire)
         assert service.model is mock_model

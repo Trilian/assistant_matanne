@@ -1,4 +1,4 @@
-﻿"""
+"""
 Package Cuisine UI - Modules séparés pour une meilleure organisation
 
 Structure:
@@ -37,4 +37,3 @@ def __getattr__(name: str):
         from . import recettes_import as mod
         return mod
     raise AttributeError(f"module 'src.domains.cuisine.ui' has no attribute '{name}'")
-

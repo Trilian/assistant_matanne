@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Scanner Barcode/QR - Interface Streamlit
 
 ✅ Scanner codes-barres
@@ -525,4 +525,3 @@ def render_import_export():
 
 if __name__ == "__main__":
     app()
-

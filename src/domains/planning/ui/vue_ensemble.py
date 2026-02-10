@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Vue d'Ensemble Planning - Dashboard d'actions prioritaires
 
 Affiche les actions critiques et suggère automatiquement ce qui doit être fait
@@ -396,4 +396,3 @@ def app():
                 st.warning("**Alertes du jour**:")
                 for alerte in jour_data_dict["alertes"]:
                     st.write(f"• {alerte}")
-

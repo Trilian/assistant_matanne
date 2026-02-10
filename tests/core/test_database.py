@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests unitaires pour database.py (src/core/database.py).
 
 Tests couvrant:
@@ -495,4 +495,3 @@ class TestDatabaseIntegration:
         
         assert isinstance(count, int)
         assert count >= 0
-

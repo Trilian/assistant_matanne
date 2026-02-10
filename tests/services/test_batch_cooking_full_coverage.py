@@ -1320,4 +1320,3 @@ class TestGenererPlanIAIntegration:
         )
         
         assert result == [] or isinstance(result, list)
-

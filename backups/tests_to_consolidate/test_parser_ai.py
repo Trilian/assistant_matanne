@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour le parseur IA ultra-robuste.
 
 Teste toutes les stratégies de parsing :
@@ -397,4 +397,3 @@ class TestEdgeCases:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
-

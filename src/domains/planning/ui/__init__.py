@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Planning - Centre de Coordination Familiale
 
 Agrège TOUS les événements familiaux en une vision unifiée:
@@ -17,7 +17,7 @@ from . import calendrier_unifie as calendrier, vue_semaine, vue_ensemble
 
 __all__ = ["calendrier", "vue_semaine", "vue_ensemble"]
 
-# Enregistrement automatique pour OptimizedRouter
+# Enregistrement automatique pour RouteurOptimise
 SUBMODULES = {
     "📅 Calendrier Familial": calendrier,
     "[CHART] Vue Semaine": vue_semaine,
@@ -42,4 +42,3 @@ def app():
     # Charger la vue sélectionnée
     submodule = SUBMODULES[view]
     submodule.app()
-

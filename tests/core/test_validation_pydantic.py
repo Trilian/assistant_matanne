@@ -465,16 +465,7 @@ class TestConstantesValidation:
         assert MAX_TEMPS_PREPARATION > 0
         assert MAX_TEMPS_CUISSON > 0
         assert MAX_PORTIONS > 0
-
-
-# ═══════════════════════════════════════════════════════════
-# TESTS: Alias de compatibilité
-# ═══════════════════════════════════════════════════════════
-
-
 class TestAliasValidation:
-    """Tests pour les alias de compatibilité"""
-
     def test_validate_input_alias(self):
         """Test alias validate_input"""
         from src.core.validation import validate_input, valider_entree

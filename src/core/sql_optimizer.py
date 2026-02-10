@@ -1,4 +1,4 @@
-﻿"""
+"""
 SQL Optimizer - Optimisation des requêtes SQLAlchemy.
 
 Fonctionnalités :
@@ -34,7 +34,7 @@ T = TypeVar("T")
 
 
 @dataclass
-class QueryInfo:
+class InfoRequete:
     """Information sur une requête SQL."""
     
     sql: str
@@ -46,7 +46,7 @@ class QueryInfo:
 
 
 @dataclass
-class N1Detection:
+class DetectionN1:
     """Détection de problème N+1."""
     
     table: str
@@ -61,7 +61,7 @@ class N1Detection:
 # ═══════════════════════════════════════════════════════════
 
 
-class SQLAlchemyListener:
+class EcouteurSQLAlchemy:
     """
     Écoute les événements SQLAlchemy pour tracking.
     
@@ -105,7 +105,7 @@ class SQLAlchemyListener:
         operation = cls._extract_operation(sql)
         table = cls._extract_table(sql)
         
-        query_info = QueryInfo(
+        query_info = InfoRequete(
             sql=sql[:500],  # Tronquer
             duration_ms=duration_ms,
             table=table,
@@ -154,14 +154,14 @@ class SQLAlchemyListener:
         return "unknown"
     
     @classmethod
-    def get_queries(cls) -> list[QueryInfo]:
+    def obtenir_requetes(cls) -> list[InfoRequete]:
         """Retourne toutes les requêtes loggées."""
         return st.session_state.get(cls.SESSION_KEY, [])
     
     @classmethod
-    def get_stats(cls) -> dict:
+    def obtenir_statistiques(cls) -> dict:
         """Calcule les statistiques des requêtes."""
-        queries = cls.get_queries()
+        queries = cls.obtenir_requetes()
         
         if not queries:
             return {
@@ -197,6 +197,10 @@ class SQLAlchemyListener:
     def clear(cls) -> None:
         """Vide le log."""
         st.session_state[cls.SESSION_KEY] = []
+    
+    # Alias anglais
+    get_queries = obtenir_requetes
+    get_stats = obtenir_statistiques
 
 
 # ═══════════════════════════════════════════════════════════
@@ -204,7 +208,7 @@ class SQLAlchemyListener:
 # ═══════════════════════════════════════════════════════════
 
 
-class N1Detector:
+class DetecteurN1:
     """
     Détecte les problèmes N+1 queries.
     
@@ -217,14 +221,14 @@ class N1Detector:
     THRESHOLD = 5  # Min requêtes similaires pour alerter
     
     @classmethod
-    def analyze(cls) -> list[N1Detection]:
+    def analyze(cls) -> list[DetectionN1]:
         """
         Analyse les requêtes récentes pour détecter N+1.
         
         Returns:
             Liste des détections N+1
         """
-        queries = SQLAlchemyListener.get_queries()
+        queries = EcouteurSQLAlchemy.obtenir_requetes()
         
         if len(queries) < cls.THRESHOLD:
             return []
@@ -246,7 +250,7 @@ class N1Detector:
                 # Probable N+1
                 table = pattern_queries[0].table
                 
-                detection = N1Detection(
+                detection = DetectionN1(
                     table=table,
                     parent_table=cls._guess_parent_table(pattern_queries),
                     count=len(pattern_queries),
@@ -272,7 +276,7 @@ class N1Detector:
         return normalized
     
     @classmethod
-    def _guess_parent_table(cls, queries: list[QueryInfo]) -> str:
+    def _guess_parent_table(cls, queries: list[InfoRequete]) -> str:
         """Devine la table parente d'un N+1."""
         # Chercher des patterns de FK
         for q in queries:
@@ -283,19 +287,19 @@ class N1Detector:
         return "unknown"
     
     @classmethod
-    def get_detections(cls) -> list[N1Detection]:
+    def obtenir_detections(cls) -> list[DetectionN1]:
         """Retourne les détections N+1."""
         return st.session_state.get(cls.SESSION_KEY, [])
     
     @classmethod
-    def get_suggestions(cls) -> list[str]:
+    def obtenir_suggestions(cls) -> list[str]:
         """
         Génère des suggestions pour corriger les N+1.
         
         Returns:
             Liste de suggestions
         """
-        detections = cls.get_detections()
+        detections = cls.obtenir_detections()
         suggestions = []
         
         for d in detections:
@@ -311,6 +315,10 @@ class N1Detector:
                 )
         
         return suggestions
+    
+    # Alias anglais
+    get_detections = obtenir_detections
+    get_suggestions = obtenir_suggestions
 
 
 # ═══════════════════════════════════════════════════════════
@@ -318,13 +326,13 @@ class N1Detector:
 # ═══════════════════════════════════════════════════════════
 
 
-class BatchLoader:
+class ChargeurParLots:
     """
     Utilitaires pour le chargement par lots.
     """
     
     @staticmethod
-    def load_in_batches(
+    def charger_par_lots(
         query: Query,
         batch_size: int = 100,
         callback: Callable[[list], None] | None = None,
@@ -383,7 +391,7 @@ class BatchLoader:
 # ═══════════════════════════════════════════════════════════
 
 
-class OptimizedQueryBuilder:
+class ConstructeurRequeteOptimisee:
     """
     Builder de requêtes avec optimisations automatiques.
     """
@@ -405,7 +413,7 @@ class OptimizedQueryBuilder:
         self._limit = None
         self._offset = None
     
-    def eager_load(self, *relationships: str) -> "OptimizedQueryBuilder":
+    def eager_load(self, *relationships: str) -> "ConstructeurRequeteOptimisee":
         """
         Ajoute des relations en eager loading.
         
@@ -419,7 +427,7 @@ class OptimizedQueryBuilder:
             self._eager_loads.append(rel)
         return self
     
-    def filter_by(self, **kwargs) -> "OptimizedQueryBuilder":
+    def filter_by(self, **kwargs) -> "ConstructeurRequeteOptimisee":
         """
         Ajoute des filtres.
         
@@ -432,7 +440,7 @@ class OptimizedQueryBuilder:
         self._filters.append(kwargs)
         return self
     
-    def order(self, column: str, desc: bool = False) -> "OptimizedQueryBuilder":
+    def order(self, column: str, desc: bool = False) -> "ConstructeurRequeteOptimisee":
         """
         Définit l'ordre.
         
@@ -446,7 +454,7 @@ class OptimizedQueryBuilder:
         self._order_by = (column, desc)
         return self
     
-    def paginate(self, page: int = 1, per_page: int = 20) -> "OptimizedQueryBuilder":
+    def paginate(self, page: int = 1, per_page: int = 20) -> "ConstructeurRequeteOptimisee":
         """
         Applique pagination.
         
@@ -513,10 +521,10 @@ class OptimizedQueryBuilder:
 # ═══════════════════════════════════════════════════════════
 
 
-def render_sql_analysis():
+def afficher_analyse_sql():
     """Affiche l'analyse SQL dans l'interface."""
     
-    stats = SQLAlchemyListener.get_stats()
+    stats = EcouteurSQLAlchemy.obtenir_statistiques()
     
     with st.expander("🗃️ Analyse SQL", expanded=False):
         
@@ -545,22 +553,22 @@ def render_sql_analysis():
             st.progress(count / stats["total"], text=f"{op}: {count}")
         
         # Détection N+1
-        detections = N1Detector.analyze()
+        detections = DetecteurN1.analyze()
         if detections:
             st.warning(f"[!] {len(detections)} problème(s) N+1 détecté(s)")
             
-            for suggestion in N1Detector.get_suggestions():
+            for suggestion in DetecteurN1.obtenir_suggestions():
                 st.caption(suggestion)
         
         # Boutons
         col1, col2 = st.columns(2)
         with col1:
             if st.button("🔄 Analyser N+1", key="analyze_n1"):
-                N1Detector.analyze()
+                DetecteurN1.analyze()
                 st.rerun()
         with col2:
             if st.button("🗑️ Vider log", key="clear_sql_log"):
-                SQLAlchemyListener.clear()
+                EcouteurSQLAlchemy.clear()
                 st.rerun()
 
 
@@ -571,16 +579,13 @@ def render_sql_analysis():
 
 __all__ = [
     # Classes
-    "QueryInfo",
-    "N1Detection",
-    "SQLAlchemyListener",
-    "N1Detector",
-    "BatchLoader",
-    "OptimizedQueryBuilder",
+    "InfoRequete",
+    "DetectionN1",
+    "EcouteurSQLAlchemy",
+    "DetecteurN1",
+    "ChargeurParLots",
+    "ConstructeurRequeteOptimisee",
     "QueryAnalyzer",  # Alias pour compatibilité tests
     # UI
     "render_sql_analysis",
 ]
-
-# Alias de compatibilité pour les tests
-QueryAnalyzer = N1Detector

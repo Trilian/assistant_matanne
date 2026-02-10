@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Rapports PDF - Interface Streamlit
 
 ✅ Rapport hebdo stocks
@@ -545,4 +545,3 @@ def render_historique():
 
 if __name__ == "__main__":
     app()
-

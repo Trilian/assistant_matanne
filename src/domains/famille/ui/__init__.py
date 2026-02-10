@@ -1,4 +1,4 @@
-﻿"""
+"""
 Package Famille - Hub de vie familiale (refonte 2026-02)
 
 Nouveaux modules:
@@ -20,4 +20,3 @@ __all__ = [
     "hub_famille", "jules", "suivi_perso", "weekend", "achats_famille",
     "activites", "routines",
 ]
-

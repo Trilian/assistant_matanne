@@ -1,15 +1,16 @@
 ﻿"""
-Decorators - Décorateurs utilitaires réutilisables.
+Decorateurs - Décorateurs utilitaires réutilisables.
 
 Contient :
-- @with_db_session : Gestion unifiée des sessions DB
-- @with_cache : Cache automatique pour fonctions
-- @with_error_handling : Gestion d'erreurs centralisée
+- @avec_session_db : Gestion unifiée des sessions DB
+- @avec_cache : Cache automatique pour fonctions
+- @avec_gestion_erreurs : Gestion d'erreurs centralisée
+- @avec_validation : Validation Pydantic automatique
 """
 
 import logging
 from functools import wraps
-from typing import Any, Callable, Generic, TypeVar
+from typing import Any, Callable, TypeVar
 import inspect
 
 from sqlalchemy.orm import Session
@@ -21,20 +22,20 @@ F = TypeVar("F", bound=Callable[..., Any])
 
 
 # ═══════════════════════════════════════════════════════════
-# DÉCORATEUR: WITH_DB_SESSION
+# DÉCORATEUR: AVEC_SESSION_DB
 # ═══════════════════════════════════════════════════════════
 
 
-def with_db_session(func: F) -> F:
+def avec_session_db(func: F) -> F:
     """
     Décorateur unifié pour gestion de session DB.
 
     Injecte automatiquement une session DB si :
     - Aucune session n'est fournie en paramètre
-    - Utilise get_db_context() pour créer une nouvelle session
+    - Utilise obtenir_contexte_db() pour créer une nouvelle session
 
     Usage:
-        @with_db_session
+        @avec_session_db
         def creer_recette(data: dict, db: Session) -> Recette:
             recette = Recette(**data)
             db.add(recette)
@@ -45,7 +46,7 @@ def with_db_session(func: F) -> F:
         recette = creer_recette({"nom": "Tarte"})
 
         # Appel avec DB existante
-        with get_db_context() as session:
+        with obtenir_contexte_db() as session:
             recette = creer_recette({"nom": "Tarte"}, db=session)
 
     Raises:
@@ -60,9 +61,9 @@ def with_db_session(func: F) -> F:
             return func(*args, **kwargs)
 
         # Sinon, créer une nouvelle session
-        from src.core.database import get_db_context
+        from src.core.database import obtenir_contexte_db
 
-        with get_db_context() as session:
+        with obtenir_contexte_db() as session:
             # Ajouter 'db' ou 'session' selon le paramètre attendu
             sig = inspect.signature(func)
             if "session" in sig.parameters:
@@ -75,21 +76,21 @@ def with_db_session(func: F) -> F:
 
 
 # ═══════════════════════════════════════════════════════════
-# DÉCORATEUR: WITH_CACHE
+# DÉCORATEUR: AVEC_CACHE
 # ═══════════════════════════════════════════════════════════
 
 
-def with_cache(ttl: int = 300, key_prefix: str | None = None, key_func: None = None):
+def avec_cache(ttl: int = 300, key_prefix: str | None = None, key_func: None = None):
     """
     Décorateur pour cache automatique avec TTL.
 
     Usage:
-        @with_cache(ttl=600, key_prefix="recipes")
+        @avec_cache(ttl=600, key_prefix="recettes")
         def charger_recettes(page: int = 1) -> list[Recette]:
             # Logique coûteuse
             return recettes
         
-        @with_cache(ttl=3600, key_func=lambda self, id: f"recette_{id}")
+        @avec_cache(ttl=3600, key_func=lambda self, id: f"recette_{id}")
         def charger_recette(self, id: int) -> Recette:
             # Custom key generation
             return recette
@@ -120,13 +121,10 @@ def with_cache(ttl: int = 300, key_prefix: str | None = None, key_func: None = N
                 filtered_kwargs = {k: v for k, v in kwargs.items() if k != 'db'}
                 
                 # Essayer d'abord de passer les arguments par position
-                # (compatible avec les lambdas utilisant des noms de paramètres personnalisés)
                 try:
                     cache_key = key_func(*args, **filtered_kwargs)
                 except TypeError:
-                    # Si ça échoue, reconstruire les kwargs en utilisant les noms de la fonction
-                    # Reconstructer les kwargs en incluant les arguments positionnels
-                    # par leur nom de paramètre (en excluant 'self' et 'db')
+                    # Reconstruire les kwargs en utilisant les noms de la fonction
                     full_kwargs = {}
                     for i, arg in enumerate(args):
                         if i < len(param_names):
@@ -175,11 +173,11 @@ def with_cache(ttl: int = 300, key_prefix: str | None = None, key_func: None = N
 
 
 # ═══════════════════════════════════════════════════════════
-# DÉCORATEUR: WITH_ERROR_HANDLING
+# DÉCORATEUR: AVEC_GESTION_ERREURS
 # ═══════════════════════════════════════════════════════════
 
 
-def with_error_handling(
+def avec_gestion_erreurs(
     default_return: Any = None,
     log_level: str = "ERROR",
     afficher_erreur: bool = False,
@@ -188,7 +186,7 @@ def with_error_handling(
     Décorateur pour gestion centralisée d'erreurs.
 
     Usage:
-        @with_error_handling(default_return=None, afficher_erreur=True)
+        @avec_gestion_erreurs(default_return=None, afficher_erreur=True)
         def operation_risquee(data: dict) -> dict:
             # Code qui peut lever des exceptions
             return resultat
@@ -235,11 +233,11 @@ def with_error_handling(
 
 
 # ═══════════════════════════════════════════════════════════
-# DÉCORATEUR: WITH_VALIDATION
+# DÉCORATEUR: AVEC_VALIDATION
 # ═══════════════════════════════════════════════════════════
 
 
-def with_validation(
+def avec_validation(
     validator_class: type,
     field_mapping: dict[str, str] | None = None,
 ):
@@ -247,7 +245,7 @@ def with_validation(
     Décorateur pour validation Pydantic automatique.
 
     Usage:
-        @with_validation(RecetteInput, field_mapping={
+        @avec_validation(RecetteInput, field_mapping={
             "data": "recipe_data"
         })
         def creer_recette(data: dict, db: Session) -> Recette:
@@ -296,3 +294,14 @@ def with_validation(
         return wrapper  # type: ignore
 
     return decorator
+
+
+# ═══════════════════════════════════════════════════════════
+# ALIAS POUR COMPATIBILITÉ (À SUPPRIMER APRÈS MIGRATION)
+# ═══════════════════════════════════════════════════════════
+
+# Alias temporaires pour la migration
+with_db_session = avec_session_db
+with_cache = avec_cache
+with_error_handling = avec_gestion_erreurs
+with_validation = avec_validation

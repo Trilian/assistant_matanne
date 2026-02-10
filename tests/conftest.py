@@ -1,4 +1,4 @@
-﻿"""
+"""
 Pytest configuration and shared fixtures for all tests.
 
 This module provides:
@@ -547,4 +547,3 @@ def mock_mistral_api(monkeypatch):
     with patch("src.core.ai.client.ClientIA", return_value=mock_client):
         with patch("src.core.ai.client.obtenir_client_ia", return_value=mock_client):
             yield mock_client
-

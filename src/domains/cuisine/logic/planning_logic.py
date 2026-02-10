@@ -1,4 +1,4 @@
-﻿"""
+"""
 Logique métier du module Planning (cuisine) - Séparée de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
@@ -360,4 +360,3 @@ def formater_historique_planning(plannings: List[Any]) -> List[Dict[str, Any]]:
         })
     
     return resultats
-

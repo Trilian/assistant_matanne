@@ -1,4 +1,4 @@
-﻿"""
+"""
 Logique métier du module Paramètres (configuration) - Séparée de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
@@ -347,4 +347,3 @@ def formater_parametre_affichage(cle: str, valeur: Any) -> str:
         return langues.get(valeur, valeur)
     else:
         return str(valeur)
-

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Logique métier du module Projets (maison) - Séparée de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
@@ -256,4 +256,3 @@ def calculer_progression(projet: Dict[str, Any]) -> float:
         return 50.0  # Estimation par défaut
     else:
         return 0.0
-

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Maison - Hub de gestion domestique
 
 Structure:
@@ -20,4 +20,3 @@ Hub principal affichant:
 from src.domains.maison.ui.hub_maison import app
 
 __all__ = ["app"]
-

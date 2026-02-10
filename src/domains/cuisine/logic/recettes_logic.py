@@ -1,4 +1,4 @@
-﻿"""
+"""
 Logique métier du module Recettes (sans UI Streamlit).
 Fonctions pures testables indépendamment de Streamlit.
 """
@@ -258,4 +258,3 @@ def valider_recette(data: Dict[str, Any]) -> tuple[bool, Optional[str]]:
         return False, "Le nombre de portions doit être supérieur à 0"
     
     return True, None
-

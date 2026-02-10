@@ -11,39 +11,39 @@ import json
 
 
 class TestOfflineQueueFileMethods:
-    """Tests pour OfflineQueue - méthodes de fichier."""
+    """Tests pour FileAttenteHorsLigne - méthodes de fichier."""
     
     @patch('src.core.offline.st')
     def test_ensure_cache_dir(self, mock_st):
         """Test _ensure_cache_dir crée le dossier."""
         mock_st.session_state = {}
-        from src.core.offline import OfflineQueue
+        from src.core.offline import FileAttenteHorsLigne
         
         with patch.object(Path, 'mkdir') as mock_mkdir:
-            OfflineQueue._ensure_cache_dir()
+            FileAttenteHorsLigne._ensure_cache_dir()
             mock_mkdir.assert_called_once_with(exist_ok=True)
     
     @patch('src.core.offline.st')
     def test_load_from_file_not_exists(self, mock_st):
         """Test _load_from_file quand le fichier n'existe pas."""
         mock_st.session_state = {}
-        from src.core.offline import OfflineQueue
+        from src.core.offline import FileAttenteHorsLigne
         
         with patch.object(Path, 'exists', return_value=False):
-            result = OfflineQueue._load_from_file()
+            result = FileAttenteHorsLigne._load_from_file()
             assert result == []
     
     @patch('src.core.offline.st')
     def test_load_from_file_exists(self, mock_st):
         """Test _load_from_file quand le fichier existe."""
         mock_st.session_state = {}
-        from src.core.offline import OfflineQueue
+        from src.core.offline import FileAttenteHorsLigne
         
         test_data = [{"id": "test123", "operation_type": "create", "model_name": "Test"}]
         
         with patch.object(Path, 'exists', return_value=True):
             with patch('builtins.open', mock_open(read_data=json.dumps(test_data))):
-                result = OfflineQueue._load_from_file()
+                result = FileAttenteHorsLigne._load_from_file()
                 assert len(result) == 1
                 assert result[0]["id"] == "test123"
     
@@ -51,96 +51,96 @@ class TestOfflineQueueFileMethods:
     def test_load_from_file_error(self, mock_st):
         """Test _load_from_file avec erreur JSON."""
         mock_st.session_state = {}
-        from src.core.offline import OfflineQueue
+        from src.core.offline import FileAttenteHorsLigne
         
         with patch.object(Path, 'exists', return_value=True):
             with patch('builtins.open', mock_open(read_data="invalid json")):
-                result = OfflineQueue._load_from_file()
+                result = FileAttenteHorsLigne._load_from_file()
                 assert result == []
     
     @patch('src.core.offline.st')
     def test_save_to_file(self, mock_st):
         """Test _save_to_file."""
         mock_st.session_state = {}
-        from src.core.offline import OfflineQueue
+        from src.core.offline import FileAttenteHorsLigne
         
         test_data = [{"id": "abc"}]
         
         with patch.object(Path, 'mkdir') as mock_mkdir:
             m = mock_open()
             with patch('builtins.open', m):
-                OfflineQueue._save_to_file(test_data)
+                FileAttenteHorsLigne._save_to_file(test_data)
                 m.assert_called_once()
 
 
 class TestConnectionManagerMethods:
-    """Tests pour ConnectionManager."""
+    """Tests pour GestionnaireConnexion."""
     
     @patch('src.core.offline.st')
     def test_set_status(self, mock_st):
         """Test set_status met à jour le statut."""
         mock_st.session_state = {}
-        from src.core.offline import ConnectionManager, ConnectionStatus
+        from src.core.offline import GestionnaireConnexion, StatutConnexion
         
-        ConnectionManager.set_status(ConnectionStatus.OFFLINE)
-        assert mock_st.session_state[ConnectionManager.SESSION_KEY] == ConnectionStatus.OFFLINE
+        GestionnaireConnexion.set_status(StatutConnexion.OFFLINE)
+        assert mock_st.session_state[GestionnaireConnexion.SESSION_KEY] == StatutConnexion.OFFLINE
     
     @patch('src.core.offline.st')
     def test_is_online_when_online(self, mock_st):
         """Test is_online retourne True quand ONLINE."""
-        from src.core.offline import ConnectionManager, ConnectionStatus
+        from src.core.offline import GestionnaireConnexion, StatutConnexion
         
-        mock_st.session_state = {ConnectionManager.SESSION_KEY: ConnectionStatus.ONLINE}
-        assert ConnectionManager.is_online() is True
+        mock_st.session_state = {GestionnaireConnexion.SESSION_KEY: StatutConnexion.ONLINE}
+        assert GestionnaireConnexion.is_online() is True
     
     @patch('src.core.offline.st')
     def test_is_online_when_offline(self, mock_st):
         """Test is_online retourne False quand OFFLINE."""
-        from src.core.offline import ConnectionManager, ConnectionStatus
+        from src.core.offline import GestionnaireConnexion, StatutConnexion
         
-        mock_st.session_state = {ConnectionManager.SESSION_KEY: ConnectionStatus.OFFLINE}
-        assert ConnectionManager.is_online() is False
+        mock_st.session_state = {GestionnaireConnexion.SESSION_KEY: StatutConnexion.OFFLINE}
+        assert GestionnaireConnexion.is_online() is False
     
     @patch('src.core.offline.st')
     def test_handle_connection_error(self, mock_st):
         """Test handle_connection_error met le statut à OFFLINE."""
         mock_st.session_state = {}
-        from src.core.offline import ConnectionManager, ConnectionStatus
+        from src.core.offline import GestionnaireConnexion, StatutConnexion
         
         error = Exception("Test error")
-        ConnectionManager.handle_connection_error(error)
-        assert mock_st.session_state[ConnectionManager.SESSION_KEY] == ConnectionStatus.OFFLINE
+        GestionnaireConnexion.handle_connection_error(error)
+        assert mock_st.session_state[GestionnaireConnexion.SESSION_KEY] == StatutConnexion.OFFLINE
 
 
 class TestMemoryMonitorMethods:
-    """Tests pour MemoryMonitor."""
+    """Tests pour MoniteurMemoire."""
     
     @patch('src.core.performance.st')
     @patch('src.core.performance.tracemalloc')
     def test_start_tracking(self, mock_tracemalloc, mock_st):
         """Test start_tracking démarre le tracking."""
         mock_st.session_state = {}
-        from src.core.performance import MemoryMonitor
+        from src.core.performance import MoniteurMemoire
         
         # Reset le flag internal
-        MemoryMonitor._tracking_active = False
+        MoniteurMemoire._tracking_active = False
         
-        MemoryMonitor.start_tracking()
+        MoniteurMemoire.start_tracking()
         mock_tracemalloc.start.assert_called_once()
-        assert MemoryMonitor._tracking_active is True
+        assert MoniteurMemoire._tracking_active is True
     
     @patch('src.core.performance.st')
     @patch('src.core.performance.tracemalloc')
     def test_stop_tracking(self, mock_tracemalloc, mock_st):
         """Test stop_tracking arrête le tracking."""
         mock_st.session_state = {}
-        from src.core.performance import MemoryMonitor
+        from src.core.performance import MoniteurMemoire
         
-        MemoryMonitor._tracking_active = True
+        MoniteurMemoire._tracking_active = True
         
-        MemoryMonitor.stop_tracking()
+        MoniteurMemoire.stop_tracking()
         mock_tracemalloc.stop.assert_called_once()
-        assert MemoryMonitor._tracking_active is False
+        assert MoniteurMemoire._tracking_active is False
     
     @patch('src.core.performance.st')
     @patch('src.core.performance.tracemalloc')
@@ -149,11 +149,11 @@ class TestMemoryMonitorMethods:
         """Test get_current_usage quand pas de tracking."""
         mock_st.session_state = {}
         mock_gc.get_objects.return_value = [1, 2, 3]
-        from src.core.performance import MemoryMonitor
+        from src.core.performance import MoniteurMemoire
         
-        MemoryMonitor._tracking_active = False
+        MoniteurMemoire._tracking_active = False
         
-        result = MemoryMonitor.get_current_usage()
+        result = MoniteurMemoire.get_current_usage()
         assert result["current_mb"] == 0
         assert result["peak_mb"] == 0
         assert result["total_objects"] == 3
@@ -166,11 +166,11 @@ class TestMemoryMonitorMethods:
         mock_st.session_state = {}
         mock_gc.get_objects.return_value = []
         mock_tracemalloc.get_traced_memory.return_value = (1024*1024*10, 1024*1024*15)  # 10MB, 15MB
-        from src.core.performance import MemoryMonitor
+        from src.core.performance import MoniteurMemoire
         
-        MemoryMonitor._tracking_active = True
+        MoniteurMemoire._tracking_active = True
         
-        result = MemoryMonitor.get_current_usage()
+        result = MoniteurMemoire.get_current_usage()
         assert result["current_mb"] == 10.0
         assert result["peak_mb"] == 15.0
     
@@ -181,27 +181,27 @@ class TestMemoryMonitorMethods:
         mock_st.session_state = {}
         mock_gc.get_objects.return_value = []
         mock_gc.collect.return_value = 50
-        from src.core.performance import MemoryMonitor
+        from src.core.performance import MoniteurMemoire
         
-        MemoryMonitor._tracking_active = False
+        MoniteurMemoire._tracking_active = False
         
-        result = MemoryMonitor.force_cleanup()
+        result = MoniteurMemoire.force_cleanup()
         assert result["objects_collected"] == 50
         mock_gc.collect.assert_called_once()
 
 
 class TestSQLAlchemyListenerLogQuery:
-    """Tests pour SQLAlchemyListener._log_query."""
+    """Tests pour EcouteurSQLAlchemy._log_query."""
     
     @patch('src.core.sql_optimizer.st')
     def test_log_query_basic(self, mock_st):
         """Test _log_query enregistre la requête."""
         mock_st.session_state = {}
-        from src.core.sql_optimizer import SQLAlchemyListener
+        from src.core.sql_optimizer import EcouteurSQLAlchemy
         
-        SQLAlchemyListener._log_query("SELECT * FROM users", 50.0, {"id": 1})
+        EcouteurSQLAlchemy._log_query("SELECT * FROM users", 50.0, {"id": 1})
         
-        queries = mock_st.session_state[SQLAlchemyListener.SESSION_KEY]
+        queries = mock_st.session_state[EcouteurSQLAlchemy.SESSION_KEY]
         assert len(queries) == 1
         assert queries[0].sql == "SELECT * FROM users"
         assert queries[0].duration_ms == 50.0
@@ -210,36 +210,36 @@ class TestSQLAlchemyListenerLogQuery:
     def test_log_query_slow(self, mock_st):
         """Test _log_query pour requête lente (>100ms)."""
         mock_st.session_state = {}
-        from src.core.sql_optimizer import SQLAlchemyListener
+        from src.core.sql_optimizer import EcouteurSQLAlchemy
         
         with patch('src.core.sql_optimizer.logger') as mock_logger:
-            SQLAlchemyListener._log_query("SELECT * FROM big_table", 150.0, {})
+            EcouteurSQLAlchemy._log_query("SELECT * FROM big_table", 150.0, {})
             mock_logger.warning.assert_called()
     
     @patch('src.core.sql_optimizer.st')
     def test_log_query_truncates_at_200(self, mock_st):
         """Test _log_query garde seulement 200 dernières requêtes."""
-        from src.core.sql_optimizer import SQLAlchemyListener
-        mock_st.session_state = {SQLAlchemyListener.SESSION_KEY: []}
+        from src.core.sql_optimizer import EcouteurSQLAlchemy
+        mock_st.session_state = {EcouteurSQLAlchemy.SESSION_KEY: []}
         
         # Ajouter 205 requêtes
         for i in range(205):
-            SQLAlchemyListener._log_query(f"SELECT {i}", 1.0, {})
+            EcouteurSQLAlchemy._log_query(f"SELECT {i}", 1.0, {})
         
-        queries = mock_st.session_state[SQLAlchemyListener.SESSION_KEY]
+        queries = mock_st.session_state[EcouteurSQLAlchemy.SESSION_KEY]
         assert len(queries) == 200
 
 
 class TestSQLAlchemyListenerGetStats:
-    """Tests pour SQLAlchemyListener.get_stats."""
+    """Tests pour EcouteurSQLAlchemy.get_stats."""
     
     @patch('src.core.sql_optimizer.st')
     def test_get_stats_empty(self, mock_st):
         """Test get_stats avec queue vide."""
         mock_st.session_state = {}
-        from src.core.sql_optimizer import SQLAlchemyListener
+        from src.core.sql_optimizer import EcouteurSQLAlchemy
         
-        stats = SQLAlchemyListener.get_stats()
+        stats = EcouteurSQLAlchemy.get_stats()
         assert stats["total"] == 0
         assert stats["by_operation"] == {}
         assert stats["avg_time_ms"] == 0
@@ -247,16 +247,16 @@ class TestSQLAlchemyListenerGetStats:
     @patch('src.core.sql_optimizer.st')
     def test_get_stats_with_queries(self, mock_st):
         """Test get_stats avec des requêtes."""
-        from src.core.sql_optimizer import SQLAlchemyListener, QueryInfo
+        from src.core.sql_optimizer import EcouteurSQLAlchemy, InfoRequete
         from datetime import datetime
         
         queries = [
-            QueryInfo(sql="SELECT *", duration_ms=50.0, table="users", operation="SELECT"),
-            QueryInfo(sql="SELECT *", duration_ms=150.0, table="users", operation="SELECT"),  # slow
+            InfoRequete(sql="SELECT *", duration_ms=50.0, table="users", operation="SELECT"),
+            InfoRequete(sql="SELECT *", duration_ms=150.0, table="users", operation="SELECT"),  # slow
         ]
-        mock_st.session_state = {SQLAlchemyListener.SESSION_KEY: queries}
+        mock_st.session_state = {EcouteurSQLAlchemy.SESSION_KEY: queries}
         
-        stats = SQLAlchemyListener.get_stats()
+        stats = EcouteurSQLAlchemy.get_stats()
         assert stats["total"] == 2
         assert stats["by_operation"]["SELECT"] == 2
         assert stats["avg_time_ms"] == 100.0
@@ -265,27 +265,27 @@ class TestSQLAlchemyListenerGetStats:
     @patch('src.core.sql_optimizer.st')
     def test_clear(self, mock_st):
         """Test clear vide le log."""
-        from src.core.sql_optimizer import SQLAlchemyListener, QueryInfo
+        from src.core.sql_optimizer import EcouteurSQLAlchemy, InfoRequete
         
-        queries = [QueryInfo(sql="SELECT *", duration_ms=50.0)]
-        mock_st.session_state = {SQLAlchemyListener.SESSION_KEY: queries}
+        queries = [InfoRequete(sql="SELECT *", duration_ms=50.0)]
+        mock_st.session_state = {EcouteurSQLAlchemy.SESSION_KEY: queries}
         
-        SQLAlchemyListener.clear()
-        assert mock_st.session_state[SQLAlchemyListener.SESSION_KEY] == []
+        EcouteurSQLAlchemy.clear()
+        assert mock_st.session_state[EcouteurSQLAlchemy.SESSION_KEY] == []
 
 
 class TestSQLOptimizer:
-    """Tests pour SQLOptimizer dans performance.py."""
+    """Tests pour OptimiseurSQL dans performance.py."""
     
     @patch('src.core.performance.st')
     def test_record_query(self, mock_st):
         """Test record_query enregistre une requête."""
         mock_st.session_state = {}
-        from src.core.performance import SQLOptimizer
+        from src.core.performance import OptimiseurSQL
         
-        SQLOptimizer.record_query("SELECT * FROM users", 50.0, 10)
+        OptimiseurSQL.record_query("SELECT * FROM users", 50.0, 10)
         
-        stats = mock_st.session_state[SQLOptimizer.SESSION_KEY]
+        stats = mock_st.session_state[OptimiseurSQL.SESSION_KEY]
         assert stats["total_count"] == 1
         assert stats["total_time_ms"] == 50.0
     
@@ -293,88 +293,88 @@ class TestSQLOptimizer:
     def test_record_query_slow(self, mock_st):
         """Test record_query pour requête lente."""
         mock_st.session_state = {}
-        from src.core.performance import SQLOptimizer
+        from src.core.performance import OptimiseurSQL
         
         with patch('src.core.performance.logger') as mock_logger:
-            SQLOptimizer.record_query("SELECT * FROM big_table", 150.0, 1000)
+            OptimiseurSQL.record_query("SELECT * FROM big_table", 150.0, 1000)
             mock_logger.warning.assert_called()
             
-        stats = mock_st.session_state[SQLOptimizer.SESSION_KEY]
+        stats = mock_st.session_state[OptimiseurSQL.SESSION_KEY]
         assert len(stats["slow_queries"]) == 1
     
     @patch('src.core.performance.st')
     def test_get_stats_empty(self, mock_st):
         """Test get_stats avec données vides."""
         mock_st.session_state = {}
-        from src.core.performance import SQLOptimizer
+        from src.core.performance import OptimiseurSQL
         
-        stats = SQLOptimizer.get_stats()
+        stats = OptimiseurSQL.get_stats()
         assert stats["total_queries"] == 0
         assert stats["avg_time_ms"] == 0
     
     @patch('src.core.performance.st')
     def test_clear(self, mock_st):
         """Test clear réinitialise."""
-        from src.core.performance import SQLOptimizer
+        from src.core.performance import OptimiseurSQL
         
-        mock_st.session_state = {SQLOptimizer.SESSION_KEY: {
+        mock_st.session_state = {OptimiseurSQL.SESSION_KEY: {
             "queries": [{"q": 1}],
             "slow_queries": [],
             "total_count": 5,
             "total_time_ms": 100.0,
         }}
         
-        SQLOptimizer.clear()
+        OptimiseurSQL.clear()
         
-        stats = mock_st.session_state[SQLOptimizer.SESSION_KEY]
+        stats = mock_st.session_state[OptimiseurSQL.SESSION_KEY]
         assert stats["total_count"] == 0
 
 
 class TestOfflineQueueMethods:
-    """Tests pour OfflineQueue - méthodes de queue."""
+    """Tests pour FileAttenteHorsLigne - méthodes de queue."""
     
     @patch('src.core.offline.st')
     def test_get_queue_from_session(self, mock_st):
         """Test _get_queue retourne de session."""
-        from src.core.offline import OfflineQueue
+        from src.core.offline import FileAttenteHorsLigne
         
-        mock_st.session_state = {OfflineQueue.SESSION_KEY: [{"id": "test"}]}
+        mock_st.session_state = {FileAttenteHorsLigne.SESSION_KEY: [{"id": "test"}]}
         
-        queue = OfflineQueue._get_queue()
+        queue = FileAttenteHorsLigne._get_queue()
         assert len(queue) == 1
         assert queue[0]["id"] == "test"
     
     @patch('src.core.offline.st')
     def test_get_count(self, mock_st):
         """Test get_count retourne le nombre d'opérations."""
-        from src.core.offline import OfflineQueue
+        from src.core.offline import FileAttenteHorsLigne
         
-        mock_st.session_state = {OfflineQueue.SESSION_KEY: [{"id": "1"}, {"id": "2"}]}
+        mock_st.session_state = {FileAttenteHorsLigne.SESSION_KEY: [{"id": "1"}, {"id": "2"}]}
         
         with patch.object(Path, 'exists', return_value=False):
-            count = OfflineQueue.get_count()
+            count = FileAttenteHorsLigne.get_count()
             assert count == 2
     
     @patch('src.core.offline.st')
     def test_remove_success(self, mock_st):
         """Test remove supprime l'opération."""
-        from src.core.offline import OfflineQueue
+        from src.core.offline import FileAttenteHorsLigne
         
-        mock_st.session_state = {OfflineQueue.SESSION_KEY: [{"id": "abc"}, {"id": "def"}]}
+        mock_st.session_state = {FileAttenteHorsLigne.SESSION_KEY: [{"id": "abc"}, {"id": "def"}]}
         
         with patch.object(Path, 'mkdir'):
             with patch('builtins.open', mock_open()):
-                result = OfflineQueue.remove("abc")
+                result = FileAttenteHorsLigne.remove("abc")
                 assert result is True
-                assert len(mock_st.session_state[OfflineQueue.SESSION_KEY]) == 1
+                assert len(mock_st.session_state[FileAttenteHorsLigne.SESSION_KEY]) == 1
     
     @patch('src.core.offline.st')
     def test_remove_not_found(self, mock_st):
         """Test remove retourne False si non trouvé."""
-        from src.core.offline import OfflineQueue
+        from src.core.offline import FileAttenteHorsLigne
         
-        mock_st.session_state = {OfflineQueue.SESSION_KEY: [{"id": "abc"}]}
+        mock_st.session_state = {FileAttenteHorsLigne.SESSION_KEY: [{"id": "abc"}]}
         
         with patch.object(Path, 'exists', return_value=False):
-            result = OfflineQueue.remove("xyz")
+            result = FileAttenteHorsLigne.remove("xyz")
             assert result is False

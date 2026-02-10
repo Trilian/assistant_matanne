@@ -1,4 +1,4 @@
-﻿"""Domaines organisés par contexte métier.
+"""Domaines organisés par contexte métier.
 
 Architecture:
 - cuisine: Recettes, planning repas, inventaire, courses
@@ -35,4 +35,3 @@ def __getattr__(name: str):
         from . import jeux as mod
         return mod
     raise AttributeError(f"module 'src.domains' has no attribute '{name}'")
-

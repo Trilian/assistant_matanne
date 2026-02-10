@@ -1,4 +1,4 @@
-﻿"""
+"""
 Logique métier du module Routines (famille) - Séparée de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
@@ -324,4 +324,3 @@ def formater_duree(minutes: int) -> str:
             return f"{heures}h{mins:02d}"
         else:
             return f"{heures}h"
-

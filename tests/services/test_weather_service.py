@@ -572,4 +572,3 @@ class TestSeuils:
     def test_seuil_secheresse(self):
         from src.services.weather import WeatherGardenService
         assert WeatherGardenService.SEUIL_SECHERESSE_JOURS == 7
-

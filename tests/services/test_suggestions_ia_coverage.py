@@ -138,7 +138,7 @@ class TestSuggestionRecetteModel:
 class TestSuggestionsIAServiceInit:
     """Tests pour l'initialisation du service."""
 
-    @patch('src.services.suggestions_ia.get_cache')
+    @patch('src.services.suggestions_ia.obtenir_cache')
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_init_success(self, mock_client_ia, mock_analyseur, mock_cache):
@@ -165,7 +165,7 @@ class TestSuggestionsIAServiceInit:
 class TestAnalyserProfilCulinaire:
     """Tests pour analyser_profil_culinaire()."""
 
-    @patch('src.services.suggestions_ia.get_cache')
+    @patch('src.services.suggestions_ia.obtenir_cache')
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_analyser_profil_sans_historique(self, mock_client, mock_analyseur, mock_cache):
@@ -186,7 +186,7 @@ class TestAnalyserProfilCulinaire:
         assert isinstance(result, ProfilCulinaire)
         assert result.categories_preferees == []
 
-    @patch('src.services.suggestions_ia.get_cache')
+    @patch('src.services.suggestions_ia.obtenir_cache')
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_analyser_profil_avec_historique(self, mock_client, mock_analyseur, mock_cache):
@@ -232,7 +232,7 @@ class TestAnalyserProfilCulinaire:
 class TestConstruireContexte:
     """Tests pour construire_contexte()."""
 
-    @patch('src.services.suggestions_ia.get_cache')
+    @patch('src.services.suggestions_ia.obtenir_cache')
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_construire_contexte_minimal(self, mock_client, mock_analyseur, mock_cache):
@@ -254,7 +254,7 @@ class TestConstruireContexte:
         
         assert isinstance(result, ContexteSuggestion)
 
-    @patch('src.services.suggestions_ia.get_cache')
+    @patch('src.services.suggestions_ia.obtenir_cache')
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_construire_contexte_avec_inventaire(self, mock_client, mock_analyseur, mock_cache):
@@ -280,7 +280,7 @@ class TestConstruireContexte:
         
         assert "Tomate" in result.ingredients_disponibles
 
-    @patch('src.services.suggestions_ia.get_cache')
+    @patch('src.services.suggestions_ia.obtenir_cache')
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_construire_contexte_avec_peremption(self, mock_client, mock_analyseur, mock_cache):
@@ -317,7 +317,7 @@ class TestConstruireContexte:
 class TestCalculerScoreRecette:
     """Tests pour _calculer_score_recette()."""
 
-    @patch('src.services.suggestions_ia.get_cache')
+    @patch('src.services.suggestions_ia.obtenir_cache')
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_calculer_score_recette_nouvelle(self, mock_client, mock_analyseur, mock_cache):
@@ -354,7 +354,7 @@ class TestCalculerScoreRecette:
         
         assert score >= 0
 
-    @patch('src.services.suggestions_ia.get_cache')
+    @patch('src.services.suggestions_ia.obtenir_cache')
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_calculer_score_recette_recente(self, mock_client, mock_analyseur, mock_cache):
@@ -389,7 +389,7 @@ class TestCalculerScoreRecette:
         
         assert score >= 0
 
-    @patch('src.services.suggestions_ia.get_cache')
+    @patch('src.services.suggestions_ia.obtenir_cache')
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_calculer_score_temps_adapte(self, mock_client, mock_analyseur, mock_cache):
@@ -421,7 +421,7 @@ class TestCalculerScoreRecette:
         assert "Temps adapté" in raisons
         assert "rapide" in tags
 
-    @patch('src.services.suggestions_ia.get_cache')
+    @patch('src.services.suggestions_ia.obtenir_cache')
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_calculer_score_temps_trop_long(self, mock_client, mock_analyseur, mock_cache):
@@ -453,7 +453,7 @@ class TestCalculerScoreRecette:
         # Score de base - 20 (trop long)
         assert score < 50  # Score de base est 50
 
-    @patch('src.services.suggestions_ia.get_cache')
+    @patch('src.services.suggestions_ia.obtenir_cache')
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_calculer_score_ingredients_disponibles(self, mock_client, mock_analyseur, mock_cache):
@@ -493,7 +493,7 @@ class TestCalculerScoreRecette:
         # Devrait avoir bon score car ingrédient disponible
         assert score >= 50
 
-    @patch('src.services.suggestions_ia.get_cache')
+    @patch('src.services.suggestions_ia.obtenir_cache')
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_calculer_score_ingredients_a_consommer(self, mock_client, mock_analyseur, mock_cache):
@@ -543,7 +543,7 @@ class TestCalculerScoreRecette:
 class TestTrouverIngredientsManquants:
     """Tests pour _trouver_ingredients_manquants()."""
 
-    @patch('src.services.suggestions_ia.get_cache')
+    @patch('src.services.suggestions_ia.obtenir_cache')
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_trouver_pas_de_manquants(self, mock_client, mock_analyseur, mock_cache):
@@ -569,7 +569,7 @@ class TestTrouverIngredientsManquants:
         
         assert result == []
 
-    @patch('src.services.suggestions_ia.get_cache')
+    @patch('src.services.suggestions_ia.obtenir_cache')
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_trouver_avec_manquants(self, mock_client, mock_analyseur, mock_cache):
@@ -608,7 +608,7 @@ class TestTrouverIngredientsManquants:
 class TestMixerSuggestions:
     """Tests pour _mixer_suggestions()."""
 
-    @patch('src.services.suggestions_ia.get_cache')
+    @patch('src.services.suggestions_ia.obtenir_cache')
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_mixer_suggestions_empty(self, mock_client, mock_analyseur, mock_cache):
@@ -626,7 +626,7 @@ class TestMixerSuggestions:
         
         assert result == []
 
-    @patch('src.services.suggestions_ia.get_cache')
+    @patch('src.services.suggestions_ia.obtenir_cache')
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_mixer_suggestions_with_items(self, mock_client, mock_analyseur, mock_cache):
@@ -661,7 +661,7 @@ class TestMixerSuggestions:
 class TestSuggererRecettes:
     """Tests pour suggerer_recettes()."""
 
-    @patch('src.services.suggestions_ia.get_cache')
+    @patch('src.services.suggestions_ia.obtenir_cache')
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_suggerer_recettes_sans_contexte(self, mock_client, mock_analyseur, mock_cache):
@@ -684,7 +684,7 @@ class TestSuggererRecettes:
         
         assert isinstance(result, list)
 
-    @patch('src.services.suggestions_ia.get_cache')
+    @patch('src.services.suggestions_ia.obtenir_cache')
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_suggerer_recettes_avec_recettes(self, mock_client, mock_analyseur, mock_cache):
@@ -732,7 +732,7 @@ class TestSuggererRecettes:
         
         assert isinstance(result, list)
 
-    @patch('src.services.suggestions_ia.get_cache')
+    @patch('src.services.suggestions_ia.obtenir_cache')
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_suggerer_recettes_pas_de_recettes(self, mock_client, mock_analyseur, mock_cache):
@@ -775,7 +775,7 @@ class TestSuggererAvecIA:
     """Tests pour suggerer_avec_ia()."""
 
     @patch('src.core.database.get_db_context')
-    @patch('src.services.suggestions_ia.get_cache')
+    @patch('src.services.suggestions_ia.obtenir_cache')
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_suggerer_avec_ia_reponse_vide(self, mock_client, mock_analyseur, mock_cache, mock_db_ctx):

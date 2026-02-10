@@ -12,29 +12,29 @@ from datetime import datetime, timedelta
 
 
 class TestRedisConfig:
-    """Tests pour la classe RedisConfig (attributs de classe)"""
+    """Tests pour la classe ConfigurationRedis (attributs de classe)"""
     
     def test_config_default_values(self):
         """Test des valeurs par défaut de configuration"""
-        from src.core.redis_cache import RedisConfig
+        from src.core.redis_cache import ConfigurationRedis
         
-        # RedisConfig utilise des attributs de classe
-        assert RedisConfig.HOST == "localhost"
-        assert RedisConfig.PORT == 6379
-        assert RedisConfig.DB == 0
-        assert RedisConfig.PASSWORD is None
-        assert RedisConfig.KEY_PREFIX == "matanne:"
-        assert RedisConfig.DEFAULT_TTL == 3600
-        assert RedisConfig.MAX_CONNECTIONS == 10
-        assert RedisConfig.SOCKET_TIMEOUT == 5
-        assert RedisConfig.SOCKET_CONNECT_TIMEOUT == 5
-        assert RedisConfig.COMPRESSION_THRESHOLD == 1024
+        # ConfigurationRedis utilise des attributs de classe
+        assert ConfigurationRedis.HOST == "localhost"
+        assert ConfigurationRedis.PORT == 6379
+        assert ConfigurationRedis.DB == 0
+        assert ConfigurationRedis.PASSWORD is None
+        assert ConfigurationRedis.KEY_PREFIX == "matanne:"
+        assert ConfigurationRedis.DEFAULT_TTL == 3600
+        assert ConfigurationRedis.MAX_CONNECTIONS == 10
+        assert ConfigurationRedis.SOCKET_TIMEOUT == 5
+        assert ConfigurationRedis.SOCKET_CONNECT_TIMEOUT == 5
+        assert ConfigurationRedis.COMPRESSION_THRESHOLD == 1024
     
     def test_config_instance_access(self):
         """Test d'accès via instance"""
-        from src.core.redis_cache import RedisConfig
+        from src.core.redis_cache import ConfigurationRedis
         
-        config = RedisConfig()
+        config = ConfigurationRedis()
         
         # Les attributs de classe sont accessibles via l'instance
         assert config.HOST == "localhost"
@@ -43,39 +43,39 @@ class TestRedisConfig:
 
 
 class TestMemoryCache:
-    """Tests pour la classe MemoryCache (fallback)"""
+    """Tests pour la classe CacheMemoire (fallback)"""
     
     def test_memory_cache_set_get(self):
         """Test set/get basique"""
-        from src.core.redis_cache import MemoryCache
+        from src.core.redis_cache import CacheMemoire
         
-        cache = MemoryCache()
+        cache = CacheMemoire()
         cache.set("key1", "value1")
         
         assert cache.get("key1") == "value1"
     
     def test_memory_cache_get_missing(self):
         """Test get pour clé inexistante"""
-        from src.core.redis_cache import MemoryCache
+        from src.core.redis_cache import CacheMemoire
         
-        cache = MemoryCache()
+        cache = CacheMemoire()
         
         assert cache.get("nonexistent") is None
     
     def test_memory_cache_set_with_ttl(self):
         """Test set avec TTL"""
-        from src.core.redis_cache import MemoryCache
+        from src.core.redis_cache import CacheMemoire
         
-        cache = MemoryCache()
+        cache = CacheMemoire()
         cache.set("key_ttl", "value", ttl=3600)
         
         assert cache.get("key_ttl") == "value"
     
     def test_memory_cache_expired_entry(self):
         """Test entrée expirée"""
-        from src.core.redis_cache import MemoryCache
+        from src.core.redis_cache import CacheMemoire
         
-        cache = MemoryCache()
+        cache = CacheMemoire()
         
         # Simuler une entrée expirée en modifiant directement le cache
         # _data stocke (value, expiry_timestamp)
@@ -86,9 +86,9 @@ class TestMemoryCache:
     
     def test_memory_cache_set_with_tags(self):
         """Test set avec tags"""
-        from src.core.redis_cache import MemoryCache
+        from src.core.redis_cache import CacheMemoire
         
-        cache = MemoryCache()
+        cache = CacheMemoire()
         cache.set("tagged_key", "value", tags=["tag1", "tag2"])
         
         assert cache.get("tagged_key") == "value"
@@ -97,9 +97,9 @@ class TestMemoryCache:
     
     def test_memory_cache_delete(self):
         """Test suppression"""
-        from src.core.redis_cache import MemoryCache
+        from src.core.redis_cache import CacheMemoire
         
-        cache = MemoryCache()
+        cache = CacheMemoire()
         cache.set("to_delete", "value")
         
         assert cache.delete("to_delete") is True
@@ -107,18 +107,18 @@ class TestMemoryCache:
     
     def test_memory_cache_delete_nonexistent(self):
         """Test suppression clé inexistante"""
-        from src.core.redis_cache import MemoryCache
+        from src.core.redis_cache import CacheMemoire
         
-        cache = MemoryCache()
+        cache = CacheMemoire()
         
         result = cache.delete("nonexistent")
         assert result is False
     
     def test_memory_cache_invalidate_tag(self):
         """Test invalidation par tag"""
-        from src.core.redis_cache import MemoryCache
+        from src.core.redis_cache import CacheMemoire
         
-        cache = MemoryCache()
+        cache = CacheMemoire()
         cache.set("key1", "value1", tags=["recipes"])
         cache.set("key2", "value2", tags=["recipes"])
         cache.set("key3", "value3", tags=["users"])
@@ -131,9 +131,9 @@ class TestMemoryCache:
     
     def test_memory_cache_clear(self):
         """Test vidage complet"""
-        from src.core.redis_cache import MemoryCache
+        from src.core.redis_cache import CacheMemoire
         
-        cache = MemoryCache()
+        cache = CacheMemoire()
         cache.set("key1", "value1")
         cache.set("key2", "value2")
         
@@ -145,9 +145,9 @@ class TestMemoryCache:
     
     def test_memory_cache_stats(self):
         """Test statistiques"""
-        from src.core.redis_cache import MemoryCache
+        from src.core.redis_cache import CacheMemoire
         
-        cache = MemoryCache()
+        cache = CacheMemoire()
         cache.set("key1", "value1")
         
         stats = cache.stats()
@@ -159,9 +159,9 @@ class TestMemoryCache:
     
     def test_memory_cache_invalidate_tag_returns_count(self):
         """Test que invalidate_tag retourne le nombre de clés supprimées"""
-        from src.core.redis_cache import MemoryCache
+        from src.core.redis_cache import CacheMemoire
         
-        cache = MemoryCache()
+        cache = CacheMemoire()
         cache.set("key1", "value1", tags=["mytag"])
         cache.set("key2", "value2", tags=["mytag"])
         
@@ -171,31 +171,31 @@ class TestMemoryCache:
 
 
 class TestRedisCacheSingleton:
-    """Tests pour le pattern singleton de RedisCache"""
+    """Tests pour le pattern singleton de CacheRedis"""
     
     @patch('src.core.redis_cache.REDIS_DISPONIBLE', False)
     def test_singleton_without_redis(self):
         """Test singleton sans Redis disponible"""
-        from src.core.redis_cache import RedisCache
+        from src.core.redis_cache import CacheRedis
         
         # Reset singleton pour le test
-        RedisCache._instance = None
-        RedisCache._initialized = False
+        CacheRedis._instance = None
+        CacheRedis._initialized = False
         
-        cache1 = RedisCache()
-        cache2 = RedisCache()
+        cache1 = CacheRedis()
+        cache2 = CacheRedis()
         
         assert cache1 is cache2
     
     @patch('src.core.redis_cache.REDIS_DISPONIBLE', False)
     def test_fallback_mode(self):
         """Test mode fallback mémoire"""
-        from src.core.redis_cache import RedisCache
+        from src.core.redis_cache import CacheRedis
         
-        RedisCache._instance = None
-        RedisCache._initialized = False
+        CacheRedis._instance = None
+        CacheRedis._initialized = False
         
-        cache = RedisCache()
+        cache = CacheRedis()
         
         assert cache._redis is None
         assert cache._fallback is not None
@@ -208,12 +208,12 @@ class TestRedisCacheOperations:
     def setup_cache(self):
         """Setup avec mock Redis"""
         with patch('src.core.redis_cache.REDIS_DISPONIBLE', False):
-            from src.core.redis_cache import RedisCache
+            from src.core.redis_cache import CacheRedis
             
-            RedisCache._instance = None
-            RedisCache._initialized = False
+            CacheRedis._instance = None
+            CacheRedis._initialized = False
             
-            self.cache = RedisCache()
+            self.cache = CacheRedis()
             yield
     
     def test_make_key(self):
@@ -303,12 +303,12 @@ class TestRedisCacheSerialization:
     def setup_cache(self):
         """Setup avec mock Redis"""
         with patch('src.core.redis_cache.REDIS_DISPONIBLE', False):
-            from src.core.redis_cache import RedisCache
+            from src.core.redis_cache import CacheRedis
             
-            RedisCache._instance = None
-            RedisCache._initialized = False
+            CacheRedis._instance = None
+            CacheRedis._initialized = False
             
-            self.cache = RedisCache()
+            self.cache = CacheRedis()
             yield
     
     def test_serialize_json_simple(self):
@@ -391,12 +391,12 @@ class TestRedisCacheHealthCheck:
     def setup_cache(self):
         """Setup avec fallback uniquement"""
         with patch('src.core.redis_cache.REDIS_DISPONIBLE', False):
-            from src.core.redis_cache import RedisCache
+            from src.core.redis_cache import CacheRedis
             
-            RedisCache._instance = None
-            RedisCache._initialized = False
+            CacheRedis._instance = None
+            CacheRedis._initialized = False
             
-            self.cache = RedisCache()
+            self.cache = CacheRedis()
             yield
     
     def test_health_check_fallback(self):
@@ -422,10 +422,10 @@ class TestRedisCachedDecorator:
     @patch('src.core.redis_cache.REDIS_DISPONIBLE', False)
     def test_redis_cached_basic(self):
         """Test décorateur basique"""
-        from src.core.redis_cache import redis_cached, RedisCache
+        from src.core.redis_cache import redis_cached, CacheRedis
         
-        RedisCache._instance = None
-        RedisCache._initialized = False
+        CacheRedis._instance = None
+        CacheRedis._initialized = False
         
         call_count = 0
         
@@ -448,10 +448,10 @@ class TestRedisCachedDecorator:
     @patch('src.core.redis_cache.REDIS_DISPONIBLE', False)
     def test_redis_cached_with_prefix(self):
         """Test décorateur avec préfixe"""
-        from src.core.redis_cache import redis_cached, RedisCache
+        from src.core.redis_cache import redis_cached, CacheRedis
         
-        RedisCache._instance = None
-        RedisCache._initialized = False
+        CacheRedis._instance = None
+        CacheRedis._initialized = False
         
         @redis_cached(ttl=60, key_prefix="myprefix")
         def prefixed_function():
@@ -464,10 +464,10 @@ class TestRedisCachedDecorator:
     @patch('src.core.redis_cache.REDIS_DISPONIBLE', False)
     def test_redis_cached_with_tags(self):
         """Test décorateur avec tags"""
-        from src.core.redis_cache import redis_cached, RedisCache
+        from src.core.redis_cache import redis_cached, CacheRedis
         
-        RedisCache._instance = None
-        RedisCache._initialized = False
+        CacheRedis._instance = None
+        CacheRedis._initialized = False
         
         @redis_cached(ttl=60, tags=["recipes", "api"])
         def tagged_function():
@@ -485,12 +485,12 @@ class TestRedisCacheTagInvalidation:
     def setup_cache(self):
         """Setup avec fallback uniquement"""
         with patch('src.core.redis_cache.REDIS_DISPONIBLE', False):
-            from src.core.redis_cache import RedisCache
+            from src.core.redis_cache import CacheRedis
             
-            RedisCache._instance = None
-            RedisCache._initialized = False
+            CacheRedis._instance = None
+            CacheRedis._initialized = False
             
-            self.cache = RedisCache()
+            self.cache = CacheRedis()
             yield
     
     def test_tag_multiple_keys(self):
@@ -531,12 +531,12 @@ class TestRedisCacheStats:
     def setup_cache(self):
         """Setup avec fallback uniquement"""
         with patch('src.core.redis_cache.REDIS_DISPONIBLE', False):
-            from src.core.redis_cache import RedisCache
+            from src.core.redis_cache import CacheRedis
             
-            RedisCache._instance = None
-            RedisCache._initialized = False
+            CacheRedis._instance = None
+            CacheRedis._initialized = False
             
-            self.cache = RedisCache()
+            self.cache = CacheRedis()
             yield
     
     def test_stats_initial(self):
@@ -563,10 +563,10 @@ class TestGetRedisCache:
     @patch('src.core.redis_cache.REDIS_DISPONIBLE', False)
     def test_get_redis_cache_returns_singleton(self):
         """Test que get_redis_cache retourne le singleton"""
-        from src.core.redis_cache import RedisCache, get_redis_cache
+        from src.core.redis_cache import CacheRedis, get_redis_cache
         
-        RedisCache._instance = None
-        RedisCache._initialized = False
+        CacheRedis._instance = None
+        CacheRedis._initialized = False
         
         cache1 = get_redis_cache()
         cache2 = get_redis_cache()
@@ -580,12 +580,12 @@ class TestCacheDecorator:
     @patch('src.core.redis_cache.REDIS_DISPONIBLE', False)
     def test_cache_decorator_basic(self):
         """Test décorateur de cache basique"""
-        from src.core.redis_cache import RedisCache
+        from src.core.redis_cache import CacheRedis
         
-        RedisCache._instance = None
-        RedisCache._initialized = False
+        CacheRedis._instance = None
+        CacheRedis._initialized = False
         
-        cache = RedisCache()
+        cache = CacheRedis()
         
         # Test du cache avec une fonction simple
         call_count = 0

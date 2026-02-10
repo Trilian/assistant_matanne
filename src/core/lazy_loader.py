@@ -1,4 +1,4 @@
-﻿"""
+"""
 Lazy Loading System - Charge modules à la demande
 Réduit temps chargement initial de 60%
 
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════════════════
 
 
-class LazyModuleLoader:
+class ChargeurModuleDiffere:
     """
     Charge les modules uniquement quand nécessaire
 
@@ -35,7 +35,7 @@ class LazyModuleLoader:
     _load_times: dict[str, float] = {}
 
     @staticmethod
-    def load(module_path: str, reload: bool = False) -> Any:
+    def charger(module_path: str, reload: bool = False) -> Any:
         """
         Charge un module à la demande
 
@@ -47,9 +47,9 @@ class LazyModuleLoader:
             Module chargé
         """
         # Vérifier cache
-        if module_path in LazyModuleLoader._cache and not reload:
+        if module_path in ChargeurModuleDiffere._cache and not reload:
             logger.debug(f"Cache HIT: {module_path}")
-            return LazyModuleLoader._cache[module_path]
+            return ChargeurModuleDiffere._cache[module_path]
 
         # Charger module
         start_time = time.time()
@@ -61,11 +61,11 @@ class LazyModuleLoader:
             module = importlib.import_module(module_path)
 
             # Cacher
-            LazyModuleLoader._cache[module_path] = module
+            ChargeurModuleDiffere._cache[module_path] = module
 
             # Métriques
             load_time = time.time() - start_time
-            LazyModuleLoader._load_times[module_path] = load_time
+            ChargeurModuleDiffere._load_times[module_path] = load_time
 
             logger.info(f"[OK] Module chargé en {load_time*1000:.0f}ms: {module_path}")
 
@@ -79,7 +79,7 @@ class LazyModuleLoader:
             raise
 
     @staticmethod
-    def preload(module_paths: list[str], background: bool = True):
+    def precharger(module_paths: list[str], background: bool = True):
         """
         Précharge des modules en arrière-plan
 
@@ -94,7 +94,7 @@ class LazyModuleLoader:
             def _worker(paths: list[str]):
                 for path in paths:
                     try:
-                        LazyModuleLoader.load(path)
+                        ChargeurModuleDiffere.charger(path)
                     except Exception:
                         # Ne pas propager les erreurs de préchargement
                         logger.debug(f"Précharge échouée pour {path}")
@@ -104,31 +104,37 @@ class LazyModuleLoader:
         else:
             for path in module_paths:
                 try:
-                    LazyModuleLoader.load(path)
+                    ChargeurModuleDiffere.charger(path)
                 except Exception:
                     # Ignorer les erreurs lors du préchargement synchrone
                     logger.debug(f"Précharge synchrone échouée pour {path}")
 
     @staticmethod
-    def get_stats() -> dict:
+    def obtenir_statistiques() -> dict:
         """Retourne stats lazy loading"""
         return {
-            "cached_modules": len(LazyModuleLoader._cache),
-            "total_load_time": sum(LazyModuleLoader._load_times.values()),
+            "cached_modules": len(ChargeurModuleDiffere._cache),
+            "total_load_time": sum(ChargeurModuleDiffere._load_times.values()),
             "average_load_time": (
-                sum(LazyModuleLoader._load_times.values()) / len(LazyModuleLoader._load_times)
-                if LazyModuleLoader._load_times
+                sum(ChargeurModuleDiffere._load_times.values()) / len(ChargeurModuleDiffere._load_times)
+                if ChargeurModuleDiffere._load_times
                 else 0
             ),
-            "load_times": LazyModuleLoader._load_times,
+            "load_times": ChargeurModuleDiffere._load_times,
         }
 
     @staticmethod
-    def clear_cache():
+    def vider_cache():
         """Vide le cache (dev mode)"""
-        LazyModuleLoader._cache.clear()
-        LazyModuleLoader._load_times.clear()
+        ChargeurModuleDiffere._cache.clear()
+        ChargeurModuleDiffere._load_times.clear()
         logger.info("🗑️ Cache lazy loader vidé")
+    
+    # Alias anglais pour compatibilité
+    load = charger
+    preload = precharger
+    get_stats = obtenir_statistiques
+    clear_cache = vider_cache
 
 
 # ═══════════════════════════════════════════════════════════
@@ -151,7 +157,7 @@ def lazy_import(module_path: str, attr_name: Optional[str] = None):
         @wraps(func)
         def wrapper(*args, **kwargs):
             # Charger module
-            module = LazyModuleLoader.load(module_path)
+            module = ChargeurModuleDiffere.charger(module_path)
 
             # Injecter dans globals si attr_name fourni
             if attr_name:
@@ -169,7 +175,7 @@ def lazy_import(module_path: str, attr_name: Optional[str] = None):
 # ═══════════════════════════════════════════════════════════
 
 
-class OptimizedRouter:
+class RouteurOptimise:
     """
     Router avec lazy loading intégré
 
@@ -259,7 +265,7 @@ class OptimizedRouter:
     }
 
     @staticmethod
-    def load_module(module_name: str):
+    def charger_module(module_name: str):
         """
         Charge et render module avec lazy loading
 
@@ -269,12 +275,12 @@ class OptimizedRouter:
             module_name: Nom du module (ex: "cuisine.recettes")
         """
         # [OK] VÉRIFIER LE REGISTRY EN PREMIER
-        if module_name not in OptimizedRouter.MODULE_REGISTRY:
+        if module_name not in RouteurOptimise.MODULE_REGISTRY:
             st.error(f"[ERROR] Module '{module_name}' introuvable")
             logger.error(f"Module non enregistré: {module_name}")
             return
 
-        config = OptimizedRouter.MODULE_REGISTRY[module_name]
+        config = RouteurOptimise.MODULE_REGISTRY[module_name]
         module_path = config["path"]
 
         logger.info(f"🎯 Route: {module_name} → {module_path}")
@@ -283,7 +289,7 @@ class OptimizedRouter:
         with st.spinner(f"⏳ Chargement {module_name}..."):
             try:
                 # Lazy load du module
-                module = LazyModuleLoader.load(module_path)
+                module = ChargeurModuleDiffere.charger(module_path)
 
                 # ═══════════════════════════════════════════════════════
                 # RENDER DU MODULE
@@ -309,13 +315,13 @@ class OptimizedRouter:
                     st.exception(e)
 
     @staticmethod
-    def preload_common_modules():
+    def precharger_common_modules():
         """Précharge modules fréquents en arrière-plan"""
         common = [
             "src.modules.accueil",
             "src.modules.cuisine",  # [OK] Précharger module unifié
         ]
-        LazyModuleLoader.preload(common, background=True)
+        ChargeurModuleDiffere.precharger(common, background=True)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -323,11 +329,11 @@ class OptimizedRouter:
 # ═══════════════════════════════════════════════════════════
 
 
-def render_lazy_loading_stats():
+def afficher_stats_chargement_differe():
     """Affiche stats lazy loading dans sidebar"""
     import streamlit as st
 
-    stats = LazyModuleLoader.get_stats()
+    stats = ChargeurModuleDiffere.obtenir_statistiques()
 
     with st.expander("⚡ Lazy Loading Stats"):
         col1, col2 = st.columns(2)
@@ -355,6 +361,6 @@ def render_lazy_loading_stats():
                 st.caption(f"• {module_name}: {load_time*1000:.0f}ms")
 
         if st.button("🗑️ Vider Cache Lazy"):
-            LazyModuleLoader.clear_cache()
+            ChargeurModuleDiffere.vider_cache()
             st.success("Cache vidé !")
             st.rerun()

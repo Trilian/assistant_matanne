@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Routines avec Agent IA intégré
 Gestion des routines quotidiennes avec rappels intelligents
 """
@@ -606,4 +606,3 @@ def app():
             st.markdown("### 📋 Historique de la semaine")
 
             st.info("Fonctionnalité en développement : graphique d'historique sur 7 jours")
-

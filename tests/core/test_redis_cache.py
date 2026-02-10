@@ -2,9 +2,9 @@
 Tests unitaires - Module Redis Cache (Cache Distribué)
 
 Couverture complète :
-- RedisConfig (configuration)
-- MemoryCache (fallback mémoire)
-- RedisCache (cache Redis distribué)
+- ConfigurationRedis (configuration)
+- CacheMemoire (fallback mémoire)
+- CacheRedis (cache Redis distribué)
 - Sérialisation JSON/Pickle
 - Invalidation par tags
 - Connection pooling
@@ -22,12 +22,12 @@ from src.core import redis_cache
 @pytest.mark.unit
 def test_import_redis_cache():
     """Vérifie que le module redis_cache s'importe sans erreur."""
-    assert hasattr(redis_cache, "RedisCache") or hasattr(redis_cache, "__file__")
+    assert hasattr(redis_cache, "CacheRedis") or hasattr(redis_cache, "__file__")
 
 from src.core.redis_cache import (
-    RedisConfig,
-    MemoryCache,
-    RedisCache,
+    ConfigurationRedis,
+    CacheMemoire,
+    CacheRedis,
     REDIS_DISPONIBLE,
 )
 
@@ -43,7 +43,7 @@ class TestRedisConfig:
     @pytest.mark.unit
     def test_default_config_values(self):
         """Test valeurs par défaut configuration."""
-        config = RedisConfig()
+        config = ConfigurationRedis()
         
         assert config.HOST == "localhost"
         assert config.PORT == 6379
@@ -57,7 +57,7 @@ class TestRedisConfig:
     @pytest.mark.unit
     def test_config_modification(self):
         """Test modification configuration."""
-        config = RedisConfig()
+        config = ConfigurationRedis()
         config.HOST = "redis.example.com"
         config.PORT = 6380
         
@@ -75,7 +75,7 @@ class TestMemoryCache:
 
     def setup_method(self):
         """Préparation avant chaque test."""
-        self.cache = MemoryCache()
+        self.cache = CacheMemoire()
 
     @pytest.mark.unit
     def test_set_get_basic(self):
@@ -212,15 +212,15 @@ class TestRedisCache:
     @pytest.mark.unit
     def test_redis_cache_singleton(self):
         """Test pattern Singleton."""
-        cache1 = RedisCache()
-        cache2 = RedisCache()
+        cache1 = CacheRedis()
+        cache2 = CacheRedis()
         
         assert cache1 is cache2
 
     @pytest.mark.unit
     def test_redis_cache_initialization(self):
         """Test initialisation."""
-        cache = RedisCache()
+        cache = CacheRedis()
         
         # Devrait avoir fallback
         assert cache._fallback is not None
@@ -228,7 +228,7 @@ class TestRedisCache:
     @pytest.mark.unit
     def test_stats_initialization(self):
         """Test stats initialisées."""
-        cache = RedisCache()
+        cache = CacheRedis()
         
         stats = cache._stats
         
@@ -240,7 +240,7 @@ class TestRedisCache:
     @patch('src.core.redis_cache.REDIS_DISPONIBLE', False)
     def test_fallback_to_memory(self):
         """Test fallback quand Redis indisponible."""
-        cache = RedisCache()
+        cache = CacheRedis()
         
         # Avec Redis indisponible, devrait utiliser fallback
         assert cache._fallback is not None
@@ -248,7 +248,7 @@ class TestRedisCache:
     @pytest.mark.unit
     def test_get_set_operations(self):
         """Test opérations get/set."""
-        cache = RedisCache()
+        cache = CacheRedis()
         
         # Utiliser fallback pour tests
         if cache._redis is None:
@@ -260,7 +260,7 @@ class TestRedisCache:
     @pytest.mark.unit
     def test_delete_operation(self):
         """Test suppression."""
-        cache = RedisCache()
+        cache = CacheRedis()
         
         if cache._redis is None:
             cache.set("key", "value")
@@ -271,7 +271,7 @@ class TestRedisCache:
     @pytest.mark.unit
     def test_tag_invalidation(self):
         """Test invalidation tags."""
-        cache = RedisCache()
+        cache = CacheRedis()
         
         if cache._redis is None:
             cache.set("key1", "value1", tags=["tag1"])
@@ -285,7 +285,7 @@ class TestRedisCache:
     @pytest.mark.unit
     def test_cache_stats(self):
         """Test statistiques cache."""
-        cache = RedisCache()
+        cache = CacheRedis()
         
         stats = cache.stats()  # C'est une méthode
         
@@ -295,7 +295,7 @@ class TestRedisCache:
     @pytest.mark.unit
     def test_cache_with_ttl(self):
         """Test cache avec TTL."""
-        cache = RedisCache()
+        cache = CacheRedis()
         
         if cache._redis is None:
             cache.set("ttl_key", "ttl_value", ttl=60)
@@ -314,7 +314,7 @@ class TestCacheSerialization:
 
     def setup_method(self):
         """Préparation avant chaque test."""
-        self.cache = MemoryCache()
+        self.cache = CacheMemoire()
 
     @pytest.mark.unit
     def test_serialize_string(self):
@@ -383,7 +383,7 @@ class TestRedisCacheIntegration:
 
     def setup_method(self):
         """Préparation avant chaque test."""
-        self.cache = MemoryCache()
+        self.cache = CacheMemoire()
 
     @pytest.mark.integration
     def test_complete_cache_workflow(self):
@@ -435,7 +435,7 @@ class TestRedisCacheEdgeCases:
 
     def setup_method(self):
         """Préparation avant chaque test."""
-        self.cache = MemoryCache()
+        self.cache = CacheMemoire()
 
     @pytest.mark.unit
     def test_very_large_value(self):

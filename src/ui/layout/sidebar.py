@@ -6,7 +6,7 @@ import streamlit as st
 
 from src.core.cache import Cache
 from src.core.state import GestionnaireEtat, obtenir_etat
-from src.core.lazy_loader import LazyModuleLoader, render_lazy_loading_stats
+from src.core.lazy_loader import ChargeurModuleDiffere, afficher_stats_chargement_differe
 
 
 # ═══════════════════════════════════════════════════════════
@@ -89,7 +89,7 @@ def afficher_sidebar():
         st.markdown("---")
 
         # Stats Lazy Loading
-        render_lazy_loading_stats()
+        afficher_stats_chargement_differe()
 
         st.markdown("---")
 
@@ -103,7 +103,7 @@ def afficher_sidebar():
                 if st.button("🔄 Reset"):
                     GestionnaireEtat.reinitialiser()
                     Cache.vider()
-                    LazyModuleLoader.clear_cache()
+                    ChargeurModuleDiffere.clear_cache()
                     st.success("Reset OK")
                     st.rerun()
 

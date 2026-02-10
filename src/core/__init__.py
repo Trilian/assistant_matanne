@@ -1,8 +1,8 @@
-﻿"""
+"""
 Core - Module central de l'application.
 
 Expose les composants essentiels pour l'ensemble de l'application.
-Convention : Noms français en priorité, alias anglais disponibles.
+Convention : Noms en français uniquement.
 """
 
 # ═══════════════════════════════════════════════════════════
@@ -10,10 +10,6 @@ Convention : Noms français en priorité, alias anglais disponibles.
 # ═══════════════════════════════════════════════════════════
 
 from .config import Parametres, obtenir_parametres
-
-# Alias anglais
-Settings = Parametres
-get_settings = obtenir_parametres
 
 # ═══════════════════════════════════════════════════════════
 # LOGGING
@@ -23,10 +19,6 @@ from .logging import (
     GestionnaireLog,
     obtenir_logger,
 )
-
-# Alias anglais
-LogManager = GestionnaireLog
-get_logger = obtenir_logger
 
 # ═══════════════════════════════════════════════════════════
 # DATABASE
@@ -42,27 +34,11 @@ from .database import (
     verifier_connexion,
 )
 
-# Alias anglais
-get_engine = obtenir_moteur
-get_db_context = obtenir_contexte_db
-get_safe_db = obtenir_db_securise
-check_connection = verifier_connexion
-get_db_info = obtenir_infos_db
-init_database = initialiser_database
-MigrationManager = GestionnaireMigrations
-
 # ═══════════════════════════════════════════════════════════
 # STATE
 # ═══════════════════════════════════════════════════════════
 
 from .state import EtatApp, GestionnaireEtat, naviguer, obtenir_etat, revenir
-
-# Alias anglais
-AppState = EtatApp
-StateManager = GestionnaireEtat
-get_state = obtenir_etat
-navigate = naviguer
-go_back = revenir
 
 # ═══════════════════════════════════════════════════════════
 # CACHE
@@ -74,30 +50,27 @@ from .cache import (
     cached,
 )
 
-# Cache multi-niveaux (nouveau)
+# Cache multi-niveaux
 from .cache_multi import (
-    MultiLevelCache,
-    get_cache,
-    cached as cached_multi,
-    CacheEntry,
-    CacheStats,
+    CacheMultiNiveau,
+    obtenir_cache,
+    avec_cache_multi,
+    EntreeCache,
+    StatistiquesCache,
 )
 
-# Mode offline
+# Mode hors ligne
 from .offline import (
-    ConnectionStatus,
-    ConnectionManager,
-    OperationType,
-    PendingOperation,
-    OfflineQueue,
-    OfflineSynchronizer,
-    offline_aware,
-    render_connection_status,
-    render_sync_panel,
+    StatutConnexion,
+    GestionnaireConnexion,
+    TypeOperation,
+    OperationEnAttente,
+    FileAttenteHorsLigne,
+    SynchroniseurHorsLigne,
+    avec_mode_hors_ligne,
+    afficher_statut_connexion,
+    afficher_panneau_sync,
 )
-
-# Alias anglais
-RateLimit = LimiteDebit
 
 # ═══════════════════════════════════════════════════════════
 # ERRORS BASE (pures, sans UI)
@@ -127,24 +100,15 @@ from .errors import (
     GestionnaireErreurs,
 )
 
-# Alias anglais
-AppException = ExceptionApp
-ValidationError = ErreurValidation
-NotFoundError = ErreurNonTrouve
-DatabaseError = ErreurBaseDeDonnees
-AIServiceError = ErreurServiceIA
-RateLimitError = ErreurLimiteDebit
-handle_errors = gerer_erreurs
-
 # ═══════════════════════════════════════════════════════════
 # DECORATORS
 # ═══════════════════════════════════════════════════════════
 
 from .decorators import (
-    with_db_session,
-    with_cache,
-    with_error_handling,
-    with_validation,
+    avec_session_db,
+    avec_cache,
+    avec_gestion_erreurs,
+    avec_validation,
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -172,21 +136,11 @@ from .validation import (
     valider_modele,
 )
 
-# Alias anglais
-InputSanitizer = NettoyeurEntrees
-validate_model = valider_modele
-
 # ═══════════════════════════════════════════════════════════
 # AI
 # ═══════════════════════════════════════════════════════════
 
 from .ai import AnalyseurIA, CacheIA, ClientIA, obtenir_client_ia
-
-# Alias anglais
-AIClient = ClientIA
-get_ai_client = obtenir_client_ia
-AIParser = AnalyseurIA
-AICache = CacheIA
 
 # ═══════════════════════════════════════════════════════════
 # CONSTANTS
@@ -199,18 +153,18 @@ from .constants import *
 # ═══════════════════════════════════════════════════════════
 
 from .performance import (
-    FunctionProfiler,
-    MemoryMonitor,
-    SQLOptimizer,
-    PerformanceDashboard,
-    ComponentLoader,
-    profile,
-    debounce,
-    throttle,
-    measure_time,
-    track_query,
-    render_performance_panel,
-    render_mini_performance_badge,
+    ProfileurFonction,
+    MoniteurMemoire,
+    OptimiseurSQL,
+    TableauBordPerformance,
+    ChargeurComposant,
+    profiler,
+    antirrebond,
+    limiter_debit,
+    mesurer_temps,
+    suivre_requete,
+    afficher_panneau_performance,
+    afficher_badge_mini_performance,
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -218,11 +172,46 @@ from .performance import (
 # ═══════════════════════════════════════════════════════════
 
 from .sql_optimizer import (
-    SQLAlchemyListener,
-    N1Detector,
-    BatchLoader,
-    OptimizedQueryBuilder,
-    render_sql_analysis,
+    EcouteurSQLAlchemy,
+    DetecteurN1,
+    ChargeurParLots,
+    ConstructeurRequeteOptimisee,
+    afficher_analyse_sql,
+)
+
+# ═══════════════════════════════════════════════════════════
+# REDIS CACHE
+# ═══════════════════════════════════════════════════════════
+
+from .redis_cache import (
+    ConfigurationRedis,
+    CacheMemoire,
+    CacheRedis,
+    avec_cache_redis,
+    obtenir_cache_redis,
+)
+
+# ═══════════════════════════════════════════════════════════
+# LAZY LOADER
+# ═══════════════════════════════════════════════════════════
+
+from .lazy_loader import (
+    ChargeurModuleDiffere,
+    RouteurOptimise,
+    afficher_stats_chargement_differe,
+)
+
+# ═══════════════════════════════════════════════════════════
+# MULTI-TENANT
+# ═══════════════════════════════════════════════════════════
+
+from .multi_tenant import (
+    ContexteUtilisateur,
+    RequeteMultiLocataire,
+    ServiceMultiLocataire,
+    initialiser_contexte_utilisateur_streamlit,
+    definir_utilisateur_from_auth,
+    creer_multi_tenant_service,
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -233,13 +222,9 @@ __all__ = [
     # Config
     "Parametres",
     "obtenir_parametres",
-    "Settings",
-    "get_settings",
     # Logging
     "GestionnaireLog",
     "obtenir_logger",
-    "LogManager",
-    "get_logger",
     # Database
     "obtenir_moteur",
     "obtenir_contexte_db",
@@ -248,29 +233,32 @@ __all__ = [
     "obtenir_infos_db",
     "initialiser_database",
     "GestionnaireMigrations",
-    "get_engine",
-    "get_db_context",
-    "get_safe_db",
-    "check_connection",
-    "get_db_info",
-    "init_database",
-    "MigrationManager",
     # State
     "EtatApp",
     "GestionnaireEtat",
     "obtenir_etat",
     "naviguer",
     "revenir",
-    "AppState",
-    "StateManager",
-    "get_state",
-    "navigate",
-    "go_back",
     # Cache
     "Cache",
     "cached",
     "LimiteDebit",
-    "RateLimit",
+    # Cache multi-niveaux
+    "CacheMultiNiveau",
+    "obtenir_cache",
+    "avec_cache_multi",
+    "EntreeCache",
+    "StatistiquesCache",
+    # Mode hors ligne
+    "StatutConnexion",
+    "GestionnaireConnexion",
+    "TypeOperation",
+    "OperationEnAttente",
+    "FileAttenteHorsLigne",
+    "SynchroniseurHorsLigne",
+    "avec_mode_hors_ligne",
+    "afficher_statut_connexion",
+    "afficher_panneau_sync",
     # Errors Base (pures)
     "ExceptionApp",
     "ErreurValidation",
@@ -287,19 +275,11 @@ __all__ = [
     "gerer_erreurs",
     "afficher_erreur_streamlit",
     "GestionnaireErreurs",
-    # Alias anglais (errors)
-    "AppException",
-    "ValidationError",
-    "NotFoundError",
-    "DatabaseError",
-    "AIServiceError",
-    "RateLimitError",
-    "handle_errors",
     # Decorators
-    "with_db_session",
-    "with_cache",
-    "with_error_handling",
-    "with_validation",
+    "avec_session_db",
+    "avec_cache",
+    "avec_gestion_erreurs",
+    "avec_validation",
     # Validators Pydantic
     "RecetteInput",
     "IngredientInput",
@@ -313,50 +293,45 @@ __all__ = [
     # Validation
     "NettoyeurEntrees",
     "valider_modele",
-    "InputSanitizer",
-    "validate_model",
     # AI
     "ClientIA",
     "obtenir_client_ia",
     "AnalyseurIA",
     "CacheIA",
-    "AIClient",
-    "get_ai_client",
-    "AIParser",
-    "AICache",
-    # Cache multi-niveaux
-    "MultiLevelCache",
-    "get_cache",
-    "cached_multi",
-    "CacheEntry",
-    "CacheStats",
-    # Mode offline
-    "ConnectionStatus",
-    "ConnectionManager",
-    "OperationType",
-    "PendingOperation",
-    "OfflineQueue",
-    "OfflineSynchronizer",
-    "offline_aware",
-    "render_connection_status",
-    "render_sync_panel",
     # Performance
-    "FunctionProfiler",
-    "MemoryMonitor",
-    "SQLOptimizer",
-    "PerformanceDashboard",
-    "ComponentLoader",
-    "profile",
-    "debounce",
-    "throttle",
-    "measure_time",
-    "track_query",
-    "render_performance_panel",
-    "render_mini_performance_badge",
+    "ProfileurFonction",
+    "MoniteurMemoire",
+    "OptimiseurSQL",
+    "TableauBordPerformance",
+    "ChargeurComposant",
+    "profiler",
+    "antirrebond",
+    "limiter_debit",
+    "mesurer_temps",
+    "suivre_requete",
+    "afficher_panneau_performance",
+    "afficher_badge_mini_performance",
     # SQL Optimizer
-    "SQLAlchemyListener",
-    "N1Detector",
-    "BatchLoader",
-    "OptimizedQueryBuilder",
-    "render_sql_analysis",
+    "EcouteurSQLAlchemy",
+    "DetecteurN1",
+    "ChargeurParLots",
+    "ConstructeurRequeteOptimisee",
+    "afficher_analyse_sql",
+    # Redis Cache
+    "ConfigurationRedis",
+    "CacheMemoire",
+    "CacheRedis",
+    "avec_cache_redis",
+    "obtenir_cache_redis",
+    # Lazy Loader
+    "ChargeurModuleDiffere",
+    "RouteurOptimise",
+    "afficher_stats_chargement_differe",
+    # Multi-Tenant
+    "ContexteUtilisateur",
+    "RequeteMultiLocataire",
+    "ServiceMultiLocataire",
+    "initialiser_contexte_utilisateur_streamlit",
+    "definir_utilisateur_from_auth",
+    "creer_multi_tenant_service",
 ]

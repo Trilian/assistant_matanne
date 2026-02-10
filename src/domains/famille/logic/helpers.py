@@ -1,4 +1,4 @@
-﻿"""
+"""
 Helpers et fonctions utilitaires pour le module Famille
 """
 
@@ -374,4 +374,3 @@ def format_date_fr(d: date) -> str:
     mois = ["jan", "fév", "mar", "avr", "mai", "jun", "jul", "aoû", "sep", "oct", "nov", "déc"]
     
     return f"{jours[d.weekday()]} {d.day} {mois[d.month-1]} {d.year}"
-

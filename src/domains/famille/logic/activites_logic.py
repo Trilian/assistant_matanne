@@ -1,4 +1,4 @@
-﻿"""
+"""
 Logique métier du module Activités (famille) - Séparée de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
@@ -240,4 +240,3 @@ def grouper_par_mois(activites: List[Dict[str, Any]]) -> Dict[str, List[Dict[str
             groupes[mois_key].append(act)
     
     return groupes
-

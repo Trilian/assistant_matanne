@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Projets - Gestion des projets maison avec IA intégrée
 Priorisation intelligente, estimation de durée, suivi de progression
 """
@@ -503,4 +503,3 @@ def app():
 
 if __name__ == "__main__":
     app()
-

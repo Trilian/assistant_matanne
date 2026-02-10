@@ -1,4 +1,4 @@
-﻿"""
+"""
 Performance - Métriques et optimisations.
 
 Fonctionnalités :
@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class PerformanceMetric:
+class MetriquePerformance:
     """Métrique de performance individuelle."""
     
     name: str
@@ -44,7 +44,7 @@ class PerformanceMetric:
 
 
 @dataclass
-class FunctionStats:
+class StatistiquesFonction:
     """Statistiques d'une fonction."""
     
     call_count: int = 0
@@ -61,7 +61,7 @@ class FunctionStats:
 # ═══════════════════════════════════════════════════════════
 
 
-class FunctionProfiler:
+class ProfileurFonction:
     """
     Profiler pour mesurer les performances des fonctions.
     
@@ -75,19 +75,19 @@ class FunctionProfiler:
     SESSION_KEY = "_function_profiler_stats"
     
     @classmethod
-    def _get_stats(cls) -> dict[str, FunctionStats]:
+    def _get_stats(cls) -> dict[str, StatistiquesFonction]:
         """Récupère les stats depuis session."""
         if cls.SESSION_KEY not in st.session_state:
             st.session_state[cls.SESSION_KEY] = {}
         return st.session_state[cls.SESSION_KEY]
     
     @classmethod
-    def record(cls, func_name: str, duration_ms: float, error: bool = False) -> None:
+    def enregistrer(cls, func_name: str, duration_ms: float, error: bool = False) -> None:
         """Enregistre une exécution."""
         stats = cls._get_stats()
         
         if func_name not in stats:
-            stats[func_name] = FunctionStats()
+            stats[func_name] = StatistiquesFonction()
         
         s = stats[func_name]
         s.call_count += 1
@@ -101,12 +101,12 @@ class FunctionProfiler:
             s.errors += 1
     
     @classmethod
-    def get_all_stats(cls) -> dict[str, FunctionStats]:
+    def obtenir_toutes_stats(cls) -> dict[str, StatistiquesFonction]:
         """Retourne toutes les stats."""
         return cls._get_stats()
     
     @classmethod
-    def get_slowest(cls, n: int = 5) -> list[tuple[str, FunctionStats]]:
+    def obtenir_plus_lentes(cls, n: int = 5) -> list[tuple[str, StatistiquesFonction]]:
         """Retourne les N fonctions les plus lentes."""
         stats = cls._get_stats()
         sorted_stats = sorted(
@@ -117,7 +117,7 @@ class FunctionProfiler:
         return sorted_stats[:n]
     
     @classmethod
-    def get_most_called(cls, n: int = 5) -> list[tuple[str, FunctionStats]]:
+    def obtenir_plus_appelees(cls, n: int = 5) -> list[tuple[str, StatistiquesFonction]]:
         """Retourne les N fonctions les plus appelées."""
         stats = cls._get_stats()
         sorted_stats = sorted(
@@ -128,12 +128,12 @@ class FunctionProfiler:
         return sorted_stats[:n]
     
     @classmethod
-    def clear(cls) -> None:
+    def effacer(cls) -> None:
         """Réinitialise les stats."""
         st.session_state[cls.SESSION_KEY] = {}
 
 
-def profile(func: Callable = None, *, name: str = None):
+def profiler(func: Callable = None, *, name: str = None):
     """
     Décorateur pour profiler une fonction.
     
@@ -165,7 +165,7 @@ def profile(func: Callable = None, *, name: str = None):
                 raise
             finally:
                 duration_ms = (time.perf_counter() - start) * 1000
-                FunctionProfiler.record(func_name, duration_ms, error)
+                ProfileurFonction.enregistrer(func_name, duration_ms, error)
         
         return wrapper
     
@@ -175,7 +175,7 @@ def profile(func: Callable = None, *, name: str = None):
 
 
 @contextmanager
-def measure_time(name: str):
+def mesurer_temps(name: str):
     """
     Context manager pour mesurer le temps d'un bloc.
     
@@ -193,7 +193,7 @@ def measure_time(name: str):
         raise
     finally:
         duration_ms = (time.perf_counter() - start) * 1000
-        FunctionProfiler.record(name, duration_ms, error)
+        ProfileurFonction.enregistrer(name, duration_ms, error)
         logger.debug(f"⏱️ {name}: {duration_ms:.1f}ms")
 
 
@@ -202,7 +202,7 @@ def measure_time(name: str):
 # ═══════════════════════════════════════════════════════════
 
 
-class MemoryMonitor:
+class MoniteurMemoire:
     """
     Moniteur de mémoire avec tracking et cleanup.
     """
@@ -211,7 +211,7 @@ class MemoryMonitor:
     _tracking_active = False
     
     @classmethod
-    def start_tracking(cls) -> None:
+    def demarrer_suivi(cls) -> None:
         """Démarre le tracking mémoire."""
         if not cls._tracking_active:
             tracemalloc.start()
@@ -219,7 +219,7 @@ class MemoryMonitor:
             logger.info("[CHART] Tracking mémoire démarré")
     
     @classmethod
-    def stop_tracking(cls) -> None:
+    def arreter_suivi(cls) -> None:
         """Arrête le tracking mémoire."""
         if cls._tracking_active:
             tracemalloc.stop()
@@ -227,7 +227,7 @@ class MemoryMonitor:
             logger.info("[CHART] Tracking mémoire arrêté")
     
     @classmethod
-    def get_current_usage(cls) -> dict:
+    def obtenir_utilisation_courante(cls) -> dict:
         """
         Retourne l'utilisation mémoire actuelle.
         
@@ -262,7 +262,7 @@ class MemoryMonitor:
         }
     
     @classmethod
-    def take_snapshot(cls, label: str = "snapshot") -> dict:
+    def prendre_instantane(cls, label: str = "snapshot") -> dict:
         """Prend un snapshot mémoire."""
         usage = cls.get_current_usage()
         usage["label"] = label
@@ -281,12 +281,12 @@ class MemoryMonitor:
         return usage
     
     @classmethod
-    def get_snapshots(cls) -> list[dict]:
+    def obtenir_instantanes(cls) -> list[dict]:
         """Retourne tous les snapshots."""
         return st.session_state.get(cls.SESSION_KEY, [])
     
     @classmethod
-    def force_cleanup(cls) -> dict:
+    def forcer_nettoyage(cls) -> dict:
         """
         Force un nettoyage mémoire.
         
@@ -325,7 +325,7 @@ class MemoryMonitor:
 # ═══════════════════════════════════════════════════════════
 
 
-class SQLOptimizer:
+class OptimiseurSQL:
     """
     Optimiseur de requêtes SQL avec tracking.
     """
@@ -345,7 +345,7 @@ class SQLOptimizer:
         return st.session_state[cls.SESSION_KEY]
     
     @classmethod
-    def record_query(
+    def enregistrer_query(
         cls,
         query: str,
         duration_ms: float,
@@ -375,7 +375,7 @@ class SQLOptimizer:
             logger.warning(f"[!] Requête lente ({duration_ms:.0f}ms): {query[:100]}")
     
     @classmethod
-    def get_stats(cls) -> dict:
+    def obtenir_statistiques(cls) -> dict:
         """Retourne les statistiques SQL."""
         stats = cls._get_stats()
         
@@ -392,7 +392,7 @@ class SQLOptimizer:
         }
     
     @classmethod
-    def clear(cls) -> None:
+    def effacer(cls) -> None:
         """Réinitialise les stats."""
         st.session_state[cls.SESSION_KEY] = {
             "queries": [],
@@ -403,7 +403,7 @@ class SQLOptimizer:
 
 
 @contextmanager
-def track_query(query_description: str):
+def suivre_requete(query_description: str):
     """
     Context manager pour tracker une requête SQL.
     
@@ -418,7 +418,7 @@ def track_query(query_description: str):
         yield
     finally:
         duration_ms = (time.perf_counter() - start) * 1000
-        SQLOptimizer.record_query(query_description, duration_ms, rows)
+        OptimiseurSQL.record_query(query_description, duration_ms, rows)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -426,33 +426,33 @@ def track_query(query_description: str):
 # ═══════════════════════════════════════════════════════════
 
 
-class PerformanceDashboard:
+class TableauBordPerformance:
     """
     Génère les métriques de performance pour l'UI.
     """
     
     @classmethod
-    def get_summary(cls) -> dict:
+    def obtenir_resume(cls) -> dict:
         """
         Retourne un résumé complet des performances.
         
         Returns:
             Dict avec toutes les métriques
         """
-        from src.core.lazy_loader import LazyModuleLoader
+        from src.core.lazy_loader import ChargeurModuleDiffere
         
         # Stats lazy loading
-        lazy_stats = LazyModuleLoader.get_stats()
+        lazy_stats = ChargeurModuleDiffere.obtenir_statistiques()
         
         # Stats profiler
-        profiler_stats = FunctionProfiler.get_all_stats()
-        slowest = FunctionProfiler.get_slowest(5)
+        profiler_stats = ProfileurFonction.obtenir_toutes_stats()
+        slowest = ProfileurFonction.obtenir_plus_lentes(5)
         
         # Stats mémoire
-        memory = MemoryMonitor.get_current_usage()
+        memory = MoniteurMemoire.get_current_usage()
         
         # Stats SQL
-        sql_stats = SQLOptimizer.get_stats()
+        sql_stats = OptimiseurSQL.obtenir_statistiques()
         
         return {
             "lazy_loading": {
@@ -476,14 +476,14 @@ class PerformanceDashboard:
         }
     
     @classmethod
-    def get_health_score(cls) -> tuple[int, str]:
+    def obtenir_score_sante(cls) -> tuple[int, str]:
         """
         Calcule un score de santé global (0-100).
         
         Returns:
             Tuple (score, status_emoji)
         """
-        summary = cls.get_summary()
+        summary = cls.obtenir_resume()
         score = 100
         
         # Pénalités mémoire
@@ -520,11 +520,11 @@ class PerformanceDashboard:
 # ═══════════════════════════════════════════════════════════
 
 
-def render_performance_panel():
+def afficher_panneau_performance():
     """Affiche le panneau de performance dans la sidebar."""
     
-    summary = PerformanceDashboard.get_summary()
-    score, status = PerformanceDashboard.get_health_score()
+    summary = TableauBordPerformance.obtenir_resume()
+    score, status = TableauBordPerformance.obtenir_score_sante()
     
     with st.expander(f"📊 Performance {status} {score}/100"):
         
@@ -564,7 +564,7 @@ def render_performance_panel():
                 )
             
             if st.button("🧹 Nettoyer mémoire", key="cleanup_mem"):
-                result = MemoryMonitor.force_cleanup()
+                result = MoniteurMemoire.force_cleanup()
                 st.success(f"Libéré: {result['memory_freed_mb']}MB")
         
         with tab3:
@@ -582,15 +582,15 @@ def render_performance_panel():
                 )
             
             if st.button("🗑️ Reset stats", key="reset_sql"):
-                SQLOptimizer.clear()
+                OptimiseurSQL.effacer()
                 st.success("Stats SQL réinitialisées")
 
 
-def render_mini_performance_badge():
+def afficher_badge_mini_performance():
     """Badge compact pour la barre latérale."""
     
-    score, status = PerformanceDashboard.get_health_score()
-    memory = MemoryMonitor.get_current_usage()
+    score, status = TableauBordPerformance.obtenir_score_sante()
+    memory = MoniteurMemoire.get_current_usage()
     
     st.markdown(
         f'<div style="display: flex; justify-content: space-between; '
@@ -608,7 +608,7 @@ def render_mini_performance_badge():
 # ═══════════════════════════════════════════════════════════
 
 
-class ComponentLoader:
+class ChargeurComposant:
     """
     Lazy loader avancé pour composants UI Streamlit.
     
@@ -618,7 +618,7 @@ class ComponentLoader:
     _loaded: set = set()
     
     @classmethod
-    def lazy_component(
+    def composant_differe(
         cls,
         component_id: str,
         loader_func: Callable,
@@ -648,10 +648,10 @@ class ComponentLoader:
     @classmethod
     def reset(cls):
         """Reset le tracker de composants."""
-        cls._loaded.clear()
+        cls._loaded.effacer()
 
 
-def debounce(wait_ms: int = 300):
+def antirrebond(wait_ms: int = 300):
     """
     Décorateur pour debouncer les appels fréquents.
     
@@ -682,7 +682,7 @@ def debounce(wait_ms: int = 300):
     return decorator
 
 
-def throttle(max_calls: int = 10, period_seconds: int = 60):
+def limiter_debit(max_calls: int = 10, period_seconds: int = 60):
     """
     Décorateur pour limiter le nombre d'appels par période.
     
@@ -727,13 +727,13 @@ def throttle(max_calls: int = 10, period_seconds: int = 60):
 
 __all__ = [
     # Classes
-    "PerformanceMetric",
-    "FunctionStats",
-    "FunctionProfiler",
-    "MemoryMonitor",
-    "SQLOptimizer",
-    "PerformanceDashboard",
-    "ComponentLoader",
+    "MetriquePerformance",
+    "StatistiquesFonction",
+    "ProfileurFonction",
+    "MoniteurMemoire",
+    "OptimiseurSQL",
+    "TableauBordPerformance",
+    "ChargeurComposant",
     # Décorateurs
     "profile",
     "debounce",

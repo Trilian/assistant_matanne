@@ -3,10 +3,10 @@
 Tests pour sql_optimizer.py - amélioration de la couverture
 
 Cible:
-- QueryInfo dataclass
-- N1Detection dataclass
-- SQLAlchemyListener class
-- N1Detector class
+- InfoRequete dataclass
+- DetectionN1 dataclass
+- EcouteurSQLAlchemy class
+- DetecteurN1 class
 """
 import pytest
 from datetime import datetime
@@ -14,13 +14,13 @@ from unittest.mock import MagicMock, patch
 
 
 class TestQueryInfo:
-    """Tests pour QueryInfo dataclass."""
+    """Tests pour InfoRequete dataclass."""
     
     def test_default_values(self):
         """Valeurs par défaut correctes."""
-        from src.core.sql_optimizer import QueryInfo
+        from src.core.sql_optimizer import InfoRequete
         
-        info = QueryInfo(sql="SELECT * FROM users", duration_ms=50.0)
+        info = InfoRequete(sql="SELECT * FROM users", duration_ms=50.0)
         
         assert info.sql == "SELECT * FROM users"
         assert info.duration_ms == 50.0
@@ -31,9 +31,9 @@ class TestQueryInfo:
     
     def test_with_all_fields(self):
         """Création avec tous les champs."""
-        from src.core.sql_optimizer import QueryInfo
+        from src.core.sql_optimizer import InfoRequete
         
-        info = QueryInfo(
+        info = InfoRequete(
             sql="SELECT * FROM users WHERE id = :id",
             duration_ms=25.5,
             table="users",
@@ -47,13 +47,13 @@ class TestQueryInfo:
 
 
 class TestN1Detection:
-    """Tests pour N1Detection dataclass."""
+    """Tests pour DetectionN1 dataclass."""
     
     def test_default_values(self):
         """Valeurs par défaut correctes."""
-        from src.core.sql_optimizer import N1Detection
+        from src.core.sql_optimizer import DetectionN1
         
-        detection = N1Detection(
+        detection = DetectionN1(
             table="ingredients",
             parent_table="recettes",
             count=15,
@@ -67,7 +67,7 @@ class TestN1Detection:
 
 
 class TestSQLAlchemyListener:
-    """Tests pour SQLAlchemyListener."""
+    """Tests pour EcouteurSQLAlchemy."""
     
     @pytest.fixture(autouse=True)
     def mock_streamlit(self):
@@ -78,84 +78,84 @@ class TestSQLAlchemyListener:
     
     def test_extract_operation_select(self, mock_streamlit):
         """Extrait SELECT correctement."""
-        from src.core.sql_optimizer import SQLAlchemyListener
+        from src.core.sql_optimizer import EcouteurSQLAlchemy
         
-        assert SQLAlchemyListener._extract_operation("SELECT * FROM users") == "SELECT"
-        assert SQLAlchemyListener._extract_operation("  select id FROM users") == "SELECT"
+        assert EcouteurSQLAlchemy._extract_operation("SELECT * FROM users") == "SELECT"
+        assert EcouteurSQLAlchemy._extract_operation("  select id FROM users") == "SELECT"
     
     def test_extract_operation_insert(self, mock_streamlit):
         """Extrait INSERT correctement."""
-        from src.core.sql_optimizer import SQLAlchemyListener
+        from src.core.sql_optimizer import EcouteurSQLAlchemy
         
-        assert SQLAlchemyListener._extract_operation("INSERT INTO users VALUES (1)") == "INSERT"
+        assert EcouteurSQLAlchemy._extract_operation("INSERT INTO users VALUES (1)") == "INSERT"
     
     def test_extract_operation_update(self, mock_streamlit):
         """Extrait UPDATE correctement."""
-        from src.core.sql_optimizer import SQLAlchemyListener
+        from src.core.sql_optimizer import EcouteurSQLAlchemy
         
-        assert SQLAlchemyListener._extract_operation("UPDATE users SET name='x'") == "UPDATE"
+        assert EcouteurSQLAlchemy._extract_operation("UPDATE users SET name='x'") == "UPDATE"
     
     def test_extract_operation_delete(self, mock_streamlit):
         """Extrait DELETE correctement."""
-        from src.core.sql_optimizer import SQLAlchemyListener
+        from src.core.sql_optimizer import EcouteurSQLAlchemy
         
-        assert SQLAlchemyListener._extract_operation("DELETE FROM users WHERE id=1") == "DELETE"
+        assert EcouteurSQLAlchemy._extract_operation("DELETE FROM users WHERE id=1") == "DELETE"
     
     def test_extract_operation_other(self, mock_streamlit):
         """Retourne OTHER pour opérations inconnues."""
-        from src.core.sql_optimizer import SQLAlchemyListener
+        from src.core.sql_optimizer import EcouteurSQLAlchemy
         
-        assert SQLAlchemyListener._extract_operation("EXPLAIN SELECT * FROM users") == "OTHER"
+        assert EcouteurSQLAlchemy._extract_operation("EXPLAIN SELECT * FROM users") == "OTHER"
     
     def test_extract_table_from_select(self, mock_streamlit):
         """Extrait table depuis SELECT."""
-        from src.core.sql_optimizer import SQLAlchemyListener
+        from src.core.sql_optimizer import EcouteurSQLAlchemy
         
-        assert SQLAlchemyListener._extract_table("SELECT * FROM users WHERE id=1") == "users"
-        assert SQLAlchemyListener._extract_table('SELECT * FROM "recettes"') == "recettes"
+        assert EcouteurSQLAlchemy._extract_table("SELECT * FROM users WHERE id=1") == "users"
+        assert EcouteurSQLAlchemy._extract_table('SELECT * FROM "recettes"') == "recettes"
     
     def test_extract_table_from_insert(self, mock_streamlit):
         """Extrait table depuis INSERT."""
-        from src.core.sql_optimizer import SQLAlchemyListener
+        from src.core.sql_optimizer import EcouteurSQLAlchemy
         
-        assert SQLAlchemyListener._extract_table("INSERT INTO ingredients (name) VALUES ('x')") == "ingredients"
+        assert EcouteurSQLAlchemy._extract_table("INSERT INTO ingredients (name) VALUES ('x')") == "ingredients"
     
     def test_extract_table_from_update(self, mock_streamlit):
         """Extrait table depuis UPDATE."""
-        from src.core.sql_optimizer import SQLAlchemyListener
+        from src.core.sql_optimizer import EcouteurSQLAlchemy
         
-        assert SQLAlchemyListener._extract_table("UPDATE inventaire SET qty=5") == "inventaire"
+        assert EcouteurSQLAlchemy._extract_table("UPDATE inventaire SET qty=5") == "inventaire"
     
     def test_extract_table_unknown(self, mock_streamlit):
         """Retourne unknown si pas de table trouvée."""
-        from src.core.sql_optimizer import SQLAlchemyListener
+        from src.core.sql_optimizer import EcouteurSQLAlchemy
         
-        assert SQLAlchemyListener._extract_table("SET timezone='UTC'") == "unknown"
+        assert EcouteurSQLAlchemy._extract_table("SET timezone='UTC'") == "unknown"
     
     def test_get_queries_empty(self, mock_streamlit):
         """get_queries retourne liste vide si pas de requêtes."""
-        from src.core.sql_optimizer import SQLAlchemyListener
+        from src.core.sql_optimizer import EcouteurSQLAlchemy
         
-        queries = SQLAlchemyListener.get_queries()
+        queries = EcouteurSQLAlchemy.get_queries()
         assert queries == []
     
     def test_get_queries_with_data(self, mock_streamlit):
         """get_queries retourne les requêtes loggées."""
-        from src.core.sql_optimizer import SQLAlchemyListener, QueryInfo
+        from src.core.sql_optimizer import EcouteurSQLAlchemy, InfoRequete
         
         mock_streamlit.session_state["_sqlalchemy_query_log"] = [
-            QueryInfo(sql="SELECT 1", duration_ms=1.0),
-            QueryInfo(sql="SELECT 2", duration_ms=2.0),
+            InfoRequete(sql="SELECT 1", duration_ms=1.0),
+            InfoRequete(sql="SELECT 2", duration_ms=2.0),
         ]
         
-        queries = SQLAlchemyListener.get_queries()
+        queries = EcouteurSQLAlchemy.get_queries()
         assert len(queries) == 2
     
     def test_get_stats_empty(self, mock_streamlit):
         """get_stats pour liste vide."""
-        from src.core.sql_optimizer import SQLAlchemyListener
+        from src.core.sql_optimizer import EcouteurSQLAlchemy
         
-        stats = SQLAlchemyListener.get_stats()
+        stats = EcouteurSQLAlchemy.get_stats()
         
         assert stats["total"] == 0
         assert stats["by_operation"] == {}
@@ -163,15 +163,15 @@ class TestSQLAlchemyListener:
     
     def test_get_stats_with_queries(self, mock_streamlit):
         """get_stats calcule les statistiques."""
-        from src.core.sql_optimizer import SQLAlchemyListener, QueryInfo
+        from src.core.sql_optimizer import EcouteurSQLAlchemy, InfoRequete
         
         mock_streamlit.session_state["_sqlalchemy_query_log"] = [
-            QueryInfo(sql="SELECT 1", duration_ms=10.0, operation="SELECT", table="users"),
-            QueryInfo(sql="SELECT 2", duration_ms=20.0, operation="SELECT", table="users"),
-            QueryInfo(sql="INSERT 1", duration_ms=5.0, operation="INSERT", table="logs"),
+            InfoRequete(sql="SELECT 1", duration_ms=10.0, operation="SELECT", table="users"),
+            InfoRequete(sql="SELECT 2", duration_ms=20.0, operation="SELECT", table="users"),
+            InfoRequete(sql="INSERT 1", duration_ms=5.0, operation="INSERT", table="logs"),
         ]
         
-        stats = SQLAlchemyListener.get_stats()
+        stats = EcouteurSQLAlchemy.get_stats()
         
         assert stats["total"] == 3
         assert stats["by_operation"]["SELECT"] == 2
@@ -180,33 +180,33 @@ class TestSQLAlchemyListener:
     
     def test_get_stats_slow_queries(self, mock_streamlit):
         """get_stats identifie les requêtes lentes."""
-        from src.core.sql_optimizer import SQLAlchemyListener, QueryInfo
+        from src.core.sql_optimizer import EcouteurSQLAlchemy, InfoRequete
         
         mock_streamlit.session_state["_sqlalchemy_query_log"] = [
-            QueryInfo(sql="FAST", duration_ms=10.0),
-            QueryInfo(sql="SLOW1", duration_ms=150.0),
-            QueryInfo(sql="SLOW2", duration_ms=200.0),
+            InfoRequete(sql="FAST", duration_ms=10.0),
+            InfoRequete(sql="SLOW1", duration_ms=150.0),
+            InfoRequete(sql="SLOW2", duration_ms=200.0),
         ]
         
-        stats = SQLAlchemyListener.get_stats()
+        stats = EcouteurSQLAlchemy.get_stats()
         
         assert len(stats["slow_queries"]) == 2
     
     def test_clear(self, mock_streamlit):
         """clear vide le log."""
-        from src.core.sql_optimizer import SQLAlchemyListener, QueryInfo
+        from src.core.sql_optimizer import EcouteurSQLAlchemy, InfoRequete
         
         mock_streamlit.session_state["_sqlalchemy_query_log"] = [
-            QueryInfo(sql="test", duration_ms=1.0)
+            InfoRequete(sql="test", duration_ms=1.0)
         ]
         
-        SQLAlchemyListener.clear()
+        EcouteurSQLAlchemy.clear()
         
         assert mock_streamlit.session_state["_sqlalchemy_query_log"] == []
 
 
 class TestN1Detector:
-    """Tests pour N1Detector."""
+    """Tests pour DetecteurN1."""
     
     @pytest.fixture(autouse=True)
     def mock_streamlit(self):
@@ -217,13 +217,13 @@ class TestN1Detector:
     
     def test_normalize_query(self, mock_streamlit):
         """Normalise les requêtes pour comparaison."""
-        from src.core.sql_optimizer import N1Detector
+        from src.core.sql_optimizer import DetecteurN1
         
         q1 = "SELECT * FROM users WHERE id = 123"
         q2 = "SELECT * FROM users WHERE name = 'John'"
         
-        n1 = N1Detector._normalize_query(q1)
-        n2 = N1Detector._normalize_query(q2)
+        n1 = DetecteurN1._normalize_query(q1)
+        n2 = DetecteurN1._normalize_query(q2)
         
         assert "123" not in n1
         assert "?" in n1
@@ -231,43 +231,43 @@ class TestN1Detector:
     
     def test_guess_parent_table(self, mock_streamlit):
         """Devine la table parente depuis FK."""
-        from src.core.sql_optimizer import N1Detector, QueryInfo
+        from src.core.sql_optimizer import DetecteurN1, InfoRequete
         
         queries = [
-            QueryInfo(sql="SELECT * FROM ingredients WHERE recette_id = 5", duration_ms=1.0)
+            InfoRequete(sql="SELECT * FROM ingredients WHERE recette_id = 5", duration_ms=1.0)
         ]
         
-        parent = N1Detector._guess_parent_table(queries)
+        parent = DetecteurN1._guess_parent_table(queries)
         assert parent == "recette"
     
     def test_guess_parent_table_unknown(self, mock_streamlit):
         """Retourne unknown si pas de FK trouvée."""
-        from src.core.sql_optimizer import N1Detector, QueryInfo
+        from src.core.sql_optimizer import DetecteurN1, InfoRequete
         
         queries = [
-            QueryInfo(sql="SELECT * FROM users", duration_ms=1.0)
+            InfoRequete(sql="SELECT * FROM users", duration_ms=1.0)
         ]
         
-        parent = N1Detector._guess_parent_table(queries)
+        parent = DetecteurN1._guess_parent_table(queries)
         assert parent == "unknown"
     
     def test_analyze_no_queries(self, mock_streamlit):
         """analyze retourne vide si peu de requêtes."""
-        from src.core.sql_optimizer import N1Detector
+        from src.core.sql_optimizer import DetecteurN1
         
-        with patch('src.core.sql_optimizer.SQLAlchemyListener') as mock_listener:
+        with patch('src.core.sql_optimizer.EcouteurSQLAlchemy') as mock_listener:
             mock_listener.get_queries.return_value = []
             
-            detections = N1Detector.analyze()
+            detections = DetecteurN1.analyze()
             assert detections == []
     
     def test_analyze_detects_n1(self, mock_streamlit):
         """analyze détecte les patterns N+1."""
-        from src.core.sql_optimizer import N1Detector, QueryInfo
+        from src.core.sql_optimizer import DetecteurN1, InfoRequete
         
         # Simuler 10 requêtes similaires (N+1 pattern)
         repeated_queries = [
-            QueryInfo(
+            InfoRequete(
                 sql=f"SELECT * FROM ingredients WHERE recette_id = {i}",
                 duration_ms=1.0,
                 operation="SELECT",
@@ -276,10 +276,10 @@ class TestN1Detector:
             for i in range(10)
         ]
         
-        with patch('src.core.sql_optimizer.SQLAlchemyListener') as mock_listener:
+        with patch('src.core.sql_optimizer.EcouteurSQLAlchemy') as mock_listener:
             mock_listener.get_queries.return_value = repeated_queries
             
-            detections = N1Detector.analyze()
+            detections = DetecteurN1.analyze()
             
             assert len(detections) >= 1
             assert detections[0].table == "ingredients"
@@ -287,18 +287,18 @@ class TestN1Detector:
     
     def test_get_detections_empty(self, mock_streamlit):
         """get_detections retourne liste vide par défaut."""
-        from src.core.sql_optimizer import N1Detector
+        from src.core.sql_optimizer import DetecteurN1
         
-        detections = N1Detector.get_detections()
+        detections = DetecteurN1.get_detections()
         assert detections == []
     
     def test_get_detections_with_data(self, mock_streamlit):
         """get_detections retourne les détections sauvegardées."""
-        from src.core.sql_optimizer import N1Detector, N1Detection
+        from src.core.sql_optimizer import DetecteurN1, DetectionN1
         
         mock_streamlit.session_state["_n1_detections"] = [
-            N1Detection(table="test", parent_table="parent", count=10)
+            DetectionN1(table="test", parent_table="parent", count=10)
         ]
         
-        detections = N1Detector.get_detections()
+        detections = DetecteurN1.get_detections()
         assert len(detections) == 1

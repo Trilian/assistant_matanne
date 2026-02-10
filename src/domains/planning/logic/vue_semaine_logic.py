@@ -1,4 +1,4 @@
-﻿"""
+"""
 Logique métier du module Vue semaine (planning) - Séparée de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
@@ -329,4 +329,3 @@ def formater_heure(heure: time) -> str:
         heure = datetime.fromisoformat(heure).time()
     
     return heure.strftime("%H:%M")
-

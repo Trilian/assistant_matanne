@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour le module errors_base.py.
 
 Tests couverts:
@@ -491,4 +491,3 @@ class TestExceptionsIntegration:
             assert "type" in data
             assert "message" in data
             assert "code_erreur" in data
-

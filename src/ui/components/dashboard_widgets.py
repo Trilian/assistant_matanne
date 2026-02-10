@@ -1,4 +1,4 @@
-﻿"""
+"""
 Dashboard Widgets - Composants enrichis pour le tableau de bord.
 
 Fournit des widgets visuels avancés :
@@ -338,8 +338,8 @@ def indicateur_sante_systeme() -> dict:
     
     try:
         # Vérifier le cache
-        from src.core.cache_multi import get_cache
-        cache = get_cache()
+        from src.core.cache_multi import obtenir_cache
+        cache = obtenir_cache()
         cache_stats = cache.get_stats()
         hit_rate = float(cache_stats.get("hit_rate", "0%").replace("%", ""))
         

@@ -1,0 +1,364 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.11.8, pytest-9.0.2, pluggy-1.6.0
+rootdir: D:\Projet_streamlit\assistant_matanne
+configfile: pytest.ini
+plugins: anyio-4.12.1, asyncio-1.3.0, cov-7.0.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collected 1599 items
+
+tests\core\test_action_history.py ........................               [  1%]
+tests\core\test_ai_agent.py ......................                       [  2%]
+tests\core\test_ai_agent_sync.py ..............                          [  3%]
+tests\core\test_ai_cache.py ................                             [  4%]
+tests\core\test_ai_client.py ..............                              [  5%]
+tests\core\test_ai_modules.py ........s                                  [  6%]
+tests\core\test_ai_parser_extended.py .......................            [  7%]
+tests\core\test_ai_rate_limit.py ............                            [  8%]
+tests\core\test_app.py ...                                               [  8%]
+tests\core\test_app_main.py .......................                      [ 10%]
+tests\core\test_cache.py ............................                    [ 11%]
+tests\core\test_cache_coverage.py .............................          [ 13%]
+tests\core\test_cache_deep.py .....................................      [ 15%]
+tests\core\test_cache_multi.py F.FFFF.FFFF..FFF.FFFF..FFFF.              [ 17%]
+tests\core\test_cache_multi_deep.py .FF.......FFFFFF..F.F......          [ 19%]
+tests\core\test_config.py ..............................                 [ 21%]
+tests\core\test_config_deep.py ...........................               [ 22%]
+tests\core\test_config_extended.py ...............                       [ 23%]
+tests\core\test_constants.py ........................................... [ 26%]
+...                                                                      [ 26%]
+tests\core\test_core_deep.py ........................................... [ 29%]
+....................EEEEEEEE...............                              [ 32%]
+tests\core\test_core_utils.py ...                                        [ 32%]
+tests\core\test_coverage_80_boost.py .F....................              [ 33%]
+tests\core\test_coverage_80_final.py FF......FF..........                [ 34%]
+tests\core\test_coverage_80_targeted.py ......FFFFFFFF...FF.FFFF.F..     [ 36%]
+tests\core\test_database.py ...................................          [ 38%]
+tests\core\test_database_deep.py ....................................... [ 41%]
+                                                                         [ 41%]
+tests\core\test_database_extended.py ..........                          [ 41%]
+tests\core\test_decorators.py ...........                                [ 42%]
+tests\core\test_decorators_basic.py .....................                [ 43%]
+tests\core\test_decorators_deep.py F..F.................                 [ 45%]
+tests\core\test_decorators_edge_cases.py .....................           [ 46%]
+tests\core\test_decorators_extended.py F...........                      [ 47%]
+tests\core\test_errors.py .....................................          [ 49%]
+tests\core\test_errors_advanced.py ..................................... [ 51%]
+......                                                                   [ 52%]
+tests\core\test_errors_base.py ......................................... [ 54%]
+......                                                                   [ 55%]
+tests\core\test_errors_deep.py .......................................   [ 57%]
+tests\core\test_lazy_cache_advanced.py ......FF...............FFF.F....  [ 59%]
+tests\core\test_lazy_loader.py ......                                    [ 60%]
+tests\core\test_lazy_loader_deep.py FF.FFFFFFFFFFFFFF.F.......           [ 61%]
+tests\core\test_lazy_loader_extended.py FFFFFFFFFFFF..FFFF               [ 62%]
+tests\core\test_logging.py ...............................               [ 64%]
+tests\core\test_models_comprehensive.py ...                              [ 64%]
+tests\core\test_models_recettes.py .......................               [ 66%]
+tests\core\test_multi_tenant.py .................................        [ 68%]
+tests\core\test_multi_tenant_deep.py ................................... [ 70%]
+...........                                                              [ 71%]
+tests\core\test_notifications_deep.py FFFFFFFFFFFFFFFFFFFFFFEEEEEEEEEEEE [ 73%]
+EEEEEEEEEEEEEE                                                           [ 74%]
+tests\core\test_offline.py ...                                           [ 74%]
+tests\core\test_offline_deep.py ..........FFFFFFFFFFFF.FF..              [ 76%]
+tests\core\test_parser_ai.py ......................                      [ 77%]
+tests\core\test_performance.py ..                                        [ 77%]
+tests\core\test_performance_deep.py ...FFFFFFFFFFFFFFFFFFF.              [ 79%]
+tests\core\test_performance_optimizations.py FFFFFFFFFFFFFFFFFFFFFFFFFFF [ 80%]
+FFFFFFFFFFFFFF                                                           [ 81%]
+tests\core\test_performance_optimizations_deep.py FEEEEEEEEEEEEEEEE      [ 82%]
+tests\core\test_redis_cache.py ........................................  [ 85%]
+tests\core\test_redis_cache_deep.py ...................................F [ 87%]
+FF.....F.                                                                [ 88%]
+tests\core\test_sql_optimizer.py ..F..F.                                 [ 88%]
+tests\core\test_sql_optimizer_deep.py ............FFFFF.....FFF          [ 90%]
+tests\core\test_state.py ..................................              [ 92%]
+tests\core\test_validation.py .......................................... [ 94%]
+                                                                         [ 94%]
+tests\core\test_validation_pydantic.py ................................. [ 96%]
+.......                                                                  [ 97%]
+tests\core\test_validators_pydantic.py .....................             [ 98%]
+tests\core\test_validators_pydantic_deep.py ......................       [100%]
+
+============================== warnings summary ===============================
+tests/core/test_cache_multi.py::TestCacheEdgeCases::test_concurrent_access
+  C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\_pytest\threadexception.py:58: PytestUnhandledThreadExceptionWarning: Exception in thread Thread-2 (reader)
+  
+  Traceback (most recent call last):
+    File "C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\threading.py", line 1045, in _bootstrap_inner
+      self.run()
+    File "C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\threading.py", line 982, in run
+      self._target(*self._args, **self._kwargs)
+    File "D:\Projet_streamlit\assistant_matanne\tests\core\test_cache_multi.py", line 539, in reader
+      entry = l1_cache.get(f"key_{i}")
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+    File "D:\Projet_streamlit\assistant_matanne\src\core\cache_multi.py", line 117, in get
+      if entry.is_expired:
+         ^^^^^^^^^^^^^^^^
+  AttributeError: 'EntreeCache' object has no attribute 'is_expired'
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+    warnings.warn(pytest.PytestUnhandledThreadExceptionWarning(msg))
+
+tests/core/test_models_recettes.py::TestIngredient::test_ingredient_unique_name
+  D:\Projet_streamlit\assistant_matanne\tests\conftest.py:138: SAWarning: transaction already deassociated from connection
+    transaction.rollback()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/core/test_cache_multi.py::TestL1MemoryCache::test_set_get_basic
+FAILED tests/core/test_cache_multi.py::TestL1MemoryCache::test_ttl_expiration
+FAILED tests/core/test_cache_multi.py::TestL1MemoryCache::test_lru_eviction
+FAILED tests/core/test_cache_multi.py::TestL1MemoryCache::test_invalidate_by_pattern
+FAILED tests/core/test_cache_multi.py::TestL1MemoryCache::test_invalidate_by_tags
+FAILED tests/core/test_cache_multi.py::TestL1MemoryCache::test_stats - Attrib...
+FAILED tests/core/test_cache_multi.py::TestL3FileCache::test_set_get_basic - ...
+FAILED tests/core/test_cache_multi.py::TestL3FileCache::test_persistence - as...
+FAILED tests/core/test_cache_multi.py::TestL3FileCache::test_ttl_expiration
+FAILED tests/core/test_cache_multi.py::TestL3FileCache::test_complex_data - A...
+FAILED tests/core/test_cache_multi.py::TestMultiLevelCache::test_cascade_write
+FAILED tests/core/test_cache_multi.py::TestMultiLevelCache::test_cascade_read_promotion
+FAILED tests/core/test_cache_multi.py::TestMultiLevelCache::test_invalidate_tag
+FAILED tests/core/test_cache_multi.py::TestMultiLevelCache::test_get_or_compute
+FAILED tests/core/test_cache_multi.py::TestMultiLevelCache::test_stats_aggregation
+FAILED tests/core/test_cache_multi.py::TestCachedDecorator::test_basic_caching
+FAILED tests/core/test_cache_multi.py::TestCacheEdgeCases::test_none_value - ...
+FAILED tests/core/test_cache_multi.py::TestCacheEdgeCases::test_empty_string_key
+FAILED tests/core/test_cache_multi.py::TestCacheEdgeCases::test_special_characters_key
+FAILED tests/core/test_cache_multi.py::TestCacheEdgeCases::test_large_value
+FAILED tests/core/test_cache_multi_deep.py::TestCacheEntry::test_is_expired_false_for_new_entry
+FAILED tests/core/test_cache_multi_deep.py::TestCacheEntry::test_is_expired_true_after_ttl
+FAILED tests/core/test_cache_multi_deep.py::TestL1MemoryCache::test_set_and_get
+FAILED tests/core/test_cache_multi_deep.py::TestL1MemoryCache::test_get_updates_hits
+FAILED tests/core/test_cache_multi_deep.py::TestL1MemoryCache::test_get_expired_returns_none
+FAILED tests/core/test_cache_multi_deep.py::TestL1MemoryCache::test_lru_eviction
+FAILED tests/core/test_cache_multi_deep.py::TestL1MemoryCache::test_invalidate_by_pattern
+FAILED tests/core/test_cache_multi_deep.py::TestL1MemoryCache::test_invalidate_by_tags
+FAILED tests/core/test_cache_multi_deep.py::TestL1MemoryCache::test_get_stats
+FAILED tests/core/test_cache_multi_deep.py::TestL2SessionCache::test_set_and_get
+FAILED tests/core/test_coverage_80_boost.py::TestConnectionStatusEnum::test_connection_status_string_inheritance
+FAILED tests/core/test_coverage_80_final.py::TestCacheEntryFunctional::test_cache_entry_is_expired_true
+FAILED tests/core/test_coverage_80_final.py::TestCacheEntryFunctional::test_cache_entry_is_expired_false
+FAILED tests/core/test_coverage_80_final.py::TestL1MemoryCacheFunctional::test_l1_cache_set_and_get
+FAILED tests/core/test_coverage_80_final.py::TestL1MemoryCacheFunctional::test_l1_cache_get_expired
+FAILED tests/core/test_coverage_80_targeted.py::TestConnectionManagerMethods::test_is_online_when_online
+FAILED tests/core/test_coverage_80_targeted.py::TestConnectionManagerMethods::test_is_online_when_offline
+FAILED tests/core/test_coverage_80_targeted.py::TestConnectionManagerMethods::test_handle_connection_error
+FAILED tests/core/test_coverage_80_targeted.py::TestMemoryMonitorMethods::test_start_tracking
+FAILED tests/core/test_coverage_80_targeted.py::TestMemoryMonitorMethods::test_stop_tracking
+FAILED tests/core/test_coverage_80_targeted.py::TestMemoryMonitorMethods::test_get_current_usage_not_tracking
+FAILED tests/core/test_coverage_80_targeted.py::TestMemoryMonitorMethods::test_get_current_usage_with_tracking
+FAILED tests/core/test_coverage_80_targeted.py::TestMemoryMonitorMethods::test_force_cleanup
+FAILED tests/core/test_coverage_80_targeted.py::TestSQLAlchemyListenerGetStats::test_get_stats_empty
+FAILED tests/core/test_coverage_80_targeted.py::TestSQLAlchemyListenerGetStats::test_get_stats_with_queries
+FAILED tests/core/test_coverage_80_targeted.py::TestSQLOptimizer::test_record_query
+FAILED tests/core/test_coverage_80_targeted.py::TestSQLOptimizer::test_record_query_slow
+FAILED tests/core/test_coverage_80_targeted.py::TestSQLOptimizer::test_get_stats_empty
+FAILED tests/core/test_coverage_80_targeted.py::TestSQLOptimizer::test_clear
+FAILED tests/core/test_coverage_80_targeted.py::TestOfflineQueueMethods::test_get_count
+FAILED tests/core/test_decorators_deep.py::TestWithDbSessionDeep::test_with_db_session_creates_session_when_none_provided
+FAILED tests/core/test_decorators_deep.py::TestWithDbSessionDeep::test_with_db_session_auto_injects_session_param
+FAILED tests/core/test_decorators_extended.py::TestWithDbSession::test_decorator_creates_session_when_none_provided
+FAILED tests/core/test_lazy_cache_advanced.py::TestOptimizedRouter::test_preload_common_modules_exists
+FAILED tests/core/test_lazy_cache_advanced.py::TestOptimizedRouter::test_load_module_exists
+FAILED tests/core/test_lazy_cache_advanced.py::TestLazyModuleLoaderMetrics::test_load_times_recorded
+FAILED tests/core/test_lazy_cache_advanced.py::TestLazyModuleLoaderMetrics::test_average_load_time
+FAILED tests/core/test_lazy_cache_advanced.py::TestLazyModuleLoaderMetrics::test_empty_stats
+FAILED tests/core/test_lazy_cache_advanced.py::TestPreloadAsync::test_preload_background
+FAILED tests/core/test_lazy_loader_deep.py::TestLazyModuleLoaderDeep::test_load_module_import_error
+FAILED tests/core/test_lazy_loader_deep.py::TestLazyModuleLoaderDeep::test_load_module_force_reload
+FAILED tests/core/test_lazy_loader_deep.py::TestLazyModuleLoaderDeep::test_preload_with_valid_modules
+FAILED tests/core/test_lazy_loader_deep.py::TestLazyModuleLoaderDeep::test_preload_with_invalid_modules
+FAILED tests/core/test_lazy_loader_deep.py::TestLazyModuleLoaderDeep::test_preload_background_thread
+FAILED tests/core/test_lazy_loader_deep.py::TestLazyModuleLoaderDeep::test_get_stats_empty
+FAILED tests/core/test_lazy_loader_deep.py::TestLazyModuleLoaderDeep::test_get_stats_after_load
+FAILED tests/core/test_lazy_loader_deep.py::TestLazyModuleLoaderDeep::test_clear_cache
+FAILED tests/core/test_lazy_loader_deep.py::TestOptimizedRouterDeep::test_load_module_not_in_registry
+FAILED tests/core/test_lazy_loader_deep.py::TestOptimizedRouterDeep::test_load_module_with_app_function
+FAILED tests/core/test_lazy_loader_deep.py::TestOptimizedRouterDeep::test_load_module_with_afficher_function
+FAILED tests/core/test_lazy_loader_deep.py::TestOptimizedRouterDeep::test_load_module_without_entry_point
+FAILED tests/core/test_lazy_loader_deep.py::TestOptimizedRouterDeep::test_load_module_module_not_found
+FAILED tests/core/test_lazy_loader_deep.py::TestOptimizedRouterDeep::test_load_module_generic_exception
+FAILED tests/core/test_lazy_loader_deep.py::TestOptimizedRouterDeep::test_load_module_debug_mode
+FAILED tests/core/test_lazy_loader_deep.py::TestOptimizedRouterDeep::test_preload_common_modules
+FAILED tests/core/test_lazy_loader_deep.py::TestRenderLazyLoadingStats::test_render_stats_with_load_times
+FAILED tests/core/test_lazy_loader_extended.py::TestLazyModuleLoader::test_load_caches_module
+FAILED tests/core/test_lazy_loader_extended.py::TestLazyModuleLoader::test_load_returns_cached_module
+FAILED tests/core/test_lazy_loader_extended.py::TestLazyModuleLoader::test_load_with_reload_reloads_module
+FAILED tests/core/test_lazy_loader_extended.py::TestLazyModuleLoader::test_load_records_load_time
+FAILED tests/core/test_lazy_loader_extended.py::TestLazyModuleLoader::test_load_raises_on_invalid_module
+FAILED tests/core/test_lazy_loader_extended.py::TestLazyModuleLoader::test_get_stats_returns_dict
+FAILED tests/core/test_lazy_loader_extended.py::TestLazyModuleLoader::test_get_stats_empty_cache
+FAILED tests/core/test_lazy_loader_extended.py::TestLazyModuleLoader::test_preload_loads_modules
+FAILED tests/core/test_lazy_loader_extended.py::TestLazyModuleLoader::test_preload_background_does_not_block
+FAILED tests/core/test_lazy_loader_extended.py::TestLazyModuleLoader::test_preload_handles_invalid_modules
+FAILED tests/core/test_lazy_loader_extended.py::TestLazyModuleLoaderCache::test_clear_cache_empties_cache
+FAILED tests/core/test_lazy_loader_extended.py::TestLazyModuleLoaderCache::test_cache_isolation_between_calls
+FAILED tests/core/test_lazy_loader_extended.py::TestOptimizedRouter::test_router_charger_module
+FAILED tests/core/test_lazy_loader_extended.py::TestLazyLoaderPerformance::test_cached_load_is_faster
+FAILED tests/core/test_lazy_loader_extended.py::TestLazyLoaderPerformance::test_load_many_modules
+FAILED tests/core/test_lazy_loader_extended.py::TestLazyLoaderThreadSafety::test_concurrent_loads
+FAILED tests/core/test_notifications_deep.py::TestNotificationType::test_info_value
+FAILED tests/core/test_notifications_deep.py::TestNotificationType::test_success_value
+FAILED tests/core/test_notifications_deep.py::TestNotificationType::test_warning_value
+FAILED tests/core/test_notifications_deep.py::TestNotificationType::test_error_value
+FAILED tests/core/test_notifications_deep.py::TestNotificationType::test_alert_value
+FAILED tests/core/test_notifications_deep.py::TestNotificationCategory::test_inventaire_value
+FAILED tests/core/test_notifications_deep.py::TestNotificationCategory::test_courses_value
+FAILED tests/core/test_notifications_deep.py::TestNotificationCategory::test_systeme_value
+FAILED tests/core/test_notifications_deep.py::TestNotification::test_notification_defaults
+FAILED tests/core/test_notifications_deep.py::TestNotification::test_is_expired_false_when_no_expiry
+FAILED tests/core/test_notifications_deep.py::TestNotification::test_is_expired_true_when_past
+FAILED tests/core/test_notifications_deep.py::TestNotification::test_is_expired_false_when_future
+FAILED tests/core/test_notifications_deep.py::TestNotification::test_age_str_instant
+FAILED tests/core/test_notifications_deep.py::TestNotification::test_age_str_minutes
+FAILED tests/core/test_notifications_deep.py::TestNotification::test_age_str_hours
+FAILED tests/core/test_notifications_deep.py::TestNotification::test_age_str_yesterday
+FAILED tests/core/test_notifications_deep.py::TestNotification::test_age_str_days
+FAILED tests/core/test_notifications_deep.py::TestNotification::test_to_dict
+FAILED tests/core/test_notifications_deep.py::TestNotification::test_to_dict_with_expires
+FAILED tests/core/test_notifications_deep.py::TestNotification::test_from_dict
+FAILED tests/core/test_notifications_deep.py::TestNotification::test_from_dict_with_expires
+FAILED tests/core/test_notifications_deep.py::TestNotification::test_from_dict_handles_invalid_expires
+FAILED tests/core/test_offline_deep.py::TestConnectionManager::test_get_status_default_online
+FAILED tests/core/test_offline_deep.py::TestConnectionManager::test_set_and_get_status
+FAILED tests/core/test_offline_deep.py::TestConnectionManager::test_is_online_true
+FAILED tests/core/test_offline_deep.py::TestConnectionManager::test_is_online_false
+FAILED tests/core/test_offline_deep.py::TestConnectionManager::test_check_connection_success
+FAILED tests/core/test_offline_deep.py::TestConnectionManager::test_check_connection_failure
+FAILED tests/core/test_offline_deep.py::TestConnectionManager::test_check_connection_error
+FAILED tests/core/test_offline_deep.py::TestConnectionManager::test_check_connection_uses_cache
+FAILED tests/core/test_offline_deep.py::TestConnectionManager::test_handle_connection_error
+FAILED tests/core/test_offline_deep.py::TestOfflineQueue::test_add_operation
+FAILED tests/core/test_offline_deep.py::TestOfflineQueue::test_get_pending - ...
+FAILED tests/core/test_offline_deep.py::TestOfflineQueue::test_remove - Attri...
+FAILED tests/core/test_offline_deep.py::TestOfflineQueue::test_update_retry
+FAILED tests/core/test_offline_deep.py::TestOfflineQueue::test_clear - Attrib...
+FAILED tests/core/test_performance_deep.py::TestFunctionProfiler::test_record_first_call
+FAILED tests/core/test_performance_deep.py::TestFunctionProfiler::test_record_multiple_calls
+FAILED tests/core/test_performance_deep.py::TestFunctionProfiler::test_record_with_error
+FAILED tests/core/test_performance_deep.py::TestFunctionProfiler::test_get_slowest
+FAILED tests/core/test_performance_deep.py::TestFunctionProfiler::test_get_most_called
+FAILED tests/core/test_performance_deep.py::TestFunctionProfiler::test_clear
+FAILED tests/core/test_performance_deep.py::TestProfileDecorator::test_profile_records_execution
+FAILED tests/core/test_performance_deep.py::TestProfileDecorator::test_profile_with_custom_name
+FAILED tests/core/test_performance_deep.py::TestProfileDecorator::test_profile_records_errors
+FAILED tests/core/test_performance_deep.py::TestMeasureTimeContextManager::test_measure_time_records
+FAILED tests/core/test_performance_deep.py::TestMeasureTimeContextManager::test_measure_time_records_errors
+FAILED tests/core/test_performance_deep.py::TestMemoryMonitor::test_start_tracking
+FAILED tests/core/test_performance_deep.py::TestMemoryMonitor::test_start_tracking_already_active
+FAILED tests/core/test_performance_deep.py::TestMemoryMonitor::test_stop_tracking
+FAILED tests/core/test_performance_deep.py::TestMemoryMonitor::test_get_current_usage
+FAILED tests/core/test_performance_deep.py::TestMemoryMonitor::test_get_current_usage_with_tracking
+FAILED tests/core/test_performance_deep.py::TestMemoryMonitor::test_take_snapshot
+FAILED tests/core/test_performance_deep.py::TestMemoryMonitor::test_take_snapshot_limits_count
+FAILED tests/core/test_performance_deep.py::TestMemoryMonitor::test_force_cleanup
+FAILED tests/core/test_performance_optimizations.py::TestRedisCache::test_redis_cache_singleton
+FAILED tests/core/test_performance_optimizations.py::TestRedisCache::test_fallback_cache_set_get
+FAILED tests/core/test_performance_optimizations.py::TestRedisCache::test_fallback_cache_expiry
+FAILED tests/core/test_performance_optimizations.py::TestRedisCache::test_delete_key
+FAILED tests/core/test_performance_optimizations.py::TestRedisCache::test_clear_pattern
+FAILED tests/core/test_performance_optimizations.py::TestRedisCache::test_stats
+FAILED tests/core/test_performance_optimizations.py::TestRedisCache::test_is_available_false_without_redis
+FAILED tests/core/test_performance_optimizations.py::TestRedisCachedDecorator::test_decorator_caches_result
+FAILED tests/core/test_performance_optimizations.py::TestRedisCachedDecorator::test_decorator_different_args
+FAILED tests/core/test_performance_optimizations.py::TestQueryOptimizer::test_optimizer_init
+FAILED tests/core/test_performance_optimizations.py::TestQueryOptimizer::test_query_creates_query
+FAILED tests/core/test_performance_optimizations.py::TestQueryOptimizer::test_filter_adds_filters
+FAILED tests/core/test_performance_optimizations.py::TestQueryOptimizer::test_all_returns_results
+FAILED tests/core/test_performance_optimizations.py::TestQueryOptimizer::test_first_returns_first
+FAILED tests/core/test_performance_optimizations.py::TestQueryOptimizer::test_count_returns_count
+FAILED tests/core/test_performance_optimizations.py::TestQueryOptimizer::test_limit_and_offset
+FAILED tests/core/test_performance_optimizations.py::TestQueryOptimizer::test_exists_true
+FAILED tests/core/test_performance_optimizations.py::TestQueryOptimizer::test_exists_false
+FAILED tests/core/test_performance_optimizations.py::TestQueryOptimizer::test_query_none_returns_empty
+FAILED tests/core/test_performance_optimizations.py::TestQueryOptimizer::test_with_related_raises_without_query
+FAILED tests/core/test_performance_optimizations.py::TestLazyImageLoader::test_init
+FAILED tests/core/test_performance_optimizations.py::TestLazyImageLoader::test_placeholder_property
+FAILED tests/core/test_performance_optimizations.py::TestLazyImageLoader::test_get_image_url_with_url
+FAILED tests/core/test_performance_optimizations.py::TestLazyImageLoader::test_get_image_url_without_url
+FAILED tests/core/test_performance_optimizations.py::TestLazyImageLoader::test_get_image_url_loaded
+FAILED tests/core/test_performance_optimizations.py::TestLazyImageLoader::test_should_load_true
+FAILED tests/core/test_performance_optimizations.py::TestLazyImageLoader::test_should_load_false_loading
+FAILED tests/core/test_performance_optimizations.py::TestLazyImageLoader::test_should_load_false_loaded
+FAILED tests/core/test_performance_optimizations.py::TestLazyImageLoader::test_mark_loading
+FAILED tests/core/test_performance_optimizations.py::TestLazyImageLoader::test_mark_loaded
+FAILED tests/core/test_performance_optimizations.py::TestLazyImageLoader::test_generate_lazy_html
+FAILED tests/core/test_performance_optimizations.py::TestLazyImageLoader::test_get_css
+FAILED tests/core/test_performance_optimizations.py::TestLazyImageLoader::test_get_javascript
+FAILED tests/core/test_performance_optimizations.py::TestLazyImageLoader::test_clear_cache
+FAILED tests/core/test_performance_optimizations.py::TestHelperFunctions::test_get_redis_cache_singleton
+FAILED tests/core/test_performance_optimizations.py::TestHelperFunctions::test_get_lazy_image_loader_singleton
+FAILED tests/core/test_performance_optimizations.py::TestHelperFunctions::test_invalidate_cache
+FAILED tests/core/test_performance_optimizations.py::TestHelperFunctions::test_get_query_optimizer
+FAILED tests/core/test_performance_optimizations.py::TestBatchOperations::test_batch_load_images
+FAILED tests/core/test_performance_optimizations.py::TestBatchOperations::test_batch_load_images_skips_loaded
+FAILED tests/core/test_performance_optimizations.py::TestEagerLoadingDecorator::test_decorator_adds_hint
+FAILED tests/core/test_performance_optimizations_deep.py::TestRedisCacheSingleton::test_singleton_returns_same_instance
+FAILED tests/core/test_redis_cache_deep.py::TestRedisCachedDecorator::test_redis_cached_basic
+FAILED tests/core/test_redis_cache_deep.py::TestRedisCachedDecorator::test_redis_cached_with_prefix
+FAILED tests/core/test_redis_cache_deep.py::TestRedisCachedDecorator::test_redis_cached_with_tags
+FAILED tests/core/test_redis_cache_deep.py::TestGetRedisCache::test_get_redis_cache_returns_singleton
+FAILED tests/core/test_sql_optimizer.py::test_get_stats_returns_dict - Attrib...
+FAILED tests/core/test_sql_optimizer.py::test_n1_detector_suggestions - Attri...
+FAILED tests/core/test_sql_optimizer_deep.py::TestSQLAlchemyListener::test_get_queries_empty
+FAILED tests/core/test_sql_optimizer_deep.py::TestSQLAlchemyListener::test_get_queries_with_data
+FAILED tests/core/test_sql_optimizer_deep.py::TestSQLAlchemyListener::test_get_stats_empty
+FAILED tests/core/test_sql_optimizer_deep.py::TestSQLAlchemyListener::test_get_stats_with_queries
+FAILED tests/core/test_sql_optimizer_deep.py::TestSQLAlchemyListener::test_get_stats_slow_queries
+FAILED tests/core/test_sql_optimizer_deep.py::TestN1Detector::test_analyze_detects_n1
+FAILED tests/core/test_sql_optimizer_deep.py::TestN1Detector::test_get_detections_empty
+FAILED tests/core/test_sql_optimizer_deep.py::TestN1Detector::test_get_detections_with_data
+ERROR tests/core/test_core_deep.py::TestLazyModuleLoader::test_load_module_standard
+ERROR tests/core/test_core_deep.py::TestLazyModuleLoader::test_load_module_cache
+ERROR tests/core/test_core_deep.py::TestLazyModuleLoader::test_load_module_reload
+ERROR tests/core/test_core_deep.py::TestLazyModuleLoader::test_load_module_not_found
+ERROR tests/core/test_core_deep.py::TestLazyModuleLoader::test_get_stats - At...
+ERROR tests/core/test_core_deep.py::TestLazyModuleLoader::test_clear_cache - ...
+ERROR tests/core/test_core_deep.py::TestLazyModuleLoader::test_preload_sync
+ERROR tests/core/test_core_deep.py::TestLazyModuleLoader::test_preload_module_inexistant
+ERROR tests/core/test_notifications_deep.py::TestNotificationManager::test_add_notification
+ERROR tests/core/test_notifications_deep.py::TestNotificationManager::test_add_with_expiration
+ERROR tests/core/test_notifications_deep.py::TestNotificationManager::test_add_auto_icon
+ERROR tests/core/test_notifications_deep.py::TestNotificationManager::test_max_notifications_limit
+ERROR tests/core/test_notifications_deep.py::TestNotificationManager::test_get_all_empty
+ERROR tests/core/test_notifications_deep.py::TestNotificationManager::test_get_all_filters_expired
+ERROR tests/core/test_notifications_deep.py::TestNotificationManager::test_get_all_filters_read
+ERROR tests/core/test_notifications_deep.py::TestNotificationManager::test_get_all_filters_by_category
+ERROR tests/core/test_notifications_deep.py::TestNotificationManager::test_get_unread_count
+ERROR tests/core/test_notifications_deep.py::TestNotificationManager::test_mark_as_read
+ERROR tests/core/test_notifications_deep.py::TestNotificationManager::test_mark_as_read_not_found
+ERROR tests/core/test_notifications_deep.py::TestNotificationManager::test_mark_all_read
+ERROR tests/core/test_notifications_deep.py::TestNotificationManager::test_dismiss
+ERROR tests/core/test_notifications_deep.py::TestNotificationManager::test_clear_all
+ERROR tests/core/test_notifications_deep.py::TestNotificationManager::test_clear_all_by_category
+ERROR tests/core/test_notifications_deep.py::TestNotificationManager::test_cleanup_expired
+ERROR tests/core/test_notifications_deep.py::TestHelperFunctions::test_notify_info
+ERROR tests/core/test_notifications_deep.py::TestHelperFunctions::test_notify_success
+ERROR tests/core/test_notifications_deep.py::TestHelperFunctions::test_notify_warning
+ERROR tests/core/test_notifications_deep.py::TestHelperFunctions::test_notify_error
+ERROR tests/core/test_notifications_deep.py::TestHelperFunctions::test_notify_stock_bas
+ERROR tests/core/test_notifications_deep.py::TestHelperFunctions::test_notify_peremption_soon
+ERROR tests/core/test_notifications_deep.py::TestHelperFunctions::test_notify_peremption_expired
+ERROR tests/core/test_notifications_deep.py::TestUIComponents::test_render_notification_badge_no_notifications
+ERROR tests/core/test_notifications_deep.py::TestUIComponents::test_render_notification_badge_with_count
+ERROR tests/core/test_notifications_deep.py::TestUIComponents::test_render_toast_notifications
+ERROR tests/core/test_performance_optimizations_deep.py::TestRedisCacheOperations::test_is_available_false_without_client
+ERROR tests/core/test_performance_optimizations_deep.py::TestRedisCacheOperations::test_is_available_true_with_client
+ERROR tests/core/test_performance_optimizations_deep.py::TestRedisCacheOperations::test_get_missing_key_returns_none
+ERROR tests/core/test_performance_optimizations_deep.py::TestRedisCacheOperations::test_set_and_get_fallback
+ERROR tests/core/test_performance_optimizations_deep.py::TestRedisCacheOperations::test_get_expired_returns_none
+ERROR tests/core/test_performance_optimizations_deep.py::TestRedisCacheOperations::test_delete
+ERROR tests/core/test_performance_optimizations_deep.py::TestRedisCacheOperations::test_delete_nonexistent
+ERROR tests/core/test_performance_optimizations_deep.py::TestRedisCacheOperations::test_clear_pattern
+ERROR tests/core/test_performance_optimizations_deep.py::TestRedisCacheOperations::test_stats_memory_backend
+ERROR tests/core/test_performance_optimizations_deep.py::TestRedisCacheWithRedisClient::test_get_from_redis
+ERROR tests/core/test_performance_optimizations_deep.py::TestRedisCacheWithRedisClient::test_get_redis_error_falls_back
+ERROR tests/core/test_performance_optimizations_deep.py::TestRedisCacheWithRedisClient::test_set_to_redis
+ERROR tests/core/test_performance_optimizations_deep.py::TestRedisCacheWithRedisClient::test_set_redis_error_uses_fallback
+ERROR tests/core/test_performance_optimizations_deep.py::TestRedisCacheWithRedisClient::test_delete_from_redis
+ERROR tests/core/test_performance_optimizations_deep.py::TestRedisCacheWithRedisClient::test_clear_pattern_redis
+ERROR tests/core/test_performance_optimizations_deep.py::TestRedisCacheWithRedisClient::test_stats_redis_backend
+SKIPPED [1] tests\core\test_ai_modules.py:161: API non disponible: 'ClientIA' object has no attribute 'obtenir_suggestions'
+===== 203 failed, 1345 passed, 1 skipped, 2 warnings, 50 errors in 44.98s =====

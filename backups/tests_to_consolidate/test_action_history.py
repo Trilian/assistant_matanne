@@ -1,4 +1,4 @@
-﻿"""Tests unitaires pour le service action_history."""
+"""Tests unitaires pour le service action_history."""
 
 import pytest
 from datetime import datetime, timedelta
@@ -380,4 +380,3 @@ class TestDescriptionAction:
         description = f"Modification de {entity_name}: {avant} â†’ {apres}"
         
         assert "10 â†’ 8" in description
-

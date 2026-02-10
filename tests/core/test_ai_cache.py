@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/core/ai/cache.py - Cache IA avec mocks Streamlit.
 """
 
@@ -260,4 +260,3 @@ class TestCacheIAConstants:
         assert CacheIA.TTL_PAR_DEFAUT > 0
         # Généralement 1h = 3600s
         assert CacheIA.TTL_PAR_DEFAUT >= 3600
-

@@ -648,4 +648,3 @@ class TestCalculJoursPeremption:
         jours = calculer_jours_avant_peremption(article)
         
         assert jours is None
-

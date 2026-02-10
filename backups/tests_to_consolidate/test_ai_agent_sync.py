@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests unitaires pour ai_agent.py (Agent IA)
 Ce fichier teste spécifiquement src/core/ai_agent.py
 """
@@ -180,4 +180,3 @@ class TestAgentIAInterface:
         agent = AgentIA()
         
         assert isinstance(agent.contexte, dict)
-

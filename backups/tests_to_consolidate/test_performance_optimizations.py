@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour les optimisations de performance
 - Redis Cache
 - Query Optimizer (N+1 prevention)
@@ -20,28 +20,28 @@ class TestRedisCache:
     
     def test_redis_cache_singleton(self):
         """Le cache Redis est un singleton"""
-        from src.core.performance_optimizations import RedisCache
+        from src.core.performance_optimizations import CacheRedis
         
         # Reset singleton pour test
-        RedisCache._instance = None
-        RedisCache._client = None
-        RedisCache._fallback_cache = {}
+        CacheRedis._instance = None
+        CacheRedis._client = None
+        CacheRedis._fallback_cache = {}
         
-        cache1 = RedisCache()
-        cache2 = RedisCache()
+        cache1 = CacheRedis()
+        cache2 = CacheRedis()
         
         assert cache1 is cache2
     
     def test_fallback_cache_set_get(self):
         """Set/Get fonctionne avec le fallback mémoire"""
-        from src.core.performance_optimizations import RedisCache
+        from src.core.performance_optimizations import CacheRedis
         
         # Reset et désactiver Redis
-        RedisCache._instance = None
-        RedisCache._client = None
-        RedisCache._fallback_cache = {}
+        CacheRedis._instance = None
+        CacheRedis._client = None
+        CacheRedis._fallback_cache = {}
         
-        cache = RedisCache()
+        cache = CacheRedis()
         cache._client = None  # Force fallback
         
         cache.set("test_key", {"value": 42}, ttl=3600)
@@ -51,14 +51,14 @@ class TestRedisCache:
     
     def test_fallback_cache_expiry(self):
         """Le cache mémoire expire correctement"""
-        from src.core.performance_optimizations import RedisCache
+        from src.core.performance_optimizations import CacheRedis
         import time
         
-        RedisCache._instance = None
-        RedisCache._client = None
-        RedisCache._fallback_cache = {}
+        CacheRedis._instance = None
+        CacheRedis._client = None
+        CacheRedis._fallback_cache = {}
         
-        cache = RedisCache()
+        cache = CacheRedis()
         cache._client = None
         
         # Set avec TTL très court
@@ -77,13 +77,13 @@ class TestRedisCache:
     
     def test_delete_key(self):
         """Suppression d'une clé fonctionne"""
-        from src.core.performance_optimizations import RedisCache
+        from src.core.performance_optimizations import CacheRedis
         
-        RedisCache._instance = None
-        RedisCache._client = None
-        RedisCache._fallback_cache = {}
+        CacheRedis._instance = None
+        CacheRedis._client = None
+        CacheRedis._fallback_cache = {}
         
-        cache = RedisCache()
+        cache = CacheRedis()
         cache._client = None
         
         cache.set("to_delete", "value")
@@ -94,13 +94,13 @@ class TestRedisCache:
     
     def test_clear_pattern(self):
         """Clear pattern supprime les clés matching"""
-        from src.core.performance_optimizations import RedisCache
+        from src.core.performance_optimizations import CacheRedis
         
-        RedisCache._instance = None
-        RedisCache._client = None
-        RedisCache._fallback_cache = {}
+        CacheRedis._instance = None
+        CacheRedis._client = None
+        CacheRedis._fallback_cache = {}
         
-        cache = RedisCache()
+        cache = CacheRedis()
         cache._client = None
         
         cache.set("recettes:1", "r1")
@@ -115,13 +115,13 @@ class TestRedisCache:
     
     def test_stats(self):
         """Les stats retournent les bonnes infos"""
-        from src.core.performance_optimizations import RedisCache
+        from src.core.performance_optimizations import CacheRedis
         
-        RedisCache._instance = None
-        RedisCache._client = None
-        RedisCache._fallback_cache = {}
+        CacheRedis._instance = None
+        CacheRedis._client = None
+        CacheRedis._fallback_cache = {}
         
-        cache = RedisCache()
+        cache = CacheRedis()
         cache._client = None
         
         cache.set("key1", "v1")
@@ -134,13 +134,13 @@ class TestRedisCache:
     
     def test_is_available_false_without_redis(self):
         """is_available retourne False sans Redis"""
-        from src.core.performance_optimizations import RedisCache
+        from src.core.performance_optimizations import CacheRedis
         
-        RedisCache._instance = None
-        RedisCache._client = None
-        RedisCache._fallback_cache = {}
+        CacheRedis._instance = None
+        CacheRedis._client = None
+        CacheRedis._fallback_cache = {}
         
-        cache = RedisCache()
+        cache = CacheRedis()
         cache._client = None
         
         assert cache.is_available is False
@@ -151,11 +151,11 @@ class TestRedisCachedDecorator:
     
     def test_decorator_caches_result(self):
         """Le décorateur met en cache le résultat"""
-        from src.core.performance_optimizations import redis_cached, RedisCache
+        from src.core.performance_optimizations import redis_cached, CacheRedis
         
-        RedisCache._instance = None
-        RedisCache._client = None
-        RedisCache._fallback_cache = {}
+        CacheRedis._instance = None
+        CacheRedis._client = None
+        CacheRedis._fallback_cache = {}
         
         call_count = 0
         
@@ -174,11 +174,11 @@ class TestRedisCachedDecorator:
     
     def test_decorator_different_args(self):
         """Le décorateur cache séparément pour différents args"""
-        from src.core.performance_optimizations import redis_cached, RedisCache
+        from src.core.performance_optimizations import redis_cached, CacheRedis
         
-        RedisCache._instance = None
-        RedisCache._client = None
-        RedisCache._fallback_cache = {}
+        CacheRedis._instance = None
+        CacheRedis._client = None
+        CacheRedis._fallback_cache = {}
         
         @redis_cached("test", ttl=3600)
         def func_with_args(x, y):
@@ -526,10 +526,10 @@ class TestHelperFunctions:
     
     def test_get_redis_cache_singleton(self):
         """get_redis_cache retourne un singleton"""
-        from src.core.performance_optimizations import get_redis_cache, RedisCache
+        from src.core.performance_optimizations import get_redis_cache, CacheRedis
         
         # Reset
-        RedisCache._instance = None
+        CacheRedis._instance = None
         
         import src.core.performance_optimizations as module
         module._redis_cache_instance = None
@@ -553,16 +553,16 @@ class TestHelperFunctions:
     
     def test_invalidate_cache(self):
         """invalidate_cache appelle clear_pattern"""
-        from src.core.performance_optimizations import invalidate_cache, RedisCache
+        from src.core.performance_optimizations import invalidate_cache, CacheRedis
         
-        RedisCache._instance = None
-        RedisCache._client = None
-        RedisCache._fallback_cache = {}
+        CacheRedis._instance = None
+        CacheRedis._client = None
+        CacheRedis._fallback_cache = {}
         
         import src.core.performance_optimizations as module
         module._redis_cache_instance = None
         
-        cache = RedisCache()
+        cache = CacheRedis()
         cache.set("recettes:1", "r1")
         cache.set("recettes:2", "r2")
         
@@ -637,4 +637,3 @@ class TestEagerLoadingDecorator:
         
         assert result["_eager_load"] == ("ingredients", "etapes")
         assert result["other_arg"] == "value"
-

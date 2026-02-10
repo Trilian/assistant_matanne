@@ -12,13 +12,13 @@ import src.app as app
 
 def test_main_runs(monkeypatch):
     """Test que la fonction main() s'exécute sans erreur."""
-    # Mock les composants UI et OptimizedRouter
+    # Mock les composants UI et RouteurOptimise
     monkeypatch.setattr(app, "afficher_header", lambda: None)
     monkeypatch.setattr(app, "afficher_sidebar", lambda: None)
     monkeypatch.setattr(app, "afficher_footer", lambda: None)
     monkeypatch.setattr(app, "injecter_css", lambda: None)
     monkeypatch.setattr(app, "initialiser_app", lambda: True)
-    monkeypatch.setattr(app, "OptimizedRouter", mock.Mock(load_module=lambda x: None))
+    monkeypatch.setattr(app, "RouteurOptimise", mock.Mock(load_module=lambda x: None))
     monkeypatch.setattr(app, "obtenir_etat", lambda: mock.Mock(module_actuel="accueil", mode_debug=False))
     monkeypatch.setattr(app, "Cache", mock.Mock(vider=lambda: None))
     monkeypatch.setattr(app, "GestionnaireEtat", mock.Mock(reinitialiser=lambda: None))
@@ -39,7 +39,7 @@ def test_main_exception(monkeypatch):
     monkeypatch.setattr(app, "afficher_footer", lambda: None)
     monkeypatch.setattr(app, "injecter_css", lambda: None)
     monkeypatch.setattr(app, "initialiser_app", lambda: True)
-    monkeypatch.setattr(app, "OptimizedRouter", mock.Mock(load_module=lambda x: None))
+    monkeypatch.setattr(app, "RouteurOptimise", mock.Mock(load_module=lambda x: None))
     monkeypatch.setattr(app, "obtenir_etat", lambda: mock.Mock(module_actuel="accueil", mode_debug=True))
     monkeypatch.setattr(app, "Cache", mock.Mock(vider=lambda: None))
     monkeypatch.setattr(app, "GestionnaireEtat", mock.Mock(reinitialiser=lambda: None))

@@ -827,4 +827,3 @@ class TestDonneesVolumineuses:
             result = service.generer_pdf_analyse_gaspillage(30, session=mock_session)
         
         assert isinstance(result, BytesIO)
-

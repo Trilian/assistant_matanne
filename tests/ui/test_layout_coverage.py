@@ -314,7 +314,7 @@ class TestSidebarDebug:
                     mock_sb.__enter__ = Mock(return_value=mock_sb)
                     mock_sb.__exit__ = Mock()
                     with patch('src.ui.layout.sidebar._rendre_menu'):
-                        with patch('src.ui.layout.sidebar.render_lazy_loading_stats'):
+                        with patch('src.ui.layout.sidebar.afficher_stats_chargement_differe'):
                             try:
                                 afficher_sidebar()
                             except:
@@ -341,7 +341,7 @@ class TestSidebarDebug:
                     mock_sb.__enter__ = Mock(return_value=mock_sb)
                     mock_sb.__exit__ = Mock()
                     with patch('src.ui.layout.sidebar._rendre_menu'):
-                        with patch('src.ui.layout.sidebar.render_lazy_loading_stats'):
+                        with patch('src.ui.layout.sidebar.afficher_stats_chargement_differe'):
                             with patch('streamlit.rerun', side_effect=Exception("rerun")):
                                 try:
                                     afficher_sidebar()

@@ -2,13 +2,13 @@
 Tests unitaires - Module Multi-Tenant (Isolation Données)
 
 Couverture complète :
-- UserContext (contexte utilisateur courant)
+- ContexteUtilisateur (contexte utilisateur courant)
 - Context managers (user_context, admin_context)
-- Décorateurs @with_user_isolation, @require_user
-- MultiTenantQuery (helper requêtes)
-- MultiTenantService (service base)
+- Décorateurs @avec_isolation_utilisateur, @exiger_utilisateur
+- RequeteMultiLocataire (helper requêtes)
+- ServiceMultiLocataire (service base)
 
-Architecture : 5 sections de tests (UserContext, Decorators, Query, Service, Integration)
+Architecture : 5 sections de tests (ContexteUtilisateur, Decorators, Query, Service, Integration)
 """
 
 from unittest.mock import MagicMock, Mock, patch
@@ -18,13 +18,13 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from src.core.multi_tenant import (
-    UserContext,
+    ContexteUtilisateur,
     admin_context,
     user_context,
-    with_user_isolation,
-    require_user,
-    MultiTenantQuery,
-    MultiTenantService,
+    avec_isolation_utilisateur,
+    exiger_utilisateur,
+    RequeteMultiLocataire,
+    ServiceMultiLocataire,
 )
 
 
@@ -34,62 +34,62 @@ from src.core.multi_tenant import (
 
 
 class TestUserContext:
-    """Tests pour UserContext."""
+    """Tests pour ContexteUtilisateur."""
 
     def setup_method(self):
         """Préparation avant chaque test."""
-        UserContext.clear()
+        ContexteUtilisateur.clear()
 
     @pytest.mark.unit
     def test_set_get_user(self):
         """Test définition et récupération utilisateur."""
-        UserContext.set_user("user-123")
+        ContexteUtilisateur.set_user("user-123")
         
-        assert UserContext.get_user() == "user-123"
+        assert ContexteUtilisateur.get_user() == "user-123"
 
     @pytest.mark.unit
     def test_clear_user_context(self):
         """Test effacement contexte utilisateur."""
-        UserContext.set_user("user-123")
+        ContexteUtilisateur.set_user("user-123")
         
-        assert UserContext.get_user() == "user-123"
+        assert ContexteUtilisateur.get_user() == "user-123"
         
-        UserContext.clear()
+        ContexteUtilisateur.clear()
         
-        assert UserContext.get_user() is None
-        assert UserContext.is_bypassed() is False
+        assert ContexteUtilisateur.get_user() is None
+        assert ContexteUtilisateur.is_bypassed() is False
 
     @pytest.mark.unit
     def test_get_user_no_context(self):
         """Test récupération utilisateur sans contexte."""
-        UserContext.clear()
+        ContexteUtilisateur.clear()
         
-        result = UserContext.get_user()
+        result = ContexteUtilisateur.get_user()
         
         assert result is None
 
     @pytest.mark.unit
     def test_set_bypass(self):
         """Test activation bypass isolation."""
-        assert UserContext.is_bypassed() is False
+        assert ContexteUtilisateur.is_bypassed() is False
         
-        UserContext.set_bypass(True)
-        assert UserContext.is_bypassed() is True
+        ContexteUtilisateur.set_bypass(True)
+        assert ContexteUtilisateur.is_bypassed() is True
         
-        UserContext.set_bypass(False)
-        assert UserContext.is_bypassed() is False
+        ContexteUtilisateur.set_bypass(False)
+        assert ContexteUtilisateur.is_bypassed() is False
 
     @pytest.mark.unit
     def test_multiple_users_sequential(self):
         """Test changement utilisateur séquentiel."""
-        UserContext.set_user("user-1")
-        assert UserContext.get_user() == "user-1"
+        ContexteUtilisateur.set_user("user-1")
+        assert ContexteUtilisateur.get_user() == "user-1"
         
-        UserContext.set_user("user-2")
-        assert UserContext.get_user() == "user-2"
+        ContexteUtilisateur.set_user("user-2")
+        assert ContexteUtilisateur.get_user() == "user-2"
         
-        UserContext.set_user("user-3")
-        assert UserContext.get_user() == "user-3"
+        ContexteUtilisateur.set_user("user-3")
+        assert ContexteUtilisateur.get_user() == "user-3"
 
 
 # ═══════════════════════════════════════════════════════════
@@ -102,82 +102,82 @@ class TestContextManagers:
 
     def setup_method(self):
         """Préparation avant chaque test."""
-        UserContext.clear()
+        ContexteUtilisateur.clear()
 
     @pytest.mark.unit
     def test_user_context_manager(self):
         """Test context manager utilisateur."""
-        UserContext.set_user("initial")
+        ContexteUtilisateur.set_user("initial")
         
         with user_context("temporary"):
-            assert UserContext.get_user() == "temporary"
+            assert ContexteUtilisateur.get_user() == "temporary"
         
-        assert UserContext.get_user() == "initial"
+        assert ContexteUtilisateur.get_user() == "initial"
 
     @pytest.mark.unit
     def test_user_context_nested(self):
         """Test context manager imbriqués."""
-        UserContext.set_user("outer")
+        ContexteUtilisateur.set_user("outer")
         
         with user_context("middle"):
-            assert UserContext.get_user() == "middle"
+            assert ContexteUtilisateur.get_user() == "middle"
             
             with user_context("inner"):
-                assert UserContext.get_user() == "inner"
+                assert ContexteUtilisateur.get_user() == "inner"
             
-            assert UserContext.get_user() == "middle"
+            assert ContexteUtilisateur.get_user() == "middle"
         
-        assert UserContext.get_user() == "outer"
+        assert ContexteUtilisateur.get_user() == "outer"
 
     @pytest.mark.unit
     def test_user_context_exception(self):
         """Test context manager avec exception."""
-        UserContext.set_user("initial")
+        ContexteUtilisateur.set_user("initial")
         
         try:
             with user_context("temporary"):
-                assert UserContext.get_user() == "temporary"
+                assert ContexteUtilisateur.get_user() == "temporary"
                 raise ValueError("Test error")
         except ValueError:
             pass
         
         # Devrait restaurer même après exception
-        assert UserContext.get_user() == "initial"
+        assert ContexteUtilisateur.get_user() == "initial"
 
     @pytest.mark.unit
     def test_admin_context_manager(self):
         """Test context manager admin."""
-        assert UserContext.is_bypassed() is False
+        assert ContexteUtilisateur.is_bypassed() is False
         
         with admin_context():
-            assert UserContext.is_bypassed() is True
+            assert ContexteUtilisateur.is_bypassed() is True
         
-        assert UserContext.is_bypassed() is False
+        assert ContexteUtilisateur.is_bypassed() is False
 
     @pytest.mark.unit
     def test_admin_context_nested(self):
         """Test context manager admin imbriqué."""
         with admin_context():
-            assert UserContext.is_bypassed() is True
+            assert ContexteUtilisateur.is_bypassed() is True
             
             with admin_context():
-                assert UserContext.is_bypassed() is True
+                assert ContexteUtilisateur.is_bypassed() is True
             
-            assert UserContext.is_bypassed() is True
+            assert ContexteUtilisateur.is_bypassed() is True
         
-        assert UserContext.is_bypassed() is False
+        assert ContexteUtilisateur.is_bypassed() is False
 
     @pytest.mark.unit
     def test_combined_contexts(self):
         """Test combinaison user_context et admin_context."""
         with user_context("user-1"):
-            assert UserContext.get_user() == "user-1"
+            assert ContexteUtilisateur.get_user() == "user-1"
             
             with admin_context():
-                assert UserContext.get_user() == "user-1"
-                assert UserContext.is_bypassed() is True
+                assert ContexteUtilisateur.get_user() == "user-1"
+                assert ContexteUtilisateur.is_bypassed() is True
             
-            assert UserContext.is_bypassed() is False
+            assert ContexteUtilisateur.is_bypassed() is False
 
 
 # ═══════════════════════════════════════════════════════════
@@ -190,14 +190,14 @@ class TestDecorators:
 
     def setup_method(self):
         """Préparation avant chaque test."""
-        UserContext.clear()
+        ContexteUtilisateur.clear()
 
     @pytest.mark.unit
     def test_with_user_isolation_decorator(self):
-        """Test décorateur @with_user_isolation."""
-        UserContext.set_user("user-123")
+        """Test décorateur @avec_isolation_utilisateur."""
+        ContexteUtilisateur.set_user("user-123")
         
-        @with_user_isolation()
+        @avec_isolation_utilisateur()
         def get_data(user_id: str = None) -> str:
             return user_id
         
@@ -208,9 +208,9 @@ class TestDecorators:
     @pytest.mark.unit
     def test_with_user_isolation_explicit_user(self):
         """Test décorateur avec user_id explicite."""
-        UserContext.set_user("user-123")
+        ContexteUtilisateur.set_user("user-123")
         
-        @with_user_isolation()
+        @avec_isolation_utilisateur()
         def get_data(user_id: str = None) -> str:
             return user_id
         
@@ -221,9 +221,9 @@ class TestDecorators:
     @pytest.mark.unit
     def test_with_user_isolation_no_context(self):
         """Test décorateur sans contexte utilisateur."""
-        UserContext.clear()
+        ContexteUtilisateur.clear()
         
-        @with_user_isolation()
+        @avec_isolation_utilisateur()
         def get_data(user_id: str = None) -> str:
             return user_id
         
@@ -234,10 +234,10 @@ class TestDecorators:
     @pytest.mark.unit
     def test_with_user_isolation_bypass(self):
         """Test décorateur avec bypass activation."""
-        UserContext.set_user("user-123")
-        UserContext.set_bypass(True)
+        ContexteUtilisateur.set_user("user-123")
+        ContexteUtilisateur.set_bypass(True)
         
-        @with_user_isolation()
+        @avec_isolation_utilisateur()
         def get_data(user_id: str = None) -> str:
             return user_id
         
@@ -248,10 +248,10 @@ class TestDecorators:
 
     @pytest.mark.unit
     def test_require_user_decorator_success(self):
-        """Test décorateur @require_user avec utilisateur."""
-        UserContext.set_user("user-123")
+        """Test décorateur @exiger_utilisateur avec utilisateur."""
+        ContexteUtilisateur.set_user("user-123")
         
-        @require_user()
+        @exiger_utilisateur()
         def create_data() -> str:
             return "created"
         
@@ -261,10 +261,10 @@ class TestDecorators:
 
     @pytest.mark.unit
     def test_require_user_decorator_fail(self):
-        """Test décorateur @require_user sans utilisateur."""
-        UserContext.clear()
+        """Test décorateur @exiger_utilisateur sans utilisateur."""
+        ContexteUtilisateur.clear()
         
-        @require_user()
+        @exiger_utilisateur()
         def create_data() -> str:
             return "created"
         
@@ -273,11 +273,11 @@ class TestDecorators:
 
     @pytest.mark.unit
     def test_require_user_decorator_bypass(self):
-        """Test décorateur @require_user avec bypass."""
-        UserContext.clear()
-        UserContext.set_bypass(True)
+        """Test décorateur @exiger_utilisateur avec bypass."""
+        ContexteUtilisateur.clear()
+        ContexteUtilisateur.set_bypass(True)
         
-        @require_user()
+        @exiger_utilisateur()
         def create_data() -> str:
             return "created"
         
@@ -292,22 +292,22 @@ class TestDecorators:
 
 
 class TestMultiTenantQuery:
-    """Tests pour MultiTenantQuery helpers."""
+    """Tests pour RequeteMultiLocataire helpers."""
 
     def setup_method(self):
         """Préparation avant chaque test."""
-        UserContext.clear()
+        ContexteUtilisateur.clear()
 
     @pytest.mark.unit
     def test_get_user_filter_with_user(self):
         """Test génération filtre utilisateur."""
-        UserContext.set_user("user-123")
+        ContexteUtilisateur.set_user("user-123")
         
         # Mock modèle
         mock_model = Mock()
         mock_model.user_id = Mock()
         
-        result = MultiTenantQuery.get_user_filter(mock_model)
+        result = RequeteMultiLocataire.get_user_filter(mock_model)
         
         # Devrait retourner une condition filtre
         assert result is not None
@@ -315,12 +315,12 @@ class TestMultiTenantQuery:
     @pytest.mark.unit
     def test_get_user_filter_bypass(self):
         """Test filtre avec bypass activation."""
-        UserContext.set_user("user-123")
-        UserContext.set_bypass(True)
+        ContexteUtilisateur.set_user("user-123")
+        ContexteUtilisateur.set_bypass(True)
         
         mock_model = Mock()
         
-        result = MultiTenantQuery.get_user_filter(mock_model)
+        result = RequeteMultiLocataire.get_user_filter(mock_model)
         
         # Avec bypass, retourne True (pas de filtre)
         assert result is True
@@ -328,11 +328,11 @@ class TestMultiTenantQuery:
     @pytest.mark.unit
     def test_get_user_filter_no_user_id_attr(self):
         """Test filtre sur modèle sans user_id."""
-        UserContext.set_user("user-123")
+        ContexteUtilisateur.set_user("user-123")
         
         mock_model = Mock(spec=[])  # Pas d'attribut user_id
         
-        result = MultiTenantQuery.get_user_filter(mock_model)
+        result = RequeteMultiLocataire.get_user_filter(mock_model)
         
         # Devrait retourner True (pas de filtre applicable)
         assert result is True
@@ -340,7 +340,7 @@ class TestMultiTenantQuery:
     @pytest.mark.unit
     def test_filter_by_user(self):
         """Test filtre_by_user helper."""
-        UserContext.set_user("user-123")
+        ContexteUtilisateur.set_user("user-123")
         
         mock_query = Mock()
         mock_query.filter.return_value = mock_query
@@ -348,7 +348,7 @@ class TestMultiTenantQuery:
         mock_model = Mock()
         mock_model.user_id = Mock()
         
-        result = MultiTenantQuery.filter_by_user(mock_query, mock_model)
+        result = RequeteMultiLocataire.filter_by_user(mock_query, mock_model)
         
         # Devrait appeler filter
         mock_query.filter.assert_called()
@@ -356,13 +356,13 @@ class TestMultiTenantQuery:
     @pytest.mark.unit
     def test_filter_by_user_bypass(self):
         """Test filter_by_user avec bypass."""
-        UserContext.set_user("user-123")
-        UserContext.set_bypass(True)
+        ContexteUtilisateur.set_user("user-123")
+        ContexteUtilisateur.set_bypass(True)
         
         mock_query = Mock()
         mock_model = Mock()
         
-        result = MultiTenantQuery.filter_by_user(mock_query, mock_model)
+        result = RequeteMultiLocataire.filter_by_user(mock_query, mock_model)
         
         # Avec bypass, retourne query non filtrée
         assert result is mock_query
@@ -379,7 +379,7 @@ class TestMultiTenantIntegration:
 
     def setup_method(self):
         """Préparation avant chaque test."""
-        UserContext.clear()
+        ContexteUtilisateur.clear()
 
     @pytest.mark.integration
     def test_complete_multitenant_workflow(self):
@@ -387,9 +387,9 @@ class TestMultiTenantIntegration:
         
         # Utilisateur 1
         with user_context("user-1"):
-            assert UserContext.get_user() == "user-1"
+            assert ContexteUtilisateur.get_user() == "user-1"
             
-            @with_user_isolation()
+            @avec_isolation_utilisateur()
             def get_data_for_user(user_id: str = None):
                 return user_id
             
@@ -404,29 +404,29 @@ class TestMultiTenantIntegration:
     @pytest.mark.integration
     def test_admin_override_workflow(self):
         """Test workflow override admin."""
-        UserContext.set_user("regular-user")
+        ContexteUtilisateur.set_user("regular-user")
         
         # Mode utilisateur normal
-        assert UserContext.is_bypassed() is False
+        assert ContexteUtilisateur.is_bypassed() is False
         
         # Mode admin
         with admin_context():
-            assert UserContext.is_bypassed() is True
-            assert UserContext.get_user() == "regular-user"  # User ID persiste
+            assert ContexteUtilisateur.is_bypassed() is True
+            assert ContexteUtilisateur.get_user() == "regular-user"  # User ID persiste
         
         # Retour mode normal
-        assert UserContext.is_bypassed() is False
+        assert ContexteUtilisateur.is_bypassed() is False
 
     @pytest.mark.integration
     def test_permission_workflow(self):
         """Test workflow permissions."""
         
-        @require_user()
+        @exiger_utilisateur()
         def protected_operation():
             return "success"
         
         # Sans utilisateur -> erreur
-        UserContext.clear()
+        ContexteUtilisateur.clear()
         with pytest.raises(PermissionError):
             protected_operation()
         
@@ -441,14 +441,14 @@ class TestMultiTenantIntegration:
         results = []
         
         with user_context("user-1"):
-            results.append(UserContext.get_user())
+            results.append(ContexteUtilisateur.get_user())
         
-        results.append(UserContext.get_user())
+        results.append(ContexteUtilisateur.get_user())
         
         with user_context("user-2"):
-            results.append(UserContext.get_user())
+            results.append(ContexteUtilisateur.get_user())
         
-        results.append(UserContext.get_user())
+        results.append(ContexteUtilisateur.get_user())
         
         assert results == ["user-1", None, "user-2", None]
 
@@ -458,65 +458,65 @@ class TestMultiTenantEdgeCases:
 
     def setup_method(self):
         """Préparation avant chaque test."""
-        UserContext.clear()
+        ContexteUtilisateur.clear()
 
     @pytest.mark.unit
     def test_empty_user_id(self):
         """Test avec ID utilisateur vide."""
-        UserContext.set_user("")
+        ContexteUtilisateur.set_user("")
         
         # String vide est accepté
-        assert UserContext.get_user() == ""
+        assert ContexteUtilisateur.get_user() == ""
 
     @pytest.mark.unit
     def test_special_characters_user_id(self):
         """Test avec caractères spéciaux."""
         special_id = "user-@#$%&123"
-        UserContext.set_user(special_id)
+        ContexteUtilisateur.set_user(special_id)
         
-        assert UserContext.get_user() == special_id
+        assert ContexteUtilisateur.get_user() == special_id
 
     @pytest.mark.unit
     def test_very_long_user_id(self):
         """Test avec très long ID utilisateur."""
         long_id = "x" * 10000
-        UserContext.set_user(long_id)
+        ContexteUtilisateur.set_user(long_id)
         
-        assert UserContext.get_user() == long_id
+        assert ContexteUtilisateur.get_user() == long_id
 
     @pytest.mark.unit
     def test_context_manager_none_user(self):
         """Test context manager avec None."""
-        UserContext.set_user("initial")
+        ContexteUtilisateur.set_user("initial")
         
         with user_context(None):
-            assert UserContext.get_user() is None
+            assert ContexteUtilisateur.get_user() is None
         
-        assert UserContext.get_user() == "initial"
+        assert ContexteUtilisateur.get_user() == "initial"
 
     @pytest.mark.unit
     def test_bypass_toggle_rapid(self):
         """Test toggles rapides du bypass."""
         for _ in range(100):
-            UserContext.set_bypass(True)
-            assert UserContext.is_bypassed() is True
-            UserContext.set_bypass(False)
-            assert UserContext.is_bypassed() is False
+            ContexteUtilisateur.set_bypass(True)
+            assert ContexteUtilisateur.is_bypassed() is True
+            ContexteUtilisateur.set_bypass(False)
+            assert ContexteUtilisateur.is_bypassed() is False
 
     @pytest.mark.unit
     def test_decorator_return_types(self):
         """Test décorateurs avec différents types retournés."""
-        UserContext.set_user("user-123")
+        ContexteUtilisateur.set_user("user-123")
         
-        @with_user_isolation()
+        @avec_isolation_utilisateur()
         def return_dict(user_id=None):
             return {"user": user_id}
         
-        @with_user_isolation()
+        @avec_isolation_utilisateur()
         def return_list(user_id=None):
             return [user_id]
         
-        @with_user_isolation()
+        @avec_isolation_utilisateur()
         def return_int(user_id=None):
             return 42
         

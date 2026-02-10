@@ -1,4 +1,4 @@
-﻿"""
+"""
 Composants réutilisables pour le module planning
 """
 
@@ -214,4 +214,3 @@ def afficher_stats_semaine(stats: dict) -> None:
     with col5:
         budget = stats.get("budget_total", 0)
         st.metric("📱 Budget", f"{budget:.0f}€")
-

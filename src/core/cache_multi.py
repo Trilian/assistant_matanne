@@ -1,4 +1,4 @@
-﻿"""
+"""
 Cache Multi-Niveaux - Système de cache hiérarchique performant.
 
 Architecture à 3 niveaux :
@@ -33,7 +33,7 @@ T = TypeVar("T")
 
 
 @dataclass
-class CacheEntry:
+class EntreeCache:
     """Entrée de cache avec métadonnées."""
     
     value: Any
@@ -43,9 +43,12 @@ class CacheEntry:
     hits: int = 0
     
     @property
-    def is_expired(self) -> bool:
+    def est_expire(self) -> bool:
         """Vérifie si l'entrée est expirée."""
         return time.time() - self.created_at > self.ttl
+    
+    # Alias anglais
+    is_expired = est_expire
     
     @property
     def age_seconds(self) -> float:
@@ -54,7 +57,7 @@ class CacheEntry:
 
 
 @dataclass
-class CacheStats:
+class StatistiquesCache:
     """Statistiques du cache."""
     
     l1_hits: int = 0
@@ -91,7 +94,7 @@ class CacheStats:
 # ═══════════════════════════════════════════════════════════
 
 
-class L1MemoryCache:
+class CacheMemoireN1:
     """
     Cache L1 en mémoire pure (dict Python).
     
@@ -101,13 +104,13 @@ class L1MemoryCache:
     """
     
     def __init__(self, max_entries: int = 500, max_size_mb: float = 50):
-        self._cache: dict[str, CacheEntry] = {}
+        self._cache: dict[str, EntreeCache] = {}
         self._access_order: list[str] = []  # Pour LRU
         self._lock = threading.RLock()
         self.max_entries = max_entries
         self.max_size_bytes = int(max_size_mb * 1024 * 1024)
         
-    def get(self, key: str) -> CacheEntry | None:
+    def get(self, key: str) -> EntreeCache | None:
         """Récupère une entrée du cache L1."""
         with self._lock:
             entry = self._cache.get(key)
@@ -126,7 +129,7 @@ class L1MemoryCache:
             
             return entry
     
-    def set(self, key: str, entry: CacheEntry) -> None:
+    def set(self, key: str, entry: EntreeCache) -> None:
         """Stocke une entrée dans le cache L1."""
         with self._lock:
             # Éviction si nécessaire
@@ -170,13 +173,16 @@ class L1MemoryCache:
     def size(self) -> int:
         return len(self._cache)
     
-    def get_stats(self) -> dict:
+    def obtenir_statistiques(self) -> dict:
         """Statistiques du cache L1."""
         return {
             "entries": len(self._cache),
             "max_entries": self.max_entries,
             "usage_percent": len(self._cache) / self.max_entries * 100,
         }
+    
+    # Alias anglais
+    get_stats = obtenir_statistiques
 
 
 # ═══════════════════════════════════════════════════════════
@@ -184,7 +190,7 @@ class L1MemoryCache:
 # ═══════════════════════════════════════════════════════════
 
 
-class L2SessionCache:
+class CacheSessionN2:
     """
     Cache L2 basé sur Streamlit session_state.
     
@@ -224,7 +230,7 @@ class L2SessionCache:
         except Exception:
             pass
     
-    def get(self, key: str) -> CacheEntry | None:
+    def get(self, key: str) -> EntreeCache | None:
         """Récupère une entrée du cache L2."""
         store = self._get_store()
         data = store.get(key)
@@ -233,7 +239,7 @@ class L2SessionCache:
             return None
         
         try:
-            entry = CacheEntry(**data)
+            entry = EntreeCache(**data)
             if entry.is_expired:
                 self.remove(key)
                 return None
@@ -242,7 +248,7 @@ class L2SessionCache:
         except Exception:
             return None
     
-    def set(self, key: str, entry: CacheEntry) -> None:
+    def set(self, key: str, entry: EntreeCache) -> None:
         """Stocke une entrée dans le cache L2."""
         store = self._get_store()
         store[key] = {
@@ -292,7 +298,7 @@ class L2SessionCache:
 # ═══════════════════════════════════════════════════════════
 
 
-class L3FileCache:
+class CacheFichierN3:
     """
     Cache L3 basé sur fichiers pickle.
     
@@ -313,7 +319,7 @@ class L3FileCache:
         hash_key = hashlib.md5(key.encode()).hexdigest()
         return self.cache_dir / f"{hash_key}.cache"
     
-    def get(self, key: str) -> CacheEntry | None:
+    def get(self, key: str) -> EntreeCache | None:
         """Récupère une entrée du cache L3."""
         filepath = self._key_to_filename(key)
         
@@ -325,7 +331,7 @@ class L3FileCache:
                 with open(filepath, "rb") as f:
                     data = pickle.load(f)
                 
-                entry = CacheEntry(**data)
+                entry = EntreeCache(**data)
                 if entry.is_expired:
                     self.remove(key)
                     return None
@@ -336,7 +342,7 @@ class L3FileCache:
             logger.debug(f"Erreur lecture cache L3: {e}")
             return None
     
-    def set(self, key: str, entry: CacheEntry) -> None:
+    def set(self, key: str, entry: EntreeCache) -> None:
         """Stocke une entrée dans le cache L3."""
         filepath = self._key_to_filename(key)
         
@@ -434,7 +440,7 @@ class L3FileCache:
 # ═══════════════════════════════════════════════════════════
 
 
-class MultiLevelCache:
+class CacheMultiNiveau:
     """
     Cache multi-niveaux unifié.
     
@@ -445,7 +451,7 @@ class MultiLevelCache:
     Stratégie d'écriture : L1 + L2 (L3 optionnel si persistent=True)
     """
     
-    _instance: "MultiLevelCache | None" = None
+    _instance: "CacheMultiNiveau | None" = None
     
     def __new__(cls, *args, **kwargs):
         """Singleton pattern."""
@@ -464,13 +470,13 @@ class MultiLevelCache:
         if self._initialized:
             return
         
-        self.l1 = L1MemoryCache(max_entries=l1_max_entries)
-        self.l2 = L2SessionCache() if l2_enabled else None
-        self.l3 = L3FileCache(cache_dir=l3_cache_dir) if l3_enabled else None
-        self.stats = CacheStats()
+        self.l1 = CacheMemoireN1(max_entries=l1_max_entries)
+        self.l2 = CacheSessionN2() if l2_enabled else None
+        self.l3 = CacheFichierN3(cache_dir=l3_cache_dir) if l3_enabled else None
+        self.stats = StatistiquesCache()
         self._initialized = True
         
-        logger.info(f"MultiLevelCache initialisé (L1={l1_max_entries}, L2={l2_enabled}, L3={l3_enabled})")
+        logger.info(f"CacheMultiNiveau initialisé (L1={l1_max_entries}, L2={l2_enabled}, L3={l3_enabled})")
     
     def get(
         self,
@@ -536,7 +542,7 @@ class MultiLevelCache:
             tags: Tags pour invalidation groupée
             persistent: Si True, écrit aussi en L3
         """
-        entry = CacheEntry(
+        entry = EntreeCache(
             value=value,
             ttl=ttl,
             tags=tags or [],
@@ -599,16 +605,16 @@ class MultiLevelCache:
         
         logger.info(f"Cache vidé (niveaux: {levels})")
     
-    def get_stats(self) -> dict:
+    def obtenir_statistiques(self) -> dict:
         """Retourne les statistiques complètes."""
         return {
             **self.stats.to_dict(),
-            "l1": self.l1.get_stats(),
+            "l1": self.l1.obtenir_statistiques(),
             "l2_size": self.l2.size if self.l2 else 0,
             "l3_size": self.l3.size if self.l3 else 0,
         }
     
-    def get_or_compute(
+    def obtenir_ou_calculer(
         self,
         key: str,
         compute_fn: Callable[[], T],
@@ -640,6 +646,10 @@ class MultiLevelCache:
         self.set(key, value, ttl=ttl, tags=tags, persistent=persistent)
         
         return value
+    
+    # Alias anglais
+    get_stats = obtenir_statistiques
+    get_or_compute = obtenir_ou_calculer
 
 
 # ═══════════════════════════════════════════════════════════
@@ -647,7 +657,7 @@ class MultiLevelCache:
 # ═══════════════════════════════════════════════════════════
 
 
-def cached(
+def avec_cache_multi(
     ttl: int = 300,
     key_prefix: str | None = None,
     tags: list[str] | None = None,
@@ -691,8 +701,8 @@ def cached(
             cache_key = "_".join(key_parts)
             
             # Utiliser le cache
-            cache = MultiLevelCache()
-            return cache.get_or_compute(
+            cache = CacheMultiNiveau()
+            return cache.obtenir_ou_calculer(
                 key=cache_key,
                 compute_fn=lambda: func(*args, **kwargs),
                 ttl=ttl,
@@ -709,10 +719,12 @@ def cached(
 # ═══════════════════════════════════════════════════════════
 
 
-def get_cache() -> MultiLevelCache:
+def obtenir_cache() -> CacheMultiNiveau:
     """Retourne l'instance globale du cache."""
-    return MultiLevelCache()
+    return CacheMultiNiveau()
 
 
-# Alias pour compatibilité
-cache = get_cache()
+# Alias anglais
+cache = obtenir_cache()
+cached = avec_cache_multi
+get_cache = obtenir_cache

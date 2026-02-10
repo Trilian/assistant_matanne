@@ -1,4 +1,4 @@
-﻿"""
+"""
 Logique métier du module Entretien (maison) - Séparée de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
@@ -305,4 +305,3 @@ def grouper_par_piece(taches: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, 
         groupes[piece].append(tache)
     
     return groupes
-

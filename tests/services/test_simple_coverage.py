@@ -139,9 +139,9 @@ class TestAIServiceUtilities:
     """Test AI service utility functions"""
 
     def test_cache_multi_import(self):
-        """Test MultiLevelCache puede ser importado"""
-        from src.core.cache_multi import MultiLevelCache
-        assert MultiLevelCache is not None
+        """Test CacheMultiNiveau puede ser importado"""
+        from src.core.cache_multi import CacheMultiNiveau
+        assert CacheMultiNiveau is not None
 
     def test_cache_import(self):
         """Test Cache puede ser importado"""

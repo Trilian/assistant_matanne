@@ -57,68 +57,68 @@ def mock_session():
 
 
 # ═══════════════════════════════════════════════════════════
-# TESTS: OptimizedRouter
+# TESTS: RouteurOptimise
 # ═══════════════════════════════════════════════════════════
 
 
 class TestOptimizedRouter:
-    """Tests pour OptimizedRouter"""
+    """Tests pour RouteurOptimise"""
 
     def test_module_registry_exists(self):
         """Test MODULE_REGISTRY existe"""
-        from src.core.lazy_loader import OptimizedRouter
+        from src.core.lazy_loader import RouteurOptimise
 
-        assert hasattr(OptimizedRouter, "MODULE_REGISTRY")
-        assert isinstance(OptimizedRouter.MODULE_REGISTRY, dict)
+        assert hasattr(RouteurOptimise, "MODULE_REGISTRY")
+        assert isinstance(RouteurOptimise.MODULE_REGISTRY, dict)
 
     def test_module_registry_has_accueil(self):
         """Test MODULE_REGISTRY contient accueil"""
-        from src.core.lazy_loader import OptimizedRouter
+        from src.core.lazy_loader import RouteurOptimise
 
-        assert "accueil" in OptimizedRouter.MODULE_REGISTRY
+        assert "accueil" in RouteurOptimise.MODULE_REGISTRY
 
     def test_module_registry_has_cuisine(self):
         """Test MODULE_REGISTRY contient modules cuisine"""
-        from src.core.lazy_loader import OptimizedRouter
+        from src.core.lazy_loader import RouteurOptimise
 
-        cuisine_modules = [k for k in OptimizedRouter.MODULE_REGISTRY if k.startswith("cuisine")]
+        cuisine_modules = [k for k in RouteurOptimise.MODULE_REGISTRY if k.startswith("cuisine")]
         assert len(cuisine_modules) > 0
 
     def test_module_registry_has_famille(self):
         """Test MODULE_REGISTRY contient modules famille"""
-        from src.core.lazy_loader import OptimizedRouter
+        from src.core.lazy_loader import RouteurOptimise
 
-        famille_modules = [k for k in OptimizedRouter.MODULE_REGISTRY if k.startswith("famille")]
+        famille_modules = [k for k in RouteurOptimise.MODULE_REGISTRY if k.startswith("famille")]
         assert len(famille_modules) > 0
 
     def test_module_registry_has_maison(self):
         """Test MODULE_REGISTRY contient modules maison"""
-        from src.core.lazy_loader import OptimizedRouter
+        from src.core.lazy_loader import RouteurOptimise
 
-        maison_modules = [k for k in OptimizedRouter.MODULE_REGISTRY if k.startswith("maison")]
+        maison_modules = [k for k in RouteurOptimise.MODULE_REGISTRY if k.startswith("maison")]
         assert len(maison_modules) > 0
 
     def test_module_config_structure(self):
         """Test structure config module"""
-        from src.core.lazy_loader import OptimizedRouter
+        from src.core.lazy_loader import RouteurOptimise
 
-        for name, config in OptimizedRouter.MODULE_REGISTRY.items():
+        for name, config in RouteurOptimise.MODULE_REGISTRY.items():
             assert "path" in config, f"Module {name} manque 'path'"
             assert "type" in config, f"Module {name} manque 'type'"
 
     def test_preload_common_modules_exists(self):
         """Test méthode preload_common_modules existe"""
-        from src.core.lazy_loader import OptimizedRouter
+        from src.core.lazy_loader import RouteurOptimise
 
-        assert hasattr(OptimizedRouter, "preload_common_modules")
-        assert callable(OptimizedRouter.preload_common_modules)
+        assert hasattr(RouteurOptimise, "preload_common_modules")
+        assert callable(RouteurOptimise.preload_common_modules)
 
     def test_load_module_exists(self):
         """Test méthode load_module existe"""
-        from src.core.lazy_loader import OptimizedRouter
+        from src.core.lazy_loader import RouteurOptimise
 
-        assert hasattr(OptimizedRouter, "load_module")
-        assert callable(OptimizedRouter.load_module)
+        assert hasattr(RouteurOptimise, "load_module")
+        assert callable(RouteurOptimise.load_module)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -362,45 +362,45 @@ class TestWithErrorHandlingAdvanced:
 
 
 # ═══════════════════════════════════════════════════════════
-# TESTS: LazyModuleLoader métriques
+# TESTS: ChargeurModuleDiffere métriques
 # ═══════════════════════════════════════════════════════════
 
 
 class TestLazyModuleLoaderMetrics:
-    """Tests pour métriques LazyModuleLoader"""
+    """Tests pour métriques ChargeurModuleDiffere"""
 
     def test_load_times_recorded(self):
         """Test enregistrement temps de chargement"""
-        from src.core.lazy_loader import LazyModuleLoader
+        from src.core.lazy_loader import ChargeurModuleDiffere
 
-        LazyModuleLoader.clear_cache()
-        LazyModuleLoader.load("json")
+        ChargeurModuleDiffere.clear_cache()
+        ChargeurModuleDiffere.load("json")
 
-        stats = LazyModuleLoader.get_stats()
+        stats = ChargeurModuleDiffere.get_stats()
 
         assert "json" in stats["load_times"]
         assert stats["load_times"]["json"] >= 0
 
     def test_average_load_time(self):
         """Test calcul temps moyen"""
-        from src.core.lazy_loader import LazyModuleLoader
+        from src.core.lazy_loader import ChargeurModuleDiffere
 
-        LazyModuleLoader.clear_cache()
-        LazyModuleLoader.load("json")
-        LazyModuleLoader.load("re")
+        ChargeurModuleDiffere.clear_cache()
+        ChargeurModuleDiffere.load("json")
+        ChargeurModuleDiffere.load("re")
 
-        stats = LazyModuleLoader.get_stats()
+        stats = ChargeurModuleDiffere.get_stats()
 
         assert stats["average_load_time"] >= 0
         assert stats["total_load_time"] >= 0
 
     def test_empty_stats(self):
         """Test stats vides"""
-        from src.core.lazy_loader import LazyModuleLoader
+        from src.core.lazy_loader import ChargeurModuleDiffere
 
-        LazyModuleLoader.clear_cache()
+        ChargeurModuleDiffere.clear_cache()
 
-        stats = LazyModuleLoader.get_stats()
+        stats = ChargeurModuleDiffere.get_stats()
 
         assert stats["cached_modules"] == 0
         assert stats["total_load_time"] == 0
@@ -408,18 +408,18 @@ class TestLazyModuleLoaderMetrics:
 
 
 # ═══════════════════════════════════════════════════════════
-# TESTS: render_lazy_loading_stats
+# TESTS: afficher_stats_chargement_differe
 # ═══════════════════════════════════════════════════════════
 
 
 class TestRenderLazyLoadingStats:
-    """Tests pour render_lazy_loading_stats"""
+    """Tests pour afficher_stats_chargement_differe"""
 
     def test_function_exists(self):
         """Test fonction existe"""
-        from src.core.lazy_loader import render_lazy_loading_stats
+        from src.core.lazy_loader import afficher_stats_chargement_differe
 
-        assert callable(render_lazy_loading_stats)
+        assert callable(afficher_stats_chargement_differe)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -432,12 +432,12 @@ class TestPreloadAsync:
 
     def test_preload_background(self):
         """Test préchargement en arrière-plan"""
-        from src.core.lazy_loader import LazyModuleLoader
+        from src.core.lazy_loader import ChargeurModuleDiffere
 
-        LazyModuleLoader.clear_cache()
+        ChargeurModuleDiffere.clear_cache()
 
         # Précharger en background (thread)
-        LazyModuleLoader.preload(["json", "re"], background=True)
+        ChargeurModuleDiffere.preload(["json", "re"], background=True)
 
         # Attendre un peu pour le thread
         time.sleep(0.1)

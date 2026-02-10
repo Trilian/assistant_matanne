@@ -1,4 +1,4 @@
-﻿"""
+"""
 Logique métier du module Vue d'ensemble (planning) - Séparée de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
@@ -322,4 +322,3 @@ def formater_evolution(evolution: str) -> str:
     }
     emoji = emojis.get(evolution, "")
     return f"{emoji} {evolution.capitalize()}"
-

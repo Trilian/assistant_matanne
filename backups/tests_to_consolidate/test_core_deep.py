@@ -531,61 +531,61 @@ class TestHelpersValidation:
 
 
 # ═══════════════════════════════════════════════════════════
-# TESTS: LazyModuleLoader (lazy_loader.py)
+# TESTS: ChargeurModuleDiffere (lazy_loader.py)
 # ═══════════════════════════════════════════════════════════
 
 
 class TestLazyModuleLoader:
-    """Tests pour LazyModuleLoader"""
+    """Tests pour ChargeurModuleDiffere"""
 
     def setup_method(self):
         """Nettoyer le cache avant chaque test"""
-        from src.core.lazy_loader import LazyModuleLoader
+        from src.core.lazy_loader import ChargeurModuleDiffere
 
-        LazyModuleLoader.clear_cache()
+        ChargeurModuleDiffere.clear_cache()
 
     def test_load_module_standard(self):
         """Test chargement module standard"""
-        from src.core.lazy_loader import LazyModuleLoader
+        from src.core.lazy_loader import ChargeurModuleDiffere
 
-        module = LazyModuleLoader.load("json")
+        module = ChargeurModuleDiffere.load("json")
         assert module is not None
         assert hasattr(module, "dumps")
 
     def test_load_module_cache(self):
         """Test cache du module"""
-        from src.core.lazy_loader import LazyModuleLoader
+        from src.core.lazy_loader import ChargeurModuleDiffere
 
-        module1 = LazyModuleLoader.load("json")
-        module2 = LazyModuleLoader.load("json")
+        module1 = ChargeurModuleDiffere.load("json")
+        module2 = ChargeurModuleDiffere.load("json")
 
         # Même référence (cache hit)
         assert module1 is module2
 
     def test_load_module_reload(self):
         """Test reload forcé"""
-        from src.core.lazy_loader import LazyModuleLoader
+        from src.core.lazy_loader import ChargeurModuleDiffere
 
-        module1 = LazyModuleLoader.load("json")
-        module2 = LazyModuleLoader.load("json", reload=True)
+        module1 = ChargeurModuleDiffere.load("json")
+        module2 = ChargeurModuleDiffere.load("json", reload=True)
 
         # Module rechargé (pas nécessairement même référence)
         assert module2 is not None
 
     def test_load_module_not_found(self):
         """Test module inexistant"""
-        from src.core.lazy_loader import LazyModuleLoader
+        from src.core.lazy_loader import ChargeurModuleDiffere
 
         with pytest.raises(ModuleNotFoundError):
-            LazyModuleLoader.load("module_qui_nexiste_pas_xyz")
+            ChargeurModuleDiffere.load("module_qui_nexiste_pas_xyz")
 
     def test_get_stats(self):
         """Test récupération statistiques"""
-        from src.core.lazy_loader import LazyModuleLoader
+        from src.core.lazy_loader import ChargeurModuleDiffere
 
-        LazyModuleLoader.load("json")
+        ChargeurModuleDiffere.load("json")
 
-        stats = LazyModuleLoader.get_stats()
+        stats = ChargeurModuleDiffere.get_stats()
         assert "cached_modules" in stats
         assert "total_load_time" in stats
         assert "average_load_time" in stats
@@ -593,29 +593,29 @@ class TestLazyModuleLoader:
 
     def test_clear_cache(self):
         """Test vidage du cache"""
-        from src.core.lazy_loader import LazyModuleLoader
+        from src.core.lazy_loader import ChargeurModuleDiffere
 
-        LazyModuleLoader.load("json")
-        assert LazyModuleLoader.get_stats()["cached_modules"] >= 1
+        ChargeurModuleDiffere.load("json")
+        assert ChargeurModuleDiffere.get_stats()["cached_modules"] >= 1
 
-        LazyModuleLoader.clear_cache()
-        assert LazyModuleLoader.get_stats()["cached_modules"] == 0
+        ChargeurModuleDiffere.clear_cache()
+        assert ChargeurModuleDiffere.get_stats()["cached_modules"] == 0
 
     def test_preload_sync(self):
         """Test préchargement synchrone"""
-        from src.core.lazy_loader import LazyModuleLoader
+        from src.core.lazy_loader import ChargeurModuleDiffere
 
-        LazyModuleLoader.preload(["json", "re"], background=False)
+        ChargeurModuleDiffere.preload(["json", "re"], background=False)
 
-        stats = LazyModuleLoader.get_stats()
+        stats = ChargeurModuleDiffere.get_stats()
         assert stats["cached_modules"] >= 2
 
     def test_preload_module_inexistant(self):
         """Test préchargement module inexistant (ne crash pas)"""
-        from src.core.lazy_loader import LazyModuleLoader
+        from src.core.lazy_loader import ChargeurModuleDiffere
 
         # Ne doit pas lever d'exception
-        LazyModuleLoader.preload(["json", "module_inexistant_xyz"], background=False)
+        ChargeurModuleDiffere.preload(["json", "module_inexistant_xyz"], background=False)
 
 
 # ═══════════════════════════════════════════════════════════

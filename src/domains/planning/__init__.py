@@ -1,4 +1,4 @@
-﻿"""Domaine Planning - Gestion calendrier, routines et planification."""
+"""Domaine Planning - Gestion calendrier, routines et planification."""
 
 # UI
 from .ui import calendrier, vue_semaine, vue_ensemble
@@ -12,4 +12,3 @@ __all__ = [
     # Logic
     "calendrier_unifie_logic", "vue_semaine_logic", "vue_ensemble_logic",
 ]
-

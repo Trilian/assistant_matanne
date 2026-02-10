@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/core/state.py - Gestionnaire d'état avec mocks Streamlit.
 """
 
@@ -480,4 +480,3 @@ class TestGestionnaireEtatContexteModule:
             assert isinstance(contexte, dict)
             assert "module" in contexte
             assert "fil_ariane" in contexte
-

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Logique métier du module Jardin (maison) - Séparée de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
@@ -233,4 +233,3 @@ def valider_plante(data: Dict[str, Any]) -> tuple[bool, List[str]]:
             erreurs.append("La fréquence d'arrosage doit être >= 1 jour")
     
     return len(erreurs) == 0, erreurs
-

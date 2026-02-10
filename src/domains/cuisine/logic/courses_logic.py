@@ -1,4 +1,4 @@
-﻿"""
+"""
 Logique métier du module Courses - Séparée de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
@@ -610,4 +610,3 @@ def generer_modele_depuis_historique(analyse: dict, seuil_frequence: int = 3) ->
         for item in analyse.get("recurrents", [])
         if item["frequence"] >= seuil_frequence
     ]
-

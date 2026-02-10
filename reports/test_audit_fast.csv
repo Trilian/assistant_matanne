@@ -1,10 +1,4 @@
 type,path,lines,nb_tests,quality_score,mapped_sources,issues,action
-test,domains\famille\ui\test_suivi_perso.py,801,41,43.0,,hasattr checks (ne teste pas la logique) (8x); Tests d'import uniquement (6x),REWRITE
-test,assistant_matanne\tests\services\test_services_coverage_boost.py,455,36,45.0,,hasattr checks (ne teste pas la logique) (18x); Tests d'import uniquement (12x); Densité tests très haute (tests superficiels?),REWRITE
-test,assistant_matanne\tests\services\test_tier1_critical.py,363,39,46.0,,hasattr checks (ne teste pas la logique) (5x); Tests d'import uniquement (10x); Densité tests très haute (tests superficiels?),REWRITE
-test,assistant_matanne\tests\services\test_services_coverage_80_part6.py,1098,81,48.0,,hasattr checks (ne teste pas la logique) (9x); Tests d'import uniquement (19x); Densité tests très haute (tests superficiels?),REWRITE
-test,assistant_matanne\tests\services\test_services_coverage_80_part8.py,837,71,48.0,,hasattr checks (ne teste pas la logique) (20x); Tests d'import uniquement (38x); Densité tests très haute (tests superficiels?),REWRITE
-test,assistant_matanne\tests\ui\test_ui_80_coverage.py,600,40,49.0,,hasattr checks (ne teste pas la logique) (9x); Densité tests très haute (tests superficiels?),REWRITE
 test,assistant_matanne\tests\services\test_inventaire_methods.py,458,32,50.0,,hasattr checks (ne teste pas la logique) (12x); Densité tests très haute (tests superficiels?),REWRITE
 test,assistant_matanne\tests\services\test_calendar_sync_coverage.py,1086,45,53.0,src\domains\planning\ui\calendar_sync_ui.py,Tests d'import uniquement (11x); Mocking excessif (5x); Tests sans assertion (5x),REWRITE
 test,assistant_matanne\tests\domains\test_modules_cuisine.py,25,16,55.0,,assert True sans condition (16x); Densité tests très haute (tests superficiels?),REWRITE
@@ -149,6 +143,8 @@ test,tests\domains\jeux\test_loto_logic.py,231,17,90.0,src\domains\jeux\logic\lo
 test,tests\domains\jeux\test_paris_logic_coverage.py,852,63,90.0,,Densité tests très haute (tests superficiels?),OK
 test,tests\domains\jeux\test_scraper_loto_coverage.py,429,32,90.0,src\domains\jeux\logic\scraper_loto.py,Densité tests très haute (tests superficiels?),OK
 test,tests\domains\jeux\test_setup.py,52,6,90.0,src\domains\jeux\setup.py,Densité tests très haute (tests superficiels?),OK
+test,domains\jeux\logic\test_paris_forme.py,229,22,90.0,,Densité tests très haute (tests superficiels?),OK
+test,domains\jeux\logic\test_paris_prediction.py,311,19,90.0,,Densité tests très haute (tests superficiels?),OK
 test,tests\domains\maison\test_entretien_logic.py,383,31,90.0,src\domains\maison\logic\entretien_logic.py;src\domains\maison\ui\entretien.py,Densité tests très haute (tests superficiels?),OK
 test,tests\domains\maison\test_jardin_logic_coverage.py,233,18,90.0,src\domains\maison\logic\jardin_logic.py,Densité tests très haute (tests superficiels?),OK
 test,tests\domains\maison\test_projets_logic_coverage.py,251,19,90.0,src\domains\maison\logic\projets_logic.py,Densité tests très haute (tests superficiels?),OK
@@ -272,6 +268,7 @@ test,assistant_matanne\tests\services\test_budget_coverage.py,432,47,96.0,src\do
 test,assistant_matanne\tests\services\test_pwa.py,273,31,96.0,src\services\pwa.py,Densité tests très haute (tests superficiels?),OK
 test,assistant_matanne\tests\services\test_recettes_utils.py,494,60,96.0,src\services\recettes_utils.py,Densité tests très haute (tests superficiels?),OK
 test,assistant_matanne\tests\api\test_main.py,115,5,97.0,src\api\main.py,,OK
+test,domains\jeux\logic\test_paris_analyseur.py,355,16,97.0,,,OK
 test,assistant_matanne\tests\services\test_backup_service.py,162,11,97.0,src\services\backup.py;src\services\backup_utils.py,Densité tests très haute (tests superficiels?),OK
 test,assistant_matanne\tests\services\test_push_notifications_utils.py,602,54,97.0,src\services\push_notifications_utils.py,Densité tests très haute (tests superficiels?),OK
 test,assistant_matanne\tests\services\test_services_coverage_80_part2.py,654,65,97.0,,Densité tests très haute (tests superficiels?),OK

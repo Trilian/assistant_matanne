@@ -77,4 +77,3 @@ class TestJulesTracking:
         mock_write.return_value = None
         mock_write("Progression", {"poids": 12.8})
         assert mock_write.called
-

@@ -1,4 +1,4 @@
-﻿"""Domaine Famille - Gestion famille (Jules, santé, activités, shopping).
+"""Domaine Famille - Gestion famille (Jules, santé, activités, shopping).
 
 Nouveaux modules (refonte 2026-02):
 - hub_famille.py: Dashboard avec cards cliquables
@@ -26,4 +26,3 @@ def __getattr__(name):
         from . import logic
         return getattr(logic, name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-

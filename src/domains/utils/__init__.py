@@ -1,4 +1,4 @@
-﻿"""Domaine Utils - Modules utilitaires (accueil, paramètres, rapports, barcode)."""
+"""Domaine Utils - Modules utilitaires (accueil, paramètres, rapports, barcode)."""
 
 # UI
 from .ui import accueil, parametres, rapports, barcode
@@ -12,4 +12,3 @@ __all__ = [
     # Logic
     "parametres_logic", "rapports_logic", "barcode_logic", "accueil_logic",
 ]
-

@@ -8,14 +8,14 @@ from unittest.mock import MagicMock, patch
 
 
 class TestCacheEntryFunctional:
-    """Tests fonctionnels pour CacheEntry."""
+    """Tests fonctionnels pour EntreeCache."""
     
     def test_cache_entry_is_expired_true(self):
-        """CacheEntry.is_expired retourne True pour entrée expirée."""
-        from src.core.cache_multi import CacheEntry
+        """EntreeCache.is_expired retourne True pour entrée expirée."""
+        from src.core.cache_multi import EntreeCache
         
         # Créer entrée avec TTL très court dans le passé
-        entry = CacheEntry(
+        entry = EntreeCache(
             value="test",
             ttl=0,  # TTL 0 = expire immédiatement
             created_at=time.time() - 1  # 1 seconde dans le passé
@@ -24,10 +24,10 @@ class TestCacheEntryFunctional:
         assert entry.is_expired is True
     
     def test_cache_entry_is_expired_false(self):
-        """CacheEntry.is_expired retourne False pour entrée valide."""
-        from src.core.cache_multi import CacheEntry
+        """EntreeCache.is_expired retourne False pour entrée valide."""
+        from src.core.cache_multi import EntreeCache
         
-        entry = CacheEntry(
+        entry = EntreeCache(
             value="test",
             ttl=3600  # 1 heure
         )
@@ -35,10 +35,10 @@ class TestCacheEntryFunctional:
         assert entry.is_expired is False
     
     def test_cache_entry_age_seconds(self):
-        """CacheEntry.age_seconds calcule l'âge."""
-        from src.core.cache_multi import CacheEntry
+        """EntreeCache.age_seconds calcule l'âge."""
+        from src.core.cache_multi import EntreeCache
         
-        entry = CacheEntry(
+        entry = EntreeCache(
             value="test",
             created_at=time.time() - 5  # 5 secondes dans le passé
         )
@@ -47,37 +47,37 @@ class TestCacheEntryFunctional:
 
 
 class TestCacheStatsFunctional:
-    """Tests fonctionnels pour CacheStats."""
+    """Tests fonctionnels pour StatistiquesCache."""
     
     def test_cache_stats_total_hits(self):
-        """CacheStats.total_hits additionne tous les hits."""
-        from src.core.cache_multi import CacheStats
+        """StatistiquesCache.total_hits additionne tous les hits."""
+        from src.core.cache_multi import StatistiquesCache
         
-        stats = CacheStats(l1_hits=10, l2_hits=5, l3_hits=2)
+        stats = StatistiquesCache(l1_hits=10, l2_hits=5, l3_hits=2)
         
         assert stats.total_hits == 17
     
     def test_cache_stats_hit_rate_with_data(self):
-        """CacheStats.hit_rate calcule le taux."""
-        from src.core.cache_multi import CacheStats
+        """StatistiquesCache.hit_rate calcule le taux."""
+        from src.core.cache_multi import StatistiquesCache
         
-        stats = CacheStats(l1_hits=80, l2_hits=10, l3_hits=10, misses=0)
+        stats = StatistiquesCache(l1_hits=80, l2_hits=10, l3_hits=10, misses=0)
         
         assert stats.hit_rate == 100.0
     
     def test_cache_stats_hit_rate_zero(self):
-        """CacheStats.hit_rate retourne 0 si pas de données."""
-        from src.core.cache_multi import CacheStats
+        """StatistiquesCache.hit_rate retourne 0 si pas de données."""
+        from src.core.cache_multi import StatistiquesCache
         
-        stats = CacheStats()
+        stats = StatistiquesCache()
         
         assert stats.hit_rate == 0.0
     
     def test_cache_stats_to_dict(self):
-        """CacheStats.to_dict retourne un dict."""
-        from src.core.cache_multi import CacheStats
+        """StatistiquesCache.to_dict retourne un dict."""
+        from src.core.cache_multi import StatistiquesCache
         
-        stats = CacheStats(l1_hits=5, misses=5)
+        stats = StatistiquesCache(l1_hits=5, misses=5)
         result = stats.to_dict()
         
         assert "l1_hits" in result
@@ -85,23 +85,23 @@ class TestCacheStatsFunctional:
 
 
 class TestL1MemoryCacheFunctional:
-    """Tests fonctionnels pour L1MemoryCache."""
+    """Tests fonctionnels pour CacheMemoireN1."""
     
     def test_l1_cache_get_miss(self):
-        """L1MemoryCache.get retourne None si clé absente."""
-        from src.core.cache_multi import L1MemoryCache
+        """CacheMemoireN1.get retourne None si clé absente."""
+        from src.core.cache_multi import CacheMemoireN1
         
-        cache = L1MemoryCache(max_entries=10)
+        cache = CacheMemoireN1(max_entries=10)
         result = cache.get("nonexistent_key")
         
         assert result is None
     
     def test_l1_cache_set_and_get(self):
-        """L1MemoryCache set puis get."""
-        from src.core.cache_multi import L1MemoryCache, CacheEntry
+        """CacheMemoireN1 set puis get."""
+        from src.core.cache_multi import CacheMemoireN1, EntreeCache
         
-        cache = L1MemoryCache(max_entries=10)
-        entry = CacheEntry(value="test_value", ttl=300)
+        cache = CacheMemoireN1(max_entries=10)
+        entry = EntreeCache(value="test_value", ttl=300)
         
         cache.set("test_key", entry)
         result = cache.get("test_key")
@@ -110,11 +110,11 @@ class TestL1MemoryCacheFunctional:
         assert result.value == "test_value"
     
     def test_l1_cache_get_expired(self):
-        """L1MemoryCache.get retourne None pour entrée expirée."""
-        from src.core.cache_multi import L1MemoryCache, CacheEntry
+        """CacheMemoireN1.get retourne None pour entrée expirée."""
+        from src.core.cache_multi import CacheMemoireN1, EntreeCache
         
-        cache = L1MemoryCache(max_entries=10)
-        entry = CacheEntry(
+        cache = CacheMemoireN1(max_entries=10)
+        entry = EntreeCache(
             value="expired", 
             ttl=0,
             created_at=time.time() - 1
@@ -126,25 +126,25 @@ class TestL1MemoryCacheFunctional:
         assert result is None
     
     def test_l1_cache_invalidate_by_pattern(self):
-        """L1MemoryCache.invalidate par pattern."""
-        from src.core.cache_multi import L1MemoryCache, CacheEntry
+        """CacheMemoireN1.invalidate par pattern."""
+        from src.core.cache_multi import CacheMemoireN1, EntreeCache
         
-        cache = L1MemoryCache(max_entries=10)
-        cache.set("user:1", CacheEntry(value="a"))
-        cache.set("user:2", CacheEntry(value="b"))
-        cache.set("other:1", CacheEntry(value="c"))
+        cache = CacheMemoireN1(max_entries=10)
+        cache.set("user:1", EntreeCache(value="a"))
+        cache.set("user:2", EntreeCache(value="b"))
+        cache.set("other:1", EntreeCache(value="c"))
         
         count = cache.invalidate(pattern="user:")
         
         assert count >= 1  # Au moins user:1 ou user:2 invalidé
     
     def test_l1_cache_invalidate_by_tags(self):
-        """L1MemoryCache.invalidate par tags."""
-        from src.core.cache_multi import L1MemoryCache, CacheEntry
+        """CacheMemoireN1.invalidate par tags."""
+        from src.core.cache_multi import CacheMemoireN1, EntreeCache
         
-        cache = L1MemoryCache(max_entries=10)
-        cache.set("key1", CacheEntry(value="a", tags=["tag1"]))
-        cache.set("key2", CacheEntry(value="b", tags=["tag2"]))
+        cache = CacheMemoireN1(max_entries=10)
+        cache.set("key1", EntreeCache(value="a", tags=["tag1"]))
+        cache.set("key2", EntreeCache(value="b", tags=["tag2"]))
         
         count = cache.invalidate(tags=["tag1"])
         
@@ -155,10 +155,10 @@ class TestSqlOptimizerDataclasses:
     """Tests pour sql_optimizer dataclasses."""
     
     def test_query_info_fields(self):
-        """QueryInfo a tous les champs."""
-        from src.core.sql_optimizer import QueryInfo
+        """InfoRequete a tous les champs."""
+        from src.core.sql_optimizer import InfoRequete
         
-        info = QueryInfo(
+        info = InfoRequete(
             sql="SELECT * FROM users",
             duration_ms=5.5,
             table="users",
@@ -169,10 +169,10 @@ class TestSqlOptimizerDataclasses:
         assert info.operation == "SELECT"
     
     def test_n1_detection_sample_query(self):
-        """N1Detection.sample_query peut être défini."""
-        from src.core.sql_optimizer import N1Detection
+        """DetectionN1.sample_query peut être défini."""
+        from src.core.sql_optimizer import DetectionN1
         
-        detection = N1Detection(
+        detection = DetectionN1(
             table="comments",
             parent_table="posts",
             count=100,
@@ -183,13 +183,13 @@ class TestSqlOptimizerDataclasses:
 
 
 class TestPerformanceMetricExtended:
-    """Tests étendus pour PerformanceMetric."""
+    """Tests étendus pour MetriquePerformance."""
     
     def test_metric_with_memory_delta(self):
-        """PerformanceMetric avec memory_delta_kb."""
-        from src.core.performance import PerformanceMetric
+        """MetriquePerformance avec memory_delta_kb."""
+        from src.core.performance import MetriquePerformance
         
-        metric = PerformanceMetric(
+        metric = MetriquePerformance(
             name="memory_test",
             duration_ms=100,
             memory_delta_kb=512.5
@@ -199,36 +199,36 @@ class TestPerformanceMetricExtended:
 
 
 class TestFunctionStatsExtended:
-    """Tests étendus pour FunctionStats."""
+    """Tests étendus pour StatistiquesFonction."""
     
     def test_function_stats_with_all_fields(self):
-        """FunctionStats avec plusieurs champs."""
-        from src.core.performance import FunctionStats
+        """StatistiquesFonction avec plusieurs champs."""
+        from src.core.performance import StatistiquesFonction
         
-        stats = FunctionStats(call_count=100)
+        stats = StatistiquesFonction(call_count=100)
         stats.call_count += 1
         
         assert stats.call_count == 101
 
 
 class TestRedisConfigExtended:
-    """Tests étendus pour RedisConfig."""
+    """Tests étendus pour ConfigurationRedis."""
     
     def test_redis_config_key_prefix(self):
-        """RedisConfig.KEY_PREFIX est défini."""
-        from src.core.redis_cache import RedisConfig
+        """ConfigurationRedis.KEY_PREFIX est défini."""
+        from src.core.redis_cache import ConfigurationRedis
         
-        assert RedisConfig.KEY_PREFIX == "matanne:"
+        assert ConfigurationRedis.KEY_PREFIX == "matanne:"
     
     def test_redis_config_compression_threshold(self):
-        """RedisConfig.COMPRESSION_THRESHOLD est défini."""
-        from src.core.redis_cache import RedisConfig
+        """ConfigurationRedis.COMPRESSION_THRESHOLD est défini."""
+        from src.core.redis_cache import ConfigurationRedis
         
-        assert RedisConfig.COMPRESSION_THRESHOLD == 1024
+        assert ConfigurationRedis.COMPRESSION_THRESHOLD == 1024
 
 
 class TestOfflineQueueFunctional:
-    """Tests fonctionnels pour OfflineQueue."""
+    """Tests fonctionnels pour FileAttenteHorsLigne."""
     
     @pytest.fixture
     def mock_streamlit(self):
@@ -238,18 +238,18 @@ class TestOfflineQueueFunctional:
             yield mock_st
     
     def test_offline_queue_is_class(self, mock_streamlit):
-        """OfflineQueue est une classe."""
-        from src.core.offline import OfflineQueue
+        """FileAttenteHorsLigne est une classe."""
+        from src.core.offline import FileAttenteHorsLigne
         
-        assert isinstance(OfflineQueue, type)
+        assert isinstance(FileAttenteHorsLigne, type)
 
 
 class TestPendingOperationExtended:
-    """Tests étendus pour PendingOperation."""
+    """Tests étendus pour OperationEnAttente."""
     
     def test_pending_operation_from_dict(self):
-        """PendingOperation.from_dict crée une instance."""
-        from src.core.offline import PendingOperation, OperationType
+        """OperationEnAttente.from_dict crée une instance."""
+        from src.core.offline import OperationEnAttente, TypeOperation
         from datetime import datetime
         
         data = {
@@ -262,10 +262,10 @@ class TestPendingOperationExtended:
             "last_error": None
         }
         
-        op = PendingOperation.from_dict(data)
+        op = OperationEnAttente.from_dict(data)
         
         assert op.id == "abc123"
-        assert op.operation_type == OperationType.UPDATE
+        assert op.operation_type == TypeOperation.UPDATE
 
 
 if __name__ == "__main__":

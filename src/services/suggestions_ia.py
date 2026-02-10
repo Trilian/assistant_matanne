@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service de suggestions IA avec historique.
 
 Améliore les suggestions en utilisant:
@@ -18,7 +18,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from src.core.ai import ClientIA, AnalyseurIA
-from src.core.cache_multi import cached, get_cache
+from src.core.cache_multi import cached, obtenir_cache
 from src.core.database import obtenir_contexte_db
 from src.core.decorators import with_db_session
 from src.core.models import (
@@ -122,7 +122,7 @@ class SuggestionsIAService:
     def __init__(self):
         self.client_ia = ClientIA()
         self.analyseur = AnalyseurIA()
-        self.cache = get_cache()
+        self.cache = obtenir_cache()
     
     # ═══════════════════════════════════════════════════════════
     # ANALYSE DU PROFIL

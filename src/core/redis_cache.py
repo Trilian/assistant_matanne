@@ -1,4 +1,4 @@
-﻿"""
+"""
 Redis Cache - Cache distribué haute performance.
 
 Fonctionnalités:
@@ -36,7 +36,7 @@ except ImportError:
 # ═══════════════════════════════════════════════════════════
 
 
-class RedisConfig:
+class ConfigurationRedis:
     """Configuration Redis"""
     HOST: str = "localhost"
     PORT: int = 6379
@@ -55,7 +55,7 @@ class RedisConfig:
 # ═══════════════════════════════════════════════════════════
 
 
-class MemoryCache:
+class CacheMemoire:
     """Cache en mémoire (fallback si Redis indisponible)"""
     
     def __init__(self):
@@ -126,7 +126,7 @@ class MemoryCache:
 # ═══════════════════════════════════════════════════════════
 
 
-class RedisCache:
+class CacheRedis:
     """
     Cache Redis haute performance avec fallback mémoire.
     
@@ -137,7 +137,7 @@ class RedisCache:
     - Statistiques temps réel
     """
     
-    _instance: "RedisCache | None" = None
+    _instance: "CacheRedis | None" = None
     _pool: "ConnectionPool | None" = None
     
     def __new__(cls):
@@ -151,9 +151,9 @@ class RedisCache:
             return
         
         self._initialized = True
-        self._fallback = MemoryCache()
+        self._fallback = CacheMemoire()
         self._redis: "redis.Redis | None" = None
-        self._config = RedisConfig()
+        self._config = ConfigurationRedis()
         self._stats = {
             "hits": 0,
             "misses": 0,
@@ -179,7 +179,7 @@ class RedisCache:
             db = int(os.getenv("REDIS_DB", self._config.DB))
             
             # Créer le pool de connexions
-            RedisCache._pool = ConnectionPool(
+            CacheRedis._pool = ConnectionPool(
                 host=host,
                 port=port,
                 password=password,
@@ -190,7 +190,7 @@ class RedisCache:
                 decode_responses=False  # On gère nous-mêmes le décodage
             )
             
-            self._redis = redis.Redis(connection_pool=RedisCache._pool)
+            self._redis = redis.Redis(connection_pool=CacheRedis._pool)
             
             # Test de connexion
             self._redis.ping()
@@ -458,7 +458,7 @@ class RedisCache:
 # ═══════════════════════════════════════════════════════════
 
 
-def redis_cached(
+def avec_cache_redis(
     ttl: int = 3600,
     key_prefix: str = "",
     tags: list[str] = None,
@@ -481,7 +481,7 @@ def redis_cached(
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs):
-            cache = RedisCache()
+            cache = CacheRedis()
             
             # Construire la clé
             if key_builder:
@@ -506,7 +506,7 @@ def redis_cached(
             return result
         
         # Ajouter méthode pour invalider
-        wrapper.invalidate = lambda: RedisCache().invalidate_pattern(f"{key_prefix or func.__name__}:*")
+        wrapper.invalidate = lambda: CacheRedis().invalidate_pattern(f"{key_prefix or func.__name__}:*")
         
         return wrapper
     return decorator
@@ -517,12 +517,12 @@ def redis_cached(
 # ═══════════════════════════════════════════════════════════
 
 
-_cache_instance: RedisCache | None = None
+_cache_instance: CacheRedis | None = None
 
 
-def get_redis_cache() -> RedisCache:
+def obtenir_cache_redis() -> CacheRedis:
     """Factory pour obtenir l'instance du cache Redis"""
     global _cache_instance
     if _cache_instance is None:
-        _cache_instance = RedisCache()
+        _cache_instance = CacheRedis()
     return _cache_instance

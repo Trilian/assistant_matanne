@@ -1,4 +1,4 @@
-﻿"""
+"""
 Helpers Maison - Fonctions réutilisables pour les 3 modules
 Gestion des projets, jardin et entretien
 """
@@ -290,4 +290,3 @@ def clear_maison_cache():
     """Invalide le cache Streamlit pour le module Maison"""
     st.cache_data.clear()
     st.rerun()
-

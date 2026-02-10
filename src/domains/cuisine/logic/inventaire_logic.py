@@ -1,4 +1,4 @@
-﻿"""
+"""
 Logique métier du module Inventaire - Séparée de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
@@ -749,4 +749,3 @@ def formater_article_inventaire(article: dict) -> dict:
         "affichage_stock": f"{emoji_stock} {article.get('ingredient_nom', 'Inconnu')}",
         "affichage_quantite": f"{article.get('quantite', 0)} {article.get('unite', '')}".strip(),
     }
-

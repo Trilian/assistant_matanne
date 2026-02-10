@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Jardin - Gestion du jardin avec IA intégrée
 Conseils saisonniers, arrosage intelligent, récoltes planifiées
 """
@@ -458,4 +458,3 @@ def app():
 
 if __name__ == "__main__":
     app()
-

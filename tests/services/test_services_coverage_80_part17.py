@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests Couverture 80% - Part 17: Weather, Suggestions IA, Backup - Tests approfondis
 """
 import pytest
@@ -236,7 +236,7 @@ class TestSuggestionsIAService:
         
         with patch('src.services.suggestions_ia.ClientIA'):
             with patch('src.services.suggestions_ia.AnalyseurIA'):
-                with patch('src.services.suggestions_ia.get_cache'):
+                with patch('src.services.suggestions_ia.obtenir_cache'):
                     service = SuggestionsIAService()
                     
         assert service is not None
@@ -246,7 +246,7 @@ class TestSuggestionsIAService:
         
         with patch('src.services.suggestions_ia.ClientIA') as mock_client:
             with patch('src.services.suggestions_ia.AnalyseurIA'):
-                with patch('src.services.suggestions_ia.get_cache'):
+                with patch('src.services.suggestions_ia.obtenir_cache'):
                     service = SuggestionsIAService()
                     
         mock_client.assert_called_once()

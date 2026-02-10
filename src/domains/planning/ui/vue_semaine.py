@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Vue Semaine - Dashboard détaillé de la semaine
 
 Vue intelligente jour par jour avec :
@@ -315,4 +315,3 @@ def app():
         st.markdown("### ⚠️ Alertes Semaine")
         for alerte in semaine.alertes_semaine:
             st.warning(alerte, icon="âš ï¸")
-

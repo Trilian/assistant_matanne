@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Entretien - Gestion du ménage et routines domestiques
 Suivi des tâches quotidiennes, planification hebdomadaire, IA d'optimisation
 """
@@ -541,4 +541,3 @@ def app():
 
 if __name__ == "__main__":
     app()
-

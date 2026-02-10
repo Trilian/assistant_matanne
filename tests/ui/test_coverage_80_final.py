@@ -369,7 +369,7 @@ class TestInitialiserApp:
 class TestSidebar:
     """Tests pour afficher_sidebar."""
     
-    @patch('src.ui.layout.sidebar.render_lazy_loading_stats')
+    @patch('src.ui.layout.sidebar.afficher_stats_chargement_differe')
     @patch('src.ui.layout.sidebar.GestionnaireEtat')
     @patch('src.ui.layout.sidebar.obtenir_etat')
     @patch('src.ui.layout.sidebar.st')

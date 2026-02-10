@@ -1,6 +1,6 @@
-﻿"""Domaine Cuisine - Gestion recettes, planning repas, inventaire et courses.
+"""Domaine Cuisine - Gestion recettes, planning repas, inventaire et courses.
 
-Modules disponibles (chargement différé via OptimizedRouter):
+Modules disponibles (chargement différé via RouteurOptimise):
 - recettes: Gestion des recettes
 - inventaire: Gestion du stock
 - planificateur_repas: Planning hebdomadaire intelligent
@@ -35,4 +35,3 @@ def __getattr__(name: str):
         from . import logic
         return getattr(logic, name)
     raise AttributeError(f"module 'src.domains.cuisine' has no attribute '{name}'")
-

@@ -1,10 +1,10 @@
-﻿"""
+"""
 Tests pour le module cache multi-niveaux (cache_multi.py).
 
 Tests couverts:
-- L1MemoryCache (LRU, TTL, éviction)
-- L3FileCache (pickle, persistence)
-- MultiLevelCache (cascade, invalidation, stats)
+- CacheMemoireN1 (LRU, TTL, éviction)
+- CacheFichierN3 (pickle, persistence)
+- CacheMultiNiveau (cascade, invalidation, stats)
 - Décorateur @cached
 """
 
@@ -39,18 +39,18 @@ def temp_cache_dir():
 
 @pytest.fixture
 def l1_cache():
-    """Instance L1MemoryCache isolée."""
-    from src.core.cache_multi import L1MemoryCache
-    cache = L1MemoryCache(max_entries=10)
+    """Instance CacheMemoireN1 isolée."""
+    from src.core.cache_multi import CacheMemoireN1
+    cache = CacheMemoireN1(max_entries=10)
     yield cache
     cache.clear()
 
 
 @pytest.fixture
 def l3_cache(temp_cache_dir):
-    """Instance L3FileCache avec dossier temporaire."""
-    from src.core.cache_multi import L3FileCache
-    cache = L3FileCache(cache_dir=temp_cache_dir)
+    """Instance CacheFichierN3 avec dossier temporaire."""
+    from src.core.cache_multi import CacheFichierN3
+    cache = CacheFichierN3(cache_dir=temp_cache_dir)
     yield cache
     cache.clear()
 
@@ -64,10 +64,10 @@ class TestL1MemoryCache:
     """Tests pour le cache mémoire L1."""
     
     def test_set_get_basic(self, l1_cache):
-        """Test set/get basique avec CacheEntry."""
-        from src.core.cache_multi import CacheEntry
+        """Test set/get basique avec EntreeCache."""
+        from src.core.cache_multi import EntreeCache
         
-        entry = CacheEntry(value={"data": "value1"}, ttl=300)
+        entry = EntreeCache(value={"data": "value1"}, ttl=300)
         l1_cache.set("key1", entry)
         result = l1_cache.get("key1")
         
@@ -81,14 +81,14 @@ class TestL1MemoryCache:
     
     def test_ttl_expiration(self, l1_cache):
         """Test expiration TTL avec mock time."""
-        from src.core.cache_multi import CacheEntry
+        from src.core.cache_multi import EntreeCache
         import time as time_module
         
         # Utiliser un TTL de 10 secondes pour le test
         base_time = 1000.0
         
         # Créer l'entrée avec created_at explicite
-        entry = CacheEntry(value="expiring_value", ttl=10, created_at=base_time)
+        entry = EntreeCache(value="expiring_value", ttl=10, created_at=base_time)
         l1_cache.set("expiring", entry)
         
         # Immédiatement disponible (time < expiration)
@@ -103,23 +103,23 @@ class TestL1MemoryCache:
     
     def test_lru_eviction(self):
         """Test éviction LRU quand max_entries atteint."""
-        from src.core.cache_multi import L1MemoryCache, CacheEntry
+        from src.core.cache_multi import CacheMemoireN1, EntreeCache
         import time as time_module
         
-        cache = L1MemoryCache(max_entries=3)
+        cache = CacheMemoireN1(max_entries=3)
         
         # Créer entrées avec created_at explicite
         base_time = 1000.0
-        cache.set("a", CacheEntry(value=1, ttl=3600, created_at=base_time))
-        cache.set("b", CacheEntry(value=2, ttl=3600, created_at=base_time + 1))
-        cache.set("c", CacheEntry(value=3, ttl=3600, created_at=base_time + 2))
+        cache.set("a", EntreeCache(value=1, ttl=3600, created_at=base_time))
+        cache.set("b", EntreeCache(value=2, ttl=3600, created_at=base_time + 1))
+        cache.set("c", EntreeCache(value=3, ttl=3600, created_at=base_time + 2))
         
         # Accéder à "a" pour le rendre récent (mise à jour de l'ordre LRU)
         with patch.object(time_module, 'time', return_value=base_time + 100):
             cache.get("a")
         
         # Ajouter "d" devrait évincer "b" (le moins récent)
-        cache.set("d", CacheEntry(value=4, ttl=3600, created_at=base_time + 4))
+        cache.set("d", EntreeCache(value=4, ttl=3600, created_at=base_time + 4))
         
         # Vérifier le résultat
         with patch.object(time_module, 'time', return_value=base_time + 100):
@@ -130,11 +130,11 @@ class TestL1MemoryCache:
     
     def test_invalidate_by_pattern(self, l1_cache):
         """Test invalidation par pattern."""
-        from src.core.cache_multi import CacheEntry
+        from src.core.cache_multi import EntreeCache
         
-        l1_cache.set("recipe:1", CacheEntry(value="tarte"))
-        l1_cache.set("recipe:2", CacheEntry(value="salade"))
-        l1_cache.set("user:1", CacheEntry(value="alice"))
+        l1_cache.set("recipe:1", EntreeCache(value="tarte"))
+        l1_cache.set("recipe:2", EntreeCache(value="salade"))
+        l1_cache.set("user:1", EntreeCache(value="alice"))
         
         # Invalider par pattern
         count = l1_cache.invalidate(pattern="recipe")
@@ -146,11 +146,11 @@ class TestL1MemoryCache:
     
     def test_invalidate_by_tags(self, l1_cache):
         """Test invalidation par tags."""
-        from src.core.cache_multi import CacheEntry
+        from src.core.cache_multi import EntreeCache
         
-        l1_cache.set("recipe:1", CacheEntry(value="tarte", tags=["recipes", "desserts"]))
-        l1_cache.set("recipe:2", CacheEntry(value="salade", tags=["recipes", "salads"]))
-        l1_cache.set("user:1", CacheEntry(value="alice", tags=["users"]))
+        l1_cache.set("recipe:1", EntreeCache(value="tarte", tags=["recipes", "desserts"]))
+        l1_cache.set("recipe:2", EntreeCache(value="salade", tags=["recipes", "salads"]))
+        l1_cache.set("user:1", EntreeCache(value="alice", tags=["users"]))
         
         # Invalider par tag
         count = l1_cache.invalidate(tags=["desserts"])
@@ -162,10 +162,10 @@ class TestL1MemoryCache:
     
     def test_clear(self, l1_cache):
         """Test vidage complet."""
-        from src.core.cache_multi import CacheEntry
+        from src.core.cache_multi import EntreeCache
         
-        l1_cache.set("key1", CacheEntry(value="value1"))
-        l1_cache.set("key2", CacheEntry(value="value2"))
+        l1_cache.set("key1", EntreeCache(value="value1"))
+        l1_cache.set("key2", EntreeCache(value="value2"))
         
         l1_cache.clear()
         
@@ -175,9 +175,9 @@ class TestL1MemoryCache:
     
     def test_stats(self, l1_cache):
         """Test statistiques."""
-        from src.core.cache_multi import CacheEntry
+        from src.core.cache_multi import EntreeCache
         
-        l1_cache.set("key1", CacheEntry(value="value1"))
+        l1_cache.set("key1", EntreeCache(value="value1"))
         
         # Hits
         l1_cache.get("key1")
@@ -199,9 +199,9 @@ class TestL3FileCache:
     
     def test_set_get_basic(self, l3_cache):
         """Test set/get basique."""
-        from src.core.cache_multi import CacheEntry
+        from src.core.cache_multi import EntreeCache
         
-        entry = CacheEntry(value={"data": "persisted"}, ttl=300)
+        entry = EntreeCache(value={"data": "persisted"}, ttl=300)
         l3_cache.set("file_key", entry)
         result = l3_cache.get("file_key")
         
@@ -210,14 +210,14 @@ class TestL3FileCache:
     
     def test_persistence(self, temp_cache_dir):
         """Test persistance entre instances."""
-        from src.core.cache_multi import L3FileCache, CacheEntry
+        from src.core.cache_multi import CacheFichierN3, EntreeCache
         
         # Première instance
-        cache1 = L3FileCache(cache_dir=temp_cache_dir)
-        cache1.set("persistent", CacheEntry(value={"value": 42}, ttl=3600))
+        cache1 = CacheFichierN3(cache_dir=temp_cache_dir)
+        cache1.set("persistent", EntreeCache(value={"value": 42}, ttl=3600))
         
         # Nouvelle instance avec même dossier
-        cache2 = L3FileCache(cache_dir=temp_cache_dir)
+        cache2 = CacheFichierN3(cache_dir=temp_cache_dir)
         result = cache2.get("persistent")
         
         assert result is not None
@@ -225,13 +225,13 @@ class TestL3FileCache:
     
     def test_ttl_expiration(self, l3_cache):
         """Test expiration TTL fichier avec mock time."""
-        from src.core.cache_multi import CacheEntry
+        from src.core.cache_multi import EntreeCache
         import time as time_module
         
         base_time = 1000.0
         
         # Créer l'entrée avec created_at explicite
-        entry = CacheEntry(value="data", ttl=10, created_at=base_time)
+        entry = EntreeCache(value="data", ttl=10, created_at=base_time)
         l3_cache.set("expiring_file", entry)
         
         # Avant expiration
@@ -245,10 +245,10 @@ class TestL3FileCache:
     
     def test_invalidate(self, l3_cache):
         """Test invalidation par tags (L3 ne supporte pas pattern car clés hashées)."""
-        from src.core.cache_multi import CacheEntry
+        from src.core.cache_multi import EntreeCache
         import time as real_time
         
-        l3_cache.set("to_delete", CacheEntry(value="value", ttl=3600, tags=["test_tag"]))
+        l3_cache.set("to_delete", EntreeCache(value="value", ttl=3600, tags=["test_tag"]))
         
         # Attendre un peu que le fichier soit écrit
         real_time.sleep(0.05)
@@ -264,10 +264,10 @@ class TestL3FileCache:
     
     def test_clear(self, l3_cache):
         """Test vidage complet."""
-        from src.core.cache_multi import CacheEntry
+        from src.core.cache_multi import EntreeCache
         
-        l3_cache.set("key1", CacheEntry(value="value1"))
-        l3_cache.set("key2", CacheEntry(value="value2"))
+        l3_cache.set("key1", EntreeCache(value="value1"))
+        l3_cache.set("key2", EntreeCache(value="value2"))
         
         l3_cache.clear()
         
@@ -275,7 +275,7 @@ class TestL3FileCache:
     
     def test_complex_data(self, l3_cache):
         """Test données complexes (sérialisables)."""
-        from src.core.cache_multi import CacheEntry
+        from src.core.cache_multi import EntreeCache
         
         complex_data = {
             "list": [1, 2, 3],
@@ -283,7 +283,7 @@ class TestL3FileCache:
             "date": datetime.now().isoformat(),
         }
         
-        l3_cache.set("complex", CacheEntry(value=complex_data, ttl=300))
+        l3_cache.set("complex", EntreeCache(value=complex_data, ttl=300))
         result = l3_cache.get("complex")
         
         assert result.value["list"] == [1, 2, 3]
@@ -301,17 +301,17 @@ class TestMultiLevelCache:
     @pytest.fixture(autouse=True)
     def reset_singleton(self):
         """Reset singleton avant et après chaque test."""
-        from src.core.cache_multi import MultiLevelCache
-        MultiLevelCache._instance = None
+        from src.core.cache_multi import CacheMultiNiveau
+        CacheMultiNiveau._instance = None
         yield
-        MultiLevelCache._instance = None
+        CacheMultiNiveau._instance = None
     
     @pytest.fixture
     def multi_cache(self, temp_cache_dir, mock_session_state):
-        """Instance MultiLevelCache isolée."""
-        from src.core.cache_multi import MultiLevelCache
+        """Instance CacheMultiNiveau isolée."""
+        from src.core.cache_multi import CacheMultiNiveau
         
-        cache = MultiLevelCache(
+        cache = CacheMultiNiveau(
             l1_max_entries=10,
             l2_enabled=False,  # Désactiver L2 pour tests isolés
             l3_enabled=True,
@@ -334,11 +334,11 @@ class TestMultiLevelCache:
     
     def test_cascade_read_promotion(self, multi_cache):
         """Test promotion de L3 vers L1."""
-        from src.core.cache_multi import CacheEntry
+        from src.core.cache_multi import EntreeCache
         
         # Ã‰crire directement dans L3
         if multi_cache.l3:
-            multi_cache.l3.set("l3_only", CacheEntry(value="value", ttl=300))
+            multi_cache.l3.set("l3_only", EntreeCache(value="value", ttl=300))
         
         # Vider L1
         multi_cache.l1.clear()
@@ -359,7 +359,7 @@ class TestMultiLevelCache:
         multi_cache.invalidate(pattern="to_delete")
         
         assert multi_cache.l1.get("to_delete") is None
-        # Note: L3FileCache ne supporte pas l'invalidation par pattern
+        # Note: CacheFichierN3 ne supporte pas l'invalidation par pattern
         # car les clés sont hashées
     
     def test_invalidate_tag(self, multi_cache):
@@ -416,10 +416,10 @@ class TestCachedDecorator:
     @pytest.fixture(autouse=True)
     def reset_singleton(self):
         """Reset singleton avant et après chaque test."""
-        from src.core.cache_multi import MultiLevelCache
-        MultiLevelCache._instance = None
+        from src.core.cache_multi import CacheMultiNiveau
+        CacheMultiNiveau._instance = None
         yield
-        MultiLevelCache._instance = None
+        CacheMultiNiveau._instance = None
     
     def test_basic_caching(self, mock_session_state, temp_cache_dir):
         """Test caching basique."""
@@ -483,9 +483,9 @@ class TestCacheEdgeCases:
     
     def test_none_value(self, l1_cache):
         """Test stockage de None."""
-        from src.core.cache_multi import CacheEntry
+        from src.core.cache_multi import EntreeCache
         
-        l1_cache.set("none_key", CacheEntry(value=None))
+        l1_cache.set("none_key", EntreeCache(value=None))
         
         result = l1_cache.get("none_key")
         # L'entrée existe mais value est None
@@ -494,19 +494,19 @@ class TestCacheEdgeCases:
     
     def test_empty_string_key(self, l1_cache):
         """Test clé vide."""
-        from src.core.cache_multi import CacheEntry
+        from src.core.cache_multi import EntreeCache
         
-        l1_cache.set("", CacheEntry(value="value"))
+        l1_cache.set("", EntreeCache(value="value"))
         result = l1_cache.get("")
         assert result is not None
         assert result.value == "value"
     
     def test_special_characters_key(self, l1_cache):
         """Test caractères spéciaux dans clé."""
-        from src.core.cache_multi import CacheEntry
+        from src.core.cache_multi import EntreeCache
         
         special_key = "clé:avec/spéciaux#chars"
-        l1_cache.set(special_key, CacheEntry(value="value"))
+        l1_cache.set(special_key, EntreeCache(value="value"))
         
         result = l1_cache.get(special_key)
         assert result is not None
@@ -514,11 +514,11 @@ class TestCacheEdgeCases:
     
     def test_large_value(self, l1_cache):
         """Test valeur volumineuse."""
-        from src.core.cache_multi import CacheEntry
+        from src.core.cache_multi import EntreeCache
         
         large_data = {"items": list(range(10000))}
         
-        l1_cache.set("large", CacheEntry(value=large_data))
+        l1_cache.set("large", EntreeCache(value=large_data))
         result = l1_cache.get("large")
         
         assert len(result.value["items"]) == 10000
@@ -526,13 +526,13 @@ class TestCacheEdgeCases:
     def test_concurrent_access(self, l1_cache):
         """Test accès concurrent basique."""
         import threading
-        from src.core.cache_multi import CacheEntry
+        from src.core.cache_multi import EntreeCache
         
         results = []
         
         def writer():
             for i in range(100):
-                l1_cache.set(f"key_{i}", CacheEntry(value=i))
+                l1_cache.set(f"key_{i}", EntreeCache(value=i))
         
         def reader():
             for i in range(100):
@@ -549,4 +549,3 @@ class TestCacheEdgeCases:
         t2.join()
         
         # Pas d'exception = succès basique
-

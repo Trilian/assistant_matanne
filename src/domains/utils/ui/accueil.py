@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Accueil - Dashboard Central
 Vue d'ensemble de l'application avec stats, alertes et raccourcis
 """
@@ -524,4 +524,3 @@ def render_planning_summary():
             st.rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
-
