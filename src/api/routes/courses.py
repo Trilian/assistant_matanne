@@ -77,13 +77,13 @@ async def list_courses(
             query = session.query(ListeCourses)
             
             if active_only:
-                query = query.filter(ListeCourses.est_active == True)
+                query = query.filter(ListeCourses.archivee == False)
             
             total = query.count()
             
             items = (
                 query
-                .order_by(ListeCourses.date_creation.desc())
+                .order_by(ListeCourses.created_at.desc())
                 .offset((page - 1) * page_size)
                 .limit(page_size)
                 .all()
@@ -95,7 +95,7 @@ async def list_courses(
                         "id": liste.id,
                         "nom": liste.nom,
                         "items_count": len(liste.articles) if liste.articles else 0,
-                        "created_at": liste.date_creation,
+                        "created_at": liste.created_at,
                     }
                     for liste in items
                 ],
@@ -116,7 +116,7 @@ async def create_liste(data: CourseListCreate):
         from src.core.models import ListeCourses
         
         with get_db_context() as session:
-            liste = ListeCourses(nom=data.nom, est_active=True)
+            liste = ListeCourses(nom=data.nom, archivee=False)
             session.add(liste)
             session.commit()
             session.refresh(liste)
@@ -132,7 +132,7 @@ async def add_item(liste_id: int, item: CourseItemBase):
     """Ajoute un article à une liste."""
     try:
         from src.core.database import get_db_context
-        from src.core.models import ListeCourses, ArticleCourse
+        from src.core.models import ListeCourses, ArticleCourses, Ingredient
         
         with get_db_context() as session:
             liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
@@ -140,13 +140,19 @@ async def add_item(liste_id: int, item: CourseItemBase):
             if not liste:
                 raise HTTPException(status_code=404, detail="Liste non trouvée")
             
-            article = ArticleCourse(
+            # Trouver ou créer l'ingrédient
+            ingredient = session.query(Ingredient).filter(Ingredient.nom == item.nom).first()
+            if not ingredient:
+                ingredient = Ingredient(nom=item.nom, unite=item.unite or "pcs")
+                session.add(ingredient)
+                session.flush()
+            
+            article = ArticleCourses(
                 liste_id=liste_id,
-                nom=item.nom,
-                quantite=item.quantite,
-                unite=item.unite,
-                categorie=item.categorie,
-                coche=item.coche,
+                ingredient_id=ingredient.id,
+                quantite_necessaire=item.quantite or 1.0,
+                priorite="moyenne",
+                rayon_magasin=item.categorie,
             )
             session.add(article)
             session.commit()

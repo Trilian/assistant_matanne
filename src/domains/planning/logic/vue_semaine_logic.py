@@ -1,4 +1,4 @@
-"""
+﻿"""
 Logique métier du module Vue semaine (planning) - Séparée de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
@@ -10,17 +10,17 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # CONSTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
 HEURES_JOURNEE = list(range(0, 24))
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # NAVIGATION SEMAINE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 def get_debut_semaine(date_ref: Optional[date] = None) -> date:
     """Retourne le lundi de la semaine (début)."""
@@ -60,9 +60,9 @@ def get_numero_semaine(date_ref: Optional[date] = None) -> int:
     return date_ref.isocalendar()[1]
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # FILTRAGE ÉVÉNEMENTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 def filtrer_evenements_semaine(evenements: List[Dict[str, Any]], date_ref: Optional[date] = None) -> List[Dict[str, Any]]:
     """Filtre les événements de la semaine."""
@@ -125,9 +125,9 @@ def trier_evenements_par_heure(evenements: List[Dict[str, Any]]) -> List[Dict[st
     return sorted(evenements, key=get_heure_key)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # ANALYSE SEMAINE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 def calculer_charge_semaine(evenements: List[Dict[str, Any]], date_ref: Optional[date] = None) -> Dict[str, Any]:
     """Calcule la charge de travail de la semaine."""
@@ -219,9 +219,9 @@ def calculer_temps_libre(evenements: List[Dict[str, Any]], date_ref: Optional[da
     return temps_libre
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # STATISTIQUES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 def calculer_statistiques_semaine(evenements: List[Dict[str, Any]], date_ref: Optional[date] = None) -> Dict[str, Any]:
     """Calcule les statistiques de la semaine."""
@@ -253,9 +253,9 @@ def calculer_statistiques_semaine(evenements: List[Dict[str, Any]], date_ref: Op
     }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # RECOMMANDATIONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 def suggerer_creneaux_libres(evenements: List[Dict[str, Any]], jour: date, duree_minutes: int = 60) -> List[Dict[str, Any]]:
     """Suggère des créneaux libres dans la journée."""
@@ -311,9 +311,9 @@ def suggerer_creneaux_libres(evenements: List[Dict[str, Any]], jour: date, duree
     return creneaux_libres
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # FORMATAGE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 def formater_periode_semaine(date_ref: Optional[date] = None) -> str:
     """Formate la période de la semaine."""

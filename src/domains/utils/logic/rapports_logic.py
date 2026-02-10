@@ -1,4 +1,4 @@
-"""
+﻿"""
 Logique métier du module Rapports (génération rapports) - Séparée de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
@@ -10,9 +10,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # GÉNÉRATION RAPPORTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 def generer_rapport_synthese(data: Dict[str, Any], periode: str = "mois") -> Dict[str, Any]:
     """
@@ -153,9 +153,9 @@ def generer_section_activites(activites: List[Dict[str, Any]]) -> Dict[str, Any]
     }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # ANALYSE COMPARATIVE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 def comparer_periodes(data_periode1: Dict[str, Any], data_periode2: Dict[str, Any]) -> Dict[str, Any]:
     """
@@ -204,9 +204,9 @@ def comparer_periodes(data_periode1: Dict[str, Any], data_periode2: Dict[str, An
     }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # FORMATAGE RAPPORTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 def formater_rapport_texte(rapport: Dict[str, Any]) -> str:
     """
@@ -219,9 +219,9 @@ def formater_rapport_texte(rapport: Dict[str, Any]) -> str:
         Texte formaté
     """
     lignes = [
-        "â•" * 60,
+        "═══════════════════════════════════════════════════════════" * 60,
         f"[CHART] {rapport.get('titre', 'RAPPORT').upper()}",
-        "â•" * 60,
+        "═══════════════════════════════════════════════════════════" * 60,
         f"Période: {rapport.get('periode', 'N/A')}",
         f"Du {rapport.get('date_debut')} au {rapport.get('date_fin')}",
         f"Généré le: {rapport.get('date_generation')}",
@@ -245,7 +245,7 @@ def formater_rapport_texte(rapport: Dict[str, Any]) -> str:
             lignes.append(f"  Total: {section.get('total', 0)}")
     
     lignes.append("")
-    lignes.append("â•" * 60)
+    lignes.append("═══════════════════════════════════════════════════════════" * 60)
     
     return "\n".join(lignes)
 
@@ -354,9 +354,9 @@ def formater_rapport_html(rapport: Dict[str, Any]) -> str:
     return html
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # EXPORT
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 def preparer_export_csv(data: List[Dict[str, Any]], colonnes: List[str]) -> str:
     """

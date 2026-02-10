@@ -44,9 +44,21 @@ def pytest_configure(config):
 # SECTION 2: APP & CLIENT FIXTURES
 # ═════════════════════════════════════════════════════════════════════
 
+
+@pytest.fixture(scope="session", autouse=True)
+def disable_rate_limiting():
+    """Désactive le rate limiting pour tous les tests API."""
+    import os
+    os.environ["RATE_LIMITING_DISABLED"] = "true"
+    yield
+    os.environ.pop("RATE_LIMITING_DISABLED", None)
+
+
 @pytest.fixture
 def app(monkeypatch, db):
-    """Fixture app FastAPI pour tests avec DB override."""
+    """Fixture app FastAPI pour tests avec DB SQLite réelle."""
+    from contextlib import contextmanager
+    
     # Patch JSONB AVANT d'importer l'app
     from sqlalchemy.dialects.sqlite.base import SQLiteTypeCompiler
     
@@ -62,24 +74,24 @@ def app(monkeypatch, db):
     
     monkeypatch.setattr(SQLiteTypeCompiler, "process", patched_process)
     
+    # Créer un VRAI context manager qui yield la DB de test
+    @contextmanager
+    def mock_get_db_context():
+        """Context manager qui utilise la session SQLite de test."""
+        try:
+            yield db
+            # PAS de commit - géré par fixture
+        except Exception:
+            db.rollback()
+            raise
+        # PAS de close - géré par fixture
+    
+    # Patch global AVANT d'importer l'app
+    monkeypatch.setattr("src.core.database.get_db_context", mock_get_db_context)
+    monkeypatch.setattr("src.core.database.obtenir_contexte_db", mock_get_db_context)
+    
     # Maintenant import l'app
     from src.api.main import app as fastapi_app, get_current_user
-    
-    # Override get_db_context pour utiliser la DB de test fournie par conftest principal
-    def mock_get_db_context():
-        """Context manager pour la session de test."""
-        class MockContext:
-            def __enter__(self):
-                return db
-            def __exit__(self, *args):
-                pass  # DB est gérée par le fixture
-        return MockContext()
-    
-    # Patch global de get_db_context
-    monkeypatch.setattr(
-        "src.core.database.get_db_context",
-        mock_get_db_context
-    )
     
     # Override FastAPI dependency pour get_current_user
     def mock_get_current_user():

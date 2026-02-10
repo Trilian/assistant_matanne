@@ -1,4 +1,4 @@
-"""
+﻿"""
 Logique métier du module Recettes (sans UI Streamlit).
 Fonctions pures testables indépendamment de Streamlit.
 """
@@ -11,9 +11,9 @@ from src.services.recettes import get_recette_service
 from src.core.models import Recette, Repas
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # LOGIQUE RECETTES - LECTURE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 def get_toutes_recettes(db: Optional[Session] = None) -> List[Recette]:
     """Récupère toutes les recettes."""
@@ -63,9 +63,9 @@ def get_recettes_favorites(db: Optional[Session] = None) -> List[Recette]:
         return session.query(Recette).filter(Recette.favorite == True).all()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # LOGIQUE RECETTES - CRÉATION/MODIFICATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 def creer_recette(
     nom: str,
@@ -146,9 +146,9 @@ def toggle_favorite(recette_id: int, db: Optional[Session] = None) -> bool:
         return recette.favorite
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # LOGIQUE PLANNING REPAS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 def get_planning_semaine(date_debut: date, date_fin: date, db: Optional[Session] = None) -> List[Repas]:
     """Récupère le planning de repas pour une période."""
@@ -179,9 +179,9 @@ def ajouter_repas_planning(
         return repas
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # LOGIQUE CALCULS & STATISTIQUES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 def calculer_cout_recette(recette: Recette, prix_ingredients: Dict[str, float]) -> float:
     """Calcule le coût estimé d'une recette."""

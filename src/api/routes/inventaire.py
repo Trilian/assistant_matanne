@@ -78,7 +78,9 @@ async def list_inventaire(
             query = session.query(ArticleInventaire)
             
             if categorie:
-                query = query.filter(ArticleInventaire.categorie == categorie)
+                # categorie via relation ingredient
+                from src.core.models import Ingredient
+                query = query.join(Ingredient).filter(Ingredient.categorie == categorie)
             
             if emplacement:
                 query = query.filter(ArticleInventaire.emplacement == emplacement)
@@ -94,14 +96,26 @@ async def list_inventaire(
             
             items = (
                 query
-                .order_by(ArticleInventaire.nom)
+                .order_by(ArticleInventaire.id)
                 .offset((page - 1) * page_size)
                 .limit(page_size)
                 .all()
             )
             
             return {
-                "items": [InventaireItemResponse.model_validate(i).model_dump() for i in items],
+                "items": [
+                    {
+                        "id": i.id,
+                        "nom": i.ingredient.nom if i.ingredient else f"Article #{i.id}",
+                        "quantite": i.quantite,
+                        "unite": i.ingredient.unite if i.ingredient else None,
+                        "categorie": i.ingredient.categorie if i.ingredient else None,
+                        "date_peremption": i.date_peremption,
+                        "code_barres": i.code_barres,
+                        "created_at": i.derniere_maj,
+                    }
+                    for i in items
+                ],
                 "total": total,
                 "page": page,
                 "page_size": page_size,
