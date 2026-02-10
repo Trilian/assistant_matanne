@@ -7,35 +7,35 @@ import json
 from typing import Any
 
 
-def generate_id(data: Any) -> str:
+def generer_id(data: Any) -> str:
     """
     Génère ID unique basé sur données
 
     Examples:
-        >>> generate_id({"nom": "test", "value": 123})
+        >>> generer_id({"nom": "test", "value": 123})
         "a1b2c3d4e5f6g7h8"
     """
     data_str = json.dumps(data, sort_keys=True, default=str)
     return hashlib.md5(data_str.encode()).hexdigest()[:16]
 
 
-def normalize_whitespace(text: str) -> str:
+def normaliser_espaces(text: str) -> str:
     """
     Normalise espaces (single space, trim)
 
     Examples:
-        >>> normalize_whitespace("  hello    world  ")
+        >>> normaliser_espaces("  hello    world  ")
         "hello world"
     """
     return " ".join(text.split())
 
 
-def remove_accents(text: str) -> str:
+def retirer_accents(text: str) -> str:
     """
     Retire les accents d'un texte
 
     Examples:
-        >>> remove_accents("café crème")
+        >>> retirer_accents("café crème")
         "cafe creme"
     """
     replacements = {
@@ -73,12 +73,12 @@ def remove_accents(text: str) -> str:
     return result
 
 
-def camel_to_snake(text: str) -> str:
+def camel_vers_snake(text: str) -> str:
     """
     Convertit camelCase en snake_case
 
     Examples:
-        >>> camel_to_snake("myVariableName")
+        >>> camel_vers_snake("myVariableName")
         "my_variable_name"
     """
     import re
@@ -86,28 +86,28 @@ def camel_to_snake(text: str) -> str:
     return re.sub(r"(?<!^)(?=[A-Z])", "_", text).lower()
 
 
-def snake_to_camel(text: str) -> str:
+def snake_vers_camel(text: str) -> str:
     """
     Convertit snake_case en camelCase
 
     Examples:
-        >>> snake_to_camel("my_variable_name")
+        >>> snake_vers_camel("my_variable_name")
         "myVariableName"
     """
     components = text.split("_")
     return components[0] + "".join(x.title() for x in components[1:])
 
 
-def pluralize(word: str, count: int, plural_form: str | None = None) -> str:
+def pluraliser(word: str, count: int, plural_form: str | None = None) -> str:
     """
     Pluralise un mot selon le nombre
 
     Examples:
-        >>> pluralize("item", 1)
+        >>> pluraliser("item", 1)
         "1 item"
-        >>> pluralize("item", 5)
+        >>> pluraliser("item", 5)
         "5 items"
-        >>> pluralize("cheval", 2, "chevaux")
+        >>> pluraliser("cheval", 2, "chevaux")
         "2 chevaux"
     """
     if count == 1:
@@ -125,12 +125,12 @@ def pluralize(word: str, count: int, plural_form: str | None = None) -> str:
         return f"{count} {word}s"
 
 
-def mask_sensitive(text: str, visible_chars: int = 4) -> str:
+def masquer_sensible(text: str, visible_chars: int = 4) -> str:
     """
     Masque données sensibles
 
     Examples:
-        >>> mask_sensitive("1234567890", 4)
+        >>> masquer_sensible("1234567890", 4)
         "1234******"
     """
     if len(text) <= visible_chars:

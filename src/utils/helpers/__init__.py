@@ -51,30 +51,9 @@ from .dates import (
 
 # Food (métier cuisine)
 from .food import (
-    batch_find_or_create_ingredients,
-    calculate_recipe_cost,
-    consolidate_duplicates,
-    enrich_with_ingredient_info,
-    find_or_create_ingredient,
-    format_inventory_summary,
-    format_recipe_summary,
-    get_all_ingredients_cached,
-    suggest_ingredient_substitutes,
-    validate_stock_level,
     convertir_unite,
     multiplier_portion,
     extraire_ingredient,
-    # Alias français
-    trouver_ou_creer_ingredients_batch,
-    calculer_cout_recette,
-    consolider_doublons,
-    enrichir_avec_info_ingredient,
-    trouver_ou_creer_ingredient,
-    formater_resume_inventaire,
-    formater_resume_recette,
-    obtenir_tous_ingredients_cache,
-    suggerer_substituts,
-    valider_niveau_stock,
 )
 
 # Stats
@@ -91,13 +70,13 @@ from .stats import (
 
 # Strings
 from .strings import (
-    camel_to_snake,
-    generate_id,
-    mask_sensitive,
-    normalize_whitespace,
-    pluralize,
-    remove_accents,
-    snake_to_camel,
+    camel_vers_snake,
+    generer_id,
+    masquer_sensible,
+    normaliser_espaces,
+    pluraliser,
+    retirer_accents,
+    snake_vers_camel,
 )
 
 __all__ = [
@@ -120,13 +99,13 @@ __all__ = [
     "is_weekend",
     "get_quarter",
     # Strings
-    "generate_id",
-    "normalize_whitespace",
-    "remove_accents",
-    "camel_to_snake",
-    "snake_to_camel",
-    "pluralize",
-    "mask_sensitive",
+    "generer_id",
+    "normaliser_espaces",
+    "retirer_accents",
+    "camel_vers_snake",
+    "snake_vers_camel",
+    "pluraliser",
+    "masquer_sensible",
     # Stats
     "calculate_average",
     "calculate_median",
@@ -137,16 +116,6 @@ __all__ = [
     "calculate_range",
     "moving_average",
     # Food
-    "find_or_create_ingredient",
-    "batch_find_or_create_ingredients",
-    "get_all_ingredients_cached",
-    "enrich_with_ingredient_info",
-    "validate_stock_level",
-    "consolidate_duplicates",
-    "format_recipe_summary",
-    "format_inventory_summary",
-    "calculate_recipe_cost",
-    "suggest_ingredient_substitutes",
     "convertir_unite",
     "multiplier_portion",
     "extraire_ingredient",
@@ -173,15 +142,4 @@ __all__ = [
     "semaines_entre",
     "est_aujourd_hui",
     "obtenir_trimestre",
-    # Alias français - Food
-    "trouver_ou_creer_ingredients_batch",
-    "calculer_cout_recette",
-    "consolider_doublons",
-    "enrichir_avec_info_ingredient",
-    "trouver_ou_creer_ingredient",
-    "formater_resume_inventaire",
-    "formater_resume_recette",
-    "obtenir_tous_ingredients_cache",
-    "suggerer_substituts",
-    "valider_niveau_stock",
 ]

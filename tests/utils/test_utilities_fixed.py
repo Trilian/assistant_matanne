@@ -520,12 +520,7 @@ class TestUnitsFormatters:
 
 @pytest.mark.unit
 class TestHelpersGeneral:
-    """Tests pour src/utils/helpers/helpers.py"""
-
-    def test_helpers_import(self):
-        """Test import du module helpers."""
-        from src.utils.helpers import helpers
-        assert helpers is not None
+    """Tests pour sous-modules de src/utils/helpers/"""
 
     def test_helpers_data_import(self):
         """Test import du module data helpers."""
