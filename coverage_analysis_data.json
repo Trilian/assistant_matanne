@@ -1,0 +1,3151 @@
+{
+  "path": ".",
+  "files": [
+    {
+      "path": "src/app.py",
+      "line_count": 133,
+      "coverage": 0.0,
+      "test_files": [],
+      "test_count": 0,
+      "needs_splitting": false,
+      "below_threshold": true,
+      "has_tests": false
+    }
+  ],
+  "subdirs": [
+    {
+      "path": "api",
+      "files": [
+        {
+          "path": "src/api/main.py",
+          "line_count": 939,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/api/test_main.py"
+          ],
+          "test_count": 5,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/api/rate_limiting.py",
+          "line_count": 521,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/api/test_rate_limiting.py",
+            "tests/api/test_rate_limiting_comprehensive.py"
+          ],
+          "test_count": 53,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        }
+      ],
+      "subdirs": [],
+      "total_files": 2,
+      "avg_coverage": 0.0,
+      "files_below_threshold": 2,
+      "large_files": 0
+    },
+    {
+      "path": "utils",
+      "files": [
+        {
+          "path": "src/utils/recipe_importer.py",
+          "line_count": 410,
+          "coverage": 0.0,
+          "test_files": [],
+          "test_count": 0,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": false
+        },
+        {
+          "path": "src/utils/constants.py",
+          "line_count": 101,
+          "coverage": 0.0,
+          "test_files": [],
+          "test_count": 0,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": false
+        },
+        {
+          "path": "src/utils/image_generator.py",
+          "line_count": 605,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/utils/test_image_generator_deep_v2.py"
+          ],
+          "test_count": 23,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/utils/media.py",
+          "line_count": 144,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/utils/test_media_deep.py"
+          ],
+          "test_count": 27,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        }
+      ],
+      "subdirs": [
+        {
+          "path": "utils/helpers",
+          "files": [
+            {
+              "path": "src/utils/helpers/stats.py",
+              "line_count": 142,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/utils/helpers/food.py",
+              "line_count": 134,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/utils/helpers/helpers.py",
+              "line_count": 369,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/utils/helpers/strings.py",
+              "line_count": 141,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/utils/helpers/data.py",
+              "line_count": 177,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/utils/helpers/dates.py",
+              "line_count": 141,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            }
+          ],
+          "subdirs": [],
+          "total_files": 6,
+          "avg_coverage": 0.0,
+          "files_below_threshold": 6,
+          "large_files": 0
+        },
+        {
+          "path": "utils/validators",
+          "files": [
+            {
+              "path": "src/utils/validators/food.py",
+              "line_count": 241,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/utils/validators/common.py",
+              "line_count": 162,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/utils/validators/dates.py",
+              "line_count": 99,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            }
+          ],
+          "subdirs": [],
+          "total_files": 3,
+          "avg_coverage": 0.0,
+          "files_below_threshold": 3,
+          "large_files": 0
+        },
+        {
+          "path": "utils/formatters",
+          "files": [
+            {
+              "path": "src/utils/formatters/units.py",
+              "line_count": 93,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/utils/formatters/numbers.py",
+              "line_count": 237,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/utils/formatters/text.py",
+              "line_count": 130,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/utils/formatters/dates.py",
+              "line_count": 194,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            }
+          ],
+          "subdirs": [],
+          "total_files": 4,
+          "avg_coverage": 0.0,
+          "files_below_threshold": 4,
+          "large_files": 0
+        }
+      ],
+      "total_files": 4,
+      "avg_coverage": 0.0,
+      "files_below_threshold": 4,
+      "large_files": 0
+    },
+    {
+      "path": "services",
+      "files": [
+        {
+          "path": "src/services/courses.py",
+          "line_count": 408,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_courses_service.py",
+            "tests/services/test_courses_intelligentes_coverage.py",
+            "tests/services/test_courses_intelligentes_service.py"
+          ],
+          "test_count": 97,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/budget_utils.py",
+          "line_count": 471,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_budget_utils.py"
+          ],
+          "test_count": 72,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/barcode.py",
+          "line_count": 500,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_barcode_coverage.py",
+            "tests/services/test_barcode_coverage_deep.py",
+            "tests/services/test_barcode_service.py"
+          ],
+          "test_count": 97,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/realtime_sync.py",
+          "line_count": 584,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_realtime_sync_coverage.py"
+          ],
+          "test_count": 69,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/calendar_sync.py",
+          "line_count": 1295,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_calendar_sync_service.py",
+            "tests/services/test_calendar_sync_coverage.py",
+            "tests/services/test_calendar_sync_comprehensive.py"
+          ],
+          "test_count": 93,
+          "needs_splitting": true,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/base_service.py",
+          "line_count": 310,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_base_service.py",
+            "tests/services/test_base_service_coverage.py"
+          ],
+          "test_count": 70,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/garmin_sync_utils.py",
+          "line_count": 714,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_garmin_sync_utils_integration.py",
+            "tests/services/test_garmin_sync_utils.py"
+          ],
+          "test_count": 160,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/io_service.py",
+          "line_count": 204,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_io_service.py",
+            "tests/services/test_io_service_coverage.py"
+          ],
+          "test_count": 54,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/push_notifications_utils.py",
+          "line_count": 688,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_push_notifications_utils.py"
+          ],
+          "test_count": 54,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/planning_unified.py",
+          "line_count": 606,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_planning_unified_service.py",
+            "tests/services/test_planning_unified_coverage.py"
+          ],
+          "test_count": 60,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/auth.py",
+          "line_count": 956,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_auth_comprehensive.py",
+            "tests/services/test_auth_service.py",
+            "tests/services/test_auth_coverage.py"
+          ],
+          "test_count": 101,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/recettes_utils.py",
+          "line_count": 694,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_recettes_utils.py"
+          ],
+          "test_count": 60,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/weather_utils.py",
+          "line_count": 847,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_weather_utils.py",
+            "tests/services/test_weather_utils_full.py"
+          ],
+          "test_count": 210,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/types.py",
+          "line_count": 474,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_types_service.py",
+            "tests/services/test_types_coverage.py"
+          ],
+          "test_count": 49,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/garmin_sync.py",
+          "line_count": 579,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_garmin_sync_utils_integration.py",
+            "tests/services/test_garmin_sync_coverage.py",
+            "tests/services/test_garmin_sync_utils.py",
+            "tests/services/test_garmin_sync.py"
+          ],
+          "test_count": 207,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/backup_utils.py",
+          "line_count": 615,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_backup_utils.py"
+          ],
+          "test_count": 54,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/user_preferences.py",
+          "line_count": 298,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_user_preferences_service.py",
+            "tests/services/test_user_preferences_coverage.py"
+          ],
+          "test_count": 40,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/batch_cooking_utils.py",
+          "line_count": 585,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_batch_cooking_utils.py"
+          ],
+          "test_count": 86,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/batch_cooking.py",
+          "line_count": 794,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_batch_cooking_utils.py",
+            "tests/services/test_batch_cooking_integration.py",
+            "tests/services/test_batch_cooking_service.py",
+            "tests/services/test_batch_cooking_full_coverage.py",
+            "tests/services/test_batch_cooking_coverage.py"
+          ],
+          "test_count": 245,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/inventaire.py",
+          "line_count": 1096,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_inventaire_sqlite_int.py",
+            "tests/services/test_inventaire_integration.py",
+            "tests/services/test_inventaire_methods.py",
+            "tests/services/test_inventaire_service.py",
+            "tests/services/test_inventaire_coverage_deep.py"
+          ],
+          "test_count": 158,
+          "needs_splitting": true,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/backup.py",
+          "line_count": 779,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_backup_integration.py",
+            "tests/services/test_backup_service.py",
+            "tests/services/test_backup_coverage.py",
+            "tests/services/test_backup_utils.py"
+          ],
+          "test_count": 177,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/budget.py",
+          "line_count": 1154,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_budget_integration.py",
+            "tests/services/test_budget_coverage_deep.py",
+            "tests/services/test_budget_service.py",
+            "tests/services/test_budget_utils.py",
+            "tests/services/test_budget_coverage.py",
+            "tests/services/test_budget_comprehensive.py",
+            "tests/services/test_budget_methods.py",
+            "tests/services/test_budget_extra.py"
+          ],
+          "test_count": 275,
+          "needs_splitting": true,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/facture_ocr.py",
+          "line_count": 262,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_facture_ocr_coverage.py"
+          ],
+          "test_count": 43,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/action_history.py",
+          "line_count": 679,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_action_history_service.py",
+            "tests/services/test_action_history_coverage.py"
+          ],
+          "test_count": 58,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/notifications.py",
+          "line_count": 297,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_notifications_push_coverage.py",
+            "tests/services/test_notifications_coverage.py",
+            "tests/services/test_notifications_service.py",
+            "tests/services/test_notifications_push_service.py"
+          ],
+          "test_count": 84,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/weather.py",
+          "line_count": 937,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_weather_utils.py",
+            "tests/services/test_weather_utils_full.py",
+            "tests/services/test_weather_service.py",
+            "tests/services/test_weather_coverage.py"
+          ],
+          "test_count": 336,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/notifications_push.py",
+          "line_count": 327,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_notifications_push_coverage.py",
+            "tests/services/test_notifications_push_service.py"
+          ],
+          "test_count": 30,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/base_ai_service.py",
+          "line_count": 653,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_base_ai_service_coverage.py",
+            "tests/services/test_base_ai_service.py"
+          ],
+          "test_count": 29,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/push_notifications.py",
+          "line_count": 990,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_push_notifications_utils.py",
+            "tests/services/test_push_notifications.py",
+            "tests/services/test_push_notifications_deep.py"
+          ],
+          "test_count": 170,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/pwa.py",
+          "line_count": 812,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_pwa.py"
+          ],
+          "test_count": 31,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/planning.py",
+          "line_count": 627,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_planning_extended.py",
+            "tests/services/test_planning_unified_service.py",
+            "tests/services/test_planning_utils.py",
+            "tests/services/test_planning_unified_coverage.py",
+            "tests/services/test_planning_service.py",
+            "tests/services/test_planning_coverage.py"
+          ],
+          "test_count": 187,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/recipe_import.py",
+          "line_count": 895,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_recipe_import_extra.py",
+            "tests/services/test_recipe_import_service.py",
+            "tests/services/test_recipe_import_integration.py"
+          ],
+          "test_count": 145,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/openfoodfacts.py",
+          "line_count": 320,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_openfoodfacts_coverage.py",
+            "tests/services/test_openfoodfacts.py"
+          ],
+          "test_count": 47,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/rapports_pdf.py",
+          "line_count": 1161,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_rapports_pdf_generation.py",
+            "tests/services/test_rapports_pdf_service.py"
+          ],
+          "test_count": 92,
+          "needs_splitting": true,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/suggestions_ia.py",
+          "line_count": 622,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_suggestions_ia_coverage.py",
+            "tests/services/test_suggestions_ia_service.py",
+            "tests/services/test_suggestions_ia_utils.py",
+            "tests/services/test_suggestions_ia_utils_full.py"
+          ],
+          "test_count": 199,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/suggestions_ia_utils.py",
+          "line_count": 771,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_suggestions_ia_utils.py",
+            "tests/services/test_suggestions_ia_utils_full.py"
+          ],
+          "test_count": 168,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/recettes.py",
+          "line_count": 1236,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_recettes_service.py",
+            "tests/services/test_recettes_coverage_deep.py",
+            "tests/services/test_recettes_utils.py",
+            "tests/services/test_recettes_coverage.py",
+            "tests/services/test_recettes_integration.py",
+            "tests/services/test_recettes_cov_boost.py",
+            "tests/services/test_recettes_import.py"
+          ],
+          "test_count": 175,
+          "needs_splitting": true,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/planning_utils.py",
+          "line_count": 716,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_planning_utils.py"
+          ],
+          "test_count": 57,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/predictions.py",
+          "line_count": 355,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_predictions_service.py",
+            "tests/services/test_predictions_coverage.py"
+          ],
+          "test_count": 46,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/courses_intelligentes.py",
+          "line_count": 428,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_courses_intelligentes_coverage.py",
+            "tests/services/test_courses_intelligentes_service.py"
+          ],
+          "test_count": 41,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/services/pdf_export.py",
+          "line_count": 423,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/services/test_pdf_export_db_methods.py",
+            "tests/services/test_pdf_export_coverage_deep.py",
+            "tests/services/test_pdf_export_coverage.py",
+            "tests/services/test_pdf_export_service.py"
+          ],
+          "test_count": 96,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        }
+      ],
+      "subdirs": [],
+      "total_files": 41,
+      "avg_coverage": 0.0,
+      "files_below_threshold": 41,
+      "large_files": 5
+    },
+    {
+      "path": "domains",
+      "files": [],
+      "subdirs": [
+        {
+          "path": "domains/jeux",
+          "files": [
+            {
+              "path": "src/domains/jeux/setup.py",
+              "line_count": 168,
+              "coverage": 0.0,
+              "test_files": [
+                "tests/domains/jeux/test_setup.py"
+              ],
+              "test_count": 6,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": true
+            },
+            {
+              "path": "src/domains/jeux/integration.py",
+              "line_count": 32,
+              "coverage": 0.0,
+              "test_files": [
+                "tests/domains/jeux/test_integration.py"
+              ],
+              "test_count": 5,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": true
+            }
+          ],
+          "subdirs": [
+            {
+              "path": "domains/jeux/logic",
+              "files": [
+                {
+                  "path": "src/domains/jeux/logic/ui_helpers.py",
+                  "line_count": 282,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": false
+                },
+                {
+                  "path": "src/domains/jeux/logic/api_service.py",
+                  "line_count": 217,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": false
+                },
+                {
+                  "path": "src/domains/jeux/logic/paris_logic.py",
+                  "line_count": 1265,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": true,
+                  "below_threshold": true,
+                  "has_tests": false
+                },
+                {
+                  "path": "src/domains/jeux/logic/loto_logic.py",
+                  "line_count": 643,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": false
+                },
+                {
+                  "path": "src/domains/jeux/logic/scraper_loto.py",
+                  "line_count": 319,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": false
+                },
+                {
+                  "path": "src/domains/jeux/logic/api_football.py",
+                  "line_count": 414,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": false
+                }
+              ],
+              "subdirs": [],
+              "total_files": 6,
+              "avg_coverage": 0.0,
+              "files_below_threshold": 6,
+              "large_files": 1
+            },
+            {
+              "path": "domains/jeux/ui",
+              "files": [],
+              "subdirs": [
+                {
+                  "path": "domains/jeux/ui/paris",
+                  "files": [
+                    {
+                      "path": "src/domains/jeux/ui/paris/dashboard.py",
+                      "line_count": 84,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/jeux/ui/paris/sync.py",
+                      "line_count": 240,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/jeux/ui/paris/_common.py",
+                      "line_count": 50,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/jeux/ui/paris/gestion.py",
+                      "line_count": 145,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/jeux/ui/paris/crud.py",
+                      "line_count": 145,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/jeux/ui/paris/helpers.py",
+                      "line_count": 145,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/jeux/ui/paris/prediction.py",
+                      "line_count": 249,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    }
+                  ],
+                  "subdirs": [],
+                  "total_files": 7,
+                  "avg_coverage": 0.0,
+                  "files_below_threshold": 7,
+                  "large_files": 0
+                },
+                {
+                  "path": "domains/jeux/ui/loto",
+                  "files": [
+                    {
+                      "path": "src/domains/jeux/ui/loto/sync.py",
+                      "line_count": 101,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/jeux/ui/loto/_common.py",
+                      "line_count": 59,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/jeux/ui/loto/simulation.py",
+                      "line_count": 173,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/jeux/ui/loto/crud.py",
+                      "line_count": 98,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/jeux/ui/loto/helpers.py",
+                      "line_count": 65,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/jeux/ui/loto/statistiques.py",
+                      "line_count": 164,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/jeux/ui/loto/generateur.py",
+                      "line_count": 168,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    }
+                  ],
+                  "subdirs": [],
+                  "total_files": 7,
+                  "avg_coverage": 0.0,
+                  "files_below_threshold": 7,
+                  "large_files": 0
+                }
+              ],
+              "total_files": 0,
+              "avg_coverage": 0.0,
+              "files_below_threshold": 0,
+              "large_files": 0
+            }
+          ],
+          "total_files": 2,
+          "avg_coverage": 0.0,
+          "files_below_threshold": 2,
+          "large_files": 0
+        },
+        {
+          "path": "domains/famille",
+          "files": [],
+          "subdirs": [
+            {
+              "path": "domains/famille/logic",
+              "files": [
+                {
+                  "path": "src/domains/famille/logic/activites_logic.py",
+                  "line_count": 243,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": false
+                },
+                {
+                  "path": "src/domains/famille/logic/helpers.py",
+                  "line_count": 377,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": false
+                },
+                {
+                  "path": "src/domains/famille/logic/routines_logic.py",
+                  "line_count": 327,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": false
+                }
+              ],
+              "subdirs": [],
+              "total_files": 3,
+              "avg_coverage": 0.0,
+              "files_below_threshold": 3,
+              "large_files": 0
+            },
+            {
+              "path": "domains/famille/ui",
+              "files": [
+                {
+                  "path": "src/domains/famille/ui/jules_planning.py",
+                  "line_count": 398,
+                  "coverage": 0.0,
+                  "test_files": [
+                    "tests/domains/famille/ui/test_jules_planning.py",
+                    "tests/domains/famille/ui/test_jules_planning_extended.py"
+                  ],
+                  "test_count": 39,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": true
+                },
+                {
+                  "path": "src/domains/famille/ui/activites.py",
+                  "line_count": 281,
+                  "coverage": 0.0,
+                  "test_files": [
+                    "tests/domains/famille/ui/test_activites.py"
+                  ],
+                  "test_count": 22,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": true
+                },
+                {
+                  "path": "src/domains/famille/ui/hub_famille.py",
+                  "line_count": 422,
+                  "coverage": 0.0,
+                  "test_files": [
+                    "tests/domains/famille/ui/test_hub_famille.py"
+                  ],
+                  "test_count": 35,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": true
+                },
+                {
+                  "path": "src/domains/famille/ui/routines.py",
+                  "line_count": 609,
+                  "coverage": 0.0,
+                  "test_files": [
+                    "tests/domains/famille/ui/test_routines.py"
+                  ],
+                  "test_count": 25,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": true
+                }
+              ],
+              "subdirs": [
+                {
+                  "path": "domains/famille/ui/suivi_perso",
+                  "files": [
+                    {
+                      "path": "src/domains/famille/ui/suivi_perso/alimentation.py",
+                      "line_count": 100,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/famille/ui/suivi_perso/dashboard.py",
+                      "line_count": 112,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/famille/ui/suivi_perso/_common.py",
+                      "line_count": 46,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/famille/ui/suivi_perso/activities.py",
+                      "line_count": 45,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/famille/ui/suivi_perso/settings.py",
+                      "line_count": 145,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/famille/ui/suivi_perso/helpers.py",
+                      "line_count": 112,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    }
+                  ],
+                  "subdirs": [],
+                  "total_files": 6,
+                  "avg_coverage": 0.0,
+                  "files_below_threshold": 6,
+                  "large_files": 0
+                },
+                {
+                  "path": "domains/famille/ui/weekend",
+                  "files": [
+                    {
+                      "path": "src/domains/famille/ui/weekend/_common.py",
+                      "line_count": 47,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/famille/ui/weekend/components.py",
+                      "line_count": 278,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/famille/ui/weekend/ai_service.py",
+                      "line_count": 70,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/famille/ui/weekend/helpers.py",
+                      "line_count": 95,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    }
+                  ],
+                  "subdirs": [],
+                  "total_files": 4,
+                  "avg_coverage": 0.0,
+                  "files_below_threshold": 4,
+                  "large_files": 0
+                },
+                {
+                  "path": "domains/famille/ui/achats_famille",
+                  "files": [
+                    {
+                      "path": "src/domains/famille/ui/achats_famille/_common.py",
+                      "line_count": 46,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/famille/ui/achats_famille/components.py",
+                      "line_count": 284,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/famille/ui/achats_famille/helpers.py",
+                      "line_count": 94,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    }
+                  ],
+                  "subdirs": [],
+                  "total_files": 3,
+                  "avg_coverage": 0.0,
+                  "files_below_threshold": 3,
+                  "large_files": 0
+                },
+                {
+                  "path": "domains/famille/ui/jules",
+                  "files": [
+                    {
+                      "path": "src/domains/famille/ui/jules/_common.py",
+                      "line_count": 69,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/famille/ui/jules/components.py",
+                      "line_count": 255,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/famille/ui/jules/ai_service.py",
+                      "line_count": 82,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/famille/ui/jules/helpers.py",
+                      "line_count": 68,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    }
+                  ],
+                  "subdirs": [],
+                  "total_files": 4,
+                  "avg_coverage": 0.0,
+                  "files_below_threshold": 4,
+                  "large_files": 0
+                }
+              ],
+              "total_files": 4,
+              "avg_coverage": 0.0,
+              "files_below_threshold": 4,
+              "large_files": 0
+            }
+          ],
+          "total_files": 0,
+          "avg_coverage": 0.0,
+          "files_below_threshold": 0,
+          "large_files": 0
+        },
+        {
+          "path": "domains/utils",
+          "files": [],
+          "subdirs": [
+            {
+              "path": "domains/utils/logic",
+              "files": [
+                {
+                  "path": "src/domains/utils/logic/accueil_logic.py",
+                  "line_count": 154,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": false
+                },
+                {
+                  "path": "src/domains/utils/logic/parametres_logic.py",
+                  "line_count": 350,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": false
+                },
+                {
+                  "path": "src/domains/utils/logic/barcode_logic.py",
+                  "line_count": 349,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": false
+                },
+                {
+                  "path": "src/domains/utils/logic/rapports_logic.py",
+                  "line_count": 379,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": false
+                }
+              ],
+              "subdirs": [],
+              "total_files": 4,
+              "avg_coverage": 0.0,
+              "files_below_threshold": 4,
+              "large_files": 0
+            },
+            {
+              "path": "domains/utils/ui",
+              "files": [
+                {
+                  "path": "src/domains/utils/ui/barcode.py",
+                  "line_count": 528,
+                  "coverage": 0.0,
+                  "test_files": [
+                    "tests/domains/utils/ui/test_barcode.py"
+                  ],
+                  "test_count": 2,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": true
+                },
+                {
+                  "path": "src/domains/utils/ui/parametres.py",
+                  "line_count": 729,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": false
+                },
+                {
+                  "path": "src/domains/utils/ui/notifications_push.py",
+                  "line_count": 342,
+                  "coverage": 0.0,
+                  "test_files": [
+                    "tests/domains/utils/ui/test_notifications_push.py"
+                  ],
+                  "test_count": 2,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": true
+                },
+                {
+                  "path": "src/domains/utils/ui/accueil.py",
+                  "line_count": 527,
+                  "coverage": 0.0,
+                  "test_files": [
+                    "tests/domains/utils/ui/test_accueil.py"
+                  ],
+                  "test_count": 2,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": true
+                },
+                {
+                  "path": "src/domains/utils/ui/rapports.py",
+                  "line_count": 548,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": false
+                }
+              ],
+              "subdirs": [],
+              "total_files": 5,
+              "avg_coverage": 0.0,
+              "files_below_threshold": 5,
+              "large_files": 0
+            }
+          ],
+          "total_files": 0,
+          "avg_coverage": 0.0,
+          "files_below_threshold": 0,
+          "large_files": 0
+        },
+        {
+          "path": "domains/maison",
+          "files": [],
+          "subdirs": [
+            {
+              "path": "domains/maison/logic",
+              "files": [
+                {
+                  "path": "src/domains/maison/logic/projets_logic.py",
+                  "line_count": 259,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": false
+                },
+                {
+                  "path": "src/domains/maison/logic/entretien_logic.py",
+                  "line_count": 308,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": false
+                },
+                {
+                  "path": "src/domains/maison/logic/jardin_logic.py",
+                  "line_count": 236,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": false
+                },
+                {
+                  "path": "src/domains/maison/logic/helpers.py",
+                  "line_count": 293,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": false
+                }
+              ],
+              "subdirs": [],
+              "total_files": 4,
+              "avg_coverage": 0.0,
+              "files_below_threshold": 4,
+              "large_files": 0
+            },
+            {
+              "path": "domains/maison/ui",
+              "files": [
+                {
+                  "path": "src/domains/maison/ui/meubles.py",
+                  "line_count": 446,
+                  "coverage": 0.0,
+                  "test_files": [
+                    "tests/domains/maison/ui/test_meubles.py"
+                  ],
+                  "test_count": 2,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": true
+                },
+                {
+                  "path": "src/domains/maison/ui/entretien.py",
+                  "line_count": 544,
+                  "coverage": 0.0,
+                  "test_files": [
+                    "tests/domains/maison/ui/test_entretien.py"
+                  ],
+                  "test_count": 2,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": true
+                },
+                {
+                  "path": "src/domains/maison/ui/jardin_zones.py",
+                  "line_count": 469,
+                  "coverage": 0.0,
+                  "test_files": [
+                    "tests/domains/maison/ui/test_jardin_zones.py"
+                  ],
+                  "test_count": 10,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": true
+                },
+                {
+                  "path": "src/domains/maison/ui/energie.py",
+                  "line_count": 460,
+                  "coverage": 0.0,
+                  "test_files": [
+                    "tests/domains/maison/ui/test_energie.py"
+                  ],
+                  "test_count": 2,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": true
+                },
+                {
+                  "path": "src/domains/maison/ui/hub_maison.py",
+                  "line_count": 391,
+                  "coverage": 0.0,
+                  "test_files": [
+                    "tests/domains/maison/ui/test_hub_maison.py"
+                  ],
+                  "test_count": 2,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": true
+                },
+                {
+                  "path": "src/domains/maison/ui/jardin.py",
+                  "line_count": 461,
+                  "coverage": 0.0,
+                  "test_files": [
+                    "tests/domains/maison/ui/test_jardin_zones.py",
+                    "tests/domains/maison/ui/test_jardin.py"
+                  ],
+                  "test_count": 15,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": true
+                },
+                {
+                  "path": "src/domains/maison/ui/scan_factures.py",
+                  "line_count": 363,
+                  "coverage": 0.0,
+                  "test_files": [
+                    "tests/domains/maison/ui/test_scan_factures.py"
+                  ],
+                  "test_count": 2,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": true
+                },
+                {
+                  "path": "src/domains/maison/ui/eco_tips.py",
+                  "line_count": 461,
+                  "coverage": 0.0,
+                  "test_files": [
+                    "tests/domains/maison/ui/test_eco_tips.py"
+                  ],
+                  "test_count": 11,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": true
+                },
+                {
+                  "path": "src/domains/maison/ui/projets.py",
+                  "line_count": 506,
+                  "coverage": 0.0,
+                  "test_files": [
+                    "tests/domains/maison/ui/test_projets.py"
+                  ],
+                  "test_count": 2,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": true
+                }
+              ],
+              "subdirs": [
+                {
+                  "path": "domains/maison/ui/depenses",
+                  "files": [
+                    {
+                      "path": "src/domains/maison/ui/depenses/_common.py",
+                      "line_count": 57,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/maison/ui/depenses/components.py",
+                      "line_count": 303,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/maison/ui/depenses/crud.py",
+                      "line_count": 169,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    }
+                  ],
+                  "subdirs": [],
+                  "total_files": 3,
+                  "avg_coverage": 0.0,
+                  "files_below_threshold": 3,
+                  "large_files": 0
+                }
+              ],
+              "total_files": 9,
+              "avg_coverage": 0.0,
+              "files_below_threshold": 9,
+              "large_files": 0
+            }
+          ],
+          "total_files": 0,
+          "avg_coverage": 0.0,
+          "files_below_threshold": 0,
+          "large_files": 0
+        },
+        {
+          "path": "domains/cuisine",
+          "files": [],
+          "subdirs": [
+            {
+              "path": "domains/cuisine/logic",
+              "files": [
+                {
+                  "path": "src/domains/cuisine/logic/batch_cooking_logic.py",
+                  "line_count": 546,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": false
+                },
+                {
+                  "path": "src/domains/cuisine/logic/recettes_logic.py",
+                  "line_count": 261,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": false
+                },
+                {
+                  "path": "src/domains/cuisine/logic/courses_logic.py",
+                  "line_count": 613,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": false
+                },
+                {
+                  "path": "src/domains/cuisine/logic/inventaire_logic.py",
+                  "line_count": 752,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": false
+                },
+                {
+                  "path": "src/domains/cuisine/logic/planning_logic.py",
+                  "line_count": 363,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": false
+                },
+                {
+                  "path": "src/domains/cuisine/logic/schemas.py",
+                  "line_count": 80,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": false
+                },
+                {
+                  "path": "src/domains/cuisine/logic/planificateur_repas_logic.py",
+                  "line_count": 589,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": false
+                }
+              ],
+              "subdirs": [],
+              "total_files": 7,
+              "avg_coverage": 0.0,
+              "files_below_threshold": 7,
+              "large_files": 0
+            },
+            {
+              "path": "domains/cuisine/ui",
+              "files": [
+                {
+                  "path": "src/domains/cuisine/ui/recettes_import.py",
+                  "line_count": 442,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": false
+                },
+                {
+                  "path": "src/domains/cuisine/ui/batch_cooking_detaille.py",
+                  "line_count": 723,
+                  "coverage": 0.0,
+                  "test_files": [
+                    "tests/domains/cuisine/ui/test_batch_cooking_detaille.py"
+                  ],
+                  "test_count": 1,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": true
+                }
+              ],
+              "subdirs": [
+                {
+                  "path": "domains/cuisine/ui/planificateur_repas",
+                  "files": [
+                    {
+                      "path": "src/domains/cuisine/ui/planificateur_repas/generation.py",
+                      "line_count": 42,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/cuisine/ui/planificateur_repas/pdf.py",
+                      "line_count": 153,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/cuisine/ui/planificateur_repas/_common.py",
+                      "line_count": 67,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/cuisine/ui/planificateur_repas/components.py",
+                      "line_count": 285,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/cuisine/ui/planificateur_repas/preferences.py",
+                      "line_count": 153,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    }
+                  ],
+                  "subdirs": [],
+                  "total_files": 5,
+                  "avg_coverage": 0.0,
+                  "files_below_threshold": 5,
+                  "large_files": 0
+                },
+                {
+                  "path": "domains/cuisine/ui/inventaire",
+                  "files": [
+                    {
+                      "path": "src/domains/cuisine/ui/inventaire/categories.py",
+                      "line_count": 62,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/cuisine/ui/inventaire/historique.py",
+                      "line_count": 107,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/cuisine/ui/inventaire/_common.py",
+                      "line_count": 65,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/cuisine/ui/inventaire/stock.py",
+                      "line_count": 199,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/cuisine/ui/inventaire/notifications.py",
+                      "line_count": 224,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/cuisine/ui/inventaire/helpers.py",
+                      "line_count": 61,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/cuisine/ui/inventaire/alertes.py",
+                      "line_count": 53,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/cuisine/ui/inventaire/suggestions.py",
+                      "line_count": 78,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/cuisine/ui/inventaire/predictions.py",
+                      "line_count": 294,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/cuisine/ui/inventaire/photos.py",
+                      "line_count": 116,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/cuisine/ui/inventaire/tools.py",
+                      "line_count": 210,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    }
+                  ],
+                  "subdirs": [],
+                  "total_files": 11,
+                  "avg_coverage": 0.0,
+                  "files_below_threshold": 11,
+                  "large_files": 0
+                },
+                {
+                  "path": "domains/cuisine/ui/courses",
+                  "files": [
+                    {
+                      "path": "src/domains/cuisine/ui/courses/historique.py",
+                      "line_count": 86,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/cuisine/ui/courses/_common.py",
+                      "line_count": 45,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/cuisine/ui/courses/realtime.py",
+                      "line_count": 96,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/cuisine/ui/courses/liste_active.py",
+                      "line_count": 323,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/cuisine/ui/courses/outils.py",
+                      "line_count": 211,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/cuisine/ui/courses/planning.py",
+                      "line_count": 164,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/cuisine/ui/courses/suggestions_ia.py",
+                      "line_count": 176,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/cuisine/ui/courses/modeles.py",
+                      "line_count": 151,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    }
+                  ],
+                  "subdirs": [],
+                  "total_files": 8,
+                  "avg_coverage": 0.0,
+                  "files_below_threshold": 8,
+                  "large_files": 0
+                },
+                {
+                  "path": "domains/cuisine/ui/recettes",
+                  "files": [
+                    {
+                      "path": "src/domains/cuisine/ui/recettes/ajout.py",
+                      "line_count": 191,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/cuisine/ui/recettes/liste.py",
+                      "line_count": 318,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/cuisine/ui/recettes/helpers.py",
+                      "line_count": 23,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/cuisine/ui/recettes/generation_image.py",
+                      "line_count": 90,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/cuisine/ui/recettes/detail.py",
+                      "line_count": 432,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/cuisine/ui/recettes/generation_ia.py",
+                      "line_count": 239,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    }
+                  ],
+                  "subdirs": [],
+                  "total_files": 6,
+                  "avg_coverage": 0.0,
+                  "files_below_threshold": 6,
+                  "large_files": 0
+                }
+              ],
+              "total_files": 2,
+              "avg_coverage": 0.0,
+              "files_below_threshold": 2,
+              "large_files": 0
+            }
+          ],
+          "total_files": 0,
+          "avg_coverage": 0.0,
+          "files_below_threshold": 0,
+          "large_files": 0
+        },
+        {
+          "path": "domains/planning",
+          "files": [],
+          "subdirs": [
+            {
+              "path": "domains/planning/logic",
+              "files": [
+                {
+                  "path": "src/domains/planning/logic/vue_ensemble_logic.py",
+                  "line_count": 325,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": false
+                },
+                {
+                  "path": "src/domains/planning/logic/vue_semaine_logic.py",
+                  "line_count": 332,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": false
+                },
+                {
+                  "path": "src/domains/planning/logic/calendrier_unifie_logic.py",
+                  "line_count": 786,
+                  "coverage": 0.0,
+                  "test_files": [
+                    "tests/domains/planning/logic/test_calendrier_unifie_logic.py"
+                  ],
+                  "test_count": 1,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": true
+                }
+              ],
+              "subdirs": [],
+              "total_files": 3,
+              "avg_coverage": 0.0,
+              "files_below_threshold": 3,
+              "large_files": 0
+            },
+            {
+              "path": "domains/planning/ui",
+              "files": [
+                {
+                  "path": "src/domains/planning/ui/vue_ensemble.py",
+                  "line_count": 399,
+                  "coverage": 0.0,
+                  "test_files": [],
+                  "test_count": 0,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": false
+                },
+                {
+                  "path": "src/domains/planning/ui/vue_semaine.py",
+                  "line_count": 318,
+                  "coverage": 0.0,
+                  "test_files": [
+                    "tests/domains/planning/ui/test_vue_semaine.py"
+                  ],
+                  "test_count": 2,
+                  "needs_splitting": false,
+                  "below_threshold": true,
+                  "has_tests": true
+                }
+              ],
+              "subdirs": [
+                {
+                  "path": "domains/planning/ui/components",
+                  "files": [],
+                  "subdirs": [],
+                  "total_files": 0,
+                  "avg_coverage": 0.0,
+                  "files_below_threshold": 0,
+                  "large_files": 0
+                },
+                {
+                  "path": "domains/planning/ui/calendrier_unifie",
+                  "files": [
+                    {
+                      "path": "src/domains/planning/ui/calendrier_unifie/_common.py",
+                      "line_count": 55,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/planning/ui/calendrier_unifie/components.py",
+                      "line_count": 370,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    },
+                    {
+                      "path": "src/domains/planning/ui/calendrier_unifie/data.py",
+                      "line_count": 88,
+                      "coverage": 0.0,
+                      "test_files": [],
+                      "test_count": 0,
+                      "needs_splitting": false,
+                      "below_threshold": true,
+                      "has_tests": false
+                    }
+                  ],
+                  "subdirs": [],
+                  "total_files": 3,
+                  "avg_coverage": 0.0,
+                  "files_below_threshold": 3,
+                  "large_files": 0
+                }
+              ],
+              "total_files": 2,
+              "avg_coverage": 0.0,
+              "files_below_threshold": 2,
+              "large_files": 0
+            }
+          ],
+          "total_files": 0,
+          "avg_coverage": 0.0,
+          "files_below_threshold": 0,
+          "large_files": 0
+        }
+      ],
+      "total_files": 0,
+      "avg_coverage": 0.0,
+      "files_below_threshold": 0,
+      "large_files": 0
+    },
+    {
+      "path": "ui",
+      "files": [
+        {
+          "path": "src/ui/domain.py",
+          "line_count": 29,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/ui/test_domain_ui.py"
+          ],
+          "test_count": 1,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/ui/tablet_mode.py",
+          "line_count": 822,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/ui/test_tablet_mode_deep.py",
+            "tests/ui/test_tablet_mode.py"
+          ],
+          "test_count": 38,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        }
+      ],
+      "subdirs": [
+        {
+          "path": "ui/feedback",
+          "files": [
+            {
+              "path": "src/ui/feedback/spinners.py",
+              "line_count": 76,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/ui/feedback/toasts.py",
+              "line_count": 101,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/ui/feedback/progress.py",
+              "line_count": 215,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            }
+          ],
+          "subdirs": [],
+          "total_files": 3,
+          "avg_coverage": 0.0,
+          "files_below_threshold": 3,
+          "large_files": 0
+        },
+        {
+          "path": "ui/components",
+          "files": [
+            {
+              "path": "src/ui/components/forms.py",
+              "line_count": 154,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/ui/components/dynamic.py",
+              "line_count": 204,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/ui/components/dashboard_widgets.py",
+              "line_count": 481,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/ui/components/camera_scanner.py",
+              "line_count": 465,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/ui/components/atoms.py",
+              "line_count": 140,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/ui/components/layouts.py",
+              "line_count": 202,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/ui/components/data.py",
+              "line_count": 203,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/ui/components/google_calendar_sync.py",
+              "line_count": 206,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            }
+          ],
+          "subdirs": [],
+          "total_files": 8,
+          "avg_coverage": 0.0,
+          "files_below_threshold": 8,
+          "large_files": 0
+        },
+        {
+          "path": "ui/core",
+          "files": [
+            {
+              "path": "src/ui/core/base_module.py",
+              "line_count": 465,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/ui/core/base_io.py",
+              "line_count": 180,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/ui/core/base_form.py",
+              "line_count": 381,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            }
+          ],
+          "subdirs": [],
+          "total_files": 3,
+          "avg_coverage": 0.0,
+          "files_below_threshold": 3,
+          "large_files": 0
+        },
+        {
+          "path": "ui/layout",
+          "files": [
+            {
+              "path": "src/ui/layout/styles.py",
+              "line_count": 94,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/ui/layout/init.py",
+              "line_count": 46,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/ui/layout/header.py",
+              "line_count": 38,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/ui/layout/footer.py",
+              "line_count": 39,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/ui/layout/sidebar.py",
+              "line_count": 152,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            }
+          ],
+          "subdirs": [],
+          "total_files": 5,
+          "avg_coverage": 0.0,
+          "files_below_threshold": 5,
+          "large_files": 0
+        }
+      ],
+      "total_files": 2,
+      "avg_coverage": 0.0,
+      "files_below_threshold": 2,
+      "large_files": 0
+    },
+    {
+      "path": "core",
+      "files": [
+        {
+          "path": "src/core/offline.py",
+          "line_count": 562,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/core/test_offline.py",
+            "tests/core/test_offline_deep.py"
+          ],
+          "test_count": 30,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/core/multi_tenant.py",
+          "line_count": 371,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/core/test_multi_tenant_deep.py",
+            "tests/core/test_multi_tenant.py"
+          ],
+          "test_count": 79,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/core/constants.py",
+          "line_count": 448,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/core/test_constants.py"
+          ],
+          "test_count": 46,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/core/database.py",
+          "line_count": 568,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/core/test_database_deep.py",
+            "tests/core/test_database.py",
+            "tests/core/test_database_extended.py"
+          ],
+          "test_count": 84,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/core/state.py",
+          "line_count": 407,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/core/test_state.py"
+          ],
+          "test_count": 34,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/core/notifications.py",
+          "line_count": 604,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/core/test_notifications.py",
+            "tests/core/test_notifications_deep.py"
+          ],
+          "test_count": 91,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/core/performance_optimizations.py",
+          "line_count": 577,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/core/test_performance_optimizations_deep.py",
+            "tests/core/test_performance_optimizations.py"
+          ],
+          "test_count": 58,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/core/cache.py",
+          "line_count": 529,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/core/test_cache_deep.py",
+            "tests/core/test_cache_multi.py",
+            "tests/core/test_cache_multi_deep.py",
+            "tests/core/test_cache_coverage.py",
+            "tests/core/test_cache.py"
+          ],
+          "test_count": 149,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/core/validation.py",
+          "line_count": 710,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/core/test_validation.py",
+            "tests/core/test_validation_pydantic.py"
+          ],
+          "test_count": 82,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/core/logging.py",
+          "line_count": 306,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/core/test_logging.py"
+          ],
+          "test_count": 31,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/core/performance.py",
+          "line_count": 747,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/core/test_performance_deep.py",
+            "tests/core/test_performance.py",
+            "tests/core/test_performance_optimizations_deep.py",
+            "tests/core/test_performance_optimizations.py"
+          ],
+          "test_count": 83,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/core/decorators.py",
+          "line_count": 298,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/core/test_decorators_basic.py",
+            "tests/core/test_decorators.py",
+            "tests/core/test_decorators_extended.py",
+            "tests/core/test_decorators_deep.py",
+            "tests/core/test_decorators_edge_cases.py"
+          ],
+          "test_count": 86,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/core/lazy_loader.py",
+          "line_count": 360,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/core/test_lazy_loader_extended.py",
+            "tests/core/test_lazy_loader_deep.py",
+            "tests/core/test_lazy_loader.py"
+          ],
+          "test_count": 50,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/core/cache_multi.py",
+          "line_count": 718,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/core/test_cache_multi.py",
+            "tests/core/test_cache_multi_deep.py"
+          ],
+          "test_count": 55,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/core/errors_base.py",
+          "line_count": 279,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/core/test_errors_base.py"
+          ],
+          "test_count": 47,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/core/config.py",
+          "line_count": 491,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/core/test_config_extended.py",
+            "tests/core/test_config_deep.py",
+            "tests/core/test_config.py"
+          ],
+          "test_count": 72,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/core/redis_cache.py",
+          "line_count": 528,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/core/test_redis_cache_deep.py",
+            "tests/core/test_redis_cache.py"
+          ],
+          "test_count": 85,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/core/sql_optimizer.py",
+          "line_count": 586,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/core/test_sql_optimizer_deep.py",
+            "tests/core/test_sql_optimizer.py"
+          ],
+          "test_count": 32,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/core/ai_agent.py",
+          "line_count": 107,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/core/test_ai_agent.py",
+            "tests/core/test_ai_agent_sync.py"
+          ],
+          "test_count": 22,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/core/errors.py",
+          "line_count": 420,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/core/test_errors.py",
+            "tests/core/test_errors_deep.py",
+            "tests/core/test_errors_base.py",
+            "tests/core/test_errors_advanced.py"
+          ],
+          "test_count": 166,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        },
+        {
+          "path": "src/core/validators_pydantic.py",
+          "line_count": 383,
+          "coverage": 0.0,
+          "test_files": [
+            "tests/core/test_validators_pydantic_deep.py",
+            "tests/core/test_validators_pydantic.py"
+          ],
+          "test_count": 43,
+          "needs_splitting": false,
+          "below_threshold": true,
+          "has_tests": true
+        }
+      ],
+      "subdirs": [
+        {
+          "path": "core/ai",
+          "files": [
+            {
+              "path": "src/core/ai/rate_limit.py",
+              "line_count": 161,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/core/ai/cache.py",
+              "line_count": 239,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/core/ai/client.py",
+              "line_count": 453,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/core/ai/parser.py",
+              "line_count": 294,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            }
+          ],
+          "subdirs": [],
+          "total_files": 4,
+          "avg_coverage": 0.0,
+          "files_below_threshold": 4,
+          "large_files": 0
+        },
+        {
+          "path": "core/models",
+          "files": [
+            {
+              "path": "src/core/models/users.py",
+              "line_count": 536,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/core/models/courses.py",
+              "line_count": 210,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/core/models/maison_extended.py",
+              "line_count": 392,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/core/models/sante.py",
+              "line_count": 162,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/core/models/nouveaux.py",
+              "line_count": 538,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/core/models/user_preferences.py",
+              "line_count": 289,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/core/models/batch_cooking.py",
+              "line_count": 428,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/core/models/inventaire.py",
+              "line_count": 148,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/core/models/famille.py",
+              "line_count": 266,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/core/models/planning.py",
+              "line_count": 142,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/core/models/maison.py",
+              "line_count": 236,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/core/models/recettes.py",
+              "line_count": 430,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/core/models/jeux.py",
+              "line_count": 335,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            },
+            {
+              "path": "src/core/models/base.py",
+              "line_count": 88,
+              "coverage": 0.0,
+              "test_files": [],
+              "test_count": 0,
+              "needs_splitting": false,
+              "below_threshold": true,
+              "has_tests": false
+            }
+          ],
+          "subdirs": [],
+          "total_files": 14,
+          "avg_coverage": 0.0,
+          "files_below_threshold": 14,
+          "large_files": 0
+        }
+      ],
+      "total_files": 21,
+      "avg_coverage": 0.0,
+      "files_below_threshold": 21,
+      "large_files": 0
+    }
+  ],
+  "total_files": 1,
+  "avg_coverage": 0.0,
+  "files_below_threshold": 1,
+  "large_files": 0
+}
