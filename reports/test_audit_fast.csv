@@ -1,0 +1,511 @@
+type,path,lines,nb_tests,quality_score,mapped_sources,issues,action
+test,domains\famille\ui\test_suivi_perso.py,801,41,43.0,,hasattr checks (ne teste pas la logique) (8x); Tests d'import uniquement (6x),REWRITE
+test,assistant_matanne\tests\services\test_services_coverage_boost.py,455,36,45.0,,hasattr checks (ne teste pas la logique) (18x); Tests d'import uniquement (12x); Densité tests très haute (tests superficiels?),REWRITE
+test,assistant_matanne\tests\services\test_tier1_critical.py,363,39,46.0,,hasattr checks (ne teste pas la logique) (5x); Tests d'import uniquement (10x); Densité tests très haute (tests superficiels?),REWRITE
+test,assistant_matanne\tests\services\test_services_coverage_80_part6.py,1098,81,48.0,,hasattr checks (ne teste pas la logique) (9x); Tests d'import uniquement (19x); Densité tests très haute (tests superficiels?),REWRITE
+test,assistant_matanne\tests\services\test_services_coverage_80_part8.py,837,71,48.0,,hasattr checks (ne teste pas la logique) (20x); Tests d'import uniquement (38x); Densité tests très haute (tests superficiels?),REWRITE
+test,assistant_matanne\tests\ui\test_ui_80_coverage.py,600,40,49.0,,hasattr checks (ne teste pas la logique) (9x); Densité tests très haute (tests superficiels?),REWRITE
+test,assistant_matanne\tests\services\test_inventaire_methods.py,458,32,50.0,,hasattr checks (ne teste pas la logique) (12x); Densité tests très haute (tests superficiels?),REWRITE
+test,assistant_matanne\tests\services\test_calendar_sync_coverage.py,1086,45,53.0,src\domains\planning\ui\calendar_sync_ui.py,Tests d'import uniquement (11x); Mocking excessif (5x); Tests sans assertion (5x),REWRITE
+test,assistant_matanne\tests\domains\test_modules_cuisine.py,25,16,55.0,,assert True sans condition (16x); Densité tests très haute (tests superficiels?),REWRITE
+test,tests\domains\cuisine\test_phase2_recipes.py,24,15,55.0,,assert True sans condition (15x); Densité tests très haute (tests superficiels?),REWRITE
+test,tests\domains\planning\test_phase2_events.py,42,33,55.0,,assert True sans condition (33x); Densité tests très haute (tests superficiels?),REWRITE
+test,assistant_matanne\tests\services\test_services_coverage_80_part11.py,220,22,55.0,,hasattr checks (ne teste pas la logique) (13x); Densité tests très haute (tests superficiels?),REWRITE
+test,assistant_matanne\tests\e2e\test_integration_workflows.py,504,39,57.0,,assert True sans condition (8x); Densité tests très haute (tests superficiels?),REWRITE
+test,assistant_matanne\tests\services\test_planning_service.py,109,11,57.0,src\core\models\planning.py;src\domains\cuisine\logic\planning_logic.py;src\domains\cuisine\ui\courses\planning.py;src\services\planning.py;src\services\planning_unified.py;src\services\planning_utils.py,hasattr checks (ne teste pas la logique) (10x); Densité tests très haute (tests superficiels?),REWRITE
+test,assistant_matanne\tests\services\test_recettes_service.py,188,21,57.0,src\core\models\recettes.py;src\domains\cuisine\logic\recettes_logic.py;src\domains\cuisine\ui\recettes_import.py;src\services\recettes.py;src\services\recettes_utils.py,hasattr checks (ne teste pas la logique) (17x); Densité tests très haute (tests superficiels?),REWRITE
+test,assistant_matanne\tests\ui\test_ui_deep.py,674,51,57.0,src\domains\jeux\logic\ui_helpers.py,hasattr checks (ne teste pas la logique) (6x); Tests d'import uniquement (21x); Densité tests très haute (tests superficiels?),REWRITE
+test,assistant_matanne\tests\core\test_app_main.py,268,23,59.0,,hasattr checks (ne teste pas la logique) (6x); Densité tests très haute (tests superficiels?),REWRITE
+test,assistant_matanne\tests\api\test_85_coverage.py,50,17,60.0,,assert True sans condition (17x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\api\test_extended_api.py,61,22,60.0,,assert True sans condition (22x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\benchmarks\test_perf_core_operations.py,75,9,60.0,,assert True sans condition (9x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\core\test_decorators_basic.py,154,21,60.0,,Tests d'import uniquement (19x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\domains\test_85_coverage.py,54,21,60.0,,assert True sans condition (21x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\domains\test_core_workflows.py,162,14,60.0,,assert True sans condition (14x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\domains\test_domains_logic_coverage.py,410,44,60.0,,Tests d'import uniquement (29x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\domains\test_extended_domains.py,77,38,60.0,,assert True sans condition (38x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\domains\test_modules_accueil.py,19,10,60.0,,assert True sans condition (10x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\domains\test_modules_barcode.py,23,8,60.0,,assert True sans condition (8x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\domains\test_modules_famille.py,21,12,60.0,,assert True sans condition (12x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\domains\test_modules_planning.py,21,12,60.0,,assert True sans condition (12x); Densité tests très haute (tests superficiels?),IMPROVE
+test,tests\domains\cuisine\test_phase2_meals.py,24,15,60.0,,assert True sans condition (15x); Densité tests très haute (tests superficiels?),IMPROVE
+test,tests\domains\famille\test_phase2_profiles.py,23,14,60.0,,assert True sans condition (14x); Densité tests très haute (tests superficiels?),IMPROVE
+test,tests\domains\famille\test_phase2_tracking.py,23,14,60.0,,assert True sans condition (14x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\edge_cases\test_edge_cases_models.py,121,18,60.0,,assert True sans condition (18x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\models\test_models_basic.py,153,22,60.0,,Tests d'import uniquement (22x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\services\test_85_coverage.py,47,14,60.0,,assert True sans condition (14x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\services\test_extended_services.py,38,11,60.0,,assert True sans condition (11x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\services\test_recipe_import_service.py,353,41,60.0,src\services\recipe_import.py,hasattr checks (ne teste pas la logique) (5x); Tests d'import uniquement (8x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\services\test_services_basic.py,88,12,60.0,,Tests d'import uniquement (8x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\services\test_services_coverage_80_part7.py,897,54,60.0,,hasattr checks (ne teste pas la logique) (27x); Tests d'import uniquement (13x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\services\test_services_extended.py,203,16,60.0,,assert True sans condition (16x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\utils\test_85_coverage.py,40,13,60.0,,assert True sans condition (13x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\utils\test_extended_utils.py,42,15,60.0,,assert True sans condition (15x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\utils\test_utilities_comprehensive.py,389,27,60.0,,Tests d'import uniquement (9x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\utils\test_utilities_fixed.py,603,74,60.0,,Tests d'import uniquement (10x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\utils\test_utils_basic.py,127,17,60.0,,Tests d'import uniquement (17x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\core\test_lazy_cache_advanced.py,514,32,64.0,,Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\services\test_services_coverage_80_part3.py,581,49,66.0,,Tests d'import uniquement (13x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\ui\test_ui_final_80_part2.py,682,35,66.0,,hasattr checks (ne teste pas la logique) (14x),IMPROVE
+test,domains\famille\ui\test_hub_famille.py,470,35,67.0,src\domains\famille\ui\hub_famille.py,hasattr checks (ne teste pas la logique) (5x); Densité tests très haute (tests superficiels?),IMPROVE
+test,domains\famille\ui\test_jules.py,582,37,67.0,src\domains\famille\ui\jules_planning.py,Tests d'import uniquement (5x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\services\test_simple_coverage.py,221,32,67.0,,Tests d'import uniquement (25x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\services\test_rapports_pdf_service.py,1269,57,70.0,src\services\rapports_pdf.py,hasattr checks (ne teste pas la logique) (13x); Tests d'import uniquement (7x),IMPROVE
+test,assistant_matanne\tests\services\test_services_comprehensive.py,907,58,70.0,,hasattr checks (ne teste pas la logique) (15x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\services\test_base_service_coverage.py,896,59,71.0,src\services\base_service.py,hasattr checks (ne teste pas la logique) (14x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\services\test_courses_service.py,904,56,71.0,src\core\models\courses.py;src\domains\cuisine\logic\courses_logic.py;src\services\courses.py;src\services\courses_intelligentes.py,hasattr checks (ne teste pas la logique) (14x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\services\test_inventaire_coverage_deep.py,453,31,71.0,,hasattr checks (ne teste pas la logique) (12x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\ui\test_ui_final_80.py,571,27,71.0,,hasattr checks (ne teste pas la logique) (8x),IMPROVE
+test,domains\famille\ui\test_routines.py,352,25,72.0,src\domains\famille\logic\routines_logic.py;src\domains\famille\ui\routines.py,hasattr checks (ne teste pas la logique) (5x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\core\test_lazy_loader.py,58,6,73.0,src\core\lazy_loader.py,Densité tests très haute (tests superficiels?),IMPROVE
+test,domains\famille\ui\test_achats_famille.py,592,36,74.0,,Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\services\test_calendar_sync_comprehensive.py,632,47,74.0,,Tests d'import uniquement (5x); Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\utils\test_helpers_deep.py,846,76,74.0,src\domains\cuisine\ui\inventaire\helpers.py;src\domains\cuisine\ui\recettes\helpers.py;src\domains\famille\logic\helpers.py;src\domains\famille\ui\achats_famille\helpers.py;src\domains\famille\ui\jules\helpers.py;src\domains\famille\ui\suivi_perso\helpers.py;src\domains\famille\ui\weekend\helpers.py;src\domains\jeux\ui\loto\helpers.py;src\domains\jeux\ui\paris\helpers.py;src\domains\maison\logic\helpers.py;src\utils\helpers\helpers.py,Densité tests très haute (tests superficiels?),IMPROVE
+test,assistant_matanne\tests\core\test_config_extended.py,247,15,75.0,src\core\config.py,hasattr checks (ne teste pas la logique) (5x); Densité tests très haute (tests superficiels?),OK
+test,tests\domains\cuisine\test_inventaire_logic.py,651,57,75.0,src\core\models\inventaire.py;src\domains\cuisine\logic\inventaire_logic.py;src\services\inventaire.py,Tests sans assertion (5x); Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_barcode_coverage_deep.py,506,49,75.0,,Tests d'import uniquement (6x); Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_budget_coverage_deep.py,472,32,75.0,,Tests d'import uniquement (5x); Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_budget_methods.py,472,24,75.0,,hasattr checks (ne teste pas la logique) (9x),OK
+test,assistant_matanne\tests\core\test_decorators_edge_cases.py,436,21,76.0,,Tests sans assertion (9x),OK
+test,assistant_matanne\tests\core\test_lazy_loader_deep.py,395,26,76.0,src\core\lazy_loader.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_recipe_import_integration.py,528,51,76.0,src\services\recipe_import.py,Densité tests très haute (tests superficiels?),OK
+test,domains\cuisine\ui\test_planificateur_repas_extended.py,429,33,77.0,src\domains\cuisine\logic\planificateur_repas_logic.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_pdf_export_coverage_deep.py,446,28,77.0,,Tests d'import uniquement (5x); Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\ui\test_ui_comprehensive_coverage.py,629,40,78.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\api\test_rate_limiting.py,62,6,79.0,src\api\rate_limiting.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_cache_deep.py,506,37,79.0,src\core\cache.py;src\core\cache_multi.py;src\core\ai\cache.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_config.py,319,30,79.0,src\core\config.py,Densité tests très haute (tests superficiels?),OK
+test,domains\maison\ui\test_eco_tips.py,144,11,79.0,src\domains\maison\ui\eco_tips.py,Densité tests très haute (tests superficiels?),OK
+test,domains\maison\ui\test_jardin_zones.py,134,10,79.0,src\domains\maison\ui\jardin_zones.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_services_coverage_80_part15.py,393,21,79.0,,assert True sans condition (6x),OK
+test,assistant_matanne\tests\ui\test_feedback.py,276,22,79.0,,Densité tests très haute (tests superficiels?),OK
+test,domains\famille\ui\test_activites.py,263,22,80.0,src\domains\famille\logic\activites_logic.py;src\domains\famille\ui\activites.py,Densité tests très haute (tests superficiels?),OK
+test,domains\famille\ui\test_jules_planning_extended.py,279,30,80.0,src\domains\famille\ui\jules_planning.py,Densité tests très haute (tests superficiels?),OK
+test,domains\maison\ui\test_jardin.py,64,5,80.0,src\domains\maison\logic\jardin_logic.py;src\domains\maison\ui\jardin.py;src\domains\maison\ui\jardin_zones.py,Densité tests très haute (tests superficiels?),OK
+test,planning\ui\components\test_components_init_extended.py,324,34,80.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_push_send_methods.py,378,23,80.0,,hasattr checks (ne teste pas la logique) (6x); Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_recipe_import_extra.py,882,53,80.0,,Tests d'import uniquement (5x); Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_services_coverage_80_part16.py,385,26,80.0,,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\jeux\test_api_football_coverage.py,616,37,81.0,src\domains\jeux\logic\api_football.py,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\maison\test_jardin_logic.py,305,29,81.0,src\domains\maison\logic\jardin_logic.py;src\domains\maison\ui\jardin.py;src\domains\maison\ui\jardin_zones.py,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\maison\test_projets_logic.py,296,30,81.0,src\domains\maison\logic\projets_logic.py;src\domains\maison\ui\projets.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\ui\test_ui_coverage_80_final.py,368,25,81.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\utils\test_image_recipe_deep.py,797,52,82.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_decorators_deep.py,380,21,83.0,src\core\decorators.py,Tests sans assertion (9x),OK
+test,assistant_matanne\tests\services\test_openfoodfacts.py,155,9,83.0,src\services\openfoodfacts.py,Tests d'import uniquement (5x),OK
+test,assistant_matanne\tests\services\test_recettes_coverage_deep.py,464,25,83.0,,hasattr checks (ne teste pas la logique) (7x),OK
+test,assistant_matanne\tests\core\test_cache_coverage.py,442,29,84.0,src\core\cache.py;src\core\cache_multi.py;src\core\ai\cache.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_multi_tenant_deep.py,705,46,84.0,src\core\multi_tenant.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_validation.py,400,42,84.0,src\core\validation.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_auth_coverage.py,1023,50,84.0,src\services\auth.py,,OK
+test,assistant_matanne\tests\services\test_base_service.py,186,11,84.0,src\core\models\base.py;src\services\base_ai_service.py;src\services\base_service.py;src\ui\core\base_form.py;src\ui\core\base_io.py;src\ui\core\base_module.py,hasattr checks (ne teste pas la logique) (8x),OK
+test,assistant_matanne\tests\services\test_budget_integration.py,474,31,84.0,src\domains\famille\ui\budget_dashboard.py;src\services\budget_utils.py,hasattr checks (ne teste pas la logique) (7x); Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_inventaire_integration.py,442,34,84.0,src\core\models\inventaire.py;src\domains\cuisine\logic\inventaire_logic.py;src\services\inventaire.py,hasattr checks (ne teste pas la logique) (10x); Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\domains\test_modules_logic.py,84,9,85.0,,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\jeux\test_jeux_apis.py,172,3,85.0,,,OK
+test,tests\domains\utils\test_barcode_logic_coverage.py,346,51,85.0,src\domains\utils\logic\barcode_logic.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_backup_integration.py,1948,89,85.0,src\services\backup.py;src\services\backup_utils.py,hasattr checks (ne teste pas la logique) (11x),OK
+test,assistant_matanne\tests\services\test_push_notifications_deep.py,469,31,85.0,src\services\push_notifications.py;src\services\push_notifications_utils.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\ui\test_ui_final_push.py,182,13,85.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_performance_optimizations.py,640,41,86.0,src\core\performance_optimizations.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_action_history_service.py,41,5,86.0,src\services\action_history.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_inventaire_service.py,238,18,86.0,src\core\models\inventaire.py;src\domains\cuisine\logic\inventaire_logic.py;src\services\inventaire.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\ui\test_layout_coverage.py,349,22,86.0,,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\ui\test_ui_helpers.py,373,24,87.0,src\domains\jeux\logic\ui_helpers.py,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\utils\test_rapports_logic_coverage.py,696,53,87.0,src\domains\utils\logic\rapports_logic.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_budget_comprehensive.py,592,49,87.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\utils\test_helpers_all_deep.py,181,25,87.0,,Densité tests très haute (tests superficiels?),OK
+test,domains\famille\ui\test_weekend.py,927,51,88.0,,,OK
+test,assistant_matanne\tests\ui\test_coverage_80_extended.py,741,48,88.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\api\test_api_coverage_80.py,2124,149,89.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_ai_agent_sync.py,183,14,89.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_constants.py,346,46,89.0,src\core\constants.py;src\domains\jeux\logic\paris\constants.py;src\utils\constants.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_decorators_extended.py,213,12,89.0,src\core\decorators.py,Tests sans assertion (5x),OK
+test,domains\cuisine\ui\test_planificateur_repas_fixed.py,595,44,89.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_planning_extended.py,471,27,89.0,src\core\models\planning.py;src\domains\cuisine\logic\planning_logic.py;src\domains\cuisine\ui\courses\planning.py;src\services\planning.py;src\services\planning_unified.py;src\services\planning_utils.py,hasattr checks (ne teste pas la logique) (5x),OK
+test,assistant_matanne\tests\services\test_recettes_integration.py,436,19,89.0,src\core\models\recettes.py;src\domains\cuisine\logic\recettes_logic.py;src\domains\cuisine\ui\recettes_import.py;src\services\recettes.py;src\services\recettes_utils.py,hasattr checks (ne teste pas la logique) (5x),OK
+test,assistant_matanne\tests\api\test_rate_limiting_comprehensive.py,606,53,90.0,,Tests sans assertion (6x); Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\api\test_simple_extended.py,74,9,90.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_ai_modules.py,161,9,90.0,,,OK
+test,assistant_matanne\tests\core\test_config_deep.py,364,27,90.0,src\core\config.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_coverage_80_targeted.py,380,28,90.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_performance_optimizations_deep.py,197,17,90.0,src\core\performance_optimizations.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_sql_optimizer.py,93,7,90.0,src\core\sql_optimizer.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\domains\test_simple_extended.py,97,9,90.0,,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\cuisine\test_batch_cooking_logic.py,462,43,90.0,src\core\models\batch_cooking.py;src\domains\cuisine\logic\batch_cooking_logic.py;src\domains\cuisine\ui\batch_cooking_detaille.py;src\services\batch_cooking.py;src\services\batch_cooking_utils.py,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\cuisine\test_batch_cooking_logic_coverage.py,479,32,90.0,src\domains\cuisine\logic\batch_cooking_logic.py,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\cuisine\test_courses_logic.py,607,49,90.0,src\core\models\courses.py;src\domains\cuisine\logic\courses_logic.py;src\services\courses.py;src\services\courses_intelligentes.py,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\cuisine\test_inventaire_logic_coverage.py,653,45,90.0,src\domains\cuisine\logic\inventaire_logic.py,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\cuisine\test_planning_logic.py,317,24,90.0,src\core\models\planning.py;src\domains\cuisine\logic\planning_logic.py;src\domains\cuisine\ui\courses\planning.py;src\services\planning.py;src\services\planning_unified.py;src\services\planning_utils.py,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\cuisine\test_recettes_logic.py,175,12,90.0,src\core\models\recettes.py;src\domains\cuisine\logic\recettes_logic.py;src\domains\cuisine\ui\recettes_import.py;src\services\recettes.py;src\services\recettes_utils.py,Densité tests très haute (tests superficiels?),OK
+test,domains\cuisine\services\test_batch_cooking.py,259,22,90.0,src\core\models\batch_cooking.py;src\domains\cuisine\logic\batch_cooking_logic.py;src\domains\cuisine\ui\batch_cooking_detaille.py;src\services\batch_cooking.py;src\services\batch_cooking_utils.py,Densité tests très haute (tests superficiels?),OK
+test,domains\cuisine\ui\test_planificateur_repas.py,82,9,90.0,src\domains\cuisine\logic\planificateur_repas_logic.py,Densité tests très haute (tests superficiels?),OK
+test,domains\cuisine\ui\test_recettes.py,153,17,90.0,src\core\models\recettes.py;src\domains\cuisine\logic\recettes_logic.py;src\domains\cuisine\ui\recettes_import.py;src\services\recettes.py;src\services\recettes_utils.py,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\famille\test_activites_logic.py,433,37,90.0,src\domains\famille\logic\activites_logic.py;src\domains\famille\ui\activites.py,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\famille\test_routines_logic.py,471,46,90.0,src\domains\famille\logic\routines_logic.py;src\domains\famille\ui\routines.py,Densité tests très haute (tests superficiels?),OK
+test,domains\famille\ui\test_jules_planning.py,80,9,90.0,src\domains\famille\ui\jules_planning.py,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\jeux\test_integration.py,67,5,90.0,src\domains\jeux\integration.py,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\jeux\test_loto_logic.py,231,17,90.0,src\domains\jeux\logic\loto_logic.py,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\jeux\test_paris_logic_coverage.py,852,63,90.0,,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\jeux\test_scraper_loto_coverage.py,429,32,90.0,src\domains\jeux\logic\scraper_loto.py,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\jeux\test_setup.py,52,6,90.0,src\domains\jeux\setup.py,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\maison\test_entretien_logic.py,383,31,90.0,src\domains\maison\logic\entretien_logic.py;src\domains\maison\ui\entretien.py,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\maison\test_jardin_logic_coverage.py,233,18,90.0,src\domains\maison\logic\jardin_logic.py,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\maison\test_projets_logic_coverage.py,251,19,90.0,src\domains\maison\logic\projets_logic.py,Densité tests très haute (tests superficiels?),OK
+test,domains\maison\services\test_inventaire.py,18,2,90.0,src\core\models\inventaire.py;src\domains\cuisine\logic\inventaire_logic.py;src\services\inventaire.py,,OK
+test,domains\maison\services\test_paris_logic.py,225,18,90.0,,Densité tests très haute (tests superficiels?),OK
+test,domains\maison\ui\test_courses.py,18,2,90.0,src\core\models\courses.py;src\domains\cuisine\logic\courses_logic.py;src\services\courses.py;src\services\courses_intelligentes.py,,OK
+test,domains\maison\ui\test_energie.py,8,2,90.0,src\domains\maison\ui\energie.py,,OK
+test,domains\maison\ui\test_entretien.py,8,2,90.0,src\domains\maison\logic\entretien_logic.py;src\domains\maison\ui\entretien.py,,OK
+test,domains\maison\ui\test_hub_maison.py,8,2,90.0,src\domains\maison\ui\hub_maison.py,,OK
+test,domains\maison\ui\test_meubles.py,8,2,90.0,src\domains\maison\ui\meubles.py,,OK
+test,domains\maison\ui\test_paris.py,18,2,90.0,,,OK
+test,domains\maison\ui\test_projets.py,8,2,90.0,src\domains\maison\logic\projets_logic.py;src\domains\maison\ui\projets.py,,OK
+test,domains\maison\ui\test_scan_factures.py,8,2,90.0,src\domains\maison\ui\scan_factures.py,,OK
+test,tests\domains\planning\test_vue_ensemble.py,18,2,90.0,src\domains\planning\logic\vue_ensemble_logic.py;src\domains\planning\ui\vue_ensemble.py,,OK
+test,tests\domains\planning\test_vue_ensemble_logic.py,259,24,90.0,src\domains\planning\logic\vue_ensemble_logic.py;src\domains\planning\ui\vue_ensemble.py,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\planning\test_vue_ensemble_logic_coverage.py,365,33,90.0,src\domains\planning\logic\vue_ensemble_logic.py,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\planning\test_vue_semaine_logic.py,250,22,90.0,src\domains\planning\logic\vue_semaine_logic.py;src\domains\planning\ui\vue_semaine.py,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\planning\test_vue_semaine_logic_coverage.py,316,22,90.0,src\domains\planning\logic\vue_semaine_logic.py,Densité tests très haute (tests superficiels?),OK
+test,domains\planning\ui\test_calendrier_unifie.py,8,2,90.0,src\domains\planning\logic\calendrier_unifie_logic.py,,OK
+test,domains\planning\ui\test_vue_semaine.py,8,2,90.0,src\domains\planning\logic\vue_semaine_logic.py;src\domains\planning\ui\vue_semaine.py,,OK
+test,planning\ui\components\test_init.py,18,2,90.0,src\ui\layout\init.py,,OK
+test,tests\domains\utils\test_accueil_logic.py,228,27,90.0,src\domains\utils\logic\accueil_logic.py;src\domains\utils\ui\accueil.py,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\utils\test_barcode_logic.py,166,24,90.0,src\domains\utils\logic\barcode_logic.py;src\domains\utils\ui\barcode.py;src\services\barcode.py,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\utils\test_parametres.py,18,2,90.0,src\domains\utils\logic\parametres_logic.py;src\domains\utils\ui\parametres.py,,OK
+test,tests\domains\utils\test_parametres_logic.py,350,43,90.0,src\domains\utils\logic\parametres_logic.py;src\domains\utils\ui\parametres.py,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\utils\test_parametres_logic_coverage.py,557,57,90.0,src\domains\utils\logic\parametres_logic.py,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\utils\test_rapports.py,18,2,90.0,src\domains\utils\logic\rapports_logic.py;src\domains\utils\ui\rapports.py;src\services\rapports_pdf.py,,OK
+test,tests\domains\utils\test_rapports_logic.py,479,34,90.0,src\domains\utils\logic\rapports_logic.py;src\domains\utils\ui\rapports.py;src\services\rapports_pdf.py,Densité tests très haute (tests superficiels?),OK
+test,domains\utils\ui\test_accueil.py,8,2,90.0,src\domains\utils\logic\accueil_logic.py;src\domains\utils\ui\accueil.py,,OK
+test,domains\utils\ui\test_barcode.py,8,2,90.0,src\domains\utils\logic\barcode_logic.py;src\domains\utils\ui\barcode.py;src\services\barcode.py,,OK
+test,domains\utils\ui\test_notifications_push.py,8,2,90.0,src\domains\utils\ui\notifications_push.py;src\services\notifications_push.py,,OK
+test,assistant_matanne\tests\services\test_garmin_sync_utils_integration.py,841,79,90.0,src\services\garmin_sync_utils.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_io_service_coverage.py,655,53,90.0,src\services\io_service.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_notifications_service.py,17,2,90.0,src\core\notifications.py;src\domains\cuisine\ui\inventaire\notifications.py;src\domains\utils\ui\notifications_push.py;src\services\notifications.py;src\services\notifications_push.py,,OK
+test,assistant_matanne\tests\services\test_pdf_export_service.py,26,3,90.0,src\services\pdf_export.py,,OK
+test,assistant_matanne\tests\services\test_planning_unified_service.py,14,2,90.0,src\services\planning_unified.py,,OK
+test,assistant_matanne\tests\services\test_planning_utils.py,695,57,90.0,src\services\planning_utils.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_recettes_import.py,18,2,90.0,src\domains\cuisine\ui\recettes_import.py,,OK
+test,assistant_matanne\tests\services\test_suggestions_ia_utils.py,618,71,90.0,src\services\suggestions_ia_utils.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_suggestions_ia_utils_full.py,789,97,90.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_user_preferences_service.py,26,3,90.0,src\core\models\user_preferences.py;src\services\user_preferences.py,,OK
+test,assistant_matanne\tests\services\test_weather_utils.py,675,92,90.0,src\services\weather_utils.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_weather_utils_full.py,778,118,90.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\ui\test_coverage_80_widgets.py,647,39,90.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\utils\test_formatters_dates.py,239,22,90.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\utils\test_formatters_deep.py,938,114,90.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\utils\test_helpers_data.py,189,24,90.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\utils\test_helpers_dates.py,143,20,90.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\utils\test_helpers_extra_deep.py,739,83,90.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\utils\test_helpers_strings.py,129,23,90.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\utils\test_image_generator_deep_v2.py,341,23,90.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\utils\test_simple_extended.py,104,13,90.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\utils\test_validators_common.py,167,29,90.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\utils\test_validators_dates.py,147,22,90.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\utils\test_validators_deep.py,899,84,90.0,src\core\validators_pydantic.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\utils\test_validators_food.py,167,15,90.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_push_notifications.py,1062,85,91.0,src\services\push_notifications.py;src\services\push_notifications_utils.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_ai_cache.py,263,16,92.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_errors.py,360,37,92.0,src\core\errors.py;src\core\errors_base.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\domains\test_init.py,6,1,92.0,src\ui\layout\init.py,,OK
+test,tests\domains\cuisine\test_init.py,6,1,92.0,src\ui\layout\init.py,,OK
+test,tests\domains\famille\test_init.py,6,1,92.0,src\ui\layout\init.py,,OK
+test,tests\domains\maison\test_init.py,6,1,92.0,src\ui\layout\init.py,,OK
+test,assistant_matanne\tests\core\test_multi_tenant.py,525,33,93.0,src\core\multi_tenant.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_cache.py,484,28,94.0,src\core\cache.py;src\core\cache_multi.py;src\core\ai\cache.py,,OK
+test,assistant_matanne\tests\core\test_decorators.py,210,11,94.0,src\core\decorators.py,,OK
+test,assistant_matanne\tests\core\test_redis_cache.py,509,40,94.0,src\core\redis_cache.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_backup_utils.py,552,54,94.0,src\services\backup_utils.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_batch_cooking_coverage.py,476,27,94.0,src\core\models\batch_cooking.py;src\domains\cuisine\logic\batch_cooking_logic.py;src\domains\cuisine\ui\batch_cooking_detaille.py;src\services\batch_cooking.py;src\services\batch_cooking_utils.py,hasattr checks (ne teste pas la logique) (7x),OK
+test,assistant_matanne\tests\services\test_garmin_sync_utils.py,634,81,94.0,src\services\garmin_sync_utils.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_database.py,498,35,95.0,src\core\database.py,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\cuisine\test_batch_cooking_detaille_ui.py,10,1,95.0,src\domains\cuisine\ui\batch_cooking_detaille.py,,OK
+test,tests\domains\cuisine\test_courses_ui.py,10,1,95.0,src\core\models\courses.py;src\domains\cuisine\logic\courses_logic.py;src\services\courses.py;src\services\courses_intelligentes.py,,OK
+test,tests\domains\cuisine\test_inventaire_ui.py,10,1,95.0,src\core\models\inventaire.py;src\domains\cuisine\logic\inventaire_logic.py;src\services\inventaire.py,,OK
+test,domains\cuisine\ui\test_batch_cooking_detaille.py,5,1,95.0,src\domains\cuisine\ui\batch_cooking_detaille.py,,OK
+test,tests\domains\famille\test_achats_famille_ui.py,10,1,95.0,,,OK
+test,domains\jeux\ui\test_loto.py,5,1,95.0,src\domains\jeux\logic\loto_logic.py,,OK
+test,domains\maison\ui\test_imports_maison_ui.py,17,1,95.0,,,OK
+test,domains\planning\logic\test_calendrier_unifie_logic.py,6,1,95.0,src\domains\planning\logic\calendrier_unifie_logic.py,,OK
+test,domains\planning\ui\test_imports_planning_ui.py,11,1,95.0,,,OK
+test,planning\ui\components\test_components_init.py,122,7,95.0,,,OK
+test,domains\utils\ui\test_imports_utils_ui.py,13,1,95.0,,,OK
+test,assistant_matanne\tests\property_tests\test_models_hypothesis.py,21,1,95.0,,,OK
+test,assistant_matanne\tests\services\test_auth_service.py,10,1,95.0,src\services\auth.py,,OK
+test,assistant_matanne\tests\services\test_barcode_service.py,10,1,95.0,src\domains\utils\logic\barcode_logic.py;src\domains\utils\ui\barcode.py;src\services\barcode.py,,OK
+test,assistant_matanne\tests\services\test_batch_cooking_service.py,10,1,95.0,src\core\models\batch_cooking.py;src\domains\cuisine\logic\batch_cooking_logic.py;src\domains\cuisine\ui\batch_cooking_detaille.py;src\services\batch_cooking.py;src\services\batch_cooking_utils.py,,OK
+test,assistant_matanne\tests\services\test_budget_service.py,10,1,95.0,src\domains\famille\ui\budget_dashboard.py;src\services\budget_utils.py,,OK
+test,assistant_matanne\tests\services\test_calendar_sync_service.py,10,1,95.0,src\domains\planning\ui\calendar_sync_ui.py,,OK
+test,assistant_matanne\tests\services\test_courses_intelligentes_service.py,10,1,95.0,src\services\courses_intelligentes.py,,OK
+test,assistant_matanne\tests\services\test_garmin_sync.py,6,1,95.0,src\services\garmin_sync.py;src\services\garmin_sync_utils.py,,OK
+test,assistant_matanne\tests\services\test_imports_services.py,41,1,95.0,,,OK
+test,assistant_matanne\tests\services\test_io_service.py,10,1,95.0,src\services\io_service.py,,OK
+test,assistant_matanne\tests\services\test_notifications_push_service.py,20,2,95.0,src\domains\utils\ui\notifications_push.py;src\services\notifications_push.py,,OK
+test,assistant_matanne\tests\services\test_services_coverage_80.py,801,84,95.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_suggestions_ia_service.py,10,1,95.0,src\domains\cuisine\ui\courses\suggestions_ia.py;src\services\suggestions_ia.py;src\services\suggestions_ia_utils.py,,OK
+test,assistant_matanne\tests\services\test_types_service.py,10,1,95.0,src\services\types.py,,OK
+test,assistant_matanne\tests\services\test_weather_coverage.py,1688,77,95.0,src\services\weather.py;src\services\weather_utils.py,,OK
+test,assistant_matanne\tests\ui\test_atoms_component.py,10,1,95.0,,,OK
+test,assistant_matanne\tests\ui\test_base_form_core.py,10,1,95.0,,,OK
+test,assistant_matanne\tests\ui\test_base_io_core.py,10,1,95.0,,,OK
+test,assistant_matanne\tests\ui\test_base_module_core.py,10,1,95.0,,,OK
+test,assistant_matanne\tests\ui\test_camera_scanner_component.py,10,1,95.0,,,OK
+test,assistant_matanne\tests\ui\test_dashboard_widgets_component.py,10,1,95.0,,,OK
+test,assistant_matanne\tests\ui\test_data_component.py,10,1,95.0,,,OK
+test,assistant_matanne\tests\ui\test_domain_ui.py,10,1,95.0,src\ui\domain.py,,OK
+test,assistant_matanne\tests\ui\test_dynamic_component.py,10,1,95.0,,,OK
+test,assistant_matanne\tests\ui\test_footer_layout.py,10,1,95.0,,,OK
+test,assistant_matanne\tests\ui\test_forms_component.py,10,1,95.0,,,OK
+test,assistant_matanne\tests\ui\test_google_calendar_sync_component.py,10,1,95.0,,,OK
+test,assistant_matanne\tests\ui\test_header_layout.py,10,1,95.0,,,OK
+test,assistant_matanne\tests\ui\test_imports_ui.py,29,1,95.0,,,OK
+test,assistant_matanne\tests\ui\test_layouts_component.py,10,1,95.0,,,OK
+test,assistant_matanne\tests\ui\test_progress_feedback.py,10,1,95.0,,,OK
+test,assistant_matanne\tests\ui\test_sidebar_layout.py,10,1,95.0,,,OK
+test,assistant_matanne\tests\ui\test_spinners_feedback.py,10,1,95.0,,,OK
+test,assistant_matanne\tests\ui\test_tablet_mode.py,10,1,95.0,src\ui\tablet_mode.py,,OK
+test,assistant_matanne\tests\ui\test_tablet_mode_deep.py,593,37,95.0,src\ui\tablet_mode.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\ui\test_toasts_feedback.py,10,1,95.0,,,OK
+test,assistant_matanne\tests\core\test_logging.py,377,31,96.0,src\core\logging.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_budget_coverage.py,432,47,96.0,src\domains\famille\ui\budget_dashboard.py;src\services\budget_utils.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_pwa.py,273,31,96.0,src\services\pwa.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_recettes_utils.py,494,60,96.0,src\services\recettes_utils.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\api\test_main.py,115,5,97.0,src\api\main.py,,OK
+test,assistant_matanne\tests\services\test_backup_service.py,162,11,97.0,src\services\backup.py;src\services\backup_utils.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_push_notifications_utils.py,602,54,97.0,src\services\push_notifications_utils.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_services_coverage_80_part2.py,654,65,97.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_action_history.py,383,24,99.0,src\services\action_history.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_cache_multi.py,552,28,99.0,src\core\cache_multi.py,,OK
+test,assistant_matanne\tests\core\test_errors_deep.py,524,39,99.0,src\core\errors.py;src\core\errors_base.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_redis_cache_deep.py,612,45,99.0,src\core\redis_cache.py,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\planning\test_calendrier_unifie_logic_coverage.py,1454,114,99.0,src\domains\planning\logic\calendrier_unifie_logic.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_auth_comprehensive.py,612,50,99.0,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_types_coverage.py,1158,48,99.0,src\services\types.py,,OK
+test,assistant_matanne\tests\api\test_api_deep.py,1083,70,100,src\domains\jeux\logic\api_football.py;src\domains\jeux\logic\api_service.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_ai_agent.py,396,22,100,src\core\ai_agent.py,,OK
+test,assistant_matanne\tests\core\test_ai_client.py,374,14,100,,,OK
+test,assistant_matanne\tests\core\test_ai_parser_extended.py,364,23,100,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_ai_rate_limit.py,270,12,100,,,OK
+test,assistant_matanne\tests\core\test_app.py,62,3,100,src\app.py,,OK
+test,assistant_matanne\tests\core\test_cache_multi_deep.py,370,27,100,src\core\cache_multi.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_core_deep.py,793,86,100,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_core_utils.py,43,3,100,,,OK
+test,assistant_matanne\tests\core\test_coverage_80_boost.py,297,22,100,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_coverage_80_final.py,272,20,100,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_database_deep.py,598,39,100,src\core\database.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_database_extended.py,187,10,100,src\core\database.py,,OK
+test,assistant_matanne\tests\core\test_errors_advanced.py,498,43,100,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_errors_base.py,494,47,100,src\core\errors_base.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_lazy_loader_extended.py,310,18,100,src\core\lazy_loader.py,,OK
+test,assistant_matanne\tests\core\test_models_comprehensive.py,66,3,100,,,OK
+test,assistant_matanne\tests\core\test_models_recettes.py,547,23,100,,,OK
+test,assistant_matanne\tests\core\test_notifications.py,626,43,100,src\core\notifications.py;src\domains\cuisine\ui\inventaire\notifications.py;src\domains\utils\ui\notifications_push.py;src\services\notifications.py;src\services\notifications_push.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_notifications_deep.py,676,48,100,src\core\notifications.py;src\domains\cuisine\ui\inventaire\notifications.py;src\domains\utils\ui\notifications_push.py;src\services\notifications.py;src\services\notifications_push.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_offline.py,31,3,100,src\core\offline.py,,OK
+test,assistant_matanne\tests\core\test_offline_deep.py,350,27,100,src\core\offline.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_parser_ai.py,400,22,100,,,OK
+test,assistant_matanne\tests\core\test_performance.py,26,2,100,src\core\performance.py;src\core\performance_optimizations.py,,OK
+test,assistant_matanne\tests\core\test_performance_deep.py,376,23,100,src\core\performance.py;src\core\performance_optimizations.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_sql_optimizer_deep.py,304,25,100,src\core\sql_optimizer.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_state.py,483,34,100,src\core\state.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_validation_pydantic.py,506,40,100,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_validators_pydantic.py,206,21,100,src\core\validators_pydantic.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\core\test_validators_pydantic_deep.py,323,22,100,src\core\validators_pydantic.py,Densité tests très haute (tests superficiels?),OK
+test,tests\domains\cuisine\test_planificateur_repas_logic.py,466,27,100,src\domains\cuisine\logic\planificateur_repas_logic.py,,OK
+test,tests\domains\cuisine\test_planificateur_repas_logic_coverage.py,741,32,100,src\domains\cuisine\logic\planificateur_repas_logic.py,,OK
+test,tests\domains\cuisine\test_recettes_logic_coverage.py,703,34,100,src\domains\cuisine\logic\recettes_logic.py,,OK
+test,tests\domains\cuisine\test_schemas.py,257,19,100,src\domains\cuisine\logic\schemas.py;src\services\budget\schemas.py;src\services\calendar_sync\schemas.py,Densité tests très haute (tests superficiels?),OK
+test,domains\maison\ui\test_depenses.py,175,9,100,,,OK
+test,domains\maison\ui\test_depenses_comprehensive.py,572,29,100,,,OK
+test,tests\domains\planning\test_calendrier_unifie_logic.py,423,37,100,src\domains\planning\logic\calendrier_unifie_logic.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\e2e\test_complete_flows.py,333,11,100,,,OK
+test,assistant_matanne\tests\e2e\test_critical_paths.py,298,13,100,,,OK
+test,assistant_matanne\tests\e2e\test_domains_e2e.py,611,10,100,,,OK
+test,assistant_matanne\tests\e2e\test_main_flows.py,81,10,100,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_action_history_coverage.py,1035,53,100,src\services\action_history.py,,OK
+test,assistant_matanne\tests\services\test_backup_coverage.py,275,23,100,src\services\backup.py;src\services\backup_utils.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_barcode_coverage.py,833,47,100,src\domains\utils\logic\barcode_logic.py;src\domains\utils\ui\barcode.py;src\services\barcode.py,,OK
+test,assistant_matanne\tests\services\test_base_ai_service.py,201,10,100,src\services\base_ai_service.py,hasattr checks (ne teste pas la logique) (5x),OK
+test,assistant_matanne\tests\services\test_base_ai_service_coverage.py,815,37,100,src\services\base_ai_service.py,,OK
+test,assistant_matanne\tests\services\test_batch_cooking_full_coverage.py,1323,79,100,,,OK
+test,assistant_matanne\tests\services\test_batch_cooking_integration.py,1141,52,100,src\core\models\batch_cooking.py;src\domains\cuisine\logic\batch_cooking_logic.py;src\domains\cuisine\ui\batch_cooking_detaille.py;src\services\batch_cooking.py;src\services\batch_cooking_utils.py,hasattr checks (ne teste pas la logique) (7x),OK
+test,assistant_matanne\tests\services\test_batch_cooking_utils.py,569,86,100,src\services\batch_cooking_utils.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_budget_extra.py,373,19,100,,,OK
+test,assistant_matanne\tests\services\test_budget_utils.py,603,72,100,src\services\budget_utils.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_courses_intelligentes_coverage.py,811,44,100,src\services\courses_intelligentes.py,,OK
+test,assistant_matanne\tests\services\test_factures_ocr.py,296,15,100,,,OK
+test,assistant_matanne\tests\services\test_facture_ocr_coverage.py,671,45,100,src\services\facture_ocr.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_garmin_sync_coverage.py,1009,46,100,src\services\garmin_sync.py;src\services\garmin_sync_utils.py,,OK
+test,assistant_matanne\tests\services\test_inventaire_sqlite_int.py,700,43,100,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_notifications_coverage.py,879,52,100,src\core\notifications.py;src\domains\cuisine\ui\inventaire\notifications.py;src\domains\utils\ui\notifications_push.py;src\services\notifications.py;src\services\notifications_push.py,,OK
+test,assistant_matanne\tests\services\test_notifications_push_coverage.py,886,48,100,src\domains\utils\ui\notifications_push.py;src\services\notifications_push.py,,OK
+test,assistant_matanne\tests\services\test_openfoodfacts_coverage.py,643,38,100,src\services\openfoodfacts.py,,OK
+test,assistant_matanne\tests\services\test_pdf_export_coverage.py,908,43,100,src\services\pdf_export.py,,OK
+test,assistant_matanne\tests\services\test_pdf_export_db_methods.py,791,22,100,,,OK
+test,assistant_matanne\tests\services\test_planning_coverage.py,682,32,100,src\core\models\planning.py;src\domains\cuisine\logic\planning_logic.py;src\domains\cuisine\ui\courses\planning.py;src\services\planning.py;src\services\planning_unified.py;src\services\planning_utils.py,,OK
+test,assistant_matanne\tests\services\test_planning_unified_coverage.py,1210,58,100,src\services\planning_unified.py,,OK
+test,assistant_matanne\tests\services\test_predictions_coverage.py,860,36,100,src\domains\cuisine\ui\inventaire\predictions.py;src\services\predictions.py,,OK
+test,assistant_matanne\tests\services\test_predictions_service.py,184,10,100,src\domains\cuisine\ui\inventaire\predictions.py;src\services\predictions.py,,OK
+test,assistant_matanne\tests\services\test_rapports_pdf_generation.py,830,35,100,,,OK
+test,assistant_matanne\tests\services\test_realtime_sync_coverage.py,1487,69,100,src\services\realtime_sync.py,,OK
+test,assistant_matanne\tests\services\test_recettes_coverage.py,583,29,100,src\core\models\recettes.py;src\domains\cuisine\logic\recettes_logic.py;src\domains\cuisine\ui\recettes_import.py;src\services\recettes.py;src\services\recettes_utils.py,,OK
+test,assistant_matanne\tests\services\test_recettes_cov_boost.py,394,19,100,,hasattr checks (ne teste pas la logique) (6x),OK
+test,assistant_matanne\tests\services\test_services_coverage_80_part17.py,360,25,100,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_services_integration.py,214,14,100,,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\services\test_suggestions_ia_coverage.py,836,30,100,src\domains\cuisine\ui\courses\suggestions_ia.py;src\services\suggestions_ia.py;src\services\suggestions_ia_utils.py,,OK
+test,assistant_matanne\tests\services\test_user_preferences_coverage.py,720,37,100,src\core\models\user_preferences.py;src\services\user_preferences.py,,OK
+test,assistant_matanne\tests\services\test_weather_service.py,575,49,100,src\services\weather.py;src\services\weather_utils.py,Densité tests très haute (tests superficiels?),OK
+test,assistant_matanne\tests\ui\test_coverage_80_final.py,757,42,100,,,OK
+test,assistant_matanne\tests\ui\test_progress_deep.py,490,28,100,src\ui\feedback\progress.py,,OK
+test,assistant_matanne\tests\utils\test_media_deep.py,449,27,100,src\utils\media.py,Densité tests très haute (tests superficiels?),OK
+source,src\__init__.py,1,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\api\__init__.py,24,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\core\__init__.py,362,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\core\ai\__init__.py,36,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\core\ai\client.py,453,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\core\ai\parser.py,294,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\core\ai\rate_limit.py,161,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\core\models\__init__.py,299,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\core\models\famille.py,266,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\core\models\jeux.py,335,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\core\models\maison.py,236,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\core\models\maison_extended.py,392,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\core\models\nouveaux.py,538,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\core\models\sante.py,162,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\core\models\users.py,536,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\__init__.py,38,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\__init__.py,38,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\logic\__init__.py,9,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\ui\__init__.py,40,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\ui\courses\__init__.py,102,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\ui\courses\_common.py,45,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\ui\courses\historique.py,86,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\ui\courses\liste_active.py,323,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\ui\courses\modeles.py,151,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\ui\courses\outils.py,211,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\ui\courses\realtime.py,96,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\ui\inventaire\__init__.py,98,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\ui\inventaire\_common.py,65,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\ui\inventaire\alertes.py,53,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\ui\inventaire\categories.py,62,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\ui\inventaire\historique.py,107,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\ui\inventaire\photos.py,116,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\ui\inventaire\stock.py,199,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\ui\inventaire\suggestions.py,78,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\ui\inventaire\tools.py,210,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\ui\planificateur_repas\__init__.py,233,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\ui\planificateur_repas\_common.py,67,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\ui\planificateur_repas\components.py,285,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\ui\planificateur_repas\generation.py,42,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\ui\planificateur_repas\pdf.py,153,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\ui\planificateur_repas\preferences.py,153,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\ui\recettes\__init__.py,86,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\ui\recettes\ajout.py,191,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\ui\recettes\detail.py,432,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\ui\recettes\generation_ia.py,239,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\ui\recettes\generation_image.py,90,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\cuisine\ui\recettes\liste.py,318,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\famille\__init__.py,29,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\famille\logic\__init__.py,8,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\famille\ui\__init__.py,23,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\famille\ui\achats_famille\__init__.py,76,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\famille\ui\achats_famille\_common.py,46,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\famille\ui\achats_famille\components.py,284,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\famille\ui\jules\__init__.py,65,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\famille\ui\jules\_common.py,69,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\famille\ui\jules\ai_service.py,82,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\famille\ui\jules\components.py,255,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\famille\ui\suivi_perso\__init__.py,78,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\famille\ui\suivi_perso\_common.py,46,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\famille\ui\suivi_perso\activities.py,45,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\famille\ui\suivi_perso\alimentation.py,100,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\famille\ui\suivi_perso\dashboard.py,112,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\famille\ui\suivi_perso\settings.py,145,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\famille\ui\weekend\__init__.py,70,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\famille\ui\weekend\_common.py,47,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\famille\ui\weekend\ai_service.py,70,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\famille\ui\weekend\components.py,278,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\jeux\__init__.py,16,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\jeux\logic\__init__.py,7,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\jeux\logic\paris\__init__.py,87,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\jeux\logic\paris\analyseur.py,373,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\jeux\logic\paris\forme.py,249,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\jeux\logic\paris\prediction.py,360,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\jeux\logic\paris\stats.py,252,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\jeux\ui\__init__.py,5,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\jeux\ui\loto\__init__.py,116,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\jeux\ui\loto\_common.py,59,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\jeux\ui\loto\crud.py,98,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\jeux\ui\loto\generateur.py,168,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\jeux\ui\loto\simulation.py,173,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\jeux\ui\loto\statistiques.py,164,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\jeux\ui\loto\sync.py,101,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\jeux\ui\paris\__init__.py,239,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\jeux\ui\paris\_common.py,50,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\jeux\ui\paris\crud.py,145,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\jeux\ui\paris\dashboard.py,84,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\jeux\ui\paris\gestion.py,145,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\jeux\ui\paris\prediction.py,249,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\jeux\ui\paris\sync.py,240,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\maison\__init__.py,23,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\maison\logic\__init__.py,6,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\maison\ui\__init__.py,23,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\maison\ui\depenses\__init__.py,79,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\maison\ui\depenses\_common.py,57,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\maison\ui\depenses\components.py,303,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\maison\ui\depenses\crud.py,169,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\planning\__init__.py,15,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\planning\logic\__init__.py,6,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\planning\ui\__init__.py,45,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\planning\ui\calendrier_unifie\__init__.py,109,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\planning\ui\calendrier_unifie\_common.py,55,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\planning\ui\calendrier_unifie\components.py,370,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\planning\ui\calendrier_unifie\data.py,88,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\planning\ui\components\__init__.py,217,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\utils\__init__.py,15,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\utils\logic\__init__.py,6,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\domains\utils\ui\__init__.py,6,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\services\__init__.py,182,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\services\budget\__init__.py,54,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\services\budget\service.py,728,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\services\calendar_sync\__init__.py,52,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\services\calendar_sync\ical_generator.py,150,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\services\calendar_sync\service.py,961,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\ui\__init__.py,111,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\ui\components\__init__.py,58,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\ui\components\atoms.py,140,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\ui\components\camera_scanner.py,465,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\ui\components\dashboard_widgets.py,481,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\ui\components\data.py,203,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\ui\components\dynamic.py,204,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\ui\components\forms.py,154,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\ui\components\google_calendar_sync.py,206,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\ui\components\layouts.py,202,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\ui\core\__init__.py,21,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\ui\feedback\__init__.py,28,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\ui\feedback\spinners.py,76,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\ui\feedback\toasts.py,101,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\ui\layout\__init__.py,19,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\ui\layout\footer.py,39,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\ui\layout\header.py,38,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\ui\layout\sidebar.py,152,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\ui\layout\styles.py,94,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\utils\__init__.py,215,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\utils\formatters\__init__.py,104,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\utils\formatters\dates.py,194,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\utils\formatters\numbers.py,237,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\utils\formatters\text.py,130,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\utils\formatters\units.py,93,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\utils\helpers\__init__.py,187,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\utils\helpers\data.py,177,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\utils\helpers\dates.py,141,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\utils\helpers\food.py,134,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\utils\helpers\stats.py,142,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\utils\helpers\strings.py,141,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\utils\image_generator.py,605,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\utils\recipe_importer.py,410,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\utils\validators\__init__.py,93,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\utils\validators\common.py,162,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\utils\validators\dates.py,99,0,0,,Pas de test correspondant,CREATE_TESTS
+source,src\utils\validators\food.py,241,0,0,,Pas de test correspondant,CREATE_TESTS
