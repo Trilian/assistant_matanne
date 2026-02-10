@@ -381,7 +381,7 @@ class TestNotificationPushServiceSync:
 class TestNotificationPushServiceDBQueries:
     """Tests for database query methods - requires DB connection."""
     
-    @pytest.mark.skip(reason="Requires database connection - tested via integration tests")
+    @pytest.mark.skip(reason="Requires real DB - service init connects to DB")
     def test_obtenir_taches_en_retard_returns_list(self):
         """Test that obtenir_taches_en_retard returns a list (may be empty on error)."""
         from src.services.notifications_push import NotificationPushService
@@ -390,7 +390,7 @@ class TestNotificationPushServiceDBQueries:
         result = service.obtenir_taches_en_retard()
         assert isinstance(result, list)
     
-    @pytest.mark.skip(reason="Requires database connection")
+    @pytest.mark.skip(reason="Requires real DB - service init connects to DB")
     def test_obtenir_taches_du_jour_returns_list(self):
         """Test that obtenir_taches_du_jour returns a list (may be empty on error)."""
         from src.services.notifications_push import NotificationPushService
@@ -399,7 +399,7 @@ class TestNotificationPushServiceDBQueries:
         result = service.obtenir_taches_du_jour()
         assert isinstance(result, list)
     
-    @pytest.mark.skip(reason="Requires database connection")
+    @pytest.mark.skip(reason="Requires real DB - service init connects to DB")
     def test_obtenir_courses_urgentes_returns_list(self):
         """Test that obtenir_courses_urgentes returns a list (may be empty on error)."""
         from src.services.notifications_push import NotificationPushService
@@ -408,7 +408,7 @@ class TestNotificationPushServiceDBQueries:
         result = service.obtenir_courses_urgentes()
         assert isinstance(result, list)
     
-    @pytest.mark.skip(reason="Requires database connection")
+    @pytest.mark.skip(reason="Requires real DB - service init connects to DB")
     def test_db_methods_have_decorators(self):
         """Test that DB methods have the right decorators applied."""
         from src.services.notifications_push import NotificationPushService

@@ -191,7 +191,6 @@ class TestPlanningServiceInit:
 class TestPlanningServiceCRUD:
     """Tests for CRUD operations."""
     
-    @pytest.mark.skip(reason="Requires real DB session due to @with_cache decorator")
     def test_get_planning_by_id(self):
         """Test getting planning by ID."""
         from src.services.planning import PlanningService
@@ -219,7 +218,6 @@ class TestPlanningServiceCRUD:
         # The result depends on decorator behavior
         # The method was exercised
     
-    @pytest.mark.skip(reason="Requires real DB session due to @with_cache decorator")
     def test_get_planning_active(self):
         """Test getting active planning."""
         from src.services.planning import PlanningService
@@ -243,7 +241,6 @@ class TestPlanningServiceCRUD:
         
         result = service.get_planning(planning_id=None, db=mock_session)
     
-    @pytest.mark.skip(reason="Requires real DB session due to @with_cache decorator")
     def test_get_planning_complet(self):
         """Test getting complete planning with meals."""
         from src.services.planning import PlanningService
@@ -281,7 +278,6 @@ class TestPlanningServiceCRUD:
         
         result = service.get_planning_complet(planning_id=1, db=mock_session)
     
-    @pytest.mark.skip(reason="Requires real DB session due to @with_cache decorator")
     def test_get_planning_complet_not_found(self):
         """Test getting non-existent planning."""
         from src.services.planning import PlanningService

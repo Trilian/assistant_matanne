@@ -101,7 +101,7 @@ class PlanningService(BaseService[Planning], BaseAIService, PlanningAIMixin):
     # SECTION 1: CRUD & PLANNING (REFACTORED)
     # ═══════════════════════════════════════════════════════════
 
-    @with_cache(ttl=1800, key_func=lambda self, pid=None: f"planning_active")
+    @with_cache(ttl=1800, key_func=lambda self, planning_id=None, **kw: f"planning_active")
     @with_error_handling(default_return=None)
     @with_db_session
     def get_planning(self, planning_id: int | None = None, db: Session | None = None) -> Planning | None:
@@ -142,7 +142,7 @@ class PlanningService(BaseService[Planning], BaseAIService, PlanningAIMixin):
         
         return planning
 
-    @with_cache(ttl=1800, key_func=lambda self, pid: f"planning_full_{pid}")
+    @with_cache(ttl=1800, key_func=lambda self, planning_id, **kw: f"planning_full_{planning_id}")
     @with_error_handling(default_return=None)
     @with_db_session
     def get_planning_complet(self, planning_id: int, db: Session | None = None) -> dict[str, Any] | None:

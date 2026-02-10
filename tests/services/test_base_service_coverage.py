@@ -694,10 +694,6 @@ class TestBaseServiceCRUDWithMockedDb:
         
         assert len(result) == 2
 
-    @pytest.mark.skip(reason="SQLAlchemy validates ORDER BY expressions even with mocks")
-    def test_get_all_with_order_desc(self, base_service, mock_session):
-        """Test get_all avec tri descendant."""
-        pass
 
     def test_get_all_with_filters(self, base_service, mock_session):
         """Test get_all avec filtres."""
@@ -790,15 +786,6 @@ class TestAdvancedSearchWithMockedDb:
         
         assert isinstance(result, list)
 
-    @pytest.mark.skip(reason="SQLAlchemy validates filter expressions even with mocks")
-    def test_advanced_search_with_text_search(self, base_service, mock_session):
-        """Test recherche textuelle."""
-        pass
-
-    @pytest.mark.skip(reason="SQLAlchemy validates ORDER BY expressions even with mocks")
-    def test_advanced_search_with_sort(self, base_service, mock_session):
-        """Test recherche avec tri."""
-        pass
 
     def test_advanced_search_with_filters(self, base_service, mock_session):
         """Test recherche avec filtres."""
@@ -882,10 +869,6 @@ class TestBulkAndStatsWithMockedDb:
         assert "total" in result
         assert result["total"] == 100
 
-    @pytest.mark.skip(reason="SQLAlchemy validates GROUP BY expressions even with mocks")
-    def test_get_stats_with_group_by(self, base_service, mock_session):
-        """Test stats avec groupement."""
-        pass
 
     def test_get_stats_with_count_filters(self, base_service, mock_session):
         """Test stats avec compteurs conditionnels."""
@@ -900,10 +883,6 @@ class TestBulkAndStatsWithMockedDb:
             db=mock_session
         )
 
-    @pytest.mark.skip(reason="SQLAlchemy validates GROUP BY expressions even with mocks")
-    def test_count_by_status(self, base_service, mock_session):
-        """Test comptage par statut."""
-        pass
 
     @patch('src.services.base_service.Cache')
     def test_mark_as(self, mock_cache, base_service, mock_session):

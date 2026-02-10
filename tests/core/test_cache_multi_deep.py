@@ -242,15 +242,18 @@ class TestL2SessionCache:
     
     @pytest.fixture(autouse=True)
     def mock_streamlit(self):
-        """Mock streamlit session_state."""
-        import sys
-        mock_st = MagicMock()
-        mock_st.session_state = {}
+        """Mock streamlit session_state directement."""
+        import streamlit as st
         
-        with patch.dict(sys.modules, {'streamlit': mock_st}):
-            yield mock_st
+        # Sauvegarder l'état original si existe
+        had_key = hasattr(st, 'session_state') and isinstance(st.session_state, dict)
+        
+        # Créer un dict mock pour session_state
+        mock_state = {}
+        
+        with patch.object(st, 'session_state', mock_state):
+            yield mock_state
     
-    @pytest.mark.skip(reason="L2SessionCache import streamlit localement - mock difficile")
     def test_get_missing_returns_none(self, mock_streamlit):
         """get retourne None si clé absente."""
         from src.core.cache_multi import L2SessionCache
@@ -258,7 +261,6 @@ class TestL2SessionCache:
         cache = L2SessionCache()
         assert cache.get("nonexistent") is None
     
-    @pytest.mark.skip(reason="L2SessionCache import streamlit localement - mock difficile")
     def test_set_and_get(self, mock_streamlit):
         """set puis get fonctionne."""
         from src.core.cache_multi import L2SessionCache, CacheEntry
@@ -272,7 +274,6 @@ class TestL2SessionCache:
         assert result is not None
         assert result.value == {"data": "test"}
     
-    @pytest.mark.skip(reason="L2SessionCache import streamlit localement - mock difficile")
     def test_get_expired_returns_none(self, mock_streamlit):
         """get retourne None pour entrée expirée."""
         from src.core.cache_multi import L2SessionCache
@@ -280,7 +281,7 @@ class TestL2SessionCache:
         cache = L2SessionCache()
         
         # Ajouter directement une entrée expirée
-        mock_streamlit.session_state["_cache_l2_data"] = {
+        mock_streamlit["_cache_l2_data"] = {
             "expired": {
                 "value": "old",
                 "created_at": time.time() - 1000,
@@ -293,7 +294,6 @@ class TestL2SessionCache:
         result = cache.get("expired")
         assert result is None
     
-    @pytest.mark.skip(reason="L2SessionCache import streamlit localement - mock difficile")
     def test_remove(self, mock_streamlit):
         """remove supprime une entrée."""
         from src.core.cache_multi import L2SessionCache, CacheEntry
@@ -305,7 +305,6 @@ class TestL2SessionCache:
         
         assert cache.get("key1") is None
     
-    @pytest.mark.skip(reason="L2SessionCache import streamlit localement - mock difficile")
     def test_invalidate_by_pattern(self, mock_streamlit):
         """invalidate par pattern fonctionne."""
         from src.core.cache_multi import L2SessionCache, CacheEntry
@@ -319,7 +318,6 @@ class TestL2SessionCache:
         
         assert removed == 2
     
-    @pytest.mark.skip(reason="L2SessionCache import streamlit localement - mock difficile")
     def test_clear(self, mock_streamlit):
         """clear vide le cache."""
         from src.core.cache_multi import L2SessionCache, CacheEntry
@@ -331,7 +329,6 @@ class TestL2SessionCache:
         
         assert cache.size == 0
     
-    @pytest.mark.skip(reason="L2SessionCache import streamlit localement - mock difficile")
     def test_size_property(self, mock_streamlit):
         """size retourne le nombre d'entrées."""
         from src.core.cache_multi import L2SessionCache, CacheEntry
@@ -346,19 +343,28 @@ class TestL2SessionCache:
 class TestL2SessionCacheNoStreamlit:
     """Tests L2 sans contexte Streamlit."""
     
-    @pytest.mark.skip(reason="L2SessionCache import streamlit localement - mock difficile")
     def test_handles_no_streamlit_context(self):
         """Gère l'absence de Streamlit gracieusement."""
-        from src.core.cache_multi import L2SessionCache
+        from src.core.cache_multi import L2SessionCache, CacheEntry
+        import streamlit as st
         
-        with patch('src.core.cache_multi.st') as mock_st:
-            # Simuler erreur d'import
-            mock_st.session_state = None
-            type(mock_st).session_state = property(
-                lambda self: (_ for _ in ()).throw(Exception("No context"))
-            )
-            
+        # Simuler une erreur lors de l'accès à session_state
+        class RaisingState:
+            def __getitem__(self, key):
+                raise Exception("No ScriptRunContext")
+            def __setitem__(self, key, value):
+                raise Exception("No ScriptRunContext")
+            def __contains__(self, key):
+                raise Exception("No ScriptRunContext")
+            def get(self, key, default=None):
+                raise Exception("No ScriptRunContext")
+        
+        with patch.object(st, 'session_state', RaisingState()):
             cache = L2SessionCache()
             # Ne doit pas lever d'exception
             result = cache.get("key")
             assert result is None
+            
+            # set ne doit pas lever d'exception non plus  
+            cache.set("key", CacheEntry(value="test"))
+            # Pas d'exception = succès

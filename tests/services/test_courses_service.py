@@ -79,7 +79,6 @@ class TestCoursesServiceCRUD:
 class TestCoursesServiceListeCourses:
     """Tests pour get_liste_courses."""
     
-    @pytest.mark.skip(reason="Mock complexe - à revoir")
     def test_get_liste_courses_returns_list(self, courses_service):
         """get_liste_courses retourne toujours une liste."""
         with patch('src.core.database.obtenir_contexte_db') as mock_db:
@@ -149,17 +148,15 @@ class TestCoursesServiceSuggestionsIA:
         assert hasattr(courses_service, 'generer_suggestions_ia_depuis_inventaire')
         assert callable(courses_service.generer_suggestions_ia_depuis_inventaire)
     
-    @pytest.mark.skip(reason="Mock complexe sur les caches - à revoir")
     def test_generer_suggestions_ia_returns_list(self, courses_service):
         """Les suggestions IA retournent une liste."""
-        with patch('src.services.courses.get_inventaire_service') as mock_inv:
+        with patch('src.services.inventaire.get_inventaire_service') as mock_inv:
             mock_inv.return_value = None
             result = courses_service.generer_suggestions_ia_depuis_inventaire()
             # Avec inventaire_service None, retourne []
             assert isinstance(result, list)
     
-    @pytest.mark.skip(reason="Mock complexe sur les caches - à revoir")
-    @patch('src.services.courses.get_inventaire_service')
+    @patch('src.services.inventaire.get_inventaire_service')
     def test_generer_suggestions_ia_inventaire_vide(self, mock_inv, courses_service):
         """Suggestions avec inventaire vide."""
         mock_service = MagicMock()
@@ -281,7 +278,6 @@ class TestSuggestionCoursesSchema:
 # TESTS INTÉGRATION (avec mocks complets)
 # ═══════════════════════════════════════════════════════════
 
-@pytest.mark.skip(reason="Mocks complexes de BD - à améliorer ultérieurement")
 @pytest.mark.integration
 class TestCoursesServiceIntegration:
     """Tests d'intégration avec mocks."""
