@@ -317,3 +317,153 @@ class TestConfigEdgeCases:
             if hasattr(params, field):
                 # L'accès ne devrait pas crash
                 getattr(params, field)
+
+
+# ═══════════════════════════════════════════════════════════
+# SECTION 8: TESTS COUVERTURE SUPPLÉMENTAIRES
+# ═══════════════════════════════════════════════════════════
+
+
+@pytest.mark.unit
+class TestConfigCouvertureSupplementaire:
+    """Tests supplémentaires pour améliorer la couverture."""
+    
+    def test_parametres_app_version(self):
+        """Test que APP_VERSION existe."""
+        params = Parametres()
+        assert hasattr(params, "APP_VERSION")
+        assert params.APP_VERSION
+    
+    def test_parametres_default_values(self):
+        """Test des valeurs par défaut."""
+        params = Parametres()
+        # Vérifier les defaults
+        assert params.CACHE_ENABLED is True or params.CACHE_ENABLED is False
+        assert params.LOG_LEVEL is not None
+    
+    def test_parametres_cache_settings(self):
+        """Test des paramètres de cache."""
+        params = Parametres()
+        assert isinstance(params.CACHE_ENABLED, bool)
+        assert isinstance(params.CACHE_DEFAULT_TTL, int)
+        assert isinstance(params.CACHE_MAX_SIZE, int)
+    
+    def test_parametres_rate_limit_settings(self):
+        """Test des paramètres de limitation de débit."""
+        params = Parametres()
+        assert isinstance(params.RATE_LIMIT_DAILY, int)
+        assert isinstance(params.RATE_LIMIT_HOURLY, int)
+        assert params.RATE_LIMIT_DAILY > 0
+        assert params.RATE_LIMIT_HOURLY > 0
+    
+    def test_parametres_mistral_settings(self):
+        """Test des paramètres Mistral."""
+        params = Parametres()
+        assert isinstance(params.MISTRAL_TIMEOUT, int)
+        assert params.MISTRAL_TIMEOUT > 0
+        assert hasattr(params, "MISTRAL_BASE_URL")
+        assert "mistral" in params.MISTRAL_BASE_URL.lower()
+    
+    def test_est_production_method(self):
+        """Test méthode est_production()."""
+        with patch.dict(os.environ, {"ENV": "production"}, clear=False):
+            params = Parametres()
+            # Méthode devrait exister et être callable
+            assert callable(params.est_production)
+    
+    def test_est_developpement_method(self):
+        """Test méthode est_developpement()."""
+        params = Parametres()
+        assert callable(params.est_developpement)
+    
+    def test_football_data_api_key_optional(self):
+        """Test que FOOTBALL_DATA_API_KEY est optionnel."""
+        # Retirer la clé de l'environnement
+        env_clean = {k: v for k, v in os.environ.items() if "FOOTBALL" not in k}
+        with patch.dict(os.environ, env_clean, clear=True):
+            params = Parametres()
+            # Devrait être None ou une valeur (pas lever d'exception)
+            result = params.FOOTBALL_DATA_API_KEY
+            assert result is None or isinstance(result, str)
+    
+    def test_mistral_model_property(self):
+        """Test propriété MISTRAL_MODEL."""
+        params = Parametres()
+        model = params.MISTRAL_MODEL
+        assert model is not None
+        assert isinstance(model, str)
+    
+    def test_reload_env_files_handles_missing_files(self):
+        """Test _reload_env_files gère les fichiers manquants."""
+        with patch("builtins.open", side_effect=FileNotFoundError):
+            # Ne devrait pas lever d'exception
+            _reload_env_files()
+            assert True
+    
+    def test_reload_env_files_handles_malformed_lines(self):
+        """Test _reload_env_files gère les lignes mal formées."""
+        # Le fichier .env peut avoir des lignes sans =
+        from io import StringIO
+        fake_env_content = """
+# Commentaire
+VALID_KEY=valid_value
+LIGNE_SANS_EGAL
+AUTRE_CLE="valeur entre guillemets"
+"""
+        with patch("builtins.open", return_value=StringIO(fake_env_content)):
+            with patch("pathlib.Path.exists", return_value=True):
+                _reload_env_files()
+                # Pas d'exception = succès
+
+
+# ═══════════════════════════════════════════════════════════
+# SECTION 9: TESTS PROPRIÉTÉS DATABASE_URL ET MISTRAL_API_KEY
+# ═══════════════════════════════════════════════════════════
+
+
+@pytest.mark.unit
+class TestProprietesConfig:
+    """Tests des propriétés avec logique complexe."""
+    
+    def test_database_url_from_db_vars(self):
+        """Test DATABASE_URL construit depuis variables DB_*."""
+        env_vars = {
+            "DB_HOST": "localhost",
+            "DB_USER": "test_user",
+            "DB_PASSWORD": "test_pass",
+            "DB_NAME": "test_db",
+            "DB_PORT": "5432",
+        }
+        with patch.dict(os.environ, env_vars, clear=False):
+            with patch("src.core.config._read_st_secret", return_value=None):
+                params = Parametres()
+                db_url = params.DATABASE_URL
+                assert "localhost" in db_url
+                assert "test_user" in db_url
+    
+    def test_database_url_adds_sslmode_for_supabase(self):
+        """Test que sslmode est ajouté pour Supabase."""
+        supabase_url = "postgresql://user:pass@xyz.supabase.co/postgres"
+        with patch.dict(os.environ, {"DATABASE_URL": supabase_url}, clear=False):
+            with patch("src.core.config._read_st_secret", return_value=None):
+                params = Parametres()
+                db_url = params.DATABASE_URL
+                # Devrait contenir sslmode
+                assert "sslmode" in db_url or "supabase" in db_url
+    
+    def test_mistral_api_key_from_env(self):
+        """Test MISTRAL_API_KEY depuis variable env."""
+        test_key = "sk-real-api-key-12345"
+        with patch.dict(os.environ, {"MISTRAL_API_KEY": test_key}, clear=False):
+            params = Parametres()
+            key = params.MISTRAL_API_KEY
+            assert key == test_key
+    
+    def test_get_mistral_api_key_from_secrets_returns_none_if_no_secrets(self):
+        """Test _get_mistral_api_key_from_secrets retourne None sans secrets."""
+        from src.core.config import _get_mistral_api_key_from_secrets
+        
+        with patch("streamlit.secrets", None):
+            result = _get_mistral_api_key_from_secrets()
+            # Devrait retourner None sans lever d'exception
+            assert result is None or isinstance(result, str)

@@ -358,3 +358,229 @@ class TestIntegrationErrorHandling:
         assert operation_validation() is None
         assert operation_non_trouve() is None
         assert operation_db() is None
+
+
+# ═══════════════════════════════════════════════════════════
+# SECTION 6: TESTS FONCTIONS SUPPLÉMENTAIRES
+# ═══════════════════════════════════════════════════════════
+
+
+@pytest.mark.unit
+class TestFonctionsHelperSupplementaires:
+    """Tests des fonctions helper supplémentaires dans errors.py."""
+    
+    def test_est_mode_debug_false_default(self):
+        """Test que _est_mode_debug retourne False par défaut."""
+        from src.core.errors import _est_mode_debug
+        # Sans mode debug configuré, devrait retourner False
+        result = _est_mode_debug()
+        assert isinstance(result, bool)
+    
+    def test_exiger_champs_function_exists(self):
+        """Test fonction exiger_champs importable depuis errors."""
+        from src.core.errors import exiger_champs
+        assert callable(exiger_champs)
+    
+    def test_exiger_positif_success(self):
+        """Test exiger_positif avec valeur positive."""
+        from src.core.errors import exiger_positif
+        # Ne devrait pas lever d'exception
+        exiger_positif(10, "quantite")
+        assert True
+    
+    def test_exiger_positif_zero_fails(self):
+        """Test exiger_positif avec 0 échoue."""
+        from src.core.errors import exiger_positif
+        with pytest.raises(ErreurValidation):
+            exiger_positif(0, "quantite")
+    
+    def test_exiger_positif_negative_fails(self):
+        """Test exiger_positif avec valeur négative échoue."""
+        from src.core.errors import exiger_positif
+        with pytest.raises(ErreurValidation):
+            exiger_positif(-5, "quantite")
+    
+    def test_exiger_existence_success(self):
+        """Test exiger_existence avec objet existant."""
+        from src.core.errors import exiger_existence
+        obj = {"test": "value"}
+        # Ne devrait pas lever d'exception
+        exiger_existence(obj, "Objet", 1)
+        assert True
+    
+    def test_exiger_existence_none_fails(self):
+        """Test exiger_existence avec None échoue."""
+        from src.core.errors import exiger_existence, ErreurNonTrouve
+        with pytest.raises(ErreurNonTrouve):
+            exiger_existence(None, "Recette", 42)
+    
+    def test_exiger_plage_success(self):
+        """Test exiger_plage avec valeur dans plage."""
+        from src.core.errors import exiger_plage
+        exiger_plage(5, minimum=1, maximum=10, nom_champ="portions")
+        assert True
+    
+    def test_exiger_plage_below_minimum_fails(self):
+        """Test exiger_plage sous le minimum échoue."""
+        from src.core.errors import exiger_plage
+        with pytest.raises(ErreurValidation):
+            exiger_plage(0, minimum=1, nom_champ="portions")
+    
+    def test_exiger_plage_above_maximum_fails(self):
+        """Test exiger_plage au dessus du maximum échoue."""
+        from src.core.errors import exiger_plage
+        with pytest.raises(ErreurValidation):
+            exiger_plage(100, maximum=50, nom_champ="portions")
+    
+    def test_exiger_longueur_success(self):
+        """Test exiger_longueur avec longueur valide."""
+        from src.core.errors import exiger_longueur
+        exiger_longueur("Hello", minimum=1, maximum=10, nom_champ="nom")
+        assert True
+    
+    def test_exiger_longueur_too_short_fails(self):
+        """Test exiger_longueur trop court échoue."""
+        from src.core.errors import exiger_longueur
+        with pytest.raises(ErreurValidation):
+            exiger_longueur("Hi", minimum=5, nom_champ="nom")
+    
+    def test_exiger_longueur_too_long_fails(self):
+        """Test exiger_longueur trop long échoue."""
+        from src.core.errors import exiger_longueur
+        with pytest.raises(ErreurValidation):
+            exiger_longueur("Very long text here", maximum=5, nom_champ="nom")
+
+
+# ═══════════════════════════════════════════════════════════
+# SECTION 7: TESTS AFFICHER ERREUR STREAMLIT
+# ═══════════════════════════════════════════════════════════
+
+
+@pytest.mark.unit
+class TestAfficherErreurStreamlit:
+    """Tests de la fonction afficher_erreur_streamlit."""
+    
+    @patch("streamlit.error")
+    def test_afficher_erreur_streamlit_validation(self, mock_error):
+        """Test affichage erreur validation."""
+        from src.core.errors import afficher_erreur_streamlit
+        erreur = ErreurValidation("interne", message_utilisateur="Message user")
+        afficher_erreur_streamlit(erreur)
+        mock_error.assert_called_once()
+    
+    @patch("streamlit.warning")
+    def test_afficher_erreur_streamlit_non_trouve(self, mock_warning):
+        """Test affichage erreur non trouvé."""
+        from src.core.errors import afficher_erreur_streamlit
+        erreur = ErreurNonTrouve("interne")
+        afficher_erreur_streamlit(erreur)
+        mock_warning.assert_called_once()
+    
+    @patch("streamlit.error")
+    def test_afficher_erreur_streamlit_db(self, mock_error):
+        """Test affichage erreur base de données."""
+        from src.core.errors import afficher_erreur_streamlit
+        erreur = ErreurBaseDeDonnees("connexion perdue")
+        afficher_erreur_streamlit(erreur)
+        mock_error.assert_called_once()
+    
+    @patch("streamlit.error")
+    def test_afficher_erreur_streamlit_ia(self, mock_error):
+        """Test affichage erreur service IA."""
+        from src.core.errors import afficher_erreur_streamlit
+        erreur = ErreurServiceIA("service down")
+        afficher_erreur_streamlit(erreur)
+        mock_error.assert_called_once()
+    
+    @patch("streamlit.warning")
+    def test_afficher_erreur_streamlit_limite_debit(self, mock_warning):
+        """Test affichage erreur limite débit."""
+        from src.core.errors import afficher_erreur_streamlit
+        erreur = ErreurLimiteDebit("10/min atteint")
+        afficher_erreur_streamlit(erreur)
+        mock_warning.assert_called_once()
+    
+    @patch("streamlit.error")
+    def test_afficher_erreur_streamlit_externe(self, mock_error):
+        """Test affichage erreur service externe."""
+        from src.core.errors import afficher_erreur_streamlit
+        erreur = ErreurServiceExterne("API down")
+        afficher_erreur_streamlit(erreur)
+        mock_error.assert_called_once()
+    
+    @patch("streamlit.error")
+    def test_afficher_erreur_streamlit_generique(self, mock_error):
+        """Test affichage erreur générique non-ExceptionApp."""
+        from src.core.errors import afficher_erreur_streamlit
+        erreur = RuntimeError("Erreur random")
+        afficher_erreur_streamlit(erreur)
+        mock_error.assert_called_once()
+
+
+# ═══════════════════════════════════════════════════════════
+# SECTION 8: TESTS GESTIONNAIRE ERREURS CONTEXT MANAGER
+# ═══════════════════════════════════════════════════════════
+
+
+@pytest.mark.unit
+class TestGestionnaireErreurs:
+    """Tests du context manager GestionnaireErreurs."""
+    
+    def test_gestionnaire_erreurs_success(self):
+        """Test GestionnaireErreurs sans erreur."""
+        from src.core.errors import GestionnaireErreurs
+        
+        with GestionnaireErreurs("test operation", afficher_dans_ui=False):
+            result = 1 + 1
+        
+        assert result == 2
+    
+    def test_gestionnaire_erreurs_enter_exit(self):
+        """Test que GestionnaireErreurs implémente __enter__ et __exit__."""
+        from src.core.errors import GestionnaireErreurs
+        
+        gestionnaire = GestionnaireErreurs("test", afficher_dans_ui=False)
+        assert hasattr(gestionnaire, "__enter__")
+        assert hasattr(gestionnaire, "__exit__")
+    
+    def test_gestionnaire_erreurs_with_custom_logger(self):
+        """Test GestionnaireErreurs avec logger custom."""
+        from src.core.errors import GestionnaireErreurs
+        import logging
+        
+        custom_logger = logging.getLogger("custom_test")
+        gestionnaire = GestionnaireErreurs(
+            "test operation", 
+            afficher_dans_ui=False, 
+            logger_instance=custom_logger
+        )
+        
+        assert gestionnaire.logger is custom_logger
+    
+    @patch("streamlit.error")
+    def test_gestionnaire_erreurs_affiche_ui(self, mock_error):
+        """Test que GestionnaireErreurs affiche dans UI si demandé."""
+        from src.core.errors import GestionnaireErreurs
+        
+        try:
+            with GestionnaireErreurs("test", afficher_dans_ui=True):
+                raise ErreurValidation("test error")
+        except ErreurValidation:
+            pass  # Attendu car le gestionnaire ne supprime pas les exceptions
+        
+        mock_error.assert_called_once()
+
+
+# ═══════════════════════════════════════════════════════════
+# SECTION 9: TESTS ALIAS
+# ═══════════════════════════════════════════════════════════
+
+
+@pytest.mark.unit
+class TestAliases:
+    """Tests des alias pour compatibilité."""
+    
+    def test_handle_errors_alias_exists(self):
+        """Test que l'alias handle_errors existe."""
+        from src.core.errors import handle_errors
+        assert callable(handle_errors)

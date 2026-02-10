@@ -331,13 +331,13 @@ class SynchroniseurHorsLigne:
                     FileAttenteHorsLigne.remove(op.id)
                     results["success"] += 1
                 else:
-                    FileAttenteHorsLigne.update_retry(op.id, "Échec synchronisation")
+                    FileAttenteHorsLigne.mettre_a_jour_tentative(op.id, "Échec synchronisation")
                     results["failed"] += 1
                     
             except Exception as e:
                 error_msg = f"{op.model_name}/{op.operation_type.value}: {str(e)}"
                 results["errors"].append(error_msg)
-                FileAttenteHorsLigne.update_retry(op.id, str(e))
+                FileAttenteHorsLigne.mettre_a_jour_tentative(op.id, str(e))
                 results["failed"] += 1
                 
                 logger.error(f"Erreur sync opération {op.id}: {e}")
@@ -436,7 +436,7 @@ def avec_mode_hors_ligne(model_name: str, operation_type: TypeOperation = TypeOp
                 except Exception as e:
                     # Si erreur de connexion, passer en offline
                     if "connection" in str(e).lower() or "timeout" in str(e).lower():
-                        GestionnaireConnexion.handle_connection_error(e)
+                        GestionnaireConnexion.gerer_erreur_connexion(e)
                     else:
                         raise
             

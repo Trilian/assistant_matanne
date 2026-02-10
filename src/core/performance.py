@@ -264,7 +264,7 @@ class MoniteurMemoire:
     @classmethod
     def prendre_instantane(cls, label: str = "snapshot") -> dict:
         """Prend un snapshot mémoire."""
-        usage = cls.get_current_usage()
+        usage = cls.obtenir_utilisation_courante()
         usage["label"] = label
         usage["timestamp"] = datetime.now().isoformat()
         
@@ -293,7 +293,7 @@ class MoniteurMemoire:
         Returns:
             Dict avec objets collectés et mémoire libérée
         """
-        before = cls.get_current_usage()
+        before = cls.obtenir_utilisation_courante()
         
         # Forcer garbage collection
         collected = gc.collect()
@@ -306,7 +306,7 @@ class MoniteurMemoire:
         except Exception:
             pass
         
-        after = cls.get_current_usage()
+        after = cls.obtenir_utilisation_courante()
         
         freed_mb = before["current_mb"] - after["current_mb"]
         
@@ -418,7 +418,7 @@ def suivre_requete(query_description: str):
         yield
     finally:
         duration_ms = (time.perf_counter() - start) * 1000
-        OptimiseurSQL.record_query(query_description, duration_ms, rows)
+        OptimiseurSQL.enregistrer_query(query_description, duration_ms, rows)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -449,7 +449,7 @@ class TableauBordPerformance:
         slowest = ProfileurFonction.obtenir_plus_lentes(5)
         
         # Stats mémoire
-        memory = MoniteurMemoire.get_current_usage()
+        memory = MoniteurMemoire.obtenir_utilisation_courante()
         
         # Stats SQL
         sql_stats = OptimiseurSQL.obtenir_statistiques()
@@ -564,7 +564,7 @@ def afficher_panneau_performance():
                 )
             
             if st.button("🧹 Nettoyer mémoire", key="cleanup_mem"):
-                result = MoniteurMemoire.force_cleanup()
+                result = MoniteurMemoire.forcer_nettoyage()
                 st.success(f"Libéré: {result['memory_freed_mb']}MB")
         
         with tab3:
@@ -590,7 +590,7 @@ def afficher_badge_mini_performance():
     """Badge compact pour la barre latérale."""
     
     score, status = TableauBordPerformance.obtenir_score_sante()
-    memory = MoniteurMemoire.get_current_usage()
+    memory = MoniteurMemoire.obtenir_utilisation_courante()
     
     st.markdown(
         f'<div style="display: flex; justify-content: space-between; '
@@ -634,13 +634,13 @@ class ChargeurComposant:
         """
         # Vérifier si déjà chargé
         if component_id in cls._loaded:
-            with measure_time(f"component_{component_id}"):
+            with mesurer_temps(f"component_{component_id}"):
                 loader_func()
             return
         
         # Premier rendu - charger avec feedback
         with st.spinner(placeholder_text):
-            with measure_time(f"component_{component_id}_initial"):
+            with mesurer_temps(f"component_{component_id}_initial"):
                 loader_func()
         
         cls._loaded.add(component_id)
@@ -648,7 +648,7 @@ class ChargeurComposant:
     @classmethod
     def reset(cls):
         """Reset le tracker de composants."""
-        cls._loaded.effacer()
+        cls._loaded.clear()
 
 
 def antirrebond(wait_ms: int = 300):
@@ -735,13 +735,13 @@ __all__ = [
     "TableauBordPerformance",
     "ChargeurComposant",
     # Décorateurs
-    "profile",
-    "debounce",
-    "throttle",
+    "profiler",
+    "antirrebond",
+    "limiter_debit",
     # Context managers
-    "measure_time",
-    "track_query",
+    "mesurer_temps",
+    "suivre_requete",
     # UI
-    "render_performance_panel",
-    "render_mini_performance_badge",
+    "afficher_panneau_performance",
+    "afficher_badge_mini_performance",
 ]
