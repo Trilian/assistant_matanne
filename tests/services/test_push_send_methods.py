@@ -63,7 +63,7 @@ class TestSendNotification:
         """Envoi sans abonnements retourne False."""
         push_service._subscriptions = {}
         
-        with patch('src.services.push_notifications.should_send_notification', return_value=True):
+        with patch('src.services.push_notifications.should_send_notification', return_value=(True, "")):
             result = push_service.send_notification("no_user", test_notification)
         
         assert result == False
@@ -74,7 +74,7 @@ class TestSendNotification:
         
         # Mock _send_web_push et should_send_notification
         with patch.object(push_service, '_send_web_push', return_value=True):
-            with patch('src.services.push_notifications.should_send_notification', return_value=True):
+            with patch('src.services.push_notifications.should_send_notification', return_value=(True, "")):
                 result = push_service.send_notification("user_test", test_notification)
         
         assert result == True
@@ -83,7 +83,7 @@ class TestSendNotification:
         """Envoi avec préférences désactivées par should_send."""
         push_service._subscriptions = {"user_test": [test_subscription]}
         
-        with patch('src.services.push_notifications.should_send_notification', return_value=False):
+        with patch('src.services.push_notifications.should_send_notification', return_value=(False, "Disabled")):
             result = push_service.send_notification("user_test", test_notification)
         
         assert result == False
@@ -92,7 +92,7 @@ class TestSendNotification:
         """Envoi gère les erreurs de push."""
         push_service._subscriptions = {"user_test": [test_subscription]}
         
-        with patch('src.services.push_notifications.should_send_notification', return_value=True):
+        with patch('src.services.push_notifications.should_send_notification', return_value=(True, "")):
             with patch.object(push_service, '_send_web_push', side_effect=Exception("Network error")):
                 result = push_service.send_notification("user_test", test_notification)
         
@@ -103,7 +103,7 @@ class TestSendNotification:
         """Envoi désactive abonnement sur erreur 410."""
         push_service._subscriptions = {"user_test": [test_subscription]}
         
-        with patch('src.services.push_notifications.should_send_notification', return_value=True):
+        with patch('src.services.push_notifications.should_send_notification', return_value=(True, "")):
             with patch.object(push_service, '_send_web_push', side_effect=Exception("410 Gone")):
                 push_service.send_notification("user_test", test_notification)
         
