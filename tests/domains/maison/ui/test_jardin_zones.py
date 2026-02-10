@@ -16,7 +16,7 @@ from datetime import date
 from decimal import Decimal
 
 import src.domains.maison.ui.jardin_zones as jardin_zones
-from src.core.models.maison_extended import GardenZone
+from src.core.models.jardin import GardenZone
 
 @pytest.fixture
 def fake_zone_dict():

@@ -19,7 +19,7 @@ from src.services.budget import (
     BudgetMensuel,
     get_budget_service,
 )
-from src.core.models.nouveaux import Depense as DepenseDB
+from src.core.models.finances import Depense as DepenseDB
 
 
 # ═══════════════════════════════════════════════════════════

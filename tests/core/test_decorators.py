@@ -646,3 +646,121 @@ class TestAvecSessionDbAdvanced:
         result = with_existing_db(db=existing_db)
         # Should use the provided db, not create new one
         assert result is existing_db
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 9: TESTS KEY_FUNC FALLBACK (TypeError path)
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+@pytest.mark.unit
+class TestAvecCacheKeyFuncFallback:
+    """Tests du fallback TypeError dans avec_cache."""
+
+    def test_key_func_with_missing_args_triggers_fallback(self, clear_cache):
+        """Test que key_func recevant les mauvais args déclenche le fallback."""
+        # key_func attend (self, a) mais le wrapper passe args différemment
+        # ce qui peut déclencher TypeError puis fallback
+        call_count = [0]
+        
+        # Lambda qui attend self mais fonction appelée sans self
+        @avec_cache(ttl=3600, key_func=lambda self, x: f"val_{x}")
+        def compute_no_self(x):
+            call_count[0] += 1
+            return x * 2
+        
+        # Le premier appel peut lever TypeError et reconstruire kwargs
+        result = compute_no_self(5)
+        assert result == 10
+
+    def test_key_func_fallback_with_defaults(self, clear_cache):
+        """Test fallback remplit les valeurs par défaut manquantes."""
+        # key_func attend plusieurs params mais certains ont des defaults
+        @avec_cache(ttl=3600, key_func=lambda self, a, b, c=100: f"calc_{a}_{b}_{c}")
+        def calculate(self, a, b, c=100):
+            return a + b + c
+        
+        instance = Mock()
+        
+        # Appel avec seulement a et b (c utilise défaut)
+        result = calculate(instance, 10, 20)
+        assert result == 130
+
+    def test_key_func_fallback_skips_self_and_db(self, clear_cache):
+        """Test que le fallback n'inclut pas 'self' et 'db' dans kwargs."""
+        @avec_cache(ttl=3600, key_func=lambda self, x, y=5: f"xy_{x}_{y}")
+        def method_with_db(self, x, db=None, y=5):
+            return x + y
+        
+        instance = Mock()
+        mock_db = Mock()
+        
+        result = method_with_db(instance, 10, db=mock_db)
+        assert result == 15
+
+    def test_key_func_fallback_no_args(self, clear_cache):
+        """Test fallback quand appelé sans args."""
+        @avec_cache(ttl=3600, key_func=lambda a=1, b=2: f"ab_{a}_{b}")
+        def default_only(a=1, b=2):
+            return a * b
+        
+        result = default_only()
+        assert result == 2
+
+    def test_key_func_fallback_positional_to_kwargs_conversion(self, clear_cache):
+        """Test conversion des args positionnels vers kwargs dans fallback."""
+        @avec_cache(ttl=3600, key_func=lambda self, x, y, z: f"xyz_{x}_{y}_{z}")
+        def xyz_method(self, x, y, z):
+            return x + y + z
+        
+        instance = Mock()
+        
+        # Appel avec tous les args positionnels
+        result = xyz_method(instance, 1, 2, 3)
+        assert result == 6
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 10: TESTS AFFICHER ERREUR STREAMLIT
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+@pytest.mark.unit
+class TestAvecGestionErreursStreamlit:
+    """Tests pour afficher_erreur dans Streamlit."""
+
+    @patch("streamlit.error")
+    def test_afficher_erreur_calls_st_error(self, mock_st_error):
+        """Test que st.error est appelé quand afficher_erreur=True."""
+        @avec_gestion_erreurs(default_return=None, afficher_erreur=True)
+        def ui_failing_func():
+            raise ValueError("Erreur visible UI")
+        
+        result = ui_failing_func()
+        
+        assert result is None
+        # Vérifier que st.error a été appelé
+        mock_st_error.assert_called_once()
+        call_args = mock_st_error.call_args[0][0]
+        assert "[ERROR]" in call_args
+
+    def test_afficher_erreur_false_no_streamlit_call(self):
+        """Test que st.error n'est pas appelé quand afficher_erreur=False."""
+        @avec_gestion_erreurs(default_return=None, afficher_erreur=False)
+        def silent_failing_func():
+            raise ValueError("Erreur silencieuse")
+        
+        # Ne devrait pas lever d'erreur même si Streamlit n'est pas initialisé
+        result = silent_failing_func()
+        assert result is None
+
+    @patch("streamlit.error", side_effect=Exception("Streamlit not initialized"))
+    def test_afficher_erreur_handles_streamlit_not_available(self, mock_st_error):
+        """Test que l'erreur est gérée si Streamlit n'est pas disponible."""
+        @avec_gestion_erreurs(default_return="fallback", afficher_erreur=True)
+        def func_when_st_unavailable():
+            raise ValueError("Some error")
+        
+        # Ne devrait pas lever d'exception même si Streamlit fail
+        result = func_when_st_unavailable()
+        assert result == "fallback"

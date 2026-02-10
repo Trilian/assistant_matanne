@@ -372,3 +372,338 @@ class TestClientIAIntegration:
         
         assert reponse == "Réponse API"
         mock_cache_store.assert_called_once()
+
+
+# ═══════════════════════════════════════════════════════════
+# SECTION 7: TESTS GENERER JSON
+# ═══════════════════════════════════════════════════════════
+
+
+@pytest.mark.unit
+class TestClientIAGenererJson:
+    """Tests pour generer_json() - wrapper synchrone."""
+
+    @patch('src.core.ai.client.obtenir_parametres')
+    def test_generer_json_success(self, mock_params):
+        """Test génération JSON réussie."""
+        mock_params.return_value = MagicMock(
+            MISTRAL_API_KEY="test_key",
+            MISTRAL_MODEL="mistral-small",
+            MISTRAL_BASE_URL="https://api.mistral.ai/v1",
+            MISTRAL_TIMEOUT=30,
+        )
+        
+        client = ClientIA()
+        
+        # Mock l'appel async
+        with patch.object(client, 'appeler', new_callable=AsyncMock) as mock_appeler:
+            mock_appeler.return_value = '{"recette": "Tarte aux pommes", "portions": 6}'
+            
+            result = client.generer_json("Génère une recette")
+            
+            assert result is not None
+            assert isinstance(result, dict)
+            assert result["recette"] == "Tarte aux pommes"
+            assert result["portions"] == 6
+
+    @patch('src.core.ai.client.obtenir_parametres')
+    def test_generer_json_with_code_blocks(self, mock_params):
+        """Test parsing JSON avec blocs de code markdown."""
+        mock_params.return_value = MagicMock(
+            MISTRAL_API_KEY="test_key",
+            MISTRAL_MODEL="mistral-small",
+            MISTRAL_BASE_URL="https://api.mistral.ai/v1",
+            MISTRAL_TIMEOUT=30,
+        )
+        
+        client = ClientIA()
+        
+        with patch.object(client, 'appeler', new_callable=AsyncMock) as mock_appeler:
+            mock_appeler.return_value = '```json\n{"nom": "Test"}\n```'
+            
+            result = client.generer_json("Test")
+            
+            assert result is not None
+            assert result["nom"] == "Test"
+
+    @patch('src.core.ai.client.obtenir_parametres')
+    def test_generer_json_invalid_json(self, mock_params):
+        """Test retour None si JSON invalide."""
+        mock_params.return_value = MagicMock(
+            MISTRAL_API_KEY="test_key",
+            MISTRAL_MODEL="mistral-small",
+            MISTRAL_BASE_URL="https://api.mistral.ai/v1",
+            MISTRAL_TIMEOUT=30,
+        )
+        
+        client = ClientIA()
+        
+        with patch.object(client, 'appeler', new_callable=AsyncMock) as mock_appeler:
+            mock_appeler.return_value = 'Ceci nest pas du JSON valide {'
+            
+            result = client.generer_json("Test")
+            
+            # JSON invalide retourne la réponse brute ou None
+            assert result is None or isinstance(result, str)
+
+    @patch('src.core.ai.client.obtenir_parametres')
+    def test_generer_json_error_returns_none(self, mock_params):
+        """Test retour None en cas d'erreur."""
+        mock_params.return_value = MagicMock(
+            MISTRAL_API_KEY="test_key",
+            MISTRAL_MODEL="mistral-small",
+            MISTRAL_BASE_URL="https://api.mistral.ai/v1",
+            MISTRAL_TIMEOUT=30,
+        )
+        
+        client = ClientIA()
+        
+        with patch.object(client, 'appeler', new_callable=AsyncMock) as mock_appeler:
+            mock_appeler.side_effect = Exception("Erreur réseau")
+            
+            result = client.generer_json("Test")
+            
+            assert result is None
+
+
+# ═══════════════════════════════════════════════════════════
+# SECTION 8: TESTS CHAT WITH VISION (OCR)
+# ═══════════════════════════════════════════════════════════
+
+
+@pytest.mark.unit
+class TestClientIAChatWithVision:
+    """Tests pour chat_with_vision() - OCR."""
+
+    @pytest.mark.asyncio
+    @patch('src.core.ai.client.obtenir_parametres')
+    @patch('src.core.ai.client.httpx.AsyncClient')
+    async def test_chat_with_vision_success(self, mock_async_client, mock_params):
+        """Test appel vision réussi."""
+        mock_params.return_value = MagicMock(
+            MISTRAL_API_KEY="test_key",
+            MISTRAL_MODEL="mistral-small",
+            MISTRAL_BASE_URL="https://api.mistral.ai/v1",
+            MISTRAL_TIMEOUT=30,
+        )
+        
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "choices": [{"message": {"content": "Texte extrait de l'image"}}]
+        }
+        mock_response.raise_for_status = MagicMock()
+        
+        mock_client_instance = AsyncMock()
+        mock_client_instance.post = AsyncMock(return_value=mock_response)
+        mock_client_instance.__aenter__ = AsyncMock(return_value=mock_client_instance)
+        mock_client_instance.__aexit__ = AsyncMock(return_value=None)
+        
+        mock_async_client.return_value = mock_client_instance
+        
+        client = ClientIA()
+        result = await client.chat_with_vision(
+            prompt="Extrais le texte",
+            image_base64="dGVzdA==",  # "test" en base64
+        )
+        
+        assert result == "Texte extrait de l'image"
+
+    @pytest.mark.asyncio
+    @patch('src.core.ai.client.obtenir_parametres')
+    async def test_chat_with_vision_no_api_key(self, mock_params):
+        """Test erreur si pas de clé API."""
+        mock_params.side_effect = ValueError("Pas de clé")
+        
+        client = ClientIA()
+        
+        with pytest.raises(ValueError):
+            await client.chat_with_vision(
+                prompt="Test",
+                image_base64="dGVzdA==",
+            )
+
+    @pytest.mark.asyncio
+    @patch('src.core.ai.client.obtenir_parametres')
+    @patch('src.core.ai.client.httpx.AsyncClient')
+    async def test_chat_with_vision_empty_response(self, mock_async_client, mock_params):
+        """Test erreur si réponse vide."""
+        mock_params.return_value = MagicMock(
+            MISTRAL_API_KEY="test_key",
+            MISTRAL_MODEL="mistral-small",
+            MISTRAL_BASE_URL="https://api.mistral.ai/v1",
+            MISTRAL_TIMEOUT=30,
+        )
+        
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"choices": []}  # Réponse vide
+        mock_response.raise_for_status = MagicMock()
+        
+        mock_client_instance = AsyncMock()
+        mock_client_instance.post = AsyncMock(return_value=mock_response)
+        mock_client_instance.__aenter__ = AsyncMock(return_value=mock_client_instance)
+        mock_client_instance.__aexit__ = AsyncMock(return_value=None)
+        
+        mock_async_client.return_value = mock_client_instance
+        
+        client = ClientIA()
+        
+        with pytest.raises(ErreurServiceIA):
+            await client.chat_with_vision(
+                prompt="Test",
+                image_base64="dGVzdA==",
+            )
+
+
+# ═══════════════════════════════════════════════════════════
+# SECTION 9: TESTS RETRY & ERROR HANDLING
+# ═══════════════════════════════════════════════════════════
+
+
+@pytest.mark.unit
+class TestClientIARetryLogic:
+    """Tests pour la logique de retry et gestion d'erreurs."""
+
+    @pytest.mark.asyncio
+    @patch('src.core.ai.client.obtenir_parametres')
+    @patch('src.core.ai.client.httpx.AsyncClient')
+    async def test_appel_all_retries_fail(self, mock_async_client, mock_params):
+        """Test échec après toutes les tentatives."""
+        mock_params.return_value = MagicMock(
+            MISTRAL_API_KEY="test_key",
+            MISTRAL_MODEL="mistral-small",
+            MISTRAL_BASE_URL="https://api.mistral.ai/v1",
+            MISTRAL_TIMEOUT=30,
+        )
+        
+        # Toutes les tentatives échouent
+        mock_response = MagicMock()
+        mock_response.raise_for_status.side_effect = HttpXError("Server error")
+        
+        mock_client_instance = AsyncMock()
+        mock_client_instance.post = AsyncMock(return_value=mock_response)
+        mock_client_instance.__aenter__ = AsyncMock(return_value=mock_client_instance)
+        mock_client_instance.__aexit__ = AsyncMock(return_value=None)
+        
+        mock_async_client.return_value = mock_client_instance
+        
+        client = ClientIA()
+        
+        with patch('src.core.ai.client.asyncio.sleep', new_callable=AsyncMock):
+            with patch('src.core.cache.LimiteDebit.peut_appeler', return_value=(True, "")):
+                with patch('src.core.ai.client.CacheIA.obtenir', return_value=None):
+                    with pytest.raises(ErreurServiceIA) as exc_info:
+                        await client.appeler(
+                            prompt="Test",
+                            max_tentatives=3,
+                        )
+        
+        assert "Erreur API Mistral" in str(exc_info.value)
+
+    @pytest.mark.asyncio
+    @patch('src.core.ai.client.obtenir_parametres')
+    async def test_appel_unexpected_error(self, mock_params):
+        """Test erreur inattendue (non HTTP)."""
+        mock_params.return_value = MagicMock(
+            MISTRAL_API_KEY="test_key",
+            MISTRAL_MODEL="mistral-small",
+            MISTRAL_BASE_URL="https://api.mistral.ai/v1",
+            MISTRAL_TIMEOUT=30,
+        )
+        
+        client = ClientIA()
+        
+        with patch('src.core.cache.LimiteDebit.peut_appeler', return_value=(True, "")):
+            with patch('src.core.ai.client.CacheIA.obtenir', return_value=None):
+                with patch.object(client, '_effectuer_appel', 
+                                new_callable=AsyncMock,
+                                side_effect=RuntimeError("Erreur système")):
+                    with pytest.raises(ErreurServiceIA) as exc_info:
+                        await client.appeler(prompt="Test")
+        
+        assert "Erreur inattendue" in str(exc_info.value)
+
+    @pytest.mark.asyncio
+    @patch('src.core.ai.client.obtenir_parametres')
+    @patch('src.core.ai.client.httpx.AsyncClient')
+    async def test_effectuer_appel_empty_response(self, mock_async_client, mock_params):
+        """Test _effectuer_appel avec réponse vide."""
+        mock_params.return_value = MagicMock(
+            MISTRAL_API_KEY="test_key",
+            MISTRAL_MODEL="mistral-small",
+            MISTRAL_BASE_URL="https://api.mistral.ai/v1",
+            MISTRAL_TIMEOUT=30,
+        )
+        
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"choices": []}  # Pas de contenu
+        mock_response.raise_for_status = MagicMock()
+        
+        mock_client_instance = AsyncMock()
+        mock_client_instance.post = AsyncMock(return_value=mock_response)
+        mock_client_instance.__aenter__ = AsyncMock(return_value=mock_client_instance)
+        mock_client_instance.__aexit__ = AsyncMock(return_value=None)
+        
+        mock_async_client.return_value = mock_client_instance
+        
+        client = ClientIA()
+        
+        with pytest.raises(ErreurServiceIA) as exc_info:
+            await client._effectuer_appel(
+                prompt="Test",
+                prompt_systeme="",
+                temperature=0.7,
+                max_tokens=100,
+            )
+        
+        assert "pas de contenu" in str(exc_info.value).lower()
+
+    @pytest.mark.asyncio
+    @patch('src.core.ai.client.obtenir_parametres')
+    async def test_effectuer_appel_no_api_key(self, mock_params):
+        """Test _effectuer_appel sans clé API."""
+        mock_params.return_value = MagicMock(
+            MISTRAL_API_KEY=None,  # Pas de clé
+            MISTRAL_MODEL="mistral-small",
+            MISTRAL_BASE_URL="https://api.mistral.ai/v1",
+            MISTRAL_TIMEOUT=30,
+        )
+        
+        client = ClientIA()
+        client._config_loaded = True  # Forcer le rechargement
+        client.cle_api = None
+        
+        with pytest.raises(ErreurServiceIA) as exc_info:
+            await client._effectuer_appel(
+                prompt="Test",
+                prompt_systeme="",
+                temperature=0.7,
+                max_tokens=100,
+            )
+        
+        assert "Clé API" in str(exc_info.value)
+
+    @pytest.mark.asyncio
+    @patch('src.core.ai.client.obtenir_parametres')
+    async def test_effectuer_appel_no_base_url(self, mock_params):
+        """Test _effectuer_appel sans URL de base."""
+        mock_params.return_value = MagicMock(
+            MISTRAL_API_KEY="test_key",
+            MISTRAL_MODEL="mistral-small",
+            MISTRAL_BASE_URL=None,  # Pas d'URL
+            MISTRAL_TIMEOUT=30,
+        )
+        
+        client = ClientIA()
+        client._config_loaded = True
+        client.cle_api = "test_key"
+        client.url_base = None
+        
+        with pytest.raises(ErreurServiceIA) as exc_info:
+            await client._effectuer_appel(
+                prompt="Test",
+                prompt_systeme="",
+                temperature=0.7,
+                max_tokens=100,
+            )
+        
+        assert "URL" in str(exc_info.value) or "configuration" in str(exc_info.value).lower()

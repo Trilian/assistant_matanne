@@ -260,3 +260,139 @@ class TestCacheIAConstants:
         assert CacheIA.TTL_PAR_DEFAUT > 0
         # Généralement 1h = 3600s
         assert CacheIA.TTL_PAR_DEFAUT >= 3600
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS NETTOYER CACHE EXPIRE
+# ═══════════════════════════════════════════════════════════
+
+
+class TestCacheIANettoyerExpires:
+    """Tests pour CacheIA.nettoyer_expires()."""
+
+    def test_nettoyer_expires_calls_cache_nettoyer(self, mock_session_state):
+        """Test nettoyer_expires appelle Cache.nettoyer_expires."""
+        with patch("streamlit.session_state", mock_session_state):
+            from src.core.ai.cache import CacheIA
+            from src.core.cache import Cache
+
+            with patch.object(Cache, "nettoyer_expires") as mock_nettoyer:
+                CacheIA.nettoyer_expires()
+                mock_nettoyer.assert_called_once_with(7200)
+
+    def test_nettoyer_expires_with_custom_age(self, mock_session_state):
+        """Test nettoyer_expires avec âge personnalisé."""
+        with patch("streamlit.session_state", mock_session_state):
+            from src.core.ai.cache import CacheIA
+            from src.core.cache import Cache
+
+            age_custom = 3600
+            with patch.object(Cache, "nettoyer_expires") as mock_nettoyer:
+                CacheIA.nettoyer_expires(age_max_secondes=age_custom)
+                mock_nettoyer.assert_called_once_with(age_custom)
+
+    def test_nettoyer_expires_logs_info(self, mock_session_state, caplog):
+        """Test nettoyer_expires écrit dans les logs."""
+        import logging
+
+        with patch("streamlit.session_state", mock_session_state):
+            from src.core.ai.cache import CacheIA
+            from src.core.cache import Cache
+
+            with patch.object(Cache, "nettoyer_expires"):
+                with caplog.at_level(logging.INFO):
+                    CacheIA.nettoyer_expires(age_max_secondes=1800)
+
+                assert any("Nettoyage cache IA" in record.message for record in caplog.records)
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS WIDGET STREAMLIT AFFICHER STATISTIQUES
+# ═══════════════════════════════════════════════════════════
+
+
+class TestAfficherStatistiquesCacheIA:
+    """Tests pour afficher_statistiques_cache_ia() - Widget Streamlit."""
+
+    def test_afficher_statistiques_calls_streamlit(self, mock_session_state):
+        """Test que le widget appelle les composants Streamlit."""
+        with patch("streamlit.session_state", mock_session_state):
+            from src.core.ai.cache import afficher_statistiques_cache_ia
+            import streamlit as st
+
+            # Mock tous les composants Streamlit
+            with patch.object(st, "expander") as mock_expander:
+                with patch.object(st, "columns") as mock_columns:
+                    with patch.object(st, "metric") as mock_metric:
+                        with patch.object(st, "button", return_value=False) as mock_button:
+                            # Configurer le context manager
+                            mock_expander.return_value.__enter__ = MagicMock(return_value=None)
+                            mock_expander.return_value.__exit__ = MagicMock(return_value=None)
+
+                            # Configurer les colonnes
+                            mock_col = MagicMock()
+                            mock_col.__enter__ = MagicMock(return_value=None)
+                            mock_col.__exit__ = MagicMock(return_value=None)
+                            mock_columns.return_value = [mock_col, mock_col]
+
+                            afficher_statistiques_cache_ia()
+
+                            # Vérifier que expander est appelé
+                            mock_expander.assert_called_once()
+                            assert "Cache IA" in mock_expander.call_args[0][0]
+
+    def test_afficher_statistiques_button_nettoyer(self, mock_session_state):
+        """Test bouton nettoyer dans le widget."""
+        with patch("streamlit.session_state", mock_session_state):
+            from src.core.ai.cache import afficher_statistiques_cache_ia, CacheIA
+            import streamlit as st
+
+            # Mock tous les composants avec bouton nettoyer cliqué
+            with patch.object(st, "expander") as mock_expander:
+                with patch.object(st, "columns") as mock_columns:
+                    with patch.object(st, "metric"):
+                        # Premier bouton (nettoyer) retourne True, second (vider) False
+                        with patch.object(st, "button", side_effect=[True, False]) as mock_button:
+                            with patch.object(st, "success"):
+                                with patch.object(st, "rerun"):
+                                    with patch.object(CacheIA, "nettoyer_expires") as mock_nettoyer:
+                                        # Configuration des mocks
+                                        mock_expander.return_value.__enter__ = MagicMock()
+                                        mock_expander.return_value.__exit__ = MagicMock()
+                                        mock_col = MagicMock()
+                                        mock_col.__enter__ = MagicMock()
+                                        mock_col.__exit__ = MagicMock()
+                                        mock_columns.return_value = [mock_col, mock_col]
+
+                                        afficher_statistiques_cache_ia()
+
+                                        # Nettoyer doit être appelé
+                                        mock_nettoyer.assert_called_once()
+
+    def test_afficher_statistiques_button_vider(self, mock_session_state):
+        """Test bouton vider dans le widget."""
+        with patch("streamlit.session_state", mock_session_state):
+            from src.core.ai.cache import afficher_statistiques_cache_ia, CacheIA
+            import streamlit as st
+
+            # Mock tous les composants avec bouton vider cliqué
+            with patch.object(st, "expander") as mock_expander:
+                with patch.object(st, "columns") as mock_columns:
+                    with patch.object(st, "metric"):
+                        # Premier bouton False, second (vider) True
+                        with patch.object(st, "button", side_effect=[False, True]) as mock_button:
+                            with patch.object(st, "success"):
+                                with patch.object(st, "rerun"):
+                                    with patch.object(CacheIA, "invalider_tout") as mock_invalider:
+                                        # Configuration des mocks
+                                        mock_expander.return_value.__enter__ = MagicMock()
+                                        mock_expander.return_value.__exit__ = MagicMock()
+                                        mock_col = MagicMock()
+                                        mock_col.__enter__ = MagicMock()
+                                        mock_col.__exit__ = MagicMock()
+                                        mock_columns.return_value = [mock_col, mock_col]
+
+                                        afficher_statistiques_cache_ia()
+
+                                        # Invalider doit être appelé
+                                        mock_invalider.assert_called_once()

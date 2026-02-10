@@ -13,7 +13,7 @@ import calendar
 
 from src.core.database import obtenir_contexte_db
 from src.core.models import HouseExpense
-from src.core.models.maison_extended import ExpenseCategory
+from src.core.models.finances import ExpenseCategory
 from src.services.budget import (
     get_budget_service,
     FactureMaison,

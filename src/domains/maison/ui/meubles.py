@@ -12,7 +12,7 @@ from typing import Optional, List
 
 from src.core.database import obtenir_contexte_db
 from src.core.models import Furniture
-from src.core.models.maison_extended import FurnitureStatus, FurniturePriority, RoomType
+from src.core.models.habitat import FurnitureStatus, FurniturePriority, RoomType
 
 
 # ═══════════════════════════════════════════════════════════

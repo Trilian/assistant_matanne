@@ -16,7 +16,7 @@ from datetime import date
 from decimal import Decimal
 
 import src.domains.maison.ui.eco_tips as eco_tips
-from src.core.models.maison_extended import EcoAction
+from src.core.models.habitat import EcoAction
 
 @pytest.fixture
 def fake_action_dict():
