@@ -549,3 +549,280 @@ class TestCacheEdgeCases:
         t2.join()
         
         # Pas d'exception = succès basique
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS ADDITIONNELS POUR COUVERTURE 85%+
+# ═══════════════════════════════════════════════════════════
+
+
+class TestCacheSessionN2:
+    """Tests pour le cache L2 basé sur session Streamlit."""
+    
+    @pytest.fixture
+    def l2_cache(self, mock_session_state):
+        """Fixture pour cache L2."""
+        from src.core.cache_multi import CacheSessionN2
+        return CacheSessionN2()
+    
+    def test_l2_get_nonexistent_key(self, l2_cache):
+        """Test get sur clé inexistante."""
+        result = l2_cache.get("nonexistent_key")
+        assert result is None
+    
+    def test_l2_set_and_get(self, l2_cache):
+        """Test set puis get."""
+        from src.core.cache_multi import EntreeCache
+        
+        entry = EntreeCache(value="test_value", ttl=3600)
+        l2_cache.set("test_key", entry)
+        
+        result = l2_cache.get("test_key")
+        assert result is not None
+        assert result.value == "test_value"
+    
+    def test_l2_remove(self, l2_cache):
+        """Test suppression d'entrée."""
+        from src.core.cache_multi import EntreeCache
+        
+        l2_cache.set("to_remove", EntreeCache(value="temp"))
+        l2_cache.remove("to_remove")
+        
+        result = l2_cache.get("to_remove")
+        assert result is None
+    
+    def test_l2_invalidate_by_pattern(self, l2_cache):
+        """Test invalidation par pattern."""
+        from src.core.cache_multi import EntreeCache
+        
+        l2_cache.set("prefix_key1", EntreeCache(value="v1"))
+        l2_cache.set("prefix_key2", EntreeCache(value="v2"))
+        l2_cache.set("other_key", EntreeCache(value="v3"))
+        
+        count = l2_cache.invalidate(pattern="prefix")
+        assert count == 2
+    
+    def test_l2_invalidate_by_tags(self, l2_cache):
+        """Test invalidation par tags."""
+        from src.core.cache_multi import EntreeCache
+        
+        l2_cache.set("tagged1", EntreeCache(value="v1", tags=["group_a"]))
+        l2_cache.set("tagged2", EntreeCache(value="v2", tags=["group_a"]))
+        l2_cache.set("tagged3", EntreeCache(value="v3", tags=["group_b"]))
+        
+        count = l2_cache.invalidate(tags=["group_a"])
+        assert count == 2
+    
+    def test_l2_clear(self, l2_cache):
+        """Test vidage complet."""
+        from src.core.cache_multi import EntreeCache
+        
+        l2_cache.set("key1", EntreeCache(value="v1"))
+        l2_cache.set("key2", EntreeCache(value="v2"))
+        
+        l2_cache.clear()
+        assert l2_cache.size == 0
+    
+    def test_l2_size_property(self, l2_cache):
+        """Test propriété size."""
+        from src.core.cache_multi import EntreeCache
+        
+        assert l2_cache.size == 0
+        l2_cache.set("key1", EntreeCache(value="v1"))
+        assert l2_cache.size == 1
+
+
+class TestCacheFichierN3Advanced:
+    """Tests avancés pour le cache L3 fichier."""
+    
+    @pytest.fixture
+    def l3_cache(self, temp_cache_dir):
+        """Fixture pour cache L3."""
+        from src.core.cache_multi import CacheFichierN3
+        return CacheFichierN3(cache_dir=temp_cache_dir)
+    
+    def test_l3_key_to_filename_consistency(self, l3_cache):
+        """Test que les clés donnent des noms de fichiers cohérents."""
+        path1 = l3_cache._key_to_filename("test_key")
+        path2 = l3_cache._key_to_filename("test_key")
+        
+        assert path1 == path2
+    
+    def test_l3_key_to_filename_different_keys(self, l3_cache):
+        """Test que différentes clés donnent différents fichiers."""
+        path1 = l3_cache._key_to_filename("key1")
+        path2 = l3_cache._key_to_filename("key2")
+        
+        assert path1 != path2
+    
+    def test_l3_get_expired_entry(self, l3_cache):
+        """Test get sur entrée expirée."""
+        from src.core.cache_multi import EntreeCache
+        import time
+        
+        # Créer entrée déjà expirée
+        entry = EntreeCache(
+            value="expired",
+            ttl=0,  # Expire immédiatement
+            created_at=time.time() - 100
+        )
+        l3_cache.set("expired_key", entry)
+        
+        result = l3_cache.get("expired_key")
+        assert result is None
+    
+    def test_l3_remove_nonexistent(self, l3_cache):
+        """Test suppression clé inexistante (ne lève pas d'erreur)."""
+        l3_cache.remove("nonexistent_key_xyz")
+        # Should not raise
+
+
+class TestEntreeCacheAdvanced:
+    """Tests avancés pour le dataclass EntreeCache."""
+    
+    def test_entree_cache_est_expire(self):
+        """Test propriété est_expire."""
+        from src.core.cache_multi import EntreeCache
+        import time
+        
+        # Entrée fraîche
+        fresh = EntreeCache(value="fresh", ttl=3600)
+        assert fresh.est_expire is False
+        
+        # Entrée expirée
+        expired = EntreeCache(
+            value="old",
+            ttl=1,
+            created_at=time.time() - 100
+        )
+        assert expired.est_expire is True
+    
+    def test_entree_cache_age_seconds(self):
+        """Test propriété age_seconds."""
+        from src.core.cache_multi import EntreeCache
+        import time
+        
+        entry = EntreeCache(
+            value="test",
+            created_at=time.time() - 10
+        )
+        
+        age = entry.age_seconds
+        assert age >= 10
+    
+    def test_entree_cache_is_expired_alias(self):
+        """Test alias anglais is_expired."""
+        from src.core.cache_multi import EntreeCache
+        
+        entry = EntreeCache(value="test", ttl=3600)
+        assert entry.is_expired == entry.est_expire
+
+
+class TestStatistiquesCacheAdvanced:
+    """Tests avancés pour StatistiquesCache."""
+    
+    def test_stats_total_hits(self):
+        """Test calcul total_hits."""
+        from src.core.cache_multi import StatistiquesCache
+        
+        stats = StatistiquesCache(l1_hits=10, l2_hits=5, l3_hits=2)
+        assert stats.total_hits == 17
+    
+    def test_stats_hit_rate_zero_total(self):
+        """Test hit_rate avec 0 accès."""
+        from src.core.cache_multi import StatistiquesCache
+        
+        stats = StatistiquesCache()
+        assert stats.hit_rate == 0.0
+    
+    def test_stats_hit_rate_all_hits(self):
+        """Test hit_rate avec 100% hits."""
+        from src.core.cache_multi import StatistiquesCache
+        
+        stats = StatistiquesCache(l1_hits=10, misses=0)
+        assert stats.hit_rate == 100.0
+    
+    def test_stats_hit_rate_mixed(self):
+        """Test hit_rate avec hits et misses."""
+        from src.core.cache_multi import StatistiquesCache
+        
+        stats = StatistiquesCache(l1_hits=3, l2_hits=2, misses=5)
+        # 5 hits / 10 total = 50%
+        assert stats.hit_rate == 50.0
+    
+    def test_stats_to_dict(self):
+        """Test conversion to_dict."""
+        from src.core.cache_multi import StatistiquesCache
+        
+        stats = StatistiquesCache(
+            l1_hits=10,
+            l2_hits=5,
+            l3_hits=2,
+            misses=3,
+            writes=20,
+            evictions=1
+        )
+        
+        d = stats.to_dict()
+        assert d["l1_hits"] == 10
+        assert d["l2_hits"] == 5
+        assert d["l3_hits"] == 2
+        assert d["total_hits"] == 17
+        assert d["misses"] == 3
+        assert d["writes"] == 20
+        assert d["evictions"] == 1
+        assert "%" in d["hit_rate"]
+
+
+class TestCacheMultiNiveauAdvanced:
+    """Tests avancés pour CacheMultiNiveau."""
+    
+    @pytest.fixture(autouse=True)
+    def reset_singleton(self):
+        """Reset singleton avant et après chaque test."""
+        from src.core.cache_multi import CacheMultiNiveau
+        CacheMultiNiveau._instance = None
+        yield
+        CacheMultiNiveau._instance = None
+    
+    @pytest.fixture
+    def multi_cache(self, mock_session_state, temp_cache_dir):
+        """Fixture pour cache multi-niveaux."""
+        from src.core.cache_multi import CacheMultiNiveau
+        return CacheMultiNiveau(
+            l1_max_entries=100,
+            l3_cache_dir=temp_cache_dir
+        )
+    
+    def test_singleton_pattern(self, mock_session_state, temp_cache_dir):
+        """Test que CacheMultiNiveau est un singleton."""
+        from src.core.cache_multi import CacheMultiNiveau
+        
+        cache1 = CacheMultiNiveau()
+        cache2 = CacheMultiNiveau()
+        
+        assert cache1 is cache2
+    
+    def test_clear_all_levels(self, multi_cache):
+        """Test vidage de tous les niveaux."""
+        multi_cache.set("key1", "value1")
+        multi_cache.set("key2", "value2", persistent=True)
+        
+        multi_cache.clear()
+        
+        assert multi_cache.l1.size == 0
+    
+    def test_get_or_compute_with_tags(self, multi_cache):
+        """Test get_or_compute avec tags."""
+        def loader():
+            return {"computed": True}
+        
+        result = multi_cache.get_or_compute(
+            "computed_key",
+            loader,
+            ttl=60,
+            tags=["test_group"]
+        )
+        
+        assert result["computed"] is True
+

@@ -12,7 +12,7 @@ Tests couvrant:
 import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
 
-from src.core.ai_agent import AgentIA
+from src.core.ai import AgentIA
 from src.core.errors import ErreurServiceIA
 
 
@@ -25,7 +25,7 @@ from src.core.errors import ErreurServiceIA
 class TestAgentIAInit:
     """Tests d'initialisation de l'agent."""
 
-    @patch('src.core.ai_agent.ClientIA')
+    @patch('src.core.ai.agent.ClientIA')
     def test_agent_creation_success(self, mock_client_class):
         """Test création réussie d'un agent."""
         mock_client = MagicMock()
@@ -37,7 +37,7 @@ class TestAgentIAInit:
         assert agent.client is not None
         assert agent.contexte == {}
 
-    @patch('src.core.ai_agent.ClientIA')
+    @patch('src.core.ai.agent.ClientIA')
     def test_agent_creation_error(self, mock_client_class):
         """Test gestion d'erreur lors de la création."""
         mock_client_class.side_effect = Exception("Erreur ClientIA")
@@ -47,7 +47,7 @@ class TestAgentIAInit:
         assert agent.client is None
         assert agent.contexte == {}
 
-    @patch('src.core.ai_agent.ClientIA')
+    @patch('src.core.ai.agent.ClientIA')
     def test_agent_contexte_initial(self, mock_client_class):
         """Test que le contexte est vide au démarrage."""
         mock_client = MagicMock()
@@ -68,7 +68,7 @@ class TestAgentIAAnalyser:
     """Tests de la méthode analyser."""
 
     @pytest.mark.asyncio
-    @patch('src.core.ai_agent.ClientIA')
+    @patch('src.core.ai.agent.ClientIA')
     async def test_analyser_simple(self, mock_client_class):
         """Test analyse simple."""
         mock_client = AsyncMock()
@@ -82,7 +82,7 @@ class TestAgentIAAnalyser:
         mock_client.appeler.assert_called_once()
 
     @pytest.mark.asyncio
-    @patch('src.core.ai_agent.ClientIA')
+    @patch('src.core.ai.agent.ClientIA')
     async def test_analyser_avec_contexte(self, mock_client_class):
         """Test analyse avec contexte."""
         mock_client = AsyncMock()
@@ -103,7 +103,7 @@ class TestAgentIAAnalyser:
         assert "Contexte" in prompt or str(contexte) in prompt
 
     @pytest.mark.asyncio
-    @patch('src.core.ai_agent.ClientIA')
+    @patch('src.core.ai.agent.ClientIA')
     async def test_analyser_temperature_custom(self, mock_client_class):
         """Test avec température personnalisée."""
         mock_client = AsyncMock()
@@ -121,7 +121,7 @@ class TestAgentIAAnalyser:
         assert call_args.kwargs.get('temperature') == 1.5
 
     @pytest.mark.asyncio
-    @patch('src.core.ai_agent.ClientIA')
+    @patch('src.core.ai.agent.ClientIA')
     async def test_analyser_client_none(self, mock_client_class):
         """Test quand le client n'est pas disponible."""
         mock_client_class.side_effect = Exception("Erreur")
@@ -132,7 +132,7 @@ class TestAgentIAAnalyser:
         assert "n'est pas disponible" in reponse or "non disponible" in reponse
 
     @pytest.mark.asyncio
-    @patch('src.core.ai_agent.ClientIA')
+    @patch('src.core.ai.agent.ClientIA')
     async def test_analyser_erreur_client(self, mock_client_class):
         """Test gestion d'erreur du client."""
         mock_client = AsyncMock()
@@ -155,7 +155,7 @@ class TestAgentIAGenererAnalyse:
     """Tests de génération d'analyses spécifiques."""
 
     @pytest.mark.asyncio
-    @patch('src.core.ai_agent.ClientIA')
+    @patch('src.core.ai.agent.ClientIA')
     async def test_generer_analyse_bien_etre(self, mock_client_class):
         """Test génération d'analyse bien-être."""
         mock_client = AsyncMock()
@@ -169,7 +169,7 @@ class TestAgentIAGenererAnalyse:
         assert reponse == "Analyse bien-être"
 
     @pytest.mark.asyncio
-    @patch('src.core.ai_agent.ClientIA')
+    @patch('src.core.ai.agent.ClientIA')
     async def test_generer_analyse_cuisine(self, mock_client_class):
         """Test génération d'analyse cuisine."""
         mock_client = AsyncMock()
@@ -183,7 +183,7 @@ class TestAgentIAGenererAnalyse:
         assert reponse == "Suggestions culinaires"
 
     @pytest.mark.asyncio
-    @patch('src.core.ai_agent.ClientIA')
+    @patch('src.core.ai.agent.ClientIA')
     async def test_generer_analyse_budget(self, mock_client_class):
         """Test génération d'analyse budget."""
         mock_client = AsyncMock()
@@ -197,7 +197,7 @@ class TestAgentIAGenererAnalyse:
         assert reponse == "Tendances budgétaires"
 
     @pytest.mark.asyncio
-    @patch('src.core.ai_agent.ClientIA')
+    @patch('src.core.ai.agent.ClientIA')
     async def test_generer_analyse_jardin(self, mock_client_class):
         """Test génération d'analyse jardin."""
         mock_client = AsyncMock()
@@ -211,7 +211,7 @@ class TestAgentIAGenererAnalyse:
         assert reponse == "Conseils jardinage"
 
     @pytest.mark.asyncio
-    @patch('src.core.ai_agent.ClientIA')
+    @patch('src.core.ai.agent.ClientIA')
     async def test_generer_analyse_routines(self, mock_client_class):
         """Test génération d'analyse routines."""
         mock_client = AsyncMock()
@@ -225,7 +225,7 @@ class TestAgentIAGenererAnalyse:
         assert reponse == "Optimisations routines"
 
     @pytest.mark.asyncio
-    @patch('src.core.ai_agent.ClientIA')
+    @patch('src.core.ai.agent.ClientIA')
     async def test_generer_analyse_type_inconnu(self, mock_client_class):
         """Test avec type d'analyse inconnu."""
         mock_client = AsyncMock()
@@ -247,7 +247,7 @@ class TestAgentIAGenererAnalyse:
 class TestAgentIAContexte:
     """Tests de gestion du contexte."""
 
-    @patch('src.core.ai_agent.ClientIA')
+    @patch('src.core.ai.agent.ClientIA')
     def test_ajouter_contexte(self, mock_client_class):
         """Test ajout d'élément au contexte."""
         mock_client = MagicMock()
@@ -258,7 +258,7 @@ class TestAgentIAContexte:
         
         assert agent.contexte["famille_size"] == 4
 
-    @patch('src.core.ai_agent.ClientIA')
+    @patch('src.core.ai.agent.ClientIA')
     def test_obtenir_contexte(self, mock_client_class):
         """Test récupération d'élément du contexte."""
         mock_client = MagicMock()
@@ -270,7 +270,7 @@ class TestAgentIAContexte:
         valeur = agent.obtenir_contexte("budget_mensuel")
         assert valeur == 2000
 
-    @patch('src.core.ai_agent.ClientIA')
+    @patch('src.core.ai.agent.ClientIA')
     def test_obtenir_contexte_inexistant(self, mock_client_class):
         """Test récupération d'une clé inexistante."""
         mock_client = MagicMock()
@@ -281,7 +281,7 @@ class TestAgentIAContexte:
         
         assert valeur is None
 
-    @patch('src.core.ai_agent.ClientIA')
+    @patch('src.core.ai.agent.ClientIA')
     def test_effacer_contexte(self, mock_client_class):
         """Test effacement du contexte."""
         mock_client = MagicMock()
@@ -297,7 +297,7 @@ class TestAgentIAContexte:
         
         assert agent.contexte == {}
 
-    @patch('src.core.ai_agent.ClientIA')
+    @patch('src.core.ai.agent.ClientIA')
     def test_contexte_multiple_values(self, mock_client_class):
         """Test stockage de multiples valeurs."""
         mock_client = MagicMock()
@@ -328,7 +328,7 @@ class TestAgentIAIntegration:
     """Tests d'intégration complets."""
 
     @pytest.mark.asyncio
-    @patch('src.core.ai_agent.ClientIA')
+    @patch('src.core.ai.agent.ClientIA')
     async def test_workflow_complet_analyse_avec_contexte(self, mock_client_class):
         """Test workflow complet: contexte + analyse."""
         mock_client = AsyncMock()
@@ -352,7 +352,7 @@ class TestAgentIAIntegration:
         assert agent.obtenir_contexte("allergies") == ["arachides", "fruits de mer"]
 
     @pytest.mark.asyncio
-    @patch('src.core.ai_agent.ClientIA')
+    @patch('src.core.ai.agent.ClientIA')
     async def test_workflow_multiple_analyses(self, mock_client_class):
         """Test workflow avec multiples analyses."""
         mock_client = AsyncMock()
@@ -372,7 +372,7 @@ class TestAgentIAIntegration:
         assert mock_client.appeler.call_count == 3
 
     @pytest.mark.asyncio
-    @patch('src.core.ai_agent.ClientIA')
+    @patch('src.core.ai.agent.ClientIA')
     async def test_workflow_erreur_recovery(self, mock_client_class):
         """Test récupération après erreur."""
         mock_client = AsyncMock()

@@ -88,24 +88,46 @@ from .maison import (
     GardenLog,
 )
 
-# Nouvelles fonctionnalités (budget étendu, météo, calendrier, notifications)
-from .nouveaux import (
+# Finances et budget
+from .finances import (
     Depense,
     BudgetMensuelDB,
-    AlerteMeteo,
-    ConfigMeteo,
-    Backup,
-    CalendrierExterne,
-    EvenementCalendrier,
-    PushSubscription,
-    NotificationPreference,
+    HouseExpense,
     # Enums
     CategorieDepenseDB,
     RecurrenceType,
+    ExpenseCategory,
+)
+
+# Jardin et météo
+from .jardin import (
+    GardenZone,
+    AlerteMeteo,
+    ConfigMeteo,
+    # Enums
+    GardenZoneType,
     NiveauAlerte,
     TypeAlerteMeteo,
+)
+
+# Calendrier externe
+from .calendrier import (
+    CalendrierExterne,
+    EvenementCalendrier,
+    # Enums
     CalendarProvider,
     SyncDirection,
+)
+
+# Notifications
+from .notifications import (
+    PushSubscription,
+    NotificationPreference,
+)
+
+# Système
+from .systeme import (
+    Backup,
 )
 
 # Jeux (Paris sportifs & Loto)
@@ -162,19 +184,15 @@ from .users import (
     PurchasePriority,
 )
 
-# Maison étendu (meubles, dépenses, éco, jardin zones) (NOUVEAU)
-from .maison_extended import (
+# Habitat (meubles, stocks, entretien, éco)
+from .habitat import (
     Furniture,
-    HouseExpense,
-    EcoAction,
-    GardenZone,
-    MaintenanceTask,
     HouseStock,
+    MaintenanceTask,
+    EcoAction,
     # Enums
     FurnitureStatus,
     FurniturePriority,
-    ExpenseCategory,
-    GardenZoneType,
     EcoActionType,
     RoomType,
 )
@@ -228,23 +246,30 @@ __all__ = [
     "RoutineTask",
     "GardenItem",
     "GardenLog",
-    # Nouvelles fonctionnalités
+    # Finances
     "Depense",
     "BudgetMensuelDB",
-    "AlerteMeteo",
-    "ConfigMeteo",
-    "Backup",
-    "CalendrierExterne",
-    "EvenementCalendrier",
-    "PushSubscription",
-    "NotificationPreference",
-    # Enums nouveaux
+    "HouseExpense",
     "CategorieDepenseDB",
     "RecurrenceType",
+    "ExpenseCategory",
+    # Jardin
+    "GardenZone",
+    "AlerteMeteo",
+    "ConfigMeteo",
+    "GardenZoneType",
     "NiveauAlerte",
     "TypeAlerteMeteo",
+    # Calendrier
+    "CalendrierExterne",
+    "EvenementCalendrier",
     "CalendarProvider",
     "SyncDirection",
+    # Notifications
+    "PushSubscription",
+    "NotificationPreference",
+    # Système
+    "Backup",
     # Jeux
     "Equipe",
     "Match",
@@ -283,17 +308,13 @@ __all__ = [
     "GarminActivityType",
     "PurchaseCategory",
     "PurchasePriority",
-    # Maison étendu (NOUVEAU)
+    # Habitat
     "Furniture",
-    "HouseExpense",
-    "EcoAction",
-    "GardenZone",
-    "MaintenanceTask",
     "HouseStock",
+    "MaintenanceTask",
+    "EcoAction",
     "FurnitureStatus",
     "FurniturePriority",
-    "ExpenseCategory",
-    "GardenZoneType",
     "EcoActionType",
     "RoomType",
 ]

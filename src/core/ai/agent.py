@@ -6,7 +6,7 @@ Fournit une interface simplifiée pour les modules
 import logging
 from typing import Any, Optional
 
-from .ai.client import ClientIA
+from .client import ClientIA
 
 logger = logging.getLogger(__name__)
 

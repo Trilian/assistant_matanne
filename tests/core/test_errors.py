@@ -16,7 +16,7 @@ def test_import_errors():
     """Vérifie que le module errors s'importe sans erreur."""
     assert hasattr(errors, "ErreurBaseDeDonnees") or hasattr(errors, "__file__")
 
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import patch, MagicMock, call, Mock
 import logging
 
 from src.core.errors import (
@@ -584,3 +584,278 @@ class TestAliases:
         """Test que l'alias handle_errors existe."""
         from src.core.errors import handle_errors
         assert callable(handle_errors)
+
+
+# ═══════════════════════════════════════════════════════════
+# SECTION 10: TESTS AVANCÉS POUR COUVERTURE 85%+
+# ═══════════════════════════════════════════════════════════
+
+
+@pytest.mark.unit
+class TestEstModeDebugAdvanced:
+    """Tests avancés pour _est_mode_debug."""
+    
+    @patch("src.core.state.obtenir_etat")
+    def test_est_mode_debug_from_etat_app_true(self, mock_obtenir_etat):
+        """Test _est_mode_debug retourne True depuis EtatApp."""
+        from src.core.errors import _est_mode_debug
+        
+        mock_etat = Mock()
+        mock_etat.mode_debug = True
+        mock_obtenir_etat.return_value = mock_etat
+        
+        result = _est_mode_debug()
+        assert result is True
+    
+    @patch("src.core.state.obtenir_etat")
+    def test_est_mode_debug_from_etat_app_false(self, mock_obtenir_etat):
+        """Test _est_mode_debug retourne False depuis EtatApp."""
+        from src.core.errors import _est_mode_debug
+        
+        mock_etat = Mock()
+        mock_etat.mode_debug = False
+        mock_obtenir_etat.return_value = mock_etat
+        
+        result = _est_mode_debug()
+        assert result is False
+    
+    @patch("src.core.state.obtenir_etat")
+    def test_est_mode_debug_fallback_session_state(self, mock_obtenir_etat):
+        """Test _est_mode_debug fallback sur session_state."""
+        from src.core.errors import _est_mode_debug
+        
+        mock_obtenir_etat.side_effect = Exception("EtatApp unavailable")
+        
+        result = _est_mode_debug()
+        # Should fallback to session_state or False
+        assert isinstance(result, bool)
+    
+    @patch("src.core.state.obtenir_etat")
+    def test_est_mode_debug_etat_sans_mode_debug(self, mock_obtenir_etat):
+        """Test _est_mode_debug quand EtatApp n'a pas mode_debug."""
+        from src.core.errors import _est_mode_debug
+        
+        mock_etat = Mock(spec=[])  # Object sans attribut mode_debug
+        mock_obtenir_etat.return_value = mock_etat
+        
+        result = _est_mode_debug()
+        assert result is False
+
+
+@pytest.mark.unit
+class TestGererErreursAdvanced:
+    """Tests avancés pour @gerer_erreurs."""
+    
+    @patch("streamlit.warning")
+    def test_gerer_erreurs_erreur_validation(self, mock_warning):
+        """Test gestion spécifique ErreurValidation."""
+        from src.core.errors import gerer_erreurs
+        
+        @gerer_erreurs(afficher_dans_ui=True, valeur_fallback="fallback")
+        def validation_fail():
+            raise ErreurValidation("champ invalide", message_utilisateur="Données invalides")
+        
+        result = validation_fail()
+        assert result == "fallback"
+    
+    @patch("streamlit.warning")
+    def test_gerer_erreurs_erreur_non_trouve(self, mock_warning):
+        """Test gestion spécifique ErreurNonTrouve."""
+        from src.core.errors import gerer_erreurs
+        
+        @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=None)
+        def not_found():
+            raise ErreurNonTrouve("Recette 42", message_utilisateur="Non trouvé")
+        
+        result = not_found()
+        mock_warning.assert_called_once()
+        assert result is None
+    
+    @patch("streamlit.error")
+    def test_gerer_erreurs_erreur_base_donnees(self, mock_error):
+        """Test gestion spécifique ErreurBaseDeDonnees."""
+        from src.core.errors import gerer_erreurs
+        
+        @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=[])
+        def db_error():
+            raise ErreurBaseDeDonnees("connexion perdue")
+        
+        result = db_error()
+        mock_error.assert_called_once()
+        assert result == []
+    
+    @patch("streamlit.error")
+    def test_gerer_erreurs_erreur_service_ia(self, mock_error):
+        """Test gestion spécifique ErreurServiceIA."""
+        from src.core.errors import gerer_erreurs
+        
+        @gerer_erreurs(afficher_dans_ui=True, valeur_fallback={})
+        def ia_error():
+            raise ErreurServiceIA("API Mistral down")
+        
+        result = ia_error()
+        mock_error.assert_called_once()
+        assert result == {}
+    
+    @patch("streamlit.warning")
+    def test_gerer_erreurs_erreur_limite_debit(self, mock_warning):
+        """Test gestion spécifique ErreurLimiteDebit."""
+        from src.core.errors import gerer_erreurs
+        
+        @gerer_erreurs(afficher_dans_ui=True, valeur_fallback="rate_limited")
+        def rate_limit():
+            raise ErreurLimiteDebit("10/min atteint")
+        
+        result = rate_limit()
+        mock_warning.assert_called_once()
+        assert result == "rate_limited"
+    
+    @patch("streamlit.error")
+    def test_gerer_erreurs_erreur_service_externe(self, mock_error):
+        """Test gestion spécifique ErreurServiceExterne."""
+        from src.core.errors import gerer_erreurs
+        
+        @gerer_erreurs(afficher_dans_ui=True, valeur_fallback="external_error")
+        def external_error():
+            raise ErreurServiceExterne("OpenFood API down")
+        
+        result = external_error()
+        mock_error.assert_called_once()
+        assert result == "external_error"
+    
+    def test_gerer_erreurs_relancer_true(self):
+        """Test que relancer=True relance l'exception."""
+        from src.core.errors import gerer_erreurs
+        
+        @gerer_erreurs(afficher_dans_ui=False, relancer=True)
+        def will_raise():
+            raise ErreurValidation("test")
+        
+        with pytest.raises(ErreurValidation):
+            will_raise()
+    
+    @patch("streamlit.error")
+    @patch("streamlit.expander")
+    @patch("streamlit.code")
+    def test_gerer_erreurs_debug_mode_shows_stacktrace(
+        self, mock_code, mock_expander, mock_error
+    ):
+        """Test que le mode debug affiche la stack trace."""
+        from src.core.errors import gerer_erreurs
+        
+        mock_expander.return_value.__enter__ = Mock(return_value=None)
+        mock_expander.return_value.__exit__ = Mock(return_value=False)
+        
+        @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=None)
+        def unexpected_error():
+            raise RuntimeError("Unexpected!")
+        
+        result = unexpected_error()
+        assert result is None
+
+
+@pytest.mark.unit
+class TestAfficherErreurStreamlitAdvanced:
+    """Tests avancés pour afficher_erreur_streamlit."""
+    
+    @patch("streamlit.error")
+    @patch("streamlit.expander")
+    @patch("streamlit.json")
+    def test_afficher_erreur_avec_details_en_debug(
+        self, mock_json, mock_expander, mock_error
+    ):
+        """Test affichage des détails en mode debug."""
+        from src.core.errors import afficher_erreur_streamlit
+        
+        mock_expander.return_value.__enter__ = Mock(return_value=None)
+        mock_expander.return_value.__exit__ = Mock(return_value=False)
+        
+        erreur = ErreurValidation(
+            "invalide",
+            details={"field": "nom", "error": "required"},
+            message_utilisateur="Champ obligatoire"
+        )
+        
+        afficher_erreur_streamlit(erreur)
+        mock_error.assert_called_once()
+    
+    @patch("streamlit.error")
+    @patch("streamlit.caption")
+    def test_afficher_erreur_avec_contexte(self, mock_caption, mock_error):
+        """Test affichage avec contexte."""
+        from src.core.errors import afficher_erreur_streamlit
+        
+        erreur = RuntimeError("Erreur générique")
+        afficher_erreur_streamlit(erreur, contexte="Création de recette")
+        
+        mock_caption.assert_called_once()
+    
+    @patch("streamlit.error")
+    def test_afficher_erreur_exception_app_generique(self, mock_error):
+        """Test affichage d'une ExceptionApp générique."""
+        from src.core.errors import afficher_erreur_streamlit, ExceptionApp
+        
+        erreur = ExceptionApp("Erreur générique")
+        afficher_erreur_streamlit(erreur)
+        
+        mock_error.assert_called_once()
+
+
+@pytest.mark.unit
+class TestGestionnaireErreursAdvanced:
+    """Tests avancés pour GestionnaireErreurs context manager."""
+    
+    def test_gestionnaire_erreurs_exit_returns_true_on_success(self):
+        """Test que __exit__ retourne True si pas d'erreur."""
+        from src.core.errors import GestionnaireErreurs
+        
+        gestionnaire = GestionnaireErreurs("test", afficher_dans_ui=False)
+        result = gestionnaire.__exit__(None, None, None)
+        
+        assert result is True
+    
+    @patch("src.core.errors.afficher_erreur_streamlit")
+    def test_gestionnaire_erreurs_exit_returns_false_on_error(self, mock_afficher):
+        """Test que __exit__ retourne False si erreur (ne supprime pas exception)."""
+        from src.core.errors import GestionnaireErreurs
+        
+        gestionnaire = GestionnaireErreurs("test", afficher_dans_ui=True)
+        
+        try:
+            raise ValueError("test error")
+        except ValueError:
+            import sys
+            exc_info = sys.exc_info()
+            result = gestionnaire.__exit__(*exc_info)
+        
+        assert result is False
+    
+    def test_gestionnaire_erreurs_contexte_stored(self):
+        """Test que le contexte est stocké."""
+        from src.core.errors import GestionnaireErreurs
+        
+        gestionnaire = GestionnaireErreurs("Mon contexte", afficher_dans_ui=False)
+        
+        assert gestionnaire.contexte == "Mon contexte"
+        assert gestionnaire.afficher_dans_ui is False
+
+
+@pytest.mark.unit
+class TestReExportsComplets:
+    """Tests vérification re-exports complets."""
+    
+    def test_valider_plage_reexported(self):
+        """Test valider_plage re-exporté."""
+        from src.core.errors import valider_plage
+        assert callable(valider_plage)
+    
+    def test_valider_type_reexported(self):
+        """Test valider_type re-exporté."""
+        from src.core.errors import valider_type
+        assert callable(valider_type)
+    
+    def test_erreur_configuration_reexported(self):
+        """Test ErreurConfiguration re-exporté."""
+        from src.core.errors import ErreurConfiguration
+        assert issubclass(ErreurConfiguration, Exception)
+

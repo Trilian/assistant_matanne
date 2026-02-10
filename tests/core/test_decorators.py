@@ -471,3 +471,178 @@ class TestEdgeCases:
         assert result == 3
 
 
+# ═══════════════════════════════════════════════════════════════════════════
+# SECTION 7: ADDITIONAL COVERAGE TESTS
+# ═══════════════════════════════════════════════════════════════════════════
+
+@pytest.mark.unit
+class TestAvecCacheAdvanced:
+    """Tests avancés pour @avec_cache."""
+    
+    def test_cache_with_none_key_func(self, clear_cache):
+        """Test cache sans key_func utilise key_prefix."""
+        call_count = 0
+        
+        @avec_cache(ttl=3600, key_prefix="test_prefix")
+        def compute_value(x: int) -> int:
+            nonlocal call_count
+            call_count += 1
+            return x * 10
+        
+        result1 = compute_value(5)
+        result2 = compute_value(5)  # Should hit cache
+        
+        assert result1 == 50
+        assert result2 == 50
+        assert call_count == 1
+    
+    def test_cache_with_key_func_using_only_args(self, clear_cache):
+        """Test key_func avec seulement des positional args."""
+        @avec_cache(ttl=3600, key_func=lambda a, b: f"sum_{a}_{b}")
+        def add(a, b):
+            return a + b
+        
+        result = add(3, 4)
+        assert result == 7
+    
+    def test_cache_with_db_kwarg_filtered(self, clear_cache):
+        """Test que 'db' est filtré du cache key auto."""
+        call_count = 0
+        mock_db1 = Mock()
+        mock_db2 = Mock()  # Different mock
+        
+        @avec_cache(ttl=3600, key_prefix="db_filter")
+        def query_data(query_type: str, db=None):
+            nonlocal call_count
+            call_count += 1
+            return f"result_{query_type}"
+        
+        # Same query_type but different db - should use cache
+        result1 = query_data("select", db=mock_db1)
+        result2 = query_data("select", db=mock_db2)
+        
+        assert result1 == result2
+        assert call_count == 1  # Only one call, 'db' was filtered
+
+
+@pytest.mark.unit
+class TestAvecGestionErreursAdvanced:
+    """Tests avancés pour @avec_gestion_erreurs."""
+    
+    def test_log_level_debug(self):
+        """Test avec log_level DEBUG."""
+        @avec_gestion_erreurs(default_return="fallback", log_level="DEBUG")
+        def debug_error():
+            raise ValueError("Debug level error")
+        
+        result = debug_error()
+        assert result == "fallback"
+    
+    def test_log_level_info(self):
+        """Test avec log_level INFO."""
+        @avec_gestion_erreurs(default_return=None, log_level="INFO")
+        def info_error():
+            raise ValueError("Info level error")
+        
+        result = info_error()
+        assert result is None
+    
+    def test_afficher_erreur_streamlit_not_initialized(self):
+        """Test afficher_erreur quand Streamlit non initialisé."""
+        @avec_gestion_erreurs(default_return=42, afficher_erreur=True)
+        def streamlit_error():
+            raise ValueError("Should not crash even if st fails")
+        
+        # Should not raise exception even if st.error fails
+        result = streamlit_error()
+        assert result == 42
+
+
+@pytest.mark.unit
+class TestAvecValidationAdvanced:
+    """Tests avancés pour @avec_validation."""
+    
+    def test_validation_with_none_field_mapping(self):
+        """Test avec field_mapping None (utilise 'data' par défaut)."""
+        from pydantic import BaseModel
+        
+        class SimpleModel(BaseModel):
+            value: int
+        
+        @avec_validation(SimpleModel, field_mapping=None)
+        def process(data):
+            return data
+        
+        result = process(data={"value": 123})
+        assert result["value"] == 123
+    
+    def test_validation_with_positional_args(self):
+        """Test validation avec args positionnels."""
+        from pydantic import BaseModel
+        
+        class ItemModel(BaseModel):
+            name: str
+        
+        @avec_validation(ItemModel, field_mapping={"data": "data"})
+        def create(data, extra_param=None):
+            return {"data": data, "extra": extra_param}
+        
+        result = create(data={"name": "test"}, extra_param="value")
+        assert result["data"]["name"] == "test"
+        assert result["extra"] == "value"
+    
+    def test_validation_validation_error_details(self):
+        """Test que ErreurValidation contient les détails de validation."""
+        from pydantic import BaseModel
+        from src.core.errors_base import ErreurValidation
+        
+        class StrictModel(BaseModel):
+            count: int
+            name: str
+        
+        @avec_validation(StrictModel, field_mapping={"data": "data"})
+        def strict_process(data):
+            return data
+        
+        with pytest.raises(ErreurValidation) as exc_info:
+            strict_process(data={"count": "not_int", "name": 123})
+        
+        # Should have validation_errors in details
+        assert hasattr(exc_info.value, "details")
+        assert "validation_errors" in exc_info.value.details
+
+
+@pytest.mark.unit
+class TestAvecSessionDbAdvanced:
+    """Tests avancés pour @avec_session_db."""
+    
+    @patch("src.core.database.obtenir_contexte_db")
+    def test_session_injected_as_kwarg(self, mock_context):
+        """Test que la session est injectée comme kwarg 'db'."""
+        mock_session = Mock()
+        mock_context.return_value.__enter__ = Mock(return_value=mock_session)
+        mock_context.return_value.__exit__ = Mock(return_value=False)
+        
+        @avec_session_db
+        def query_with_session(query: str, db=None):
+            return db is not None
+        
+        result = query_with_session("SELECT 1")
+        assert result is True
+    
+    @patch("src.core.database.obtenir_contexte_db")
+    def test_session_not_injected_if_already_provided(self, mock_context):
+        """Test que la session n'est pas réinjectée si déjà fournie."""
+        mock_session = Mock()
+        mock_context.return_value.__enter__ = Mock(return_value=mock_session)
+        mock_context.return_value.__exit__ = Mock(return_value=False)
+        
+        existing_db = Mock(name="existing_db")
+        
+        @avec_session_db
+        def with_existing_db(db=None):
+            return db
+        
+        result = with_existing_db(db=existing_db)
+        # Should use the provided db, not create new one
+        assert result is existing_db

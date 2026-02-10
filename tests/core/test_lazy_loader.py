@@ -370,3 +370,215 @@ class TestIntegrationLazyLoader:
         
         assert all(results)
         assert len(ChargeurModuleDiffere._cache) == 3
+
+
+# ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+# TESTS ADDITIONNELS POUR COUVERTURE 85%+
+# ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+
+@pytest.mark.unit
+class TestChargeurModuleDiffereAdvanced:
+    """Tests avancés pour ChargeurModuleDiffere."""
+    
+    def test_charger_with_invalid_module_path(self):
+        """Test chargement d'un module invalide."""
+        with pytest.raises(ModuleNotFoundError):
+            ChargeurModuleDiffere.charger("module.inexistant.xyz")
+    
+    def test_charger_returns_cached_module(self):
+        """Test que le deuxième appel retourne le module du cache."""
+        ChargeurModuleDiffere.vider_cache()
+        
+        module1 = ChargeurModuleDiffere.charger("json")
+        module2 = ChargeurModuleDiffere.charger("json")
+        
+        # Should be same cached module
+        assert module1 is module2
+    
+    def test_precharger_modules_vides(self):
+        """Test préchargement avec liste vide."""
+        ChargeurModuleDiffere.vider_cache()
+        ChargeurModuleDiffere.precharger([], background=False)
+        assert len(ChargeurModuleDiffere._cache) == 0
+    
+    def test_precharger_modules_foreground(self):
+        """Test préchargement en foreground."""
+        ChargeurModuleDiffere.vider_cache()
+        ChargeurModuleDiffere.precharger(["json", "os"], background=False)
+        
+        stats = ChargeurModuleDiffere.obtenir_statistiques()
+        assert stats["cached_modules"] >= 2
+    
+    def test_obtenir_statistiques_keys(self):
+        """Test que les statistiques contiennent les bonnes clés."""
+        ChargeurModuleDiffere.vider_cache()
+        ChargeurModuleDiffere.charger("json")
+        
+        stats = ChargeurModuleDiffere.obtenir_statistiques()
+        
+        assert "cached_modules" in stats
+        assert "average_load_time" in stats
+        assert "load_times" in stats
+    
+    def test_alias_get_stats(self):
+        """Test de l'alias anglais get_stats."""
+        ChargeurModuleDiffere.vider_cache()
+        ChargeurModuleDiffere.charger("os")
+        
+        stats = ChargeurModuleDiffere.get_stats()
+        assert "cached_modules" in stats
+
+
+@pytest.mark.unit
+class TestRouteurOptimiseAdvanced:
+    """Tests avancés pour RouteurOptimise."""
+    
+    def test_module_registry_contains_cuisine(self):
+        """Test que les modules cuisine sont enregistrés."""
+        registry = RouteurOptimise.MODULE_REGISTRY
+        
+        cuisine_modules = [k for k in registry.keys() if k.startswith("cuisine")]
+        assert len(cuisine_modules) > 0
+    
+    def test_module_registry_contains_famille(self):
+        """Test que les modules famille sont enregistrés."""
+        registry = RouteurOptimise.MODULE_REGISTRY
+        
+        famille_modules = [k for k in registry.keys() if k.startswith("famille")]
+        assert len(famille_modules) > 0
+    
+    def test_module_registry_contains_maison(self):
+        """Test que les modules maison sont enregistrés."""
+        registry = RouteurOptimise.MODULE_REGISTRY
+        
+        maison_modules = [k for k in registry.keys() if k.startswith("maison")]
+        assert len(maison_modules) > 0
+    
+    @patch("streamlit.error")
+    @patch("streamlit.spinner")
+    @patch("streamlit.warning")
+    @patch("streamlit.info")
+    def test_charger_module_not_implemented(self, mock_info, mock_warning, mock_spinner, mock_error):
+        """Test chargement d'un module pas encore implémenté."""
+        mock_spinner.return_value.__enter__ = Mock(return_value=None)
+        mock_spinner.return_value.__exit__ = Mock(return_value=False)
+        
+        # Add a fake module to registry
+        RouteurOptimise.MODULE_REGISTRY["fake_module"] = {
+            "path": "src.modules.fake.not_exists_xyz",
+            "type": "simple"
+        }
+        
+        try:
+            RouteurOptimise.charger_module("fake_module")
+            # Should show warning for non-implemented module
+        finally:
+            # Cleanup
+            del RouteurOptimise.MODULE_REGISTRY["fake_module"]
+    
+    @patch("streamlit.spinner")
+    def test_precharger_common_modules(self, mock_spinner):
+        """Test le préchargement des modules communs."""
+        mock_spinner.return_value.__enter__ = Mock(return_value=None)
+        mock_spinner.return_value.__exit__ = Mock(return_value=False)
+        
+        # Should not raise
+        RouteurOptimise.precharger_common_modules()
+
+
+@pytest.mark.unit
+class TestLazyImportAdvanced:
+    """Tests avancés pour le décorateur lazy_import."""
+    
+    def test_lazy_import_preserves_function_name(self):
+        """Test que lazy_import préserve le nom de la fonction."""
+        @lazy_import("json")
+        def ma_fonction():
+            return True
+        
+        assert ma_fonction.__name__ == "ma_fonction"
+    
+    def test_lazy_import_with_submodule(self):
+        """Test lazy_import avec sous-module."""
+        @lazy_import("os.path")
+        def use_path():
+            import os.path
+            return os.path.exists(".")
+        
+        result = use_path()
+        assert result is True
+    
+    def test_lazy_import_function_called_multiple_times(self):
+        """Test que la fonction décorée peut être appelée plusieurs fois."""
+        call_count = 0
+        
+        @lazy_import("json")
+        def increment():
+            nonlocal call_count
+            call_count += 1
+            return call_count
+        
+        assert increment() == 1
+        assert increment() == 2
+        assert increment() == 3
+
+
+@pytest.mark.unit
+class TestAfficherStatsAdvanced:
+    """Tests avancés pour l'affichage des statistiques."""
+    
+    @patch("streamlit.expander")
+    @patch("streamlit.columns")
+    @patch("streamlit.metric")
+    @patch("streamlit.caption")
+    @patch("streamlit.button")
+    def test_afficher_stats_with_slow_modules(
+        self, mock_button, mock_caption, mock_metric, mock_columns, mock_expander
+    ):
+        """Test affichage avec modules lents."""
+        mock_expander.return_value.__enter__ = Mock(return_value=None)
+        mock_expander.return_value.__exit__ = Mock(return_value=False)
+        mock_col = Mock()
+        mock_col.__enter__ = Mock(return_value=mock_col)
+        mock_col.__exit__ = Mock(return_value=False)
+        mock_columns.return_value = [mock_col, mock_col]
+        mock_button.return_value = False
+        
+        # Charger plusieurs modules
+        ChargeurModuleDiffere.charger("json")
+        ChargeurModuleDiffere.charger("os")
+        ChargeurModuleDiffere.charger("sys")
+        ChargeurModuleDiffere.charger("collections")
+        ChargeurModuleDiffere.charger("functools")
+        ChargeurModuleDiffere.charger("itertools")
+        
+        afficher_stats_chargement_differe()
+        
+        # Should have been called
+        mock_expander.assert_called_once()
+    
+    @patch("streamlit.expander")
+    @patch("streamlit.columns")
+    @patch("streamlit.metric")
+    @patch("streamlit.button")
+    @patch("streamlit.success")
+    @patch("streamlit.rerun")
+    def test_afficher_stats_button_vider_cache(
+        self, mock_rerun, mock_success, mock_button, mock_metric, mock_columns, mock_expander
+    ):
+        """Test le bouton 'Vider Cache' dans les stats."""
+        mock_expander.return_value.__enter__ = Mock(return_value=None)
+        mock_expander.return_value.__exit__ = Mock(return_value=False)
+        mock_col = Mock()
+        mock_col.__enter__ = Mock(return_value=mock_col)
+        mock_col.__exit__ = Mock(return_value=False)
+        mock_columns.return_value = [mock_col, mock_col]
+        mock_button.return_value = True  # Simuler clic sur bouton
+        
+        ChargeurModuleDiffere.charger("json")
+        
+        afficher_stats_chargement_differe()
+        
+        # Cache should be cleared
+        mock_success.assert_called_once()
+

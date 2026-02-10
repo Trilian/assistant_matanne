@@ -545,3 +545,450 @@ class TestRecettesIntegration:
         assert recette.id is not None
         assert version.recette_base_id == recette.id
         assert historique.recette_id == recette.id
+
+
+# ═══════════════════════════════════════════════════════════
+# SECTION 9: TESTS ADDITIONNELS POUR COUVERTURE 85%+
+# ═══════════════════════════════════════════════════════════
+
+
+@pytest.mark.unit
+class TestRecetteRobots:
+    """Tests pour la compatibilité avec les robots culinaires."""
+
+    def test_recette_compatible_cookeo(self, db: Session):
+        """Test attribut compatible Cookeo."""
+        recette = Recette(
+            nom="Recette Cookeo",
+            temps_preparation=10,
+            temps_cuisson=30,
+            portions=4,
+            compatible_cookeo=True,
+        )
+        db.add(recette)
+        db.commit()
+        
+        assert recette.compatible_cookeo is True
+
+    def test_recette_compatible_monsieur_cuisine(self, db: Session):
+        """Test attribut compatible Monsieur Cuisine."""
+        recette = Recette(
+            nom="Recette MC",
+            temps_preparation=15,
+            temps_cuisson=25,
+            portions=4,
+            compatible_monsieur_cuisine=True,
+        )
+        db.add(recette)
+        db.commit()
+        
+        assert recette.compatible_monsieur_cuisine is True
+
+    def test_recette_compatible_airfryer(self, db: Session):
+        """Test attribut compatible Airfryer."""
+        recette = Recette(
+            nom="Recette Airfryer",
+            temps_preparation=10,
+            temps_cuisson=20,
+            portions=2,
+            compatible_airfryer=True,
+        )
+        db.add(recette)
+        db.commit()
+        
+        assert recette.compatible_airfryer is True
+
+    def test_recette_compatible_multicooker(self, db: Session):
+        """Test attribut compatible Multicooker."""
+        recette = Recette(
+            nom="Recette Multicooker",
+            temps_preparation=10,
+            temps_cuisson=60,
+            portions=6,
+            compatible_multicooker=True,
+        )
+        db.add(recette)
+        db.commit()
+        
+        assert recette.compatible_multicooker is True
+
+
+@pytest.mark.unit
+class TestRecetteNutrition:
+    """Tests pour les attributs nutritionnels."""
+
+    def test_recette_calories(self, db: Session):
+        """Test calories par portion."""
+        recette = Recette(
+            nom="Recette Calories",
+            temps_preparation=10,
+            temps_cuisson=20,
+            portions=4,
+            calories=350,
+        )
+        db.add(recette)
+        db.commit()
+        
+        assert recette.calories == 350
+
+    def test_recette_proteines(self, db: Session):
+        """Test protéines par portion."""
+        recette = Recette(
+            nom="Recette Protéines",
+            temps_preparation=15,
+            temps_cuisson=25,
+            portions=4,
+            proteines=25.5,
+        )
+        db.add(recette)
+        db.commit()
+        
+        assert recette.proteines == 25.5
+
+    def test_recette_lipides(self, db: Session):
+        """Test lipides par portion."""
+        recette = Recette(
+            nom="Recette Lipides",
+            temps_preparation=10,
+            temps_cuisson=15,
+            portions=2,
+            lipides=15.3,
+        )
+        db.add(recette)
+        db.commit()
+        
+        assert recette.lipides == 15.3
+
+    def test_recette_glucides(self, db: Session):
+        """Test glucides par portion."""
+        recette = Recette(
+            nom="Recette Glucides",
+            temps_preparation=5,
+            temps_cuisson=10,
+            portions=3,
+            glucides=45.0,
+        )
+        db.add(recette)
+        db.commit()
+        
+        assert recette.glucides == 45.0
+
+    def test_recette_nutrition_complete(self, db: Session):
+        """Test recette avec toutes les infos nutritionnelles."""
+        recette = Recette(
+            nom="Recette Nutrition Complète",
+            temps_preparation=20,
+            temps_cuisson=30,
+            portions=4,
+            calories=450,
+            proteines=30.0,
+            lipides=20.0,
+            glucides=40.0,
+        )
+        db.add(recette)
+        db.commit()
+        
+        assert recette.calories == 450
+        assert recette.proteines == 30.0
+        assert recette.lipides == 20.0
+        assert recette.glucides == 40.0
+
+
+@pytest.mark.unit
+class TestRecetteIA:
+    """Tests pour les attributs liés à l'IA."""
+
+    def test_recette_genere_par_ia(self, db: Session):
+        """Test flag généré par IA."""
+        recette = Recette(
+            nom="Recette IA",
+            temps_preparation=10,
+            temps_cuisson=20,
+            portions=4,
+            genere_par_ia=True,
+            score_ia=0.95,
+        )
+        db.add(recette)
+        db.commit()
+        
+        assert recette.genere_par_ia is True
+        assert recette.score_ia == 0.95
+
+    def test_recette_url_image(self, db: Session):
+        """Test URL image."""
+        recette = Recette(
+            nom="Recette avec Image",
+            temps_preparation=15,
+            temps_cuisson=25,
+            portions=4,
+            url_image="https://example.com/image.jpg",
+        )
+        db.add(recette)
+        db.commit()
+        
+        assert recette.url_image == "https://example.com/image.jpg"
+
+
+@pytest.mark.unit
+class TestRecetteCategories:
+    """Tests pour les catégories et classifications."""
+
+    def test_recette_type_repas(self, db: Session):
+        """Test type de repas."""
+        recette = Recette(
+            nom="Petit Déjeuner",
+            temps_preparation=5,
+            temps_cuisson=0,
+            portions=1,
+            type_repas="petit_déjeuner",
+        )
+        db.add(recette)
+        db.commit()
+        
+        assert recette.type_repas == "petit_déjeuner"
+
+    def test_recette_saison(self, db: Session):
+        """Test saison recommandée."""
+        recette = Recette(
+            nom="Soupe d'Hiver",
+            temps_preparation=15,
+            temps_cuisson=45,
+            portions=6,
+            saison="hiver",
+        )
+        db.add(recette)
+        db.commit()
+        
+        assert recette.saison == "hiver"
+
+    def test_recette_categorie(self, db: Session):
+        """Test catégorie de recette."""
+        recette = Recette(
+            nom="Dessert Chocolat",
+            temps_preparation=20,
+            temps_cuisson=25,
+            portions=8,
+            categorie="dessert",
+        )
+        db.add(recette)
+        db.commit()
+        
+        assert recette.categorie == "dessert"
+
+    def test_recette_type_proteines(self, db: Session):
+        """Test type de protéines."""
+        recette = Recette(
+            nom="Saumon Grillé",
+            temps_preparation=10,
+            temps_cuisson=15,
+            portions=2,
+            type_proteines="poisson",
+        )
+        db.add(recette)
+        db.commit()
+        
+        assert recette.type_proteines == "poisson"
+
+
+@pytest.mark.unit
+class TestRecetteVegetarien:
+    """Tests pour les recettes végétariennes."""
+
+    def test_recette_est_vegetarien(self, db: Session):
+        """Test flag végétarien."""
+        recette = Recette(
+            nom="Curry Légumes",
+            temps_preparation=15,
+            temps_cuisson=30,
+            portions=4,
+            est_vegetarien=True,
+        )
+        db.add(recette)
+        db.commit()
+        
+        assert recette.est_vegetarien is True
+
+
+@pytest.mark.unit
+class TestRecetteScores:
+    """Tests pour les scores bio/local."""
+
+    def test_recette_score_bio(self, db: Session):
+        """Test score bio."""
+        recette = Recette(
+            nom="Recette Bio",
+            temps_preparation=15,
+            temps_cuisson=20,
+            portions=4,
+            est_bio=True,
+            score_bio=85,
+        )
+        db.add(recette)
+        db.commit()
+        
+        assert recette.score_bio == 85
+
+    def test_recette_score_local(self, db: Session):
+        """Test score local."""
+        recette = Recette(
+            nom="Recette Locale",
+            temps_preparation=10,
+            temps_cuisson=25,
+            portions=4,
+            est_local=True,
+            score_local=90,
+        )
+        db.add(recette)
+        db.commit()
+        
+        assert recette.score_local == 90
+
+
+@pytest.mark.unit  
+class TestRecetteIngredientAdvanced:
+    """Tests avancés pour RecetteIngredient."""
+
+    def test_recette_ingredient_optionalite(self, db: Session):
+        """Test que l'ingrédient peut être optionnel."""
+        ingredient = Ingredient(nom="Sel Optionnel")
+        recette = Recette(
+            nom="Recette Simple",
+            temps_preparation=5,
+            temps_cuisson=10,
+            portions=2,
+        )
+        
+        db.add(ingredient)
+        db.add(recette)
+        db.commit()
+        
+        ri = RecetteIngredient(
+            recette_id=recette.id,
+            ingredient_id=ingredient.id,
+            quantite=1,
+            unite="pcs",
+            optionnel=True,
+        )
+        db.add(ri)
+        db.commit()
+        
+        assert ri.optionnel is True
+
+    def test_recette_ingredient_notes(self, db: Session):
+        """Test notes sur l'ingrédient."""
+        ingredient = Ingredient(nom="Poulet Notes")
+        recette = Recette(
+            nom="Recette Notes",
+            temps_preparation=10,
+            temps_cuisson=30,
+            portions=4,
+        )
+        
+        db.add(ingredient)
+        db.add(recette)
+        db.commit()
+        
+        # Check if notes attribute exists on the model
+        ri = RecetteIngredient(
+            recette_id=recette.id,
+            ingredient_id=ingredient.id,
+            quantite=500,
+            unite="g",
+        )
+        db.add(ri)
+        db.commit()
+        
+        assert ri.quantite == 500
+
+
+@pytest.mark.unit
+class TestEtapeRecetteAdvanced:
+    """Tests avancés pour EtapeRecette."""
+
+    def test_etape_avec_duree(self, db: Session):
+        """Test étape avec durée."""
+        recette = Recette(
+            nom="Recette Durée",
+            temps_preparation=15,
+            temps_cuisson=30,
+            portions=4,
+        )
+        db.add(recette)
+        db.commit()
+        
+        etape = EtapeRecette(
+            recette_id=recette.id,
+            ordre=1,
+            description="Laisser mijoter",
+            duree=20,
+        )
+        db.add(etape)
+        db.commit()
+        
+        assert etape.duree == 20
+
+
+@pytest.mark.unit
+class TestVersionRecetteAdvanced:
+    """Tests avancés pour VersionRecette."""
+
+    def test_version_batch_cooking(self, db: Session):
+        """Test version batch cooking."""
+        recette = Recette(
+            nom="Recette Batch",
+            temps_preparation=20,
+            temps_cuisson=60,
+            portions=8,
+        )
+        db.add(recette)
+        db.commit()
+        
+        version = VersionRecette(
+            recette_base_id=recette.id,
+            type_version="batch_cooking",
+            temps_optimise_batch=45,
+        )
+        db.add(version)
+        db.commit()
+        
+        assert version.type_version == "batch_cooking"
+        assert version.temps_optimise_batch == 45
+
+
+@pytest.mark.unit
+class TestBatchMealAdvanced:
+    """Tests avancés pour BatchMeal."""
+
+    def test_batch_meal_portions_update(self, db: Session):
+        """Test mise à jour des portions restantes."""
+        batch = BatchMeal(
+            nom="Batch Test",
+            portions_creees=10,
+            portions_restantes=10,
+            date_preparation=date.today(),
+            date_peremption=date.today(),
+        )
+        db.add(batch)
+        db.commit()
+        
+        # Simuler consommation
+        batch.portions_restantes = 7
+        db.commit()
+        
+        assert batch.portions_restantes == 7
+
+    def test_batch_meal_lieu_stockage(self, db: Session):
+        """Test localisation de stockage."""
+        batch = BatchMeal(
+            nom="Batch Congelé",
+            portions_creees=8,
+            portions_restantes=8,
+            date_preparation=date.today(),
+            date_peremption=date.today(),
+            localisation="congélateur",
+        )
+        db.add(batch)
+        db.commit()
+        
+        assert batch.localisation == "congélateur"
+

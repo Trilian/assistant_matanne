@@ -9,7 +9,7 @@ from datetime import datetime
 import pandas as pd
 import streamlit as st
 
-from src.core.ai_agent import AgentIA
+from src.core.ai import AgentIA
 from src.core.database import obtenir_contexte_db
 from src.core.models import ChildProfile, Routine, RoutineTask
 

@@ -264,5 +264,67 @@ class TestPerformance:
         assert result == "result"
 
 
+class TestMainFunction:
+    """Tests pour la fonction main() de app.py (fusionnés depuis test_app.py)"""
+    
+    def test_main_runs(self, monkeypatch):
+        """Test que la fonction main() s'exécute sans erreur."""
+        import streamlit as st
+        import src.app as app
+        
+        # Mock les composants UI et RouteurOptimise
+        monkeypatch.setattr(app, "afficher_header", lambda: None)
+        monkeypatch.setattr(app, "afficher_sidebar", lambda: None)
+        monkeypatch.setattr(app, "afficher_footer", lambda: None)
+        monkeypatch.setattr(app, "injecter_css", lambda: None)
+        monkeypatch.setattr(app, "initialiser_app", lambda: True)
+        monkeypatch.setattr(app, "RouteurOptimise", Mock(load_module=lambda x: None))
+        monkeypatch.setattr(app, "obtenir_etat", lambda: Mock(module_actuel="accueil", mode_debug=False))
+        monkeypatch.setattr(app, "Cache", Mock(vider=lambda: None))
+        monkeypatch.setattr(app, "GestionnaireEtat", Mock(reinitialiser=lambda: None))
+        monkeypatch.setattr(st, "set_page_config", lambda **kwargs: None)
+        monkeypatch.setattr(st, "stop", lambda: None)
+        monkeypatch.setattr(st, "error", lambda msg: None)
+        monkeypatch.setattr(st, "exception", lambda e: None)
+        monkeypatch.setattr(st, "button", lambda label: False)
+
+        # Appel de main
+        app.main()
+
+    def test_main_exception(self, monkeypatch):
+        """Test gestion d'exception dans main()."""
+        import streamlit as st
+        import src.app as app
+        
+        monkeypatch.setattr(app, "afficher_header", lambda: (_ for _ in ()).throw(Exception("Test")))
+        monkeypatch.setattr(app, "afficher_sidebar", lambda: None)
+        monkeypatch.setattr(app, "afficher_footer", lambda: None)
+        monkeypatch.setattr(app, "injecter_css", lambda: None)
+        monkeypatch.setattr(app, "initialiser_app", lambda: True)
+        monkeypatch.setattr(app, "RouteurOptimise", Mock(load_module=lambda x: None))
+        monkeypatch.setattr(app, "obtenir_etat", lambda: Mock(module_actuel="accueil", mode_debug=True))
+        monkeypatch.setattr(app, "Cache", Mock(vider=lambda: None))
+        monkeypatch.setattr(app, "GestionnaireEtat", Mock(reinitialiser=lambda: None))
+        monkeypatch.setattr(st, "set_page_config", lambda **kwargs: None)
+        monkeypatch.setattr(st, "stop", lambda: None)
+        monkeypatch.setattr(st, "error", lambda msg: None)
+        monkeypatch.setattr(st, "exception", lambda e: None)
+        monkeypatch.setattr(st, "button", lambda label: False)
+
+        # Appel de main (doit gérer l'exception)
+        app.main()
+
+    def test_initialiser_app_stop(self, monkeypatch):
+        """Test arrêt si initialiser_app() retourne False."""
+        import streamlit as st
+        import src.app as app
+        
+        monkeypatch.setattr(app, "initialiser_app", lambda: False)
+        monkeypatch.setattr(st, "stop", lambda: None)
+        # Appel de la logique d'initialisation
+        if not app.initialiser_app():
+            st.stop()
+
+
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

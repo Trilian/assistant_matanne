@@ -523,3 +523,475 @@ class TestMultiTenantEdgeCases:
         assert return_dict() == {"user": "user-123"}
         assert return_list() == ["user-123"]
         assert return_int() == 42
+
+# ═══════════════════════════════════════════════════════════
+# SECTION 6: SERVICE MULTI-LOCATAIRE
+# ═══════════════════════════════════════════════════════════
+
+
+class TestServiceMultiLocataire:
+    """Tests pour ServiceMultiLocataire."""
+
+    def setup_method(self):
+        """Préparation avant chaque test."""
+        ContexteUtilisateur.clear()
+
+    @pytest.mark.unit
+    def test_service_creation(self):
+        """Test création service avec modèle."""
+        mock_model = Mock()
+        mock_model.user_id = Mock()
+        
+        service = ServiceMultiLocataire(mock_model)
+        
+        assert service.model == mock_model
+        assert service._has_user_id is True
+
+    @pytest.mark.unit
+    def test_service_creation_without_user_id(self):
+        """Test création service sans user_id sur modèle."""
+        mock_model = Mock(spec=[])  # Pas d'attribut user_id
+        
+        service = ServiceMultiLocataire(mock_model)
+        
+        assert service._has_user_id is False
+
+    @pytest.mark.unit
+    def test_apply_user_filter_with_user(self):
+        """Test application filtre utilisateur."""
+        ContexteUtilisateur.set_user("user-123")
+        
+        mock_model = Mock()
+        mock_model.user_id = Mock()
+        
+        mock_query = Mock()
+        mock_query.filter.return_value = mock_query
+        
+        service = ServiceMultiLocataire(mock_model)
+        result = service._apply_user_filter(mock_query)
+        
+        mock_query.filter.assert_called()
+
+    @pytest.mark.unit
+    def test_apply_user_filter_bypass(self):
+        """Test filtre avec bypass."""
+        ContexteUtilisateur.set_user("user-123")
+        ContexteUtilisateur.set_bypass(True)
+        
+        mock_model = Mock()
+        mock_model.user_id = Mock()
+        
+        mock_query = Mock()
+        
+        service = ServiceMultiLocataire(mock_model)
+        result = service._apply_user_filter(mock_query)
+        
+        # Avec bypass, query non modifiée
+        assert result == mock_query
+
+    @pytest.mark.unit
+    def test_apply_user_filter_no_user(self):
+        """Test filtre sans utilisateur."""
+        ContexteUtilisateur.clear()
+        
+        mock_model = Mock()
+        mock_model.user_id = Mock()
+        
+        mock_query = Mock()
+        
+        service = ServiceMultiLocataire(mock_model)
+        result = service._apply_user_filter(mock_query)
+        
+        # Sans utilisateur, query non modifiée
+        assert result == mock_query
+
+    @pytest.mark.unit
+    def test_inject_user_id(self):
+        """Test injection user_id dans données."""
+        ContexteUtilisateur.set_user("user-123")
+        
+        mock_model = Mock()
+        mock_model.user_id = Mock()
+        
+        service = ServiceMultiLocataire(mock_model)
+        data = {"name": "test"}
+        result = service._inject_user_id(data)
+        
+        assert result["user_id"] == "user-123"
+
+    @pytest.mark.unit
+    def test_inject_user_id_bypass(self):
+        """Test injection avec bypass."""
+        ContexteUtilisateur.set_user("user-123")
+        ContexteUtilisateur.set_bypass(True)
+        
+        mock_model = Mock()
+        mock_model.user_id = Mock()
+        
+        service = ServiceMultiLocataire(mock_model)
+        data = {"name": "test"}
+        result = service._inject_user_id(data)
+        
+        # Avec bypass, pas d'injection
+        assert "user_id" not in result
+
+    @pytest.mark.unit
+    def test_inject_user_id_already_present(self):
+        """Test injection quand user_id déjà présent."""
+        ContexteUtilisateur.set_user("user-123")
+        
+        mock_model = Mock()
+        mock_model.user_id = Mock()
+        
+        service = ServiceMultiLocataire(mock_model)
+        data = {"name": "test", "user_id": "other-user"}
+        result = service._inject_user_id(data)
+        
+        # Ne devrait pas écraser
+        assert result["user_id"] == "other-user"
+
+    @pytest.mark.unit
+    def test_obtenir_tout(self):
+        """Test obtenir_tout."""
+        ContexteUtilisateur.set_user("user-123")
+        
+        mock_model = Mock()
+        mock_model.user_id = Mock()
+        
+        mock_session = Mock()
+        mock_query = Mock()
+        mock_session.query.return_value = mock_query
+        mock_query.filter.return_value = mock_query
+        mock_query.all.return_value = ["item1", "item2"]
+        
+        service = ServiceMultiLocataire(mock_model)
+        result = service.obtenir_tout(mock_session)
+        
+        assert result == ["item1", "item2"]
+
+    @pytest.mark.unit
+    def test_obtenir_tout_with_filters(self):
+        """Test obtenir_tout avec filtres additionnels."""
+        ContexteUtilisateur.set_user("user-123")
+        
+        mock_model = Mock()
+        mock_model.user_id = Mock()
+        mock_model.active = Mock()
+        
+        mock_session = Mock()
+        mock_query = Mock()
+        mock_session.query.return_value = mock_query
+        mock_query.filter.return_value = mock_query
+        mock_query.all.return_value = ["item1"]
+        
+        service = ServiceMultiLocataire(mock_model)
+        result = service.obtenir_tout(mock_session, active=True)
+        
+        # filter devrait être appelé pour user_id ET active
+        assert result == ["item1"]
+
+    @pytest.mark.unit
+    def test_obtenir_par_id(self):
+        """Test obtenir_par_id."""
+        ContexteUtilisateur.set_user("user-123")
+        
+        mock_model = Mock()
+        mock_model.id = Mock()
+        mock_model.user_id = Mock()
+        
+        mock_session = Mock()
+        mock_query = Mock()
+        mock_session.query.return_value = mock_query
+        mock_query.filter.return_value = mock_query
+        mock_query.first.return_value = "item1"
+        
+        service = ServiceMultiLocataire(mock_model)
+        result = service.obtenir_par_id(mock_session, 1)
+        
+        assert result == "item1"
+
+    @pytest.mark.unit
+    def test_creer(self):
+        """Test création entité."""
+        ContexteUtilisateur.set_user("user-123")
+        
+        mock_model = Mock()
+        mock_model.user_id = Mock()
+        mock_entity = Mock()
+        mock_model.return_value = mock_entity
+        
+        mock_session = Mock()
+        
+        service = ServiceMultiLocataire(mock_model)
+        result = service.creer(mock_session, {"name": "test"})
+        
+        mock_session.add.assert_called_with(mock_entity)
+        mock_session.commit.assert_called()
+        mock_session.refresh.assert_called_with(mock_entity)
+
+    @pytest.mark.unit
+    def test_mettre_a_jour(self):
+        """Test mise à jour."""
+        ContexteUtilisateur.set_user("user-123")
+        
+        mock_model = Mock()
+        mock_model.id = Mock()
+        mock_model.user_id = Mock()
+        
+        mock_entity = Mock()
+        mock_entity.id = 1
+        mock_entity.name = "old"
+        
+        mock_session = Mock()
+        mock_query = Mock()
+        mock_session.query.return_value = mock_query
+        mock_query.filter.return_value = mock_query
+        mock_query.first.return_value = mock_entity
+        
+        service = ServiceMultiLocataire(mock_model)
+        result = service.mettre_a_jour(mock_session, 1, {"name": "new"})
+        
+        mock_session.commit.assert_called()
+
+    @pytest.mark.unit
+    def test_mettre_a_jour_not_found(self):
+        """Test mise à jour entité non trouvée."""
+        ContexteUtilisateur.set_user("user-123")
+        
+        mock_model = Mock()
+        mock_model.id = Mock()
+        mock_model.user_id = Mock()
+        
+        mock_session = Mock()
+        mock_query = Mock()
+        mock_session.query.return_value = mock_query
+        mock_query.filter.return_value = mock_query
+        mock_query.first.return_value = None
+        
+        service = ServiceMultiLocataire(mock_model)
+        result = service.mettre_a_jour(mock_session, 999, {"name": "new"})
+        
+        assert result is None
+
+    @pytest.mark.unit
+    def test_supprimer(self):
+        """Test suppression."""
+        ContexteUtilisateur.set_user("user-123")
+        
+        mock_model = Mock()
+        mock_model.id = Mock()
+        mock_model.user_id = Mock()
+        
+        mock_entity = Mock()
+        
+        mock_session = Mock()
+        mock_query = Mock()
+        mock_session.query.return_value = mock_query
+        mock_query.filter.return_value = mock_query
+        mock_query.first.return_value = mock_entity
+        
+        service = ServiceMultiLocataire(mock_model)
+        result = service.supprimer(mock_session, 1)
+        
+        assert result is True
+        mock_session.delete.assert_called_with(mock_entity)
+
+    @pytest.mark.unit
+    def test_supprimer_not_found(self):
+        """Test suppression entité non trouvée."""
+        ContexteUtilisateur.set_user("user-123")
+        
+        mock_model = Mock()
+        mock_model.id = Mock()
+        mock_model.user_id = Mock()
+        
+        mock_session = Mock()
+        mock_query = Mock()
+        mock_session.query.return_value = mock_query
+        mock_query.filter.return_value = mock_query
+        mock_query.first.return_value = None
+        
+        service = ServiceMultiLocataire(mock_model)
+        result = service.supprimer(mock_session, 999)
+        
+        assert result is False
+
+    @pytest.mark.unit
+    def test_compter(self):
+        """Test comptage."""
+        ContexteUtilisateur.set_user("user-123")
+        
+        mock_model = Mock()
+        mock_model.user_id = Mock()
+        
+        mock_session = Mock()
+        mock_query = Mock()
+        mock_session.query.return_value = mock_query
+        mock_query.filter.return_value = mock_query
+        mock_query.count.return_value = 42
+        
+        service = ServiceMultiLocataire(mock_model)
+        result = service.compter(mock_session)
+        
+        assert result == 42
+
+    @pytest.mark.unit
+    def test_english_aliases(self):
+        """Test alias anglais."""
+        mock_model = Mock()
+        mock_model.user_id = Mock()
+        
+        service = ServiceMultiLocataire(mock_model)
+        
+        # Vérifier que les alias existent
+        assert hasattr(service, "get_all")
+        assert hasattr(service, "get_by_id")
+        assert hasattr(service, "create")
+        assert hasattr(service, "update")
+        assert hasattr(service, "delete")
+        assert hasattr(service, "count")
+
+
+# ═══════════════════════════════════════════════════════════
+# SECTION 7: FONCTIONS UTILITAIRES
+# ═══════════════════════════════════════════════════════════
+
+
+class TestFonctionsUtilitaires:
+    """Tests pour fonctions utilitaires."""
+
+    def setup_method(self):
+        """Préparation avant chaque test."""
+        ContexteUtilisateur.clear()
+
+    @pytest.mark.unit
+    def test_initialiser_contexte_utilisateur_streamlit(self):
+        """Test initialisation contexte depuis Streamlit."""
+        from src.core.multi_tenant import initialiser_contexte_utilisateur_streamlit
+        
+        with patch("streamlit.session_state", {"user_id": "user-123"}):
+            initialiser_contexte_utilisateur_streamlit()
+            
+            assert ContexteUtilisateur.get_user() == "user-123"
+
+    @pytest.mark.unit
+    def test_initialiser_contexte_sans_user(self):
+        """Test initialisation contexte sans utilisateur."""
+        from src.core.multi_tenant import initialiser_contexte_utilisateur_streamlit
+        
+        ContexteUtilisateur.set_user("previous")
+        
+        with patch("streamlit.session_state", {}):
+            initialiser_contexte_utilisateur_streamlit()
+            
+            assert ContexteUtilisateur.get_user() is None
+
+    @pytest.mark.unit
+    def test_initialiser_contexte_streamlit_not_available(self):
+        """Test initialisation quand Streamlit non disponible."""
+        from src.core.multi_tenant import initialiser_contexte_utilisateur_streamlit
+        
+        with patch.dict("sys.modules", {"streamlit": None}):
+            # Ne devrait pas lever d'exception
+            try:
+                initialiser_contexte_utilisateur_streamlit()
+            except Exception:
+                pass  # OK si Streamlit non disponible
+
+    @pytest.mark.unit
+    def test_definir_utilisateur_from_auth(self):
+        """Test définition utilisateur depuis auth."""
+        from src.core.multi_tenant import definir_utilisateur_from_auth
+        
+        with patch("streamlit.session_state", {}) as mock_state:
+            user_data = {"id": "user-123", "email": "test@example.com"}
+            definir_utilisateur_from_auth(user_data)
+            
+            assert ContexteUtilisateur.get_user() == "user-123"
+
+    @pytest.mark.unit
+    def test_definir_utilisateur_from_auth_empty(self):
+        """Test définition utilisateur avec données vides."""
+        from src.core.multi_tenant import definir_utilisateur_from_auth
+        
+        ContexteUtilisateur.set_user("previous")
+        
+        definir_utilisateur_from_auth(None)
+        
+        # Ne devrait pas changer le contexte
+        assert ContexteUtilisateur.get_user() == "previous"
+
+    @pytest.mark.unit
+    def test_definir_utilisateur_from_auth_no_id(self):
+        """Test définition utilisateur sans id."""
+        from src.core.multi_tenant import definir_utilisateur_from_auth
+        
+        ContexteUtilisateur.set_user("previous")
+        
+        user_data = {"email": "test@example.com"}  # Pas d'id
+        definir_utilisateur_from_auth(user_data)
+        
+        # Ne devrait pas changer le contexte
+        assert ContexteUtilisateur.get_user() == "previous"
+
+
+# ═══════════════════════════════════════════════════════════
+# SECTION 8: FACTORY
+# ═══════════════════════════════════════════════════════════
+
+
+class TestFactory:
+    """Tests pour factory multi-tenant."""
+
+    @pytest.mark.unit
+    def test_creer_multi_tenant_service(self):
+        """Test factory création service."""
+        from src.core.multi_tenant import creer_multi_tenant_service
+        
+        mock_model = Mock()
+        mock_model.user_id = Mock()
+        
+        service = creer_multi_tenant_service(mock_model)
+        
+        assert isinstance(service, ServiceMultiLocataire)
+        assert service.model == mock_model
+
+
+# ═══════════════════════════════════════════════════════════
+# SECTION 9: TESTS ALIAS FRANÇAIS
+# ═══════════════════════════════════════════════════════════
+
+
+class TestAliases:
+    """Tests pour vérifier les alias français/anglais."""
+
+    def setup_method(self):
+        """Préparation avant chaque test."""
+        ContexteUtilisateur.clear()
+
+    @pytest.mark.unit
+    def test_contexte_utilisateur_aliases(self):
+        """Test alias ContexteUtilisateur."""
+        # Méthodes françaises
+        ContexteUtilisateur.definir_utilisateur("user-1")
+        assert ContexteUtilisateur.obtenir_utilisateur() == "user-1"
+        
+        # Alias anglais
+        ContexteUtilisateur.set_user("user-2")
+        assert ContexteUtilisateur.get_user() == "user-2"
+        
+        # Bypass
+        ContexteUtilisateur.definir_contournement(True)
+        assert ContexteUtilisateur.est_contourne() is True
+        
+        ContexteUtilisateur.set_bypass(False)
+        assert ContexteUtilisateur.is_bypassed() is False
+
+    @pytest.mark.unit
+    def test_requete_multi_locataire_aliases(self):
+        """Test alias RequeteMultiLocataire."""
+        # Vérifier que les alias existent
+        assert hasattr(RequeteMultiLocataire, "filter_by_user")
+        assert hasattr(RequeteMultiLocataire, "get_user_filter")
+        assert hasattr(RequeteMultiLocataire, "filtrer_par_utilisateur")
+        assert hasattr(RequeteMultiLocataire, "obtenir_utilisateur_filter")

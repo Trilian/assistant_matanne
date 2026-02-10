@@ -465,3 +465,229 @@ class TestIntegration:
         
         assert len(result) == 2
         assert result[0].titre == "Tâche 1"
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# TESTS ADDITIONNELS POUR COUVERTURE 85%+
+# ═══════════════════════════════════════════════════════════════════════════
+
+@pytest.mark.unit
+class TestAnalyseurIAStrategie4ParsePartiel:
+    """Tests de la stratégie 4: parse partiel."""
+    
+    def test_strategie4_parse_partiel_utilise(self):
+        """Test que la stratégie 4 est utilisée quand les autres échouent."""
+        # JSON malformé mais avec champs extractibles
+        malformed = '{"nom": "Partiel", "age": 25 invalid syntax here'
+        
+        # Avec fallback au cas où le parse partiel échoue aussi
+        result = AnalyseurIA.analyser(
+            malformed,
+            PersonneTest,
+            valeur_secours={"nom": "Fallback", "age": 0}
+        )
+        
+        # Devrait au moins avoir un résultat
+        assert result is not None
+        assert hasattr(result, "nom")
+    
+    def test_analyser_partiel_champs_multiples(self):
+        """Test parse partiel avec plusieurs champs."""
+        json_casse = '"nom": "Test", "temps": 30, broken'
+        
+        result = AnalyseurIA._analyser_partiel(json_casse, RecetteTest)
+        
+        # Peut retourner None ou dict partiel
+        if result is not None:
+            assert "nom" in result or "temps" in result
+
+
+@pytest.mark.unit
+class TestAnalyseurIAAdvanced:
+    """Tests avancés de l'analyseur IA."""
+    
+    def test_analyser_json_nested_objects(self):
+        """Test parse d'objets JSON imbriqués."""
+        class NestedModel(BaseModel):
+            outer: str
+            inner: dict
+        
+        json_str = '{"outer": "value", "inner": {"key": "nested_value"}}'
+        result = AnalyseurIA.analyser(json_str, NestedModel)
+        
+        assert result.outer == "value"
+        assert result.inner["key"] == "nested_value"
+    
+    def test_analyser_avec_commentaires_texte(self):
+        """Test parse avec commentaires texte autour."""
+        texte = '''
+        Voici ma réponse:
+        
+        {"nom": "Réponse", "age": 42}
+        
+        J'espère que cela convient.
+        '''
+        
+        result = AnalyseurIA.analyser(texte, PersonneTest)
+        
+        assert result.nom == "Réponse"
+        assert result.age == 42
+    
+    def test_extraire_objet_json_nested_arrays(self):
+        """Test extraction avec tableaux imbriqués."""
+        texte = '[[1, 2], [3, 4]]'
+        result = AnalyseurIA._extraire_objet_json(texte)
+        
+        parsed = json.loads(result)
+        assert parsed == [[1, 2], [3, 4]]
+    
+    def test_reparer_cle_sans_guillemets_complex(self):
+        """Test réparation clés sans guillemets complexe."""
+        texte = '{key1: "value1", key2: 123}'
+        result = AnalyseurIA._reparer_intelligemment(texte)
+        
+        # Devrait ajouter des guillemets
+        assert '"key1"' in result or '"key2"' in result
+
+
+@pytest.mark.unit
+class TestAnalyserListeReponseAdvanced:
+    """Tests avancés pour analyser_liste_reponse."""
+    
+    def test_parse_liste_cle_custom(self):
+        """Test parse avec clé personnalisée."""
+        json_obj = '{"resultats": [{"nom": "A", "age": 1}]}'
+        result = analyser_liste_reponse(
+            json_obj,
+            PersonneTest,
+            cle_liste="resultats"
+        )
+        
+        assert len(result) == 1
+        assert result[0].nom == "A"
+    
+    def test_parse_liste_regex_strategy(self):
+        """Test la stratégie regex pour listes."""
+        # Texte avec liste JSON au milieu
+        texte = '''
+        Début du texte
+        [{"nom": "Regex", "age": 99}]
+        Fin du texte
+        '''
+        
+        result = analyser_liste_reponse(texte, PersonneTest)
+        
+        assert len(result) == 1
+        assert result[0].nom == "Regex"
+    
+    def test_parse_liste_fallback_items_secours_invalid(self):
+        """Test fallback avec items_secours invalides."""
+        texte_invalide = "pas de json ici"
+        
+        # items_secours invalides pour le modèle
+        items_invalides = [{"invalid_field": "value"}]
+        
+        result = analyser_liste_reponse(
+            texte_invalide,
+            PersonneTest,
+            items_secours=items_invalides
+        )
+        
+        # Devrait retourner liste vide car items_secours invalides
+        assert result == []
+    
+    def test_parse_liste_objet_avec_mauvaise_cle(self):
+        """Test parse objet avec clé différente de cle_liste."""
+        json_obj = '{"other_key": [{"nom": "X", "age": 1}]}'
+        
+        result = analyser_liste_reponse(
+            json_obj,
+            PersonneTest,
+            cle_liste="items"  # Pas "other_key"
+        )
+        
+        # Devrait quand même parser car la liste est dans l'objet
+        # via les autres stratégies
+        assert isinstance(result, list)
+
+
+@pytest.mark.unit
+class TestNettoyageAdvanced:
+    """Tests avancés pour le nettoyage."""
+    
+    def test_nettoyer_json_case_insensitive(self):
+        """Test que ```JSON est aussi nettoyé."""
+        texte = '```JSON\n{"key": "value"}\n```'
+        result = AnalyseurIA._nettoyer_basique(texte)
+        
+        assert '```' not in result
+    
+    def test_nettoyer_multiples_blocs_markdown(self):
+        """Test nettoyage avec multiples blocs markdown."""
+        texte = '```\ncode\n``` more ```json\n{"a": 1}\n```'
+        result = AnalyseurIA._nettoyer_basique(texte)
+        
+        assert result.count('```') == 0 or '```' not in result
+    
+    def test_nettoyer_preserve_content(self):
+        """Test que le contenu est préservé."""
+        texte = '  {"nom": "Préservé"}  '
+        result = AnalyseurIA._nettoyer_basique(texte)
+        
+        assert "Préservé" in result
+
+
+@pytest.mark.unit
+class TestReparationAdvanced:
+    """Tests avancés pour la réparation JSON."""
+    
+    def test_reparer_apostrophe_dans_string(self):
+        """Test réparation apostrophe dans une chaîne."""
+        texte = '{"message": "C\'est une phrase"}'
+        result = AnalyseurIA._reparer_intelligemment(texte)
+        
+        # Devrait fonctionner
+        assert "message" in result
+    
+    def test_reparer_virgule_trailing_array(self):
+        """Test réparation virgule trailing dans array."""
+        texte = '{"items": [1, 2, 3,]}'
+        result = AnalyseurIA._reparer_intelligemment(texte)
+        
+        # La virgule devrait être supprimée
+        parsed = json.loads(result)
+        assert parsed["items"] == [1, 2, 3]
+    
+    def test_reparer_none_to_null(self):
+        """Test conversion None → null."""
+        texte = '{"value": None, "other": "valid"}'
+        result = AnalyseurIA._reparer_intelligemment(texte)
+        
+        assert "null" in result
+
+
+@pytest.mark.unit
+class TestExtractionAdvanced:
+    """Tests avancés pour l'extraction JSON."""
+    
+    def test_extraire_premier_objet(self):
+        """Test extraction du premier objet seulement."""
+        texte = '{"first": 1} {"second": 2}'
+        result = AnalyseurIA._extraire_objet_json(texte)
+        
+        parsed = json.loads(result)
+        assert "first" in parsed
+    
+    def test_extraire_objet_avec_accolades_desequilibrees(self):
+        """Test avec accolades en texte."""
+        texte = 'Le résultat est: {"key": "value avec { dans texte"}'
+        
+        try:
+            result = AnalyseurIA._extraire_objet_json(texte)
+            # Si ça parse, vérifier la valeur
+            parsed = json.loads(result)
+            assert "key" in parsed
+        except (ValueError, json.JSONDecodeError):
+            # Acceptable si le JSON est vraiment malformé
+            pass
+

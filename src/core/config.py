@@ -74,6 +74,28 @@ def _read_st_secret(section: str):
     return None
 
 
+def _is_streamlit_cloud() -> bool:
+    """Détecte si l'app s'exécute sur Streamlit Cloud.
+    
+    Returns:
+        True si sur Streamlit Cloud, False sinon
+    """
+    import os
+    # Indicateurs de Streamlit Cloud
+    if os.getenv("STREAMLIT_SERVER_HEADLESS") == "true":
+        return True
+    if os.getenv("STREAMLIT_RUNTIME_ENV") == "cloud":
+        return True
+    # Présence de secrets indique souvent le cloud - vérification sécurisée
+    try:
+        if hasattr(st, "secrets"):
+            # Éviter d'accéder directement à st.secrets pour ne pas lever d'exception
+            return False  # En dev, considérer comme non-cloud
+    except Exception:
+        pass
+    return False
+
+
 def _get_mistral_api_key_from_secrets() -> str | None:
     """Récupère la clé API Mistral des secrets Streamlit.
     
