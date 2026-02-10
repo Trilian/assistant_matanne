@@ -4,11 +4,13 @@
 from .ui import paris, loto
 
 # Logic
-from .logic import paris_logic, loto_logic
+from .logic import paris as paris_logic_module, loto_logic
+# Backward compatibility alias
+paris_logic = paris_logic_module
 
 __all__ = [
     # UI
     "paris", "loto",
     # Logic
-    "paris_logic", "loto_logic",
+    "paris_logic", "paris_logic_module", "loto_logic",
 ]

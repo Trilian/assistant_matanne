@@ -16,7 +16,7 @@ from src.core.models import Equipe, Match, PariSportif, HistoriqueJeux
 
 logger = logging.getLogger(__name__)
 
-from src.domains.jeux.logic.paris_logic import (
+from src.domains.jeux.logic.paris import (
     CHAMPIONNATS,
     calculer_forme_equipe,
     calculer_historique_face_a_face,

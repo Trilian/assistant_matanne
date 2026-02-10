@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service de synchronisation avec calendriers externes.
 
 Fonctionnalités:
@@ -11,12 +11,9 @@ Fonctionnalités:
 
 import logging
 from datetime import datetime, date, timedelta
-from enum import Enum
-from typing import Any
 from uuid import uuid4, UUID
 
 import httpx
-from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from src.core.decorators import with_error_handling, with_db_session
@@ -28,237 +25,18 @@ from src.core.models import (
     FamilyActivity,
     CalendrierExterne,
     EvenementCalendrier,
-    CalendarProvider as CalendarProviderEnum,
-    SyncDirection as SyncDirectionEnum,
 )
 
+from .schemas import (
+    CalendarProvider,
+    SyncDirection,
+    ExternalCalendarConfig,
+    CalendarEventExternal,
+    SyncResult,
+)
+from .ical_generator import ICalGenerator
+
 logger = logging.getLogger(__name__)
-
-
-# ═══════════════════════════════════════════════════════════
-# TYPES ET SCHÉMAS
-# ═══════════════════════════════════════════════════════════
-
-
-class CalendarProvider(str, Enum):
-    """Fournisseurs de calendrier supportés."""
-    GOOGLE = "google"
-    APPLE = "apple"  # iCal/iCloud
-    OUTLOOK = "outlook"
-    ICAL_URL = "ical_url"  # URL iCal générique
-
-
-class SyncDirection(str, Enum):
-    """Direction de synchronisation."""
-    IMPORT_ONLY = "import"  # Du calendrier externe vers l'app
-    EXPORT_ONLY = "export"  # De l'app vers le calendrier externe
-    BIDIRECTIONAL = "both"  # Dans les deux sens
-
-
-class ExternalCalendarConfig(BaseModel):
-    """Configuration d'un calendrier externe."""
-    
-    id: str = Field(default_factory=lambda: str(uuid4())[:12])
-    user_id: str
-    provider: CalendarProvider
-    name: str = "Mon calendrier"
-    
-    # Configuration selon le provider
-    calendar_id: str = ""  # ID Google/Outlook
-    ical_url: str = ""  # URL pour iCal
-    
-    # OAuth tokens (pour Google/Outlook)
-    access_token: str = ""
-    refresh_token: str = ""
-    token_expiry: datetime | None = None
-    
-    # Options de sync
-    sync_direction: SyncDirection = SyncDirection.BIDIRECTIONAL
-    sync_meals: bool = True
-    sync_activities: bool = True
-    sync_events: bool = True
-    
-    # État
-    last_sync: datetime | None = None
-    is_active: bool = True
-    created_at: datetime = Field(default_factory=datetime.now)
-
-
-class CalendarEventExternal(BaseModel):
-    """Événement de calendrier externe."""
-    
-    id: str = ""
-    external_id: str = ""  # ID dans le calendrier externe
-    title: str
-    description: str = ""
-    start_time: datetime
-    end_time: datetime
-    all_day: bool = False
-    location: str = ""
-    color: str = ""
-    
-    # Métadonnées de sync
-    source_type: str = ""  # "meal", "activity", "event"
-    source_id: int | None = None
-    last_modified: datetime = Field(default_factory=datetime.now)
-
-
-class SyncResult(BaseModel):
-    """Résultat d'une synchronisation."""
-    
-    success: bool = False
-    message: str = ""
-    events_imported: int = 0
-    events_exported: int = 0
-    events_updated: int = 0
-    conflicts: list[dict] = Field(default_factory=list)
-    errors: list[str] = Field(default_factory=list)
-    duration_seconds: float = 0.0
-
-
-# ═══════════════════════════════════════════════════════════
-# GÉNÉRATEUR iCAL
-# ═══════════════════════════════════════════════════════════
-
-
-class ICalGenerator:
-    """Génère des fichiers iCal (.ics) à partir des événements."""
-    
-    @staticmethod
-    def generate_ical(events: list[CalendarEventExternal], calendar_name: str = "Assistant Matanne") -> str:
-        """
-        Génère un fichier iCal complet.
-        
-        Args:
-            events: Liste d'événements à inclure
-            calendar_name: Nom du calendrier
-            
-        Returns:
-            Contenu du fichier .ics
-        """
-        lines = [
-            "BEGIN:VCALENDAR",
-            "VERSION:2.0",
-            "PRODID:-//Assistant Matanne//Planning Familial//FR",
-            f"X-WR-CALNAME:{calendar_name}",
-            "CALSCALE:GREGORIAN",
-            "METHOD:PUBLISH",
-        ]
-        
-        for event in events:
-            lines.extend(ICalGenerator._event_to_vevent(event))
-        
-        lines.append("END:VCALENDAR")
-        
-        return "\r\n".join(lines)
-    
-    @staticmethod
-    def _event_to_vevent(event: CalendarEventExternal) -> list[str]:
-        """Convertit un événement en VEVENT iCal."""
-        uid = event.external_id or str(uuid4())
-        
-        lines = [
-            "BEGIN:VEVENT",
-            f"UID:{uid}@assistant-matanne",
-            f"DTSTAMP:{datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')}",
-        ]
-        
-        if event.all_day:
-            lines.append(f"DTSTART;VALUE=DATE:{event.start_time.strftime('%Y%m%d')}")
-            lines.append(f"DTEND;VALUE=DATE:{event.end_time.strftime('%Y%m%d')}")
-        else:
-            lines.append(f"DTSTART:{event.start_time.strftime('%Y%m%dT%H%M%S')}")
-            lines.append(f"DTEND:{event.end_time.strftime('%Y%m%dT%H%M%S')}")
-        
-        # Échapper les caractères spéciaux
-        summary = event.title.replace(",", "\\,").replace(";", "\\;")
-        lines.append(f"SUMMARY:{summary}")
-        
-        if event.description:
-            desc = event.description.replace("\n", "\\n").replace(",", "\\,")
-            lines.append(f"DESCRIPTION:{desc}")
-        
-        if event.location:
-            lines.append(f"LOCATION:{event.location}")
-        
-        # Catégorie basée sur le type
-        if event.source_type == "meal":
-            lines.append("CATEGORIES:Repas")
-        elif event.source_type == "activity":
-            lines.append("CATEGORIES:Activité Familiale")
-        
-        lines.append("END:VEVENT")
-        
-        return lines
-    
-    @staticmethod
-    def parse_ical(ical_content: str) -> list[CalendarEventExternal]:
-        """
-        Parse un fichier iCal et extrait les événements.
-        
-        Args:
-            ical_content: Contenu du fichier .ics
-            
-        Returns:
-            Liste d'événements extraits
-        """
-        events = []
-        current_event = None
-        
-        for line in ical_content.split("\n"):
-            line = line.strip()
-            
-            if line == "BEGIN:VEVENT":
-                current_event = {}
-            elif line == "END:VEVENT" and current_event is not None:
-                # Créer l'événement
-                try:
-                    event = CalendarEventExternal(
-                        external_id=current_event.get("UID", ""),
-                        title=current_event.get("SUMMARY", "Sans titre"),
-                        description=current_event.get("DESCRIPTION", ""),
-                        start_time=ICalGenerator._parse_ical_datetime(current_event.get("DTSTART", "")),
-                        end_time=ICalGenerator._parse_ical_datetime(current_event.get("DTEND", "")),
-                        all_day=";VALUE=DATE" in current_event.get("DTSTART_RAW", ""),
-                        location=current_event.get("LOCATION", ""),
-                    )
-                    events.append(event)
-                except Exception as e:
-                    logger.warning(f"Erreur parsing événement: {e}")
-                
-                current_event = None
-            elif current_event is not None and ":" in line:
-                key, value = line.split(":", 1)
-                
-                # Gérer les paramètres (ex: DTSTART;VALUE=DATE:20260101)
-                if ";" in key:
-                    current_event[key.split(";")[0]] = value
-                    current_event[key.split(";")[0] + "_RAW"] = key
-                else:
-                    current_event[key] = value.replace("\\n", "\n").replace("\\,", ",")
-        
-        return events
-    
-    @staticmethod
-    def _parse_ical_datetime(value: str) -> datetime:
-        """Parse une date/heure iCal."""
-        value = value.strip()
-        
-        # Format date seule: 20260101
-        if len(value) == 8:
-            return datetime.strptime(value, "%Y%m%d")
-        
-        # Format datetime: 20260101T120000 ou 20260101T120000Z
-        if "T" in value:
-            value = value.rstrip("Z")
-            return datetime.strptime(value, "%Y%m%dT%H%M%S")
-        
-        return datetime.now()
-
-
-# ═══════════════════════════════════════════════════════════
-# SERVICE DE SYNCHRONISATION
-# ═══════════════════════════════════════════════════════════
 
 
 class CalendarSyncService:
@@ -475,8 +253,6 @@ class CalendarSyncService:
                         description=event.description,
                         date_debut=event.start_time.date(),
                         date_fin=event.end_time.date() if event.end_time else None,
-                        # heure_debut=event.start_time.time() if not event.all_day else None,
-                        # journee_entiere=event.all_day,
                         source_externe=f"ical:{ical_url}",
                         external_id=event.external_id,
                     )
@@ -1183,113 +959,3 @@ def get_calendar_sync_service() -> CalendarSyncService:
     if _calendar_sync_service is None:
         _calendar_sync_service = CalendarSyncService()
     return _calendar_sync_service
-
-
-# ═══════════════════════════════════════════════════════════
-# COMPOSANT UI STREAMLIT
-# ═══════════════════════════════════════════════════════════
-
-
-def render_calendar_sync_ui():
-    """Interface Streamlit pour la synchronisation des calendriers."""
-    import streamlit as st
-    
-    st.subheader("📅 Synchronisation Calendriers")
-    
-    service = get_calendar_sync_service()
-    
-    # Tabs pour les différentes options
-    tab1, tab2, tab3 = st.tabs(["📤 Exporter", "📥 Importer", "🔗 Connecter"])
-    
-    with tab1:
-        st.markdown("### Exporter vers iCal")
-        st.info("Téléchargez vos repas et activités au format iCal pour les importer dans votre application de calendrier préférée.")
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            include_meals = st.checkbox("Inclure les repas", value=True, key="export_meals")
-        with col2:
-            include_activities = st.checkbox("Inclure les activités", value=True, key="export_activities")
-        
-        days_ahead = st.slider("Période (jours)", 7, 90, 30, key="export_days")
-        
-        if st.button("📥 Générer le fichier iCal", type="primary"):
-            from src.services.auth import get_auth_service
-            auth = get_auth_service()
-            user = auth.get_current_user()
-            user_id = user.id if user else "anonymous"
-            
-            ical_content = service.export_to_ical(
-                user_id=user_id,
-                end_date=date.today() + timedelta(days=days_ahead),
-                include_meals=include_meals,
-                include_activities=include_activities,
-            )
-            
-            if ical_content:
-                st.download_button(
-                    label="💾 Télécharger le fichier .ics",
-                    data=ical_content,
-                    file_name="assistant_matanne_calendar.ics",
-                    mime="text/calendar",
-                )
-                st.success("✅ Fichier généré avec succès!")
-    
-    with tab2:
-        st.markdown("### Importer depuis une URL iCal")
-        st.info("Importez des événements depuis un calendrier partagé (Google Calendar, iCloud, etc.)")
-        
-        ical_url = st.text_input(
-            "URL du calendrier iCal",
-            placeholder="https://calendar.google.com/calendar/ical/...",
-            key="import_ical_url"
-        )
-        
-        calendar_name = st.text_input(
-            "Nom du calendrier",
-            value="Calendrier importé",
-            key="import_calendar_name"
-        )
-        
-        if st.button("📤 Importer", type="primary") and ical_url:
-            from src.services.auth import get_auth_service
-            auth = get_auth_service()
-            user = auth.get_current_user()
-            user_id = user.id if user else "anonymous"
-            
-            with st.spinner("Import en cours..."):
-                result = service.import_from_ical_url(
-                    user_id=user_id,
-                    ical_url=ical_url,
-                    calendar_name=calendar_name,
-                )
-            
-            if result and result.success:
-                st.success(f"✅ {result.message}")
-            else:
-                st.error(f"❌ {result.message if result else 'Erreur inconnue'}")
-    
-    with tab3:
-        st.markdown("### Connecter un calendrier")
-        
-        st.markdown("#### Google Calendar")
-        st.caption("Synchronisez automatiquement avec votre Google Calendar")
-        
-        from src.core.config import obtenir_parametres
-        params = obtenir_parametres()
-        
-        if getattr(params, 'GOOGLE_CLIENT_ID', None):
-            if st.button("🔗 Connecter Google Calendar", key="connect_google"):
-                # Générer l'URL d'auth
-                auth_url = service.get_google_auth_url(
-                    user_id="current_user",
-                    redirect_uri="http://localhost:8501/callback"
-                )
-                st.markdown(f"[Cliquez ici pour autoriser]({auth_url})")
-        else:
-            st.warning("Google Calendar non configuré (GOOGLE_CLIENT_ID manquant)")
-        
-        st.markdown("---")
-        st.markdown("#### Apple iCloud Calendar")
-        st.caption("Utilisez l'URL de partage iCal de votre calendrier iCloud")
-        st.info("Dans iCloud Calendar: Partager → Calendrier public → Copier le lien")
