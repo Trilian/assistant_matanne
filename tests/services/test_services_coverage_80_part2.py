@@ -499,7 +499,6 @@ class TestBaseServiceModelToDict:
 class TestRapportsPDFServiceInit:
     """Tests pour RapportsPDFService initialization"""
     
-    @pytest.mark.skip(reason="model_name attribute not set correctly in RapportsPDFService - needs investigation")
     def test_service_init(self):
         """Test service can be instantiated"""
         from src.services.rapports_pdf import RapportsPDFService

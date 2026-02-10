@@ -60,18 +60,5 @@ def test_import_jardin():
     module = importlib.import_module("src.domains.maison.ui.jardin")
     assert module is not None
 
-@pytest.mark.skip(reason="app() nécessite mock complet de JardinService et tabs context managers")
-def test_render_app(monkeypatch):
-    monkeypatch.setattr(jardin.st, "title", lambda *a, **k: None)
-    monkeypatch.setattr(jardin.st, "caption", lambda *a, **k: None)
-    monkeypatch.setattr(jardin, "get_saison", lambda: "été")
-    monkeypatch.setattr(jardin.st, "info", lambda *a, **k: None)
-    monkeypatch.setattr(jardin, "get_plantes_a_arroser", lambda: [])
-    monkeypatch.setattr(jardin, "get_recoltes_proches", lambda: [])
-    monkeypatch.setattr(jardin.st, "markdown", lambda *a, **k: None)
-    monkeypatch.setattr(jardin.st, "tabs", lambda labels: [MagicMock() for _ in labels])
-    monkeypatch.setattr(jardin.st, "subheader", lambda *a, **k: None)
-    monkeypatch.setattr(jardin, "charger_plantes", lambda: MagicMock(empty=True))
-    monkeypatch.setattr(jardin.st, "selectbox", lambda *a, **k: "Tous")
-    monkeypatch.setattr(jardin.st, "checkbox", lambda *a, **k: False)
-    jardin.app()
+# NOTE: test_render_app supprimé
+# Raison: app() nécessite mock complet de JardinService et tabs context managers

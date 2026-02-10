@@ -148,7 +148,6 @@ class TestFabriqueSession:
 
 
 @pytest.mark.unit
-@pytest.mark.skip(reason="get_db_context is a lambda wrapper, not direct alias")
 class TestGetDbContextAlias:
     """Tests pour l'alias get_db_context."""
 

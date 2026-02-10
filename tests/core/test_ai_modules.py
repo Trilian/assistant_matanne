@@ -28,15 +28,10 @@ except ImportError:
 class TestClientIA:
     """Tests du client Mistral IA."""
     
-    @pytest.mark.skip(reason="Mock Mistral incompatible avec httpx-client actuel")
-    def test_client_initialization(self, mock_mistral):
-        """Test l'initialisation du client IA."""
-        pass
-    
-    @pytest.mark.skip(reason="Mock Mistral incompatible avec httpx-client actuel")
-    def test_client_call_method(self, mock_mistral):
-        """Test l'appel d'une méthode du client."""
-        pass
+    # NOTE: Tests supprimés:
+    # - test_client_initialization
+    # - test_client_call_method
+    # Raison: Mock Mistral incompatible avec httpx-client actuel
     
     @pytest.mark.skipif(ClientIA is None, reason="ClientIA non importable")
     def test_client_error_handling(self):

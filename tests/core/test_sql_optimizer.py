@@ -89,7 +89,5 @@ def test_batch_loader_chunked():
     assert chunks[0] == list(range(100))
     assert chunks[2] == list(range(200, 250))
 
-@pytest.mark.skip(reason="DummyModel n'a pas de relation 'rel' - test incomplet")
-def test_optimized_query_builder_methods():
-    """Test le query builder avec des relations."""
-    pass
+# NOTE: test_optimized_query_builder_methods supprimé
+# Raison: DummyModel n'a pas de relation 'rel' - test incomplet

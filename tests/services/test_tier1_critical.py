@@ -45,10 +45,20 @@ class TestBudgetServiceCore:
         )
         assert depense.montant == 100.00
     
-    @pytest.mark.skip(reason="Requires database connection - use mocked tests instead")
     def test_budget_create_expense(self):
-        """Test creating a budget expense"""
+        """Test creating a budget expense with mocked session"""
         from src.services.budget import get_budget_service, Depense, CategorieDepense
+        from unittest.mock import MagicMock
+        
+        # Create mock session
+        mock_db = MagicMock()
+        mock_budget_entry = MagicMock()
+        mock_budget_entry.id = 1
+        
+        # Configure mock to return the entry after commit
+        def refresh_side_effect(entry):
+            entry.id = 1
+        mock_db.refresh.side_effect = refresh_side_effect
         
         service = get_budget_service()
         depense = Depense(
@@ -58,8 +68,10 @@ class TestBudgetServiceCore:
             date=datetime.now().date()
         )
         
-        result = service.ajouter_depense(depense)
+        result = service.ajouter_depense(depense, db=mock_db)
         assert result is not None
+        mock_db.add.assert_called_once()
+        mock_db.commit.assert_called_once()
 
 
 class TestBudgetAnalysis:
@@ -72,13 +84,20 @@ class TestBudgetAnalysis:
         assert CategorieDepense.COURSES is not None
         assert CategorieDepense.MAISON is not None
     
-    @pytest.mark.skip(reason="Requires database connection - use mocked tests instead")
     def test_budget_get_depenses_mois(self):
-        """Test getting expenses for a month"""
+        """Test getting expenses for a month with mocked session"""
         from src.services.budget import get_budget_service
+        from unittest.mock import MagicMock
+        
+        mock_db = MagicMock()
+        mock_query = MagicMock()
+        mock_db.query.return_value = mock_query
+        mock_query.filter.return_value = mock_query
+        mock_query.all.return_value = []  # Returns empty list
+        
         service = get_budget_service()
         today = datetime.now()
-        result = service.get_depenses_mois(today.month, today.year)
+        result = service.get_depenses_mois(today.month, today.year, db=mock_db)
         assert isinstance(result, list)
     
     def test_budget_service_has_methods(self):

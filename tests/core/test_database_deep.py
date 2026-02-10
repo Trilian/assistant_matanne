@@ -572,7 +572,6 @@ class TestAliases:
         from src.core.database import get_engine, obtenir_moteur
         assert get_engine is obtenir_moteur
     
-    @pytest.mark.skip(reason="Identity comparison fails when patch_db_context overwrites get_db_context")
     def test_get_db_context_alias(self):
         """get_db_context est un alias pour obtenir_contexte_db."""
         from src.core.database import get_db_context, obtenir_contexte_db

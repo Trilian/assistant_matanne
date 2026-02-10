@@ -381,49 +381,58 @@ class TestNotificationPushServiceSync:
 class TestNotificationPushServiceDBQueries:
     """Tests for database query methods - requires DB connection."""
     
-    @pytest.mark.skip(reason="Requires real DB - service init connects to DB")
-    def test_obtenir_taches_en_retard_returns_list(self):
+    @pytest.fixture
+    def mock_db_session(self):
+        """Create a mock DB session for testing."""
+        mock_session = MagicMock()
+        mock_query = MagicMock()
+        mock_session.query.return_value = mock_query
+        mock_query.filter.return_value = mock_query
+        mock_query.limit.return_value = mock_query
+        mock_query.all.return_value = []
+        return mock_session
+    
+    def test_obtenir_taches_en_retard_returns_list(self, mock_db_session):
         """Test that obtenir_taches_en_retard returns a list (may be empty on error)."""
         from src.services.notifications_push import NotificationPushService
         
         service = NotificationPushService()
-        result = service.obtenir_taches_en_retard()
+        # Call directly with mocked session
+        result = service.obtenir_taches_en_retard(db=mock_db_session)
         assert isinstance(result, list)
     
-    @pytest.mark.skip(reason="Requires real DB - service init connects to DB")
-    def test_obtenir_taches_du_jour_returns_list(self):
+    def test_obtenir_taches_du_jour_returns_list(self, mock_db_session):
         """Test that obtenir_taches_du_jour returns a list (may be empty on error)."""
         from src.services.notifications_push import NotificationPushService
         
         service = NotificationPushService()
-        result = service.obtenir_taches_du_jour()
+        result = service.obtenir_taches_du_jour(db=mock_db_session)
         assert isinstance(result, list)
     
-    @pytest.mark.skip(reason="Requires real DB - service init connects to DB")
-    def test_obtenir_courses_urgentes_returns_list(self):
+    def test_obtenir_courses_urgentes_returns_list(self, mock_db_session):
         """Test that obtenir_courses_urgentes returns a list (may be empty on error)."""
         from src.services.notifications_push import NotificationPushService
         
         service = NotificationPushService()
-        result = service.obtenir_courses_urgentes()
+        result = service.obtenir_courses_urgentes(db=mock_db_session)
         assert isinstance(result, list)
     
-    @pytest.mark.skip(reason="Requires real DB - service init connects to DB")
-    def test_db_methods_have_decorators(self):
+    def test_db_methods_have_decorators(self, mock_db_session):
         """Test that DB methods have the right decorators applied."""
         from src.services.notifications_push import NotificationPushService
         
         service = NotificationPushService()
         
+        # Test each method returns a list with mocked session
         methods = [
-            service.obtenir_taches_en_retard,
-            service.obtenir_taches_du_jour,
-            service.obtenir_courses_urgentes
+            (service.obtenir_taches_en_retard, mock_db_session),
+            (service.obtenir_taches_du_jour, mock_db_session),
+            (service.obtenir_courses_urgentes, mock_db_session)
         ]
         
-        for method in methods:
+        for method, session in methods:
             assert callable(method)
-            result = method()
+            result = method(db=session)
             assert isinstance(result, list)
     
     def test_db_methods_exist(self):
