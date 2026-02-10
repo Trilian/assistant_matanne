@@ -38,13 +38,13 @@ class TestIngredientInput:
 
         assert ing.optionnel is False
 
-    def test_ingredient_nom_trop_court(self):
-        """Test nom trop court"""
+    def test_ingredient_nom_vide(self):
+        """Test nom vide (min_length=1)"""
         from src.core.validation import IngredientInput
         from pydantic import ValidationError
 
         with pytest.raises(ValidationError):
-            IngredientInput(nom="A", quantite=100, unite="g")
+            IngredientInput(nom="", quantite=100, unite="g")
 
     def test_ingredient_quantite_negative(self):
         """Test quantité négative"""
@@ -83,13 +83,13 @@ class TestEtapeInput:
         with pytest.raises(ValidationError):
             EtapeInput(ordre=0, description="Description valide ici")
 
-    def test_etape_description_trop_courte(self):
-        """Test description trop courte"""
+    def test_etape_description_vide(self):
+        """Test description vide (min_length=1)"""
         from src.core.validation import EtapeInput
         from pydantic import ValidationError
 
         with pytest.raises(ValidationError):
-            EtapeInput(ordre=1, description="Trop")
+            EtapeInput(ordre=1, description="")
 
 
 class TestArticleInventaireInput:
@@ -239,10 +239,10 @@ class TestValiderModele:
         assert instance is not None
 
     def test_valider_modele_echec_champ_manquant(self):
-        """Test validation échouée - champ manquant"""
+        """Test validation échouée - quantité négative"""
         from src.core.validation import valider_modele, IngredientInput
 
-        succes, erreur, instance = valider_modele(IngredientInput, {"nom": "Farine"})
+        succes, erreur, instance = valider_modele(IngredientInput, {"nom": "Farine", "quantite": -5})
 
         assert succes is False
         assert instance is None

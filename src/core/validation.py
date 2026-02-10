@@ -294,20 +294,21 @@ class IngredientInput(BaseModel):
 
     Attributes:
         nom: Nom de l'ingrédient
-        quantite: Quantité nécessaire
-        unite: Unité de mesure
+        quantite: Quantité nécessaire (optionnel)
+        unite: Unité de mesure (optionnel)
         optionnel: Est-ce optionnel
     """
 
-    nom: str = Field(..., min_length=2, max_length=MAX_LENGTH_MEDIUM)
-    quantite: float = Field(..., gt=0, le=MAX_QUANTITE)
-    unite: str = Field(..., min_length=1, max_length=50)
+    nom: str = Field(..., min_length=1, max_length=MAX_LENGTH_MEDIUM)
+    quantite: float | None = Field(None, ge=0.01, le=MAX_QUANTITE)
+    unite: str | None = Field(None, max_length=50)
     optionnel: bool = False
 
     @field_validator("nom")
     @classmethod
-    def nettoyer_nom(cls, v):
-        return nettoyer_texte(v)
+    def nettoyer_nom(cls, v: str) -> str:
+        """Nettoie et normalise le nom"""
+        return v.strip().capitalize()
 
 
 class EtapeInput(BaseModel):
@@ -315,19 +316,33 @@ class EtapeInput(BaseModel):
     Validation d'une étape de recette.
 
     Attributes:
-        ordre: Ordre de l'étape
+        numero: Numéro de l'étape (alias: ordre)
+        ordre: Ordre de l'étape (alias de numero)
         description: Description de l'étape
         duree: Durée en minutes (optionnelle)
     """
 
-    ordre: int = Field(..., ge=1, le=MAX_ETAPES)
-    description: str = Field(..., min_length=10, max_length=MAX_LENGTH_LONG)
+    numero: int | None = Field(None, ge=1, le=MAX_ETAPES, description="Numéro de l'étape")
+    ordre: int | None = Field(None, ge=1, le=MAX_ETAPES, description="Ordre de l'étape (alias de numero)")
+    description: str = Field(..., min_length=1, max_length=MAX_LENGTH_LONG)
     duree: int | None = Field(None, ge=0, le=MAX_TEMPS_CUISSON)
+
+    model_config = {"populate_by_name": True}
 
     @field_validator("description")
     @classmethod
     def nettoyer_description(cls, v):
-        return nettoyer_texte(v)
+        return nettoyer_texte(v) if v else v
+
+    @model_validator(mode="after")
+    def valider_numero_ou_ordre(self) -> "EtapeInput":
+        """Assure qu'au moins un de numero ou ordre est fourni"""
+        if self.numero is None and self.ordre is None:
+            raise ValueError("Soit 'numero' soit 'ordre' doit être fourni")
+        # Utiliser ordre si numero n'est pas fourni
+        if self.numero is None and self.ordre is not None:
+            self.numero = self.ordre
+        return self
 
 
 class RecetteInput(BaseModel):
@@ -347,30 +362,72 @@ class RecetteInput(BaseModel):
         etapes: Liste des étapes
     """
 
-    nom: str = Field(..., min_length=3, max_length=MAX_LENGTH_MEDIUM)
+    nom: str = Field(..., min_length=1, max_length=MAX_LENGTH_MEDIUM)
     description: str | None = Field(None, max_length=MAX_LENGTH_TEXT)
-    temps_preparation: int = Field(..., gt=0, le=MAX_TEMPS_PREPARATION)
+    temps_preparation: int = Field(..., ge=1, le=MAX_TEMPS_PREPARATION)
     temps_cuisson: int = Field(..., ge=0, le=MAX_TEMPS_CUISSON)
-    portions: int = Field(..., gt=0, le=MAX_PORTIONS)
-    difficulte: str = Field(..., pattern="^(facile|moyen|difficile)$")
-    type_repas: str = Field(..., pattern="^(petit_déjeuner|déjeuner|dîner|goûter)$")
-    saison: str = Field(..., pattern="^(printemps|été|automne|hiver|toute_année)$")
+    portions: int = Field(default=4, ge=1, le=MAX_PORTIONS)
+    difficulte: str = Field(default="moyen", description="Niveau de difficulté")
+    type_repas: str = Field(..., description="Type de repas")
+    saison: str | None = Field(None, description="Saison (printemps, été, automne, hiver)")
+    url_image: str | None = Field(None, max_length=500, description="URL ou chemin de l'image")
     ingredients: list[IngredientInput] = Field(
         ..., min_length=MIN_INGREDIENTS, max_length=MAX_INGREDIENTS
     )
     etapes: list[EtapeInput] = Field(..., min_length=MIN_ETAPES, max_length=MAX_ETAPES)
 
-    @field_validator("nom", "description")
+    @field_validator("nom")
     @classmethod
-    def nettoyer_chaines(cls, v):
-        return nettoyer_texte(v) if v else v
+    def valider_nom(cls, v: str) -> str:
+        """Nettoie et valide le nom"""
+        cleaned = v.strip()
+        if cleaned:
+            cleaned = cleaned[0].upper() + cleaned[1:] if len(cleaned) > 1 else cleaned.upper()
+        if len(cleaned) < 2:
+            raise ValueError("Le nom doit contenir au moins 2 caractères")
+        return cleaned
+
+    @field_validator("difficulte")
+    @classmethod
+    def valider_difficulte(cls, v: str) -> str:
+        """Valide la difficulté"""
+        difficultes_valides = {"facile", "moyen", "difficile"}
+        if v.lower() not in difficultes_valides:
+            raise ValueError(
+                f"Difficulté invalide. Doit être parmi: {', '.join(difficultes_valides)}"
+            )
+        return v.lower()
+
+    @field_validator("type_repas")
+    @classmethod
+    def valider_type_repas(cls, v: str) -> str:
+        """Valide le type de repas"""
+        types_valides = {"petit_déjeuner", "déjeuner", "dîner", "goûter", "apéritif", "dessert"}
+        if v.lower() not in types_valides:
+            raise ValueError(
+                f"Type de repas invalide. Doit être parmi: {', '.join(types_valides)}"
+            )
+        return v.lower()
+
+    @field_validator("saison")
+    @classmethod
+    def valider_saison(cls, v: str | None) -> str | None:
+        """Valide la saison"""
+        if v:
+            saisons_valides = {"printemps", "été", "automne", "hiver", "toute_année"}
+            if v.lower() not in saisons_valides:
+                raise ValueError(
+                    f"Saison invalide. Doit être parmi: {', '.join(saisons_valides)}"
+                )
+            return v.lower()
+        return None
 
     @model_validator(mode="after")
-    def valider_etapes_ordre(self):
-        """Vérifie que les étapes sont ordonnées."""
-        ordres = [e.ordre for e in self.etapes]
-        if ordres != sorted(ordres):
-            raise ValueError("Les étapes doivent être ordonnées")
+    def valider_temps_total(self) -> "RecetteInput":
+        """Valide que le temps total n'est pas trop long"""
+        temps_total = self.temps_preparation + self.temps_cuisson
+        if temps_total > 1440:  # 24 heures
+            raise ValueError("Temps total ne peut pas dépasser 24 heures")
         return self
 
 
@@ -430,6 +487,196 @@ class ArticleCoursesInput(BaseModel):
     @classmethod
     def nettoyer_nom(cls, v):
         return nettoyer_texte(v)
+
+
+# --- INVENTAIRE (STOCK) ---
+
+
+class IngredientStockInput(BaseModel):
+    """
+    Input pour ajouter/modifier un article en inventaire.
+    """
+
+    nom: str = Field(..., min_length=1, max_length=200)
+    quantite: float = Field(..., ge=0.01)
+    unite: str = Field(..., min_length=1, max_length=50)
+    date_expiration: date | None = Field(None, description="Date d'expiration")
+    localisation: str | None = Field(None, max_length=200)
+    prix_unitaire: float | None = Field(None, ge=0)
+
+    @field_validator("nom")
+    @classmethod
+    def nettoyer_nom(cls, v: str) -> str:
+        return v.strip().capitalize()
+
+    @field_validator("localisation")
+    @classmethod
+    def nettoyer_localisation(cls, v: str | None) -> str | None:
+        if v:
+            return v.strip().capitalize()
+        return None
+
+
+# --- PLANNING ---
+
+
+class RepasInput(BaseModel):
+    """
+    Input pour ajouter/modifier un repas au planning.
+    """
+
+    date_repas: date = Field(..., alias="date", description="Date du repas")
+    type_repas: str = Field(
+        ...,
+        description="Type (petit_déjeuner, déjeuner, dîner, goûter)",
+    )
+    recette_id: int | None = Field(None, description="ID recette (optionnel)")
+    description: str | None = Field(None, max_length=500)
+    portions: int = Field(default=4, ge=1, le=50)
+
+    model_config = {"populate_by_name": True}
+
+    @field_validator("type_repas")
+    @classmethod
+    def valider_type(cls, v: str) -> str:
+        """Valide le type de repas"""
+        types_valides = {
+            "petit_déjeuner",
+            "déjeuner",
+            "dîner",
+            "goûter",
+        }
+        if v.lower() not in types_valides:
+            raise ValueError(
+                f"Type invalide. Doit être parmi: {', '.join(types_valides)}"
+            )
+        return v.lower()
+
+
+# --- FAMILLE ---
+
+
+class RoutineInput(BaseModel):
+    """
+    Input pour créer/modifier une routine.
+    """
+
+    nom: str = Field(..., min_length=1, max_length=200)
+    description: str | None = Field(None, max_length=500)
+    pour_qui: str = Field(..., description="Enfant associé")
+    frequence: str = Field(
+        ..., description="Fréquence (quotidien, hebdo, mensuel)"
+    )
+    is_active: bool = Field(default=True)
+
+    @field_validator("nom")
+    @classmethod
+    def nettoyer_nom(cls, v: str) -> str:
+        return v.strip().capitalize()
+
+    @field_validator("frequence")
+    @classmethod
+    def valider_frequence(cls, v: str) -> str:
+        """Valide la fréquence"""
+        frequences_valides = {"quotidien", "hebdomadaire", "mensuel"}
+        if v.lower() not in frequences_valides:
+            raise ValueError(
+                f"Fréquence invalide. Doit être parmi: {', '.join(frequences_valides)}"
+            )
+        return v.lower()
+
+
+class TacheRoutineInput(BaseModel):
+    """
+    Input pour ajouter une tâche à une routine.
+    """
+
+    nom: str = Field(..., min_length=1, max_length=200)
+    heure: str | None = Field(None, pattern=r"^\d{2}:\d{2}$")
+    description: str | None = Field(None, max_length=500)
+
+    @field_validator("nom")
+    @classmethod
+    def nettoyer_nom(cls, v: str) -> str:
+        return v.strip().capitalize()
+
+
+# --- JOURNAL / BIEN-ÊTRE ---
+
+
+class EntreeJournalInput(BaseModel):
+    """
+    Input pour ajouter une entrée au journal.
+    """
+
+    domaine: str = Field(..., description="Domaine (santé, humeur, développement)")
+    titre: str = Field(..., min_length=1, max_length=200)
+    contenu: str = Field(..., min_length=1, max_length=2000)
+    date_entree: date = Field(default_factory=date.today, alias="date")
+    tags: list[str] = Field(default_factory=list, max_length=10)
+
+    model_config = {"populate_by_name": True}
+
+    @field_validator("domaine")
+    @classmethod
+    def valider_domaine(cls, v: str) -> str:
+        """Valide le domaine"""
+        domaines_valides = {"santé", "humeur", "développement", "comportement"}
+        if v.lower() not in domaines_valides:
+            raise ValueError(
+                f"Domaine invalide. Doit être parmi: {', '.join(domaines_valides)}"
+            )
+        return v.lower()
+
+    @field_validator("titre")
+    @classmethod
+    def nettoyer_titre(cls, v: str) -> str:
+        return v.strip().capitalize()
+
+
+# --- MAISON - PROJETS ---
+
+
+class ProjetInput(BaseModel):
+    """
+    Input pour créer/modifier un projet.
+    """
+
+    nom: str = Field(..., min_length=1, max_length=200)
+    description: str | None = Field(None, max_length=1000)
+    categorie: str = Field(..., description="Catégorie du projet")
+    priorite: str = Field(default="moyenne", description="Priorité")
+    date_debut: date | None = Field(None)
+    date_fin_estimee: date | None = Field(None, alias="date_fin")
+
+    model_config = {"populate_by_name": True}
+
+    @field_validator("nom")
+    @classmethod
+    def nettoyer_nom(cls, v: str) -> str:
+        return v.strip().capitalize()
+
+    @field_validator("priorite")
+    @classmethod
+    def valider_priorite(cls, v: str) -> str:
+        """Valide la priorité"""
+        priorites_valides = {"basse", "moyenne", "haute"}
+        if v.lower() not in priorites_valides:
+            raise ValueError(
+                f"Priorité invalide. Doit être parmi: {', '.join(priorites_valides)}"
+            )
+        return v.lower()
+
+    @model_validator(mode="after")
+    def valider_dates(self) -> "ProjetInput":
+        """Valide que la date de fin est après la date de début"""
+        if (
+            self.date_debut
+            and self.date_fin_estimee
+            and self.date_fin_estimee < self.date_debut
+        ):
+            raise ValueError("La date de fin doit être après la date de début")
+        return self
 
 
 # ═══════════════════════════════════════════════════════════

@@ -112,10 +112,10 @@ from .decorators import (
 )
 
 # ═══════════════════════════════════════════════════════════
-# VALIDATORS PYDANTIC
+# VALIDATORS PYDANTIC (depuis validation.py)
 # ═══════════════════════════════════════════════════════════
 
-from .validators_pydantic import (
+from .validation import (
     RecetteInput,
     IngredientInput,
     EtapeInput,

@@ -1,42 +1,258 @@
 ﻿"""
-Tests unitaires pour lazy_loader.py (Chargement différé des modules)
+Tests unitaires complets pour lazy_loader.py (Chargement différé des modules)
+Couverture cible: 80%+
 """
 
 import pytest
+import time
+import threading
+from unittest.mock import MagicMock, patch, Mock
+
 from src.core import lazy_loader
+from src.core.lazy_loader import (
+    ChargeurModuleDiffere,
+    RouteurOptimise,
+    lazy_import,
+    afficher_stats_chargement_differe,
+)
+
+
+# ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+# FIXTURES
+# ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+
+@pytest.fixture(autouse=True)
+def nettoyer_cache():
+    """Nettoie le cache avant et après chaque test"""
+    ChargeurModuleDiffere.vider_cache()
+    yield
+    ChargeurModuleDiffere.vider_cache()
+
+
+# ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+# TESTS IMPORT MODULE
+# ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 @pytest.mark.unit
 def test_import_lazy_loader():
     """Vérifie que le module lazy_loader s'importe sans erreur."""
-    assert hasattr(lazy_loader, "RouteurOptimise") or hasattr(lazy_loader, "ChargeurModuleDiffere")
-
-from unittest.mock import MagicMock, patch
-
-# Import direct du module à tester
-from src.core.lazy_loader import ChargeurModuleDiffere, RouteurOptimise
+    assert hasattr(lazy_loader, "RouteurOptimise")
+    assert hasattr(lazy_loader, "ChargeurModuleDiffere")
+    assert hasattr(lazy_loader, "lazy_import")
+    assert hasattr(lazy_loader, "afficher_stats_chargement_differe")
 
 
 # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-# TESTS LAZY MODULE LOADER
+# TESTS CHARGEUR MODULE DIFFERE - METHODE CHARGER
 # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
-class TestLazyModuleLoader:
-    """Tests du chargeur de modules différé"""
+@pytest.mark.unit
+class TestChargeurModuleDiffereCharger:
+    """Tests de la méthode charger()"""
     
-    def test_class_exists(self):
-        """Test que la classe existe"""
-        assert ChargeurModuleDiffere is not None
+    def test_charger_module_existant(self):
+        """Test chargement d'un module Python standard"""
+        module = ChargeurModuleDiffere.charger("json")
+        assert module is not None
+        assert hasattr(module, "loads")
+        assert hasattr(module, "dumps")
     
-    def test_class_callable(self):
-        """Test que la classe est instanciable"""
-        assert callable(ChargeurModuleDiffere)
+    def test_charger_module_cache_hit(self):
+        """Test que le cache fonctionne (2ème appel = cache hit)"""
+        # Premier chargement
+        module1 = ChargeurModuleDiffere.charger("os")
+        # Deuxième chargement (doit venir du cache)
+        module2 = ChargeurModuleDiffere.charger("os")
+        
+        assert module1 is module2
+        assert "os" in ChargeurModuleDiffere._cache
+    
+    def test_charger_module_reload_force(self):
+        """Test rechargement forcé avec reload=True"""
+        # Premier chargement
+        ChargeurModuleDiffere.charger("sys")
+        stats_avant = ChargeurModuleDiffere.obtenir_statistiques()
+        
+        # Forcer rechargement
+        module = ChargeurModuleDiffere.charger("sys", reload=True)
+        
+        assert module is not None
+        assert hasattr(module, "path")
+    
+    def test_charger_module_inexistant(self):
+        """Test chargement d'un module inexistant lève ModuleNotFoundError"""
+        with pytest.raises(ModuleNotFoundError):
+            ChargeurModuleDiffere.charger("module_inexistant_xyz_123")
+    
+    def test_charger_enregistre_temps(self):
+        """Test que le temps de chargement est enregistré"""
+        ChargeurModuleDiffere.charger("collections")
+        
+        stats = ChargeurModuleDiffere.obtenir_statistiques()
+        assert "collections" in stats["load_times"]
+        assert stats["load_times"]["collections"] >= 0
+    
+    def test_charger_alias_load(self):
+        """Test de l'alias anglais 'load'"""
+        module = ChargeurModuleDiffere.load("re")
+        assert module is not None
+        assert hasattr(module, "match")
 
 
 # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-# TESTS OPTIMIZED ROUTER
+# TESTS CHARGEUR MODULE DIFFERE - METHODE PRECHARGER
 # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
-class TestOptimizedRouter:
+@pytest.mark.unit  
+class TestChargeurModuleDifferePrecharger:
+    """Tests de la méthode precharger()"""
+    
+    def test_precharger_synchrone(self):
+        """Test préchargement synchrone sans background"""
+        modules = ["json", "os", "sys"]
+        ChargeurModuleDiffere.precharger(modules, background=False)
+        
+        # Vérifier que les modules sont en cache
+        for mod in modules:
+            assert mod in ChargeurModuleDiffere._cache
+    
+    def test_precharger_background(self):
+        """Test préchargement en arrière-plan"""
+        modules = ["collections", "itertools"]
+        ChargeurModuleDiffere.precharger(modules, background=True)
+        
+        # Attendre un peu que le thread finisse
+        time.sleep(0.2)
+        
+        # Vérifier que les modules sont en cache
+        for mod in modules:
+            assert mod in ChargeurModuleDiffere._cache
+    
+    def test_precharger_module_inexistant_ne_propage_pas_erreur(self):
+        """Test que le préchargement silencieux n'échoue pas sur module inexistant"""
+        modules = ["json", "module_inexistant_xyz"]
+        
+        # Ne doit pas lever d'exception
+        ChargeurModuleDiffere.precharger(modules, background=False)
+        
+        # json doit être chargé
+        assert "json" in ChargeurModuleDiffere._cache
+    
+    def test_precharger_alias_preload(self):
+        """Test de l'alias anglais 'preload'"""
+        ChargeurModuleDiffere.preload(["functools"], background=False)
+        assert "functools" in ChargeurModuleDiffere._cache
+
+
+# ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+# TESTS CHARGEUR MODULE DIFFERE - STATISTIQUES
+# ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+
+@pytest.mark.unit
+class TestChargeurModuleDiffereStatistiques:
+    """Tests des statistiques lazy loading"""
+    
+    def test_obtenir_statistiques_vide(self):
+        """Test stats avec cache vide"""
+        stats = ChargeurModuleDiffere.obtenir_statistiques()
+        
+        assert stats["cached_modules"] == 0
+        assert stats["total_load_time"] == 0
+        assert stats["average_load_time"] == 0
+        assert stats["load_times"] == {}
+    
+    def test_obtenir_statistiques_avec_modules(self):
+        """Test stats après chargement de modules"""
+        ChargeurModuleDiffere.charger("json")
+        ChargeurModuleDiffere.charger("os")
+        
+        stats = ChargeurModuleDiffere.obtenir_statistiques()
+        
+        assert stats["cached_modules"] == 2
+        # Les temps peuvent être 0 si modules déjà en mémoire
+        assert stats["total_load_time"] >= 0
+        assert stats["average_load_time"] >= 0
+        assert len(stats["load_times"]) == 2
+    
+    def test_alias_get_stats(self):
+        """Test de l'alias anglais 'get_stats'"""
+        ChargeurModuleDiffere.charger("sys")
+        stats = ChargeurModuleDiffere.get_stats()
+        
+        assert stats["cached_modules"] >= 1
+
+
+# ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+# TESTS CHARGEUR MODULE DIFFERE - VIDER CACHE
+# ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+
+@pytest.mark.unit
+class TestChargeurModuleDiffereViderCache:
+    """Tests de la méthode vider_cache()"""
+    
+    def test_vider_cache(self):
+        """Test que vider_cache() fonctionne"""
+        ChargeurModuleDiffere.charger("json")
+        assert len(ChargeurModuleDiffere._cache) > 0
+        
+        ChargeurModuleDiffere.vider_cache()
+        
+        assert len(ChargeurModuleDiffere._cache) == 0
+        assert len(ChargeurModuleDiffere._load_times) == 0
+    
+    def test_alias_clear_cache(self):
+        """Test de l'alias anglais 'clear_cache'"""
+        ChargeurModuleDiffere.charger("os")
+        ChargeurModuleDiffere.clear_cache()
+        
+        assert len(ChargeurModuleDiffere._cache) == 0
+
+
+# ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+# TESTS DECORATOR LAZY_IMPORT
+# ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+
+@pytest.mark.unit
+class TestLazyImportDecorator:
+    """Tests du décorateur lazy_import"""
+    
+    def test_lazy_import_sans_attr_name(self):
+        """Test lazy_import sans attr_name"""
+        @lazy_import("json")
+        def utiliser_json():
+            return True
+        
+        result = utiliser_json()
+        assert result is True
+    
+    def test_lazy_import_avec_attr_name(self):
+        """Test lazy_import avec attr_name injecte dans globals"""
+        # On utilise loads depuis json car c'est un attribut valide
+        @lazy_import("json", "loads")
+        def utiliser_json_loads():
+            # L'attribut 'loads' devrait être injecté dans globals
+            return True
+        
+        result = utiliser_json_loads()
+        assert result is True
+    
+    def test_lazy_import_charge_module(self):
+        """Test que lazy_import charge bien le module"""
+        @lazy_import("collections")
+        def get_counter():
+            import collections
+            return collections.Counter
+        
+        result = get_counter()
+        assert result is not None
+
+
+# ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+# TESTS ROUTEUR OPTIMISE
+# ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+
+@pytest.mark.unit
+class TestRouteurOptimise:
     """Tests du routeur optimisé"""
     
     def test_class_exists(self):
@@ -45,13 +261,112 @@ class TestOptimizedRouter:
     
     def test_has_module_registry(self):
         """Test que le registre de modules existe"""
-        assert hasattr(RouteurOptimise, 'MODULE_REGISTRY') or hasattr(RouteurOptimise, 'modules')
+        assert hasattr(RouteurOptimise, "MODULE_REGISTRY")
+        assert isinstance(RouteurOptimise.MODULE_REGISTRY, dict)
+    
+    def test_module_registry_contient_accueil(self):
+        """Test que le module accueil est enregistré"""
+        assert "accueil" in RouteurOptimise.MODULE_REGISTRY
+    
+    def test_module_registry_structure(self):
+        """Test la structure des entrées du registry"""
+        for name, config in RouteurOptimise.MODULE_REGISTRY.items():
+            assert "path" in config, f"Module {name} manque 'path'"
+            assert "type" in config, f"Module {name} manque 'type'"
+            assert config["type"] in ["simple", "hub"], f"Module {name} type invalide"
+    
+    @patch("streamlit.error")
+    @patch("streamlit.spinner")
+    def test_charger_module_inexistant(self, mock_spinner, mock_error):
+        """Test chargement d'un module non enregistré"""
+        mock_spinner.return_value.__enter__ = Mock(return_value=None)
+        mock_spinner.return_value.__exit__ = Mock(return_value=False)
+        
+        RouteurOptimise.charger_module("module_qui_existe_pas")
+        
+        mock_error.assert_called_once()
     
     def test_class_instantiable(self):
         """Test que la classe est instanciable"""
-        try:
-            router = RouteurOptimise()
-            assert router is not None
-        except Exception:
-            # Peut échouer si Streamlit n'est pas disponible
-            pass
+        router = RouteurOptimise()
+        assert router is not None
+
+
+# ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+# TESTS AFFICHER STATS
+# ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+
+@pytest.mark.unit
+class TestAfficherStats:
+    """Tests de la fonction d'affichage des stats"""
+    
+    @patch("streamlit.expander")
+    @patch("streamlit.columns")
+    @patch("streamlit.metric")
+    def test_afficher_stats_charge_modules(self, mock_metric, mock_columns, mock_expander):
+        """Test affichage des stats avec modules"""
+        # Setup mocks
+        mock_expander.return_value.__enter__ = Mock(return_value=None)
+        mock_expander.return_value.__exit__ = Mock(return_value=False)
+        mock_col = Mock()
+        mock_col.__enter__ = Mock(return_value=mock_col)
+        mock_col.__exit__ = Mock(return_value=False)
+        mock_columns.return_value = [mock_col, mock_col]
+        
+        # Charger des modules
+        ChargeurModuleDiffere.charger("json")
+        
+        # Appeler la fonction
+        afficher_stats_chargement_differe()
+        
+        # Vérifier les appels
+        mock_expander.assert_called_once()
+
+
+# ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+# TESTS INTEGRATION
+# ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+
+@pytest.mark.unit
+class TestIntegrationLazyLoader:
+    """Tests d'intégration du lazy loader"""
+    
+    def test_workflow_complet(self):
+        """Test workflow complet: charger → stats → vider"""
+        # Charger plusieurs modules
+        ChargeurModuleDiffere.charger("json")
+        ChargeurModuleDiffere.charger("os")
+        ChargeurModuleDiffere.charger("sys")
+        
+        # Vérifier stats
+        stats = ChargeurModuleDiffere.obtenir_statistiques()
+        assert stats["cached_modules"] == 3
+        
+        # Vider cache
+        ChargeurModuleDiffere.vider_cache()
+        
+        # Vérifier que c'est vide
+        stats_apres = ChargeurModuleDiffere.obtenir_statistiques()
+        assert stats_apres["cached_modules"] == 0
+    
+    def test_thread_safety_basique(self):
+        """Test basique de thread safety"""
+        results = []
+        
+        def charger_module(name):
+            module = ChargeurModuleDiffere.charger(name)
+            results.append(module is not None)
+        
+        threads = [
+            threading.Thread(target=charger_module, args=("json",)),
+            threading.Thread(target=charger_module, args=("os",)),
+            threading.Thread(target=charger_module, args=("sys",)),
+        ]
+        
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+        
+        assert all(results)
+        assert len(ChargeurModuleDiffere._cache) == 3
