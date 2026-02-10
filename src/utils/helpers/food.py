@@ -1,4 +1,4 @@
-﻿"""
+"""
 Food Helpers - Utilitaires pour la gestion des recettes et de l'inventaire
 """
 

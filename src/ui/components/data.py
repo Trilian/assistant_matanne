@@ -1,4 +1,4 @@
-﻿"""
+"""
 UI Components - Data
 Pagination, métriques, export
 """

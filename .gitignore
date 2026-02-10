@@ -60,4 +60,4 @@ media/
 *.pem
 *.key
 credentials.json
-token.json
+token.json*.py.bak

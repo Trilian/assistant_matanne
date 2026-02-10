@@ -1,4 +1,4 @@
-﻿"""
+"""
 Formatters - Dates et durées
 """
 

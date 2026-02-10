@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Activités - Planning et budget des activités familiales
 Version améliorée avec helpers, caching, graphiques et Plotly
 """

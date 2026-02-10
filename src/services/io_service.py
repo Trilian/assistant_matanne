@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service I/O Universel - Import/Export CSV/JSON
 Remplace inventaire_io_service.py + recette_io_service.py + base_io_service.py
 """

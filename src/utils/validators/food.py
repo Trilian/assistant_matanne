@@ -1,4 +1,4 @@
-﻿"""
+"""
 Validators - Validation données cuisine
 """
 

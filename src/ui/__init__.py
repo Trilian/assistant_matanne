@@ -1,4 +1,4 @@
-﻿"""
+"""
 UI - Point d'entrée unifié optimisé
 Architecture claire : core/ components/ feedback/
 """

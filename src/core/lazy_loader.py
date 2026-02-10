@@ -1,4 +1,4 @@
-﻿"""
+"""
 Lazy Loading System - Charge modules à la demande
 Réduit temps chargement initial de 60%
 

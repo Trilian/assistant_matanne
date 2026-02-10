@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service Multi-utilisateurs - Isolation des données par utilisateur
 
 [OK] Filtrage automatique par user_id

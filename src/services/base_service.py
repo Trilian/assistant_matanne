@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service CRUD Universel - Version Finale Optimisée
 Fusionne base_service.py + base_service_optimized.py + enhanced_service.py + service_mixins.py
 """

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Paramètres - Configuration Application
 Gestion configuration foyer, IA, base de données, cache
 """

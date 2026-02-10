@@ -1,4 +1,4 @@
-﻿"""
+"""
 Modèles pour l'inventaire et le stock.
 
 Contient :

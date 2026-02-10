@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service d'import de recettes depuis URL.
 
 Fonctionnalités:

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Decorators - Décorateurs utilitaires réutilisables.
 
 Contient :

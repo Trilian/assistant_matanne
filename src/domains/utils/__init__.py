@@ -1,4 +1,4 @@
-﻿"""Domaine Utils - Modules utilitaires (accueil, paramètres, rapports, barcode)."""
+"""Domaine Utils - Modules utilitaires (accueil, paramètres, rapports, barcode)."""
 
 # UI
 from .ui import accueil, parametres, rapports, barcode

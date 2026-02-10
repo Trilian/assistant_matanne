@@ -1,4 +1,4 @@
-﻿"""UI Utils - Modules utilitaires (accueil, paramètres, rapports, barcode)."""
+"""UI Utils - Modules utilitaires (accueil, paramètres, rapports, barcode)."""
 
 from . import accueil, parametres, rapports, barcode
 

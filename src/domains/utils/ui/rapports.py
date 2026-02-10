@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Rapports PDF - Interface Streamlit
 
 ✅ Rapport hebdo stocks

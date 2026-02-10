@@ -1,4 +1,4 @@
-﻿"""
+"""
 Services - Point d'Entrée Unifié COMPLET
 
 Exporte tous les services métier de l'application.

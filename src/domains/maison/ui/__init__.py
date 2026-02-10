@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Maison - Hub de gestion domestique
 
 Structure:

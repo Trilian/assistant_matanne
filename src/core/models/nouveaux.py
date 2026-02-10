@@ -1,4 +1,4 @@
-﻿"""
+"""
 Modèles SQLAlchemy pour les nouvelles fonctionnalités.
 
 Contient :

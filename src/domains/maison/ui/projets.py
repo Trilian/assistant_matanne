@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Projets - Gestion des projets maison avec IA intégrée
 Priorisation intelligente, estimation de durée, suivi de progression
 """

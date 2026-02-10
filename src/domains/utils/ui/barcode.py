@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Scanner Barcode/QR - Interface Streamlit
 
 ✅ Scanner codes-barres

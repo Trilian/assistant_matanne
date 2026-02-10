@@ -1,4 +1,4 @@
-﻿"""Domaine Famille - Gestion famille (Jules, santé, activités, shopping).
+"""Domaine Famille - Gestion famille (Jules, santé, activités, shopping).
 
 Nouveaux modules (refonte 2026-02):
 - hub_famille.py: Dashboard avec cards cliquables

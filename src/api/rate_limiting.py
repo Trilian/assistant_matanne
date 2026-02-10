@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module de Rate Limiting pour l'API REST.
 
 Implémente la limitation de débit avec:

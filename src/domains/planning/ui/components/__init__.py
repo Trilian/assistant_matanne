@@ -1,4 +1,4 @@
-﻿"""
+"""
 Composants réutilisables pour le module planning
 """
 

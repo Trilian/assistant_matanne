@@ -1,4 +1,4 @@
-﻿"""Domaines organisés par contexte métier.
+"""Domaines organisés par contexte métier.
 
 Architecture:
 - cuisine: Recettes, planning repas, inventaire, courses
