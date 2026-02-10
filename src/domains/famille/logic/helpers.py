@@ -1,4 +1,4 @@
-﻿"""
+"""
 Helpers et fonctions utilitaires pour le module Famille
 """
 

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Models - Point d'entrée unifié pour tous les modèles SQLAlchemy.
 
 Architecture modulaire :

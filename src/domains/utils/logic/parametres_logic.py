@@ -1,4 +1,4 @@
-﻿"""
+"""
 Logique métier du module Paramètres (configuration) - Séparée de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service de suggestions IA avec historique.
 
 Améliore les suggestions en utilisant:

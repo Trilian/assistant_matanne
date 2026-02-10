@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service Export PDF - Extension du service rapports_pdf
 
 ✅ Export recettes individuelles en PDF

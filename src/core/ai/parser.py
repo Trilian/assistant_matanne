@@ -1,4 +1,4 @@
-﻿"""
+"""
 Analyseur JSON IA Ultra-Robuste
 Gère tous les cas edge des réponses Mistral/GPT
 """

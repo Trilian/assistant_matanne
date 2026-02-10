@@ -1,4 +1,4 @@
-﻿"""
+"""
 Validation - Validation Pydantic + Sanitization des entrées.
 
 Ce module fournit :

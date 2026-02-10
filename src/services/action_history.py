@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service d'historique des actions utilisateur.
 
 Trace toutes les actions importantes effectuées par les utilisateurs

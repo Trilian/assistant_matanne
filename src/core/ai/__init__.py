@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module IA - Client, Analyseur, Cache, Rate Limiting
 Tout harmonisé en français avec exports propres
 """

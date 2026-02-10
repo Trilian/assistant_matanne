@@ -1,4 +1,4 @@
-﻿"""
+"""
 Base Module UI - Module CRUD universel générique
 100% réutilisable, agnostique du domaine métier
 

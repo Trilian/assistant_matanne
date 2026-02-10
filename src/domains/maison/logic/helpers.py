@@ -1,4 +1,4 @@
-﻿"""
+"""
 Helpers Maison - Fonctions réutilisables pour les 3 modules
 Gestion des projets, jardin et entretien
 """

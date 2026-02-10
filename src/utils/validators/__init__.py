@@ -1,4 +1,4 @@
-﻿"""
+"""
 Validators - Point d'entrée unifié
 """
 

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Base Form - Générateur de formulaires universel
 """
 

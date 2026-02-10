@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service Planning Unifié - Centre de Coordination Familiale
 
 ✅ Agrégation complète de TOUS les événements familiaux

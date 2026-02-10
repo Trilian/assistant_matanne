@@ -1,4 +1,4 @@
-﻿"""
+"""
 Notifications Temps Réel - Système de notifications centralisé.
 
 Fonctionnalités :

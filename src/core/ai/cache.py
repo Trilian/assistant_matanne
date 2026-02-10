@@ -1,4 +1,4 @@
-﻿"""
+"""
 Cache IA - Wrapper spécifique pour réponses Mistral.
 
 Ce module fournit un cache dédié aux réponses IA avec :

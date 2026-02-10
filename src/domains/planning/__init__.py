@@ -1,4 +1,4 @@
-﻿"""Domaine Planning - Gestion calendrier, routines et planification."""
+"""Domaine Planning - Gestion calendrier, routines et planification."""
 
 # UI
 from .ui import calendrier, vue_semaine, vue_ensemble

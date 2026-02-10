@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Accueil - Dashboard Central
 Vue d'ensemble de l'application avec stats, alertes et raccourcis
 """

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service Recettes Unifié (REFACTORING PHASE 2)
 
 ✅ Utilise @with_db_session et @with_cache (Phase 1)

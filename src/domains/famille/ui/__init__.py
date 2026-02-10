@@ -1,4 +1,4 @@
-﻿"""
+"""
 Package Famille - Hub de vie familiale (refonte 2026-02)
 
 Nouveaux modules:

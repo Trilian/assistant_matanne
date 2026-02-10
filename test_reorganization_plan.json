@@ -1,0 +1,1221 @@
+{
+  "create_missing_tests": [
+    {
+      "source": "utils/recipe_importer.py",
+      "test_file": "utils/test_recipe_importer.py"
+    },
+    {
+      "source": "utils/helpers/stats.py",
+      "test_file": "utils/helpers/test_stats.py"
+    },
+    {
+      "source": "utils/helpers/food.py",
+      "test_file": "utils/helpers/test_food.py"
+    },
+    {
+      "source": "utils/helpers/strings.py",
+      "test_file": "utils/helpers/test_strings.py"
+    },
+    {
+      "source": "utils/helpers/dates.py",
+      "test_file": "utils/helpers/test_dates.py"
+    },
+    {
+      "source": "utils/validators/food.py",
+      "test_file": "utils/validators/test_food.py"
+    },
+    {
+      "source": "utils/validators/common.py",
+      "test_file": "utils/validators/test_common.py"
+    },
+    {
+      "source": "utils/validators/dates.py",
+      "test_file": "utils/validators/test_dates.py"
+    },
+    {
+      "source": "utils/formatters/units.py",
+      "test_file": "utils/formatters/test_units.py"
+    },
+    {
+      "source": "utils/formatters/numbers.py",
+      "test_file": "utils/formatters/test_numbers.py"
+    },
+    {
+      "source": "utils/formatters/text.py",
+      "test_file": "utils/formatters/test_text.py"
+    },
+    {
+      "source": "utils/formatters/dates.py",
+      "test_file": "utils/formatters/test_dates.py"
+    },
+    {
+      "source": "domains/jeux/logic/api_service.py",
+      "test_file": "domains/jeux/logic/test_api_service.py"
+    },
+    {
+      "source": "domains/jeux/ui/paris/sync.py",
+      "test_file": "domains/jeux/ui/paris/test_sync.py"
+    },
+    {
+      "source": "domains/jeux/ui/paris/gestion.py",
+      "test_file": "domains/jeux/ui/paris/test_gestion.py"
+    },
+    {
+      "source": "domains/jeux/ui/paris/crud.py",
+      "test_file": "domains/jeux/ui/paris/test_crud.py"
+    },
+    {
+      "source": "domains/jeux/ui/paris/prediction.py",
+      "test_file": "domains/jeux/ui/paris/test_prediction.py"
+    },
+    {
+      "source": "domains/jeux/ui/loto/sync.py",
+      "test_file": "domains/jeux/ui/loto/test_sync.py"
+    },
+    {
+      "source": "domains/jeux/ui/loto/simulation.py",
+      "test_file": "domains/jeux/ui/loto/test_simulation.py"
+    },
+    {
+      "source": "domains/jeux/ui/loto/crud.py",
+      "test_file": "domains/jeux/ui/loto/test_crud.py"
+    },
+    {
+      "source": "domains/jeux/ui/loto/statistiques.py",
+      "test_file": "domains/jeux/ui/loto/test_statistiques.py"
+    },
+    {
+      "source": "domains/jeux/ui/loto/generateur.py",
+      "test_file": "domains/jeux/ui/loto/test_generateur.py"
+    },
+    {
+      "source": "domains/famille/ui/suivi_perso/alimentation.py",
+      "test_file": "domains/famille/ui/suivi_perso/test_alimentation.py"
+    },
+    {
+      "source": "domains/famille/ui/suivi_perso/activities.py",
+      "test_file": "domains/famille/ui/suivi_perso/test_activities.py"
+    },
+    {
+      "source": "domains/famille/ui/suivi_perso/settings.py",
+      "test_file": "domains/famille/ui/suivi_perso/test_settings.py"
+    },
+    {
+      "source": "domains/famille/ui/weekend/ai_service.py",
+      "test_file": "domains/famille/ui/weekend/test_ai_service.py"
+    },
+    {
+      "source": "domains/famille/ui/jules/ai_service.py",
+      "test_file": "domains/famille/ui/jules/test_ai_service.py"
+    },
+    {
+      "source": "domains/maison/ui/depenses/crud.py",
+      "test_file": "domains/maison/ui/depenses/test_crud.py"
+    },
+    {
+      "source": "domains/cuisine/ui/planificateur_repas/generation.py",
+      "test_file": "domains/cuisine/ui/planificateur_repas/test_generation.py"
+    },
+    {
+      "source": "domains/cuisine/ui/planificateur_repas/preferences.py",
+      "test_file": "domains/cuisine/ui/planificateur_repas/test_preferences.py"
+    },
+    {
+      "source": "domains/cuisine/ui/inventaire/categories.py",
+      "test_file": "domains/cuisine/ui/inventaire/test_categories.py"
+    },
+    {
+      "source": "domains/cuisine/ui/inventaire/historique.py",
+      "test_file": "domains/cuisine/ui/inventaire/test_historique.py"
+    },
+    {
+      "source": "domains/cuisine/ui/inventaire/stock.py",
+      "test_file": "domains/cuisine/ui/inventaire/test_stock.py"
+    },
+    {
+      "source": "domains/cuisine/ui/inventaire/alertes.py",
+      "test_file": "domains/cuisine/ui/inventaire/test_alertes.py"
+    },
+    {
+      "source": "domains/cuisine/ui/inventaire/photos.py",
+      "test_file": "domains/cuisine/ui/inventaire/test_photos.py"
+    },
+    {
+      "source": "domains/cuisine/ui/inventaire/tools.py",
+      "test_file": "domains/cuisine/ui/inventaire/test_tools.py"
+    },
+    {
+      "source": "domains/cuisine/ui/courses/historique.py",
+      "test_file": "domains/cuisine/ui/courses/test_historique.py"
+    },
+    {
+      "source": "domains/cuisine/ui/courses/liste_active.py",
+      "test_file": "domains/cuisine/ui/courses/test_liste_active.py"
+    },
+    {
+      "source": "domains/cuisine/ui/courses/outils.py",
+      "test_file": "domains/cuisine/ui/courses/test_outils.py"
+    },
+    {
+      "source": "domains/cuisine/ui/courses/modeles.py",
+      "test_file": "domains/cuisine/ui/courses/test_modeles.py"
+    },
+    {
+      "source": "domains/cuisine/ui/recettes/ajout.py",
+      "test_file": "domains/cuisine/ui/recettes/test_ajout.py"
+    },
+    {
+      "source": "domains/cuisine/ui/recettes/liste.py",
+      "test_file": "domains/cuisine/ui/recettes/test_liste.py"
+    },
+    {
+      "source": "domains/cuisine/ui/recettes/generation_image.py",
+      "test_file": "domains/cuisine/ui/recettes/test_generation_image.py"
+    },
+    {
+      "source": "domains/cuisine/ui/recettes/detail.py",
+      "test_file": "domains/cuisine/ui/recettes/test_detail.py"
+    },
+    {
+      "source": "domains/cuisine/ui/recettes/generation_ia.py",
+      "test_file": "domains/cuisine/ui/recettes/test_generation_ia.py"
+    },
+    {
+      "source": "ui/layout/styles.py",
+      "test_file": "ui/layout/test_styles.py"
+    },
+    {
+      "source": "core/ai/rate_limit.py",
+      "test_file": "core/ai/test_rate_limit.py"
+    },
+    {
+      "source": "core/ai/client.py",
+      "test_file": "core/ai/test_client.py"
+    },
+    {
+      "source": "core/models/users.py",
+      "test_file": "core/models/test_users.py"
+    },
+    {
+      "source": "core/models/maison_extended.py",
+      "test_file": "core/models/test_maison_extended.py"
+    },
+    {
+      "source": "core/models/sante.py",
+      "test_file": "core/models/test_sante.py"
+    },
+    {
+      "source": "core/models/nouveaux.py",
+      "test_file": "core/models/test_nouveaux.py"
+    },
+    {
+      "source": "core/models/famille.py",
+      "test_file": "core/models/test_famille.py"
+    },
+    {
+      "source": "core/models/maison.py",
+      "test_file": "core/models/test_maison.py"
+    }
+  ],
+  "consolidate_tests": [
+    {
+      "source": "app.py",
+      "primary_test": "core/test_app.py",
+      "duplicate_tests": [
+        "core/test_app_coverage.py",
+        "core/test_app_main.py"
+      ]
+    },
+    {
+      "source": "api/main.py",
+      "primary_test": "api/test_main.py",
+      "duplicate_tests": [
+        "e2e/test_main_flows.py"
+      ]
+    },
+    {
+      "source": "api/rate_limiting.py",
+      "primary_test": "api/test_rate_limiting_comprehensive.py",
+      "duplicate_tests": [
+        "api/test_rate_limiting.py"
+      ]
+    },
+    {
+      "source": "services/courses.py",
+      "primary_test": "services/test_courses_intelligentes_service.py",
+      "duplicate_tests": [
+        "domains/cuisine/test_courses_ui.py",
+        "services/test_courses_service.py",
+        "domains/maison/ui/test_courses.py",
+        "services/test_courses_intelligentes_coverage.py",
+        "domains/cuisine/test_courses_logic.py"
+      ]
+    },
+    {
+      "source": "services/barcode.py",
+      "primary_test": "domains/utils/test_barcode_logic_coverage.py",
+      "duplicate_tests": [
+        "services/test_barcode_service.py",
+        "domains/utils/test_barcode_logic.py",
+        "services/test_barcode_coverage_deep.py",
+        "domains/utils/ui/test_barcode.py",
+        "services/test_barcode_coverage.py"
+      ]
+    },
+    {
+      "source": "services/calendar_sync.py",
+      "primary_test": "services/test_calendar_sync_coverage.py",
+      "duplicate_tests": [
+        "services/test_calendar_sync_comprehensive.py",
+        "services/test_calendar_sync_service.py"
+      ]
+    },
+    {
+      "source": "services/base_service.py",
+      "primary_test": "services/test_base_service_coverage.py",
+      "duplicate_tests": [
+        "services/test_base_service.py"
+      ]
+    },
+    {
+      "source": "services/garmin_sync_utils.py",
+      "primary_test": "services/test_garmin_sync_utils.py",
+      "duplicate_tests": [
+        "services/test_garmin_sync_utils_integration.py"
+      ]
+    },
+    {
+      "source": "services/io_service.py",
+      "primary_test": "services/test_io_service_coverage.py",
+      "duplicate_tests": [
+        "services/test_io_service.py"
+      ]
+    },
+    {
+      "source": "services/planning_unified.py",
+      "primary_test": "services/test_planning_unified_coverage.py",
+      "duplicate_tests": [
+        "services/test_planning_unified_service.py"
+      ]
+    },
+    {
+      "source": "services/auth.py",
+      "primary_test": "services/test_auth_service.py",
+      "duplicate_tests": [
+        "services/test_auth_comprehensive.py",
+        "services/test_auth_coverage.py"
+      ]
+    },
+    {
+      "source": "services/weather_utils.py",
+      "primary_test": "services/test_weather_utils.py",
+      "duplicate_tests": [
+        "services/test_weather_utils_full.py"
+      ]
+    },
+    {
+      "source": "services/types.py",
+      "primary_test": "services/test_types_service.py",
+      "duplicate_tests": [
+        "services/test_types_coverage.py"
+      ]
+    },
+    {
+      "source": "services/garmin_sync.py",
+      "primary_test": "services/test_garmin_sync.py",
+      "duplicate_tests": [
+        "services/test_garmin_sync_coverage.py",
+        "services/test_garmin_sync_utils.py",
+        "services/test_garmin_sync_utils_integration.py"
+      ]
+    },
+    {
+      "source": "services/user_preferences.py",
+      "primary_test": "services/test_user_preferences_coverage.py",
+      "duplicate_tests": [
+        "services/test_user_preferences_service.py"
+      ]
+    },
+    {
+      "source": "services/batch_cooking.py",
+      "primary_test": "services/test_batch_cooking_service.py",
+      "duplicate_tests": [
+        "services/test_batch_cooking_utils.py",
+        "domains/cuisine/test_batch_cooking_logic.py",
+        "services/test_batch_cooking_coverage.py",
+        "domains/cuisine/test_batch_cooking_logic_coverage.py",
+        "services/test_batch_cooking_full_coverage.py",
+        "domains/cuisine/services/test_batch_cooking.py",
+        "domains/cuisine/ui/test_batch_cooking_detaille.py",
+        "services/test_batch_cooking_integration.py",
+        "domains/cuisine/test_batch_cooking_detaille_ui.py"
+      ]
+    },
+    {
+      "source": "services/inventaire.py",
+      "primary_test": "services/test_inventaire_integration.py",
+      "duplicate_tests": [
+        "services/test_inventaire_sqlite_int.py",
+        "services/test_inventaire_methods.py",
+        "domains/cuisine/test_inventaire_ui.py",
+        "domains/cuisine/test_inventaire_logic_coverage.py",
+        "domains/maison/services/test_inventaire.py",
+        "domains/cuisine/test_inventaire_logic.py",
+        "services/test_inventaire_coverage_deep.py",
+        "services/test_inventaire_service.py"
+      ]
+    },
+    {
+      "source": "services/backup.py",
+      "primary_test": "services/test_backup_integration.py",
+      "duplicate_tests": [
+        "services/test_backup_utils.py",
+        "services/test_backup_coverage.py",
+        "services/test_backup_service.py"
+      ]
+    },
+    {
+      "source": "services/budget.py",
+      "primary_test": "services/test_budget_service.py",
+      "duplicate_tests": [
+        "services/test_budget_coverage_deep.py",
+        "services/test_budget_methods.py",
+        "services/test_budget_extra.py",
+        "services/test_budget_comprehensive.py",
+        "services/test_budget_utils.py",
+        "services/test_budget_integration.py",
+        "services/test_budget_coverage.py"
+      ]
+    },
+    {
+      "source": "services/action_history.py",
+      "primary_test": "services/test_action_history_service.py",
+      "duplicate_tests": [
+        "services/test_action_history_coverage.py",
+        "core/test_action_history.py"
+      ]
+    },
+    {
+      "source": "services/notifications.py",
+      "primary_test": "domains/utils/ui/test_notifications_push.py",
+      "duplicate_tests": [
+        "services/test_notifications_push_coverage.py",
+        "services/test_notifications_coverage.py",
+        "core/test_notifications_deep.py",
+        "services/test_notifications_service.py",
+        "services/test_notifications_push_service.py",
+        "core/test_notifications.py"
+      ]
+    },
+    {
+      "source": "services/weather.py",
+      "primary_test": "services/test_weather_utils.py",
+      "duplicate_tests": [
+        "services/test_weather_coverage.py",
+        "services/test_weather_utils_full.py",
+        "services/test_weather_service.py"
+      ]
+    },
+    {
+      "source": "services/notifications_push.py",
+      "primary_test": "services/test_notifications_push_coverage.py",
+      "duplicate_tests": [
+        "services/test_notifications_push_service.py",
+        "domains/utils/ui/test_notifications_push.py"
+      ]
+    },
+    {
+      "source": "services/base_ai_service.py",
+      "primary_test": "services/test_base_ai_service.py",
+      "duplicate_tests": [
+        "services/test_base_ai_service_coverage.py"
+      ]
+    },
+    {
+      "source": "services/push_notifications.py",
+      "primary_test": "services/test_push_notifications_deep.py",
+      "duplicate_tests": [
+        "services/test_push_notifications_utils.py",
+        "services/test_push_notifications.py"
+      ]
+    },
+    {
+      "source": "services/planning.py",
+      "primary_test": "services/test_planning_service.py",
+      "duplicate_tests": [
+        "services/test_planning_utils.py",
+        "services/test_planning_unified_coverage.py",
+        "services/test_planning_extended.py",
+        "domains/cuisine/test_planning_logic.py",
+        "services/test_planning_coverage.py",
+        "services/test_planning_unified_service.py"
+      ]
+    },
+    {
+      "source": "services/recipe_import.py",
+      "primary_test": "services/test_recipe_import_extra.py",
+      "duplicate_tests": [
+        "services/test_recipe_import_integration.py",
+        "services/test_recipe_import_service.py"
+      ]
+    },
+    {
+      "source": "services/openfoodfacts.py",
+      "primary_test": "services/test_openfoodfacts.py",
+      "duplicate_tests": [
+        "services/test_openfoodfacts_coverage.py"
+      ]
+    },
+    {
+      "source": "services/rapports_pdf.py",
+      "primary_test": "services/test_rapports_pdf_service.py",
+      "duplicate_tests": [
+        "services/test_rapports_pdf_generation.py"
+      ]
+    },
+    {
+      "source": "services/suggestions_ia.py",
+      "primary_test": "services/test_suggestions_ia_utils_full.py",
+      "duplicate_tests": [
+        "services/test_suggestions_ia_utils.py",
+        "services/test_suggestions_ia_service.py",
+        "services/test_suggestions_ia_coverage.py"
+      ]
+    },
+    {
+      "source": "services/suggestions_ia_utils.py",
+      "primary_test": "services/test_suggestions_ia_utils_full.py",
+      "duplicate_tests": [
+        "services/test_suggestions_ia_utils.py"
+      ]
+    },
+    {
+      "source": "services/recettes.py",
+      "primary_test": "services/test_recettes_coverage_deep.py",
+      "duplicate_tests": [
+        "services/test_recettes_coverage.py",
+        "services/test_recettes_cov_boost.py",
+        "domains/cuisine/test_recettes_logic.py",
+        "services/test_recettes_import.py",
+        "domains/cuisine/ui/test_recettes.py",
+        "domains/cuisine/test_recettes_logic_coverage.py",
+        "services/test_recettes_service.py",
+        "services/test_recettes_utils.py",
+        "services/test_recettes_integration.py"
+      ]
+    },
+    {
+      "source": "services/predictions.py",
+      "primary_test": "services/test_predictions_service.py",
+      "duplicate_tests": [
+        "services/test_predictions_coverage.py"
+      ]
+    },
+    {
+      "source": "services/courses_intelligentes.py",
+      "primary_test": "services/test_courses_intelligentes_service.py",
+      "duplicate_tests": [
+        "services/test_courses_intelligentes_coverage.py"
+      ]
+    },
+    {
+      "source": "services/pdf_export.py",
+      "primary_test": "services/test_pdf_export_service.py",
+      "duplicate_tests": [
+        "services/test_pdf_export_db_methods.py",
+        "services/test_pdf_export_coverage_deep.py",
+        "services/test_pdf_export_coverage.py"
+      ]
+    },
+    {
+      "source": "ui/tablet_mode.py",
+      "primary_test": "ui/test_tablet_mode.py",
+      "duplicate_tests": [
+        "ui/test_tablet_mode_deep.py"
+      ]
+    },
+    {
+      "source": "core/offline.py",
+      "primary_test": "core/test_offline.py",
+      "duplicate_tests": [
+        "core/test_offline_deep.py"
+      ]
+    },
+    {
+      "source": "core/multi_tenant.py",
+      "primary_test": "core/test_multi_tenant.py",
+      "duplicate_tests": [
+        "core/test_multi_tenant_deep.py"
+      ]
+    },
+    {
+      "source": "core/database.py",
+      "primary_test": "core/test_database.py",
+      "duplicate_tests": [
+        "core/test_database_extended.py",
+        "core/test_database_deep.py"
+      ]
+    },
+    {
+      "source": "core/notifications.py",
+      "primary_test": "domains/utils/ui/test_notifications_push.py",
+      "duplicate_tests": [
+        "services/test_notifications_push_coverage.py",
+        "core/test_notifications_deep.py",
+        "services/test_notifications_coverage.py",
+        "services/test_notifications_service.py",
+        "services/test_notifications_push_service.py",
+        "core/test_notifications.py"
+      ]
+    },
+    {
+      "source": "core/performance_optimizations.py",
+      "primary_test": "core/test_performance_optimizations.py",
+      "duplicate_tests": [
+        "core/test_performance_optimizations_deep.py"
+      ]
+    },
+    {
+      "source": "core/cache.py",
+      "primary_test": "core/test_cache.py",
+      "duplicate_tests": [
+        "core/test_cache_coverage.py",
+        "core/test_cache_multi_deep.py",
+        "core/test_cache_multi.py",
+        "core/test_cache_deep.py"
+      ]
+    },
+    {
+      "source": "core/validation.py",
+      "primary_test": "core/test_validation_pydantic.py",
+      "duplicate_tests": [
+        "core/test_validation.py"
+      ]
+    },
+    {
+      "source": "core/performance.py",
+      "primary_test": "core/test_performance_deep.py",
+      "duplicate_tests": [
+        "core/test_performance_optimizations.py",
+        "core/test_performance_optimizations_deep.py",
+        "core/test_performance.py"
+      ]
+    },
+    {
+      "source": "core/decorators.py",
+      "primary_test": "core/test_decorators_edge_cases.py",
+      "duplicate_tests": [
+        "core/test_decorators_basic.py",
+        "core/test_decorators_deep.py",
+        "core/test_decorators.py",
+        "core/test_decorators_extended.py"
+      ]
+    },
+    {
+      "source": "core/lazy_loader.py",
+      "primary_test": "core/test_lazy_loader_deep.py",
+      "duplicate_tests": [
+        "core/test_lazy_loader.py",
+        "core/test_lazy_loader_extended.py"
+      ]
+    },
+    {
+      "source": "core/cache_multi.py",
+      "primary_test": "core/test_cache_multi_deep.py",
+      "duplicate_tests": [
+        "core/test_cache_multi.py"
+      ]
+    },
+    {
+      "source": "core/config.py",
+      "primary_test": "core/test_config_deep.py",
+      "duplicate_tests": [
+        "core/test_config.py",
+        "core/test_config_extended.py"
+      ]
+    },
+    {
+      "source": "core/redis_cache.py",
+      "primary_test": "core/test_redis_cache_deep.py",
+      "duplicate_tests": [
+        "core/test_redis_cache.py"
+      ]
+    },
+    {
+      "source": "core/sql_optimizer.py",
+      "primary_test": "core/test_sql_optimizer_deep.py",
+      "duplicate_tests": [
+        "core/test_sql_optimizer.py"
+      ]
+    },
+    {
+      "source": "core/ai_agent.py",
+      "primary_test": "core/test_ai_agent_sync.py",
+      "duplicate_tests": [
+        "core/test_ai_agent.py"
+      ]
+    },
+    {
+      "source": "core/errors.py",
+      "primary_test": "core/test_errors_advanced.py",
+      "duplicate_tests": [
+        "core/test_errors_deep.py",
+        "core/test_errors.py",
+        "core/test_errors_base.py"
+      ]
+    },
+    {
+      "source": "core/validators_pydantic.py",
+      "primary_test": "core/test_validators_pydantic_deep.py",
+      "duplicate_tests": [
+        "core/test_validators_pydantic.py"
+      ]
+    },
+    {
+      "source": "utils/helpers/helpers.py",
+      "primary_test": "utils/test_helpers_deep.py",
+      "duplicate_tests": [
+        "utils/test_helpers_all_deep.py",
+        "utils/test_helpers_dates.py",
+        "utils/test_helpers_strings.py",
+        "utils/test_helpers_data.py",
+        "utils/test_helpers_extra_deep.py"
+      ]
+    },
+    {
+      "source": "domains/jeux/integration.py",
+      "primary_test": "e2e/test_integration_workflows.py",
+      "duplicate_tests": [
+        "domains/jeux/test_integration.py"
+      ]
+    },
+    {
+      "source": "domains/jeux/logic/paris_logic.py",
+      "primary_test": "domains/maison/services/test_paris_logic.py",
+      "duplicate_tests": [
+        "domains/jeux/test_paris_logic_coverage.py"
+      ]
+    },
+    {
+      "source": "domains/jeux/ui/paris/helpers.py",
+      "primary_test": "utils/test_helpers_deep.py",
+      "duplicate_tests": [
+        "utils/test_helpers_all_deep.py",
+        "utils/test_helpers_dates.py",
+        "utils/test_helpers_strings.py",
+        "utils/test_helpers_data.py",
+        "utils/test_helpers_extra_deep.py"
+      ]
+    },
+    {
+      "source": "domains/jeux/ui/loto/helpers.py",
+      "primary_test": "utils/test_helpers_deep.py",
+      "duplicate_tests": [
+        "utils/test_helpers_all_deep.py",
+        "utils/test_helpers_dates.py",
+        "utils/test_helpers_strings.py",
+        "utils/test_helpers_data.py",
+        "utils/test_helpers_extra_deep.py"
+      ]
+    },
+    {
+      "source": "domains/famille/logic/helpers.py",
+      "primary_test": "utils/test_helpers_deep.py",
+      "duplicate_tests": [
+        "utils/test_helpers_all_deep.py",
+        "utils/test_helpers_dates.py",
+        "utils/test_helpers_strings.py",
+        "utils/test_helpers_data.py",
+        "utils/test_helpers_extra_deep.py"
+      ]
+    },
+    {
+      "source": "domains/famille/ui/jules_planning.py",
+      "primary_test": "domains/famille/ui/test_jules_planning.py",
+      "duplicate_tests": [
+        "domains/famille/ui/test_jules_planning_extended.py"
+      ]
+    },
+    {
+      "source": "domains/famille/ui/activites.py",
+      "primary_test": "domains/famille/ui/test_activites.py",
+      "duplicate_tests": [
+        "domains/famille/test_activites_logic.py"
+      ]
+    },
+    {
+      "source": "domains/famille/ui/routines.py",
+      "primary_test": "domains/famille/test_routines_logic.py",
+      "duplicate_tests": [
+        "domains/famille/ui/test_routines.py"
+      ]
+    },
+    {
+      "source": "domains/famille/ui/suivi_perso/helpers.py",
+      "primary_test": "utils/test_helpers_deep.py",
+      "duplicate_tests": [
+        "utils/test_helpers_all_deep.py",
+        "utils/test_helpers_dates.py",
+        "utils/test_helpers_strings.py",
+        "utils/test_helpers_data.py",
+        "utils/test_helpers_extra_deep.py"
+      ]
+    },
+    {
+      "source": "domains/famille/ui/weekend/components.py",
+      "primary_test": "domains/planning/ui/components/test_components_init.py",
+      "duplicate_tests": [
+        "domains/planning/ui/components/test_components_init_extended.py"
+      ]
+    },
+    {
+      "source": "domains/famille/ui/weekend/helpers.py",
+      "primary_test": "utils/test_helpers_deep.py",
+      "duplicate_tests": [
+        "utils/test_helpers_all_deep.py",
+        "utils/test_helpers_dates.py",
+        "utils/test_helpers_strings.py",
+        "utils/test_helpers_data.py",
+        "utils/test_helpers_extra_deep.py"
+      ]
+    },
+    {
+      "source": "domains/famille/ui/achats_famille/components.py",
+      "primary_test": "domains/planning/ui/components/test_components_init.py",
+      "duplicate_tests": [
+        "domains/planning/ui/components/test_components_init_extended.py"
+      ]
+    },
+    {
+      "source": "domains/famille/ui/achats_famille/helpers.py",
+      "primary_test": "utils/test_helpers_deep.py",
+      "duplicate_tests": [
+        "utils/test_helpers_all_deep.py",
+        "utils/test_helpers_dates.py",
+        "utils/test_helpers_strings.py",
+        "utils/test_helpers_data.py",
+        "utils/test_helpers_extra_deep.py"
+      ]
+    },
+    {
+      "source": "domains/famille/ui/jules/components.py",
+      "primary_test": "domains/planning/ui/components/test_components_init.py",
+      "duplicate_tests": [
+        "domains/planning/ui/components/test_components_init_extended.py"
+      ]
+    },
+    {
+      "source": "domains/famille/ui/jules/helpers.py",
+      "primary_test": "utils/test_helpers_deep.py",
+      "duplicate_tests": [
+        "utils/test_helpers_all_deep.py",
+        "utils/test_helpers_dates.py",
+        "utils/test_helpers_strings.py",
+        "utils/test_helpers_data.py",
+        "utils/test_helpers_extra_deep.py"
+      ]
+    },
+    {
+      "source": "domains/utils/logic/parametres_logic.py",
+      "primary_test": "domains/utils/test_parametres_logic.py",
+      "duplicate_tests": [
+        "domains/utils/test_parametres_logic_coverage.py"
+      ]
+    },
+    {
+      "source": "domains/utils/logic/barcode_logic.py",
+      "primary_test": "domains/utils/test_barcode_logic_coverage.py",
+      "duplicate_tests": [
+        "domains/utils/test_barcode_logic.py"
+      ]
+    },
+    {
+      "source": "domains/utils/logic/rapports_logic.py",
+      "primary_test": "domains/utils/test_rapports_logic.py",
+      "duplicate_tests": [
+        "domains/utils/test_rapports_logic_coverage.py"
+      ]
+    },
+    {
+      "source": "domains/utils/ui/barcode.py",
+      "primary_test": "domains/utils/test_barcode_logic_coverage.py",
+      "duplicate_tests": [
+        "services/test_barcode_service.py",
+        "domains/utils/test_barcode_logic.py",
+        "services/test_barcode_coverage_deep.py",
+        "domains/utils/ui/test_barcode.py",
+        "services/test_barcode_coverage.py"
+      ]
+    },
+    {
+      "source": "domains/utils/ui/parametres.py",
+      "primary_test": "domains/utils/test_parametres.py",
+      "duplicate_tests": [
+        "domains/utils/test_parametres_logic.py",
+        "domains/utils/test_parametres_logic_coverage.py"
+      ]
+    },
+    {
+      "source": "domains/utils/ui/notifications_push.py",
+      "primary_test": "services/test_notifications_push_coverage.py",
+      "duplicate_tests": [
+        "services/test_notifications_push_service.py",
+        "domains/utils/ui/test_notifications_push.py"
+      ]
+    },
+    {
+      "source": "domains/utils/ui/accueil.py",
+      "primary_test": "domains/utils/test_accueil_logic.py",
+      "duplicate_tests": [
+        "domains/utils/ui/test_accueil.py"
+      ]
+    },
+    {
+      "source": "domains/utils/ui/rapports.py",
+      "primary_test": "domains/utils/test_rapports.py",
+      "duplicate_tests": [
+        "domains/utils/test_rapports_logic.py",
+        "services/test_rapports_pdf_generation.py",
+        "services/test_rapports_pdf_service.py",
+        "domains/utils/test_rapports_logic_coverage.py"
+      ]
+    },
+    {
+      "source": "domains/maison/logic/projets_logic.py",
+      "primary_test": "domains/maison/test_projets_logic_coverage.py",
+      "duplicate_tests": [
+        "domains/maison/test_projets_logic.py"
+      ]
+    },
+    {
+      "source": "domains/maison/logic/jardin_logic.py",
+      "primary_test": "domains/maison/test_jardin_logic_coverage.py",
+      "duplicate_tests": [
+        "domains/maison/test_jardin_logic.py"
+      ]
+    },
+    {
+      "source": "domains/maison/logic/helpers.py",
+      "primary_test": "utils/test_helpers_deep.py",
+      "duplicate_tests": [
+        "utils/test_helpers_all_deep.py",
+        "utils/test_helpers_dates.py",
+        "utils/test_helpers_strings.py",
+        "utils/test_helpers_data.py",
+        "utils/test_helpers_extra_deep.py"
+      ]
+    },
+    {
+      "source": "domains/maison/ui/entretien.py",
+      "primary_test": "domains/maison/ui/test_entretien.py",
+      "duplicate_tests": [
+        "domains/maison/test_entretien_logic.py"
+      ]
+    },
+    {
+      "source": "domains/maison/ui/jardin.py",
+      "primary_test": "domains/maison/ui/test_jardin.py",
+      "duplicate_tests": [
+        "domains/maison/test_jardin_logic.py",
+        "domains/maison/test_jardin_logic_coverage.py",
+        "domains/maison/ui/test_jardin_zones.py"
+      ]
+    },
+    {
+      "source": "domains/maison/ui/projets.py",
+      "primary_test": "domains/maison/ui/test_projets.py",
+      "duplicate_tests": [
+        "domains/maison/test_projets_logic_coverage.py",
+        "domains/maison/test_projets_logic.py"
+      ]
+    },
+    {
+      "source": "domains/maison/ui/depenses/components.py",
+      "primary_test": "domains/planning/ui/components/test_components_init.py",
+      "duplicate_tests": [
+        "domains/planning/ui/components/test_components_init_extended.py"
+      ]
+    },
+    {
+      "source": "domains/cuisine/logic/batch_cooking_logic.py",
+      "primary_test": "domains/cuisine/test_batch_cooking_logic.py",
+      "duplicate_tests": [
+        "domains/cuisine/test_batch_cooking_logic_coverage.py"
+      ]
+    },
+    {
+      "source": "domains/cuisine/logic/recettes_logic.py",
+      "primary_test": "domains/cuisine/test_recettes_logic.py",
+      "duplicate_tests": [
+        "domains/cuisine/test_recettes_logic_coverage.py"
+      ]
+    },
+    {
+      "source": "domains/cuisine/logic/inventaire_logic.py",
+      "primary_test": "domains/cuisine/test_inventaire_logic.py",
+      "duplicate_tests": [
+        "domains/cuisine/test_inventaire_logic_coverage.py"
+      ]
+    },
+    {
+      "source": "domains/cuisine/logic/planificateur_repas_logic.py",
+      "primary_test": "domains/cuisine/test_planificateur_repas_logic_coverage.py",
+      "duplicate_tests": [
+        "domains/cuisine/test_planificateur_repas_logic.py"
+      ]
+    },
+    {
+      "source": "domains/cuisine/ui/batch_cooking_detaille.py",
+      "primary_test": "domains/cuisine/ui/test_batch_cooking_detaille.py",
+      "duplicate_tests": [
+        "domains/cuisine/test_batch_cooking_detaille_ui.py"
+      ]
+    },
+    {
+      "source": "domains/cuisine/ui/planificateur_repas/pdf.py",
+      "primary_test": "services/test_pdf_export_service.py",
+      "duplicate_tests": [
+        "services/test_pdf_export_db_methods.py",
+        "services/test_pdf_export_coverage_deep.py",
+        "services/test_pdf_export_coverage.py"
+      ]
+    },
+    {
+      "source": "domains/cuisine/ui/planificateur_repas/components.py",
+      "primary_test": "domains/planning/ui/components/test_components_init.py",
+      "duplicate_tests": [
+        "domains/planning/ui/components/test_components_init_extended.py"
+      ]
+    },
+    {
+      "source": "domains/cuisine/ui/inventaire/notifications.py",
+      "primary_test": "domains/utils/ui/test_notifications_push.py",
+      "duplicate_tests": [
+        "services/test_notifications_push_coverage.py",
+        "services/test_notifications_coverage.py",
+        "core/test_notifications_deep.py",
+        "services/test_notifications_service.py",
+        "services/test_notifications_push_service.py",
+        "core/test_notifications.py"
+      ]
+    },
+    {
+      "source": "domains/cuisine/ui/inventaire/helpers.py",
+      "primary_test": "utils/test_helpers_deep.py",
+      "duplicate_tests": [
+        "utils/test_helpers_all_deep.py",
+        "utils/test_helpers_dates.py",
+        "utils/test_helpers_strings.py",
+        "utils/test_helpers_data.py",
+        "utils/test_helpers_extra_deep.py"
+      ]
+    },
+    {
+      "source": "domains/cuisine/ui/inventaire/suggestions.py",
+      "primary_test": "services/test_suggestions_ia_utils_full.py",
+      "duplicate_tests": [
+        "services/test_suggestions_ia_utils.py",
+        "services/test_suggestions_ia_service.py",
+        "services/test_suggestions_ia_coverage.py"
+      ]
+    },
+    {
+      "source": "domains/cuisine/ui/inventaire/predictions.py",
+      "primary_test": "services/test_predictions_service.py",
+      "duplicate_tests": [
+        "services/test_predictions_coverage.py"
+      ]
+    },
+    {
+      "source": "domains/cuisine/ui/courses/planning.py",
+      "primary_test": "services/test_planning_service.py",
+      "duplicate_tests": [
+        "services/test_planning_utils.py",
+        "services/test_planning_unified_coverage.py",
+        "services/test_planning_extended.py",
+        "domains/cuisine/test_planning_logic.py",
+        "services/test_planning_coverage.py",
+        "services/test_planning_unified_service.py"
+      ]
+    },
+    {
+      "source": "domains/cuisine/ui/courses/suggestions_ia.py",
+      "primary_test": "services/test_suggestions_ia_utils_full.py",
+      "duplicate_tests": [
+        "services/test_suggestions_ia_utils.py",
+        "services/test_suggestions_ia_service.py",
+        "services/test_suggestions_ia_coverage.py"
+      ]
+    },
+    {
+      "source": "domains/cuisine/ui/recettes/helpers.py",
+      "primary_test": "utils/test_helpers_deep.py",
+      "duplicate_tests": [
+        "utils/test_helpers_all_deep.py",
+        "utils/test_helpers_dates.py",
+        "utils/test_helpers_strings.py",
+        "utils/test_helpers_data.py",
+        "utils/test_helpers_extra_deep.py"
+      ]
+    },
+    {
+      "source": "domains/planning/logic/vue_ensemble_logic.py",
+      "primary_test": "domains/planning/test_vue_ensemble_logic.py",
+      "duplicate_tests": [
+        "domains/planning/test_vue_ensemble_logic_coverage.py"
+      ]
+    },
+    {
+      "source": "domains/planning/logic/vue_semaine_logic.py",
+      "primary_test": "domains/planning/test_vue_semaine_logic_coverage.py",
+      "duplicate_tests": [
+        "domains/planning/test_vue_semaine_logic.py"
+      ]
+    },
+    {
+      "source": "domains/planning/logic/calendrier_unifie_logic.py",
+      "primary_test": "domains/planning/test_calendrier_unifie_logic.py",
+      "duplicate_tests": [
+        "domains/planning/logic/test_calendrier_unifie_logic.py",
+        "domains/planning/test_calendrier_unifie_logic_coverage.py"
+      ]
+    },
+    {
+      "source": "domains/planning/ui/vue_ensemble.py",
+      "primary_test": "domains/planning/test_vue_ensemble_logic.py",
+      "duplicate_tests": [
+        "domains/planning/test_vue_ensemble_logic_coverage.py",
+        "domains/planning/test_vue_ensemble.py"
+      ]
+    },
+    {
+      "source": "domains/planning/ui/vue_semaine.py",
+      "primary_test": "domains/planning/test_vue_semaine_logic_coverage.py",
+      "duplicate_tests": [
+        "domains/planning/test_vue_semaine_logic.py",
+        "domains/planning/ui/test_vue_semaine.py"
+      ]
+    },
+    {
+      "source": "domains/planning/ui/calendrier_unifie/components.py",
+      "primary_test": "domains/planning/ui/components/test_components_init.py",
+      "duplicate_tests": [
+        "domains/planning/ui/components/test_components_init_extended.py"
+      ]
+    },
+    {
+      "source": "ui/feedback/progress.py",
+      "primary_test": "ui/test_progress_deep.py",
+      "duplicate_tests": [
+        "ui/test_progress_feedback.py"
+      ]
+    },
+    {
+      "source": "ui/layout/init.py",
+      "primary_test": "domains/test_init.py",
+      "duplicate_tests": [
+        "domains/famille/test_init.py",
+        "domains/cuisine/test_init.py",
+        "domains/maison/test_init.py",
+        "domains/planning/ui/components/test_init.py"
+      ]
+    },
+    {
+      "source": "core/ai/cache.py",
+      "primary_test": "core/test_cache.py",
+      "duplicate_tests": [
+        "core/test_cache_coverage.py",
+        "core/test_cache_multi_deep.py",
+        "core/test_cache_multi.py",
+        "core/test_cache_deep.py"
+      ]
+    },
+    {
+      "source": "core/models/courses.py",
+      "primary_test": "services/test_courses_intelligentes_service.py",
+      "duplicate_tests": [
+        "domains/cuisine/test_courses_ui.py",
+        "services/test_courses_service.py",
+        "domains/maison/ui/test_courses.py",
+        "services/test_courses_intelligentes_coverage.py",
+        "domains/cuisine/test_courses_logic.py"
+      ]
+    },
+    {
+      "source": "core/models/user_preferences.py",
+      "primary_test": "services/test_user_preferences_coverage.py",
+      "duplicate_tests": [
+        "services/test_user_preferences_service.py"
+      ]
+    },
+    {
+      "source": "core/models/batch_cooking.py",
+      "primary_test": "services/test_batch_cooking_service.py",
+      "duplicate_tests": [
+        "services/test_batch_cooking_utils.py",
+        "domains/cuisine/test_batch_cooking_logic.py",
+        "services/test_batch_cooking_coverage.py",
+        "domains/cuisine/test_batch_cooking_logic_coverage.py",
+        "services/test_batch_cooking_full_coverage.py",
+        "domains/cuisine/services/test_batch_cooking.py",
+        "domains/cuisine/ui/test_batch_cooking_detaille.py",
+        "services/test_batch_cooking_integration.py",
+        "domains/cuisine/test_batch_cooking_detaille_ui.py"
+      ]
+    },
+    {
+      "source": "core/models/inventaire.py",
+      "primary_test": "services/test_inventaire_integration.py",
+      "duplicate_tests": [
+        "services/test_inventaire_sqlite_int.py",
+        "services/test_inventaire_methods.py",
+        "domains/cuisine/test_inventaire_ui.py",
+        "domains/cuisine/test_inventaire_logic_coverage.py",
+        "domains/maison/services/test_inventaire.py",
+        "domains/cuisine/test_inventaire_logic.py",
+        "services/test_inventaire_coverage_deep.py",
+        "services/test_inventaire_service.py"
+      ]
+    },
+    {
+      "source": "core/models/planning.py",
+      "primary_test": "services/test_planning_service.py",
+      "duplicate_tests": [
+        "services/test_planning_utils.py",
+        "services/test_planning_unified_coverage.py",
+        "services/test_planning_extended.py",
+        "domains/cuisine/test_planning_logic.py",
+        "services/test_planning_coverage.py",
+        "services/test_planning_unified_service.py"
+      ]
+    },
+    {
+      "source": "core/models/recettes.py",
+      "primary_test": "services/test_recettes_coverage_deep.py",
+      "duplicate_tests": [
+        "services/test_recettes_coverage.py",
+        "services/test_recettes_cov_boost.py",
+        "domains/cuisine/test_recettes_logic.py",
+        "services/test_recettes_import.py",
+        "domains/cuisine/ui/test_recettes.py",
+        "domains/cuisine/test_recettes_logic_coverage.py",
+        "services/test_recettes_service.py",
+        "services/test_recettes_utils.py",
+        "services/test_recettes_integration.py"
+      ]
+    },
+    {
+      "source": "core/models/base.py",
+      "primary_test": "ui/test_base_module_core.py",
+      "duplicate_tests": [
+        "services/test_base_ai_service_coverage.py",
+        "services/test_base_service_coverage.py",
+        "services/test_base_ai_service.py",
+        "ui/test_base_form_core.py",
+        "services/test_base_service.py",
+        "ui/test_base_io_core.py"
+      ]
+    }
+  ],
+  "move_tests": []
+}

@@ -1,0 +1,595 @@
+[
+  {
+    "file": "services/calendar_sync.py",
+    "line_count": 1296,
+    "structure": {
+      "classes": [
+        {
+          "name": "CalendarProvider",
+          "line_start": 43,
+          "line_end": 48,
+          "line_count": 6,
+          "methods": [],
+          "method_count": 0
+        },
+        {
+          "name": "SyncDirection",
+          "line_start": 51,
+          "line_end": 55,
+          "line_count": 5,
+          "methods": [],
+          "method_count": 0
+        },
+        {
+          "name": "ExternalCalendarConfig",
+          "line_start": 58,
+          "line_end": 84,
+          "line_count": 27,
+          "methods": [],
+          "method_count": 0
+        },
+        {
+          "name": "CalendarEventExternal",
+          "line_start": 87,
+          "line_end": 103,
+          "line_count": 17,
+          "methods": [],
+          "method_count": 0
+        },
+        {
+          "name": "SyncResult",
+          "line_start": 106,
+          "line_end": 116,
+          "line_count": 11,
+          "methods": [],
+          "method_count": 0
+        },
+        {
+          "name": "ICalGenerator",
+          "line_start": 124,
+          "line_end": 256,
+          "line_count": 133,
+          "methods": [
+            "generate_ical",
+            "_event_to_vevent",
+            "parse_ical",
+            "_parse_ical_datetime"
+          ],
+          "method_count": 4
+        },
+        {
+          "name": "CalendarSyncService",
+          "line_start": 264,
+          "line_end": 1169,
+          "line_count": 906,
+          "methods": [
+            "__init__",
+            "add_calendar",
+            "remove_calendar",
+            "get_user_calendars",
+            "export_to_ical",
+            "import_from_ical_url",
+            "get_google_auth_url",
+            "handle_google_callback",
+            "sync_google_calendar",
+            "_import_from_google",
+            "_export_to_google",
+            "_export_meal_to_google",
+            "_export_activity_to_google",
+            "_find_google_event_by_matanne_id",
+            "export_planning_to_google",
+            "_refresh_google_token",
+            "_import_events_to_db",
+            "_save_config_to_db",
+            "_remove_config_from_db",
+            "ajouter_calendrier_externe",
+            "lister_calendriers_utilisateur",
+            "sauvegarder_evenement_calendrier",
+            "lister_evenements_calendrier"
+          ],
+          "method_count": 23
+        }
+      ],
+      "functions": [],
+      "import_lines": [
+        12,
+        13,
+        14,
+        15,
+        16,
+        18,
+        19,
+        20,
+        22,
+        23,
+        24,
+        1195,
+        528,
+        568,
+        917,
+        1278,
+        1217,
+        1255
+      ],
+      "total_lines": 1296
+    },
+    "suggestions": [
+      {
+        "strategy": "extract_class",
+        "class_name": "CalendarSyncService",
+        "new_file": "calendarsyncservice.py",
+        "line_range": [
+          264,
+          1169
+        ],
+        "reason": "Classe volumineuse: 906 lignes"
+      }
+    ]
+  },
+  {
+    "file": "domains/jeux/logic/paris_logic.py",
+    "line_count": 1266,
+    "structure": {
+      "classes": [
+        {
+          "name": "AnalyseurParis",
+          "line_start": 794,
+          "line_end": 949,
+          "line_count": 156,
+          "methods": [
+            "analyser_serie_complete",
+            "calculer_value_bet",
+            "analyser_tendance_buts"
+          ],
+          "method_count": 3
+        }
+      ],
+      "functions": [],
+      "import_lines": [
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "total_lines": 1266
+    },
+    "suggestions": []
+  },
+  {
+    "file": "services/recettes.py",
+    "line_count": 1237,
+    "structure": {
+      "classes": [
+        {
+          "name": "RecetteSuggestion",
+          "line_start": 49,
+          "line_end": 72,
+          "line_count": 24,
+          "methods": [
+            "convert_float_to_int"
+          ],
+          "method_count": 1
+        },
+        {
+          "name": "VersionBebeGeneree",
+          "line_start": 75,
+          "line_end": 88,
+          "line_count": 14,
+          "methods": [
+            "convert_float_to_int_age"
+          ],
+          "method_count": 1
+        },
+        {
+          "name": "VersionBatchCookingGeneree",
+          "line_start": 91,
+          "line_end": 107,
+          "line_count": 17,
+          "methods": [
+            "convert_float_to_int_portions"
+          ],
+          "method_count": 1
+        },
+        {
+          "name": "VersionRobotGeneree",
+          "line_start": 110,
+          "line_end": 125,
+          "line_count": 16,
+          "methods": [
+            "convert_float_to_int_temps"
+          ],
+          "method_count": 1
+        },
+        {
+          "name": "RecetteService",
+          "line_start": 133,
+          "line_end": 1205,
+          "line_count": 1073,
+          "methods": [
+            "__init__",
+            "get_by_id_full",
+            "get_by_type",
+            "create_complete",
+            "search_advanced",
+            "generer_recettes_ia",
+            "generer_variantes_recette_ia",
+            "generer_version_bebe",
+            "generer_version_batch_cooking",
+            "generer_version_robot",
+            "enregistrer_cuisson",
+            "get_historique",
+            "get_stats_recette",
+            "get_versions",
+            "export_to_csv",
+            "export_to_json",
+            "_find_or_create_ingredient"
+          ],
+          "method_count": 17
+        }
+      ],
+      "functions": [],
+      "import_lines": [
+        16,
+        17,
+        18,
+        19,
+        20,
+        22,
+        23,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        37,
+        38,
+        39,
+        226,
+        227,
+        173,
+        990,
+        991,
+        1026,
+        1051,
+        1052
+      ],
+      "total_lines": 1237
+    },
+    "suggestions": [
+      {
+        "strategy": "extract_class",
+        "class_name": "RecetteService",
+        "new_file": "recetteservice.py",
+        "line_range": [
+          133,
+          1205
+        ],
+        "reason": "Classe volumineuse: 1073 lignes"
+      }
+    ]
+  },
+  {
+    "file": "services/rapports_pdf.py",
+    "line_count": 1162,
+    "structure": {
+      "classes": [
+        {
+          "name": "RapportStocks",
+          "line_start": 38,
+          "line_end": 46,
+          "line_count": 9,
+          "methods": [],
+          "method_count": 0
+        },
+        {
+          "name": "RapportBudget",
+          "line_start": 49,
+          "line_end": 56,
+          "line_count": 8,
+          "methods": [],
+          "method_count": 0
+        },
+        {
+          "name": "AnalyseGaspillage",
+          "line_start": 59,
+          "line_end": 67,
+          "line_count": 9,
+          "methods": [],
+          "method_count": 0
+        },
+        {
+          "name": "RapportPlanning",
+          "line_start": 70,
+          "line_end": 79,
+          "line_count": 10,
+          "methods": [],
+          "method_count": 0
+        },
+        {
+          "name": "RapportsPDFService",
+          "line_start": 87,
+          "line_end": 1145,
+          "line_count": 1059,
+          "methods": [
+            "__init__",
+            "generer_donnees_rapport_stocks",
+            "generer_pdf_rapport_stocks",
+            "generer_donnees_rapport_budget",
+            "generer_pdf_rapport_budget",
+            "generer_analyse_gaspillage",
+            "generer_pdf_analyse_gaspillage",
+            "telecharger_rapport_pdf",
+            "generer_donnees_rapport_planning",
+            "generer_pdf_rapport_planning",
+            "telecharger_rapport_planning"
+          ],
+          "method_count": 11
+        }
+      ],
+      "functions": [],
+      "import_lines": [
+        10,
+        11,
+        12,
+        13,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        880
+      ],
+      "total_lines": 1162
+    },
+    "suggestions": [
+      {
+        "strategy": "extract_class",
+        "class_name": "RapportsPDFService",
+        "new_file": "rapportspdfservice.py",
+        "line_range": [
+          87,
+          1145
+        ],
+        "reason": "Classe volumineuse: 1059 lignes"
+      }
+    ]
+  },
+  {
+    "file": "services/budget.py",
+    "line_count": 1155,
+    "structure": {
+      "classes": [
+        {
+          "name": "CategorieDepense",
+          "line_start": 39,
+          "line_end": 62,
+          "line_count": 24,
+          "methods": [],
+          "method_count": 0
+        },
+        {
+          "name": "FrequenceRecurrence",
+          "line_start": 65,
+          "line_end": 71,
+          "line_count": 7,
+          "methods": [],
+          "method_count": 0
+        },
+        {
+          "name": "Depense",
+          "line_start": 74,
+          "line_end": 94,
+          "line_count": 21,
+          "methods": [],
+          "method_count": 0
+        },
+        {
+          "name": "FactureMaison",
+          "line_start": 97,
+          "line_end": 124,
+          "line_count": 28,
+          "methods": [
+            "prix_unitaire",
+            "periode"
+          ],
+          "method_count": 2
+        },
+        {
+          "name": "BudgetMensuel",
+          "line_start": 127,
+          "line_end": 152,
+          "line_count": 26,
+          "methods": [
+            "pourcentage_utilise",
+            "reste_disponible",
+            "est_depasse"
+          ],
+          "method_count": 3
+        },
+        {
+          "name": "ResumeFinancier",
+          "line_start": 155,
+          "line_end": 174,
+          "line_count": 20,
+          "methods": [],
+          "method_count": 0
+        },
+        {
+          "name": "PrevisionDepense",
+          "line_start": 177,
+          "line_end": 183,
+          "line_count": 7,
+          "methods": [],
+          "method_count": 0
+        },
+        {
+          "name": "BudgetService",
+          "line_start": 191,
+          "line_end": 867,
+          "line_count": 677,
+          "methods": [
+            "__init__",
+            "ajouter_depense",
+            "modifier_depense",
+            "supprimer_depense",
+            "get_depenses_mois",
+            "definir_budget",
+            "get_budget",
+            "get_tous_budgets",
+            "definir_budgets_batch",
+            "get_resume_mensuel",
+            "get_tendances",
+            "prevoir_depenses",
+            "_verifier_alertes_budget",
+            "ajouter_facture_maison",
+            "get_factures_maison",
+            "get_evolution_consommation"
+          ],
+          "method_count": 16
+        }
+      ],
+      "functions": [],
+      "import_lines": [
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        20,
+        21,
+        22,
+        24,
+        25,
+        26,
+        893,
+        894,
+        895,
+        683,
+        736,
+        797
+      ],
+      "total_lines": 1155
+    },
+    "suggestions": [
+      {
+        "strategy": "extract_class",
+        "class_name": "BudgetService",
+        "new_file": "budgetservice.py",
+        "line_range": [
+          191,
+          867
+        ],
+        "reason": "Classe volumineuse: 677 lignes"
+      }
+    ]
+  },
+  {
+    "file": "services/inventaire.py",
+    "line_count": 1097,
+    "structure": {
+      "classes": [
+        {
+          "name": "SuggestionCourses",
+          "line_start": 50,
+          "line_end": 56,
+          "line_count": 7,
+          "methods": [],
+          "method_count": 0
+        },
+        {
+          "name": "ArticleImport",
+          "line_start": 59,
+          "line_end": 67,
+          "line_count": 9,
+          "methods": [],
+          "method_count": 0
+        },
+        {
+          "name": "InventaireService",
+          "line_start": 75,
+          "line_end": 1078,
+          "line_count": 1004,
+          "methods": [
+            "__init__",
+            "get_inventaire_complet",
+            "get_alertes",
+            "suggerer_courses_ia",
+            "_calculer_statut",
+            "_jours_avant_peremption",
+            "_enregistrer_modification",
+            "get_historique",
+            "ajouter_article",
+            "mettre_a_jour_article",
+            "supprimer_article",
+            "ajouter_photo",
+            "supprimer_photo",
+            "obtenir_photo",
+            "generer_notifications_alertes",
+            "obtenir_alertes_actives",
+            "get_statistiques",
+            "get_stats_par_categorie",
+            "get_articles_a_prelever",
+            "importer_articles",
+            "exporter_inventaire",
+            "_exporter_csv",
+            "_exporter_json",
+            "valider_fichier_import"
+          ],
+          "method_count": 24
+        }
+      ],
+      "functions": [],
+      "import_lines": [
+        10,
+        11,
+        12,
+        14,
+        15,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        331,
+        374,
+        375,
+        437,
+        722,
+        782,
+        874,
+        991,
+        1028,
+        917,
+        918
+      ],
+      "total_lines": 1097
+    },
+    "suggestions": [
+      {
+        "strategy": "extract_class",
+        "class_name": "InventaireService",
+        "new_file": "inventaireservice.py",
+        "line_range": [
+          75,
+          1078
+        ],
+        "reason": "Classe volumineuse: 1004 lignes"
+      }
+    ]
+  }
+]

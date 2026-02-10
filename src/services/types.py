@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service Types - Types et classes de base partagés
 Point d'entrée sans dépendances circulaires
 """

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service Notifications pour Inventaire
 Gère les notifications (browser + email) pour alertes stock/péremption
 """

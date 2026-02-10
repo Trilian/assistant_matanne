@@ -1,4 +1,4 @@
-﻿"""Domaine Maison - Gestion entretien, projets et jardin."""
+"""Domaine Maison - Gestion entretien, projets et jardin."""
 
 # Import paresseux des modules pour faciliter les tests
 # Les modules UI dépendent de pandas et ne sont pas requis pour les tests de logique

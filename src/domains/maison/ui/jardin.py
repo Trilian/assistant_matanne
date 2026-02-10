@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Jardin - Gestion du jardin avec IA intégrée
 Conseils saisonniers, arrosage intelligent, récoltes planifiées
 """

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Routines avec Agent IA intégré
 Gestion des routines quotidiennes avec rappels intelligents
 """

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Logique métier du module Jardin (maison) - Séparée de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """

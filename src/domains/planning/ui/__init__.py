@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Planning - Centre de Coordination Familiale
 
 Agrège TOUS les événements familiaux en une vision unifiée:

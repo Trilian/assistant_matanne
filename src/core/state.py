@@ -1,4 +1,4 @@
-﻿"""
+"""
 State Unifié - Gestionnaire État Complet
 Tout harmonisé en français avec alias anglais
 """

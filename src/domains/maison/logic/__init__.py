@@ -1,4 +1,4 @@
-﻿"""Logic Maison - Logique métier."""
+"""Logic Maison - Logique métier."""
 
 from . import entretien_logic, projets_logic, jardin_logic, helpers
 

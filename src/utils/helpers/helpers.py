@@ -1,4 +1,4 @@
-﻿"""
+"""
 Helpers - Gestion ingrédients et métier cuisine
 Fonctions spécifiques au domaine alimentaire
 """

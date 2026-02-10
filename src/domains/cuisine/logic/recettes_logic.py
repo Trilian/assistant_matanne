@@ -1,4 +1,4 @@
-﻿"""
+"""
 Logique métier du module Recettes (sans UI Streamlit).
 Fonctions pures testables indépendamment de Streamlit.
 """

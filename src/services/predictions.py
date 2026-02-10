@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service Prévisions ML pour Inventaire
 Analyse historique + prédictions de consommation
 """

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Package Cuisine UI - Modules séparés pour une meilleure organisation
 
 Structure:

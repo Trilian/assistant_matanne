@@ -1,4 +1,4 @@
-﻿"""
+"""
 Modèles pour la santé et le bien-être.
 
 Contient :

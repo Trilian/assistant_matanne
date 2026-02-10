@@ -1,4 +1,4 @@
-﻿"""Domaine Cuisine - Gestion recettes, planning repas, inventaire et courses.
+"""Domaine Cuisine - Gestion recettes, planning repas, inventaire et courses.
 
 Modules disponibles (chargement différé via OptimizedRouter):
 - recettes: Gestion des recettes

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Modèles pour le planning et le calendrier.
 
 Contient :

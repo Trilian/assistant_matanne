@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Vue Semaine - Dashboard détaillé de la semaine
 
 Vue intelligente jour par jour avec :

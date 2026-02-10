@@ -1,4 +1,4 @@
-﻿"""
+"""
 Redis Cache - Cache distribué haute performance.
 
 Fonctionnalités:
