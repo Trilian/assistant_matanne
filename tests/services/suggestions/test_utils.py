@@ -841,7 +841,7 @@ class TestFilterByConstraints:
         recettes = [
             {"id": 1, "est_vegetarien": True, "contient_gluten": False},
             {"id": 2, "est_vegetarien": True, "contient_gluten": True},
-            {"id": 3, "est_vegetarien": False},
+            {"id": 3, "nom": "Boeuf bourguignon"},  # Sera détecté comme viande rouge
         ]
         result = filter_by_constraints(recettes, ["vegetarien", "sans gluten"])
         assert len(result) == 1

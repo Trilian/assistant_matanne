@@ -1,0 +1,188 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.11.8, pytest-9.0.2, pluggy-1.6.0
+rootdir: D:\Projet_streamlit\assistant_matanne
+configfile: pytest.ini
+plugins: anyio-4.12.1, asyncio-1.3.0, cov-7.0.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collected 2203 items
+
+tests\services\backup\test_service.py .................................. [  1%]
+..................................                                       [  3%]
+tests\services\backup\test_types.py .................................... [  4%]
+                                                                         [  4%]
+tests\services\backup\test_utils.py .................................... [  6%]
+...............................................................          [  9%]
+tests\services\base\test_ai_service.py ................................. [ 10%]
+.......................                                                  [ 11%]
+tests\services\base\test_io_service.py ................................. [ 13%]
+.......................................                                  [ 15%]
+tests\services\base\test_types.py ...................................... [ 16%]
+......................................                                   [ 18%]
+tests\services\batch_cooking\test_service.py ........................... [ 19%]
+....................                                                     [ 20%]
+tests\services\batch_cooking\test_utils.py ............................. [ 21%]
+..............................                                           [ 23%]
+tests\services\budget\test_schemas.py ..............................     [ 24%]
+tests\services\budget\test_service.py .................................. [ 26%]
+...                                                                      [ 26%]
+tests\services\budget\test_utils.py .................................... [ 27%]
+.......................................                                  [ 29%]
+tests\services\calendrier\test_ical_generator.py ....................... [ 30%]
+......                                                                   [ 31%]
+tests\services\calendrier\test_schemas.py .................              [ 31%]
+tests\services\calendrier\test_service.py .............................. [ 33%]
+...................ssssss                                                [ 34%]
+tests\services\courses\test_service.py ................................  [ 35%]
+tests\services\courses\test_suggestion.py .............................. [ 37%]
+....................                                                     [ 38%]
+tests\services\courses\test_types.py ................................... [ 39%]
+......                                                                   [ 39%]
+tests\services\garmin\test_service.py .................................. [ 41%]
+.......                                                                  [ 41%]
+tests\services\garmin\test_utils.py .................................... [ 43%]
+................................................                         [ 45%]
+tests\services\integrations\test_codes_barres.py ....................... [ 46%]
+.................................                                        [ 48%]
+tests\services\integrations\test_facture.py ............................ [ 49%]
+................                                                         [ 50%]
+tests\services\integrations\test_produit.py ............................ [ 51%]
+...................                                                      [ 52%]
+tests\services\inventaire\test_service.py .............................. [ 53%]
+................................                                         [ 55%]
+tests\services\notifications\test_inventaire.py ........................ [ 56%]
+.....                                                                    [ 56%]
+tests\services\notifications\test_notif_ntfy.py ........................ [ 57%]
+...........                                                              [ 57%]
+tests\services\notifications\test_notif_web.py ............F............ [ 59%]
+..s                                                                      [ 59%]
+tests\services\notifications\test_ui.py ............                     [ 59%]
+tests\services\notifications\test_utils.py ............................. [ 61%]
+...............................                                          [ 62%]
+tests\services\planning\test_global_planning.py ........................ [ 63%]
+......................                                                   [ 64%]
+tests\services\planning\test_service.py ................................ [ 66%]
+.........                                                                [ 66%]
+tests\services\planning\test_utils.py .................................. [ 67%]
+......................................................................   [ 71%]
+tests\services\rapports\test_export.py ................................. [ 72%]
+                                                                         [ 72%]
+tests\services\rapports\test_generation.py ............................. [ 73%]
+...........                                                              [ 74%]
+tests\services\recettes\test_import_url.py ............................. [ 75%]
+...........................                                              [ 77%]
+tests\services\recettes\test_service.py ................................ [ 78%]
+..............                                                           [ 79%]
+tests\services\recettes\test_utils.py .................................. [ 80%]
+..............................                                           [ 82%]
+tests\services\suggestions\test_predictions.py ......................... [ 83%]
+...............                                                          [ 83%]
+tests\services\suggestions\test_service.py ............................. [ 85%]
+...                                                                      [ 85%]
+tests\services\suggestions\test_utils.py ............................... [ 86%]
+............................................................             [ 89%]
+tests\services\utilisateur\test_authentification.py .................... [ 90%]
+........................................................................ [ 93%]
+.........                                                                [ 94%]
+tests\services\utilisateur\test_historique.py .......................... [ 95%]
+...............................................................          [ 98%]
+tests\services\utilisateur\test_preferences.py ......................... [ 99%]
+..................                                                       [100%]
+
+============================== warnings summary ===============================
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\decl_api.py:0
+  C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\decl_api.py:0: PytestCollectionWarning: cannot collect test class 'Base' because it has a __init__ constructor (from: tests/services/base/test_types.py)
+
+tests/services/batch_cooking/test_service.py::TestAjouterEtapes::test_ajouter_etapes_success
+tests/services/courses/test_suggestion.py::TestAjouterAListeCourses::test_ajouter_avec_ingredient_sans_article_existant
+tests/services/courses/test_suggestion.py::TestAjouterAListeCourses::test_ajouter_cree_ingredient_si_inexistant
+  D:\Projet_streamlit\assistant_matanne\tests\conftest.py:141: SAWarning: transaction already deassociated from connection
+    transaction.rollback()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.11.8-final-0 _______________
+
+Name                                           Stmts   Miss Branch BrPart   Cover
+---------------------------------------------------------------------------------
+src\services\__init__.py                          10      1      0      0  90.00%
+src\services\backup\__init__.py                    4      0      0      0 100.00%
+src\services\backup\service.py                   285     58     68      2  76.20%
+src\services\backup\types.py                      31      0      0      0 100.00%
+src\services\backup\utils.py                     131      3     60      2  97.38%
+src\services\base\__init__.py                      4      0      0      0 100.00%
+src\services\base\ai_service.py                  222     24     66      4  89.58%
+src\services\base\io_service.py                  110      4     42      0  97.37%
+src\services\base\types.py                       204      7     88      9  93.15%
+src\services\batch_cooking\__init__.py             5      0      0      0 100.00%
+src\services\batch_cooking\constantes.py           4      0      0      0 100.00%
+src\services\batch_cooking\service.py            281      6     84      8  95.62%
+src\services\batch_cooking\types.py               25      0      0      0 100.00%
+src\services\batch_cooking\utils.py              122      1     46      2  98.21%
+src\services\budget\__init__.py                    7      2      0      0  71.43%
+src\services\budget\schemas.py                   102      0      4      0 100.00%
+src\services\budget\service.py                   242     17     66     11  90.91%
+src\services\budget\utils.py                     108      0     36      1  99.31%
+src\services\calendrier\__init__.py                7      2      0      0  71.43%
+src\services\calendrier\generateur.py             66      2     26      0  97.83%
+src\services\calendrier\schemas.py                52      0      0      0 100.00%
+src\services\calendrier\service.py               318     37     82      6  87.25%
+src\services\courses\__init__.py                   5      0      0      0 100.00%
+src\services\courses\constantes.py                 3      0      0      0 100.00%
+src\services\courses\service.py                  128      0     28      1  99.36%
+src\services\courses\suggestion.py               132      3     40      3  96.51%
+src\services\courses\types.py                     50      0     14      2  96.88%
+src\services\garmin\__init__.py                    4      0      0      0 100.00%
+src\services\garmin\service.py                   224      9     38      2  95.80%
+src\services\garmin\types.py                      20      0      0      0 100.00%
+src\services\garmin\utils.py                     182      3     80      6  96.56%
+src\services\integrations\__init__.py              4      0      0      0 100.00%
+src\services\integrations\codes_barres.py        189      9     58      3  94.33%
+src\services\integrations\facture.py              95      2     18      0  98.23%
+src\services\integrations\produit.py             123      0     16      2  98.56%
+src\services\inventaire\__init__.py                3      0      0      0 100.00%
+src\services\inventaire\service.py               269     36     86      4  83.66%
+src\services\inventaire\types.py                  16      0      0      0 100.00%
+src\services\notifications\__init__.py             7      0      0      0 100.00%
+src\services\notifications\inventaire.py         108      1     36      3  97.22%
+src\services\notifications\notif_ntfy.py         126     10     28      4  89.61%
+src\services\notifications\notif_web.py          252     97     60      6  59.29%
+src\services\notifications\types.py              146     11      0      0  92.47%
+src\services\notifications\ui.py                  46      5      2      1  87.50%
+src\services\notifications\utils.py              148      2     52      4  97.00%
+src\services\planning\__init__.py                  6      0      0      0 100.00%
+src\services\planning\constantes.py                5      0      0      0 100.00%
+src\services\planning\global_planning.py         175      7     50      7  92.89%
+src\services\planning\service.py                 181      3     56      5  96.62%
+src\services\planning\types.py                    44      0      0      0 100.00%
+src\services\planning\utils.py                   146      0     70      2  99.07%
+src\services\rapports\__init__.py                  4      0      0      0 100.00%
+src\services\rapports\export.py                  150      0     32      2  98.90%
+src\services\rapports\generation.py              336      0    100      3  99.31%
+src\services\rapports\types.py                    59      0      0      0 100.00%
+src\services\recettes\__init__.py                  5      0      0      0 100.00%
+src\services\recettes\import_url.py              402     69    226     45  77.71%
+src\services\recettes\service.py                 271     33     50      9  86.92%
+src\services\recettes\types.py                    59      4      8      4  88.06%
+src\services\recettes\utils.py                   160      1     70      7  96.52%
+src\services\suggestions\__init__.py               5      0      0      0 100.00%
+src\services\suggestions\predictions.py          132      3     34      4  95.78%
+src\services\suggestions\service.py              201      4     96     23  90.91%
+src\services\suggestions\types.py                 30      0      0      0 100.00%
+src\services\suggestions\utils.py                287     21    172     22  89.32%
+src\services\utilisateur\__init__.py               4      0      0      0 100.00%
+src\services\utilisateur\authentification.py     381     45    112      6  84.79%
+src\services\utilisateur\historique.py           237     34     40      1  82.31%
+src\services\utilisateur\preferences.py          118      0     14      0 100.00%
+src\services\weather\__init__.py                   3      3      0      0   0.00%
+src\services\weather\service.py                  273    273     84      0   0.00%
+src\services\weather\utils.py                    250    250    132      0   0.00%
+src\services\web\__init__.py                       3      3      0      0   0.00%
+src\services\web\pwa.py                           49     49      0      0   0.00%
+src\services\web\synchronisation.py              249    249     50      0   0.00%
+---------------------------------------------------------------------------------
+TOTAL                                           8845   1403   2620    226  82.09%
+=========================== short test summary info ===========================
+FAILED tests/services/notifications/test_notif_web.py::TestDoitEnvoyer::test_doit_envoyer_type_actif
+SKIPPED [6] tests\services\calendrier\test_service.py: NÚcessite fixtures DB avec FK constraints user_id - testÚ via mocks ci-dessus
+SKIPPED [1] tests\services\notifications\test_notif_web.py:464: could not import 'pywebpush': No module named 'pywebpush'
+====== 1 failed, 2195 passed, 7 skipped, 4 warnings in 73.93s (0:01:13) =======
