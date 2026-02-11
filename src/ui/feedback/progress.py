@@ -9,207 +9,207 @@ from typing import Optional
 import streamlit as st
 
 
-class ProgressTracker:
+class SuiviProgression:
     """
     Tracker de progression pour opérations longues
 
     Usage:
-        progress = ProgressTracker("Import recettes", total=100)
+        progression = SuiviProgression("Import recettes", total=100)
         for i, item in enumerate(items):
             process_item(item)
-            progress.update(i+1, f"Traitement: {item.name}")
-        progress.complete()
+            progression.mettre_a_jour(i+1, f"Traitement: {item.name}")
+        progression.terminer()
     """
 
-    def __init__(self, operation: str, total: int, show_percentage: bool = True):
+    def __init__(self, operation: str, total: int, afficher_pourcentage: bool = True):
         self.operation = operation
         self.total = total
-        self.show_percentage = show_percentage
-        self.current = 0
-        self.start_time = datetime.now()
+        self.afficher_pourcentage = afficher_pourcentage
+        self.courant = 0
+        self.debut = datetime.now()
 
         # Créer éléments Streamlit
-        self.title_placeholder = st.empty()
-        self.progress_bar = st.progress(0)
-        self.status_placeholder = st.empty()
+        self.titre_placeholder = st.empty()
+        self.barre_progression = st.progress(0)
+        self.statut_placeholder = st.empty()
 
-        self._update_display()
+        self._mettre_a_jour_affichage()
 
-    def update(self, current: int, status: str = ""):
+    def mettre_a_jour(self, courant: int, statut: str = ""):
         """
         Met à jour la progression
 
         Args:
-            current: Valeur actuelle (0 à total)
-            status: Message de statut
+            courant: Valeur actuelle (0 à total)
+            statut: Message de statut
         """
-        self.current = current
-        self._update_display(status)
+        self.courant = courant
+        self._mettre_a_jour_affichage(statut)
 
-    def increment(self, step: int = 1, status: str = ""):
+    def incrementer(self, pas: int = 1, statut: str = ""):
         """Incrémente la progression"""
-        self.current = min(self.current + step, self.total)
-        self._update_display(status)
+        self.courant = min(self.courant + pas, self.total)
+        self._mettre_a_jour_affichage(statut)
 
-    def complete(self, message: str = ""):
+    def terminer(self, message: str = ""):
         """Marque comme terminé"""
-        self.current = self.total
-        self._update_display()
+        self.courant = self.total
+        self._mettre_a_jour_affichage()
 
-        elapsed = (datetime.now() - self.start_time).total_seconds()
+        temps_ecoule = (datetime.now() - self.debut).total_seconds()
 
         if message:
-            self.status_placeholder.success(f"✅ {message} (en {elapsed:.1f}s)")
+            self.statut_placeholder.success(f"✅ {message} (en {temps_ecoule:.1f}s)")
         else:
-            self.status_placeholder.success(f"✅ Terminé en {elapsed:.1f}s")
+            self.statut_placeholder.success(f"✅ Terminé en {temps_ecoule:.1f}s")
 
         # Nettoyer après 2s
         time.sleep(2)
-        self.title_placeholder.empty()
-        self.progress_bar.empty()
+        self.titre_placeholder.empty()
+        self.barre_progression.empty()
 
-    def error(self, message: str):
+    def erreur(self, message: str):
         """Affiche une erreur"""
-        self.status_placeholder.error(f"❌ {message}")
+        self.statut_placeholder.error(f"❌ {message}")
 
-    def _update_display(self, status: str = ""):
+    def _mettre_a_jour_affichage(self, statut: str = ""):
         """Met à jour l'affichage"""
-        progress_pct = self.current / self.total if self.total > 0 else 0
+        pct_progression = self.courant / self.total if self.total > 0 else 0
 
         # Titre avec pourcentage
-        if self.show_percentage:
-            title = f"{self.operation} - {progress_pct*100:.0f}%"
+        if self.afficher_pourcentage:
+            titre = f"{self.operation} - {pct_progression*100:.0f}%"
         else:
-            title = f"{self.operation} - {self.current}/{self.total}"
+            titre = f"{self.operation} - {self.courant}/{self.total}"
 
-        self.title_placeholder.markdown(f"**{title}**")
+        self.titre_placeholder.markdown(f"**{titre}**")
 
-        # Progress bar
-        self.progress_bar.progress(progress_pct)
+        # Barre de progression
+        self.barre_progression.progress(pct_progression)
 
         # Estimation temps restant
-        if self.current > 0 and self.current < self.total:
-            elapsed = (datetime.now() - self.start_time).total_seconds()
-            estimated_total = elapsed / self.current * self.total
-            remaining = estimated_total - elapsed
+        if self.courant > 0 and self.courant < self.total:
+            temps_ecoule = (datetime.now() - self.debut).total_seconds()
+            estimation_total = temps_ecoule / self.courant * self.total
+            restant = estimation_total - temps_ecoule
 
-            status_msg = f"⏱️ Temps restant: ~{remaining:.0f}s"
+            msg_statut = f"⏱️ Temps restant: ~{restant:.0f}s"
 
-            if status:
-                status_msg = f"{status} • {status_msg}"
+            if statut:
+                msg_statut = f"{statut} • {msg_statut}"
 
-            self.status_placeholder.caption(status_msg)
-        elif status:
-            self.status_placeholder.caption(status)
+            self.statut_placeholder.caption(msg_statut)
+        elif statut:
+            self.statut_placeholder.caption(statut)
 
 
-class LoadingState:
+class EtatChargement:
     """
     Gestion d'états de chargement multiples
 
     Usage:
-        loading = LoadingState("Chargement données")
+        chargement = EtatChargement("Chargement données")
 
-        loading.add_step("Connexion DB")
+        chargement.ajouter_etape("Connexion DB")
         # ... code ...
-        loading.complete_step("Connexion DB")
+        chargement.terminer_etape("Connexion DB")
 
-        loading.add_step("Import recettes")
+        chargement.ajouter_etape("Import recettes")
         # ... code ...
-        loading.complete_step("Import recettes")
+        chargement.terminer_etape("Import recettes")
 
-        loading.finish()
+        chargement.finaliser()
     """
 
-    def __init__(self, title: str):
-        self.title = title
-        self.steps: list[dict] = []
-        self.current_step = None
-        self.start_time = datetime.now()
+    def __init__(self, titre: str):
+        self.titre = titre
+        self.etapes: list[dict] = []
+        self.etape_courante = None
+        self.debut = datetime.now()
 
         # UI
-        self.title_placeholder = st.empty()
-        self.steps_placeholder = st.empty()
+        self.titre_placeholder = st.empty()
+        self.etapes_placeholder = st.empty()
 
-        self._update_display()
+        self._mettre_a_jour_affichage()
 
-    def add_step(self, step_name: str):
+    def ajouter_etape(self, nom_etape: str):
         """Ajoute une étape"""
-        self.steps.append(
+        self.etapes.append(
             {
-                "name": step_name,
+                "name": nom_etape,
                 "status": "⏳ En cours...",
                 "started_at": datetime.now(),
                 "completed": False,
             }
         )
-        self.current_step = len(self.steps) - 1
-        self._update_display()
+        self.etape_courante = len(self.etapes) - 1
+        self._mettre_a_jour_affichage()
 
-    def complete_step(self, step_name: Optional[str] = None, success: bool = True):
+    def terminer_etape(self, nom_etape: Optional[str] = None, succes: bool = True):
         """Marque une étape comme terminée"""
         # Trouver l'étape
-        if step_name:
-            step_idx = next((i for i, s in enumerate(self.steps) if s["name"] == step_name), None)
+        if nom_etape:
+            idx_etape = next((i for i, s in enumerate(self.etapes) if s["name"] == nom_etape), None)
         else:
-            step_idx = self.current_step
+            idx_etape = self.etape_courante
 
-        if step_idx is not None and step_idx < len(self.steps):
-            step = self.steps[step_idx]
+        if idx_etape is not None and idx_etape < len(self.etapes):
+            etape = self.etapes[idx_etape]
 
-            elapsed = (datetime.now() - step["started_at"]).total_seconds()
+            temps_ecoule = (datetime.now() - etape["started_at"]).total_seconds()
 
-            if success:
-                step["status"] = f"✅ OK ({elapsed:.1f}s)"
+            if succes:
+                etape["status"] = f"✅ OK ({temps_ecoule:.1f}s)"
             else:
-                step["status"] = "❌ Erreur"
+                etape["status"] = "❌ Erreur"
 
-            step["completed"] = True
-            self._update_display()
+            etape["completed"] = True
+            self._mettre_a_jour_affichage()
 
-    def error_step(self, step_name: Optional[str] = None, error_msg: str = ""):
+    def erreur_etape(self, nom_etape: Optional[str] = None, msg_erreur: str = ""):
         """Marque une étape en erreur"""
-        if step_name:
-            step_idx = next((i for i, s in enumerate(self.steps) if s["name"] == step_name), None)
+        if nom_etape:
+            idx_etape = next((i for i, s in enumerate(self.etapes) if s["name"] == nom_etape), None)
         else:
-            step_idx = self.current_step
+            idx_etape = self.etape_courante
 
-        if step_idx is not None and step_idx < len(self.steps):
-            step = self.steps[step_idx]
-            step["status"] = f"❌ {error_msg}" if error_msg else "❌ Erreur"
-            step["completed"] = True
-            self._update_display()
+        if idx_etape is not None and idx_etape < len(self.etapes):
+            etape = self.etapes[idx_etape]
+            etape["status"] = f"❌ {msg_erreur}" if msg_erreur else "❌ Erreur"
+            etape["completed"] = True
+            self._mettre_a_jour_affichage()
 
-    def finish(self, success_message: str = ""):
+    def finaliser(self, message_succes: str = ""):
         """Termine le chargement"""
-        elapsed = (datetime.now() - self.start_time).total_seconds()
+        temps_ecoule = (datetime.now() - self.debut).total_seconds()
 
-        if success_message:
-            self.title_placeholder.success(f"✅ {success_message} (en {elapsed:.1f}s)")
+        if message_succes:
+            self.titre_placeholder.success(f"✅ {message_succes} (en {temps_ecoule:.1f}s)")
         else:
-            self.title_placeholder.success(f"✅ {self.title} terminé (en {elapsed:.1f}s)")
+            self.titre_placeholder.success(f"✅ {self.titre} terminé (en {temps_ecoule:.1f}s)")
 
         # Nettoyer après 3s
         time.sleep(3)
-        self.title_placeholder.empty()
-        self.steps_placeholder.empty()
+        self.titre_placeholder.empty()
+        self.etapes_placeholder.empty()
 
-    def _update_display(self):
+    def _mettre_a_jour_affichage(self):
         """Met à jour l'affichage"""
-        completed = sum(1 for s in self.steps if s["completed"])
-        total = len(self.steps)
+        terminees = sum(1 for s in self.etapes if s["completed"])
+        total = len(self.etapes)
 
-        title = f"**{self.title}** ({completed}/{total})"
-        self.title_placeholder.markdown(title)
+        titre = f"**{self.titre}** ({terminees}/{total})"
+        self.titre_placeholder.markdown(titre)
 
         # Liste des étapes
-        steps_html = "<div style='padding: 1rem; background: #f8f9fa; border-radius: 8px;'>"
+        etapes_html = "<div style='padding: 1rem; background: #f8f9fa; border-radius: 8px;'>"
 
-        for step in self.steps:
-            steps_html += "<div style='margin: 0.5rem 0;'>"
-            steps_html += f"<strong>{step['name']}</strong> • {step['status']}"
-            steps_html += "</div>"
+        for etape in self.etapes:
+            etapes_html += "<div style='margin: 0.5rem 0;'>"
+            etapes_html += f"<strong>{etape['name']}</strong> • {etape['status']}"
+            etapes_html += "</div>"
 
-        steps_html += "</div>"
+        etapes_html += "</div>"
 
-        self.steps_placeholder.markdown(steps_html, unsafe_allow_html=True)
+        self.etapes_placeholder.markdown(etapes_html, unsafe_allow_html=True)

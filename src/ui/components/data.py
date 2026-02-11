@@ -59,7 +59,7 @@ def pagination(
     return current_page, items_per_page
 
 
-def metrics_row(stats: list[dict], cols: int | None = None):
+def ligne_metriques(stats: list[dict], cols: int | None = None):
     """
     Ligne de métriques
 
@@ -68,7 +68,7 @@ def metrics_row(stats: list[dict], cols: int | None = None):
         cols: Nombre de colonnes (auto si None)
 
     Example:
-        metrics_row([
+        ligne_metriques([
             {"label": "Total", "value": 42, "delta": "+5"},
             {"label": "Actifs", "value": 38}
         ])
@@ -89,23 +89,23 @@ def metrics_row(stats: list[dict], cols: int | None = None):
             )
 
 
-def export_buttons(
+def boutons_export(
     data: list[dict] | pd.DataFrame,
-    filename: str = "export",
+    nom_fichier: str = "export",
     formats: list[str] | None = None,
-    key: str = "export",
+    cle: str = "export",
 ):
     """
     Boutons d'export
 
     Args:
         data: Données (list ou DataFrame)
-        filename: Nom fichier (sans extension)
+        nom_fichier: Nom fichier (sans extension)
         formats: Formats disponibles
-        key: Clé unique
+        cle: Clé unique
 
     Example:
-        export_buttons(items, "recettes", ["csv", "json"], "recipes_export")
+        boutons_export(items, "recettes", ["csv", "json"], "recipes_export")
     """
     if isinstance(data, list):
         df = pd.DataFrame(data)
@@ -123,9 +123,9 @@ def export_buttons(
                 st.download_button(
                     "📥 CSV",
                     csv,
-                    f"{filename}.csv",
+                    f"{nom_fichier}.csv",
                     "text/csv",
-                    key=f"{key}_csv",
+                    key=f"{cle}_csv",
                     use_container_width=True,
                 )
 
@@ -134,69 +134,69 @@ def export_buttons(
                 st.download_button(
                     "📥 JSON",
                     json_str,
-                    f"{filename}.json",
+                    f"{nom_fichier}.json",
                     "application/json",
-                    key=f"{key}_json",
+                    key=f"{cle}_json",
                     use_container_width=True,
                 )
 
 
-def data_table(data: list[dict] | pd.DataFrame, key: str = "table"):
+def tableau_donnees(data: list[dict] | pd.DataFrame, cle: str = "table"):
     """
     Tableau de données interactif
 
     Args:
         data: Données
-        key: Clé unique
+        cle: Clé unique
 
     Example:
-        data_table(recipes, "recipes_table")
+        tableau_donnees(recipes, "recipes_table")
     """
     if isinstance(data, list):
         df = pd.DataFrame(data)
     else:
         df = data
 
-    st.dataframe(df, use_container_width=True, key=key)
+    st.dataframe(df, use_container_width=True, key=cle)
 
 
-def progress_bar(value: float, label: str = "", key: str = "progress"):
+def barre_progression(valeur: float, label: str = "", cle: str = "progress"):
     """
     Barre de progression
 
     Args:
-        value: Valeur (0.0 - 1.0)
+        valeur: Valeur (0.0 - 1.0)
         label: Label
-        key: Clé unique
+        cle: Clé unique
 
     Example:
-        progress_bar(0.75, "Progression", "import_progress")
+        barre_progression(0.75, "Progression", "import_progress")
     """
     if label:
         st.markdown(f"**{label}**")
 
-    st.progress(value, key=key)
+    st.progress(valeur, key=cle)
 
 
-def status_indicator(status: str, label: str = ""):
+def indicateur_statut(statut: str, label: str = ""):
     """
     Indicateur de statut (LED)
 
     Args:
-        status: "success", "warning", "error", "info"
+        statut: "success", "warning", "error", "info"
         label: Label
 
     Example:
-        status_indicator("success", "Connecté")
+        indicateur_statut("success", "Connecté")
     """
-    colors = {"success": "#4CAF50", "warning": "#FFC107", "error": "#f44336", "info": "#2196F3"}
+    couleurs = {"success": "#4CAF50", "warning": "#FFC107", "error": "#f44336", "info": "#2196F3"}
 
-    color = colors.get(status, "#gray")
+    couleur = couleurs.get(statut, "#gray")
 
     st.markdown(
         f'<div style="display: flex; align-items: center; gap: 0.5rem;">'
-        f'<div style="width: 12px; height: 12px; background: {color}; '
-        f'border-radius: 50%; box-shadow: 0 0 8px {color};"></div>'
+        f'<div style="width: 12px; height: 12px; background: {couleur}; '
+        f'border-radius: 50%; box-shadow: 0 0 8px {couleur};"></div>'
         f"<span>{label}</span>"
         f"</div>",
         unsafe_allow_html=True,

@@ -8,11 +8,11 @@ from typing import Callable, Any, Optional
 import streamlit as st
 
 # ═══════════════════════════════════════════════════════════
-# FORM BUILDER
+# CONSTRUCTEUR FORMULAIRE
 # ═══════════════════════════════════════════════════════════
 
 
-class FormBuilder:
+class ConstructeurFormulaire:
     """
     Générateur de formulaires dynamiques
 
@@ -379,3 +379,7 @@ class FormBuilder:
     def get_data(self) -> dict:
         """Récupère données formulaire"""
         return self.data
+
+
+# Alias pour compatibilité
+FormBuilder = ConstructeurFormulaire

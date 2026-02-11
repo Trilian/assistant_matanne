@@ -1,5 +1,5 @@
 ﻿"""
-UI Feedback - Toast notifications
+UI Feedback - Notifications
 """
 
 from datetime import datetime, timedelta
@@ -7,64 +7,64 @@ from datetime import datetime, timedelta
 import streamlit as st
 
 
-class ToastManager:
+class GestionnaireNotifications:
     """
-    Gestionnaire de notifications toast
+    Gestionnaire de notifications
 
     Affiche des notifications temporaires
 
     Usage:
-        ToastManager.show("Sauvegarde réussie", "success", duration=3)
-        ToastManager.render()  # À appeler dans le main
+        GestionnaireNotifications.afficher("Sauvegarde réussie", "success", duree=3)
+        GestionnaireNotifications.rendre()  # À appeler dans le main
     """
 
-    TOAST_KEY = "toast_notifications"
+    CLE_NOTIFICATIONS = "notifications"
 
     @staticmethod
     def _init():
-        if ToastManager.TOAST_KEY not in st.session_state:
-            st.session_state[ToastManager.TOAST_KEY] = []
+        if GestionnaireNotifications.CLE_NOTIFICATIONS not in st.session_state:
+            st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS] = []
 
     @staticmethod
-    def show(message: str, type: str = "info", duration: int = 3):
+    def afficher(message: str, type: str = "info", duree: int = 3):
         """
-        Affiche une notification toast
+        Affiche une notification
 
         Args:
             message: Message
             type: "success", "error", "warning", "info"
-            duration: Durée en secondes
+            duree: Durée en secondes
         """
-        ToastManager._init()
+        GestionnaireNotifications._init()
 
-        toast = {
+        notification = {
             "message": message,
             "type": type,
             "created_at": datetime.now(),
-            "expires_at": datetime.now() + timedelta(seconds=duration),
+            "expires_at": datetime.now() + timedelta(seconds=duree),
         }
 
-        st.session_state[ToastManager.TOAST_KEY].append(toast)
+        st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS].append(notification)
 
     @staticmethod
-    def render():
-        """Affiche les toasts actifs"""
-        ToastManager._init()
+    def rendre():
+        """Affiche les notifications actives"""
+        GestionnaireNotifications._init()
 
-        toasts = st.session_state[ToastManager.TOAST_KEY]
-        now = datetime.now()
+        notifications = st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS]
+        maintenant = datetime.now()
 
-        # Filtrer expirés
-        active_toasts = [toast for toast in toasts if toast["expires_at"] > now]
+        # Filtrer expirées
+        notifications_actives = [n for n in notifications if n["expires_at"] > maintenant]
 
-        st.session_state[ToastManager.TOAST_KEY] = active_toasts
+        st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS] = notifications_actives
 
         # Afficher (max 3)
-        if active_toasts:
-            toast_container = st.container()
+        if notifications_actives:
+            conteneur = st.container()
 
-            with toast_container:
-                for toast in active_toasts[-3:]:
+            with conteneur:
+                for notification in notifications_actives[-3:]:
                     type_map = {
                         "success": st.success,
                         "error": st.error,
@@ -72,8 +72,8 @@ class ToastManager:
                         "info": st.info,
                     }
 
-                    display_func = type_map.get(toast["type"], st.info)
-                    display_func(toast["message"])
+                    func_affichage = type_map.get(notification["type"], st.info)
+                    func_affichage(notification["message"])
 
 
 # ═══════════════════════════════════════════════════════════
@@ -81,21 +81,21 @@ class ToastManager:
 # ═══════════════════════════════════════════════════════════
 
 
-def show_success(message: str, duration: int = 3):
-    """Raccourci pour toast success"""
-    ToastManager.show(message, "success", duration)
+def afficher_succes(message: str, duree: int = 3):
+    """Raccourci pour notification succès"""
+    GestionnaireNotifications.afficher(message, "success", duree)
 
 
-def show_error(message: str, duration: int = 5):
-    """Raccourci pour toast error"""
-    ToastManager.show(message, "error", duration)
+def afficher_erreur(message: str, duree: int = 5):
+    """Raccourci pour notification erreur"""
+    GestionnaireNotifications.afficher(message, "error", duree)
 
 
-def show_warning(message: str, duration: int = 4):
-    """Raccourci pour toast warning"""
-    ToastManager.show(message, "warning", duration)
+def afficher_avertissement(message: str, duree: int = 4):
+    """Raccourci pour notification avertissement"""
+    GestionnaireNotifications.afficher(message, "warning", duree)
 
 
-def show_info(message: str, duration: int = 3):
-    """Raccourci pour toast info"""
-    ToastManager.show(message, "info", duration)
+def afficher_info(message: str, duree: int = 3):
+    """Raccourci pour notification info"""
+    GestionnaireNotifications.afficher(message, "info", duree)

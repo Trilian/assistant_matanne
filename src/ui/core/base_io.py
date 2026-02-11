@@ -14,12 +14,12 @@ logger = logging.getLogger(__name__)
 
 
 # ═══════════════════════════════════════════════════════════
-# CONFIG I/O
+# CONFIGURATION IO
 # ═══════════════════════════════════════════════════════════
 
 
 @dataclass
-class IOConfig:
+class ConfigurationIO:
     """
     Configuration Import/Export
 
@@ -37,11 +37,11 @@ class IOConfig:
 
 
 # ═══════════════════════════════════════════════════════════
-# BASE I/O SERVICE
+# SERVICE IO BASE
 # ═══════════════════════════════════════════════════════════
 
 
-class BaseIOService:
+class ServiceIOBase:
     """
     Service I/O universel
 
@@ -65,7 +65,7 @@ class BaseIOService:
         items, errors = io.from_csv(csv_content)
     """
 
-    def __init__(self, config: IOConfig):
+    def __init__(self, config: ConfigurationIO):
         self.config = config
         self.io_service = IOService()
 
@@ -175,6 +175,12 @@ class BaseIOService:
 # ═══════════════════════════════════════════════════════════
 
 
-def create_io_service(config: IOConfig) -> BaseIOService:
+def creer_service_io(config: ConfigurationIO) -> ServiceIOBase:
     """Factory pour créer service I/O"""
-    return BaseIOService(config)
+    return ServiceIOBase(config)
+
+
+# Alias pour compatibilité
+IOConfig = ConfigurationIO
+BaseIOService = ServiceIOBase
+create_io_service = creer_service_io

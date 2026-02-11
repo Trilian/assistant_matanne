@@ -1,19 +1,19 @@
-﻿"""
-Module Domain - Composants métier pour les domaines (cuisine, inventaire, etc.)
-Affichage d'alertes spécifiques au domaine
+"""
+Alertes - Composants d'affichage des alertes métier
+Stock critique, péremption, notifications domaine
 """
 
 import streamlit as st
 from typing import List, Dict, Any
 
 
-def stock_alert(articles: List[Dict[str, Any]], key: str = "stock_alert") -> None:
+def alerte_stock(articles: List[Dict[str, Any]], cle: str = "alerte_stock") -> None:
     """
     Affiche une alerte de stock critique ou péremption
     
     Args:
         articles: Liste des articles en alerte
-        key: Clé unique Streamlit pour le widget
+        cle: Clé unique Streamlit pour le widget
     """
     if not articles:
         return

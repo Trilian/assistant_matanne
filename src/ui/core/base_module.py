@@ -15,16 +15,16 @@ from src.core.cache import Cache
 
 # ✅ Import depuis types.py au lieu de base_service.py
 from src.services.types import BaseService
-from src.ui.components import empty_state, export_buttons, pagination, search_bar
-from src.ui.feedback import show_success
+from src.ui.components import barre_recherche, boutons_export, etat_vide, pagination
+from src.ui.feedback import afficher_succes
 
 # ═══════════════════════════════════════════════════════════
-# CONFIG MODULE
+# CONFIGURATION MODULE
 # ═══════════════════════════════════════════════════════════
 
 
 @dataclass
-class ModuleConfig:
+class ConfigurationModule:
     """
     Configuration complète d'un module CRUD
 
@@ -77,11 +77,11 @@ class ModuleConfig:
 
 
 # ═══════════════════════════════════════════════════════════
-# BASE MODULE UI
+# MODULE UI BASE
 # ═══════════════════════════════════════════════════════════
 
 
-class BaseModuleUI:
+class ModuleUIBase:
     """
     Module CRUD universel
 
@@ -94,18 +94,18 @@ class BaseModuleUI:
     - Formulaires
 
     Usage:
-        config = ModuleConfig(
+        config = ConfigurationModule(
             name="recettes",
             title="Recettes",
             icon="🍽️",
             service=recette_service,
             ...
         )
-        module = BaseModuleUI(config)
+        module = ModuleUIBase(config)
         module.render()
     """
 
-    def __init__(self, config: ModuleConfig):
+    def __init__(self, config: ConfigurationModule):
         self.config = config
         self.session_key = f"module_{config.name}"
         self._init_session()
@@ -143,7 +143,7 @@ class BaseModuleUI:
         items = self._load_items()
 
         if not items:
-            empty_state(f"Aucun {self.config.name}", self.config.icon)
+            etat_vide(f"Aucun {self.config.name}", self.config.icon)
             return
 
         # Pagination
@@ -204,9 +204,9 @@ class BaseModuleUI:
                 stats.append({"label": stat_config["label"], "value": value})
 
         if stats:
-            from src.ui.components import metrics_row
+            from src.ui.components import ligne_metriques
 
-            metrics_row(stats)
+            ligne_metriques(stats)
 
     # ═══════════════════════════════════════════════════════
     # RECHERCHE & FILTRES
@@ -217,17 +217,17 @@ class BaseModuleUI:
         col1, col2 = st.columns([2, 1])
 
         with col1:
-            search = search_bar(
-                placeholder=f"Rechercher {self.config.name}...", key=f"{self.session_key}_search"
+            search = barre_recherche(
+                texte_indicatif=f"Rechercher {self.config.name}...", cle=f"{self.session_key}_search"
             )
             st.session_state[self.session_key]["search_term"] = search
 
         with col2:
             if self.config.filters_config:
                 with st.popover("🔍 Filtres"):
-                    from src.ui.components import filter_panel
+                    from src.ui.components import panneau_filtres
 
-                    filters = filter_panel(self.config.filters_config, key_prefix=self.session_key)
+                    filters = panneau_filtres(self.config.filters_config, prefixe_cle=self.session_key)
                     st.session_state[self.session_key]["filters"] = filters
 
     # ═══════════════════════════════════════════════════════
@@ -257,7 +257,7 @@ class BaseModuleUI:
         with col3:
             if st.button("🗑️ Cache", use_container_width=True, key=f"{self.session_key}_cache"):
                 Cache.invalider(self.config.name)
-                show_success("Cache vidé")
+                afficher_succes("Cache vidé")
 
     # ═══════════════════════════════════════════════════════
     # CHARGEMENT DONNÉES
@@ -308,11 +308,11 @@ class BaseModuleUI:
 
                 if item_idx < len(items):
                     with cols[col_idx]:
-                        self._render_item_card(items[item_idx])
+                        self._render_carte_item(items[item_idx])
 
-    def _render_item_card(self, item: Any):
+    def _render_carte_item(self, item: Any):
         """Render carte item"""
-        from src.ui.components import item_card
+        from src.ui.components import carte_item
 
         item_dict = self._item_to_dict(item)
 
@@ -347,14 +347,14 @@ class BaseModuleUI:
             for action in self.config.actions
         ]
 
-        item_card(
-            title=title,
-            metadata=metadata,
-            status=status,
-            status_color=status_color,
-            image_url=image_url,
+        carte_item(
+            titre=title,
+            metadonnees=metadata,
+            statut=status,
+            couleur_statut=status_color,
+            url_image=image_url,
             actions=actions,
-            key=f"{self.session_key}_card_{item.id}",
+            cle=f"{self.session_key}_card_{item.id}",
         )
 
     # ═══════════════════════════════════════════════════════
@@ -426,11 +426,11 @@ class BaseModuleUI:
 
         items_dict = [self._item_to_dict(i) for i in items]
 
-        export_buttons(
+        boutons_export(
             items_dict,
-            filename=f"{self.config.name}_export",
+            nom_fichier=f"{self.config.name}_export",
             formats=self.config.export_formats,
-            key=f"{self.session_key}_export_btn",
+            cle=f"{self.session_key}_export_btn",
         )
 
     # ═══════════════════════════════════════════════════════
@@ -460,6 +460,12 @@ class BaseModuleUI:
 # ═══════════════════════════════════════════════════════════
 
 
-def create_module_ui(config: ModuleConfig) -> BaseModuleUI:
+def creer_module_ui(config: ConfigurationModule) -> ModuleUIBase:
     """Factory pour créer module UI"""
-    return BaseModuleUI(config)
+    return ModuleUIBase(config)
+
+
+# Alias pour compatibilité
+ModuleConfig = ConfigurationModule
+BaseModuleUI = ModuleUIBase
+create_module_ui = creer_module_ui

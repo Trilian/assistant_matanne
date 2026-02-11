@@ -2,6 +2,7 @@ import pytest
 import importlib
 
 @pytest.mark.parametrize("module_path", [
+    "src.ui.components.alertes",
     "src.ui.components.atoms",
     "src.ui.components.camera_scanner",
     "src.ui.components.dashboard_widgets",
@@ -13,7 +14,6 @@ import importlib
     "src.ui.core.base_form",
     "src.ui.core.base_io",
     "src.ui.core.base_module",
-    "src.ui.domain",
     "src.ui.feedback.progress",
     "src.ui.feedback.spinners",
     "src.ui.feedback.toasts",

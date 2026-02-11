@@ -1,96 +1,96 @@
 ﻿"""
 UI Components - Atoms (composants de base)
-Badge, empty_state, metric_card
+badge, etat_vide, carte_metrique
 """
 
 import streamlit as st
 
 
-def badge(text: str, color: str = "#4CAF50"):
+def badge(texte: str, couleur: str = "#4CAF50"):
     """
     Badge coloré
 
     Args:
-        text: Texte du badge
-        color: Couleur (hex)
+        texte: Texte du badge
+        couleur: Couleur (hex)
 
     Example:
         badge("Actif", "#4CAF50")
     """
     st.markdown(
-        f'<span style="background: {color}; color: white; '
+        f'<span style="background: {couleur}; color: white; '
         f"padding: 0.25rem 0.75rem; border-radius: 12px; "
-        f'font-size: 0.875rem; font-weight: 600;">{text}</span>',
+        f'font-size: 0.875rem; font-weight: 600;">{texte}</span>',
         unsafe_allow_html=True,
     )
 
 
-def empty_state(message: str, icon: str = "📭", subtext: str | None = None):
+def etat_vide(message: str, icone: str = "📭", sous_texte: str | None = None):
     """
     État vide centré
 
     Args:
         message: Message principal
-        icon: Icône (emoji)
-        subtext: Texte secondaire
+        icone: Icône (emoji)
+        sous_texte: Texte secondaire
 
     Example:
-        empty_state("Aucune recette", "🍽️", "Ajoutez-en une")
+        etat_vide("Aucune recette", "🍽️", "Ajoutez-en une")
     """
-    sub_html = (
-        f'<div style="font-size: 1rem; margin-top: 0.5rem;">{subtext}</div>' if subtext else ""
+    html_sous_texte = (
+        f'<div style="font-size: 1rem; margin-top: 0.5rem;">{sous_texte}</div>' if sous_texte else ""
     )
 
     st.markdown(
         f'<div style="text-align: center; padding: 3rem; color: #6c757d;">'
-        f'<div style="font-size: 4rem;">{icon}</div>'
+        f'<div style="font-size: 4rem;">{icone}</div>'
         f'<div style="font-size: 1.5rem; margin-top: 1rem; font-weight: 500;">{message}</div>'
-        f"{sub_html}"
+        f"{html_sous_texte}"
         f"</div>",
         unsafe_allow_html=True,
     )
 
 
-def metric_card(label: str, value: str, delta: str | None = None, color: str = "#ffffff"):
+def carte_metrique(label: str, valeur: str, delta: str | None = None, couleur: str = "#ffffff"):
     """
     Carte métrique stylée
 
     Args:
         label: Label métrique
-        value: Valeur
+        valeur: Valeur
         delta: Variation (optionnel)
-        color: Couleur fond
+        couleur: Couleur fond
 
     Example:
-        metric_card("Total", "42", "+5", "#f0f0f0")
+        carte_metrique("Total", "42", "+5", "#f0f0f0")
     """
-    delta_html = (
+    html_delta = (
         f'<div style="font-size: 0.875rem; color: #4CAF50; margin-top: 0.25rem;">{delta}</div>'
         if delta
         else ""
     )
 
     st.markdown(
-        f'<div style="background: {color}; padding: 1.5rem; '
+        f'<div style="background: {couleur}; padding: 1.5rem; '
         f'border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">'
         f'<div style="font-size: 0.875rem; color: #666; font-weight: 500;">{label}</div>'
-        f'<div style="font-size: 2rem; font-weight: 700; margin-top: 0.5rem;">{value}</div>'
-        f"{delta_html}"
+        f'<div style="font-size: 2rem; font-weight: 700; margin-top: 0.5rem;">{valeur}</div>'
+        f"{html_delta}"
         f"</div>",
         unsafe_allow_html=True,
     )
 
 
-def toast(message: str, type: str = "success"):
+def notification(message: str, type: str = "success"):
     """
-    Notification toast simple
+    Notification simple
 
     Args:
         message: Message
         type: "success", "error", "warning", "info"
 
     Example:
-        toast("Sauvegarde réussie", "success")
+        notification("Sauvegarde réussie", "success")
     """
     if type == "success":
         st.success(message)
@@ -102,18 +102,18 @@ def toast(message: str, type: str = "success"):
         st.info(message)
 
 
-def divider(text: str | None = None):
+def separateur(texte: str | None = None):
     """
     Séparateur avec texte optionnel
 
     Example:
-        divider("OU")
+        separateur("OU")
     """
-    if text:
+    if texte:
         st.markdown(
             f'<div style="text-align: center; margin: 1.5rem 0;">'
             f'<span style="padding: 0 1rem; background: white; '
-            f'position: relative; top: -0.75rem;">{text}</span>'
+            f'position: relative; top: -0.75rem;">{texte}</span>'
             f'<hr style="margin-top: -1.5rem; border: 1px solid #e0e0e0;">'
             f"</div>",
             unsafe_allow_html=True,
@@ -122,19 +122,19 @@ def divider(text: str | None = None):
         st.markdown("---")
 
 
-def info_box(title: str, content: str, icon: str = "ℹ️"):
+def boite_info(titre: str, contenu: str, icone: str = "ℹ️"):
     """
     Boîte d'information
 
     Example:
-        info_box("Astuce", "Utilisez Ctrl+S pour sauvegarder", "💡")
+        boite_info("Astuce", "Utilisez Ctrl+S pour sauvegarder", "💡")
     """
     st.markdown(
         f'<div style="background: #e7f3ff; border-left: 4px solid #2196F3; '
         f'padding: 1rem; border-radius: 4px; margin: 1rem 0;">'
         f'<div style="font-weight: 600; margin-bottom: 0.5rem;">'
-        f"{icon} {title}</div>"
-        f"<div>{content}</div>"
+        f"{icone} {titre}</div>"
+        f"<div>{contenu}</div>"
         f"</div>",
         unsafe_allow_html=True,
     )

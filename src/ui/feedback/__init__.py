@@ -4,25 +4,32 @@ Feedback temps réel pour l'utilisateur
 """
 
 # Spinners
-# Progress
-from .progress import LoadingState, ProgressTracker
-from .spinners import loading_indicator, skeleton_loader, smart_spinner
+from .spinners import chargeur_squelette, indicateur_chargement, spinner_intelligent
 
-# Toasts
-from .toasts import ToastManager, show_error, show_info, show_success, show_warning
+# Progress
+from .progress import EtatChargement, SuiviProgression
+
+# Notifications
+from .toasts import (
+    GestionnaireNotifications,
+    afficher_avertissement,
+    afficher_erreur,
+    afficher_info,
+    afficher_succes,
+)
 
 __all__ = [
     # Spinners
-    "smart_spinner",
-    "loading_indicator",
-    "skeleton_loader",
+    "spinner_intelligent",
+    "indicateur_chargement",
+    "chargeur_squelette",
     # Progress
-    "ProgressTracker",
-    "LoadingState",
-    # Toasts
-    "ToastManager",
-    "show_success",
-    "show_error",
-    "show_warning",
-    "show_info",
+    "SuiviProgression",
+    "EtatChargement",
+    # Notifications
+    "GestionnaireNotifications",
+    "afficher_succes",
+    "afficher_erreur",
+    "afficher_avertissement",
+    "afficher_info",
 ]

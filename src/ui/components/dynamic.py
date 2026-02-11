@@ -5,15 +5,15 @@ Listes dynamiques, modals
 
 import streamlit as st
 
-from src.ui.components.forms import form_field
+from src.ui.components.forms import champ_formulaire
 
 
-class Modal:
+class Modale:
     """
     Modal simple
 
     Usage:
-        modal = Modal("delete_confirm")
+        modal = Modale("delete_confirm")
 
         if modal.is_showing():
             st.warning("Confirmer suppression ?")
@@ -51,12 +51,12 @@ class Modal:
             self.close()
 
 
-class DynamicList:
+class ListeDynamique:
     """
     Liste dynamique (ajouter/supprimer items)
 
     Usage:
-        dynamic_list = DynamicList(
+        dynamic_list = ListeDynamique(
             "ingredients",
             fields=[
                 {"name": "nom", "label": "Nom", "type": "text"},
@@ -90,7 +90,7 @@ class DynamicList:
 
             for i, field in enumerate(self.fields):
                 with cols[i]:
-                    form_data[field["name"]] = form_field(field, f"add_{self.key}")
+                    form_data[field["name"]] = champ_formulaire(field, f"add_{self.key}")
 
             with cols[-1]:
                 st.write("")
@@ -130,12 +130,12 @@ class DynamicList:
         st.session_state[f"{self.key}_items"].append(item)
 
 
-class Stepper:
+class AssistantEtapes:
     """
     Stepper (wizard multi-étapes)
 
     Usage:
-        stepper = Stepper("wizard", ["Étape 1", "Étape 2", "Étape 3"])
+        stepper = AssistantEtapes("wizard", ["Étape 1", "Étape 2", "Étape 3"])
 
         current = stepper.render()
 
