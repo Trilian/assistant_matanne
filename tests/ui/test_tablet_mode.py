@@ -440,6 +440,237 @@ class TestRenderModeSelector:
         # Info devrait être affiché en mode cuisine
         mock_info.assert_called_once()
 
+    @patch("streamlit.session_state", {"tablet_mode": "normal"})
+    @patch("streamlit.sidebar")
+    @patch("streamlit.selectbox")
+    @patch("streamlit.markdown")
+    @patch("streamlit.rerun")
+    def test_render_mode_change(self, mock_rerun, mock_md, mock_select, mock_sidebar):
+        """Test changement de mode déclenche rerun."""
+        from src.ui.tablet_mode import render_mode_selector, TabletMode
+        
+        mock_sidebar.__enter__ = MagicMock()
+        mock_sidebar.__exit__ = MagicMock()
+        mock_select.return_value = TabletMode.TABLET  # Différent du mode actuel
+        
+        try:
+            render_mode_selector()
+        except Exception:
+            pass
+        
+        mock_rerun.assert_called_once()
+
+
+# ═══════════════════════════════════════════════════════════
+# RENDER KITCHEN RECIPE VIEW
+# ═══════════════════════════════════════════════════════════
+
+
+class TestRenderKitchenRecipeView:
+    """Tests pour render_kitchen_recipe_view."""
+
+    def test_import(self):
+        """Test import réussi."""
+        from src.ui.tablet_mode import render_kitchen_recipe_view
+        assert render_kitchen_recipe_view is not None
+
+    @patch("streamlit.session_state", {})
+    @patch("streamlit.markdown")
+    @patch("streamlit.tabs")
+    @patch("streamlit.button", return_value=False)
+    @patch("streamlit.columns")
+    @patch("streamlit.progress")
+    def test_recipe_start_screen(self, mock_prog, mock_cols, mock_btn, mock_tabs, mock_md):
+        """Test écran de démarrage recette."""
+        from src.ui.tablet_mode import render_kitchen_recipe_view
+        
+        mock_tabs.return_value = [MagicMock(), MagicMock()]
+        for tab in mock_tabs.return_value:
+            tab.__enter__ = MagicMock(return_value=tab)
+            tab.__exit__ = MagicMock()
+        
+        mock_cols.return_value = [MagicMock() for _ in range(3)]
+        for col in mock_cols.return_value:
+            col.__enter__ = MagicMock(return_value=col)
+            col.__exit__ = MagicMock()
+        
+        recette = {
+            "nom": "Tarte aux pommes",
+            "temps_preparation": 20,
+            "temps_cuisson": 40,
+            "instructions": ["Étape 1", "Étape 2"],
+            "ingredients": ["Pommes", "Sucre"]
+        }
+        
+        render_kitchen_recipe_view(recette, key="test_recipe")
+        
+        mock_md.assert_called()
+
+    @patch("streamlit.session_state", {"test_step": 1})
+    @patch("streamlit.markdown")
+    @patch("streamlit.tabs")
+    @patch("streamlit.button", return_value=False)
+    @patch("streamlit.columns")
+    @patch("streamlit.progress")
+    @patch("streamlit.checkbox")
+    def test_recipe_step_view(self, mock_check, mock_prog, mock_cols, mock_btn, mock_tabs, mock_md):
+        """Test affichage étape de recette."""
+        from src.ui.tablet_mode import render_kitchen_recipe_view
+        import streamlit as st
+        
+        st.session_state["test_step"] = 1
+        
+        mock_tabs.return_value = [MagicMock(), MagicMock()]
+        for tab in mock_tabs.return_value:
+            tab.__enter__ = MagicMock(return_value=tab)
+            tab.__exit__ = MagicMock()
+        
+        mock_cols.return_value = [MagicMock() for _ in range(3)]
+        for col in mock_cols.return_value:
+            col.__enter__ = MagicMock(return_value=col)
+            col.__exit__ = MagicMock()
+        
+        recette = {
+            "nom": "Test",
+            "instructions": ["Mélanger", "Cuire"],
+            "ingredients": [{"quantite": "100", "unite": "g", "nom": "Farine"}]
+        }
+        
+        render_kitchen_recipe_view(recette, key="test")
+        
+        mock_prog.assert_called()
+
+    @patch("streamlit.session_state", {"test_fin_step": 3})
+    @patch("streamlit.markdown")
+    @patch("streamlit.tabs")
+    @patch("streamlit.button", return_value=False)
+    @patch("streamlit.columns")
+    @patch("streamlit.balloons")
+    def test_recipe_end_screen(self, mock_balloons, mock_cols, mock_btn, mock_tabs, mock_md):
+        """Test écran de fin de recette."""
+        from src.ui.tablet_mode import render_kitchen_recipe_view
+        import streamlit as st
+        
+        st.session_state["test_fin_step"] = 3
+        
+        mock_tabs.return_value = [MagicMock(), MagicMock()]
+        for tab in mock_tabs.return_value:
+            tab.__enter__ = MagicMock(return_value=tab)
+            tab.__exit__ = MagicMock()
+        
+        mock_cols.return_value = [MagicMock() for _ in range(3)]
+        for col in mock_cols.return_value:
+            col.__enter__ = MagicMock(return_value=col)
+            col.__exit__ = MagicMock()
+        
+        recette = {
+            "nom": "Test",
+            "instructions": ["A", "B"]  # 2 étapes, step=3 = fin
+        }
+        
+        render_kitchen_recipe_view(recette, key="test_fin")
+        
+        mock_balloons.assert_called_once()
+
+    @patch("streamlit.session_state", {"test_timer_step": 1, "test_timer_timer": 5})
+    @patch("streamlit.markdown")
+    @patch("streamlit.tabs")
+    @patch("streamlit.button", return_value=False)
+    @patch("streamlit.columns")
+    @patch("streamlit.progress")
+    @patch("streamlit.checkbox")
+    def test_recipe_with_timer(self, mock_check, mock_prog, mock_cols, mock_btn, mock_tabs, mock_md):
+        """Test recette avec timer actif."""
+        from src.ui.tablet_mode import render_kitchen_recipe_view
+        import streamlit as st
+        
+        st.session_state["test_timer_step"] = 1
+        st.session_state["test_timer_timer"] = 5
+        
+        mock_tabs.return_value = [MagicMock(), MagicMock()]
+        for tab in mock_tabs.return_value:
+            tab.__enter__ = MagicMock(return_value=tab)
+            tab.__exit__ = MagicMock()
+        
+        mock_cols.return_value = [MagicMock() for _ in range(3)]
+        for col in mock_cols.return_value:
+            col.__enter__ = MagicMock(return_value=col)
+            col.__exit__ = MagicMock()
+        
+        recette = {"nom": "Test", "instructions": ["Cuire"]}
+        
+        render_kitchen_recipe_view(recette, key="test_timer")
+        
+        # Timer markdown should contain "5 min"
+        timer_calls = [str(call) for call in mock_md.call_args_list]
+        assert any("5" in call and "min" in call for call in timer_calls)
+
+    @patch("streamlit.session_state", {"nav_step": 2})
+    @patch("streamlit.markdown")
+    @patch("streamlit.tabs")
+    @patch("streamlit.button")
+    @patch("streamlit.columns")
+    @patch("streamlit.progress")
+    @patch("streamlit.checkbox")
+    @patch("streamlit.rerun")
+    def test_recipe_navigation_prev(self, mock_rerun, mock_check, mock_prog, mock_cols, mock_btn, mock_tabs, mock_md):
+        """Test navigation précédent."""
+        from src.ui.tablet_mode import render_kitchen_recipe_view
+        import streamlit as st
+        
+        st.session_state["nav_step"] = 2
+        
+        mock_tabs.return_value = [MagicMock(), MagicMock()]
+        for tab in mock_tabs.return_value:
+            tab.__enter__ = MagicMock(return_value=tab)
+            tab.__exit__ = MagicMock()
+        
+        mock_cols.return_value = [MagicMock() for _ in range(3)]
+        for col in mock_cols.return_value:
+            col.__enter__ = MagicMock(return_value=col)
+            col.__exit__ = MagicMock()
+        
+        # Simule: Timer1=False, Timer5=False, Timer10=False, Prev=True
+        mock_btn.side_effect = [False, False, False, True, False, False]
+        
+        recette = {"nom": "Test", "instructions": ["A", "B", "C"]}
+        
+        try:
+            render_kitchen_recipe_view(recette, key="nav")
+        except Exception:
+            pass
+        
+        assert st.session_state.get("nav_step") == 1
+
+    @patch("streamlit.session_state", {"start_step": 0})
+    @patch("streamlit.markdown")
+    @patch("streamlit.tabs")
+    @patch("streamlit.button")
+    @patch("streamlit.columns")
+    @patch("streamlit.metric")
+    def test_recipe_start_button(self, mock_metric, mock_cols, mock_btn, mock_tabs, mock_md):
+        """Test bouton commencer est affiché."""
+        from src.ui.tablet_mode import render_kitchen_recipe_view
+        
+        mock_tabs.return_value = [MagicMock(), MagicMock()]
+        for tab in mock_tabs.return_value:
+            tab.__enter__ = MagicMock(return_value=tab)
+            tab.__exit__ = MagicMock()
+        
+        mock_cols.return_value = [MagicMock() for _ in range(3)]
+        for col in mock_cols.return_value:
+            col.__enter__ = MagicMock(return_value=col)
+            col.__exit__ = MagicMock()
+        
+        mock_btn.return_value = False  # Pas de clic
+        
+        recette = {"nom": "Test", "temps_preparation": 10, "instructions": ["A"]}
+        
+        render_kitchen_recipe_view(recette, key="start")
+        
+        # Vérifie que button est appelé (écran d'accueil)
+        mock_btn.assert_called()
+
 
 # ═══════════════════════════════════════════════════════════
 # INTEGRATION
@@ -461,3 +692,29 @@ class TestTabletModeIntegration:
         from src.ui.tablet_mode import KITCHEN_MODE_CSS
         
         assert KITCHEN_MODE_CSS is not None
+
+    def test_all_exports(self):
+        """Test tous les exports principaux."""
+        from src.ui.tablet_mode import (
+            TabletMode,
+            get_tablet_mode,
+            set_tablet_mode,
+            apply_tablet_mode,
+            close_tablet_mode,
+            tablet_button,
+            tablet_select_grid,
+            tablet_number_input,
+            tablet_checklist,
+            render_kitchen_recipe_view,
+            render_mode_selector,
+            TABLET_CSS,
+            KITCHEN_MODE_CSS,
+        )
+        
+        assert all([
+            TabletMode, get_tablet_mode, set_tablet_mode,
+            apply_tablet_mode, close_tablet_mode, tablet_button,
+            tablet_select_grid, tablet_number_input, tablet_checklist,
+            render_kitchen_recipe_view, render_mode_selector,
+            TABLET_CSS, KITCHEN_MODE_CSS,
+        ])

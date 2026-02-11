@@ -227,13 +227,13 @@ class TestAfficherSidebarInteractions:
         from src.ui.layout.sidebar import afficher_sidebar
         
         mock_etat.return_value = MagicMock(module_actuel="accueil", mode_debug=True)
-        mock_gest.obtenir_fil_ariane_navigation.return_value = ["Accueil"]
+        mock_gest.obtenir_fil_ariane_navigation.return_value = ["Accueil"]  # 1 seul élément = pas de Retour
         mock_gest.obtenir_resume_etat.return_value = {}
         
         mock_st.sidebar.__enter__ = MagicMock()
         mock_st.sidebar.__exit__ = MagicMock()
         mock_st.checkbox.return_value = True
-        mock_st.button.side_effect = [False, True]  # 2e bouton = Reset
+        mock_st.button.return_value = True  # Reset cliqué
         mock_st.expander.return_value.__enter__ = MagicMock()
         mock_st.expander.return_value.__exit__ = MagicMock()
         
@@ -259,7 +259,7 @@ class TestAfficherSidebarInteractions:
         
         mock_st.sidebar.__enter__ = MagicMock()
         mock_st.sidebar.__exit__ = MagicMock()
-        mock_st.button.return_value = True  # Retour cliqué
+        mock_st.button.return_value = True  # Retour cliqué en premier
         mock_st.checkbox.return_value = False
         
         try:
@@ -268,7 +268,3 @@ class TestAfficherSidebarInteractions:
             pass
         
         mock_gest.revenir.assert_called()
-
-        _rendre_menu(menu, etat)
-        
-        mock_st.expander.assert_called()
