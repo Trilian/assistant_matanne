@@ -5,7 +5,7 @@ Formatters - Dates et durées
 from datetime import date, datetime
 
 
-def format_date(d: date | datetime | None, format: str = "short", locale: str = "fr") -> str:
+def formater_date(d: date | datetime | None, format: str = "short", locale: str = "fr") -> str:
     """
     Formate une date
 
@@ -15,9 +15,9 @@ def format_date(d: date | datetime | None, format: str = "short", locale: str = 
         locale: "fr" ou "en"
 
     Examples:
-        >>> format_date(date(2025, 12, 1), "short")
+        >>> formater_date(date(2025, 12, 1), "short")
         "01/12"
-        >>> format_date(date(2025, 12, 1), "long")
+        >>> formater_date(date(2025, 12, 1), "long")
         "1 décembre 2025"
     """
     if d is None:
@@ -53,7 +53,7 @@ def format_date(d: date | datetime | None, format: str = "short", locale: str = 
         return d.strftime("%d/%m/%Y")
 
 
-def format_datetime(dt: datetime | None, format: str = "medium", locale: str = "fr") -> str:
+def formater_datetime(dt: datetime | None, format: str = "medium", locale: str = "fr") -> str:
     """
     Formate une date/heure
 
@@ -63,7 +63,7 @@ def format_datetime(dt: datetime | None, format: str = "medium", locale: str = "
         locale: Locale
 
     Examples:
-        >>> format_datetime(datetime(2025, 12, 1, 14, 30), "medium")
+        >>> formater_datetime(datetime(2025, 12, 1, 14, 30), "medium")
         "01/12/2025 14:30"
     """
     if dt is None:
@@ -74,21 +74,21 @@ def format_datetime(dt: datetime | None, format: str = "medium", locale: str = "
     elif format == "medium":
         return dt.strftime("%d/%m/%Y %H:%M")
     elif format == "long":
-        date_part = format_date(dt.date(), "long", locale)
+        date_part = formater_date(dt.date(), "long", locale)
         time_part = dt.strftime("%H:%M")
         return f"{date_part} à {time_part}"
     else:
         return dt.strftime("%d/%m/%Y %H:%M")
 
 
-def format_relative_date(d: date | datetime) -> str:
+def temps_ecoule(d: date | datetime) -> str:
     """
     Formate une date relativement (hier, aujourd'hui, demain)
 
     Examples:
-        >>> format_relative_date(date.today())
+        >>> temps_ecoule(date.today())
         "Aujourd'hui"
-        >>> format_relative_date(date.today() - timedelta(days=1))
+        >>> temps_ecoule(date.today() - timedelta(days=1))
         "Hier"
     """
     if isinstance(d, datetime):
@@ -108,17 +108,17 @@ def format_relative_date(d: date | datetime) -> str:
     elif -7 <= delta <= -2:
         return f"Il y a {abs(delta)} jours"
     else:
-        return format_date(d, "medium")
+        return formater_date(d, "medium")
 
 
-def format_time(minutes: int | float | None) -> str:
+def formater_temps(minutes: int | float | None) -> str:
     """
     Formate une durée en minutes vers format lisible
 
     Examples:
-        >>> format_time(90)
+        >>> formater_temps(90)
         "1h30"
-        >>> format_time(45)
+        >>> formater_temps(45)
         "45min"
     """
     if minutes is None or minutes == 0:
@@ -141,14 +141,14 @@ def format_time(minutes: int | float | None) -> str:
     return f"{hours}h{remaining_minutes:02d}"
 
 
-def format_duration(seconds: int | float | None, short: bool = False) -> str:
+def formater_duree(seconds: int | float | None, short: bool = False) -> str:
     """
     Formate une durée en secondes
 
     Examples:
-        >>> format_duration(3665)
+        >>> formater_duree(3665)
         "1h 1min 5s"
-        >>> format_duration(3665, short=False)
+        >>> formater_duree(3665, short=False)
         "1 heure 1 minute 5 secondes"
     """
     if seconds is None or seconds == 0:
@@ -181,14 +181,3 @@ def format_duration(seconds: int | float | None, short: bool = False) -> str:
             parts.append(f"{remaining_seconds} seconde" + ("s" if remaining_seconds > 1 else ""))
 
     return " ".join(parts) if parts else ("0s" if short else "0 seconde")
-
-
-# ═══════════════════════════════════════════════════════════
-# ALIAS FRANÇAIS (pour compatibilité)
-# ═══════════════════════════════════════════════════════════
-
-formater_date = format_date
-formater_datetime = format_datetime
-temps_ecoule = format_relative_date
-formater_temps = format_time
-formater_duree = format_duration

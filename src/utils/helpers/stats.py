@@ -6,23 +6,23 @@ import statistics
 from typing import Any
 
 
-def calculate_average(values: list[float]) -> float:
+def calculer_moyenne(values: list[float]) -> float:
     """
     Calcule moyenne
 
     Examples:
-        >>> calculate_average([1, 2, 3, 4, 5])
+        >>> calculer_moyenne([1, 2, 3, 4, 5])
         3.0
     """
     return sum(values) / len(values) if values else 0.0
 
 
-def calculate_median(values: list[float]) -> float:
+def calculer_mediane(values: list[float]) -> float:
     """
     Calcule médiane
 
     Examples:
-        >>> calculate_median([1, 2, 3, 4, 5])
+        >>> calculer_mediane([1, 2, 3, 4, 5])
         3.0
     """
     if not values:
@@ -37,12 +37,12 @@ def calculate_median(values: list[float]) -> float:
         return sorted_values[n // 2]
 
 
-def calculate_variance(values: list[float]) -> float:
+def calculer_variance(values: list[float]) -> float:
     """
     Calcule variance
 
     Examples:
-        >>> calculate_variance([1, 2, 3, 4, 5])
+        >>> calculer_variance([1, 2, 3, 4, 5])
         2.0
     """
     if not values or len(values) < 2:
@@ -51,12 +51,12 @@ def calculate_variance(values: list[float]) -> float:
     return statistics.variance(values)
 
 
-def calculate_std_dev(values: list[float]) -> float:
+def calculer_ecart_type(values: list[float]) -> float:
     """
     Calcule écart-type
 
     Examples:
-        >>> calculate_std_dev([1, 2, 3, 4, 5])
+        >>> calculer_ecart_type([1, 2, 3, 4, 5])
         1.4142135623730951
     """
     if not values or len(values) < 2:
@@ -65,7 +65,7 @@ def calculate_std_dev(values: list[float]) -> float:
     return statistics.stdev(values)
 
 
-def calculate_percentile(values: list[float], percentile: int) -> float:
+def calculer_percentile(values: list[float], percentile: int) -> float:
     """
     Calcule un percentile
 
@@ -74,7 +74,7 @@ def calculate_percentile(values: list[float], percentile: int) -> float:
         percentile: 0-100
 
     Examples:
-        >>> calculate_percentile([1, 2, 3, 4, 5], 50)
+        >>> calculer_percentile([1, 2, 3, 4, 5], 50)
         3.0
     """
     if not values:
@@ -91,12 +91,12 @@ def calculate_percentile(values: list[float], percentile: int) -> float:
     return sorted_values[lower] * (1 - weight) + sorted_values[upper] * weight
 
 
-def calculate_mode(values: list) -> Any:
+def calculer_mode(values: list) -> Any:
     """
     Calcule le mode (valeur la plus fréquente)
 
     Examples:
-        >>> calculate_mode([1, 2, 2, 3, 3, 3])
+        >>> calculer_mode([1, 2, 2, 3, 3, 3])
         3
     """
     if not values:
@@ -109,12 +109,12 @@ def calculate_mode(values: list) -> Any:
         return None
 
 
-def calculate_range(values: list[float]) -> float:
+def calculer_etendue(values: list[float]) -> float:
     """
     Calcule l'étendue (max - min)
 
     Examples:
-        >>> calculate_range([1, 2, 3, 4, 5])
+        >>> calculer_etendue([1, 2, 3, 4, 5])
         4.0
     """
     if not values:
@@ -123,12 +123,12 @@ def calculate_range(values: list[float]) -> float:
     return max(values) - min(values)
 
 
-def moving_average(values: list[float], window: int) -> list[float]:
+def moyenne_mobile(values: list[float], window: int) -> list[float]:
     """
     Calcule moyenne mobile
 
     Examples:
-        >>> moving_average([1, 2, 3, 4, 5], 3)
+        >>> moyenne_mobile([1, 2, 3, 4, 5], 3)
         [2.0, 3.0, 4.0]
     """
     if len(values) < window:
@@ -140,3 +140,4 @@ def moving_average(values: list[float], window: int) -> list[float]:
         result.append(sum(window_values) / window)
 
     return result
+

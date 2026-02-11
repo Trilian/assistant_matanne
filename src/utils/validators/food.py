@@ -5,7 +5,7 @@ Validators - Validation données cuisine
 from ..constants import DIFFICULTES, PRIORITES_COURSES, SAISONS, TYPES_REPAS, UNITES_MESURE
 
 
-def validate_recipe(data: dict) -> tuple[bool, list[str]]:
+def valider_recette(data: dict) -> tuple[bool, list[str]]:
     """
     Valide données recette
 
@@ -61,7 +61,7 @@ def validate_recipe(data: dict) -> tuple[bool, list[str]]:
     return len(errors) == 0, errors
 
 
-def validate_ingredient(data: dict) -> tuple[bool, list[str]]:
+def valider_ingredient(data: dict) -> tuple[bool, list[str]]:
     """
     Valide données ingrédient
 
@@ -88,7 +88,7 @@ def validate_ingredient(data: dict) -> tuple[bool, list[str]]:
     return len(errors) == 0, errors
 
 
-def validate_inventory_item(data: dict) -> tuple[bool, list[str]]:
+def valider_article_inventaire(data: dict) -> tuple[bool, list[str]]:
     """
     Valide article inventaire
 
@@ -124,7 +124,7 @@ def validate_inventory_item(data: dict) -> tuple[bool, list[str]]:
     return len(errors) == 0, errors
 
 
-def validate_shopping_item(data: dict) -> tuple[bool, list[str]]:
+def valider_article_courses(data: dict) -> tuple[bool, list[str]]:
     """
     Valide article courses
 
@@ -155,7 +155,7 @@ def validate_shopping_item(data: dict) -> tuple[bool, list[str]]:
     return len(errors) == 0, errors
 
 
-def validate_meal(data: dict) -> tuple[bool, list[str]]:
+def valider_repas(data: dict) -> tuple[bool, list[str]]:
     """
     Valide données repas
 
@@ -195,10 +195,6 @@ def validate_meal(data: dict) -> tuple[bool, list[str]]:
     return len(errors) == 0, errors
 
 
-# ═══════════════════════════════════════════════════════════════
-# ALIAS FRANÇAIS et FONCTIONS ADDITIONNELLES
-# ═══════════════════════════════════════════════════════════════
-
 def valider_quantite(quantite: float | int | str, min_val: float = 0, max_val: float = 10000) -> tuple[bool, str]:
     """
     Valide une quantité
@@ -231,11 +227,3 @@ def valider_allergie(allergie: str) -> tuple[bool, str]:
     if len(allergie) > 100:
         return False, "Allergie trop longue (max 100 caractères)"
     return True, ""
-
-
-# Alias français
-valider_recette = validate_recipe
-valider_ingredient = validate_ingredient
-valider_article_inventaire = validate_inventory_item
-valider_article_courses = validate_shopping_item
-valider_repas = validate_meal

@@ -5,7 +5,7 @@ Validators - Validation dates
 from datetime import date
 
 
-def validate_date_range(start: date, end: date, max_days: int | None = None) -> tuple[bool, str]:
+def valider_plage_dates(start: date, end: date, max_days: int | None = None) -> tuple[bool, str]:
     """
     Valide une plage de dates
 
@@ -13,7 +13,7 @@ def validate_date_range(start: date, end: date, max_days: int | None = None) -> 
         (is_valid, error_message)
 
     Examples:
-        >>> validate_date_range(date(2025, 1, 1), date(2025, 1, 10))
+        >>> valider_plage_dates(date(2025, 1, 1), date(2025, 1, 10))
         (True, "")
     """
     if start > end:
@@ -27,29 +27,29 @@ def validate_date_range(start: date, end: date, max_days: int | None = None) -> 
     return True, ""
 
 
-def is_future_date(d: date) -> bool:
+def est_date_future(d: date) -> bool:
     """
     Vérifie si une date est dans le futur
 
     Examples:
-        >>> is_future_date(date(2030, 1, 1))
+        >>> est_date_future(date(2030, 1, 1))
         True
     """
     return d > date.today()
 
 
-def is_past_date(d: date) -> bool:
+def est_date_passee(d: date) -> bool:
     """
     Vérifie si une date est dans le passé
 
     Examples:
-        >>> is_past_date(date(2020, 1, 1))
+        >>> est_date_passee(date(2020, 1, 1))
         True
     """
     return d < date.today()
 
 
-def validate_expiry_date(expiry: date, min_days_ahead: int = 1) -> tuple[bool, str]:
+def valider_date_peremption(expiry: date, min_days_ahead: int = 1) -> tuple[bool, str]:
     """
     Valide une date de péremption
 
@@ -76,24 +76,25 @@ def validate_expiry_date(expiry: date, min_days_ahead: int = 1) -> tuple[bool, s
     return True, ""
 
 
-def days_until(target: date) -> int:
+def jours_jusqua(target: date) -> int:
     """
     Calcule nombre de jours jusqu'à une date
 
     Examples:
-        >>> days_until(date.today() + timedelta(days=7))
+        >>> jours_jusqua(date.today() + timedelta(days=7))
         7
     """
     return (target - date.today()).days
 
 
-def is_within_days(target: date, days: int) -> bool:
+def est_dans_x_jours(target: date, days: int) -> bool:
     """
     Vérifie si une date est dans X jours
 
     Examples:
-        >>> is_within_days(date.today() + timedelta(days=3), 7)
+        >>> est_dans_x_jours(date.today() + timedelta(days=3), 7)
         True
     """
-    delta = days_until(target)
+    delta = jours_jusqua(target)
     return 0 <= delta <= days
+

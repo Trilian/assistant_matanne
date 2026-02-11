@@ -6,26 +6,26 @@ import re
 from typing import Any
 
 
-def is_valid_email(email: str) -> bool:
+def valider_email(email: str) -> bool:
     """
     Valide un email
 
     Examples:
-        >>> is_valid_email("test@example.com")
+        >>> valider_email("test@example.com")
         True
-        >>> is_valid_email("invalid")
+        >>> valider_email("invalid")
         False
     """
     pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
     return bool(re.match(pattern, email))
 
 
-def is_valid_phone(phone: str, country: str = "FR") -> bool:
+def valider_telephone(phone: str, country: str = "FR") -> bool:
     """
     Valide un numéro de téléphone
 
     Examples:
-        >>> is_valid_phone("0612345678")
+        >>> valider_telephone("0612345678")
         True
     """
     if country == "FR":
@@ -34,20 +34,20 @@ def is_valid_phone(phone: str, country: str = "FR") -> bool:
     return False
 
 
-def clamp(value: float, min_val: float, max_val: float) -> float:
+def borner(value: float, min_val: float, max_val: float) -> float:
     """
     Limite valeur entre min et max
 
     Examples:
-        >>> clamp(15, 0, 10)
+        >>> borner(15, 0, 10)
         10
-        >>> clamp(-5, 0, 10)
+        >>> borner(-5, 0, 10)
         0
     """
     return max(min_val, min(value, max_val))
 
 
-def validate_range(
+def valider_plage(
     value: Any, min_val: Any = None, max_val: Any = None, field_name: str = "valeur"
 ) -> tuple[bool, str]:
     """
@@ -57,9 +57,9 @@ def validate_range(
         (is_valid, error_message)
 
     Examples:
-        >>> validate_range(5, 0, 10)
+        >>> valider_plage(5, 0, 10)
         (True, "")
-        >>> validate_range(15, 0, 10)
+        >>> valider_plage(15, 0, 10)
         (False, "valeur doit être <= 10")
     """
     try:
@@ -76,7 +76,7 @@ def validate_range(
     return True, ""
 
 
-def validate_string_length(
+def valider_longueur_texte(
     text: str, min_length: int = 0, max_length: int | None = None, field_name: str = "texte"
 ) -> tuple[bool, str]:
     """
@@ -99,7 +99,7 @@ def validate_string_length(
     return True, ""
 
 
-def validate_required_fields(data: dict, required_fields: list) -> tuple[bool, list]:
+def valider_champs_requis(data: dict, required_fields: list) -> tuple[bool, list]:
     """
     Valide présence de champs requis
 
@@ -107,7 +107,7 @@ def validate_required_fields(data: dict, required_fields: list) -> tuple[bool, l
         (is_valid, list_of_missing_fields)
 
     Examples:
-        >>> validate_required_fields({"nom": "Test"}, ["nom", "email"])
+        >>> valider_champs_requis({"nom": "Test"}, ["nom", "email"])
         (False, ["email"])
     """
     missing = []
@@ -119,7 +119,7 @@ def validate_required_fields(data: dict, required_fields: list) -> tuple[bool, l
     return len(missing) == 0, missing
 
 
-def validate_choice(
+def valider_choix(
     value: Any, allowed_values: list, field_name: str = "valeur"
 ) -> tuple[bool, str]:
     """
@@ -134,29 +134,15 @@ def validate_choice(
     return True, ""
 
 
-def is_valid_url(url: str) -> bool:
+def valider_url(url: str) -> bool:
     """
     Valide une URL
 
     Examples:
-        >>> is_valid_url("https://example.com")
+        >>> valider_url("https://example.com")
         True
-        >>> is_valid_url("invalid")
+        >>> valider_url("invalid")
         False
     """
     pattern = r"^https?://[\w\.-]+\.[a-zA-Z]{2,}(/.*)?$"
     return bool(re.match(pattern, url))
-
-
-# ═══════════════════════════════════════════════════════════
-# ALIAS FRANÇAIS (pour compatibilité)
-# ═══════════════════════════════════════════════════════════
-
-valider_email = is_valid_email
-valider_telephone = is_valid_phone
-valider_url = is_valid_url
-borner = clamp
-valider_plage = validate_range
-valider_longueur_texte = validate_string_length
-valider_champs_requis = validate_required_fields
-valider_choix = validate_choice

@@ -5,12 +5,12 @@ Helpers - Manipulation de dates
 from datetime import date, timedelta
 
 
-def get_week_bounds(d: date) -> tuple[date, date]:
+def obtenir_bornes_semaine(d: date) -> tuple[date, date]:
     """
     Retourne (lundi, dimanche) de la semaine
 
     Examples:
-        >>> get_week_bounds(date(2025, 1, 8))  # Mercredi
+        >>> obtenir_bornes_semaine(date(2025, 1, 8))  # Mercredi
         (date(2025, 1, 6), date(2025, 1, 12))  # Lundi -> Dimanche
     """
     monday = d - timedelta(days=d.weekday())
@@ -18,24 +18,24 @@ def get_week_bounds(d: date) -> tuple[date, date]:
     return monday, sunday
 
 
-def date_range(start: date, end: date) -> list[date]:
+def plage_dates(start: date, end: date) -> list[date]:
     """
     Génère liste de dates
 
     Examples:
-        >>> date_range(date(2025, 1, 1), date(2025, 1, 3))
+        >>> plage_dates(date(2025, 1, 1), date(2025, 1, 3))
         [date(2025, 1, 1), date(2025, 1, 2), date(2025, 1, 3)]
     """
     delta = end - start
     return [start + timedelta(days=i) for i in range(delta.days + 1)]
 
 
-def get_month_bounds(d: date) -> tuple[date, date]:
+def obtenir_bornes_mois(d: date) -> tuple[date, date]:
     """
     Retourne premier et dernier jour du mois
 
     Examples:
-        >>> get_month_bounds(date(2025, 2, 15))
+        >>> obtenir_bornes_mois(date(2025, 2, 15))
         (date(2025, 2, 1), date(2025, 2, 28))
     """
     first_day = d.replace(day=1)
@@ -51,12 +51,12 @@ def get_month_bounds(d: date) -> tuple[date, date]:
     return first_day, last_day
 
 
-def add_business_days(d: date, days: int) -> date:
+def ajouter_jours_ouvres(d: date, days: int) -> date:
     """
     Ajoute X jours ouvrés (skip weekends)
 
     Examples:
-        >>> add_business_days(date(2025, 1, 6), 5)  # Lundi + 5 jours
+        >>> ajouter_jours_ouvres(date(2025, 1, 6), 5)  # Lundi + 5 jours
         date(2025, 1, 13)  # Lundi suivant
     """
     current = d
@@ -71,36 +71,36 @@ def add_business_days(d: date, days: int) -> date:
     return current
 
 
-def weeks_between(start: date, end: date) -> int:
+def semaines_entre(start: date, end: date) -> int:
     """
     Nombre de semaines entre deux dates
 
     Examples:
-        >>> weeks_between(date(2025, 1, 1), date(2025, 1, 15))
+        >>> semaines_entre(date(2025, 1, 1), date(2025, 1, 15))
         2
     """
     return (end - start).days // 7
 
 
-def is_weekend(d: date) -> bool:
+def est_weekend(d: date) -> bool:
     """
     Vérifie si weekend
 
     Examples:
-        >>> is_weekend(date(2025, 1, 11))  # Samedi
+        >>> est_weekend(date(2025, 1, 11))  # Samedi
         True
     """
     return d.weekday() >= 5
 
 
-def get_quarter(d: date) -> int:
+def obtenir_trimestre(d: date) -> int:
     """
     Retourne le trimestre (1-4)
 
     Examples:
-        >>> get_quarter(date(2025, 2, 1))
+        >>> obtenir_trimestre(date(2025, 2, 1))
         1
-        >>> get_quarter(date(2025, 7, 1))
+        >>> obtenir_trimestre(date(2025, 7, 1))
         3
     """
     return (d.month - 1) // 3 + 1
@@ -118,24 +118,11 @@ def est_aujourd_hui(d: date) -> bool:
     return d == date.today()
 
 
-# ═══════════════════════════════════════════════════════════
-# ALIAS FRANÇAIS (pour compatibilité)
-# ═══════════════════════════════════════════════════════════
-
 def obtenir_debut_semaine(d: date) -> date:
     """Retourne le lundi de la semaine"""
-    return get_week_bounds(d)[0]
+    return obtenir_bornes_semaine(d)[0]
 
 
 def obtenir_fin_semaine(d: date) -> date:
     """Retourne le dimanche de la semaine"""
-    return get_week_bounds(d)[1]
-
-
-obtenir_bornes_semaine = get_week_bounds
-plage_dates = date_range
-obtenir_bornes_mois = get_month_bounds
-ajouter_jours_ouvres = add_business_days
-semaines_entre = weeks_between
-est_weekend = is_weekend
-obtenir_trimestre = get_quarter
+    return obtenir_bornes_semaine(d)[1]

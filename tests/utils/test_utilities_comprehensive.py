@@ -125,41 +125,32 @@ class TestTextFormatters:
     
     def test_text_formatters_import(self):
         """Test l'import des formatters de texte."""
-        try:
-            from src.utils.formatters.text import (
-                slugify,
-                capitalize_words,
-                truncate
-            )
-            assert slugify is not None
-        except ImportError:
-            pytest.skip("Formatters de texte non disponibles")
+        from src.utils.formatters.text import (
+            generer_slug,
+            capitaliser_mots,
+            tronquer
+        )
+        assert generer_slug is not None
     
-    def test_slugify(self):
+    def test_generer_slug(self):
         """Test la conversion en slug."""
-        try:
-            from src.utils.formatters.text import slugify
-            
-            result = slugify("Bonjour le Monde!")
-            
-            assert result is not None
-            assert isinstance(result, str)
-            # Les slugs sont généralement en minuscules et sans espaces
-        except ImportError:
-            pytest.skip("Formatters non disponibles")
+        from src.utils.formatters.text import generer_slug
+        
+        result = generer_slug("Bonjour le Monde!")
+        
+        assert result is not None
+        assert isinstance(result, str)
+        # Les slugs sont généralement en minuscules et sans espaces
     
-    def test_truncate(self):
+    def test_tronquer(self):
         """Test la troncature de texte."""
-        try:
-            from src.utils.formatters.text import truncate
-            
-            long_text = "Ceci est un très long texte " * 10
-            result = truncate(long_text, 50)
-            
-            assert result is not None
-            assert len(result) <= 55  # 50 + "..."
-        except ImportError:
-            pytest.skip("Formatters non disponibles")
+        from src.utils.formatters.text import tronquer
+        
+        long_text = "Ceci est un très long texte " * 10
+        result = tronquer(long_text, 50)
+        
+        assert result is not None
+        assert len(result) <= 55  # 50 + "..."
 
 
 @pytest.mark.unit

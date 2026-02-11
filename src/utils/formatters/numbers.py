@@ -3,16 +3,16 @@ Formatters - Nombres, quantités, prix, pourcentages
 """
 
 
-def format_quantity(quantity: int | float | None, decimals: int = 2) -> str:
+def formater_quantite(quantity: int | float | None, decimals: int = 2) -> str:
     """
     Formate une quantité en enlevant les décimales inutiles
 
     Examples:
-        >>> format_quantity(2.0)
+        >>> formater_quantite(2.0)
         "2"
-        >>> format_quantity(2.5)
+        >>> formater_quantite(2.5)
         "2.5"
-        >>> format_quantity(2.123)
+        >>> formater_quantite(2.123)
         "2.12"
     """
     if quantity is None or quantity == 0:
@@ -34,28 +34,28 @@ def format_quantity(quantity: int | float | None, decimals: int = 2) -> str:
     return formatted
 
 
-def format_quantity_with_unit(quantity: int | float | None, unit: str, decimals: int = 2) -> str:
+def formater_quantite_unite(quantity: int | float | None, unit: str, decimals: int = 2) -> str:
     """
     Formate quantité + unité
 
     Examples:
-        >>> format_quantity_with_unit(2.5, "kg")
+        >>> formater_quantite_unite(2.5, "kg")
         "2.5 kg"
     """
-    qty_formatted = format_quantity(quantity, decimals)
+    qty_formatted = formater_quantite(quantity, decimals)
     unit_clean = (unit or "").strip()
 
     return f"{qty_formatted} {unit_clean}" if unit_clean else qty_formatted
 
 
-def format_price(price: int | float | None, currency: str = "€") -> str:
+def formater_prix(price: int | float | None, currency: str = "€") -> str:
     """
     Formate un prix
 
     Examples:
-        >>> format_price(10.0)
+        >>> formater_prix(10.0)
         "10€"
-        >>> format_price(10.50)
+        >>> formater_prix(10.50)
         "10.50€"
     """
     if price is None:
@@ -74,14 +74,14 @@ def format_price(price: int | float | None, currency: str = "€") -> str:
     return f"{rounded:.2f}{currency}"
 
 
-def format_currency(
+def formater_monnaie(
     amount: int | float | None, currency: str = "EUR", locale: str = "fr_FR"
 ) -> str:
     """
     Formate montant avec séparateurs de milliers
 
     Examples:
-        >>> format_currency(1234.56, "EUR")
+        >>> formater_monnaie(1234.56, "EUR")
         "1 234,56 €"
     """
     if amount is None:
@@ -107,14 +107,14 @@ def format_currency(
         return f"{symbol}{formatted}"
 
 
-def format_percentage(value: int | float | None, decimals: int = 1, symbol: str = "%") -> str:
+def formater_pourcentage(value: int | float | None, decimals: int = 1, symbol: str = "%") -> str:
     """
     Formate un pourcentage
 
     Examples:
-        >>> format_percentage(85.0)
+        >>> formater_pourcentage(85.0)
         "85%"
-        >>> format_percentage(85.5)
+        >>> formater_pourcentage(85.5)
         "85.5%"
     """
     if value is None:
@@ -134,14 +134,14 @@ def format_percentage(value: int | float | None, decimals: int = 1, symbol: str 
     return f"{formatted}{symbol}"
 
 
-def format_number(number: int | float | None, decimals: int = 0, thousands_sep: str = " ") -> str:
+def formater_nombre(number: int | float | None, decimals: int = 0, thousands_sep: str = " ") -> str:
     """
     Formate un nombre avec séparateurs
 
     Examples:
-        >>> format_number(1234567)
+        >>> formater_nombre(1234567)
         "1 234 567"
-        >>> format_number(1234.56, decimals=2)
+        >>> formater_nombre(1234.56, decimals=2)
         "1 234,56"
     """
     if number is None:
@@ -160,14 +160,14 @@ def format_number(number: int | float | None, decimals: int = 0, thousands_sep: 
     return formatted
 
 
-def format_file_size(bytes: int | float | None) -> str:
+def formater_taille_fichier(bytes: int | float | None) -> str:
     """
     Formate une taille de fichier
 
     Examples:
-        >>> format_file_size(1024)
+        >>> formater_taille_fichier(1024)
         "1 Ko"
-        >>> format_file_size(1048576)
+        >>> formater_taille_fichier(1048576)
         "1 Mo"
     """
     if bytes is None or bytes == 0:
@@ -185,31 +185,31 @@ def format_file_size(bytes: int | float | None) -> str:
         size /= 1024
         unit_index += 1
 
-    return f"{format_quantity(size, 1)} {units[unit_index]}"
+    return f"{formater_quantite(size, 1)} {units[unit_index]}"
 
 
-def format_range(min_val: float, max_val: float, unit: str = "") -> str:
+def formater_plage(min_val: float, max_val: float, unit: str = "") -> str:
     """
     Formate une plage de valeurs
 
     Examples:
-        >>> format_range(10, 20, "€")
+        >>> formater_plage(10, 20, "€")
         "10-20 €"
     """
-    min_str = format_quantity(min_val)
-    max_str = format_quantity(max_val)
+    min_str = formater_quantite(min_val)
+    max_str = formater_quantite(max_val)
 
     if unit:
         return f"{min_str}-{max_str} {unit}"
     return f"{min_str}-{max_str}"
 
 
-def smart_round(value: int | float, precision: int = 2) -> float:
+def arrondir_intelligent(value: int | float, precision: int = 2) -> float:
     """
     Arrondi intelligent (évite erreurs de float)
 
     Examples:
-        >>> smart_round(2.5000000001)
+        >>> arrondir_intelligent(2.5000000001)
         2.5
     """
     if value is None:
@@ -219,19 +219,3 @@ def smart_round(value: int | float, precision: int = 2) -> float:
         return round(float(value), precision)
     except (ValueError, TypeError):
         return 0.0
-
-
-# ═══════════════════════════════════════════════════════════
-# ALIAS FRANÇAIS (pour compatibilité)
-# ═══════════════════════════════════════════════════════════
-
-formater_quantite = format_quantity
-formater_quantite_unite = format_quantity_with_unit
-formater_prix = format_price
-formater_monnaie = format_currency
-formater_pourcentage = format_percentage
-formater_entier = format_number
-formater_nombre = format_number
-formater_taille_fichier = format_file_size
-formater_plage = format_range
-arrondir_intelligent = smart_round

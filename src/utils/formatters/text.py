@@ -5,12 +5,12 @@ Formatters - Texte
 import re
 
 
-def truncate(text: str, length: int = 100, suffix: str = "...") -> str:
+def tronquer(text: str, length: int = 100, suffix: str = "...") -> str:
     """
     Tronque un texte
 
     Examples:
-        >>> truncate("Un texte très long...", length=10)
+        >>> tronquer("Un texte très long...", length=10)
         "Un texte..."
     """
     if len(text) <= length:
@@ -18,12 +18,12 @@ def truncate(text: str, length: int = 100, suffix: str = "...") -> str:
     return text[: length - len(suffix)] + suffix
 
 
-def clean_text(text: str) -> str:
+def nettoyer_texte(text: str) -> str:
     """
     Nettoie texte (évite injection)
 
     Examples:
-        >>> clean_text("<script>alert('xss')</script>")
+        >>> nettoyer_texte("<script>alert('xss')</script>")
         "scriptalert('xss')/script"
     """
     if not text:
@@ -31,12 +31,12 @@ def clean_text(text: str) -> str:
     return re.sub(r"[<>{}]", "", text).strip()
 
 
-def slugify(text: str) -> str:
+def generer_slug(text: str) -> str:
     """
     Convertit texte en slug
 
     Examples:
-        >>> slugify("Tarte aux Pommes")
+        >>> generer_slug("Tarte aux Pommes")
         "tarte-aux-pommes"
     """
     text = text.lower()
@@ -65,14 +65,14 @@ def slugify(text: str) -> str:
     return text.strip("-")
 
 
-def extract_number(text: str) -> float | None:
+def extraire_nombre(text: str) -> float | None:
     """
     Extrait un nombre depuis une string
 
     Examples:
-        >>> extract_number("2.5 kg")
+        >>> extraire_nombre("2.5 kg")
         2.5
-        >>> extract_number("Prix: 10,50€")
+        >>> extraire_nombre("Prix: 10,50€")
         10.5
     """
     if not text:
@@ -93,12 +93,12 @@ def extract_number(text: str) -> float | None:
     return None
 
 
-def capitalize_first(text: str) -> str:
+def capitaliser_premiere(text: str) -> str:
     """
     Capitalise première lettre uniquement
 
     Examples:
-        >>> capitalize_first("tomate")
+        >>> capitaliser_premiere("tomate")
         "Tomate"
     """
     if not text:
@@ -106,25 +106,15 @@ def capitalize_first(text: str) -> str:
     return text[0].upper() + text[1:].lower() if len(text) > 0 else text
 
 
-def capitalize_words(text: str) -> str:
+def capitaliser_mots(text: str) -> str:
     """
     Capitalise chaque mot
 
     Examples:
-        >>> capitalize_words("bonjour le monde")
+        >>> capitaliser_mots("bonjour le monde")
         "Bonjour Le Monde"
     """
     if not text:
         return text
     return " ".join(word.capitalize() for word in text.split())
 
-
-# ═══════════════════════════════════════════════════════════
-# ALIAS FRANÇAIS (pour compatibilité)
-# ═══════════════════════════════════════════════════════════
-
-tronquer = truncate
-nettoyer_texte = clean_text
-extraire_nombre = extract_number
-capitaliser_premier = capitalize_first
-capitaliser_mots = capitalize_words

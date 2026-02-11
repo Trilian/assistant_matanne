@@ -5,48 +5,60 @@ Module: src.utils.validators.dates
 """
 
 import pytest
-from unittest.mock import MagicMock, patch
-
-# TODO: Ajuster l'import selon la structure
-# from src.utils.validators.dates import ...
+from datetime import date, timedelta
+from src.utils.validators.dates import (
+    valider_plage_dates,
+    est_date_future,
+    est_date_passee,
+    valider_date_peremption,
+    jours_jusqua,
+    est_dans_x_jours,
+)
 
 
 class TestDates:
     """Tests pour le module dates."""
 
+    def test_valider_plage_dates(self):
+        """Test de la fonction valider_plage_dates."""
+        is_valid, msg = valider_plage_dates(date(2025, 1, 1), date(2025, 1, 10))
+        assert is_valid is True
+        assert msg == ""
+        
+        is_valid, msg = valider_plage_dates(date(2025, 1, 10), date(2025, 1, 1))
+        assert is_valid is False
 
-    def test_validate_date_range(self):
-        """Test de la fonction validate_date_range."""
-        # TODO: Implémenter
-        pass
+    def test_est_date_future(self):
+        """Test de la fonction est_date_future."""
+        future = date.today() + timedelta(days=10)
+        past = date.today() - timedelta(days=10)
+        assert est_date_future(future) is True
+        assert est_date_future(past) is False
 
+    def test_est_date_passee(self):
+        """Test de la fonction est_date_passee."""
+        future = date.today() + timedelta(days=10)
+        past = date.today() - timedelta(days=10)
+        assert est_date_passee(past) is True
+        assert est_date_passee(future) is False
 
-    def test_is_future_date(self):
-        """Test de la fonction is_future_date."""
-        # TODO: Implémenter
-        pass
+    def test_valider_date_peremption(self):
+        """Test de la fonction valider_date_peremption."""
+        valid_date = date.today() + timedelta(days=30)
+        is_valid, msg = valider_date_peremption(valid_date)
+        assert is_valid is True
+        
+        past_date = date.today() - timedelta(days=1)
+        is_valid, msg = valider_date_peremption(past_date)
+        assert is_valid is False
 
+    def test_jours_jusqua(self):
+        """Test de la fonction jours_jusqua."""
+        target = date.today() + timedelta(days=7)
+        assert jours_jusqua(target) == 7
 
-    def test_is_past_date(self):
-        """Test de la fonction is_past_date."""
-        # TODO: Implémenter
-        pass
-
-
-    def test_validate_expiry_date(self):
-        """Test de la fonction validate_expiry_date."""
-        # TODO: Implémenter
-        pass
-
-
-    def test_days_until(self):
-        """Test de la fonction days_until."""
-        # TODO: Implémenter
-        pass
-
-
-    def test_is_within_days(self):
-        """Test de la fonction is_within_days."""
-        # TODO: Implémenter
-        pass
-
+    def test_est_dans_x_jours(self):
+        """Test de la fonction est_dans_x_jours."""
+        target = date.today() + timedelta(days=3)
+        assert est_dans_x_jours(target, 7) is True
+        assert est_dans_x_jours(target, 2) is False

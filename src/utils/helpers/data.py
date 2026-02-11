@@ -7,14 +7,14 @@ from collections.abc import Callable
 from typing import Any
 
 
-def safe_get(data: dict, *keys, default=None) -> Any:
+def obtenir_securise(data: dict, *keys, default=None) -> Any:
     """
     Récupère valeur nested avec fallback
 
     Examples:
-        >>> safe_get({"a": {"b": {"c": 1}}}, "a", "b", "c")
+        >>> obtenir_securise({"a": {"b": {"c": 1}}}, "a", "b", "c")
         1
-        >>> safe_get({"a": 1}, "b", "c", default=0)
+        >>> obtenir_securise({"a": 1}, "b", "c", default=0)
         0
     """
     result = data
@@ -28,13 +28,13 @@ def safe_get(data: dict, *keys, default=None) -> Any:
     return result
 
 
-def group_by(items: list[dict], key: str) -> dict[Any, list[dict]]:
+def grouper_par(items: list[dict], key: str) -> dict[Any, list[dict]]:
     """
     Regroupe items par clé
 
     Examples:
         >>> items = [{"type": "A", "val": 1}, {"type": "A", "val": 2}, {"type": "B", "val": 3}]
-        >>> group_by(items, "type")
+        >>> grouper_par(items, "type")
         {"A": [{"type": "A", "val": 1}, {"type": "A", "val": 2}], "B": [{"type": "B", "val": 3}]}
     """
     grouped = defaultdict(list)
@@ -44,26 +44,26 @@ def group_by(items: list[dict], key: str) -> dict[Any, list[dict]]:
     return dict(grouped)
 
 
-def count_by(items: list[dict], key: str) -> dict[Any, int]:
+def compter_par(items: list[dict], key: str) -> dict[Any, int]:
     """
     Compte items par clé
 
     Examples:
         >>> items = [{"type": "A"}, {"type": "A"}, {"type": "B"}]
-        >>> count_by(items, "type")
+        >>> compter_par(items, "type")
         {"A": 2, "B": 1}
     """
     return dict(Counter(item.get(key) for item in items))
 
 
-def deduplicate(items: list[Any], key: Callable | None = None) -> list[Any]:
+def dedupliquer(items: list[Any], key: Callable | None = None) -> list[Any]:
     """
     Déduplique une liste
 
     Examples:
-        >>> deduplicate([1, 2, 2, 3])
+        >>> dedupliquer([1, 2, 2, 3])
         [1, 2, 3]
-        >>> deduplicate([{"id": 1}, {"id": 1}, {"id": 2}], key=lambda x: x["id"])
+        >>> dedupliquer([{"id": 1}, {"id": 1}, {"id": 2}], key=lambda x: x["id"])
         [{"id": 1}, {"id": 2}]
     """
     if not key:
@@ -79,18 +79,18 @@ def deduplicate(items: list[Any], key: Callable | None = None) -> list[Any]:
     return result
 
 
-def flatten(nested_list: list[list[Any]]) -> list[Any]:
+def aplatir(nested_list: list[list[Any]]) -> list[Any]:
     """
     Aplatit une liste de listes
 
     Examples:
-        >>> flatten([[1, 2], [3, 4], [5]])
+        >>> aplatir([[1, 2], [3, 4], [5]])
         [1, 2, 3, 4, 5]
     """
     return [item for sublist in nested_list for item in sublist]
 
 
-def partition(items: list[Any], predicate: Callable) -> tuple[list[Any], list[Any]]:
+def partitionner(items: list[Any], predicate: Callable) -> tuple[list[Any], list[Any]]:
     """
     Partitionne liste selon prédicat
 
@@ -98,7 +98,7 @@ def partition(items: list[Any], predicate: Callable) -> tuple[list[Any], list[An
         (items_matching, items_not_matching)
 
     Examples:
-        >>> partition([1, 2, 3, 4], lambda x: x % 2 == 0)
+        >>> partitionner([1, 2, 3, 4], lambda x: x % 2 == 0)
         ([2, 4], [1, 3])
     """
     matching = []
@@ -113,12 +113,12 @@ def partition(items: list[Any], predicate: Callable) -> tuple[list[Any], list[An
     return matching, not_matching
 
 
-def merge_dicts(*dicts: dict) -> dict:
+def fusionner_dicts(*dicts: dict) -> dict:
     """
     Fusionne plusieurs dicts (dernier gagne)
 
     Examples:
-        >>> merge_dicts({"a": 1}, {"b": 2}, {"a": 3})
+        >>> fusionner_dicts({"a": 1}, {"b": 2}, {"a": 3})
         {"a": 3, "b": 2}
     """
     result = {}
@@ -127,23 +127,23 @@ def merge_dicts(*dicts: dict) -> dict:
     return result
 
 
-def pick(data: dict, keys: list[str]) -> dict:
+def extraire(data: dict, keys: list[str]) -> dict:
     """
     Extrait uniquement les clés spécifiées
 
     Examples:
-        >>> pick({"a": 1, "b": 2, "c": 3}, ["a", "c"])
+        >>> extraire({"a": 1, "b": 2, "c": 3}, ["a", "c"])
         {"a": 1, "c": 3}
     """
     return {k: v for k, v in data.items() if k in keys}
 
 
-def omit(data: dict, keys: list[str]) -> dict:
+def omettre(data: dict, keys: list[str]) -> dict:
     """
     Exclut les clés spécifiées
 
     Examples:
-        >>> omit({"a": 1, "b": 2, "c": 3}, ["b"])
+        >>> omettre({"a": 1, "b": 2, "c": 3}, ["b"])
         {"a": 1, "c": 3}
     """
     return {k: v for k, v in data.items() if k not in keys}
@@ -159,19 +159,3 @@ def trier_donnees(items: list[dict], key: str, reverse: bool = False) -> list[di
     """
     return sorted(items, key=lambda x: x.get(key), reverse=reverse)
 
-
-# ═══════════════════════════════════════════════════════════
-# ALIAS FRANÇAIS (pour compatibilité)
-# ═══════════════════════════════════════════════════════════
-
-obtenir_securise = safe_get
-grouper_par = group_by
-compter_par = count_by
-dedupliquer = deduplicate
-deduplicater = deduplicate  # Alias alternatif
-aplatir = flatten
-fusionner_listes = flatten  # Flatten sert de fusion
-partitionner = partition
-fusionner_dicts = merge_dicts
-extraire = pick
-omettre = omit
