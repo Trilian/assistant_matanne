@@ -13,7 +13,7 @@ from datetime import date, datetime, timedelta
 import streamlit as st
 import plotly.graph_objects as go
 
-from src.services.planning_unified import get_planning_unified_service
+from src.services.planning import get_planning_unified_service
 
 # Logique métier pure
 from src.domains.planning.logic.vue_semaine_logic import (

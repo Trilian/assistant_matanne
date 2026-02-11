@@ -3,8 +3,8 @@ import importlib
 
 @pytest.mark.unit
 def test_import_planning_unified_service():
-    """Vérifie que le module planning_unified s'importe sans erreur."""
-    module = importlib.import_module("src.services.planning_unified")
+    """Vérifie que le module planning s'importe sans erreur."""
+    module = importlib.import_module("src.services.planning")
     assert module is not None
 
 def test_import_planning():

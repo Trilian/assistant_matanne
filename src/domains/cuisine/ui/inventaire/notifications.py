@@ -6,7 +6,10 @@ Affiche et gère les notifications d'alerte.
 import streamlit as st
 
 from src.services.inventaire import get_inventaire_service
-from src.services.notifications import obtenir_service_notifications
+from src.services.notifications import obtenir_service_notifications_inventaire
+
+# Alias pour rétrocompatibilité
+obtenir_service_notifications = obtenir_service_notifications_inventaire
 
 
 def render_notifications_widget():

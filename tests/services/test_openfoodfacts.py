@@ -22,7 +22,7 @@ class TestOpenFoodFactsService:
     
     def test_import_service(self):
         """Vérifie que le service peut être importé"""
-        from src.services.openfoodfacts import get_openfoodfacts_service
+        from src.services.integrations import get_openfoodfacts_service
         
         service = get_openfoodfacts_service()
         assert service is not None
@@ -30,7 +30,7 @@ class TestOpenFoodFactsService:
     @patch('httpx.Client')
     def test_rechercher_produit_mock(self, mock_client_class: Mock):
         """Test recherche produit avec API mockée"""
-        from src.services.openfoodfacts import get_openfoodfacts_service
+        from src.services.integrations import get_openfoodfacts_service
         
         # Configurer le mock pour httpx.Client
         mock_client = Mock()
@@ -60,7 +60,7 @@ class TestOpenFoodFactsService:
     @patch('httpx.Client')
     def test_rechercher_produit_non_trouve(self, mock_client_class: Mock):
         """Test recherche produit non trouvé"""
-        from src.services.openfoodfacts import get_openfoodfacts_service
+        from src.services.integrations import get_openfoodfacts_service
         
         # Configurer le mock
         mock_client = Mock()

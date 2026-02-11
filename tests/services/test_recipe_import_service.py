@@ -277,7 +277,7 @@ class TestRecipeImportServiceMethods:
     
     def test_service_inherits_base(self):
         from src.services.recipe_import import RecipeImportService
-        from src.services.base_ai_service import BaseAIService
+        from src.services.base import BaseAIService
         assert issubclass(RecipeImportService, BaseAIService)
 
 

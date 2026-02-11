@@ -14,7 +14,7 @@ from typing import Optional
 
 from src.core.database import obtenir_contexte_db
 from src.core.models import WeekendActivity, ChildProfile
-from src.services.base_ai_service import BaseAIService
+from src.services.base import BaseAIService
 from src.core.ai import ClientIA
 
 

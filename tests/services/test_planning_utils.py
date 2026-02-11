@@ -1,7 +1,7 @@
-"""
-Tests unitaires pour planning_utils.py.
+﻿"""
+Tests unitaires pour les utilitaires planning.
 
-Ces tests vérifient les fonctions pures du module planning_utils
+Ces tests vérifient les fonctions pures du module planning
 sans nécessiter de base de données ni de dépendances externes.
 """
 
@@ -14,7 +14,7 @@ class TestWeekdayNames:
     
     def test_get_weekday_names_returns_7_days(self):
         """Test que get_weekday_names retourne 7 jours."""
-        from src.services.planning_utils import get_weekday_names
+        from src.services.planning import get_weekday_names
         
         days = get_weekday_names()
         
@@ -24,7 +24,7 @@ class TestWeekdayNames:
     
     def test_get_weekday_names_returns_copy(self):
         """Test que la liste retournée est une copie."""
-        from src.services.planning_utils import get_weekday_names
+        from src.services.planning import get_weekday_names
         
         days1 = get_weekday_names()
         days2 = get_weekday_names()
@@ -34,7 +34,7 @@ class TestWeekdayNames:
     
     def test_get_weekday_name_valid_index(self):
         """Test get_weekday_name avec index valide."""
-        from src.services.planning_utils import get_weekday_name
+        from src.services.planning import get_weekday_name
         
         assert get_weekday_name(0) == "Lundi"
         assert get_weekday_name(4) == "Vendredi"
@@ -42,14 +42,14 @@ class TestWeekdayNames:
     
     def test_get_weekday_name_invalid_index(self):
         """Test get_weekday_name avec index invalide."""
-        from src.services.planning_utils import get_weekday_name
+        from src.services.planning import get_weekday_name
         
         assert get_weekday_name(-1) == ""
         assert get_weekday_name(7) == ""
     
     def test_get_weekday_index_valid(self):
         """Test get_weekday_index avec nom valide."""
-        from src.services.planning_utils import get_weekday_index
+        from src.services.planning import get_weekday_index
         
         assert get_weekday_index("Lundi") == 0
         assert get_weekday_index("lundi") == 0  # Case-insensitive
@@ -57,7 +57,7 @@ class TestWeekdayNames:
     
     def test_get_weekday_index_invalid(self):
         """Test get_weekday_index avec nom invalide."""
-        from src.services.planning_utils import get_weekday_index
+        from src.services.planning import get_weekday_index
         
         assert get_weekday_index("Monday") == -1
         assert get_weekday_index("") == -1
@@ -68,7 +68,7 @@ class TestCalculateWeekDates:
     
     def test_calculate_week_dates_returns_7_dates(self):
         """Test que calculate_week_dates retourne 7 dates."""
-        from src.services.planning_utils import calculate_week_dates
+        from src.services.planning import calculate_week_dates
         
         start = date(2024, 1, 15)  # Lundi
         dates = calculate_week_dates(start)
@@ -77,7 +77,7 @@ class TestCalculateWeekDates:
     
     def test_calculate_week_dates_consecutive(self):
         """Test que les dates sont consécutives."""
-        from src.services.planning_utils import calculate_week_dates
+        from src.services.planning import calculate_week_dates
         
         start = date(2024, 1, 15)
         dates = calculate_week_dates(start)
@@ -88,7 +88,7 @@ class TestCalculateWeekDates:
     
     def test_calculate_week_dates_starts_correctly(self):
         """Test que la première date est correcte."""
-        from src.services.planning_utils import calculate_week_dates
+        from src.services.planning import calculate_week_dates
         
         start = date(2024, 1, 15)
         dates = calculate_week_dates(start)
@@ -98,7 +98,7 @@ class TestCalculateWeekDates:
     
     def test_get_week_range(self):
         """Test get_week_range."""
-        from src.services.planning_utils import get_week_range
+        from src.services.planning import get_week_range
         
         start = date(2024, 1, 15)
         monday, sunday = get_week_range(start)
@@ -109,7 +109,7 @@ class TestCalculateWeekDates:
     
     def test_get_monday_of_week_already_monday(self):
         """Test get_monday_of_week quand c'est déjà lundi."""
-        from src.services.planning_utils import get_monday_of_week
+        from src.services.planning import get_monday_of_week
         
         monday = date(2024, 1, 15)  # Lundi
         result = get_monday_of_week(monday)
@@ -118,7 +118,7 @@ class TestCalculateWeekDates:
     
     def test_get_monday_of_week_from_thursday(self):
         """Test get_monday_of_week depuis un jeudi."""
-        from src.services.planning_utils import get_monday_of_week
+        from src.services.planning import get_monday_of_week
         
         thursday = date(2024, 1, 18)  # Jeudi
         result = get_monday_of_week(thursday)
@@ -127,7 +127,7 @@ class TestCalculateWeekDates:
     
     def test_get_monday_of_week_from_sunday(self):
         """Test get_monday_of_week depuis un dimanche."""
-        from src.services.planning_utils import get_monday_of_week
+        from src.services.planning import get_monday_of_week
         
         sunday = date(2024, 1, 21)  # Dimanche
         result = get_monday_of_week(sunday)
@@ -136,7 +136,7 @@ class TestCalculateWeekDates:
     
     def test_get_monday_of_week_datetime(self):
         """Test get_monday_of_week avec datetime."""
-        from src.services.planning_utils import get_monday_of_week
+        from src.services.planning import get_monday_of_week
         
         dt = datetime(2024, 1, 18, 14, 30)  # Jeudi
         result = get_monday_of_week(dt)
@@ -145,7 +145,7 @@ class TestCalculateWeekDates:
     
     def test_format_week_label(self):
         """Test format_week_label."""
-        from src.services.planning_utils import format_week_label
+        from src.services.planning import format_week_label
         
         start = date(2024, 1, 15)
         label = format_week_label(start)
@@ -159,7 +159,7 @@ class TestProteinType:
     
     def test_determine_protein_type_poisson(self):
         """Test jour poisson."""
-        from src.services.planning_utils import determine_protein_type
+        from src.services.planning import determine_protein_type
         
         protein, emoji = determine_protein_type(
             "lundi",
@@ -173,7 +173,7 @@ class TestProteinType:
     
     def test_determine_protein_type_viande_rouge(self):
         """Test jour viande rouge."""
-        from src.services.planning_utils import determine_protein_type
+        from src.services.planning import determine_protein_type
         
         protein, emoji = determine_protein_type(
             "mardi",
@@ -187,7 +187,7 @@ class TestProteinType:
     
     def test_determine_protein_type_vegetarien(self):
         """Test jour végétarien."""
-        from src.services.planning_utils import determine_protein_type
+        from src.services.planning import determine_protein_type
         
         protein, emoji = determine_protein_type(
             "mercredi",
@@ -201,7 +201,7 @@ class TestProteinType:
     
     def test_determine_protein_type_default_volaille(self):
         """Test jour par défaut = volaille."""
-        from src.services.planning_utils import determine_protein_type
+        from src.services.planning import determine_protein_type
         
         protein, emoji = determine_protein_type(
             "vendredi",
@@ -215,7 +215,7 @@ class TestProteinType:
     
     def test_get_default_protein_schedule(self):
         """Test planning protéines par défaut."""
-        from src.services.planning_utils import get_default_protein_schedule
+        from src.services.planning import get_default_protein_schedule
         
         schedule = get_default_protein_schedule()
         
@@ -229,7 +229,7 @@ class TestWeekBalance:
     
     def test_calculate_week_balance(self):
         """Test calcul de l'équilibre."""
-        from src.services.planning_utils import calculate_week_balance
+        from src.services.planning import calculate_week_balance
         
         repas = [
             {"type_proteines": "poisson"},
@@ -246,7 +246,7 @@ class TestWeekBalance:
     
     def test_calculate_week_balance_empty(self):
         """Test équilibre avec liste vide."""
-        from src.services.planning_utils import calculate_week_balance
+        from src.services.planning import calculate_week_balance
         
         balance = calculate_week_balance([])
         
@@ -255,7 +255,7 @@ class TestWeekBalance:
     
     def test_calculate_week_balance_with_keywords(self):
         """Test équilibre avec mots-clés."""
-        from src.services.planning_utils import calculate_week_balance
+        from src.services.planning import calculate_week_balance
         
         repas = [
             {"type_proteines": "saumon grillé"},  # Devrait être poisson
@@ -269,7 +269,7 @@ class TestWeekBalance:
     
     def test_is_balanced_week_valid(self):
         """Test semaine équilibrée."""
-        from src.services.planning_utils import is_balanced_week
+        from src.services.planning import is_balanced_week
         
         repas = [
             {"type_proteines": "poisson"},
@@ -285,7 +285,7 @@ class TestWeekBalance:
     
     def test_is_balanced_week_not_enough_fish(self):
         """Test semaine sans assez de poisson."""
-        from src.services.planning_utils import is_balanced_week
+        from src.services.planning import is_balanced_week
         
         repas = [
             {"type_proteines": "poisson"},  # Seulement 1
@@ -300,7 +300,7 @@ class TestWeekBalance:
     
     def test_is_balanced_week_too_much_red_meat(self):
         """Test semaine avec trop de viande rouge."""
-        from src.services.planning_utils import is_balanced_week
+        from src.services.planning import is_balanced_week
         
         repas = [
             {"type_proteines": "poisson"},
@@ -322,7 +322,7 @@ class TestMealFormatting:
     
     def test_format_meal_for_display(self):
         """Test formatage repas basique."""
-        from src.services.planning_utils import format_meal_for_display
+        from src.services.planning import format_meal_for_display
         
         repas = {
             "id": 1,
@@ -338,7 +338,7 @@ class TestMealFormatting:
     
     def test_format_meal_for_display_with_emoji(self):
         """Test formatage repas avec emoji correct."""
-        from src.services.planning_utils import format_meal_for_display
+        from src.services.planning import format_meal_for_display
         
         assert format_meal_for_display({"type_repas": "petit-dejeuner"})["emoji"] == "🌅"
         assert format_meal_for_display({"type_repas": "dejeuner"})["emoji"] == "☀️"
@@ -346,7 +346,7 @@ class TestMealFormatting:
     
     def test_format_meal_for_display_fallback_to_notes(self):
         """Test fallback sur notes si pas de recette."""
-        from src.services.planning_utils import format_meal_for_display
+        from src.services.planning import format_meal_for_display
         
         repas = {"type_repas": "dejeuner", "notes": "Restes d'hier"}
         
@@ -356,7 +356,7 @@ class TestMealFormatting:
     
     def test_format_planning_summary(self):
         """Test résumé du planning."""
-        from src.services.planning_utils import format_planning_summary
+        from src.services.planning import format_planning_summary
         
         planning = {
             "nom": "Planning 15/01",
@@ -374,7 +374,7 @@ class TestMealFormatting:
     
     def test_group_meals_by_type(self):
         """Test groupement par type."""
-        from src.services.planning_utils import group_meals_by_type
+        from src.services.planning import group_meals_by_type
         
         repas = [
             {"type_repas": "dejeuner", "id": 1},
@@ -393,7 +393,7 @@ class TestIngredientAggregation:
     
     def test_aggregate_ingredients_basic(self):
         """Test agrégation basique."""
-        from src.services.planning_utils import aggregate_ingredients
+        from src.services.planning import aggregate_ingredients
         
         ingredients = [
             {"nom": "Tomate", "quantite": 2, "unite": "pcs"},
@@ -409,7 +409,7 @@ class TestIngredientAggregation:
     
     def test_aggregate_ingredients_different_units(self):
         """Test agrégation avec unités différentes."""
-        from src.services.planning_utils import aggregate_ingredients
+        from src.services.planning import aggregate_ingredients
         
         ingredients = [
             {"nom": "Eau", "quantite": 1, "unite": "L"},
@@ -423,7 +423,7 @@ class TestIngredientAggregation:
     
     def test_aggregate_ingredients_empty_name(self):
         """Test agrégation avec nom vide."""
-        from src.services.planning_utils import aggregate_ingredients
+        from src.services.planning import aggregate_ingredients
         
         ingredients = [
             {"nom": "", "quantite": 1},
@@ -437,7 +437,7 @@ class TestIngredientAggregation:
     
     def test_sort_ingredients_by_rayon(self):
         """Test tri par rayon."""
-        from src.services.planning_utils import sort_ingredients_by_rayon
+        from src.services.planning import sort_ingredients_by_rayon
         
         ingredients = {
             "Lait": {"nom": "Lait", "rayon": "cremerie", "quantite": 2},
@@ -452,7 +452,7 @@ class TestIngredientAggregation:
     
     def test_sort_ingredients_by_rayon_list_input(self):
         """Test tri avec liste en entrée."""
-        from src.services.planning_utils import sort_ingredients_by_rayon
+        from src.services.planning import sort_ingredients_by_rayon
         
         ingredients = [
             {"nom": "Lait", "rayon": "z_autre", "quantite": 2},
@@ -465,7 +465,7 @@ class TestIngredientAggregation:
     
     def test_get_rayon_order(self):
         """Test ordre des rayons."""
-        from src.services.planning_utils import get_rayon_order
+        from src.services.planning import get_rayon_order
         
         order = get_rayon_order()
         
@@ -478,7 +478,7 @@ class TestValidation:
     
     def test_validate_planning_dates_valid(self):
         """Test validation dates valides."""
-        from src.services.planning_utils import validate_planning_dates
+        from src.services.planning import validate_planning_dates
         
         start = date(2024, 1, 15)  # Lundi
         end = date(2024, 1, 21)  # Dimanche
@@ -490,7 +490,7 @@ class TestValidation:
     
     def test_validate_planning_dates_wrong_order(self):
         """Test validation dates inversées."""
-        from src.services.planning_utils import validate_planning_dates
+        from src.services.planning import validate_planning_dates
         
         is_valid, error = validate_planning_dates(date(2024, 1, 21), date(2024, 1, 15))
         
@@ -499,7 +499,7 @@ class TestValidation:
     
     def test_validate_planning_dates_not_7_days(self):
         """Test validation pas 7 jours."""
-        from src.services.planning_utils import validate_planning_dates
+        from src.services.planning import validate_planning_dates
         
         is_valid, error = validate_planning_dates(date(2024, 1, 15), date(2024, 1, 20))
         
@@ -508,7 +508,7 @@ class TestValidation:
     
     def test_validate_planning_dates_not_monday(self):
         """Test validation pas un lundi."""
-        from src.services.planning_utils import validate_planning_dates
+        from src.services.planning import validate_planning_dates
         
         # Commence un mardi
         is_valid, error = validate_planning_dates(date(2024, 1, 16), date(2024, 1, 22))
@@ -518,7 +518,7 @@ class TestValidation:
     
     def test_validate_meal_selection_valid(self):
         """Test validation sélection valide."""
-        from src.services.planning_utils import validate_meal_selection
+        from src.services.planning import validate_meal_selection
         
         selection = {"jour_0": 1, "jour_1": 2}
         available = [1, 2, 3, 4]
@@ -530,7 +530,7 @@ class TestValidation:
     
     def test_validate_meal_selection_missing_recipe(self):
         """Test validation recette manquante."""
-        from src.services.planning_utils import validate_meal_selection
+        from src.services.planning import validate_meal_selection
         
         selection = {"jour_0": 1, "jour_1": 999}  # 999 n'existe pas
         available = [1, 2, 3]
@@ -546,7 +546,7 @@ class TestAIPrompt:
     
     def test_build_planning_prompt_context_basic(self):
         """Test contexte prompt basique."""
-        from src.services.planning_utils import build_planning_prompt_context
+        from src.services.planning import build_planning_prompt_context
         
         context = build_planning_prompt_context(date(2024, 1, 15))
         
@@ -555,7 +555,7 @@ class TestAIPrompt:
     
     def test_build_planning_prompt_context_with_preferences(self):
         """Test contexte avec préférences."""
-        from src.services.planning_utils import build_planning_prompt_context
+        from src.services.planning import build_planning_prompt_context
         
         prefs = {
             "nb_personnes": 4,
@@ -571,7 +571,7 @@ class TestAIPrompt:
     
     def test_build_planning_prompt_context_with_constraints(self):
         """Test contexte avec contraintes."""
-        from src.services.planning_utils import build_planning_prompt_context
+        from src.services.planning import build_planning_prompt_context
         
         context = build_planning_prompt_context(
             date(2024, 1, 15),
@@ -583,7 +583,7 @@ class TestAIPrompt:
     
     def test_parse_ai_planning_response(self):
         """Test parsing réponse IA."""
-        from src.services.planning_utils import parse_ai_planning_response
+        from src.services.planning import parse_ai_planning_response
         
         response = [
             {"jour": "Lundi", "dejeuner": "Pâtes", "diner": "Salade"},
@@ -598,7 +598,7 @@ class TestAIPrompt:
     
     def test_parse_ai_planning_response_normalize_day(self):
         """Test normalisation du jour."""
-        from src.services.planning_utils import parse_ai_planning_response
+        from src.services.planning import parse_ai_planning_response
         
         response = [{"jour": "lundi", "dejeuner": "X", "diner": "Y"}]
         
@@ -608,7 +608,7 @@ class TestAIPrompt:
     
     def test_parse_ai_planning_response_missing_fields(self):
         """Test champs manquants."""
-        from src.services.planning_utils import parse_ai_planning_response
+        from src.services.planning import parse_ai_planning_response
         
         response = [{"jour": "Lundi"}]
         
@@ -623,21 +623,21 @@ class TestConstants:
     
     def test_jours_semaine_constant(self):
         """Test constante JOURS_SEMAINE."""
-        from src.services.planning_utils import JOURS_SEMAINE
+        from src.services.planning import JOURS_SEMAINE
         
         assert len(JOURS_SEMAINE) == 7
         assert JOURS_SEMAINE[0] == "Lundi"
     
     def test_types_repas_constant(self):
         """Test constante TYPES_REPAS."""
-        from src.services.planning_utils import TYPES_REPAS
+        from src.services.planning import TYPES_REPAS
         
         assert "dejeuner" in TYPES_REPAS
         assert "diner" in TYPES_REPAS
     
     def test_types_proteines_constant(self):
         """Test constante TYPES_PROTEINES."""
-        from src.services.planning_utils import TYPES_PROTEINES
+        from src.services.planning import TYPES_PROTEINES
         
         assert "poisson" in TYPES_PROTEINES
         assert "saumon" in TYPES_PROTEINES["poisson"]
@@ -648,7 +648,7 @@ class TestEdgeCases:
     
     def test_aggregate_ingredients_null_quantity(self):
         """Test agrégation avec quantité nulle."""
-        from src.services.planning_utils import aggregate_ingredients
+        from src.services.planning import aggregate_ingredients
         
         ingredients = [{"nom": "Sel", "quantite": None, "unite": "pcs"}]
         
@@ -658,7 +658,7 @@ class TestEdgeCases:
     
     def test_format_meal_unknown_type(self):
         """Test formatage type inconnu."""
-        from src.services.planning_utils import format_meal_for_display
+        from src.services.planning import format_meal_for_display
         
         formatted = format_meal_for_display({"type_repas": "unknown_type"})
         
@@ -666,7 +666,7 @@ class TestEdgeCases:
     
     def test_calculate_week_dates_across_month(self):
         """Test dates traversant un mois."""
-        from src.services.planning_utils import calculate_week_dates
+        from src.services.planning import calculate_week_dates
         
         start = date(2024, 1, 29)  # Lundi 29 janvier
         dates = calculate_week_dates(start)
@@ -676,7 +676,7 @@ class TestEdgeCases:
     
     def test_calculate_week_dates_across_year(self):
         """Test dates traversant une année."""
-        from src.services.planning_utils import calculate_week_dates
+        from src.services.planning import calculate_week_dates
         
         start = date(2024, 12, 30)  # Lundi 30 décembre
         dates = calculate_week_dates(start)
@@ -686,7 +686,7 @@ class TestEdgeCases:
     
     def test_empty_planning_summary(self):
         """Test résumé planning vide."""
-        from src.services.planning_utils import format_planning_summary
+        from src.services.planning import format_planning_summary
         
         planning = {"nom": "Vide", "repas_par_jour": {}}
         

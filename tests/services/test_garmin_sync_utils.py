@@ -6,7 +6,7 @@ Ces tests vérifient les fonctions pures sans dépendance API ou base de donnée
 
 import pytest
 from datetime import date, datetime, timedelta
-from src.services.garmin_sync_utils import (
+from src.services.garmin import (
     # Parsing
     parse_garmin_timestamp,
     parse_garmin_date,

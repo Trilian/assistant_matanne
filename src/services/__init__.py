@@ -2,9 +2,10 @@
 Services - Point d'Entrée Unifié COMPLET
 
 Exporte tous les services métier de l'application.
-Architecture refactorisée avec BaseService depuis types.py (pas de cycle).
+Architecture refactorisée avec BaseService depuis base/ (pas de cycle).
 
 ✅ MODULES COMPLETS:
+- Base (types, AI, IO)
 - Recettes (6 fichiers)
 - Inventaire (3 fichiers)
 - Courses (3 fichiers)
@@ -12,10 +13,18 @@ Architecture refactorisée avec BaseService depuis types.py (pas de cycle).
 """
 
 # ═══════════════════════════════════════════════════════════
-# BASE SERVICES (génériques) - Import depuis types.py
+# BASE SERVICES (génériques) - Import depuis base/
 # ═══════════════════════════════════════════════════════════
 
-from .base_ai_service import BaseAIService, InventoryAIMixin, PlanningAIMixin, RecipeAIMixin
+from .base import (
+    BaseAIService,
+    BaseService,
+    InventoryAIMixin,
+    PlanningAIMixin,
+    RecipeAIMixin,
+    IOService,
+    create_base_ai_service,
+)
 
 # ═══════════════════════════════════════════════════════════
 # 🛒 COURSES (3 fichiers)
@@ -38,11 +47,10 @@ from .inventaire import (
     inventaire_service,
 )
 
-# Service IO (Import/Export universel)
-from .io_service import IOService
+# Service IO importé depuis base/
 
 # ═══════════════════════════════════════════════════════════
-# 📅 PLANNING (2 services distincts)
+# 📅 PLANNING (Package unifié)
 # ═══════════════════════════════════════════════════════════
 # PlanningService: Gestion repas hebdomadaires + génération IA menus
 # PlanningAIService: Vue unifiée (repas + activités + projets + routines)
@@ -50,16 +58,12 @@ from .planning import (
     # Services CRUD
     PlanningService,
     get_planning_service,
-    planning_service,
-    # Schémas
-    JourPlanning,
-    ParametresEquilibre,
-)
-from .planning_unified import (
     # Service Unifié (repas + activités + projets + routines)
     PlanningAIService,
     get_planning_unified_service,
     # Schémas
+    JourPlanning,
+    ParametresEquilibre,
     JourCompletSchema,
     SemaineCompleSchema,
 )
@@ -75,19 +79,71 @@ from .recettes import (
     VersionBebeGeneree,
     VersionBebeGeneree,
     recette_service,
+    # Import URL (scraping)
+    ImportedIngredient,
+    ImportedRecipe,
+    ImportResult,
+    RecipeImportService,
+    get_recipe_import_service,
 )
-from .types import BaseService  # ✅ Plus de cycle ici
+# BaseService importé depuis base/
 
 # ═══════════════════════════════════════════════════════════
-# � PRÉFÉRENCES UTILISATEUR
+# 🧑 UTILISATEUR (auth, historique, préférences)
 # ═══════════════════════════════════════════════════════════
-from .user_preferences import (
+from .utilisateur import (
+    # Auth
+    AuthService,
+    get_auth_service,
+    UserProfile,
+    AuthResult,
+    Role,
+    Permission,
+    render_login_form,
+    render_user_menu,
+    render_profile_settings,
+    require_authenticated,
+    require_role,
+    # Historique
+    ActionHistoryService,
+    get_action_history_service,
+    ActionType,
+    ActionEntry,
+    ActionFilter,
+    ActionStats,
+    render_activity_timeline,
+    render_user_activity,
+    render_activity_stats,
+    # Préférences
     UserPreferenceService,
     get_user_preference_service,
 )
 
 # ═══════════════════════════════════════════════════════════
-# �📤 EXPORTS GLOBAUX
+# 🔌 INTÉGRATIONS EXTERNES
+# ═══════════════════════════════════════════════════════════
+from .integrations import (
+    # Codes-barres
+    BarcodeService,
+    get_barcode_service,
+    BarcodeData,
+    BarcodeArticle,
+    BarcodeRecette,
+    ScanResultat,
+    # OpenFoodFacts
+    OpenFoodFactsService,
+    get_openfoodfacts_service,
+    NutritionInfo,
+    ProduitOpenFoodFacts,
+    # Facture OCR
+    FactureOCRService,
+    get_facture_ocr_service,
+    DonneesFacture,
+    ResultatOCR,
+)
+
+# ═══════════════════════════════════════════════════════════
+# 📤 EXPORTS GLOBAUX
 # ═══════════════════════════════════════════════════════════
 
 __all__ = [
@@ -108,6 +164,12 @@ __all__ = [
     "RecetteSuggestion",
     "VersionBebeGeneree",
     "VersionBebeGeneree",
+    # Import URL (scraping)
+    "ImportedIngredient",
+    "ImportedRecipe",
+    "ImportResult",
+    "RecipeImportService",
+    "get_recipe_import_service",
     # Instances
     "recette_service",
     # ═══════════════════════════════════════════════════════════
@@ -144,12 +206,53 @@ __all__ = [
     "JourCompletSchema",
     "SemaineCompleSchema",
     # ═══════════════════════════════════════════════════════════
-    # PRÉFÉRENCES UTILISATEUR
+    # UTILISATEUR (auth, historique, préférences)
     # ═══════════════════════════════════════════════════════════
-    # Classes
+    # Auth
+    "AuthService",
+    "get_auth_service",
+    "UserProfile",
+    "AuthResult",
+    "Role",
+    "Permission",
+    "render_login_form",
+    "render_user_menu",
+    "render_profile_settings",
+    "require_authenticated",
+    "require_role",
+    # Historique
+    "ActionHistoryService",
+    "get_action_history_service",
+    "ActionType",
+    "ActionEntry",
+    "ActionFilter",
+    "ActionStats",
+    "render_activity_timeline",
+    "render_user_activity",
+    "render_activity_stats",
+    # Préférences
     "UserPreferenceService",
-    # Factories
     "get_user_preference_service",
+    # ═══════════════════════════════════════════════════════════
+    # INTÉGRATIONS EXTERNES
+    # ═══════════════════════════════════════════════════════════
+    # Codes-barres
+    "BarcodeService",
+    "get_barcode_service",
+    "BarcodeData",
+    "BarcodeArticle",
+    "BarcodeRecette",
+    "ScanResultat",
+    # OpenFoodFacts
+    "OpenFoodFactsService",
+    "get_openfoodfacts_service",
+    "NutritionInfo",
+    "ProduitOpenFoodFacts",
+    # Facture OCR
+    "FactureOCRService",
+    "get_facture_ocr_service",
+    "DonneesFacture",
+    "ResultatOCR",
 ]
 
 

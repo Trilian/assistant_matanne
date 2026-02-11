@@ -6,7 +6,7 @@ Ces tests vérifient les fonctions pures sans dépendance base de données.
 
 import pytest
 from datetime import date, datetime, timedelta
-from src.services.suggestions_ia_utils import (
+from src.services.suggestions import (
     # Saison
     get_current_season,
     get_seasonal_ingredients,

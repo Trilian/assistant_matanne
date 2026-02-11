@@ -9,11 +9,10 @@ from datetime import date
 from unittest.mock import MagicMock
 
 from src.services.budget import (
+    # Types
     CategorieDepense,
     Depense,
     FrequenceRecurrence,
-)
-from src.services.budget_utils import (
     # Conversion
     db_entry_to_depense,
     db_entries_to_depenses,

@@ -1,14 +1,14 @@
 """
 Tests unitaires pour courses_intelligentes.py
 
-Module: src.services.courses_intelligentes
+Module: src.services.courses
 """
 
 import pytest
 from unittest.mock import MagicMock, patch
 
 # TODO: Ajuster l'import selon la structure
-# from src.services.courses_intelligentes import ...
+# from src.services.courses import ...
 
 
 class TestCoursesIntelligentes:

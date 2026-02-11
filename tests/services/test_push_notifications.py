@@ -13,7 +13,7 @@ import pytest
 from datetime import datetime, time
 from unittest.mock import MagicMock, patch
 
-from src.services.push_notifications import (
+from src.services.notifications import (
     NotificationType,
     PushSubscription,
     PushNotification,
@@ -1040,21 +1040,21 @@ class TestFactory:
     
     def test_get_push_notification_service(self):
         """Test factory retourne une instance."""
-        from src.services.push_notifications import get_push_notification_service, _push_service
+        from src.services.notifications import get_push_notification_service
         
         # Reset singleton pour test propre
-        import src.services.push_notifications as module
-        module._push_service = None
+        import src.services.notifications.webpush as module
+        module._service_webpush = None
         
         service = get_push_notification_service()
         assert isinstance(service, PushNotificationService)
     
     def test_get_push_notification_service_singleton(self):
         """Test factory retourne singleton."""
-        from src.services.push_notifications import get_push_notification_service
-        import src.services.push_notifications as module
+        from src.services.notifications import get_push_notification_service
+        import src.services.notifications.webpush as module
         
-        module._push_service = None
+        module._service_webpush = None
         
         service1 = get_push_notification_service()
         service2 = get_push_notification_service()

@@ -10,7 +10,7 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
-from src.services.pwa import (
+from src.services.web import (
     PWA_CONFIG,
     generate_manifest,
     generate_service_worker,
@@ -254,19 +254,19 @@ class TestGenerateIconSVG:
 class TestStreamlitIntegration:
     """Tests pour les fonctions Streamlit avec mocks."""
     
-    @patch("src.services.pwa.components")
+    @patch("src.services.web.pwa.components")
     def test_inject_pwa_meta(self, mock_components):
         """Test inject_pwa_meta avec mock Streamlit."""
-        from src.services.pwa import inject_pwa_meta
+        from src.services.web import inject_pwa_meta
         
         inject_pwa_meta()
         
         mock_components.html.assert_called_once()
     
-    @patch("src.services.pwa.components")
+    @patch("src.services.web.pwa.components")
     def test_render_install_prompt(self, mock_components):
         """Test render_install_prompt avec mock Streamlit."""
-        from src.services.pwa import render_install_prompt
+        from src.services.web import render_install_prompt
         
         render_install_prompt()
         

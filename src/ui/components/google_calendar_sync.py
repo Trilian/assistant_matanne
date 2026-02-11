@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 import logging
 
 from src.core.config import obtenir_parametres
-from src.services.calendar_sync import (
+from src.services.calendrier import (
     get_calendar_sync_service,
     CalendarProvider,
     ExternalCalendarConfig,

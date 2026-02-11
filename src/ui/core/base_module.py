@@ -14,7 +14,7 @@ import streamlit as st
 from src.core.cache import Cache
 
 # ✅ Import depuis types.py au lieu de base_service.py
-from src.services.types import BaseService
+from src.services.base import BaseService
 from src.ui.components import barre_recherche, boutons_export, etat_vide, pagination
 from src.ui.feedback import afficher_succes
 

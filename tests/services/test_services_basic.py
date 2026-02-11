@@ -17,7 +17,7 @@ class TestServiceImports:
     
     def test_import_auth_service(self):
         """Test importing auth service"""
-        from src.services.auth import AuthService
+        from src.services.utilisateur import AuthService
         assert AuthService is not None
     
     def test_import_backup_service(self):
@@ -52,7 +52,7 @@ class TestServiceImports:
     
     def test_import_barcode_service(self):
         """Test importing barcode service"""
-        from src.services.barcode import BarcodeService
+        from src.services.integrations import BarcodeService
         assert BarcodeService is not None
 
 
@@ -73,13 +73,13 @@ class TestServiceBasicInstantiation:
     
     def test_auth_service_creation(self):
         """Test creating auth service"""
-        from src.services.auth import AuthService
+        from src.services.utilisateur import AuthService
         service = AuthService()
         assert service is not None
     
     def test_barcode_service_creation(self):
         """Test creating barcode service"""
-        from src.services.barcode import BarcodeService
+        from src.services.integrations import BarcodeService
         service = BarcodeService()
         assert service is not None
 

@@ -7,8 +7,8 @@ Module: src.services.realtime_sync
 import pytest
 from unittest.mock import MagicMock, patch
 
-# TODO: Ajuster l'import selon la structure
-# from src.services.realtime_sync import ...
+# Import depuis le package web/ (unifié sync + pwa)
+from src.services.web import get_realtime_sync_service, RealtimeSyncService, SyncEventType
 
 
 class TestRealtimeSync:

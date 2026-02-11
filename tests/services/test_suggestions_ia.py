@@ -8,7 +8,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 
 # TODO: Ajuster l'import selon la structure
-# from src.services.suggestions_ia import ...
+# from src.services.suggestions import ...
 
 
 class TestSuggestionsIa:

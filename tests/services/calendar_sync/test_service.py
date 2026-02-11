@@ -8,7 +8,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 
 # TODO: Ajuster l'import selon la structure
-# from src.services.calendar_sync.service import ...
+# from src.services.calendrier.service import ...
 
 
 class TestService:

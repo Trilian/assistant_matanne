@@ -9,7 +9,7 @@ from datetime import date, datetime, timedelta
 
 import streamlit as st
 
-from src.services.planning_unified import get_planning_unified_service
+from src.services.planning import get_planning_unified_service
 
 # Logique métier pure
 from src.domains.planning.logic.vue_ensemble_logic import (

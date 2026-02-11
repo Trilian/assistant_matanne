@@ -11,7 +11,7 @@ import pytest
 from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 
-from src.services.push_notifications import (
+from src.services.notifications import (
     NotificationType,
     PushSubscription,
     PushNotification,
@@ -359,7 +359,7 @@ class TestFactoryFunctions:
 
     def test_get_push_notification_service(self):
         """Factory retourne une instance."""
-        from src.services.push_notifications import get_push_notification_service
+        from src.services.notifications import get_push_notification_service
         
         service = get_push_notification_service()
         assert service is not None
@@ -367,7 +367,7 @@ class TestFactoryFunctions:
 
     def test_service_has_required_methods(self):
         """Service a les méthodes requises."""
-        from src.services.push_notifications import get_push_notification_service
+        from src.services.notifications import get_push_notification_service
         
         service = get_push_notification_service()
         

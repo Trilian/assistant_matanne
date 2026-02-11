@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 from src.core.database import obtenir_contexte_db
 from src.core.models import Routine, RoutineTask
 from src.core.decorators import avec_session_db
-from src.services.base_ai_service import BaseAIService
+from src.services.base import BaseAIService
 from src.core.ai import ClientIA
 
 # Logique métier pure

@@ -13,7 +13,7 @@ import base64
 from datetime import date
 from typing import Any
 
-from src.services.facture_ocr import get_facture_ocr_service, DonneesFacture, ResultatOCR
+from src.services.integrations import get_facture_ocr_service, DonneesFacture, ResultatOCR
 from src.services.budget import get_budget_service, FactureMaison, CategorieDepense
 from src.core.database import obtenir_contexte_db
 from src.core.models import HouseExpense

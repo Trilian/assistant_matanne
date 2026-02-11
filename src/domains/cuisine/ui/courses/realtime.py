@@ -37,7 +37,7 @@ def render_realtime_status():
         if not sync_service.is_configured:
             return
         
-        from src.services.realtime_sync import (
+        from src.services.web import (
             render_presence_indicator,
             render_typing_indicator,
             render_sync_status,

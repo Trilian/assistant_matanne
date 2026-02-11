@@ -8,7 +8,7 @@ Ces fonctions n'ont pas de dépendances DB/API.
 import pytest
 from datetime import date, datetime, timedelta
 
-from src.services.garmin_sync_utils import (
+from src.services.garmin import (
     # Constants
     ACTIVITY_TYPE_MAPPING,
     ACTIVITY_ICONS,

@@ -13,7 +13,7 @@ Couvre toutes les fonctions pures du module:
 import pytest
 from datetime import date, datetime, timedelta
 
-from src.services.suggestions_ia_utils import (
+from src.services.suggestions import (
     # Constantes
     SAISONS,
     INGREDIENTS_SAISON,

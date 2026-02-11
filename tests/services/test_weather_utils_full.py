@@ -13,7 +13,7 @@ Couvre toutes les fonctions pures du module:
 import pytest
 from datetime import date, datetime
 
-from src.services.weather_utils import (
+from src.services.weather import (
     # Constantes
     SEUIL_GEL,
     SEUIL_GEL_SEVERE,
@@ -55,9 +55,10 @@ from src.services.weather_utils import (
     format_weather_summary,
     # Parsing API
     parse_open_meteo_daily,
-    _safe_get_index,
     validate_coordinates,
 )
+# Fonction interne importée depuis utils
+from src.services.weather.utils import _safe_get_index
 
 
 # ═══════════════════════════════════════════════════════════

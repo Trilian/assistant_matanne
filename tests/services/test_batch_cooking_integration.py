@@ -149,7 +149,7 @@ class TestConstants:
 class TestBatchCookingServiceInit:
     """Tests pour l'initialisation du service."""
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_service_init(self, mock_client):
         """Le service s'initialise correctement."""
         mock_client.return_value = Mock()
@@ -169,7 +169,7 @@ class TestBatchCookingServiceInit:
 class TestConfigWithDB:
     """Tests pour get_config et update_config avec test_db."""
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_get_config_creates_default(self, mock_client, test_db):
         """get_config crée une config par défaut."""
         mock_client.return_value = Mock()
@@ -182,7 +182,7 @@ class TestConfigWithDB:
             assert hasattr(result, 'jours_batch')
             assert hasattr(result, 'robots_disponibles')
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_update_config_creates_if_not_exists(self, mock_client, test_db):
         """update_config crée config si elle n'existe pas."""
         mock_client.return_value = Mock()
@@ -196,7 +196,7 @@ class TestConfigWithDB:
         if result is not None:
             assert result.jours_batch == [5, 6]
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_update_config_all_fields(self, mock_client, test_db):
         """update_config met à jour tous les champs."""
         mock_client.return_value = Mock()
@@ -241,7 +241,7 @@ def patched_db_context(test_db):
 class TestSessionCreationWithPatchedDB:
     """Tests de création de session avec DB patchée."""
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_create_session_success(self, mock_client, patched_db_context):
         """creer_session crée une session quand DB est accessible."""
         mock_client.return_value = Mock()
@@ -261,7 +261,7 @@ class TestSessionCreationWithPatchedDB:
             assert result.avec_jules is True
             assert result.statut == StatutSessionEnum.PLANIFIEE.value
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_demarrer_session_workflow(self, mock_client, patched_db_context):
         """Workflow complet: créer puis démarrer session."""
         mock_client.return_value = Mock()
@@ -285,7 +285,7 @@ class TestSessionCreationWithPatchedDB:
             if started is not None:
                 assert started.statut == StatutSessionEnum.EN_COURS.value
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_terminer_session_workflow(self, mock_client, patched_db_context):
         """Workflow complet: créer, démarrer, terminer session."""
         mock_client.return_value = Mock()
@@ -312,7 +312,7 @@ class TestSessionCreationWithPatchedDB:
             if result is not None:
                 assert result.statut == StatutSessionEnum.TERMINEE.value
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_ajouter_etapes_workflow(self, mock_client, patched_db_context):
         """Workflow: créer session puis ajouter étapes."""
         mock_client.return_value = Mock()
@@ -343,7 +343,7 @@ class TestSessionCreationWithPatchedDB:
                 # Vérifie que les étapes ont été ajoutées
                 assert len(result.etapes) == 2
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_etape_lifecycle_workflow(self, mock_client, patched_db_context):
         """Workflow complet d'une étape: créer, ajouter, démarrer, terminer."""
         mock_client.return_value = Mock()
@@ -383,7 +383,7 @@ class TestSessionCreationWithPatchedDB:
         if finished is not None:
             assert finished.statut == StatutEtapeEnum.TERMINEE.value
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_passer_etape_workflow(self, mock_client, patched_db_context):
         """Tester passer_etape pour sauter une étape."""
         mock_client.return_value = Mock()
@@ -426,17 +426,17 @@ class TestSessionCreationWithPatchedDB:
 class TestSessionOperationsWithDB:
     """Tests pour les opérations de session avec test_db."""
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
-    def test_get_session_not_found(self, mock_client, test_db):
-        """obtenir_contexte_db retourne None si non trouvée."""
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
+    def test_obtenir_session_not_found(self, mock_client, test_db):
+        """obtenir_session retourne None si non trouvée."""
         mock_client.return_value = Mock()
         
         service = BatchCookingService()
-        result = service.obtenir_contexte_db(session_id=99999, db=test_db)
+        result = service.obtenir_session(session_id=99999, db=test_db)
         
         assert result is None
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_get_session_active_none(self, mock_client, test_db):
         """get_session_active retourne None si aucune active."""
         mock_client.return_value = Mock()
@@ -446,17 +446,17 @@ class TestSessionOperationsWithDB:
         
         assert result is None
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
-    def test_obtenir_contexte_dbs_planifiees_empty(self, mock_client, test_db):
-        """obtenir_contexte_dbs_planifiees retourne liste vide."""
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
+    def test_obtenir_sessions_planifiees_empty(self, mock_client, test_db):
+        """obtenir_sessions_planifiees retourne liste vide."""
         mock_client.return_value = Mock()
         
         service = BatchCookingService()
-        result = service.obtenir_contexte_dbs_planifiees(db=test_db)
+        result = service.obtenir_sessions_planifiees(db=test_db)
         
         assert result == []
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_creer_session_validation_empty_recettes(self, mock_client, test_db):
         """creer_session lève ErreurValidation si recettes_ids vide."""
         mock_client.return_value = Mock()
@@ -470,7 +470,7 @@ class TestSessionOperationsWithDB:
                 db=test_db
             )
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_demarrer_session_not_found(self, mock_client, test_db):
         """demarrer_session lève ErreurNonTrouve si session non trouvée."""
         mock_client.return_value = Mock()
@@ -489,7 +489,7 @@ class TestSessionOperationsWithDB:
 class TestEtapesOperationsWithDB:
     """Tests pour les opérations d'étapes avec test_db."""
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_demarrer_etape_not_found(self, mock_client, test_db):
         """demarrer_etape lève ErreurNonTrouve si étape non trouvée."""
         mock_client.return_value = Mock()
@@ -499,7 +499,7 @@ class TestEtapesOperationsWithDB:
         with pytest.raises(ErreurNonTrouve):
             service.demarrer_etape(etape_id=99999, db=test_db)
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_terminer_etape_not_found(self, mock_client, test_db):
         """terminer_etape lève ErreurNonTrouve si étape non trouvée."""
         mock_client.return_value = Mock()
@@ -509,7 +509,7 @@ class TestEtapesOperationsWithDB:
         with pytest.raises(ErreurNonTrouve):
             service.terminer_etape(etape_id=99999, db=test_db)
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_passer_etape_not_found(self, mock_client, test_db):
         """passer_etape lève ErreurNonTrouve si étape non trouvée."""
         mock_client.return_value = Mock()
@@ -528,7 +528,7 @@ class TestEtapesOperationsWithDB:
 class TestPreparationsOperationsWithDB:
     """Tests pour les opérations de préparations avec test_db."""
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_get_preparations_empty(self, mock_client, test_db):
         """get_preparations retourne liste vide."""
         mock_client.return_value = Mock()
@@ -538,7 +538,7 @@ class TestPreparationsOperationsWithDB:
         
         assert result == []
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_get_preparations_alertes_empty(self, mock_client, test_db):
         """get_preparations_alertes retourne liste vide."""
         mock_client.return_value = Mock()
@@ -548,7 +548,7 @@ class TestPreparationsOperationsWithDB:
         
         assert result == []
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_consommer_preparation_not_found(self, mock_client, test_db):
         """consommer_preparation lève ErreurNonTrouve si non trouvée."""
         mock_client.return_value = Mock()
@@ -571,7 +571,7 @@ class TestPreparationsOperationsWithDB:
 class TestTerminerSessionWithDB:
     """Tests pour terminer_session avec test_db."""
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_terminer_session_not_found(self, mock_client, test_db):
         """terminer_session lève ErreurNonTrouve si session non trouvée."""
         mock_client.return_value = Mock()
@@ -590,7 +590,7 @@ class TestTerminerSessionWithDB:
 class TestGetBatchCookingService:
     """Tests pour get_batch_cooking_service."""
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_returns_service(self, mock_client):
         """get_batch_cooking_service retourne un service."""
         mock_client.return_value = Mock()
@@ -606,7 +606,7 @@ class TestGetBatchCookingService:
         # Cleanup
         bc_module._batch_cooking_service = None
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_singleton_pattern(self, mock_client):
         """get_batch_cooking_service retourne le même service."""
         mock_client.return_value = Mock()
@@ -630,7 +630,7 @@ class TestGetBatchCookingService:
 class TestBatchCookingWorkflow:
     """Tests workflow complet batch cooking."""
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_create_and_obtenir_contexte_db(self, mock_client, test_db):
         """Créer une session puis la récupérer - peut échouer à cause de l'isolation DB."""
         mock_client.return_value = Mock()
@@ -654,7 +654,7 @@ class TestBatchCookingWorkflow:
             # Erreur de DB isolation - test passe quand même
             pass
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_config_update_workflow(self, mock_client, test_db):
         """Créer config puis la mettre à jour."""
         mock_client.return_value = Mock()
@@ -682,7 +682,7 @@ class TestBatchCookingWorkflow:
 class TestAIMethodsMocked:
     """Tests pour les méthodes IA avec mocks."""
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_generer_plan_ia_method_exists(self, mock_client):
         """generer_plan_ia existe."""
         mock_client.return_value = Mock()
@@ -692,7 +692,7 @@ class TestAIMethodsMocked:
         assert hasattr(service, 'generer_plan_ia')
         assert callable(service.generer_plan_ia)
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_suggerer_recettes_batch_method_exists(self, mock_client):
         """suggerer_recettes_batch existe."""
         mock_client.return_value = Mock()
@@ -702,7 +702,7 @@ class TestAIMethodsMocked:
         assert hasattr(service, 'suggerer_recettes_batch')
         assert callable(service.suggerer_recettes_batch)
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_attribuer_preparations_planning_method_exists(self, mock_client):
         """attribuer_preparations_planning existe."""
         mock_client.return_value = Mock()
@@ -712,7 +712,7 @@ class TestAIMethodsMocked:
         assert hasattr(service, 'attribuer_preparations_planning')
         assert callable(service.attribuer_preparations_planning)
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_generer_plan_ia_no_recettes(self, mock_client, patched_db_context):
         """generer_plan_ia lève ErreurValidation si pas de recettes."""
         mock_client.return_value = Mock()
@@ -728,7 +728,7 @@ class TestAIMethodsMocked:
                 db=patched_db_context
             )
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_suggerer_recettes_batch_returns_list(self, mock_client, patched_db_context):
         """suggerer_recettes_batch retourne une liste."""
         mock_client.return_value = Mock()
@@ -745,7 +745,7 @@ class TestAIMethodsMocked:
         # Le décorateur retourne [] en cas d'erreur
         assert isinstance(result, list)
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_attribuer_preparations_planning_empty(self, mock_client, patched_db_context):
         """attribuer_preparations_planning avec préparations vides."""
         mock_client.return_value = Mock()
@@ -773,7 +773,7 @@ from src.core.models import Recette, EtapeRecette
 class TestAIMethodsWithRecipes:
     """Tests pour les méthodes IA avec vraies recettes."""
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_generer_plan_ia_with_recipe(self, mock_client, patched_db_context):
         """generer_plan_ia avec une recette réelle appelle l'IA."""
         # Mock AI client
@@ -809,7 +809,7 @@ class TestAIMethodsWithRecipes:
         # Mais le test couvre le code de construction du prompt
         assert result is None or isinstance(result, SessionBatchIA)
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_suggerer_recettes_batch_with_recipes(self, mock_client, patched_db_context):
         """suggerer_recettes_batch avec recettes en DB."""
         mock_ia = Mock()
@@ -841,7 +841,7 @@ class TestAIMethodsWithRecipes:
         # Retourne liste (vide car mock ne retourne rien)
         assert isinstance(result, list)
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_generer_plan_ia_with_recipe_and_etapes(self, mock_client, patched_db_context):
         """generer_plan_ia avec recette qui a des étapes pour couvrir le code."""
         # Mock AI client
@@ -898,7 +898,7 @@ class TestAIMethodsWithRecipes:
 class TestFactoryFunction:
     """Tests pour get_batch_cooking_service."""
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_factory_creates_service(self, mock_client):
         """get_batch_cooking_service crée un service."""
         mock_client.return_value = Mock()
@@ -922,7 +922,7 @@ class TestFactoryFunction:
 class TestSessionLifecycle:
     """Tests du cycle de vie complet d'une session."""
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_create_session_accepts_valid_params(self, mock_client, test_db):
         """creer_session accepte les paramètres valides."""
         mock_client.return_value = Mock()
@@ -947,7 +947,7 @@ class TestSessionLifecycle:
             # Le test passe si l'erreur est liée à la DB isolation
             pass
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_create_session_validation_error(self, mock_client, test_db):
         """creer_session lève ErreurValidation si pas de recettes."""
         mock_client.return_value = Mock()
@@ -962,7 +962,7 @@ class TestSessionLifecycle:
                 db=test_db
             )
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_demarrer_session_not_found_returns_none(self, mock_client, test_db):
         """demarrer_session avec session inexistante lève ErreurNonTrouve."""
         mock_client.return_value = Mock()
@@ -982,7 +982,7 @@ class TestSessionLifecycle:
 class TestStepManagement:
     """Tests pour la gestion des étapes."""
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_ajouter_etapes_not_found_session(self, mock_client, test_db):
         """ajouter_etapes lève ErreurNonTrouve si session n'existe pas."""
         mock_client.return_value = Mock()
@@ -997,7 +997,7 @@ class TestStepManagement:
                 db=test_db
             )
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_ajouter_etapes_not_found(self, mock_client, test_db):
         """ajouter_etapes lève erreur si session non trouvée."""
         mock_client.return_value = Mock()
@@ -1020,7 +1020,7 @@ class TestStepManagement:
 class TestPreparationManagement:
     """Tests pour la gestion des préparations."""
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_creer_preparation(self, mock_client, test_db):
         """creer_preparation crée une préparation."""
         mock_client.return_value = Mock()
@@ -1043,7 +1043,7 @@ class TestPreparationManagement:
             assert result.portions_initiales == 4
             assert result.portions_restantes == 4
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_consommer_preparation_success(self, mock_client, test_db):
         """consommer_preparation réduit les portions."""
         mock_client.return_value = Mock()
@@ -1084,7 +1084,7 @@ class TestPreparationManagement:
 class TestTerminerSessionWorkflow:
     """Tests pour terminer une session."""
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_terminer_session_not_found(self, mock_client, test_db):
         """terminer_session lève ErreurNonTrouve si session n'existe pas."""
         mock_client.return_value = Mock()
@@ -1104,7 +1104,7 @@ class TestTerminerSessionWorkflow:
 class TestPreparationsQueries:
     """Tests pour les requêtes de préparations."""
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_get_preparations_with_data(self, mock_client, test_db):
         """get_preparations retourne les préparations."""
         mock_client.return_value = Mock()
@@ -1126,7 +1126,7 @@ class TestPreparationsQueries:
             
             assert isinstance(result, list)
 
-    @patch('src.services.batch_cooking.obtenir_client_ia')
+    @patch('src.services.batch_cooking.service.obtenir_client_ia')
     def test_get_preparations_with_filter(self, mock_client, test_db):
         """get_preparations avec filtre localisation."""
         mock_client.return_value = Mock()

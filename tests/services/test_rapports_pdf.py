@@ -1,7 +1,7 @@
 """
 Tests unitaires pour rapports_pdf.py
 
-Module: src.services.rapports_pdf
+Module: src.services.rapports
 """
 
 import pytest

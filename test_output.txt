@@ -1,0 +1,48 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.11.8, pytest-9.0.2, pluggy-1.6.0
+rootdir: D:\Projet_streamlit\assistant_matanne
+configfile: pytest.ini
+plugins: anyio-4.12.1, asyncio-1.3.0, cov-7.0.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collected 101 items
+
+tests\services\calendrier\test_ical_generator.py ....................... [ 22%]
+......                                                                   [ 28%]
+tests\services\calendrier\test_schemas.py .................              [ 45%]
+tests\services\calendrier\test_service.py .......................F...... [ 75%]
+...........FF.F....FFFFFF                                                [100%]
+
+============================== warnings summary ===============================
+tests/services/calendrier/test_service.py::TestSessionDecoratedMethods::test_ajouter_calendrier_externe
+tests/services/calendrier/test_service.py::TestSessionDecoratedMethods::test_lister_calendriers_utilisateur
+tests/services/calendrier/test_service.py::TestSessionDecoratedMethods::test_sauvegarder_evenement_calendrier_create
+tests/services/calendrier/test_service.py::TestSessionDecoratedMethods::test_sauvegarder_evenement_calendrier_update
+tests/services/calendrier/test_service.py::TestSessionDecoratedMethods::test_lister_evenements_calendrier
+tests/services/calendrier/test_service.py::TestSessionDecoratedMethods::test_lister_evenements_par_calendrier
+  D:\Projet_streamlit\assistant_matanne\tests\conftest.py:141: SAWarning: transaction already deassociated from connection
+    transaction.rollback()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.11.8-final-0 _______________
+
+Name                                    Stmts   Miss Branch BrPart   Cover
+--------------------------------------------------------------------------
+src\services\calendrier\__init__.py         7      2      0      0  71.43%
+src\services\calendrier\generateur.py      66      2     26      0  97.83%
+src\services\calendrier\schemas.py         52      0      0      0 100.00%
+src\services\calendrier\service.py        318     41     82      6  85.75%
+--------------------------------------------------------------------------
+TOTAL                                     443     45    108      6  88.93%
+=========================== short test summary info ===========================
+FAILED tests/services/calendrier/test_service.py::TestGoogleCalendar::test_sync_google_calendar_import
+FAILED tests/services/calendrier/test_service.py::TestDatabasePersistence::test_import_events_to_db_create
+FAILED tests/services/calendrier/test_service.py::TestDatabasePersistence::test_import_events_to_db_update
+FAILED tests/services/calendrier/test_service.py::TestSaveConfigToDb::test_save_config_create
+FAILED tests/services/calendrier/test_service.py::TestSessionDecoratedMethods::test_ajouter_calendrier_externe
+FAILED tests/services/calendrier/test_service.py::TestSessionDecoratedMethods::test_lister_calendriers_utilisateur
+FAILED tests/services/calendrier/test_service.py::TestSessionDecoratedMethods::test_sauvegarder_evenement_calendrier_create
+FAILED tests/services/calendrier/test_service.py::TestSessionDecoratedMethods::test_sauvegarder_evenement_calendrier_update
+FAILED tests/services/calendrier/test_service.py::TestSessionDecoratedMethods::test_lister_evenements_calendrier
+FAILED tests/services/calendrier/test_service.py::TestSessionDecoratedMethods::test_lister_evenements_par_calendrier
+================= 10 failed, 91 passed, 6 warnings in 30.73s ==================

@@ -18,7 +18,7 @@ from datetime import datetime, timedelta
 @pytest.fixture
 def mock_rapport_stocks():
     """Crée des données de rapport stocks."""
-    from src.services.rapports_pdf import RapportStocks
+    from src.services.rapports import RapportStocks
     
     return RapportStocks(
         date_rapport=datetime.now(),
@@ -46,7 +46,7 @@ def mock_rapport_stocks():
 @pytest.fixture
 def mock_rapport_stocks_minimal():
     """Crée des données minimales de rapport stocks."""
-    from src.services.rapports_pdf import RapportStocks
+    from src.services.rapports import RapportStocks
     
     return RapportStocks(
         date_rapport=datetime.now(),
@@ -62,7 +62,7 @@ def mock_rapport_stocks_minimal():
 @pytest.fixture
 def mock_rapport_budget():
     """Crée des données de rapport budget."""
-    from src.services.rapports_pdf import RapportBudget
+    from src.services.rapports import RapportBudget
     
     return RapportBudget(
         date_rapport=datetime.now(),
@@ -91,7 +91,7 @@ def mock_rapport_budget():
 @pytest.fixture
 def mock_rapport_budget_minimal():
     """Crée des données minimales de rapport budget."""
-    from src.services.rapports_pdf import RapportBudget
+    from src.services.rapports import RapportBudget
     
     return RapportBudget(
         date_rapport=datetime.now(),
@@ -106,7 +106,7 @@ def mock_rapport_budget_minimal():
 @pytest.fixture
 def mock_analyse_gaspillage():
     """Crée des données d'analyse gaspillage."""
-    from src.services.rapports_pdf import AnalyseGaspillage
+    from src.services.rapports import AnalyseGaspillage
     
     return AnalyseGaspillage(
         date_rapport=datetime.now(),
@@ -133,7 +133,7 @@ def mock_analyse_gaspillage():
 @pytest.fixture
 def mock_analyse_gaspillage_minimal():
     """Crée des données minimales d'analyse gaspillage."""
-    from src.services.rapports_pdf import AnalyseGaspillage
+    from src.services.rapports import AnalyseGaspillage
     
     return AnalyseGaspillage(
         date_rapport=datetime.now(),
@@ -149,7 +149,7 @@ def mock_analyse_gaspillage_minimal():
 @pytest.fixture
 def mock_rapport_planning():
     """Crée des données de rapport planning."""
-    from src.services.rapports_pdf import RapportPlanning
+    from src.services.rapports import RapportPlanning
     
     now = datetime.now()
     debut = now - timedelta(days=now.weekday())
@@ -191,7 +191,7 @@ def mock_rapport_planning():
 @pytest.fixture
 def mock_rapport_planning_minimal():
     """Crée des données minimales de rapport planning."""
-    from src.services.rapports_pdf import RapportPlanning
+    from src.services.rapports import RapportPlanning
     
     return RapportPlanning(
         date_rapport=datetime.now(),
@@ -215,7 +215,7 @@ class TestGenererPDFRapportStocks:
 
     def test_generer_pdf_rapport_stocks_complet(self, mock_rapport_stocks):
         """Test génération PDF rapport stocks avec données complètes."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         
@@ -233,7 +233,7 @@ class TestGenererPDFRapportStocks:
 
     def test_generer_pdf_rapport_stocks_vide(self, mock_rapport_stocks_minimal):
         """Test génération PDF rapport stocks sans données."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         
@@ -246,7 +246,7 @@ class TestGenererPDFRapportStocks:
 
     def test_generer_pdf_rapport_stocks_periode_differente(self, mock_rapport_stocks):
         """Test génération PDF rapport stocks avec période différente."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         mock_rapport_stocks.periode_jours = 30
@@ -268,7 +268,7 @@ class TestGenererPDFRapportBudget:
 
     def test_generer_pdf_rapport_budget_complet(self, mock_rapport_budget):
         """Test génération PDF rapport budget avec données complètes."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         
@@ -284,7 +284,7 @@ class TestGenererPDFRapportBudget:
 
     def test_generer_pdf_rapport_budget_vide(self, mock_rapport_budget_minimal):
         """Test génération PDF rapport budget sans données."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         
@@ -297,7 +297,7 @@ class TestGenererPDFRapportBudget:
 
     def test_generer_pdf_rapport_budget_categories_multiples(self, mock_rapport_budget):
         """Test génération PDF rapport budget avec beaucoup de catégories."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         
@@ -316,7 +316,7 @@ class TestGenererPDFRapportBudget:
 
     def test_generer_pdf_rapport_budget_periode_courte(self, mock_rapport_budget):
         """Test génération PDF rapport budget période courte."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         mock_rapport_budget.periode_jours = 7
@@ -338,7 +338,7 @@ class TestGenererPDFAnalyseGaspillage:
 
     def test_generer_pdf_analyse_gaspillage_complet(self, mock_analyse_gaspillage):
         """Test génération PDF analyse gaspillage avec données complètes."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         
@@ -354,7 +354,7 @@ class TestGenererPDFAnalyseGaspillage:
 
     def test_generer_pdf_analyse_gaspillage_vide(self, mock_analyse_gaspillage_minimal):
         """Test génération PDF analyse gaspillage sans données."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         
@@ -367,7 +367,7 @@ class TestGenererPDFAnalyseGaspillage:
 
     def test_generer_pdf_analyse_gaspillage_recommandations(self, mock_analyse_gaspillage):
         """Test génération PDF avec recommandations multiples."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         
@@ -386,7 +386,7 @@ class TestGenererPDFAnalyseGaspillage:
 
     def test_generer_pdf_analyse_gaspillage_valeur_elevee(self, mock_analyse_gaspillage):
         """Test génération PDF avec valeur perdue élevée."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         mock_analyse_gaspillage.valeur_perdue = 250.00
@@ -409,7 +409,7 @@ class TestGenererPDFRapportPlanning:
 
     def test_generer_pdf_rapport_planning_complet(self, mock_rapport_planning):
         """Test génération PDF rapport planning avec données complètes."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         
@@ -425,7 +425,7 @@ class TestGenererPDFRapportPlanning:
 
     def test_generer_pdf_rapport_planning_vide(self, mock_rapport_planning_minimal):
         """Test génération PDF rapport planning sans données."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         
@@ -438,7 +438,7 @@ class TestGenererPDFRapportPlanning:
 
     def test_generer_pdf_rapport_planning_avec_date(self, mock_rapport_planning):
         """Test génération PDF rapport planning avec date spécifiée."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         
@@ -450,7 +450,7 @@ class TestGenererPDFRapportPlanning:
 
     def test_generer_pdf_rapport_planning_tous_jours(self, mock_rapport_planning):
         """Test génération PDF rapport planning avec tous les jours."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         
@@ -478,7 +478,7 @@ class TestGenererPDFRapportPlanning:
 
     def test_generer_pdf_rapport_planning_liste_courses_longue(self, mock_rapport_planning):
         """Test génération PDF rapport planning avec longue liste courses."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         
@@ -505,15 +505,15 @@ class TestRapportsPDFUtilitaires:
 
     def test_service_instantiation(self):
         """Test instanciation du service."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         assert service is not None
 
     def test_factory_function(self):
         """Test factory function get_rapports_pdf_service."""
-        import src.services.rapports_pdf as module
-        from src.services.rapports_pdf import get_rapports_pdf_service
+        import src.services.rapports.rapports as module
+        from src.services.rapports import get_rapports_pdf_service
         
         # Reset singleton for isolated test
         module._rapports_pdf_service_instance = None
@@ -523,8 +523,8 @@ class TestRapportsPDFUtilitaires:
 
     def test_factory_returns_same_instance(self):
         """Test factory retourne la même instance (singleton)."""
-        import src.services.rapports_pdf as module
-        from src.services.rapports_pdf import get_rapports_pdf_service
+        import src.services.rapports.rapports as module
+        from src.services.rapports import get_rapports_pdf_service
         
         # Reset singleton
         module._rapports_pdf_service_instance = None
@@ -536,7 +536,7 @@ class TestRapportsPDFUtilitaires:
 
     def test_schemas_exports(self):
         """Test export des schémas Pydantic."""
-        from src.services.rapports_pdf import (
+        from src.services.rapports import (
             RapportStocks,
             RapportBudget,
             AnalyseGaspillage,
@@ -565,7 +565,7 @@ class TestGenererDonneesRapport:
 
     def test_generer_donnees_rapport_stocks_avec_session(self):
         """Test génération données stocks avec session mockée."""
-        from src.services.rapports_pdf import RapportsPDFService, RapportStocks
+        from src.services.rapports import RapportsPDFService, RapportStocks
         
         service = RapportsPDFService()
         
@@ -583,7 +583,7 @@ class TestGenererDonneesRapport:
 
     def test_generer_donnees_rapport_budget_avec_session(self):
         """Test génération données budget avec session mockée."""
-        from src.services.rapports_pdf import RapportsPDFService, RapportBudget
+        from src.services.rapports import RapportsPDFService, RapportBudget
         
         service = RapportsPDFService()
         
@@ -609,7 +609,7 @@ class TestCasLimites:
 
     def test_rapport_stocks_valeur_tres_elevee(self, mock_rapport_stocks):
         """Test rapport stocks avec valeur très élevée."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         mock_rapport_stocks.valeur_stock_total = 99999.99
@@ -623,7 +623,7 @@ class TestCasLimites:
 
     def test_rapport_budget_depenses_zero(self, mock_rapport_budget_minimal):
         """Test rapport budget avec dépenses zéro."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         
@@ -635,7 +635,7 @@ class TestCasLimites:
 
     def test_gaspillage_sans_recommandations(self, mock_analyse_gaspillage):
         """Test analyse gaspillage sans recommandations."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         mock_analyse_gaspillage.recommandations = []
@@ -648,7 +648,7 @@ class TestCasLimites:
 
     def test_planning_nom_long(self, mock_rapport_planning):
         """Test planning avec nom très long."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         mock_rapport_planning.nom_planning = "Menu de la semaine avec des plats traditionnels et modernes pour toute la famille"
@@ -661,7 +661,7 @@ class TestCasLimites:
 
     def test_planning_notes_speciales(self, mock_rapport_planning):
         """Test planning avec notes contenant caractères spéciaux."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         from datetime import datetime, timedelta
         
         service = RapportsPDFService()
@@ -693,7 +693,7 @@ class TestPDFValidation:
 
     def test_pdf_stocks_contient_eof(self, mock_rapport_stocks):
         """Test PDF stocks contient marqueur EOF."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         
@@ -707,7 +707,7 @@ class TestPDFValidation:
 
     def test_pdf_budget_contient_eof(self, mock_rapport_budget):
         """Test PDF budget contient marqueur EOF."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         
@@ -721,7 +721,7 @@ class TestPDFValidation:
 
     def test_pdf_gaspillage_contient_eof(self, mock_analyse_gaspillage):
         """Test PDF gaspillage contient marqueur EOF."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         
@@ -735,7 +735,7 @@ class TestPDFValidation:
 
     def test_pdf_planning_contient_eof(self, mock_rapport_planning):
         """Test PDF planning contient marqueur EOF."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         
@@ -758,7 +758,7 @@ class TestDonneesVolumineuses:
 
     def test_stocks_beaucoup_articles_faible_stock(self, mock_rapport_stocks):
         """Test rapport stocks avec beaucoup d'articles faible stock."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         
@@ -776,7 +776,7 @@ class TestDonneesVolumineuses:
 
     def test_stocks_beaucoup_articles_perimes(self, mock_rapport_stocks):
         """Test rapport stocks avec beaucoup d'articles périmés."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         
@@ -794,7 +794,7 @@ class TestDonneesVolumineuses:
 
     def test_budget_beaucoup_categories(self, mock_rapport_budget):
         """Test rapport budget avec beaucoup de catégories."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         
@@ -812,7 +812,7 @@ class TestDonneesVolumineuses:
 
     def test_gaspillage_beaucoup_articles_detail(self, mock_analyse_gaspillage):
         """Test analyse gaspillage avec beaucoup de détails."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         

@@ -3,35 +3,24 @@ import importlib
 
 # Liste des modules de services à tester (corrigé pour correspondre aux fichiers réels)
 MODULES_SERVICES = [
-    "action_history",
-    "auth",
     "backup",
-    "barcode",
+    "base",  # Package unifié (remplace base_ai_service.py, types.py, io_service.py)
     "batch_cooking",
     "budget",
-    "calendar_sync",
-    "courses",
-    "courses_intelligentes",
-    "facture_ocr",
-    "garmin_sync",
+    "calendrier",
+    "courses",  # Package unifie (remplace courses.py, courses_intelligentes.py)
+    "garmin",  # Package unifié (remplace garmin_sync.py, garmin_sync_utils.py)
+    "integrations",  # Package unifié (codes-barres, openfoodfacts, facture_ocr)
     "inventaire",
-    "notifications",
-    "notifications_push",
-    "openfoodfacts",
-    "pdf_export",
-    "planning",
-    "planning_unified",
-    "predictions",
-    "push_notifications",
-    "pwa",
-    "rapports_pdf",
-    "realtime_sync",
-    "recettes",
-    "recipe_import",
-    "suggestions_ia",
-    "types",
-    "user_preferences",
-    "weather",
+    "notifications",  # Package unifié qui remplace notifications.py, notifications_push.py, push_notifications.py
+    "rapports",  # Package unifié qui remplace pdf_export.py, rapports_pdf.py
+    "planning",  # Package unifie (remplace planning.py, planning_unified.py, planning_utils.py)
+    # predictions -> fusionné dans suggestions/
+    "web",  # Package unifié (sync + pwa fusionnés)
+    "recettes",  # Package unifié (inclut import_url.py via recettes.import_url)
+    "suggestions",
+    "utilisateur",  # Package unifié (remplace auth.py, action_history.py, user_preferences.py)
+    "weather",  # Package unifié (remplace weather.py, weather_utils.py)
 ]
 
 @pytest.mark.parametrize("module_name", MODULES_SERVICES)

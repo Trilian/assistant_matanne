@@ -21,7 +21,7 @@ class TestCalculerStatut:
     @pytest.fixture
     def service(self):
         """Crée un service inventaire mocké."""
-        with patch("src.services.inventaire.obtenir_client_ia"):
+        with patch("src.services.inventaire.service.obtenir_client_ia"):
             from src.services.inventaire import InventaireService
             return InventaireService()
 
@@ -78,7 +78,7 @@ class TestJoursAvantPeremption:
     @pytest.fixture
     def service(self):
         """Crée un service inventaire mocké."""
-        with patch("src.services.inventaire.obtenir_client_ia"):
+        with patch("src.services.inventaire.service.obtenir_client_ia"):
             from src.services.inventaire import InventaireService
             return InventaireService()
 
@@ -209,7 +209,7 @@ class TestInventaireServiceGetAlertes:
     @pytest.fixture
     def service_mock(self):
         """Crée un service mocké."""
-        with patch("src.services.inventaire.obtenir_client_ia"):
+        with patch("src.services.inventaire.service.obtenir_client_ia"):
             from src.services.inventaire import InventaireService
             service = InventaireService()
             return service

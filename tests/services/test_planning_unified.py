@@ -1,14 +1,14 @@
 """
 Tests unitaires pour planning_unified.py
 
-Module: src.services.planning_unified
+Module: src.services.planning
 """
 
 import pytest
 from unittest.mock import MagicMock, patch
 
 # TODO: Ajuster l'import selon la structure
-# from src.services.planning_unified import ...
+# from src.services.planning import ...
 
 
 class TestPlanningUnified:

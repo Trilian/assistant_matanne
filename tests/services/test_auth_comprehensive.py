@@ -11,7 +11,7 @@ import pytest
 from datetime import datetime
 from unittest.mock import Mock, patch, MagicMock
 
-from src.services.auth import (
+from src.services.utilisateur import (
     Role,
     Permission,
     UserProfile,

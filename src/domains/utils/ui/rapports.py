@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 
 from src.core.state import GestionnaireEtat, obtenir_etat
-from src.services.rapports_pdf import RapportsPDFService
+from src.services.rapports import RapportsPDFService
 
 # Logique métier pure
 from src.domains.utils.logic.rapports_logic import (

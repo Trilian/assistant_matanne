@@ -7,7 +7,7 @@ Ces tests ne nécessitent pas de base de données.
 import pytest
 from datetime import date, time, datetime, timedelta
 
-from src.services.batch_cooking_utils import (
+from src.services.batch_cooking import (
     # Constantes
     JOURS_SEMAINE,
     ROBOTS_DISPONIBLES,

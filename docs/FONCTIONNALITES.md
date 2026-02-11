@@ -203,7 +203,7 @@ GOOGLE_CLIENT_SECRET=votre_client_secret
 ### Utilisation
 
 ```python
-from src.services.calendar_sync import get_calendar_sync_service
+from src.services.calendrier import get_calendar_sync_service
 
 service = get_calendar_sync_service()
 

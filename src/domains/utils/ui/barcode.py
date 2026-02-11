@@ -12,7 +12,7 @@ from datetime import datetime
 from io import StringIO
 
 from src.core.state import GestionnaireEtat, obtenir_etat
-from src.services.barcode import BarcodeService
+from src.services.integrations import BarcodeService
 from src.services.inventaire import InventaireService
 from src.core.errors_base import ErreurValidation, ErreurNonTrouve
 

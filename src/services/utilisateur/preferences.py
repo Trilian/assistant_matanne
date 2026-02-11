@@ -1,0 +1,299 @@
+﻿"""
+Service Pr�f�rences Utilisateur - Persistance DB
+
+G�re:
+- UserPreference: Pr�f�rences familiales persistantes
+- RecipeFeedback: Feedbacks ??/?? pour apprentissage IA
+
+Remplace st.session_state par persistance PostgreSQL.
+"""
+
+import logging
+from typing import Optional
+from datetime import datetime, timezone, date
+
+from sqlalchemy.orm import Session
+from sqlalchemy import select
+
+from src.core.decorators import avec_session_db
+from src.core.models import UserPreference, RecipeFeedback
+from src.domains.cuisine.logic.schemas import (
+    PreferencesUtilisateur,
+    FeedbackRecette,
+)
+
+logger = logging.getLogger(__name__)
+
+# ID utilisateur par d�faut (famille Matanne)
+DEFAULT_USER_ID = "matanne"
+
+
+class UserPreferenceService:
+    """Service pour g�rer les pr�f�rences utilisateur en DB."""
+    
+    def __init__(self, user_id: str = DEFAULT_USER_ID):
+        self.user_id = user_id
+    
+    @avec_session_db
+    def charger_preferences(self, db: Optional[Session] = None) -> PreferencesUtilisateur:
+        """
+        Charge les pr�f�rences depuis la DB.
+        
+        Returns:
+            PreferencesUtilisateur avec valeurs DB ou d�fauts
+        """
+        stmt = select(UserPreference).where(UserPreference.user_id == self.user_id)
+        db_pref = db.execute(stmt).scalar_one_or_none()
+        
+        if db_pref:
+            logger.debug(f"Pr�f�rences charg�es pour {self.user_id}")
+            return self._db_to_dataclass(db_pref)
+        
+        # Cr�er les pr�f�rences par d�faut
+        logger.info(f"Cr�ation pr�f�rences par d�faut pour {self.user_id}")
+        default_prefs = self._get_default_preferences()
+        self.sauvegarder_preferences(default_prefs, db=db)
+        return default_prefs
+    
+    @avec_session_db
+    def sauvegarder_preferences(self, prefs: PreferencesUtilisateur, db: Optional[Session] = None) -> bool:
+        """
+        Sauvegarde les pr�f�rences en DB (insert ou update).
+        
+        Args:
+            prefs: PreferencesUtilisateur � sauvegarder
+            
+        Returns:
+            True si succ�s
+        """
+        try:
+            stmt = select(UserPreference).where(UserPreference.user_id == self.user_id)
+            db_pref = db.execute(stmt).scalar_one_or_none()
+            
+            if db_pref:
+                # Update existant
+                self._update_db_from_dataclass(db_pref, prefs)
+                db_pref.updated_at = datetime.now(timezone.utc)
+            else:
+                # Insert nouveau
+                db_pref = self._dataclass_to_db(prefs)
+                db.add(db_pref)
+            
+            db.commit()
+            logger.info(f"? Pr�f�rences sauvegard�es pour {self.user_id}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"? Erreur sauvegarde pr�f�rences: {e}")
+            db.rollback()
+            return False
+    
+    @avec_session_db
+    def charger_feedbacks(self, db: Optional[Session] = None) -> list[FeedbackRecette]:
+        """
+        Charge tous les feedbacks de l'utilisateur.
+        
+        Returns:
+            Liste de FeedbackRecette
+        """
+        stmt = select(RecipeFeedback).where(
+            RecipeFeedback.user_id == self.user_id
+        ).order_by(RecipeFeedback.created_at.desc())
+        
+        db_feedbacks = db.execute(stmt).scalars().all()
+        
+        feedbacks: list[FeedbackRecette] = []
+        for fb in db_feedbacks:
+            date_fb: Optional[date] = fb.created_at.date() if fb.created_at else None
+            feedbacks.append(FeedbackRecette(
+                recette_id=fb.recette_id,
+                recette_nom=fb.notes or f"Recette #{fb.recette_id}",  # nom stock� dans notes
+                feedback=fb.feedback,
+                date_feedback=date_fb,
+                contexte=fb.contexte,
+            ))
+        
+        logger.debug(f"Charg� {len(feedbacks)} feedbacks pour {self.user_id}")
+        return feedbacks
+    
+    @avec_session_db
+    def ajouter_feedback(
+        self, 
+        recette_id: int, 
+        recette_nom: str, 
+        feedback: str, 
+        contexte: Optional[str] = None,
+        db: Optional[Session] = None
+    ) -> bool:
+        """
+        Ajoute ou met � jour un feedback sur une recette.
+        
+        Args:
+            recette_id: ID de la recette
+            recette_nom: Nom de la recette (stock� dans notes)
+            feedback: "like", "dislike", ou "neutral"
+            contexte: Contexte optionnel
+            
+        Returns:
+            True si succ�s
+        """
+        try:
+            # V�rifier si feedback existe d�j�
+            stmt = select(RecipeFeedback).where(
+                RecipeFeedback.user_id == self.user_id,
+                RecipeFeedback.recette_id == recette_id
+            )
+            existing = db.execute(stmt).scalar_one_or_none()
+            
+            if existing:
+                # Update
+                existing.feedback = feedback
+                existing.contexte = contexte
+                existing.notes = recette_nom
+                logger.debug(f"Feedback mis � jour: {recette_nom} ? {feedback}")
+            else:
+                # Insert
+                new_fb = RecipeFeedback(
+                    user_id=self.user_id,
+                    recette_id=recette_id,
+                    feedback=feedback,
+                    contexte=contexte,
+                    notes=recette_nom,  # Stocker le nom dans notes
+                )
+                db.add(new_fb)
+                logger.debug(f"Nouveau feedback: {recette_nom} ? {feedback}")
+            
+            db.commit()
+            return True
+            
+        except Exception as e:
+            logger.error(f"? Erreur ajout feedback: {e}")
+            db.rollback()
+            return False
+    
+    @avec_session_db
+    def supprimer_feedback(self, recette_id: int, db: Optional[Session] = None) -> bool:
+        """Supprime un feedback."""
+        try:
+            stmt = select(RecipeFeedback).where(
+                RecipeFeedback.user_id == self.user_id,
+                RecipeFeedback.recette_id == recette_id
+            )
+            fb = db.execute(stmt).scalar_one_or_none()
+            
+            if fb:
+                db.delete(fb)
+                db.commit()
+                logger.info(f"Feedback supprim� pour recette {recette_id}")
+                return True
+            return False
+            
+        except Exception as e:
+            logger.error(f"? Erreur suppression feedback: {e}")
+            db.rollback()
+            return False
+    
+    @avec_session_db
+    def get_feedbacks_stats(self, db: Optional[Session] = None) -> dict[str, int]:
+        """
+        Retourne les statistiques des feedbacks.
+        
+        Returns:
+            Dict avec likes, dislikes, neutrals counts
+        """
+        stmt = select(RecipeFeedback).where(RecipeFeedback.user_id == self.user_id)
+        feedbacks = db.execute(stmt).scalars().all()
+        
+        stats = {"like": 0, "dislike": 0, "neutral": 0, "total": 0}
+        for fb in feedbacks:
+            stats[fb.feedback] = stats.get(fb.feedback, 0) + 1
+            stats["total"] += 1
+        
+        return stats
+    
+    # -----------------------------------------------------------
+    # HELPERS CONVERSION
+    # -----------------------------------------------------------
+    
+    def _get_default_preferences(self) -> PreferencesUtilisateur:
+        """Retourne les pr�f�rences par d�faut pour la famille Matanne."""
+        return PreferencesUtilisateur(
+            nb_adultes=2,
+            jules_present=True,
+            jules_age_mois=19,
+            temps_semaine="normal",
+            temps_weekend="long",
+            aliments_exclus=[],
+            aliments_favoris=["poulet", "p�tes", "gratins", "soupes"],
+            poisson_par_semaine=2,
+            vegetarien_par_semaine=1,
+            viande_rouge_max=2,
+            robots=["monsieur_cuisine", "cookeo", "four"],
+            magasins_preferes=["Carrefour Drive", "Bio Coop", "Grand Frais", "Thiriet"],
+        )
+    
+    def _db_to_dataclass(self, db_pref: UserPreference) -> PreferencesUtilisateur:
+        """Convertit UserPreference (DB) ? PreferencesUtilisateur (dataclass)."""
+        return PreferencesUtilisateur(
+            nb_adultes=db_pref.nb_adultes,
+            jules_present=db_pref.jules_present,
+            jules_age_mois=db_pref.jules_age_mois,
+            temps_semaine=db_pref.temps_semaine,
+            temps_weekend=db_pref.temps_weekend,
+            aliments_exclus=db_pref.aliments_exclus or [],
+            aliments_favoris=db_pref.aliments_favoris or [],
+            poisson_par_semaine=db_pref.poisson_par_semaine,
+            vegetarien_par_semaine=db_pref.vegetarien_par_semaine,
+            viande_rouge_max=db_pref.viande_rouge_max,
+            robots=db_pref.robots or [],
+            magasins_preferes=db_pref.magasins_preferes or [],
+        )
+    
+    def _dataclass_to_db(self, prefs: PreferencesUtilisateur) -> UserPreference:
+        """Convertit PreferencesUtilisateur (dataclass) ? UserPreference (DB)."""
+        return UserPreference(
+            user_id=self.user_id,
+            nb_adultes=prefs.nb_adultes,
+            jules_present=prefs.jules_present,
+            jules_age_mois=prefs.jules_age_mois,
+            temps_semaine=prefs.temps_semaine,
+            temps_weekend=prefs.temps_weekend,
+            aliments_exclus=prefs.aliments_exclus,
+            aliments_favoris=prefs.aliments_favoris,
+            poisson_par_semaine=prefs.poisson_par_semaine,
+            vegetarien_par_semaine=prefs.vegetarien_par_semaine,
+            viande_rouge_max=prefs.viande_rouge_max,
+            robots=prefs.robots,
+            magasins_preferes=prefs.magasins_preferes,
+        )
+    
+    def _update_db_from_dataclass(self, db_pref: UserPreference, prefs: PreferencesUtilisateur):
+        """Met � jour les champs DB depuis le dataclass."""
+        db_pref.nb_adultes = prefs.nb_adultes
+        db_pref.jules_present = prefs.jules_present
+        db_pref.jules_age_mois = prefs.jules_age_mois
+        db_pref.temps_semaine = prefs.temps_semaine
+        db_pref.temps_weekend = prefs.temps_weekend
+        db_pref.aliments_exclus = prefs.aliments_exclus
+        db_pref.aliments_favoris = prefs.aliments_favoris
+        db_pref.poisson_par_semaine = prefs.poisson_par_semaine
+        db_pref.vegetarien_par_semaine = prefs.vegetarien_par_semaine
+        db_pref.viande_rouge_max = prefs.viande_rouge_max
+        db_pref.robots = prefs.robots
+        db_pref.magasins_preferes = prefs.magasins_preferes
+
+
+# -----------------------------------------------------------
+# FACTORY
+# -----------------------------------------------------------
+
+_preference_service: Optional[UserPreferenceService] = None
+
+
+def get_user_preference_service(user_id: str = DEFAULT_USER_ID) -> UserPreferenceService:
+    """Factory pour obtenir le service de pr�f�rences."""
+    global _preference_service
+    if _preference_service is None or _preference_service.user_id != user_id:
+        _preference_service = UserPreferenceService(user_id)
+    return _preference_service
+

@@ -7,8 +7,8 @@ Module: src.services.barcode
 import pytest
 from unittest.mock import MagicMock, patch
 
-# TODO: Ajuster l'import selon la structure
-# from src.services.barcode import ...
+# Import depuis le nouveau package integrations
+from src.services.integrations import BarcodeService, BarcodeData, BarcodeArticle, BarcodeRecette, ScanResultat
 
 
 class TestBarcode:

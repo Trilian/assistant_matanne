@@ -18,7 +18,7 @@ class TestRapportsSchemas:
     
     def test_rapport_stocks_creation_complete(self):
         """Test création RapportStocks avec tous les champs."""
-        from src.services.rapports_pdf import RapportStocks
+        from src.services.rapports import RapportStocks
         
         rapport = RapportStocks(
             periode_jours=30,
@@ -38,7 +38,7 @@ class TestRapportsSchemas:
     
     def test_rapport_stocks_defaults(self):
         """Test valeurs par défaut RapportStocks."""
-        from src.services.rapports_pdf import RapportStocks
+        from src.services.rapports import RapportStocks
         
         rapport = RapportStocks()
         
@@ -51,7 +51,7 @@ class TestRapportsSchemas:
     
     def test_rapport_budget_creation_complete(self):
         """Test création RapportBudget avec tous les champs."""
-        from src.services.rapports_pdf import RapportBudget
+        from src.services.rapports import RapportBudget
         
         rapport = RapportBudget(
             periode_jours=30,
@@ -68,7 +68,7 @@ class TestRapportsSchemas:
     
     def test_rapport_budget_defaults(self):
         """Test valeurs par défaut RapportBudget."""
-        from src.services.rapports_pdf import RapportBudget
+        from src.services.rapports import RapportBudget
         
         rapport = RapportBudget()
         
@@ -78,7 +78,7 @@ class TestRapportsSchemas:
     
     def test_analyse_gaspillage_creation(self):
         """Test création AnalyseGaspillage."""
-        from src.services.rapports_pdf import AnalyseGaspillage
+        from src.services.rapports import AnalyseGaspillage
         
         analyse = AnalyseGaspillage(
             periode_jours=30,
@@ -96,7 +96,7 @@ class TestRapportsSchemas:
     
     def test_rapport_planning_creation(self):
         """Test création RapportPlanning."""
-        from src.services.rapports_pdf import RapportPlanning
+        from src.services.rapports import RapportPlanning
         
         rapport = RapportPlanning(
             planning_id=1,
@@ -119,7 +119,7 @@ class TestRapportsPDFServiceInit:
     
     def test_service_init(self):
         """Test initialisation du service."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         
@@ -128,7 +128,7 @@ class TestRapportsPDFServiceInit:
     
     def test_service_has_methods(self):
         """Test que le service a les méthodes attendues."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         
@@ -152,7 +152,7 @@ class TestRapportsPDFServiceWithDB:
     
     def test_generer_donnees_rapport_stocks_empty(self, patch_db_context):
         """Test génération rapport stocks sur DB vide."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         rapport = service.generer_donnees_rapport_stocks(periode_jours=7)
@@ -163,7 +163,7 @@ class TestRapportsPDFServiceWithDB:
     
     def test_generer_donnees_rapport_budget_empty(self, patch_db_context):
         """Test génération rapport budget sur DB vide."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         rapport = service.generer_donnees_rapport_budget(periode_jours=30)
@@ -173,7 +173,7 @@ class TestRapportsPDFServiceWithDB:
     
     def test_generer_analyse_gaspillage_empty(self, patch_db_context):
         """Test génération analyse gaspillage sur DB vide."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         analyse = service.generer_analyse_gaspillage(periode_jours=30)
@@ -192,7 +192,7 @@ class TestSuggestionsIASchemas:
     
     def test_profil_culinaire_creation(self):
         """Test création ProfilCulinaire."""
-        from src.services.suggestions_ia import ProfilCulinaire
+        from src.services.suggestions import ProfilCulinaire
         
         profil = ProfilCulinaire(
             categories_preferees=["Italien", "Asiatique"],
@@ -212,7 +212,7 @@ class TestSuggestionsIASchemas:
     
     def test_profil_culinaire_defaults(self):
         """Test valeurs par défaut ProfilCulinaire."""
-        from src.services.suggestions_ia import ProfilCulinaire
+        from src.services.suggestions import ProfilCulinaire
         
         profil = ProfilCulinaire()
         
@@ -223,7 +223,7 @@ class TestSuggestionsIASchemas:
     
     def test_contexte_suggestion_creation(self):
         """Test création ContexteSuggestion."""
-        from src.services.suggestions_ia import ContexteSuggestion
+        from src.services.suggestions import ContexteSuggestion
         
         contexte = ContexteSuggestion(
             type_repas="déjeuner",
@@ -243,7 +243,7 @@ class TestSuggestionsIASchemas:
     
     def test_contexte_suggestion_defaults(self):
         """Test valeurs par défaut ContexteSuggestion."""
-        from src.services.suggestions_ia import ContexteSuggestion
+        from src.services.suggestions import ContexteSuggestion
         
         contexte = ContexteSuggestion()
         
@@ -254,7 +254,7 @@ class TestSuggestionsIASchemas:
     
     def test_suggestion_recette_creation(self):
         """Test création SuggestionRecette."""
-        from src.services.suggestions_ia import SuggestionRecette
+        from src.services.suggestions import SuggestionRecette
         
         suggestion = SuggestionRecette(
             recette_id=42,
@@ -275,7 +275,7 @@ class TestSuggestionsIASchemas:
     
     def test_suggestion_recette_defaults(self):
         """Test valeurs par défaut SuggestionRecette."""
-        from src.services.suggestions_ia import SuggestionRecette
+        from src.services.suggestions import SuggestionRecette
         
         suggestion = SuggestionRecette()
         
@@ -290,7 +290,7 @@ class TestSuggestionsIAServiceInit:
     
     def test_service_init(self):
         """Test initialisation du service."""
-        from src.services.suggestions_ia import SuggestionsIAService
+        from src.services.suggestions import SuggestionsIAService
         
         service = SuggestionsIAService()
         
@@ -301,7 +301,7 @@ class TestSuggestionsIAServiceInit:
     
     def test_service_has_methods(self):
         """Test que le service a les méthodes attendues."""
-        from src.services.suggestions_ia import SuggestionsIAService
+        from src.services.suggestions import SuggestionsIAService
         
         service = SuggestionsIAService()
         
@@ -315,7 +315,7 @@ class TestSuggestionsIAServiceWithDB:
     
     def test_analyser_profil_culinaire_empty(self, patch_db_context):
         """Test analyse profil sur historique vide."""
-        from src.services.suggestions_ia import SuggestionsIAService
+        from src.services.suggestions import SuggestionsIAService
         
         service = SuggestionsIAService()
         profil = service.analyser_profil_culinaire(jours_historique=90)
@@ -452,7 +452,7 @@ class TestBarcodeServiceMethods:
     
     def test_service_init(self):
         """Test initialisation du service."""
-        from src.services.barcode import BarcodeService
+        from src.services.integrations import BarcodeService
         
         service = BarcodeService()
         
@@ -460,7 +460,7 @@ class TestBarcodeServiceMethods:
     
     def test_valider_barcode_valid_ean13(self):
         """Test validation d'un code-barres EAN-13 valide."""
-        from src.services.barcode import BarcodeService
+        from src.services.integrations import BarcodeService
         
         service = BarcodeService()
         
@@ -472,7 +472,7 @@ class TestBarcodeServiceMethods:
     
     def test_scanner_code_method_exists(self):
         """Test que scanner_code existe."""
-        from src.services.barcode import BarcodeService
+        from src.services.integrations import BarcodeService
         
         service = BarcodeService()
         
@@ -837,7 +837,7 @@ class TestAuthServiceComplete:
     
     def test_service_init(self):
         """Test initialisation du service."""
-        from src.services.auth import AuthService
+        from src.services.utilisateur import AuthService
         
         service = AuthService()
         
@@ -845,7 +845,7 @@ class TestAuthServiceComplete:
     
     def test_service_has_auth_methods(self):
         """Test que le service a les méthodes d'auth."""
-        from src.services.auth import AuthService
+        from src.services.utilisateur import AuthService
         
         service = AuthService()
         
@@ -871,7 +871,7 @@ class TestCalendarSyncServiceComplete:
     
     def test_service_exists(self):
         """Test que le service existe."""
-        from src.services.calendar_sync import CalendarSyncService
+        from src.services.calendrier import CalendarSyncService
         
         service = CalendarSyncService()
         assert service is not None
@@ -887,7 +887,7 @@ class TestPredictionsServiceComplete:
     
     def test_service_init(self):
         """Test initialisation du service."""
-        from src.services.predictions import PredictionService
+        from src.services.suggestions import PredictionService
         
         service = PredictionService()
         
@@ -895,7 +895,7 @@ class TestPredictionsServiceComplete:
     
     def test_service_has_prediction_methods(self):
         """Test que le service a des méthodes de prédiction."""
-        from src.services.predictions import PredictionService
+        from src.services.suggestions import PredictionService
         
         service = PredictionService()
         

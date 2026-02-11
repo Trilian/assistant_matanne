@@ -1,14 +1,14 @@
 """
 Tests unitaires pour pdf_export.py
 
-Module: src.services.pdf_export
+Module: src.services.rapports
 """
 
 import pytest
 from unittest.mock import MagicMock, patch
 
 # TODO: Ajuster l'import selon la structure
-# from src.services.pdf_export import ...
+# from src.services.rapports import ...
 
 
 class TestPdfExport:

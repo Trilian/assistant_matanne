@@ -16,7 +16,7 @@ class TestMarmitonParserParse:
     
     def test_parse_minimal_page(self):
         """Parse une page avec seulement un titre."""
-        from src.services.recipe_import import MarmitonParser
+        from src.services.recettes.import_url import MarmitonParser
         
         html = """
         <html><body>
@@ -31,7 +31,7 @@ class TestMarmitonParserParse:
     
     def test_parse_with_description(self):
         """Parse une page avec titre et description."""
-        from src.services.recipe_import import MarmitonParser
+        from src.services.recettes.import_url import MarmitonParser
         
         html = """
         <html><body>
@@ -47,7 +47,7 @@ class TestMarmitonParserParse:
     
     def test_parse_with_image(self):
         """Parse une page avec image de recette."""
-        from src.services.recipe_import import MarmitonParser
+        from src.services.recettes.import_url import MarmitonParser
         
         html = """
         <html><body>
@@ -62,7 +62,7 @@ class TestMarmitonParserParse:
     
     def test_parse_with_times(self):
         """Parse une page avec temps de préparation et cuisson."""
-        from src.services.recipe_import import MarmitonParser
+        from src.services.recettes.import_url import MarmitonParser
         
         html = """
         <html><body>
@@ -79,7 +79,7 @@ class TestMarmitonParserParse:
     
     def test_parse_with_portions(self):
         """Parse une page avec nombre de portions."""
-        from src.services.recipe_import import MarmitonParser
+        from src.services.recettes.import_url import MarmitonParser
         
         html = """
         <html><body>
@@ -94,7 +94,7 @@ class TestMarmitonParserParse:
     
     def test_parse_with_ingredients(self):
         """Parse une page avec liste d'ingrédients."""
-        from src.services.recipe_import import MarmitonParser
+        from src.services.recettes.import_url import MarmitonParser
         
         html = """
         <html><body>
@@ -113,7 +113,7 @@ class TestMarmitonParserParse:
     
     def test_parse_with_steps(self):
         """Parse une page avec étapes de préparation."""
-        from src.services.recipe_import import MarmitonParser
+        from src.services.recettes.import_url import MarmitonParser
         
         html = """
         <html><body>
@@ -131,7 +131,7 @@ class TestMarmitonParserParse:
     
     def test_parse_complete_recipe(self):
         """Parse une page complète avec tous les éléments."""
-        from src.services.recipe_import import MarmitonParser
+        from src.services.recettes.import_url import MarmitonParser
         
         html = """
         <html><body>
@@ -170,7 +170,7 @@ class TestMarmitonCalculateConfidence:
     
     def test_confidence_empty_recipe(self):
         """Recipe vide a un score bas."""
-        from src.services.recipe_import import MarmitonParser, ImportedRecipe
+        from src.services.recettes.import_url import MarmitonParser, ImportedRecipe
         
         recipe = ImportedRecipe()
         score = MarmitonParser._calculate_confidence(recipe)
@@ -179,7 +179,7 @@ class TestMarmitonCalculateConfidence:
     
     def test_confidence_with_name(self):
         """Recipe avec nom a un score plus élevé."""
-        from src.services.recipe_import import MarmitonParser, ImportedRecipe
+        from src.services.recettes.import_url import MarmitonParser, ImportedRecipe
         
         recipe = ImportedRecipe(nom="Ma recette test")
         score = MarmitonParser._calculate_confidence(recipe)
@@ -188,7 +188,7 @@ class TestMarmitonCalculateConfidence:
     
     def test_confidence_with_ingredients(self):
         """Recipe avec ingrédients a un score plus élevé."""
-        from src.services.recipe_import import MarmitonParser, ImportedRecipe, ImportedIngredient
+        from src.services.recettes.import_url import MarmitonParser, ImportedRecipe, ImportedIngredient
         
         recipe = ImportedRecipe(
             nom="Ma recette test",  # >5 chars pour +0.2
@@ -205,7 +205,7 @@ class TestMarmitonCalculateConfidence:
     
     def test_confidence_with_steps(self):
         """Recipe avec étapes a un score plus élevé."""
-        from src.services.recipe_import import MarmitonParser, ImportedRecipe
+        from src.services.recettes.import_url import MarmitonParser, ImportedRecipe
         
         recipe = ImportedRecipe(
             nom="Test Recipe",
@@ -217,7 +217,7 @@ class TestMarmitonCalculateConfidence:
     
     def test_confidence_with_time(self):
         """Recipe avec temps préparation a un score plus élevé."""
-        from src.services.recipe_import import MarmitonParser, ImportedRecipe
+        from src.services.recettes.import_url import MarmitonParser, ImportedRecipe
         
         recipe = ImportedRecipe(
             nom="Test Recipe",
@@ -229,7 +229,7 @@ class TestMarmitonCalculateConfidence:
     
     def test_confidence_with_image(self):
         """Recipe avec image a un score plus élevé."""
-        from src.services.recipe_import import MarmitonParser, ImportedRecipe
+        from src.services.recettes.import_url import MarmitonParser, ImportedRecipe
         
         recipe = ImportedRecipe(
             nom="Test Recipe",
@@ -241,7 +241,7 @@ class TestMarmitonCalculateConfidence:
     
     def test_confidence_max_one(self):
         """Score de confiance ne dépasse pas 1.0."""
-        from src.services.recipe_import import MarmitonParser, ImportedRecipe, ImportedIngredient
+        from src.services.recettes.import_url import MarmitonParser, ImportedRecipe, ImportedIngredient
         
         recipe = ImportedRecipe(
             nom="Super recette complète",
@@ -265,7 +265,7 @@ class TestCuisineAZParserParse:
     
     def test_parse_minimal(self):
         """Parse une page minimale."""
-        from src.services.recipe_import import CuisineAZParser
+        from src.services.recettes.import_url import CuisineAZParser
         
         html = """
         <html><body>
@@ -280,7 +280,7 @@ class TestCuisineAZParserParse:
     
     def test_parse_with_title_class(self):
         """Parse avec h1 ayant une classe title."""
-        from src.services.recipe_import import CuisineAZParser
+        from src.services.recettes.import_url import CuisineAZParser
         
         html = """
         <html><body>
@@ -294,7 +294,7 @@ class TestCuisineAZParserParse:
     
     def test_parse_with_image_relative(self):
         """Parse avec image en URL relative."""
-        from src.services.recipe_import import CuisineAZParser
+        from src.services.recettes.import_url import CuisineAZParser
         
         html = """
         <html><body>
@@ -309,7 +309,7 @@ class TestCuisineAZParserParse:
     
     def test_parse_with_meta_times(self):
         """Parse avec meta tags pour temps."""
-        from src.services.recipe_import import CuisineAZParser
+        from src.services.recettes.import_url import CuisineAZParser
         
         html = """
         <html>
@@ -330,7 +330,7 @@ class TestCuisineAZParserParse:
     
     def test_parse_with_json_ld(self):
         """Parse avec données JSON-LD."""
-        from src.services.recipe_import import CuisineAZParser
+        from src.services.recettes.import_url import CuisineAZParser
         import json
         
         json_ld = json.dumps({
@@ -360,7 +360,7 @@ class TestCuisineAZParserParse:
     
     def test_parse_fallback_ingredients_html(self):
         """Parse ingrédients depuis HTML si pas de JSON-LD."""
-        from src.services.recipe_import import CuisineAZParser
+        from src.services.recettes.import_url import CuisineAZParser
         
         html = """
         <html><body>
@@ -377,7 +377,7 @@ class TestCuisineAZParserParse:
     
     def test_parse_fallback_steps_html(self):
         """Parse étapes depuis HTML si pas de JSON-LD."""
-        from src.services.recipe_import import CuisineAZParser
+        from src.services.recettes.import_url import CuisineAZParser
         
         html = """
         <html><body>
@@ -398,12 +398,12 @@ class TestCuisineAZCalculateConfidence:
     """Tests pour CuisineAZParser._calculate_confidence()."""
     
     def test_confidence_empty(self):
-        from src.services.recipe_import import CuisineAZParser, ImportedRecipe
+        from src.services.recettes.import_url import CuisineAZParser, ImportedRecipe
         recipe = ImportedRecipe()
         assert CuisineAZParser._calculate_confidence(recipe) == 0.0
     
     def test_confidence_increases(self):
-        from src.services.recipe_import import CuisineAZParser, ImportedRecipe, ImportedIngredient
+        from src.services.recettes.import_url import CuisineAZParser, ImportedRecipe, ImportedIngredient
         
         recipe1 = ImportedRecipe()
         recipe2 = ImportedRecipe(nom="Test")
@@ -430,7 +430,7 @@ class TestGenericRecipeParserParse:
     
     def test_parse_with_json_ld_recipe(self):
         """Parse avec JSON-LD schema.org Recipe."""
-        from src.services.recipe_import import GenericRecipeParser
+        from src.services.recettes.import_url import GenericRecipeParser
         import json
         
         json_ld = json.dumps({
@@ -461,7 +461,7 @@ class TestGenericRecipeParserParse:
     
     def test_parse_json_ld_list(self):
         """Parse quand JSON-LD est une liste."""
-        from src.services.recipe_import import GenericRecipeParser
+        from src.services.recettes.import_url import GenericRecipeParser
         import json
         
         json_ld = json.dumps([
@@ -481,7 +481,7 @@ class TestGenericRecipeParserParse:
     
     def test_parse_json_ld_image_list(self):
         """Parse quand image est une liste."""
-        from src.services.recipe_import import GenericRecipeParser
+        from src.services.recettes.import_url import GenericRecipeParser
         import json
         
         json_ld = json.dumps({
@@ -502,7 +502,7 @@ class TestGenericRecipeParserParse:
     
     def test_parse_json_ld_instructions_string(self):
         """Parse quand instructions est une string."""
-        from src.services.recipe_import import GenericRecipeParser
+        from src.services.recettes.import_url import GenericRecipeParser
         import json
         
         json_ld = json.dumps({
@@ -523,7 +523,7 @@ class TestGenericRecipeParserParse:
     
     def test_parse_fallback_html_title(self):
         """Parse titre depuis HTML quand pas de JSON-LD."""
-        from src.services.recipe_import import GenericRecipeParser
+        from src.services.recettes.import_url import GenericRecipeParser
         
         html = """
         <html><body>
@@ -537,7 +537,7 @@ class TestGenericRecipeParserParse:
     
     def test_parse_fallback_itemprop_name(self):
         """Parse titre depuis itemprop."""
-        from src.services.recipe_import import GenericRecipeParser
+        from src.services.recettes.import_url import GenericRecipeParser
         
         html = """
         <html><body>
@@ -551,7 +551,7 @@ class TestGenericRecipeParserParse:
     
     def test_parse_fallback_description_meta(self):
         """Parse description depuis meta tag."""
-        from src.services.recipe_import import GenericRecipeParser
+        from src.services.recettes.import_url import GenericRecipeParser
         
         html = """
         <html><head>
@@ -567,7 +567,7 @@ class TestGenericRecipeParserParse:
     
     def test_parse_fallback_ingredients(self):
         """Parse ingrédients depuis HTML fallback."""
-        from src.services.recipe_import import GenericRecipeParser
+        from src.services.recettes.import_url import GenericRecipeParser
         
         html = """
         <html><body>
@@ -585,7 +585,7 @@ class TestGenericRecipeParserParse:
     
     def test_parse_fallback_steps(self):
         """Parse étapes depuis HTML fallback."""
-        from src.services.recipe_import import GenericRecipeParser
+        from src.services.recettes.import_url import GenericRecipeParser
         
         html = """
         <html><body>
@@ -603,7 +603,7 @@ class TestGenericRecipeParserParse:
     
     def test_parse_fallback_times(self):
         """Parse temps depuis HTML fallback."""
-        from src.services.recipe_import import GenericRecipeParser
+        from src.services.recettes.import_url import GenericRecipeParser
         
         html = """
         <html><body>
@@ -620,7 +620,7 @@ class TestGenericRecipeParserParse:
     
     def test_parse_fallback_image_og(self):
         """Parse image depuis og:image meta."""
-        from src.services.recipe_import import GenericRecipeParser
+        from src.services.recettes.import_url import GenericRecipeParser
         
         html = """
         <html><head>
@@ -636,7 +636,7 @@ class TestGenericRecipeParserParse:
     
     def test_parse_json_ld_invalid_json(self):
         """Gère gracieusement le JSON invalide."""
-        from src.services.recipe_import import GenericRecipeParser
+        from src.services.recettes.import_url import GenericRecipeParser
         
         html = """
         <html><head>
@@ -655,12 +655,12 @@ class TestGenericRecipeParserCalculateConfidence:
     """Tests pour GenericRecipeParser._calculate_confidence()."""
     
     def test_confidence_empty(self):
-        from src.services.recipe_import import GenericRecipeParser, ImportedRecipe
+        from src.services.recettes.import_url import GenericRecipeParser, ImportedRecipe
         recipe = ImportedRecipe()
         assert GenericRecipeParser._calculate_confidence(recipe) == 0.0
     
     def test_confidence_complete(self):
-        from src.services.recipe_import import GenericRecipeParser, ImportedRecipe, ImportedIngredient
+        from src.services.recettes.import_url import GenericRecipeParser, ImportedRecipe, ImportedIngredient
         
         recipe = ImportedRecipe(
             nom="Complete recipe",
@@ -685,28 +685,28 @@ class TestRecipeImportServiceGetParser:
     """Tests pour _get_parser_for_url()."""
     
     def test_parser_marmiton(self):
-        from src.services.recipe_import import RecipeImportService, MarmitonParser
+        from src.services.recettes.import_url import RecipeImportService, MarmitonParser
         service = RecipeImportService()
         
         parser = service._get_parser_for_url("https://www.marmiton.org/recettes/recette_1")
         assert parser == MarmitonParser
     
     def test_parser_cuisineaz(self):
-        from src.services.recipe_import import RecipeImportService, CuisineAZParser
+        from src.services.recettes.import_url import RecipeImportService, CuisineAZParser
         service = RecipeImportService()
         
         parser = service._get_parser_for_url("https://www.cuisineaz.com/recettes/quiche")
         assert parser == CuisineAZParser
     
     def test_parser_generic(self):
-        from src.services.recipe_import import RecipeImportService, GenericRecipeParser
+        from src.services.recettes.import_url import RecipeImportService, GenericRecipeParser
         service = RecipeImportService()
         
         parser = service._get_parser_for_url("https://www.allrecipes.com/recipe/123")
         assert parser == GenericRecipeParser
     
     def test_parser_strips_www(self):
-        from src.services.recipe_import import RecipeImportService, MarmitonParser
+        from src.services.recettes.import_url import RecipeImportService, MarmitonParser
         service = RecipeImportService()
         
         parser = service._get_parser_for_url("https://marmiton.org/recettes/test")
@@ -718,7 +718,7 @@ class TestRecipeImportServiceImportFromUrl:
     
     def test_import_invalid_url_scheme(self):
         """Rejette les URLs avec schéma invalide."""
-        from src.services.recipe_import import RecipeImportService
+        from src.services.recettes.import_url import RecipeImportService
         service = RecipeImportService()
         
         result = service.import_from_url("ftp://example.com/recipe")
@@ -727,7 +727,7 @@ class TestRecipeImportServiceImportFromUrl:
     
     def test_import_http_error(self):
         """Gère les erreurs HTTP."""
-        from src.services.recipe_import import RecipeImportService
+        from src.services.recettes.import_url import RecipeImportService
         import httpx
         
         service = RecipeImportService()
@@ -747,7 +747,7 @@ class TestRecipeImportServiceImportFromUrl:
     
     def test_import_success_marmiton(self):
         """Importe avec succès depuis Marmiton."""
-        from src.services.recipe_import import RecipeImportService
+        from src.services.recettes.import_url import RecipeImportService
         
         service = RecipeImportService()
         
@@ -783,7 +783,7 @@ class TestRecipeImportServiceImportFromUrl:
     
     def test_import_low_confidence_no_ai(self):
         """Import avec score bas sans AI fallback."""
-        from src.services.recipe_import import RecipeImportService
+        from src.services.recettes.import_url import RecipeImportService
         
         service = RecipeImportService()
         
@@ -802,7 +802,7 @@ class TestRecipeImportServiceImportFromUrl:
     
     def test_import_connection_error(self):
         """Gère les erreurs de connexion."""
-        from src.services.recipe_import import RecipeImportService
+        from src.services.recettes.import_url import RecipeImportService
         
         service = RecipeImportService()
         
@@ -817,7 +817,7 @@ class TestRecipeImportServiceBatch:
     
     def test_batch_empty(self):
         """Import lot vide."""
-        from src.services.recipe_import import RecipeImportService
+        from src.services.recettes.import_url import RecipeImportService
         service = RecipeImportService()
         
         results = service.import_batch([])
@@ -825,7 +825,7 @@ class TestRecipeImportServiceBatch:
     
     def test_batch_with_urls(self):
         """Import lot avec URLs."""
-        from src.services.recipe_import import RecipeImportService, ImportResult
+        from src.services.recettes.import_url import RecipeImportService, ImportResult
         service = RecipeImportService()
         
         with patch.object(service, 'import_from_url') as mock_import:
@@ -850,7 +850,7 @@ class TestParseIngredientBranches:
     
     def test_parse_with_three_groups(self):
         """Parse ingrédient avec quantité, unité et nom."""
-        from src.services.recipe_import import RecipeParser
+        from src.services.recettes.import_url import RecipeParser
         
         ing = RecipeParser.parse_ingredient("500 ml de lait")
         assert ing.quantite == 500.0
@@ -859,14 +859,14 @@ class TestParseIngredientBranches:
     
     def test_parse_with_two_groups(self):
         """Parse ingrédient avec quantité et nom (sans unité)."""
-        from src.services.recipe_import import RecipeParser
+        from src.services.recettes.import_url import RecipeParser
         
         ing = RecipeParser.parse_ingredient("6 tomates")
         assert ing.quantite == 6.0
     
     def test_parse_invalid_quantity_three_groups(self):
         """Parse avec quantité invalide dans pattern 3 groupes."""
-        from src.services.recipe_import import RecipeParser
+        from src.services.recettes.import_url import RecipeParser
         
         # "abc g de farine" - abc n'est pas un nombre
         ing = RecipeParser.parse_ingredient("abc g de farine")
@@ -875,7 +875,7 @@ class TestParseIngredientBranches:
     
     def test_parse_invalid_quantity_two_groups(self):
         """Parse avec quantité invalide dans pattern 2 groupes."""
-        from src.services.recipe_import import RecipeParser
+        from src.services.recettes.import_url import RecipeParser
         
         ing = RecipeParser.parse_ingredient("plusieurs oeufs")
         # "plusieurs" n'est pas un nombre

@@ -3,15 +3,15 @@ import importlib
 
 
 def test_import_pdf_export_module():
-    """Vérifie que le module pdf_export s'importe sans erreur."""
-    module = importlib.import_module("src.services.pdf_export")
+    """Vérifie que le module pdf s'importe sans erreur."""
+    module = importlib.import_module("src.services.rapports")
     assert module is not None
 
 
 @pytest.mark.unit
 def test_import_pdf_export_service():
-    """Vérifie que le module pdf_export s'importe sans erreur."""
-    module = importlib.import_module("src.services.pdf_export")
+    """Vérifie que le module pdf s'importe sans erreur."""
+    module = importlib.import_module("src.services.rapports")
     assert module is not None
 
 
@@ -19,7 +19,7 @@ def test_import_pdf_export_service():
 def test_pdf_export_service_exists():
     """Test that PDF export service exists."""
     try:
-        from src.services.pdf_export import get_pdf_export_service
+        from src.services.rapports import get_pdf_export_service
         service = get_pdf_export_service()
         assert service is not None
     except ImportError:

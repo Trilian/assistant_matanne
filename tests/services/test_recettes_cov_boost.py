@@ -284,8 +284,8 @@ class TestFactory:
 
     def test_service_inherits_correctly(self):
         """Service hérite des bonnes classes."""
-        from src.services.base_ai_service import BaseAIService, RecipeAIMixin
-        from src.services.types import BaseService
+        from src.services.base import BaseAIService, RecipeAIMixin
+        from src.services.base import BaseService
         
         service = get_recette_service()
         

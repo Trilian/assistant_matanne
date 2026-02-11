@@ -7,7 +7,7 @@ import streamlit as st
 import pandas as pd
 
 from src.services.inventaire import get_inventaire_service
-from src.services.predictions import obtenir_service_predictions
+from src.services.suggestions import obtenir_service_predictions
 
 
 def render_predictions():

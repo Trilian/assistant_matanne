@@ -10,7 +10,7 @@ class TestPredictionArticleSchema:
 
     def test_prediction_article_minimal(self):
         """Prédiction avec champs requis."""
-        from src.services.predictions import PredictionArticle
+        from src.services.suggestions import PredictionArticle
         
         pred = PredictionArticle(
             article_id=1,
@@ -27,7 +27,7 @@ class TestPredictionArticleSchema:
 
     def test_prediction_article_complet(self):
         """Prédiction avec tous les champs."""
-        from src.services.predictions import PredictionArticle
+        from src.services.suggestions import PredictionArticle
         
         pred = PredictionArticle(
             article_id=1,
@@ -52,7 +52,7 @@ class TestAnalysePredictionSchema:
 
     def test_analyse_prediction_default(self):
         """Analyse avec valeurs par défaut."""
-        from src.services.predictions import AnalysePrediction
+        from src.services.suggestions import AnalysePrediction
         
         analyse = AnalysePrediction(
             nombre_articles=10,
@@ -68,7 +68,7 @@ class TestAnalysePredictionSchema:
 
     def test_analyse_prediction_complete(self):
         """Analyse complète."""
-        from src.services.predictions import AnalysePrediction
+        from src.services.suggestions import AnalysePrediction
         
         analyse = AnalysePrediction(
             nombre_articles=50,
@@ -93,7 +93,7 @@ class TestPredictionService:
     @pytest.fixture
     def service(self):
         """Crée une instance du service."""
-        from src.services.predictions import PredictionService
+        from src.services.suggestions import PredictionService
         return PredictionService()
 
     def test_init_default_min_data_points(self, service):

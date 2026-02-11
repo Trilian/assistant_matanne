@@ -11,7 +11,7 @@ import pytest
 from datetime import datetime, timedelta
 from unittest.mock import Mock, patch, MagicMock
 
-from src.services.calendar_sync import (
+from src.services.calendrier import (
     CalendarProvider,
     SyncDirection,
     ExternalCalendarConfig,

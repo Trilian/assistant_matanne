@@ -1,7 +1,7 @@
-﻿"""
+"""
 Tests pour src/domains/famille/ui/weekend/
 
-Couverture ciblée: 80%
+Couverture cibl�e: 80%
 - helpers.py: get_next_weekend, get_weekend_activities, get_budget_weekend, etc.
 - ai_service.py: WeekendAIService
 - components.py: render_dashboard, render_calendar, render_activities
@@ -19,13 +19,13 @@ from tests.fixtures.ui_mocks import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
+# -----------------------------------------------------------
 # FIXTURES
-# ═══════════════════════════════════════════════════════════
+# -----------------------------------------------------------
 
 @pytest.fixture
 def mock_st():
-    """Mock Streamlit configuré pour famille."""
+    """Mock Streamlit configur� pour famille."""
     return create_ui_test_context("famille")
 
 
@@ -45,7 +45,7 @@ def mock_db_context():
         yield mock_db
 
 
-def create_mock_activity(date_prevue, statut="prévu", cout_estime=50, cout_reel=None):
+def create_mock_activity(date_prevue, statut="pr�vu", cout_estime=50, cout_reel=None):
     """Factory pour WeekendActivity mock."""
     act = MagicMock()
     act.id = 1
@@ -58,15 +58,15 @@ def create_mock_activity(date_prevue, statut="prévu", cout_estime=50, cout_reel
     return act
 
 
-# ═══════════════════════════════════════════════════════════
+# -----------------------------------------------------------
 # TESTS HELPERS - Pure functions
-# ═══════════════════════════════════════════════════════════
+# -----------------------------------------------------------
 
 class TestWeekendHelpersImport:
     """Tests d'import des helpers."""
     
     def test_import_helpers(self):
-        """Vérifie que les helpers s'importent."""
+        """V�rifie que les helpers s'importent."""
         from src.domains.famille.ui.weekend.helpers import (
             get_next_weekend,
             get_weekend_activities,
@@ -145,7 +145,7 @@ class TestGetWeekendActivities:
     """Tests pour get_weekend_activities()."""
     
     def test_get_weekend_activities_empty(self):
-        """Test sans activités."""
+        """Test sans activit�s."""
         from src.domains.famille.ui.weekend.helpers import get_weekend_activities
         
         saturday = date(2025, 7, 19)
@@ -157,7 +157,7 @@ class TestGetWeekendActivities:
         assert result == {"saturday": [], "sunday": []}
     
     def test_get_weekend_activities_with_data(self):
-        """Test avec activités."""
+        """Test avec activit�s."""
         from src.domains.famille.ui.weekend.helpers import get_weekend_activities
         
         saturday = date(2025, 7, 19)
@@ -196,7 +196,7 @@ class TestGetBudgetWeekend:
     """Tests pour get_budget_weekend()."""
     
     def test_get_budget_weekend_empty(self):
-        """Test sans activités."""
+        """Test sans activit�s."""
         from src.domains.famille.ui.weekend.helpers import get_budget_weekend
         
         with mock_db_context():
@@ -205,12 +205,12 @@ class TestGetBudgetWeekend:
         assert result == {"estime": 0, "reel": 0}
     
     def test_get_budget_weekend_with_data(self):
-        """Test avec activités."""
+        """Test avec activit�s."""
         from src.domains.famille.ui.weekend.helpers import get_budget_weekend
         
         mock_activities = [
-            create_mock_activity(date.today(), statut="prévu", cout_estime=50),
-            create_mock_activity(date.today(), statut="terminé", cout_estime=30, cout_reel=25),
+            create_mock_activity(date.today(), statut="pr�vu", cout_estime=50),
+            create_mock_activity(date.today(), statut="termin�", cout_estime=30, cout_reel=25),
         ]
         
         mock_db = MagicMock()
@@ -224,7 +224,7 @@ class TestGetBudgetWeekend:
             result = get_budget_weekend(date.today(), date.today())
         
         assert result["estime"] == 80  # 50 + 30
-        assert result["reel"] == 25  # Seulement l'activité terminée
+        assert result["reel"] == 25  # Seulement l'activit� termin�e
     
     def test_get_budget_weekend_db_error(self):
         """Test avec erreur DB."""
@@ -253,7 +253,7 @@ class TestGetLieuxTestes:
         """Test avec lieux."""
         from src.domains.famille.ui.weekend.helpers import get_lieux_testes
         
-        mock_lieux = [create_mock_activity(date.today(), statut="terminé")]
+        mock_lieux = [create_mock_activity(date.today(), statut="termin�")]
         
         mock_db = MagicMock()
         mock_db.query.return_value.filter.return_value.order_by.return_value.all.return_value = mock_lieux
@@ -302,13 +302,13 @@ class TestGetAgeJulesMois:
         assert result >= 0
     
     def test_get_age_jules_mois_without_profile(self):
-        """Test sans profil (valeur par défaut)."""
+        """Test sans profil (valeur par d�faut)."""
         from src.domains.famille.ui.weekend.helpers import get_age_jules_mois
         
         with mock_db_context():
             result = get_age_jules_mois()
         
-        assert result == 19  # Valeur par défaut
+        assert result == 19  # Valeur par d�faut
     
     def test_get_age_jules_mois_db_error(self):
         """Test avec erreur DB."""
@@ -318,14 +318,14 @@ class TestGetAgeJulesMois:
                    side_effect=Exception("DB Error")):
             result = get_age_jules_mois()
         
-        assert result == 19  # Valeur par défaut
+        assert result == 19  # Valeur par d�faut
 
 
 class TestMarkActivityDone:
     """Tests pour mark_activity_done()."""
     
     def test_mark_activity_done_success(self):
-        """Test marquer terminé avec succès."""
+        """Test marquer termin� avec succ�s."""
         from src.domains.famille.ui.weekend.helpers import mark_activity_done
         
         mock_activity = MagicMock()
@@ -339,11 +339,11 @@ class TestMarkActivityDone:
         with patch("src.domains.famille.ui.weekend.helpers.obtenir_contexte_db", context):
             mark_activity_done(1)
         
-        assert mock_activity.statut == "terminé"
+        assert mock_activity.statut == "termin�"
         mock_db.commit.assert_called_once()
     
     def test_mark_activity_done_not_found(self):
-        """Test avec activité non trouvée."""
+        """Test avec activit� non trouv�e."""
         from src.domains.famille.ui.weekend.helpers import mark_activity_done
         
         mock_db = MagicMock()
@@ -369,15 +369,15 @@ class TestMarkActivityDone:
             mark_activity_done(1)
 
 
-# ═══════════════════════════════════════════════════════════
+# -----------------------------------------------------------
 # TESTS COMPONENTS
-# ═══════════════════════════════════════════════════════════
+# -----------------------------------------------------------
 
 class TestWeekendComponents:
     """Tests pour weekend/components.py"""
     
     def test_import_components(self):
-        """Vérifie l'import des composants."""
+        """V�rifie l'import des composants."""
         from src.domains.famille.ui.weekend.components import (
             render_planning,
             render_day_activities,
@@ -415,7 +415,7 @@ class TestWeekendComponents:
         assert mock_st.columns.called
     
     def test_render_day_activities_empty(self, mock_st):
-        """Test render_day_activities sans activités."""
+        """Test render_day_activities sans activit�s."""
         from src.domains.famille.ui.weekend import components
         
         with patch.object(components, "st", mock_st):
@@ -425,7 +425,7 @@ class TestWeekendComponents:
         assert mock_st.button.called
     
     def test_render_day_activities_with_data(self, mock_st):
-        """Test render_day_activities avec activités."""
+        """Test render_day_activities avec activit�s."""
         from src.domains.famille.ui.weekend import components
         
         mock_activity = create_mock_activity(date(2025, 7, 19))
@@ -433,7 +433,7 @@ class TestWeekendComponents:
         mock_activity.nom = "Parc test"
         mock_activity.heure_debut = "10:00"
         mock_activity.duree_minutes = 60
-        mock_activity.statut = "prévu"
+        mock_activity.statut = "pr�vu"
         
         with patch.object(components, "st", mock_st):
             with patch.object(components, "mark_activity_done", MagicMock()):
@@ -443,13 +443,13 @@ class TestWeekendComponents:
 
 
 class TestWeekendComponentsAdvanced:
-    """Tests avancés pour weekend/components.py"""
+    """Tests avanc�s pour weekend/components.py"""
     
     def test_render_suggestions(self, mock_st):
         """Test render_suggestions rendu."""
         from src.domains.famille.ui.weekend import components
         
-        mock_st.button.return_value = False  # Bouton non cliqué
+        mock_st.button.return_value = False  # Bouton non cliqu�
         
         with patch.object(components, "st", mock_st):
             with patch.object(components, "get_age_jules_mois", return_value=19):
@@ -464,8 +464,8 @@ class TestWeekendComponentsAdvanced:
         """Test render_suggestions avec clic sur bouton IA."""
         from src.domains.famille.ui.weekend import components
         
-        mock_st.button.return_value = True  # Bouton cliqué
-        mock_st.selectbox.return_value = "ensoleillé"
+        mock_st.button.return_value = True  # Bouton cliqu�
+        mock_st.selectbox.return_value = "ensoleill�"
         mock_st.slider.return_value = 50
         mock_st.text_input.return_value = "Paris"
         
@@ -494,10 +494,10 @@ class TestWeekendComponentsAdvanced:
         mock_st.info.assert_called()
     
     def test_render_lieux_testes_with_data(self, mock_st):
-        """Test render_lieux_testes avec données."""
+        """Test render_lieux_testes avec donn�es."""
         from src.domains.famille.ui.weekend import components
         
-        mock_lieu = create_mock_activity(date(2025, 7, 19), statut="terminé")
+        mock_lieu = create_mock_activity(date(2025, 7, 19), statut="termin�")
         mock_lieu.type_activite = "parc"
         mock_lieu.titre = "Parc de la Villette"
         mock_lieu.lieu = "Paris"
@@ -565,7 +565,7 @@ class TestWeekendComponentsAdvanced:
         
         mock_st.form_submit_button.return_value = False
         
-        mock_activity = create_mock_activity(date(2025, 7, 19), statut="terminé")
+        mock_activity = create_mock_activity(date(2025, 7, 19), statut="termin�")
         mock_activity.id = 1
         mock_activity.titre = "Sortie test"
         
@@ -583,7 +583,7 @@ class TestWeekendComponentsAdvanced:
         mock_st.subheader.assert_called()
     
     def test_render_noter_sortie_no_activities(self, mock_st):
-        """Test render_noter_sortie sans activités à noter."""
+        """Test render_noter_sortie sans activit�s � noter."""
         from src.domains.famille.ui.weekend import components
         
         mock_db = MagicMock()
@@ -600,26 +600,26 @@ class TestWeekendComponentsAdvanced:
         mock_st.info.assert_called()
 
 
-# ═══════════════════════════════════════════════════════════
+# -----------------------------------------------------------
 # TESTS MODULE APP
-# ═══════════════════════════════════════════════════════════
+# -----------------------------------------------------------
 
-# ═══════════════════════════════════════════════════════════
+# -----------------------------------------------------------
 # TESTS AI SERVICE
-# ═══════════════════════════════════════════════════════════
+# -----------------------------------------------------------
 
 class TestWeekendAIServiceImport:
     """Tests d'import du service IA."""
     
     def test_import_ai_service(self):
-        """Vérifie l'import du service IA."""
+        """V�rifie l'import du service IA."""
         from src.domains.famille.ui.weekend.ai_service import WeekendAIService
         assert WeekendAIService is not None
     
     def test_ai_service_inherits_base(self):
-        """Vérifie l'héritage de BaseAIService."""
+        """V�rifie l'h�ritage de BaseAIService."""
         from src.domains.famille.ui.weekend.ai_service import WeekendAIService
-        from src.services.base_ai_service import BaseAIService
+        from src.services.base import BaseAIService
         
         assert issubclass(WeekendAIService, BaseAIService)
 
@@ -628,7 +628,7 @@ class TestWeekendAIServiceInit:
     """Tests pour l'initialisation du service IA."""
     
     def test_init_with_defaults(self):
-        """Test initialisation avec valeurs par défaut."""
+        """Test initialisation avec valeurs par d�faut."""
         from src.domains.famille.ui.weekend.ai_service import WeekendAIService
         
         with patch("src.domains.famille.ui.weekend.ai_service.ClientIA") as mock_client:
@@ -640,7 +640,7 @@ class TestWeekendAIServiceInit:
         assert service.service_name == "weekend_ai"
     
     def test_init_creates_client(self):
-        """Test que l'initialisation crée un ClientIA."""
+        """Test que l'initialisation cr�e un ClientIA."""
         from src.domains.famille.ui.weekend.ai_service import WeekendAIService
         
         with patch("src.domains.famille.ui.weekend.ai_service.ClientIA") as mock_client:
@@ -655,7 +655,7 @@ class TestSuggererActivites:
     
     @pytest.mark.asyncio
     async def test_suggerer_activites_default_params(self):
-        """Test avec paramètres par défaut."""
+        """Test avec param�tres par d�faut."""
         from src.domains.famille.ui.weekend.ai_service import WeekendAIService
         
         with patch("src.domains.famille.ui.weekend.ai_service.ClientIA") as mock_client:
@@ -669,7 +669,7 @@ class TestSuggererActivites:
     
     @pytest.mark.asyncio
     async def test_suggerer_activites_custom_params(self):
-        """Test avec paramètres personnalisés."""
+        """Test avec param�tres personnalis�s."""
         from src.domains.famille.ui.weekend.ai_service import WeekendAIService
         
         with patch("src.domains.famille.ui.weekend.ai_service.ClientIA") as mock_client:
@@ -680,28 +680,28 @@ class TestSuggererActivites:
             service.call_with_cache = mock_call
             
             result = await service.suggerer_activites(
-                meteo="ensoleillé",
+                meteo="ensoleill�",
                 age_enfant_mois=24,
                 budget=100,
                 region="Lyon",
                 nb_suggestions=5
             )
             
-            # Vérifier que le prompt contient les paramètres
+            # V�rifier que le prompt contient les param�tres
             call_args = mock_call.call_args
             prompt = call_args[1]["prompt"]
             
             assert "24 mois" in prompt
-            assert "ensoleillé" in prompt
+            assert "ensoleill�" in prompt
             assert "100" in prompt
             assert "Lyon" in prompt
-            assert "5 activités" in prompt
+            assert "5 activit�s" in prompt
         
         assert result == "Custom suggestions"
     
     @pytest.mark.asyncio
     async def test_suggerer_activites_uses_cache(self):
-        """Test que la méthode utilise le cache."""
+        """Test que la m�thode utilise le cache."""
         from src.domains.famille.ui.weekend.ai_service import WeekendAIService
         
         with patch("src.domains.famille.ui.weekend.ai_service.ClientIA") as mock_client:
@@ -718,7 +718,7 @@ class TestSuggererActivites:
     
     @pytest.mark.asyncio
     async def test_suggerer_activites_prompt_structure(self):
-        """Test la structure du prompt généré."""
+        """Test la structure du prompt g�n�r�."""
         from src.domains.famille.ui.weekend.ai_service import WeekendAIService
         
         with patch("src.domains.famille.ui.weekend.ai_service.ClientIA") as mock_client:
@@ -738,15 +738,15 @@ class TestSuggererActivites:
             
             prompt = mock_call.call_args[1]["prompt"]
             
-            # Vérifier des éléments clés du prompt
+            # V�rifier des �l�ments cl�s du prompt
             assert "18 mois" in prompt
             assert "pluvieux" in prompt
-            assert "40€" in prompt
+            assert "40�" in prompt
             assert "Paris" in prompt
-            assert "2 activités" in prompt
-            assert "🎯" in prompt  # Emoji pour activité
-            assert "📍" in prompt  # Emoji pour lieu
-            assert "💰" in prompt  # Emoji pour budget
+            assert "2 activit�s" in prompt
+            assert "??" in prompt  # Emoji pour activit�
+            assert "??" in prompt  # Emoji pour lieu
+            assert "??" in prompt  # Emoji pour budget
 
 
 class TestDetailsLieu:
@@ -754,21 +754,21 @@ class TestDetailsLieu:
     
     @pytest.mark.asyncio
     async def test_details_lieu_basic(self):
-        """Test récupération détails lieu."""
+        """Test r�cup�ration d�tails lieu."""
         from src.domains.famille.ui.weekend.ai_service import WeekendAIService
         
         with patch("src.domains.famille.ui.weekend.ai_service.ClientIA") as mock_client:
             mock_client.return_value = MagicMock()
             service = WeekendAIService()
             
-            service.call_with_cache = AsyncMock(return_value="Détails du lieu")
+            service.call_with_cache = AsyncMock(return_value="D�tails du lieu")
             result = await service.details_lieu("Jardin des Plantes", "parc")
         
-        assert "Détails du lieu" in result
+        assert "D�tails du lieu" in result
     
     @pytest.mark.asyncio
     async def test_details_lieu_prompt_content(self):
-        """Test contenu du prompt pour détails lieu."""
+        """Test contenu du prompt pour d�tails lieu."""
         from src.domains.famille.ui.weekend.ai_service import WeekendAIService
         
         with patch("src.domains.famille.ui.weekend.ai_service.ClientIA") as mock_client:
@@ -778,11 +778,11 @@ class TestDetailsLieu:
             mock_call = AsyncMock(return_value="Info")
             service.call_with_cache = mock_call
             
-            await service.details_lieu("Musée d'Orsay", "musee")
+            await service.details_lieu("Mus�e d'Orsay", "musee")
             
             prompt = mock_call.call_args[1]["prompt"]
             
-            assert "Musée d'Orsay" in prompt
+            assert "Mus�e d'Orsay" in prompt
             assert "musee" in prompt
             assert "Horaires" in prompt
             assert "Tarifs" in prompt
@@ -790,7 +790,7 @@ class TestDetailsLieu:
     
     @pytest.mark.asyncio
     async def test_details_lieu_max_tokens(self):
-        """Test limite de tokens pour détails lieu."""
+        """Test limite de tokens pour d�tails lieu."""
         from src.domains.famille.ui.weekend.ai_service import WeekendAIService
         
         with patch("src.domains.famille.ui.weekend.ai_service.ClientIA") as mock_client:
@@ -806,7 +806,7 @@ class TestDetailsLieu:
     
     @pytest.mark.asyncio
     async def test_details_lieu_system_prompt(self):
-        """Test system prompt pour détails lieu."""
+        """Test system prompt pour d�tails lieu."""
         from src.domains.famille.ui.weekend.ai_service import WeekendAIService
         
         with patch("src.domains.famille.ui.weekend.ai_service.ClientIA") as mock_client:
@@ -827,7 +827,7 @@ class TestWeekendAIServiceEdgeCases:
     
     @pytest.mark.asyncio
     async def test_suggerer_activites_age_zero(self):
-        """Test avec âge 0 mois."""
+        """Test avec �ge 0 mois."""
         from src.domains.famille.ui.weekend.ai_service import WeekendAIService
         
         with patch("src.domains.famille.ui.weekend.ai_service.ClientIA") as mock_client:
@@ -841,7 +841,7 @@ class TestWeekendAIServiceEdgeCases:
     
     @pytest.mark.asyncio
     async def test_suggerer_activites_high_budget(self):
-        """Test avec budget élevé."""
+        """Test avec budget �lev�."""
         from src.domains.famille.ui.weekend.ai_service import WeekendAIService
         
         with patch("src.domains.famille.ui.weekend.ai_service.ClientIA") as mock_client:
@@ -869,7 +869,7 @@ class TestWeekendAIServiceEdgeCases:
     
     @pytest.mark.asyncio
     async def test_details_lieu_special_characters(self):
-        """Test avec caractères spéciaux dans le nom du lieu."""
+        """Test avec caract�res sp�ciaux dans le nom du lieu."""
         from src.domains.famille.ui.weekend.ai_service import WeekendAIService
         
         with patch("src.domains.famille.ui.weekend.ai_service.ClientIA") as mock_client:
@@ -877,7 +877,7 @@ class TestWeekendAIServiceEdgeCases:
             service = WeekendAIService()
             
             service.call_with_cache = AsyncMock(return_value="Result")
-            result = await service.details_lieu("Café-Restaurant L'Étoile", "restaurant")
+            result = await service.details_lieu("Caf�-Restaurant L'�toile", "restaurant")
         
         assert result is not None
     
@@ -896,20 +896,20 @@ class TestWeekendAIServiceEdgeCases:
         assert result is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# -----------------------------------------------------------
 # TESTS MODULE APP
-# ═══════════════════════════════════════════════════════════
+# -----------------------------------------------------------
 
 class TestWeekendApp:
     """Tests pour weekend/__init__.py (app entry point)"""
     
     def test_import_app(self):
-        """Vérifie l'import de app."""
+        """V�rifie l'import de app."""
         from src.domains.famille.ui.weekend import app
         assert callable(app)
     
     def test_app_renders_without_error(self, mock_st):
-        """Test que app() s'exécute."""
+        """Test que app() s'ex�cute."""
         from src.domains.famille.ui import weekend
         
         saturday = date(2025, 7, 19)

@@ -6,8 +6,8 @@ Tests de génération et parsing de fichiers .ics.
 
 import pytest
 from datetime import datetime
-from src.services.calendar_sync.ical_generator import ICalGenerator
-from src.services.calendar_sync.schemas import CalendarEventExternal
+from src.services.calendrier.generateur import ICalGenerator
+from src.services.calendrier.schemas import CalendarEventExternal
 
 
 class TestICalGeneratorGenerate:

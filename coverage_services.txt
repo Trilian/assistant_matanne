@@ -1,0 +1,415 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.11.8, pytest-9.0.2, pluggy-1.6.0
+rootdir: D:\Projet_streamlit\assistant_matanne
+configfile: pytest.ini
+plugins: anyio-4.12.1, asyncio-1.3.0, cov-7.0.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collected 2434 items
+
+tests\services\budget\test_schemas.py ..............................     [  1%]
+tests\services\budget\test_service.py ...                                [  1%]
+tests\services\test_action_history.py ..............                     [  1%]
+tests\services\test_action_history_service.py .....                      [  2%]
+tests\services\test_auth.py ................                             [  2%]
+tests\services\test_auth_comprehensive.py ..........................F... [  4%]
+......FF...F...FF...                                                     [  4%]
+tests\services\test_auth_service.py F                                    [  4%]
+tests\services\test_backup.py ............                               [  5%]
+tests\services\test_backup_integration.py ...................F.......... [  6%]
+...............................................F.....FFFFFF              [  9%]
+tests\services\test_backup_service.py ...........                        [  9%]
+tests\services\test_backup_utils.py .................................... [ 10%]
+..................                                                       [ 11%]
+tests\services\test_barcode.py ..........                                [ 12%]
+tests\services\test_barcode_service.py F                                 [ 12%]
+tests\services\test_base_ai_service.py ..........                        [ 12%]
+tests\services\test_base_service.py FFFEEEEEEEE                          [ 13%]
+tests\services\test_batch_cooking.py .........                           [ 13%]
+tests\services\test_batch_cooking_integration.py ................F.F.... [ 14%]
+.............................                                            [ 15%]
+tests\services\test_batch_cooking_service.py .                           [ 15%]
+tests\services\test_batch_cooking_utils.py ............................. [ 16%]
+.........................................................                [ 19%]
+tests\services\test_budget_comprehensive.py ............................ [ 20%]
+.....................                                                    [ 21%]
+tests\services\test_budget_extra.py .........FF........                  [ 21%]
+tests\services\test_budget_integration.py .............................. [ 23%]
+.                                                                        [ 23%]
+tests\services\test_budget_methods.py ........................           [ 24%]
+tests\services\test_budget_service.py .                                  [ 24%]
+tests\services\test_budget_utils.py .................................... [ 25%]
+....................................                                     [ 27%]
+tests\services\test_calendar_sync_comprehensive.py ..................... [ 28%]
+..................FF......                                               [ 29%]
+tests\services\test_calendar_sync_service.py F                           [ 29%]
+tests\services\test_courses.py .....                                     [ 29%]
+tests\services\test_courses_intelligentes.py .........                   [ 29%]
+tests\services\test_courses_intelligentes_service.py .                   [ 29%]
+tests\services\test_courses_service.py .......FFF....................... [ 31%]
+.........FFFFFFFFFF                                                      [ 31%]
+tests\services\test_extended_services.py ...........                     [ 32%]
+tests\services\test_facture_ocr.py .........                             [ 32%]
+tests\services\test_factures_ocr.py .......FFFFF..F                      [ 33%]
+tests\services\test_garmin_sync.py F                                     [ 33%]
+tests\services\test_garmin_sync_utils.py ............................... [ 34%]
+..................................................                       [ 36%]
+tests\services\test_garmin_sync_utils_integration.py ................... [ 37%]
+............................................................             [ 39%]
+tests\services\test_imports_services.py .................                [ 40%]
+tests\services\test_inventaire.py .......                                [ 40%]
+tests\services\test_inventaire_integration.py .......................... [ 41%]
+........                                                                 [ 42%]
+tests\services\test_inventaire_methods.py .............................. [ 43%]
+..                                                                       [ 43%]
+tests\services\test_inventaire_service.py ..................             [ 44%]
+tests\services\test_inventaire_sqlite_int.py ........................... [ 45%]
+................                                                         [ 46%]
+tests\services\test_io_service.py F                                      [ 46%]
+tests\services\test_notifications.py .......                             [ 46%]
+tests\services\test_notifications_push.py ............                   [ 46%]
+tests\services\test_notifications_push_service.py F.                     [ 47%]
+tests\services\test_notifications_service.py ..                          [ 47%]
+tests\services\test_openfoodfacts.py .........                           [ 47%]
+tests\services\test_pdf_export.py .........                              [ 47%]
+tests\services\test_pdf_export_db_methods.py ......................      [ 48%]
+tests\services\test_pdf_export_service.py ...                            [ 48%]
+tests\services\test_planning.py .........                                [ 49%]
+tests\services\test_planning_service.py ...........                      [ 49%]
+tests\services\test_planning_unified.py .........                        [ 50%]
+tests\services\test_planning_unified_service.py ..                       [ 50%]
+tests\services\test_planning_utils.py .................................. [ 51%]
+.......................                                                  [ 52%]
+tests\services\test_predictions.py .......                               [ 52%]
+tests\services\test_predictions_service.py ..........                    [ 53%]
+tests\services\test_push_notifications.py .............................. [ 54%]
+..........F.......FF.FFFFFFFFF.FF..........F.FF....F.FF                  [ 56%]
+tests\services\test_push_notifications_utils.py FFFFFFFFFFFFFFFFFFFFFFFF [ 57%]
+FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF                                           [ 58%]
+tests\services\test_push_send_methods.py FFFFF..FFFFFFF.......           [ 59%]
+tests\services\test_pwa.py ...............................               [ 61%]
+tests\services\test_rapports_pdf.py ...........                          [ 61%]
+tests\services\test_rapports_pdf_generation.py .................FF...... [ 62%]
+..........                                                               [ 62%]
+tests\services\test_rapports_pdf_service.py ............................ [ 64%]
+.............................                                            [ 65%]
+tests\services\test_realtime_sync.py ..............                      [ 65%]
+tests\services\test_recettes.py ...........                              [ 66%]
+tests\services\test_recettes_cov_boost.py ...................            [ 67%]
+tests\services\test_recettes_import.py ..                                [ 67%]
+tests\services\test_recettes_integration.py ...................          [ 67%]
+tests\services\test_recettes_service.py .....................            [ 68%]
+tests\services\test_recettes_utils.py .................................. [ 70%]
+..........................                                               [ 71%]
+tests\services\test_recipe_import.py ............                        [ 71%]
+tests\services\test_recipe_import_extra.py ............................. [ 72%]
+........................                                                 [ 73%]
+tests\services\test_recipe_import_integration.py .........F............. [ 74%]
+........................F...                                             [ 76%]
+tests\services\test_recipe_import_service.py FF.FFFFFFFFFFFFFFFFFFFFFFFF [ 77%]
+FFFFFFFFFFFFFF                                                           [ 77%]
+tests\services\test_services_basic.py ............                       [ 78%]
+tests\services\test_services_comprehensive.py .......................... [ 79%]
+............................F...                                         [ 80%]
+tests\services\test_services_integration.py ..............               [ 81%]
+tests\services\test_suggestions_ia.py .........                          [ 81%]
+tests\services\test_suggestions_ia_service.py .                          [ 81%]
+tests\services\test_suggestions_ia_utils.py ............................ [ 82%]
+...........................................                              [ 84%]
+tests\services\test_suggestions_ia_utils_full.py ....................... [ 85%]
+........................................................................ [ 88%]
+..                                                                       [ 88%]
+tests\services\test_types.py ..                                          [ 88%]
+tests\services\test_types_service.py F                                   [ 88%]
+tests\services\test_user_preferences.py ...                              [ 88%]
+tests\services\test_user_preferences_service.py FF.                      [ 88%]
+tests\services\test_weather.py ............                              [ 89%]
+tests\services\test_weather_service.py ................................. [ 90%]
+................                                                         [ 91%]
+tests\services\test_weather_utils.py ................................... [ 92%]
+.........................................................                [ 95%]
+tests\services\test_weather_utils_full.py .............................. [ 96%]
+........................................................................ [ 99%]
+................                                                         [100%]
+
+============================== warnings summary ===============================
+tests/services/test_backup_integration.py::TestHistoriqueWithDB::test_enregistrer_backup_historique
+tests/services/test_backup_integration.py::TestHistoriqueFullWorkflow::test_enregistrer_et_lister
+tests/services/test_backup_integration.py::TestHistoriqueFullWorkflow::test_enregistrer_et_supprimer
+  D:\Projet_streamlit\assistant_matanne\tests\conftest.py:141: SAWarning: transaction already deassociated from connection
+    transaction.rollback()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.11.8-final-0 _______________
+
+Name                                           Stmts   Miss Branch BrPart   Cover   Missing
+-------------------------------------------------------------------------------------------
+src\services\__init__.py                          10      1      0      0  90.00%   276
+src\services\backup\__init__.py                    4      0      0      0 100.00%
+src\services\backup\service.py                   285     92     68      6  64.31%   195-197, 325, 333-334, 339-347, 354-358, 429-430, 468-479, 506-513, 556-558, 585, 607-610, 645-730
+src\services\backup\types.py                      31      0      0      0 100.00%
+src\services\backup\utils.py                     131      9     60      9  90.58%   146-147, 149->154, 178, 180, 206-207, 243, 265, 346, 349->353, 571->574
+src\services\base\__init__.py                      4      0      0      0 100.00%
+src\services\base\ai_service.py                  222    129     66      9  40.28%   94-95, 101->113, 109-110, 115-116, 129-151, 174-201, 220-245, 275-304, 324-348, 393-428, 453-465, 490->496, 513->519, 529, 533, 537-538, 557->559, 562, 578-590, 598-628, 643-647
+src\services\base\io_service.py                  110     87     42      0  15.13%   31-47, 64-88, 93-96, 101-123, 128-138, 143-169
+src\services\base\types.py                       204    131     88      6  29.79%   51-57, 68-76, 96, 97->100, 106-122, 126-138, 142-151, 182->186, 190->194, 229-262, 293-344, 364-365, 385, 428, 433-441, 455-461, 469-471
+src\services\batch_cooking\__init__.py             5      0      0      0 100.00%
+src\services\batch_cooking\constantes.py           4      0      0      0 100.00%
+src\services\batch_cooking\service.py            281     47     84      7  76.99%   81->94, 114->116, 145, 179-188, 242, 275, 282->288, 289, 376->379, 611-614, 627-648, 662-707
+src\services\batch_cooking\types.py               25      0      0      0 100.00%
+src\services\batch_cooking\utils.py              122      4     46      4  95.24%   263, 298, 418, 440
+src\services\budget\__init__.py                    7      2      0      0  71.43%   63-64
+src\services\budget\schemas.py                   102      0      4      0 100.00%
+src\services\budget\service.py                   242     33     66      6  84.74%   115->114, 256, 483-521, 535, 544, 551, 594-600, 649, 673-675
+src\services\budget\utils.py                     108      2     36      1  97.92%   44-45, 397->400
+src\services\calendrier\__init__.py                7      2      0      0  71.43%   34-35
+src\services\calendrier\generateur.py             66      3     26      1  95.65%   120-121, 150
+src\services\calendrier\schemas.py                52      0      0      0 100.00%
+src\services\calendrier\service.py               318    240     82      2  20.50%   113-197, 226, 235-281, 310, 351-352, 382-384, 396-438, 442-477, 485-521, 532-586, 596-632, 636-650, 671-684, 693-715, 719-747, 755-789, 793-800, 826-836, 854, 880-910, 934-945, 959-961
+src\services\courses\__init__.py                   5      0      0      0 100.00%
+src\services\courses\constantes.py                 3      0      0      0 100.00%
+src\services\courses\service.py                  128     64     28      3  46.79%   79->82, 83, 143-189, 198-207, 235-266, 274-283, 292-335
+src\services\courses\suggestion.py               132     79     40      1  36.05%   34, 58-68, 74-80, 88-130, 160-194, 218-263, 279-308, 321-323
+src\services\courses\types.py                     50      0     14      3  95.31%   22->51, 42->51, 48->51
+src\services\garmin\__init__.py                    4      0      0      0 100.00%
+src\services\garmin\service.py                   224    182     38      0  16.03%   50-52, 74-76, 92-118, 140-186, 190, 219-263, 272-285, 294-307, 311-346, 351-386, 395-406, 416-448, 464-493, 507, 512, 527-539, 545-547, 553, 559
+src\services\garmin\types.py                      20      0      0      0 100.00%
+src\services\garmin\utils.py                     182      5     80      7  95.42%   43-44, 388->396, 412, 416, 590, 596->602, 598->602, 599->602
+src\services\integrations\__init__.py              4      0      0      0 100.00%
+src\services\integrations\codes_barres.py        189    111     58      3  32.79%   111-137, 143, 152-157, 162-167, 187-213, 254-288, 308-321, 339-365, 391-409, 419-423, 446-459, 477-500, 513-515
+src\services\integrations\facture.py              95     28     18      1  69.03%   95-142, 171-174, 199-200, 235-241, 246-253, 262
+src\services\integrations\produit.py             123     32     16      3  70.50%   129-130, 142-143, 155->158, 160-165, 249-284, 288-295, 299-305
+src\services\inventaire\__init__.py                3      0      0      0 100.00%
+src\services\inventaire\service.py               269     28     86      7  85.63%   363, 369, 683, 713-751, 820->828, 836->835
+src\services\inventaire\types.py                  16      0      0      0 100.00%
+src\services\notifications\__init__.py             7      0      0      0 100.00%
+src\services\notifications\inventaire.py         108     65     36      3  33.33%   76-98, 115-132, 142->145, 160, 164-166, 175-185, 189-200, 204-220, 227-245, 253-260
+src\services\notifications\notif_ntfy.py         126     82     28      0  28.57%   35-36, 48-93, 97, 103-110, 116-123, 129-134, 138-158, 162-188, 192-206, 210-217, 221, 225, 229, 233-234, 241-242, 246-253, 257, 266, 271-272
+src\services\notifications\notif_web.py          252     33     60      7  85.26%   172-173, 179, 218-221, 224->229, 249-280, 284-286, 386-393, 422-423, 438-439, 531-541, 550, 600-601, 609, 611
+src\services\notifications\types.py              146      0      0      0 100.00%
+src\services\notifications\ui.py                  46     38      2      0  16.67%   20-114, 119-192
+src\services\notifications\utils.py              148     91     52      5  32.00%   56->62, 59-60, 66, 100, 107, 122-133, 159-179, 197-222, 235, 265-267, 297-313, 339, 367, 396-400, 426, 452, 466-476, 490, 508-521, 534-553
+src\services\planning\__init__.py                  6      0      0      0 100.00%
+src\services\planning\constantes.py                5      0      0      0 100.00%
+src\services\planning\global_planning.py         175    130     50      0  20.00%   102-157, 172-196, 200-227, 231-255, 259-281, 285-311, 325-341, 345-350, 361-380, 384-407, 411, 415-417, 452-472, 481-487, 521-542, 547-550
+src\services\planning\service.py                 181    134     56      0  20.68%   81-107, 125-166, 193-268, 294-339, 363-429, 461-576
+src\services\planning\types.py                    44      0      0      0 100.00%
+src\services\planning\utils.py                   146      2     70      6  96.30%   153->156, 247->245, 295, 608, 642->647, 643->642
+src\services\rapports\__init__.py                  4      0      0      0 100.00%
+src\services\rapports\export.py                  150      3     32      4  96.15%   172-174, 225->228, 317->319, 405->407
+src\services\rapports\generation.py              336     14    100      7  94.72%   567->572, 575->579, 797-798, 801-802, 805-806, 811, 865->868, 883->889, 1095-1098, 1116-1118
+src\services\rapports\types.py                    59      0      0      0 100.00%
+src\services\recettes\__init__.py                  5      0      0      0 100.00%
+src\services\recettes\import_url.py              402     44    226     30  86.31%   107->110, 122, 147-148, 150->139, 154-155, 172->176, 191->187, 204->202, 212->210, 251->255, 258->260, 271->263, 280->299, 281->287, 284->282, 287->299, 289->299, 293->290, 295-296, 302->300, 310->308, 350->341, 366->364, 373->380, 377-378, 387->394, 400, 409->407, 419->417, 439, 494-495, 543-544, 577-580, 585, 614-700, 735->737
+src\services\recettes\service.py                 271     55     50     18  77.26%   116-118, 129-131, 152->163, 164->175, 177-179, 252, 254, 256, 458-459, 471-473, 529-531, 579, 591-592, 662-663, 713, 725-728, 825, 860-861, 910-927, 956-958, 990-1002, 1021-1023, 1085, 1121->1126
+src\services\recettes\types.py                    59      2      8      2  94.03%   68, 86
+src\services\recettes\utils.py                   160      6     70      9  91.74%   53->65, 148, 349->355, 557->566, 562->566, 566->571, 567->571, 572-573, 577-579
+src\services\suggestions\__init__.py               5      0      0      0 100.00%
+src\services\suggestions\predictions.py          132     65     34      2  47.59%   110-115, 141-144, 162-170, 186-235, 249-283, 309-340, 351-355
+src\services\suggestions\service.py              201    163     96      1  13.13%   86-154, 185-220, 246-302, 316-403, 411-424, 436-449, 473-522, 536-538
+src\services\suggestions\types.py                 30      0      0      0 100.00%
+src\services\suggestions\utils.py                287     22    172     18  89.11%   94, 275, 281->278, 287-288, 326, 348->352, 366->370, 374-375, 380->383, 384-385, 459, 466, 491-496, 517, 521, 613->611, 615, 619-620, 622->611, 753->756
+src\services\utilisateur\__init__.py               4      0      0      0 100.00%
+src\services\utilisateur\authentification.py     381    238    112      8  32.25%   126-139, 143-144, 175, 217, 257-299, 337, 366, 399, 449-450, 476-479, 488-505, 521-546, 559-578, 603-677, 693-718, 733-790, 795-816, 821-874, 884-897, 902-925, 939->941
+src\services\utilisateur\historique.py           237    103     40      3  50.18%   202, 215-216, 229, 240, 251-252, 265, 276, 284, 310-346, 357, 363, 390-440, 481, 499-500, 513-515, 524-540, 549, 553-567, 577-609, 614-628, 633-650, 664-666
+src\services\utilisateur\preferences.py          118     84     14      1  26.52%   45-56, 69-89, 99-117, 140-172, 177-194, 204-212, 220, 237, 254, 272-283, 296->298
+src\services\weather\__init__.py                   3      0      0      0 100.00%
+src\services\weather\service.py                  273     93     84      4  61.62%   263-265, 397, 437->447, 447->457, 469, 498-560, 584-604, 624-650, 668-676, 694-699, 717, 744-763, 782-784, 789, 794
+src\services\weather\utils.py                    250      7    132      8  96.07%   421->430, 423->430, 432->439, 510-511, 534, 538, 542-543, 618
+src\services\web\__init__.py                       3      0      0      0 100.00%
+src\services\web\pwa.py                           49      0      0      0 100.00%
+src\services\web\synchronisation.py              249    174     50      0  25.08%   99-102, 106-123, 128, 133-135, 153-210, 214-237, 250-265, 269, 279-280, 290, 300, 314-334, 338-353, 357-371, 375-384, 398-400, 404, 408-409, 428-447, 455-458, 462-465, 469, 473-482, 492-528, 533-543, 548-556, 570-572
+-------------------------------------------------------------------------------------------
+TOTAL                                           8845   2959   2620    215  63.40%
+=========================== short test summary info ===========================
+FAILED tests/services/test_auth_comprehensive.py::TestAuthServiceLogin::test_login_success
+FAILED tests/services/test_auth_comprehensive.py::TestAuthServiceSession::test_get_current_user_authenticated
+FAILED tests/services/test_auth_comprehensive.py::TestAuthServiceSession::test_get_current_user_not_authenticated
+FAILED tests/services/test_auth_comprehensive.py::TestAuthServicePermissions::test_require_auth_not_authenticated
+FAILED tests/services/test_auth_comprehensive.py::TestAuthServiceRefresh::test_refresh_session_success
+FAILED tests/services/test_auth_comprehensive.py::TestAuthServiceRefresh::test_refresh_session_expired
+FAILED tests/services/test_auth_service.py::test_import_auth_service - Module...
+FAILED tests/services/test_backup_integration.py::TestGetBackupService::test_with_custom_config
+FAILED tests/services/test_backup_integration.py::TestRenderBackupUI::test_render_backup_ui_mocked
+FAILED tests/services/test_backup_integration.py::TestRenderBackupUIButtonClicks::test_ui_create_backup_button_clicked
+FAILED tests/services/test_backup_integration.py::TestRenderBackupUIErrorPaths::test_ui_create_backup_fails
+FAILED tests/services/test_backup_integration.py::TestRenderBackupUIErrorPaths::test_ui_restore_backup_fails
+FAILED tests/services/test_backup_integration.py::TestRenderBackupUIErrorPaths::test_ui_delete_backup_clicked
+FAILED tests/services/test_backup_integration.py::TestRenderBackupUIErrorPaths::test_ui_with_backups_list
+FAILED tests/services/test_backup_integration.py::TestRenderBackupUIErrorPaths::test_ui_file_upload
+FAILED tests/services/test_barcode_service.py::test_import_barcode_service - ...
+FAILED tests/services/test_base_service.py::TestBaseServiceInit::test_init_sets_model
+FAILED tests/services/test_base_service.py::TestBaseServiceInit::test_init_sets_cache_ttl
+FAILED tests/services/test_base_service.py::TestBaseServiceInit::test_init_default_cache_ttl
+FAILED tests/services/test_batch_cooking_integration.py::TestSessionOperationsWithDB::test_get_session_not_found
+FAILED tests/services/test_batch_cooking_integration.py::TestSessionOperationsWithDB::test_obtenir_contexte_dbs_planifiees_empty
+FAILED tests/services/test_budget_extra.py::TestPrevoirDepenses::test_prevoir_depenses_sans_historique
+FAILED tests/services/test_budget_extra.py::TestPrevoirDepenses::test_prevoir_depenses_avec_historique
+FAILED tests/services/test_calendar_sync_comprehensive.py::TestCalendarSyncService::test_export_to_ical
+FAILED tests/services/test_calendar_sync_comprehensive.py::TestCalendarSyncService::test_import_from_ical_url_success
+FAILED tests/services/test_calendar_sync_service.py::test_import_calendar_sync_service
+FAILED tests/services/test_courses_service.py::TestCoursesServiceModeles::test_get_modeles_tous
+FAILED tests/services/test_courses_service.py::TestCoursesServiceModeles::test_get_modeles_par_utilisateur
+FAILED tests/services/test_courses_service.py::TestCoursesServiceModeles::test_delete_modele_succes
+FAILED tests/services/test_courses_service.py::TestGetListeCoursesDirect::test_get_liste_courses_avec_articles
+FAILED tests/services/test_courses_service.py::TestGetListeCoursesDirect::test_get_liste_courses_avec_priorite
+FAILED tests/services/test_courses_service.py::TestGetListeCoursesDirect::test_get_liste_courses_inclut_achetes
+FAILED tests/services/test_courses_service.py::TestGenererSuggestionsIADirect::test_generer_suggestions_inventaire_service_none
+FAILED tests/services/test_courses_service.py::TestGenererSuggestionsIADirect::test_generer_suggestions_inventaire_vide
+FAILED tests/services/test_courses_service.py::TestGenererSuggestionsIADirect::test_delete_modele_non_trouve
+FAILED tests/services/test_courses_service.py::TestGenererSuggestionsIADirect::test_appliquer_modele_succes
+FAILED tests/services/test_courses_service.py::TestGenererSuggestionsIADirect::test_appliquer_modele_non_trouve
+FAILED tests/services/test_courses_service.py::TestGenererSuggestionsIADirect::test_appliquer_modele_sans_ingredient
+FAILED tests/services/test_courses_service.py::TestGenererSuggestionsIADirect::test_create_modele_succes
+FAILED tests/services/test_factures_ocr.py::TestNotificationPushService::test_config_par_defaut
+FAILED tests/services/test_factures_ocr.py::TestNotificationPushService::test_config_personnalisee
+FAILED tests/services/test_factures_ocr.py::TestNotificationPushService::test_get_urls
+FAILED tests/services/test_factures_ocr.py::TestNotificationPushService::test_envoi_desactive
+FAILED tests/services/test_factures_ocr.py::TestNotificationPushService::test_creation_notification
+FAILED tests/services/test_factures_ocr.py::TestNotificationsPushUI::test_help_text
+FAILED tests/services/test_garmin_sync.py::test_import_garmin_sync - ModuleNo...
+FAILED tests/services/test_io_service.py::test_import_io_service - ModuleNotF...
+FAILED tests/services/test_notifications_push_service.py::test_import_push_notifications_module
+FAILED tests/services/test_push_notifications.py::TestPushNotificationServiceMethods::test_get_user_subscriptions_from_db
+FAILED tests/services/test_push_notifications.py::TestPushNotificationServiceNotifications::test_send_notification_success
+FAILED tests/services/test_push_notifications.py::TestPushNotificationServiceNotifications::test_send_notification_updates_count
+FAILED tests/services/test_push_notifications.py::TestPushNotificationServiceNotifications::test_send_notification_deactivates_on_410
+FAILED tests/services/test_push_notifications.py::TestPushNotificationServiceNotifications::test_send_to_all_users
+FAILED tests/services/test_push_notifications.py::TestPushNotificationServicePredefinedNotifications::test_notify_stock_low
+FAILED tests/services/test_push_notifications.py::TestPushNotificationServicePredefinedNotifications::test_notify_expiration_expired
+FAILED tests/services/test_push_notifications.py::TestPushNotificationServicePredefinedNotifications::test_notify_expiration_tomorrow
+FAILED tests/services/test_push_notifications.py::TestPushNotificationServicePredefinedNotifications::test_notify_expiration_critical
+FAILED tests/services/test_push_notifications.py::TestPushNotificationServicePredefinedNotifications::test_notify_expiration_warning
+FAILED tests/services/test_push_notifications.py::TestPushNotificationServicePredefinedNotifications::test_notify_meal_reminder
+FAILED tests/services/test_push_notifications.py::TestPushNotificationServicePredefinedNotifications::test_notify_shopping_list_shared
+FAILED tests/services/test_push_notifications.py::TestWebPushSending::test_send_web_push_success
+FAILED tests/services/test_push_notifications.py::TestSupabaseIntegration::test_get_supabase_client_not_configured
+FAILED tests/services/test_push_notifications.py::TestSQLAlchemyMethods::test_sauvegarder_abonnement_db_nouveau_mocked
+FAILED tests/services/test_push_notifications.py::TestSQLAlchemyMethods::test_lister_abonnements_utilisateur_mocked
+FAILED tests/services/test_push_notifications.py::TestSQLAlchemyMethods::test_lister_abonnements_utilisateur_vide
+FAILED tests/services/test_push_notifications.py::TestSQLAlchemyMethods::test_sauvegarder_preferences_db_nouveau
+FAILED tests/services/test_push_notifications.py::TestFactory::test_get_push_notification_service
+FAILED tests/services/test_push_notifications.py::TestFactory::test_get_push_notification_service_singleton
+FAILED tests/services/test_push_notifications_utils.py::TestNotificationTypeMapping::test_get_notification_type_mapping_returns_dict
+FAILED tests/services/test_push_notifications_utils.py::TestNotificationTypeMapping::test_get_notification_type_mapping_all_types
+FAILED tests/services/test_push_notifications_utils.py::TestCheckNotificationTypeEnabled::test_type_enabled
+FAILED tests/services/test_push_notifications_utils.py::TestCheckNotificationTypeEnabled::test_type_disabled
+FAILED tests/services/test_push_notifications_utils.py::TestCheckNotificationTypeEnabled::test_type_not_in_prefs_defaults_true
+FAILED tests/services/test_push_notifications_utils.py::TestCheckNotificationTypeEnabled::test_string_type
+FAILED tests/services/test_push_notifications_utils.py::TestCheckNotificationTypeEnabled::test_unknown_string_type
+FAILED tests/services/test_push_notifications_utils.py::TestQuietHours::test_is_quiet_hours_during_quiet
+FAILED tests/services/test_push_notifications_utils.py::TestQuietHours::test_is_quiet_hours_outside_quiet
+FAILED tests/services/test_push_notifications_utils.py::TestQuietHours::test_is_quiet_hours_no_quiet
+FAILED tests/services/test_push_notifications_utils.py::TestQuietHours::test_is_quiet_hours_same_day_range
+FAILED tests/services/test_push_notifications_utils.py::TestQuietHours::test_is_quiet_hours_invalid_hour
+FAILED tests/services/test_push_notifications_utils.py::TestQuietHours::test_can_send_during_quiet_hours_critical
+FAILED tests/services/test_push_notifications_utils.py::TestQuietHours::test_can_send_during_quiet_hours_normal
+FAILED tests/services/test_push_notifications_utils.py::TestShouldSendNotification::test_should_send_normal_case
+FAILED tests/services/test_push_notifications_utils.py::TestShouldSendNotification::test_should_send_type_disabled
+FAILED tests/services/test_push_notifications_utils.py::TestShouldSendNotification::test_should_send_quiet_hours
+FAILED tests/services/test_push_notifications_utils.py::TestShouldSendNotification::test_should_send_critical_during_quiet
+FAILED tests/services/test_push_notifications_utils.py::TestShouldSendNotification::test_should_send_limit_reached
+FAILED tests/services/test_push_notifications_utils.py::TestBuildPayload::test_build_push_payload_basic
+FAILED tests/services/test_push_notifications_utils.py::TestBuildPayload::test_build_push_payload_with_actions
+FAILED tests/services/test_push_notifications_utils.py::TestBuildPayload::test_build_push_payload_with_timestamp
+FAILED tests/services/test_push_notifications_utils.py::TestBuildPayload::test_build_subscription_info
+FAILED tests/services/test_push_notifications_utils.py::TestCreateNotifications::test_create_stock_notification
+FAILED tests/services/test_push_notifications_utils.py::TestCreateNotifications::test_create_stock_notification_without_unit
+FAILED tests/services/test_push_notifications_utils.py::TestCreateNotifications::test_create_expiration_notification_expired
+FAILED tests/services/test_push_notifications_utils.py::TestCreateNotifications::test_create_expiration_notification_tomorrow
+FAILED tests/services/test_push_notifications_utils.py::TestCreateNotifications::test_create_expiration_notification_warning
+FAILED tests/services/test_push_notifications_utils.py::TestCreateNotifications::test_create_meal_reminder_notification
+FAILED tests/services/test_push_notifications_utils.py::TestCreateNotifications::test_create_shopping_shared_notification
+FAILED tests/services/test_push_notifications_utils.py::TestCreateNotifications::test_create_activity_reminder_notification
+FAILED tests/services/test_push_notifications_utils.py::TestCreateNotifications::test_create_activity_reminder_without_location
+FAILED tests/services/test_push_notifications_utils.py::TestCreateNotifications::test_create_milestone_reminder_notification
+FAILED tests/services/test_push_notifications_utils.py::TestCounterUtils::test_generate_count_key
+FAILED tests/services/test_push_notifications_utils.py::TestCounterUtils::test_generate_count_key_default_time
+FAILED tests/services/test_push_notifications_utils.py::TestCounterUtils::test_parse_count_key_valid
+FAILED tests/services/test_push_notifications_utils.py::TestCounterUtils::test_parse_count_key_invalid
+FAILED tests/services/test_push_notifications_utils.py::TestCounterUtils::test_should_reset_counter_same_hour
+FAILED tests/services/test_push_notifications_utils.py::TestCounterUtils::test_should_reset_counter_new_hour
+FAILED tests/services/test_push_notifications_utils.py::TestValidation::test_validate_subscription_valid
+FAILED tests/services/test_push_notifications_utils.py::TestValidation::test_validate_subscription_no_endpoint
+FAILED tests/services/test_push_notifications_utils.py::TestValidation::test_validate_subscription_http_endpoint
+FAILED tests/services/test_push_notifications_utils.py::TestValidation::test_validate_subscription_missing_keys
+FAILED tests/services/test_push_notifications_utils.py::TestValidation::test_validate_preferences_valid
+FAILED tests/services/test_push_notifications_utils.py::TestValidation::test_validate_preferences_invalid_hours
+FAILED tests/services/test_push_notifications_utils.py::TestValidation::test_validate_preferences_low_max_per_hour
+FAILED tests/services/test_push_notifications_utils.py::TestEdgeCases::test_notification_with_special_characters
+FAILED tests/services/test_push_notifications_utils.py::TestEdgeCases::test_empty_preferences
+FAILED tests/services/test_push_notifications_utils.py::TestEdgeCases::test_payload_with_empty_data
+FAILED tests/services/test_push_notifications_utils.py::TestEdgeCases::test_quiet_hours_edge_midnight
+FAILED tests/services/test_push_notifications_utils.py::TestEdgeCases::test_expiration_exactly_today
+FAILED tests/services/test_push_notifications_utils.py::TestNotificationTypeEnum::test_notification_types_values
+FAILED tests/services/test_push_notifications_utils.py::TestNotificationTypeEnum::test_notification_type_from_string
+FAILED tests/services/test_push_notifications_utils.py::TestNotificationTypeEnum::test_notification_type_invalid_string
+FAILED tests/services/test_push_send_methods.py::TestSendNotification::test_send_notification_no_subscriptions
+FAILED tests/services/test_push_send_methods.py::TestSendNotification::test_send_notification_with_subscription
+FAILED tests/services/test_push_send_methods.py::TestSendNotification::test_send_notification_preferences_disabled
+FAILED tests/services/test_push_send_methods.py::TestSendNotification::test_send_notification_handles_push_error
+FAILED tests/services/test_push_send_methods.py::TestSendNotification::test_send_notification_disables_on_410
+FAILED tests/services/test_push_send_methods.py::TestNotifyStockLow::test_notify_stock_low_creates_notification
+FAILED tests/services/test_push_send_methods.py::TestNotifyExpiration::test_notify_expiration_expired
+FAILED tests/services/test_push_send_methods.py::TestNotifyExpiration::test_notify_expiration_tomorrow
+FAILED tests/services/test_push_send_methods.py::TestNotifyExpiration::test_notify_expiration_soon
+FAILED tests/services/test_push_send_methods.py::TestNotifyExpiration::test_notify_expiration_critical_flag
+FAILED tests/services/test_push_send_methods.py::TestNotifyMealReminder::test_notify_meal_reminder_content
+FAILED tests/services/test_push_send_methods.py::TestNotifyShoppingListShared::test_notify_shopping_list_shared_content
+FAILED tests/services/test_rapports_pdf_generation.py::TestRapportsPDFUtilitaires::test_factory_function
+FAILED tests/services/test_rapports_pdf_generation.py::TestRapportsPDFUtilitaires::test_factory_returns_same_instance
+FAILED tests/services/test_recipe_import_integration.py::TestImportedRecipe::test_validation_nom_min_length
+FAILED tests/services/test_recipe_import_integration.py::TestImportFromUrlMocked::test_import_returns_import_result
+FAILED tests/services/test_recipe_import_service.py::test_import_recipe_import_module
+FAILED tests/services/test_recipe_import_service.py::test_import_recipe_import_service
+FAILED tests/services/test_recipe_import_service.py::TestImportedIngredient::test_create_simple
+FAILED tests/services/test_recipe_import_service.py::TestImportedIngredient::test_create_with_quantity
+FAILED tests/services/test_recipe_import_service.py::TestImportedRecipe::test_create_minimal
+FAILED tests/services/test_recipe_import_service.py::TestImportedRecipe::test_create_full
+FAILED tests/services/test_recipe_import_service.py::TestImportResult::test_success_result
+FAILED tests/services/test_recipe_import_service.py::TestImportResult::test_failure_result
+FAILED tests/services/test_recipe_import_service.py::TestRecipeParserCleanText::test_clean_normal
+FAILED tests/services/test_recipe_import_service.py::TestRecipeParserCleanText::test_clean_empty
+FAILED tests/services/test_recipe_import_service.py::TestRecipeParserCleanText::test_clean_newlines
+FAILED tests/services/test_recipe_import_service.py::TestRecipeParserParseDuration::test_parse_minutes
+FAILED tests/services/test_recipe_import_service.py::TestRecipeParserParseDuration::test_parse_hours
+FAILED tests/services/test_recipe_import_service.py::TestRecipeParserParseDuration::test_parse_hours_and_minutes
+FAILED tests/services/test_recipe_import_service.py::TestRecipeParserParseDuration::test_parse_just_number
+FAILED tests/services/test_recipe_import_service.py::TestRecipeParserParseDuration::test_parse_empty
+FAILED tests/services/test_recipe_import_service.py::TestRecipeParserParsePortions::test_parse_simple
+FAILED tests/services/test_recipe_import_service.py::TestRecipeParserParsePortions::test_parse_limits
+FAILED tests/services/test_recipe_import_service.py::TestRecipeParserParsePortions::test_parse_empty
+FAILED tests/services/test_recipe_import_service.py::TestRecipeParserParseIngredient::test_parse_with_unit
+FAILED tests/services/test_recipe_import_service.py::TestRecipeParserParseIngredient::test_parse_without_unit
+FAILED tests/services/test_recipe_import_service.py::TestRecipeParserParseIngredient::test_parse_decimal
+FAILED tests/services/test_recipe_import_service.py::TestRecipeParserParseIngredient::test_parse_no_quantity
+FAILED tests/services/test_recipe_import_service.py::TestRecipeParserParseIngredient::test_parse_empty
+FAILED tests/services/test_recipe_import_service.py::TestMarmitonParser::test_parser_exists
+FAILED tests/services/test_recipe_import_service.py::TestMarmitonParser::test_parser_has_parse
+FAILED tests/services/test_recipe_import_service.py::TestCuisineAZParser::test_parser_exists
+FAILED tests/services/test_recipe_import_service.py::TestGenericRecipeParser::test_parser_exists
+FAILED tests/services/test_recipe_import_service.py::TestGenericRecipeParser::test_parser_has_parse
+FAILED tests/services/test_recipe_import_service.py::TestRecipeImportServiceInit::test_service_creation
+FAILED tests/services/test_recipe_import_service.py::TestRecipeImportServiceInit::test_factory_function
+FAILED tests/services/test_recipe_import_service.py::TestRecipeImportServiceMethods::test_service_has_import_method
+FAILED tests/services/test_recipe_import_service.py::TestRecipeImportServiceMethods::test_service_inherits_base
+FAILED tests/services/test_recipe_import_service.py::TestRecipeParserHelpers::test_clean_text_multiline
+FAILED tests/services/test_recipe_import_service.py::TestRecipeParserHelpers::test_parse_duration_hour_short
+FAILED tests/services/test_recipe_import_service.py::TestRecipeParserHelpers::test_parse_portions_default
+FAILED tests/services/test_recipe_import_service.py::TestRecipeImportServiceMocked::test_import_url_network_error
+FAILED tests/services/test_recipe_import_service.py::TestRecipeImportServiceMocked::test_import_url_404
+FAILED tests/services/test_recipe_import_service.py::TestBatchImport::test_import_urls_list
+FAILED tests/services/test_recipe_import_service.py::TestBatchImport::test_import_empty_list
+FAILED tests/services/test_services_comprehensive.py::TestCalendarSyncServiceComplete::test_import_module
+FAILED tests/services/test_types_service.py::test_import_types_service - Modu...
+FAILED tests/services/test_user_preferences_service.py::test_import_user_preferences_module
+FAILED tests/services/test_user_preferences_service.py::test_import_user_preferences_service
+ERROR tests/services/test_base_service.py::TestBaseServiceCreate::test_create_has_method
+ERROR tests/services/test_base_service.py::TestBaseServiceRead::test_get_by_id_method_exists
+ERROR tests/services/test_base_service.py::TestBaseServiceRead::test_get_all_method_exists
+ERROR tests/services/test_base_service.py::TestBaseServiceUpdate::test_update_method_exists
+ERROR tests/services/test_base_service.py::TestBaseServiceDelete::test_delete_method_exists
+ERROR tests/services/test_base_service.py::TestBaseServiceCache::test_invalider_cache_method_exists
+ERROR tests/services/test_base_service.py::TestBaseServiceStats::test_count_method_exists
+ERROR tests/services/test_base_service.py::TestBaseServiceSearch::test_advanced_search_method_exists
+====== 182 failed, 2244 passed, 3 warnings, 8 errors in 74.98s (0:01:14) ======

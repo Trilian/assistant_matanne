@@ -10,7 +10,7 @@ from datetime import date
 from unittest.mock import patch, MagicMock
 from bs4 import BeautifulSoup
 
-from src.services.recipe_import import (
+from src.services.recettes.import_url import (
     ImportedIngredient,
     ImportedRecipe,
     ImportResult,
@@ -521,7 +521,7 @@ class TestServiceUtilities:
 
     def test_service_inherits_from_base(self):
         """Le service hérite de BaseAIService."""
-        from src.services.base_ai_service import BaseAIService
+        from src.services.base import BaseAIService
         
         service = RecipeImportService()
         

@@ -8,7 +8,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
-from src.services.io_service import IOService
+from src.services.base import IOService
 
 logger = logging.getLogger(__name__)
 

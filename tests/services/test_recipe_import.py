@@ -1,14 +1,14 @@
 """
 Tests unitaires pour recipe_import.py
 
-Module: src.services.recipe_import
+Module: src.services.recettes.import_url
 """
 
 import pytest
 from unittest.mock import MagicMock, patch
 
 # TODO: Ajuster l'import selon la structure
-# from src.services.recipe_import import ...
+# from src.services.recettes.import_url import ...
 
 
 class TestRecipeImport:

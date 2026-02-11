@@ -12,11 +12,16 @@ Fonctionnalités:
 import streamlit as st
 from datetime import date
 
-from src.services.notifications_push import (
+from src.services.notifications import (
+    obtenir_service_ntfy,
+    ConfigurationNtfy,
+    NotificationNtfy,
+    ServiceNtfy,
+    # Alias rétrocompatibilité
     get_notification_push_service,
     NotificationPushConfig,
     NotificationPush,
-    NotificationPushService
+    NotificationPushService,
 )
 
 

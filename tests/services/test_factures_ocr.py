@@ -18,7 +18,7 @@ class TestFactureOCRService:
     
     def test_parser_reponse_valid_json(self):
         """Test parsing d'une réponse JSON valide."""
-        from src.services.facture_ocr import FactureOCRService
+        from src.services.integrations import FactureOCRService
         
         service = FactureOCRService()
         
@@ -43,7 +43,7 @@ class TestFactureOCRService:
     
     def test_parser_reponse_markdown_wrapper(self):
         """Test parsing avec wrapper markdown."""
-        from src.services.facture_ocr import FactureOCRService
+        from src.services.integrations import FactureOCRService
         
         service = FactureOCRService()
         
@@ -62,7 +62,7 @@ class TestFactureOCRService:
     
     def test_parser_reponse_invalid_json(self):
         """Test parsing d'une réponse JSON invalide."""
-        from src.services.facture_ocr import FactureOCRService
+        from src.services.integrations import FactureOCRService
         
         service = FactureOCRService()
         
@@ -76,7 +76,7 @@ class TestFactureOCRService:
     
     def test_calcul_confiance(self):
         """Test du calcul du score de confiance."""
-        from src.services.facture_ocr import FactureOCRService
+        from src.services.integrations import FactureOCRService
         
         service = FactureOCRService()
         
@@ -113,10 +113,10 @@ class TestCoursesIntelligentesService:
     
     def test_determiner_rayon(self):
         """Test détermination du rayon par ingrédient."""
-        from src.services.courses_intelligentes import CoursesIntelligentesService
+        from src.services.courses import CoursesIntelligentesService
         
         # Mock le client IA pour éviter l'erreur
-        with patch('src.services.courses_intelligentes.obtenir_client_ia') as mock_client:
+        with patch('src.services.courses.suggestion.obtenir_client_ia') as mock_client:
             mock_client.return_value = Mock()
             service = CoursesIntelligentesService()
         
@@ -129,9 +129,9 @@ class TestCoursesIntelligentesService:
     
     def test_determiner_priorite(self):
         """Test détermination de priorité par rayon."""
-        from src.services.courses_intelligentes import CoursesIntelligentesService
+        from src.services.courses import CoursesIntelligentesService
         
-        with patch('src.services.courses_intelligentes.obtenir_client_ia') as mock_client:
+        with patch('src.services.courses.suggestion.obtenir_client_ia') as mock_client:
             mock_client.return_value = Mock()
             service = CoursesIntelligentesService()
         
@@ -144,9 +144,9 @@ class TestCoursesIntelligentesService:
     
     def test_comparer_avec_stock(self):
         """Test comparaison besoins vs stock."""
-        from src.services.courses_intelligentes import CoursesIntelligentesService, ArticleCourse
+        from src.services.courses import CoursesIntelligentesService, ArticleCourse
         
-        with patch('src.services.courses_intelligentes.obtenir_client_ia') as mock_client:
+        with patch('src.services.courses.suggestion.obtenir_client_ia') as mock_client:
             mock_client.return_value = Mock()
             service = CoursesIntelligentesService()
         

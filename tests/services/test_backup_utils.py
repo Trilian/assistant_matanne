@@ -14,7 +14,7 @@ class TestBackupId:
     
     def test_generate_backup_id_default(self):
         """Test génération ID avec date courante."""
-        from src.services.backup_utils import generate_backup_id
+        from src.services.backup import generate_backup_id
         
         backup_id = generate_backup_id()
         
@@ -24,7 +24,7 @@ class TestBackupId:
     
     def test_generate_backup_id_specific_date(self):
         """Test génération ID avec date spécifique."""
-        from src.services.backup_utils import generate_backup_id
+        from src.services.backup import generate_backup_id
         
         dt = datetime(2024, 1, 15, 14, 30, 45)
         backup_id = generate_backup_id(dt)
@@ -33,7 +33,7 @@ class TestBackupId:
     
     def test_generate_backup_id_midnight(self):
         """Test génération ID à minuit."""
-        from src.services.backup_utils import generate_backup_id
+        from src.services.backup import generate_backup_id
         
         dt = datetime(2024, 12, 31, 0, 0, 0)
         backup_id = generate_backup_id(dt)
@@ -42,7 +42,7 @@ class TestBackupId:
     
     def test_parse_backup_id_valid(self):
         """Test parsing d'un ID valide."""
-        from src.services.backup_utils import parse_backup_id
+        from src.services.backup import parse_backup_id
         
         result = parse_backup_id("20240115_143045")
         
@@ -50,7 +50,7 @@ class TestBackupId:
     
     def test_parse_backup_id_invalid(self):
         """Test parsing d'un ID invalide."""
-        from src.services.backup_utils import parse_backup_id
+        from src.services.backup import parse_backup_id
         
         assert parse_backup_id("invalid") is None
         assert parse_backup_id("20241315_143045") is None  # Mois invalide
@@ -58,7 +58,7 @@ class TestBackupId:
     
     def test_is_valid_backup_id(self):
         """Test validation d'ID."""
-        from src.services.backup_utils import is_valid_backup_id
+        from src.services.backup import is_valid_backup_id
         
         assert is_valid_backup_id("20240115_143045") is True
         assert is_valid_backup_id("invalid") is False
@@ -70,7 +70,7 @@ class TestChecksum:
     
     def test_calculate_checksum_simple(self):
         """Test calcul MD5 simple."""
-        from src.services.backup_utils import calculate_checksum
+        from src.services.backup import calculate_checksum
         
         checksum = calculate_checksum('{"test": 1}')
         
@@ -79,7 +79,7 @@ class TestChecksum:
     
     def test_calculate_checksum_deterministic(self):
         """Test que le checksum est déterministe."""
-        from src.services.backup_utils import calculate_checksum
+        from src.services.backup import calculate_checksum
         
         data = '{"key": "value", "number": 123}'
         
@@ -87,7 +87,7 @@ class TestChecksum:
     
     def test_calculate_checksum_different_data(self):
         """Test que différentes données donnent différents checksums."""
-        from src.services.backup_utils import calculate_checksum
+        from src.services.backup import calculate_checksum
         
         checksum1 = calculate_checksum("data1")
         checksum2 = calculate_checksum("data2")
@@ -96,7 +96,7 @@ class TestChecksum:
     
     def test_verify_checksum_valid(self):
         """Test vérification checksum valide."""
-        from src.services.backup_utils import calculate_checksum, verify_checksum
+        from src.services.backup import calculate_checksum, verify_checksum
         
         data = "test data"
         checksum = calculate_checksum(data)
@@ -105,7 +105,7 @@ class TestChecksum:
     
     def test_verify_checksum_invalid(self):
         """Test vérification checksum invalide."""
-        from src.services.backup_utils import verify_checksum
+        from src.services.backup import verify_checksum
         
         assert verify_checksum("data", "wrong_checksum") is False
 
@@ -115,7 +115,7 @@ class TestSerialization:
     
     def test_serialize_value_datetime(self):
         """Test sérialisation datetime."""
-        from src.services.backup_utils import serialize_value
+        from src.services.backup import serialize_value
         
         dt = datetime(2024, 1, 15, 10, 30, 0)
         result = serialize_value(dt)
@@ -124,7 +124,7 @@ class TestSerialization:
     
     def test_serialize_value_primitives(self):
         """Test sérialisation de primitives."""
-        from src.services.backup_utils import serialize_value
+        from src.services.backup import serialize_value
         
         assert serialize_value(123) == 123
         assert serialize_value("string") == "string"
@@ -134,7 +134,7 @@ class TestSerialization:
     
     def test_deserialize_value_datetime(self):
         """Test désérialisation datetime."""
-        from src.services.backup_utils import deserialize_value
+        from src.services.backup import deserialize_value
         
         result = deserialize_value("2024-01-15T10:30:00")
         
@@ -144,14 +144,14 @@ class TestSerialization:
     
     def test_deserialize_value_non_datetime(self):
         """Test que les non-datetimes ne sont pas modifiées."""
-        from src.services.backup_utils import deserialize_value
+        from src.services.backup import deserialize_value
         
         assert deserialize_value(123) == 123
         assert deserialize_value("simple string") == "simple string"
     
     def test_model_to_dict_simple(self):
         """Test conversion d'objet en dict."""
-        from src.services.backup_utils import model_to_dict
+        from src.services.backup import model_to_dict
         
         class SimpleObject:
             def __init__(self):
@@ -171,7 +171,7 @@ class TestValidation:
     
     def test_validate_backup_structure_valid(self):
         """Test validation structure valide."""
-        from src.services.backup_utils import validate_backup_structure
+        from src.services.backup import validate_backup_structure
         
         data = {"metadata": {"id": "123"}, "data": {"recettes": []}}
         is_valid, error = validate_backup_structure(data)
@@ -181,7 +181,7 @@ class TestValidation:
     
     def test_validate_backup_structure_missing_metadata(self):
         """Test validation sans metadata."""
-        from src.services.backup_utils import validate_backup_structure
+        from src.services.backup import validate_backup_structure
         
         data = {"data": {"recettes": []}}
         is_valid, error = validate_backup_structure(data)
@@ -191,7 +191,7 @@ class TestValidation:
     
     def test_validate_backup_structure_missing_data(self):
         """Test validation sans data."""
-        from src.services.backup_utils import validate_backup_structure
+        from src.services.backup import validate_backup_structure
         
         data = {"metadata": {"id": "123"}}
         is_valid, error = validate_backup_structure(data)
@@ -201,7 +201,7 @@ class TestValidation:
     
     def test_validate_backup_structure_not_dict(self):
         """Test validation avec non-dict."""
-        from src.services.backup_utils import validate_backup_structure
+        from src.services.backup import validate_backup_structure
         
         is_valid, error = validate_backup_structure([1, 2, 3])
         
@@ -210,7 +210,7 @@ class TestValidation:
     
     def test_validate_backup_metadata_valid(self):
         """Test validation métadonnées valides."""
-        from src.services.backup_utils import validate_backup_metadata
+        from src.services.backup import validate_backup_metadata
         
         metadata = {"id": "20240115_143000", "created_at": "2024-01-15T14:30:00"}
         is_valid, error = validate_backup_metadata(metadata)
@@ -219,7 +219,7 @@ class TestValidation:
     
     def test_validate_backup_metadata_missing_id(self):
         """Test validation métadonnées sans ID."""
-        from src.services.backup_utils import validate_backup_metadata
+        from src.services.backup import validate_backup_metadata
         
         is_valid, error = validate_backup_metadata({"created_at": "2024-01-15"})
         
@@ -232,21 +232,21 @@ class TestFileUtils:
     
     def test_is_compressed_file_gz(self):
         """Test détection fichier gzip."""
-        from src.services.backup_utils import is_compressed_file
+        from src.services.backup import is_compressed_file
         
         assert is_compressed_file("backup.json.gz") is True
         assert is_compressed_file("file.gz") is True
     
     def test_is_compressed_file_json(self):
         """Test détection fichier JSON non compressé."""
-        from src.services.backup_utils import is_compressed_file
+        from src.services.backup import is_compressed_file
         
         assert is_compressed_file("backup.json") is False
         assert is_compressed_file("data.txt") is False
     
     def test_get_backup_filename_compressed(self):
         """Test génération nom fichier compressé."""
-        from src.services.backup_utils import get_backup_filename
+        from src.services.backup import get_backup_filename
         
         filename = get_backup_filename("20240115_143000", compressed=True)
         
@@ -254,7 +254,7 @@ class TestFileUtils:
     
     def test_get_backup_filename_uncompressed(self):
         """Test génération nom fichier non compressé."""
-        from src.services.backup_utils import get_backup_filename
+        from src.services.backup import get_backup_filename
         
         filename = get_backup_filename("20240115_143000", compressed=False)
         
@@ -262,7 +262,7 @@ class TestFileUtils:
     
     def test_parse_backup_filename_compressed(self):
         """Test parsing nom fichier compressé."""
-        from src.services.backup_utils import parse_backup_filename
+        from src.services.backup import parse_backup_filename
         
         result = parse_backup_filename("backup_20240115_143000.json.gz")
         
@@ -272,7 +272,7 @@ class TestFileUtils:
     
     def test_parse_backup_filename_uncompressed(self):
         """Test parsing nom fichier non compressé."""
-        from src.services.backup_utils import parse_backup_filename
+        from src.services.backup import parse_backup_filename
         
         result = parse_backup_filename("backup_20240115_143000.json")
         
@@ -282,7 +282,7 @@ class TestFileUtils:
     
     def test_parse_backup_filename_invalid(self):
         """Test parsing nom fichier invalide."""
-        from src.services.backup_utils import parse_backup_filename
+        from src.services.backup import parse_backup_filename
         
         result = parse_backup_filename("random_file.txt")
         
@@ -290,26 +290,26 @@ class TestFileUtils:
     
     def test_format_file_size_bytes(self):
         """Test formatage taille en bytes."""
-        from src.services.backup_utils import format_file_size
+        from src.services.backup import format_file_size
         
         assert format_file_size(500) == "500 B"
     
     def test_format_file_size_kb(self):
         """Test formatage taille en KB."""
-        from src.services.backup_utils import format_file_size
+        from src.services.backup import format_file_size
         
         assert format_file_size(1024) == "1.0 KB"
         assert format_file_size(2048) == "2.0 KB"
     
     def test_format_file_size_mb(self):
         """Test formatage taille en MB."""
-        from src.services.backup_utils import format_file_size
+        from src.services.backup import format_file_size
         
         assert format_file_size(1024 * 1024) == "1.0 MB"
     
     def test_format_file_size_gb(self):
         """Test formatage taille en GB."""
-        from src.services.backup_utils import format_file_size
+        from src.services.backup import format_file_size
         
         assert format_file_size(1024 * 1024 * 1024) == "1.0 GB"
 
@@ -319,7 +319,7 @@ class TestRestoreOrder:
     
     def test_get_restore_order_returns_list(self):
         """Test que l'ordre retourne une liste."""
-        from src.services.backup_utils import get_restore_order
+        from src.services.backup import get_restore_order
         
         order = get_restore_order()
         
@@ -328,7 +328,7 @@ class TestRestoreOrder:
     
     def test_get_restore_order_ingredients_first(self):
         """Test que ingredients est en premier."""
-        from src.services.backup_utils import get_restore_order
+        from src.services.backup import get_restore_order
         
         order = get_restore_order()
         
@@ -336,7 +336,7 @@ class TestRestoreOrder:
     
     def test_get_restore_order_recettes_before_repas(self):
         """Test que recettes vient avant repas."""
-        from src.services.backup_utils import get_restore_order
+        from src.services.backup import get_restore_order
         
         order = get_restore_order()
         
@@ -347,7 +347,7 @@ class TestRestoreOrder:
     
     def test_filter_and_order_tables(self):
         """Test filtrage et tri des tables."""
-        from src.services.backup_utils import filter_and_order_tables
+        from src.services.backup import filter_and_order_tables
         
         tables = ["repas", "ingredients", "recettes"]
         result = filter_and_order_tables(tables)
@@ -358,7 +358,7 @@ class TestRestoreOrder:
     
     def test_filter_and_order_tables_unknown(self):
         """Test filtrage avec tables inconnues."""
-        from src.services.backup_utils import filter_and_order_tables
+        from src.services.backup import filter_and_order_tables
         
         tables = ["unknown_table", "ingredients"]
         result = filter_and_order_tables(tables)
@@ -371,7 +371,7 @@ class TestBackupStats:
     
     def test_calculate_backup_stats(self):
         """Test calcul des stats."""
-        from src.services.backup_utils import calculate_backup_stats
+        from src.services.backup import calculate_backup_stats
         
         data = {
             "data": {
@@ -389,7 +389,7 @@ class TestBackupStats:
     
     def test_calculate_backup_stats_empty(self):
         """Test calcul stats backup vide."""
-        from src.services.backup_utils import calculate_backup_stats
+        from src.services.backup import calculate_backup_stats
         
         stats = calculate_backup_stats({"data": {}})
         
@@ -398,7 +398,7 @@ class TestBackupStats:
     
     def test_compare_backup_stats_identical(self):
         """Test comparaison stats identiques."""
-        from src.services.backup_utils import compare_backup_stats
+        from src.services.backup import compare_backup_stats
         
         stats = {"tables_count": 5, "total_records": 100, "records_per_table": {"a": 50, "b": 50}}
         
@@ -411,7 +411,7 @@ class TestBackupStats:
     
     def test_compare_backup_stats_different(self):
         """Test comparaison stats différentes."""
-        from src.services.backup_utils import compare_backup_stats
+        from src.services.backup import compare_backup_stats
         
         original = {"tables_count": 5, "total_records": 100, "records_per_table": {"a": 50, "b": 50}}
         restored = {"tables_count": 4, "total_records": 80, "records_per_table": {"a": 50, "c": 30}}
@@ -429,7 +429,7 @@ class TestRotation:
     
     def test_get_backups_to_rotate_under_limit(self):
         """Test rotation sous la limite."""
-        from src.services.backup_utils import get_backups_to_rotate
+        from src.services.backup import get_backups_to_rotate
         
         files = [("a.json", 100), ("b.json", 200)]
         
@@ -439,7 +439,7 @@ class TestRotation:
     
     def test_get_backups_to_rotate_over_limit(self):
         """Test rotation au-dessus de la limite."""
-        from src.services.backup_utils import get_backups_to_rotate
+        from src.services.backup import get_backups_to_rotate
         
         files = [
             ("a.json", 100),  # Le plus ancien
@@ -453,13 +453,13 @@ class TestRotation:
     
     def test_should_run_backup_first_time(self):
         """Test backup première fois."""
-        from src.services.backup_utils import should_run_backup
+        from src.services.backup import should_run_backup
         
         assert should_run_backup(None, interval_hours=24) is True
     
     def test_should_run_backup_interval_passed(self):
         """Test backup après intervalle écoulé."""
-        from src.services.backup_utils import should_run_backup
+        from src.services.backup import should_run_backup
         
         last = datetime.now() - timedelta(hours=25)
         
@@ -467,7 +467,7 @@ class TestRotation:
     
     def test_should_run_backup_interval_not_passed(self):
         """Test backup avant intervalle."""
-        from src.services.backup_utils import should_run_backup
+        from src.services.backup import should_run_backup
         
         last = datetime.now() - timedelta(hours=12)
         
@@ -479,14 +479,14 @@ class TestEdgeCases:
     
     def test_empty_data_serialization(self):
         """Test sérialisation données vides."""
-        from src.services.backup_utils import serialize_value
+        from src.services.backup import serialize_value
         
         assert serialize_value({}) == {}
         assert serialize_value([]) == []
     
     def test_unicode_checksum(self):
         """Test checksum avec caractères unicode."""
-        from src.services.backup_utils import calculate_checksum
+        from src.services.backup import calculate_checksum
         
         checksum = calculate_checksum('{"nom": "Bœuf bourguignon", "émoji": "🍖"}')
         
@@ -494,7 +494,7 @@ class TestEdgeCases:
     
     def test_deserialize_value_with_z_timezone(self):
         """Test désérialisation avec timezone Z."""
-        from src.services.backup_utils import deserialize_value
+        from src.services.backup import deserialize_value
         
         result = deserialize_value("2024-01-15T10:30:00Z")
         
@@ -502,13 +502,13 @@ class TestEdgeCases:
     
     def test_format_file_size_zero(self):
         """Test formatage taille zéro."""
-        from src.services.backup_utils import format_file_size
+        from src.services.backup import format_file_size
         
         assert format_file_size(0) == "0 B"
     
     def test_validate_backup_structure_nested_invalid(self):
         """Test validation avec data non-dict."""
-        from src.services.backup_utils import validate_backup_structure
+        from src.services.backup import validate_backup_structure
         
         data = {"metadata": {}, "data": "not a dict"}
         is_valid, error = validate_backup_structure(data)
@@ -523,7 +523,7 @@ class TestPerformance:
     
     def test_checksum_performance(self):
         """Test performance du calcul de checksum."""
-        from src.services.backup_utils import calculate_checksum
+        from src.services.backup import calculate_checksum
         import time
         
         # Générer une grande chaîne
@@ -539,7 +539,7 @@ class TestPerformance:
     
     def test_filter_and_order_performance(self):
         """Test performance du filtrage."""
-        from src.services.backup_utils import filter_and_order_tables
+        from src.services.backup import filter_and_order_tables
         import time
         
         tables = ["repas", "ingredients", "recettes"] * 100

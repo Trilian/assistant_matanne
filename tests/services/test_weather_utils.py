@@ -6,7 +6,7 @@ Ces tests vérifient les fonctions pures sans dépendance externe.
 
 import pytest
 from datetime import date
-from src.services.weather_utils import (
+from src.services.weather import (
     # Conversion de direction
     direction_from_degrees,
     degrees_from_direction,

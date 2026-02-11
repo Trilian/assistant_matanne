@@ -1,0 +1,366 @@
+"""
+Service Courses Unifie.
+
+Service complet pour la gestion de la liste de courses avec support IA.
+"""
+
+import logging
+from typing import Any
+
+from sqlalchemy.orm import Session, joinedload
+
+from src.core.ai import obtenir_client_ia
+from src.core.database import obtenir_contexte_db
+from src.core.decorators import avec_session_db, avec_cache, avec_gestion_erreurs
+from src.core.models import ArticleCourses
+from src.services.base import BaseAIService
+from src.services.base import BaseService
+from .types import SuggestionCourses
+
+logger = logging.getLogger(__name__)
+
+
+class ServiceCourses(BaseService[ArticleCourses], BaseAIService):
+    """
+    Service complet pour la liste de courses.
+
+    Heritages:
+    - BaseService: CRUD generique
+    - BaseAIService: Rate limiting + cache auto
+
+    Fonctionnalites:
+    - CRUD optimise avec cache
+    - Liste de courses avec filtres
+    - Suggestions IA basees sur inventaire
+    - Gestion priorites et rayons magasin
+    """
+
+    def __init__(self):
+        BaseService.__init__(self, ArticleCourses, cache_ttl=1800)
+        BaseAIService.__init__(
+            self,
+            client=obtenir_client_ia(),
+            cache_prefix="courses",
+            default_ttl=1800,
+            default_temperature=0.7,
+            service_name="courses",
+        )
+
+    # ═══════════════════════════════════════════════════════════
+    # SECTION 1: CRUD & LISTE COURSES
+    # ═══════════════════════════════════════════════════════════
+
+    @avec_cache(
+        ttl=1800,
+        key_func=lambda self, achetes, priorite: f"courses_{achetes}_{priorite}",
+    )
+    @avec_gestion_erreurs(default_return=[])
+    @avec_session_db
+    def obtenir_liste_courses(
+        self,
+        achetes: bool = False,
+        priorite: str | None = None,
+        db: Session | None = None,
+    ) -> list[dict[str, Any]]:
+        """Recupere la liste de courses.
+
+        Args:
+            achetes: Inclure articles achetes
+            priorite: Filtrer par priorite (haute, moyenne, basse)
+            db: Session DB (injectee par @avec_session_db)
+
+        Returns:
+            Liste de dicts avec donnees articles organisees par rayon
+        """
+        query = db.query(ArticleCourses).options(
+            joinedload(ArticleCourses.ingredient)
+        )
+
+        if not achetes:
+            query = query.filter(ArticleCourses.achete.is_(False))
+
+        if priorite:
+            query = query.filter(ArticleCourses.priorite == priorite)
+
+        articles = query.order_by(ArticleCourses.rayon_magasin).all()
+
+        result = []
+        for article in articles:
+            result.append(
+                {
+                    "id": article.id,
+                    "ingredient_id": article.ingredient_id,
+                    "ingredient_nom": article.ingredient.nom,
+                    "quantite_necessaire": article.quantite_necessaire,
+                    "unite": article.ingredient.unite,
+                    "priorite": article.priorite,
+                    "achete": article.achete,
+                    "rayon_magasin": article.rayon_magasin,
+                    "magasin_cible": article.magasin_cible,
+                    "notes": article.notes,
+                    "suggere_par_ia": article.suggere_par_ia,
+                }
+            )
+
+        logger.info(
+            f"Liste courses recuperee: {len(result)} items "
+            f"(priorite={priorite or 'toutes'}, achetes={achetes})"
+        )
+        return result
+
+    # Alias pour compatibilite
+    get_liste_courses = obtenir_liste_courses
+
+    # ═══════════════════════════════════════════════════════════
+    # SECTION 2: SUGGESTIONS IA
+    # ═══════════════════════════════════════════════════════════
+
+    @avec_cache(ttl=3600, key_func=lambda self: "suggestions_courses_ia")
+    @avec_gestion_erreurs(default_return=[])
+    def generer_suggestions_ia_depuis_inventaire(self) -> list[SuggestionCourses]:
+        """Genere des suggestions de courses depuis l'inventaire via IA.
+
+        Returns:
+            Liste de SuggestionCourses, liste vide en cas d'erreur
+        """
+        from src.services.inventaire import get_inventaire_service
+
+        logger.info("Generation suggestions courses depuis inventaire avec IA")
+
+        try:
+            # Recuperer etat inventaire
+            inventaire_service = get_inventaire_service()
+            if not inventaire_service:
+                logger.warning("Service inventaire indisponible")
+                return []
+            
+            inventaire = inventaire_service.get_inventaire_complet()
+            if not inventaire:
+                logger.info("Inventaire vide, pas de suggestions")
+                return []
+
+            # Utiliser le Mixin d'inventaire pour contexte
+            context = inventaire_service.build_inventory_summary(inventaire)
+
+            # Construire prompt avec schema clair
+            prompt = self.build_json_prompt(
+                context=context,
+                task="Generer 15 articles prioritaires a acheter",
+                json_schema='[{"nom": str, "quantite": float, "unite": str, "priorite": str, "rayon": str}]',
+                constraints=[
+                    "Priorite: haute/moyenne/basse",
+                    "Articles critiques d'abord",
+                    "Quantites realistes",
+                    "Grouper par rayon",
+                    "Respecter budget",
+                ],
+            )
+
+            # Appel IA avec auto rate limiting & parsing
+            suggestions = self.call_with_list_parsing_sync(
+                prompt=prompt,
+                item_model=SuggestionCourses,
+                system_prompt=self.build_system_prompt(
+                    role="Assistant d'achat intelligent",
+                    expertise=[
+                        "Gestion stock",
+                        "Optimisation inventaire",
+                        "Organisation achats",
+                        "Gestion budget",
+                    ],
+                    rules=[
+                        "Suggerer articles critiques d'abord",
+                        "Grouper par rayon magasin",
+                        "Minimiser trajets",
+                        "Equilibre qualite-prix",
+                    ],
+                ),
+                max_items=15,
+            )
+
+            logger.info(f"Genere {len(suggestions)} suggestions courses")
+            return suggestions or []
+        
+        except KeyError as e:
+            logger.error(f"Erreur parsing (champ manquant): {e}")
+            return []
+        except Exception as e:
+            logger.error(f"Erreur generation suggestions: {str(e)}")
+            return []
+
+    # ═══════════════════════════════════════════════════════════
+    # SECTION 3: MODELES PERSISTANTS
+    # ═══════════════════════════════════════════════════════════
+
+    @avec_session_db
+    def obtenir_modeles(self, utilisateur_id: str | None = None, db: Session | None = None) -> list[dict]:
+        """Recuperer tous les modeles sauvegardes."""
+        from src.core.models import ModeleCourses
+        
+        query = db.query(ModeleCourses).filter(ModeleCourses.actif == True)
+        
+        if utilisateur_id:
+            query = query.filter(ModeleCourses.utilisateur_id == utilisateur_id)
+        
+        modeles = query.order_by(ModeleCourses.nom).all()
+        
+        return [
+            {
+                "id": m.id,
+                "nom": m.nom,
+                "description": m.description,
+                "articles": [
+                    {
+                        "nom": a.nom_article,
+                        "quantite": a.quantite,
+                        "unite": a.unite,
+                        "rayon": a.rayon_magasin,
+                        "priorite": a.priorite,
+                        "notes": a.notes,
+                    }
+                    for a in sorted(m.articles, key=lambda x: x.ordre)
+                ],
+                "cree_le": m.cree_le.isoformat() if m.cree_le else None,
+            }
+            for m in modeles
+        ]
+
+    # Alias pour compatibilite
+    get_modeles = obtenir_modeles
+
+    @avec_session_db
+    def creer_modele(self, nom: str, articles: list[dict], description: str | None = None, 
+                     utilisateur_id: str | None = None, db: Session | None = None) -> int:
+        """Creer un nouveau modele de courses."""
+        from src.core.models import ModeleCourses, ArticleModele
+        from src.core.models import Ingredient
+        
+        modele = ModeleCourses(
+            nom=nom,
+            description=description,
+            utilisateur_id=utilisateur_id,
+        )
+        db.add(modele)
+        db.flush()
+        
+        for ordre, article_data in enumerate(articles):
+            ingredient = None
+            if "ingredient_id" in article_data:
+                ingredient = db.query(Ingredient).filter_by(id=article_data["ingredient_id"]).first()
+            
+            article_modele = ArticleModele(
+                modele_id=modele.id,
+                ingredient_id=ingredient.id if ingredient else None,
+                nom_article=article_data.get("nom", "Article"),
+                quantite=float(article_data.get("quantite", 1.0)),
+                unite=article_data.get("unite", "piece"),
+                rayon_magasin=article_data.get("rayon", "Autre"),
+                priorite=article_data.get("priorite", "moyenne"),
+                notes=article_data.get("notes"),
+                ordre=ordre,
+            )
+            db.add(article_modele)
+        
+        db.commit()
+        logger.info(f"Modele '{nom}' cree avec {len(articles)} articles")
+        return modele.id
+
+    # Alias pour compatibilite
+    create_modele = creer_modele
+
+    @avec_session_db
+    def supprimer_modele(self, modele_id: int, db: Session | None = None) -> bool:
+        """Supprimer un modele."""
+        from src.core.models import ModeleCourses
+        
+        modele = db.query(ModeleCourses).filter_by(id=modele_id).first()
+        if not modele:
+            return False
+        
+        db.delete(modele)
+        db.commit()
+        logger.info(f"Modele {modele_id} supprime")
+        return True
+
+    # Alias pour compatibilite
+    delete_modele = supprimer_modele
+
+    @avec_session_db
+    def appliquer_modele(self, modele_id: int, utilisateur_id: str | None = None, 
+                        db: Session | None = None) -> list[int]:
+        """Appliquer un modele a la liste active (cree articles cours)."""
+        from src.core.models import ModeleCourses, Ingredient, ArticleModele
+        from sqlalchemy.orm import joinedload
+        
+        modele = db.query(ModeleCourses).options(
+            joinedload(ModeleCourses.articles).joinedload(ArticleModele.ingredient)
+        ).filter_by(id=modele_id).first()
+        
+        if not modele:
+            logger.error(f"Modele {modele_id} non trouve")
+            return []
+        
+        article_ids = []
+        for article_modele in modele.articles:
+            logger.debug(f"Traitement article: {article_modele.nom_article}")
+            ingredient = article_modele.ingredient
+            if not ingredient:
+                logger.debug(f"  Recherche ingredient par nom: {article_modele.nom_article}")
+                ingredient = db.query(Ingredient).filter_by(
+                    nom=article_modele.nom_article
+                ).first()
+                if not ingredient:
+                    logger.debug(f"  Creation nouvel ingredient: {article_modele.nom_article}")
+                    ingredient = Ingredient(
+                        nom=article_modele.nom_article,
+                        unite=article_modele.unite,
+                    )
+                    db.add(ingredient)
+                    db.flush()
+            
+            data = {
+                "ingredient_id": ingredient.id,
+                "quantite_necessaire": article_modele.quantite,
+                "priorite": article_modele.priorite,
+                "rayon_magasin": article_modele.rayon_magasin,
+                "notes": article_modele.notes,
+                "achete": False,
+            }
+            
+            article_id = self.create(data, db=db)
+            article_ids.append(article_id)
+            logger.debug(f"  Article cree: ID={article_id}")
+        
+        logger.info(f"Modele {modele_id} applique ({len(article_ids)} articles)")
+        return article_ids
+
+
+# ═══════════════════════════════════════════════════════════
+# SINGLETON SERVICE INSTANCE
+# ═══════════════════════════════════════════════════════════
+
+_service_courses: ServiceCourses | None = None
+
+
+def obtenir_service_courses() -> ServiceCourses:
+    """Obtient ou cree l'instance globale ServiceCourses."""
+    global _service_courses
+    if _service_courses is None:
+        _service_courses = ServiceCourses()
+    return _service_courses
+
+
+# Aliases pour compatibilite
+CoursesService = ServiceCourses
+get_courses_service = obtenir_service_courses
+courses_service = None
+
+__all__ = [
+    # Noms francais
+    "ServiceCourses",
+    "obtenir_service_courses",
+    # Aliases anglais
+    "CoursesService",
+    "get_courses_service",
+    "courses_service",
+]

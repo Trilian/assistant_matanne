@@ -7,8 +7,8 @@ Module: src.services.facture_ocr
 import pytest
 from unittest.mock import MagicMock, patch
 
-# TODO: Ajuster l'import selon la structure
-# from src.services.facture_ocr import ...
+# Import depuis le nouveau package integrations
+from src.services.integrations import FactureOCRService, DonneesFacture, ResultatOCR, get_facture_ocr_service
 
 
 class TestFactureOcr:

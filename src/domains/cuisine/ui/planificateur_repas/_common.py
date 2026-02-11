@@ -24,7 +24,7 @@ from src.core.models import (
 from src.core.ai import obtenir_client_ia
 from src.services.recettes import get_recette_service
 from src.services.planning import get_planning_service
-from src.services.user_preferences import get_user_preference_service
+from src.services.utilisateur import get_user_preference_service
 
 # Logique métier pure
 from src.domains.cuisine.logic.planificateur_repas_logic import (

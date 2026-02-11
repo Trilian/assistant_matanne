@@ -592,7 +592,7 @@ class TestSuggestionCoursesModelValidation:
 class TestCoursesServiceModeles:
     """Tests pour get_modeles, create_modele, delete_modele, appliquer_modele."""
 
-    @patch('src.services.courses.obtenir_client_ia')
+    @patch('src.services.courses.base.obtenir_client_ia')
     def test_get_modeles_tous(self, mock_client):
         """get_modeles retourne tous les modeles."""
         from src.services.courses import CoursesService
@@ -628,7 +628,7 @@ class TestCoursesServiceModeles:
         assert len(result) == 1
         assert result[0]["nom"] == "Courses hebdo"
 
-    @patch('src.services.courses.obtenir_client_ia')
+    @patch('src.services.courses.base.obtenir_client_ia')
     def test_get_modeles_par_utilisateur(self, mock_client):
         """get_modeles filtre par utilisateur."""
         from src.services.courses import CoursesService
@@ -647,7 +647,7 @@ class TestCoursesServiceModeles:
         
         assert result == []
 
-    @patch('src.services.courses.obtenir_client_ia')
+    @patch('src.services.courses.base.obtenir_client_ia')
     def test_delete_modele_succes(self, mock_client):
         """delete_modele supprime un modele existant."""
         from src.services.courses import CoursesService
@@ -671,7 +671,7 @@ class TestCoursesServiceModeles:
 class TestGetListeCoursesDirect:
     """Tests directs pour get_liste_courses."""
 
-    @patch('src.services.courses.obtenir_client_ia')
+    @patch('src.services.courses.base.obtenir_client_ia')
     def test_get_liste_courses_avec_articles(self, mock_client):
         """get_liste_courses retourne des articles formates."""
         from src.services.courses import CoursesService
@@ -711,7 +711,7 @@ class TestGetListeCoursesDirect:
         assert result[0]["ingredient_nom"] == "Tomates"
         assert result[0]["quantite_necessaire"] == 2.0
 
-    @patch('src.services.courses.obtenir_client_ia')
+    @patch('src.services.courses.base.obtenir_client_ia')
     def test_get_liste_courses_avec_priorite(self, mock_client):
         """get_liste_courses filtre par priorite."""
         from src.services.courses import CoursesService
@@ -731,7 +731,7 @@ class TestGetListeCoursesDirect:
         
         assert result == []
 
-    @patch('src.services.courses.obtenir_client_ia')
+    @patch('src.services.courses.base.obtenir_client_ia')
     def test_get_liste_courses_inclut_achetes(self, mock_client):
         """get_liste_courses inclut les achetes si demande."""
         from src.services.courses import CoursesService
@@ -755,7 +755,7 @@ class TestGetListeCoursesDirect:
 class TestGenererSuggestionsIADirect:
     """Tests directs pour generer_suggestions_ia_depuis_inventaire."""
 
-    @patch('src.services.courses.obtenir_client_ia')
+    @patch('src.services.courses.base.obtenir_client_ia')
     def test_generer_suggestions_inventaire_service_none(self, mock_client):
         """Retourne liste vide si inventaire service non disponible."""
         from src.services.courses import CoursesService
@@ -767,7 +767,7 @@ class TestGenererSuggestionsIADirect:
             result = service.generer_suggestions_ia_depuis_inventaire()
             assert result == []
 
-    @patch('src.services.courses.obtenir_client_ia')
+    @patch('src.services.courses.base.obtenir_client_ia')
     def test_generer_suggestions_inventaire_vide(self, mock_client):
         """Retourne liste vide si inventaire vide."""
         from src.services.courses import CoursesService
@@ -779,7 +779,7 @@ class TestGenererSuggestionsIADirect:
             result = service.generer_suggestions_ia_depuis_inventaire()
             assert result == []
 
-    @patch('src.services.courses.obtenir_client_ia')
+    @patch('src.services.courses.base.obtenir_client_ia')
     def test_delete_modele_non_trouve(self, mock_client):
         """delete_modele retourne False si modele non trouve."""
         from src.services.courses import CoursesService
@@ -794,7 +794,7 @@ class TestGenererSuggestionsIADirect:
         
         assert result is False
 
-    @patch('src.services.courses.obtenir_client_ia')
+    @patch('src.services.courses.base.obtenir_client_ia')
     def test_appliquer_modele_succes(self, mock_client):
         """appliquer_modele applique un modele."""
         from src.services.courses import CoursesService
@@ -827,7 +827,7 @@ class TestGenererSuggestionsIADirect:
         
         assert len(result) == 1
 
-    @patch('src.services.courses.obtenir_client_ia')
+    @patch('src.services.courses.base.obtenir_client_ia')
     def test_appliquer_modele_non_trouve(self, mock_client):
         """appliquer_modele retourne liste vide si modele non trouve."""
         from src.services.courses import CoursesService
@@ -842,7 +842,7 @@ class TestGenererSuggestionsIADirect:
         
         assert result == []
 
-    @patch('src.services.courses.obtenir_client_ia')
+    @patch('src.services.courses.base.obtenir_client_ia')
     def test_appliquer_modele_sans_ingredient(self, mock_client):
         """appliquer_modele cree des ingredients si necessaire."""
         from src.services.courses import CoursesService
@@ -873,7 +873,7 @@ class TestGenererSuggestionsIADirect:
         
         assert len(result) == 1
 
-    @patch('src.services.courses.obtenir_client_ia')
+    @patch('src.services.courses.base.obtenir_client_ia')
     def test_create_modele_succes(self, mock_client):
         """create_modele cree un modele."""
         from src.services.courses import CoursesService

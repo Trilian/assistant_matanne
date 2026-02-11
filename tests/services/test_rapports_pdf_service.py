@@ -27,12 +27,12 @@ class TestRapportStocksSchema:
 
     def test_import_schema(self):
         """Test import RapportStocks."""
-        from src.services.rapports_pdf import RapportStocks
+        from src.services.rapports import RapportStocks
         assert RapportStocks is not None
 
     def test_default_values(self):
         """Test valeurs par défaut."""
-        from src.services.rapports_pdf import RapportStocks
+        from src.services.rapports import RapportStocks
         rapport = RapportStocks()
         
         assert rapport.periode_jours == 7
@@ -45,7 +45,7 @@ class TestRapportStocksSchema:
 
     def test_custom_values(self):
         """Test assignation valeurs personnalisées."""
-        from src.services.rapports_pdf import RapportStocks
+        from src.services.rapports import RapportStocks
         
         rapport = RapportStocks(
             periode_jours=30,
@@ -65,21 +65,21 @@ class TestRapportStocksSchema:
 
     def test_periode_validation_min(self):
         """Test validation periode_jours minimum."""
-        from src.services.rapports_pdf import RapportStocks
+        from src.services.rapports import RapportStocks
         
         with pytest.raises(ValidationError):
             RapportStocks(periode_jours=0)
 
     def test_periode_validation_max(self):
         """Test validation periode_jours maximum."""
-        from src.services.rapports_pdf import RapportStocks
+        from src.services.rapports import RapportStocks
         
         with pytest.raises(ValidationError):
             RapportStocks(periode_jours=500)
 
     def test_periode_valid_range(self):
         """Test période valide dans la plage."""
-        from src.services.rapports_pdf import RapportStocks
+        from src.services.rapports import RapportStocks
         
         for days in [1, 7, 30, 180, 365]:
             rapport = RapportStocks(periode_jours=days)
@@ -91,12 +91,12 @@ class TestRapportBudgetSchema:
 
     def test_import_schema(self):
         """Test import RapportBudget."""
-        from src.services.rapports_pdf import RapportBudget
+        from src.services.rapports import RapportBudget
         assert RapportBudget is not None
 
     def test_default_values(self):
         """Test valeurs par défaut."""
-        from src.services.rapports_pdf import RapportBudget
+        from src.services.rapports import RapportBudget
         rapport = RapportBudget()
         
         assert rapport.periode_jours == 30
@@ -108,7 +108,7 @@ class TestRapportBudgetSchema:
 
     def test_custom_values(self):
         """Test assignation valeurs personnalisées."""
-        from src.services.rapports_pdf import RapportBudget
+        from src.services.rapports import RapportBudget
         
         rapport = RapportBudget(
             periode_jours=60,
@@ -124,7 +124,7 @@ class TestRapportBudgetSchema:
 
     def test_periode_validation(self):
         """Test validation de la période."""
-        from src.services.rapports_pdf import RapportBudget
+        from src.services.rapports import RapportBudget
         
         # Valid
         rapport = RapportBudget(periode_jours=1)
@@ -146,12 +146,12 @@ class TestAnalyseGaspillageSchema:
 
     def test_import_schema(self):
         """Test import AnalyseGaspillage."""
-        from src.services.rapports_pdf import AnalyseGaspillage
+        from src.services.rapports import AnalyseGaspillage
         assert AnalyseGaspillage is not None
 
     def test_default_values(self):
         """Test valeurs par défaut."""
-        from src.services.rapports_pdf import AnalyseGaspillage
+        from src.services.rapports import AnalyseGaspillage
         analyse = AnalyseGaspillage()
         
         assert analyse.periode_jours == 30
@@ -164,7 +164,7 @@ class TestAnalyseGaspillageSchema:
 
     def test_custom_values(self):
         """Test assignation valeurs personnalisées."""
-        from src.services.rapports_pdf import AnalyseGaspillage
+        from src.services.rapports import AnalyseGaspillage
         
         analyse = AnalyseGaspillage(
             periode_jours=90,
@@ -188,12 +188,12 @@ class TestRapportPlanningSchema:
 
     def test_import_schema(self):
         """Test import RapportPlanning."""
-        from src.services.rapports_pdf import RapportPlanning
+        from src.services.rapports import RapportPlanning
         assert RapportPlanning is not None
 
     def test_default_values(self):
         """Test valeurs par défaut."""
-        from src.services.rapports_pdf import RapportPlanning
+        from src.services.rapports import RapportPlanning
         rapport = RapportPlanning()
         
         assert rapport.planning_id == 0
@@ -207,7 +207,7 @@ class TestRapportPlanningSchema:
 
     def test_custom_values(self):
         """Test assignation valeurs personnalisées."""
-        from src.services.rapports_pdf import RapportPlanning
+        from src.services.rapports import RapportPlanning
         
         now = datetime.now()
         rapport = RapportPlanning(
@@ -237,12 +237,12 @@ class TestRapportsPDFServiceInit:
 
     def test_import_service(self):
         """Test import du service."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         assert RapportsPDFService is not None
 
     def test_init_service(self):
         """Test création instance."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         assert service is not None
@@ -250,7 +250,7 @@ class TestRapportsPDFServiceInit:
 
     def test_service_has_methods(self):
         """Test que le service a les méthodes attendues."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         
@@ -281,7 +281,7 @@ class TestGenererDonneesRapportStocks:
 
     def test_empty_database(self):
         """Test avec base de données vide."""
-        from src.services.rapports_pdf import RapportsPDFService, RapportStocks
+        from src.services.rapports import RapportsPDFService, RapportStocks
         
         mock_session = Mock()
         mock_session.query.return_value.all.return_value = []
@@ -297,7 +297,7 @@ class TestGenererDonneesRapportStocks:
 
     def test_with_articles(self):
         """Test avec articles en stock."""
-        from src.services.rapports_pdf import RapportsPDFService, RapportStocks
+        from src.services.rapports import RapportsPDFService, RapportStocks
         
         # Mock articles
         article1 = Mock()
@@ -335,7 +335,7 @@ class TestGenererDonneesRapportStocks:
 
     def test_articles_faible_stock_sorted(self):
         """Test tri des articles faible stock."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         # Articles avec différents ratios quantité/min
         article1 = Mock()
@@ -369,7 +369,7 @@ class TestGenererDonneesRapportStocks:
 
     def test_articles_perimes_sorted(self):
         """Test tri des articles périmés par jours."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         now = datetime.now()
         
@@ -405,7 +405,7 @@ class TestGenererDonneesRapportStocks:
 
     def test_categorie_summary(self):
         """Test résumé par catégorie."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         articles = []
         for i, cat in enumerate(["Frais", "Frais", "Épicerie"]):
@@ -442,7 +442,7 @@ class TestGenererDonneesRapportBudget:
 
     def test_empty_database(self):
         """Test avec base de données vide."""
-        from src.services.rapports_pdf import RapportsPDFService, RapportBudget
+        from src.services.rapports import RapportsPDFService, RapportBudget
         
         mock_session = Mock()
         mock_session.query.return_value.all.return_value = []
@@ -457,7 +457,7 @@ class TestGenererDonneesRapportBudget:
 
     def test_with_articles(self):
         """Test avec articles."""
-        from src.services.rapports_pdf import RapportsPDFService, RapportBudget
+        from src.services.rapports import RapportsPDFService, RapportBudget
         
         article1 = Mock()
         article1.nom = "Viande"
@@ -488,7 +488,7 @@ class TestGenererDonneesRapportBudget:
 
     def test_articles_couteux_sorted(self):
         """Test tri des articles coûteux."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         articles = []
         for i, cout in enumerate([50, 20, 100, 15]):
@@ -512,7 +512,7 @@ class TestGenererDonneesRapportBudget:
 
     def test_articles_without_price(self):
         """Test articles sans prix."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         article = Mock()
         article.nom = "SansPrix"
@@ -540,7 +540,7 @@ class TestGenererAnalyseGaspillage:
 
     def test_empty_database(self):
         """Test sans articles périmés."""
-        from src.services.rapports_pdf import RapportsPDFService, AnalyseGaspillage
+        from src.services.rapports import RapportsPDFService, AnalyseGaspillage
         
         article = Mock()
         article.nom = "Valide"
@@ -563,7 +563,7 @@ class TestGenererAnalyseGaspillage:
 
     def test_with_expired_articles(self):
         """Test avec articles périmés."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         now = datetime.now()
         
@@ -589,7 +589,7 @@ class TestGenererAnalyseGaspillage:
 
     def test_recommendations_gaspillage_important(self):
         """Test recommandations pour gaspillage important."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         now = datetime.now()
         articles = []
@@ -616,7 +616,7 @@ class TestGenererAnalyseGaspillage:
 
     def test_valeur_perdue_elevee(self):
         """Test recommandation pour valeur perdue élevée."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         now = datetime.now()
         
@@ -640,7 +640,7 @@ class TestGenererAnalyseGaspillage:
 
     def test_gaspillage_par_categorie(self):
         """Test gaspillage par catégorie."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         now = datetime.now()
         articles = []
@@ -677,7 +677,7 @@ class TestGenererDonneesRapportPlanning:
 
     def test_planning_not_found(self):
         """Test planning non trouvé."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         from src.core.errors_base import ErreurNonTrouve
         
         mock_session = Mock()
@@ -694,7 +694,7 @@ class TestGenererDonneesRapportPlanning:
 
     def test_with_planning(self):
         """Test avec planning valide."""
-        from src.services.rapports_pdf import RapportsPDFService, RapportPlanning
+        from src.services.rapports import RapportsPDFService, RapportPlanning
         
         now = datetime.now()
         
@@ -723,7 +723,7 @@ class TestGenererDonneesRapportPlanning:
 
     def test_with_repas(self):
         """Test avec repas planifiés."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         now = datetime.now()
         
@@ -768,7 +768,7 @@ class TestGenererDonneesRapportPlanning:
 
     def test_liste_courses_estimee(self):
         """Test création liste courses estimée."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         now = datetime.now()
         
@@ -831,7 +831,7 @@ class TestGenererPDFRapportStocks:
 
     def test_pdf_stocks_structure(self):
         """Test structure des données du PDF stocks."""
-        from src.services.rapports_pdf import RapportStocks
+        from src.services.rapports import RapportStocks
         
         # Test qu'on peut créer un rapport avec données
         rapport = RapportStocks(
@@ -855,7 +855,7 @@ class TestGenererPDFRapportBudget:
 
     def test_pdf_budget_structure(self):
         """Test structure des données du PDF budget."""
-        from src.services.rapports_pdf import RapportBudget
+        from src.services.rapports import RapportBudget
         
         rapport = RapportBudget(
             depenses_total=100.0,
@@ -874,7 +874,7 @@ class TestGenererPDFAnalyseGaspillage:
 
     def test_pdf_gaspillage_structure(self):
         """Test structure des données du gaspillage."""
-        from src.services.rapports_pdf import AnalyseGaspillage
+        from src.services.rapports import AnalyseGaspillage
         
         analyse = AnalyseGaspillage(
             articles_perimes_total=8,
@@ -895,7 +895,7 @@ class TestGenererPDFRapportPlanning:
 
     def test_pdf_planning_structure(self):
         """Test structure des données du planning."""
-        from src.services.rapports_pdf import RapportPlanning
+        from src.services.rapports import RapportPlanning
         
         now = datetime.now()
         date_key = now.strftime('%Y-%m-%d')
@@ -928,7 +928,7 @@ class TestTelechargerRapportPDF:
 
     def test_telecharger_type_inconnu(self):
         """Test type de rapport inconnu."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         from src.core.errors_base import ErreurValidation
         
         service = RapportsPDFService()
@@ -938,7 +938,7 @@ class TestTelechargerRapportPDF:
 
     def test_service_a_methode_telecharger(self):
         """Test que le service possède les méthodes telecharger."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         
@@ -952,7 +952,7 @@ class TestTelechargerRapportPlanning:
 
     def test_service_a_methode_telecharger_planning(self):
         """Test que le service possède la méthode telecharger_rapport_planning."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         service = RapportsPDFService()
         
@@ -1004,7 +1004,7 @@ class TestPDFStyles:
         
     def test_pdf_content_validation(self):
         """Test que le module PDF exporte les éléments requis."""
-        from src.services.rapports_pdf import (
+        from src.services.rapports import (
             RapportsPDFService,
             RapportStocks,
             RapportBudget,
@@ -1028,7 +1028,7 @@ class TestEdgeCases:
 
     def test_article_with_zero_quantity_min(self):
         """Test article avec quantité_min = 0."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         article = Mock()
         article.nom = "Test"
@@ -1050,7 +1050,7 @@ class TestEdgeCases:
 
     def test_article_with_none_values(self):
         """Test article avec valeurs None."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         article = Mock()
         article.nom = "Test"
@@ -1072,7 +1072,7 @@ class TestEdgeCases:
 
     def test_long_article_names_in_schema(self):
         """Test noms longs dans les schémas."""
-        from src.services.rapports_pdf import RapportStocks
+        from src.services.rapports import RapportStocks
         
         # Créer un rapport avec nom long
         rapport = RapportStocks(
@@ -1089,7 +1089,7 @@ class TestEdgeCases:
 
     def test_empty_categories(self):
         """Test catégorie vide."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         article = Mock()
         article.nom = "Test"
@@ -1111,7 +1111,7 @@ class TestEdgeCases:
 
     def test_special_characters_in_names(self):
         """Test caractères spéciaux dans les noms de schéma."""
-        from src.services.rapports_pdf import RapportStocks
+        from src.services.rapports import RapportStocks
         
         # Créer un rapport avec caractères spéciaux
         rapport = RapportStocks(
@@ -1128,7 +1128,7 @@ class TestEdgeCases:
 
     def test_repas_without_recette(self):
         """Test repas sans recette associée."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         now = datetime.now()
         
@@ -1162,7 +1162,7 @@ class TestEdgeCases:
 
     def test_ingredient_without_ingredient(self):
         """Test RecetteIngredient sans ingrédient."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         now = datetime.now()
         
@@ -1216,7 +1216,7 @@ class TestPerformance:
 
     def test_many_articles(self):
         """Test avec beaucoup d'articles."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         articles = []
         for i in range(100):
@@ -1242,7 +1242,7 @@ class TestPerformance:
 
     def test_many_expired_articles(self):
         """Test avec beaucoup d'articles périmés."""
-        from src.services.rapports_pdf import RapportsPDFService
+        from src.services.rapports import RapportsPDFService
         
         now = datetime.now()
         articles = []

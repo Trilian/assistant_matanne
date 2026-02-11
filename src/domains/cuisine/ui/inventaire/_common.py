@@ -10,7 +10,7 @@ from datetime import date, timedelta
 from typing import Any
 
 from src.services.inventaire import get_inventaire_service
-from src.services.predictions import obtenir_service_predictions
+from src.services.suggestions import obtenir_service_predictions
 from src.core.errors_base import ErreurValidation
 
 # Import du module logique métier séparé

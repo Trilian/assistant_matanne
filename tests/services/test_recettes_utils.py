@@ -2,12 +2,14 @@
 Tests pour les fonctions utilitaires pures des recettes.
 
 Ces tests ne nécessitent pas de base de données.
+
+Module: src.services.recettes
 """
 
 import pytest
 import json
 
-from src.services.recettes_utils import (
+from src.services.recettes import (
     # Constantes
     DIFFICULTES,
     TYPES_REPAS,

@@ -7,11 +7,10 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
 
-from src.services.courses import get_courses_service
+from src.services.courses import get_courses_service, get_courses_intelligentes_service
 from src.services.inventaire import get_inventaire_service
 from src.services.recettes import get_recette_service
-from src.services.realtime_sync import get_realtime_sync_service
-from src.services.courses_intelligentes import get_courses_intelligentes_service
+from src.services.web import get_realtime_sync_service
 from src.core.errors_base import ErreurValidation
 from src.core.database import obtenir_contexte_db
 

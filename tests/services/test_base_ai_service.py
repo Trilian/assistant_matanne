@@ -53,7 +53,7 @@ def mock_session_state():
 @pytest.fixture
 def base_ai_service(mock_client_ia):
     """Instance BaseAIService pour tests."""
-    from src.services.base_ai_service import BaseAIService
+    from src.services.base import BaseAIService
     
     return BaseAIService(
         client=mock_client_ia,
@@ -75,7 +75,7 @@ class TestBaseAIServiceInit:
 
     def test_init_sets_client(self, mock_client_ia):
         """Vérifie que le client est correctement défini."""
-        from src.services.base_ai_service import BaseAIService
+        from src.services.base import BaseAIService
         
         service = BaseAIService(client=mock_client_ia)
         
@@ -83,7 +83,7 @@ class TestBaseAIServiceInit:
 
     def test_init_sets_cache_prefix(self, mock_client_ia):
         """Vérifie que le préfixe cache est correctement défini."""
-        from src.services.base_ai_service import BaseAIService
+        from src.services.base import BaseAIService
         
         service = BaseAIService(client=mock_client_ia, cache_prefix="recipes")
         
@@ -91,7 +91,7 @@ class TestBaseAIServiceInit:
 
     def test_init_sets_default_values(self, mock_client_ia):
         """Vérifie les valeurs par défaut."""
-        from src.services.base_ai_service import BaseAIService
+        from src.services.base import BaseAIService
         
         service = BaseAIService(client=mock_client_ia)
         
@@ -101,7 +101,7 @@ class TestBaseAIServiceInit:
 
     def test_init_custom_values(self, mock_client_ia):
         """Vérifie les valeurs personnalisées."""
-        from src.services.base_ai_service import BaseAIService
+        from src.services.base import BaseAIService
         
         service = BaseAIService(
             client=mock_client_ia,
@@ -146,7 +146,7 @@ class TestClientNone:
 
     def test_service_accepts_none_client(self):
         """Vérifie que le service accepte un client None."""
-        from src.services.base_ai_service import BaseAIService
+        from src.services.base import BaseAIService
         
         service = BaseAIService(client=None)
         
@@ -154,7 +154,7 @@ class TestClientNone:
 
     def test_call_with_cache_handles_none_client(self):
         """Vérifie que call_with_cache gère un client None."""
-        from src.services.base_ai_service import BaseAIService
+        from src.services.base import BaseAIService
         import asyncio
         
         service = BaseAIService(client=None)
