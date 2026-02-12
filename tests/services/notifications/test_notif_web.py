@@ -279,12 +279,17 @@ class TestDoitEnvoyer:
         """Ne pas envoyer si limite par heure atteinte."""
         service._preferences["user123"] = preferences
         
-        # Mock generer_cle_compteur pour retourner une clé fixe
-        with patch("src.services.notifications.notif_web.generer_cle_compteur") as mock_gen:
-            mock_gen.return_value = "user123_2024011510"
-            
-            # Simuler 5 envois avec cette clé
-            service._sent_count["user123_2024011510"] = 5  # max_par_heure = 5
+        # Simuler 5 envois cette heure
+        from src.services.notifications.utils import generer_cle_compteur
+        now = datetime.now()
+        count_key = generer_cle_compteur("user123", now)
+        service._sent_count[count_key] = 5  # max_par_heure = 5
+        
+        # Mock pour être hors heures silencieuses
+        with patch("src.services.notifications.notif_web.datetime") as mock_dt:
+            mock_now = MagicMock()
+            mock_now.hour = 10  # 10h du matin
+            mock_dt.now.return_value = mock_now
             
             result = service.doit_envoyer("user123", TypeNotification.STOCK_BAS)
         
@@ -460,13 +465,10 @@ class TestEnvoyerWebPush:
 
     def test_envoyer_web_push_erreur_410(self, service, notification, subscription_info):
         """Gestion erreur 410 (abonnement expiré)."""
-        # Skip si pywebpush n'est pas installé
-        pytest.importorskip("pywebpush")
-        
         service._sauvegarder_abonnement_supabase = MagicMock()
         sub = service.sauvegarder_abonnement("user123", subscription_info)
         
-        with patch("pywebpush.webpush", side_effect=Exception("410 Gone")):
+        with patch("src.services.notifications.notif_web.webpush", side_effect=Exception("410 Gone")):
             try:
                 service._envoyer_web_push(sub, notification)
             except Exception:

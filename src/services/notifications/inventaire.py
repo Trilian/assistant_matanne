@@ -144,7 +144,8 @@ class ServiceNotificationsInventaire:
 
         priorite_ordre = {"haute": 0, "moyenne": 1, "basse": 2}
         notifs.sort(
-            key=lambda x: (priorite_ordre[x.priorite], -x.date_creation.timestamp()),
+            key=lambda x: (priorite_ordre[x.priorite], x.date_creation),
+            reverse=True,
         )
 
         return notifs

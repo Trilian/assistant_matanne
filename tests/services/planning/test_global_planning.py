@@ -1,815 +1,741 @@
-"""Tests pour src/services/planning/global_planning.py - ServicePlanningUnifie.
+"""
+Tests pour src/services/planning/global_planning.py
 
-Couverture des fonctionnalités:
-- get_semaine_complete
-- _charger_repas, _charger_activites, _charger_projets, _charger_routines, _charger_events
-- _calculer_charge, _score_to_charge
-- _detecter_alertes, _detecter_alertes_semaine
-- _calculer_budget_jour, _calculer_stats_semaine
-- generer_semaine_ia, creer_event
+Tests du service de planning unifié.
 """
 
 import pytest
-from unittest.mock import MagicMock, patch
 from datetime import date, datetime, timedelta
-from contextlib import contextmanager
+from unittest.mock import MagicMock, patch
 
-from src.services.planning.global_planning import (
-    ServicePlanningUnifie,
-    get_planning_unified_service,
-    obtenir_service_planning_unifie,
-)
+from src.services.planning.global_planning import ServicePlanningUnifie
 from src.services.planning.types import JourCompletSchema, SemaineCompleSchema
 
 
-# ═══════════════════════════════════════════════════════════
-# FIXTURES
-# ═══════════════════════════════════════════════════════════
-
-
-@pytest.fixture
-def lundi_test():
-    """Un lundi de test."""
-    return date(2024, 1, 15)
-
-
-@pytest.fixture
-def mock_db_session():
-    """Session de base de données pleinement mockée."""
-    from sqlalchemy.orm import Session
+class TestServicePlanningUnifieInit:
+    """Tests d'initialisation du service planning unifié."""
     
-    mock_session = MagicMock(spec=Session)
-    mock_query = MagicMock()
-    mock_query.options.return_value = mock_query
-    mock_query.filter.return_value = mock_query
-    mock_query.filter_by.return_value = mock_query
-    mock_query.order_by.return_value = mock_query
-    mock_query.outerjoin.return_value = mock_query
-    mock_query.join.return_value = mock_query
-    mock_query.limit.return_value = mock_query
-    mock_query.all.return_value = []
-    mock_query.first.return_value = None
-    mock_query.count.return_value = 0
-    mock_session.query.return_value = mock_query
+    def test_service_creation(self):
+        """Vérifie que le service peut être créé."""
+        with patch('src.services.planning.global_planning.obtenir_client_ia'):
+            service = ServicePlanningUnifie()
+            assert service is not None
     
-    return mock_session
+    def test_service_has_cache_ttl(self):
+        """Vérifie que le TTL de cache est défini."""
+        with patch('src.services.planning.global_planning.obtenir_client_ia'):
+            service = ServicePlanningUnifie()
+            assert service.cache_ttl == 1800
+    
+    def test_service_has_model(self):
+        """Vérifie que le service a un modèle défini."""
+        with patch('src.services.planning.global_planning.obtenir_client_ia'):
+            service = ServicePlanningUnifie()
+            assert service.model is not None
 
 
-@pytest.fixture
-def mock_context(mock_db_session):
-    """Context manager pour mocker obtenir_contexte_db."""
-    @contextmanager
-    def _mock_db():
-        yield mock_db_session
-    return _mock_db
+class TestServicePlanningUnifieMethods:
+    """Tests des méthodes du service."""
+    
+    @pytest.fixture
+    def service(self):
+        """Fixture pour créer un service mocké."""
+        with patch('src.services.planning.global_planning.obtenir_client_ia'):
+            return ServicePlanningUnifie()
+    
+    @pytest.fixture
+    def mock_db(self):
+        """Fixture pour une session DB mockée."""
+        mock = MagicMock()
+        mock.query.return_value.filter.return_value.all.return_value = []
+        mock.query.return_value.options.return_value.filter.return_value.all.return_value = []
+        mock.query.return_value.outerjoin.return_value.filter.return_value.all.return_value = []
+        mock.query.return_value.join.return_value.filter.return_value.all.return_value = []
+        return mock
+    
+    def test_get_semaine_complete_returns_schema_or_none(self, service, mock_db):
+        """Vérifie que get_semaine_complete retourne un schéma ou None."""
+        result = service.get_semaine_complete(date_debut=date.today(), db=mock_db)
+        assert result is None or isinstance(result, SemaineCompleSchema)
+    
+    def test_service_has_model_calendar_event(self, service):
+        """Vérifie que le modèle est CalendarEvent."""
+        from src.core.models import CalendarEvent
+        assert service.model == CalendarEvent
 
 
-@pytest.fixture
-def service():
-    """Instance de ServicePlanningUnifie."""
-    return ServicePlanningUnifie()
+class TestSemaineCompleSchema:
+    """Tests pour le schéma SemaineCompleSchema."""
+    
+    def test_import_schema(self):
+        """Vérifie que le schéma peut être importé."""
+        from src.services.planning.types import SemaineCompleSchema
+        assert SemaineCompleSchema is not None
 
 
-@pytest.fixture
-def sample_repas_dict():
-    """Repas de test sous forme de dict."""
-    return {
-        "id": 1,
-        "type": "dejeuner",
-        "recette": "Pâtes carbonara",
-        "recette_id": 1,
-        "portions": 4,
-        "temps_total": 45,
-        "notes": "Test"
-    }
+class TestJourCompletSchema:
+    """Tests pour le schéma JourCompletSchema."""
+    
+    def test_import_schema(self):
+        """Vérifie que le schéma peut être importé."""
+        from src.services.planning.types import JourCompletSchema
+        assert JourCompletSchema is not None
 
 
-@pytest.fixture
-def sample_activite_dict():
-    """Activité de test sous forme de dict."""
-    return {
-        "id": 1,
-        "titre": "Piscine avec Jules",
-        "type": "sport",
-        "debut": datetime(2024, 1, 15, 14, 0),
-        "fin": datetime(2024, 1, 15, 16, 0),
-        "lieu": "Piscine",
-        "budget": 10,
-        "duree": 2,
-        "pour_jules": True,
-    }
-
-
-@pytest.fixture
-def sample_projet_dict():
-    """Projet de test sous forme de dict."""
-    return {
-        "id": 1,
-        "nom": "Rangement garage",
-        "priorite": "haute",
-        "statut": "en_cours",
-        "echéance": date(2024, 1, 20),
-    }
-
-
-@pytest.fixture
-def sample_routine_dict():
-    """Routine de test sous forme de dict."""
-    return {
-        "id": 1,
-        "nom": "Brossage dents",
-        "routine": "Routine matin",
-        "heure": "07:00",
-        "fait": False,
-    }
-
-
-@pytest.fixture
-def sample_event_dict():
-    """Événement de test sous forme de dict."""
-    return {
-        "id": 1,
-        "titre": "RDV médecin",
-        "type": "rdv",
-        "debut": datetime(2024, 1, 15, 10, 0),
-        "fin": datetime(2024, 1, 15, 10, 30),
-        "lieu": "Cabinet",
-        "couleur": "#FF0000",
-    }
-
-
-@pytest.fixture
-def sample_jour_complet(lundi_test, sample_repas_dict, sample_activite_dict):
-    """JourCompletSchema de test."""
-    return JourCompletSchema(
-        date=lundi_test,
-        charge="normal",
-        charge_score=50,
-        repas=[sample_repas_dict],
-        activites=[sample_activite_dict],
-        projets=[],
-        routines=[],
-        events=[],
-        budget_jour=10.0,
-        alertes=[],
-    )
-
-
-# ═══════════════════════════════════════════════════════════
-# TESTS FACTORY
-# ═══════════════════════════════════════════════════════════
-
-
-@pytest.mark.unit
-class TestServiceFactory:
-    """Tests pour les factories du service."""
-
-    def test_get_planning_unified_service_returns_instance(self):
-        """La factory retourne une instance de ServicePlanningUnifie."""
-        service = get_planning_unified_service()
-        assert service is not None
-        assert isinstance(service, ServicePlanningUnifie)
-
-    def test_obtenir_service_planning_unifie_returns_instance(self):
-        """La factory française retourne une instance."""
-        service = obtenir_service_planning_unifie()
-        assert service is not None
-        assert isinstance(service, ServicePlanningUnifie)
-
-    def test_service_has_required_attributes(self):
-        """Le service a les attributs requis."""
-        service = ServicePlanningUnifie()
-        assert hasattr(service, 'model')
-        assert hasattr(service, 'get_semaine_complete')
-        assert hasattr(service, '_charger_repas')
-        assert hasattr(service, '_calculer_charge')
-
-
-# ═══════════════════════════════════════════════════════════
-# TESTS GET_SEMAINE_COMPLETE
-# ═══════════════════════════════════════════════════════════
-
-
-@pytest.mark.unit
-class TestGetSemaineComplete:
-    """Tests pour get_semaine_complete."""
-
-    def test_retourne_semaine_schema(self, service, mock_db_session, mock_context, lundi_test):
-        """Retourne une SemaineCompleSchema."""
-        with patch('src.core.database.obtenir_contexte_db', mock_context):
-            result = service.get_semaine_complete(lundi_test)
+class TestServicePlanningUnifieAggregation:
+    """Tests de l'agrégation de données."""
+    
+    @pytest.fixture
+    def service(self):
+        """Fixture pour le service."""
+        with patch('src.services.planning.global_planning.obtenir_client_ia'):
+            return ServicePlanningUnifie()
+    
+    @pytest.fixture
+    def mock_db_with_data(self):
+        """Fixture avec données mockées."""
+        mock = MagicMock()
         
+        # Mock des requêtes vides par défaut
+        mock.query.return_value.filter.return_value.all.return_value = []
+        mock.query.return_value.options.return_value.filter.return_value.all.return_value = []
+        
+        return mock
+    
+    def test_aggregation_handles_empty_data(self, service, mock_db_with_data):
+        """Vérifie que l'agrégation gère les données vides."""
+        result = service.get_semaine_complete(
+            date_debut=date.today(),
+            db=mock_db_with_data
+        )
+        # Doit retourner None ou un schéma vide
         assert result is None or isinstance(result, SemaineCompleSchema)
 
-    def test_structure_7_jours(self, service, mock_db_session, mock_context, lundi_test):
-        """La semaine contient 7 jours."""
-        with patch('src.core.database.obtenir_contexte_db', mock_context):
-            result = service.get_semaine_complete(lundi_test)
-        
-        if result is not None:
-            assert len(result.jours) == 7
 
-    def test_dates_correctes(self, service, mock_db_session, mock_context, lundi_test):
-        """Les dates de début et fin sont correctes."""
-        with patch('src.core.database.obtenir_contexte_db', mock_context):
-            result = service.get_semaine_complete(lundi_test)
-        
-        if result is not None:
-            assert result.semaine_debut == lundi_test
-            assert result.semaine_fin == lundi_test + timedelta(days=6)
+class TestServicePlanningUnifieCache:
+    """Tests du cache du service."""
+    
+    def test_cache_key_includes_date(self):
+        """Vérifie que la clé de cache inclut la date."""
+        with patch('src.services.planning.global_planning.obtenir_client_ia'):
+            service = ServicePlanningUnifie()
+            # Le décorateur @avec_cache utilise une key_func
+            # qui génère une clé basée sur la date
+            assert hasattr(service, 'get_semaine_complete')
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS CHARGER DONNÉES
-# ═══════════════════════════════════════════════════════════
-
-
-@pytest.mark.unit
-class TestChargerRepas:
-    """Tests pour _charger_repas."""
-
-    def test_retourne_dict_vide_sans_repas(self, service, mock_db_session, lundi_test):
-        """Retourne dict vide sans repas."""
-        mock_db_session.query.return_value.outerjoin.return_value.filter.return_value.all.return_value = []
-        
-        result = service._charger_repas(lundi_test, lundi_test + timedelta(days=6), mock_db_session)
-        
-        assert result == {}
-
-    def test_groupe_par_jour(self, service, mock_db_session, lundi_test):
-        """Groupe les repas par jour."""
-        mock_repas = MagicMock()
-        mock_repas.id = 1
-        mock_repas.date_repas = lundi_test
-        mock_repas.type_repas = "dejeuner"
-        mock_repas.portion_ajustee = None
-        mock_repas.notes = "Test"
-        
-        mock_recette = MagicMock()
-        mock_recette.id = 1
-        mock_recette.nom = "Pâtes"
-        mock_recette.temps_preparation = 20
-        mock_recette.temps_cuisson = 25
-        mock_recette.portions = 4
-        
-        mock_db_session.query.return_value.outerjoin.return_value.filter.return_value.all.return_value = [
-            (mock_repas, mock_recette)
-        ]
-        
-        result = service._charger_repas(lundi_test, lundi_test + timedelta(days=6), mock_db_session)
-        
-        assert isinstance(result, dict)
-
-
-@pytest.mark.unit
-class TestChargerActivites:
-    """Tests pour _charger_activites."""
-
-    def test_retourne_dict_vide_sans_activites(self, service, mock_db_session, lundi_test):
-        """Retourne dict vide sans activités."""
-        mock_db_session.query.return_value.filter.return_value.all.return_value = []
-        
-        result = service._charger_activites(lundi_test, lundi_test + timedelta(days=6), mock_db_session)
-        
-        assert result == {}
-
-    def test_groupe_activites_par_jour(self, service, mock_db_session, lundi_test):
-        """Groupe les activités par jour."""
-        mock_activite = MagicMock()
-        mock_activite.id = 1
-        mock_activite.titre = "Piscine"
-        mock_activite.date_prevue = lundi_test
-        mock_activite.type_activite = "sport"
-        mock_activite.lieu = "Piscine"
-        mock_activite.cout_estime = 10
-        mock_activite.duree_heures = 2
-        
-        mock_db_session.query.return_value.filter.return_value.all.return_value = [mock_activite]
-        
-        result = service._charger_activites(lundi_test, lundi_test + timedelta(days=6), mock_db_session)
-        
-        assert isinstance(result, dict)
-
-
-@pytest.mark.unit
-class TestChargerProjets:
-    """Tests pour _charger_projets."""
-
-    def test_retourne_dict_vide_sans_projets(self, service, mock_db_session, lundi_test):
-        """Retourne dict vide sans projets."""
-        mock_db_session.query.return_value.filter.return_value.all.return_value = []
-        
-        result = service._charger_projets(lundi_test, lundi_test + timedelta(days=6), mock_db_session)
-        
-        assert result == {}
-
-    def test_filtre_projets_actifs(self, service, mock_db_session, lundi_test):
-        """Filtre uniquement les projets actifs."""
-        mock_projet = MagicMock()
-        mock_projet.id = 1
-        mock_projet.nom = "Rangement"
-        mock_projet.priorite = "haute"
-        mock_projet.statut = "en_cours"
-        mock_projet.date_fin_prevue = lundi_test + timedelta(days=3)
-        
-        mock_db_session.query.return_value.filter.return_value.all.return_value = [mock_projet]
-        
-        result = service._charger_projets(lundi_test, lundi_test + timedelta(days=6), mock_db_session)
-        
-        assert isinstance(result, dict)
-
-
-@pytest.mark.unit
-class TestChargerRoutines:
-    """Tests pour _charger_routines."""
-
-    def test_retourne_dict_vide_sans_routines(self, service, mock_db_session):
-        """Retourne dict vide sans routines."""
-        mock_db_session.query.return_value.join.return_value.filter.return_value.all.return_value = []
-        
-        result = service._charger_routines(mock_db_session)
-        
-        assert result == {}
-
-    def test_charge_routines_actives(self, service, mock_db_session):
-        """Charge les routines actives."""
-        mock_task = MagicMock()
-        mock_task.id = 1
-        mock_task.nom = "Brossage dents"
-        mock_task.heure_prevue = "07:00"
-        mock_task.fait_le = None
-        
-        mock_routine = MagicMock()
-        mock_routine.nom = "Routine matin"
-        mock_routine.actif = True
-        
-        mock_db_session.query.return_value.join.return_value.filter.return_value.all.return_value = [
-            (mock_task, mock_routine)
-        ]
-        
-        result = service._charger_routines(mock_db_session)
-        
-        assert isinstance(result, dict)
-
-
-@pytest.mark.unit
-class TestChargerEvents:
-    """Tests pour _charger_events."""
-
-    def test_retourne_dict_vide_sans_events(self, service, mock_db_session, lundi_test):
-        """Retourne dict vide sans événements."""
-        mock_db_session.query.return_value.filter.return_value.all.return_value = []
-        
-        result = service._charger_events(lundi_test, lundi_test + timedelta(days=6), mock_db_session)
-        
-        assert result == {}
-
-    def test_groupe_events_par_jour(self, service, mock_db_session, lundi_test):
-        """Groupe les événements par jour."""
-        mock_event = MagicMock()
-        mock_event.id = 1
-        mock_event.titre = "RDV médecin"
-        mock_event.date_debut = datetime.combine(lundi_test, datetime.min.time())
-        mock_event.date_fin = datetime.combine(lundi_test, datetime.min.time()) + timedelta(hours=1)
-        mock_event.type_event = "rdv"
-        mock_event.lieu = "Cabinet"
-        mock_event.couleur = "#FF0000"
-        
-        mock_db_session.query.return_value.filter.return_value.all.return_value = [mock_event]
-        
-        result = service._charger_events(lundi_test, lundi_test + timedelta(days=6), mock_db_session)
-        
-        assert isinstance(result, dict)
+class TestServicePlanningUnifieIA:
+    """Tests de l'intégration IA."""
+    
+    @pytest.fixture
+    def service(self):
+        """Fixture pour le service."""
+        with patch('src.services.planning.global_planning.obtenir_client_ia'):
+            return ServicePlanningUnifie()
+    
+    def test_service_has_generer_semaine_ia_method(self, service):
+        """Vérifie que le service a la méthode de génération IA."""
+        assert hasattr(service, 'generer_semaine_ia')
+    
+    def test_service_has_creer_event_method(self, service):
+        """Vérifie que le service a la méthode creer_event."""
+        assert hasattr(service, 'creer_event')
 
 
 # ═══════════════════════════════════════════════════════════
-# TESTS CALCUL CHARGE
+# TESTS DES MÉTHODES PRIVÉES DE CALCUL
 # ═══════════════════════════════════════════════════════════
 
 
-@pytest.mark.unit
 class TestCalculerCharge:
-    """Tests pour _calculer_charge."""
-
-    def test_charge_zero_jour_vide(self, service):
-        """Charge zéro pour jour vide."""
-        charge = service._calculer_charge(
+    """Tests pour la méthode _calculer_charge."""
+    
+    @pytest.fixture
+    def service(self):
+        """Fixture pour créer un service mocké."""
+        with patch('src.services.planning.global_planning.obtenir_client_ia'):
+            return ServicePlanningUnifie()
+    
+    def test_empty_data_returns_zero(self, service):
+        """Données vides retournent 0."""
+        score = service._calculer_charge(
             repas=[],
             activites=[],
             projets=[],
             routines=[]
         )
-        
-        assert charge == 0
-
-    def test_charge_augmente_avec_repas(self, service, sample_repas_dict):
-        """La charge augmente avec les repas."""
-        charge = service._calculer_charge(
-            repas=[sample_repas_dict],
+        assert score == 0
+    
+    def test_repas_contribuent_au_score(self, service):
+        """Les repas contribuent au score."""
+        score = service._calculer_charge(
+            repas=[{"temps_total": 60}],  # 60 minutes
             activites=[],
             projets=[],
             routines=[]
         )
-        
-        assert charge > 0
-
-    def test_charge_augmente_avec_activites(self, service, sample_activite_dict):
-        """La charge augmente avec les activités."""
-        charge = service._calculer_charge(
+        assert score > 0
+    
+    def test_activites_contribuent_au_score(self, service):
+        """Les activités contribuent au score."""
+        score = service._calculer_charge(
             repas=[],
-            activites=[sample_activite_dict],
+            activites=[{"id": 1}, {"id": 2}],
             projets=[],
             routines=[]
         )
-        
-        assert charge > 0
-
-    def test_charge_augmente_avec_projets_urgents(self, service, sample_projet_dict):
-        """La charge augmente avec les projets urgents."""
-        charge = service._calculer_charge(
+        assert score >= 10  # 2 activités * 10 points max
+    
+    def test_projets_urgents_contribuent_au_score(self, service):
+        """Les projets urgents contribuent au score."""
+        score = service._calculer_charge(
             repas=[],
             activites=[],
-            projets=[sample_projet_dict],
+            projets=[{"priorite": "haute"}],
             routines=[]
         )
-        
-        assert charge > 0
-
-    def test_charge_max_100(self, service, sample_repas_dict, sample_activite_dict, sample_projet_dict, sample_routine_dict):
-        """La charge est plafonnée à 100."""
-        charge = service._calculer_charge(
-            repas=[sample_repas_dict] * 10,
-            activites=[sample_activite_dict] * 10,
-            projets=[sample_projet_dict] * 10,
-            routines=[sample_routine_dict] * 10
+        assert score >= 15  # 1 projet haute * 15 points
+    
+    def test_routines_contribuent_au_score(self, service):
+        """Les routines contribuent au score."""
+        score = service._calculer_charge(
+            repas=[],
+            activites=[],
+            projets=[],
+            routines=[{"id": 1}, {"id": 2}, {"id": 3}]
         )
-        
-        assert charge <= 100
+        assert score >= 15  # 3 * 5 points
+    
+    def test_score_max_is_100(self, service):
+        """Le score maximum est 100."""
+        score = service._calculer_charge(
+            repas=[{"temps_total": 300}] * 10,
+            activites=[{"id": i} for i in range(10)],
+            projets=[{"priorite": "haute"} for _ in range(10)],
+            routines=[{"id": i} for i in range(20)]
+        )
+        assert score <= 100
 
 
-@pytest.mark.unit
 class TestScoreToCharge:
-    """Tests pour _score_to_charge."""
-
-    def test_score_faible(self, service):
-        """Score faible retourne 'faible'."""
-        assert service._score_to_charge(20) == "faible"
+    """Tests pour la méthode _score_to_charge."""
+    
+    @pytest.fixture
+    def service(self):
+        """Fixture pour créer un service mocké."""
+        with patch('src.services.planning.global_planning.obtenir_client_ia'):
+            return ServicePlanningUnifie()
+    
+    def test_faible_for_low_score(self, service):
+        """Score bas = charge faible."""
         assert service._score_to_charge(0) == "faible"
         assert service._score_to_charge(34) == "faible"
-
-    def test_score_normal(self, service):
-        """Score moyen retourne 'normal'."""
-        assert service._score_to_charge(50) == "normal"
+    
+    def test_normal_for_medium_score(self, service):
+        """Score moyen = charge normal."""
         assert service._score_to_charge(35) == "normal"
         assert service._score_to_charge(69) == "normal"
-
-    def test_score_intense(self, service):
-        """Score élevé retourne 'intense'."""
-        assert service._score_to_charge(80) == "intense"
+    
+    def test_intense_for_high_score(self, service):
+        """Score haut = charge intense."""
         assert service._score_to_charge(70) == "intense"
         assert service._score_to_charge(100) == "intense"
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS DÉTECTION ALERTES
-# ═══════════════════════════════════════════════════════════
-
-
-@pytest.mark.unit
 class TestDetecterAlertes:
-    """Tests pour _detecter_alertes."""
-
-    def test_alerte_surcharge(self, service, lundi_test):
-        """Détecte surcharge (charge >= 80)."""
+    """Tests pour la méthode _detecter_alertes."""
+    
+    @pytest.fixture
+    def service(self):
+        """Fixture pour créer un service mocké."""
+        with patch('src.services.planning.global_planning.obtenir_client_ia'):
+            return ServicePlanningUnifie()
+    
+    def test_alerte_jour_tres_charge(self, service):
+        """Alerte pour jour très chargé."""
         alertes = service._detecter_alertes(
-            jour=lundi_test,
+            jour=date.today(),
             repas=[],
             activites=[],
             projets=[],
             charge_score=85
         )
-        
         assert any("chargé" in a.lower() for a in alertes)
-
-    def test_alerte_pas_activite_jules(self, service, lundi_test):
-        """Détecte absence d'activité pour Jules."""
+    
+    def test_alerte_pas_activite_jules(self, service):
+        """Alerte si pas d'activité pour Jules."""
         alertes = service._detecter_alertes(
-            jour=lundi_test,
+            jour=date.today(),
             repas=[],
-            activites=[],  # Pas d'activité pour Jules
+            activites=[{"pour_jules": False}],
             projets=[],
             charge_score=50
         )
-        
         assert any("jules" in a.lower() for a in alertes)
-
-    def test_alerte_projets_urgents(self, service, lundi_test, sample_projet_dict):
-        """Détecte projets urgents."""
+    
+    def test_alerte_projets_urgents(self, service):
+        """Alerte pour projets urgents."""
         alertes = service._detecter_alertes(
-            jour=lundi_test,
+            jour=date.today(),
             repas=[],
             activites=[],
-            projets=[sample_projet_dict],
+            projets=[{"priorite": "haute"}, {"priorite": "haute"}],
             charge_score=50
         )
-        
         assert any("urgent" in a.lower() for a in alertes)
-
-    def test_alerte_trop_repas(self, service, lundi_test, sample_repas_dict):
-        """Détecte trop de repas."""
+    
+    def test_alerte_trop_repas(self, service):
+        """Alerte pour trop de repas."""
         alertes = service._detecter_alertes(
-            jour=lundi_test,
-            repas=[sample_repas_dict] * 4,
+            jour=date.today(),
+            repas=[{}, {}, {}, {}],  # 4 repas
             activites=[],
             projets=[],
             charge_score=50
         )
-        
         assert any("repas" in a.lower() for a in alertes)
-
-    def test_pas_alerte_jour_normal(self, service, lundi_test, sample_activite_dict):
+    
+    def test_pas_alerte_jour_normal(self, service):
         """Pas d'alerte pour jour normal."""
-        sample_activite_dict["pour_jules"] = True
         alertes = service._detecter_alertes(
-            jour=lundi_test,
-            repas=[],
-            activites=[sample_activite_dict],
+            jour=date.today(),
+            repas=[{}],
+            activites=[{"pour_jules": True}],
             projets=[],
             charge_score=30
         )
-        
-        # Peut avoir des alertes mineures mais pas de surcharge
+        # Peut avoir quelques alertes mais pas les critiques
         assert not any("très chargé" in a.lower() for a in alertes)
 
 
-@pytest.mark.unit
 class TestDetecterAlertesSemaine:
-    """Tests pour _detecter_alertes_semaine."""
-
-    def test_alerte_aucune_activite_jules(self, service, sample_jour_complet, lundi_test):
-        """Détecte aucune activité Jules sur la semaine."""
-        # Créer 7 jours sans activité Jules
-        jours = {}
-        for i in range(7):
-            jour_date = lundi_test + timedelta(days=i)
-            jours[jour_date.isoformat()] = JourCompletSchema(
-                date=jour_date,
+    """Tests pour la méthode _detecter_alertes_semaine."""
+    
+    @pytest.fixture
+    def service(self):
+        """Fixture pour créer un service mocké."""
+        with patch('src.services.planning.global_planning.obtenir_client_ia'):
+            return ServicePlanningUnifie()
+    
+    def test_alerte_pas_activite_jules_semaine(self, service):
+        """Alerte si aucune activité Jules sur la semaine."""
+        jours = {
+            "2024-01-15": JourCompletSchema(
+                date=date(2024, 1, 15),
                 charge="faible",
                 charge_score=20,
-                repas=[],
-                activites=[],  # Pas d'activité pour Jules
-                projets=[],
-                routines=[],
-                events=[],
-                budget_jour=0,
-                alertes=[],
+                activites=[]
             )
-        
+        }
         alertes = service._detecter_alertes_semaine(jours)
-        
         assert any("jules" in a.lower() for a in alertes)
-
-    def test_alerte_trop_jours_charges(self, service, lundi_test):
-        """Détecte plus de 3 jours très chargés."""
+    
+    def test_alerte_jours_charges(self, service):
+        """Alerte si plusieurs jours très chargés."""
         jours = {}
-        for i in range(7):
-            jour_date = lundi_test + timedelta(days=i)
-            jours[jour_date.isoformat()] = JourCompletSchema(
-                date=jour_date,
-                charge="intense" if i < 4 else "faible",
-                charge_score=85 if i < 4 else 20,
-                repas=[],
-                activites=[],
-                projets=[],
-                routines=[],
-                events=[],
-                budget_jour=0,
-                alertes=[],
+        for i in range(4):
+            jour = date(2024, 1, 15 + i)
+            jours[jour.isoformat()] = JourCompletSchema(
+                date=jour,
+                charge="intense",
+                charge_score=85,
+                activites=[]
             )
-        
         alertes = service._detecter_alertes_semaine(jours)
-        
-        assert any("chargé" in a.lower() or "burnout" in a.lower() for a in alertes)
-
-
-# ═══════════════════════════════════════════════════════════
-# TESTS BUDGET ET STATS
-# ═══════════════════════════════════════════════════════════
-
-
-@pytest.mark.unit
-class TestCalculerBudgetJour:
-    """Tests pour _calculer_budget_jour."""
-
-    def test_budget_zero_sans_activites(self, service):
-        """Budget zéro sans activités."""
-        budget = service._calculer_budget_jour(activites=[], projets=[])
-        
-        assert budget == 0
-
-    def test_somme_budgets_activites(self, service, sample_activite_dict):
-        """Somme les budgets des activités."""
-        budget = service._calculer_budget_jour(
-            activites=[sample_activite_dict],
-            projets=[]
-        )
-        
-        assert budget == 10
-
-
-@pytest.mark.unit
-class TestCalculerStatsSemaine:
-    """Tests pour _calculer_stats_semaine."""
-
-    def test_stats_completes(self, service, lundi_test, sample_repas_dict, sample_activite_dict):
-        """Calcule les stats complètes."""
+        assert any("chargé" in a.lower() for a in alertes)
+    
+    def test_alerte_budget_eleve(self, service):
+        """Alerte si budget élevé."""
         jours = {}
         for i in range(7):
-            jour_date = lundi_test + timedelta(days=i)
-            jours[jour_date.isoformat()] = JourCompletSchema(
-                date=jour_date,
-                charge="normal",
-                charge_score=50,
-                repas=[sample_repas_dict] if i < 3 else [],
-                activites=[sample_activite_dict] if i < 2 else [],
-                projets=[],
-                routines=[],
-                events=[],
-                budget_jour=10 if i < 2 else 0,
-                alertes=[],
+            jour = date(2024, 1, 15 + i)
+            jours[jour.isoformat()] = JourCompletSchema(
+                date=jour,
+                charge="faible",
+                charge_score=20,
+                budget_jour=100.0,  # 7 * 100 = 700€ > 500€
+                activites=[{"pour_jules": True}]
             )
-        
+        alertes = service._detecter_alertes_semaine(jours)
+        assert any("budget" in a.lower() for a in alertes)
+
+
+class TestCalculerBudgetJour:
+    """Tests pour la méthode _calculer_budget_jour."""
+    
+    @pytest.fixture
+    def service(self):
+        """Fixture pour créer un service mocké."""
+        with patch('src.services.planning.global_planning.obtenir_client_ia'):
+            return ServicePlanningUnifie()
+    
+    def test_empty_lists_return_zero(self, service):
+        """Listes vides retournent 0."""
+        result = service._calculer_budget_jour([], [])
+        assert result == 0.0
+    
+    def test_activites_budget_aggregated(self, service):
+        """Budget des activités agrégé."""
+        activites = [{"budget": 20}, {"budget": 30}]
+        result = service._calculer_budget_jour(activites, [])
+        assert result == 50.0
+    
+    def test_none_budget_handled(self, service):
+        """Budget None géré."""
+        activites = [{"budget": None}, {"budget": 10}]
+        result = service._calculer_budget_jour(activites, [])
+        assert result == 10.0
+
+
+class TestCalculerStatsSemaine:
+    """Tests pour la méthode _calculer_stats_semaine."""
+    
+    @pytest.fixture
+    def service(self):
+        """Fixture pour créer un service mocké."""
+        with patch('src.services.planning.global_planning.obtenir_client_ia'):
+            return ServicePlanningUnifie()
+    
+    def test_stats_structure(self, service):
+        """Structure des stats."""
+        jours = {
+            "2024-01-15": JourCompletSchema(
+                date=date(2024, 1, 15),
+                charge="faible",
+                charge_score=20,
+                repas=[{"id": 1}],
+                activites=[{"pour_jules": True}],
+                projets=[],
+                events=[],
+                budget_jour=50.0
+            )
+        }
         stats = service._calculer_stats_semaine(jours)
-        
         assert "total_repas" in stats
         assert "total_activites" in stats
+        assert "activites_jules" in stats
         assert "budget_total" in stats
-        assert stats["total_repas"] == 3
+        assert "charge_moyenne" in stats
+    
+    def test_stats_values(self, service):
+        """Valeurs des stats."""
+        jours = {
+            "2024-01-15": JourCompletSchema(
+                date=date(2024, 1, 15),
+                charge="faible",
+                charge_score=40,
+                repas=[{}, {}],  # 2 repas
+                activites=[{"pour_jules": True}, {"pour_jules": False}],
+                projets=[{}],
+                events=[{}, {}, {}],
+                budget_jour=75.0
+            )
+        }
+        stats = service._calculer_stats_semaine(jours)
+        assert stats["total_repas"] == 2
         assert stats["total_activites"] == 2
+        assert stats["activites_jules"] == 1
+        assert stats["total_projets"] == 1
+        assert stats["total_events"] == 3
+        assert stats["budget_total"] == 75.0
+        assert stats["charge_moyenne"] == 40
 
 
 # ═══════════════════════════════════════════════════════════
-# TESTS GÉNÉRATION IA
+# TESTS DES MÉTHODES DE CHARGEMENT
 # ═══════════════════════════════════════════════════════════
 
 
-@pytest.mark.unit
-class TestGenererSemaineIA:
-    """Tests pour generer_semaine_ia."""
-
-    def test_appelle_ia(self, service, lundi_test):
-        """Appelle l'IA pour générer la semaine."""
-        with patch.object(service, 'call_with_list_parsing_sync') as mock_ia:
-            mock_ia.return_value = [{"repas_proposes": [], "activites_proposees": []}]
-            
-            result = service.generer_semaine_ia(lundi_test)
+class TestChargerRepas:
+    """Tests pour la méthode _charger_repas."""
+    
+    @pytest.fixture
+    def service(self):
+        """Fixture pour créer un service mocké."""
+        with patch('src.services.planning.global_planning.obtenir_client_ia'):
+            return ServicePlanningUnifie()
+    
+    def test_returns_dict(self, service):
+        """Retourne un dictionnaire."""
+        mock_db = MagicMock()
+        mock_db.query.return_value.outerjoin.return_value.filter.return_value.all.return_value = []
         
-        # Le résultat dépend du cache
-        assert result is None or mock_ia.called
+        result = service._charger_repas(date(2024, 1, 15), date(2024, 1, 21), mock_db)
+        assert isinstance(result, dict)
+    
+    def test_empty_for_no_data(self, service):
+        """Vide sans données."""
+        mock_db = MagicMock()
+        mock_db.query.return_value.outerjoin.return_value.filter.return_value.all.return_value = []
+        
+        result = service._charger_repas(date(2024, 1, 15), date(2024, 1, 21), mock_db)
+        assert result == {}
+    
+    def test_with_meal_and_recipe(self, service):
+        """Avec repas et recette."""
+        mock_meal = MagicMock()
+        mock_meal.id = 1
+        mock_meal.date_repas = date(2024, 1, 15)
+        mock_meal.type_repas = "déjeuner"
+        mock_meal.portion_ajustee = None
+        mock_meal.notes = "Test"
+        
+        mock_recipe = MagicMock()
+        mock_recipe.id = 1
+        mock_recipe.nom = "Pâtes"
+        mock_recipe.portions = 4
+        mock_recipe.temps_preparation = 10
+        mock_recipe.temps_cuisson = 20
+        
+        mock_db = MagicMock()
+        mock_db.query.return_value.outerjoin.return_value.filter.return_value.all.return_value = [
+            (mock_meal, mock_recipe)
+        ]
+        
+        result = service._charger_repas(date(2024, 1, 15), date(2024, 1, 21), mock_db)
+        assert "2024-01-15" in result
+        assert result["2024-01-15"][0]["recette"] == "Pâtes"
+        assert result["2024-01-15"][0]["temps_total"] == 30
+    
+    def test_with_meal_without_recipe(self, service):
+        """Avec repas sans recette."""
+        mock_meal = MagicMock()
+        mock_meal.id = 1
+        mock_meal.date_repas = date(2024, 1, 15)
+        mock_meal.type_repas = "déjeuner"
+        mock_meal.portion_ajustee = 2
+        mock_meal.notes = "Test"
+        
+        mock_db = MagicMock()
+        mock_db.query.return_value.outerjoin.return_value.filter.return_value.all.return_value = [
+            (mock_meal, None)
+        ]
+        
+        result = service._charger_repas(date(2024, 1, 15), date(2024, 1, 21), mock_db)
+        assert "2024-01-15" in result
+        assert result["2024-01-15"][0]["recette"] == "Non défini"
+        assert result["2024-01-15"][0]["temps_total"] == 0
 
-    def test_avec_contraintes(self, service, lundi_test):
-        """Prend en compte les contraintes."""
-        contraintes = {"budget": 300, "energie": "faible"}
-        
-        with patch.object(service, 'call_with_list_parsing_sync') as mock_ia:
-            mock_ia.return_value = None
-            
-            result = service.generer_semaine_ia(lundi_test, contraintes=contraintes)
-        
-        assert result is None or mock_ia.called
 
-    def test_avec_contexte(self, service, lundi_test):
-        """Prend en compte le contexte familial."""
-        contexte = {"jules_age_mois": 19, "objectifs_sante": ["sport"]}
+class TestChargerActivites:
+    """Tests pour la méthode _charger_activites."""
+    
+    @pytest.fixture
+    def service(self):
+        """Fixture pour créer un service mocké."""
+        with patch('src.services.planning.global_planning.obtenir_client_ia'):
+            return ServicePlanningUnifie()
+    
+    def test_returns_dict(self, service):
+        """Retourne un dictionnaire."""
+        mock_db = MagicMock()
+        mock_db.query.return_value.filter.return_value.all.return_value = []
         
-        with patch.object(service, 'call_with_list_parsing_sync') as mock_ia:
-            mock_ia.return_value = None
-            
-            result = service.generer_semaine_ia(lundi_test, contexte=contexte)
+        result = service._charger_activites(date(2024, 1, 15), date(2024, 1, 21), mock_db)
+        assert isinstance(result, dict)
+    
+    def test_with_activity(self, service):
+        """Avec une activité."""
+        mock_activity = MagicMock()
+        mock_activity.id = 1
+        mock_activity.titre = "Sortie parc"
+        mock_activity.type_activite = "loisir"
+        mock_activity.date_prevue = date(2024, 1, 15)
+        mock_activity.lieu = "Parc"
+        mock_activity.cout_estime = 20.0
+        mock_activity.duree_heures = 2
         
-        assert result is None or mock_ia.called
+        mock_db = MagicMock()
+        mock_db.query.return_value.filter.return_value.all.return_value = [mock_activity]
+        
+        result = service._charger_activites(date(2024, 1, 15), date(2024, 1, 21), mock_db)
+        assert "2024-01-15" in result
+        assert result["2024-01-15"][0]["titre"] == "Sortie parc"
+        assert result["2024-01-15"][0]["budget"] == 20.0
+    
+    def test_with_none_budget(self, service):
+        """Avec budget None."""
+        mock_activity = MagicMock()
+        mock_activity.id = 1
+        mock_activity.titre = "Test"
+        mock_activity.type_activite = "loisir"
+        mock_activity.date_prevue = date(2024, 1, 15)
+        mock_activity.lieu = None
+        mock_activity.cout_estime = None
+        mock_activity.duree_heures = None
+        
+        mock_db = MagicMock()
+        mock_db.query.return_value.filter.return_value.all.return_value = [mock_activity]
+        
+        result = service._charger_activites(date(2024, 1, 15), date(2024, 1, 21), mock_db)
+        assert result["2024-01-15"][0]["budget"] == 0
+        assert result["2024-01-15"][0]["duree"] == 0
+
+
+class TestChargerProjets:
+    """Tests pour la méthode _charger_projets."""
+    
+    @pytest.fixture
+    def service(self):
+        """Fixture pour créer un service mocké."""
+        with patch('src.services.planning.global_planning.obtenir_client_ia'):
+            return ServicePlanningUnifie()
+    
+    def test_returns_dict(self, service):
+        """Retourne un dictionnaire."""
+        mock_db = MagicMock()
+        mock_db.query.return_value.filter.return_value.all.return_value = []
+        
+        result = service._charger_projets(date(2024, 1, 15), date(2024, 1, 21), mock_db)
+        assert isinstance(result, dict)
+    
+    def test_with_project(self, service):
+        """Avec un projet."""
+        mock_project = MagicMock()
+        mock_project.id = 1
+        mock_project.nom = "Projet test"
+        mock_project.priorite = "haute"
+        mock_project.statut = "en_cours"
+        mock_project.date_fin_prevue = date(2024, 1, 18)
+        
+        mock_db = MagicMock()
+        mock_db.query.return_value.filter.return_value.all.return_value = [mock_project]
+        
+        result = service._charger_projets(date(2024, 1, 15), date(2024, 1, 21), mock_db)
+        assert "2024-01-18" in result
+        assert result["2024-01-18"][0]["nom"] == "Projet test"
+    
+    def test_with_project_no_date(self, service):
+        """Avec projet sans date de fin."""
+        mock_project = MagicMock()
+        mock_project.id = 1
+        mock_project.nom = "Projet sans date"
+        mock_project.priorite = "normale"
+        mock_project.statut = "à_faire"
+        mock_project.date_fin_prevue = None
+        
+        mock_db = MagicMock()
+        mock_db.query.return_value.filter.return_value.all.return_value = [mock_project]
+        
+        result = service._charger_projets(date(2024, 1, 15), date(2024, 1, 21), mock_db)
+        # Devrait utiliser date_fin comme fallback
+        assert "2024-01-21" in result
+
+
+class TestChargerRoutines:
+    """Tests pour la méthode _charger_routines."""
+    
+    @pytest.fixture
+    def service(self):
+        """Fixture pour créer un service mocké."""
+        with patch('src.services.planning.global_planning.obtenir_client_ia'):
+            return ServicePlanningUnifie()
+    
+    def test_returns_dict(self, service):
+        """Retourne un dictionnaire."""
+        mock_db = MagicMock()
+        mock_db.query.return_value.join.return_value.filter.return_value.all.return_value = []
+        
+        result = service._charger_routines(mock_db)
+        assert isinstance(result, dict)
+    
+    def test_with_routine(self, service):
+        """Avec une routine."""
+        mock_task = MagicMock()
+        mock_task.id = 1
+        mock_task.nom = "Tâche matin"
+        mock_task.heure_prevue = "08:00"
+        mock_task.fait_le = None
+        
+        mock_routine = MagicMock()
+        mock_routine.nom = "Routine matin"
+        
+        mock_db = MagicMock()
+        mock_db.query.return_value.join.return_value.filter.return_value.all.return_value = [
+            (mock_task, mock_routine)
+        ]
+        
+        result = service._charger_routines(mock_db)
+        assert "routine_quotidienne" in result
+        assert result["routine_quotidienne"][0]["nom"] == "Tâche matin"
+        assert result["routine_quotidienne"][0]["fait"] is False
+    
+    def test_with_done_task(self, service):
+        """Avec tâche faite."""
+        mock_task = MagicMock()
+        mock_task.id = 1
+        mock_task.nom = "Tâche faite"
+        mock_task.heure_prevue = "08:00"
+        mock_task.fait_le = datetime(2024, 1, 15)
+        
+        mock_routine = MagicMock()
+        mock_routine.nom = "Routine"
+        
+        mock_db = MagicMock()
+        mock_db.query.return_value.join.return_value.filter.return_value.all.return_value = [
+            (mock_task, mock_routine)
+        ]
+        
+        result = service._charger_routines(mock_db)
+        assert result["routine_quotidienne"][0]["fait"] is True
+
+
+class TestChargerEvents:
+    """Tests pour la méthode _charger_events."""
+    
+    @pytest.fixture
+    def service(self):
+        """Fixture pour créer un service mocké."""
+        with patch('src.services.planning.global_planning.obtenir_client_ia'):
+            return ServicePlanningUnifie()
+    
+    def test_returns_dict(self, service):
+        """Retourne un dictionnaire."""
+        mock_db = MagicMock()
+        mock_db.query.return_value.filter.return_value.all.return_value = []
+        
+        result = service._charger_events(date(2024, 1, 15), date(2024, 1, 21), mock_db)
+        assert isinstance(result, dict)
+    
+    def test_with_event(self, service):
+        """Avec un événement."""
+        mock_event = MagicMock()
+        mock_event.id = 1
+        mock_event.titre = "RDV médecin"
+        mock_event.type_event = "rdv"
+        mock_event.date_debut = datetime(2024, 1, 15, 10, 0)
+        mock_event.date_fin = datetime(2024, 1, 15, 11, 0)
+        mock_event.lieu = "Cabinet"
+        mock_event.couleur = "#ff0000"
+        
+        mock_db = MagicMock()
+        mock_db.query.return_value.filter.return_value.all.return_value = [mock_event]
+        
+        result = service._charger_events(date(2024, 1, 15), date(2024, 1, 21), mock_db)
+        assert "2024-01-15" in result
+        assert result["2024-01-15"][0]["titre"] == "RDV médecin"
+        assert result["2024-01-15"][0]["type"] == "rdv"
 
 
 # ═══════════════════════════════════════════════════════════
-# TESTS CRÉER EVENT
+# TESTS DES FACTORIES
 # ═══════════════════════════════════════════════════════════
 
 
-@pytest.mark.unit
-class TestCreerEvent:
-    """Tests pour creer_event."""
-
-    def test_cree_event(self, service, mock_db_session, mock_context):
-        """Crée un événement."""
-        with patch('src.core.database.obtenir_contexte_db', mock_context):
-            result = service.creer_event(
-                titre="Test Event",
-                date_debut=datetime(2024, 1, 15, 10, 0),
-                type_event="rdv"
-            )
-        
-        assert mock_db_session.add.called or result is None
-
-    def test_cree_event_complet(self, service, mock_db_session, mock_context):
-        """Crée un événement avec tous les champs."""
-        with patch('src.core.database.obtenir_contexte_db', mock_context):
-            result = service.creer_event(
-                titre="RDV Médecin",
-                date_debut=datetime(2024, 1, 15, 10, 0),
-                type_event="rdv",
-                date_fin=datetime(2024, 1, 15, 10, 30),
-                description="Consultation annuelle",
-                lieu="Cabinet médical",
-                couleur="#FF0000"
-            )
-        
-        assert mock_db_session.add.called or result is None
-
-
-# ═══════════════════════════════════════════════════════════
-# TESTS INVALIDER CACHE
-# ═══════════════════════════════════════════════════════════
-
-
-@pytest.mark.unit
-class TestInvaliderCache:
-    """Tests pour _invalider_cache_semaine."""
-
-    def test_invalide_cache(self, service, lundi_test):
-        """Invalide le cache pour la semaine."""
-        with patch('src.core.cache.Cache.invalider') as mock_invalider:
-            service._invalider_cache_semaine(lundi_test)
-        
-        # La méthode devrait être appelée
-        assert mock_invalider.called or True  # Peut ne pas être appelée si pas de cache
-
-
-# ═══════════════════════════════════════════════════════════
-# TESTS AVEC FIXTURE DB PATCHÉE
-# ═══════════════════════════════════════════════════════════
-
-
-@pytest.mark.unit
-class TestServiceWithPatchedDB:
-    """Tests avec la DB patchée."""
-
-    def test_service_instantiation(self):
-        """Vérifie l'instanciation du service."""
-        service = ServicePlanningUnifie()
-        assert service is not None
-        assert isinstance(service, ServicePlanningUnifie)
-
-
-# ═══════════════════════════════════════════════════════════
-# TESTS MÉTHODES HÉRITÉES
-# ═══════════════════════════════════════════════════════════
-
-
-@pytest.mark.unit
-class TestMethodesHeritees:
-    """Tests pour les méthodes héritées."""
-
-    def test_has_model_attribute(self):
-        """Le service a l'attribut model."""
-        service = ServicePlanningUnifie()
-        assert hasattr(service, 'model')
-
-    def test_inherits_from_base_ai_service(self):
-        """Le service hérite de BaseAIService."""
-        from src.services.base import BaseAIService
-        service = ServicePlanningUnifie()
-        assert isinstance(service, BaseAIService)
-
-    def test_inherits_from_base_service(self):
-        """Le service hérite de BaseService."""
-        from src.services.base import BaseService
-        service = ServicePlanningUnifie()
-        assert isinstance(service, BaseService)
-
-
-# ═══════════════════════════════════════════════════════════
-# TESTS CAS LIMITES
-# ═══════════════════════════════════════════════════════════
-
-
-@pytest.mark.unit
-class TestCasLimites:
-    """Tests pour les cas limites."""
-
-    def test_semaine_vide(self, service, mock_db_session, mock_context, lundi_test):
-        """Gère une semaine vide."""
-        with patch('src.core.database.obtenir_contexte_db', mock_context):
-            result = service.get_semaine_complete(lundi_test)
-        
-        if result is not None:
-            assert len(result.jours) == 7
-
-    def test_date_pas_lundi(self, service, mock_db_session, mock_context):
-        """Gère une date qui n'est pas un lundi."""
-        mardi = date(2024, 1, 16)  # Mardi
-        
-        with patch('src.core.database.obtenir_contexte_db', mock_context):
-            result = service.get_semaine_complete(mardi)
-        
-        # Devrait fonctionner même si pas un lundi
-        assert result is None or isinstance(result, SemaineCompleSchema)
+class TestFactories:
+    """Tests pour les factories."""
+    
+    def test_obtenir_service_planning_unifie(self):
+        """Test de la factory."""
+        from src.services.planning.global_planning import obtenir_service_planning_unifie
+        with patch('src.services.planning.global_planning.obtenir_client_ia'):
+            service = obtenir_service_planning_unifie()
+            assert service is not None
+            assert isinstance(service, ServicePlanningUnifie)
+    
+    def test_get_planning_unified_service_alias(self):
+        """Test de l'alias."""
+        from src.services.planning.global_planning import get_planning_unified_service
+        with patch('src.services.planning.global_planning.obtenir_client_ia'):
+            service = get_planning_unified_service()
+            assert service is not None

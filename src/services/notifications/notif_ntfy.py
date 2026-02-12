@@ -103,9 +103,9 @@ class ServiceNtfy:
         today = date.today()
         
         taches = db.query(MaintenanceTask).filter(
-            MaintenanceTask.prochaine_fois < today,
-            MaintenanceTask.fait == False
-        ).order_by(MaintenanceTask.prochaine_fois).all()
+            MaintenanceTask.date_echeance < today,
+            MaintenanceTask.statut != "termine"
+        ).order_by(MaintenanceTask.date_echeance).all()
         
         return taches
     
@@ -116,8 +116,8 @@ class ServiceNtfy:
         today = date.today()
         
         taches = db.query(MaintenanceTask).filter(
-            MaintenanceTask.prochaine_fois == today,
-            MaintenanceTask.fait == False
+            MaintenanceTask.date_echeance == today,
+            MaintenanceTask.statut != "termine"
         ).all()
         
         return taches
@@ -125,16 +125,17 @@ class ServiceNtfy:
     @avec_gestion_erreurs(default_return=[])
     @avec_session_db
     def obtenir_courses_urgentes(self, db: Session = None) -> list[ShoppingItem]:
-        """Récupère les articles de courses actifs (non achetés)."""
+        """Récupère les articles de courses haute priorité."""
         articles = db.query(ShoppingItem).filter(
-            ShoppingItem.actif == True
+            ShoppingItem.achete == False,
+            ShoppingItem.priorite == 1
         ).limit(10).all()
         
         return articles
     
     async def envoyer_alerte_tache_retard(self, tache: MaintenanceTask) -> ResultatEnvoiNtfy:
         """Envoie une alerte pour une tâche en retard."""
-        jours_retard = (date.today() - tache.prochaine_fois).days
+        jours_retard = (date.today() - tache.date_echeance).days
         
         # Priorité selon retard
         if jours_retard > 7:
@@ -148,8 +149,8 @@ class ServiceNtfy:
             tags = ["calendar"]
         
         notification = NotificationNtfy(
-            titre=f"⏰ Tâche en retard: {tache.nom}",
-            message=f"{tache.nom}\n\n📅 Prévue le {tache.prochaine_fois.strftime('%d/%m')}\n⚠️ {jours_retard} jour(s) de retard\n\n{tache.description or ''}",
+            titre=f"⏰ Tâche en retard: {tache.titre}",
+            message=f"{tache.titre}\n\n📅 Prévue le {tache.date_echeance.strftime('%d/%m')}\n⚠️ {jours_retard} jour(s) de retard\n\n{tache.description or ''}",
             priorite=priorite,
             tags=tags
         )
@@ -170,12 +171,12 @@ class ServiceNtfy:
         if taches_retard:
             lines.append(f"⚠️ {len(taches_retard)} tâche(s) en retard:")
             for t in taches_retard[:3]:
-                lines.append(f"  • {t.nom}")
+                lines.append(f"  • {t.titre}")
         
         if taches_jour:
             lines.append(f"\n📅 {len(taches_jour)} tâche(s) aujourd'hui:")
             for t in taches_jour[:5]:
-                lines.append(f"  • {t.nom}")
+                lines.append(f"  • {t.titre}")
         
         notification = NotificationNtfy(
             titre="📋 Digest Matanne",
@@ -193,7 +194,7 @@ class ServiceNtfy:
         if not courses_urgentes:
             return ResultatEnvoiNtfy(succes=True, message="Pas de courses urgentes")
         
-        articles_noms = [c.titre for c in courses_urgentes[:5]]
+        articles_noms = [c.nom for c in courses_urgentes[:5]]
         
         notification = NotificationNtfy(
             titre=f"🛒 {nb_articles} articles en attente",
