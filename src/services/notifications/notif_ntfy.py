@@ -16,7 +16,7 @@ import httpx
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_session_db, avec_gestion_erreurs
-from src.core.models import MaintenanceTask, ShoppingItem
+from src.core.models import MaintenanceTask, ArticleCourses
 
 from src.services.notifications.types import (
     ConfigurationNtfy,
@@ -103,9 +103,9 @@ class ServiceNtfy:
         today = date.today()
         
         taches = db.query(MaintenanceTask).filter(
-            MaintenanceTask.date_echeance < today,
-            MaintenanceTask.statut != "termine"
-        ).order_by(MaintenanceTask.date_echeance).all()
+            MaintenanceTask.prochaine_fois < today,
+            MaintenanceTask.fait == False
+        ).order_by(MaintenanceTask.prochaine_fois).all()
         
         return taches
     
@@ -116,26 +116,26 @@ class ServiceNtfy:
         today = date.today()
         
         taches = db.query(MaintenanceTask).filter(
-            MaintenanceTask.date_echeance == today,
-            MaintenanceTask.statut != "termine"
+            MaintenanceTask.prochaine_fois == today,
+            MaintenanceTask.fait == False
         ).all()
         
         return taches
     
     @avec_gestion_erreurs(default_return=[])
     @avec_session_db
-    def obtenir_courses_urgentes(self, db: Session = None) -> list[ShoppingItem]:
+    def obtenir_courses_urgentes(self, db: Session = None) -> list[ArticleCourses]:
         """Récupère les articles de courses haute priorité."""
-        articles = db.query(ShoppingItem).filter(
-            ShoppingItem.achete == False,
-            ShoppingItem.priorite == 1
+        articles = db.query(ArticleCourses).filter(
+            ArticleCourses.achete == False,
+            ArticleCourses.priorite == "haute"
         ).limit(10).all()
         
         return articles
     
     async def envoyer_alerte_tache_retard(self, tache: MaintenanceTask) -> ResultatEnvoiNtfy:
         """Envoie une alerte pour une tâche en retard."""
-        jours_retard = (date.today() - tache.date_echeance).days
+        jours_retard = (date.today() - tache.prochaine_fois).days
         
         # Priorité selon retard
         if jours_retard > 7:
