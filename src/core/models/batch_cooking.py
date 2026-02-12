@@ -1,4 +1,4 @@
-"""
+﻿"""
 Modèles pour le Batch Cooking.
 
 Contient :
@@ -33,9 +33,9 @@ from .base import Base
 import enum
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ÉNUMÉRATIONS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class StatutSessionEnum(str, enum.Enum):
@@ -74,9 +74,9 @@ class LocalisationStockageEnum(str, enum.Enum):
     TEMPERATURE_AMBIANTE = "temperature_ambiante"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONFIGURATION BATCH COOKING
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class ConfigBatchCooking(Base):
@@ -126,9 +126,9 @@ class ConfigBatchCooking(Base):
         return f"<ConfigBatchCooking(id={self.id}, jours={self.jours_batch})>"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SESSION BATCH COOKING
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class SessionBatchCooking(Base):
@@ -142,9 +142,9 @@ class SessionBatchCooking(Base):
         duree_estimee: Durée estimée en minutes
         duree_reelle: Durée réelle en minutes
         statut: Statut de la session
-        avec_jules: Si Jules participe à cette session
+        avec_jules: Si Jules participe Ã  cette session
         planning_id: Lien vers le planning de la semaine (optionnel)
-        recettes_selectionnees: IDs des recettes à préparer (JSON)
+        recettes_selectionnees: IDs des recettes Ã  préparer (JSON)
         robots_utilises: Robots utilisés pour cette session (JSON)
         notes_avant: Notes de préparation
         notes_apres: Retour d'expérience
@@ -226,9 +226,9 @@ class SessionBatchCooking(Base):
         return f"<SessionBatchCooking(id={self.id}, nom='{self.nom}', statut={self.statut})>"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ÉTAPES BATCH COOKING
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class EtapeBatchCooking(Base):
@@ -249,7 +249,7 @@ class EtapeBatchCooking(Base):
         robots_requis: Liste des robots nécessaires (JSON)
         est_supervision: Étape de surveillance passive (ex: cuisson four)
         alerte_bruit: Si l'étape fait du bruit (important si Jules dort)
-        temperature: Température requise (°C, optionnel)
+        temperature: Température requise (Â°C, optionnel)
         statut: Statut de l'étape
         heure_debut: Heure de début réelle
         heure_fin: Heure de fin réelle
@@ -285,7 +285,7 @@ class EtapeBatchCooking(Base):
     # Caractéristiques
     est_supervision: Mapped[bool] = mapped_column(Boolean, default=False)
     alerte_bruit: Mapped[bool] = mapped_column(Boolean, default=False)
-    temperature: Mapped[int | None] = mapped_column(Integer)  # °C
+    temperature: Mapped[int | None] = mapped_column(Integer)  # Â°C
     
     # Statut et timing réel
     statut: Mapped[str] = mapped_column(
@@ -321,9 +321,9 @@ class EtapeBatchCooking(Base):
         return f"<EtapeBatchCooking(id={self.id}, ordre={self.ordre}, titre='{self.titre}')>"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # PRÉPARATIONS STOCKÉES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class PreparationBatch(Base):

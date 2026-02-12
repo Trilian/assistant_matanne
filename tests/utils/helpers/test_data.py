@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/utils/helpers/data.py
 """
 import pytest

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests complets pour src/services/facture_ocr.py
 Objectif: couverture >80%
 """
@@ -8,9 +8,9 @@ from unittest.mock import Mock, MagicMock, patch, AsyncMock
 from datetime import date
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MODELES PYDANTIC
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestDonneesFacture:
     """Tests pour DonneesFacture model."""
@@ -43,7 +43,7 @@ class TestDonneesFacture:
             montant_ttc=89.99,
             montant_ht=75.00,
             consommation=120.5,
-            unite_consommation="m³",
+            unite_consommation="mÂ³",
             date_debut=date(2025, 12, 1),
             date_fin=date(2026, 1, 31),
             mois_facturation=1,
@@ -59,7 +59,7 @@ class TestDonneesFacture:
         assert facture.fournisseur == "Engie"
         assert facture.montant_ht == 75.00
         assert facture.consommation == 120.5
-        assert facture.unite_consommation == "m³"
+        assert facture.unite_consommation == "mÂ³"
         assert facture.date_debut == date(2025, 12, 1)
         assert facture.mois_facturation == 1
         assert facture.confiance == 0.95
@@ -89,7 +89,7 @@ class TestDonneesFacture:
             type_energie="eau",
             montant_ttc=45.30,
             consommation=18.5,
-            unite_consommation="m³"
+            unite_consommation="mÂ³"
         )
         
         assert facture.fournisseur == "Veolia"
@@ -103,7 +103,7 @@ class TestDonneesFacture:
             fournisseur="Inconnu",
             type_energie="autre",
             montant_ttc=0,
-            erreurs=["Montant TTC non trouvé", "Fournisseur non identifié"]
+            erreurs=["Montant TTC non trouvÃ©", "Fournisseur non identifiÃ©"]
         )
         
         assert len(facture.erreurs) == 2
@@ -126,12 +126,12 @@ class TestResultatOCR:
             succes=True,
             donnees=donnees,
             texte_brut='{"fournisseur": "EDF"}',
-            message="Extraction réussie"
+            message="Extraction rÃ©ussie"
         )
         
         assert resultat.succes is True
         assert resultat.donnees is not None
-        assert resultat.message == "Extraction réussie"
+        assert resultat.message == "Extraction rÃ©ussie"
     
     def test_resultat_ocr_failure(self):
         """Test failed ResultatOCR."""
@@ -159,9 +159,9 @@ class TestResultatOCR:
         assert resultat.message == ""
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FACTURE OCR SERVICE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestFactureOCRServiceInit:
     """Tests for FactureOCRService initialization."""
@@ -336,7 +336,7 @@ class TestFactureOCRServiceParserReponse:
         result = service._parser_reponse(reponse)
         
         assert result.confiance < 1.0
-        assert "Fournisseur non identifié" in result.erreurs
+        assert "Fournisseur non identifiÃ©" in result.erreurs
     
     def test_parser_reponse_confiance_no_consommation(self):
         """Test confidence reduced when no consommation."""
@@ -358,9 +358,9 @@ class TestFactureOCRServiceParserReponse:
         assert result.confiance == 0.9  # 1.0 - 0.1 for no consommation
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS HELPER FUNCTIONS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestDetecterFournisseur:
     """Tests for detecter_fournisseur function."""
@@ -369,7 +369,7 @@ class TestDetecterFournisseur:
         """Test detecting EDF."""
         from src.services.facture_ocr import detecter_fournisseur
         
-        texte = "Facture EDF - Électricité de France"
+        texte = "Facture EDF - Ã‰lectricitÃ© de France"
         nom, type_energie = detecter_fournisseur(texte)
         
         assert nom == "EDF"
@@ -419,7 +419,7 @@ class TestDetecterFournisseur:
         """Test detecting TotalEnergies."""
         from src.services.facture_ocr import detecter_fournisseur
         
-        texte = "TotalEnergies - Électricité"
+        texte = "TotalEnergies - Ã‰lectricitÃ©"
         nom, type_energie = detecter_fournisseur(texte)
         
         assert nom == "TOTALENERGIES"
@@ -462,7 +462,7 @@ class TestExtraireMontant:
         """Test extracting TTC amount."""
         from src.services.facture_ocr import extraire_montant, PATTERNS_MONTANTS
         
-        texte = "Total à payer: 125,50 €"
+        texte = "Total Ã  payer: 125,50 â‚¬"
         result = extraire_montant(texte, PATTERNS_MONTANTS["montant_ttc"])
         
         assert result == 125.50
@@ -471,7 +471,7 @@ class TestExtraireMontant:
         """Test extracting TTC amount with dot decimal."""
         from src.services.facture_ocr import extraire_montant, PATTERNS_MONTANTS
         
-        texte = "Total TTC 89.99€"
+        texte = "Total TTC 89.99â‚¬"
         result = extraire_montant(texte, PATTERNS_MONTANTS["montant_ttc"])
         
         assert result == 89.99
@@ -486,10 +486,10 @@ class TestExtraireMontant:
         assert result == 850
     
     def test_extraire_consommation_m3(self):
-        """Test extracting m³ consumption."""
+        """Test extracting mÂ³ consumption."""
         from src.services.facture_ocr import extraire_montant, PATTERNS_MONTANTS
         
-        texte = "Volume: 18.5 m³"
+        texte = "Volume: 18.5 mÂ³"
         result = extraire_montant(texte, PATTERNS_MONTANTS["consommation_m3"])
         
         assert result == 18.5
@@ -514,9 +514,9 @@ class TestExtraireMontant:
         assert result is not None or result is None  # Just check it doesn't crash
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PATTERNS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestPatterns:
     """Tests for pattern constants."""
@@ -543,9 +543,9 @@ class TestPatterns:
         assert "consommation_m3" in PATTERNS_MONTANTS
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ASYNC EXTRACTION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestFactureOCRServiceAsync:
     """Tests for async extraction methods."""
@@ -625,9 +625,9 @@ class TestFactureOCRServiceSync:
             assert result.donnees.fournisseur == "Engie"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MODULE EXPORTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestModuleExports:
     """Tests for module exports."""

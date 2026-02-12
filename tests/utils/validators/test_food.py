@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/utils/validators/food.py
 """
 import pytest
@@ -415,8 +415,8 @@ class TestValiderAllergie:
         assert is_valid is True
 
     def test_allergie_valide_fruits_coque(self):
-        """Fruits à coque valide."""
-        is_valid, msg = valider_allergie("fruits à coque")
+        """Fruits Ã  coque valide."""
+        is_valid, msg = valider_allergie("fruits Ã  coque")
         assert is_valid is True
 
     def test_allergie_vide(self):

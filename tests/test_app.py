@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour app.py
 
 Module: src.app

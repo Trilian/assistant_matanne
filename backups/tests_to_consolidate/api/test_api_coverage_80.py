@@ -1,11 +1,11 @@
-"""
+﻿"""
 Tests complets pour src/api/ - Objectif: 80%+ couverture
 
 Couvre:
-- src/api/main.py: Schémas Pydantic, endpoints, authentification
-- src/api/rate_limiting.py: RateLimitStore, RateLimiter, middleware, décorateurs
+- src/api/main.py: SchÃ©mas Pydantic, endpoints, authentification
+- src/api/rate_limiting.py: RateLimitStore, RateLimiter, middleware, dÃ©corateurs
 
-Stratégie: Tests unitaires avec mocks pour éviter les dépendances DB
+StratÃ©gie: Tests unitaires avec mocks pour Ã©viter les dÃ©pendances DB
 """
 
 import pytest
@@ -70,7 +70,7 @@ class TestRateLimitStrategy:
 # =============================================================================
 
 class TestRateLimitStore:
-    """Tests pour RateLimitStore - stockage en mémoire."""
+    """Tests pour RateLimitStore - stockage en mÃ©moire."""
     
     def test_init(self):
         from src.api.rate_limiting import RateLimitStore
@@ -218,7 +218,7 @@ class TestRateLimiter:
         assert "endpoint:/api/test" in key
     
     def test_check_rate_limit_exempt_path(self):
-        """Test le chemin exempté de rate limiting."""
+        """Test le chemin exemptÃ© de rate limiting."""
         import importlib
         from src.api import rate_limiting as rl_module
         importlib.reload(rl_module)
@@ -235,7 +235,7 @@ class TestRateLimiter:
         assert result["limit"] == -1
     
     def test_check_rate_limit_blocked(self):
-        """Test le blocage quand le rate limit est dépassé."""
+        """Test le blocage quand le rate limit est dÃ©passÃ©."""
         import importlib
         from src.api import rate_limiting as rl_module
         importlib.reload(rl_module)
@@ -349,7 +349,7 @@ class TestRateLimitingUtils:
 # =============================================================================
 
 class TestRecetteSchemas:
-    """Tests pour les schémas Pydantic de recettes."""
+    """Tests pour les schÃ©mas Pydantic de recettes."""
     
     def test_recette_base_valid(self):
         from src.api.main import RecetteBase
@@ -382,7 +382,7 @@ class TestRecetteSchemas:
         recette = RecetteCreate(
             nom="Quiche",
             ingredients=[{"nom": "Oeuf", "quantite": 4}],
-            instructions=["Préchauffer le four"],
+            instructions=["PrÃ©chauffer le four"],
             tags=["facile", "rapide"]
         )
         assert recette.nom == "Quiche"
@@ -402,7 +402,7 @@ class TestRecetteSchemas:
 
 
 class TestInventaireSchemas:
-    """Tests pour les schémas Pydantic d'inventaire."""
+    """Tests pour les schÃ©mas Pydantic d'inventaire."""
     
     def test_inventaire_item_base_valid(self):
         from src.api.main import InventaireItemBase
@@ -441,7 +441,7 @@ class TestInventaireSchemas:
 
 
 class TestRepasSchemas:
-    """Tests pour les schémas Pydantic de repas."""
+    """Tests pour les schÃ©mas Pydantic de repas."""
     
     def test_repas_base_valid(self):
         from src.api.main import RepasBase
@@ -459,15 +459,15 @@ class TestRepasSchemas:
     
     def test_repas_base_all_valid_types(self):
         from src.api.main import RepasBase
-        valid_types = ["petit_déjeuner", "petit_dejeuner", "déjeuner", 
-                       "dejeuner", "dîner", "diner", "goûter", "gouter"]
+        valid_types = ["petit_dÃ©jeuner", "petit_dejeuner", "dÃ©jeuner", 
+                       "dejeuner", "dÃ®ner", "diner", "goÃ»ter", "gouter"]
         for t in valid_types:
             repas = RepasBase(type_repas=t, date=datetime.now())
             assert repas.type_repas == t
 
 
 class TestCoursesSchemas:
-    """Tests pour les schémas Pydantic de courses."""
+    """Tests pour les schÃ©mas Pydantic de courses."""
     
     def test_course_item_base_valid(self):
         from src.api.main import CourseItemBase
@@ -494,7 +494,7 @@ class TestCoursesSchemas:
 
 
 class TestOtherSchemas:
-    """Tests pour les autres schémas."""
+    """Tests pour les autres schÃ©mas."""
     
     def test_planning_base(self):
         from src.api.main import PlanningBase
@@ -586,7 +586,7 @@ class TestHealthEndpoint:
         client = TestClient(main_module.app)
         response = client.get("/health")
         
-        # Peut être 200/500 selon l'état de la DB
+        # Peut Ãªtre 200/500 selon l'Ã©tat de la DB
         assert response.status_code in [200, 500]
         if response.status_code == 200:
             data = response.json()
@@ -603,7 +603,7 @@ class TestAuthentication:
     
     @patch.dict("os.environ", {"ENVIRONMENT": "development"})
     def test_get_current_user_dev_mode(self):
-        """En mode dev sans token, retourne un utilisateur par défaut."""
+        """En mode dev sans token, retourne un utilisateur par dÃ©faut."""
         # This test verifies the development fallback behavior
         pass  # Covered by integration tests
     
@@ -621,7 +621,7 @@ class TestAuthentication:
 # =============================================================================
 
 class TestRateLimitDecorator:
-    """Tests pour le décorateur @rate_limit."""
+    """Tests pour le dÃ©corateur @rate_limit."""
     
     @pytest.mark.asyncio
     async def test_rate_limit_decorator_no_request(self):
@@ -661,7 +661,7 @@ class TestRateLimitDecorator:
 # =============================================================================
 
 class TestCheckRateLimitDependency:
-    """Tests pour la dépendance check_rate_limit."""
+    """Tests pour la dÃ©pendance check_rate_limit."""
     
     @pytest.mark.asyncio
     async def test_check_rate_limit(self):
@@ -749,7 +749,7 @@ class TestRateLimitMiddleware:
     
     @pytest.mark.asyncio
     async def test_middleware_extracts_user_from_jwt(self):
-        """Test middleware JWT extraction - skip si PyJWT non installé."""
+        """Test middleware JWT extraction - skip si PyJWT non installÃ©."""
         from src.api.rate_limiting import RateLimitMiddleware, reset_rate_limits
         
         try:
@@ -809,11 +809,11 @@ class TestRateLimitMiddleware:
 
 
 # =============================================================================
-# TESTS: Limite de requêtes avec différents types d'utilisateurs
+# TESTS: Limite de requÃªtes avec diffÃ©rents types d'utilisateurs
 # =============================================================================
 
 class TestRateLimitUserTypes:
-    """Tests pour les différents types d'utilisateurs."""
+    """Tests pour les diffÃ©rents types d'utilisateurs."""
     
     def test_anonymous_limits(self):
         import importlib
@@ -895,11 +895,11 @@ class TestRateLimitUserTypes:
 
 
 # =============================================================================
-# TESTS: Dépassement de limite
+# TESTS: DÃ©passement de limite
 # =============================================================================
 
 class TestRateLimitExceeded:
-    """Tests pour le dépassement de limite."""
+    """Tests pour le dÃ©passement de limite."""
     
     def test_minute_limit_exceeded(self):
         import importlib
@@ -930,7 +930,7 @@ class TestRateLimitExceeded:
 
 
 # =============================================================================
-# TESTS: main.py - Endpoints CRUD (tests d'intégration simples)
+# TESTS: main.py - Endpoints CRUD (tests d'intÃ©gration simples)
 # =============================================================================
 
 class TestRecetteEndpoints:
@@ -953,7 +953,7 @@ class TestRecetteEndpoints:
         assert response.status_code in [200, 401, 500]
     
     def test_get_recette_endpoint(self):
-        """Test récupération recette."""
+        """Test rÃ©cupÃ©ration recette."""
         import importlib
         from src.api import rate_limiting as rl_module
         from src.api import main as main_module
@@ -965,7 +965,7 @@ class TestRecetteEndpoints:
         client = TestClient(main_module.app)
         response = client.get("/api/v1/recettes/1")
         
-        # 200/404/401/500 selon l'état de la DB et l'auth
+        # 200/404/401/500 selon l'Ã©tat de la DB et l'auth
         assert response.status_code in [200, 401, 404, 500]
 
 
@@ -1096,11 +1096,11 @@ class TestRequireAuth:
 
 
 # =============================================================================
-# TESTS: Schémas Pydantic supplémentaires
+# TESTS: SchÃ©mas Pydantic supplÃ©mentaires
 # =============================================================================
 
 class TestPlanningSchemas:
-    """Tests pour les schémas de planning."""
+    """Tests pour les schÃ©mas de planning."""
     
     def test_planning_base(self):
         from src.api.main import PlanningBase
@@ -1124,16 +1124,16 @@ class TestPlanningSchemas:
 
 
 class TestRepasSchemas:
-    """Tests pour les schémas de repas."""
+    """Tests pour les schÃ©mas de repas."""
     
     def test_repas_base_valid(self):
         from src.api.main import RepasBase
         repas = RepasBase(
-            type_repas="déjeuner",
+            type_repas="dÃ©jeuner",
             date=datetime.now(),
             notes="Repas familial"
         )
-        assert repas.type_repas == "déjeuner"
+        assert repas.type_repas == "dÃ©jeuner"
         assert repas.notes == "Repas familial"
     
     def test_repas_base_invalid_type(self):
@@ -1149,7 +1149,7 @@ class TestRepasSchemas:
     def test_repas_create(self):
         from src.api.main import RepasCreate
         repas = RepasCreate(
-            type_repas="dîner",
+            type_repas="dÃ®ner",
             date=datetime.now(),
             recette_id=1
         )
@@ -1157,7 +1157,7 @@ class TestRepasSchemas:
 
 
 class TestCourseSchemasExtra:
-    """Tests supplémentaires pour les schémas de courses."""
+    """Tests supplÃ©mentaires pour les schÃ©mas de courses."""
     
     def test_course_list_create(self):
         from src.api.main import CourseListCreate
@@ -1192,7 +1192,7 @@ class TestCourseSchemasExtra:
 
 
 class TestInventaireExtraSchemas:
-    """Tests supplémentaires pour les schémas d'inventaire."""
+    """Tests supplÃ©mentaires pour les schÃ©mas d'inventaire."""
     
     def test_inventaire_item_create(self):
         from src.api.main import InventaireItemCreate
@@ -1235,14 +1235,14 @@ class TestHealthResponse:
 
 
 class TestRecetteExtraSchemas:
-    """Tests supplémentaires pour les schémas de recettes."""
+    """Tests supplÃ©mentaires pour les schÃ©mas de recettes."""
     
     def test_recette_create_with_ingredients(self):
         from src.api.main import RecetteCreate
         recette = RecetteCreate(
             nom="Tarte",
             ingredients=[{"nom": "farine", "quantite": 200}],
-            instructions=["Mélanger", "Cuire"],
+            instructions=["MÃ©langer", "Cuire"],
             tags=["dessert", "facile"]
         )
         assert len(recette.ingredients) == 1
@@ -1269,10 +1269,10 @@ class TestRecetteExtraSchemas:
 # =============================================================================
 
 class TestCRUDEndpoints:
-    """Tests pour les opérations CRUD."""
+    """Tests pour les opÃ©rations CRUD."""
     
     def test_create_recette_endpoint(self):
-        """Test création recette."""
+        """Test crÃ©ation recette."""
         import importlib
         from src.api import rate_limiting as rl_module
         from src.api import main as main_module
@@ -1295,7 +1295,7 @@ class TestCRUDEndpoints:
         assert response.status_code in [200, 201, 401, 500]
     
     def test_update_recette_endpoint(self):
-        """Test mise à jour recette."""
+        """Test mise Ã  jour recette."""
         import importlib
         from src.api import rate_limiting as rl_module
         from src.api import main as main_module
@@ -1308,7 +1308,7 @@ class TestCRUDEndpoints:
         response = client.put(
             "/api/v1/recettes/1",
             json={
-                "nom": "Recette modifiée",
+                "nom": "Recette modifiÃ©e",
                 "description": "Nouvelle description"
             }
         )
@@ -1335,7 +1335,7 @@ class TestInventaireCRUD:
     """Tests CRUD pour l'inventaire."""
     
     def test_create_inventaire_item(self):
-        """Test création article inventaire."""
+        """Test crÃ©ation article inventaire."""
         import importlib
         from src.api import rate_limiting as rl_module
         from src.api import main as main_module
@@ -1357,7 +1357,7 @@ class TestInventaireCRUD:
         assert response.status_code in [200, 201, 401, 405, 422, 500]
     
     def test_get_inventaire_item(self):
-        """Test récupération article inventaire."""
+        """Test rÃ©cupÃ©ration article inventaire."""
         import importlib
         from src.api import rate_limiting as rl_module
         from src.api import main as main_module
@@ -1376,7 +1376,7 @@ class TestCoursesCRUD:
     """Tests CRUD pour les courses."""
     
     def test_create_course_list(self):
-        """Test création liste de courses."""
+        """Test crÃ©ation liste de courses."""
         import importlib
         from src.api import rate_limiting as rl_module
         from src.api import main as main_module
@@ -1394,7 +1394,7 @@ class TestCoursesCRUD:
         assert response.status_code in [200, 201, 401, 405, 422, 500]
     
     def test_add_course_item(self):
-        """Test ajout article à liste."""
+        """Test ajout article Ã  liste."""
         import importlib
         from src.api import rate_limiting as rl_module
         from src.api import main as main_module
@@ -1416,7 +1416,7 @@ class TestPlanningCRUD:
     """Tests pour les endpoints de planning."""
     
     def test_get_planning_semaine(self):
-        """Test récupération planning semaine."""
+        """Test rÃ©cupÃ©ration planning semaine."""
         import importlib
         from src.api import rate_limiting as rl_module
         from src.api import main as main_module
@@ -1431,7 +1431,7 @@ class TestPlanningCRUD:
         assert response.status_code in [200, 401, 404, 405, 422, 500]
     
     def test_create_repas(self):
-        """Test création repas."""
+        """Test crÃ©ation repas."""
         import importlib
         from src.api import rate_limiting as rl_module
         from src.api import main as main_module
@@ -1444,7 +1444,7 @@ class TestPlanningCRUD:
         response = client.post(
             "/api/v1/planning/repas",
             json={
-                "type_repas": "déjeuner",
+                "type_repas": "dÃ©jeuner",
                 "date": datetime.now().isoformat()
             }
         )
@@ -1471,7 +1471,7 @@ class TestAIEndpoints:
         assert response.status_code in [200, 401, 404, 405, 500]
     
     def test_generate_menu(self):
-        """Test génération menu IA."""
+        """Test gÃ©nÃ©ration menu IA."""
         import importlib
         from src.api import rate_limiting as rl_module
         from src.api import main as main_module
@@ -1487,15 +1487,15 @@ class TestAIEndpoints:
 
 
 class TestRateLimitDecorator:
-    """Tests pour le décorateur rate_limit."""
+    """Tests pour le dÃ©corateur rate_limit."""
     
     def test_rate_limit_decorator_import(self):
-        """Test import du décorateur."""
+        """Test import du dÃ©corateur."""
         from src.api.rate_limiting import rate_limit
         assert callable(rate_limit)
     
     def test_rate_limit_decorator_usage(self):
-        """Test utilisation basique du décorateur."""
+        """Test utilisation basique du dÃ©corateur."""
         from src.api.rate_limiting import rate_limit
         
         @rate_limit(requests_per_minute=10)
@@ -1509,7 +1509,7 @@ class TestRateLimitMiddlewareConfig:
     """Tests pour la configuration du middleware."""
     
     def test_middleware_custom_config(self):
-        """Test middleware avec config personnalisée."""
+        """Test middleware avec config personnalisÃ©e."""
         import importlib
         from src.api import rate_limiting as rl_module
         importlib.reload(rl_module)
@@ -1548,7 +1548,7 @@ class TestTokenAuth:
         assert response.status_code in [200, 401, 403, 500]
     
     def test_endpoint_with_malformed_token(self):
-        """Test endpoint avec token malformé."""
+        """Test endpoint avec token malformÃ©."""
         import importlib
         from src.api import rate_limiting as rl_module
         from src.api import main as main_module
@@ -1655,7 +1655,7 @@ class TestMorePydanticValidation:
         """Test RecetteBase avec nom vide."""
         from src.api.main import RecetteBase
         
-        # Test avec nom très court
+        # Test avec nom trÃ¨s court
         try:
             r = RecetteBase(
                 nom="A",
@@ -1663,7 +1663,7 @@ class TestMorePydanticValidation:
             )
             assert r.nom == "A"
         except Exception:
-            pass  # Validation peut échouer
+            pass  # Validation peut Ã©chouer
     
     def test_recette_base_long_description(self):
         """Test RecetteBase avec longue description."""
@@ -1677,38 +1677,38 @@ class TestMorePydanticValidation:
         assert len(r.description) == 1000
     
     def test_inventaire_special_characters(self):
-        """Test InventaireItemBase avec caractères spéciaux."""
+        """Test InventaireItemBase avec caractÃ¨res spÃ©ciaux."""
         from src.api.main import InventaireItemBase
         
         item = InventaireItemBase(
-            nom="Item éàü",
+            nom="Item Ã©Ã Ã¼",
             quantite=1.5,
-            unite="pièce(s)"
+            unite="piÃ¨ce(s)"
         )
-        assert "é" in item.nom
+        assert "Ã©" in item.nom
     
     def test_course_item_unicode(self):
         """Test CourseItemBase avec unicode."""
         from src.api.main import CourseItemBase
         
         item = CourseItemBase(
-            nom="🍎 Pommes",
+            nom="ðŸŽ Pommes",
             quantite=3,
             coche=False
         )
-        assert "🍎" in item.nom
+        assert "ðŸŽ" in item.nom
     
     def test_repas_base_all_fields(self):
         """Test RepasBase avec tous les champs."""
         from src.api.main import RepasBase
         
         repas = RepasBase(
-            type_repas="dîner",
+            type_repas="dÃ®ner",
             date="2024-01-15",
             recette_id=123,
             notes="Notes du repas"
         )
-        assert repas.type_repas == "dîner"
+        assert repas.type_repas == "dÃ®ner"
         assert repas.recette_id == 123
 
 
@@ -1716,7 +1716,7 @@ class TestRateLimitingEdgeCases:
     """Tests edge cases pour rate limiting."""
     
     def test_rate_limiter_empty_requests(self):
-        """Test RateLimiter sans requêtes."""
+        """Test RateLimiter sans requÃªtes."""
         import importlib
         from src.api import rate_limiting as rl_module
         importlib.reload(rl_module)
@@ -1725,11 +1725,11 @@ class TestRateLimitingEdgeCases:
         config = rl_module.RateLimitConfig()
         limiter = rl_module.RateLimiter(store=store, config=config)
         
-        # Vérifier état initial
+        # VÃ©rifier Ã©tat initial
         assert limiter.config.requests_per_minute > 0
     
     def test_rate_limit_config_high_values(self):
-        """Test RateLimitConfig avec valeurs élevées."""
+        """Test RateLimitConfig avec valeurs Ã©levÃ©es."""
         import importlib
         from src.api import rate_limiting as rl_module
         importlib.reload(rl_module)
@@ -1749,46 +1749,46 @@ class TestRateLimitingEdgeCases:
         
         store = rl_module.RateLimitStore()
         
-        # Vérifier les méthodes disponibles du store
+        # VÃ©rifier les mÃ©thodes disponibles du store
         assert store is not None
         assert hasattr(store, 'requests') or hasattr(store, '_requests') or True
         
-        # Test que l'objet store peut être utilisé
+        # Test que l'objet store peut Ãªtre utilisÃ©
         config = rl_module.RateLimitConfig()
         limiter = rl_module.RateLimiter(store=store, config=config)
         assert limiter.store == store
 
 
 class TestRateLimitStoreOperations:
-    """Tests pour les opérations du RateLimitStore."""
+    """Tests pour les opÃ©rations du RateLimitStore."""
     
     def test_store_clean_old_entries(self):
-        """Test nettoyage des entrées périmées."""
+        """Test nettoyage des entrÃ©es pÃ©rimÃ©es."""
         import importlib
         from src.api import rate_limiting as rl_module
         importlib.reload(rl_module)
         
         store = rl_module.RateLimitStore()
         
-        # Simuler une entrée
+        # Simuler une entrÃ©e
         key = "test_client"
         store._store[key] = [(time.time() - 120, 1)]  # Entry from 2 min ago
         
-        # Nettoyer avec fenêtre de 60 secondes
+        # Nettoyer avec fenÃªtre de 60 secondes
         store._clean_old_entries(key, 60)
         
-        # L'entrée devrait être nettoyée
+        # L'entrÃ©e devrait Ãªtre nettoyÃ©e
         assert len(store._store[key]) == 0
     
     def test_store_add_entry(self):
-        """Test ajout d'entrées via _store."""
+        """Test ajout d'entrÃ©es via _store."""
         import importlib
         from src.api import rate_limiting as rl_module
         importlib.reload(rl_module)
         
         store = rl_module.RateLimitStore()
         
-        # Ajouter directement une entrée
+        # Ajouter directement une entrÃ©e
         key = "test_client_2"
         store._store[key].append((time.time(), 1))
         
@@ -1796,10 +1796,10 @@ class TestRateLimitStoreOperations:
 
 
 class TestRateLimitStrategies:
-    """Tests pour les stratégies de rate limiting."""
+    """Tests pour les stratÃ©gies de rate limiting."""
     
     def test_fixed_window_strategy(self):
-        """Test stratégie fenêtre fixe."""
+        """Test stratÃ©gie fenÃªtre fixe."""
         import importlib
         from src.api import rate_limiting as rl_module
         importlib.reload(rl_module)
@@ -1811,7 +1811,7 @@ class TestRateLimitStrategies:
         assert config.strategy == rl_module.RateLimitStrategy.FIXED_WINDOW
     
     def test_sliding_window_strategy(self):
-        """Test stratégie fenêtre glissante."""
+        """Test stratÃ©gie fenÃªtre glissante."""
         import importlib
         from src.api import rate_limiting as rl_module
         importlib.reload(rl_module)
@@ -1823,7 +1823,7 @@ class TestRateLimitStrategies:
         assert config.strategy == rl_module.RateLimitStrategy.SLIDING_WINDOW
     
     def test_token_bucket_strategy(self):
-        """Test stratégie seau à jetons."""
+        """Test stratÃ©gie seau Ã  jetons."""
         import importlib
         from src.api import rate_limiting as rl_module
         importlib.reload(rl_module)
@@ -1854,7 +1854,7 @@ class TestMoreEndpoints:
         assert response.status_code in [200, 401, 404, 405, 500]
     
     def test_get_single_recette(self):
-        """Test récupération recette unique."""
+        """Test rÃ©cupÃ©ration recette unique."""
         import importlib
         from src.api import rate_limiting as rl_module
         from src.api import main as main_module
@@ -1885,10 +1885,10 @@ class TestMoreEndpoints:
 
 
 class TestExemptPaths:
-    """Tests pour les chemins exemptés du rate limiting."""
+    """Tests pour les chemins exemptÃ©s du rate limiting."""
     
     def test_exempt_paths_in_config(self):
-        """Test chemins exemptés dans config."""
+        """Test chemins exemptÃ©s dans config."""
         import importlib
         from src.api import rate_limiting as rl_module
         importlib.reload(rl_module)
@@ -1900,7 +1900,7 @@ class TestExemptPaths:
         assert "/openapi.json" in config.exempt_paths
     
     def test_custom_exempt_paths(self):
-        """Test chemins exemptés personnalisés."""
+        """Test chemins exemptÃ©s personnalisÃ©s."""
         import importlib
         from src.api import rate_limiting as rl_module
         importlib.reload(rl_module)
@@ -1914,10 +1914,10 @@ class TestExemptPaths:
 
 
 class TestRateLimitDecorator:
-    """Tests pour le décorateur rate_limit."""
+    """Tests pour le dÃ©corateur rate_limit."""
     
     def test_rate_limit_import(self):
-        """Test import du décorateur."""
+        """Test import du dÃ©corateur."""
         import importlib
         from src.api import rate_limiting as rl_module
         importlib.reload(rl_module)
@@ -1927,7 +1927,7 @@ class TestRateLimitDecorator:
     
     @pytest.mark.asyncio
     async def test_rate_limit_decorator_no_request(self):
-        """Test décorateur sans request."""
+        """Test dÃ©corateur sans request."""
         import importlib
         from src.api import rate_limiting as rl_module
         importlib.reload(rl_module)
@@ -1941,7 +1941,7 @@ class TestRateLimitDecorator:
     
     @pytest.mark.asyncio
     async def test_rate_limit_with_mock_request(self):
-        """Test décorateur avec mock request."""
+        """Test dÃ©corateur avec mock request."""
         import importlib
         from src.api import rate_limiting as rl_module
         importlib.reload(rl_module)
@@ -1961,10 +1961,10 @@ class TestRateLimitDecorator:
 
 
 class TestDatabaseIndependentSchemas:
-    """Tests schemas qui ne dépendent pas de la BD."""
+    """Tests schemas qui ne dÃ©pendent pas de la BD."""
     
     def test_health_response_with_degraded_status(self):
-        """Test HealthResponse avec status dégradé."""
+        """Test HealthResponse avec status dÃ©gradÃ©."""
         from src.api.main import HealthResponse
         from datetime import datetime
         
@@ -1985,15 +1985,15 @@ class TestDatabaseIndependentSchemas:
         
         recette = RecetteResponse(
             id=1,
-            nom="Pâtes carbonara",
+            nom="PÃ¢tes carbonara",
             description="Recette italienne",
             categorie="Plat principal",
             temps_preparation=15,
             temps_cuisson=20,
             portions=4,
             difficulte="Facile",
-            ingredients=[{"nom": "Pâtes", "quantite": "500g"}],
-            instructions=["Cuire les pâtes", "Ajouter les oeufs"],
+            ingredients=[{"nom": "PÃ¢tes", "quantite": "500g"}],
+            instructions=["Cuire les pÃ¢tes", "Ajouter les oeufs"],
             created_at=datetime.now(),
             updated_at=datetime.now()
         )
@@ -2002,7 +2002,7 @@ class TestDatabaseIndependentSchemas:
         assert recette.portions == 4
     
     def test_inventaire_update_model(self):
-        """Test modèle de mise à jour inventaire."""
+        """Test modÃ¨le de mise Ã  jour inventaire."""
         from src.api.main import InventaireItemBase
         
         item = InventaireItemBase(

@@ -1,5 +1,5 @@
-﻿"""
-Logique métier du module Projets (maison) - Séparée de l'UI
+"""
+Logique metier du module Projets (maison) - Separee de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
 
@@ -14,9 +14,9 @@ logger = logging.getLogger(__name__)
 # CONSTANTES
 # ═══════════════════════════════════════════════════════════
 
-STATUTS_PROJET = ["À faire", "En cours", "Terminé", "En pause"]
+STATUTS_PROJET = ["À faire", "En cours", "Termine", "En pause"]
 PRIORITES = ["Basse", "Moyenne", "Haute", "Urgente"]
-CATEGORIES_PROJET = ["Rénovation", "Décoration", "Réparation", "Amélioration", "Autre"]
+CATEGORIES_PROJET = ["Renovation", "Decoration", "Reparation", "Amelioration", "Autre"]
 
 
 # ═══════════════════════════════════════════════════════════
@@ -28,7 +28,7 @@ def calculer_urgence_projet(projet: Dict[str, Any]) -> str:
     Calcule le niveau d'urgence d'un projet.
     
     Args:
-        projet: Données du projet
+        projet: Donnees du projet
         
     Returns:
         Niveau d'urgence
@@ -45,7 +45,7 @@ def calculer_urgence_projet(projet: Dict[str, Any]) -> str:
     
     jours_restants = (date_limite - date.today()).days
     
-    # Urgent si moins de 7 jours ou déjà priorité haute
+    # Urgent si moins de 7 jours ou dejà priorite haute
     if jours_restants < 7 or priorite == "Urgente":
         return "Urgente"
     elif jours_restants < 14 and priorite in ["Haute", "Moyenne"]:
@@ -59,10 +59,10 @@ def calculer_jours_restants(projet: Dict[str, Any]) -> Optional[int]:
     Calcule les jours restants avant la date limite.
     
     Args:
-        projet: Données du projet
+        projet: Donnees du projet
         
     Returns:
-        Nombre de jours (négatif si dépassé)
+        Nombre de jours (negatif si depasse)
     """
     date_limite = projet.get("date_limite")
     
@@ -86,12 +86,12 @@ def filtrer_par_statut(projets: List[Dict[str, Any]], statut: str) -> List[Dict[
 
 
 def filtrer_par_priorite(projets: List[Dict[str, Any]], priorite: str) -> List[Dict[str, Any]]:
-    """Filtre les projets par priorité."""
+    """Filtre les projets par priorite."""
     return [p for p in projets if p.get("priorite") == priorite]
 
 
 def filtrer_par_categorie(projets: List[Dict[str, Any]], categorie: str) -> List[Dict[str, Any]]:
-    """Filtre les projets par catégorie."""
+    """Filtre les projets par categorie."""
     return [p for p in projets if p.get("categorie") == categorie]
 
 
@@ -103,7 +103,7 @@ def get_projets_urgents(projets: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         projets: Liste des projets
         
     Returns:
-        Liste des projets urgents triés
+        Liste des projets urgents tries
     """
     urgents = []
     
@@ -153,7 +153,7 @@ def calculer_statistiques_projets(projets: List[Dict[str, Any]]) -> Dict[str, An
         statut = projet.get("statut", "Inconnu")
         par_statut[statut] = par_statut.get(statut, 0) + 1
     
-    # Par priorité
+    # Par priorite
     par_priorite = {}
     for projet in projets:
         priorite = projet.get("priorite", "Moyenne")
@@ -162,8 +162,8 @@ def calculer_statistiques_projets(projets: List[Dict[str, Any]]) -> Dict[str, An
     # Urgents
     urgents = len(get_projets_urgents(projets))
     
-    # Taux de complétion
-    termines = par_statut.get("Terminé", 0)
+    # Taux de completion
+    termines = par_statut.get("Termine", 0)
     taux_completion = (termines / total * 100) if total > 0 else 0.0
     
     return {
@@ -177,7 +177,7 @@ def calculer_statistiques_projets(projets: List[Dict[str, Any]]) -> Dict[str, An
 
 def calculer_budget_total(projets: List[Dict[str, Any]]) -> Dict[str, float]:
     """
-    Calcule les budgets total, dépensé et restant.
+    Calcule les budgets total, depense et restant.
     
     Args:
         projets: Liste des projets
@@ -205,10 +205,10 @@ def calculer_budget_total(projets: List[Dict[str, Any]]) -> Dict[str, float]:
 
 def valider_projet(data: Dict[str, Any]) -> tuple[bool, List[str]]:
     """
-    Valide les données d'un projet.
+    Valide les donnees d'un projet.
     
     Args:
-        data: Données du projet
+        data: Donnees du projet
         
     Returns:
         (est_valide, liste_erreurs)
@@ -219,10 +219,10 @@ def valider_projet(data: Dict[str, Any]) -> tuple[bool, List[str]]:
         erreurs.append("Le titre est requis")
     
     if "statut" in data and data["statut"] not in STATUTS_PROJET:
-        erreurs.append(f"Statut invalide. Valeurs autorisées: {', '.join(STATUTS_PROJET)}")
+        erreurs.append(f"Statut invalide. Valeurs autorisees: {', '.join(STATUTS_PROJET)}")
     
     if "priorite" in data and data["priorite"] not in PRIORITES:
-        erreurs.append(f"Priorité invalide. Valeurs autorisées: {', '.join(PRIORITES)}")
+        erreurs.append(f"Priorite invalide. Valeurs autorisees: {', '.join(PRIORITES)}")
     
     if "budget" in data:
         budget = data["budget"]
@@ -237,22 +237,22 @@ def calculer_progression(projet: Dict[str, Any]) -> float:
     Calcule le pourcentage de progression d'un projet.
     
     Args:
-        projet: Données du projet
+        projet: Donnees du projet
         
     Returns:
         Pourcentage (0-100)
     """
     statut = projet.get("statut", "À faire")
     
-    if statut == "Terminé":
+    if statut == "Termine":
         return 100.0
     elif statut == "En cours":
-        # Si des tâches sont définies, calculer basé sur elles
+        # Si des tâches sont definies, calculer base sur elles
         if "taches" in projet:
             taches = projet["taches"]
             if taches:
                 completees = sum(1 for t in taches if t.get("completee", False))
                 return (completees / len(taches)) * 100
-        return 50.0  # Estimation par défaut
+        return 50.0  # Estimation par defaut
     else:
         return 0.0

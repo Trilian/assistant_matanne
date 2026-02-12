@@ -1,5 +1,5 @@
-"""
-Tests supplémentaires pour améliorer la couverture des services
+﻿"""
+Tests supplÃ©mentaires pour amÃ©liorer la couverture des services
  
 Partie 2 - Fonctions additionnelles
 """
@@ -10,9 +10,9 @@ from unittest.mock import Mock, MagicMock, patch
 import json
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS OpenFoodFacts - Methods additionnelles
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestOpenFoodFactsNutriscoreEmoji:
@@ -22,49 +22,49 @@ class TestOpenFoodFactsNutriscoreEmoji:
         """Test emoji nutriscore A"""
         from src.services.openfoodfacts import OpenFoodFactsService
         service = OpenFoodFactsService()
-        assert service.obtenir_nutriscore_emoji("A") == "🟢"
+        assert service.obtenir_nutriscore_emoji("A") == "ðŸŸ¢"
     
     def test_nutriscore_b(self):
         """Test emoji nutriscore B"""
         from src.services.openfoodfacts import OpenFoodFactsService
         service = OpenFoodFactsService()
-        assert service.obtenir_nutriscore_emoji("B") == "🟡"
+        assert service.obtenir_nutriscore_emoji("B") == "ðŸŸ¡"
     
     def test_nutriscore_c(self):
         """Test emoji nutriscore C"""
         from src.services.openfoodfacts import OpenFoodFactsService
         service = OpenFoodFactsService()
-        assert service.obtenir_nutriscore_emoji("C") == "🟠"
+        assert service.obtenir_nutriscore_emoji("C") == "ðŸŸ "
     
     def test_nutriscore_d(self):
         """Test emoji nutriscore D"""
         from src.services.openfoodfacts import OpenFoodFactsService
         service = OpenFoodFactsService()
-        assert service.obtenir_nutriscore_emoji("D") == "🟧"
+        assert service.obtenir_nutriscore_emoji("D") == "ðŸŸ§"
     
     def test_nutriscore_e(self):
         """Test emoji nutriscore E"""
         from src.services.openfoodfacts import OpenFoodFactsService
         service = OpenFoodFactsService()
-        assert service.obtenir_nutriscore_emoji("E") == "🔴"
+        assert service.obtenir_nutriscore_emoji("E") == "ðŸ”´"
     
     def test_nutriscore_lowercase(self):
         """Test emoji nutriscore lowercase"""
         from src.services.openfoodfacts import OpenFoodFactsService
         service = OpenFoodFactsService()
-        assert service.obtenir_nutriscore_emoji("a") == "🟢"
+        assert service.obtenir_nutriscore_emoji("a") == "ðŸŸ¢"
     
     def test_nutriscore_none(self):
         """Test emoji nutriscore None"""
         from src.services.openfoodfacts import OpenFoodFactsService
         service = OpenFoodFactsService()
-        assert service.obtenir_nutriscore_emoji(None) == "⚪"
+        assert service.obtenir_nutriscore_emoji(None) == "âšª"
     
     def test_nutriscore_invalid(self):
         """Test emoji nutriscore invalid"""
         from src.services.openfoodfacts import OpenFoodFactsService
         service = OpenFoodFactsService()
-        assert service.obtenir_nutriscore_emoji("X") == "⚪"
+        assert service.obtenir_nutriscore_emoji("X") == "âšª"
 
 
 class TestOpenFoodFactsNovaDescription:
@@ -75,24 +75,24 @@ class TestOpenFoodFactsNovaDescription:
         from src.services.openfoodfacts import OpenFoodFactsService
         service = OpenFoodFactsService()
         result = service.obtenir_nova_description(1)
-        assert "non transformé" in result
-        assert "🥬" in result
+        assert "non transformÃ©" in result
+        assert "ðŸ¥¬" in result
     
     def test_nova_group_2(self):
         """Test NOVA group 2"""
         from src.services.openfoodfacts import OpenFoodFactsService
         service = OpenFoodFactsService()
         result = service.obtenir_nova_description(2)
-        assert "Ingrédient" in result
-        assert "🧂" in result
+        assert "IngrÃ©dient" in result
+        assert "ðŸ§‚" in result
     
     def test_nova_group_3(self):
         """Test NOVA group 3"""
         from src.services.openfoodfacts import OpenFoodFactsService
         service = OpenFoodFactsService()
         result = service.obtenir_nova_description(3)
-        assert "transformé" in result
-        assert "🥫" in result
+        assert "transformÃ©" in result
+        assert "ðŸ¥«" in result
     
     def test_nova_group_4(self):
         """Test NOVA group 4"""
@@ -100,7 +100,7 @@ class TestOpenFoodFactsNovaDescription:
         service = OpenFoodFactsService()
         result = service.obtenir_nova_description(4)
         assert "Ultra" in result
-        assert "🍟" in result
+        assert "ðŸŸ" in result
     
     def test_nova_group_none(self):
         """Test NOVA group None"""
@@ -228,9 +228,9 @@ class TestOpenFoodFactsParserFullData:
         assert result.origine == "France"
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS RecipeParser - Methodes supplémentaires
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS RecipeParser - Methodes supplÃ©mentaires
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestRecipeParserParsePortions:
@@ -326,7 +326,7 @@ class TestRecipeParserParseIngredient:
 
 
 class TestRecipeParserDurationAdvanced:
-    """Tests avancés pour parse_duration"""
+    """Tests avancÃ©s pour parse_duration"""
     
     def test_parse_duration_just_number(self):
         """Test parse just a number"""
@@ -380,7 +380,7 @@ class TestMarmitonParserConfidence:
         from src.services.recipe_import import MarmitonParser, ImportedRecipe
         recipe = ImportedRecipe(
             nom="Tarte aux pommes",
-            etapes=["Étape 1", "Étape 2", "Étape 3"]
+            etapes=["Ã‰tape 1", "Ã‰tape 2", "Ã‰tape 3"]
         )
         score = MarmitonParser._calculate_confidence(recipe)
         assert score >= 0.5  # Has name + steps
@@ -413,15 +413,15 @@ class TestMarmitonParserConfidence:
             temps_preparation=30,
             image_url="https://example.com/image.jpg",
             ingredients=[ImportedIngredient(nom=f"ing{i}") for i in range(8)],
-            etapes=["Étape 1", "Étape 2", "Étape 3", "Étape 4"]
+            etapes=["Ã‰tape 1", "Ã‰tape 2", "Ã‰tape 3", "Ã‰tape 4"]
         )
         score = MarmitonParser._calculate_confidence(recipe)
         assert score >= 0.9  # High confidence
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS BaseService - Helper methods
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBaseServiceApplyFilters:
@@ -491,9 +491,9 @@ class TestBaseServiceModelToDict:
         assert result["nom"] == "Test"
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS rapports_pdf - Méthodes utilitaires
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS rapports_pdf - MÃ©thodes utilitaires
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestRapportsPDFServiceInit:
@@ -533,9 +533,9 @@ class TestRapportBudgetValidation:
             RapportBudget(periode_jours=0)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS Dataclasses edge cases
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestProduitOpenFoodFactsEdgeCases:
@@ -600,9 +600,9 @@ class TestNutritionInfoEdgeCases:
         assert info.ecoscore == "A"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS Import validation
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestImportedRecipeValidation:

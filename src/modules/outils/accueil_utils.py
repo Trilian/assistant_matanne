@@ -1,5 +1,5 @@
-"""
-Logique métier pour le dashboard central (shared/ui/accueil.py)
+﻿"""
+Logique mÃetier pour le dashboard central (shared/ui/accueil.py)
 """
 
 from datetime import date, datetime, timedelta
@@ -8,10 +8,10 @@ from typing import Any
 
 def calculer_metriques_dashboard() -> dict[str, Any]:
     """
-    Calcule les métriques globales du dashboard central
+    Calcule les mÃetriques globales du dashboard central
     
     Returns:
-        Dictionnaire avec les métriques principales
+        Dictionnaire avec les mÃetriques principales
     """
     return {
         "recettes_total": 0,
@@ -43,11 +43,11 @@ def generer_notifications(
     planning_vide: bool = False
 ) -> list[dict]:
     """
-    Génère les notifications du dashboard
+    GÃenère les notifications du dashboard
     
     Args:
         inventaire_critiques: Articles en stock critique
-        peremption_proche: Articles périssables proches péremption
+        peremption_proche: Articles pÃerissables proches pÃeremption
         planning_vide: Si le planning est vide
         
     Returns:
@@ -65,7 +65,7 @@ def generer_notifications(
     if peremption_proche:
         notifications.append({
             "type": "warning",
-            "message": f"{len(peremption_proche)} article(s) périment bientôt",
+            "message": f"{len(peremption_proche)} article(s) pÃeriment bientôt",
             "priorite": "haute"
         })
     
@@ -81,13 +81,13 @@ def generer_notifications(
 
 def trier_notifications_par_priorite(notifications: list[dict]) -> list[dict]:
     """
-    Trie les notifications par priorité (haute → basse)
+    Trie les notifications par prioritÃe (haute â†’ basse)
     
     Args:
         notifications: Liste des notifications
         
     Returns:
-        Liste triée
+        Liste triÃee
     """
     priorites = {"haute": 0, "moyenne": 1, "basse": 2}
     return sorted(
@@ -98,10 +98,10 @@ def trier_notifications_par_priorite(notifications: list[dict]) -> list[dict]:
 
 def est_cette_semaine(date_check: date) -> bool:
     """
-    Vérifie si une date est dans cette semaine
+    VÃerifie si une date est dans cette semaine
     
     Args:
-        date_check: Date à vérifier
+        date_check: Date Ã  vÃerifier
         
     Returns:
         True si c'est cette semaine
@@ -120,10 +120,10 @@ def est_cette_semaine(date_check: date) -> bool:
 
 def est_aujourdhui(date_check: date) -> bool:
     """
-    Vérifie si une date est aujourd'hui
+    VÃerifie si une date est aujourd'hui
     
     Args:
-        date_check: Date à vérifier
+        date_check: Date Ã  vÃerifier
         
     Returns:
         True si c'est aujourd'hui
@@ -138,13 +138,13 @@ def est_aujourdhui(date_check: date) -> bool:
 
 def est_en_retard(date_check: date) -> bool:
     """
-    Vérifie si une date est dans le passé
+    VÃerifie si une date est dans le passÃe
     
     Args:
-        date_check: Date à vérifier
+        date_check: Date Ã  vÃerifier
         
     Returns:
-        True si la date est passée
+        True si la date est passÃee
     """
     if isinstance(date_check, str):
         date_check = datetime.fromisoformat(date_check).date()

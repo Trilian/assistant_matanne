@@ -1,5 +1,5 @@
-﻿"""
-Module Entretien - Gestion du ménage et routines domestiques
+"""
+Module Entretien - Gestion du menage et routines domestiques
 Suivi des tâches quotidiennes, planification hebdomadaire, IA d'optimisation
 """
 
@@ -14,8 +14,8 @@ from src.core.decorators import avec_session_db
 from src.services.base import BaseAIService
 from src.core.ai import ClientIA
 
-# Logique métier pure
-from src.domains.maison.logic.entretien_logic import (
+# Logique metier pure
+from src.modules.maison.entretien_utils import (
     calculer_prochaine_occurrence,
     calculer_jours_avant_tache,
     get_taches_aujourd_hui,
@@ -30,7 +30,7 @@ from src.domains.maison.logic.entretien_logic import (
     grouper_par_piece
 )
 
-from src.domains.maison.logic.helpers import (
+from src.modules.maison.utilitaires import (
     charger_routines,
     get_taches_today,
     get_stats_entretien,
@@ -44,7 +44,7 @@ from src.domains.maison.logic.helpers import (
 
 
 class EntretienService(BaseAIService):
-    """Service IA pour optimisation du ménage et routines"""
+    """Service IA pour optimisation du menage et routines"""
     
     def __init__(self, client: ClientIA = None):
         if client is None:
@@ -57,7 +57,7 @@ class EntretienService(BaseAIService):
         )
     
     async def creer_routine(self, nom: str, description: str = "") -> str:
-        """Crée une routine avec tâches suggérées"""
+        """Cree une routine avec tâches suggerees"""
         prompt = f"""Pour la routine "{nom}" {description},
 suggère 5-8 tâches pratiques et dans un ordre logique.
 Format: "- Tâche : description courte"."""
@@ -70,10 +70,10 @@ Format: "- Tâche : description courte"."""
     
     async def optimiser_semaine(self, types_taches: str) -> str:
         """Optimise la distribution des tâches sur la semaine"""
-        prompt = f"""Propose une répartition optimale pour ces tâches ménagères:
+        prompt = f"""Propose une repartition optimale pour ces tâches menagères:
 {types_taches}
 
-Organise par jour (Lun-Dim) pour équilibrer la charge et ne pas surcharger un jour."""
+Organise par jour (Lun-Dim) pour equilibrer la charge et ne pas surcharger un jour."""
         
         return await self.call_with_cache(
             prompt=prompt,
@@ -82,24 +82,24 @@ Organise par jour (Lun-Dim) pour équilibrer la charge et ne pas surcharger un j
         )
     
     async def conseil_temps_estime(self, tache: str) -> str:
-        """Estime le temps pour une tâche ménagère"""
-        prompt = f"""Pour la tâche ménagère "{tache}",
-estime le temps nécessaire (min/max), la fréquence idéale et des astuces."""
+        """Estime le temps pour une tâche menagère"""
+        prompt = f"""Pour la tâche menagère "{tache}",
+estime le temps necessaire (min/max), la frequence ideale et des astuces."""
         
         return await self.call_with_cache(
             prompt=prompt,
-            system_prompt="Tu es expert en optimisation du ménage",
+            system_prompt="Tu es expert en optimisation du menage",
             max_tokens=400
         )
     
     async def conseil_efficacite(self) -> str:
-        """Donne des astuces pour gagner du temps au ménage"""
-        prompt = """Donne 5 astuces pratiques pour rendre le ménage plus efficace et moins chronophage.
-Sois spécifique et actionnable."""
+        """Donne des astuces pour gagner du temps au menage"""
+        prompt = """Donne 5 astuces pratiques pour rendre le menage plus efficace et moins chronophage.
+Sois specifique et actionnable."""
         
         return await self.call_with_cache(
             prompt=prompt,
-            system_prompt="Tu es expert en organisation domestique et efficacité",
+            system_prompt="Tu es expert en organisation domestique et efficacite",
             max_tokens=500
         )
 
@@ -122,7 +122,7 @@ def creer_routine(
     description: str = "",
     db=None
 ) -> int:
-    """Crée une nouvelle routine"""
+    """Cree une nouvelle routine"""
     try:
         routine = Routine(
             nom=nom,
@@ -137,7 +137,7 @@ def creer_routine(
         clear_maison_cache()
         return routine.id
     except Exception as e:
-        st.error(f"❌ Erreur création routine: {e}")
+        st.error(f"❌ Erreur creation routine: {e}")
         return None
 
 
@@ -186,7 +186,7 @@ def marquer_tache_faite(task_id: int, db=None) -> bool:
 
 @avec_session_db
 def desactiver_routine(routine_id: int, db=None) -> bool:
-    """Désactive une routine"""
+    """Desactive une routine"""
     try:
         routine = db.query(Routine).get(routine_id)
         if routine:
@@ -205,9 +205,9 @@ def desactiver_routine(routine_id: int, db=None) -> bool:
 
 
 def app():
-    """Point d'entrée module Entretien"""
-    st.title("🧹 Entretien & Ménage")
-    st.caption("Gestion des routines et tâches ménagères avec IA")
+    """Point d'entree module Entretien"""
+    st.title("🧹 Entretien & Menage")
+    st.caption("Gestion des routines et tâches menagères avec IA")
     
     service = get_entretien_service()
     
@@ -238,7 +238,7 @@ def app():
     # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
     
     tab1, tab2, tab3, tab4 = st.tabs(
-        ["✓ Aujourd'hui", "🝴 Routines", "🤖 Assistant IA", "➕ Créer"]
+        ["✓ Aujourd'hui", "🝴 Routines", "🤖 Assistant IA", "➕ Creer"]
     )
     
     # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -283,7 +283,7 @@ def app():
                     if not tache["fait"]:
                         if st.button("✅ Fait", key=f"check_{tache['id']}", use_container_width=True):
                             if marquer_tache_faite(tache["id"]):
-                                st.success("✅ Tâche marquée!")
+                                st.success("✅ Tâche marquee!")
                                 st.rerun()
                 
                 with col3:
@@ -302,11 +302,11 @@ def app():
         df_routines = charger_routines()
         
         if df_routines.empty:
-            st.info("Aucune routine créée. Créez-en une!")
+            st.info("Aucune routine creee. Creez-en une!")
         else:
-            # Filtre par catégorie
+            # Filtre par categorie
             categories = ["Tous"] + sorted(df_routines["categorie"].unique().tolist())
-            filtre_cat = st.selectbox("Filtrer par catégorie", categories)
+            filtre_cat = st.selectbox("Filtrer par categorie", categories)
             
             if filtre_cat != "Tous":
                 df_routines = df_routines[df_routines["categorie"] == filtre_cat]
@@ -322,7 +322,7 @@ def app():
                     st.caption(
                         f"📊 {routine['completion']:.0f}% • "
                         f"{routine['tasks_aujourd_hui']}/{routine['tasks_count']} tâches • "
-                        f"Fréquence: {routine['frequence']}"
+                        f"Frequence: {routine['frequence']}"
                     )
                     
                     if routine['description']:
@@ -331,7 +331,7 @@ def app():
                 with col2:
                     if st.button("⚙️", key=f"settings_{routine['id']}", use_container_width=True):
                         if desactiver_routine(routine['id']):
-                            st.info("Routine désactivée")
+                            st.info("Routine desactivee")
                             st.rerun()
                 
                 # Tâches
@@ -368,8 +368,8 @@ def app():
     with tab3:
         st.subheader("🤖 Assistant Entretien IA")
         
-        # Créer routine avec IA
-        st.markdown("#### 📅 Créer une routine avec IA")
+        # Creer routine avec IA
+        st.markdown("#### 📅 Creer une routine avec IA")
         
         col_r1, col_r2 = st.columns(2)
         
@@ -381,24 +381,24 @@ def app():
         
         with col_r2:
             routine_freq = st.selectbox(
-                "Fréquence",
+                "Frequence",
                 ["quotidien", "hebdomadaire", "mensuel", "hebdomadaire 2x"]
             )
         
-        if st.button("👶 Générer tâches", use_container_width=True):
+        if st.button("👶 Generer tâches", use_container_width=True):
             if routine_nom:
-                with st.spinner("IA crée la routine..."):
+                with st.spinner("IA cree la routine..."):
                     try:
                         import asyncio
-                        taches = asyncio.run(service.creer_routine(routine_nom, f"Fréquence: {routine_freq}"))
+                        taches = asyncio.run(service.creer_routine(routine_nom, f"Frequence: {routine_freq}"))
                         if taches:
                             st.success(taches)
                             
-                            # Proposer de créer
-                            if st.button("✅ Créer cette routine", use_container_width=True):
-                                r_id = creer_routine(routine_nom, "Général", routine_freq)
+                            # Proposer de creer
+                            if st.button("✅ Creer cette routine", use_container_width=True):
+                                r_id = creer_routine(routine_nom, "General", routine_freq)
                                 if r_id:
-                                    st.success("Routine créée!")
+                                    st.success("Routine creee!")
                     except Exception as e:
                         st.warning(f"âš ï¸ IA indisponible: {e}")
         
@@ -413,7 +413,7 @@ def app():
             height=120
         )
         
-        if st.button("💡 Proposer répartition", use_container_width=True):
+        if st.button("💡 Proposer repartition", use_container_width=True):
             if types:
                 with st.spinner("Optimisation en cours..."):
                     try:
@@ -427,7 +427,7 @@ def app():
         st.markdown("---")
         
         # Astuces
-        st.markdown("#### 👶 Astuces d'efficacité")
+        st.markdown("#### 👶 Astuces d'efficacite")
         
         if st.button("💰 Obtenir astuces", use_container_width=True):
             with st.spinner("Recherche astuces..."):
@@ -465,7 +465,7 @@ def app():
     # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
     
     with tab4:
-        st.subheader("Créer une nouvelle routine")
+        st.subheader("Creer une nouvelle routine")
         
         with st.form("form_routine"):
             nom_r = st.text_input("Nom *", placeholder="Ex: Nettoyage salle de bain")
@@ -474,13 +474,13 @@ def app():
             
             with col_r1:
                 categorie_r = st.selectbox(
-                    "Catégorie",
-                    ["Cuisine", "Salle de bain", "Chambres", "Salon", "Extérieur", "Autre"]
+                    "Categorie",
+                    ["Cuisine", "Salle de bain", "Chambres", "Salon", "Exterieur", "Autre"]
                 )
             
             with col_r2:
                 frequence_r = st.selectbox(
-                    "Fréquence",
+                    "Frequence",
                     ["quotidien", "hebdomadaire", "bi-hebdomadaire", "mensuel"]
                 )
             
@@ -492,7 +492,7 @@ def app():
             
             nb_taches = st.number_input("Nombre de tâches à ajouter", 1, 10, 3)
             
-            submitted = st.form_submit_button("✅ Créer routine", type="primary")
+            submitted = st.form_submit_button("✅ Creer routine", type="primary")
             
             if submitted:
                 if not nom_r:
@@ -500,7 +500,7 @@ def app():
                 else:
                     r_id = creer_routine(nom_r, categorie_r, frequence_r, desc_r)
                     if r_id:
-                        st.success(f"✅ Routine '{nom_r}' créée!")
+                        st.success(f"✅ Routine '{nom_r}' creee!")
                         st.rerun()
         
         st.markdown("---")
@@ -525,7 +525,7 @@ def app():
                 "nom": "Lessive",
                 "categorie": "Chambres",
                 "freq": "hebdomadaire",
-                "taches": ["Trier linge", "Laver", "Sécher", "Plier", "Ranger"]
+                "taches": ["Trier linge", "Laver", "Secher", "Plier", "Ranger"]
             }
         ]
         
@@ -535,7 +535,7 @@ def app():
                 if r_id:
                     for ordre, tache_nom in enumerate(templ["taches"], 1):
                         ajouter_tache_routine(r_id, tache_nom, ordre=ordre)
-                    st.success("✅ Routine créée!")
+                    st.success("✅ Routine creee!")
                     st.rerun()
 
 

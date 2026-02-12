@@ -1,11 +1,11 @@
-"""
+﻿"""
 Tests pour vue_ensemble_logic.py
 Couverture cible: 80%+
 """
 import pytest
 from datetime import date, datetime, timedelta
 
-from src.domains.planning.logic.vue_ensemble_logic import (
+from src.modules.planning.vue_ensemble_utils import (
     # Constantes
     PERIODES,
     CATEGORIES_TACHES,
@@ -17,9 +17,9 @@ from src.domains.planning.logic.vue_ensemble_logic import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONSTANTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestConstantes:
@@ -39,9 +39,9 @@ class TestConstantes:
         assert "Famille" in CATEGORIES_TACHES
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EST EN RETARD
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestEstEnRetard:
@@ -85,9 +85,9 @@ class TestEstEnRetard:
         assert est_en_retard(tache) is True
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ANALYSE CHARGE GLOBALE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAnalyseChargeGlobale:
@@ -141,7 +141,7 @@ class TestAnalyseChargeGlobale:
         assert result["charge_par_categorie"]["Travail"] == 2
 
     def test_niveau_charge_libre(self):
-        """Niveau 'Libre' si rien à faire."""
+        """Niveau 'Libre' si rien Ã  faire."""
         result = analyser_charge_globale([], [])
         assert result["niveau_charge"] == "Libre"
 
@@ -157,12 +157,12 @@ class TestAnalyseChargeGlobale:
         evenements = [{"titre": f"E{i}"} for i in range(20)]
         taches = [{"titre": f"T{i}", "complete": False} for i in range(10)]
         result = analyser_charge_globale(evenements, taches)
-        assert result["niveau_charge"] in ["Élevé", "Très élevé"]
+        assert result["niveau_charge"] in ["Ã‰levé", "Très élevé"]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ANALYSE TENDANCES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAnalyseTendances:
@@ -199,7 +199,7 @@ class TestAnalyseTendances:
         assert result["pic_activite"]["nombre"] >= 5
 
     def test_tendance_hausse(self):
-        """Détecte une tendance à la hausse."""
+        """Détecte une tendance Ã  la hausse."""
         # Plus d'activité dans la 2ème moitié
         historique = [
             {"date": (date.today() - timedelta(days=i)).isoformat()}
@@ -210,9 +210,9 @@ class TestAnalyseTendances:
         assert result["evolution"] in ["stable", "hausse"]
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS PRÉVISION SEMAINE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS PRÃ‰VISION SEMAINE
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPrevisionSemaine:
@@ -239,7 +239,7 @@ class TestPrevisionSemaine:
         assert result["evenements"] == 2
 
     def test_avec_taches_echeance(self):
-        """Compte les tâches à échéance."""
+        """Compte les tâches Ã  échéance."""
         debut_semaine_prochaine = date.today() + timedelta(days=7 - date.today().weekday())
         taches = [
             {"titre": "T1", "complete": False, "date_limite": debut_semaine_prochaine.isoformat()},

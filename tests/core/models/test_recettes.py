@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour recettes.py
 
 Module: src.core.models.recettes
@@ -272,12 +272,12 @@ class TestEtapeRecette:
             id=1,
             recette_id=1,
             ordre=1,
-            description="Préchauffer le four à 180°C",
+            description="Préchauffer le four Ã  180Â°C",
             duree=5,
         )
         
         assert etape.ordre == 1
-        assert etape.description == "Préchauffer le four à 180°C"
+        assert etape.description == "Préchauffer le four Ã  180Â°C"
         assert etape.duree == 5
 
     def test_etaperecette_repr(self):

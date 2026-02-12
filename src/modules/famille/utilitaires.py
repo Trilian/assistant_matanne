@@ -1,4 +1,4 @@
-﻿"""
+"""
 Helpers et fonctions utilitaires pour le module Famille
 """
 
@@ -22,13 +22,13 @@ from src.core.database import obtenir_contexte_db
 
 @st.cache_data(ttl=3600)
 def get_or_create_jules() -> int:
-    """Récupère ou crée le profil Jules, retourne son ID"""
+    """Recupère ou cree le profil Jules, retourne son ID"""
     try:
         with obtenir_contexte_db() as session:
             child = session.query(ChildProfile).filter_by(name="Jules", actif=True).first()
             
             if not child:
-                # Créer Jules (né le 22 juin 2024)
+                # Creer Jules (ne le 22 juin 2024)
                 child = ChildProfile(
                     name="Jules",
                     date_of_birth=date(2024, 6, 22),
@@ -38,11 +38,11 @@ def get_or_create_jules() -> int:
                 )
                 session.add(child)
                 session.commit()
-                st.success("✅ Profil Jules créé !")
+                st.success("✅ Profil Jules cree !")
             
             return child.id
     except Exception as e:
-        st.error(f"❌ Erreur création Jules: {str(e)}")
+        st.error(f"❌ Erreur creation Jules: {str(e)}")
         raise
 
 
@@ -82,7 +82,7 @@ def calculer_age_jules() -> dict:
 
 @st.cache_data(ttl=1800)
 def get_milestones_by_category(child_id: int) -> dict:
-    """Récupère les jalons groupés par catégorie"""
+    """Recupère les jalons groupes par categorie"""
     try:
         with obtenir_contexte_db() as session:
             milestones = session.query(Milestone).filter_by(child_id=child_id).all()
@@ -107,7 +107,7 @@ def get_milestones_by_category(child_id: int) -> dict:
 
 
 def count_milestones_by_category(child_id: int) -> dict:
-    """Compte les jalons par catégorie"""
+    """Compte les jalons par categorie"""
     try:
         with obtenir_contexte_db() as session:
             result = session.query(
@@ -127,7 +127,7 @@ def count_milestones_by_category(child_id: int) -> dict:
 
 
 def calculer_progression_objectif(objective: HealthObjective) -> float:
-    """Calcule le % de progression d'un objectif santé"""
+    """Calcule le % de progression d'un objectif sante"""
     try:
         if not objective.valeur_cible or not objective.valeur_actuelle:
             return 0.0
@@ -140,7 +140,7 @@ def calculer_progression_objectif(objective: HealthObjective) -> float:
 
 @st.cache_data(ttl=1800)
 def get_objectives_actifs() -> list:
-    """Récupère tous les objectifs en cours avec progression"""
+    """Recupère tous les objectifs en cours avec progression"""
     try:
         with obtenir_contexte_db() as session:
             objectives = session.query(HealthObjective).filter_by(statut="en_cours").all()
@@ -173,7 +173,7 @@ def get_objectives_actifs() -> list:
 
 @st.cache_data(ttl=1800)
 def get_budget_par_period(period: str = "month") -> dict:
-    """Récupère le budget par période (day, week, month)"""
+    """Recupère le budget par periode (day, week, month)"""
     try:
         with obtenir_contexte_db() as session:
             if period == "day":
@@ -210,7 +210,7 @@ def get_budget_par_period(period: str = "month") -> dict:
 
 
 def get_budget_mois_dernier() -> float:
-    """Récupère le budget total du mois dernier"""
+    """Recupère le budget total du mois dernier"""
     try:
         aujourd_hui = date.today()
         
@@ -243,7 +243,7 @@ def get_budget_mois_dernier() -> float:
 
 @st.cache_data(ttl=1800)
 def get_activites_semaine() -> list:
-    """Récupère les activités de cette semaine"""
+    """Recupère les activites de cette semaine"""
     try:
         debut_semaine = date.today() - timedelta(days=date.today().weekday())
         fin_semaine = debut_semaine + timedelta(days=6)
@@ -253,7 +253,7 @@ def get_activites_semaine() -> list:
                 and_(
                     FamilyActivity.date_prevue >= debut_semaine,
                     FamilyActivity.date_prevue <= fin_semaine,
-                    FamilyActivity.statut != "annulé"
+                    FamilyActivity.statut != "annule"
                 )
             ).order_by(FamilyActivity.date_prevue).all()
             
@@ -271,12 +271,12 @@ def get_activites_semaine() -> list:
                 for act in activities
             ]
     except Exception as e:
-        st.error(f"❌ Erreur lecture activités: {str(e)}")
+        st.error(f"❌ Erreur lecture activites: {str(e)}")
         return []
 
 
 def get_budget_activites_mois() -> float:
-    """Récupère les dépenses en activités ce mois"""
+    """Recupère les depenses en activites ce mois"""
     try:
         debut_mois = date(date.today().year, date.today().month, 1)
         if date.today().month == 12:
@@ -295,7 +295,7 @@ def get_budget_activites_mois() -> float:
             
             return float(total)
     except Exception as e:
-        st.error(f"❌ Erreur budget activités: {str(e)}")
+        st.error(f"❌ Erreur budget activites: {str(e)}")
         return 0.0
 
 
@@ -306,7 +306,7 @@ def get_budget_activites_mois() -> float:
 
 @st.cache_data(ttl=1800)
 def get_routines_actives() -> list:
-    """Récupère les routines de santé actives"""
+    """Recupère les routines de sante actives"""
     try:
         with obtenir_contexte_db() as session:
             routines = session.query(HealthRoutine).filter_by(actif=True).all()
@@ -329,7 +329,7 @@ def get_routines_actives() -> list:
 
 
 def get_stats_sante_semaine() -> dict:
-    """Calcule les stats de santé pour cette semaine"""
+    """Calcule les stats de sante pour cette semaine"""
     try:
         debut_semaine = date.today() - timedelta(days=date.today().weekday())
         
@@ -348,7 +348,7 @@ def get_stats_sante_semaine() -> dict:
             
             return stats
     except Exception as e:
-        st.error(f"❌ Erreur stats santé: {str(e)}")
+        st.error(f"❌ Erreur stats sante: {str(e)}")
         return {
             "nb_seances": 0,
             "total_minutes": 0,
@@ -371,7 +371,7 @@ def clear_famille_cache():
 def format_date_fr(d: date) -> str:
     """Formate une date en français"""
     jours = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
-    mois = ["jan", "fév", "mar", "avr", "mai", "jun", "jul", "aoû", "sep", "oct", "nov", "déc"]
+    mois = ["jan", "fev", "mar", "avr", "mai", "jun", "jul", "aoû", "sep", "oct", "nov", "dec"]
     
     return f"{jours[d.weekday()]} {d.day} {mois[d.month-1]} {d.year}"
 

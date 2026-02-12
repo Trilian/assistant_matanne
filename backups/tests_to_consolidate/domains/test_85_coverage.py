@@ -1,11 +1,11 @@
-"""Tests pour atteindre 85% de couverture - Domains."""
+﻿"""Tests pour atteindre 85% de couverture - Domains."""
 
 import pytest
 
 
 @pytest.mark.unit
 class TestCuisineDomainAdvanced:
-    """Tests avancés domaine cuisine."""
+    """Tests avancÃ©s domaine cuisine."""
     
     def test_recipe_nutrition_calculation(self): assert True
     def test_recipe_allergen_detection(self): assert True
@@ -16,7 +16,7 @@ class TestCuisineDomainAdvanced:
 
 @pytest.mark.unit
 class TestFamilleDomainAdvanced:
-    """Tests avancés domaine famille."""
+    """Tests avancÃ©s domaine famille."""
     
     def test_child_growth_tracking(self): assert True
     def test_activity_difficulty_scaling(self): assert True
@@ -26,7 +26,7 @@ class TestFamilleDomainAdvanced:
 
 @pytest.mark.unit
 class TestPlanningDomainAdvanced:
-    """Tests avancés domaine planning."""
+    """Tests avancÃ©s domaine planning."""
     
     def test_event_collision_detection(self): assert True
     def test_recurring_event_expansion(self): assert True
@@ -36,7 +36,7 @@ class TestPlanningDomainAdvanced:
 
 @pytest.mark.unit
 class TestInventoryDomainAdvanced:
-    """Tests avancés domaine inventaire."""
+    """Tests avancÃ©s domaine inventaire."""
     
     def test_inventory_forecasting(self): assert True
     def test_expiration_alert_logic(self): assert True
@@ -46,7 +46,7 @@ class TestInventoryDomainAdvanced:
 
 @pytest.mark.unit
 class TestBusinessLogicAdvanced:
-    """Tests avancés logique métier."""
+    """Tests avancÃ©s logique mÃ©tier."""
     
     def test_budget_calculation_accuracy(self): assert True
     def test_discount_application_rules(self): assert True

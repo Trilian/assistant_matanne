@@ -1,5 +1,5 @@
-﻿"""
-Logique métier du module Activités (famille) - Séparée de l'UI
+"""
+Logique metier du module Activites (famille) - Separee de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
 
@@ -24,17 +24,17 @@ CATEGORIES_AGE = ["0-1 an", "1-2 ans", "2-3 ans", "3-5 ans", "5+ ans", "Famille"
 # ═══════════════════════════════════════════════════════════
 
 def filtrer_par_type(activites: List[Dict[str, Any]], type_act: str) -> List[Dict[str, Any]]:
-    """Filtre les activités par type."""
+    """Filtre les activites par type."""
     return [a for a in activites if a.get("type") == type_act]
 
 
 def filtrer_par_lieu(activites: List[Dict[str, Any]], lieu: str) -> List[Dict[str, Any]]:
-    """Filtre les activités par lieu."""
+    """Filtre les activites par lieu."""
     return [a for a in activites if a.get("lieu") == lieu]
 
 
 def filtrer_par_date(activites: List[Dict[str, Any]], date_debut: date, date_fin: date) -> List[Dict[str, Any]]:
-    """Filtre les activités par période."""
+    """Filtre les activites par periode."""
     resultats = []
     
     for act in activites:
@@ -50,13 +50,13 @@ def filtrer_par_date(activites: List[Dict[str, Any]], date_debut: date, date_fin
 
 
 def get_activites_a_venir(activites: List[Dict[str, Any]], jours: int = 7) -> List[Dict[str, Any]]:
-    """Retourne les activités à venir dans X jours."""
+    """Retourne les activites à venir dans X jours."""
     date_fin = date.today() + timedelta(days=jours)
     return filtrer_par_date(activites, date.today(), date_fin)
 
 
 def get_activites_passees(activites: List[Dict[str, Any]], jours: int = 30) -> List[Dict[str, Any]]:
-    """Retourne les activités passées des X derniers jours."""
+    """Retourne les activites passees des X derniers jours."""
     date_debut = date.today() - timedelta(days=jours)
     return filtrer_par_date(activites, date_debut, date.today())
 
@@ -66,7 +66,7 @@ def get_activites_passees(activites: List[Dict[str, Any]], jours: int = 30) -> L
 # ═══════════════════════════════════════════════════════════
 
 def calculer_statistiques_activites(activites: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """Calcule les statistiques des activités."""
+    """Calcule les statistiques des activites."""
     total = len(activites)
     
     if total == 0:
@@ -90,7 +90,7 @@ def calculer_statistiques_activites(activites: List[Dict[str, Any]]) -> Dict[str
         lieu = act.get("lieu", "Autre")
         par_lieu[lieu] = par_lieu.get(lieu, 0) + 1
     
-    # Coûts et durée
+    # Coûts et duree
     cout_total = sum(act.get("cout", 0.0) for act in activites)
     durees = [act.get("duree", 0) for act in activites if act.get("duree")]
     duree_moyenne = sum(durees) / len(durees) if durees else 0.0
@@ -106,7 +106,7 @@ def calculer_statistiques_activites(activites: List[Dict[str, Any]]) -> Dict[str
 
 
 def calculer_frequence_hebdomadaire(activites: List[Dict[str, Any]], semaines: int = 4) -> float:
-    """Calcule la fréquence hebdomadaire moyenne d'activités."""
+    """Calcule la frequence hebdomadaire moyenne d'activites."""
     if not activites or semaines == 0:
         return 0.0
     
@@ -118,39 +118,39 @@ def calculer_frequence_hebdomadaire(activites: List[Dict[str, Any]], semaines: i
 # ═══════════════════════════════════════════════════════════
 
 def suggerer_activites_age(age_mois: int) -> List[Dict[str, str]]:
-    """Suggère des activités adaptées à l'âge."""
+    """Suggère des activites adaptees à l'âge."""
     suggestions = []
     
     if age_mois < 12:
         suggestions = [
-            {"type": "Jeu", "titre": "Jeux d'éveil", "description": "Hochets, tapis d'éveil"},
-            {"type": "Sport", "titre": "Motricité libre", "description": "Temps au sol pour ramper"},
+            {"type": "Jeu", "titre": "Jeux d'eveil", "description": "Hochets, tapis d'eveil"},
+            {"type": "Sport", "titre": "Motricite libre", "description": "Temps au sol pour ramper"},
             {"type": "Culture", "titre": "Comptines", "description": "Chansons et comptines"}
         ]
     elif age_mois < 24:
         suggestions = [
             {"type": "Jeu", "titre": "Jeux de manipulation", "description": "Empiler, encastrer"},
             {"type": "Sport", "titre": "Marche", "description": "Promenades, parc"},
-            {"type": "Culture", "titre": "Histoires", "description": "Livres imagés"}
+            {"type": "Culture", "titre": "Histoires", "description": "Livres images"}
         ]
     elif age_mois < 36:
         suggestions = [
-            {"type": "Jeu", "titre": "Jeux symboliques", "description": "Poupées, voitures"},
-            {"type": "Sport", "titre": "Parcours moteur", "description": "Escalade, vélo"},
+            {"type": "Jeu", "titre": "Jeux symboliques", "description": "Poupees, voitures"},
+            {"type": "Sport", "titre": "Parcours moteur", "description": "Escalade, velo"},
             {"type": "Culture", "titre": "Musique", "description": "Instruments simples"}
         ]
     else:
         suggestions = [
-            {"type": "Atelier", "titre": "Activités créatives", "description": "Peinture, pâte à modeler"},
+            {"type": "Atelier", "titre": "Activites creatives", "description": "Peinture, pâte à modeler"},
             {"type": "Sport", "titre": "Sport collectif", "description": "Football, natation"},
-            {"type": "Culture", "titre": "Sorties culturelles", "description": "Musées, spectacles"}
+            {"type": "Culture", "titre": "Sorties culturelles", "description": "Musees, spectacles"}
         ]
     
     return suggestions
 
 
 def detecter_desequilibre_types(activites: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """Détecte les déséquilibres dans les types d'activités."""
+    """Detecte les desequilibres dans les types d'activites."""
     stats = calculer_statistiques_activites(activites)
     par_type = stats.get("par_type", {})
     
@@ -160,13 +160,13 @@ def detecter_desequilibre_types(activites: List[Dict[str, Any]]) -> Dict[str, An
     total = stats["total"]
     recommandations = []
     
-    # Vérifier si un type est sous-représenté (< 15%)
+    # Verifier si un type est sous-represente (< 15%)
     for type_act in TYPES_ACTIVITE[:3]:  # Sport, Culture, Sortie
         count = par_type.get(type_act, 0)
         pourcentage = (count / total * 100) if total > 0 else 0
         
         if pourcentage < 15:
-            recommandations.append(f"Augmenter les activités de type '{type_act}' ({pourcentage:.0f}%)")
+            recommandations.append(f"Augmenter les activites de type '{type_act}' ({pourcentage:.0f}%)")
     
     return {
         "equilibre": len(recommandations) == 0,
@@ -179,7 +179,7 @@ def detecter_desequilibre_types(activites: List[Dict[str, Any]]) -> Dict[str, An
 # ═══════════════════════════════════════════════════════════
 
 def valider_activite(data: Dict[str, Any]) -> tuple[bool, List[str]]:
-    """Valide une activité."""
+    """Valide une activite."""
     erreurs = []
     
     if "titre" not in data or not data["titre"]:
@@ -194,7 +194,7 @@ def valider_activite(data: Dict[str, Any]) -> tuple[bool, List[str]]:
     if "duree" in data:
         duree = data["duree"]
         if not isinstance(duree, (int, float)) or duree <= 0:
-            erreurs.append("La durée doit être > 0")
+            erreurs.append("La duree doit être > 0")
     
     if "cout" in data:
         cout = data["cout"]
@@ -209,8 +209,8 @@ def valider_activite(data: Dict[str, Any]) -> tuple[bool, List[str]]:
 # ═══════════════════════════════════════════════════════════
 
 def formater_activite_resume(activite: Dict[str, Any]) -> str:
-    """Formate le résumé d'une activité."""
-    titre = activite.get("titre", "Activité")
+    """Formate le resume d'une activite."""
+    titre = activite.get("titre", "Activite")
     type_act = activite.get("type", "")
     lieu = activite.get("lieu", "")
     
@@ -224,7 +224,7 @@ def formater_activite_resume(activite: Dict[str, Any]) -> str:
 
 
 def grouper_par_mois(activites: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
-    """Groupe les activités par mois."""
+    """Groupe les activites par mois."""
     groupes = {}
     
     for act in activites:

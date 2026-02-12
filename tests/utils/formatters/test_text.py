@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour text.py
 
 Module: src.utils.formatters.text
@@ -36,7 +36,7 @@ class TestText:
     def test_extraire_nombre(self):
         """Test de la fonction extraire_nombre."""
         assert extraire_nombre("2.5 kg") == 2.5
-        assert extraire_nombre("Prix: 10,50€") == 10.5
+        assert extraire_nombre("Prix: 10,50â‚¬") == 10.5
         assert extraire_nombre("") is None
 
     def test_capitaliser_premiere(self):

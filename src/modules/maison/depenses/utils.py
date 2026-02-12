@@ -1,8 +1,8 @@
-﻿"""
-Module Dépenses Maison - Imports et constantes partagés
+"""
+Module Depenses Maison - Imports et constantes partages
 
-Focus sur les dépenses récurrentes de la maison avec consommation.
-Utilise le service Budget unifié (src/services/budget.py).
+Focus sur les depenses recurrentes de la maison avec consommation.
+Utilise le service Budget unifie (src/services/budget.py).
 """
 
 import streamlit as st
@@ -21,10 +21,10 @@ from src.services.budget import (
 )
 
 
-# Labels des catégories de dépenses
+# Labels des categories de depenses
 CATEGORY_LABELS = {
     "gaz": "🔥 Gaz (chauffage)",
-    "electricite": "⚡ Électricité",
+    "electricite": "⚡ Électricite",
     "eau": "💧 Eau",
     "internet": "📶 Internet/Box",
     "loyer": "🏠 Loyer",
@@ -35,13 +35,13 @@ CATEGORY_LABELS = {
     "autre": "📦 Autre"
 }
 
-# Catégories avec suivi consommation (kWh, m³)
+# Categories avec suivi consommation (kWh, m³)
 CATEGORIES_AVEC_CONSO = {"gaz", "electricite", "eau"}
 
 # Noms des mois en français
 MOIS_FR = [
-    "", "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
-    "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+    "", "Janvier", "Fevrier", "Mars", "Avril", "Mai", "Juin",
+    "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Decembre"
 ]
 
 

@@ -1,13 +1,13 @@
-"""
+﻿"""
 Module Courses - Gestion complète de la liste de courses
 
-Fonctionnalités complètes:
+FonctionnalitÃes complètes:
 - Gestion CRUD complète de la liste
-- Intégration inventaire (stock bas → courses)
+- IntÃegration inventaire (stock bas â†’ courses)
 - Suggestions IA par recettes
-- Historique & modèles récurrents
+- Historique & modèles rÃecurrents
 - Partage & synchronisation multi-appareils
-- Synchronisation temps réel entre utilisateurs
+- Synchronisation temps rÃeel entre utilisateurs
 """
 
 import streamlit as st
@@ -35,8 +35,8 @@ from ._common import PRIORITY_EMOJIS, RAYONS_DEFAULT
 
 
 def app():
-    """Point d'entrée module courses"""
-    st.title("🛍 Courses")
+    """Point d'entrÃee module courses"""
+    st.title("ðŸ› Courses")
     st.caption("Gestion de votre liste de courses")
 
     # Initialiser session state
@@ -47,17 +47,17 @@ def app():
     if "courses_active_tab" not in st.session_state:
         st.session_state.courses_active_tab = 0
     
-    # Initialiser la synchronisation temps réel
+    # Initialiser la synchronisation temps rÃeel
     _init_realtime_sync()
 
     # Tabs principales
     tab_liste, tab_planning, tab_suggestions, tab_historique, tab_modeles, tab_outils = st.tabs([
-        "📋 Liste Active",
-        "🍽️ Depuis Planning",
-        "✨ Suggestions IA",
-        "📚 Historique",
-        "📄 Modèles",
-        "📧 Outils"
+        "ðŸ“‹ Liste Active",
+        "ðŸ½ï¸ Depuis Planning",
+        "âœ¨ Suggestions IA",
+        "ðŸ“š Historique",
+        "ðŸ“„ Modèles",
+        "ðŸ“§ Outils"
     ])
 
     with tab_liste:

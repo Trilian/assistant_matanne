@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/utils/helpers/dates.py
 """
 import pytest
@@ -82,7 +82,7 @@ class TestObtenirBornesMois:
         assert last == date(2025, 1, 31)
 
     def test_month_bounds_december(self):
-        """Décembre passe à l'année suivante."""
+        """Décembre passe Ã  l'année suivante."""
         first, last = obtenir_bornes_mois(date(2025, 12, 15))
         assert first == date(2025, 12, 1)
         assert last == date(2025, 12, 31)

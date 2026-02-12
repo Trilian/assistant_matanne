@@ -1,8 +1,8 @@
-"""
+﻿"""
 Tests profonds pour les modules core.
 
-Ces tests exécutent réellement le code (pas juste des imports)
-pour améliorer significativement la couverture.
+Ces tests exÃ©cutent rÃ©ellement le code (pas juste des imports)
+pour amÃ©liorer significativement la couverture.
 """
 
 import logging
@@ -12,9 +12,9 @@ from datetime import date, datetime
 from unittest.mock import MagicMock, patch
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: NettoyeurEntrees (validation.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestNettoyeurEntreesChaine:
@@ -46,8 +46,8 @@ class TestNettoyeurEntreesChaine:
         from src.core.validation import NettoyeurEntrees
 
         result = NettoyeurEntrees.nettoyer_chaine("<script>alert('xss')</script>Hello")
-        # Le code échappe les balises HTML mais conserve le contenu
-        assert "<script>" not in result  # Balise échappée en &lt;script&gt;
+        # Le code Ã©chappe les balises HTML mais conserve le contenu
+        assert "<script>" not in result  # Balise Ã©chappÃ©e en &lt;script&gt;
         # Le contenu (alert) reste mais les balises sont inoffensives
 
     def test_nettoyer_chaine_xss_javascript(self):
@@ -72,11 +72,11 @@ class TestNettoyeurEntreesChaine:
         assert "onerror=" not in result.lower()
 
     def test_nettoyer_chaine_escape_html(self):
-        """Test échappement HTML"""
+        """Test Ã©chappement HTML"""
         from src.core.validation import NettoyeurEntrees
 
         result = NettoyeurEntrees.nettoyer_chaine("<b>bold</b>")
-        # Le HTML doit être échappé ou supprimé
+        # Le HTML doit Ãªtre Ã©chappÃ© ou supprimÃ©
         assert result != "<b>bold</b>" or "&lt;" in result or "<b>" not in result
 
     def test_nettoyer_chaine_none(self):
@@ -87,26 +87,26 @@ class TestNettoyeurEntreesChaine:
         assert result is None or result == ""
 
     def test_nettoyer_chaine_vide(self):
-        """Test avec chaîne vide"""
+        """Test avec chaÃ®ne vide"""
         from src.core.validation import NettoyeurEntrees
 
         result = NettoyeurEntrees.nettoyer_chaine("")
         assert result == ""
 
     def test_nettoyer_chaine_sql_injection_or(self):
-        """Test détection SQL injection OR 1=1"""
+        """Test dÃ©tection SQL injection OR 1=1"""
         from src.core.validation import NettoyeurEntrees
 
         with patch.object(logging.getLogger("src.core.validation"), "warning") as mock_warn:
             NettoyeurEntrees.nettoyer_chaine("'; OR '1'='1")
-            # Vérifie que le pattern SQL est détecté (warning loggé)
+            # VÃ©rifie que le pattern SQL est dÃ©tectÃ© (warning loggÃ©)
 
     def test_nettoyer_chaine_sql_injection_drop(self):
-        """Test détection SQL injection DROP TABLE"""
+        """Test dÃ©tection SQL injection DROP TABLE"""
         from src.core.validation import NettoyeurEntrees
 
         result = NettoyeurEntrees.nettoyer_chaine("; DROP TABLE users; --")
-        # La chaîne est retournée mais warning loggé
+        # La chaÃ®ne est retournÃ©e mais warning loggÃ©
 
 
 class TestNettoyeurEntreesNombre:
@@ -120,7 +120,7 @@ class TestNettoyeurEntreesNombre:
         assert result == 42
 
     def test_nettoyer_nombre_float(self):
-        """Test nombre décimal"""
+        """Test nombre dÃ©cimal"""
         from src.core.validation import NettoyeurEntrees
 
         result = NettoyeurEntrees.nettoyer_nombre(3.14)
@@ -134,14 +134,14 @@ class TestNettoyeurEntreesNombre:
         assert result == 42
 
     def test_nettoyer_nombre_string_float(self):
-        """Test conversion string décimal"""
+        """Test conversion string dÃ©cimal"""
         from src.core.validation import NettoyeurEntrees
 
         result = NettoyeurEntrees.nettoyer_nombre("3.14")
         assert result == 3.14
 
     def test_nettoyer_nombre_virgule_francaise(self):
-        """Test virgule française -> point"""
+        """Test virgule franÃ§aise -> point"""
         from src.core.validation import NettoyeurEntrees
 
         result = NettoyeurEntrees.nettoyer_nombre("3,14")
@@ -169,7 +169,7 @@ class TestNettoyeurEntreesNombre:
         assert result == 50
 
     def test_nettoyer_nombre_invalide(self):
-        """Test chaîne invalide"""
+        """Test chaÃ®ne invalide"""
         from src.core.validation import NettoyeurEntrees
 
         result = NettoyeurEntrees.nettoyer_nombre("abc")
@@ -211,14 +211,14 @@ class TestNettoyeurEntreesDate:
         assert result == date(2024, 12, 31)
 
     def test_nettoyer_date_format_francais_slash(self):
-        """Test format français DD/MM/YYYY"""
+        """Test format franÃ§ais DD/MM/YYYY"""
         from src.core.validation import NettoyeurEntrees
 
         result = NettoyeurEntrees.nettoyer_date("31/12/2024")
         assert result == date(2024, 12, 31)
 
     def test_nettoyer_date_format_francais_tiret(self):
-        """Test format français DD-MM-YYYY"""
+        """Test format franÃ§ais DD-MM-YYYY"""
         from src.core.validation import NettoyeurEntrees
 
         result = NettoyeurEntrees.nettoyer_date("31-12-2024")
@@ -285,7 +285,7 @@ class TestNettoyeurEntreesEmail:
         assert result is None
 
     def test_nettoyer_email_vide(self):
-        """Test chaîne vide"""
+        """Test chaÃ®ne vide"""
         from src.core.validation import NettoyeurEntrees
 
         result = NettoyeurEntrees.nettoyer_email("")
@@ -368,23 +368,23 @@ class TestNettoyeurEntreesDictionnaire:
         assert "description" not in result
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: Exceptions (errors.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestExceptions:
     """Tests pour les classes d'exception"""
 
     def test_erreur_validation_creation(self):
-        """Test création ErreurValidation"""
+        """Test crÃ©ation ErreurValidation"""
         from src.core.errors import ErreurValidation
 
         err = ErreurValidation("Test message")
         assert str(err) == "Test message"
 
     def test_erreur_validation_avec_details(self):
-        """Test ErreurValidation avec détails"""
+        """Test ErreurValidation avec dÃ©tails"""
         from src.core.errors import ErreurValidation
 
         err = ErreurValidation(
@@ -394,35 +394,35 @@ class TestExceptions:
         assert err.message_utilisateur == "Nom invalide"
 
     def test_erreur_non_trouve_creation(self):
-        """Test création ErreurNonTrouve"""
+        """Test crÃ©ation ErreurNonTrouve"""
         from src.core.errors import ErreurNonTrouve
 
-        err = ErreurNonTrouve("Recette 42 non trouvée")
+        err = ErreurNonTrouve("Recette 42 non trouvÃ©e")
         assert "42" in str(err)
 
     def test_erreur_base_de_donnees_creation(self):
-        """Test création ErreurBaseDeDonnees"""
+        """Test crÃ©ation ErreurBaseDeDonnees"""
         from src.core.errors import ErreurBaseDeDonnees
 
         err = ErreurBaseDeDonnees("Connection failed")
         assert "failed" in str(err).lower()
 
     def test_erreur_service_ia_creation(self):
-        """Test création ErreurServiceIA"""
+        """Test crÃ©ation ErreurServiceIA"""
         from src.core.errors import ErreurServiceIA
 
         err = ErreurServiceIA("API error")
         assert str(err) == "API error"
 
     def test_erreur_limite_debit_creation(self):
-        """Test création ErreurLimiteDebit"""
+        """Test crÃ©ation ErreurLimiteDebit"""
         from src.core.errors import ErreurLimiteDebit
 
         err = ErreurLimiteDebit("Rate limit exceeded")
         assert "rate" in str(err).lower() or "limit" in str(err).lower()
 
     def test_erreur_service_externe_creation(self):
-        """Test création ErreurServiceExterne"""
+        """Test crÃ©ation ErreurServiceExterne"""
         from src.core.errors import ErreurServiceExterne
 
         err = ErreurServiceExterne("Service unavailable")
@@ -433,7 +433,7 @@ class TestHelpersValidation:
     """Tests pour les helpers de validation (errors.py)"""
 
     def test_exiger_champs_valides(self):
-        """Test exiger_champs avec tous les champs présents"""
+        """Test exiger_champs avec tous les champs prÃ©sents"""
         from src.core.errors import exiger_champs
 
         data = {"nom": "Tarte", "temps": 30, "portions": 4}
@@ -456,21 +456,21 @@ class TestHelpersValidation:
         from src.core.errors import exiger_positif
 
         # Ne doit pas lever d'exception
-        exiger_positif(10, "quantité")
+        exiger_positif(10, "quantitÃ©")
 
     def test_exiger_positif_zero(self):
-        """Test exiger_positif avec zéro"""
+        """Test exiger_positif avec zÃ©ro"""
         from src.core.errors import exiger_positif, ErreurValidation
 
         with pytest.raises(ErreurValidation):
-            exiger_positif(0, "quantité")
+            exiger_positif(0, "quantitÃ©")
 
     def test_exiger_positif_negatif(self):
-        """Test exiger_positif avec valeur négative"""
+        """Test exiger_positif avec valeur nÃ©gative"""
         from src.core.errors import exiger_positif, ErreurValidation
 
         with pytest.raises(ErreurValidation):
-            exiger_positif(-5, "quantité")
+            exiger_positif(-5, "quantitÃ©")
 
     def test_exiger_existence_valide(self):
         """Test exiger_existence avec objet existant"""
@@ -530,9 +530,9 @@ class TestHelpersValidation:
             exiger_longueur("A" * 100, maximum=50, nom_champ="nom")
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: ChargeurModuleDiffere (lazy_loader.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestLazyModuleLoader:
@@ -559,17 +559,17 @@ class TestLazyModuleLoader:
         module1 = ChargeurModuleDiffere.load("json")
         module2 = ChargeurModuleDiffere.load("json")
 
-        # Même référence (cache hit)
+        # MÃªme rÃ©fÃ©rence (cache hit)
         assert module1 is module2
 
     def test_load_module_reload(self):
-        """Test reload forcé"""
+        """Test reload forcÃ©"""
         from src.core.lazy_loader import ChargeurModuleDiffere
 
         module1 = ChargeurModuleDiffere.load("json")
         module2 = ChargeurModuleDiffere.load("json", reload=True)
 
-        # Module rechargé (pas nécessairement même référence)
+        # Module rechargÃ© (pas nÃ©cessairement mÃªme rÃ©fÃ©rence)
         assert module2 is not None
 
     def test_load_module_not_found(self):
@@ -580,7 +580,7 @@ class TestLazyModuleLoader:
             ChargeurModuleDiffere.load("module_qui_nexiste_pas_xyz")
 
     def test_get_stats(self):
-        """Test récupération statistiques"""
+        """Test rÃ©cupÃ©ration statistiques"""
         from src.core.lazy_loader import ChargeurModuleDiffere
 
         ChargeurModuleDiffere.load("json")
@@ -602,7 +602,7 @@ class TestLazyModuleLoader:
         assert ChargeurModuleDiffere.get_stats()["cached_modules"] == 0
 
     def test_preload_sync(self):
-        """Test préchargement synchrone"""
+        """Test prÃ©chargement synchrone"""
         from src.core.lazy_loader import ChargeurModuleDiffere
 
         ChargeurModuleDiffere.preload(["json", "re"], background=False)
@@ -611,23 +611,23 @@ class TestLazyModuleLoader:
         assert stats["cached_modules"] >= 2
 
     def test_preload_module_inexistant(self):
-        """Test préchargement module inexistant (ne crash pas)"""
+        """Test prÃ©chargement module inexistant (ne crash pas)"""
         from src.core.lazy_loader import ChargeurModuleDiffere
 
         # Ne doit pas lever d'exception
         ChargeurModuleDiffere.preload(["json", "module_inexistant_xyz"], background=False)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: Decorateurs (decorators.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestWithErrorHandling:
-    """Tests pour décorateur @with_error_handling"""
+    """Tests pour dÃ©corateur @with_error_handling"""
 
     def test_with_error_handling_success(self):
-        """Test exécution réussie"""
+        """Test exÃ©cution rÃ©ussie"""
         from src.core.decorators import with_error_handling
 
         @with_error_handling(default_return=None)
@@ -638,7 +638,7 @@ class TestWithErrorHandling:
         assert result == "success"
 
     def test_with_error_handling_exception(self):
-        """Test gestion exception générique"""
+        """Test gestion exception gÃ©nÃ©rique"""
         from src.core.decorators import with_error_handling
 
         @with_error_handling(default_return="fallback")
@@ -649,7 +649,7 @@ class TestWithErrorHandling:
         assert result == "fallback"
 
     def test_with_error_handling_default_none(self):
-        """Test valeur par défaut None"""
+        """Test valeur par dÃ©faut None"""
         from src.core.decorators import with_error_handling
 
         @with_error_handling()
@@ -660,7 +660,7 @@ class TestWithErrorHandling:
         assert result is None
 
     def test_with_error_handling_app_exception_raised(self):
-        """Test exception métier relancée"""
+        """Test exception mÃ©tier relancÃ©e"""
         from src.core.decorators import with_error_handling
         from src.core.errors_base import ExceptionApp
 
@@ -671,14 +671,14 @@ class TestWithErrorHandling:
         def func_app_error():
             raise CustomAppError("App error")
 
-        # L'exception métier doit être relancée
+        # L'exception mÃ©tier doit Ãªtre relancÃ©e
         with pytest.raises(CustomAppError):
             func_app_error()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: nettoyer_texte helper
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestNettoyerTexteHelper:
@@ -715,7 +715,7 @@ class TestNettoyerTexteHelper:
         assert result == "Hello World"
 
     def test_nettoyer_texte_vide(self):
-        """Test chaîne vide"""
+        """Test chaÃ®ne vide"""
         from src.core.validation import nettoyer_texte
 
         result = nettoyer_texte("")
@@ -730,16 +730,16 @@ class TestNettoyerTexteHelper:
         assert result == ""
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: GestionnaireErreurs (context manager)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGestionnaireErreurs:
     """Tests pour le context manager GestionnaireErreurs"""
 
     def test_gestionnaire_sans_erreur(self):
-        """Test exécution sans erreur"""
+        """Test exÃ©cution sans erreur"""
         from src.core.errors import GestionnaireErreurs
 
         with GestionnaireErreurs("test", afficher_dans_ui=False):
@@ -756,9 +756,9 @@ class TestGestionnaireErreurs:
                 raise ValueError("Test error")
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: InputSanitizer Alias
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestInputSanitizerAlias:
@@ -771,16 +771,16 @@ class TestInputSanitizerAlias:
         assert InputSanitizer is NettoyeurEntrees
 
     def test_alias_methods(self):
-        """Test méthodes accessibles via alias"""
+        """Test mÃ©thodes accessibles via alias"""
         from src.core.validation import InputSanitizer
 
         result = InputSanitizer.nettoyer_chaine("test")
         assert result is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: handle_errors Alias
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestHandleErrorsAlias:

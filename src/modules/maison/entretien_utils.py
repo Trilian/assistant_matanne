@@ -1,5 +1,5 @@
-﻿"""
-Logique métier du module Entretien (maison) - Séparée de l'UI
+"""
+Logique metier du module Entretien (maison) - Separee de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
 
@@ -15,8 +15,8 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════════════════
 
 FREQUENCES = ["Quotidienne", "Hebdomadaire", "Mensuelle", "Trimestrielle", "Annuelle"]
-CATEGORIES_TACHE = ["Ménage", "Maintenance", "Contrôle", "Autre"]
-PIECES = ["Cuisine", "Salon", "Chambre", "Salle de bain", "Bureau", "Extérieur", "Garage", "Autre"]
+CATEGORIES_TACHE = ["Menage", "Maintenance", "Contrôle", "Autre"]
+PIECES = ["Cuisine", "Salon", "Chambre", "Salle de bain", "Bureau", "Exterieur", "Garage", "Autre"]
 
 
 # ═══════════════════════════════════════════════════════════
@@ -25,11 +25,11 @@ PIECES = ["Cuisine", "Salon", "Chambre", "Salle de bain", "Bureau", "Extérieur"
 
 def calculer_prochaine_occurrence(derniere_execution: date, frequence: str) -> date:
     """
-    Calcule la prochaine date d'exécution d'une tâche.
+    Calcule la prochaine date d'execution d'une tâche.
     
     Args:
-        derniere_execution: Date de la dernière exécution
-        frequence: Fréquence de la tâche
+        derniere_execution: Date de la dernière execution
+        frequence: Frequence de la tâche
         
     Returns:
         Date de la prochaine occurrence
@@ -54,16 +54,16 @@ def calculer_jours_avant_tache(tache: Dict[str, Any]) -> Optional[int]:
     Calcule combien de jours avant la prochaine occurrence.
     
     Args:
-        tache: Données de la tâche
+        tache: Donnees de la tâche
         
     Returns:
-        Nombre de jours (négatif si retard)
+        Nombre de jours (negatif si retard)
     """
     derniere = tache.get("derniere_execution")
     frequence = tache.get("frequence", "Hebdomadaire")
     
     if not derniere:
-        return 0  # À faire immédiatement
+        return 0  # À faire immediatement
     
     if isinstance(derniere, str):
         from datetime import datetime
@@ -153,7 +153,7 @@ def get_taches_en_retard(taches: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 # ═══════════════════════════════════════════════════════════
 
 def filtrer_par_categorie(taches: List[Dict[str, Any]], categorie: str) -> List[Dict[str, Any]]:
-    """Filtre les tâches par catégorie."""
+    """Filtre les tâches par categorie."""
     return [t for t in taches if t.get("categorie") == categorie]
 
 
@@ -163,7 +163,7 @@ def filtrer_par_piece(taches: List[Dict[str, Any]], piece: str) -> List[Dict[str
 
 
 def filtrer_par_frequence(taches: List[Dict[str, Any]], frequence: str) -> List[Dict[str, Any]]:
-    """Filtre les tâches par fréquence."""
+    """Filtre les tâches par frequence."""
     return [t for t in taches if t.get("frequence") == frequence]
 
 
@@ -183,13 +183,13 @@ def calculer_statistiques_entretien(taches: List[Dict[str, Any]]) -> Dict[str, A
     """
     total = len(taches)
     
-    # Par catégorie
+    # Par categorie
     par_categorie = {}
     for tache in taches:
         cat = tache.get("categorie", "Autre")
         par_categorie[cat] = par_categorie.get(cat, 0) + 1
     
-    # Par fréquence
+    # Par frequence
     par_frequence = {}
     for tache in taches:
         freq = tache.get("frequence", "Hebdomadaire")
@@ -212,21 +212,21 @@ def calculer_statistiques_entretien(taches: List[Dict[str, Any]]) -> Dict[str, A
 
 def calculer_taux_completion(taches: List[Dict[str, Any]], periode_jours: int = 30) -> float:
     """
-    Calcule le taux de complétion des tâches.
+    Calcule le taux de completion des tâches.
     
     Args:
         taches: Liste des tâches
-        periode_jours: Période de calcul en jours
+        periode_jours: Periode de calcul en jours
         
     Returns:
-        Taux de complétion (0-100)
+        Taux de completion (0-100)
     """
     if not taches:
         return 0.0
     
     date_debut = date.today() - timedelta(days=periode_jours)
     
-    # Compter tâches attendues vs complétées
+    # Compter tâches attendues vs completees
     attendues = 0
     completees = 0
     
@@ -245,7 +245,7 @@ def calculer_taux_completion(taches: List[Dict[str, Any]], periode_jours: int = 
         
         attendues += occurrences
         
-        # Compter complétées (simplification)
+        # Compter completees (simplification)
         derniere = tache.get("derniere_execution")
         if derniere:
             if isinstance(derniere, str):
@@ -264,10 +264,10 @@ def calculer_taux_completion(taches: List[Dict[str, Any]], periode_jours: int = 
 
 def valider_tache(data: Dict[str, Any]) -> tuple[bool, List[str]]:
     """
-    Valide les données d'une tâche.
+    Valide les donnees d'une tâche.
     
     Args:
-        data: Données de la tâche
+        data: Donnees de la tâche
         
     Returns:
         (est_valide, liste_erreurs)
@@ -278,10 +278,10 @@ def valider_tache(data: Dict[str, Any]) -> tuple[bool, List[str]]:
         erreurs.append("Le titre est requis")
     
     if "frequence" in data and data["frequence"] not in FREQUENCES:
-        erreurs.append(f"Fréquence invalide. Valeurs autorisées: {', '.join(FREQUENCES)}")
+        erreurs.append(f"Frequence invalide. Valeurs autorisees: {', '.join(FREQUENCES)}")
     
     if "categorie" in data and data["categorie"] not in CATEGORIES_TACHE:
-        erreurs.append(f"Catégorie invalide. Valeurs autorisées: {', '.join(CATEGORIES_TACHE)}")
+        erreurs.append(f"Categorie invalide. Valeurs autorisees: {', '.join(CATEGORIES_TACHE)}")
     
     return len(erreurs) == 0, erreurs
 

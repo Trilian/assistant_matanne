@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/utils/validators/common.py
 """
 import pytest

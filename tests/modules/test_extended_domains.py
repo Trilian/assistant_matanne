@@ -1,4 +1,4 @@
-"""Tests étendus - Domaines métier (42 tests)."""
+﻿"""Tests étendus - Domaines métier (42 tests)."""
 
 import pytest
 

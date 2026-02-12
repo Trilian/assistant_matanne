@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests approfondis pour helpers/food.py, helpers/helpers.py, helpers/stats.py
 
 Modules: src/utils/helpers/
@@ -69,9 +69,9 @@ class TestFoodHelpers:
 class TestHelpersPure:
     def test_validate_stock_level(self):
         from src.utils.helpers.helpers import validate_stock_level
-        assert validate_stock_level(1, 5, "Tomate") == ("critique", "🔴")
-        assert validate_stock_level(3, 5, "Tomate") == ("sous_seuil", "⚠️")
-        assert validate_stock_level(6, 5, "Tomate") == ("ok", "✅")
+        assert validate_stock_level(1, 5, "Tomate") == ("critique", "ðŸ”´")
+        assert validate_stock_level(3, 5, "Tomate") == ("sous_seuil", "âš ï¸")
+        assert validate_stock_level(6, 5, "Tomate") == ("ok", "âœ…")
 
     def test_consolidate_duplicates_default(self):
         from src.utils.helpers.helpers import consolidate_duplicates
@@ -113,7 +113,7 @@ class TestHelpersPure:
         summary = format_inventory_summary(inv)
         assert "4 articles" in summary
         assert "2 stock bas" in summary
-        assert "1 péremption proche" in summary
+        assert "1 pÃ©remption proche" in summary
 
     def test_calculate_recipe_cost(self):
         from src.utils.helpers.helpers import calculate_recipe_cost

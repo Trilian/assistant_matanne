@@ -1,4 +1,4 @@
-"""
+﻿"""
 Outils utilitaires pour les courses.
 """
 
@@ -9,38 +9,38 @@ from ._common import (
 
 
 def render_outils():
-    """Outils utilitaires - Phase 2: Code-barres, partage, UX améliorée"""
-    st.subheader("📧 Outils")
+    """Outils utilitaires - Phase 2: Code-barres, partage, UX amÃeliorÃee"""
+    st.subheader("ðŸ“§ Outils")
     
     # PHASE 2 FEATURES
     tab_barcode, tab_share, tab_export, tab_stats = st.tabs([
-        "📱 Code-barres (PHASE 2)",
-        "👥 Partage (PHASE 2)", 
-        "💾 Export/Import", 
-        "📊 Stats"
+        "ðŸ“± Code-barres (PHASE 2)",
+        "ðŸ‘¥ Partage (PHASE 2)", 
+        "ðŸ’¾ Export/Import", 
+        "ðŸ“Š Stats"
     ])
     
-    # ─────────────────────────────────────────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # PHASE 2: CODE-BARRES SCANNING
-    # ─────────────────────────────────────────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     
     with tab_barcode:
-        st.write("**📱 Scanner code-barres pour saisie rapide**")
-        st.info("⏳ Phase 2 - En développement")
+        st.write("**ðŸ“± Scanner code-barres pour saisie rapide**")
+        st.info("â³ Phase 2 - En dÃeveloppement")
         
         # Simuler la structure Phase 2
         col1, col2 = st.columns(2)
         with col1:
             st.write("""
-            **Fonctionnalités planifiées:**
-            - 📱 Scan code-barres avec webcam
-            - 🔍 Reconnaissance automatique article
-            - ⚡ Saisie 10x plus rapide
-            - 📊 Base de codes-barres articles
+            **FonctionnalitÃes planifiÃees:**
+            - ðŸ“± Scan code-barres avec webcam
+            - ðŸ” Reconnaissance automatique article
+            - âš¡ Saisie 10x plus rapide
+            - ðŸ“Š Base de codes-barres articles
             """)
         with col2:
             st.write("""
-            **Intégration:**
+            **IntÃegration:**
             - Ajout rapide en magasin
             - Sync prix automatique
             - Recommandations marque
@@ -48,30 +48,30 @@ def render_outils():
             """)
         
         st.divider()
-        st.markdown("**Estimation:** 2-3 jours (composant scanning + base données)")
+        st.markdown("**Estimation:** 2-3 jours (composant scanning + base donnÃees)")
     
-    # ─────────────────────────────────────────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # PHASE 2: PARTAGE MULTI-UTILISATEURS
-    # ─────────────────────────────────────────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     
     with tab_share:
-        st.write("**👥 Partager liste avec famille/colocataires**")
-        st.info("⏳ Phase 2 - En développement")
+        st.write("**ðŸ‘¥ Partager liste avec famille/colocataires**")
+        st.info("â³ Phase 2 - En dÃeveloppement")
         
         col1, col2 = st.columns(2)
         with col1:
             st.write("""
-            **Fonctionnalités planifiées:**
-            - 👥 Partage par email/lien
-            - 📄 Sync temps réel
-            - ✅ Permissions (lecture/écriture)
-            - 📱 Notifications mises à jour
+            **FonctionnalitÃes planifiÃees:**
+            - ðŸ‘¥ Partage par email/lien
+            - ðŸ“„ Sync temps rÃeel
+            - âœ… Permissions (lecture/Ãecriture)
+            - ðŸ“± Notifications mises Ã  jour
             """)
         with col2:
             st.write("""
             **Avantages:**
             - Colocataires voient qui achète
-            - Une seule liste partagée
+            - Une seule liste partagÃee
             - Pas de doublons articles
             - Historique collaboratif
             """)
@@ -79,7 +79,7 @@ def render_outils():
         st.divider()
         
         # Structure Phase 2
-        st.subheader("Configuration partage (à venir)")
+        st.subheader("Configuration partage (Ã  venir)")
         shared_with = st.multiselect(
             "Partager avec:",
             ["Alice", "Bob", "Charlie"],
@@ -89,9 +89,9 @@ def render_outils():
         
         st.markdown("**Estimation:** 3-4 jours (BD + permissions + notifications)")
     
-    # ─────────────────────────────────────────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # EXPORT/IMPORT (EXISTANT)
-    # ─────────────────────────────────────────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     
     with tab_export:
         st.write("**Exporter/Importer listes**")
@@ -104,30 +104,30 @@ def render_outils():
             if liste:
                 df = pd.DataFrame([{
                     "Article": a.get('ingredient_nom'),
-                    "Quantité": a.get('quantite_necessaire'),
-                    "Unité": a.get('unite'),
-                    "Priorité": a.get('priorite'),
+                    "QuantitÃe": a.get('quantite_necessaire'),
+                    "UnitÃe": a.get('unite'),
+                    "PrioritÃe": a.get('priorite'),
                     "Rayon": a.get('rayon_magasin'),
                     "Notes": a.get('notes', '')
                 } for a in liste])
                 
                 csv = df.to_csv(index=False)
                 st.download_button(
-                    label="📥 Télécharger liste (CSV)",
+                    label="ðŸ“¥ TÃelÃecharger liste (CSV)",
                     data=csv,
                     file_name=f"liste_courses_{datetime.now().strftime('%Y%m%d')}.csv",
                     mime="text/csv"
                 )
         
         with col2:
-            uploaded = st.file_uploader("📤 Importer liste (CSV)", type=["csv"], key="import_csv")
+            uploaded = st.file_uploader("ðŸ“¤ Importer liste (CSV)", type=["csv"], key="import_csv")
             if uploaded:
                 try:
                     import io
                     df_import = pd.read_csv(io.BytesIO(uploaded.getvalue()))
-                    st.write(f"✅ Fichier contient {len(df_import)} articles")
+                    st.write(f"âœ… Fichier contient {len(df_import)} articles")
                     
-                    if st.button("✅ Confirmer import"):
+                    if st.button("âœ… Confirmer import"):
                         from src.core.models import Ingredient
                         db = next(obtenir_contexte_db())
                         service = get_courses_service()
@@ -141,32 +141,32 @@ def render_outils():
                             if not ingredient:
                                 ingredient = Ingredient(
                                     nom=row['Article'],
-                                    unite=row.get('Unité', 'pièce')
+                                    unite=row.get('UnitÃe', 'pièce')
                                 )
                                 db.add(ingredient)
                                 db.commit()
                             
                             service.create({
                                 "ingredient_id": ingredient.id,
-                                "quantite_necessaire": float(row['Quantité']),
-                                "priorite": row.get('Priorité', 'moyenne'),
+                                "quantite_necessaire": float(row['QuantitÃe']),
+                                "priorite": row.get('PrioritÃe', 'moyenne'),
                                 "rayon_magasin": row.get('Rayon', 'Autre'),
                                 "notes": row.get('Notes')
                             })
                             count += 1
                         
-                        st.success(f"✅ {count} articles importés!")
+                        st.success(f"âœ… {count} articles importÃes!")
                         st.session_state.courses_refresh += 1
                         st.rerun()
                 except Exception as e:
-                    st.error(f"❌ Erreur import: {str(e)}")
+                    st.error(f"âŒ Erreur import: {str(e)}")
     
-    # ─────────────────────────────────────────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # STATISTIQUES GLOBALES (EXISTANT + PHASE 2)
-    # ─────────────────────────────────────────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     
     with tab_stats:
-        st.write("**📊 Statistiques globales**")
+        st.write("**ðŸ“Š Statistiques globales**")
         
         try:
             service = get_courses_service()
@@ -175,37 +175,37 @@ def render_outils():
             col1, col2, col3, col4 = st.columns(4)
             with col1:
                 liste = service.get_liste_courses(achetes=False)
-                st.metric("📋 Articles actifs", len(liste))
+                st.metric("ðŸ“‹ Articles actifs", len(liste))
             with col2:
                 liste_achetee = service.get_liste_courses(achetes=True)
-                st.metric("✅ Articles achetés", len(liste_achetee))
+                st.metric("âœ… Articles achetÃes", len(liste_achetee))
             with col3:
                 rayons = set(a.get('rayon_magasin') for a in liste if a.get('rayon_magasin'))
-                st.metric("🪑 Rayons utilisés", len(rayons))
+                st.metric("ðŸª‘ Rayons utilisÃes", len(rayons))
             with col4:
-                st.metric("⏲️ Dernière mise à jour", datetime.now().strftime("%H:%M"))
+                st.metric("â²ï¸ Dernière mise Ã  jour", datetime.now().strftime("%H:%M"))
             
             st.divider()
             
-            # Stats par priorité
+            # Stats par prioritÃe
             col1, col2, col3 = st.columns(3)
             with col1:
                 haute = len([a for a in liste if a.get('priorite') == 'haute'])
-                st.metric("🔴 Haute", haute)
+                st.metric("ðŸ”´ Haute", haute)
             with col2:
                 moyenne = len([a for a in liste if a.get('priorite') == 'moyenne'])
-                st.metric("🟡 Moyenne", moyenne)
+                st.metric("ðŸŸ¡ Moyenne", moyenne)
             with col3:
                 basse = len([a for a in liste if a.get('priorite') == 'basse'])
-                st.metric("🟢 Basse", basse)
+                st.metric("ðŸŸ¢ Basse", basse)
             
             st.divider()
             
             # Phase 2: Budgeting
-            st.subheader("💰 Budget tracking (PHASE 2)")
+            st.subheader("ðŸ’° Budget tracking (PHASE 2)")
             
         except Exception as e:
-            st.error(f"❌ Erreur chargement stats: {str(e)}")
+            st.error(f"âŒ Erreur chargement stats: {str(e)}")
 
 
 __all__ = ["render_outils"]

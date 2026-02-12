@@ -1,4 +1,4 @@
-"""Tests pour le module cuisine (réorganisé depuis tests/modules/)."""
+﻿"""Tests pour le module cuisine (réorganisé depuis tests/modules/)."""
 
 import pytest
 

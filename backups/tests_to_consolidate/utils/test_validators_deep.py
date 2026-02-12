@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests approfondis pour src/utils/validators/
 Objectif: Atteindre 80%+ de couverture
 
@@ -12,9 +12,9 @@ import pytest
 from datetime import date, timedelta
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS COMMON VALIDATORS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestIsValidEmail:
@@ -73,55 +73,55 @@ class TestIsValidPhone:
     """Tests pour is_valid_phone"""
     
     def test_phone_valide_fr_classique(self):
-        """Test numéro FR classique"""
+        """Test numÃ©ro FR classique"""
         from src.utils.validators.common import is_valid_phone
         
         assert is_valid_phone("0612345678") is True
     
     def test_phone_valide_fr_avec_espaces(self):
-        """Test numéro FR avec espaces"""
+        """Test numÃ©ro FR avec espaces"""
         from src.utils.validators.common import is_valid_phone
         
         assert is_valid_phone("06 12 34 56 78") is True
     
     def test_phone_valide_fr_avec_points(self):
-        """Test numéro FR avec points"""
+        """Test numÃ©ro FR avec points"""
         from src.utils.validators.common import is_valid_phone
         
         assert is_valid_phone("06.12.34.56.78") is True
     
     def test_phone_valide_fr_avec_tirets(self):
-        """Test numéro FR avec tirets"""
+        """Test numÃ©ro FR avec tirets"""
         from src.utils.validators.common import is_valid_phone
         
         assert is_valid_phone("06-12-34-56-78") is True
     
     def test_phone_valide_fr_avec_indicatif_33(self):
-        """Test numéro FR avec +33"""
+        """Test numÃ©ro FR avec +33"""
         from src.utils.validators.common import is_valid_phone
         
         assert is_valid_phone("+33612345678") is True
     
     def test_phone_valide_fr_avec_0033(self):
-        """Test numéro FR avec 0033"""
+        """Test numÃ©ro FR avec 0033"""
         from src.utils.validators.common import is_valid_phone
         
         assert is_valid_phone("0033612345678") is True
     
     def test_phone_invalide_trop_court(self):
-        """Test numéro trop court"""
+        """Test numÃ©ro trop court"""
         from src.utils.validators.common import is_valid_phone
         
         assert is_valid_phone("061234") is False
     
     def test_phone_invalide_lettres(self):
-        """Test numéro avec lettres"""
+        """Test numÃ©ro avec lettres"""
         from src.utils.validators.common import is_valid_phone
         
         assert is_valid_phone("06ABCDEFGH") is False
     
     def test_phone_autre_pays_false(self):
-        """Test autre pays non supporté"""
+        """Test autre pays non supportÃ©"""
         from src.utils.validators.common import is_valid_phone
         
         assert is_valid_phone("0612345678", country="US") is False
@@ -149,13 +149,13 @@ class TestClamp:
         assert clamp(-5, 0, 10) == 0
     
     def test_clamp_valeur_egale_min(self):
-        """Test valeur égale min"""
+        """Test valeur Ã©gale min"""
         from src.utils.validators.common import clamp
         
         assert clamp(0, 0, 10) == 0
     
     def test_clamp_valeur_egale_max(self):
-        """Test valeur égale max"""
+        """Test valeur Ã©gale max"""
         from src.utils.validators.common import clamp
         
         assert clamp(10, 0, 10) == 10
@@ -168,7 +168,7 @@ class TestClamp:
         assert clamp(1.5, 0.0, 1.0) == 1.0
     
     def test_clamp_negatifs(self):
-        """Test avec valeurs négatives"""
+        """Test avec valeurs nÃ©gatives"""
         from src.utils.validators.common import clamp
         
         assert clamp(-15, -10, -5) == -10
@@ -222,7 +222,7 @@ class TestValidateRange:
         assert is_valid is True
     
     def test_validate_range_valeur_invalide(self):
-        """Test valeur non numérique"""
+        """Test valeur non numÃ©rique"""
         from src.utils.validators.common import validate_range
         
         is_valid, error = validate_range("abc", 0, 10)
@@ -231,12 +231,12 @@ class TestValidateRange:
         assert "nombre" in error
     
     def test_validate_range_custom_field_name(self):
-        """Test nom de champ personnalisé"""
+        """Test nom de champ personnalisÃ©"""
         from src.utils.validators.common import validate_range
         
-        is_valid, error = validate_range(15, 0, 10, "quantité")
+        is_valid, error = validate_range(15, 0, 10, "quantitÃ©")
         
-        assert "quantité" in error
+        assert "quantitÃ©" in error
 
 
 class TestValidateStringLength:
@@ -291,7 +291,7 @@ class TestValidateRequiredFields:
     """Tests pour validate_required_fields"""
     
     def test_validate_required_fields_tous_presents(self):
-        """Test tous champs présents"""
+        """Test tous champs prÃ©sents"""
         from src.utils.validators.common import validate_required_fields
         
         data = {"nom": "Test", "email": "test@test.com"}
@@ -350,12 +350,12 @@ class TestValidateChoice:
         is_valid, error = validate_choice("expert", ["facile", "moyen", "difficile"])
         
         assert is_valid is False
-        assert "doit être dans" in error
+        assert "doit Ãªtre dans" in error
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS DATE VALIDATORS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestValidateDateRange:
@@ -374,7 +374,7 @@ class TestValidateDateRange:
         assert error == ""
     
     def test_validate_date_range_invalide_inversee(self):
-        """Test plage inversée"""
+        """Test plage inversÃ©e"""
         from src.utils.validators.dates import validate_date_range
         
         start = date(2025, 1, 10)
@@ -397,7 +397,7 @@ class TestValidateDateRange:
         assert is_valid is True
     
     def test_validate_date_range_avec_max_days_depasse(self):
-        """Test avec max_days dépassé"""
+        """Test avec max_days dÃ©passÃ©"""
         from src.utils.validators.dates import validate_date_range
         
         start = date(2025, 1, 1)
@@ -421,7 +421,7 @@ class TestIsFutureDate:
         assert is_future_date(future) is True
     
     def test_is_future_date_passe(self):
-        """Test date dans le passé"""
+        """Test date dans le passÃ©"""
         from src.utils.validators.dates import is_future_date
         
         past = date.today() - timedelta(days=30)
@@ -439,7 +439,7 @@ class TestIsPastDate:
     """Tests pour is_past_date"""
     
     def test_is_past_date_passe(self):
-        """Test date dans le passé"""
+        """Test date dans le passÃ©"""
         from src.utils.validators.dates import is_past_date
         
         past = date.today() - timedelta(days=30)
@@ -476,7 +476,7 @@ class TestValidateExpiryDate:
         assert error == ""
     
     def test_validate_expiry_date_passee(self):
-        """Test date expiration passée"""
+        """Test date expiration passÃ©e"""
         from src.utils.validators.dates import validate_expiry_date
         
         expiry = date.today() - timedelta(days=1)
@@ -484,7 +484,7 @@ class TestValidateExpiryDate:
         is_valid, error = validate_expiry_date(expiry)
         
         assert is_valid is False
-        assert "passée" in error
+        assert "passÃ©e" in error
     
     def test_validate_expiry_date_trop_proche(self):
         """Test date expiration trop proche"""
@@ -503,7 +503,7 @@ class TestDaysUntil:
     """Tests pour days_until"""
     
     def test_days_until_futur(self):
-        """Test jours jusqu'à date future"""
+        """Test jours jusqu'Ã  date future"""
         from src.utils.validators.dates import days_until
         
         target = date.today() + timedelta(days=7)
@@ -511,7 +511,7 @@ class TestDaysUntil:
         assert days_until(target) == 7
     
     def test_days_until_passe(self):
-        """Test jours jusqu'à date passée (négatif)"""
+        """Test jours jusqu'Ã  date passÃ©e (nÃ©gatif)"""
         from src.utils.validators.dates import days_until
         
         target = date.today() - timedelta(days=3)
@@ -519,7 +519,7 @@ class TestDaysUntil:
         assert days_until(target) == -3
     
     def test_days_until_aujourdhui(self):
-        """Test jours jusqu'à aujourd'hui"""
+        """Test jours jusqu'Ã  aujourd'hui"""
         from src.utils.validators.dates import days_until
         
         assert days_until(date.today()) == 0
@@ -545,7 +545,7 @@ class TestIsWithinDays:
         assert is_within_days(target, 7) is False
     
     def test_is_within_days_passe(self):
-        """Test date passée"""
+        """Test date passÃ©e"""
         from src.utils.validators.dates import is_within_days
         
         target = date.today() - timedelta(days=1)
@@ -553,9 +553,9 @@ class TestIsWithinDays:
         assert is_within_days(target, 7) is False
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FOOD VALIDATORS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestValidateRecipe:
@@ -597,7 +597,7 @@ class TestValidateRecipe:
         from src.utils.validators.food import validate_recipe
         
         data = {
-            "nom": "Ta",  # < 3 caractères
+            "nom": "Ta",  # < 3 caractÃ¨res
             "temps_preparation": 30,
             "temps_cuisson": 45,
             "portions": 8
@@ -606,14 +606,14 @@ class TestValidateRecipe:
         is_valid, errors = validate_recipe(data)
         
         assert is_valid is False
-        assert any("3 caractères" in e for e in errors)
+        assert any("3 caractÃ¨res" in e for e in errors)
     
     def test_validate_recipe_nom_trop_long(self):
         """Test recette nom trop long"""
         from src.utils.validators.food import validate_recipe
         
         data = {
-            "nom": "A" * 250,  # > 200 caractères
+            "nom": "A" * 250,  # > 200 caractÃ¨res
             "temps_preparation": 30,
             "temps_cuisson": 45,
             "portions": 8
@@ -625,7 +625,7 @@ class TestValidateRecipe:
         assert any("trop long" in e for e in errors)
     
     def test_validate_recipe_temps_negatif(self):
-        """Test recette temps négatif"""
+        """Test recette temps nÃ©gatif"""
         from src.utils.validators.food import validate_recipe
         
         data = {
@@ -657,7 +657,7 @@ class TestValidateRecipe:
         assert any("entre 1 et 50" in e for e in errors)
     
     def test_validate_recipe_difficulte_invalide(self):
-        """Test recette difficulté invalide"""
+        """Test recette difficultÃ© invalide"""
         from src.utils.validators.food import validate_recipe
         
         data = {
@@ -678,7 +678,7 @@ class TestValidateIngredient:
     """Tests pour validate_ingredient"""
     
     def test_validate_ingredient_valide(self):
-        """Test ingrédient valide"""
+        """Test ingrÃ©dient valide"""
         from src.utils.validators.food import validate_ingredient
         
         data = {
@@ -692,7 +692,7 @@ class TestValidateIngredient:
         assert errors == []
     
     def test_validate_ingredient_nom_manquant(self):
-        """Test ingrédient nom manquant"""
+        """Test ingrÃ©dient nom manquant"""
         from src.utils.validators.food import validate_ingredient
         
         data = {"unite": "kg"}
@@ -703,7 +703,7 @@ class TestValidateIngredient:
         assert any("nom" in e for e in errors)
     
     def test_validate_ingredient_nom_trop_court(self):
-        """Test ingrédient nom trop court"""
+        """Test ingrÃ©dient nom trop court"""
         from src.utils.validators.food import validate_ingredient
         
         data = {"nom": "P", "unite": "kg"}
@@ -711,10 +711,10 @@ class TestValidateIngredient:
         is_valid, errors = validate_ingredient(data)
         
         assert is_valid is False
-        assert any("2 caractères" in e for e in errors)
+        assert any("2 caractÃ¨res" in e for e in errors)
     
     def test_validate_ingredient_unite_invalide(self):
-        """Test ingrédient unité invalide"""
+        """Test ingrÃ©dient unitÃ© invalide"""
         from src.utils.validators.food import validate_ingredient
         
         data = {"nom": "Pommes", "unite": "xyz"}
@@ -754,7 +754,7 @@ class TestValidateInventoryItem:
         assert any("quantite" in e for e in errors)
     
     def test_validate_inventory_item_quantite_negative(self):
-        """Test article inventaire quantité négative"""
+        """Test article inventaire quantitÃ© nÃ©gative"""
         from src.utils.validators.food import validate_inventory_item
         
         data = {"ingredient_id": 1, "quantite": -5}
@@ -765,7 +765,7 @@ class TestValidateInventoryItem:
         assert any(">= 0" in e for e in errors)
     
     def test_validate_inventory_item_quantite_min_negative(self):
-        """Test article inventaire quantite_min négative"""
+        """Test article inventaire quantite_min nÃ©gative"""
         from src.utils.validators.food import validate_inventory_item
         
         data = {"ingredient_id": 1, "quantite": 5, "quantite_min": -2}
@@ -793,7 +793,7 @@ class TestValidateShoppingItem:
         assert errors == []
     
     def test_validate_shopping_item_quantite_zero(self):
-        """Test article courses quantité zéro"""
+        """Test article courses quantitÃ© zÃ©ro"""
         from src.utils.validators.food import validate_shopping_item
         
         data = {"ingredient_id": 1, "quantite_necessaire": 0}
@@ -804,7 +804,7 @@ class TestValidateShoppingItem:
         assert any("> 0" in e for e in errors)
     
     def test_validate_shopping_item_priorite_invalide(self):
-        """Test article courses priorité invalide"""
+        """Test article courses prioritÃ© invalide"""
         from src.utils.validators.food import validate_shopping_item
         
         data = {
@@ -830,7 +830,7 @@ class TestValidateMeal:
             "planning_id": 1,
             "jour_semaine": 0,
             "date": date.today(),
-            "type_repas": "déjeuner"
+            "type_repas": "dÃ©jeuner"
         }
         
         is_valid, errors = validate_meal(data)
@@ -857,7 +857,7 @@ class TestValidateMeal:
             "planning_id": 1,
             "jour_semaine": 10,  # > 6
             "date": date.today(),
-            "type_repas": "déjeuner"
+            "type_repas": "dÃ©jeuner"
         }
         
         is_valid, errors = validate_meal(data)
@@ -889,7 +889,7 @@ class TestValidateMeal:
             "planning_id": 1,
             "jour_semaine": 0,
             "date": date.today(),
-            "type_repas": "déjeuner",
+            "type_repas": "dÃ©jeuner",
             "portions": 100  # > 50
         }
         

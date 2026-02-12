@@ -1,1 +1,1 @@
-"""Module d'initialisation pour benchmarks."""
+﻿"""Module d'initialisation pour benchmarks."""

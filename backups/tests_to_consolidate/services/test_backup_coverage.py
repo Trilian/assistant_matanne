@@ -1,7 +1,7 @@
-"""
-Tests de couverture supplémentaires pour backup.py.
+﻿"""
+Tests de couverture supplÃ©mentaires pour backup.py.
 
-Couvre les méthodes helper et les edge cases.
+Couvre les mÃ©thodes helper et les edge cases.
 """
 
 import pytest
@@ -19,9 +19,9 @@ from src.services.backup import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONFIGURATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBackupConfigEdgeCases:
@@ -112,16 +112,16 @@ class TestRestoreResultEdgeCases:
         assert len(result.errors) == 3
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS BACKUP SERVICE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBackupServiceInit:
     """Tests pour l'initialisation du BackupService."""
     
     def test_init_with_default_config(self):
-        """Test initialisation avec config par défaut."""
+        """Test initialisation avec config par dÃ©faut."""
         with tempfile.TemporaryDirectory() as tmp_dir:
             config = BackupConfig(backup_dir=tmp_dir)
             service = BackupService(config=config)
@@ -129,7 +129,7 @@ class TestBackupServiceInit:
             assert service.config.backup_dir == tmp_dir
     
     def test_init_creates_backup_dir(self):
-        """Test que le dossier de backup est créé."""
+        """Test que le dossier de backup est crÃ©Ã©."""
         with tempfile.TemporaryDirectory() as tmp_dir:
             backup_dir = Path(tmp_dir) / "new_backup_folder"
             config = BackupConfig(backup_dir=str(backup_dir))
@@ -139,22 +139,22 @@ class TestBackupServiceInit:
             assert backup_dir.exists()
     
     def test_models_to_backup_count(self):
-        """Test que MODELS_TO_BACKUP contient tous les modèles."""
-        # Au moins 20 tables devraient être sauvegardées
+        """Test que MODELS_TO_BACKUP contient tous les modÃ¨les."""
+        # Au moins 20 tables devraient Ãªtre sauvegardÃ©es
         assert len(BackupService.MODELS_TO_BACKUP) >= 20
 
 
 class TestBackupServiceHelpers:
-    """Tests pour les méthodes helper du BackupService."""
+    """Tests pour les mÃ©thodes helper du BackupService."""
     
     @pytest.fixture
     def service(self, tmp_path):
-        """Crée un service avec config temporaire."""
+        """CrÃ©e un service avec config temporaire."""
         config = BackupConfig(backup_dir=str(tmp_path))
         return BackupService(config=config)
     
     def test_generate_backup_id(self, service):
-        """Test génération d'ID de backup."""
+        """Test gÃ©nÃ©ration d'ID de backup."""
         backup_id = service._generate_backup_id()
         
         assert backup_id is not None
@@ -179,7 +179,7 @@ class TestBackupServiceHelpers:
         assert len(checksum) == 32  # MD5 hex = 32 chars
     
     def test_calculate_checksum_same_data(self, service):
-        """Test que le même data donne le même checksum."""
+        """Test que le mÃªme data donne le mÃªme checksum."""
         data = "identical data"
         checksum1 = service._calculate_checksum(data)
         checksum2 = service._calculate_checksum(data)
@@ -187,15 +187,15 @@ class TestBackupServiceHelpers:
         assert checksum1 == checksum2
     
     def test_calculate_checksum_different_data(self, service):
-        """Test que des données différentes donnent des checksums différents."""
+        """Test que des donnÃ©es diffÃ©rentes donnent des checksums diffÃ©rents."""
         checksum1 = service._calculate_checksum("data1")
         checksum2 = service._calculate_checksum("data2")
         
         assert checksum1 != checksum2
     
     def test_model_to_dict_with_mock(self, service):
-        """Test conversion modèle vers dict avec mock."""
-        # Créer un mock simple de modèle SQLAlchemy
+        """Test conversion modÃ¨le vers dict avec mock."""
+        # CrÃ©er un mock simple de modÃ¨le SQLAlchemy
         mock_model = MagicMock()
         mock_model.__table__ = MagicMock()
         
@@ -233,7 +233,7 @@ class TestBackupServiceHelpers:
 
 
 class TestBackupServiceMethods:
-    """Tests pour les méthodes principales (avec mocks)."""
+    """Tests pour les mÃ©thodes principales (avec mocks)."""
     
     @pytest.fixture
     def service(self, tmp_path):
@@ -245,7 +245,7 @@ class TestBackupServiceMethods:
         assert Path(service.config.backup_dir).exists()
     
     def test_models_include_key_tables(self, service):
-        """Test que les tables clés sont présentes."""
+        """Test que les tables clÃ©s sont prÃ©sentes."""
         key_tables = [
             "recettes",
             "ingredients",
@@ -259,10 +259,10 @@ class TestBackupServiceMethods:
 
 
 class TestBackupServiceIntegration:
-    """Tests d'intégration simplifiés."""
+    """Tests d'intÃ©gration simplifiÃ©s."""
     
     def test_service_with_different_configs(self, tmp_path):
-        """Test avec différentes configurations."""
+        """Test avec diffÃ©rentes configurations."""
         configs = [
             BackupConfig(backup_dir=str(tmp_path / "backup1"), compress=True),
             BackupConfig(backup_dir=str(tmp_path / "backup2"), compress=False),

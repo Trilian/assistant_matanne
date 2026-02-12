@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests complets pour src/services/planning_unified.py
 Objectif: couverture >80%
 """
@@ -8,9 +8,9 @@ from unittest.mock import Mock, MagicMock, patch
 from datetime import date, datetime, timedelta
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MODELES PYDANTIC
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestJourCompletSchema:
     """Tests pour JourCompletSchema model."""
@@ -45,13 +45,13 @@ class TestJourCompletSchema:
             date=date(2026, 2, 7),
             charge="intense",
             charge_score=85,
-            repas=[{"id": 1, "type": "déjeuner", "recette": "Poulet"}],
+            repas=[{"id": 1, "type": "dÃ©jeuner", "recette": "Poulet"}],
             activites=[{"id": 1, "titre": "Sortie parc"}],
             projets=[{"id": 1, "nom": "Rangement"}],
             routines=[{"id": 1, "nom": "Bain Jules"}],
-            events=[{"id": 1, "titre": "RDV médecin"}],
+            events=[{"id": 1, "titre": "RDV mÃ©decin"}],
             budget_jour=45.50,
-            alertes=["⚠️ Jour très chargé"],
+            alertes=["âš ï¸ Jour trÃ¨s chargÃ©"],
             suggestions_ia=["Simplifier les repas"]
         )
         
@@ -124,7 +124,7 @@ class TestSemaineCompleSchema:
             jours=jours,
             stats_semaine={"total_repas": 14, "total_activites": 5},
             charge_globale="normal",
-            alertes_semaine=["👶 Peu d'activités pour Jules"]
+            alertes_semaine=["ðŸ‘¶ Peu d'activitÃ©s pour Jules"]
         )
         
         assert semaine.stats_semaine["total_repas"] == 14
@@ -152,7 +152,7 @@ class TestSemaineGenereeIASchema:
         
         semaine = SemaineGenereeIASchema(
             repas_proposes=[
-                {"jour": "Lundi", "dejeuner": "Pâtes", "diner": "Soupe"}
+                {"jour": "Lundi", "dejeuner": "PÃ¢tes", "diner": "Soupe"}
             ],
             activites_proposees=[
                 {"jour": "Mardi", "activite": "Parc", "pour_jules": True}
@@ -160,20 +160,20 @@ class TestSemaineGenereeIASchema:
             projets_suggeres=[
                 {"projet": "Rangement cuisine", "priorite": "haute"}
             ],
-            harmonie_description="Semaine équilibrée avec activités variées",
-            raisons=["Météo favorable", "Budget respecté"]
+            harmonie_description="Semaine Ã©quilibrÃ©e avec activitÃ©s variÃ©es",
+            raisons=["MÃ©tÃ©o favorable", "Budget respectÃ©"]
         )
         
         assert len(semaine.repas_proposes) == 1
         assert len(semaine.activites_proposees) == 1
         assert len(semaine.projets_suggeres) == 1
-        assert "équilibrée" in semaine.harmonie_description
+        assert "Ã©quilibrÃ©e" in semaine.harmonie_description
         assert len(semaine.raisons) == 2
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PLANNING AI SERVICE INIT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestPlanningAIServiceInit:
     """Tests for PlanningAIService initialization."""
@@ -210,9 +210,9 @@ class TestPlanningAIServiceInit:
         assert service is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS HELPER METHODS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestPlanningAIServiceCalculerCharge:
     """Tests for _calculer_charge method."""
@@ -405,7 +405,7 @@ class TestPlanningAIServiceDetecterAlertes:
             charge_score=85
         )
         
-        assert any("chargé" in a for a in alertes)
+        assert any("chargÃ©" in a for a in alertes)
     
     def test_detecter_alertes_pas_activite_jules(self):
         """Test no Jules activity alert."""
@@ -536,7 +536,7 @@ class TestPlanningAIServiceDetecterAlertesSemaine:
                 charge="normal",
                 charge_score=40,
                 activites=[],
-                budget_jour=100.0  # 700€ total > 500€
+                budget_jour=100.0  # 700â‚¬ total > 500â‚¬
             )
         
         alertes = service._detecter_alertes_semaine(jours)
@@ -655,9 +655,9 @@ class TestPlanningAIServiceCalculerStatsSemaine:
         assert stats["charge_moyenne"] == 50
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS LOADERS (Chargers)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestPlanningAIServiceChargerRepas:
     """Tests for _charger_repas method."""
@@ -688,13 +688,13 @@ class TestPlanningAIServiceChargerRepas:
         mock_meal = Mock()
         mock_meal.id = 1
         mock_meal.date_repas = date(2026, 2, 3)
-        mock_meal.type_repas = "déjeuner"
+        mock_meal.type_repas = "dÃ©jeuner"
         mock_meal.portion_ajustee = 4
         mock_meal.notes = "Note"
         
         mock_recipe = Mock()
         mock_recipe.id = 1
-        mock_recipe.nom = "Poulet rôti"
+        mock_recipe.nom = "Poulet rÃ´ti"
         mock_recipe.portions = 4
         mock_recipe.temps_preparation = 15
         mock_recipe.temps_cuisson = 45
@@ -783,7 +783,7 @@ class TestPlanningAIServiceChargerProjets:
         mock_project.id = 1
         mock_project.nom = "Rangement"
         mock_project.priorite = "haute"
-        mock_project.statut = "à_faire"
+        mock_project.statut = "Ã _faire"
         mock_project.date_fin_prevue = date(2026, 2, 5)
         
         mock_session = Mock()
@@ -897,7 +897,7 @@ class TestPlanningAIServiceChargerEvents:
         mock_event.id = 1
         mock_event.date_debut = datetime(2026, 2, 3, 10, 0)
         mock_event.date_fin = datetime(2026, 2, 3, 11, 0)
-        mock_event.titre = "RDV médecin"
+        mock_event.titre = "RDV mÃ©decin"
         mock_event.type_event = "rdv"
         mock_event.lieu = "Cabinet"
         mock_event.couleur = "#FF0000"
@@ -910,9 +910,9 @@ class TestPlanningAIServiceChargerEvents:
         assert "2026-02-03" in result
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CREER EVENT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestPlanningAIServiceCreerEvent:
     """Tests for creer_event method."""
@@ -929,7 +929,7 @@ class TestPlanningAIServiceCreerEvent:
         
         with patch.object(service, '_invalider_cache_semaine'):
             result = service.creer_event(
-                titre="RDV médecin",
+                titre="RDV mÃ©decin",
                 date_debut=datetime(2026, 2, 7, 10, 0),
                 type_event="rdv",
                 db=mock_session
@@ -954,7 +954,7 @@ class TestPlanningAIServiceCreerEvent:
                 date_debut=datetime(2026, 2, 7, 10, 0),
                 date_fin=datetime(2026, 2, 7, 11, 0),
                 type_event="rdv",
-                lieu="Cabinet médical",
+                lieu="Cabinet mÃ©dical",
                 description="Description",
                 couleur="#FF0000",
                 recurrence=None,
@@ -976,7 +976,7 @@ class TestPlanningAIServiceCreerEvent:
         
         with patch.object(service, '_invalider_cache_semaine'):
             result = service.creer_event(
-                titre="RDV médecin",
+                titre="RDV mÃ©decin",
                 date_debut=datetime(2026, 2, 7, 10, 0),
                 type_event="rdv",
                 db=mock_session
@@ -1004,9 +1004,9 @@ class TestPlanningAIServiceInvaliderCacheSemaine:
             assert mock_cache.invalider.call_count == 2
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GENERER SEMAINE IA
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestPlanningAIServiceGenererSemaineIA:
     """Tests for generer_semaine_ia method."""
@@ -1020,10 +1020,10 @@ class TestPlanningAIServiceGenererSemaineIA:
             service = PlanningAIService()
         
         mock_response = [{
-            "repas_proposes": [{"jour": "Lundi", "dejeuner": "Pâtes"}],
+            "repas_proposes": [{"jour": "Lundi", "dejeuner": "PÃ¢tes"}],
             "activites_proposees": [{"jour": "Mardi", "activite": "Parc"}],
             "projets_suggeres": [],
-            "harmonie_description": "Semaine équilibrée",
+            "harmonie_description": "Semaine Ã©quilibrÃ©e",
             "raisons": []
         }]
         
@@ -1035,7 +1035,7 @@ class TestPlanningAIServiceGenererSemaineIA:
             )
         
         assert result is not None
-        assert result.harmonie_description == "Semaine équilibrée"
+        assert result.harmonie_description == "Semaine Ã©quilibrÃ©e"
     
     def test_generer_semaine_ia_failure(self):
         """Test generating week with AI failure."""
@@ -1110,9 +1110,9 @@ class TestPlanningAIServiceGenererSemaineIA:
         assert "normal" in prompt  # Default energy
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GET SEMAINE COMPLETE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestPlanningAIServiceGetSemaineComplete:
     """Tests for get_semaine_complete method."""
@@ -1170,9 +1170,9 @@ class TestPlanningAIServiceGetSemaineComplete:
         assert len(result.jours[jour_key].repas) == 1
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MODULE EXPORTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestModuleExports:
     """Tests for module exports."""

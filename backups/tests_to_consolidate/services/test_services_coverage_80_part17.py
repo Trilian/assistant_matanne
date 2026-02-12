@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests Couverture 80% - Part 17: Weather, Suggestions IA, Backup - Tests approfondis
 """
 import pytest
@@ -6,12 +6,12 @@ from unittest.mock import Mock, MagicMock, patch
 from datetime import datetime, date, timedelta
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # WEATHER SERVICE TESTS COMPLETS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestWeatherModels:
-    """Tests complets modèles Weather"""
+    """Tests complets modÃ¨les Weather"""
     
     def test_type_alert_meteo_values(self):
         from src.services.weather import TypeAlertMeteo
@@ -19,10 +19,10 @@ class TestWeatherModels:
         assert TypeAlertMeteo.GEL.value == "gel"
         assert TypeAlertMeteo.CANICULE.value == "canicule"
         assert TypeAlertMeteo.PLUIE_FORTE.value == "pluie_forte"
-        assert TypeAlertMeteo.SECHERESSE.value == "sécheresse"
+        assert TypeAlertMeteo.SECHERESSE.value == "sÃ©cheresse"
         assert TypeAlertMeteo.VENT_FORT.value == "vent_fort"
         assert TypeAlertMeteo.ORAGE.value == "orage"
-        assert TypeAlertMeteo.GRELE.value == "grêle"
+        assert TypeAlertMeteo.GRELE.value == "grÃªle"
         assert TypeAlertMeteo.NEIGE.value == "neige"
         
     def test_niveau_alerte_values(self):
@@ -46,7 +46,7 @@ class TestWeatherModels:
             vent_km_h=15.0,
             direction_vent="NO",
             uv_index=6,
-            condition="ensoleillé"
+            condition="ensoleillÃ©"
         )
         
         assert meteo.date == date(2024, 6, 15)
@@ -61,8 +61,8 @@ class TestWeatherModels:
             type_alerte=TypeAlertMeteo.GEL,
             niveau=NiveauAlerte.DANGER,
             titre="Risque de gel",
-            message="Températures négatives prévues",
-            conseil_jardin="Protégez vos plantes fragiles",
+            message="TempÃ©ratures nÃ©gatives prÃ©vues",
+            conseil_jardin="ProtÃ©gez vos plantes fragiles",
             date_debut=date(2024, 1, 15),
             date_fin=date(2024, 1, 17),
             temperature=-3.0
@@ -77,8 +77,8 @@ class TestWeatherModels:
         
         conseil = ConseilJardin(
             priorite=1,
-            icone="💧",
-            titre="Arrosage nécessaire",
+            icone="ðŸ’§",
+            titre="Arrosage nÃ©cessaire",
             description="Le sol est sec",
             plantes_concernees=["Tomates", "Courgettes"],
             action_recommandee="Arroser abondamment"
@@ -147,12 +147,12 @@ class TestWeatherGardenService:
         assert "open-meteo" in WeatherGardenService.API_URL
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SUGGESTIONS IA TESTS COMPLETS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestSuggestionsIAModels:
-    """Tests modèles SuggestionsIA"""
+    """Tests modÃ¨les SuggestionsIA"""
     
     def test_profil_culinaire_defaults(self):
         from src.services.suggestions_ia import ProfilCulinaire
@@ -169,7 +169,7 @@ class TestSuggestionsIAModels:
         from src.services.suggestions_ia import ProfilCulinaire
         
         profil = ProfilCulinaire(
-            categories_preferees=["Italien", "Français"],
+            categories_preferees=["Italien", "FranÃ§ais"],
             ingredients_frequents=["Tomates", "Oignons"],
             ingredients_evites=["Piments"],
             difficulte_moyenne="facile",
@@ -185,7 +185,7 @@ class TestSuggestionsIAModels:
         
         ctx = ContexteSuggestion()
         
-        assert ctx.type_repas == "dîner"
+        assert ctx.type_repas == "dÃ®ner"
         assert ctx.nb_personnes == 4
         assert ctx.temps_disponible_minutes == 60
         assert ctx.budget == "normal"
@@ -194,27 +194,27 @@ class TestSuggestionsIAModels:
         from src.services.suggestions_ia import ContexteSuggestion
         
         ctx = ContexteSuggestion(
-            type_repas="déjeuner",
+            type_repas="dÃ©jeuner",
             nb_personnes=2,
             temps_disponible_minutes=30,
-            ingredients_disponibles=["Pâtes", "Tomates"],
-            ingredients_a_utiliser=["Crème fraîche"],
-            contraintes=["végétarien"],
-            saison="été",
-            budget="économique"
+            ingredients_disponibles=["PÃ¢tes", "Tomates"],
+            ingredients_a_utiliser=["CrÃ¨me fraÃ®che"],
+            contraintes=["vÃ©gÃ©tarien"],
+            saison="Ã©tÃ©",
+            budget="Ã©conomique"
         )
         
-        assert ctx.type_repas == "déjeuner"
+        assert ctx.type_repas == "dÃ©jeuner"
         assert len(ctx.ingredients_disponibles) == 2
-        assert "végétarien" in ctx.contraintes
+        assert "vÃ©gÃ©tarien" in ctx.contraintes
         
     def test_suggestion_recette_creation(self):
         from src.services.suggestions_ia import SuggestionRecette
         
         suggestion = SuggestionRecette(
             recette_id=42,
-            nom="Pâtes carbonara",
-            raison="Ingrédients disponibles",
+            nom="PÃ¢tes carbonara",
+            raison="IngrÃ©dients disponibles",
             score=0.85,
             tags=["Italien", "Rapide"],
             temps_preparation=25,
@@ -252,12 +252,12 @@ class TestSuggestionsIAService:
         mock_client.assert_called_once()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # BACKUP SERVICE TESTS COMPLETS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestBackupModelsComplete:
-    """Tests complets modèles Backup"""
+    """Tests complets modÃ¨les Backup"""
     
     def test_backup_config_all_fields(self):
         from src.services.backup import BackupConfig
@@ -301,7 +301,7 @@ class TestBackupModelsComplete:
         meta = BackupMetadata(id="test", tables_count=10)
         result = BackupResult(
             success=True,
-            message="Backup terminé avec succès",
+            message="Backup terminÃ© avec succÃ¨s",
             file_path="/backups/backup_2024.json.gz",
             metadata=meta,
             duration_seconds=45.5
@@ -312,48 +312,48 @@ class TestBackupModelsComplete:
         assert result.metadata.tables_count == 10
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # USER PREFERENCES SERVICE TESTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestUserPreferencesModels:
-    """Tests modèles UserPreferences"""
+    """Tests modÃ¨les UserPreferences"""
     
     def test_user_preferences_module(self):
         import src.services.user_preferences
         assert src.services.user_preferences is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # REALTIME SYNC TESTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestRealtimeSyncModels:
-    """Tests modèles RealtimeSync"""
+    """Tests modÃ¨les RealtimeSync"""
     
     def test_realtime_sync_module(self):
         import src.services.realtime_sync
         assert src.services.realtime_sync is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # BATCH COOKING SERVICE TESTS COMPLETS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestBatchCookingModels:
-    """Tests modèles BatchCooking"""
+    """Tests modÃ¨les BatchCooking"""
     
     def test_batch_cooking_module_imports(self):
         import src.services.batch_cooking
         assert src.services.batch_cooking is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # PDF EXPORT SERVICE TESTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestPDFExportModels:
-    """Tests modèles PDFExport"""
+    """Tests modÃ¨les PDFExport"""
     
     def test_pdf_export_module(self):
         import src.services.pdf_export

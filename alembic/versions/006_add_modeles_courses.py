@@ -1,4 +1,4 @@
-"""Add ModeleCourses table for Phase 2 persistent templates.
+﻿"""Add ModeleCourses table for Phase 2 persistent templates.
 
 Revision ID: 006
 Revises: 005_add_photos_inventaire.py
@@ -46,7 +46,7 @@ def upgrade() -> None:
         sa.Column('ingredient_id', sa.Integer(), nullable=True),
         sa.Column('nom_article', sa.String(length=100), nullable=False),
         sa.Column('quantite', sa.Float(), nullable=False, server_default='1.0'),
-        sa.Column('unite', sa.String(length=20), nullable=False, server_default='pièce'),
+        sa.Column('unite', sa.String(length=20), nullable=False, server_default='piÃ¨ce'),
         sa.Column('rayon_magasin', sa.String(length=100), nullable=False, server_default='Autre'),
         sa.Column('priorite', sa.String(length=20), nullable=False, server_default='moyenne'),
         sa.Column('notes', sa.Text(), nullable=True),

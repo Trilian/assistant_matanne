@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour sante.py
 
 Module: src.core.models.sante

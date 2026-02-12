@@ -1,9 +1,9 @@
-"""
-Intégration API Football-Data.org pour les matchs de foot
+﻿"""
+IntÃegration API Football-Data.org pour les matchs de foot
 
 API gratuite avec limitation:
 - 10 requêtes par minute
-- Dernières 10 années d'historique
+- Dernières 10 annÃees d'historique
 - Tous les championnats majeurs
 
 Docs: https://www.football-data.org/client/register
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 # Configuration
 API_BASE_URL = "https://api.football-data.org/v4"
-API_KEY = None  # À configurer dans .env
+API_KEY = None  # Ã€ configurer dans .env
 
 # Mapping des championnats vers Football-Data codes
 CHAMP_MAPPING = {
@@ -30,8 +30,8 @@ CHAMP_MAPPING = {
     "Bundesliga": "BL1",
 }
 
-# IDs des compétitions Football-Data (API v4 - TIER_ONE = gratuit)
-# Source: GET /competitions - vérifiés le 2025-02-01
+# IDs des compÃetitions Football-Data (API v4 - TIER_ONE = gratuit)
+# Source: GET /competitions - vÃerifiÃes le 2025-02-01
 COMP_IDS = {
     "FL1": 2015,     # Ligue 1 (France)
     "PL": 2021,      # Premier League (England)
@@ -43,19 +43,19 @@ COMP_IDS = {
     # "ELC": 2016,   # Championship (England 2nd)
     # "DED": 2003,   # Eredivisie (Netherlands)
     # "PPL": 2017,   # Primeira Liga (Portugal)
-    # "BSA": 2013,   # Brasileirão Série A
+    # "BSA": 2013,   # BrasileirÃ£o SÃerie A
 }
 
 
 def configurer_api_key(api_key: str):
-    """Configure la clé API Football-Data"""
+    """Configure la clÃe API Football-Data"""
     global API_KEY
     API_KEY = api_key
-    logger.info("✅ Clé API Football-Data configurée")
+    logger.info("âœ… ClÃe API Football-Data configurÃee")
 
 
 def obtenir_cle_api() -> Optional[str]:
-    """Obtient la clé API depuis la config"""
+    """Obtient la clÃe API depuis la config"""
     global API_KEY
     if API_KEY:
         return API_KEY
@@ -65,13 +65,13 @@ def obtenir_cle_api() -> Optional[str]:
         from src.core.config import obtenir_parametres
         return obtenir_parametres().FOOTBALL_DATA_API_KEY
     except Exception as e:
-        logger.debug(f"Erreur récupération clé API: {e}")
+        logger.debug(f"Erreur rÃecupÃeration clÃe API: {e}")
         return None
 
 
 def faire_requete(endpoint: str, params: Dict[str, Any] = None) -> Optional[Dict]:
     """
-    Fait une requête à l'API Football-Data
+    Fait une requête Ã  l'API Football-Data
     
     Args:
         endpoint: Chemin de l'endpoint (ex: "/competitions/{id}/matches")
@@ -83,41 +83,41 @@ def faire_requete(endpoint: str, params: Dict[str, Any] = None) -> Optional[Dict
     api_key = obtenir_cle_api()
     
     # DEBUG: Log ce qu'on trouve
-    logger.info(f"🔑 faire_requete: api_key présente = {bool(api_key)}")
+    logger.info(f"ðŸ”‘ faire_requete: api_key prÃesente = {bool(api_key)}")
     
     if not api_key:
-        logger.warning("⚠️ Clé API Football-Data non configurée")
+        logger.warning("âš ï¸ ClÃe API Football-Data non configurÃee")
         return None
     
     url = f"{API_BASE_URL}{endpoint}"
     headers = {"X-Auth-Token": api_key}
     
     try:
-        logger.info(f"📡 Appel API: {endpoint}")
+        logger.info(f"ðŸ“¡ Appel API: {endpoint}")
         response = requests.get(url, headers=headers, params=params, timeout=10)
         
-        # Log la réponse même en cas d'erreur
+        # Log la rÃeponse même en cas d'erreur
         if response.status_code != 200:
-            logger.warning(f"⚠️ Statut HTTP {response.status_code} pour {endpoint}")
+            logger.warning(f"âš ï¸ Statut HTTP {response.status_code} pour {endpoint}")
             try:
                 error_detail = response.json()
-                logger.debug(f"   Détail erreur API: {error_detail}")
+                logger.debug(f"   DÃetail erreur API: {error_detail}")
             except:
-                logger.debug(f"   Réponse brute: {response.text[:200]}")
+                logger.debug(f"   RÃeponse brute: {response.text[:200]}")
         
         response.raise_for_status()
-        logger.info(f"✅ Réponse API OK")
+        logger.info(f"âœ… RÃeponse API OK")
         return response.json()
     except requests.exceptions.HTTPError as e:
         if e.response.status_code == 429:
-            logger.warning("⚠️ Limite de requêtes API dépassée (10/min)")
+            logger.warning("âš ï¸ Limite de requêtes API dÃepassÃee (10/min)")
         elif e.response.status_code == 404:
-            logger.error(f"❌ Endpoint non trouvé (404): {endpoint}")
+            logger.error(f"âŒ Endpoint non trouvÃe (404): {endpoint}")
         else:
-            logger.error(f"❌ Erreur API Football-Data: {e.response.status_code}")
+            logger.error(f"âŒ Erreur API Football-Data: {e.response.status_code}")
         return None
     except Exception as e:
-        logger.error(f"❌ Erreur requête API: {e}")
+        logger.error(f"âŒ Erreur requête API: {e}")
         return None
 
 
@@ -127,11 +127,11 @@ def charger_matchs_a_venir(
     statut: str = "SCHEDULED,LIVE"
 ) -> List[Dict[str, Any]]:
     """
-    Charge les matchs à venir d'un championnat
+    Charge les matchs Ã  venir d'un championnat
     
     Args:
         championnat: Nom du championnat ("Ligue 1", "Premier League", etc)
-        jours: Nombre de jours à chercher
+        jours: Nombre de jours Ã  chercher
         statut: Filtrer par statut ("SCHEDULED", "LIVE", "FINISHED")
         
     Returns:
@@ -139,7 +139,7 @@ def charger_matchs_a_venir(
     """
     code_champ = CHAMP_MAPPING.get(championnat)
     if not code_champ:
-        logger.warning(f"Championnat non supporté: {championnat}")
+        logger.warning(f"Championnat non supportÃe: {championnat}")
         return []
     
     comp_id = COMP_IDS.get(code_champ)
@@ -187,20 +187,20 @@ def charger_matchs_a_venir(
 
 def charger_historique_equipe(nom_equipe: str, limite: int = 10) -> List[Dict[str, Any]]:
     """
-    Charge l'historique des matchs d'une équipe
+    Charge l'historique des matchs d'une Ãequipe
     
     Args:
-        nom_equipe: Nom de l'équipe
-        limite: Nombre de matchs à récupérer
+        nom_equipe: Nom de l'Ãequipe
+        limite: Nombre de matchs Ã  rÃecupÃerer
         
     Returns:
-        Liste des matchs récents
+        Liste des matchs rÃecents
     """
-    # Chercher l'ID de l'équipe
+    # Chercher l'ID de l'Ãequipe
     data = faire_requete("/teams", {"name": nom_equipe})
     
     if not data or not data.get("teams"):
-        logger.warning(f"Équipe non trouvée: {nom_equipe}")
+        logger.warning(f"Équipe non trouvÃee: {nom_equipe}")
         return []
     
     equipe_id = data["teams"][0].get("id")
@@ -208,7 +208,7 @@ def charger_historique_equipe(nom_equipe: str, limite: int = 10) -> List[Dict[st
     if not equipe_id:
         return []
     
-    # Charger les matchs de l'équipe
+    # Charger les matchs de l'Ãequipe
     params = {
         "limit": limite,
         "status": "FINISHED"
@@ -249,7 +249,7 @@ def charger_classement(championnat: str) -> List[Dict[str, Any]]:
         championnat: Nom du championnat
         
     Returns:
-        Liste des équipes avec classement (ou juste équipes si pas de standings)
+        Liste des Ãequipes avec classement (ou juste Ãequipes si pas de standings)
     """
     code_champ = CHAMP_MAPPING.get(championnat)
     if not code_champ:
@@ -260,7 +260,7 @@ def charger_classement(championnat: str) -> List[Dict[str, Any]]:
         return []
     
     # Essayer d'abord les standings
-    logger.info(f"📡 Tentative standings pour {championnat} (ID: {comp_id})")
+    logger.info(f"ðŸ“¡ Tentative standings pour {championnat} (ID: {comp_id})")
     data = faire_requete(f"/competitions/{comp_id}/standings")
     
     if data and data.get("standings"):
@@ -284,8 +284,8 @@ def charger_classement(championnat: str) -> List[Dict[str, Any]]:
         
         return equipes
     
-    # Fallback: charger juste les équipes sans standings
-    logger.info(f"📡 Fallback /teams pour {championnat}")
+    # Fallback: charger juste les Ãequipes sans standings
+    logger.info(f"ðŸ“¡ Fallback /teams pour {championnat}")
     data = faire_requete(f"/competitions/{comp_id}/teams")
     
     if data and data.get("teams"):
@@ -303,22 +303,22 @@ def charger_classement(championnat: str) -> List[Dict[str, Any]]:
                 "points": 0
             })
         
-        logger.info(f"✅ {len(equipes)} équipes chargées pour {championnat}")
+        logger.info(f"âœ… {len(equipes)} Ãequipes chargÃees pour {championnat}")
         return equipes
     
-    logger.warning(f"❌ Pas de données pour {championnat}")
+    logger.warning(f"âŒ Pas de donnÃees pour {championnat}")
     return []
 
 
 def chercher_equipe(nom: str) -> Optional[Dict[str, Any]]:
     """
-    Cherche une équipe par nom
+    Cherche une Ãequipe par nom
     
     Args:
-        nom: Nom de l'équipe (partiel accepté)
+        nom: Nom de l'Ãequipe (partiel acceptÃe)
         
     Returns:
-        Infos de l'équipe ou None
+        Infos de l'Ãequipe ou None
     """
     data = faire_requete("/teams", {"name": nom})
     
@@ -337,17 +337,17 @@ def chercher_equipe(nom: str) -> Optional[Dict[str, Any]]:
     }
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # MATCHS TERMINÉS (pour refresh scores)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def charger_matchs_termines(
     championnat: str,
     jours: int = 7
 ) -> List[Dict[str, Any]]:
     """
-    Charge les matchs terminés des derniers jours d'un championnat.
-    Utilisé pour mettre à jour les scores.
+    Charge les matchs terminÃes des derniers jours d'un championnat.
+    UtilisÃe pour mettre Ã  jour les scores.
     
     Args:
         championnat: Nom du championnat
@@ -358,14 +358,14 @@ def charger_matchs_termines(
     """
     code_champ = CHAMP_MAPPING.get(championnat)
     if not code_champ:
-        logger.warning(f"Championnat non supporté: {championnat}")
+        logger.warning(f"Championnat non supportÃe: {championnat}")
         return []
     
     comp_id = COMP_IDS.get(code_champ)
     if not comp_id:
         return []
     
-    # Paramètres: matchs terminés des X derniers jours
+    # Paramètres: matchs terminÃes des X derniers jours
     fin = date.today()
     debut = fin - timedelta(days=jours)
     
@@ -392,20 +392,20 @@ def charger_matchs_termines(
                 "score_exterieur": score.get("away"),
             })
         except Exception as e:
-            logger.debug(f"Erreur parsing match terminé: {e}")
+            logger.debug(f"Erreur parsing match terminÃe: {e}")
             continue
     
-    logger.info(f"✅ {len(matchs)} matchs terminés chargés pour {championnat}")
+    logger.info(f"âœ… {len(matchs)} matchs terminÃes chargÃes pour {championnat}")
     return matchs
 
 
-# ═══════════════════════════════════════════════════════════
-# CACHE (éviter trop de requêtes)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# CACHE (Ãeviter trop de requêtes)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @lru_cache(maxsize=128)
 def charger_matchs_cache(championnat: str, jours: int = 7) -> tuple:
-    """Version cachée de charger_matchs_a_venir"""
+    """Version cachÃee de charger_matchs_a_venir"""
     return tuple(charger_matchs_a_venir(championnat, jours))
 
 

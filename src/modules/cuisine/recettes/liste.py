@@ -1,4 +1,4 @@
-"""
+﻿"""
 Liste des recettes - Affichage et pagination.
 """
 
@@ -8,7 +8,7 @@ import time
 import streamlit as st
 
 from src.services.recettes import get_recette_service
-from .helpers import formater_quantite
+from .utilitaires import formater_quantite
 
 
 def render_liste():
@@ -16,7 +16,7 @@ def render_liste():
     service = get_recette_service()
     
     if service is None:
-        st.error("❌ Service recettes indisponible")
+        st.error("âŒ Service recettes indisponible")
         return
     
     # Initialiser pagination
@@ -29,7 +29,7 @@ def render_liste():
     # Contrôles de pagination en haut
     col_size1, col_size2, col_size3 = st.columns([2, 1.5, 2])
     with col_size1:
-        st.caption("👁️ Options d'affichage")
+        st.caption("ðŸ‘ï¸ Options d'affichage")
     with col_size2:
         page_size = st.selectbox(
             "Recettes/page",
@@ -56,13 +56,13 @@ def render_liste():
     with col2:
         type_repas = st.selectbox(
             "Type de repas",
-            ["Tous", "petit_déjeuner", "déjeuner", "dîner", "goûter"],
+            ["Tous", "petit_dÃejeuner", "dÃejeuner", "dîner", "goûter"],
             key="filter_type_repas",
             label_visibility="collapsed"
         )
     with col3:
         difficulte = st.selectbox(
-            "Difficulté",
+            "DifficultÃe",
             ["Tous", "facile", "moyen", "difficile"],
             key="filter_difficulte",
             label_visibility="collapsed"
@@ -77,16 +77,16 @@ def render_liste():
             label_visibility="collapsed"
         )
     
-    # Filtres supplémentaires avancés
-    with st.expander("⚙️ Filtres avancés", expanded=False):
+    # Filtres supplÃementaires avancÃes
+    with st.expander("âš™ï¸ Filtres avancÃes", expanded=False):
         col_bio, col_local = st.columns(2)
         with col_bio:
-            min_score_bio = st.slider("🌱 Score bio min (%)", 0, 100, 0, key="filter_score_bio")
+            min_score_bio = st.slider("ðŸŒ± Score bio min (%)", 0, 100, 0, key="filter_score_bio")
         with col_local:
-            min_score_local = st.slider("🚜 Score local min (%)", 0, 100, 0, key="filter_score_local")
+            min_score_local = st.slider("ðŸšœ Score local min (%)", 0, 100, 0, key="filter_score_local")
         
         # Filtres robots
-        st.markdown("**🤖 Compatible avec:**")
+        st.markdown("**ðŸ¤– Compatible avec:**")
         col_robots = st.columns(4)
         robots_selected = {}
         with col_robots[0]:
@@ -99,14 +99,14 @@ def render_liste():
             robots_selected['multicooker'] = st.checkbox("Multicooker", key="robot_multicooker")
         
         # Filtres tags
-        st.markdown("**🏷️ Caractéristiques:**")
+        st.markdown("**ðŸ·ï¸ CaractÃeristiques:**")
         col_tags = st.columns(3)
         with col_tags[0]:
-            est_rapide = st.checkbox("⚡ Rapide", key="tag_rapide")
+            est_rapide = st.checkbox("âš¡ Rapide", key="tag_rapide")
         with col_tags[1]:
-            est_equilibre = st.checkbox("💪 Équilibré", key="tag_equilibre")
+            est_equilibre = st.checkbox("ðŸ’ª ÉquilibrÃe", key="tag_equilibre")
         with col_tags[2]:
-            congelable = st.checkbox("❄️ Congélable", key="tag_congelable")
+            congelable = st.checkbox("â„ï¸ CongÃelable", key="tag_congelable")
     
     # Chercher les recettes
     type_repas_filter = None if type_repas == "Tous" else type_repas
@@ -124,7 +124,7 @@ def render_liste():
         nom_lower = nom_filter.strip().lower()
         recettes = [r for r in recettes if nom_lower in r.nom.lower()]
     
-    # Appliquer les filtres avancés
+    # Appliquer les filtres avancÃes
     if min_score_bio > 0:
         recettes = [r for r in recettes if (r.score_bio or 0) >= min_score_bio]
     if min_score_local > 0:
@@ -153,7 +153,7 @@ def render_liste():
         recettes = [r for r in recettes if r.congelable]
     
     if not recettes:
-        st.info("Aucune recette ne correspond à vos critères. Créez-en une!")
+        st.info("Aucune recette ne correspond Ã  vos critères. CrÃeez-en une!")
         return
     
     # Pagination
@@ -164,7 +164,7 @@ def render_liste():
     end_idx = start_idx + PAGE_SIZE
     page_recettes = recettes[start_idx:end_idx]
     
-    st.success(f"✅ {len(recettes)} recette(s) trouvée(s) | Page {st.session_state.recettes_page + 1}/{total_pages}")
+    st.success(f"âœ… {len(recettes)} recette(s) trouvÃee(s) | Page {st.session_state.recettes_page + 1}/{total_pages}")
     
     # Afficher en grid avec badges
     cols = st.columns(3, gap="small")
@@ -172,7 +172,7 @@ def render_liste():
         with cols[idx % 3]:
             # Container avec flexbox minimal
             with st.container(border=True):
-                # Image avec hauteur RÉDUITE (100px) et conteneur strictement dimensionné
+                # Image avec hauteur RÉDUITE (100px) et conteneur strictement dimensionnÃe
                 if recette.url_image:
                     try:
                         st.markdown(
@@ -181,11 +181,11 @@ def render_liste():
                         )
                     except Exception:
                         st.markdown(
-                            '<div style="height: 100px; width: 100%; border-radius: 6px; margin-bottom: 6px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 40px; opacity: 0.3;">🖼️</div>',
+                            '<div style="height: 100px; width: 100%; border-radius: 6px; margin-bottom: 6px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 40px; opacity: 0.3;">ðŸ–¼ï¸</div>',
                             unsafe_allow_html=True
                         )
                 else:
-                    food_emojis = ["🍽️", "🍳", "🥘", "🍲", "🥗", "🍜"]
+                    food_emojis = ["ðŸ½ï¸", "ðŸ³", "ðŸ¥˜", "ðŸ²", "ðŸ¥—", "ðŸœ"]
                     emoji = random.choice(food_emojis)
                     st.markdown(
                         f'<div style="height: 100px; width: 100%; border-radius: 6px; margin-bottom: 6px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 40px; opacity: 0.3;">{emoji}</div>',
@@ -193,17 +193,17 @@ def render_liste():
                     )
                 
                 # Titre et infos compactes - HAUTEUR FIXE
-                difficulty_emoji = {"facile": "🟢", "moyen": "🟡", "difficile": "🔴"}.get(recette.difficulte, "⚫")
+                difficulty_emoji = {"facile": "ðŸŸ¢", "moyen": "ðŸŸ¡", "difficile": "ðŸ”´"}.get(recette.difficulte, "âš«")
                 
-                # Échapper le nom pour éviter les problèmes d'encodage
-                nom_echappé = html.escape(recette.nom, quote=True)
-                st.markdown(f"<h4 style='margin: 6px 0; line-height: 1.3; font-size: 15px; min-height: 3.9em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; word-break: break-word;'>{difficulty_emoji} {nom_echappé}</h4>", unsafe_allow_html=True)
+                # Échapper le nom pour Ãeviter les problèmes d'encodage
+                nom_echappÃe = html.escape(recette.nom, quote=True)
+                st.markdown(f"<h4 style='margin: 6px 0; line-height: 1.3; font-size: 15px; min-height: 3.9em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; word-break: break-word;'>{difficulty_emoji} {nom_echappÃe}</h4>", unsafe_allow_html=True)
                 
-                # Description sur hauteur fixe pour éviter décalage
+                # Description sur hauteur fixe pour Ãeviter dÃecalage
                 if recette.description:
-                    # Limiter à ~250 caractères pour laisser la CSS faire le clamp sur 3 lignes
+                    # Limiter Ã  ~250 caractères pour laisser la CSS faire le clamp sur 3 lignes
                     desc = recette.description
-                    # Tronquer à limite mais sans couper mid-word
+                    # Tronquer Ã  limite mais sans couper mid-word
                     if len(desc) > 250:
                         truncated = desc[:250]
                         last_space = truncated.rfind(' ')
@@ -217,35 +217,35 @@ def render_liste():
                 
                 # Badges et robots sur la même ligne
                 badge_definitions = {
-                    "🌱": "Bio",
-                    "🚜": "Local",
-                    "⚡": "Rapide",
-                    "💪": "Équilibré",
-                    "❄️": "Congélable"
+                    "ðŸŒ±": "Bio",
+                    "ðŸšœ": "Local",
+                    "âš¡": "Rapide",
+                    "ðŸ’ª": "ÉquilibrÃe",
+                    "â„ï¸": "CongÃelable"
                 }
                 
                 all_badges = []
                 
                 if recette.est_bio:
-                    all_badges.append(f'<span title="{badge_definitions["🌱"]}" style="cursor: help;">🌱</span>')
+                    all_badges.append(f'<span title="{badge_definitions["ðŸŒ±"]}" style="cursor: help;">ðŸŒ±</span>')
                 if recette.est_local:
-                    all_badges.append(f'<span title="{badge_definitions["🚜"]}" style="cursor: help;">🚜</span>')
+                    all_badges.append(f'<span title="{badge_definitions["ðŸšœ"]}" style="cursor: help;">ðŸšœ</span>')
                 if recette.est_rapide:
-                    all_badges.append(f'<span title="{badge_definitions["⚡"]}" style="cursor: help;">⚡</span>')
+                    all_badges.append(f'<span title="{badge_definitions["âš¡"]}" style="cursor: help;">âš¡</span>')
                 if recette.est_equilibre:
-                    all_badges.append(f'<span title="{badge_definitions["💪"]}" style="cursor: help;">💪</span>')
+                    all_badges.append(f'<span title="{badge_definitions["ðŸ’ª"]}" style="cursor: help;">ðŸ’ª</span>')
                 if recette.congelable:
-                    all_badges.append(f'<span title="{badge_definitions["❄️"]}" style="cursor: help;">❄️</span>')
+                    all_badges.append(f'<span title="{badge_definitions["â„ï¸"]}" style="cursor: help;">â„ï¸</span>')
                 
                 if recette.robots_compatibles:
                     robots_icons = {
-                        'Cookeo': ('🤖', 'Cookeo'),
-                        'Monsieur Cuisine': ('👨‍🍳', 'MC'),
-                        'Airfryer': ('🌪️', 'Airfryer'),
-                        'Multicooker': ('🍳', 'MC')
+                        'Cookeo': ('ðŸ¤–', 'Cookeo'),
+                        'Monsieur Cuisine': ('ðŸ‘¨â€ðŸ³', 'MC'),
+                        'Airfryer': ('ðŸŒªï¸', 'Airfryer'),
+                        'Multicooker': ('ðŸ³', 'MC')
                     }
                     for robot in recette.robots_compatibles:
-                        icon, tooltip = robots_icons.get(robot, ('🤖', robot))
+                        icon, tooltip = robots_icons.get(robot, ('ðŸ¤–', robot))
                         all_badges.append(f'<span title="{tooltip}" style="cursor: help;">{icon}</span>')
                 
                 if all_badges:
@@ -257,16 +257,16 @@ def render_liste():
                 # Infos principales (3 colonnes compactes)
                 info_cols = st.columns(3, gap="small")
                 with info_cols[0]:
-                    st.markdown(f"<div style='text-align: center; font-size: 13px;'><div>⏱️</div><div style='font-weight: bold;'>{recette.temps_preparation}m</div></div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='text-align: center; font-size: 13px;'><div>â±ï¸</div><div style='font-weight: bold;'>{recette.temps_preparation}m</div></div>", unsafe_allow_html=True)
                 with info_cols[1]:
-                    st.markdown(f"<div style='text-align: center; font-size: 13px;'><div>👥</div><div style='font-weight: bold;'>{recette.portions}</div></div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='text-align: center; font-size: 13px;'><div>ðŸ‘¥</div><div style='font-weight: bold;'>{recette.portions}</div></div>", unsafe_allow_html=True)
                 with info_cols[2]:
-                    cal = recette.calories if recette.calories else "–"
-                    st.markdown(f"<div style='text-align: center; font-size: 13px;'><div>🔥</div><div style='font-weight: bold;'>{cal}</div></div>", unsafe_allow_html=True)
+                    cal = recette.calories if recette.calories else "â€“"
+                    st.markdown(f"<div style='text-align: center; font-size: 13px;'><div>ðŸ”¥</div><div style='font-weight: bold;'>{cal}</div></div>", unsafe_allow_html=True)
                 
-                # Bouton voir détails
+                # Bouton voir dÃetails
                 if st.button(
-                    "👁️ Voir détails",
+                    "ðŸ‘ï¸ Voir dÃetails",
                     use_container_width=True,
                     key=f"detail_{recette.id}"
                 ):
@@ -274,25 +274,25 @@ def render_liste():
                     st.rerun()
                 
                 # Bouton supprimer avec popover confirmation
-                with st.popover("🗑️ Supprimer", width='stretch'):
-                    st.warning(f"⚠️ Êtes-vous sûr de vouloir supprimer:\n\n**{recette.nom}** ?")
+                with st.popover("ðŸ—‘ï¸ Supprimer", width='stretch'):
+                    st.warning(f"âš ï¸ ÃŠtes-vous sûr de vouloir supprimer:\n\n**{recette.nom}** ?")
                     col_del_oui, col_del_non = st.columns(2)
                     with col_del_oui:
-                        if st.button("✅ Oui, supprimer", width='stretch', key=f"btn_del_oui_{recette.id}"):
+                        if st.button("âœ… Oui, supprimer", width='stretch', key=f"btn_del_oui_{recette.id}"):
                             if service:
                                 try:
                                     with st.spinner("Suppression en cours..."):
                                         if service.delete(recette.id):
-                                            st.success("✅ Recette supprimée!")
+                                            st.success("âœ… Recette supprimÃee!")
                                             st.session_state.detail_recette_id = None
                                             time.sleep(1)
                                             st.rerun()
                                         else:
-                                            st.error("❌ Impossible de supprimer la recette")
+                                            st.error("âŒ Impossible de supprimer la recette")
                                 except Exception as e:
-                                    st.error(f"❌ Erreur lors de la suppression: {str(e)}")
+                                    st.error(f"âŒ Erreur lors de la suppression: {str(e)}")
                     with col_del_non:
-                        if st.button("❌ Annuler", width='stretch', key=f"btn_del_non_{recette.id}"):
+                        if st.button("âŒ Annuler", width='stretch', key=f"btn_del_non_{recette.id}"):
                             st.rerun()
     
     # Pagination controls
@@ -301,7 +301,7 @@ def render_liste():
     
     with col1:
         if st.session_state.recettes_page > 0:
-            if st.button("⬅️ Précédent"):
+            if st.button("â¬…ï¸ PrÃecÃedent"):
                 st.session_state.recettes_page -= 1
                 st.rerun()
     
@@ -310,7 +310,7 @@ def render_liste():
     
     with col5:
         if st.session_state.recettes_page < total_pages - 1:
-            if st.button("Suivant ➡️"):
+            if st.button("Suivant âž¡ï¸"):
                 st.session_state.recettes_page += 1
                 st.rerun()
 

@@ -1,4 +1,4 @@
-"""Add photos support to inventory articles
+﻿"""Add photos support to inventory articles
 
 Revision ID: 005
 Revises: 004
@@ -17,7 +17,7 @@ depends_on = None
 
 
 def upgrade() -> None:
-    # Ajoute les colonnes photo à la table inventaire
+    # Ajoute les colonnes photo Ã  la table inventaire
     op.add_column(
         "inventaire",
         sa.Column("photo_url", sa.String(500), nullable=True),

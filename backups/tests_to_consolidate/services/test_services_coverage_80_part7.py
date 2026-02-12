@@ -1,6 +1,6 @@
-"""
-Tests de couverture étendus pour src/services - Partie 7
-Tests plus profonds: méthodes de service, logique métier, helpers
+﻿"""
+Tests de couverture Ã©tendus pour src/services - Partie 7
+Tests plus profonds: mÃ©thodes de service, logique mÃ©tier, helpers
 """
 
 import pytest
@@ -10,9 +10,9 @@ from io import StringIO
 import json
 
 
-# ═══════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# ═══════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
@@ -51,13 +51,13 @@ def patch_db_context(mock_db_session):
         yield mock_db_session
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# TESTS BASE SERVICE AVANCÉS
-# ═══════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS BASE SERVICE AVANCÃ‰S
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBaseServiceHelpers:
-    """Tests des méthodes helper du BaseService."""
+    """Tests des mÃ©thodes helper du BaseService."""
 
     def test_model_to_dict_exists(self):
         """Teste que _model_to_dict existe."""
@@ -85,7 +85,7 @@ class TestBaseServiceHelpers:
 
 
 class TestBaseServiceBulk:
-    """Tests des opérations bulk du BaseService."""
+    """Tests des opÃ©rations bulk du BaseService."""
 
     def test_bulk_create_with_merge_exists(self):
         """Teste que bulk_create_with_merge existe."""
@@ -128,13 +128,13 @@ class TestBaseServiceStats:
         assert callable(service.mark_as)
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# TESTS NOTIFICATION SERVICE AVANCÉS
-# ═══════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS NOTIFICATION SERVICE AVANCÃ‰S
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestNotificationServiceAdvanced:
-    """Tests avancés du NotificationService."""
+    """Tests avancÃ©s du NotificationService."""
 
     def test_multiple_users_notifications(self):
         """Teste les notifications pour plusieurs utilisateurs."""
@@ -167,7 +167,7 @@ class TestNotificationServiceAdvanced:
         assert len(service.notifications[2]) == 1
 
     def test_different_types_same_article(self):
-        """Teste différents types de notif pour le même article."""
+        """Teste diffÃ©rents types de notif pour le mÃªme article."""
         from src.services.notifications import NotificationService, Notification, TypeAlerte
         
         service = NotificationService()
@@ -181,57 +181,57 @@ class TestNotificationServiceAdvanced:
         )
         
         notif2 = Notification(
-            type_alerte=TypeAlerte.PEREMPTION_PROCHE,  # Type différent
+            type_alerte=TypeAlerte.PEREMPTION_PROCHE,  # Type diffÃ©rent
             article_id=1,
             ingredient_id=10,
-            titre="Péremption proche",
-            message="Péremption proche pour cet article"
+            titre="PÃ©remption proche",
+            message="PÃ©remption proche pour cet article"
         )
         
         service.ajouter_notification(notif1, utilisateur_id=1)
         service.ajouter_notification(notif2, utilisateur_id=1)
         
-        # Les deux devraient être ajoutées car types différents
+        # Les deux devraient Ãªtre ajoutÃ©es car types diffÃ©rents
         assert len(service.notifications[1]) == 2
 
 
 class TestNotificationPriorities:
-    """Tests des priorités de notification."""
+    """Tests des prioritÃ©s de notification."""
 
     def test_notification_haute_priorite(self):
-        """Teste la notification haute priorité."""
+        """Teste la notification haute prioritÃ©."""
         from src.services.notifications import Notification, TypeAlerte
         
         notif = Notification(
             type_alerte=TypeAlerte.STOCK_CRITIQUE,
             article_id=1,
             ingredient_id=10,
-            titre="Test haute priorité",
-            message="Test message haute priorité",
+            titre="Test haute prioritÃ©",
+            message="Test message haute prioritÃ©",
             priorite="haute"
         )
         
         assert notif.priorite == "haute"
 
     def test_notification_basse_priorite(self):
-        """Teste la notification basse priorité."""
+        """Teste la notification basse prioritÃ©."""
         from src.services.notifications import Notification, TypeAlerte
         
         notif = Notification(
             type_alerte=TypeAlerte.ARTICLE_AJOUTE,
             article_id=1,
             ingredient_id=10,
-            titre="Test basse priorité",
-            message="Test message basse priorité",
+            titre="Test basse prioritÃ©",
+            message="Test message basse prioritÃ©",
             priorite="basse"
         )
         
         assert notif.priorite == "basse"
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# TESTS RECETTE SERVICE AVANCÉS
-# ═══════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS RECETTE SERVICE AVANCÃ‰S
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestRecetteServiceInit:
@@ -243,12 +243,12 @@ class TestRecetteServiceInit:
         
         service = RecetteService()
         
-        # Devrait hériter de BaseService et BaseAIService
+        # Devrait hÃ©riter de BaseService et BaseAIService
         assert hasattr(service, 'model')
         assert hasattr(service, 'cache_ttl')
 
     def test_recette_service_has_crud_methods(self):
-        """Teste que RecetteService a les méthodes CRUD."""
+        """Teste que RecetteService a les mÃ©thodes CRUD."""
         from src.services.recettes import RecetteService
         
         service = RecetteService()
@@ -261,10 +261,10 @@ class TestRecetteServiceInit:
 
 
 class TestRecetteServiceMethods:
-    """Tests des méthodes du RecetteService."""
+    """Tests des mÃ©thodes du RecetteService."""
 
     def test_has_search_method(self):
-        """Teste que RecetteService a une méthode de recherche."""
+        """Teste que RecetteService a une mÃ©thode de recherche."""
         from src.services.recettes import RecetteService
         
         service = RecetteService()
@@ -277,43 +277,43 @@ class TestRecetteSuggestionValidation:
     """Tests de validation RecetteSuggestion."""
 
     def test_nom_trop_court(self):
-        """Teste que nom trop court est rejeté."""
+        """Teste que nom trop court est rejetÃ©."""
         from src.services.recettes import RecetteSuggestion
         from pydantic import ValidationError
         
         with pytest.raises(ValidationError):
             RecetteSuggestion(
-                nom="AB",  # Min 3 caractères
+                nom="AB",  # Min 3 caractÃ¨res
                 description="Description valide pour le test",
                 temps_preparation=20,
                 temps_cuisson=30,
                 portions=4,
                 difficulte="facile",
-                type_repas="dîner",
+                type_repas="dÃ®ner",
                 ingredients=[],
                 etapes=[]
             )
 
     def test_description_trop_courte(self):
-        """Teste que description trop courte est rejetée."""
+        """Teste que description trop courte est rejetÃ©e."""
         from src.services.recettes import RecetteSuggestion
         from pydantic import ValidationError
         
         with pytest.raises(ValidationError):
             RecetteSuggestion(
                 nom="Nom valide",
-                description="Court",  # Min 10 caractères
+                description="Court",  # Min 10 caractÃ¨res
                 temps_preparation=20,
                 temps_cuisson=30,
                 portions=4,
                 difficulte="facile",
-                type_repas="dîner",
+                type_repas="dÃ®ner",
                 ingredients=[],
                 etapes=[]
             )
 
     def test_difficulte_invalide(self):
-        """Teste que difficulté invalide est rejetée."""
+        """Teste que difficultÃ© invalide est rejetÃ©e."""
         from src.services.recettes import RecetteSuggestion
         from pydantic import ValidationError
         
@@ -324,16 +324,16 @@ class TestRecetteSuggestionValidation:
                 temps_preparation=20,
                 temps_cuisson=30,
                 portions=4,
-                difficulte="extreme",  # Doit être facile, moyen ou difficile
-                type_repas="dîner",
+                difficulte="extreme",  # Doit Ãªtre facile, moyen ou difficile
+                type_repas="dÃ®ner",
                 ingredients=[],
                 etapes=[]
             )
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# TESTS COURSES SERVICE AVANCÉS
-# ═══════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS COURSES SERVICE AVANCÃ‰S
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCoursesServiceInit:
@@ -349,7 +349,7 @@ class TestCoursesServiceInit:
         assert hasattr(service, 'cache_ttl')
 
     def test_courses_service_has_crud_methods(self):
-        """Teste que CoursesService a les méthodes CRUD."""
+        """Teste que CoursesService a les mÃ©thodes CRUD."""
         from src.services.courses import CoursesService
         
         service = CoursesService()
@@ -363,7 +363,7 @@ class TestSuggestionCoursesValidation:
     """Tests de validation SuggestionCourses."""
 
     def test_priorite_invalide(self):
-        """Teste que priorité invalide est rejetée."""
+        """Teste que prioritÃ© invalide est rejetÃ©e."""
         from src.services.courses import SuggestionCourses
         from pydantic import ValidationError
         
@@ -372,32 +372,32 @@ class TestSuggestionCoursesValidation:
                 nom="Lait",
                 quantite=2.0,
                 unite="L",
-                priorite="urgente",  # Doit être haute, moyenne ou basse
+                priorite="urgente",  # Doit Ãªtre haute, moyenne ou basse
                 rayon="Produits frais"
             )
 
     def test_quantite_negative(self):
-        """Teste que quantité négative est rejetée."""
+        """Teste que quantitÃ© nÃ©gative est rejetÃ©e."""
         from src.services.courses import SuggestionCourses
         from pydantic import ValidationError
         
         with pytest.raises(ValidationError):
             SuggestionCourses(
                 nom="Lait",
-                quantite=-1.0,  # Doit être > 0
+                quantite=-1.0,  # Doit Ãªtre > 0
                 unite="L",
                 priorite="haute",
                 rayon="Produits frais"
             )
 
     def test_normalisation_priority_high(self):
-        """Teste la normalisation de priority 'high' → 'haute'."""
+        """Teste la normalisation de priority 'high' â†’ 'haute'."""
         from src.services.courses import SuggestionCourses
         
         data = {
             'nom': 'Pain',
             'quantite': 1.0,
-            'unite': 'unité',
+            'unite': 'unitÃ©',
             'priority': 'high',
             'rayon': 'Boulangerie'
         }
@@ -406,7 +406,7 @@ class TestSuggestionCoursesValidation:
         assert suggestion.priorite == 'haute'
 
     def test_normalisation_priority_medium(self):
-        """Teste la normalisation de priority 'medium' → 'moyenne'."""
+        """Teste la normalisation de priority 'medium' â†’ 'moyenne'."""
         from src.services.courses import SuggestionCourses
         
         data = {
@@ -414,14 +414,14 @@ class TestSuggestionCoursesValidation:
             'quantite': 1.0,
             'unite': 'L',
             'priority': 'medium',
-            'rayon': 'Épicerie'
+            'rayon': 'Ã‰picerie'
         }
         
         suggestion = SuggestionCourses.model_validate(data)
         assert suggestion.priorite == 'moyenne'
 
     def test_normalisation_priority_low(self):
-        """Teste la normalisation de priority 'low' → 'basse'."""
+        """Teste la normalisation de priority 'low' â†’ 'basse'."""
         from src.services.courses import SuggestionCourses
         
         data = {
@@ -429,16 +429,16 @@ class TestSuggestionCoursesValidation:
             'quantite': 1.0,
             'unite': 'paquet',
             'priority': 'low',
-            'rayon': 'Hygiène'
+            'rayon': 'HygiÃ¨ne'
         }
         
         suggestion = SuggestionCourses.model_validate(data)
         assert suggestion.priorite == 'basse'
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# TESTS PLANNING SERVICE AVANCÉS
-# ═══════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS PLANNING SERVICE AVANCÃ‰S
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPlanningServiceInit:
@@ -454,7 +454,7 @@ class TestPlanningServiceInit:
         assert hasattr(service, 'cache_ttl')
 
     def test_planning_service_has_crud_methods(self):
-        """Teste que PlanningService a les méthodes CRUD."""
+        """Teste que PlanningService a les mÃ©thodes CRUD."""
         from src.services.planning import PlanningService
         
         service = PlanningService()
@@ -488,33 +488,33 @@ class TestJourPlanningValidation:
     """Tests de validation JourPlanning."""
 
     def test_jour_trop_court(self):
-        """Teste que jour trop court est rejeté."""
+        """Teste que jour trop court est rejetÃ©."""
         from src.services.planning import JourPlanning
         from pydantic import ValidationError
         
         with pytest.raises(ValidationError):
             JourPlanning(
-                jour="2026",  # Min 6 caractères
+                jour="2026",  # Min 6 caractÃ¨res
                 dejeuner="Salade",
                 diner="Soupe"
             )
 
     def test_dejeuner_trop_court(self):
-        """Teste que déjeuner trop court est rejeté."""
+        """Teste que dÃ©jeuner trop court est rejetÃ©."""
         from src.services.planning import JourPlanning
         from pydantic import ValidationError
         
         with pytest.raises(ValidationError):
             JourPlanning(
                 jour="2026-02-06",
-                dejeuner="A",  # Min 3 caractères
-                diner="Soupe de légumes"
+                dejeuner="A",  # Min 3 caractÃ¨res
+                diner="Soupe de lÃ©gumes"
             )
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# TESTS INVENTAIRE SERVICE AVANCÉS
-# ═══════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS INVENTAIRE SERVICE AVANCÃ‰S
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestInventaireServiceInit:
@@ -534,35 +534,35 @@ class TestArticleImportValidation:
     """Tests de validation ArticleImport."""
 
     def test_nom_trop_court(self):
-        """Teste que nom trop court est rejeté."""
+        """Teste que nom trop court est rejetÃ©."""
         from src.services.inventaire import ArticleImport
         from pydantic import ValidationError
         
         with pytest.raises(ValidationError):
             ArticleImport(
-                nom="A",  # Min 2 caractères
+                nom="A",  # Min 2 caractÃ¨res
                 quantite=1.0,
                 quantite_min=0.5,
                 unite="kg"
             )
 
     def test_quantite_negative(self):
-        """Teste que quantité négative est rejetée."""
+        """Teste que quantitÃ© nÃ©gative est rejetÃ©e."""
         from src.services.inventaire import ArticleImport
         from pydantic import ValidationError
         
         with pytest.raises(ValidationError):
             ArticleImport(
                 nom="Sel",
-                quantite=-1.0,  # Doit être >= 0
+                quantite=-1.0,  # Doit Ãªtre >= 0
                 quantite_min=0.5,
                 unite="kg"
             )
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# TESTS WEATHER SERVICE AVANCÉS
-# ═══════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS WEATHER SERVICE AVANCÃ‰S
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestMeteoJourValidation:
@@ -587,7 +587,7 @@ class TestMeteoJourValidation:
             lever_soleil="07:30",
             coucher_soleil="18:00",
             condition="pluvieux",
-            icone="🌧️"
+            icone="ðŸŒ§ï¸"
         )
         
         assert meteo.direction_vent == "NO"
@@ -600,7 +600,7 @@ class TestConseilJardinValidation:
     """Tests de validation ConseilJardin."""
 
     def test_conseil_jardin_defaults(self):
-        """Teste les valeurs par défaut de ConseilJardin."""
+        """Teste les valeurs par dÃ©faut de ConseilJardin."""
         from src.services.weather import ConseilJardin
         
         conseil = ConseilJardin(
@@ -609,7 +609,7 @@ class TestConseilJardinValidation:
         )
         
         assert conseil.priorite == 1
-        assert conseil.icone == "🌱"
+        assert conseil.icone == "ðŸŒ±"
         assert conseil.plantes_concernees == []
         assert conseil.action_recommandee == ""
 
@@ -626,7 +626,7 @@ class TestAlerteMeteoValidation:
             type_alerte=TypeAlertMeteo.CANICULE,
             niveau=NiveauAlerte.DANGER,
             titre="Canicule",
-            message="Vague de chaleur prévue",
+            message="Vague de chaleur prÃ©vue",
             conseil_jardin="Arroser matin et soir",
             date_debut=date(2026, 7, 15),
             date_fin=date(2026, 7, 20),
@@ -637,13 +637,13 @@ class TestAlerteMeteoValidation:
         assert alerte.temperature == 38.0
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# TESTS BACKUP SERVICE AVANCÉS
-# ═══════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS BACKUP SERVICE AVANCÃ‰S
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBackupMetadataAdvanced:
-    """Tests avancés de BackupMetadata."""
+    """Tests avancÃ©s de BackupMetadata."""
 
     def test_backup_metadata_with_values(self):
         """Teste BackupMetadata avec valeurs."""
@@ -673,10 +673,10 @@ class TestBackupMetadataAdvanced:
 
 
 class TestBackupConfigAdvanced:
-    """Tests avancés de BackupConfig."""
+    """Tests avancÃ©s de BackupConfig."""
 
     def test_all_options_disabled(self):
-        """Teste avec toutes les options désactivées."""
+        """Teste avec toutes les options dÃ©sactivÃ©es."""
         from src.services.backup import BackupConfig
         
         config = BackupConfig(
@@ -693,13 +693,13 @@ class TestBackupConfigAdvanced:
         assert config.auto_backup_enabled is False
 
 
-# ═══════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS VERSION GENEREE ADVANCED
-# ═══════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestVersionBebeGenereeAdvanced:
-    """Tests avancés de VersionBebeGeneree."""
+    """Tests avancÃ©s de VersionBebeGeneree."""
 
     def test_age_minimum_bounds(self):
         """Teste les bornes de age_minimum_mois."""
@@ -724,7 +724,7 @@ class TestVersionBebeGenereeAdvanced:
 
 
 class TestVersionBatchCookingAdvanced:
-    """Tests avancés de VersionBatchCookingGeneree."""
+    """Tests avancÃ©s de VersionBatchCookingGeneree."""
 
     def test_portions_bounds(self):
         """Teste les bornes de nombre_portions_recommande."""
@@ -744,7 +744,7 @@ class TestVersionBatchCookingAdvanced:
 
 
 class TestVersionRobotAdvanced:
-    """Tests avancés de VersionRobotGeneree."""
+    """Tests avancÃ©s de VersionRobotGeneree."""
 
     def test_temps_cuisson_bounds(self):
         """Teste les bornes de temps_cuisson_adapte_minutes."""
@@ -761,9 +761,9 @@ class TestVersionRobotAdvanced:
             )
 
 
-# ═══════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SERVICE TYPES
-# ═══════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestServiceTypes:
@@ -775,9 +775,9 @@ class TestServiceTypes:
         assert BaseService is not None
 
 
-# ═══════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS IO SERVICE
-# ═══════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestIOService:
@@ -789,9 +789,9 @@ class TestIOService:
         assert io_service is not None
 
 
-# ═══════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS AUTRES SERVICES
-# ═══════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPWAService:

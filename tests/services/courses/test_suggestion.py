@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/services/courses/suggestion.py
 
 Tests du ServiceCoursesIntelligentes:
@@ -6,7 +6,7 @@ Tests du ServiceCoursesIntelligentes:
 - Extraction ingrédients du planning
 - Comparaison avec stock
 - Génération liste de courses intelligente
-- Ajout à la liste de courses
+- Ajout Ã  la liste de courses
 - Suggestions de substitutions IA
 """
 
@@ -29,9 +29,9 @@ from src.services.courses.types import ArticleCourse, ListeCoursesIntelligente, 
 from src.services.courses.constantes import MAPPING_RAYONS, PRIORITES
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @pytest.fixture
 def mock_client_ia():
@@ -170,9 +170,9 @@ def sample_liste_courses(db: Session) -> "ListeCourses":
     return liste
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS CRÉATION SERVICE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS CRÃ‰ATION SERVICE
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestServiceCreation:
     """Tests de création du service."""
@@ -212,9 +212,9 @@ class TestServiceCreation:
                 assert isinstance(service, ServiceCoursesIntelligentes)
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS DÉTERMINATION RAYON
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS DÃ‰TERMINATION RAYON
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestDeterminerRayon:
     """Tests pour _determiner_rayon."""
@@ -240,8 +240,8 @@ class TestDeterminerRayon:
         assert service_suggestions._determiner_rayon("saumon") == "Poissonnerie"
 
     def test_rayon_pates(self, service_suggestions):
-        """Test rayon pâtes -> Épicerie."""
-        assert service_suggestions._determiner_rayon("pâtes") == "Épicerie"
+        """Test rayon pâtes -> Ã‰picerie."""
+        assert service_suggestions._determiner_rayon("pâtes") == "Ã‰picerie"
 
     def test_rayon_surgele(self, service_suggestions):
         """Test rayon surgelé -> Surgelés."""
@@ -252,14 +252,14 @@ class TestDeterminerRayon:
         assert service_suggestions._determiner_rayon("xyzinconnu") == "Autre"
 
     def test_rayon_case_insensitive(self, service_suggestions):
-        """Test insensibilité à la casse."""
+        """Test insensibilité Ã  la casse."""
         assert service_suggestions._determiner_rayon("TOMATE") == "Fruits & Légumes"
         assert service_suggestions._determiner_rayon("Poulet") == "Boucherie"
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS DÉTERMINATION PRIORITÉ
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS DÃ‰TERMINATION PRIORITÃ‰
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestDeterminerPriorite:
     """Tests pour _determiner_priorite."""
@@ -285,8 +285,8 @@ class TestDeterminerPriorite:
         assert service_suggestions._determiner_priorite("Surgelés") == 2
 
     def test_priorite_epicerie(self, service_suggestions):
-        """Test priorité Épicerie = 3."""
-        assert service_suggestions._determiner_priorite("Épicerie") == 3
+        """Test priorité Ã‰picerie = 3."""
+        assert service_suggestions._determiner_priorite("Ã‰picerie") == 3
 
     def test_priorite_autre(self, service_suggestions):
         """Test priorité Autre = 3."""
@@ -297,9 +297,9 @@ class TestDeterminerPriorite:
         assert service_suggestions._determiner_priorite("Rayon Inexistant") == 3
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS OBTENIR PLANNING ACTIF
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestObtenirPlanningActif:
     """Tests pour obtenir_planning_actif."""
@@ -341,9 +341,9 @@ class TestObtenirPlanningActif:
         assert result is None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS OBTENIR STOCK ACTUEL
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestObtenirStockActuel:
     """Tests pour obtenir_stock_actuel."""
@@ -385,9 +385,9 @@ class TestObtenirStockActuel:
         assert "tomates" not in result
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS EXTRACTION INGRÉDIENTS PLANNING
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS EXTRACTION INGRÃ‰DIENTS PLANNING
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestExtraireIngredientsPlanning:
     """Tests pour extraire_ingredients_planning."""
@@ -467,9 +467,9 @@ class TestExtraireIngredientsPlanning:
         assert "Ratatouille" in result[0].recettes_source
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS COMPARAISON STOCK
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestComparerAvecStock:
     """Tests pour comparer_avec_stock."""
@@ -523,9 +523,9 @@ class TestComparerAvecStock:
         assert "Lait" in noms
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS GÉNÉRATION LISTE COURSES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS GÃ‰NÃ‰RATION LISTE COURSES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestGenererListeCourses:
     """Tests pour generer_liste_courses."""
@@ -596,9 +596,9 @@ class TestGenererListeCourses:
         assert "Inventaire vide" in result.alertes[0]
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS AJOUTER À LISTE COURSES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS AJOUTER Ã€ LISTE COURSES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestAjouterAListeCourses:
     """Tests pour ajouter_a_liste_courses."""
@@ -616,7 +616,7 @@ class TestAjouterAListeCourses:
         sample_ingredient,
         sample_liste_courses
     ):
-        """Test mise à jour article déjà dans la liste."""
+        """Test mise Ã  jour article déjÃ  dans la liste."""
         # Créer article existant
         article_existant = ArticleCourses(
             liste_id=sample_liste_courses.id,
@@ -642,7 +642,7 @@ class TestAjouterAListeCourses:
         result = service_suggestions.ajouter_a_liste_courses([article])
         
         assert len(result) == 1
-        # Vérifier que la quantité a été mise à jour
+        # Vérifier que la quantité a été mise Ã  jour
         db.refresh(article_existant)
         assert article_existant.quantite_necessaire == 3.0  # 1.0 + 2.0
 
@@ -660,7 +660,7 @@ class TestAjouterAListeCourses:
         Le gestionnaire d'erreurs retourne [] par défaut.
         """
         article = ArticleCourse(
-            nom="Tomates",  # Correspond à sample_ingredient
+            nom="Tomates",  # Correspond Ã  sample_ingredient
             quantite=1.0,
             unite="kg",
             rayon="Fruits & Légumes",
@@ -670,7 +670,7 @@ class TestAjouterAListeCourses:
         )
         
         # Le code source ne définit pas liste_id, donc l'insertion échoue
-        # À cause du décorateur @avec_gestion_erreurs(default_return=[])
+        # Ã€ cause du décorateur @avec_gestion_erreurs(default_return=[])
         result = service_suggestions.ajouter_a_liste_courses([article])
         
         # Le décorateur retourne [] en cas d'erreur
@@ -691,7 +691,7 @@ class TestAjouterAListeCourses:
             nom="Nouvel Ingredient Unique",
             quantite=1.0,
             unite="pièce",
-            rayon="Épicerie",
+            rayon="Ã‰picerie",
             a_acheter=1.0,
             priorite=3,
             recettes_source=["Test"]
@@ -699,16 +699,16 @@ class TestAjouterAListeCourses:
         
         result = service_suggestions.ajouter_a_liste_courses([article])
         
-        # Le décorateur retourne [] à cause de l'erreur de contrainte
+        # Le décorateur retourne [] Ã  cause de l'erreur de contrainte
         assert result == []
         
         # Mais l'ingrédient a été créé (commit partiel avant flush ArticleCourses)
         # Note: le comportement exact dépend du rollback
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SUGGESTIONS SUBSTITUTIONS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestSuggererSubstitutions:
     """Tests pour suggerer_substitutions (async)."""
@@ -770,7 +770,7 @@ class TestSuggererSubstitutions:
 
     @pytest.mark.asyncio
     async def test_substitutions_limite_5_articles(self, service_suggestions, mock_client_ia):
-        """Test limite à 5 articles évalués."""
+        """Test limite Ã  5 articles évalués."""
         articles = [
             ArticleCourse(nom=f"Article{i}", quantite=1.0, priorite=1)
             for i in range(10)

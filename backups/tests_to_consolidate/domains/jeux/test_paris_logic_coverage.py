@@ -1,9 +1,9 @@
-"""
-Tests complets pour paris_logic.py - Couverture ≥80%
+﻿"""
+Tests complets pour paris_logic.py - Couverture â‰¥80%
 
 Ce module teste toutes les fonctions de logique de paris sportifs:
-- Calcul de forme des équipes
-- Prédiction de résultats
+- Calcul de forme des Ã©quipes
+- PrÃ©diction de rÃ©sultats
 - Analyse des confrontations directes (H2H)
 - Conseils de paris
 - Over/Under predictions
@@ -15,7 +15,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 from unittest.mock import patch, MagicMock
 
-from src.domains.jeux.logic.paris_logic import (
+from src.modules.jeux.logic.paris_logic import (
     # Constantes
     CHAMPIONNATS,
     AVANTAGE_DOMICILE,
@@ -41,14 +41,14 @@ from src.domains.jeux.logic.paris_logic import (
 )
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
 def match_victoire_domicile():
-    """Match gagné par l'équipe domicile."""
+    """Match gagnÃ© par l'Ã©quipe domicile."""
     return {
         "equipe_domicile_id": 1,
         "equipe_exterieur_id": 2,
@@ -59,7 +59,7 @@ def match_victoire_domicile():
 
 @pytest.fixture
 def match_victoire_exterieur():
-    """Match gagné par l'équipe extérieur."""
+    """Match gagnÃ© par l'Ã©quipe extÃ©rieur."""
     return {
         "equipe_domicile_id": 1,
         "equipe_exterieur_id": 2,
@@ -81,7 +81,7 @@ def match_nul():
 
 @pytest.fixture
 def matchs_5_victoires():
-    """5 victoires consécutives pour l'équipe 1."""
+    """5 victoires consÃ©cutives pour l'Ã©quipe 1."""
     return [
         {"equipe_domicile_id": 1, "equipe_exterieur_id": 3, "score_domicile": 2, "score_exterieur": 0},
         {"equipe_domicile_id": 4, "equipe_exterieur_id": 1, "score_domicile": 1, "score_exterieur": 3},
@@ -93,7 +93,7 @@ def matchs_5_victoires():
 
 @pytest.fixture
 def matchs_mixtes():
-    """Matchs avec résultats variés VNDVN."""
+    """Matchs avec rÃ©sultats variÃ©s VNDVN."""
     return [
         {"equipe_domicile_id": 1, "equipe_exterieur_id": 2, "score_domicile": 2, "score_exterieur": 0},  # V
         {"equipe_domicile_id": 3, "equipe_exterieur_id": 1, "score_domicile": 1, "score_exterieur": 1},  # N
@@ -105,7 +105,7 @@ def matchs_mixtes():
 
 @pytest.fixture
 def forme_bonne():
-    """Forme d'une équipe en bonne forme."""
+    """Forme d'une Ã©quipe en bonne forme."""
     return {
         "score": 80.0,
         "forme_str": "VVVNV",
@@ -123,7 +123,7 @@ def forme_bonne():
 
 @pytest.fixture
 def forme_mauvaise():
-    """Forme d'une équipe en mauvaise forme."""
+    """Forme d'une Ã©quipe en mauvaise forme."""
     return {
         "score": 20.0,
         "forme_str": "DDDND",
@@ -163,39 +163,39 @@ def cotes_standard():
     }
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONSTANTES
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestConstantes:
     """Tests des constantes du module."""
     
     def test_championnats_non_vide(self):
-        """Vérifie que la liste des championnats n'est pas vide."""
+        """VÃ©rifie que la liste des championnats n'est pas vide."""
         assert len(CHAMPIONNATS) >= 5
         assert "Ligue 1" in CHAMPIONNATS
         assert "Premier League" in CHAMPIONNATS
     
     def test_avantage_domicile_range(self):
-        """L'avantage domicile doit être entre 0 et 0.20."""
+        """L'avantage domicile doit Ãªtre entre 0 et 0.20."""
         assert 0 < AVANTAGE_DOMICILE < 0.20
     
     def test_seuils_confiance_ordonnees(self):
-        """Les seuils de confiance doivent être ordonnés."""
+        """Les seuils de confiance doivent Ãªtre ordonnÃ©s."""
         assert SEUIL_CONFIANCE_HAUTE > SEUIL_CONFIANCE_MOYENNE
         assert SEUIL_CONFIANCE_MOYENNE > 0
     
     def test_poids_forme_decroissants(self):
-        """Les poids de forme doivent être décroissants."""
+        """Les poids de forme doivent Ãªtre dÃ©croissants."""
         assert len(POIDS_FORME) == 5
         for i in range(len(POIDS_FORME) - 1):
             assert POIDS_FORME[i] > POIDS_FORME[i + 1]
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS calculer_forme_equipe
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalculerFormeEquipe:
@@ -213,7 +213,7 @@ class TestCalculerFormeEquipe:
         assert result["defaites"] == 0
     
     def test_victoire_domicile(self, match_victoire_domicile):
-        """Test d'une victoire à domicile."""
+        """Test d'une victoire Ã  domicile."""
         result = calculer_forme_equipe([match_victoire_domicile], equipe_id=1)
         
         assert result["victoires"] == 1
@@ -223,7 +223,7 @@ class TestCalculerFormeEquipe:
         assert result["buts_encaisses"] == 1
     
     def test_victoire_exterieur(self, match_victoire_exterieur):
-        """Test d'une victoire à l'extérieur."""
+        """Test d'une victoire Ã  l'extÃ©rieur."""
         result = calculer_forme_equipe([match_victoire_exterieur], equipe_id=2)
         
         assert result["victoires"] == 1
@@ -231,7 +231,7 @@ class TestCalculerFormeEquipe:
         assert "V" in result["forme_str"]
     
     def test_defaite(self, match_victoire_domicile):
-        """Test d'une défaite (équipe 2 perd)."""
+        """Test d'une dÃ©faite (Ã©quipe 2 perd)."""
         result = calculer_forme_equipe([match_victoire_domicile], equipe_id=2)
         
         assert result["defaites"] == 1
@@ -246,7 +246,7 @@ class TestCalculerFormeEquipe:
         assert "N" in result["forme_str"]
     
     def test_5_victoires_score_eleve(self, matchs_5_victoires):
-        """5 victoires = score très élevé."""
+        """5 victoires = score trÃ¨s Ã©levÃ©."""
         result = calculer_forme_equipe(matchs_5_victoires, equipe_id=1)
         
         assert result["score"] > 90.0
@@ -256,14 +256,14 @@ class TestCalculerFormeEquipe:
         assert "V" in result["serie_en_cours"]
     
     def test_matchs_mixtes(self, matchs_mixtes):
-        """Matchs variés = score moyen."""
+        """Matchs variÃ©s = score moyen."""
         result = calculer_forme_equipe(matchs_mixtes, equipe_id=1)
         
         assert 30.0 < result["score"] < 70.0
         assert result["victoires"] + result["nuls"] + result["defaites"] == 5
     
     def test_tendance_hausse(self):
-        """Tendance hausse avec 3 victoires récentes."""
+        """Tendance hausse avec 3 victoires rÃ©centes."""
         matchs = [
             {"equipe_domicile_id": 1, "equipe_exterieur_id": 2, "score_domicile": 0, "score_exterieur": 1},  # D (ancien)
             {"equipe_domicile_id": 1, "equipe_exterieur_id": 3, "score_domicile": 2, "score_exterieur": 0},  # V
@@ -275,7 +275,7 @@ class TestCalculerFormeEquipe:
         assert result["tendance"] == "hausse"
     
     def test_tendance_baisse(self):
-        """Tendance baisse avec 3 défaites récentes."""
+        """Tendance baisse avec 3 dÃ©faites rÃ©centes."""
         matchs = [
             {"equipe_domicile_id": 1, "equipe_exterieur_id": 2, "score_domicile": 2, "score_exterieur": 0},  # V (ancien)
             {"equipe_domicile_id": 1, "equipe_exterieur_id": 3, "score_domicile": 0, "score_exterieur": 2},  # D
@@ -287,7 +287,7 @@ class TestCalculerFormeEquipe:
         assert result["tendance"] == "baisse"
     
     def test_serie_en_cours_detection(self):
-        """Détection d'une série en cours."""
+        """DÃ©tection d'une sÃ©rie en cours."""
         matchs = [
             {"equipe_domicile_id": 1, "equipe_exterieur_id": 2, "score_domicile": 2, "score_exterieur": 0},
             {"equipe_domicile_id": 1, "equipe_exterieur_id": 3, "score_domicile": 2, "score_exterieur": 0},
@@ -308,9 +308,9 @@ class TestCalculerFormeEquipe:
         assert result["nb_matchs"] == 5
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS calculer_serie_sans_nul
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalculerSerieSansNul:
@@ -321,11 +321,11 @@ class TestCalculerSerieSansNul:
         assert calculer_serie_sans_nul([]) == 0
     
     def test_commence_par_nul(self):
-        """Si le premier résultat est un nul, série = 0."""
+        """Si le premier rÃ©sultat est un nul, sÃ©rie = 0."""
         assert calculer_serie_sans_nul(["N", "V", "D"]) == 0
     
     def test_tous_sans_nul(self):
-        """Tous les résultats sans nul."""
+        """Tous les rÃ©sultats sans nul."""
         assert calculer_serie_sans_nul(["V", "D", "V", "V", "D"]) == 5
     
     def test_nul_au_milieu(self):
@@ -337,9 +337,9 @@ class TestCalculerSerieSansNul:
         assert calculer_serie_sans_nul(["V"]) == 1
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS calculer_bonus_nul_regression
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalculerBonusNulRegression:
@@ -350,22 +350,22 @@ class TestCalculerBonusNulRegression:
         assert calculer_bonus_nul_regression(3, 3) == 0.0
     
     def test_bonus_une_equipe_au_seuil(self):
-        """Bonus si une équipe au seuil."""
+        """Bonus si une Ã©quipe au seuil."""
         bonus = calculer_bonus_nul_regression(5, 0)
         assert bonus > 0.0
     
     def test_bonus_deux_equipes_au_seuil(self):
-        """Bonus combo si les deux équipes au seuil."""
+        """Bonus combo si les deux Ã©quipes au seuil."""
         bonus = calculer_bonus_nul_regression(5, 5)
         assert bonus > calculer_bonus_nul_regression(5, 0) * 2  # Bonus combo
     
     def test_cap_maximum(self):
-        """Le bonus est plafonné à 25%."""
+        """Le bonus est plafonnÃ© Ã  25%."""
         bonus = calculer_bonus_nul_regression(20, 20)
         assert bonus <= 0.25
     
     def test_bonus_progressif(self):
-        """Le bonus augmente avec la série."""
+        """Le bonus augmente avec la sÃ©rie."""
         bonus_5 = calculer_bonus_nul_regression(5, 0)
         bonus_6 = calculer_bonus_nul_regression(6, 0)
         bonus_7 = calculer_bonus_nul_regression(7, 0)
@@ -373,9 +373,9 @@ class TestCalculerBonusNulRegression:
         assert bonus_5 < bonus_6 < bonus_7
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS calculer_historique_face_a_face
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalculerHistoriqueFaceAFace:
@@ -389,7 +389,7 @@ class TestCalculerHistoriqueFaceAFace:
         assert result["avantage"] is None
     
     def test_avantage_domicile(self):
-        """Détecte avantage pour le domicile."""
+        """DÃ©tecte avantage pour le domicile."""
         matchs = [
             {"equipe_domicile_id": 1, "equipe_exterieur_id": 2, "score_domicile": 2, "score_exterieur": 0},
             {"equipe_domicile_id": 2, "equipe_exterieur_id": 1, "score_domicile": 0, "score_exterieur": 1},
@@ -401,7 +401,7 @@ class TestCalculerHistoriqueFaceAFace:
         assert result["victoires_dom"] >= 2
     
     def test_avantage_exterieur(self):
-        """Détecte avantage pour l'extérieur."""
+        """DÃ©tecte avantage pour l'extÃ©rieur."""
         matchs = [
             {"equipe_domicile_id": 1, "equipe_exterieur_id": 2, "score_domicile": 0, "score_exterieur": 2},
             {"equipe_domicile_id": 2, "equipe_exterieur_id": 1, "score_domicile": 3, "score_exterieur": 0},
@@ -412,30 +412,30 @@ class TestCalculerHistoriqueFaceAFace:
         assert result["victoires_ext"] >= 2
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS predire_resultat_match
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPredireResultatMatch:
     """Tests pour predire_resultat_match."""
     
     def test_prediction_forme_bonne_vs_mauvaise(self, forme_bonne, forme_mauvaise, h2h_avantage_domicile):
-        """Équipe en forme vs équipe en difficulté."""
+        """Ã‰quipe en forme vs Ã©quipe en difficultÃ©."""
         result = predire_resultat_match(forme_bonne, forme_mauvaise, h2h_avantage_domicile)
         
         assert result["prediction"] == "1"  # Victoire domicile
         assert result["confiance"] > 60
     
     def test_prediction_forme_mauvaise_vs_bonne(self, forme_bonne, forme_mauvaise, h2h_avantage_domicile):
-        """Équipe en difficulté à domicile vs équipe en forme."""
+        """Ã‰quipe en difficultÃ© Ã  domicile vs Ã©quipe en forme."""
         result = predire_resultat_match(forme_mauvaise, forme_bonne, h2h_avantage_domicile)
         
-        # L'extérieur devrait être favori malgré le désavantage domicile
+        # L'extÃ©rieur devrait Ãªtre favori malgrÃ© le dÃ©savantage domicile
         assert result["prediction"] in ["2", "N"]
     
     def test_prediction_avec_cotes(self, forme_bonne, forme_mauvaise, h2h_avantage_domicile, cotes_standard):
-        """Les cotes influencent la prédiction."""
+        """Les cotes influencent la prÃ©diction."""
         result = predire_resultat_match(
             forme_bonne, forme_mauvaise, h2h_avantage_domicile, 
             cotes=cotes_standard
@@ -448,27 +448,27 @@ class TestPredireResultatMatch:
         assert "exterieur" in result["probabilites"]
     
     def test_probas_somme_environ_100(self, forme_bonne, forme_mauvaise, h2h_avantage_domicile):
-        """La somme des probabilités doit être proche de 100%."""
+        """La somme des probabilitÃ©s doit Ãªtre proche de 100%."""
         result = predire_resultat_match(forme_bonne, forme_mauvaise, h2h_avantage_domicile)
         
         # Probabilites are returned as percentages (0-100)
         probas = result["probabilites"]
         total = probas["domicile"] + probas["nul"] + probas["exterieur"]
-        assert 95 <= total <= 105  # Tolérance (percentages, ~100%)
+        assert 95 <= total <= 105  # TolÃ©rance (percentages, ~100%)
     
     def test_bonus_nul_avec_series_sans_nul(self):
-        """Test du bonus nul quand les équipes n'ont pas fait de nul."""
+        """Test du bonus nul quand les Ã©quipes n'ont pas fait de nul."""
         forme_dom = {"score": 50, "matchs_sans_nul": 6, "serie_en_cours": None}
         forme_ext = {"score": 50, "matchs_sans_nul": 6, "serie_en_cours": None}
         h2h = {"nb_matchs": 0}
         
         result = predire_resultat_match(forme_dom, forme_ext, h2h)
         
-        # La proba nul devrait être plus élevée (returned as percentage)
+        # La proba nul devrait Ãªtre plus Ã©levÃ©e (returned as percentage)
         assert result["probabilites"]["nul"] > 25  # > 25%
     
     def test_regression_serie_defaites(self):
-        """Bonus pour équipe avec série de défaites."""
+        """Bonus pour Ã©quipe avec sÃ©rie de dÃ©faites."""
         forme_dom = {"score": 30, "matchs_sans_nul": 0, "serie_en_cours": "4D"}
         forme_ext = {"score": 50, "matchs_sans_nul": 0, "serie_en_cours": None}
         h2h = {"nb_matchs": 0}
@@ -479,9 +479,9 @@ class TestPredireResultatMatch:
         assert result["probabilites"]["domicile"] > 20  # > 20%
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS generer_conseil_pari
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGenererConseilPari:
@@ -501,36 +501,36 @@ class TestGenererConseilPari:
         assert "PRUDENT" in conseil
     
     def test_confiance_faible_eviter(self):
-        """Confiance faible = éviter."""
+        """Confiance faible = Ã©viter."""
         conseil = generer_conseil_pari("1", confiance=40)
         
-        assert "ÉVITER" in conseil
+        assert "Ã‰VITER" in conseil
     
     def test_value_bet_detection(self, cotes_standard):
-        """Détection des value bets."""
-        # Cote élevée + confiance = value bet
+        """DÃ©tection des value bets."""
+        # Cote Ã©levÃ©e + confiance = value bet
         cotes_value = {"domicile": 3.5, "nul": 3.5, "exterieur": 2.0}
         conseil = generer_conseil_pari("1", confiance=70, cotes=cotes_value)
         
         assert "VALUE" in conseil
     
     def test_mention_proba_nul_elevee(self):
-        """Mention si proba nul élevée."""
+        """Mention si proba nul Ã©levÃ©e."""
         conseil = generer_conseil_pari("1", confiance=60, proba_nul=0.35)
         
         assert "nul" in conseil.lower()
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS generer_conseils_avances
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGenererConseilsAvances:
     """Tests pour generer_conseils_avances."""
     
     def test_conseil_serie_sans_nul(self):
-        """Conseil quand série sans nul."""
+        """Conseil quand sÃ©rie sans nul."""
         forme_dom = {"matchs_sans_nul": 7, "serie_en_cours": None, "buts_marques": 5, "buts_encaisses": 5, "nb_matchs": 5}
         forme_ext = {"matchs_sans_nul": 3, "serie_en_cours": None, "buts_marques": 5, "buts_encaisses": 5, "nb_matchs": 5}
         
@@ -540,7 +540,7 @@ class TestGenererConseilsAvances:
         assert any("NUL" in t for t in types)
     
     def test_conseil_rebond_serie_defaites(self):
-        """Conseil rebond après défaites."""
+        """Conseil rebond aprÃ¨s dÃ©faites."""
         forme_dom = {"matchs_sans_nul": 0, "serie_en_cours": "5D", "buts_marques": 2, "buts_encaisses": 10, "nb_matchs": 5}
         forme_ext = {"matchs_sans_nul": 0, "serie_en_cours": None, "buts_marques": 5, "buts_encaisses": 5, "nb_matchs": 5}
         
@@ -550,7 +550,7 @@ class TestGenererConseilsAvances:
         assert any("REBOND" in t for t in types)
     
     def test_conseil_over_teams_offensives(self):
-        """Conseil Over avec équipes offensives."""
+        """Conseil Over avec Ã©quipes offensives."""
         forme_dom = {"matchs_sans_nul": 0, "serie_en_cours": None, "buts_marques": 12, "buts_encaisses": 8, "nb_matchs": 5}
         forme_ext = {"matchs_sans_nul": 0, "serie_en_cours": None, "buts_marques": 10, "buts_encaisses": 10, "nb_matchs": 5}
         
@@ -560,7 +560,7 @@ class TestGenererConseilsAvances:
         assert any("OVER" in t for t in types)
     
     def test_conseil_under_teams_defensives(self):
-        """Conseil Under avec équipes défensives."""
+        """Conseil Under avec Ã©quipes dÃ©fensives."""
         forme_dom = {"matchs_sans_nul": 0, "serie_en_cours": None, "buts_marques": 3, "buts_encaisses": 2, "nb_matchs": 5}
         forme_ext = {"matchs_sans_nul": 0, "serie_en_cours": None, "buts_marques": 2, "buts_encaisses": 3, "nb_matchs": 5}
         
@@ -570,7 +570,7 @@ class TestGenererConseilsAvances:
         assert any("UNDER" in t for t in types)
     
     def test_conseil_value_bet_nul(self, cotes_standard):
-        """Conseil value bet nul avec cote élevée."""
+        """Conseil value bet nul avec cote Ã©levÃ©e."""
         cotes_value = {"domicile": 2.0, "nul": 4.2, "exterieur": 3.0}
         forme_dom = {"matchs_sans_nul": 5, "serie_en_cours": None, "buts_marques": 5, "buts_encaisses": 5, "nb_matchs": 5}
         forme_ext = {"matchs_sans_nul": 0, "serie_en_cours": None, "buts_marques": 5, "buts_encaisses": 5, "nb_matchs": 5}
@@ -581,16 +581,16 @@ class TestGenererConseilsAvances:
         assert any("VALUE" in t for t in types)
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS predire_over_under
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPredireOverUnder:
     """Tests pour predire_over_under."""
     
     def test_equipes_offensives_over(self):
-        """Équipes offensives = over probable."""
+        """Ã‰quipes offensives = over probable."""
         forme_dom = {"buts_marques": 12, "buts_encaisses": 8, "nb_matchs": 5}
         forme_ext = {"buts_marques": 10, "buts_encaisses": 10, "nb_matchs": 5}
         
@@ -600,7 +600,7 @@ class TestPredireOverUnder:
         assert result["probabilite_over"] > 50  # Returned as percentage
     
     def test_equipes_defensives_under(self):
-        """Équipes défensives = under probable."""
+        """Ã‰quipes dÃ©fensives = under probable."""
         forme_dom = {"buts_marques": 3, "buts_encaisses": 2, "nb_matchs": 5}
         forme_ext = {"buts_marques": 2, "buts_encaisses": 2, "nb_matchs": 5}
         
@@ -610,7 +610,7 @@ class TestPredireOverUnder:
         assert result["probabilite_over"] < 50  # Returned as percentage
     
     def test_seuil_different(self):
-        """Test avec seuil différent (1.5)."""
+        """Test avec seuil diffÃ©rent (1.5)."""
         forme_dom = {"buts_marques": 5, "buts_encaisses": 5, "nb_matchs": 5}
         forme_ext = {"buts_marques": 5, "buts_encaisses": 5, "nb_matchs": 5}
         
@@ -620,7 +620,7 @@ class TestPredireOverUnder:
         assert result["probabilite_over"] > 50  # 2 buts/match en moyenne, returned as percentage
     
     def test_buts_attendus_calcules(self):
-        """Vérifie le calcul des buts attendus."""
+        """VÃ©rifie le calcul des buts attendus."""
         forme_dom = {"buts_marques": 10, "buts_encaisses": 5, "nb_matchs": 5}
         forme_ext = {"buts_marques": 5, "buts_encaisses": 10, "nb_matchs": 5}
         
@@ -630,23 +630,23 @@ class TestPredireOverUnder:
         assert result["buts_attendus"] > 0
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS calculer_performance_paris
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalculerPerformanceParis:
     """Tests pour calculer_performance_paris."""
     
     def test_paris_vides(self):
-        """Sans paris, retourne stats à zéro."""
+        """Sans paris, retourne stats Ã  zÃ©ro."""
         result = calculer_performance_paris([])
         
         assert result["nb_paris"] == 0
         assert result["roi"] == 0.0
     
     def test_tous_paris_gagnes(self):
-        """Tous les paris gagnés = ROI positif."""
+        """Tous les paris gagnÃ©s = ROI positif."""
         paris = [
             {"mise": 10, "cote": 2.0, "statut": "gagne", "gain": 20},
             {"mise": 10, "cote": 1.8, "statut": "gagne", "gain": 18},
@@ -658,7 +658,7 @@ class TestCalculerPerformanceParis:
         assert result["roi"] > 0
     
     def test_tous_paris_perdus(self):
-        """Tous les paris perdus = ROI négatif."""
+        """Tous les paris perdus = ROI nÃ©gatif."""
         paris = [
             {"mise": 10, "cote": 2.0, "statut": "perdu"},
             {"mise": 10, "cote": 1.8, "statut": "perdu"},
@@ -670,7 +670,7 @@ class TestCalculerPerformanceParis:
         assert result["roi"] < 0
     
     def test_calcul_profit_net(self):
-        """Vérifie le calcul du profit net."""
+        """VÃ©rifie le calcul du profit net."""
         paris = [
             {"mise": 10, "cote": 2.0, "statut": "gagne", "gain": 20},  # +10 profit
             {"mise": 10, "cote": 2.0, "statut": "perdu"},  # -10 loss
@@ -681,9 +681,9 @@ class TestCalculerPerformanceParis:
         assert result["profit"] == 0
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS analyser_tendances_championnat
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAnalyserTendancesChampionnat:
@@ -697,7 +697,7 @@ class TestAnalyserTendancesChampionnat:
         assert result["nb_matchs"] == 0
     
     def test_tendances_calcul(self):
-        """Vérifie le calcul des tendances."""
+        """VÃ©rifie le calcul des tendances."""
         # Matches need 'joue': True to be counted
         matchs = [
             {"score_domicile": 2, "score_exterieur": 1, "joue": True},  # V dom
@@ -714,7 +714,7 @@ class TestAnalyserTendancesChampionnat:
         assert result["nuls_pct"] == 25.0  # 1/4 = 25%
     
     def test_moyenne_buts(self):
-        """Vérifie le calcul de la moyenne de buts."""
+        """VÃ©rifie le calcul de la moyenne de buts."""
         # Matches need 'joue': True to be counted
         matchs = [
             {"score_domicile": 2, "score_exterieur": 1, "joue": True},  # 3 buts
@@ -726,9 +726,9 @@ class TestAnalyserTendancesChampionnat:
         assert result["moyenne_buts"] == 2.0
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS AnalyseurParis (classe)
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAnalyseurParis:
@@ -741,7 +741,7 @@ class TestAnalyseurParis:
         assert analyseur is not None
     
     def test_analyser_serie_complete(self):
-        """Test analyse de série."""
+        """Test analyse de sÃ©rie."""
         analyseur = AnalyseurParis()
         
         result = analyseur.analyser_serie_complete("VVVND")
@@ -773,16 +773,16 @@ class TestAnalyseurParis:
         assert "profil" in result
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS generer_analyse_complete
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGenererAnalyseComplete:
     """Tests pour generer_analyse_complete."""
     
     def test_analyse_complete_structure(self, forme_bonne, forme_mauvaise, h2h_avantage_domicile):
-        """Vérifie la structure de l'analyse complète."""
+        """VÃ©rifie la structure de l'analyse complÃ¨te."""
         result = generer_analyse_complete(
             forme_dom=forme_bonne,
             forme_ext=forme_mauvaise,
@@ -795,7 +795,7 @@ class TestGenererAnalyseComplete:
         assert "stats" in result
     
     def test_analyse_complete_avec_cotes(self, forme_bonne, forme_mauvaise, h2h_avantage_domicile, cotes_standard):
-        """Analyse complète avec cotes."""
+        """Analyse complÃ¨te avec cotes."""
         result = generer_analyse_complete(
             forme_dom=forme_bonne,
             forme_ext=forme_mauvaise,
@@ -807,16 +807,16 @@ class TestGenererAnalyseComplete:
         assert "recommandation" in result
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS generer_resume_parieur
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGenererResumeParieur:
     """Tests pour generer_resume_parieur."""
     
     def test_resume_basique(self):
-        """Génère un résumé basique."""
+        """GÃ©nÃ¨re un rÃ©sumÃ© basique."""
         # generer_resume_parieur expects the output format from generer_analyse_complete
         analyse = {
             "recommandation": {
@@ -835,13 +835,13 @@ class TestGenererResumeParieur:
         assert "65%" in resume or "65" in resume
     
     def test_resume_affiche_prediction(self):
-        """Le résumé affiche la prédiction."""
+        """Le rÃ©sumÃ© affiche la prÃ©diction."""
         analyse = {
             "recommandation": {
                 "pari": "N",
                 "confiance": 50,
                 "mise": "1-2%",
-                "raison": "Match équilibré"
+                "raison": "Match Ã©quilibrÃ©"
             },
             "conseils": [],
             "alertes": []

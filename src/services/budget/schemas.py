@@ -1,4 +1,4 @@
-"""
+﻿"""
 Schémas Pydantic pour le service budget.
 
 Types et modèles de données pour la gestion du budget familial.
@@ -78,8 +78,8 @@ class FactureMaison(BaseModel):
     id: int | None = None
     categorie: CategorieDepense  # GAZ, ELECTRICITE, EAU, etc.
     montant: float
-    consommation: float | None = None  # kWh pour élec, m³ pour gaz/eau
-    unite_consommation: str = ""  # "kWh", "m³"
+    consommation: float | None = None  # kWh pour élec, mÂ³ pour gaz/eau
+    unite_consommation: str = ""  # "kWh", "mÂ³"
     mois: int  # 1-12
     annee: int
     date_facture: date_type | None = None

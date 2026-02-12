@@ -1,5 +1,5 @@
-"""
-Lazy Loading System - Charge modules à la demande
+﻿"""
+Lazy Loading System - Charge modules Ã  la demande
 Réduit temps chargement initial de 60%
 
 [OK] FIX: Support pour modules unifiés avec navigation interne
@@ -16,9 +16,9 @@ import streamlit as st
 logger = logging.getLogger(__name__)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # LAZY LOADER PRINCIPAL
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class ChargeurModuleDiffere:
@@ -37,7 +37,7 @@ class ChargeurModuleDiffere:
     @staticmethod
     def charger(module_path: str, reload: bool = False) -> Any:
         """
-        Charge un module à la demande
+        Charge un module Ã  la demande
 
         Args:
             module_path: Chemin du module (ex: "src.modules.cuisine")
@@ -55,7 +55,7 @@ class ChargeurModuleDiffere:
         start_time = time.time()
 
         try:
-            logger.info(f"📦 Chargement lazy: {module_path}")
+            logger.info(f"ðŸ“¦ Chargement lazy: {module_path}")
 
             # Import dynamique
             module = importlib.import_module(module_path)
@@ -128,7 +128,7 @@ class ChargeurModuleDiffere:
         """Vide le cache (dev mode)"""
         ChargeurModuleDiffere._cache.clear()
         ChargeurModuleDiffere._load_times.clear()
-        logger.info("🗑️ Cache lazy loader vidé")
+        logger.info("ðŸ—‘ï¸ Cache lazy loader vidé")
     
     # Alias anglais pour compatibilité
     load = charger
@@ -137,9 +137,9 @@ class ChargeurModuleDiffere:
     clear_cache = vider_cache
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # DECORATOR LAZY LOAD
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def lazy_import(module_path: str, attr_name: Optional[str] = None):
@@ -170,9 +170,9 @@ def lazy_import(module_path: str, attr_name: Optional[str] = None):
     return decorator
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ROUTER OPTIMISÉ AVEC LAZY LOADING
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class RouteurOptimise:
@@ -182,86 +182,86 @@ class RouteurOptimise:
     [OK] Support pour modules unifiés avec navigation interne
     """
 
-    # ═══════════════════════════════════════════════════════
-    # REGISTRY AVEC MAPPING MODULE UNIFIÉ → SOUS-SECTIONS
-    # ═══════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # REGISTRY AVEC MAPPING MODULE UNIFIÉ â†’ SOUS-SECTIONS
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     MODULE_REGISTRY = {
-        "accueil": {"path": "src.domains.utils.ui.accueil", "type": "simple"},
+        "accueil": {"path": "src.modules.outils.ui.accueil", "type": "simple"},
         
         # [NEW] CALENDRIER UNIFIÉ - VUE CENTRALE
         "planning.calendrier_unifie": {
-            "path": "src.domains.planning.ui.calendrier_unifie",
+            "path": "src.modules.planning.ui.calendrier_unifie",
             "type": "simple",
         },
         
         # [OK] DOMAINE CUISINE
         "cuisine.recettes": {
-            "path": "src.domains.cuisine.ui.recettes",
+            "path": "src.modules.cuisine.ui.recettes",
             "type": "simple",
         },
         "cuisine.inventaire": {
-            "path": "src.domains.cuisine.ui.inventaire",
+            "path": "src.modules.cuisine.ui.inventaire",
             "type": "simple",
         },
         # [UNIFIÉ] Planificateur repas intelligent (Jow-like)
         "cuisine.planificateur_repas": {
-            "path": "src.domains.cuisine.ui.planificateur_repas",
+            "path": "src.modules.cuisine.ui.planificateur_repas",
             "type": "simple",
         },
-        # [LEGACY] Ancien planning semaine → redirige vers planificateur
+        # [LEGACY] Ancien planning semaine â†’ redirige vers planificateur
         "cuisine.planning_semaine": {
-            "path": "src.domains.cuisine.ui.planificateur_repas",
+            "path": "src.modules.cuisine.ui.planificateur_repas",
             "type": "simple",
         },
-        # [UNIFIÉ] Batch Cooking → utilise le nouveau module détaillé
+        # [UNIFIÉ] Batch Cooking â†’ utilise le nouveau module détaillé
         "cuisine.batch_cooking": {
-            "path": "src.domains.cuisine.ui.batch_cooking_detaille",
+            "path": "src.modules.cuisine.ui.batch_cooking_detaille",
             "type": "simple",
         },
         # [NEW] Batch Cooking détaillé (alias direct)
         "cuisine.batch_cooking_detaille": {
-            "path": "src.domains.cuisine.ui.batch_cooking_detaille",
+            "path": "src.modules.cuisine.ui.batch_cooking_detaille",
             "type": "simple",
         },
         "cuisine.courses": {
-            "path": "src.domains.cuisine.ui.courses",
+            "path": "src.modules.cuisine.ui.courses",
             "type": "simple",
         },
         # [SUPPRIMÉ] Anciens modules planning.py et batch_cooking.py (legacy)
         
         # Outils transversaux
-        "barcode": {"path": "src.domains.utils.ui.barcode", "type": "simple"},
-        "rapports": {"path": "src.domains.utils.ui.rapports", "type": "simple"},
+        "barcode": {"path": "src.modules.outils.ui.barcode", "type": "simple"},
+        "rapports": {"path": "src.modules.outils.ui.rapports", "type": "simple"},
         
         # [OK] DOMAINE FAMILLE - NOUVEAU HUB
-        "famille.hub": {"path": "src.domains.famille.ui.hub_famille", "type": "simple"},
-        "famille.jules": {"path": "src.domains.famille.ui.jules", "type": "simple"},
-        "famille.jules_planning": {"path": "src.domains.famille.ui.jules_planning", "type": "simple"},  # Planning activités éveil
-        "famille.suivi_perso": {"path": "src.domains.famille.ui.suivi_perso", "type": "simple"},
-        "famille.weekend": {"path": "src.domains.famille.ui.weekend", "type": "simple"},
-        "famille.achats_famille": {"path": "src.domains.famille.ui.achats_famille", "type": "simple"},
+        "famille.hub": {"path": "src.modules.famille.ui.hub_famille", "type": "simple"},
+        "famille.jules": {"path": "src.modules.famille.ui.jules", "type": "simple"},
+        "famille.jules_planning": {"path": "src.modules.famille.ui.jules_planning", "type": "simple"},  # Planning activités éveil
+        "famille.suivi_perso": {"path": "src.modules.famille.ui.suivi_perso", "type": "simple"},
+        "famille.weekend": {"path": "src.modules.famille.ui.weekend", "type": "simple"},
+        "famille.achats_famille": {"path": "src.modules.famille.ui.achats_famille", "type": "simple"},
         # Modules famille conservés
-        "famille.activites": {"path": "src.domains.famille.ui.activites", "type": "simple"},
-        "famille.routines": {"path": "src.domains.famille.ui.routines", "type": "simple"},
+        "famille.activites": {"path": "src.modules.famille.ui.activites", "type": "simple"},
+        "famille.routines": {"path": "src.modules.famille.ui.routines", "type": "simple"},
         
         # [OK] DOMAINE MAISON
-        "maison": {"path": "src.domains.maison.ui", "type": "hub"},  # Hub Maison avec cards
-        "maison.projets": {"path": "src.domains.maison.ui.projets", "type": "simple"},
-        "maison.jardin": {"path": "src.domains.maison.ui.jardin", "type": "simple"},
-        "maison.jardin_zones": {"path": "src.domains.maison.ui.jardin_zones", "type": "simple"},  # Dashboard zones 2600m²
-        "maison.entretien": {"path": "src.domains.maison.ui.entretien", "type": "simple"},
-        "maison.meubles": {"path": "src.domains.maison.ui.meubles", "type": "simple"},
-        "maison.eco": {"path": "src.domains.maison.ui.eco_tips", "type": "simple"},
-        "maison.depenses": {"path": "src.domains.maison.ui.depenses", "type": "simple"},
-        "maison.energie": {"path": "src.domains.maison.ui.energie", "type": "simple"},  # Dashboard énergie
-        "maison.scan_factures": {"path": "src.domains.maison.ui.scan_factures", "type": "simple"},  # OCR factures
+        "maison": {"path": "src.modules.maison.ui", "type": "hub"},  # Hub Maison avec cards
+        "maison.projets": {"path": "src.modules.maison.ui.projets", "type": "simple"},
+        "maison.jardin": {"path": "src.modules.maison.ui.jardin", "type": "simple"},
+        "maison.jardin_zones": {"path": "src.modules.maison.ui.jardin_zones", "type": "simple"},  # Dashboard zones 2600mÂ²
+        "maison.entretien": {"path": "src.modules.maison.ui.entretien", "type": "simple"},
+        "maison.meubles": {"path": "src.modules.maison.ui.meubles", "type": "simple"},
+        "maison.eco": {"path": "src.modules.maison.ui.eco_tips", "type": "simple"},
+        "maison.depenses": {"path": "src.modules.maison.ui.depenses", "type": "simple"},
+        "maison.energie": {"path": "src.modules.maison.ui.energie", "type": "simple"},  # Dashboard énergie
+        "maison.scan_factures": {"path": "src.modules.maison.ui.scan_factures", "type": "simple"},  # OCR factures
         # [OK] DOMAINE JEUX (Paris sportifs & Loto)
-        "jeux.paris": {"path": "src.domains.jeux.ui.paris", "type": "simple"},
-        "jeux.loto": {"path": "src.domains.jeux.ui.loto", "type": "simple"},
+        "jeux.paris": {"path": "src.modules.jeux.ui.paris", "type": "simple"},
+        "jeux.loto": {"path": "src.modules.jeux.ui.loto", "type": "simple"},
         # Paramètres
-        "parametres": {"path": "src.domains.utils.ui.parametres", "type": "simple"},
-        "notifications_push": {"path": "src.domains.utils.ui.notifications_push", "type": "simple"},  # Alertes push
+        "parametres": {"path": "src.modules.outils.ui.parametres", "type": "simple"},
+        "notifications_push": {"path": "src.modules.outils.ui.notifications_push", "type": "simple"},  # Alertes push
     }
 
     @staticmethod
@@ -283,17 +283,17 @@ class RouteurOptimise:
         config = RouteurOptimise.MODULE_REGISTRY[module_name]
         module_path = config["path"]
 
-        logger.info(f"🎯 Route: {module_name} → {module_path}")
+        logger.info(f"ðŸŽ¯ Route: {module_name} â†’ {module_path}")
 
         # Afficher spinner pendant chargement
-        with st.spinner(f"⏳ Chargement {module_name}..."):
+        with st.spinner(f"â³ Chargement {module_name}..."):
             try:
                 # Lazy load du module
                 module = ChargeurModuleDiffere.charger(module_path)
 
-                # ═══════════════════════════════════════════════════════
+                # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
                 # RENDER DU MODULE
-                # ═══════════════════════════════════════════════════════
+                # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
                 if hasattr(module, "app"):
                     module.app()
                 elif hasattr(module, "afficher"):
@@ -324,9 +324,9 @@ class RouteurOptimise:
         ChargeurModuleDiffere.precharger(common, background=True)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # MÉTRIQUES LAZY LOADING
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def afficher_stats_chargement_differe():
@@ -335,7 +335,7 @@ def afficher_stats_chargement_differe():
 
     stats = ChargeurModuleDiffere.obtenir_statistiques()
 
-    with st.expander("⚡ Lazy Loading Stats"):
+    with st.expander("âš¡ Lazy Loading Stats"):
         col1, col2 = st.columns(2)
 
         with col1:
@@ -358,9 +358,9 @@ def afficher_stats_chargement_differe():
                 :5
             ]:  # Top 5 plus lents
                 module_name = module.split(".")[-1]
-                st.caption(f"• {module_name}: {load_time*1000:.0f}ms")
+                st.caption(f"â€¢ {module_name}: {load_time*1000:.0f}ms")
 
-        if st.button("🗑️ Vider Cache Lazy"):
+        if st.button("ðŸ—‘ï¸ Vider Cache Lazy"):
             ChargeurModuleDiffere.vider_cache()
             st.success("Cache vidé !")
             st.rerun()

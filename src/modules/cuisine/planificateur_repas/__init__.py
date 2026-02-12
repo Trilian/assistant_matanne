@@ -1,12 +1,12 @@
-"""
+﻿"""
 Module Planificateur de Repas Intelligent - UI Streamlit
 
 Interface style Jow:
-- Générateur IA de menus équilibrés
-- Apprentissage des goûts (👍/👎) persistant en DB
-- Versions Jules intégrées
+- GÃenÃerateur IA de menus ÃequilibrÃes
+- Apprentissage des goûts (ðŸ‘/ðŸ‘Ž) persistant en DB
+- Versions Jules intÃegrÃees
 - Suggestions alternatives
-- Validation équilibre nutritionnel
+- Validation Ãequilibre nutritionnel
 """
 
 from ._common import st, date, timedelta
@@ -28,17 +28,17 @@ from .generation import generer_semaine_ia
 
 
 def app():
-    """Point d'entrée du module Planificateur de Repas."""
+    """Point d'entrÃee du module Planificateur de Repas."""
     
-    st.title("🍽️ Planifier mes repas")
-    st.caption("Générateur intelligent de menus équilibrés avec adaptation pour Jules")
+    st.title("ðŸ½ï¸ Planifier mes repas")
+    st.caption("GÃenÃerateur intelligent de menus ÃequilibrÃes avec adaptation pour Jules")
     
     # Initialiser la session
     if "planning_data" not in st.session_state:
         st.session_state.planning_data = {}
     
     if "planning_date_debut" not in st.session_state:
-        # Par défaut: mercredi prochain
+        # Par dÃefaut: mercredi prochain
         today = date.today()
         days_until_wednesday = (2 - today.weekday()) % 7
         if days_until_wednesday == 0:
@@ -47,30 +47,30 @@ def app():
     
     # Tabs
     tab_planifier, tab_preferences, tab_historique = st.tabs([
-        "📅 Planifier",
-        "⚙️ Préférences",
-        "📚 Historique"
+        "ðŸ“… Planifier",
+        "âš™ï¸ PrÃefÃerences",
+        "ðŸ“š Historique"
     ])
     
-    # ═══════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TAB: PLANIFIER
-    # ═══════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     with tab_planifier:
-        # Sélection période
+        # SÃelection pÃeriode
         col1, col2, col3 = st.columns([2, 2, 1])
         
         with col1:
             date_debut = st.date_input(
-                "📅 Début de la semaine",
+                "ðŸ“… DÃebut de la semaine",
                 value=st.session_state.planning_date_debut,
                 format="DD/MM/YYYY",
             )
             st.session_state.planning_date_debut = date_debut
         
         with col2:
-            date_fin = date_debut + timedelta(days=9)  # Mer → Ven suivant = 10 jours
-            st.markdown(f"**→** Vendredi {date_fin.strftime('%d/%m/%Y')}")
+            date_fin = date_debut + timedelta(days=9)  # Mer â†’ Ven suivant = 10 jours
+            st.markdown(f"**â†’** Vendredi {date_fin.strftime('%d/%m/%Y')}")
         
         with col3:
             st.write("")  # Spacer
@@ -78,17 +78,17 @@ def app():
         st.divider()
         
         # Apprentissage IA
-        with st.expander("🧠 Ce que l'IA a appris", expanded=False):
+        with st.expander("ðŸ§  Ce que l'IA a appris", expanded=False):
             render_apprentissage_ia()
         
         st.divider()
         
-        # Bouton génération
+        # Bouton gÃenÃeration
         col_gen1, col_gen2, col_gen3 = st.columns([2, 2, 1])
         
         with col_gen1:
-            if st.button("🎲 Générer une semaine", type="primary", use_container_width=True):
-                with st.spinner("🤖 L'IA réfléchit à vos menus..."):
+            if st.button("ðŸŽ² GÃenÃerer une semaine", type="primary", use_container_width=True):
+                with st.spinner("ðŸ¤– L'IA rÃeflÃechit Ã  vos menus..."):
                     result = generer_semaine_ia(date_debut)
                     
                     if result and result.get("semaine"):
@@ -106,17 +106,17 @@ def app():
                         st.session_state.planning_conseils = result.get("conseils_batch", "")
                         st.session_state.planning_suggestions_bio = result.get("suggestions_bio", [])
                         
-                        st.success("✅ Semaine générée!")
+                        st.success("âœ… Semaine gÃenÃerÃee!")
                         st.rerun()
                     else:
-                        st.error("❌ Impossible de générer la semaine")
+                        st.error("âŒ Impossible de gÃenÃerer la semaine")
         
         with col_gen2:
-            if st.button("📦 Utiliser mon stock", use_container_width=True):
-                st.info("🚧 Fonctionnalité en développement")
+            if st.button("ðŸ“¦ Utiliser mon stock", use_container_width=True):
+                st.info("ðŸš§ FonctionnalitÃe en dÃeveloppement")
         
         with col_gen3:
-            if st.button("🔄 Reset", use_container_width=True):
+            if st.button("ðŸ”„ Reset", use_container_width=True):
                 st.session_state.planning_data = {}
                 st.rerun()
         
@@ -124,7 +124,7 @@ def app():
         
         # Afficher le planning
         if st.session_state.planning_data:
-            # Résumé équilibre
+            # RÃesumÃe Ãequilibre
             render_resume_equilibre(st.session_state.planning_data)
             
             st.divider()
@@ -138,14 +138,14 @@ def app():
             
             # Conseils batch
             if st.session_state.get("planning_conseils"):
-                st.markdown("##### 🍳 Conseils Batch Cooking")
+                st.markdown("##### ðŸ³ Conseils Batch Cooking")
                 st.info(st.session_state.planning_conseils)
             
             # Suggestions bio
             if st.session_state.get("planning_suggestions_bio"):
-                st.markdown("##### 🌿 Suggestions bio/local")
+                st.markdown("##### ðŸŒ¿ Suggestions bio/local")
                 for sug in st.session_state.planning_suggestions_bio:
-                    st.caption(f"• {sug}")
+                    st.caption(f"â€¢ {sug}")
             
             st.divider()
             
@@ -153,13 +153,13 @@ def app():
             col_val1, col_val2, col_val3 = st.columns(3)
             
             with col_val1:
-                if st.button("💚 Valider ce planning", type="primary", use_container_width=True):
-                    st.success("✅ Planning validé! Redirection vers les courses...")
-                    # TODO: Créer le planning en DB et générer la liste de courses
+                if st.button("ðŸ’š Valider ce planning", type="primary", use_container_width=True):
+                    st.success("âœ… Planning validÃe! Redirection vers les courses...")
+                    # TODO: CrÃeer le planning en DB et gÃenÃerer la liste de courses
             
             with col_val2:
-                if st.button("🛒 Générer courses", use_container_width=True):
-                    st.info("🚧 Génération de la liste de courses...")
+                if st.button("ðŸ›’ GÃenÃerer courses", use_container_width=True):
+                    st.info("ðŸš§ GÃenÃeration de la liste de courses...")
             
             with col_val3:
                 # Export PDF du planning
@@ -172,41 +172,41 @@ def app():
                     )
                     if pdf_buffer:
                         st.download_button(
-                            label="🖨️ Télécharger PDF",
+                            label="ðŸ–¨ï¸ TÃelÃecharger PDF",
                             data=pdf_buffer,
                             file_name=f"planning_{date_debut.strftime('%Y%m%d')}.pdf",
                             mime="application/pdf",
                             use_container_width=True
                         )
                     else:
-                        st.button("🖨️ Imprimer", disabled=True, use_container_width=True)
+                        st.button("ðŸ–¨ï¸ Imprimer", disabled=True, use_container_width=True)
         
         else:
-            st.info("👆 Cliquez sur 'Générer une semaine' pour commencer")
+            st.info("ðŸ‘† Cliquez sur 'GÃenÃerer une semaine' pour commencer")
     
-    # ═══════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TAB: PRÉFÉRENCES
-    # ═══════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     with tab_preferences:
         render_configuration_preferences()
     
-    # ═══════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TAB: HISTORIQUE
-    # ═══════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     with tab_historique:
-        st.subheader("📚 Historique des plannings")
+        st.subheader("ðŸ“š Historique des plannings")
         
         # TODO: Charger l'historique depuis la DB
-        st.info("🚧 Historique des plannings passés à venir")
+        st.info("ðŸš§ Historique des plannings passÃes Ã  venir")
         
-        st.markdown("##### 🧠 Vos feedbacks")
+        st.markdown("##### ðŸ§  Vos feedbacks")
         feedbacks = charger_feedbacks()
         
         if feedbacks:
             for fb in feedbacks[-10:]:
-                emoji = "👍" if fb.feedback == "like" else "👎" if fb.feedback == "dislike" else "😐"
+                emoji = "ðŸ‘" if fb.feedback == "like" else "ðŸ‘Ž" if fb.feedback == "dislike" else "ðŸ˜"
                 st.caption(f"{emoji} {fb.recette_nom} ({fb.date_feedback.strftime('%d/%m')})")
         else:
             st.caption("Pas encore de feedbacks")

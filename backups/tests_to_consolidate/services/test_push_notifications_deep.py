@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests complets pour src/services/push_notifications.py
 
 Couverture cible: >80%
@@ -9,9 +9,9 @@ from datetime import datetime, timedelta, time
 from unittest.mock import Mock, patch, MagicMock
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ENUMS ET TYPES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestNotificationType:
@@ -41,7 +41,7 @@ class TestNotificationType:
         assert NotificationType.MILESTONE_REMINDER == "milestone_reminder"
         assert NotificationType.HEALTH_CHECK_REMINDER == "health_check_reminder"
         
-        # Système
+        # SystÃ¨me
         assert NotificationType.SYSTEM_UPDATE == "system_update"
         assert NotificationType.SYNC_COMPLETE == "sync_complete"
 
@@ -50,13 +50,13 @@ class TestNotificationType:
         assert len(NotificationType) == 11
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS SCHÉMAS PYDANTIC
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS SCHÃ‰MAS PYDANTIC
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPushSubscription:
-    """Tests schéma PushSubscription."""
+    """Tests schÃ©ma PushSubscription."""
 
     def test_import_schema(self):
         from src.services.push_notifications import PushSubscription
@@ -93,7 +93,7 @@ class TestPushSubscription:
 
 
 class TestPushNotification:
-    """Tests schéma PushNotification."""
+    """Tests schÃ©ma PushNotification."""
 
     def test_creation_basique(self):
         from src.services.push_notifications import PushNotification, NotificationType
@@ -143,7 +143,7 @@ class TestPushNotification:
 
 
 class TestNotificationPreferences:
-    """Tests schéma NotificationPreferences."""
+    """Tests schÃ©ma NotificationPreferences."""
 
     def test_creation_valide(self):
         from src.services.push_notifications import NotificationPreferences
@@ -157,20 +157,20 @@ class TestNotificationPreferences:
         
         prefs = NotificationPreferences(user_id="user123")
         
-        # Catégories activées par défaut
+        # CatÃ©gories activÃ©es par dÃ©faut
         assert prefs.stock_alerts is True
         assert prefs.expiration_alerts is True
         assert prefs.meal_reminders is True
         assert prefs.activity_reminders is True
         assert prefs.shopping_updates is True
         assert prefs.family_reminders is True
-        assert prefs.system_updates is False  # Désactivé par défaut
+        assert prefs.system_updates is False  # DÃ©sactivÃ© par dÃ©faut
         
         # Horaires de silence
         assert prefs.quiet_hours_start == 22
         assert prefs.quiet_hours_end == 7
         
-        # Fréquence
+        # FrÃ©quence
         assert prefs.max_per_hour == 5
         assert prefs.digest_mode is False
 
@@ -192,9 +192,9 @@ class TestNotificationPreferences:
         assert prefs.digest_mode is True
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONFIGURATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPushNotificationsConfig:
@@ -213,9 +213,9 @@ class TestPushNotificationsConfig:
         assert VAPID_EMAIL.startswith("mailto:")
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS UTILS IMPORTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPushNotificationsUtilsImports:
@@ -253,8 +253,8 @@ class TestPushNotificationsUtilsImports:
         from src.services.push_notifications_utils import is_quiet_hours
         
         # Test pendant les heures silencieuses
-        assert is_quiet_hours(23, 22, 7) is True  # 23h dans période 22h-7h
-        assert is_quiet_hours(10, 22, 7) is False  # 10h hors période
+        assert is_quiet_hours(23, 22, 7) is True  # 23h dans pÃ©riode 22h-7h
+        assert is_quiet_hours(10, 22, 7) is False  # 10h hors pÃ©riode
         assert is_quiet_hours(10, None, None) is False  # Pas de silence
 
     def test_build_push_payload(self):
@@ -291,19 +291,19 @@ class TestPushNotificationsUtilsImports:
     def test_create_meal_reminder_notification(self):
         from src.services.push_notifications_utils import create_meal_reminder_notification
         
-        notif = create_meal_reminder_notification("Poulet rôti", "déjeuner", "12:30")
+        notif = create_meal_reminder_notification("Poulet rÃ´ti", "dÃ©jeuner", "12:30")
         
         assert notif is not None
         assert isinstance(notif, dict)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MODELS IMPORTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPushNotificationsModels:
-    """Tests imports modèles DB."""
+    """Tests imports modÃ¨les DB."""
 
     def test_import_models(self):
         from src.core.models import (
@@ -315,9 +315,9 @@ class TestPushNotificationsModels:
         assert NotificationPreferenceModel is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EDGE CASES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPushNotificationsEdgeCases:
@@ -381,7 +381,7 @@ class TestPushNotificationsEdgeCases:
     def test_vibration_pattern(self):
         from src.services.push_notifications import PushNotification
         
-        # Pattern personnalisé
+        # Pattern personnalisÃ©
         notif = PushNotification(
             title="Urgent",
             body="Message urgent",
@@ -403,7 +403,7 @@ class TestPushNotificationsEdgeCases:
 
 
 class TestPushNotificationsIntegration:
-    """Tests d'intégration."""
+    """Tests d'intÃ©gration."""
 
     def test_workflow_notification_stock(self):
         from src.services.push_notifications_utils import (
@@ -412,16 +412,16 @@ class TestPushNotificationsIntegration:
             NotificationType
         )
         
-        # Créer préférences comme dict
+        # CrÃ©er prÃ©fÃ©rences comme dict
         prefs = {
             "stock_alerts": True
         }
         
-        # Vérifier si on peut envoyer
+        # VÃ©rifier si on peut envoyer
         can_send = check_notification_type_enabled(NotificationType.STOCK_LOW, prefs)
         assert can_send is True
         
-        # Créer notification
+        # CrÃ©er notification
         notif = create_stock_notification("Lait", 0.5, "L")
         assert notif is not None
         assert isinstance(notif, dict)
@@ -440,7 +440,7 @@ class TestPushNotificationsIntegration:
         can_send = check_notification_type_enabled(NotificationType.MEAL_REMINDER, prefs)
         assert can_send is True
         
-        notif = create_meal_reminder_notification("Salade César", "dîner", "19:00")
+        notif = create_meal_reminder_notification("Salade CÃ©sar", "dÃ®ner", "19:00")
         assert notif is not None
         assert isinstance(notif, dict)
 
@@ -449,7 +449,7 @@ class TestPushNotificationsIntegration:
         
         prefs = NotificationPreferences(user_id="test")
         
-        # Chaque type de notification devrait avoir une préférence correspondante
+        # Chaque type de notification devrait avoir une prÃ©fÃ©rence correspondante
         preference_mapping = {
             NotificationType.STOCK_LOW: prefs.stock_alerts,
             NotificationType.EXPIRATION_WARNING: prefs.expiration_alerts,
@@ -464,6 +464,6 @@ class TestPushNotificationsIntegration:
             NotificationType.SYNC_COMPLETE: prefs.system_updates,
         }
         
-        # Vérifier que toutes les valeurs sont des booléens
+        # VÃ©rifier que toutes les valeurs sont des boolÃ©ens
         for notif_type, pref_value in preference_mapping.items():
             assert isinstance(pref_value, bool), f"{notif_type} preference is not bool"

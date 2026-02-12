@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Loto - Synchronisation des tirages
 """
 
@@ -12,26 +12,26 @@ def sync_tirages_loto(limite: int = 50) -> int:
     Synchronise les derniers tirages du Loto FDJ depuis le web.
     
     Args:
-        limite: Nombre de tirages à récupérer (max 100)
+        limite: Nombre de tirages à recuperer (max 100)
         
     Returns:
-        Nombre de nouveaux tirages ajoutés
+        Nombre de nouveaux tirages ajoutes
     """
     try:
-        logger.info(f"🔄 Synchronisation Loto: récupération {limite} derniers tirages")
+        logger.info(f"🔄 Synchronisation Loto: recuperation {limite} derniers tirages")
         
         # Charger les tirages depuis le web/API FDJ
         tirages_api = charger_tirages_loto(limite=limite)
         
         if not tirages_api:
-            logger.warning("⚠️ Pas de données Loto trouvées")
+            logger.warning("⚠️ Pas de donnees Loto trouvees")
             return 0
         
         count = 0
         with obtenir_contexte_db() as session:
             for tirage_api in tirages_api:
                 try:
-                    # Vérifier si le tirage existe déjà
+                    # Verifier si le tirage existe dejà
                     date_tirage = None
                     if isinstance(tirage_api.get("date"), str):
                         # Parser la date
@@ -58,10 +58,10 @@ def sync_tirages_loto(limite: int = 50) -> int:
                     ).first()
                     
                     if existing:
-                        logger.debug(f"Tirage du {date_tirage} existe déjà")
+                        logger.debug(f"Tirage du {date_tirage} existe dejà")
                         continue
                     
-                    # Créer nouveau tirage
+                    # Creer nouveau tirage
                     numeros = tirage_api.get("numeros", [])
                     numero_chance = tirage_api.get("numero_chance")
                     jackpot = tirage_api.get("jackpot", 0)
@@ -89,7 +89,7 @@ def sync_tirages_loto(limite: int = 50) -> int:
             
             try:
                 session.commit()
-                logger.info(f"📊 {count} nouveaux tirages ajoutés")
+                logger.info(f"📊 {count} nouveaux tirages ajoutes")
             except Exception as e:
                 logger.error(f"Erreur commit: {e}")
                 session.rollback()

@@ -2,8 +2,8 @@
 Module Suivi Perso - Dashboard et graphiques
 """
 
-from ._common import st, date, timedelta, go
-from .helpers import get_current_user, set_current_user
+from .utils import st, date, timedelta, go
+from .utilitaires import get_current_user, set_current_user
 
 
 def render_user_switch():
@@ -14,13 +14,13 @@ def render_user_switch():
     
     with col1:
         btn_type = "primary" if current == "anne" else "secondary"
-        if st.button("👩 Anne", key="switch_anne", use_container_width=True, type=btn_type):
+        if st.button("ðŸ‘e Anne", key="switch_anne", use_container_width=True, type=btn_type):
             set_current_user("anne")
             st.rerun()
     
     with col2:
         btn_type = "primary" if current == "mathieu" else "secondary"
-        if st.button("👨 Mathieu", key="switch_mathieu", use_container_width=True, type=btn_type):
+        if st.button("ðŸ‘¨ Mathieu", key="switch_mathieu", use_container_width=True, type=btn_type):
             set_current_user("mathieu")
             st.rerun()
 
@@ -29,17 +29,17 @@ def render_dashboard(data: dict):
     """Affiche le dashboard principal"""
     user = data.get("user")
     if not user:
-        st.warning("Utilisateur non trouvé")
+        st.warning("Utilisateur non trouvÃe")
         return
     
-    st.subheader("📊 Dashboard")
+    st.subheader("ðŸ“Š Dashboard")
     
-    # Métriques principales
+    # MÃetriques principales
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
         streak = data.get("streak", 0)
-        st.metric("🔥 Streak", f"{streak} jours")
+        st.metric("ðŸ”¥ Streak", f"{streak} jours")
     
     with col2:
         today_summary = None
@@ -51,15 +51,15 @@ def render_dashboard(data: dict):
         today_pas = today_summary.pas if today_summary else 0
         objectif = data.get("objectif_pas", 10000)
         pct = min(100, (today_pas / objectif) * 100)
-        st.metric("👣 Pas aujourd'hui", f"{today_pas:,}", f"{pct:.0f}%")
+        st.metric("ðŸ‘£ Pas aujourd'hui", f"{today_pas:,}", f"{pct:.0f}%")
     
     with col3:
         today_cal = today_summary.calories_actives if today_summary else 0
-        st.metric("🔥 Calories", f"{today_cal}")
+        st.metric("ðŸ”¥ Calories", f"{today_cal}")
     
     with col4:
-        garmin = "✅ Connecté" if data.get("garmin_connected") else "❌ Non connecté"
-        st.metric("⌚ Garmin", garmin)
+        garmin = "âœ… ConnectÃe" if data.get("garmin_connected") else "âŒ Non connectÃe"
+        st.metric("âŒš Garmin", garmin)
     
     # Graphique des 7 derniers jours
     st.markdown("---")
@@ -69,10 +69,10 @@ def render_dashboard(data: dict):
 def render_weekly_chart(summaries: list, objectif: int):
     """Affiche le graphique des 7 derniers jours"""
     if not summaries:
-        st.info("Pas de données Garmin. Connectez votre montre pour voir vos stats.")
+        st.info("Pas de donnÃees Garmin. Connectez votre montre pour voir vos stats.")
         return
     
-    # Préparer les données
+    # PrÃeparer les donnÃees
     dates = []
     pas_values = []
     calories_values = []
@@ -85,7 +85,7 @@ def render_weekly_chart(summaries: list, objectif: int):
         pas_values.append(summary.pas if summary else 0)
         calories_values.append(summary.calories_actives if summary else 0)
     
-    # Créer le graphique
+    # CrÃeer le graphique
     fig = go.Figure()
     
     # Barres pour les pas
@@ -102,7 +102,7 @@ def render_weekly_chart(summaries: list, objectif: int):
                   annotation_text=f"Objectif: {objectif:,}")
     
     fig.update_layout(
-        title="📈 Pas quotidiens (7 derniers jours)",
+        title="ðŸ“ˆ Pas quotidiens (7 derniers jours)",
         xaxis_title="",
         yaxis_title="Pas",
         showlegend=False,

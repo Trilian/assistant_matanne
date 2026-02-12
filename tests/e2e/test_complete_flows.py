@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests E2E pour les flux complets de l'application (PHASE 5)
 """
 import pytest
@@ -17,7 +17,7 @@ class TestE2ERecipeWorkflow:
     def test_create_recipe_flow(self, mock_success, mock_input, mock_button):
         """Test le flux complet de création de recette"""
         mock_button.side_effect = [False, False, True]  # Simuler les clics
-        mock_input.return_value = "Pâtes à la Carbonara"
+        mock_input.return_value = "Pâtes Ã  la Carbonara"
         mock_success.return_value = None
         
         # Simuler le flux:
@@ -131,7 +131,7 @@ class TestE2EPlanningWorkflow:
         
         # 4. Confirmer
         if st.button("Planifier"):
-            st.write(f"Activité planifiée: {activity} le {date} à {time_val}")
+            st.write(f"Activité planifiée: {activity} le {date} Ã  {time_val}")
         
         assert mock_date.called
         assert mock_time.called
@@ -246,18 +246,18 @@ class TestE2EMultiStepWorkflow:
         # 1. Créer les tabs pour les étapes
         tabs = st.tabs(["Infos", "Ingrédients", "Préparation"])
         
-        # Étape 1: Informations
+        # Ã‰tape 1: Informations
         with tabs[0]:
             name = st.text_input("Nom")
             time = st.text_input("Temps (min)")
         
-        # Étape 2: Ingrédients
+        # Ã‰tape 2: Ingrédients
         with tabs[1]:
             ingredient = st.text_input("Ingrédient")
         
-        # Étape 3: Préparation
+        # Ã‰tape 3: Préparation
         with tabs[2]:
-            step = st.text_input("Étape")
+            step = st.text_input("Ã‰tape")
         
         # Soumettre
         if st.form_submit_button("Créer recette"):

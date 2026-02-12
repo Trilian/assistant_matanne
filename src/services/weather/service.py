@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service d'alertes météo pour le jardin.
 
 Fonctionnalités:
@@ -49,9 +49,9 @@ from .utils import (
 logger = logging.getLogger(__name__)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TYPES ET SCHÉMAS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TypeAlertMeteo(str, Enum):
@@ -109,7 +109,7 @@ class ConseilJardin(BaseModel):
     """Conseil de jardinage basé sur la météo."""
     
     priorite: int = 1  # 1 = haute, 3 = basse
-    icone: str = "🌱"
+    icone: str = "ðŸŒ±"
     titre: str
     description: str
     plantes_concernees: list[str] = Field(default_factory=list)
@@ -126,9 +126,9 @@ class PlanArrosage(BaseModel):
     plantes_prioritaires: list[str] = Field(default_factory=list)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SERVICE MÉTÉO JARDIN
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class ServiceMeteo:
@@ -139,8 +139,8 @@ class ServiceMeteo:
     """
     
     # Seuils d'alerte
-    SEUIL_GEL = 2.0  # °C
-    SEUIL_CANICULE = 35.0  # °C
+    SEUIL_GEL = 2.0  # Â°C
+    SEUIL_CANICULE = 35.0  # Â°C
     SEUIL_SECHERESSE_JOURS = 7  # jours sans pluie significative
     SEUIL_PLUIE_FORTE = 20.0  # mm/jour
     SEUIL_VENT_FORT = 50.0  # km/h
@@ -161,13 +161,13 @@ class ServiceMeteo:
         self.http_client = httpx.Client(timeout=30.0)
     
     def set_location(self, latitude: float, longitude: float):
-        """Met à jour la localisation."""
+        """Met Ã  jour la localisation."""
         self.latitude = latitude
         self.longitude = longitude
     
     def set_location_from_city(self, city: str):
         """
-        Met à jour la localisation à partir d'un nom de ville.
+        Met Ã  jour la localisation Ã  partir d'un nom de ville.
         
         Args:
             city: Nom de la ville
@@ -185,16 +185,16 @@ class ServiceMeteo:
                 result = data["results"][0]
                 self.latitude = result["latitude"]
                 self.longitude = result["longitude"]
-                logger.info(f"Localisation mise à jour: {city} ({self.latitude}, {self.longitude})")
+                logger.info(f"Localisation mise Ã  jour: {city} ({self.latitude}, {self.longitude})")
                 return True
         except Exception as e:
             logger.error(f"Erreur géocodage: {e}")
         
         return False
     
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # RÉCUPÉRATION MÉTÉO
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     @avec_cache(ttl=3600)  # Cache 1h
     @avec_gestion_erreurs(default_return=None, afficher_erreur=True)
@@ -265,20 +265,20 @@ class ServiceMeteo:
             return None
     
     def _direction_from_degrees(self, degrees: float | None) -> str:
-        """Convertit des degrés en direction cardinale. Délègue à weather_utils."""
+        """Convertit des degrés en direction cardinale. Délègue Ã  weather_utils."""
         return direction_from_degrees(degrees)
     
     def _weathercode_to_condition(self, code: int | None) -> str:
-        """Convertit le code météo en description. Délègue à weather_utils."""
+        """Convertit le code météo en description. Délègue Ã  weather_utils."""
         return weathercode_to_condition(code)
     
     def _weathercode_to_icon(self, code: int | None) -> str:
-        """Convertit le code météo en emoji. Délègue à weather_utils."""
+        """Convertit le code météo en emoji. Délègue Ã  weather_utils."""
         return weathercode_to_icon(code)
     
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # ALERTES
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     def generer_alertes(self, previsions: list[MeteoJour] | None = None) -> list[AlerteMeteo]:
         """
@@ -305,8 +305,8 @@ class ServiceMeteo:
                 alertes.append(AlerteMeteo(
                     type_alerte=TypeAlertMeteo.GEL,
                     niveau=niveau,
-                    titre="🥶 Risque de gel",
-                    message=f"Température minimale prévue: {prev.temperature_min}°C",
+                    titre="ðŸ¥¶ Risque de gel",
+                    message=f"Température minimale prévue: {prev.temperature_min}Â°C",
                     conseil_jardin="Protégez vos plantes sensibles avec un voile d'hivernage. Rentrez les pots fragiles.",
                     date_debut=prev.date,
                     temperature=prev.temperature_min,
@@ -318,8 +318,8 @@ class ServiceMeteo:
                 alertes.append(AlerteMeteo(
                     type_alerte=TypeAlertMeteo.CANICULE,
                     niveau=niveau,
-                    titre="🔥 Canicule",
-                    message=f"Température maximale prévue: {prev.temperature_max}°C",
+                    titre="ðŸ”¥ Canicule",
+                    message=f"Température maximale prévue: {prev.temperature_max}Â°C",
                     conseil_jardin="Arrosez tôt le matin ou tard le soir. Installez des ombrages. Paillez abondamment.",
                     date_debut=prev.date,
                     temperature=prev.temperature_max,
@@ -330,7 +330,7 @@ class ServiceMeteo:
                 alertes.append(AlerteMeteo(
                     type_alerte=TypeAlertMeteo.PLUIE_FORTE,
                     niveau=NiveauAlerte.ATTENTION,
-                    titre="🌧️ Fortes pluies",
+                    titre="ðŸŒ§ï¸ Fortes pluies",
                     message=f"Précipitations prévues: {prev.precipitation_mm}mm",
                     conseil_jardin="Vérifiez le drainage. Protégez les semis. Évitez de marcher sur sol détrempé.",
                     date_debut=prev.date,
@@ -341,7 +341,7 @@ class ServiceMeteo:
                 alertes.append(AlerteMeteo(
                     type_alerte=TypeAlertMeteo.VENT_FORT,
                     niveau=NiveauAlerte.ATTENTION,
-                    titre="💨 Vent fort",
+                    titre="ðŸ’¨ Vent fort",
                     message=f"Vent prévu: {prev.vent_km_h} km/h",
                     conseil_jardin="Tuteurez les plantes hautes. Rentrez ou fixez les pots légers. Reportez les traitements.",
                     date_debut=prev.date,
@@ -352,7 +352,7 @@ class ServiceMeteo:
                 alertes.append(AlerteMeteo(
                     type_alerte=TypeAlertMeteo.ORAGE,
                     niveau=NiveauAlerte.ATTENTION,
-                    titre="⛈️ Orages",
+                    titre="â›ˆï¸ Orages",
                     message="Orages prévus",
                     conseil_jardin="Débranchez les systèmes d'arrosage automatique. Protégez les jeunes plants.",
                     date_debut=prev.date,
@@ -370,7 +370,7 @@ class ServiceMeteo:
             alertes.append(AlerteMeteo(
                 type_alerte=TypeAlertMeteo.SECHERESSE,
                 niveau=NiveauAlerte.ATTENTION,
-                titre="☀️ Période sèche",
+                titre="â˜€ï¸ Période sèche",
                 message=f"{jours_sans_pluie} jours sans pluie significative prévus",
                 conseil_jardin="Renforcez l'arrosage. Privilégiez le paillage. Arrosez en profondeur moins souvent.",
                 date_debut=previsions[0].date,
@@ -379,9 +379,9 @@ class ServiceMeteo:
         
         return alertes
     
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # CONSEILS DE JARDINAGE
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     def generer_conseils(self, previsions: list[MeteoJour] | None = None) -> list[ConseilJardin]:
         """
@@ -409,16 +409,16 @@ class ServiceMeteo:
         if aujourd_hui.temperature_max >= 25:
             conseils.append(ConseilJardin(
                 priorite=1,
-                icone="💧",
+                icone="ðŸ’§",
                 titre="Arrosage recommandé",
-                description="Températures élevées, pensez à arroser le soir ou tôt le matin.",
+                description="Températures élevées, pensez Ã  arroser le soir ou tôt le matin.",
                 action_recommandee="Arroser ce soir après 19h"
             ))
         
         if aujourd_hui.temperature_min < 10:
             conseils.append(ConseilJardin(
                 priorite=2,
-                icone="🌡️",
+                icone="ðŸŒ¡ï¸",
                 titre="Nuits fraîches",
                 description="Les nuits sont fraîches, attention aux plantes sensibles.",
                 plantes_concernees=["Tomates", "Basilic", "Courges"],
@@ -429,7 +429,7 @@ class ServiceMeteo:
         if aujourd_hui.probabilite_pluie < 20 and aujourd_hui.precipitation_mm < 2:
             conseils.append(ConseilJardin(
                 priorite=2,
-                icone="🌱",
+                icone="ðŸŒ±",
                 titre="Journée sèche",
                 description="Pas de pluie prévue, idéal pour les travaux au jardin.",
                 action_recommandee="Désherber, tailler, ou planter"
@@ -437,7 +437,7 @@ class ServiceMeteo:
         elif aujourd_hui.probabilite_pluie > 60:
             conseils.append(ConseilJardin(
                 priorite=2,
-                icone="🌧️",
+                icone="ðŸŒ§ï¸",
                 titre="Pluie prévue",
                 description="Inutile d'arroser, la pluie s'en chargera.",
                 action_recommandee="Reporter l'arrosage"
@@ -447,7 +447,7 @@ class ServiceMeteo:
         if aujourd_hui.vent_km_h < 15:
             conseils.append(ConseilJardin(
                 priorite=3,
-                icone="🐝",
+                icone="ðŸ",
                 titre="Conditions idéales pour traiter",
                 description="Peu de vent, conditions parfaites pour les traitements foliaires.",
                 action_recommandee="Traiter si nécessaire (purin, savon noir...)"
@@ -457,9 +457,9 @@ class ServiceMeteo:
         if aujourd_hui.uv_index >= 8:
             conseils.append(ConseilJardin(
                 priorite=1,
-                icone="☀️",
+                icone="â˜€ï¸",
                 titre="UV très forts",
-                description="Évitez de jardiner entre 12h et 16h. Pensez à vous protéger.",
+                description="Évitez de jardiner entre 12h et 16h. Pensez Ã  vous protéger.",
                 action_recommandee="Jardiner le matin ou en fin de journée"
             ))
         
@@ -468,7 +468,7 @@ class ServiceMeteo:
         if 1 <= jour_mois <= 7 or 15 <= jour_mois <= 22:
             conseils.append(ConseilJardin(
                 priorite=3,
-                icone="🌙",
+                icone="ðŸŒ™",
                 titre="Période favorable aux semis",
                 description="Lune montante, favorable aux semis et greffes.",
                 action_recommandee="Semer les graines"
@@ -476,9 +476,9 @@ class ServiceMeteo:
         
         return sorted(conseils, key=lambda c: c.priorite)
     
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # PLAN D'ARROSAGE
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     def generer_plan_arrosage(
         self,
@@ -489,8 +489,8 @@ class ServiceMeteo:
         Génère un plan d'arrosage intelligent.
         
         Args:
-            nb_jours: Nombre de jours à planifier
-            surface_m2: Surface du jardin en m²
+            nb_jours: Nombre de jours Ã  planifier
+            surface_m2: Surface du jardin en mÂ²
             
         Returns:
             Plan d'arrosage journalier
@@ -505,7 +505,7 @@ class ServiceMeteo:
         
         for i, prev in enumerate(previsions):
             # Calculer le besoin en eau
-            # Base: 3-5L/m² par semaine = ~0.5-0.7L/m²/jour
+            # Base: 3-5L/mÂ² par semaine = ~0.5-0.7L/mÂ²/jour
             besoin_base = surface_m2 * 0.6  # Litres/jour
             
             # Ajuster selon température
@@ -516,7 +516,7 @@ class ServiceMeteo:
             elif prev.temperature_max < 15:
                 besoin_base *= 0.7
             
-            # Soustraire la pluie prévue (1mm = 1L/m²)
+            # Soustraire la pluie prévue (1mm = 1L/mÂ²)
             apport_pluie = prev.precipitation_mm * surface_m2 / 1000 * surface_m2
             
             # Tenir compte de la pluie récente
@@ -540,7 +540,7 @@ class ServiceMeteo:
             elif pluie_cumul > 10:
                 raison = "Sol encore humide des dernières pluies"
             elif besoin_arrosage:
-                raison = f"Températures {prev.temperature_max}°C, évaporation importante"
+                raison = f"Températures {prev.temperature_max}Â°C, évaporation importante"
             else:
                 raison = "Conditions favorables, arrosage léger possible"
             
@@ -559,9 +559,9 @@ class ServiceMeteo:
         
         return plan
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # PERSISTANCE BASE DE DONNÉES
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     @avec_session_db
     def sauvegarder_alerte(
@@ -574,7 +574,7 @@ class ServiceMeteo:
         Sauvegarde une alerte météo dans la base de données.
         
         Args:
-            alerte: Alerte Pydantic à sauvegarder
+            alerte: Alerte Pydantic Ã  sauvegarder
             user_id: UUID de l'utilisateur (optionnel)
             db: Session SQLAlchemy (injectée)
             
@@ -614,7 +614,7 @@ class ServiceMeteo:
         Sauvegarde plusieurs alertes météo.
         
         Args:
-            alertes: Liste d'alertes à sauvegarder
+            alertes: Liste d'alertes Ã  sauvegarder
             user_id: UUID de l'utilisateur
             db: Session SQLAlchemy
             
@@ -729,17 +729,17 @@ class ServiceMeteo:
         db: Session = None,
     ) -> ConfigMeteo:
         """
-        Crée ou met à jour la configuration météo d'un utilisateur.
+        Crée ou met Ã  jour la configuration météo d'un utilisateur.
         
         Args:
             user_id: UUID de l'utilisateur
             latitude, longitude: Coordonnées
             ville: Nom de la ville
-            surface_jardin: Surface en m²
+            surface_jardin: Surface en mÂ²
             db: Session SQLAlchemy
             
         Returns:
-            Configuration créée ou mise à jour
+            Configuration créée ou mise Ã  jour
         """
         config = db.query(ConfigMeteo).filter(
             ConfigMeteo.user_id == UUID(str(user_id))
@@ -768,9 +768,9 @@ WeatherGardenService = ServiceMeteo
 WeatherService = ServiceMeteo
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FACTORY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 _weather_service: ServiceMeteo | None = None
@@ -794,21 +794,21 @@ def get_weather_garden_service() -> ServiceMeteo:
     return obtenir_service_meteo()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # COMPOSANT UI STREAMLIT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def render_weather_garden_ui():  # pragma: no cover
     """Interface Streamlit pour les alertes météo jardin."""
     import streamlit as st
     
-    st.subheader("🌤️ Météo & Jardin")
+    st.subheader("ðŸŒ¤ï¸ Météo & Jardin")
     
     service = get_weather_garden_service()
     
     # Configuration localisation
-    with st.expander("📍 Configurer la localisation"):
+    with st.expander("ðŸ“ Configurer la localisation"):
         city = st.text_input(
             "Ville",
             value="Paris",
@@ -816,9 +816,9 @@ def render_weather_garden_ui():  # pragma: no cover
             help="Entrez le nom de votre ville"
         )
         
-        if st.button("🔍 Localiser", key="locate_btn"):
+        if st.button("ðŸ” Localiser", key="locate_btn"):
             if service.set_location_from_city(city):
-                st.success(f"✅ Localisation mise à jour: {city}")
+                st.success(f"âœ… Localisation mise Ã  jour: {city}")
             else:
                 st.error("Ville non trouvée")
     
@@ -826,14 +826,14 @@ def render_weather_garden_ui():  # pragma: no cover
     previsions = service.get_previsions(7)
     
     if not previsions:
-        st.error("❌ Impossible de récupérer les données météo")
+        st.error("âŒ Impossible de récupérer les données météo")
         return
     
     # Alertes en premier
     alertes = service.generer_alertes(previsions)
     
     if alertes:
-        st.markdown("### ⚠️ Alertes")
+        st.markdown("### âš ï¸ Alertes")
         for alerte in alertes:
             if alerte.niveau == NiveauAlerte.DANGER:
                 st.error(f"**{alerte.titre}** - {alerte.message}")
@@ -842,12 +842,12 @@ def render_weather_garden_ui():  # pragma: no cover
             else:
                 st.info(f"**{alerte.titre}** - {alerte.message}")
             
-            st.caption(f"💡 {alerte.conseil_jardin}")
+            st.caption(f"ðŸ’¡ {alerte.conseil_jardin}")
     
     st.markdown("---")
     
     # Prévisions 7 jours
-    st.markdown("### 📅 Prévisions 7 jours")
+    st.markdown("### ðŸ“… Prévisions 7 jours")
     
     cols = st.columns(min(7, len(previsions)))
     
@@ -859,45 +859,45 @@ def render_weather_garden_ui():  # pragma: no cover
             st.markdown(f"### {prev.icone}")
             st.metric(
                 label=prev.date.strftime("%d/%m"),
-                value=f"{prev.temperature_max:.0f}°",
-                delta=f"{prev.temperature_min:.0f}°",
+                value=f"{prev.temperature_max:.0f}Â°",
+                delta=f"{prev.temperature_min:.0f}Â°",
             )
             
             if prev.precipitation_mm > 0:
-                st.caption(f"🌧️ {prev.precipitation_mm}mm")
+                st.caption(f"ðŸŒ§ï¸ {prev.precipitation_mm}mm")
             if prev.vent_km_h > 30:
-                st.caption(f"💨 {prev.vent_km_h:.0f}km/h")
+                st.caption(f"ðŸ’¨ {prev.vent_km_h:.0f}km/h")
     
     st.markdown("---")
     
     # Tabs pour détails
-    tab1, tab2, tab3 = st.tabs(["💡 Conseils", "💧 Arrosage", "📊 Détails"])
+    tab1, tab2, tab3 = st.tabs(["ðŸ’¡ Conseils", "ðŸ’§ Arrosage", "ðŸ“Š Détails"])
     
     with tab1:
         conseils = service.generer_conseils(previsions[:3])
         
         if conseils:
             for conseil in conseils:
-                priorite_badge = "🔴" if conseil.priorite == 1 else "🟡" if conseil.priorite == 2 else "🟢"
+                priorite_badge = "ðŸ”´" if conseil.priorite == 1 else "ðŸŸ¡" if conseil.priorite == 2 else "ðŸŸ¢"
                 
                 st.markdown(f"#### {conseil.icone} {conseil.titre} {priorite_badge}")
                 st.write(conseil.description)
                 
                 if conseil.action_recommandee:
-                    st.info(f"👉 {conseil.action_recommandee}")
+                    st.info(f"ðŸ‘‰ {conseil.action_recommandee}")
                 
                 if conseil.plantes_concernees:
-                    st.caption(f"🌱 Plantes concernées: {', '.join(conseil.plantes_concernees)}")
+                    st.caption(f"ðŸŒ± Plantes concernées: {', '.join(conseil.plantes_concernees)}")
                 
                 st.markdown("---")
         else:
             st.info("Pas de conseil particulier pour aujourd'hui")
     
     with tab2:
-        st.markdown("### 💧 Plan d'arrosage intelligent")
+        st.markdown("### ðŸ’§ Plan d'arrosage intelligent")
         
         surface = st.slider(
-            "Surface du jardin (m²)",
+            "Surface du jardin (mÂ²)",
             min_value=10,
             max_value=500,
             value=50,
@@ -918,19 +918,19 @@ def render_weather_garden_ui():  # pragma: no cover
                 
                 with col2:
                     if jour.besoin_arrosage:
-                        st.markdown("💧 **Oui**")
+                        st.markdown("ðŸ’§ **Oui**")
                     else:
-                        st.markdown("✅ Non")
+                        st.markdown("âœ… Non")
                 
                 with col3:
                     st.caption(jour.raison)
                     if jour.quantite_recommandee_litres > 0:
-                        st.caption(f"≈ {jour.quantite_recommandee_litres:.0f}L recommandés")
+                        st.caption(f"â‰ˆ {jour.quantite_recommandee_litres:.0f}L recommandés")
                     if jour.plantes_prioritaires:
                         st.caption(f"Priorité: {', '.join(jour.plantes_prioritaires)}")
     
     with tab3:
-        st.markdown("### 📊 Détails météo")
+        st.markdown("### ðŸ“Š Détails météo")
         
         import pandas as pd
         
@@ -939,8 +939,8 @@ def render_weather_garden_ui():  # pragma: no cover
             data.append({
                 "Date": prev.date.strftime("%d/%m"),
                 "Condition": prev.condition,
-                "T° Min": f"{prev.temperature_min}°C",
-                "T° Max": f"{prev.temperature_max}°C",
+                "TÂ° Min": f"{prev.temperature_min}Â°C",
+                "TÂ° Max": f"{prev.temperature_max}Â°C",
                 "Pluie": f"{prev.precipitation_mm}mm",
                 "Prob. Pluie": f"{prev.probabilite_pluie}%",
                 "Vent": f"{prev.vent_km_h}km/h",

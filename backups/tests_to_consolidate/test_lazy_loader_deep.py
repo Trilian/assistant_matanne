@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests approfondis pour src/core/lazy_loader.py
 
 Cible: Atteindre 80%+ de couverture
@@ -9,9 +9,9 @@ import pytest
 from unittest.mock import Mock, patch, MagicMock
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: ChargeurModuleDiffere - lignes 77-79, 98-100
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestLazyModuleLoaderDeep:
@@ -21,12 +21,12 @@ class TestLazyModuleLoaderDeep:
         """Test chargement module avec import error"""
         from src.core.lazy_loader import ChargeurModuleDiffere
 
-        # Module inexistant - lève ModuleNotFoundError
+        # Module inexistant - lÃ¨ve ModuleNotFoundError
         with pytest.raises(ModuleNotFoundError):
             ChargeurModuleDiffere.load("module.inexistant.xyz")
 
     def test_load_module_force_reload(self):
-        """Test rechargement forcé"""
+        """Test rechargement forcÃ©"""
         from src.core.lazy_loader import ChargeurModuleDiffere
 
         # Charger un module standard
@@ -42,23 +42,23 @@ class TestLazyModuleLoaderDeep:
         """Test exception lors du chargement"""
         from src.core.lazy_loader import ChargeurModuleDiffere
 
-        # Test avec module invalide - lève une exception
+        # Test avec module invalide - lÃ¨ve une exception
         with pytest.raises((ModuleNotFoundError, Exception)):
             ChargeurModuleDiffere.load("__module_that_does_not_exist_xyz__")
 
     def test_preload_with_valid_modules(self):
-        """Test préchargement avec modules valides"""
+        """Test prÃ©chargement avec modules valides"""
         from src.core.lazy_loader import ChargeurModuleDiffere
 
         modules = ["json", "os"]
         ChargeurModuleDiffere.preload(modules, background=False)
 
-        # Vérifier que les modules sont en cache
+        # VÃ©rifier que les modules sont en cache
         stats = ChargeurModuleDiffere.get_stats()
         assert stats["cached_modules"] >= 0  # Au moins 0 modules en cache
 
     def test_preload_with_invalid_modules(self):
-        """Test préchargement avec modules invalides"""
+        """Test prÃ©chargement avec modules invalides"""
         from src.core.lazy_loader import ChargeurModuleDiffere
 
         modules = ["module_inexistant_xyz_123"]
@@ -66,7 +66,7 @@ class TestLazyModuleLoaderDeep:
         ChargeurModuleDiffere.preload(modules, background=False)
 
     def test_preload_background_thread(self):
-        """Test préchargement en arrière-plan"""
+        """Test prÃ©chargement en arriÃ¨re-plan"""
         from src.core.lazy_loader import ChargeurModuleDiffere
         import time
 
@@ -90,7 +90,7 @@ class TestLazyModuleLoaderDeep:
         assert "load_times" in stats
 
     def test_get_stats_after_load(self):
-        """Test stats après chargement"""
+        """Test stats aprÃ¨s chargement"""
         from src.core.lazy_loader import ChargeurModuleDiffere
 
         ChargeurModuleDiffere.clear_cache()
@@ -114,16 +114,16 @@ class TestLazyModuleLoaderDeep:
         assert stats["cached_modules"] == 0
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: RouteurOptimise - lignes 272-309
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestOptimizedRouterDeep:
     """Tests approfondis pour RouteurOptimise"""
 
     def test_load_module_not_in_registry(self):
-        """Test chargement module non enregistré"""
+        """Test chargement module non enregistrÃ©"""
         from src.core.lazy_loader import RouteurOptimise
 
         with patch("streamlit.error") as mock_error:
@@ -164,7 +164,7 @@ class TestOptimizedRouterDeep:
                     mock_module.afficher.assert_called_once()
 
     def test_load_module_without_entry_point(self):
-        """Test chargement module sans point d'entrée"""
+        """Test chargement module sans point d'entrÃ©e"""
         from src.core.lazy_loader import RouteurOptimise
 
         # Mock du module sans app() ni afficher()
@@ -194,7 +194,7 @@ class TestOptimizedRouterDeep:
                             mock_warning.assert_called()
 
     def test_load_module_generic_exception(self):
-        """Test chargement module avec exception générique"""
+        """Test chargement module avec exception gÃ©nÃ©rique"""
         from src.core.lazy_loader import RouteurOptimise
 
         with patch.object(RouteurOptimise, "MODULE_REGISTRY", {"test": {"path": "test.path"}}):
@@ -222,11 +222,11 @@ class TestOptimizedRouterDeep:
                             with patch("streamlit.exception") as mock_exception:
                                 RouteurOptimise.load_module("test")
 
-                                # En mode debug, st.exception est appelé
+                                # En mode debug, st.exception est appelÃ©
                                 mock_exception.assert_called()
 
     def test_preload_common_modules(self):
-        """Test préchargement des modules communs"""
+        """Test prÃ©chargement des modules communs"""
         from src.core.lazy_loader import RouteurOptimise
 
         with patch("src.core.lazy_loader.ChargeurModuleDiffere.preload") as mock_preload:
@@ -235,9 +235,9 @@ class TestOptimizedRouterDeep:
             mock_preload.assert_called_once()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: afficher_stats_chargement_differe - lignes 328-360
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestRenderLazyLoadingStats:
@@ -313,19 +313,19 @@ class TestRenderLazyLoadingStats:
                                     afficher_stats_chargement_differe()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: lazy_import decorator - lignes 158
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestLazyImportDecorator:
-    """Tests pour le décorateur lazy_import"""
+    """Tests pour le dÃ©corateur lazy_import"""
 
     def test_lazy_import_basic(self):
-        """Test décorateur lazy_import basique"""
+        """Test dÃ©corateur lazy_import basique"""
         from src.core.lazy_loader import lazy_import
 
-        # Le décorateur charge le module quand la fonction est appelée
+        # Le dÃ©corateur charge le module quand la fonction est appelÃ©e
         @lazy_import("json")
         def use_json():
             import json
@@ -335,7 +335,7 @@ class TestLazyImportDecorator:
         assert result is True
 
     def test_lazy_import_with_attr(self):
-        """Test décorateur lazy_import avec attr_name"""
+        """Test dÃ©corateur lazy_import avec attr_name"""
         from src.core.lazy_loader import lazy_import
 
         # Utiliser un attribut qui existe vraiment dans os
@@ -348,7 +348,7 @@ class TestLazyImportDecorator:
         assert result is True
 
     def test_lazy_import_invalid_module(self):
-        """Test décorateur lazy_import avec module invalide"""
+        """Test dÃ©corateur lazy_import avec module invalide"""
         from src.core.lazy_loader import lazy_import
 
         @lazy_import("module_inexistant_xyz_456")
@@ -359,29 +359,29 @@ class TestLazyImportDecorator:
             use_invalid()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: MODULE_REGISTRY validation
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestModuleRegistry:
     """Tests pour MODULE_REGISTRY"""
 
     def test_registry_has_required_keys(self):
-        """Test que le registry a les clés requises"""
+        """Test que le registry a les clÃ©s requises"""
         from src.core.lazy_loader import RouteurOptimise
 
-        # Les modules minimaux requis (peuvent être préfixés)
+        # Les modules minimaux requis (peuvent Ãªtre prÃ©fixÃ©s)
         registry_keys = list(RouteurOptimise.MODULE_REGISTRY.keys())
         
-        # Vérifier qu'il y a au moins quelques modules
+        # VÃ©rifier qu'il y a au moins quelques modules
         assert len(registry_keys) > 0, "Le registry est vide"
         
-        # Vérifier que "accueil" existe
+        # VÃ©rifier que "accueil" existe
         assert "accueil" in registry_keys, "Module accueil manquant"
 
     def test_registry_entries_have_path(self):
-        """Test que chaque entrée a un path"""
+        """Test que chaque entrÃ©e a un path"""
         from src.core.lazy_loader import RouteurOptimise
 
         for name, config in RouteurOptimise.MODULE_REGISTRY.items():

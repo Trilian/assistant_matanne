@@ -1,11 +1,11 @@
-﻿"""
-Module Jules - Imports et constantes partagés
+"""
+Module Jules - Imports et constantes partages
 
-Activités adaptées, achats suggérés, conseils développement:
-- 📊 Dashboard: âge, prochains achats suggérés
-- 🎨 Activités du jour (adaptées 19 mois)
-- 🛒 Shopping Jules (vêtements taille actuelle, jouets recommandés)
-- 💡 Conseils (propreté, sommeil, alimentation) - IA
+Activites adaptees, achats suggeres, conseils developpement:
+- 📊 Dashboard: âge, prochains achats suggeres
+- 🎨 Activites du jour (adaptees 19 mois)
+- 🛒 Shopping Jules (vêtements taille actuelle, jouets recommandes)
+- 💡 Conseils (proprete, sommeil, alimentation) - IA
 """
 
 import streamlit as st
@@ -18,13 +18,13 @@ from src.services.base import BaseAIService
 from src.core.ai import ClientIA
 
 
-# Activités par tranche d'âge (mois)
+# Activites par tranche d'âge (mois)
 ACTIVITES_PAR_AGE = {
     (18, 24): [
-        {"nom": "Pâte à modeler", "emoji": "🎨", "duree": "20min", "interieur": True, "description": "Développe la motricité fine"},
+        {"nom": "Pâte à modeler", "emoji": "🎨", "duree": "20min", "interieur": True, "description": "Developpe la motricite fine"},
         {"nom": "Lecture interactive", "emoji": "📚", "duree": "15min", "interieur": True, "description": "Pointer les images, nommer les objets"},
-        {"nom": "Jeux d'eau", "emoji": "💧", "duree": "30min", "interieur": False, "description": "Transvaser, verser, éclabousser"},
-        {"nom": "Cache-cache simplifié", "emoji": "🙈", "duree": "15min", "interieur": True, "description": "Se cacher derrière un rideau"},
+        {"nom": "Jeux d'eau", "emoji": "💧", "duree": "30min", "interieur": False, "description": "Transvaser, verser, eclabousser"},
+        {"nom": "Cache-cache simplifie", "emoji": "🙈", "duree": "15min", "interieur": True, "description": "Se cacher derrière un rideau"},
         {"nom": "Danse et musique", "emoji": "🎵", "duree": "15min", "interieur": True, "description": "Bouger sur des comptines"},
         {"nom": "Dessin au doigt", "emoji": "✋", "duree": "20min", "interieur": True, "description": "Peinture au doigt sur grande feuille"},
         {"nom": "Tour de cubes", "emoji": "🧱", "duree": "15min", "interieur": True, "description": "Empiler et faire tomber"},
@@ -34,7 +34,7 @@ ACTIVITES_PAR_AGE = {
     ],
     (24, 36): [
         {"nom": "Puzzle simple", "emoji": "🧩", "duree": "20min", "interieur": True, "description": "3-6 pièces"},
-        {"nom": "Jeu de rôle", "emoji": "🎭", "duree": "20min", "interieur": True, "description": "Dînette, poupées, voitures"},
+        {"nom": "Jeu de rôle", "emoji": "🎭", "duree": "20min", "interieur": True, "description": "Dînette, poupees, voitures"},
         {"nom": "Parcours moteur", "emoji": "🏃", "duree": "20min", "interieur": True, "description": "Coussins, tunnels, cerceaux"},
     ],
 }
@@ -46,14 +46,14 @@ TAILLES_PAR_AGE = {
     (24, 36): {"vetements": "92-98", "chaussures": "24-25"},
 }
 
-# Catégories de conseils
+# Categories de conseils
 CATEGORIES_CONSEILS = {
-    "proprete": {"emoji": "🚽", "titre": "Propreté", "description": "Apprentissage du pot"},
+    "proprete": {"emoji": "🚽", "titre": "Proprete", "description": "Apprentissage du pot"},
     "sommeil": {"emoji": "😴", "titre": "Sommeil", "description": "Routines et astuces"},
     "alimentation": {"emoji": "🍽️", "titre": "Alimentation", "description": "Diversification, autonomie"},
     "langage": {"emoji": "💬", "titre": "Langage", "description": "Stimuler la parole"},
-    "motricite": {"emoji": "🏃", "titre": "Motricité", "description": "Développement physique"},
-    "social": {"emoji": "👥", "titre": "Social", "description": "Interactions, émotions"},
+    "motricite": {"emoji": "🏃", "titre": "Motricite", "description": "Developpement physique"},
+    "social": {"emoji": "👥", "titre": "Social", "description": "Interactions, emotions"},
 }
 
 

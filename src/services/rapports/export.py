@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service Export PDF.
 
 Export de recettes, planning et courses en PDF.
@@ -31,9 +31,9 @@ from src.services.rapports.types import (
 logger = logging.getLogger(__name__)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SERVICE EXPORT PDF
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class ServiceExportPDF:
@@ -74,9 +74,9 @@ class ServiceExportPDF:
             leftIndent=20
         ))
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # EXPORT RECETTE
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     @avec_gestion_erreurs()
     def exporter_recette(self, recette_id: int) -> BytesIO:
@@ -127,7 +127,7 @@ class ServiceExportPDF:
         story = []
         
         # Titre
-        story.append(Paragraph(f"🍽️ {data.nom}", self.styles['TitreRecette']))
+        story.append(Paragraph(f"ðŸ½ï¸ {data.nom}", self.styles['TitreRecette']))
         story.append(Spacer(1, 12))
         
         # Description
@@ -137,10 +137,10 @@ class ServiceExportPDF:
         
         # Infos pratiques
         infos_data = [
-            ["⏱️ Préparation", f"{data.temps_preparation} min"],
-            ["🔥 Cuisson", f"{data.temps_cuisson} min"],
-            ["👥 Portions", str(data.portions)],
-            ["📊 Difficulté", data.difficulte.capitalize()]
+            ["â±ï¸ Préparation", f"{data.temps_preparation} min"],
+            ["ðŸ”¥ Cuisson", f"{data.temps_cuisson} min"],
+            ["ðŸ‘¥ Portions", str(data.portions)],
+            ["ðŸ“Š Difficulté", data.difficulte.capitalize()]
         ]
         infos_table = Table(infos_data, colWidths=[4*cm, 3*cm])
         infos_table.setStyle(TableStyle([
@@ -156,14 +156,14 @@ class ServiceExportPDF:
         story.append(Spacer(1, 20))
         
         # Ingrédients
-        story.append(Paragraph("🥕 Ingrédients", self.styles['SousTitre']))
+        story.append(Paragraph("ðŸ¥• Ingrédients", self.styles['SousTitre']))
         for ing in data.ingredients:
             quantite = f"{ing['quantite']} {ing['unite']}" if ing['quantite'] else ""
-            story.append(Paragraph(f"• {ing['nom']} {quantite}".strip(), self.styles['Normal']))
+            story.append(Paragraph(f"â€¢ {ing['nom']} {quantite}".strip(), self.styles['Normal']))
         story.append(Spacer(1, 12))
         
         # Étapes
-        story.append(Paragraph("📝 Préparation", self.styles['SousTitre']))
+        story.append(Paragraph("ðŸ“ Préparation", self.styles['SousTitre']))
         for i, etape in enumerate(data.etapes, 1):
             story.append(Paragraph(f"{i}. {etape}", self.styles['Etape']))
         
@@ -184,9 +184,9 @@ class ServiceExportPDF:
         buffer.seek(0)
         return buffer
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # EXPORT PLANNING
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     @avec_gestion_erreurs()
     def exporter_planning_semaine(self, planning_id: int, date_debut: datetime = None) -> BytesIO:
@@ -247,7 +247,7 @@ class ServiceExportPDF:
         story = []
         
         # Titre
-        story.append(Paragraph(f"📅 {nom_planning}", self.styles['TitreRecette']))
+        story.append(Paragraph(f"ðŸ“… {nom_planning}", self.styles['TitreRecette']))
         story.append(Paragraph(
             f"Semaine du {data.semaine_debut.strftime('%d/%m')} au {data.semaine_fin.strftime('%d/%m/%Y')}",
             ParagraphStyle(name='DateRange', parent=self.styles['Normal'], alignment=TA_CENTER, fontSize=12)
@@ -293,9 +293,9 @@ class ServiceExportPDF:
         buffer.seek(0)
         return buffer
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # EXPORT LISTE COURSES
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     @avec_gestion_erreurs()
     def exporter_liste_courses(self) -> BytesIO:
@@ -338,32 +338,32 @@ class ServiceExportPDF:
         story = []
         
         # Titre
-        story.append(Paragraph("🛒 Liste de Courses", self.styles['TitreRecette']))
+        story.append(Paragraph("ðŸ›’ Liste de Courses", self.styles['TitreRecette']))
         story.append(Paragraph(
-            f"Générée le {data.date_export.strftime('%d/%m/%Y à %H:%M')}",
+            f"Générée le {data.date_export.strftime('%d/%m/%Y Ã  %H:%M')}",
             ParagraphStyle(name='Date', parent=self.styles['Normal'], alignment=TA_CENTER, fontSize=10, textColor=colors.grey)
         ))
         story.append(Spacer(1, 20))
         
         # Emojis par catégorie
         emojis_categories = {
-            "fruits_legumes": "🥬",
-            "viande": "🥩",
-            "poisson": "🐟",
-            "produits_laitiers": "🧀",
-            "epicerie": "🥫",
-            "surgeles": "🧊",
-            "boissons": "🥤",
-            "hygiene": "🧴",
-            "autre": "📦"
+            "fruits_legumes": "ðŸ¥¬",
+            "viande": "ðŸ¥©",
+            "poisson": "ðŸŸ",
+            "produits_laitiers": "ðŸ§€",
+            "epicerie": "ðŸ¥«",
+            "surgeles": "ðŸ§Š",
+            "boissons": "ðŸ¥¤",
+            "hygiene": "ðŸ§´",
+            "autre": "ðŸ“¦"
         }
         
         for categorie, articles in data.par_categorie.items():
-            emoji = emojis_categories.get(categorie.lower(), "📦")
+            emoji = emojis_categories.get(categorie.lower(), "ðŸ“¦")
             story.append(Paragraph(f"{emoji} {categorie.replace('_', ' ').title()}", self.styles['SousTitre']))
             
             for article in articles:
-                prefix = "🔴 " if article.get("urgent") else "☐ "
+                prefix = "ðŸ”´ " if article.get("urgent") else "â˜ "
                 quantite = f" ({article['quantite']} {article['unite']})" if article['quantite'] else ""
                 story.append(Paragraph(f"{prefix}{article['nom']}{quantite}", self.styles['Normal']))
             
@@ -371,12 +371,12 @@ class ServiceExportPDF:
         
         # Total
         story.append(Spacer(1, 10))
-        story.append(Paragraph(f"📊 Total: {data.total_articles} articles", self.styles['Normal']))
+        story.append(Paragraph(f"ðŸ“Š Total: {data.total_articles} articles", self.styles['Normal']))
         
         # Pied de page
         story.append(Spacer(1, 30))
         story.append(Paragraph(
-            "Assistant Matanne - Imprimez et cochez au fur et à mesure !",
+            "Assistant Matanne - Imprimez et cochez au fur et Ã  mesure !",
             ParagraphStyle(name='Footer', parent=self.styles['Normal'], fontSize=8, textColor=colors.grey, alignment=TA_CENTER)
         ))
         
@@ -384,17 +384,17 @@ class ServiceExportPDF:
         buffer.seek(0)
         return buffer
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # ALIAS MÉTHODES RÉTROCOMPATIBILITÉ
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     # Alias méthode privée anglais
     _setup_custom_styles = _configurer_styles
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SINGLETON
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 _service_export_pdf: ServiceExportPDF | None = None
 
@@ -407,9 +407,9 @@ def obtenir_service_export_pdf() -> ServiceExportPDF:
     return _service_export_pdf
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ALIAS RÉTROCOMPATIBILITÉ
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 PDFExportService = ServiceExportPDF
 get_pdf_export_service = obtenir_service_export_pdf

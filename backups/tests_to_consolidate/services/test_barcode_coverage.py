@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests complets pour src/services/barcode.py
 Objectif: couverture >80%
 """
@@ -8,9 +8,9 @@ from unittest.mock import Mock, MagicMock, patch
 from datetime import datetime, timedelta
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MODELES PYDANTIC
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestBarcodeData:
     """Tests pour BarcodeData model."""
@@ -66,7 +66,7 @@ class TestBarcodeArticle:
         )
         
         assert article.quantite_defaut == 1.0
-        assert article.unite_defaut == "unité"
+        assert article.unite_defaut == "unitÃ©"
         assert article.lieu_stockage == "Placard"
         assert article.prix_unitaire is None
     
@@ -101,12 +101,12 @@ class TestBarcodeRecette:
         recette = BarcodeRecette(
             barcode="3017760000000",
             recette_id=1,
-            nom_recette="Gâteau"
+            nom_recette="GÃ¢teau"
         )
         
         assert recette.barcode == "3017760000000"
         assert recette.recette_id == 1
-        assert recette.nom_recette == "Gâteau"
+        assert recette.nom_recette == "GÃ¢teau"
         assert recette.ingredient_detecete is None
 
 
@@ -134,15 +134,15 @@ class TestScanResultat:
         result = ScanResultat(
             barcode="9999999999999",
             type_scan="inconnu",
-            details={"message": "Non trouvé"}
+            details={"message": "Non trouvÃ©"}
         )
         
         assert result.type_scan == "inconnu"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS VALIDATION BARCODE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestBarcodeValidation:
     """Tests for barcode validation methods."""
@@ -229,13 +229,13 @@ class TestBarcodeValidation:
         assert code_type == "QR"
     
     def test_valider_barcode_code128(self):
-        """Test CODE128 validation - utilise 8-9 caractères pour éviter QR (10+)."""
+        """Test CODE128 validation - utilise 8-9 caractÃ¨res pour Ã©viter QR (10+)."""
         from src.services.barcode import BarcodeService
         
         service = BarcodeService()
         
-        # CODE128: 8+ caractères alphanum ; QR: 10+ caractères
-        # Donc on utilise 9 caractères pour éviter le pattern QR
+        # CODE128: 8+ caractÃ¨res alphanum ; QR: 10+ caractÃ¨res
+        # Donc on utilise 9 caractÃ¨res pour Ã©viter le pattern QR
         valid, code_type = service.valider_barcode("ABCD12345")
         
         assert valid is True
@@ -325,9 +325,9 @@ class TestChecksumValidation:
         assert result is False
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS BARCODE SERVICE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestBarcodeServiceInit:
     """Tests for BarcodeService initialization."""
@@ -473,7 +473,7 @@ class TestBarcodeServiceArticleOperations:
         from src.services.barcode import BarcodeService
         
         service = BarcodeService()
-        service.cache = Mock()  # Mock cache pour éviter AttributeError
+        service.cache = Mock()  # Mock cache pour Ã©viter AttributeError
         
         mock_article = Mock()
         mock_article.nom = "Lait"
@@ -626,7 +626,7 @@ class TestBarcodeServiceStockVerification:
         assert result["peremption_etat"] == "URGENT"
     
     def test_verifier_stock_barcode_perime(self):
-        """Test expiration status PÉRIMÉ."""
+        """Test expiration status PÃ‰RIMÃ‰."""
         from src.services.barcode import BarcodeService
         
         service = BarcodeService()
@@ -650,10 +650,10 @@ class TestBarcodeServiceStockVerification:
         
         result = service.verifier_stock_barcode("3017760000000", session=mock_session)
         
-        assert result["peremption_etat"] == "PÉRIMÉ"
+        assert result["peremption_etat"] == "PÃ‰RIMÃ‰"
     
     def test_verifier_stock_barcode_peremption_bientot(self):
-        """Test expiration status BIENTÔT."""
+        """Test expiration status BIENTÃ”T."""
         from src.services.barcode import BarcodeService
         
         service = BarcodeService()
@@ -677,7 +677,7 @@ class TestBarcodeServiceStockVerification:
         
         result = service.verifier_stock_barcode("3017760000000", session=mock_session)
         
-        assert result["peremption_etat"] == "BIENTÔT"
+        assert result["peremption_etat"] == "BIENTÃ”T"
 
 
 class TestBarcodeServiceMappings:
@@ -716,7 +716,7 @@ class TestBarcodeServiceMappings:
         from src.services.barcode import BarcodeService
         
         service = BarcodeService()
-        service.cache = Mock()  # Mock cache pour éviter AttributeError
+        service.cache = Mock()  # Mock cache pour Ã©viter AttributeError
         
         mock_article = Mock()
         mock_article.id = 1
@@ -754,7 +754,7 @@ class TestBarcodeServiceMappings:
         mock_article2.nom = "Pain"
         mock_article2.code_barres = "3017760000001"
         mock_article2.quantite = 1
-        mock_article2.unite = "pièce"
+        mock_article2.unite = "piÃ¨ce"
         mock_article2.categorie = "Boulangerie"
         
         mock_query = Mock()

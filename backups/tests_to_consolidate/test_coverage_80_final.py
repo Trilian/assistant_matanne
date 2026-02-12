@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 Tests additionnels ciblant les lignes non couvertes pour atteindre 80%.
 """
@@ -11,20 +11,20 @@ class TestCacheEntryFunctional:
     """Tests fonctionnels pour EntreeCache."""
     
     def test_cache_entry_is_expired_true(self):
-        """EntreeCache.is_expired retourne True pour entrée expirée."""
+        """EntreeCache.is_expired retourne True pour entrÃ©e expirÃ©e."""
         from src.core.cache_multi import EntreeCache
         
-        # Créer entrée avec TTL très court dans le passé
+        # CrÃ©er entrÃ©e avec TTL trÃ¨s court dans le passÃ©
         entry = EntreeCache(
             value="test",
-            ttl=0,  # TTL 0 = expire immédiatement
-            created_at=time.time() - 1  # 1 seconde dans le passé
+            ttl=0,  # TTL 0 = expire immÃ©diatement
+            created_at=time.time() - 1  # 1 seconde dans le passÃ©
         )
         
         assert entry.is_expired is True
     
     def test_cache_entry_is_expired_false(self):
-        """EntreeCache.is_expired retourne False pour entrée valide."""
+        """EntreeCache.is_expired retourne False pour entrÃ©e valide."""
         from src.core.cache_multi import EntreeCache
         
         entry = EntreeCache(
@@ -35,12 +35,12 @@ class TestCacheEntryFunctional:
         assert entry.is_expired is False
     
     def test_cache_entry_age_seconds(self):
-        """EntreeCache.age_seconds calcule l'âge."""
+        """EntreeCache.age_seconds calcule l'Ã¢ge."""
         from src.core.cache_multi import EntreeCache
         
         entry = EntreeCache(
             value="test",
-            created_at=time.time() - 5  # 5 secondes dans le passé
+            created_at=time.time() - 5  # 5 secondes dans le passÃ©
         )
         
         assert entry.age_seconds >= 5
@@ -66,7 +66,7 @@ class TestCacheStatsFunctional:
         assert stats.hit_rate == 100.0
     
     def test_cache_stats_hit_rate_zero(self):
-        """StatistiquesCache.hit_rate retourne 0 si pas de données."""
+        """StatistiquesCache.hit_rate retourne 0 si pas de donnÃ©es."""
         from src.core.cache_multi import StatistiquesCache
         
         stats = StatistiquesCache()
@@ -88,7 +88,7 @@ class TestL1MemoryCacheFunctional:
     """Tests fonctionnels pour CacheMemoireN1."""
     
     def test_l1_cache_get_miss(self):
-        """CacheMemoireN1.get retourne None si clé absente."""
+        """CacheMemoireN1.get retourne None si clÃ© absente."""
         from src.core.cache_multi import CacheMemoireN1
         
         cache = CacheMemoireN1(max_entries=10)
@@ -110,7 +110,7 @@ class TestL1MemoryCacheFunctional:
         assert result.value == "test_value"
     
     def test_l1_cache_get_expired(self):
-        """CacheMemoireN1.get retourne None pour entrée expirée."""
+        """CacheMemoireN1.get retourne None pour entrÃ©e expirÃ©e."""
         from src.core.cache_multi import CacheMemoireN1, EntreeCache
         
         cache = CacheMemoireN1(max_entries=10)
@@ -136,7 +136,7 @@ class TestL1MemoryCacheFunctional:
         
         count = cache.invalidate(pattern="user:")
         
-        assert count >= 1  # Au moins user:1 ou user:2 invalidé
+        assert count >= 1  # Au moins user:1 ou user:2 invalidÃ©
     
     def test_l1_cache_invalidate_by_tags(self):
         """CacheMemoireN1.invalidate par tags."""
@@ -169,7 +169,7 @@ class TestSqlOptimizerDataclasses:
         assert info.operation == "SELECT"
     
     def test_n1_detection_sample_query(self):
-        """DetectionN1.sample_query peut être défini."""
+        """DetectionN1.sample_query peut Ãªtre dÃ©fini."""
         from src.core.sql_optimizer import DetectionN1
         
         detection = DetectionN1(
@@ -183,7 +183,7 @@ class TestSqlOptimizerDataclasses:
 
 
 class TestPerformanceMetricExtended:
-    """Tests étendus pour MetriquePerformance."""
+    """Tests Ã©tendus pour MetriquePerformance."""
     
     def test_metric_with_memory_delta(self):
         """MetriquePerformance avec memory_delta_kb."""
@@ -199,7 +199,7 @@ class TestPerformanceMetricExtended:
 
 
 class TestFunctionStatsExtended:
-    """Tests étendus pour StatistiquesFonction."""
+    """Tests Ã©tendus pour StatistiquesFonction."""
     
     def test_function_stats_with_all_fields(self):
         """StatistiquesFonction avec plusieurs champs."""
@@ -212,16 +212,16 @@ class TestFunctionStatsExtended:
 
 
 class TestRedisConfigExtended:
-    """Tests étendus pour ConfigurationRedis."""
+    """Tests Ã©tendus pour ConfigurationRedis."""
     
     def test_redis_config_key_prefix(self):
-        """ConfigurationRedis.KEY_PREFIX est défini."""
+        """ConfigurationRedis.KEY_PREFIX est dÃ©fini."""
         from src.core.redis_cache import ConfigurationRedis
         
         assert ConfigurationRedis.KEY_PREFIX == "matanne:"
     
     def test_redis_config_compression_threshold(self):
-        """ConfigurationRedis.COMPRESSION_THRESHOLD est défini."""
+        """ConfigurationRedis.COMPRESSION_THRESHOLD est dÃ©fini."""
         from src.core.redis_cache import ConfigurationRedis
         
         assert ConfigurationRedis.COMPRESSION_THRESHOLD == 1024
@@ -245,10 +245,10 @@ class TestOfflineQueueFunctional:
 
 
 class TestPendingOperationExtended:
-    """Tests étendus pour OperationEnAttente."""
+    """Tests Ã©tendus pour OperationEnAttente."""
     
     def test_pending_operation_from_dict(self):
-        """OperationEnAttente.from_dict crée une instance."""
+        """OperationEnAttente.from_dict crÃ©e une instance."""
         from src.core.offline import OperationEnAttente, TypeOperation
         from datetime import datetime
         

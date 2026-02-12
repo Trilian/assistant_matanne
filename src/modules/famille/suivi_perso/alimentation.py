@@ -1,13 +1,13 @@
-﻿"""
+"""
 Module Suivi Perso - Log alimentation
 """
 
-from ._common import (
+from .utils import (
     st, date, datetime,
     obtenir_contexte_db, UserProfile, FoodLog,
     get_or_create_user
 )
-from .helpers import get_food_logs_today
+from .utilitaires import get_food_logs_today
 
 
 def render_food_log(username: str):
@@ -20,7 +20,7 @@ def render_food_log(username: str):
         logs = get_food_logs_today(username)
         
         if not logs:
-            st.caption("Aucun repas enregistré aujourd'hui")
+            st.caption("Aucun repas enregistre aujourd'hui")
         else:
             total_cal = sum(l.calories_estimees or 0 for l in logs)
             st.metric("Total calories", f"{total_cal} kcal")
@@ -52,8 +52,8 @@ def render_food_form(username: str):
     """Formulaire d'ajout de repas"""
     with st.form("add_food"):
         repas = st.selectbox("Repas", [
-            ("petit_dejeuner", "🌅 Petit-déjeuner"),
-            ("dejeuner", "🌞 Déjeuner"),
+            ("petit_dejeuner", "🌅 Petit-dejeuner"),
+            ("dejeuner", "🌞 Dejeuner"),
             ("diner", "🌙 Dîner"),
             ("snack", "🍎 Snack"),
         ], format_func=lambda x: x[1])
@@ -62,9 +62,9 @@ def render_food_form(username: str):
         
         col1, col2 = st.columns(2)
         with col1:
-            calories = st.number_input("Calories (estimées)", min_value=0, step=50)
+            calories = st.number_input("Calories (estimees)", min_value=0, step=50)
         with col2:
-            qualite = st.slider("Qualité", 1, 5, 3)
+            qualite = st.slider("Qualite", 1, 5, 3)
         
         notes = st.text_input("Notes (optionnel)")
         
@@ -94,7 +94,7 @@ def render_food_form(username: str):
                         )
                         db.add(log)
                         db.commit()
-                        st.success("✅ Repas enregistré!")
+                        st.success("✅ Repas enregistre!")
                         st.rerun()
                 except Exception as e:
                     st.error(f"Erreur: {e}")

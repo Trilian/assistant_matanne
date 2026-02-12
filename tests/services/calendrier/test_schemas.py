@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests du package calendar_sync - Schémas Pydantic.
 
 Tests de validation des modèles de données pour la synchronisation calendrier.
@@ -127,7 +127,7 @@ class TestCalendarEventExternal:
         assert event.location == ""
     
     def test_evenement_journee_entiere(self):
-        """Événement sur toute la journée."""
+        """Ã‰vénement sur toute la journée."""
         event = CalendarEventExternal(
             title="Anniversaire",
             start_time=datetime(2026, 3, 15),
@@ -138,7 +138,7 @@ class TestCalendarEventExternal:
         assert event.all_day is True
     
     def test_evenement_avec_source(self):
-        """Événement lié à un repas ou activité."""
+        """Ã‰vénement lié Ã  un repas ou activité."""
         event = CalendarEventExternal(
             title="Dîner famille",
             start_time=datetime(2026, 2, 10, 19, 0),
@@ -151,7 +151,7 @@ class TestCalendarEventExternal:
         assert event.source_id == 42
     
     def test_evenement_avec_external_id(self):
-        """Événement importé avec ID externe."""
+        """Ã‰vénement importé avec ID externe."""
         event = CalendarEventExternal(
             external_id="google_evt_abc123",
             title="Cours de sport",
@@ -208,7 +208,7 @@ class TestSyncResult:
             success=False,
             message="Synchronisation partielle",
             events_imported=2,
-            errors=["Token expiré", "Événement invalide"]
+            errors=["Token expiré", "Ã‰vénement invalide"]
         )
         
         assert result.success is False

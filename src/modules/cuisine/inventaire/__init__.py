@@ -1,12 +1,12 @@
-"""
+﻿"""
 Module Inventaire - Gestion du stock
 
-Fonctionnalités complètes:
+FonctionnalitÃes complètes:
 - Gestion complète du stock avec alertes
-- Catégorisation et filtres avancés
+- CatÃegorisation et filtres avancÃes
 - Suggestions IA pour les courses
-- Export/Import des données
-- Prédictions ML et recommandations
+- Export/Import des donnÃees
+- PrÃedictions ML et recommandations
 - Notifications d'alertes
 - Gestion des photos
 """
@@ -26,9 +26,9 @@ from .historique import render_historique
 
 
 def app():
-    """Point d'entrée module inventaire"""
-    st.title("📦 Inventaire")
-    st.caption("Gestion complète de votre stock d'ingrédients")
+    """Point d'entrÃee module inventaire"""
+    st.title("ðŸ“¦ Inventaire")
+    st.caption("Gestion complète de votre stock d'ingrÃedients")
 
     # Initialiser session state
     if "show_form" not in st.session_state:
@@ -38,15 +38,15 @@ def app():
 
     # Tabs principales
     tab_stock, tab_alertes, tab_categories, tab_suggestions, tab_historique, tab_photos, tab_notifications, tab_predictions, tab_tools = st.tabs([
-        "📊 Stock", 
-        "⚠️ Alertes", 
-        "🏷️ Catégories", 
-        "🛒 Suggestions IA",
-        "📋 Historique",
-        "📷 Photos",
-        "🔔 Notifications",
-        "🔮 Prévisions",
-        "🔧 Outils"
+        "ðŸ“Š Stock", 
+        "âš ï¸ Alertes", 
+        "ðŸ·ï¸ CatÃegories", 
+        "ðŸ›’ Suggestions IA",
+        "ðŸ“‹ Historique",
+        "ðŸ“· Photos",
+        "ðŸ”” Notifications",
+        "ðŸ”® PrÃevisions",
+        "ðŸ”§ Outils"
     ])
 
     with tab_stock:
@@ -76,7 +76,7 @@ def app():
     with tab_tools:
         render_tools()
 
-    # Afficher formulaire d'ajout si demandé
+    # Afficher formulaire d'ajout si demandÃe
     if st.session_state.show_form:
         st.divider()
         render_add_article_form()

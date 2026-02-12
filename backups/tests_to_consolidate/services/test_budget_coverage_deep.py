@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests complets pour src/services/budget.py
 
 Couverture cible: >80%
@@ -9,9 +9,9 @@ from datetime import date, datetime, timedelta
 from unittest.mock import Mock, patch, MagicMock
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ENUMS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCategorieDepense:
@@ -27,7 +27,7 @@ class TestCategorieDepense:
         assert CategorieDepense.ALIMENTATION == "alimentation"
         assert CategorieDepense.COURSES == "courses"
         assert CategorieDepense.MAISON == "maison"
-        assert CategorieDepense.SANTE == "santé"
+        assert CategorieDepense.SANTE == "santÃ©"
         assert CategorieDepense.TRANSPORT == "transport"
         assert CategorieDepense.LOISIRS == "loisirs"
 
@@ -43,7 +43,7 @@ class TestCategorieDepense:
     def test_enum_count(self):
         from src.services.budget import CategorieDepense
         
-        # Au moins 20 catégories
+        # Au moins 20 catÃ©gories
         assert len(CategorieDepense) >= 20
 
 
@@ -60,13 +60,13 @@ class TestFrequenceRecurrence:
         assert FrequenceRecurrence.ANNUEL == "annuel"
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS SCHÉMAS PYDANTIC
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS SCHÃ‰MAS PYDANTIC
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestDepense:
-    """Tests schéma Depense."""
+    """Tests schÃ©ma Depense."""
 
     def test_import_schema(self):
         from src.services.budget import Depense
@@ -92,7 +92,7 @@ class TestDepense:
             date=date(2026, 2, 8),
             montant=150.0,
             categorie=CategorieDepense.ALIMENTATION,
-            description="Courses supermarché",
+            description="Courses supermarchÃ©",
             magasin="Carrefour",
             est_recurrente=True,
             frequence=FrequenceRecurrence.HEBDOMADAIRE,
@@ -122,7 +122,7 @@ class TestDepense:
 
 
 class TestFactureMaison:
-    """Tests schéma FactureMaison."""
+    """Tests schÃ©ma FactureMaison."""
 
     def test_creation_valide(self):
         from src.services.budget import FactureMaison, CategorieDepense
@@ -148,7 +148,7 @@ class TestFactureMaison:
             categorie=CategorieDepense.GAZ,
             montant=100.0,
             consommation=200.0,
-            unite_consommation="m³",
+            unite_consommation="mÂ³",
             mois=2,
             annee=2026
         )
@@ -195,7 +195,7 @@ class TestFactureMaison:
 
 
 class TestBudgetMensuel:
-    """Tests schéma BudgetMensuel."""
+    """Tests schÃ©ma BudgetMensuel."""
 
     def test_creation_valide(self):
         from src.services.budget import BudgetMensuel, CategorieDepense
@@ -274,12 +274,12 @@ class TestBudgetMensuel:
             depense_reelle=150.0
         )
         
-        assert budget.reste_disponible == 0.0  # Jamais négatif
+        assert budget.reste_disponible == 0.0  # Jamais nÃ©gatif
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONSTANTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBudgetConstants:
@@ -291,13 +291,13 @@ class TestBudgetConstants:
         assert DEFAULT_USER_ID == "matanne"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MODELS IMPORTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBudgetModels:
-    """Tests imports modèles DB."""
+    """Tests imports modÃ¨les DB."""
 
     def test_import_models(self):
         from src.core.models import FamilyBudget, BudgetMensuelDB
@@ -306,9 +306,9 @@ class TestBudgetModels:
         assert BudgetMensuelDB is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EDGE CASES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBudgetEdgeCases:
@@ -327,7 +327,7 @@ class TestBudgetEdgeCases:
     def test_depense_montant_negatif(self):
         from src.services.budget import Depense, CategorieDepense
         
-        # Remboursement pourrait être négatif
+        # Remboursement pourrait Ãªtre nÃ©gatif
         depense = Depense(
             montant=-50.0,
             categorie=CategorieDepense.AUTRE,
@@ -340,9 +340,9 @@ class TestBudgetEdgeCases:
         from src.services.budget import FactureMaison, CategorieDepense
         
         mois_noms_attendus = {
-            1: "Janvier", 2: "Février", 3: "Mars", 4: "Avril",
-            5: "Mai", 6: "Juin", 7: "Juillet", 8: "Août",
-            9: "Septembre", 10: "Octobre", 11: "Novembre", 12: "Décembre"
+            1: "Janvier", 2: "FÃ©vrier", 3: "Mars", 4: "Avril",
+            5: "Mai", 6: "Juin", 7: "Juillet", 8: "AoÃ»t",
+            9: "Septembre", 10: "Octobre", 11: "Novembre", 12: "DÃ©cembre"
         }
         
         for mois, nom in mois_noms_attendus.items():
@@ -365,17 +365,17 @@ class TestBudgetEdgeCases:
             depense_reelle=10000.0  # 100 000%!
         )
         
-        # Limité à 999%
+        # LimitÃ© Ã  999%
         assert budget.pourcentage_utilise == 999
 
 
 class TestBudgetIntegration:
-    """Tests d'intégration."""
+    """Tests d'intÃ©gration."""
 
     def test_workflow_depenses_mensuelles(self):
         from src.services.budget import Depense, BudgetMensuel, CategorieDepense
         
-        # Créer plusieurs dépenses
+        # CrÃ©er plusieurs dÃ©penses
         depenses = [
             Depense(montant=100.0, categorie=CategorieDepense.COURSES),
             Depense(montant=50.0, categorie=CategorieDepense.COURSES),
@@ -384,7 +384,7 @@ class TestBudgetIntegration:
         
         total_depenses = sum(d.montant for d in depenses)
         
-        # Créer budget
+        # CrÃ©er budget
         budget = BudgetMensuel(
             mois=2,
             annee=2026,
@@ -400,12 +400,12 @@ class TestBudgetIntegration:
     def test_workflow_factures_annuelles(self):
         from src.services.budget import FactureMaison, CategorieDepense
         
-        # Créer les factures d'électricité de l'année
+        # CrÃ©er les factures d'Ã©lectricitÃ© de l'annÃ©e
         factures = []
         for mois in range(1, 13):
             facture = FactureMaison(
                 categorie=CategorieDepense.ELECTRICITE,
-                montant=80.0 + (mois * 5),  # Variation saisonnière
+                montant=80.0 + (mois * 5),  # Variation saisonniÃ¨re
                 consommation=400 + (mois * 20),
                 unite_consommation="kWh",
                 mois=mois,
@@ -425,7 +425,7 @@ class TestBudgetIntegration:
     def test_toutes_categories_valides(self):
         from src.services.budget import Depense, CategorieDepense
         
-        # Créer une dépense pour chaque catégorie
+        # CrÃ©er une dÃ©pense pour chaque catÃ©gorie
         for categorie in CategorieDepense:
             depense = Depense(
                 montant=10.0,
@@ -447,7 +447,7 @@ class TestBudgetIntegration:
 
 
 class TestBudgetServiceMethods:
-    """Tests méthodes du service (si service existe)."""
+    """Tests mÃ©thodes du service (si service existe)."""
 
     def test_budget_utils_import(self):
         """Test import des utilitaires budget."""

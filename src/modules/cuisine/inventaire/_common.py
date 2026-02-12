@@ -1,6 +1,6 @@
 """
-Imports partagés pour le module inventaire UI.
-Centralise toutes les dépendances communes.
+Imports partagÃes pour le module inventaire UI.
+Centralise toutes les dÃependances communes.
 """
 
 import logging
@@ -13,8 +13,8 @@ from src.services.inventaire import get_inventaire_service
 from src.services.suggestions import obtenir_service_predictions
 from src.core.errors_base import ErreurValidation
 
-# Import du module logique métier séparé
-from src.domains.cuisine.logic.inventaire_logic import (
+# Import du module logique mÃetier sÃeparÃe
+from src.modules.cuisine.inventaire.utils import (
     EMPLACEMENTS,
     CATEGORIES,
     STATUS_CONFIG,

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour les optimisations de performance
 - Redis Cache
 - Query Optimizer (N+1 prevention)
@@ -11,9 +11,9 @@ from datetime import datetime
 import json
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢
 # TESTS REDIS CACHE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢
 
 class TestRedisCache:
     """Tests pour le cache Redis"""
@@ -33,10 +33,10 @@ class TestRedisCache:
         assert cache1 is cache2
     
     def test_fallback_cache_set_get(self):
-        """Set/Get fonctionne avec le fallback mémoire"""
+        """Set/Get fonctionne avec le fallback mÃ©moire"""
         from src.core.performance_optimizations import CacheRedis
         
-        # Reset et désactiver Redis
+        # Reset et dÃ©sactiver Redis
         CacheRedis._instance = None
         CacheRedis._client = None
         CacheRedis._fallback_cache = {}
@@ -50,7 +50,7 @@ class TestRedisCache:
         assert result == {"value": 42}
     
     def test_fallback_cache_expiry(self):
-        """Le cache mémoire expire correctement"""
+        """Le cache mÃ©moire expire correctement"""
         from src.core.performance_optimizations import CacheRedis
         import time
         
@@ -61,10 +61,10 @@ class TestRedisCache:
         cache = CacheRedis()
         cache._client = None
         
-        # Set avec TTL très court
+        # Set avec TTL trÃ¨s court
         cache.set("expire_key", "value", ttl=1)
         
-        # Devrait être accessible immédiatement
+        # Devrait Ãªtre accessible immÃ©diatement
         assert cache.get("expire_key") == "value"
         
         # Simuler expiration en manipulant le timestamp
@@ -72,11 +72,11 @@ class TestRedisCache:
         key, (val, expiry) = list(cache._fallback_cache.items())[0]
         cache._fallback_cache[key] = (val, time_module.time() - 1)
         
-        # Devrait être expiré
+        # Devrait Ãªtre expirÃ©
         assert cache.get("expire_key") is None
     
     def test_delete_key(self):
-        """Suppression d'une clé fonctionne"""
+        """Suppression d'une clÃ© fonctionne"""
         from src.core.performance_optimizations import CacheRedis
         
         CacheRedis._instance = None
@@ -93,7 +93,7 @@ class TestRedisCache:
         assert cache.get("to_delete") is None
     
     def test_clear_pattern(self):
-        """Clear pattern supprime les clés matching"""
+        """Clear pattern supprime les clÃ©s matching"""
         from src.core.performance_optimizations import CacheRedis
         
         CacheRedis._instance = None
@@ -147,10 +147,10 @@ class TestRedisCache:
 
 
 class TestRedisCachedDecorator:
-    """Tests pour le décorateur redis_cached"""
+    """Tests pour le dÃ©corateur redis_cached"""
     
     def test_decorator_caches_result(self):
-        """Le décorateur met en cache le résultat"""
+        """Le dÃ©corateur met en cache le rÃ©sultat"""
         from src.core.performance_optimizations import redis_cached, CacheRedis
         
         CacheRedis._instance = None
@@ -169,11 +169,11 @@ class TestRedisCachedDecorator:
         result2 = expensive_function()
         
         assert result1 == {"result": 1}
-        assert result2 == {"result": 1}  # Même résultat (caché)
-        assert call_count == 1  # Appelé une seule fois
+        assert result2 == {"result": 1}  # MÃªme rÃ©sultat (cachÃ©)
+        assert call_count == 1  # AppelÃ© une seule fois
     
     def test_decorator_different_args(self):
-        """Le décorateur cache séparément pour différents args"""
+        """Le dÃ©corateur cache sÃ©parÃ©ment pour diffÃ©rents args"""
         from src.core.performance_optimizations import redis_cached, CacheRedis
         
         CacheRedis._instance = None
@@ -191,12 +191,12 @@ class TestRedisCachedDecorator:
         assert result2 == 7
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢
 # TESTS QUERY OPTIMIZER
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢
 
 class TestQueryOptimizer:
-    """Tests pour le QueryOptimizer (prévention N+1)"""
+    """Tests pour le QueryOptimizer (prÃ©vention N+1)"""
     
     def test_optimizer_init(self):
         """L'optimizer s'initialise correctement"""
@@ -209,7 +209,7 @@ class TestQueryOptimizer:
         assert optimizer._query is None
     
     def test_query_creates_query(self):
-        """La méthode query crée une requête"""
+        """La mÃ©thode query crÃ©e une requÃªte"""
         from src.core.performance_optimizations import QueryOptimizer
         
         mock_session = Mock()
@@ -226,7 +226,7 @@ class TestQueryOptimizer:
         assert result is optimizer
     
     def test_filter_adds_filters(self):
-        """La méthode filter ajoute des filtres"""
+        """La mÃ©thode filter ajoute des filtres"""
         from src.core.performance_optimizations import QueryOptimizer
         
         mock_session = Mock()
@@ -243,7 +243,7 @@ class TestQueryOptimizer:
         mock_query.filter.assert_called_once()
     
     def test_all_returns_results(self):
-        """La méthode all retourne les résultats"""
+        """La mÃ©thode all retourne les rÃ©sultats"""
         from src.core.performance_optimizations import QueryOptimizer
         
         mock_session = Mock()
@@ -260,7 +260,7 @@ class TestQueryOptimizer:
         assert results == [1, 2, 3]
     
     def test_first_returns_first(self):
-        """La méthode first retourne le premier résultat"""
+        """La mÃ©thode first retourne le premier rÃ©sultat"""
         from src.core.performance_optimizations import QueryOptimizer
         
         mock_session = Mock()
@@ -277,7 +277,7 @@ class TestQueryOptimizer:
         assert result == "first_item"
     
     def test_count_returns_count(self):
-        """La méthode count retourne le nombre"""
+        """La mÃ©thode count retourne le nombre"""
         from src.core.performance_optimizations import QueryOptimizer
         
         mock_session = Mock()
@@ -294,7 +294,7 @@ class TestQueryOptimizer:
         assert count == 42
     
     def test_limit_and_offset(self):
-        """Les méthodes limit et offset fonctionnent"""
+        """Les mÃ©thodes limit et offset fonctionnent"""
         from src.core.performance_optimizations import QueryOptimizer
         
         mock_session = Mock()
@@ -343,7 +343,7 @@ class TestQueryOptimizer:
         assert optimizer.query(FakeModel).exists() is False
     
     def test_query_none_returns_empty(self):
-        """Sans query, les méthodes retournent des valeurs par défaut"""
+        """Sans query, les mÃ©thodes retournent des valeurs par dÃ©faut"""
         from src.core.performance_optimizations import QueryOptimizer
         
         mock_session = Mock()
@@ -364,9 +364,9 @@ class TestQueryOptimizer:
             optimizer.with_related("ingredients")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢
 # TESTS LAZY IMAGE LOADER
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢
 
 class TestLazyImageLoader:
     """Tests pour le LazyImageLoader"""
@@ -382,7 +382,7 @@ class TestLazyImageLoader:
         assert len(loader._loaded_urls) == 0
     
     def test_placeholder_property(self):
-        """La propriété placeholder retourne l'URL"""
+        """La propriÃ©tÃ© placeholder retourne l'URL"""
         from src.core.performance_optimizations import LazyImageLoader
         
         loader = LazyImageLoader()
@@ -410,7 +410,7 @@ class TestLazyImageLoader:
         assert result == loader.placeholder
     
     def test_get_image_url_loaded(self):
-        """get_image_url retourne l'URL chargée"""
+        """get_image_url retourne l'URL chargÃ©e"""
         from src.core.performance_optimizations import LazyImageLoader
         
         loader = LazyImageLoader()
@@ -438,7 +438,7 @@ class TestLazyImageLoader:
         assert loader.should_load(1) is False
     
     def test_should_load_false_loaded(self):
-        """should_load retourne False si déjà chargé"""
+        """should_load retourne False si dÃ©jÃ  chargÃ©"""
         from src.core.performance_optimizations import LazyImageLoader
         
         loader = LazyImageLoader()
@@ -456,7 +456,7 @@ class TestLazyImageLoader:
         assert 42 in loader._loading
     
     def test_mark_loaded(self):
-        """mark_loaded retire des en cours et ajoute aux chargés"""
+        """mark_loaded retire des en cours et ajoute aux chargÃ©s"""
         from src.core.performance_optimizations import LazyImageLoader
         
         loader = LazyImageLoader()
@@ -468,7 +468,7 @@ class TestLazyImageLoader:
         assert loader._loaded_urls[42] == "https://final.com/image.jpg"
     
     def test_generate_lazy_html(self):
-        """generate_lazy_html génère le HTML correct"""
+        """generate_lazy_html gÃ©nÃ¨re le HTML correct"""
         from src.core.performance_optimizations import LazyImageLoader
         
         loader = LazyImageLoader()
@@ -517,9 +517,9 @@ class TestLazyImageLoader:
         assert len(loader._loaded_urls) == 0
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢
 # TESTS HELPER FUNCTIONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢
 
 class TestHelperFunctions:
     """Tests pour les fonctions helpers"""
@@ -582,7 +582,7 @@ class TestHelperFunctions:
 
 
 class TestBatchOperations:
-    """Tests pour les opérations batch"""
+    """Tests pour les opÃ©rations batch"""
     
     def test_batch_load_images(self):
         """batch_load_images charge les images"""
@@ -601,7 +601,7 @@ class TestBatchOperations:
         assert results[3] == "https://example.com/3.jpg"
     
     def test_batch_load_images_skips_loaded(self):
-        """batch_load_images ne recharge pas les images chargées"""
+        """batch_load_images ne recharge pas les images chargÃ©es"""
         import src.core.performance_optimizations as module
         module._lazy_loader_instance = None
         
@@ -619,14 +619,14 @@ class TestBatchOperations:
         results = batch_load_images([1, 2], get_url)
         
         assert call_count == 1  # Seulement pour ID 2
-        assert 1 not in results  # ID 1 pas rechargé
+        assert 1 not in results  # ID 1 pas rechargÃ©
 
 
 class TestEagerLoadingDecorator:
-    """Tests pour le décorateur with_eager_loading"""
+    """Tests pour le dÃ©corateur with_eager_loading"""
     
     def test_decorator_adds_hint(self):
-        """Le décorateur ajoute un hint pour les relations"""
+        """Le dÃ©corateur ajoute un hint pour les relations"""
         from src.core.performance_optimizations import with_eager_loading
         
         @with_eager_loading("ingredients", "etapes")

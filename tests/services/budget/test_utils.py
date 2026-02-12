@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour utils.py
 
 Module: src.services.budget.utils
@@ -46,9 +46,9 @@ from src.services.budget.schemas import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
-# CONVERSION DB → PYDANTIC
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# CONVERSION DB â†’ PYDANTIC
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestDbEntryToDepense:
@@ -176,9 +176,9 @@ class TestDbEntriesToDepenses:
         assert result[2].montant == 30.0
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CALCULS STATISTIQUES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalculerMoyennePonderee:
@@ -206,7 +206,7 @@ class TestCalculerMoyennePonderee:
         assert abs(result - expected) < 0.01
 
     def test_poids_tous_zero(self):
-        """Poids tous à zéro retourne 0."""
+        """Poids tous Ã  zéro retourne 0."""
         result = calculer_moyenne_ponderee([100.0, 200.0], [0.0, 0.0])
         assert result == 0.0
 
@@ -264,7 +264,7 @@ class TestCalculerVariance:
         valeurs = [10.0, 20.0, 30.0]
         moyenne = 20.0
         result = calculer_variance(valeurs, moyenne)
-        # Variance = ((10-20)² + (20-20)² + (30-20)²) / 3 = (100 + 0 + 100) / 3
+        # Variance = ((10-20)Â² + (20-20)Â² + (30-20)Â²) / 3 = (100 + 0 + 100) / 3
         expected = 200 / 3
         assert abs(result - expected) < 0.01
 
@@ -301,7 +301,7 @@ class TestGenererPrevisionCategorie:
         assert result is None
 
     def test_valeurs_toutes_zero(self):
-        """Toutes les valeurs à 0 retourne None."""
+        """Toutes les valeurs Ã  0 retourne None."""
         result = generer_prevision_categorie(CategorieDepense.COURSES, [0, 0, 0])
         assert result is None
 
@@ -318,9 +318,9 @@ class TestGenererPrevisionCategorie:
         assert "3 mois" in result.base_calcul
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CALCULS DE BUDGET
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalculerPourcentageBudget:
@@ -343,7 +343,7 @@ class TestCalculerPourcentageBudget:
         assert calculer_pourcentage_budget(500.0, 500.0) == 100.0
 
     def test_plafond_999(self):
-        """Pourcentage plafonné à 999%."""
+        """Pourcentage plafonné Ã  999%."""
         result = calculer_pourcentage_budget(10000.0, 100.0)
         assert result == 999.0
 
@@ -384,27 +384,27 @@ class TestEstBudgetARisque:
     """Tests pour est_budget_a_risque."""
 
     def test_budget_zero(self):
-        """Budget zéro = pas à risque."""
+        """Budget zéro = pas Ã  risque."""
         assert est_budget_a_risque(50.0, 0.0) is False
 
     def test_pas_a_risque(self):
-        """< 80% = pas à risque."""
+        """< 80% = pas Ã  risque."""
         assert est_budget_a_risque(350.0, 500.0) is False  # 70%
 
     def test_a_risque_80_pourcent(self):
-        """80% exactement = à risque."""
+        """80% exactement = Ã  risque."""
         assert est_budget_a_risque(400.0, 500.0) is True
 
     def test_a_risque_entre_80_et_100(self):
-        """Entre 80% et 100% = à risque."""
+        """Entre 80% et 100% = Ã  risque."""
         assert est_budget_a_risque(450.0, 500.0) is True  # 90%
 
     def test_100_pourcent_pas_a_risque(self):
-        """100% n'est pas à risque (c'est dépassé)."""
+        """100% n'est pas Ã  risque (c'est dépassé)."""
         assert est_budget_a_risque(500.0, 500.0) is False
 
     def test_depasse_pas_a_risque(self):
-        """Dépassé n'est pas 'à risque' (c'est dépassé!)."""
+        """Dépassé n'est pas 'Ã  risque' (c'est dépassé!)."""
         assert est_budget_a_risque(600.0, 500.0) is False
 
     def test_seuil_personnalise(self):
@@ -414,9 +414,9 @@ class TestEstBudgetARisque:
         assert est_budget_a_risque(300.0, 500.0, seuil=70.0) is False
 
 
-# ═══════════════════════════════════════════════════════════
-# AGRÉGATION DES DÉPENSES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# AGRÃ‰GATION DES DÃ‰PENSES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAgregerDepensesParCategorie:
@@ -547,9 +547,9 @@ class TestFiltrerDepensesParPeriode:
         assert len(result) == 3
 
 
-# ═══════════════════════════════════════════════════════════
-# CONSTRUCTION DE RÉSUMÉS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# CONSTRUCTION DE RÃ‰SUMÃ‰S
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestConstruireResumeFinancier:
@@ -611,7 +611,7 @@ class TestConstruireResumeFinancier:
         assert "alimentation" in result.categories_depassees
 
     def test_categories_a_risque(self):
-        """Détection des catégories à risque."""
+        """Détection des catégories Ã  risque."""
         depenses = [
             Depense(montant=450.0, categorie=CategorieDepense.TRANSPORT),  # 90%
         ]
@@ -666,9 +666,9 @@ class TestConstruireResumeFinancier:
         assert result.variation_vs_mois_precedent == 0.0
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # VALIDATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestValiderMontant:

@@ -1,5 +1,5 @@
-"""
-Tests ciblés pour améliorer la couverture UI vers 80%.
+﻿"""
+Tests ciblÃ©s pour amÃ©liorer la couverture UI vers 80%.
 
 Focus sur tablet_mode.py et camera_scanner.py
 """
@@ -8,9 +8,9 @@ import pytest
 from unittest.mock import Mock, MagicMock, patch
 
 
-# ═══════════════════════════════════════════════════════════
-# TABLET_MODE.PY - TESTS CIBLÉS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TABLET_MODE.PY - TESTS CIBLÃ‰S
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -18,7 +18,7 @@ class TestTabletModeBasicFunctions:
     """Tests fonctions basiques tablet_mode."""
 
     def test_get_tablet_mode_default(self):
-        """Test get_tablet_mode par défaut."""
+        """Test get_tablet_mode par dÃ©faut."""
         from src.ui.tablet_mode import get_tablet_mode, TabletMode
         
         mock_state = MagicMock()
@@ -107,7 +107,7 @@ class TestTabletButton:
         from src.ui.tablet_mode import tablet_button
         
         with patch('streamlit.button', return_value=False) as mock_btn:
-            result = tablet_button("Test", icon="🧪")
+            result = tablet_button("Test", icon="ðŸ§ª")
             assert result == False
             mock_btn.assert_called_once()
 
@@ -116,7 +116,7 @@ class TestTabletButton:
         from src.ui.tablet_mode import tablet_button
         
         with patch('streamlit.button', return_value=True):
-            result = tablet_button("Test", icon="🧪")
+            result = tablet_button("Test", icon="ðŸ§ª")
             assert result == True
 
     def test_tablet_button_with_key(self):
@@ -124,7 +124,7 @@ class TestTabletButton:
         from src.ui.tablet_mode import tablet_button
         
         with patch('streamlit.button', return_value=False) as mock_btn:
-            tablet_button("Test", key="test_key", icon="🧪")
+            tablet_button("Test", key="test_key", icon="ðŸ§ª")
             mock_btn.assert_called_once()
 
 
@@ -152,7 +152,7 @@ class TestTabletSelectGrid:
                     result = tablet_select_grid(options, key="test_grid")
 
     def test_tablet_select_grid_with_selection(self):
-        """Test tablet_select_grid avec sélection existante."""
+        """Test tablet_select_grid avec sÃ©lection existante."""
         from src.ui.tablet_mode import tablet_select_grid
         
         options = [
@@ -190,7 +190,7 @@ class TestTabletNumberInput:
                     mock_cols.return_value = [MagicMock(), MagicMock(), MagicMock()]
                     with patch('streamlit.button', return_value=False):
                         with patch('streamlit.markdown'):
-                            result = tablet_number_input("Quantité", key="qty")
+                            result = tablet_number_input("QuantitÃ©", key="qty")
 
     def test_tablet_number_input_decrement(self):
         """Test tablet_number_input decrement."""
@@ -209,7 +209,7 @@ class TestTabletNumberInput:
                         with patch('streamlit.markdown'):
                             with patch('streamlit.rerun', side_effect=Exception("rerun")):
                                 try:
-                                    tablet_number_input("Quantité", key="qty_dec")
+                                    tablet_number_input("QuantitÃ©", key="qty_dec")
                                 except:
                                     pass
 
@@ -274,9 +274,9 @@ class TestRenderModeSelector:
                     render_mode_selector()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CAMERA_SCANNER.PY - TESTS ADDITIONNELS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -299,7 +299,7 @@ class TestCameraScannerAdditional:
         assert scanner.last_scan_time is None
 
     def test_should_report_scan_different_codes(self):
-        """Test _should_report_scan avec codes différents."""
+        """Test _should_report_scan avec codes diffÃ©rents."""
         from src.ui.components.camera_scanner import BarcodeScanner
         
         scanner = BarcodeScanner()
@@ -316,9 +316,9 @@ class TestCameraScannerAdditional:
         assert callable(scanner._render_fallback_input)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # LAYOUT INIT - TESTS ADDITIONNELS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -344,9 +344,9 @@ class TestLayoutInit:
         assert init is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # LAYOUT STYLES - TESTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit

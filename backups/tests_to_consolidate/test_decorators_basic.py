@@ -1,4 +1,4 @@
-"""
+﻿"""
 DECORATOR AND UTILITY TESTS
 Test core decorators, cache, and utilities
 """

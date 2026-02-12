@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour l'application principale app.py
 Couvre: Initialisation, routing, état, configuration
 """
@@ -62,7 +62,7 @@ class TestAppConfiguration:
         assert hasattr(params, 'nom_application') or hasattr(params, '__dict__')
     
     def test_database_connection_verification(self):
-        """Teste la vérification de la connexion à la base de données"""
+        """Teste la vérification de la connexion Ã  la base de données"""
         from src.core.database import verifier_connexion
         
         try:

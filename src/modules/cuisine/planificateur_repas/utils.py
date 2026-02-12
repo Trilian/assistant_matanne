@@ -1,14 +1,14 @@
-"""
-Logique métier du Planificateur de Repas Intelligent
+﻿"""
+Logique metier du Planificateur de Repas Intelligent
 
-Inspiré de Jow:
-- Génération IA de menus équilibrés
-- Apprentissage des goûts (👍/👎)
-- Versions Jules intégrées aux recettes
+Inspire de Jow:
+- Generation IA de menus equilibres
+- Apprentissage des goûts (ðŸ‘/ðŸ‘Ž)
+- Versions Jules integrees aux recettes
 - Prise en compte du stock existant
 - Suggestions alternatives
 
-Séparée de l'UI pour être testable sans Streamlit.
+Separee de l'UI pour être testable sans Streamlit.
 """
 
 from datetime import date, timedelta, time
@@ -18,44 +18,43 @@ from enum import Enum
 import logging
 import json
 
-# Import des schemas partagés (évite import circulaire)
-from src.domains.cuisine.logic.schemas import PreferencesUtilisateur, FeedbackRecette
+# Import des schemas partages (evite import circulaire)
+from src.modules.cuisine.schemas import PreferencesUtilisateur, FeedbackRecette
+from src.modules.shared.constantes import JOURS_SEMAINE
 
 logger = logging.getLogger(__name__)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONSTANTES
-# ═══════════════════════════════════════════════════════════
-
-JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 # Types de repas
-TYPES_REPAS = ["déjeuner", "dîner", "goûter"]
+TYPES_REPAS = ["dejeuner", "dîner", "goûter"]
 
-# Catégories de protéines
+# Categories de proteines
 PROTEINES = {
-    "poulet": {"label": "Poulet", "emoji": "🐔", "categorie": "volaille"},
-    "boeuf": {"label": "Bœuf", "emoji": "🐄", "categorie": "viande_rouge"},
-    "porc": {"label": "Porc", "emoji": "🐷", "categorie": "viande"},
-    "agneau": {"label": "Agneau", "emoji": "🐑", "categorie": "viande_rouge"},
-    "poisson": {"label": "Poisson", "emoji": "🐟", "categorie": "poisson"},
-    "crevettes": {"label": "Crevettes", "emoji": "🦐", "categorie": "fruits_mer"},
-    "oeufs": {"label": "Œufs", "emoji": "🥚", "categorie": "vegetarien"},
-    "tofu": {"label": "Tofu", "emoji": "🧊", "categorie": "vegan"},
-    "legumineuses": {"label": "Légumineuses", "emoji": "🫘", "categorie": "vegetarien"},
+    "poulet": {"label": "Poulet", "emoji": "ðŸ”", "categorie": "volaille"},
+    "boeuf": {"label": "BÅ“uf", "emoji": "ðŸ„", "categorie": "viande_rouge"},
+    "porc": {"label": "Porc", "emoji": "ðŸ·", "categorie": "viande"},
+    "agneau": {"label": "Agneau", "emoji": "ðŸ‘", "categorie": "viande_rouge"},
+    "poisson": {"label": "Poisson", "emoji": "ðŸŸ", "categorie": "poisson"},
+    "crevettes": {"label": "Crevettes", "emoji": "ðŸ¦", "categorie": "fruits_mer"},
+    "oeufs": {"label": "Å’ufs", "emoji": "ðŸ¥š", "categorie": "vegetarien"},
+    "tofu": {"label": "Tofu", "emoji": "ðŸ§Š", "categorie": "vegan"},
+    "legumineuses": {"label": "Legumineuses", "emoji": "ðŸ«˜", "categorie": "vegetarien"},
 }
 
-# Équilibre recommandé par semaine (nombre de repas)
+# Équilibre recommande par semaine (nombre de repas)
 EQUILIBRE_DEFAUT = {
     "poisson": 2,           # 2 fois poisson
     "viande_rouge": 1,      # Max 1-2 fois viande rouge
     "volaille": 2,          # 2-3 fois volaille
-    "vegetarien": 2,        # 2 repas végé
-    "pates_riz": 3,         # Max 3 féculents "lourds"
+    "vegetarien": 2,        # 2 repas vege
+    "pates_riz": 3,         # Max 3 feculents "lourds"
 }
 
-# Temps de préparation
+# Temps de preparation
 TEMPS_CATEGORIES = {
     "express": {"max_minutes": 20, "label": "Express (< 20 min)"},
     "normal": {"max_minutes": 40, "label": "Normal (20-40 min)"},
@@ -64,17 +63,17 @@ TEMPS_CATEGORIES = {
 
 # Robots cuisine
 ROBOTS_CUISINE = {
-    "monsieur_cuisine": {"label": "Monsieur Cuisine", "emoji": "🤖"},
-    "cookeo": {"label": "Cookeo", "emoji": "🍲"},
-    "four": {"label": "Four", "emoji": "🔥"},
-    "airfryer": {"label": "Airfryer", "emoji": "🍟"},
-    "poele": {"label": "Poêle/Casserole", "emoji": "🍳"},
+    "monsieur_cuisine": {"label": "Monsieur Cuisine", "emoji": "ðŸ¤–"},
+    "cookeo": {"label": "Cookeo", "emoji": "ðŸ²"},
+    "four": {"label": "Four", "emoji": "ðŸ”¥"},
+    "airfryer": {"label": "Airfryer", "emoji": "ðŸŸ"},
+    "poele": {"label": "Poêle/Casserole", "emoji": "ðŸ³"},
 }
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # DATACLASSES (PreferencesUtilisateur et FeedbackRecette dans schemas.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @dataclass
@@ -100,11 +99,11 @@ class RecetteSuggestion:
     # Version Jules
     instructions_jules: Optional[str] = None
     
-    # Robot suggéré
+    # Robot suggere
     robot_suggere: Optional[str] = None
     
     # Score IA
-    score_match: float = 0.0  # 0-100, correspondance avec préférences
+    score_match: float = 0.0  # 0-100, correspondance avec preferences
     raison_suggestion: Optional[str] = None
     
     # Stock
@@ -117,14 +116,14 @@ class RecetteSuggestion:
     
     @property
     def emoji_difficulte(self) -> str:
-        return {"facile": "🟢", "moyen": "🟡", "difficile": "🔴"}.get(self.difficulte, "⚪")
+        return {"facile": "ðŸŸ¢", "moyen": "ðŸŸ¡", "difficile": "ðŸ”´"}.get(self.difficulte, "âšª")
 
 
 @dataclass
 class RepasPlannifie:
-    """Un repas planifié dans la semaine."""
+    """Un repas planifie dans la semaine."""
     jour: date
-    type_repas: str  # déjeuner, dîner, goûter
+    type_repas: str  # dejeuner, dîner, goûter
     recette: Optional[RecetteSuggestion] = None
     notes: Optional[str] = None
     prepare: bool = False  # Pour batch cooking
@@ -158,7 +157,7 @@ class PlanningSemaine:
         return [r for r in self.repas if r.jour == jour]
     
     def get_equilibre(self) -> Dict[str, int]:
-        """Calcule l'équilibre actuel de la semaine."""
+        """Calcule l'equilibre actuel de la semaine."""
         equilibre = {
             "poisson": 0,
             "viande_rouge": 0,
@@ -177,9 +176,9 @@ class PlanningSemaine:
         return equilibre
 
 
-# ═══════════════════════════════════════════════════════════
-# APPRENTISSAGE DES GOÛTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# APPRENTISSAGE DES GOÃ›TS
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def calculer_score_recette(
@@ -194,10 +193,10 @@ def calculer_score_recette(
     
     Args:
         recette: Objet recette (SQLAlchemy ou dict)
-        preferences: Préférences utilisateur
+        preferences: Preferences utilisateur
         feedbacks: Historique des feedbacks
         equilibre_actuel: Équilibre de la semaine en cours
-        stock_disponible: Ingrédients en stock
+        stock_disponible: Ingredients en stock
     
     Returns:
         (score 0-100, raison principale)
@@ -209,7 +208,7 @@ def calculer_score_recette(
     nom = recette.nom if hasattr(recette, 'nom') else recette.get('nom', '')
     recette_id = recette.id if hasattr(recette, 'id') else recette.get('id', 0)
     
-    # 1. Vérifier les exclusions (éliminatoire)
+    # 1. Verifier les exclusions (eliminatoire)
     for exclu in preferences.aliments_exclus:
         if exclu.lower() in nom.lower():
             return 0.0, f"Contient {exclu} (exclu)"
@@ -225,9 +224,9 @@ def calculer_score_recette(
         if fb.recette_id == recette_id:
             score += fb.score * 15
             if fb.feedback == "like":
-                raison = "Vous avez aimé cette recette"
+                raison = "Vous avez aime cette recette"
             elif fb.feedback == "dislike":
-                raison = "Vous n'avez pas aimé cette recette"
+                raison = "Vous n'avez pas aime cette recette"
     
     # 4. Équilibre de la semaine (+10 si manquant)
     categorie = None
@@ -247,12 +246,12 @@ def calculer_score_recette(
         
         if actuel < objectif:
             score += 10
-            raison = f"Aide à l'équilibre ({categorie})"
+            raison = f"Aide Ã  l'equilibre ({categorie})"
         elif categorie == "viande_rouge" and actuel >= objectif:
             score -= 15
-            raison = "Déjà assez de viande rouge cette semaine"
+            raison = "DejÃ  assez de viande rouge cette semaine"
     
-    # 5. Stock disponible (+15 si ingrédients en stock)
+    # 5. Stock disponible (+15 si ingredients en stock)
     nb_en_stock = 0
     if hasattr(recette, 'ingredients') and recette.ingredients:
         for ing in recette.ingredients:
@@ -262,9 +261,9 @@ def calculer_score_recette(
         
         if nb_en_stock >= 3:
             score += 15
-            raison = f"Utilise {nb_en_stock} ingrédients de votre stock"
+            raison = f"Utilise {nb_en_stock} ingredients de votre stock"
     
-    # 6. Temps de préparation
+    # 6. Temps de preparation
     temps_total = 0
     if hasattr(recette, 'temps_preparation'):
         temps_total = recette.temps_preparation + (recette.temps_cuisson or 0)
@@ -272,7 +271,7 @@ def calculer_score_recette(
     temps_max = TEMPS_CATEGORIES.get(preferences.temps_semaine, {}).get("max_minutes", 40)
     if temps_total > temps_max:
         score -= 10
-        raison = f"Temps de préparation long ({temps_total} min)"
+        raison = f"Temps de preparation long ({temps_total} min)"
     
     # 7. Compatible Jules (+5)
     if preferences.jules_present:
@@ -294,25 +293,25 @@ def calculer_score_recette(
 def filtrer_recettes_eligibles(
     recettes: List[Any],
     preferences: PreferencesUtilisateur,
-    type_repas: str = "déjeuner",
+    type_repas: str = "dejeuner",
 ) -> List[Any]:
     """
-    Filtre les recettes éligibles selon les contraintes.
+    Filtre les recettes eligibles selon les contraintes.
     
     Args:
         recettes: Liste des recettes
-        preferences: Préférences utilisateur
-        type_repas: Type de repas (déjeuner, dîner, goûter)
+        preferences: Preferences utilisateur
+        type_repas: Type de repas (dejeuner, dîner, goûter)
     
     Returns:
-        Liste filtrée
+        Liste filtree
     """
     eligibles = []
     
     for recette in recettes:
         nom = recette.nom if hasattr(recette, 'nom') else recette.get('nom', '')
         
-        # Vérifier exclusions
+        # Verifier exclusions
         exclu = False
         for aliment_exclu in preferences.aliments_exclus:
             if aliment_exclu.lower() in nom.lower():
@@ -322,10 +321,10 @@ def filtrer_recettes_eligibles(
         if exclu:
             continue
         
-        # Vérifier type de repas
+        # Verifier type de repas
         if hasattr(recette, 'type_repas'):
             if recette.type_repas:
-                # Gérer les types multiples séparés par virgule
+                # Gerer les types multiples separes par virgule
                 types_valides = [t.strip() for t in recette.type_repas.split(',')]
                 if type_repas not in types_valides:
                     continue
@@ -345,10 +344,10 @@ def generer_suggestions_alternatives(
     nb_alternatives: int = 3,
 ) -> List[RecetteSuggestion]:
     """
-    Génère des alternatives à une recette.
+    Genère des alternatives Ã  une recette.
     
     Returns:
-        Liste de suggestions alternatives triées par score
+        Liste de suggestions alternatives triees par score
     """
     alternatives = []
     
@@ -388,9 +387,9 @@ def generer_suggestions_alternatives(
     return alternatives[:nb_alternatives]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # GÉNÉRATION DE PROMPTS IA
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def generer_prompt_semaine(
@@ -400,56 +399,56 @@ def generer_prompt_semaine(
     jours_a_planifier: List[str] = None,
 ) -> str:
     """
-    Génère un prompt pour l'IA pour créer une semaine de repas.
+    Genère un prompt pour l'IA pour creer une semaine de repas.
     
     Args:
-        preferences: Préférences utilisateur
+        preferences: Preferences utilisateur
         feedbacks: Historique feedbacks pour apprentissage
-        date_debut: Date de début de la semaine
+        date_debut: Date de debut de la semaine
         jours_a_planifier: Liste des jours (si partiel)
     
     Returns:
-        Prompt formaté pour l'IA
+        Prompt formate pour l'IA
     """
     
     # Construire le contexte d'apprentissage
     recettes_aimees = [f.recette_nom for f in feedbacks if f.feedback == "like"][-10:]
     recettes_pas_aimees = [f.recette_nom for f in feedbacks if f.feedback == "dislike"][-5:]
     
-    # Jours à planifier
+    # Jours Ã  planifier
     if not jours_a_planifier:
         jours_a_planifier = JOURS_SEMAINE
     
-    prompt = f"""Tu es un assistant culinaire familial expert. Génère un planning de repas pour une famille.
+    prompt = f"""Tu es un assistant culinaire familial expert. Genère un planning de repas pour une famille.
 
 CONTEXTE FAMILLE:
 - {preferences.nb_adultes} adultes
-- 1 bébé de {preferences.jules_age_mois} mois (Jules) qui mange avec nous
+- 1 bebe de {preferences.jules_age_mois} mois (Jules) qui mange avec nous
 - Robots cuisine disponibles: {', '.join(preferences.robots)}
 
 CONTRAINTES:
 - Temps de cuisine en semaine: {preferences.temps_semaine} ({TEMPS_CATEGORIES[preferences.temps_semaine]['label']})
-- Aliments à ÉVITER: {', '.join(preferences.aliments_exclus) if preferences.aliments_exclus else 'aucun'}
-- Aliments favoris: {', '.join(preferences.aliments_favoris) if preferences.aliments_favoris else 'variés'}
+- Aliments Ã  ÉVITER: {', '.join(preferences.aliments_exclus) if preferences.aliments_exclus else 'aucun'}
+- Aliments favoris: {', '.join(preferences.aliments_favoris) if preferences.aliments_favoris else 'varies'}
 
 ÉQUILIBRE SOUHAITÉ PAR SEMAINE:
 - Poisson: {preferences.poisson_par_semaine} fois
-- Repas végétarien: {preferences.vegetarien_par_semaine} fois
+- Repas vegetarien: {preferences.vegetarien_par_semaine} fois
 - Viande rouge: maximum {preferences.viande_rouge_max} fois
 
-APPRENTISSAGE (basé sur l'historique):
-- La famille a aimé: {', '.join(recettes_aimees) if recettes_aimees else 'pas encore assez de données'}
-- La famille n'a pas aimé: {', '.join(recettes_pas_aimees) if recettes_pas_aimees else 'pas encore assez de données'}
+APPRENTISSAGE (base sur l'historique):
+- La famille a aime: {', '.join(recettes_aimees) if recettes_aimees else 'pas encore assez de donnees'}
+- La famille n'a pas aime: {', '.join(recettes_pas_aimees) if recettes_pas_aimees else 'pas encore assez de donnees'}
 
-JOURS À PLANIFIER: {', '.join(jours_a_planifier)}
+JOURS Ã€ PLANIFIER: {', '.join(jours_a_planifier)}
 
 Pour chaque repas, fournis:
 1. Nom du plat (simple et familial)
-2. Type de protéine principale
-3. Temps total de préparation
-4. Instructions SPÉCIFIQUES pour adapter le repas à Jules ({preferences.jules_age_mois} mois):
+2. Type de proteine principale
+3. Temps total de preparation
+4. Instructions SPÉCIFIQUES pour adapter le repas Ã  Jules ({preferences.jules_age_mois} mois):
    - Comment adapter la texture
-   - Quelle quantité prélever avant assaisonnement
+   - Quelle quantite prelever avant assaisonnement
    - Comment servir pour son âge
 
 FORMAT DE RÉPONSE (JSON):
@@ -458,12 +457,12 @@ FORMAT DE RÉPONSE (JSON):
     {{
       "jour": "Mercredi",
       "midi": {{
-        "nom": "Poulet rôti aux légumes",
+        "nom": "Poulet rôti aux legumes",
         "proteine": "poulet",
         "temps_minutes": 45,
         "robot": "four",
         "difficulte": "facile",
-        "jules_adaptation": "Prélever 80g de poulet et légumes avant sel. Mixer grossièrement pour texture avec morceaux. Servir tiède."
+        "jules_adaptation": "Prelever 80g de poulet et legumes avant sel. Mixer grossièrement pour texture avec morceaux. Servir tiède."
       }},
       "soir": {{...}},
       "gouter": {{
@@ -474,8 +473,8 @@ FORMAT DE RÉPONSE (JSON):
     }}
   ],
   "equilibre_respecte": true,
-  "conseils_batch": "Dimanche: préparer la sauce bolognaise et la soupe. Mercredi: poulet mariné + gratin.",
-  "suggestions_bio": ["Le poulet fermier Bio Coop", "Les légumes Grand Frais"]
+  "conseils_batch": "Dimanche: preparer la sauce bolognaise et la soupe. Mercredi: poulet marine + gratin.",
+  "suggestions_bio": ["Le poulet fermier Bio Coop", "Les legumes Grand Frais"]
 }}
 """
     
@@ -490,20 +489,20 @@ def generer_prompt_alternative(
     contraintes_equilibre: Dict[str, int],
 ) -> str:
     """
-    Génère un prompt pour obtenir des alternatives à une recette.
+    Genère un prompt pour obtenir des alternatives Ã  une recette.
     """
     
-    prompt = f"""Propose 3 alternatives à "{recette_a_remplacer}" pour le {type_repas} du {jour}.
+    prompt = f"""Propose 3 alternatives Ã  "{recette_a_remplacer}" pour le {type_repas} du {jour}.
 
 CONTRAINTES:
-- Famille avec bébé de {preferences.jules_age_mois} mois
+- Famille avec bebe de {preferences.jules_age_mois} mois
 - Temps disponible: {preferences.temps_semaine}
 - Équipement: {', '.join(preferences.robots)}
-- À éviter: {', '.join(preferences.aliments_exclus) if preferences.aliments_exclus else 'rien'}
+- Ã€ eviter: {', '.join(preferences.aliments_exclus) if preferences.aliments_exclus else 'rien'}
 
 ÉQUILIBRE ACTUEL DE LA SEMAINE:
-- Poisson déjà prévu: {contraintes_equilibre.get('poisson', 0)}/{preferences.poisson_par_semaine}
-- Végétarien: {contraintes_equilibre.get('vegetarien', 0)}/{preferences.vegetarien_par_semaine}
+- Poisson dejÃ  prevu: {contraintes_equilibre.get('poisson', 0)}/{preferences.poisson_par_semaine}
+- Vegetarien: {contraintes_equilibre.get('vegetarien', 0)}/{preferences.vegetarien_par_semaine}
 - Viande rouge: {contraintes_equilibre.get('viande_rouge', 0)}/{preferences.viande_rouge_max}
 
 FORMAT JSON:
@@ -523,9 +522,9 @@ FORMAT JSON:
     return prompt
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # VALIDATION ET ÉQUILIBRE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def valider_equilibre_semaine(
@@ -533,7 +532,7 @@ def valider_equilibre_semaine(
     preferences: PreferencesUtilisateur,
 ) -> Tuple[bool, List[str]]:
     """
-    Valide l'équilibre nutritionnel d'une semaine.
+    Valide l'equilibre nutritionnel d'une semaine.
     
     Returns:
         (est_valide, liste_alertes)
@@ -541,21 +540,21 @@ def valider_equilibre_semaine(
     alertes = []
     equilibre = planning.get_equilibre()
     
-    # Vérifier poisson
+    # Verifier poisson
     if equilibre["poisson"] < preferences.poisson_par_semaine:
-        alertes.append(f"⚠️ Seulement {equilibre['poisson']} repas poisson (objectif: {preferences.poisson_par_semaine})")
+        alertes.append(f"âš ï¸ Seulement {equilibre['poisson']} repas poisson (objectif: {preferences.poisson_par_semaine})")
     
-    # Vérifier végétarien
+    # Verifier vegetarien
     if equilibre["vegetarien"] < preferences.vegetarien_par_semaine:
-        alertes.append(f"⚠️ Seulement {equilibre['vegetarien']} repas végétarien (objectif: {preferences.vegetarien_par_semaine})")
+        alertes.append(f"âš ï¸ Seulement {equilibre['vegetarien']} repas vegetarien (objectif: {preferences.vegetarien_par_semaine})")
     
-    # Vérifier viande rouge
+    # Verifier viande rouge
     if equilibre["viande_rouge"] > preferences.viande_rouge_max:
-        alertes.append(f"⚠️ Trop de viande rouge: {equilibre['viande_rouge']} (max: {preferences.viande_rouge_max})")
+        alertes.append(f"âš ï¸ Trop de viande rouge: {equilibre['viande_rouge']} (max: {preferences.viande_rouge_max})")
     
-    # Vérifier repas planifiés
+    # Verifier repas planifies
     if planning.nb_repas_planifies < 10:  # Au moins 10 repas sur 14 possibles
-        alertes.append(f"⚠️ Seulement {planning.nb_repas_planifies} repas planifiés sur 14")
+        alertes.append(f"âš ï¸ Seulement {planning.nb_repas_planifies} repas planifies sur 14")
     
     est_valide = len(alertes) == 0
     
@@ -567,7 +566,7 @@ def suggerer_ajustements_equilibre(
     preferences: PreferencesUtilisateur,
 ) -> List[str]:
     """
-    Suggère des ajustements pour atteindre l'équilibre.
+    Suggère des ajustements pour atteindre l'equilibre.
     
     Returns:
         Liste de suggestions
@@ -580,7 +579,7 @@ def suggerer_ajustements_equilibre(
     
     if equilibre_actuel["vegetarien"] < preferences.vegetarien_par_semaine:
         manque = preferences.vegetarien_par_semaine - equilibre_actuel["vegetarien"]
-        suggestions.append(f"Ajouter {manque} repas végétarien (omelette, gratin légumes, curry légumineuses...)")
+        suggestions.append(f"Ajouter {manque} repas vegetarien (omelette, gratin legumes, curry legumineuses...)")
     
     if equilibre_actuel["viande_rouge"] > preferences.viande_rouge_max:
         exces = equilibre_actuel["viande_rouge"] - preferences.viande_rouge_max

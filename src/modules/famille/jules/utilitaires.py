@@ -1,8 +1,8 @@
-﻿"""
+"""
 Module Jules - Fonctions helper
 """
 
-from ._common import (
+from .utils import (
     date,
     obtenir_contexte_db, ChildProfile, FamilyPurchase,
     ACTIVITES_PAR_AGE, TAILLES_PAR_AGE
@@ -10,7 +10,7 @@ from ._common import (
 
 
 def get_age_jules() -> dict:
-    """Récupère l'âge de Jules"""
+    """Recupère l'âge de Jules"""
     try:
         with obtenir_contexte_db() as db:
             jules = db.query(ChildProfile).filter_by(name="Jules", actif=True).first()
@@ -28,7 +28,7 @@ def get_age_jules() -> dict:
     except:
         pass
     
-    # Valeur par défaut si pas trouvé (Jules né le 22 juin 2024)
+    # Valeur par defaut si pas trouve (Jules ne le 22 juin 2024)
     default_birth = date(2024, 6, 22)
     delta = date.today() - default_birth
     return {
@@ -40,11 +40,11 @@ def get_age_jules() -> dict:
 
 
 def get_activites_pour_age(age_mois: int) -> list[dict]:
-    """Retourne les activités adaptées à l'âge"""
+    """Retourne les activites adaptees à l'âge"""
     for (min_age, max_age), activites in ACTIVITES_PAR_AGE.items():
         if min_age <= age_mois < max_age:
             return activites
-    # Par défaut: 18-24 mois
+    # Par defaut: 18-24 mois
     return ACTIVITES_PAR_AGE.get((18, 24), [])
 
 
@@ -57,7 +57,7 @@ def get_taille_vetements(age_mois: int) -> dict:
 
 
 def get_achats_jules_en_attente() -> list:
-    """Récupère les achats Jules en attente"""
+    """Recupère les achats Jules en attente"""
     try:
         with obtenir_contexte_db() as db:
             return db.query(FamilyPurchase).filter(

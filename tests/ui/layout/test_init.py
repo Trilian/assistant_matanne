@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour src/ui/layout/init.py
 """
 

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Package de gestion du budget familial.
 
 Exports:
@@ -25,7 +25,7 @@ from .service import (
 )
 
 from .utils import (
-    # Conversion DB → Pydantic
+    # Conversion DB â†’ Pydantic
     db_entry_to_depense,
     db_entries_to_depenses,
     # Calculs statistiques
@@ -57,10 +57,10 @@ def render_budget_dashboard():
     """
     Affiche le tableau de bord budget dans Streamlit.
     
-    Déplacé vers src/domains/famille/ui/budget_dashboard.py
+    Déplacé vers src/modules/famille/ui/budget_dashboard.py
     Cette fonction assure la rétrocompatibilité.
     """
-    from src.domains.famille.ui.budget_dashboard import render_budget_dashboard as _render
+    from src.modules.famille.budget_dashboard import render_budget_dashboard as _render
     return _render()
 
 

@@ -1,14 +1,14 @@
-"""Add batch cooking tables
+﻿"""Add batch cooking tables
 
 Revision ID: 013
 Revises: 012
 Create Date: 2026-02-01 14:00:00.000000
 
-Tables créées:
+Tables crÃ©Ã©es:
 - config_batch_cooking: Configuration utilisateur
 - sessions_batch_cooking: Sessions de batch cooking
-- etapes_batch_cooking: Étapes d'une session
-- preparations_batch: Préparations stockées
+- etapes_batch_cooking: Ã‰tapes d'une session
+- preparations_batch: PrÃ©parations stockÃ©es
 
 """
 from alembic import op
@@ -23,22 +23,22 @@ depends_on = None
 
 
 def upgrade():
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TABLE: config_batch_cooking
     # Configuration singleton pour le batch cooking
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     op.create_table(
         'config_batch_cooking',
         sa.Column('id', sa.Integer(), primary_key=True),
-        # Jours préférés (JSON: [0, 6] pour lundi et dimanche)
+        # Jours prÃ©fÃ©rÃ©s (JSON: [0, 6] pour lundi et dimanche)
         sa.Column('jours_batch', postgresql.JSONB(), default=lambda: [6]),
         sa.Column('heure_debut_preferee', sa.Time(), default=sa.text("'10:00:00'")),
         sa.Column('duree_max_session', sa.Integer(), default=180),
         # Mode famille
         sa.Column('avec_jules_par_defaut', sa.Boolean(), default=True),
-        # Équipement (JSON: ["cookeo", "airfryer", ...])
+        # Ã‰quipement (JSON: ["cookeo", "airfryer", ...])
         sa.Column('robots_disponibles', postgresql.JSONB(), default=lambda: ["four", "plaques"]),
-        # Préférences stockage
+        # PrÃ©fÃ©rences stockage
         sa.Column('preferences_stockage', postgresql.JSONB(), nullable=True),
         # Objectifs
         sa.Column('objectif_portions_semaine', sa.Integer(), default=20),
@@ -48,10 +48,10 @@ def upgrade():
         sa.Column('modifie_le', sa.DateTime(), server_default=sa.func.now(), onupdate=sa.func.now()),
     )
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TABLE: sessions_batch_cooking
-    # Sessions de batch cooking planifiées/en cours/terminées
-    # ═══════════════════════════════════════════════════════════
+    # Sessions de batch cooking planifiÃ©es/en cours/terminÃ©es
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     op.create_table(
         'sessions_batch_cooking',
         sa.Column('id', sa.Integer(), primary_key=True),
@@ -70,7 +70,7 @@ def upgrade():
         sa.Column('planning_id', sa.Integer(), 
                   sa.ForeignKey('plannings.id', ondelete='SET NULL'), 
                   nullable=True, index=True),
-        # Données session (JSON)
+        # DonnÃ©es session (JSON)
         sa.Column('recettes_selectionnees', postgresql.JSONB(), nullable=True),
         sa.Column('robots_utilises', postgresql.JSONB(), nullable=True),
         # Notes
@@ -78,7 +78,7 @@ def upgrade():
         sa.Column('notes_apres', sa.Text(), nullable=True),
         # IA
         sa.Column('genere_par_ia', sa.Boolean(), default=False),
-        # Métriques
+        # MÃ©triques
         sa.Column('nb_portions_preparees', sa.Integer(), default=0),
         sa.Column('nb_recettes_completees', sa.Integer(), default=0),
         # Timestamps
@@ -86,17 +86,17 @@ def upgrade():
         sa.Column('modifie_le', sa.DateTime(), server_default=sa.func.now(), onupdate=sa.func.now()),
     )
 
-    # Index composé pour recherche par date et statut
+    # Index composÃ© pour recherche par date et statut
     op.create_index(
         'idx_session_date_statut', 
         'sessions_batch_cooking', 
         ['date_session', 'statut']
     )
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TABLE: etapes_batch_cooking
-    # Étapes d'une session avec gestion de parallélisation
-    # ═══════════════════════════════════════════════════════════
+    # Ã‰tapes d'une session avec gestion de parallÃ©lisation
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     op.create_table(
         'etapes_batch_cooking',
         sa.Column('id', sa.Integer(), primary_key=True),
@@ -106,7 +106,7 @@ def upgrade():
         sa.Column('recette_id', sa.Integer(),
                   sa.ForeignKey('recettes.id', ondelete='SET NULL'),
                   nullable=True, index=True),
-        # Ordre et parallélisation
+        # Ordre et parallÃ©lisation
         sa.Column('ordre', sa.Integer(), nullable=False),
         sa.Column('groupe_parallele', sa.Integer(), default=0),
         # Contenu
@@ -115,13 +115,13 @@ def upgrade():
         # Timing
         sa.Column('duree_minutes', sa.Integer(), default=10),
         sa.Column('duree_reelle', sa.Integer(), nullable=True),
-        # Équipement (JSON: ["cookeo", "four"])
+        # Ã‰quipement (JSON: ["cookeo", "four"])
         sa.Column('robots_requis', postgresql.JSONB(), nullable=True),
-        # Caractéristiques
+        # CaractÃ©ristiques
         sa.Column('est_supervision', sa.Boolean(), default=False),
         sa.Column('alerte_bruit', sa.Boolean(), default=False),
         sa.Column('temperature', sa.Integer(), nullable=True),
-        # Statut et timing réel
+        # Statut et timing rÃ©el
         sa.Column('statut', sa.String(20), default='a_faire'),
         sa.Column('heure_debut', sa.DateTime(), nullable=True),
         sa.Column('heure_fin', sa.DateTime(), nullable=True),
@@ -131,17 +131,17 @@ def upgrade():
         sa.Column('timer_actif', sa.Boolean(), default=False),
     )
 
-    # Index composé pour recherche par session et ordre
+    # Index composÃ© pour recherche par session et ordre
     op.create_index(
         'idx_etape_session_ordre',
         'etapes_batch_cooking',
         ['session_id', 'ordre']
     )
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TABLE: preparations_batch
-    # Préparations stockées issues du batch cooking
-    # ═══════════════════════════════════════════════════════════
+    # PrÃ©parations stockÃ©es issues du batch cooking
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     op.create_table(
         'preparations_batch',
         sa.Column('id', sa.Integer(), primary_key=True),
@@ -164,9 +164,9 @@ def upgrade():
         sa.Column('localisation', sa.String(50), default='frigo', index=True),
         sa.Column('container', sa.String(100), nullable=True),
         sa.Column('etagere', sa.String(50), nullable=True),
-        # Utilisation planifiée (JSON: [repas_id, ...])
+        # Utilisation planifiÃ©e (JSON: [repas_id, ...])
         sa.Column('repas_attribues', postgresql.JSONB(), nullable=True),
-        # Métadonnées
+        # MÃ©tadonnÃ©es
         sa.Column('notes', sa.Text(), nullable=True),
         sa.Column('photo_url', sa.String(500), nullable=True),
         # Statut
@@ -176,7 +176,7 @@ def upgrade():
         sa.Column('modifie_le', sa.DateTime(), server_default=sa.func.now(), onupdate=sa.func.now()),
     )
 
-    # Index composés pour les requêtes fréquentes
+    # Index composÃ©s pour les requÃªtes frÃ©quentes
     op.create_index(
         'idx_prep_localisation_peremption',
         'preparations_batch',
@@ -196,7 +196,7 @@ def downgrade():
     op.drop_index('idx_etape_session_ordre', table_name='etapes_batch_cooking')
     op.drop_index('idx_session_date_statut', table_name='sessions_batch_cooking')
     
-    # Supprimer les tables dans l'ordre inverse (dépendances)
+    # Supprimer les tables dans l'ordre inverse (dÃ©pendances)
     op.drop_table('preparations_batch')
     op.drop_table('etapes_batch_cooking')
     op.drop_table('sessions_batch_cooking')

@@ -1,5 +1,5 @@
-﻿"""
-Logique métier du module Vue d'ensemble (planning) - Séparée de l'UI
+"""
+Logique metier du module Vue d'ensemble (planning) - Separee de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
 
@@ -14,8 +14,8 @@ logger = logging.getLogger(__name__)
 # CONSTANTES
 # ═══════════════════════════════════════════════════════════
 
-PERIODES = ["Jour", "Semaine", "Mois", "Année"]
-CATEGORIES_TACHES = ["Travail", "Maison", "Famille", "Personnel", "Courses", "Santé"]
+PERIODES = ["Jour", "Semaine", "Mois", "Annee"]
+CATEGORIES_TACHES = ["Travail", "Maison", "Famille", "Personnel", "Courses", "Sante"]
 
 
 # ═══════════════════════════════════════════════════════════
@@ -29,7 +29,7 @@ def analyser_charge_globale(evenements: List[Dict[str, Any]], taches: List[Dict[
     taches_completees = len([t for t in taches if t.get("complete", False)])
     taches_en_retard = len([t for t in taches if est_en_retard(t)])
     
-    # Charge par catégorie
+    # Charge par categorie
     charge_par_categorie = {}
     for tache in taches:
         cat = tache.get("categorie", "Personnel")
@@ -41,13 +41,13 @@ def analyser_charge_globale(evenements: List[Dict[str, Any]], taches: List[Dict[
     if charge_totale == 0:
         niveau = "Libre"
     elif charge_totale <= 5:
-        niveau = "Léger"
+        niveau = "Leger"
     elif charge_totale <= 15:
         niveau = "Moyen"
     elif charge_totale <= 25:
-        niveau = "Élevé"
+        niveau = "Éleve"
     else:
-        niveau = "Très élevé"
+        niveau = "Très eleve"
     
     return {
         "total_evenements": total_evenements,
@@ -61,7 +61,7 @@ def analyser_charge_globale(evenements: List[Dict[str, Any]], taches: List[Dict[
 
 
 def est_en_retard(tache: Dict[str, Any]) -> bool:
-    """Vérifie si une tâche est en retard."""
+    """Verifie si une tâche est en retard."""
     if tache.get("complete", False):
         return False
     
@@ -80,7 +80,7 @@ def est_en_retard(tache: Dict[str, Any]) -> bool:
 # ═══════════════════════════════════════════════════════════
 
 def analyser_tendances(historique: List[Dict[str, Any]], jours: int = 30) -> Dict[str, Any]:
-    """Analyse les tendances sur une période."""
+    """Analyse les tendances sur une periode."""
     date_limite = date.today() - timedelta(days=jours)
     
     # Filtrer historique
@@ -113,7 +113,7 @@ def analyser_tendances(historique: List[Dict[str, Any]], jours: int = 30) -> Dic
     # Moyenne par jour
     moyenne_jour = len(historique_periode) / jours
     
-    # Pic d'activité
+    # Pic d'activite
     if par_jour:
         pic_jour = max(par_jour.items(), key=lambda x: x[1])
         pic_date = datetime.strptime(pic_jour[0], "%Y-%m-%d").date()
@@ -121,7 +121,7 @@ def analyser_tendances(historique: List[Dict[str, Any]], jours: int = 30) -> Dic
     else:
         pic_activite = None
     
-    # Tendance (comparer première et seconde moitié)
+    # Tendance (comparer première et seconde moitie)
     mid = jours // 2
     date_mid = date.today() - timedelta(days=mid)
     
@@ -148,11 +148,11 @@ def analyser_tendances(historique: List[Dict[str, Any]], jours: int = 30) -> Dic
 
 
 def prevoir_charge_prochaine_semaine(evenements: List[Dict[str, Any]], taches: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """Prévoit la charge de la semaine prochaine."""
+    """Prevoit la charge de la semaine prochaine."""
     debut_semaine = date.today() + timedelta(days=7 - date.today().weekday())
     fin_semaine = debut_semaine + timedelta(days=6)
     
-    # Événements prévus
+    # Évenements prevus
     evt_semaine = []
     for evt in evenements:
         date_evt = evt.get("date")
@@ -162,7 +162,7 @@ def prevoir_charge_prochaine_semaine(evenements: List[Dict[str, Any]], taches: L
         if debut_semaine <= date_evt <= fin_semaine:
             evt_semaine.append(evt)
     
-    # Tâches à échéance
+    # Tâches à echeance
     taches_semaine = []
     for tache in taches:
         if tache.get("complete"):
@@ -181,13 +181,13 @@ def prevoir_charge_prochaine_semaine(evenements: List[Dict[str, Any]], taches: L
     charge_totale = len(evt_semaine) + len(taches_semaine)
     
     if charge_totale <= 5:
-        prevision = "Semaine légère"
+        prevision = "Semaine legère"
     elif charge_totale <= 15:
         prevision = "Semaine normale"
     elif charge_totale <= 25:
-        prevision = "Semaine chargée"
+        prevision = "Semaine chargee"
     else:
-        prevision = "Semaine très chargée"
+        prevision = "Semaine très chargee"
     
     return {
         "evenements": len(evt_semaine),
@@ -224,7 +224,7 @@ def identifier_taches_urgentes(taches: List[Dict[str, Any]], jours_seuil: int = 
 
 
 def generer_alertes(evenements: List[Dict[str, Any]], taches: List[Dict[str, Any]]) -> List[Dict[str, str]]:
-    """Génère les alertes pour la vue d'ensemble."""
+    """Genère les alertes pour la vue d'ensemble."""
     alertes = []
     
     # Tâches en retard
@@ -243,7 +243,7 @@ def generer_alertes(evenements: List[Dict[str, Any]], taches: List[Dict[str, Any
             "message": f"⏰ {len(urgentes)} tâche(s) urgente(s) (< 3 jours)"
         })
     
-    # Événements aujourd'hui
+    # Évenements aujourd'hui
     evt_aujourdhui = []
     for evt in evenements:
         date_evt = evt.get("date")
@@ -256,7 +256,7 @@ def generer_alertes(evenements: List[Dict[str, Any]], taches: List[Dict[str, Any
     if evt_aujourdhui:
         alertes.append({
             "type": "info",
-            "message": f"🎯 {len(evt_aujourdhui)} événement(s) aujourd'hui"
+            "message": f"🎯 {len(evt_aujourdhui)} evenement(s) aujourd'hui"
         })
     
     return alertes
@@ -267,14 +267,14 @@ def generer_alertes(evenements: List[Dict[str, Any]], taches: List[Dict[str, Any
 # ═══════════════════════════════════════════════════════════
 
 def calculer_statistiques_periode(items: List[Dict[str, Any]], periode: str = "Semaine") -> Dict[str, Any]:
-    """Calcule les statistiques pour une période donnée."""
+    """Calcule les statistiques pour une periode donnee."""
     if periode == "Jour":
         jours = 1
     elif periode == "Semaine":
         jours = 7
     elif periode == "Mois":
         jours = 30
-    else:  # Année
+    else:  # Annee
         jours = 365
     
     date_debut = date.today() - timedelta(days=jours)
@@ -304,17 +304,17 @@ def formater_niveau_charge(niveau: str) -> str:
     """Formate le niveau de charge avec emoji."""
     emojis = {
         "Libre": "😌",
-        "Léger": "🙂",
+        "Leger": "🙂",
         "Moyen": "😐",
-        "Élevé": "😐°",
-        "Très élevé": "📥"
+        "Éleve": "😐°",
+        "Très eleve": "📥"
     }
     emoji = emojis.get(niveau, "")
     return f"{emoji} {niveau}"
 
 
 def formater_evolution(evolution: str) -> str:
-    """Formate l'évolution avec emoji."""
+    """Formate l'evolution avec emoji."""
     emojis = {
         "hausse": "�",
         "baisse": "📉",

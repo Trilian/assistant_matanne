@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour toasts.py (notifications)
 
 Module: src.ui.feedback.toasts

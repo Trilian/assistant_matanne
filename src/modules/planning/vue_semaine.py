@@ -1,10 +1,10 @@
-﻿"""
-Module Vue Semaine - Dashboard détaillé de la semaine
+"""
+Module Vue Semaine - Dashboard detaille de la semaine
 
 Vue intelligente jour par jour avec :
-- Charge équilibrée
+- Charge equilibree
 - Alertes contextuelles
-- Suggestions d'amélioration
+- Suggestions d'amelioration
 - Vue globale charge familiale
 """
 
@@ -14,9 +14,10 @@ import streamlit as st
 import plotly.graph_objects as go
 
 from src.services.planning import get_planning_unified_service
+from src.modules.shared.constantes import JOURS_SEMAINE_LOWER
 
-# Logique métier pure
-from src.domains.planning.logic.vue_semaine_logic import (
+# Logique metier pure
+from src.modules.planning.vue_semaine_utils import (
     get_debut_semaine,
     get_jours_semaine,
     calculer_charge_semaine
@@ -70,8 +71,8 @@ def afficher_graphique_charge_semaine(jours: dict) -> None:
 
 
 def afficher_graphique_repartition_activites(stats: dict) -> None:
-    """Pie chart répartition activités"""
-    labels = ["Repas", "Activités", "Projets", "Événements"]
+    """Pie chart repartition activites"""
+    labels = ["Repas", "Activites", "Projets", "Évenements"]
     values = [
         stats.get("total_repas", 0),
         stats.get("total_activites", 0),
@@ -81,13 +82,13 @@ def afficher_graphique_repartition_activites(stats: dict) -> None:
 
     fig = go.Figure(data=[go.Pie(labels=labels, values=values)])
 
-    fig.update_layout(title="🎯 Répartition des événements", height=400)
+    fig.update_layout(title="🎯 Repartition des evenements", height=400)
 
     st.plotly_chart(fig, width="stretch", key="planning_repartition_events")
 
 
 def afficher_timeline_jour(jour_complet: dict, jour: date) -> None:
-    """Affiche timeline des événements du jour"""
+    """Affiche timeline des evenements du jour"""
     jour_nom = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"][
         jour.weekday()
     ]
@@ -113,15 +114,15 @@ def afficher_timeline_jour(jour_complet: dict, jour: date) -> None:
 
     st.markdown("---")
 
-    # Événements triés par type
-    st.markdown("#### 🎯 Événements du jour")
+    # Évenements tries par type
+    st.markdown("#### 🎯 Évenements du jour")
 
     events_grouped = {
         "📷 Repas": jour_complet.get("repas", []),
-        "🎨 Activités": jour_complet.get("activites", []),
+        "🎨 Activites": jour_complet.get("activites", []),
         "🧹 Projets": jour_complet.get("projets", []),
         "⏰ Routines": jour_complet.get("routines", []),
-        "📱… Événements": jour_complet.get("events", []),
+        "📱… Évenements": jour_complet.get("events", []),
     }
 
     for groupe_nom, events in events_grouped.items():
@@ -133,7 +134,7 @@ def afficher_timeline_jour(jour_complet: dict, jour: date) -> None:
                         st.write(f"**{event['type'].capitalize()}**: {event['recette']}")
                         st.caption(f"{event['portions']} portions | {event.get('temps_total', 0)} min")
 
-                    elif groupe_nom == "🎨 Activités":
+                    elif groupe_nom == "🎨 Activites":
                         label = "👶" if event.get("pour_jules") else "📅"
                         st.write(f"{label} **{event['titre']}** ({event['type']})")
                         if event.get("budget"):
@@ -147,7 +148,7 @@ def afficher_timeline_jour(jour_complet: dict, jour: date) -> None:
                         }.get(event.get("priorite", "moyenne"), "⚫")
                         st.write(f"{priorite_emoji} **{event['nom']}** ({event['statut']})")
 
-                    elif groupe_nom == "📱… Événements":
+                    elif groupe_nom == "📱… Évenements":
                         debut = (
                             event["debut"].strftime("%H:%M")
                             if isinstance(event["debut"], datetime)
@@ -176,10 +177,10 @@ def afficher_timeline_jour(jour_complet: dict, jour: date) -> None:
 
 
 def app():
-    """Module Vue Semaine - Dashboard détaillé"""
+    """Module Vue Semaine - Dashboard detaille"""
 
-    st.title("📊 Vue Semaine Détaillée")
-    st.caption("Analyse complète de la charge familiale et répartition des événements")
+    st.title("📊 Vue Semaine Detaillee")
+    st.caption("Analyse complète de la charge familiale et repartition des evenements")
 
     # ═══════════════════════════════════════════════════════════
     # NAVIGATION SEMAINE
@@ -192,7 +193,7 @@ def app():
     col_nav1, col_nav2, col_nav3 = st.columns([1, 2, 1])
 
     with col_nav1:
-        if st.button("â¬…ï¸ Semaine précédente", key="prev_semaine_view"):
+        if st.button("â¬…ï¸ Semaine precedente", key="prev_semaine_view"):
             st.session_state.semaine_view_start -= timedelta(days=7)
             st.rerun()
 
@@ -226,7 +227,7 @@ def app():
     # ONGLETS VUE
     # ═══════════════════════════════════════════════════════════
 
-    tab1, tab2, tab3 = st.tabs(["📱ˆ Analyse Charge", "🎯 Répartition", "📱… Détail Jours"])
+    tab1, tab2, tab3 = st.tabs(["📱ˆ Analyse Charge", "🎯 Repartition", "📱… Detail Jours"])
 
     with tab1:
         st.subheader("📱ˆ Analyse de la charge familiale")
@@ -242,15 +243,15 @@ def app():
         stats = semaine.stats_semaine
         jours_list = list(semaine.jours.values())
 
-        # Jour le plus chargé
+        # Jour le plus charge
         jour_max = max(jours_list, key=lambda j: j.charge_score)
         jour_max_nom = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"][
             (st.session_state.semaine_view_start + timedelta(days=list(semaine.jours.values()).index(jour_max))).weekday()
         ]
 
-        st.info(f"❌ Jour le plus chargé: **{jour_max_nom.capitalize()}** ({jour_max.charge_score}/100)")
+        st.info(f"❌ Jour le plus charge: **{jour_max_nom.capitalize()}** ({jour_max.charge_score}/100)")
 
-        # Jour le moins chargé
+        # Jour le moins charge
         jour_min = min(jours_list, key=lambda j: j.charge_score)
         jour_min_nom = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"][
             (st.session_state.semaine_view_start + timedelta(days=list(semaine.jours.values()).index(jour_min))).weekday()
@@ -260,7 +261,7 @@ def app():
 
         # Couverture Jules
         st.write(
-            f"🍽️ **Activités Jules**: {stats.get('activites_jules', 0)} activités "
+            f"🍽️ **Activites Jules**: {stats.get('activites_jules', 0)} activites "
             f"({stats.get('total_activites', 0)} au total)"
         )
 
@@ -268,7 +269,7 @@ def app():
         st.write(f"📋 **Budget semaine**: {stats.get('budget_total', 0):.0f}€")
 
     with tab2:
-        st.subheader("🎯 Répartition des événements")
+        st.subheader("🎯 Repartition des evenements")
 
         col_r1, col_r2 = st.columns(2)
 
@@ -276,25 +277,23 @@ def app():
             afficher_graphique_repartition_activites(stats)
 
         with col_r2:
-            st.markdown("### 🎯 Résumé")
+            st.markdown("### 🎯 Resume")
 
-            st.metric("📷 Repas planifiés", stats.get("total_repas", 0))
-            st.metric("🎨 Activités", stats.get("total_activites", 0))
+            st.metric("📷 Repas planifies", stats.get("total_repas", 0))
+            st.metric("🎨 Activites", stats.get("total_activites", 0))
             st.metric("🧹 Projets", stats.get("total_projets", 0))
-            st.metric("📱… Événements", stats.get("total_events", 0))
+            st.metric("📱… Évenements", stats.get("total_events", 0))
 
     with tab3:
-        st.subheader("📱… Détail par jour")
+        st.subheader("📱… Detail par jour")
 
-        jours_semaine = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
-
-        # Sélection du jour
+        # Selection du jour
         jour_select = st.selectbox(
-            "Sélectionner un jour",
-            jours_semaine,
+            "Selectionner un jour",
+            JOURS_SEMAINE_LOWER,
         )
 
-        jour_index = jours_semaine.index(jour_select)
+        jour_index = JOURS_SEMAINE_LOWER.index(jour_select)
         jour = st.session_state.semaine_view_start + timedelta(days=jour_index)
         jour_str = jour.isoformat()
 
@@ -303,7 +302,7 @@ def app():
         if jour_complet:
             afficher_timeline_jour(jour_complet.dict(), jour)
         else:
-            st.warning(f"Pas de données pour {jour_select.capitalize()}")
+            st.warning(f"Pas de donnees pour {jour_select.capitalize()}")
 
     st.markdown("---")
 

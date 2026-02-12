@@ -1,13 +1,13 @@
-﻿"""
+"""
 Hub Maison - Dashboard central avec cards cliquables.
 
 Structure:
 ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
-│ 📋 Projets  │ │ 🌱 Jardin   │ │ 🧹 Ménage   │
+│ 📋 Projets  │ │ 🌱 Jardin   │ │ 🧹 Menage   │
 │ Garage,SdB  │ │ 2600m² 😰  │ │ Vitres, Tri │
 └─────────────┘ └─────────────┘ └─────────────┘
 ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
-│ 🛋️ Meubles  │ │ 💡 Éco-Tips │ │ 💰 Dépenses │
+│ 🛋️ Meubles  │ │ 💡 Éco-Tips │ │ 💰 Depenses │
 │ Wishlist    │ │ Lavable,Gaz │ │ Gaz,Eau,Elec│
 └─────────────┘ └─────────────┘ └─────────────┘
 """
@@ -85,7 +85,7 @@ CARD_STYLES = """
 # ═══════════════════════════════════════════════════════════
 
 def get_stats_projets() -> dict:
-    """Récupère stats projets"""
+    """Recupère stats projets"""
     try:
         from src.core.models import Project
         with obtenir_contexte_db() as db:
@@ -97,7 +97,7 @@ def get_stats_projets() -> dict:
 
 
 def get_stats_jardin() -> dict:
-    """Récupère stats zones jardin"""
+    """Recupère stats zones jardin"""
     try:
         from src.core.models import GardenZone
         with obtenir_contexte_db() as db:
@@ -112,7 +112,7 @@ def get_stats_jardin() -> dict:
 
 
 def get_stats_menage() -> dict:
-    """Récupère stats tâches ménage"""
+    """Recupère stats tâches menage"""
     try:
         from src.core.models import MaintenanceTask
         today = date.today()
@@ -128,7 +128,7 @@ def get_stats_menage() -> dict:
 
 
 def get_stats_meubles() -> dict:
-    """Récupère stats wishlist meubles"""
+    """Recupère stats wishlist meubles"""
     try:
         from src.core.models import Furniture
         with obtenir_contexte_db() as db:
@@ -144,7 +144,7 @@ def get_stats_meubles() -> dict:
 
 
 def get_stats_eco() -> dict:
-    """Récupère stats actions éco"""
+    """Recupère stats actions eco"""
     try:
         from src.core.models import EcoAction
         with obtenir_contexte_db() as db:
@@ -156,7 +156,7 @@ def get_stats_eco() -> dict:
 
 
 def get_stats_depenses() -> dict:
-    """Récupère stats dépenses du mois"""
+    """Recupère stats depenses du mois"""
     try:
         from src.core.models import HouseExpense
         today = date.today()
@@ -198,7 +198,7 @@ def render_card_jardin():
         st.session_state["maison_page"] = "jardin"
         st.rerun()
     
-    # Afficher état moyen avec emoji
+    # Afficher etat moyen avec emoji
     etat = stats["etat_moyen"]
     if etat <= 1:
         emoji = "😰"
@@ -215,10 +215,10 @@ def render_card_jardin():
 
 
 def render_card_menage():
-    """Card Ménage/Entretien"""
+    """Card Menage/Entretien"""
     stats = get_stats_menage()
     
-    if st.button("🧹 **Ménage**", key="card_menage", use_container_width=True, type="primary"):
+    if st.button("🧹 **Menage**", key="card_menage", use_container_width=True, type="primary"):
         st.session_state["maison_page"] = "menage"
         st.rerun()
     
@@ -259,10 +259,10 @@ def render_card_eco():
 
 
 def render_card_depenses():
-    """Card Dépenses maison"""
+    """Card Depenses maison"""
     stats = get_stats_depenses()
     
-    if st.button("💰 **Dépenses**", key="card_depenses", use_container_width=True, type="primary"):
+    if st.button("💰 **Depenses**", key="card_depenses", use_container_width=True, type="primary"):
         st.session_state["maison_page"] = "depenses"
         st.rerun()
     
@@ -285,27 +285,27 @@ def render_page_content():
         st.divider()
     
     if page == "projets":
-        from src.domains.maison.ui.projets import app as projets_app
+        from src.modules.maison.projets import app as projets_app
         projets_app()
     
     elif page == "jardin":
-        from src.domains.maison.ui.jardin import app as jardin_app
+        from src.modules.maison.jardin import app as jardin_app
         jardin_app()
     
     elif page == "menage":
-        from src.domains.maison.ui.entretien import app as entretien_app
+        from src.modules.maison.entretien import app as entretien_app
         entretien_app()
     
     elif page == "meubles":
-        from src.domains.maison.ui.meubles import app as meubles_app
+        from src.modules.maison.meubles import app as meubles_app
         meubles_app()
     
     elif page == "eco":
-        from src.domains.maison.ui.eco_tips import app as eco_app
+        from src.modules.maison.eco_tips import app as eco_app
         eco_app()
     
     elif page == "depenses":
-        from src.domains.maison.ui.depenses import app as depenses_app
+        from src.modules.maison.depenses import app as depenses_app
         depenses_app()
     
     else:
@@ -319,11 +319,11 @@ def render_hub():
     
     # Titre
     st.title("🏠 Hub Maison")
-    st.caption("Gestion travaux, jardin, ménage et budget")
+    st.caption("Gestion travaux, jardin, menage et budget")
     
     st.divider()
     
-    # Ligne 1: Projets, Jardin, Ménage
+    # Ligne 1: Projets, Jardin, Menage
     col1, col2, col3 = st.columns(3)
     
     with col1:
@@ -338,7 +338,7 @@ def render_hub():
         with st.container(border=True):
             render_card_menage()
     
-    # Ligne 2: Meubles, Éco, Dépenses
+    # Ligne 2: Meubles, Éco, Depenses
     col4, col5, col6 = st.columns(3)
     
     with col4:
@@ -365,15 +365,15 @@ def render_alertes():
     
     alertes = []
     
-    # Vérifier tâches en retard
+    # Verifier tâches en retard
     stats_menage = get_stats_menage()
     if stats_menage["urgentes"] > 0:
-        alertes.append(f"🧹 {stats_menage['urgentes']} tâche(s) ménage en retard")
+        alertes.append(f"🧹 {stats_menage['urgentes']} tâche(s) menage en retard")
     
-    # Vérifier état jardin
+    # Verifier etat jardin
     stats_jardin = get_stats_jardin()
     if stats_jardin["etat_moyen"] < 2:
-        alertes.append(f"🌱 Jardin en mauvais état ({stats_jardin['etat_moyen']}/5)")
+        alertes.append(f"🌱 Jardin en mauvais etat ({stats_jardin['etat_moyen']}/5)")
     
     if alertes:
         for alerte in alertes:
@@ -387,6 +387,6 @@ def render_alertes():
 # ═══════════════════════════════════════════════════════════
 
 def app():
-    """Point d'entrée module Hub Maison"""
+    """Point d'entree module Hub Maison"""
     render_page_content()
 

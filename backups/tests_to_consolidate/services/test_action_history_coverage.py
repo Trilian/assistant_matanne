@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests de couverture pour src/services/action_history.py
 """
 
@@ -7,9 +7,9 @@ from unittest.mock import Mock, MagicMock, patch
 from datetime import datetime, timedelta
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ENUMS ET MODELES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -17,7 +17,7 @@ class TestActionType:
     """Tests pour ActionType enum."""
 
     def test_action_type_values(self):
-        """Test que les types d'actions sont définis."""
+        """Test que les types d'actions sont dÃ©finis."""
         from src.services.action_history import ActionType
         
         assert ActionType.RECETTE_CREATED.value == "recette.created"
@@ -28,7 +28,7 @@ class TestActionType:
         """Test tous les membres de l'enum."""
         from src.services.action_history import ActionType
         
-        # Vérifier qu'il y a plusieurs types
+        # VÃ©rifier qu'il y a plusieurs types
         assert len(ActionType) > 10
 
 
@@ -37,7 +37,7 @@ class TestActionEntry:
     """Tests pour ActionEntry model."""
 
     def test_action_entry_defaults(self):
-        """Test valeurs par défaut."""
+        """Test valeurs par dÃ©faut."""
         from src.services.action_history import ActionEntry, ActionType
         
         entry = ActionEntry(
@@ -65,7 +65,7 @@ class TestActionEntry:
             entity_type="recette",
             entity_id=42,
             entity_name="Tarte",
-            description="Recette mise à jour",
+            description="Recette mise Ã  jour",
             details={"field": "nom"},
             old_value={"nom": "Ancien"},
             new_value={"nom": "Nouveau"}
@@ -80,7 +80,7 @@ class TestActionFilter:
     """Tests pour ActionFilter model."""
 
     def test_action_filter_defaults(self):
-        """Test valeurs par défaut."""
+        """Test valeurs par dÃ©faut."""
         from src.services.action_history import ActionFilter
         
         filters = ActionFilter()
@@ -90,7 +90,7 @@ class TestActionFilter:
         assert filters.user_id is None
 
     def test_action_filter_with_values(self):
-        """Test avec valeurs personnalisées."""
+        """Test avec valeurs personnalisÃ©es."""
         from src.services.action_history import ActionFilter, ActionType
         
         filters = ActionFilter(
@@ -109,7 +109,7 @@ class TestActionStats:
     """Tests pour ActionStats model."""
 
     def test_action_stats_defaults(self):
-        """Test valeurs par défaut."""
+        """Test valeurs par dÃ©faut."""
         from src.services.action_history import ActionStats
         
         stats = ActionStats()
@@ -119,9 +119,9 @@ class TestActionStats:
         assert stats.most_active_users == []
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SERVICE INIT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -146,9 +146,9 @@ class TestActionHistoryServiceInit:
         assert service._session == mock_session
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS LOG_ACTION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -168,7 +168,7 @@ class TestLogAction:
         entry = service.log_action(
             action_type=ActionType.RECETTE_CREATED,
             entity_type="recette",
-            description="Recette créée"
+            description="Recette crÃ©Ã©e"
         )
         
         assert entry.action_type == ActionType.RECETTE_CREATED
@@ -177,7 +177,7 @@ class TestLogAction:
     @patch.object(__import__('src.services.action_history', fromlist=['ActionHistoryService']).ActionHistoryService, '_save_to_database')
     @patch.object(__import__('src.services.action_history', fromlist=['ActionHistoryService']).ActionHistoryService, '_get_current_user')
     def test_log_action_with_entity(self, mock_user, mock_save):
-        """Test log_action avec entité."""
+        """Test log_action avec entitÃ©."""
         mock_user.return_value = ("user1", "Test User")
         
         from src.services.action_history import ActionHistoryService, ActionType
@@ -189,7 +189,7 @@ class TestLogAction:
             entity_type="recette",
             entity_id=42,
             entity_name="Tarte",
-            description="Recette mise à jour",
+            description="Recette mise Ã  jour",
             old_value={"nom": "Ancien"},
             new_value={"nom": "Nouveau"}
         )
@@ -198,19 +198,19 @@ class TestLogAction:
         assert entry.entity_name == "Tarte"
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS MÉTHODES LOG SPÉCIALISÉES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS MÃ‰THODES LOG SPÃ‰CIALISÃ‰ES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestLogSpecializedMethods:
-    """Tests pour les méthodes de log spécialisées."""
+    """Tests pour les mÃ©thodes de log spÃ©cialisÃ©es."""
 
     @patch.object(__import__('src.services.action_history', fromlist=['ActionHistoryService']).ActionHistoryService, '_save_to_database')
     @patch.object(__import__('src.services.action_history', fromlist=['ActionHistoryService']).ActionHistoryService, '_get_current_user')
     def test_log_recette_created(self, mock_user, mock_save):
-        """Test log création recette."""
+        """Test log crÃ©ation recette."""
         mock_user.return_value = ("user1", "Test")
         
         from src.services.action_history import ActionHistoryService, ActionType
@@ -224,7 +224,7 @@ class TestLogSpecializedMethods:
     @patch.object(__import__('src.services.action_history', fromlist=['ActionHistoryService']).ActionHistoryService, '_save_to_database')
     @patch.object(__import__('src.services.action_history', fromlist=['ActionHistoryService']).ActionHistoryService, '_get_current_user')
     def test_log_recette_updated(self, mock_user, mock_save):
-        """Test log mise à jour recette."""
+        """Test log mise Ã  jour recette."""
         mock_user.return_value = ("user1", "Test")
         
         from src.services.action_history import ActionHistoryService, ActionType
@@ -267,7 +267,7 @@ class TestLogSpecializedMethods:
     @patch.object(__import__('src.services.action_history', fromlist=['ActionHistoryService']).ActionHistoryService, '_save_to_database')
     @patch.object(__import__('src.services.action_history', fromlist=['ActionHistoryService']).ActionHistoryService, '_get_current_user')
     def test_log_courses_item_checked(self, mock_user, mock_save):
-        """Test log article coché."""
+        """Test log article cochÃ©."""
         mock_user.return_value = ("user1", "Test")
         
         from src.services.action_history import ActionHistoryService, ActionType
@@ -280,13 +280,13 @@ class TestLogSpecializedMethods:
     @patch.object(__import__('src.services.action_history', fromlist=['ActionHistoryService']).ActionHistoryService, '_save_to_database')
     @patch.object(__import__('src.services.action_history', fromlist=['ActionHistoryService']).ActionHistoryService, '_get_current_user')
     def test_log_planning_repas_added(self, mock_user, mock_save):
-        """Test log repas planifié."""
+        """Test log repas planifiÃ©."""
         mock_user.return_value = ("user1", "Test")
         
         from src.services.action_history import ActionHistoryService, ActionType
         
         service = ActionHistoryService()
-        entry = service.log_planning_repas_added(1, "Tarte", datetime.now().date(), "dîner")
+        entry = service.log_planning_repas_added(1, "Tarte", datetime.now().date(), "dÃ®ner")
         
         assert entry.action_type == ActionType.PLANNING_REPAS_ADDED
 
@@ -306,7 +306,7 @@ class TestLogSpecializedMethods:
     @patch.object(__import__('src.services.action_history', fromlist=['ActionHistoryService']).ActionHistoryService, '_save_to_database')
     @patch.object(__import__('src.services.action_history', fromlist=['ActionHistoryService']).ActionHistoryService, '_get_current_user')
     def test_log_system_logout(self, mock_user, mock_save):
-        """Test log déconnexion."""
+        """Test log dÃ©connexion."""
         mock_user.return_value = ("user1", "Test")
         
         from src.services.action_history import ActionHistoryService, ActionType
@@ -317,9 +317,9 @@ class TestLogSpecializedMethods:
         assert entry.action_type == ActionType.SYSTEM_LOGOUT
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GET HISTORY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -328,7 +328,7 @@ class TestGetHistory:
 
     @patch('src.core.database.get_db_context')
     def test_get_history_success(self, mock_db_ctx):
-        """Test récupération historique réussie."""
+        """Test rÃ©cupÃ©ration historique rÃ©ussie."""
         from src.services.action_history import ActionHistoryService, ActionFilter
         
         mock_session = MagicMock()
@@ -340,7 +340,7 @@ class TestGetHistory:
         mock_entry.entity_type = "recette"
         mock_entry.entity_id = 1
         mock_entry.entity_name = "Tarte"
-        mock_entry.description = "Créé"
+        mock_entry.description = "CrÃ©Ã©"
         mock_entry.details = {}
         mock_entry.old_value = None
         mock_entry.new_value = None
@@ -367,7 +367,7 @@ class TestGetHistory:
         """Test fallback sur cache en cas d'erreur."""
         from src.services.action_history import ActionHistoryService, ActionEntry, ActionType
         
-        # Ajouter une entrée au cache
+        # Ajouter une entrÃ©e au cache
         service = ActionHistoryService()
         service._recent_cache = [
             ActionEntry(
@@ -386,7 +386,7 @@ class TestGetHistory:
             assert len(result) >= 0
 
     def test_get_user_history(self):
-        """Test get_user_history délègue à get_history."""
+        """Test get_user_history dÃ©lÃ¨gue Ã  get_history."""
         from src.services.action_history import ActionHistoryService
         
         service = ActionHistoryService()
@@ -398,7 +398,7 @@ class TestGetHistory:
             assert result == []
 
     def test_get_entity_history(self):
-        """Test get_entity_history délègue à get_history."""
+        """Test get_entity_history dÃ©lÃ¨gue Ã  get_history."""
         from src.services.action_history import ActionHistoryService
         
         service = ActionHistoryService()
@@ -421,9 +421,9 @@ class TestGetHistory:
             mock_get.assert_called_once()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GET STATS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -432,12 +432,12 @@ class TestGetStats:
 
     @patch('src.core.database.get_db_context')
     def test_get_stats_success(self, mock_db_ctx):
-        """Test statistiques réussies."""
+        """Test statistiques rÃ©ussies."""
         from src.services.action_history import ActionHistoryService, ActionStats
         
         mock_session = MagicMock()
         
-        # Mock les requêtes de comptage
+        # Mock les requÃªtes de comptage
         mock_session.query.return_value.scalar.return_value = 100
         mock_session.query.return_value.filter.return_value.scalar.return_value = 10
         mock_session.query.return_value.group_by.return_value.order_by.return_value.limit.return_value.all.return_value = []
@@ -463,9 +463,9 @@ class TestGetStats:
             assert result.total_actions == 0
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CAN_UNDO ET UNDO_ACTION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -493,20 +493,20 @@ class TestUndoActions:
         assert result is False
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS MÉTHODES PRIVÉES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS MÃ‰THODES PRIVÃ‰ES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestPrivateMethods:
-    """Tests pour les méthodes privées."""
+    """Tests pour les mÃ©thodes privÃ©es."""
 
     def test_get_current_user_anonymous(self):
-        """Test récupération utilisateur anonyme."""
+        """Test rÃ©cupÃ©ration utilisateur anonyme."""
         from src.services.action_history import ActionHistoryService
         
-        # Mock auth service qui échoue
+        # Mock auth service qui Ã©choue
         with patch('src.services.auth.get_auth_service', side_effect=Exception("No auth")):
             service = ActionHistoryService()
             user_id, user_name = service._get_current_user()
@@ -586,9 +586,9 @@ class TestPrivateMethods:
         assert changes[0]["field"] == "description"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FACTORY ET EXPORTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -620,9 +620,9 @@ class TestFactoryAndExports:
         assert ActionHistoryService is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS POUR METHODES DB AVANCEES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @pytest.mark.unit
 class TestGetHistoryDB:
@@ -659,7 +659,7 @@ class TestGetHistoryDB:
         )
         
         service = ActionHistoryService()
-        # Ajouter des entrées au cache
+        # Ajouter des entrÃ©es au cache
         entry = ActionEntry(
             id=1,
             user_id="user1",
@@ -720,7 +720,7 @@ class TestGetCurrentUser:
     """Tests pour _get_current_user."""
 
     def test_get_current_user_authenticated(self):
-        """Test avec utilisateur authentifié."""
+        """Test avec utilisateur authentifiÃ©."""
         from src.services.action_history import ActionHistoryService
         
         mock_user = Mock()
@@ -738,7 +738,7 @@ class TestGetCurrentUser:
         assert user_name == "John Doe"
 
     def test_get_current_user_not_authenticated(self):
-        """Test avec utilisateur non authentifié."""
+        """Test avec utilisateur non authentifiÃ©."""
         from src.services.action_history import ActionHistoryService
         
         mock_auth = Mock()
@@ -770,7 +770,7 @@ class TestSaveToDatabase:
     """Tests pour _save_to_database."""
 
     def test_save_to_database_success(self):
-        """Test sauvegarde en DB - gère l'exception si model n'existe pas."""
+        """Test sauvegarde en DB - gÃ¨re l'exception si model n'existe pas."""
         from src.services.action_history import ActionHistoryService, ActionEntry, ActionType
         
         entry = ActionEntry(
@@ -783,8 +783,8 @@ class TestSaveToDatabase:
         
         service = ActionHistoryService()
         
-        # Le test vérifie que _save_to_database ne crash pas
-        # même si l'exception est levée (le try/except interne gère)
+        # Le test vÃ©rifie que _save_to_database ne crash pas
+        # mÃªme si l'exception est levÃ©e (le try/except interne gÃ¨re)
         with patch("src.core.database.get_db_context") as mock_ctx:
             mock_ctx.side_effect = ImportError("ActionHistory not found")
             # Should not raise - exception is caught
@@ -812,10 +812,10 @@ class TestSaveToDatabase:
 
 @pytest.mark.unit
 class TestCanUndoWithHistory:
-    """Tests pour can_undo avec historique réel."""
+    """Tests pour can_undo avec historique rÃ©el."""
 
     def test_can_undo_reversible_action_with_old_value(self):
-        """Test can_undo pour action réversible avec old_value."""
+        """Test can_undo pour action rÃ©versible avec old_value."""
         from src.services.action_history import ActionHistoryService, ActionType, ActionEntry, ActionFilter
         
         entry = ActionEntry(
@@ -828,7 +828,7 @@ class TestCanUndoWithHistory:
             old_value={"nom": "Ancien"}
         )
         
-        # Vérifier que l'action est bien réversible
+        # VÃ©rifier que l'action est bien rÃ©versible
         reversible_types = {
             ActionType.RECETTE_UPDATED,
             ActionType.INVENTAIRE_UPDATED,
@@ -839,12 +839,12 @@ class TestCanUndoWithHistory:
         assert entry.old_value is not None
         assert entry.id == 42
         
-        # Résultat attendu: entry.action_type in reversible_types AND old_value is not None
+        # RÃ©sultat attendu: entry.action_type in reversible_types AND old_value is not None
         expected = (entry.action_type in reversible_types and entry.old_value is not None)
         assert expected is True
 
     def test_can_undo_non_reversible_action(self):
-        """Test can_undo pour action non réversible."""
+        """Test can_undo pour action non rÃ©versible."""
         from src.services.action_history import ActionHistoryService, ActionType, ActionEntry
         
         entry = ActionEntry(
@@ -870,7 +870,7 @@ class TestUndoAction:
     """Tests pour undo_action."""
 
     def test_undo_action_returns_false(self):
-        """Test undo_action retourne False (non implémenté)."""
+        """Test undo_action retourne False (non implÃ©mentÃ©)."""
         from src.services.action_history import ActionHistoryService
         
         service = ActionHistoryService()
@@ -879,9 +879,9 @@ class TestUndoAction:
         assert result is False
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS COMPOSANTS UI
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @pytest.mark.unit
 class TestRenderActivityTimeline:
@@ -898,7 +898,7 @@ class TestRenderActivityTimeline:
                 user_name="Test",
                 action_type=ActionType.RECETTE_CREATED,
                 entity_type="recette",
-                description="Recette créée"
+                description="Recette crÃ©Ã©e"
             )
         ]
         
@@ -908,7 +908,7 @@ class TestRenderActivityTimeline:
             mock_factory.return_value = mock_service
             
             with patch("src.services.action_history.st") as mock_st:
-                # Créer des mocks qui supportent le context manager
+                # CrÃ©er des mocks qui supportent le context manager
                 col1_mock = MagicMock()
                 col2_mock = MagicMock()
                 mock_st.columns.return_value = [col1_mock, col2_mock]
@@ -946,7 +946,7 @@ class TestRenderUserActivity:
                 user_name="Test",
                 action_type=ActionType.RECETTE_CREATED,
                 entity_type="recette",
-                description="Recette créée",
+                description="Recette crÃ©Ã©e",
                 details={"field": "test"}
             )
         ]
@@ -1000,7 +1000,7 @@ class TestRenderActivityStats:
             mock_factory.return_value = mock_service
             
             with patch("src.services.action_history.st") as mock_st:
-                # Créer des mocks qui supportent le context manager
+                # CrÃ©er des mocks qui supportent le context manager
                 col1_mock = MagicMock()
                 col2_mock = MagicMock()
                 col3_mock = MagicMock()
@@ -1027,7 +1027,7 @@ class TestRenderActivityStats:
             mock_factory.return_value = mock_service
             
             with patch("src.services.action_history.st") as mock_st:
-                # Créer des mocks qui supportent le context manager
+                # CrÃ©er des mocks qui supportent le context manager
                 col1_mock = MagicMock()
                 col2_mock = MagicMock()
                 col3_mock = MagicMock()

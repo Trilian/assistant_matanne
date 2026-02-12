@@ -1,4 +1,4 @@
-"""
+﻿"""
 Modèles SQLAlchemy pour le domaine Jeux (Paris sportifs & Loto)
 """
 
@@ -13,9 +13,9 @@ import enum
 from src.core.models.base import Base
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ENUMS
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class ResultatMatchEnum(str, enum.Enum):
     """Résultat possible d'un match"""
@@ -52,9 +52,9 @@ class ChampionnatEnum(str, enum.Enum):
     EUROPA_LEAGUE = "Europa League"
 
 
-# ═══════════════════════════════════════════════════════════════════
-# MODÈLES PARIS SPORTIFS
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# MODÃˆLES PARIS SPORTIFS
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class Equipe(Base):
     """Équipe de football"""
@@ -67,7 +67,7 @@ class Equipe(Base):
     pays: Mapped[str] = mapped_column(String(50), nullable=True)
     logo_url: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     
-    # Stats agrégées (mises à jour automatiquement)
+    # Stats agrégées (mises Ã  jour automatiquement)
     matchs_joues: Mapped[int] = mapped_column(Integer, default=0)
     victoires: Mapped[int] = mapped_column(Integer, default=0)
     nuls: Mapped[int] = mapped_column(Integer, default=0)
@@ -184,9 +184,9 @@ class PariSportif(Base):
         return f"<Pari {self.prediction} @ {self.cote} - {self.statut}>"
 
 
-# ═══════════════════════════════════════════════════════════════════
-# MODÈLES LOTO
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# MODÃˆLES LOTO
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TirageLoto(Base):
     """Historique des tirages du Loto"""
@@ -220,8 +220,8 @@ class TirageLoto(Base):
     
     @property
     def numeros_str(self) -> str:
-        """Format affichage: 5-12-23-34-45 + N°8"""
-        return f"{'-'.join(map(str, self.numeros))} + N°{self.numero_chance}"
+        """Format affichage: 5-12-23-34-45 + NÂ°8"""
+        return f"{'-'.join(map(str, self.numeros))} + NÂ°{self.numero_chance}"
 
 
 class GrilleLoto(Base):
@@ -266,7 +266,7 @@ class GrilleLoto(Base):
     
     @property
     def numeros_str(self) -> str:
-        return f"{'-'.join(map(str, self.numeros))} + N°{self.numero_chance}"
+        return f"{'-'.join(map(str, self.numeros))} + NÂ°{self.numero_chance}"
 
 
 class StatistiquesLoto(Base):
@@ -293,9 +293,9 @@ class StatistiquesLoto(Base):
     nb_tirages_analyses: Mapped[int] = mapped_column(Integer, default=0)
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SUIVI GLOBAL (Bankroll & Performance)
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class HistoriqueJeux(Base):
     """Historique global pour tracker la performance"""

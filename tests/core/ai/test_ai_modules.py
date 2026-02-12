@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour les clients et parseurs IA (Mistral).
 
 Couvre les fonctionnalités de communication avec l'API Mistral.
@@ -149,7 +149,7 @@ class TestClientIAIntegration:
     """Tests d'intégration du client IA."""
     
     def test_client_real_api_call(self):
-        """Test un appel réel à l'API Mistral."""
+        """Test un appel réel Ã  l'API Mistral."""
         try:
             if ClientIA is None:
                 pytest.skip("ClientIA non importable")

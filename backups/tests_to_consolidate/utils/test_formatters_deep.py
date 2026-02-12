@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests approfondis pour src/utils/formatters/
 Objectif: Atteindre 80%+ de couverture
 
@@ -13,9 +13,9 @@ import pytest
 from datetime import date, datetime, timedelta
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FORMATTERS DATES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFormatDate:
@@ -36,11 +36,11 @@ class TestFormatDate:
         assert result == "01/12/2025"
     
     def test_format_date_long_fr(self):
-        """Test format long français"""
+        """Test format long franÃ§ais"""
         from src.utils.formatters.dates import format_date
         
         result = format_date(date(2025, 12, 1), "long", "fr")
-        assert result == "1 décembre 2025"
+        assert result == "1 dÃ©cembre 2025"
     
     def test_format_date_long_en(self):
         """Test format long anglais"""
@@ -50,7 +50,7 @@ class TestFormatDate:
         assert "December" in result or "12" in result
     
     def test_format_date_defaut(self):
-        """Test format par défaut"""
+        """Test format par dÃ©faut"""
         from src.utils.formatters.dates import format_date
         
         result = format_date(date(2025, 12, 1), "unknown")
@@ -61,7 +61,7 @@ class TestFormatDate:
         from src.utils.formatters.dates import format_date
         
         result = format_date(None)
-        assert result == "—"
+        assert result == "â€”"
     
     def test_format_date_datetime_input(self):
         """Test avec datetime au lieu de date"""
@@ -71,12 +71,12 @@ class TestFormatDate:
         assert result == "01/12"
     
     @pytest.mark.parametrize("month,expected", [
-        (1, "janvier"), (2, "février"), (3, "mars"), (4, "avril"),
-        (5, "mai"), (6, "juin"), (7, "juillet"), (8, "août"),
-        (9, "septembre"), (10, "octobre"), (11, "novembre"), (12, "décembre")
+        (1, "janvier"), (2, "fÃ©vrier"), (3, "mars"), (4, "avril"),
+        (5, "mai"), (6, "juin"), (7, "juillet"), (8, "aoÃ»t"),
+        (9, "septembre"), (10, "octobre"), (11, "novembre"), (12, "dÃ©cembre")
     ])
     def test_format_date_tous_les_mois(self, month, expected):
-        """Test tous les mois en français"""
+        """Test tous les mois en franÃ§ais"""
         from src.utils.formatters.dates import format_date
         
         result = format_date(date(2025, month, 15), "long", "fr")
@@ -105,11 +105,11 @@ class TestFormatDatetime:
         from src.utils.formatters.dates import format_datetime
         
         result = format_datetime(datetime(2025, 12, 1, 14, 30), "long", "fr")
-        assert "1 décembre 2025" in result
+        assert "1 dÃ©cembre 2025" in result
         assert "14:30" in result
     
     def test_format_datetime_defaut(self):
-        """Test format par défaut"""
+        """Test format par dÃ©faut"""
         from src.utils.formatters.dates import format_datetime
         
         result = format_datetime(datetime(2025, 12, 1, 14, 30), "unknown")
@@ -120,7 +120,7 @@ class TestFormatDatetime:
         from src.utils.formatters.dates import format_datetime
         
         result = format_datetime(None)
-        assert result == "—"
+        assert result == "â€”"
 
 
 class TestFormatRelativeDate:
@@ -169,7 +169,7 @@ class TestFormatRelativeDate:
         assert "/" in result  # Format medium
     
     def test_format_relative_plus_de_7_jours_passe(self):
-        """Test plus de 7 jours dans le passé"""
+        """Test plus de 7 jours dans le passÃ©"""
         from src.utils.formatters.dates import format_relative_date
         
         result = format_relative_date(date.today() - timedelta(days=30))
@@ -208,7 +208,7 @@ class TestFormatTime:
         assert result == "1h30"
     
     def test_format_time_zero(self):
-        """Test zéro minutes"""
+        """Test zÃ©ro minutes"""
         from src.utils.formatters.dates import format_time
         
         result = format_time(0)
@@ -277,7 +277,7 @@ class TestFormatDuration:
         assert "secondes" in result
     
     def test_format_duration_zero(self):
-        """Test zéro"""
+        """Test zÃ©ro"""
         from src.utils.formatters.dates import format_duration
         
         result_short = format_duration(0, short=True)
@@ -300,37 +300,37 @@ class TestFormatDuration:
         assert "0" in result
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FORMATTERS NUMBERS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFormatQuantity:
     """Tests pour format_quantity"""
     
     def test_format_quantity_entier(self):
-        """Test quantité entière"""
+        """Test quantitÃ© entiÃ¨re"""
         from src.utils.formatters.numbers import format_quantity
         
         result = format_quantity(2.0)
         assert result == "2"
     
     def test_format_quantity_decimal(self):
-        """Test quantité décimale"""
+        """Test quantitÃ© dÃ©cimale"""
         from src.utils.formatters.numbers import format_quantity
         
         result = format_quantity(2.5)
         assert result == "2.5"
     
     def test_format_quantity_precision(self):
-        """Test précision"""
+        """Test prÃ©cision"""
         from src.utils.formatters.numbers import format_quantity
         
         result = format_quantity(2.123, decimals=2)
         assert result == "2.12"
     
     def test_format_quantity_zero(self):
-        """Test zéro"""
+        """Test zÃ©ro"""
         from src.utils.formatters.numbers import format_quantity
         
         result = format_quantity(0)
@@ -362,28 +362,28 @@ class TestFormatQuantityWithUnit:
     """Tests pour format_quantity_with_unit"""
     
     def test_format_quantity_with_unit_simple(self):
-        """Test avec unité"""
+        """Test avec unitÃ©"""
         from src.utils.formatters.numbers import format_quantity_with_unit
         
         result = format_quantity_with_unit(2.5, "kg")
         assert result == "2.5 kg"
     
     def test_format_quantity_with_unit_none(self):
-        """Test sans unité"""
+        """Test sans unitÃ©"""
         from src.utils.formatters.numbers import format_quantity_with_unit
         
         result = format_quantity_with_unit(2.5, None)
         assert result == "2.5"
     
     def test_format_quantity_with_unit_vide(self):
-        """Test avec unité vide"""
+        """Test avec unitÃ© vide"""
         from src.utils.formatters.numbers import format_quantity_with_unit
         
         result = format_quantity_with_unit(2.5, "")
         assert result == "2.5"
     
     def test_format_quantity_with_unit_espaces(self):
-        """Test avec espaces dans unité"""
+        """Test avec espaces dans unitÃ©"""
         from src.utils.formatters.numbers import format_quantity_with_unit
         
         result = format_quantity_with_unit(2.5, "  kg  ")
@@ -398,24 +398,24 @@ class TestFormatPrice:
         from src.utils.formatters.numbers import format_price
         
         result = format_price(10.0)
-        assert result == "10€"
+        assert result == "10â‚¬"
     
     def test_format_price_decimal(self):
-        """Test prix décimal"""
+        """Test prix dÃ©cimal"""
         from src.utils.formatters.numbers import format_price
         
         result = format_price(10.50)
-        assert result == "10.50€"
+        assert result == "10.50â‚¬"
     
     def test_format_price_none(self):
         """Test None"""
         from src.utils.formatters.numbers import format_price
         
         result = format_price(None)
-        assert result == "0€"
+        assert result == "0â‚¬"
     
     def test_format_price_custom_currency(self):
-        """Test devise personnalisée"""
+        """Test devise personnalisÃ©e"""
         from src.utils.formatters.numbers import format_price
         
         result = format_price(10, "$")
@@ -426,19 +426,19 @@ class TestFormatPrice:
         from src.utils.formatters.numbers import format_price
         
         result = format_price("invalid")
-        assert result == "0€"
+        assert result == "0â‚¬"
 
 
 class TestFormatCurrency:
     """Tests pour format_currency"""
     
     def test_format_currency_fr(self):
-        """Test format français"""
+        """Test format franÃ§ais"""
         from src.utils.formatters.numbers import format_currency
         
         result = format_currency(1234.56, "EUR", "fr_FR")
         assert "1 234,56" in result
-        assert "€" in result
+        assert "â‚¬" in result
     
     def test_format_currency_en(self):
         """Test format anglais"""
@@ -463,10 +463,10 @@ class TestFormatCurrency:
         assert "0" in result
     
     @pytest.mark.parametrize("currency,symbol", [
-        ("EUR", "€"), ("USD", "$"), ("GBP", "£"), ("CHF", "CHF")
+        ("EUR", "â‚¬"), ("USD", "$"), ("GBP", "Â£"), ("CHF", "CHF")
     ])
     def test_format_currency_symboles(self, currency, symbol):
-        """Test différents symboles"""
+        """Test diffÃ©rents symboles"""
         from src.utils.formatters.numbers import format_currency
         
         result = format_currency(100, currency, "fr_FR")
@@ -484,7 +484,7 @@ class TestFormatPercentage:
         assert result == "85%"
     
     def test_format_percentage_decimal(self):
-        """Test pourcentage décimal"""
+        """Test pourcentage dÃ©cimal"""
         from src.utils.formatters.numbers import format_percentage
         
         result = format_percentage(85.5)
@@ -498,14 +498,14 @@ class TestFormatPercentage:
         assert result == "0%"
     
     def test_format_percentage_custom_symbol(self):
-        """Test symbole personnalisé"""
+        """Test symbole personnalisÃ©"""
         from src.utils.formatters.numbers import format_percentage
         
         result = format_percentage(85, symbol=" pourcent")
         assert result == "85 pourcent"
     
     def test_format_percentage_precision(self):
-        """Test précision"""
+        """Test prÃ©cision"""
         from src.utils.formatters.numbers import format_percentage
         
         result = format_percentage(85.123, decimals=2)
@@ -523,14 +523,14 @@ class TestFormatNumber:
     """Tests pour format_number"""
     
     def test_format_number_milliers(self):
-        """Test séparateur milliers"""
+        """Test sÃ©parateur milliers"""
         from src.utils.formatters.numbers import format_number
         
         result = format_number(1234567)
         assert result == "1 234 567"
     
     def test_format_number_decimales(self):
-        """Test avec décimales"""
+        """Test avec dÃ©cimales"""
         from src.utils.formatters.numbers import format_number
         
         result = format_number(1234.56, decimals=2)
@@ -584,7 +584,7 @@ class TestFormatFileSize:
         assert result == "1 Go"
     
     def test_format_file_size_zero(self):
-        """Test zéro"""
+        """Test zÃ©ro"""
         from src.utils.formatters.numbers import format_file_size
         
         result = format_file_size(0)
@@ -609,21 +609,21 @@ class TestFormatRange:
     """Tests pour format_range"""
     
     def test_format_range_avec_unite(self):
-        """Test avec unité"""
+        """Test avec unitÃ©"""
         from src.utils.formatters.numbers import format_range
         
-        result = format_range(10, 20, "€")
-        assert result == "10-20 €"
+        result = format_range(10, 20, "â‚¬")
+        assert result == "10-20 â‚¬"
     
     def test_format_range_sans_unite(self):
-        """Test sans unité"""
+        """Test sans unitÃ©"""
         from src.utils.formatters.numbers import format_range
         
         result = format_range(10, 20)
         assert result == "10-20"
     
     def test_format_range_decimales(self):
-        """Test avec décimales"""
+        """Test avec dÃ©cimales"""
         from src.utils.formatters.numbers import format_range
         
         result = format_range(10.5, 20.5, "kg")
@@ -641,7 +641,7 @@ class TestSmartRound:
         assert result == 2.5
     
     def test_smart_round_precision(self):
-        """Test avec précision"""
+        """Test avec prÃ©cision"""
         from src.utils.formatters.numbers import smart_round
         
         result = smart_round(2.123456, precision=3)
@@ -662,9 +662,9 @@ class TestSmartRound:
         assert result == 0.0
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FORMATTERS TEXT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestTruncate:
@@ -681,15 +681,15 @@ class TestTruncate:
         """Test texte plus long que limite"""
         from src.utils.formatters.text import truncate
         
-        result = truncate("Un texte très long...", length=10)
+        result = truncate("Un texte trÃ¨s long...", length=10)
         assert len(result) == 10
         assert result.endswith("...")
     
     def test_truncate_custom_suffix(self):
-        """Test suffixe personnalisé"""
+        """Test suffixe personnalisÃ©"""
         from src.utils.formatters.text import truncate
         
-        result = truncate("Un texte très long...", length=15, suffix="[...]")
+        result = truncate("Un texte trÃ¨s long...", length=15, suffix="[...]")
         assert result.endswith("[...]")
 
 
@@ -723,7 +723,7 @@ class TestCleanText:
         """Test None (devrait retourner None ou lever exception)"""
         from src.utils.formatters.text import clean_text
         
-        # Le comportement peut varier selon l'implémentation
+        # Le comportement peut varier selon l'implÃ©mentation
         result = clean_text(None)
         assert result is None
 
@@ -742,13 +742,13 @@ class TestSlugify:
         """Test avec accents"""
         from src.utils.formatters.text import slugify
         
-        result = slugify("Crème brûlée à la française")
+        result = slugify("CrÃ¨me brÃ»lÃ©e Ã  la franÃ§aise")
         assert "creme" in result
         assert "brulee" in result
         assert "francaise" in result
     
     def test_slugify_caracteres_speciaux(self):
-        """Test avec caractères spéciaux"""
+        """Test avec caractÃ¨res spÃ©ciaux"""
         from src.utils.formatters.text import slugify
         
         result = slugify("Test!@#$%^&*()")
@@ -777,14 +777,14 @@ class TestExtractNumber:
         """Test avec virgule"""
         from src.utils.formatters.text import extract_number
         
-        result = extract_number("Prix: 10,50€")
+        result = extract_number("Prix: 10,50â‚¬")
         assert result == 10.5
     
     def test_extract_number_negatif(self):
-        """Test nombre négatif"""
+        """Test nombre nÃ©gatif"""
         from src.utils.formatters.text import extract_number
         
-        result = extract_number("-5 degrés")
+        result = extract_number("-5 degrÃ©s")
         assert result == -5.0
     
     def test_extract_number_none(self):
@@ -834,16 +834,16 @@ class TestCapitalizeFirst:
         assert result == ""
     
     def test_capitalize_first_un_caractere(self):
-        """Test un seul caractère"""
+        """Test un seul caractÃ¨re"""
         from src.utils.formatters.text import capitalize_first
         
         result = capitalize_first("a")
         assert result == "A"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FORMATTERS UNITS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFormatWeight:
@@ -864,14 +864,14 @@ class TestFormatWeight:
         assert result == "1 kg"
     
     def test_format_weight_kg_decimal(self):
-        """Test kilogrammes décimaux"""
+        """Test kilogrammes dÃ©cimaux"""
         from src.utils.formatters.units import format_weight
         
         result = format_weight(1500)
         assert result == "1.5 kg"
     
     def test_format_weight_zero(self):
-        """Test zéro"""
+        """Test zÃ©ro"""
         from src.utils.formatters.units import format_weight
         
         result = format_weight(0)
@@ -910,14 +910,14 @@ class TestFormatVolume:
         assert result == "1 L"
     
     def test_format_volume_litres_decimal(self):
-        """Test litres décimaux"""
+        """Test litres dÃ©cimaux"""
         from src.utils.formatters.units import format_volume
         
         result = format_volume(1500)
         assert result == "1.5 L"
     
     def test_format_volume_zero(self):
-        """Test zéro"""
+        """Test zÃ©ro"""
         from src.utils.formatters.units import format_volume
         
         result = format_volume(0)

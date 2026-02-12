@@ -1,10 +1,10 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 API Analysis & Maintenance Tool
-════════════════════════════════════════════════════════════════════
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-Analyse src/api/, détecte patterns, suggère improvements.
-Similaire à scripts/manage_tests.py mais pour API.
+Analyse src/api/, dÃ©tecte patterns, suggÃ¨re improvements.
+Similaire Ã  scripts/manage_tests.py mais pour API.
 """
 
 import ast
@@ -15,13 +15,13 @@ from typing import List, Dict, Set, Optional
 from collections import defaultdict
 
 
-# ═════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 1: DATA STRUCTURES
-# ═════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @dataclass
 class APIEndpoint:
-    """Représente un endpoint API."""
+    """ReprÃ©sente un endpoint API."""
     path: str
     method: str  # GET, POST, PUT, DELETE, PATCH
     function_name: str
@@ -34,7 +34,7 @@ class APIEndpoint:
 
 @dataclass
 class APIFile:
-    """Représente un fichier API."""
+    """ReprÃ©sente un fichier API."""
     path: Path
     name: str
     lines: int
@@ -47,7 +47,7 @@ class APIFile:
 
 @dataclass
 class APISuggestion:
-    """Suggestion d'amélioration API."""
+    """Suggestion d'amÃ©lioration API."""
     file: str
     issue: str
     severity: str  # high, medium, low
@@ -55,9 +55,9 @@ class APISuggestion:
     example: Optional[str]
 
 
-# ═════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 2: API ANALYZER
-# ═════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class APIAnalyzer:
     """Analyse les fichiers src/api/."""
@@ -70,7 +70,7 @@ class APIAnalyzer:
 
     def analyze_all(self) -> Dict:
         """Analyse tous les fichiers API."""
-        print("🔍 Analyzing API files...")
+        print("ðŸ” Analyzing API files...")
 
         api_files = list(self.api_dir.glob("*.py"))
         
@@ -92,7 +92,7 @@ class APIAnalyzer:
             tree = ast.parse(content)
             lines = len(content.split('\n'))
 
-            # Compte les éléments
+            # Compte les Ã©lÃ©ments
             endpoints = len(re.findall(r'@app\.(get|post|put|delete|patch)', content))
             schemas = len([n for n in ast.walk(tree) 
                           if isinstance(n, ast.ClassDef) and 'Base' in str(n.bases)])
@@ -101,7 +101,7 @@ class APIAnalyzer:
             # Extrait les imports
             imports = self._extract_imports(tree)
 
-            # Détecte les issues
+            # DÃ©tecte les issues
             issues = self._detect_issues(content)
 
             self.files[filepath.name] = APIFile(
@@ -116,7 +116,7 @@ class APIAnalyzer:
             )
 
         except Exception as e:
-            print(f"  ⚠️  Error analyzing {filepath}: {e}")
+            print(f"  âš ï¸  Error analyzing {filepath}: {e}")
 
     def _extract_imports(self, tree: ast.AST) -> Set[str]:
         """Extrait les imports."""
@@ -130,7 +130,7 @@ class APIAnalyzer:
         return imports
 
     def _detect_issues(self, content: str) -> List[str]:
-        """Détecte les issues courants."""
+        """DÃ©tecte les issues courants."""
         issues = []
 
         # Issue 1: Pas de docstrings
@@ -157,8 +157,8 @@ class APIAnalyzer:
         return issues
 
     def _detect_endpoints(self) -> None:
-        """Détecte les endpoints définis."""
-        print("  ✓ Detecting endpoints...")
+        """DÃ©tecte les endpoints dÃ©finis."""
+        print("  âœ“ Detecting endpoints...")
 
         for filename, fileinfo in self.files.items():
             with open(fileinfo.path, 'r', encoding='utf-8') as f:
@@ -182,8 +182,8 @@ class APIAnalyzer:
                 ))
 
     def _generate_suggestions(self) -> None:
-        """Génère les suggestions."""
-        print("  ✓ Generating suggestions...")
+        """GÃ©nÃ¨re les suggestions."""
+        print("  âœ“ Generating suggestions...")
 
         for filename, fileinfo in self.files.items():
             # Suggestion 1: Trop d'endpoints
@@ -206,7 +206,7 @@ class APIAnalyzer:
                     example=None
                 ))
 
-            # Suggestion 3: Issues détectées
+            # Suggestion 3: Issues dÃ©tectÃ©es
             for issue in fileinfo.issues:
                 self.suggestions.append(APISuggestion(
                     file=filename,
@@ -217,7 +217,7 @@ class APIAnalyzer:
                 ))
 
     def _generate_report(self) -> Dict:
-        """Génère le rapport."""
+        """GÃ©nÃ¨re le rapport."""
         return {
             'total_files': len(self.files),
             'total_endpoints': len(self.endpoints),
@@ -229,12 +229,12 @@ class APIAnalyzer:
         }
 
 
-# ═════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 3: REPORT GENERATOR
-# ═════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class APIReportGenerator:
-    """Génère rapports pour API."""
+    """GÃ©nÃ¨re rapports pour API."""
 
     @staticmethod
     def print_analysis(report: Dict) -> None:
@@ -243,40 +243,40 @@ class APIReportGenerator:
         print("API ANALYSIS REPORT")
         print("="*80 + "\n")
 
-        print(f"📊 OVERVIEW")
+        print(f"ðŸ“Š OVERVIEW")
         print(f"  Files: {report['total_files']}")
         print(f"  Endpoints: {report['total_endpoints']}")
         print(f"  Total lines: {report['total_lines']}")
         print(f"  Schemas: {report['total_schemas']}")
         print(f"  Suggestions: {len(report['suggestions'])}\n")
 
-        print(f"📋 FILES")
+        print(f"ðŸ“‹ FILES")
         for filename, fileinfo in report['files'].items():
             print(f"  {filename}")
             print(f"    Lines: {fileinfo['lines']}, Endpoints: {fileinfo['endpoints']}, Schemas: {fileinfo['schemas']}")
             if fileinfo['issues']:
                 for issue in fileinfo['issues']:
-                    print(f"    ⚠️  {issue}")
+                    print(f"    âš ï¸  {issue}")
 
         if report['endpoints']:
-            print(f"\n🔌 ENDPOINTS")
+            print(f"\nðŸ”Œ ENDPOINTS")
             for endpoint in report['endpoints'][:10]:  # First 10
                 print(f"  {endpoint['method']:6} {endpoint['path']:30} ({endpoint['file']})")
 
         if report['suggestions']:
-            print(f"\n💡 SUGGESTIONS")
+            print(f"\nðŸ’¡ SUGGESTIONS")
             for i, sugg in enumerate(report['suggestions'][:5], 1):
                 print(f"  {i}. [{sugg['severity'].upper()}] {sugg['file']}")
                 print(f"     {sugg['issue']}")
-                print(f"     → {sugg['suggestion']}\n")
+                print(f"     â†’ {sugg['suggestion']}\n")
 
 
-# ═════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 4: CLI INTERFACE
-# ═════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def main():
-    """Point d'entrée principal."""
+    """Point d'entrÃ©e principal."""
     import sys
 
     analyzer = APIAnalyzer()

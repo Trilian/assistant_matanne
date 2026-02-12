@@ -86,7 +86,7 @@ print(produit.nutrition.nutriscore)  # "E"
 
 ### Ajout manuel
 
-Interface dans `src/domains/cuisine/ui/inventaire.py`:
+Interface dans `src/modules/cuisine/ui/inventaire.py`:
 
 - Nom, catégorie, quantité, unité
 - Code-barres (optionnel)
@@ -288,18 +288,18 @@ html = service.generer_html_imprimable(listes)
 
 ### Calendrier Unifié
 
-- Logic: `src/domains/planning/logic/calendrier_unifie_logic.py`
-- UI: `src/domains/planning/ui/calendrier_unifie.py`
+- Logic: `src/modules/planning/logic/calendrier_unifie_logic.py`
+- UI: `src/modules/planning/ui/calendrier_unifie.py`
 
 ### Planificateur Repas (style Jow)
 
-- Logic: `src/domains/cuisine/logic/planificateur_repas_logic.py`
-- UI: `src/domains/cuisine/ui/planificateur_repas.py`
+- Logic: `src/modules/cuisine/logic/planificateur_repas_logic.py`
+- UI: `src/modules/cuisine/ui/planificateur_repas.py`
 
 ### Batch Cooking Détaillé
 
-- Logic existante: `src/domains/cuisine/logic/batch_cooking_logic.py`
-- UI: `src/domains/cuisine/ui/batch_cooking_detaille.py`
+- Logic existante: `src/modules/cuisine/logic/batch_cooking_logic.py`
+- UI: `src/modules/cuisine/ui/batch_cooking_detaille.py`
 
 ---
 

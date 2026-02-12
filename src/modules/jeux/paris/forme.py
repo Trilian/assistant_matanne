@@ -1,9 +1,9 @@
 """
-Calcul de forme des équipes.
+Calcul de forme des Ãequipes.
 
-Fonctionnalités:
-- Score de forme basé sur les 5 derniers matchs
-- Détection de séries (victoires, défaites, nuls)
+FonctionnalitÃes:
+- Score de forme basÃe sur les 5 derniers matchs
+- DÃetection de sÃeries (victoires, dÃefaites, nuls)
 - Tendance (hausse/baisse/stable)
 """
 
@@ -17,11 +17,11 @@ logger = logging.getLogger(__name__)
 
 def calculer_forme_equipe(matchs_recents: List[Dict[str, Any]], equipe_id: int) -> Dict[str, Any]:
     """
-    Calcule la forme d'une équipe sur ses derniers matchs.
+    Calcule la forme d'une Ãequipe sur ses derniers matchs.
     
     Args:
-        matchs_recents: Liste des matchs récents (du plus ancien au plus récent)
-        equipe_id: ID de l'équipe à analyser
+        matchs_recents: Liste des matchs rÃecents (du plus ancien au plus rÃecent)
+        equipe_id: ID de l'Ãequipe Ã  analyser
         
     Returns:
         Dict avec score de forme, tendance, stats
@@ -49,11 +49,11 @@ def calculer_forme_equipe(matchs_recents: List[Dict[str, Any]], equipe_id: int) 
     buts_marques, buts_encaisses = 0, 0
     serie = []
     
-    for i, match in enumerate(reversed(matchs)):  # Du plus récent au plus ancien
+    for i, match in enumerate(reversed(matchs)):  # Du plus rÃecent au plus ancien
         poids = POIDS_FORME[i] if i < len(POIDS_FORME) else 0.3
         poids_total += poids
         
-        # Déterminer si victoire/nul/défaite pour cette équipe
+        # DÃeterminer si victoire/nul/dÃefaite pour cette Ãequipe
         est_domicile = match.get("equipe_domicile_id") == equipe_id
         score_dom = match.get("score_domicile", 0) or 0
         score_ext = match.get("score_exterieur", 0) or 0
@@ -92,10 +92,10 @@ def calculer_forme_equipe(matchs_recents: List[Dict[str, Any]], equipe_id: int) 
         forme_lettres.append(resultat)
         serie.append(resultat)
     
-    # Score normalisé (0-100)
+    # Score normalisÃe (0-100)
     score_forme = score_total / poids_total if poids_total > 0 else 50.0
     
-    # Déterminer la tendance
+    # DÃeterminer la tendance
     if len(forme_lettres) >= 3:
         recents = forme_lettres[:3]
         if recents.count("V") >= 2:
@@ -107,7 +107,7 @@ def calculer_forme_equipe(matchs_recents: List[Dict[str, Any]], equipe_id: int) 
     else:
         tendance = "inconnue"
     
-    # Série en cours
+    # SÃerie en cours
     serie_en_cours = None
     if serie:
         premier = serie[0]
@@ -137,11 +137,11 @@ def calculer_forme_equipe(matchs_recents: List[Dict[str, Any]], equipe_id: int) 
 
 def calculer_serie_sans_nul(forme_lettres: List[str]) -> int:
     """
-    Calcule le nombre de matchs consécutifs sans nul.
+    Calcule le nombre de matchs consÃecutifs sans nul.
     
     Principe statistique: En moyenne ~25% des matchs sont nuls.
-    Si une équipe n'a pas fait de nul depuis longtemps, la probabilité
-    d'en faire un augmente (régression vers la moyenne).
+    Si une Ãequipe n'a pas fait de nul depuis longtemps, la probabilitÃe
+    d'en faire un augmente (rÃegression vers la moyenne).
     """
     count = 0
     for resultat in forme_lettres:
@@ -153,24 +153,24 @@ def calculer_serie_sans_nul(forme_lettres: List[str]) -> int:
 
 def calculer_bonus_nul_regression(matchs_sans_nul_dom: int, matchs_sans_nul_ext: int) -> float:
     """
-    Calcule le bonus de probabilité de nul basé sur les séries sans nul.
+    Calcule le bonus de probabilitÃe de nul basÃe sur les sÃeries sans nul.
     
-    Si les 2 équipes n'ont pas fait de nul depuis longtemps,
-    la probabilité d'un nul augmente significativement.
+    Si les 2 Ãequipes n'ont pas fait de nul depuis longtemps,
+    la probabilitÃe d'un nul augmente significativement.
     """
     bonus = 0.0
     
-    # Bonus équipe domicile
+    # Bonus Ãequipe domicile
     if matchs_sans_nul_dom >= SEUIL_SERIE_SANS_NUL:
         excedent = matchs_sans_nul_dom - SEUIL_SERIE_SANS_NUL + 1
         bonus += min(0.15, excedent * BONUS_NUL_PAR_MATCH)
     
-    # Bonus équipe extérieur  
+    # Bonus Ãequipe extÃerieur  
     if matchs_sans_nul_ext >= SEUIL_SERIE_SANS_NUL:
         excedent = matchs_sans_nul_ext - SEUIL_SERIE_SANS_NUL + 1
         bonus += min(0.15, excedent * BONUS_NUL_PAR_MATCH)
     
-    # Bonus combo si les DEUX équipes ont une longue série sans nul
+    # Bonus combo si les DEUX Ãequipes ont une longue sÃerie sans nul
     if matchs_sans_nul_dom >= SEUIL_SERIE_SANS_NUL and matchs_sans_nul_ext >= SEUIL_SERIE_SANS_NUL:
         bonus += 0.05
     
@@ -186,12 +186,12 @@ def calculer_historique_face_a_face(
     Analyse l'historique des confrontations directes.
     
     Args:
-        matchs_h2h: Matchs entre les deux équipes
-        equipe_dom_id: ID équipe qui joue à domicile
-        equipe_ext_id: ID équipe qui joue à l'extérieur
+        matchs_h2h: Matchs entre les deux Ãequipes
+        equipe_dom_id: ID Ãequipe qui joue Ã  domicile
+        equipe_ext_id: ID Ãequipe qui joue Ã  l'extÃerieur
         
     Returns:
-        Stats des face-à-face
+        Stats des face-Ã -face
     """
     if not matchs_h2h:
         return {
@@ -229,7 +229,7 @@ def calculer_historique_face_a_face(
             else:
                 nuls += 1
     
-    # Déterminer l'avantage
+    # DÃeterminer l'avantage
     if vic_dom > vic_ext + 1:
         avantage = "domicile"
     elif vic_ext > vic_dom + 1:

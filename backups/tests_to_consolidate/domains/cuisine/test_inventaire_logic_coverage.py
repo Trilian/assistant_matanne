@@ -1,12 +1,12 @@
-"""
+﻿"""
 Tests de couverture complets pour inventaire_logic.py
 Objectif: atteindre 80%+ de couverture
-Couvre les lignes non testées
+Couvre les lignes non testÃ©es
 """
 import pytest
 from datetime import date, datetime, timedelta
 
-from src.domains.cuisine.logic.inventaire_logic import (
+from src.modules.cuisine.logic.inventaire_logic import (
     calculer_status_stock,
     calculer_status_peremption,
     calculer_status_global,
@@ -28,9 +28,9 @@ from src.domains.cuisine.logic.inventaire_logic import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FILTRER_PAR_STATUS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestFiltrerParStatus:
     """Tests pour filtrer_par_status."""
@@ -71,7 +71,7 @@ class TestFiltrerParStatus:
         assert len(result) == 2
 
     def test_filtrer_par_status_perime(self):
-        """Filtre les articles périmés."""
+        """Filtre les articles pÃ©rimÃ©s."""
         hier = date.today() - timedelta(days=1)
         articles = [
             {"ingredient_nom": "Lait", "quantite": 1, "seuil_alerte": 5, "seuil_critique": 2, "date_peremption": hier},
@@ -84,9 +84,9 @@ class TestFiltrerParStatus:
         assert result[0]["ingredient_nom"] == "Lait"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS VALIDER_ARTICLE_INVENTAIRE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestValiderArticleInventaire:
     """Tests pour valider_article_inventaire."""
@@ -126,10 +126,10 @@ class TestValiderArticleInventaire:
         valide, erreurs = valider_article_inventaire(article)
         
         assert valide is False
-        assert any("2 caractères" in e for e in erreurs)
+        assert any("2 caractÃ¨res" in e for e in erreurs)
 
     def test_article_quantite_negative(self):
-        """Quantité négative invalide."""
+        """QuantitÃ© nÃ©gative invalide."""
         article = {
             "ingredient_nom": "Sel",
             "quantite": -5,
@@ -138,7 +138,7 @@ class TestValiderArticleInventaire:
         valide, erreurs = valider_article_inventaire(article)
         
         assert valide is False
-        assert any("négative" in e.lower() for e in erreurs)
+        assert any("nÃ©gative" in e.lower() for e in erreurs)
 
     def test_seuil_critique_superieur_alerte(self):
         """Seuil critique > seuil alerte invalide."""
@@ -155,7 +155,7 @@ class TestValiderArticleInventaire:
         assert any("critique" in e.lower() for e in erreurs)
 
     def test_emplacement_non_standard(self):
-        """Emplacement non standard génère warning (mais valide)."""
+        """Emplacement non standard gÃ©nÃ¨re warning (mais valide)."""
         article = {
             "ingredient_nom": "Sel",
             "quantite": 5,
@@ -168,11 +168,11 @@ class TestValiderArticleInventaire:
         assert valide is True
 
     def test_categorie_non_standard(self):
-        """Catégorie non standard génère warning (mais valide)."""
+        """CatÃ©gorie non standard gÃ©nÃ¨re warning (mais valide)."""
         article = {
             "ingredient_nom": "Sel",
             "quantite": 5,
-            "categorie": "Nouveauté",
+            "categorie": "NouveautÃ©",
         }
         
         valide, erreurs = valider_article_inventaire(article)
@@ -180,7 +180,7 @@ class TestValiderArticleInventaire:
         assert valide is True
 
     def test_date_peremption_format_invalide(self):
-        """Date de péremption au format invalide."""
+        """Date de pÃ©remption au format invalide."""
         article = {
             "ingredient_nom": "Sel",
             "quantite": 5,
@@ -193,7 +193,7 @@ class TestValiderArticleInventaire:
         assert any("date" in e.lower() for e in erreurs)
 
     def test_date_peremption_string_valide(self):
-        """Date de péremption string valide."""
+        """Date de pÃ©remption string valide."""
         demain = (date.today() + timedelta(days=1)).isoformat()
         article = {
             "ingredient_nom": "Sel",
@@ -206,7 +206,7 @@ class TestValiderArticleInventaire:
         assert valide is True
 
     def test_date_peremption_datetime(self):
-        """Date de péremption comme datetime."""
+        """Date de pÃ©remption comme datetime."""
         article = {
             "ingredient_nom": "Sel",
             "quantite": 5,
@@ -218,21 +218,21 @@ class TestValiderArticleInventaire:
         assert valide is True
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS VALIDER_NOUVEL_ARTICLE_INVENTAIRE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestValiderNouvelArticleInventaire:
     """Tests pour valider_nouvel_article_inventaire."""
 
     def test_nouvel_article_valide(self):
-        """Création d'un nouvel article valide."""
+        """CrÃ©ation d'un nouvel article valide."""
         valide, result = valider_nouvel_article_inventaire(
             nom="Farine",
             quantite=1.5,
             unite="kg",
             emplacement="Garde-manger",
-            categorie="Épicerie"
+            categorie="Ã‰picerie"
         )
         
         assert valide is True
@@ -242,7 +242,7 @@ class TestValiderNouvelArticleInventaire:
         assert "date_ajout" in result
 
     def test_nouvel_article_invalide(self):
-        """Création article invalide retourne erreurs."""
+        """CrÃ©ation article invalide retourne erreurs."""
         valide, result = valider_nouvel_article_inventaire(
             nom="",  # Nom vide invalide
             quantite=5,
@@ -254,7 +254,7 @@ class TestValiderNouvelArticleInventaire:
         assert len(result) > 0
 
     def test_nouvel_article_avec_date_peremption(self):
-        """Création avec date de péremption."""
+        """CrÃ©ation avec date de pÃ©remption."""
         valide, result = valider_nouvel_article_inventaire(
             nom="Lait",
             quantite=1,
@@ -266,9 +266,9 @@ class TestValiderNouvelArticleInventaire:
         assert result["date_peremption"] == date.today() + timedelta(days=5)
 
     def test_nouvel_article_seuils_personnalises(self):
-        """Création avec seuils personnalisés."""
+        """CrÃ©ation avec seuils personnalisÃ©s."""
         valide, result = valider_nouvel_article_inventaire(
-            nom="Épice rare",
+            nom="Ã‰pice rare",
             quantite=3,
             unite="g",
             seuil_alerte=10,
@@ -280,9 +280,9 @@ class TestValiderNouvelArticleInventaire:
         assert result["seuil_critique"] == 5
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FORMATER_ARTICLE_LABEL
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestFormaterArticleLabel:
     """Tests pour formater_article_label."""
@@ -302,7 +302,7 @@ class TestFormaterArticleLabel:
         assert "Sucre" in label
         assert "10" in label
         assert "kg" in label
-        assert "💡" in label
+        assert "ðŸ’¡" in label
 
     def test_label_article_critique(self):
         """Label pour article critique."""
@@ -316,10 +316,10 @@ class TestFormaterArticleLabel:
         
         label = formater_article_label(article)
         
-        assert "❌" in label
+        assert "âŒ" in label
 
     def test_label_article_bientot_perime(self):
-        """Label avec date de péremption proche."""
+        """Label avec date de pÃ©remption proche."""
         article = {
             "ingredient_nom": "Lait",
             "quantite": 1,
@@ -331,10 +331,10 @@ class TestFormaterArticleLabel:
         
         label = formater_article_label(article)
         
-        assert "📅" in label
+        assert "ðŸ“…" in label
 
     def test_label_article_perime(self):
-        """Label pour article périmé."""
+        """Label pour article pÃ©rimÃ©."""
         article = {
             "ingredient_nom": "Yaourt",
             "quantite": 4,
@@ -346,11 +346,11 @@ class TestFormaterArticleLabel:
         
         label = formater_article_label(article)
         
-        assert "📅" in label  # Date affichée
-        assert "⚫" in label  # Emoji périmé
+        assert "ðŸ“…" in label  # Date affichÃ©e
+        assert "âš«" in label  # Emoji pÃ©rimÃ©
 
     def test_label_article_perime_datetime(self):
-        """Label pour article périmé avec datetime."""
+        """Label pour article pÃ©rimÃ© avec datetime."""
         article = {
             "ingredient_nom": "Yaourt",
             "quantite": 4,
@@ -362,21 +362,21 @@ class TestFormaterArticleLabel:
         
         label = formater_article_label(article)
         
-        assert "📅" in label
+        assert "ðŸ“…" in label
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FORMATER_INVENTAIRE_RAPPORT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestFormaterInventaireRapport:
     """Tests pour formater_inventaire_rapport."""
 
     def test_rapport_inventaire_complet(self):
-        """Génère un rapport complet."""
+        """GÃ©nÃ¨re un rapport complet."""
         articles = [
-            {"ingredient_nom": "Sucre", "quantite": 10, "prix_unitaire": 1.5, "seuil_alerte": 5, "seuil_critique": 2, "emplacement": "Garde-manger", "categorie": "Épicerie"},
-            {"ingredient_nom": "Sel", "quantite": 1, "prix_unitaire": 0.5, "seuil_alerte": 5, "seuil_critique": 2, "emplacement": "Garde-manger", "categorie": "Épicerie"},
+            {"ingredient_nom": "Sucre", "quantite": 10, "prix_unitaire": 1.5, "seuil_alerte": 5, "seuil_critique": 2, "emplacement": "Garde-manger", "categorie": "Ã‰picerie"},
+            {"ingredient_nom": "Sel", "quantite": 1, "prix_unitaire": 0.5, "seuil_alerte": 5, "seuil_critique": 2, "emplacement": "Garde-manger", "categorie": "Ã‰picerie"},
         ]
         
         rapport = formater_inventaire_rapport(articles)
@@ -390,13 +390,13 @@ class TestFormaterInventaireRapport:
         hier = date.today() - timedelta(days=1)
         articles = [
             {"ingredient_nom": "Sel critique", "quantite": 1, "prix_unitaire": 0.5, "seuil_alerte": 5, "seuil_critique": 2, "emplacement": "Cuisine"},
-            {"ingredient_nom": "Lait périmé", "quantite": 1, "prix_unitaire": 1.0, "seuil_alerte": 5, "seuil_critique": 2, "date_peremption": hier, "emplacement": "Frigo"},
+            {"ingredient_nom": "Lait pÃ©rimÃ©", "quantite": 1, "prix_unitaire": 1.0, "seuil_alerte": 5, "seuil_critique": 2, "date_peremption": hier, "emplacement": "Frigo"},
         ]
         
         rapport = formater_inventaire_rapport(articles)
         
         assert "ALERTES CRITIQUES" in rapport
-        assert "Stock critique" in rapport or "PÉRIMÉ" in rapport
+        assert "Stock critique" in rapport or "PÃ‰RIMÃ‰" in rapport
 
     def test_rapport_inventaire_minimum(self):
         """Rapport pour inventaire avec un seul article."""
@@ -409,9 +409,9 @@ class TestFormaterInventaireRapport:
         assert "Total articles: 1" in rapport
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CALCULER_JOURS_AVANT_PEREMPTION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestCalculerJoursAvantPeremption:
     """Tests pour calculer_jours_avant_peremption."""
@@ -425,7 +425,7 @@ class TestCalculerJoursAvantPeremption:
         assert result == 10
 
     def test_date_passee(self):
-        """Calcul jours pour date passée (négatif)."""
+        """Calcul jours pour date passÃ©e (nÃ©gatif)."""
         article = {"date_peremption": date.today() - timedelta(days=3)}
         
         result = calculer_jours_avant_peremption(article)
@@ -441,7 +441,7 @@ class TestCalculerJoursAvantPeremption:
         assert result is None
 
     def test_date_string_valide(self):
-        """Gère les dates en string."""
+        """GÃ¨re les dates en string."""
         date_str = (date.today() + timedelta(days=5)).isoformat()
         article = {"date_peremption": date_str}
         
@@ -458,7 +458,7 @@ class TestCalculerJoursAvantPeremption:
         assert result is None
 
     def test_date_datetime(self):
-        """Gère les datetime."""
+        """GÃ¨re les datetime."""
         article = {"date_peremption": datetime.now() + timedelta(days=7)}
         
         result = calculer_jours_avant_peremption(article)
@@ -466,9 +466,9 @@ class TestCalculerJoursAvantPeremption:
         assert result == 7
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GROUPER_PAR_EMPLACEMENT ET CATEGORIE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestGrouperParEmplacement:
     """Tests pour grouper_par_emplacement."""
@@ -476,14 +476,14 @@ class TestGrouperParEmplacement:
     def test_grouper_par_emplacement(self):
         """Groupe correctement par emplacement."""
         articles = [
-            {"ingredient_nom": "Lait", "emplacement": "Réfrigérateur"},
+            {"ingredient_nom": "Lait", "emplacement": "RÃ©frigÃ©rateur"},
             {"ingredient_nom": "Sucre", "emplacement": "Garde-manger"},
-            {"ingredient_nom": "Beurre", "emplacement": "Réfrigérateur"},
+            {"ingredient_nom": "Beurre", "emplacement": "RÃ©frigÃ©rateur"},
         ]
         
         groupes = grouper_par_emplacement(articles)
         
-        assert len(groupes["Réfrigérateur"]) == 2
+        assert len(groupes["RÃ©frigÃ©rateur"]) == 2
         assert len(groupes["Garde-manger"]) == 1
 
     def test_grouper_sans_emplacement(self):
@@ -502,20 +502,20 @@ class TestGrouperParCategorie:
     """Tests pour grouper_par_categorie."""
 
     def test_grouper_par_categorie(self):
-        """Groupe correctement par catégorie."""
+        """Groupe correctement par catÃ©gorie."""
         articles = [
-            {"ingredient_nom": "Pomme", "categorie": "Fruits & Légumes"},
+            {"ingredient_nom": "Pomme", "categorie": "Fruits & LÃ©gumes"},
             {"ingredient_nom": "Boeuf", "categorie": "Viandes & Poissons"},
-            {"ingredient_nom": "Carotte", "categorie": "Fruits & Légumes"},
+            {"ingredient_nom": "Carotte", "categorie": "Fruits & LÃ©gumes"},
         ]
         
         groupes = grouper_par_categorie(articles)
         
-        assert len(groupes["Fruits & Légumes"]) == 2
+        assert len(groupes["Fruits & LÃ©gumes"]) == 2
         assert len(groupes["Viandes & Poissons"]) == 1
 
     def test_grouper_sans_categorie(self):
-        """Articles sans catégorie vont dans 'Autre'."""
+        """Articles sans catÃ©gorie vont dans 'Autre'."""
         articles = [
             {"ingredient_nom": "Inconnu"},
         ]
@@ -525,15 +525,15 @@ class TestGrouperParCategorie:
         assert "Autre" in groupes
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS TRI
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestTrierParPeremption:
     """Tests pour trier_par_peremption."""
 
     def test_trier_par_peremption(self):
-        """Trie correctement par date de péremption."""
+        """Trie correctement par date de pÃ©remption."""
         articles = [
             {"ingredient_nom": "Lait", "date_peremption": date.today() + timedelta(days=10)},
             {"ingredient_nom": "Yaourt", "date_peremption": date.today() + timedelta(days=3)},
@@ -546,7 +546,7 @@ class TestTrierParPeremption:
         assert result[2]["ingredient_nom"] == "Lait"  # Plus lointain
 
     def test_trier_avec_sans_date(self):
-        """Articles sans date à la fin."""
+        """Articles sans date Ã  la fin."""
         articles = [
             {"ingredient_nom": "Sel"},  # Pas de date
             {"ingredient_nom": "Lait", "date_peremption": date.today() + timedelta(days=5)},
@@ -555,7 +555,7 @@ class TestTrierParPeremption:
         result = trier_par_peremption(articles)
         
         assert result[0]["ingredient_nom"] == "Lait"  # Avec date en premier
-        assert result[1]["ingredient_nom"] == "Sel"  # Sans date à la fin
+        assert result[1]["ingredient_nom"] == "Sel"  # Sans date Ã  la fin
 
 
 class TestTrierParUrgence:
@@ -567,19 +567,19 @@ class TestTrierParUrgence:
         articles = [
             {"ingredient_nom": "OK", "quantite": 10, "seuil_alerte": 5, "seuil_critique": 2},
             {"ingredient_nom": "Critique", "quantite": 1, "seuil_alerte": 5, "seuil_critique": 2},
-            {"ingredient_nom": "Périmé", "quantite": 10, "seuil_alerte": 5, "seuil_critique": 2, "date_peremption": hier},
+            {"ingredient_nom": "PÃ©rimÃ©", "quantite": 10, "seuil_alerte": 5, "seuil_critique": 2, "date_peremption": hier},
         ]
         
         result = trier_par_urgence(articles)
         
-        assert result[0]["ingredient_nom"] == "Périmé"  # Périmé en premier
+        assert result[0]["ingredient_nom"] == "PÃ©rimÃ©"  # PÃ©rimÃ© en premier
         assert result[1]["ingredient_nom"] == "Critique"  # Puis critique
-        assert result[2]["ingredient_nom"] == "OK"  # OK à la fin
+        assert result[2]["ingredient_nom"] == "OK"  # OK Ã  la fin
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FORMATER_ARTICLE_INVENTAIRE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestFormaterArticleInventaire:
     """Tests pour formater_article_inventaire."""
@@ -618,12 +618,12 @@ class TestFormaterArticleInventaire:
         result = formater_article_inventaire(article)
         
         assert result["status_stock"] == "critique"
-        assert "❌" in result["emoji_stock"]
+        assert "âŒ" in result["emoji_stock"]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ALERTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestAlertesCritiquesExistent:
     """Tests pour alertes_critiques_existent."""
@@ -635,7 +635,7 @@ class TestAlertesCritiquesExistent:
         assert alertes_critiques_existent(alertes) is True
 
     def test_avec_article_perime(self):
-        """True si article périmé."""
+        """True si article pÃ©rimÃ©."""
         alertes = {"critique": [], "perime": [{"ingredient_nom": "Lait"}]}
         
         assert alertes_critiques_existent(alertes) is True

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Fonctions utilitaires pures pour le service budget.
 
 Ces fonctions ne dépendent pas de la base de données et sont testables unitairement.
@@ -17,9 +17,9 @@ from src.services.budget import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
-# CONVERSION DB → PYDANTIC
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# CONVERSION DB â†’ PYDANTIC
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def db_entry_to_depense(entry: Any) -> Depense:
@@ -69,9 +69,9 @@ def db_entries_to_depenses(entries: list[Any]) -> list[Depense]:
     return [db_entry_to_depense(e) for e in entries]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CALCULS STATISTIQUES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def calculer_moyenne_ponderee(valeurs: list[float], poids: list[float] | None = None) -> float:
@@ -157,7 +157,7 @@ def calculer_confiance_prevision(valeurs: list[float], moyenne: float) -> float:
     variance = calculer_variance(valeurs, moyenne)
     
     # Confiance basée sur le coefficient de variation
-    # Plus la variance est faible par rapport à la moyenne, plus on est confiant
+    # Plus la variance est faible par rapport Ã  la moyenne, plus on est confiant
     confiance = max(0, 1 - (variance / (moyenne ** 2 + 1)))
     
     return round(min(1.0, confiance), 2)
@@ -168,7 +168,7 @@ def generer_prevision_categorie(
     valeurs_historiques: list[float],
 ) -> PrevisionDepense | None:
     """
-    Génère une prévision pour une catégorie à partir de l'historique.
+    Génère une prévision pour une catégorie Ã  partir de l'historique.
     
     Args:
         categorie: Catégorie de dépense
@@ -194,9 +194,9 @@ def generer_prevision_categorie(
     )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CALCULS DE BUDGET
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def calculer_pourcentage_budget(depense: float, budget: float) -> float:
@@ -208,7 +208,7 @@ def calculer_pourcentage_budget(depense: float, budget: float) -> float:
         budget: Budget prévu
         
     Returns:
-        Pourcentage (plafonné à 999%)
+        Pourcentage (plafonné Ã  999%)
     """
     if budget <= 0:
         return 0.0
@@ -222,7 +222,7 @@ def calculer_reste_disponible(budget: float, depense: float) -> float:
     
     Args:
         budget: Budget prévu
-        depense: Montant déjà dépensé
+        depense: Montant déjÃ  dépensé
         
     Returns:
         Montant restant (minimum 0)
@@ -246,15 +246,15 @@ def est_budget_depasse(depense: float, budget: float) -> bool:
 
 def est_budget_a_risque(depense: float, budget: float, seuil: float = 80.0) -> bool:
     """
-    Vérifie si un budget est à risque de dépassement.
+    Vérifie si un budget est Ã  risque de dépassement.
     
     Args:
         depense: Montant dépensé
         budget: Budget prévu
-        seuil: Seuil de pourcentage pour considérer à risque
+        seuil: Seuil de pourcentage pour considérer Ã  risque
         
     Returns:
-        True si à risque
+        True si Ã  risque
     """
     if budget <= 0:
         return False
@@ -263,9 +263,9 @@ def est_budget_a_risque(depense: float, budget: float, seuil: float = 80.0) -> b
     return seuil <= pourcentage < 100
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # AGRÉGATION DES DÉPENSES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def agreger_depenses_par_categorie(depenses: list[Depense]) -> dict[CategorieDepense, float]:
@@ -276,7 +276,7 @@ def agreger_depenses_par_categorie(depenses: list[Depense]) -> dict[CategorieDep
         depenses: Liste de dépenses
         
     Returns:
-        Dictionnaire catégorie → total
+        Dictionnaire catégorie â†’ total
     """
     totaux: dict[CategorieDepense, float] = {}
     
@@ -308,7 +308,7 @@ def filtrer_depenses_par_categorie(
     
     Args:
         depenses: Liste de dépenses
-        categorie: Catégorie à filtrer
+        categorie: Catégorie Ã  filtrer
         
     Returns:
         Dépenses filtrées
@@ -335,9 +335,9 @@ def filtrer_depenses_par_periode(
     return [d for d in depenses if date_debut <= d.date <= date_fin]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONSTRUCTION DE RÉSUMÉS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def construire_resume_financier(
@@ -410,9 +410,9 @@ def construire_resume_financier(
     )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # VALIDATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def valider_montant(montant: float | str) -> float:
@@ -420,7 +420,7 @@ def valider_montant(montant: float | str) -> float:
     Valide et convertit un montant.
     
     Args:
-        montant: Montant à valider
+        montant: Montant Ã  valider
         
     Returns:
         Montant comme float

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Types et schémas Pydantic pour le package recettes.
 
 Module unifié avec tous les modèles de données pour les services de recettes.
@@ -87,9 +87,9 @@ class VersionRobotGeneree(BaseModel):
         return v
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ALIASES ANGLAIS (pour compatibilité)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 RecipeSuggestion = RecetteSuggestion
 BabyVersionGenerated = VersionBebeGeneree

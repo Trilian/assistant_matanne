@@ -1,6 +1,6 @@
-"""
-Script de seed - Données de démonstration
-Remplit la base avec des données réalistes pour tester l'application
+﻿"""
+Script de seed - DonnÃ©es de dÃ©monstration
+Remplit la base avec des donnÃ©es rÃ©alistes pour tester l'application
 """
 
 import sys
@@ -35,11 +35,11 @@ from src.core.models import (
 
 
 def clear_database():
-    """Nettoie toutes les données (optionnel)"""
-    print("🧹 Nettoyage de la base...")
+    """Nettoie toutes les donnÃ©es (optionnel)"""
+    print("ðŸ§¹ Nettoyage de la base...")
 
     with get_db_context() as db:
-        # Supprimer dans l'ordre inverse des dépendances
+        # Supprimer dans l'ordre inverse des dÃ©pendances
         db.query(GardenLog).delete()
         db.query(GardenItem).delete()
         db.query(ProjectTask).delete()
@@ -62,12 +62,12 @@ def clear_database():
 
         db.commit()
 
-    print("✅ Base nettoyée")
+    print("âœ… Base nettoyÃ©e")
 
 
 def seed_users():
-    """Crée les utilisateurs"""
-    print("👤 Création des utilisateurs...")
+    """CrÃ©e les utilisateurs"""
+    print("ðŸ‘¤ CrÃ©ation des utilisateurs...")
 
     with get_db_context() as db:
         # Utilisateur principal
@@ -99,47 +99,47 @@ def seed_users():
         db.add_all([profil_anne, profil_mathieu])
         db.commit()
 
-        print(f"✅ Utilisateur '{anne.username}' créé avec 2 profils")
+        print(f"âœ… Utilisateur '{anne.username}' crÃ©Ã© avec 2 profils")
         return anne.id
 
 
 def seed_ingredients():
-    """Crée les ingrédients de base"""
-    print("🥕 Création des ingrédients...")
+    """CrÃ©e les ingrÃ©dients de base"""
+    print("ðŸ¥• CrÃ©ation des ingrÃ©dients...")
 
     ingredients_data = [
-        # Légumes
-        ("Tomates", "kg", "Légumes"),
-        ("Carottes", "kg", "Légumes"),
-        ("Oignons", "kg", "Légumes"),
-        ("Pommes de terre", "kg", "Légumes"),
-        ("Courgettes", "kg", "Légumes"),
-        ("Poivrons", "pcs", "Légumes"),
-        # Féculents
-        ("Pâtes", "g", "Féculents"),
-        ("Riz", "g", "Féculents"),
-        ("Farine", "g", "Féculents"),
-        ("Pain", "pcs", "Féculents"),
-        # Protéines
-        ("Poulet", "g", "Protéines"),
-        ("Boeuf haché", "g", "Protéines"),
-        ("Oeufs", "pcs", "Protéines"),
-        ("Saumon", "g", "Protéines"),
+        # LÃ©gumes
+        ("Tomates", "kg", "LÃ©gumes"),
+        ("Carottes", "kg", "LÃ©gumes"),
+        ("Oignons", "kg", "LÃ©gumes"),
+        ("Pommes de terre", "kg", "LÃ©gumes"),
+        ("Courgettes", "kg", "LÃ©gumes"),
+        ("Poivrons", "pcs", "LÃ©gumes"),
+        # FÃ©culents
+        ("PÃ¢tes", "g", "FÃ©culents"),
+        ("Riz", "g", "FÃ©culents"),
+        ("Farine", "g", "FÃ©culents"),
+        ("Pain", "pcs", "FÃ©culents"),
+        # ProtÃ©ines
+        ("Poulet", "g", "ProtÃ©ines"),
+        ("Boeuf hachÃ©", "g", "ProtÃ©ines"),
+        ("Oeufs", "pcs", "ProtÃ©ines"),
+        ("Saumon", "g", "ProtÃ©ines"),
         # Laitier
         ("Lait", "L", "Laitier"),
-        ("Fromage râpé", "g", "Laitier"),
+        ("Fromage rÃ¢pÃ©", "g", "Laitier"),
         ("Yaourts", "pcs", "Laitier"),
         ("Beurre", "g", "Laitier"),
-        ("Crème fraîche", "mL", "Laitier"),
+        ("CrÃ¨me fraÃ®che", "mL", "Laitier"),
         # Fruits
         ("Pommes", "pcs", "Fruits"),
         ("Bananes", "pcs", "Fruits"),
         ("Oranges", "pcs", "Fruits"),
-        # Épices et autres
-        ("Sel", "g", "Épices"),
-        ("Poivre", "g", "Épices"),
+        # Ã‰pices et autres
+        ("Sel", "g", "Ã‰pices"),
+        ("Poivre", "g", "Ã‰pices"),
         ("Huile d'olive", "mL", "Huiles"),
-        ("Ail", "pcs", "Épices"),
+        ("Ail", "pcs", "Ã‰pices"),
     ]
 
     with get_db_context() as db:
@@ -149,19 +149,19 @@ def seed_ingredients():
 
         db.commit()
 
-    print(f"✅ {len(ingredients_data)} ingrédients créés")
+    print(f"âœ… {len(ingredients_data)} ingrÃ©dients crÃ©Ã©s")
 
 
 def seed_recipes():
-    """Crée des recettes d'exemple"""
-    print("📖 Création des recettes...")
+    """CrÃ©e des recettes d'exemple"""
+    print("ðŸ“– CrÃ©ation des recettes...")
 
     with get_db_context() as db:
-        # Recette 1 : Pâtes à la tomate
+        # Recette 1 : PÃ¢tes Ã  la tomate
         r1 = Recipe(
-            name="Pâtes à la tomate",
+            name="PÃ¢tes Ã  la tomate",
             category="Plat",
-            instructions="1. Faire cuire les pâtes\n2. Préparer la sauce tomate\n3. Mélanger et servir",
+            instructions="1. Faire cuire les pÃ¢tes\n2. PrÃ©parer la sauce tomate\n3. MÃ©langer et servir",
             prep_time=10,
             cook_time=15,
             servings=4,
@@ -170,8 +170,8 @@ def seed_recipes():
         db.add(r1)
         db.flush()
 
-        # Ingrédients pâtes tomate
-        ing_pates = db.query(Ingredient).filter(Ingredient.name == "Pâtes").first()
+        # IngrÃ©dients pÃ¢tes tomate
+        ing_pates = db.query(Ingredient).filter(Ingredient.name == "PÃ¢tes").first()
         ing_tomates = db.query(Ingredient).filter(Ingredient.name == "Tomates").first()
         ing_ail = db.query(Ingredient).filter(Ingredient.name == "Ail").first()
 
@@ -187,11 +187,11 @@ def seed_recipes():
             ]
         )
 
-        # Recette 2 : Poulet rôti
+        # Recette 2 : Poulet rÃ´ti
         r2 = Recipe(
-            name="Poulet rôti aux légumes",
+            name="Poulet rÃ´ti aux lÃ©gumes",
             category="Plat",
-            instructions="1. Préparer le poulet\n2. Couper les légumes\n3. Enfourner 45min à 180°C",
+            instructions="1. PrÃ©parer le poulet\n2. Couper les lÃ©gumes\n3. Enfourner 45min Ã  180Â°C",
             prep_time=15,
             cook_time=45,
             servings=4,
@@ -222,7 +222,7 @@ def seed_recipes():
         r3 = Recipe(
             name="Omelette nature",
             category="Plat",
-            instructions="1. Battre les oeufs\n2. Cuire à la poêle\n3. Servir chaud",
+            instructions="1. Battre les oeufs\n2. Cuire Ã  la poÃªle\n3. Servir chaud",
             prep_time=5,
             cook_time=10,
             servings=2,
@@ -245,11 +245,11 @@ def seed_recipes():
             ]
         )
 
-        # Recette 4 : Gratin dauphinois (générée par IA)
+        # Recette 4 : Gratin dauphinois (gÃ©nÃ©rÃ©e par IA)
         r4 = Recipe(
             name="Gratin dauphinois",
             category="Accompagnement",
-            instructions="1. Émincer les pommes de terre\n2. Préparer la crème\n3. Enfourner 1h",
+            instructions="1. Ã‰mincer les pommes de terre\n2. PrÃ©parer la crÃ¨me\n3. Enfourner 1h",
             prep_time=20,
             cook_time=60,
             servings=6,
@@ -260,8 +260,8 @@ def seed_recipes():
         db.add(r4)
         db.flush()
 
-        ing_creme = db.query(Ingredient).filter(Ingredient.name == "Crème fraîche").first()
-        ing_fromage = db.query(Ingredient).filter(Ingredient.name == "Fromage râpé").first()
+        ing_creme = db.query(Ingredient).filter(Ingredient.name == "CrÃ¨me fraÃ®che").first()
+        ing_fromage = db.query(Ingredient).filter(Ingredient.name == "Fromage rÃ¢pÃ©").first()
 
         db.add_all(
             [
@@ -279,24 +279,24 @@ def seed_recipes():
 
         db.commit()
 
-    print("✅ 4 recettes créées (dont 1 par IA)")
+    print("âœ… 4 recettes crÃ©Ã©es (dont 1 par IA)")
 
 
 def seed_inventory():
     """Remplit l'inventaire"""
-    print("📦 Remplissage de l'inventaire...")
+    print("ðŸ“¦ Remplissage de l'inventaire...")
 
     inventory_data = [
         ("Tomates", 2.5, 1.0, "Frigo"),
         ("Carottes", 1.2, 0.5, "Frigo"),
         ("Oignons", 0.8, 0.3, "Placard"),
         ("Pommes de terre", 3.0, 1.0, "Placard"),
-        ("Pâtes", 800, 200, "Placard"),
+        ("PÃ¢tes", 800, 200, "Placard"),
         ("Riz", 500, 200, "Placard"),
-        ("Poulet", 0, 500, "Congélateur"),  # Stock vide
+        ("Poulet", 0, 500, "CongÃ©lateur"),  # Stock vide
         ("Oeufs", 6, 6, "Frigo"),
         ("Lait", 0.5, 1.0, "Frigo"),  # Stock bas
-        ("Fromage râpé", 50, 100, "Frigo"),  # Stock bas
+        ("Fromage rÃ¢pÃ©", 50, 100, "Frigo"),  # Stock bas
         ("Huile d'olive", 500, 100, "Placard"),
     ]
 
@@ -311,17 +311,17 @@ def seed_inventory():
 
         db.commit()
 
-    print(f"✅ {len(inventory_data)} articles ajoutés à l'inventaire")
+    print(f"âœ… {len(inventory_data)} articles ajoutÃ©s Ã  l'inventaire")
 
 
 def seed_batch_meals():
     """Planifie des repas"""
-    print("🍽️ Planification de repas...")
+    print("ðŸ½ï¸ Planification de repas...")
 
     with get_db_context() as db:
         today = date.today()
 
-        # Récupérer les recettes
+        # RÃ©cupÃ©rer les recettes
         recettes = db.query(Recipe).all()
 
         for i, recette in enumerate(recettes[:7]):  # 7 jours
@@ -336,30 +336,30 @@ def seed_batch_meals():
 
         db.commit()
 
-    print("✅ 7 repas planifiés")
+    print("âœ… 7 repas planifiÃ©s")
 
 
 def seed_child_and_family():
-    """Crée Jules et ses données"""
-    print("👶 Création du profil de Jules...")
+    """CrÃ©e Jules et ses donnÃ©es"""
+    print("ðŸ‘¶ CrÃ©ation du profil de Jules...")
 
     with get_db_context() as db:
         # Jules
         jules = ChildProfile(
-            name="Jules", birth_date=date(2024, 6, 22), notes="Notre petit bout de chou ❤️"
+            name="Jules", birth_date=date(2024, 6, 22), notes="Notre petit bout de chou â¤ï¸"
         )
         db.add(jules)
         db.flush()
 
-        # Entrées bien-être
+        # EntrÃ©es bien-Ãªtre
         for i in range(7):
             entry = WellbeingEntry(
                 child_id=jules.id,
                 date=date.today() - timedelta(days=i),
-                mood=["😊 BIEN", "😐 MOYEN", "😊 BIEN"][i % 3],
+                mood=["ðŸ˜Š BIEN", "ðŸ˜ MOYEN", "ðŸ˜Š BIEN"][i % 3],
                 sleep_hours=7.5 + (i % 3) * 0.5,
-                activity=["Crèche", "Promenade", "Jeux à la maison"][i % 3],
-                notes=f"Journée du {(date.today() - timedelta(days=i)).strftime('%d/%m')}",
+                activity=["CrÃ¨che", "Promenade", "Jeux Ã  la maison"][i % 3],
+                notes=f"JournÃ©e du {(date.today() - timedelta(days=i)).strftime('%d/%m')}",
             )
             db.add(entry)
 
@@ -374,10 +374,10 @@ def seed_child_and_family():
         db.add(routine)
         db.flush()
 
-        # Tâches de routine
+        # TÃ¢ches de routine
         taches = [
             ("Bain", "19:00", "TERMINE"),
-            ("Dîner", "19:30", "TERMINE"),
+            ("DÃ®ner", "19:30", "TERMINE"),
             ("Brossage dents", "20:00", "A_FAIRE"),
             ("Histoire", "20:15", "A_FAIRE"),
             ("Dodo", "20:30", "A_FAIRE"),
@@ -391,19 +391,19 @@ def seed_child_and_family():
 
         db.commit()
 
-    print("✅ Jules et sa routine créés")
+    print("âœ… Jules et sa routine crÃ©Ã©s")
 
 
 def seed_projects():
-    """Crée des projets maison"""
-    print("🏗️ Création des projets...")
+    """CrÃ©e des projets maison"""
+    print("ðŸ—ï¸ CrÃ©ation des projets...")
 
     with get_db_context() as db:
         # Projet 1
         p1 = Project(
-            name="Aménagement jardin",
-            description="Créer un potager et une zone détente",
-            category="Extérieur",
+            name="AmÃ©nagement jardin",
+            description="CrÃ©er un potager et une zone dÃ©tente",
+            category="ExtÃ©rieur",
             start_date=date(2025, 4, 1),
             end_date=date(2025, 12, 31),
             priority="HAUTE",
@@ -417,7 +417,7 @@ def seed_projects():
             [
                 ProjectTask(
                     project_id=p1.id,
-                    task_name="Préparer le sol",
+                    task_name="PrÃ©parer le sol",
                     status="TERMINE",
                     due_date=date(2025, 4, 15),
                 ),
@@ -429,7 +429,7 @@ def seed_projects():
                 ),
                 ProjectTask(
                     project_id=p1.id,
-                    task_name="Planter légumes",
+                    task_name="Planter lÃ©gumes",
                     status="EN_COURS",
                     due_date=date(2025, 5, 15),
                 ),
@@ -444,9 +444,9 @@ def seed_projects():
 
         # Projet 2
         p2 = Project(
-            name="Rénovation chambre",
+            name="RÃ©novation chambre",
             description="Refaire la peinture et changer les meubles",
-            category="Intérieur",
+            category="IntÃ©rieur",
             start_date=date.today(),
             end_date=date.today() + timedelta(days=30),
             priority="MOYENNE",
@@ -465,17 +465,17 @@ def seed_projects():
 
         db.commit()
 
-    print("✅ 2 projets créés")
+    print("âœ… 2 projets crÃ©Ã©s")
 
 
 def seed_garden():
-    """Crée le jardin"""
-    print("🌱 Plantation du jardin...")
+    """CrÃ©e le jardin"""
+    print("ðŸŒ± Plantation du jardin...")
 
     with get_db_context() as db:
         plantes = [
-            ("Tomates cerises", "Légume", date(2025, 5, 1), date(2025, 8, 1), 3, 2),
-            ("Courgettes", "Légume", date(2025, 5, 10), date(2025, 7, 15), 2, 3),
+            ("Tomates cerises", "LÃ©gume", date(2025, 5, 1), date(2025, 8, 1), 3, 2),
+            ("Courgettes", "LÃ©gume", date(2025, 5, 10), date(2025, 7, 15), 2, 3),
             ("Basilic", "Aromatique", date(2025, 4, 20), None, 1, 1),
             ("Fraisiers", "Fruit", date(2025, 4, 1), date(2025, 6, 15), 5, 2),
         ]
@@ -498,24 +498,24 @@ def seed_garden():
                 item_id=item.id,
                 action="Arrosage",
                 date=date.today() - timedelta(days=1),
-                notes="Arrosage régulier",
+                notes="Arrosage rÃ©gulier",
             )
             db.add(log)
 
         db.commit()
 
-    print("✅ 4 plantes ajoutées au jardin")
+    print("âœ… 4 plantes ajoutÃ©es au jardin")
 
 
 def seed_notifications(user_id: int):
-    """Crée des notifications"""
-    print("🔔 Création de notifications...")
+    """CrÃ©e des notifications"""
+    print("ðŸ”” CrÃ©ation de notifications...")
 
     with get_db_context() as db:
         notifs = [
-            ("Inventaire", "Stock bas : Lait, Fromage râpé", "HAUTE", False),
-            ("Batch Cooking", "Aucun repas planifié pour après-demain", "MOYENNE", False),
-            ("Routines", "2 tâches du soir en attente", "BASSE", False),
+            ("Inventaire", "Stock bas : Lait, Fromage rÃ¢pÃ©", "HAUTE", False),
+            ("Batch Cooking", "Aucun repas planifiÃ© pour aprÃ¨s-demain", "MOYENNE", False),
+            ("Routines", "2 tÃ¢ches du soir en attente", "BASSE", False),
             ("Jardin", "Les tomates ont besoin d'eau", "MOYENNE", True),
         ]
 
@@ -527,18 +527,18 @@ def seed_notifications(user_id: int):
 
         db.commit()
 
-    print(f"✅ {len(notifs)} notifications créées")
+    print(f"âœ… {len(notifs)} notifications crÃ©Ã©es")
 
 
 def main():
-    """Point d'entrée principal"""
+    """Point d'entrÃ©e principal"""
     print("=" * 60)
-    print("🌱 SEED DATABASE - Assistant MaTanne v2")
+    print("ðŸŒ± SEED DATABASE - Assistant MaTanne v2")
     print("=" * 60)
     print()
 
     # Demander confirmation pour nettoyer
-    response = input("⚠️  Nettoyer la base avant (supprime toutes les données) ? (o/N) : ")
+    response = input("âš ï¸  Nettoyer la base avant (supprime toutes les donnÃ©es) ? (o/N) : ")
 
     if response.lower() in ["o", "oui", "y", "yes"]:
         clear_database()
@@ -557,24 +557,24 @@ def main():
 
     print()
     print("=" * 60)
-    print("✅ SEED TERMINÉ AVEC SUCCÈS")
+    print("âœ… SEED TERMINÃ‰ AVEC SUCCÃˆS")
     print("=" * 60)
     print()
-    print("📊 Résumé des données créées :")
-    print("  • 1 utilisateur (Anne)")
-    print("  • 2 profils (Anne, Mathieu)")
-    print("  • 26 ingrédients")
-    print("  • 4 recettes (dont 1 IA)")
-    print("  • 11 articles en inventaire")
-    print("  • 7 repas planifiés")
-    print("  • 1 enfant (Jules)")
-    print("  • 7 entrées bien-être")
-    print("  • 1 routine (5 tâches)")
-    print("  • 2 projets (6 tâches)")
-    print("  • 4 plantes au jardin")
-    print("  • 4 notifications")
+    print("ðŸ“Š RÃ©sumÃ© des donnÃ©es crÃ©Ã©es :")
+    print("  â€¢ 1 utilisateur (Anne)")
+    print("  â€¢ 2 profils (Anne, Mathieu)")
+    print("  â€¢ 26 ingrÃ©dients")
+    print("  â€¢ 4 recettes (dont 1 IA)")
+    print("  â€¢ 11 articles en inventaire")
+    print("  â€¢ 7 repas planifiÃ©s")
+    print("  â€¢ 1 enfant (Jules)")
+    print("  â€¢ 7 entrÃ©es bien-Ãªtre")
+    print("  â€¢ 1 routine (5 tÃ¢ches)")
+    print("  â€¢ 2 projets (6 tÃ¢ches)")
+    print("  â€¢ 4 plantes au jardin")
+    print("  â€¢ 4 notifications")
     print()
-    print("🚀 Tu peux maintenant lancer l'application !")
+    print("ðŸš€ Tu peux maintenant lancer l'application !")
     print("   poetry run streamlit run src/app.py")
     print()
 

@@ -1,4 +1,4 @@
-"""Tests pour le module famille (réorganisé depuis tests/modules/)."""
+﻿"""Tests pour le module famille (réorganisé depuis tests/modules/)."""
 
 import pytest
 

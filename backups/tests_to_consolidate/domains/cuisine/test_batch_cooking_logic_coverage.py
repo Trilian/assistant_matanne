@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests de couverture complets pour batch_cooking_logic.py
 Objectif: atteindre 80%+ de couverture
 Couvre: identifier_moments_jules, generer_planning_jules,
@@ -7,7 +7,7 @@ Couvre: identifier_moments_jules, generer_planning_jules,
 import pytest
 from datetime import date, time, timedelta
 
-from src.domains.cuisine.logic.batch_cooking_logic import (
+from src.modules.cuisine.logic.batch_cooking_logic import (
     identifier_moments_jules,
     generer_planning_jules,
     calculer_statistiques_session,
@@ -17,17 +17,17 @@ from src.domains.cuisine.logic.batch_cooking_logic import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS IDENTIFIER_MOMENTS_JULES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestIdentifierMomentsJules:
     """Tests pour identifier_moments_jules."""
 
     def test_activite_melanger_securisee(self):
-        """Identifier activité 'mélanger' comme sécurisée."""
+        """Identifier activitÃ© 'mÃ©langer' comme sÃ©curisÃ©e."""
         etapes = [
-            {"titre": "Mélanger la pâte", "description": "Mélanger les ingrédients", "alerte_bruit": False}
+            {"titre": "MÃ©langer la pÃ¢te", "description": "MÃ©langer les ingrÃ©dients", "alerte_bruit": False}
         ]
         
         moments = identifier_moments_jules(etapes)
@@ -37,7 +37,7 @@ class TestIdentifierMomentsJules:
         assert "participer" in moments[0]["conseil_jules"].lower()
 
     def test_activite_verser_securisee(self):
-        """Identifier activité 'verser' comme sécurisée."""
+        """Identifier activitÃ© 'verser' comme sÃ©curisÃ©e."""
         etapes = [
             {"titre": "Verser la farine", "description": "", "alerte_bruit": False}
         ]
@@ -47,9 +47,9 @@ class TestIdentifierMomentsJules:
         assert len(moments) == 1
 
     def test_activite_observer(self):
-        """Identifier activité 'observer' comme sécurisée."""
+        """Identifier activitÃ© 'observer' comme sÃ©curisÃ©e."""
         etapes = [
-            {"titre": "Observer la cuisson", "description": "Regarder le gâteau lever", "alerte_bruit": False}
+            {"titre": "Observer la cuisson", "description": "Regarder le gÃ¢teau lever", "alerte_bruit": False}
         ]
         
         moments = identifier_moments_jules(etapes)
@@ -57,25 +57,25 @@ class TestIdentifierMomentsJules:
         assert len(moments) == 1
 
     def test_exclusion_si_bruyant(self):
-        """Exclure si activité bruyante."""
+        """Exclure si activitÃ© bruyante."""
         etapes = [
-            {"titre": "Mélanger au robot", "description": "", "alerte_bruit": True}
+            {"titre": "MÃ©langer au robot", "description": "", "alerte_bruit": True}
         ]
         
         moments = identifier_moments_jules(etapes)
         
-        # Bruyant => pas adapté à Jules (même si activité sécurisée)
+        # Bruyant => pas adaptÃ© Ã  Jules (mÃªme si activitÃ© sÃ©curisÃ©e)
         assert len(moments) == 0
 
     def test_exclusion_si_temperature_elevee(self):
-        """Exclure si température dangereuse."""
+        """Exclure si tempÃ©rature dangereuse."""
         etapes = [
-            {"titre": "Mélanger sauce chaude", "description": "", "alerte_bruit": False, "temperature": 100}
+            {"titre": "MÃ©langer sauce chaude", "description": "", "alerte_bruit": False, "temperature": 100}
         ]
         
         moments = identifier_moments_jules(etapes)
         
-        # Température > 50 => pas adapté
+        # TempÃ©rature > 50 => pas adaptÃ©
         assert len(moments) == 0
 
     def test_supervision_calme_ok(self):
@@ -97,17 +97,17 @@ class TestIdentifierMomentsJules:
         
         moments = identifier_moments_jules(etapes)
         
-        # Bruyant exclut même les supervisions
+        # Bruyant exclut mÃªme les supervisions
         assert len(moments) == 0
 
     def test_activites_multiples(self):
-        """Tester plusieurs activités sécurisées."""
+        """Tester plusieurs activitÃ©s sÃ©curisÃ©es."""
         etapes = [
-            {"titre": "Décorer le gâteau", "description": "", "alerte_bruit": False},
-            {"titre": "Toucher la pâte", "description": "", "alerte_bruit": False},
-            {"titre": "Sentir les épices", "description": "", "alerte_bruit": False},
-            {"titre": "Goûter la sauce", "description": "", "alerte_bruit": False, "temperature": 30},
-            {"titre": "Ranger les ingrédients", "description": "", "alerte_bruit": False},
+            {"titre": "DÃ©corer le gÃ¢teau", "description": "", "alerte_bruit": False},
+            {"titre": "Toucher la pÃ¢te", "description": "", "alerte_bruit": False},
+            {"titre": "Sentir les Ã©pices", "description": "", "alerte_bruit": False},
+            {"titre": "GoÃ»ter la sauce", "description": "", "alerte_bruit": False, "temperature": 30},
+            {"titre": "Ranger les ingrÃ©dients", "description": "", "alerte_bruit": False},
             {"titre": "Nettoyer le plan", "description": "", "alerte_bruit": False},
         ]
         
@@ -121,7 +121,7 @@ class TestIdentifierMomentsJules:
         assert len(moments) == 0
 
     def test_aucune_activite_securisee(self):
-        """Aucune activité sécurisée identifiée."""
+        """Aucune activitÃ© sÃ©curisÃ©e identifiÃ©e."""
         etapes = [
             {"titre": "Couper oignons", "description": "", "alerte_bruit": False},
             {"titre": "Utiliser le four", "description": "", "alerte_bruit": False, "temperature": 180},
@@ -129,21 +129,21 @@ class TestIdentifierMomentsJules:
         
         moments = identifier_moments_jules(etapes)
         
-        # Couper = pas sécurisé, Four = température élevée
+        # Couper = pas sÃ©curisÃ©, Four = tempÃ©rature Ã©levÃ©e
         assert len(moments) == 0
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GENERER_PLANNING_JULES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestGenererPlanningJules:
     """Tests pour generer_planning_jules."""
 
     def test_planning_avant_sieste(self):
-        """Étapes programmées avant la sieste."""
+        """Ã‰tapes programmÃ©es avant la sieste."""
         etapes = [
-            {"titre": "Préparer", "duree_minutes": 30, "alerte_bruit": False},
+            {"titre": "PrÃ©parer", "duree_minutes": 30, "alerte_bruit": False},
         ]
         
         planning = generer_planning_jules(
@@ -158,7 +158,7 @@ class TestGenererPlanningJules:
         assert len(planning["apres_sieste"]) == 0
 
     def test_planning_pendant_sieste(self):
-        """Étapes pendant la sieste (bruyantes idéales)."""
+        """Ã‰tapes pendant la sieste (bruyantes idÃ©ales)."""
         etapes = [
             {"titre": "Mixer", "duree_minutes": 30, "alerte_bruit": True},
         ]
@@ -173,7 +173,7 @@ class TestGenererPlanningJules:
         assert len(planning["pendant_sieste"]) == 1
 
     def test_planning_apres_sieste(self):
-        """Étapes après la sieste."""
+        """Ã‰tapes aprÃ¨s la sieste."""
         etapes = [
             {"titre": "Finition", "duree_minutes": 30, "alerte_bruit": False},
         ]
@@ -188,11 +188,11 @@ class TestGenererPlanningJules:
         assert len(planning["apres_sieste"]) == 1
 
     def test_planning_alerte_bruyant_sieste(self):
-        """Conseil si étapes bruyantes pendant sieste."""
+        """Conseil si Ã©tapes bruyantes pendant sieste."""
         etapes = [
-            # Étape calme avant
-            {"titre": "Préparer", "duree_minutes": 30, "alerte_bruit": False},
-            # Étape bruyante pendant sieste (si mal programmée)
+            # Ã‰tape calme avant
+            {"titre": "PrÃ©parer", "duree_minutes": 30, "alerte_bruit": False},
+            # Ã‰tape bruyante pendant sieste (si mal programmÃ©e)
             {"titre": "Mixer", "duree_minutes": 30, "alerte_bruit": True},
         ]
         
@@ -204,15 +204,15 @@ class TestGenererPlanningJules:
         )
         
         # Devrait avoir un conseil si bruyant pendant sieste
-        # La 2e étape commence à 13:00 (pile sieste)
+        # La 2e Ã©tape commence Ã  13:00 (pile sieste)
         assert "conseils" in planning
 
     def test_planning_etapes_multiples(self):
-        """Planning avec plusieurs étapes à différents moments."""
+        """Planning avec plusieurs Ã©tapes Ã  diffÃ©rents moments."""
         etapes = [
-            {"titre": "Étape 1", "duree_minutes": 60, "alerte_bruit": False},
-            {"titre": "Étape 2", "duree_minutes": 120, "alerte_bruit": True},
-            {"titre": "Étape 3", "duree_minutes": 60, "alerte_bruit": False},
+            {"titre": "Ã‰tape 1", "duree_minutes": 60, "alerte_bruit": False},
+            {"titre": "Ã‰tape 2", "duree_minutes": 120, "alerte_bruit": True},
+            {"titre": "Ã‰tape 3", "duree_minutes": 60, "alerte_bruit": False},
         ]
         
         planning = generer_planning_jules(
@@ -239,15 +239,15 @@ class TestGenererPlanningJules:
         assert len(planning["apres_sieste"]) == 0
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CALCULER_STATISTIQUES_SESSION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestCalculerStatistiquesSession:
     """Tests pour calculer_statistiques_session."""
 
     def test_session_complete(self):
-        """Statistiques d'une session complète."""
+        """Statistiques d'une session complÃ¨te."""
         session_data = {
             "etapes": [
                 {"duree_minutes": 30, "statut": "terminee", "robots": ["cookeo"], "groupe_parallele": 0},
@@ -286,7 +286,7 @@ class TestCalculerStatistiquesSession:
         assert stats["nb_preparations"] == 0
 
     def test_session_sans_preparations(self):
-        """Session avec étapes mais sans préparations."""
+        """Session avec Ã©tapes mais sans prÃ©parations."""
         session_data = {
             "etapes": [
                 {"duree_minutes": 30, "statut": "terminee", "robots": []},
@@ -305,7 +305,7 @@ class TestCalculerStatistiquesSession:
         session_data = {
             "etapes": [
                 {"duree_minutes": 60, "groupe_parallele": 0, "robots": []},
-                {"duree_minutes": 30, "groupe_parallele": 0, "robots": []},  # Parallèle
+                {"duree_minutes": 30, "groupe_parallele": 0, "robots": []},  # ParallÃ¨le
             ],
             "preparations": []
         }
@@ -313,15 +313,15 @@ class TestCalculerStatistiquesSession:
         stats = calculer_statistiques_session(session_data)
         
         # Brut: 60 + 30 = 90
-        # Optimisé: max(60, 30) = 60 (groupe 0)
+        # OptimisÃ©: max(60, 30) = 60 (groupe 0)
         assert stats["duree_estimee_brute"] == 90
         assert stats["duree_estimee_optimisee"] == 60
         assert stats["gain_temps_pct"] == pytest.approx(33.33, rel=0.1)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CALCULER_HISTORIQUE_BATCH
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestCalculerHistoriqueBatch:
     """Tests pour calculer_historique_batch."""
@@ -388,15 +388,15 @@ class TestCalculerHistoriqueBatch:
         assert stats["robot_prefere"] == "cookeo"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS OPTIMISER_ORDRE_ETAPES - EDGE CASES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestOptimiserOrdreEtapesEdgeCases:
     """Tests edge cases pour optimiser_ordre_etapes."""
 
     def test_parallelisation_avec_conflit_robot(self):
-        """Ne parallélise pas si conflit de robot."""
+        """Ne parallÃ©lise pas si conflit de robot."""
         etapes = [
             {"titre": "Cuisson 1", "duree_minutes": 60, "est_supervision": True, "robots": ["cookeo"]},
             {"titre": "Cuisson 2", "duree_minutes": 30, "est_supervision": False, "robots": ["cookeo"]},
@@ -404,23 +404,23 @@ class TestOptimiserOrdreEtapesEdgeCases:
         
         resultat = optimiser_ordre_etapes(etapes)
         
-        # Les deux utilisent cookeo, donc ne peuvent pas être parallèles
+        # Les deux utilisent cookeo, donc ne peuvent pas Ãªtre parallÃ¨les
         assert len(resultat) == 2
 
     def test_sans_supervision(self):
-        """Gère le cas sans étapes de supervision."""
+        """GÃ¨re le cas sans Ã©tapes de supervision."""
         etapes = [
-            {"titre": "Étape 1", "duree_minutes": 20, "est_supervision": False},
-            {"titre": "Étape 2", "duree_minutes": 15, "est_supervision": False},
+            {"titre": "Ã‰tape 1", "duree_minutes": 20, "est_supervision": False},
+            {"titre": "Ã‰tape 2", "duree_minutes": 15, "est_supervision": False},
         ]
         
         resultat = optimiser_ordre_etapes(etapes)
         
         assert len(resultat) == 2
-        # Les deux devraient avoir des groupes différents (séquentiels)
+        # Les deux devraient avoir des groupes diffÃ©rents (sÃ©quentiels)
 
     def test_toutes_supervisions(self):
-        """Gère le cas où toutes les étapes sont des supervisions."""
+        """GÃ¨re le cas oÃ¹ toutes les Ã©tapes sont des supervisions."""
         etapes = [
             {"titre": "Four 1", "duree_minutes": 60, "est_supervision": True, "robots": ["four"]},
             {"titre": "Four 2", "duree_minutes": 30, "est_supervision": True, "robots": ["four"]},
@@ -431,18 +431,18 @@ class TestOptimiserOrdreEtapesEdgeCases:
         assert len(resultat) == 2
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS DETECTER_CONFLITS_ROBOTS - EDGE CASES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestDetecterConflitsRobotsEdgeCases:
     """Tests edge cases pour detecter_conflits_robots."""
 
     def test_etape_unique_dans_groupe(self):
-        """Pas de conflit si une seule étape dans un groupe."""
+        """Pas de conflit si une seule Ã©tape dans un groupe."""
         etapes = [
-            {"titre": "Étape 1", "groupe_parallele": 0, "robots": ["mixeur"]},
-            {"titre": "Étape 2", "groupe_parallele": 1, "robots": ["mixeur"]},
+            {"titre": "Ã‰tape 1", "groupe_parallele": 0, "robots": ["mixeur"]},
+            {"titre": "Ã‰tape 2", "groupe_parallele": 1, "robots": ["mixeur"]},
         ]
         
         conflits = detecter_conflits_robots(etapes)
@@ -450,15 +450,15 @@ class TestDetecterConflitsRobotsEdgeCases:
         assert len(conflits) == 0
 
     def test_robot_inconnu(self):
-        """Gère robot non présent dans ROBOTS_INFO."""
+        """GÃ¨re robot non prÃ©sent dans ROBOTS_INFO."""
         etapes = [
-            {"titre": "Étape 1", "groupe_parallele": 0, "robots": ["robot_inconnu"]},
-            {"titre": "Étape 2", "groupe_parallele": 0, "robots": ["robot_inconnu"]},
+            {"titre": "Ã‰tape 1", "groupe_parallele": 0, "robots": ["robot_inconnu"]},
+            {"titre": "Ã‰tape 2", "groupe_parallele": 0, "robots": ["robot_inconnu"]},
         ]
         
         conflits = detecter_conflits_robots(etapes)
         
-        # Robot inconnu avec peut_parallele=True par défaut => pas de conflit
+        # Robot inconnu avec peut_parallele=True par dÃ©faut => pas de conflit
         assert len(conflits) == 0
 
     def test_liste_vide(self):
@@ -468,10 +468,10 @@ class TestDetecterConflitsRobotsEdgeCases:
         assert len(conflits) == 0
 
     def test_etapes_sans_robots(self):
-        """Pas de conflit si étapes sans robots."""
+        """Pas de conflit si Ã©tapes sans robots."""
         etapes = [
-            {"titre": "Étape 1", "groupe_parallele": 0, "robots": []},
-            {"titre": "Étape 2", "groupe_parallele": 0, "robots": []},
+            {"titre": "Ã‰tape 1", "groupe_parallele": 0, "robots": []},
+            {"titre": "Ã‰tape 2", "groupe_parallele": 0, "robots": []},
         ]
         
         conflits = detecter_conflits_robots(etapes)

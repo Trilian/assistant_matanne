@@ -1,8 +1,8 @@
-"""
+﻿"""
 Module Sorties Weekend - Service IA pour suggestions
 """
 
-from ._common import BaseAIService, ClientIA
+from .utils import BaseAIService, ClientIA
 
 
 class WeekendAIService(BaseAIService):
@@ -21,50 +21,50 @@ class WeekendAIService(BaseAIService):
         meteo: str = "variable",
         age_enfant_mois: int = 19,
         budget: int = 50,
-        region: str = "Île-de-France",
+        region: str = "ÃŽle-de-France",
         nb_suggestions: int = 3
     ) -> str:
-        """Suggère des activités weekend"""
+        """Suggère des activitÃes weekend"""
         
-        prompt = f"""Suggère {nb_suggestions} activités pour un weekend en famille avec:
+        prompt = f"""Suggère {nb_suggestions} activitÃes pour un weekend en famille avec:
 - Enfant de {age_enfant_mois} mois
-- Météo prévue: {meteo}
-- Budget max: {budget}€
-- Région: {region}
+- MÃetÃeo prÃevue: {meteo}
+- Budget max: {budget}â‚¬
+- RÃegion: {region}
 
-Pour chaque activité:
-🎯 [Nom de l'activité]
-📍 Type de lieu: [parc/musée/piscine/etc.]
-⏱️ Durée recommandée: X heures
-💰 Budget estimé: X€
-👶 Adapté à l'âge: Oui/Non + explications
-🌤️ Météo requise: intérieur/extérieur
-📝 Description: 2-3 phrases sur pourquoi c'est bien
+Pour chaque activitÃe:
+ðŸŽ¯ [Nom de l'activitÃe]
+ðŸ“ Type de lieu: [parc/musÃee/piscine/etc.]
+â±ï¸ DurÃee recommandÃee: X heures
+ðŸ’° Budget estimÃe: Xâ‚¬
+ðŸ‘¶ AdaptÃe Ã  l'âge: Oui/Non + explications
+ðŸŒ¤ï¸ MÃetÃeo requise: intÃerieur/extÃerieur
+ðŸ“ Description: 2-3 phrases sur pourquoi c'est bien
 
-Privilégie les activités:
-- Adaptées à un enfant de {age_enfant_mois} mois
+PrivilÃegie les activitÃes:
+- AdaptÃees Ã  un enfant de {age_enfant_mois} mois
 - Dans le budget
-- Selon la météo ({meteo})"""
+- Selon la mÃetÃeo ({meteo})"""
         
         return await self.call_with_cache(
             prompt=prompt,
-            system_prompt="Tu es expert en sorties familiales avec jeunes enfants en France. Réponds en français.",
+            system_prompt="Tu es expert en sorties familiales avec jeunes enfants en France. RÃeponds en français.",
             max_tokens=800
         )
     
     async def details_lieu(self, nom_lieu: str, type_activite: str) -> str:
-        """Donne des détails sur un lieu"""
+        """Donne des dÃetails sur un lieu"""
         prompt = f"""Donne des informations pratiques sur {nom_lieu} ({type_activite}):
 
 - Horaires habituels
 - Tarifs (adulte, enfant, gratuit?)
-- Équipements bébé (poussette, change, etc.)
+- Équipements bÃebÃe (poussette, change, etc.)
 - Conseils pour y aller avec un enfant de 18-24 mois
 - Meilleur moment pour y aller
 - Ce qu'il faut apporter"""
         
         return await self.call_with_cache(
             prompt=prompt,
-            system_prompt="Tu es guide touristique spécialisé familles avec jeunes enfants.",
+            system_prompt="Tu es guide touristique spÃecialisÃe familles avec jeunes enfants.",
             max_tokens=500
         )

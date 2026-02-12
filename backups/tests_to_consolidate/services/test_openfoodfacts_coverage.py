@@ -1,13 +1,13 @@
-"""
+﻿"""
 Tests complets pour src/services/openfoodfacts.py
 Objectif: Atteindre 80%+ de couverture
 
 Tests couvrant:
 - rechercher_produit avec cache hit/miss, errors, timeout
-- rechercher_par_nom avec résultats/vide/erreur
+- rechercher_par_nom avec rÃ©sultats/vide/erreur
 - obtenir_nutriscore_emoji pour tous les grades
 - obtenir_nova_description pour tous les groupes
-- _parser_produit avec données complètes/partielles
+- _parser_produit avec donnÃ©es complÃ¨tes/partielles
 """
 import pytest
 from unittest.mock import Mock, patch, MagicMock
@@ -18,7 +18,7 @@ class TestOpenFoodFactsServiceInit:
     """Tests d'initialisation du service."""
 
     def test_service_init(self):
-        """Vérifie l'initialisation correcte du service."""
+        """VÃ©rifie l'initialisation correcte du service."""
         from src.services.openfoodfacts import OpenFoodFactsService
         
         service = OpenFoodFactsService()
@@ -26,7 +26,7 @@ class TestOpenFoodFactsServiceInit:
         assert "AssistantMatanne" in service.user_agent
 
     def test_get_openfoodfacts_service_singleton(self):
-        """Vérifie que la factory retourne un singleton."""
+        """VÃ©rifie que la factory retourne un singleton."""
         from src.services.openfoodfacts import get_openfoodfacts_service
         
         service1 = get_openfoodfacts_service()
@@ -39,7 +39,7 @@ class TestRechercherProduitCacheHit:
 
     @patch('src.services.openfoodfacts.Cache')
     def test_rechercher_produit_cache_hit(self, mock_cache_class):
-        """Produit trouvé en cache, pas d'appel API."""
+        """Produit trouvÃ© en cache, pas d'appel API."""
         from src.services.openfoodfacts import OpenFoodFactsService, ProduitOpenFoodFacts
         
         # Mock du produit en cache
@@ -66,7 +66,7 @@ class TestRechercherProduitAPICalls:
     @patch('src.services.openfoodfacts.Cache')
     @patch('src.services.openfoodfacts.httpx.Client')
     def test_rechercher_produit_api_success(self, mock_client_class, mock_cache_class):
-        """Produit trouvé via API, mis en cache."""
+        """Produit trouvÃ© via API, mis en cache."""
         from src.services.openfoodfacts import OpenFoodFactsService
         
         # Cache miss
@@ -138,7 +138,7 @@ class TestRechercherProduitAPICalls:
     @patch('src.services.openfoodfacts.Cache')
     @patch('src.services.openfoodfacts.httpx.Client')
     def test_rechercher_produit_status_not_found(self, mock_client_class, mock_cache_class):
-        """API retourne status != 1 (produit non trouvé)."""
+        """API retourne status != 1 (produit non trouvÃ©)."""
         from src.services.openfoodfacts import OpenFoodFactsService
         
         mock_cache_class.obtenir.return_value = None
@@ -183,7 +183,7 @@ class TestRechercherProduitAPICalls:
     @patch('src.services.openfoodfacts.Cache')
     @patch('src.services.openfoodfacts.httpx.Client')
     def test_rechercher_produit_generic_exception(self, mock_client_class, mock_cache_class):
-        """Exception générique retourne None."""
+        """Exception gÃ©nÃ©rique retourne None."""
         from src.services.openfoodfacts import OpenFoodFactsService
         
         mock_cache_class.obtenir.return_value = None
@@ -244,7 +244,7 @@ class TestRechercherParNom:
 
     @patch('src.services.openfoodfacts.httpx.Client')
     def test_rechercher_par_nom_empty_results(self, mock_client_class):
-        """Recherche sans résultats retourne liste vide."""
+        """Recherche sans rÃ©sultats retourne liste vide."""
         from src.services.openfoodfacts import OpenFoodFactsService
         
         mock_client = MagicMock()
@@ -296,7 +296,7 @@ class TestRechercherParNom:
 
     @patch('src.services.openfoodfacts.httpx.Client')
     def test_rechercher_par_nom_product_without_code(self, mock_client_class):
-        """Produits sans code sont ignorés."""
+        """Produits sans code sont ignorÃ©s."""
         from src.services.openfoodfacts import OpenFoodFactsService
         
         mock_client = MagicMock()
@@ -329,89 +329,89 @@ class TestNutriscoreEmoji:
         from src.services.openfoodfacts import OpenFoodFactsService
         
         service = OpenFoodFactsService()
-        assert service.obtenir_nutriscore_emoji("A") == "🟢"
-        assert service.obtenir_nutriscore_emoji("a") == "🟢"
+        assert service.obtenir_nutriscore_emoji("A") == "ðŸŸ¢"
+        assert service.obtenir_nutriscore_emoji("a") == "ðŸŸ¢"
 
     def test_nutriscore_b(self):
         """Nutriscore B retourne emoji jaune."""
         from src.services.openfoodfacts import OpenFoodFactsService
         
         service = OpenFoodFactsService()
-        assert service.obtenir_nutriscore_emoji("B") == "🟡"
-        assert service.obtenir_nutriscore_emoji("b") == "🟡"
+        assert service.obtenir_nutriscore_emoji("B") == "ðŸŸ¡"
+        assert service.obtenir_nutriscore_emoji("b") == "ðŸŸ¡"
 
     def test_nutriscore_c(self):
         """Nutriscore C retourne emoji orange."""
         from src.services.openfoodfacts import OpenFoodFactsService
         
         service = OpenFoodFactsService()
-        assert service.obtenir_nutriscore_emoji("C") == "🟠"
+        assert service.obtenir_nutriscore_emoji("C") == "ðŸŸ "
 
     def test_nutriscore_d(self):
-        """Nutriscore D retourne emoji orange foncé."""
+        """Nutriscore D retourne emoji orange foncÃ©."""
         from src.services.openfoodfacts import OpenFoodFactsService
         
         service = OpenFoodFactsService()
-        assert service.obtenir_nutriscore_emoji("D") == "🟧"
+        assert service.obtenir_nutriscore_emoji("D") == "ðŸŸ§"
 
     def test_nutriscore_e(self):
         """Nutriscore E retourne emoji rouge."""
         from src.services.openfoodfacts import OpenFoodFactsService
         
         service = OpenFoodFactsService()
-        assert service.obtenir_nutriscore_emoji("E") == "🔴"
-        assert service.obtenir_nutriscore_emoji("e") == "🔴"
+        assert service.obtenir_nutriscore_emoji("E") == "ðŸ”´"
+        assert service.obtenir_nutriscore_emoji("e") == "ðŸ”´"
 
     def test_nutriscore_none(self):
         """Nutriscore None retourne emoji blanc."""
         from src.services.openfoodfacts import OpenFoodFactsService
         
         service = OpenFoodFactsService()
-        assert service.obtenir_nutriscore_emoji(None) == "⚪"
+        assert service.obtenir_nutriscore_emoji(None) == "âšª"
 
     def test_nutriscore_unknown(self):
         """Nutriscore inconnu retourne emoji blanc."""
         from src.services.openfoodfacts import OpenFoodFactsService
         
         service = OpenFoodFactsService()
-        assert service.obtenir_nutriscore_emoji("X") == "⚪"
-        assert service.obtenir_nutriscore_emoji("") == "⚪"
+        assert service.obtenir_nutriscore_emoji("X") == "âšª"
+        assert service.obtenir_nutriscore_emoji("") == "âšª"
 
 
 class TestNovaDescription:
     """Tests obtenir_nova_description."""
 
     def test_nova_1(self):
-        """NOVA 1 - Aliments non transformés."""
+        """NOVA 1 - Aliments non transformÃ©s."""
         from src.services.openfoodfacts import OpenFoodFactsService
         
         service = OpenFoodFactsService()
         result = service.obtenir_nova_description(1)
-        assert "non transformé" in result.lower() or "unprocessed" in result.lower() or "🥬" in result
+        assert "non transformÃ©" in result.lower() or "unprocessed" in result.lower() or "ðŸ¥¬" in result
 
     def test_nova_2(self):
-        """NOVA 2 - Ingrédients culinaires."""
+        """NOVA 2 - IngrÃ©dients culinaires."""
         from src.services.openfoodfacts import OpenFoodFactsService
         
         service = OpenFoodFactsService()
         result = service.obtenir_nova_description(2)
-        assert "culinaire" in result.lower() or "🧂" in result
+        assert "culinaire" in result.lower() or "ðŸ§‚" in result
 
     def test_nova_3(self):
-        """NOVA 3 - Aliments transformés."""
+        """NOVA 3 - Aliments transformÃ©s."""
         from src.services.openfoodfacts import OpenFoodFactsService
         
         service = OpenFoodFactsService()
         result = service.obtenir_nova_description(3)
-        assert "transformé" in result.lower() or "🥫" in result
+        assert "transformÃ©" in result.lower() or "ðŸ¥«" in result
 
     def test_nova_4(self):
-        """NOVA 4 - Ultra-transformés."""
+        """NOVA 4 - Ultra-transformÃ©s."""
         from src.services.openfoodfacts import OpenFoodFactsService
         
         service = OpenFoodFactsService()
         result = service.obtenir_nova_description(4)
-        assert "ultra" in result.lower() or "🍟" in result
+        assert "ultra" in result.lower() or "ðŸŸ" in result
 
     def test_nova_none(self):
         """NOVA None - Inconnu."""
@@ -419,7 +419,7 @@ class TestNovaDescription:
         
         service = OpenFoodFactsService()
         result = service.obtenir_nova_description(None)
-        assert "inconnu" in result.lower() or "❓" in result
+        assert "inconnu" in result.lower() or "â“" in result
 
     def test_nova_invalid(self):
         """NOVA invalide - Inconnu."""
@@ -427,22 +427,22 @@ class TestNovaDescription:
         
         service = OpenFoodFactsService()
         result = service.obtenir_nova_description(5)
-        assert "inconnu" in result.lower() or "❓" in result
+        assert "inconnu" in result.lower() or "â“" in result
         result = service.obtenir_nova_description(0)
-        assert "inconnu" in result.lower() or "❓" in result
+        assert "inconnu" in result.lower() or "â“" in result
 
 
 class TestParserProduit:
-    """Tests _parser_produit avec différentes données."""
+    """Tests _parser_produit avec diffÃ©rentes donnÃ©es."""
 
     def test_parser_produit_complet(self):
-        """Parser avec données complètes."""
+        """Parser avec donnÃ©es complÃ¨tes."""
         from src.services.openfoodfacts import OpenFoodFactsService
         
         service = OpenFoodFactsService()
         
         data = {
-            "product_name_fr": "Biscuits Petit Déjeuner",
+            "product_name_fr": "Biscuits Petit DÃ©jeuner",
             "brands": "Lu",
             "quantity": "400g",
             "nutriments": {
@@ -462,9 +462,9 @@ class TestParserProduit:
             "labels_tags": ["en:organic", "fr:sans-gluten"],
             "allergens_tags": ["en:gluten", "en:eggs"],
             "traces_tags": ["en:nuts"],
-            "ingredients_text_fr": "Farine de blé, sucre, huile végétale...",
+            "ingredients_text_fr": "Farine de blÃ©, sucre, huile vÃ©gÃ©tale...",
             "origins": "France",
-            "conservation_conditions": "À conserver au sec",
+            "conservation_conditions": "Ã€ conserver au sec",
             "image_front_url": "https://example.com/image.jpg",
             "image_front_small_url": "https://example.com/thumb.jpg",
             "completeness": 85,
@@ -473,7 +473,7 @@ class TestParserProduit:
         result = service._parser_produit("3017620422003", data)
         
         assert result.code_barres == "3017620422003"
-        assert result.nom == "Biscuits Petit Déjeuner"
+        assert result.nom == "Biscuits Petit DÃ©jeuner"
         assert result.marque == "Lu"
         assert result.quantite == "400g"
         assert result.nutrition.energie_kcal == 450
@@ -486,12 +486,12 @@ class TestParserProduit:
         assert result.confiance == 0.85
 
     def test_parser_produit_minimal(self):
-        """Parser avec données minimales."""
+        """Parser avec donnÃ©es minimales."""
         from src.services.openfoodfacts import OpenFoodFactsService
         
         service = OpenFoodFactsService()
         
-        data = {}  # Données vides
+        data = {}  # DonnÃ©es vides
         
         result = service._parser_produit("1234567890123", data)
         
@@ -513,9 +513,9 @@ class TestParserProduit:
         assert result1.nom == "English Name"
         
         # product_name absent, utilise generic_name_fr
-        data2 = {"generic_name_fr": "Nom Générique FR"}
+        data2 = {"generic_name_fr": "Nom GÃ©nÃ©rique FR"}
         result2 = service._parser_produit("222", data2)
-        assert result2.nom == "Nom Générique FR"
+        assert result2.nom == "Nom GÃ©nÃ©rique FR"
         
         # Tous absents sauf generic_name
         data3 = {"generic_name": "Generic Name"}
@@ -537,7 +537,7 @@ class TestParserProduit:
         assert result.ingredients_texte == "Wheat flour, sugar, salt"
 
     def test_parser_produit_categories_limit(self):
-        """Parser limite les catégories à 5."""
+        """Parser limite les catÃ©gories Ã  5."""
         from src.services.openfoodfacts import OpenFoodFactsService
         
         service = OpenFoodFactsService()
@@ -550,7 +550,7 @@ class TestParserProduit:
         assert len(result.categories) == 5
 
     def test_parser_produit_empty_nutriscore(self):
-        """Parser gère nutriscore vide."""
+        """Parser gÃ¨re nutriscore vide."""
         from src.services.openfoodfacts import OpenFoodFactsService
         
         service = OpenFoodFactsService()
@@ -575,7 +575,7 @@ class TestParserProduit:
         assert result.confiance == 0.5
 
     def test_parser_produit_confiance_max(self):
-        """Parser limite la confiance à 1.0."""
+        """Parser limite la confiance Ã  1.0."""
         from src.services.openfoodfacts import OpenFoodFactsService
         
         service = OpenFoodFactsService()
@@ -589,7 +589,7 @@ class TestDataclasses:
     """Tests des dataclasses."""
 
     def test_nutrition_info_defaults(self):
-        """NutritionInfo avec valeurs par défaut."""
+        """NutritionInfo avec valeurs par dÃ©faut."""
         from src.services.openfoodfacts import NutritionInfo
         
         info = NutritionInfo()
@@ -618,7 +618,7 @@ class TestDataclasses:
         assert info.nutriscore == "B"
 
     def test_produit_openfoodfacts_defaults(self):
-        """ProduitOpenFoodFacts avec valeurs par défaut."""
+        """ProduitOpenFoodFacts avec valeurs par dÃ©faut."""
         from src.services.openfoodfacts import ProduitOpenFoodFacts
         
         produit = ProduitOpenFoodFacts(

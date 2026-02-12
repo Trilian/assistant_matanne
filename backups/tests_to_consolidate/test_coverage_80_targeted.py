@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests finaux pour atteindre 80% de couverture du module Core.
 Cible: lignes non couvertes dans offline.py, performance.py, sql_optimizer.py
 """
@@ -11,11 +11,11 @@ import json
 
 
 class TestOfflineQueueFileMethods:
-    """Tests pour FileAttenteHorsLigne - méthodes de fichier."""
+    """Tests pour FileAttenteHorsLigne - mÃ©thodes de fichier."""
     
     @patch('src.core.offline.st')
     def test_ensure_cache_dir(self, mock_st):
-        """Test _ensure_cache_dir crée le dossier."""
+        """Test _ensure_cache_dir crÃ©e le dossier."""
         mock_st.session_state = {}
         from src.core.offline import FileAttenteHorsLigne
         
@@ -78,7 +78,7 @@ class TestConnectionManagerMethods:
     
     @patch('src.core.offline.st')
     def test_set_status(self, mock_st):
-        """Test set_status met à jour le statut."""
+        """Test set_status met Ã  jour le statut."""
         mock_st.session_state = {}
         from src.core.offline import GestionnaireConnexion, StatutConnexion
         
@@ -103,7 +103,7 @@ class TestConnectionManagerMethods:
     
     @patch('src.core.offline.st')
     def test_handle_connection_error(self, mock_st):
-        """Test handle_connection_error met le statut à OFFLINE."""
+        """Test handle_connection_error met le statut Ã  OFFLINE."""
         mock_st.session_state = {}
         from src.core.offline import GestionnaireConnexion, StatutConnexion
         
@@ -118,7 +118,7 @@ class TestMemoryMonitorMethods:
     @patch('src.core.performance.st')
     @patch('src.core.performance.tracemalloc')
     def test_start_tracking(self, mock_tracemalloc, mock_st):
-        """Test start_tracking démarre le tracking."""
+        """Test start_tracking dÃ©marre le tracking."""
         mock_st.session_state = {}
         from src.core.performance import MoniteurMemoire
         
@@ -132,7 +132,7 @@ class TestMemoryMonitorMethods:
     @patch('src.core.performance.st')
     @patch('src.core.performance.tracemalloc')
     def test_stop_tracking(self, mock_tracemalloc, mock_st):
-        """Test stop_tracking arrête le tracking."""
+        """Test stop_tracking arrÃªte le tracking."""
         mock_st.session_state = {}
         from src.core.performance import MoniteurMemoire
         
@@ -195,7 +195,7 @@ class TestSQLAlchemyListenerLogQuery:
     
     @patch('src.core.sql_optimizer.st')
     def test_log_query_basic(self, mock_st):
-        """Test _log_query enregistre la requête."""
+        """Test _log_query enregistre la requÃªte."""
         mock_st.session_state = {}
         from src.core.sql_optimizer import EcouteurSQLAlchemy
         
@@ -208,7 +208,7 @@ class TestSQLAlchemyListenerLogQuery:
     
     @patch('src.core.sql_optimizer.st')
     def test_log_query_slow(self, mock_st):
-        """Test _log_query pour requête lente (>100ms)."""
+        """Test _log_query pour requÃªte lente (>100ms)."""
         mock_st.session_state = {}
         from src.core.sql_optimizer import EcouteurSQLAlchemy
         
@@ -218,11 +218,11 @@ class TestSQLAlchemyListenerLogQuery:
     
     @patch('src.core.sql_optimizer.st')
     def test_log_query_truncates_at_200(self, mock_st):
-        """Test _log_query garde seulement 200 dernières requêtes."""
+        """Test _log_query garde seulement 200 derniÃ¨res requÃªtes."""
         from src.core.sql_optimizer import EcouteurSQLAlchemy
         mock_st.session_state = {EcouteurSQLAlchemy.SESSION_KEY: []}
         
-        # Ajouter 205 requêtes
+        # Ajouter 205 requÃªtes
         for i in range(205):
             EcouteurSQLAlchemy._log_query(f"SELECT {i}", 1.0, {})
         
@@ -246,7 +246,7 @@ class TestSQLAlchemyListenerGetStats:
     
     @patch('src.core.sql_optimizer.st')
     def test_get_stats_with_queries(self, mock_st):
-        """Test get_stats avec des requêtes."""
+        """Test get_stats avec des requÃªtes."""
         from src.core.sql_optimizer import EcouteurSQLAlchemy, InfoRequete
         from datetime import datetime
         
@@ -279,7 +279,7 @@ class TestSQLOptimizer:
     
     @patch('src.core.performance.st')
     def test_record_query(self, mock_st):
-        """Test record_query enregistre une requête."""
+        """Test record_query enregistre une requÃªte."""
         mock_st.session_state = {}
         from src.core.performance import OptimiseurSQL
         
@@ -291,7 +291,7 @@ class TestSQLOptimizer:
     
     @patch('src.core.performance.st')
     def test_record_query_slow(self, mock_st):
-        """Test record_query pour requête lente."""
+        """Test record_query pour requÃªte lente."""
         mock_st.session_state = {}
         from src.core.performance import OptimiseurSQL
         
@@ -304,7 +304,7 @@ class TestSQLOptimizer:
     
     @patch('src.core.performance.st')
     def test_get_stats_empty(self, mock_st):
-        """Test get_stats avec données vides."""
+        """Test get_stats avec donnÃ©es vides."""
         mock_st.session_state = {}
         from src.core.performance import OptimiseurSQL
         
@@ -314,7 +314,7 @@ class TestSQLOptimizer:
     
     @patch('src.core.performance.st')
     def test_clear(self, mock_st):
-        """Test clear réinitialise."""
+        """Test clear rÃ©initialise."""
         from src.core.performance import OptimiseurSQL
         
         mock_st.session_state = {OptimiseurSQL.SESSION_KEY: {
@@ -331,7 +331,7 @@ class TestSQLOptimizer:
 
 
 class TestOfflineQueueMethods:
-    """Tests pour FileAttenteHorsLigne - méthodes de queue."""
+    """Tests pour FileAttenteHorsLigne - mÃ©thodes de queue."""
     
     @patch('src.core.offline.st')
     def test_get_queue_from_session(self, mock_st):
@@ -346,7 +346,7 @@ class TestOfflineQueueMethods:
     
     @patch('src.core.offline.st')
     def test_get_count(self, mock_st):
-        """Test get_count retourne le nombre d'opérations."""
+        """Test get_count retourne le nombre d'opÃ©rations."""
         from src.core.offline import FileAttenteHorsLigne
         
         mock_st.session_state = {FileAttenteHorsLigne.SESSION_KEY: [{"id": "1"}, {"id": "2"}]}
@@ -357,7 +357,7 @@ class TestOfflineQueueMethods:
     
     @patch('src.core.offline.st')
     def test_remove_success(self, mock_st):
-        """Test remove supprime l'opération."""
+        """Test remove supprime l'opÃ©ration."""
         from src.core.offline import FileAttenteHorsLigne
         
         mock_st.session_state = {FileAttenteHorsLigne.SESSION_KEY: [{"id": "abc"}, {"id": "def"}]}
@@ -370,7 +370,7 @@ class TestOfflineQueueMethods:
     
     @patch('src.core.offline.st')
     def test_remove_not_found(self, mock_st):
-        """Test remove retourne False si non trouvé."""
+        """Test remove retourne False si non trouvÃ©."""
         from src.core.offline import FileAttenteHorsLigne
         
         mock_st.session_state = {FileAttenteHorsLigne.SESSION_KEY: [{"id": "abc"}]}

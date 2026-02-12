@@ -1,5 +1,5 @@
-﻿"""
-Module Loto - Opérations CRUD (création/mise à jour)
+"""
+Module Loto - Operations CRUD (creation/mise à jour)
 """
 
 from ._common import (
@@ -12,7 +12,7 @@ def ajouter_tirage(date_t: date, numeros: list, chance: int, jackpot: int = None
     """Ajoute un nouveau tirage"""
     try:
         if len(numeros) != 5:
-            st.error("Il faut exactement 5 numéros")
+            st.error("Il faut exactement 5 numeros")
             return False
         
         numeros = sorted(numeros)
@@ -58,7 +58,7 @@ def ajouter_tirage(date_t: date, numeros: list, chance: int, jackpot: int = None
                 grille.gain = resultat["gain"]
             
             session.commit()
-            st.success(f"✅ Tirage du {date_t} enregistré!")
+            st.success(f"✅ Tirage du {date_t} enregistre!")
             return True
             
     except Exception as e:
@@ -71,7 +71,7 @@ def enregistrer_grille(numeros: list, chance: int, source: str = "manuel",
     """Enregistre une nouvelle grille"""
     try:
         if len(numeros) != 5:
-            st.error("Il faut exactement 5 numéros")
+            st.error("Il faut exactement 5 numeros")
             return False
         
         numeros = sorted(numeros)
@@ -90,7 +90,7 @@ def enregistrer_grille(numeros: list, chance: int, source: str = "manuel",
             )
             session.add(grille)
             session.commit()
-            st.success(f"✅ Grille enregistrée: {'-'.join(map(str, numeros))} + N°{chance}")
+            st.success(f"✅ Grille enregistree: {'-'.join(map(str, numeros))} + N°{chance}")
             return True
             
     except Exception as e:

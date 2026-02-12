@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests complets pour src/services/pdf_export.py
 
 Couverture cible: >80%
@@ -10,13 +10,13 @@ from io import BytesIO
 from unittest.mock import Mock, patch, MagicMock
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS SCHÉMAS PYDANTIC
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS SCHÃ‰MAS PYDANTIC
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestRecettePDFData:
-    """Tests schéma RecettePDFData."""
+    """Tests schÃ©ma RecettePDFData."""
 
     def test_import_schema(self):
         from src.services.pdf_export import RecettePDFData
@@ -44,16 +44,16 @@ class TestRecettePDFData:
         data = RecettePDFData(
             id=1,
             nom="Tarte aux pommes",
-            description="Délicieuse tarte familiale",
+            description="DÃ©licieuse tarte familiale",
             temps_preparation=30,
             temps_cuisson=45,
             portions=8,
             difficulte="moyen",
             ingredients=[
-                {"nom": "Pommes", "quantite": 4, "unite": "unités"},
+                {"nom": "Pommes", "quantite": 4, "unite": "unitÃ©s"},
                 {"nom": "Sucre", "quantite": 100, "unite": "g"}
             ],
-            etapes=["Éplucher les pommes", "Préparer la pâte"],
+            etapes=["Ã‰plucher les pommes", "PrÃ©parer la pÃ¢te"],
             tags=["dessert", "familial"]
         )
         
@@ -65,7 +65,7 @@ class TestRecettePDFData:
 
 
 class TestPlanningPDFData:
-    """Tests schéma PlanningPDFData."""
+    """Tests schÃ©ma PlanningPDFData."""
 
     def test_creation_minimal(self):
         from src.services.pdf_export import PlanningPDFData
@@ -89,8 +89,8 @@ class TestPlanningPDFData:
             semaine_debut=now,
             semaine_fin=now + timedelta(days=7),
             repas_par_jour={
-                "Lundi": ["Petit-déj", "Déjeuner", "Dîner"],
-                "Mardi": ["Petit-déj", "Déjeuner", "Dîner"]
+                "Lundi": ["Petit-dÃ©j", "DÃ©jeuner", "DÃ®ner"],
+                "Mardi": ["Petit-dÃ©j", "DÃ©jeuner", "DÃ®ner"]
             },
             total_repas=6
         )
@@ -100,7 +100,7 @@ class TestPlanningPDFData:
 
 
 class TestCoursesPDFData:
-    """Tests schéma CoursesPDFData."""
+    """Tests schÃ©ma CoursesPDFData."""
 
     def test_creation_minimal(self):
         from src.services.pdf_export import CoursesPDFData
@@ -132,9 +132,9 @@ class TestCoursesPDFData:
         assert len(data.par_categorie) == 2
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SERVICE PDF EXPORT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPDFExportServiceInit:
@@ -157,14 +157,14 @@ class TestPDFExportServiceInit:
         
         service = PDFExportService()
         
-        # Vérifier que les styles personnalisés sont créés
+        # VÃ©rifier que les styles personnalisÃ©s sont crÃ©Ã©s
         assert 'TitreRecette' in service.styles.byName
         assert 'SousTitre' in service.styles.byName
         assert 'Etape' in service.styles.byName
 
 
 class TestPDFExportServiceStyles:
-    """Tests styles PDF personnalisés."""
+    """Tests styles PDF personnalisÃ©s."""
 
     def test_style_titre_recette(self):
         from src.services.pdf_export import PDFExportService
@@ -191,13 +191,13 @@ class TestPDFExportServiceStyles:
         assert style.fontSize == 11
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GENERATION PDF
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPDFGeneration:
-    """Tests génération de PDF."""
+    """Tests gÃ©nÃ©ration de PDF."""
 
     def test_generer_pdf_recette(self):
         from src.services.pdf_export import PDFExportService, RecettePDFData
@@ -212,15 +212,15 @@ class TestPDFGeneration:
             temps_cuisson=30,
             portions=4,
             difficulte="facile",
-            ingredients=[{"nom": "Test", "quantite": 1, "unite": "unité"}],
-            etapes=["Étape 1", "Étape 2"]
+            ingredients=[{"nom": "Test", "quantite": 1, "unite": "unitÃ©"}],
+            etapes=["Ã‰tape 1", "Ã‰tape 2"]
         )
         
-        # Appeler la méthode privée de génération
+        # Appeler la mÃ©thode privÃ©e de gÃ©nÃ©ration
         result = service._generer_pdf_recette(data)
         
         assert isinstance(result, BytesIO)
-        # Vérifier que le buffer a du contenu avec getvalue()
+        # VÃ©rifier que le buffer a du contenu avec getvalue()
         assert len(result.getvalue()) > 0
 
     def test_generer_pdf_recette_sans_description(self):
@@ -261,7 +261,7 @@ class TestPDFGeneration:
         data = RecettePDFData(
             id=1,
             nom="Recette Tags",
-            tags=["végétarien", "rapide", "économique"]
+            tags=["vÃ©gÃ©tarien", "rapide", "Ã©conomique"]
         )
         
         result = service._generer_pdf_recette(data)
@@ -269,9 +269,9 @@ class TestPDFGeneration:
         assert isinstance(result, BytesIO)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EDGE CASES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPDFExportEdgeCases:
@@ -282,7 +282,7 @@ class TestPDFExportEdgeCases:
         
         data = RecettePDFData(
             id=1,
-            nom="Recette avec un nom vraiment très très long qui pourrait poser des problèmes de mise en page"
+            nom="Recette avec un nom vraiment trÃ¨s trÃ¨s long qui pourrait poser des problÃ¨mes de mise en page"
         )
         
         assert len(data.nom) > 50
@@ -302,7 +302,7 @@ class TestPDFExportEdgeCases:
         from src.services.pdf_export import RecettePDFData
         
         ingredients = [
-            {"nom": f"Ingrédient {i}", "quantite": i, "unite": "g"}
+            {"nom": f"IngrÃ©dient {i}", "quantite": i, "unite": "g"}
             for i in range(50)
         ]
         
@@ -317,7 +317,7 @@ class TestPDFExportEdgeCases:
     def test_recette_beaucoup_etapes(self):
         from src.services.pdf_export import RecettePDFData
         
-        etapes = [f"Étape numéro {i} avec des instructions détaillées." for i in range(30)]
+        etapes = [f"Ã‰tape numÃ©ro {i} avec des instructions dÃ©taillÃ©es." for i in range(30)]
         
         data = RecettePDFData(
             id=1,
@@ -332,7 +332,7 @@ class TestPDFExportEdgeCases:
         
         now = datetime.now()
         jours = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
-        repas = {jour: ["Petit-déj", "Déjeuner", "Goûter", "Dîner"] for jour in jours}
+        repas = {jour: ["Petit-dÃ©j", "DÃ©jeuner", "GoÃ»ter", "DÃ®ner"] for jour in jours}
         
         data = PlanningPDFData(
             semaine_debut=now,
@@ -346,18 +346,18 @@ class TestPDFExportEdgeCases:
 
 
 class TestPDFExportIntegration:
-    """Tests d'intégration."""
+    """Tests d'intÃ©gration."""
 
     def test_workflow_export_recette(self):
         from src.services.pdf_export import PDFExportService, RecettePDFData
         
         service = PDFExportService()
         
-        # Créer les données
+        # CrÃ©er les donnÃ©es
         data = RecettePDFData(
             id=42,
-            nom="Poulet rôti",
-            description="Recette traditionnelle de poulet rôti aux herbes",
+            nom="Poulet rÃ´ti",
+            description="Recette traditionnelle de poulet rÃ´ti aux herbes",
             temps_preparation=20,
             temps_cuisson=90,
             portions=6,
@@ -369,23 +369,23 @@ class TestPDFExportIntegration:
                 {"nom": "Beurre", "quantite": 50, "unite": "g"}
             ],
             etapes=[
-                "Préchauffer le four à 200°C",
-                "Placer les herbes dans la cavité du poulet",
+                "PrÃ©chauffer le four Ã  200Â°C",
+                "Placer les herbes dans la cavitÃ© du poulet",
                 "Badigeonner de beurre fondu",
                 "Enfourner et cuire 1h30",
-                "Arroser régulièrement"
+                "Arroser rÃ©guliÃ¨rement"
             ],
             tags=["viande", "familial", "four"]
         )
         
-        # Générer le PDF
+        # GÃ©nÃ©rer le PDF
         pdf_buffer = service._generer_pdf_recette(data)
         
-        # Vérifier le résultat
+        # VÃ©rifier le rÃ©sultat
         assert isinstance(pdf_buffer, BytesIO)
         pdf_content = pdf_buffer.getvalue()
         assert len(pdf_content) > 0
-        # Vérifier signature PDF
+        # VÃ©rifier signature PDF
         assert pdf_content[:4] == b'%PDF'
 
     def test_workflow_courses_liste(self):

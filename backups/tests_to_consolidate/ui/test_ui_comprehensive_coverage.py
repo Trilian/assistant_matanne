@@ -1,9 +1,9 @@
-"""
-Tests complets pour les composants UI à faible couverture.
+﻿"""
+Tests complets pour les composants UI Ã  faible couverture.
 
 Couvre:
-- camera_scanner.py (fonctions de détection)
-- google_calendar_sync.py (vérification config)
+- camera_scanner.py (fonctions de dÃ©tection)
+- google_calendar_sync.py (vÃ©rification config)
 - base_module.py (ModuleConfig, BaseModuleUI)
 - base_io.py (IOConfig, BaseIOService)
 - domain.py (stock_alert)
@@ -15,9 +15,9 @@ from dataclasses import dataclass
 import numpy as np
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CAMERA_SCANNER.PY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -25,7 +25,7 @@ class TestDetectBarcodePyzbar:
     """Tests pour _detect_barcode_pyzbar."""
 
     def test_detect_with_pyzbar_installed(self):
-        """Test détection avec pyzbar installé."""
+        """Test dÃ©tection avec pyzbar installÃ©."""
         from src.ui.components.camera_scanner import _detect_barcode_pyzbar
         
         # Mock frame (image BGR)
@@ -40,7 +40,7 @@ class TestDetectBarcodePyzbar:
                 # May return empty list or raise ImportError - both valid
 
     def test_detect_without_pyzbar(self):
-        """Test détection sans pyzbar (ImportError)."""
+        """Test dÃ©tection sans pyzbar (ImportError)."""
         from src.ui.components.camera_scanner import _detect_barcode_pyzbar
         
         mock_frame = np.zeros((100, 100, 3), dtype=np.uint8)
@@ -55,7 +55,7 @@ class TestDetectBarcodeZxing:
     """Tests pour _detect_barcode_zxing."""
 
     def test_detect_without_zxing(self):
-        """Test détection sans zxing (ImportError)."""
+        """Test dÃ©tection sans zxing (ImportError)."""
         from src.ui.components.camera_scanner import _detect_barcode_zxing
         
         mock_frame = np.zeros((100, 100, 3), dtype=np.uint8)
@@ -79,7 +79,7 @@ class TestDetectBarcodes:
         assert isinstance(result, list)
 
     def test_detect_barcodes_with_mocked_pyzbar(self):
-        """Test detect_barcodes avec pyzbar mocké."""
+        """Test detect_barcodes avec pyzbar mockÃ©."""
         from src.ui.components.camera_scanner import detect_barcodes
         
         mock_frame = np.zeros((100, 100, 3), dtype=np.uint8)
@@ -155,7 +155,7 @@ class TestBarcodeScanner:
         assert result is False
 
     def test_should_report_scan_different_code(self):
-        """Test _should_report_scan avec code différent."""
+        """Test _should_report_scan avec code diffÃ©rent."""
         from src.ui.components.camera_scanner import BarcodeScanner
         from datetime import datetime
         
@@ -168,7 +168,7 @@ class TestBarcodeScanner:
         assert result is True
 
     def test_should_report_scan_after_cooldown(self):
-        """Test _should_report_scan après cooldown."""
+        """Test _should_report_scan aprÃ¨s cooldown."""
         from src.ui.components.camera_scanner import BarcodeScanner
         from datetime import datetime, timedelta
         
@@ -182,9 +182,9 @@ class TestBarcodeScanner:
         assert result is True
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GOOGLE_CALENDAR_SYNC.PY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -192,7 +192,7 @@ class TestVerifierConfigGoogle:
     """Tests pour verifier_config_google."""
 
     def test_config_ok(self):
-        """Test avec config complète."""
+        """Test avec config complÃ¨te."""
         from src.ui.components.google_calendar_sync import verifier_config_google
         
         mock_params = Mock()
@@ -246,7 +246,7 @@ class TestGoogleCalendarConstants:
     """Tests pour les constantes."""
 
     def test_google_scopes_defined(self):
-        """Test que GOOGLE_SCOPES est défini."""
+        """Test que GOOGLE_SCOPES est dÃ©fini."""
         from src.ui.components.google_calendar_sync import GOOGLE_SCOPES
         
         assert isinstance(GOOGLE_SCOPES, list)
@@ -254,16 +254,16 @@ class TestGoogleCalendarConstants:
         assert any("calendar" in scope for scope in GOOGLE_SCOPES)
 
     def test_redirect_uri_defined(self):
-        """Test que REDIRECT_URI_LOCAL est défini."""
+        """Test que REDIRECT_URI_LOCAL est dÃ©fini."""
         from src.ui.components.google_calendar_sync import REDIRECT_URI_LOCAL
         
         assert isinstance(REDIRECT_URI_LOCAL, str)
         assert "localhost" in REDIRECT_URI_LOCAL
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS BASE_MODULE.PY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -271,31 +271,31 @@ class TestModuleConfig:
     """Tests pour ModuleConfig."""
 
     def test_minimal_config(self):
-        """Test création config minimale."""
+        """Test crÃ©ation config minimale."""
         from src.ui.core.base_module import ModuleConfig
         
         mock_service = Mock()
         config = ModuleConfig(
             name="test",
             title="Test Module",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=mock_service
         )
         
         assert config.name == "test"
         assert config.title == "Test Module"
-        assert config.icon == "🧪"
+        assert config.icon == "ðŸ§ª"
         assert config.service == mock_service
 
     def test_default_values(self):
-        """Test valeurs par défaut."""
+        """Test valeurs par dÃ©faut."""
         from src.ui.core.base_module import ModuleConfig
         
         mock_service = Mock()
         config = ModuleConfig(
             name="test",
             title="Test",
-            icon="📦",
+            icon="ðŸ“¦",
             service=mock_service
         )
         
@@ -305,14 +305,14 @@ class TestModuleConfig:
         assert config.export_formats == ["csv", "json"]
 
     def test_full_config(self):
-        """Test config complète."""
+        """Test config complÃ¨te."""
         from src.ui.core.base_module import ModuleConfig
         
         mock_service = Mock()
         config = ModuleConfig(
             name="recettes",
             title="Recettes",
-            icon="🍽️",
+            icon="ðŸ½ï¸",
             service=mock_service,
             display_fields=[{"name": "nom", "label": "Nom"}],
             search_fields=["nom", "ingredients"],
@@ -338,7 +338,7 @@ class TestBaseModuleUI:
         config = ModuleConfig(
             name="test",
             title="Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=mock_service
         )
         
@@ -346,14 +346,14 @@ class TestBaseModuleUI:
         assert module.config == config
 
     def test_module_has_render_methods(self):
-        """Test que le module a des méthodes de rendu."""
+        """Test que le module a des mÃ©thodes de rendu."""
         from src.ui.core.base_module import BaseModuleUI, ModuleConfig
         
         mock_service = Mock()
         config = ModuleConfig(
             name="test",
             title="Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=mock_service
         )
         
@@ -363,9 +363,9 @@ class TestBaseModuleUI:
         assert hasattr(module, 'config')
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS BASE_IO.PY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -423,7 +423,7 @@ class TestBaseIOService:
         from src.ui.core.base_io import BaseIOService, IOConfig
         
         config = IOConfig(
-            field_mapping={"nom": "Nom", "quantite": "Quantité"},
+            field_mapping={"nom": "Nom", "quantite": "QuantitÃ©"},
             required_fields=["nom"]
         )
         
@@ -456,9 +456,9 @@ class TestBaseIOService:
             assert result is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS DOMAIN.PY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -488,7 +488,7 @@ class TestStockAlert:
                 stock_alert(articles)
 
     def test_peremption_article(self):
-        """Test avec article péremption proche."""
+        """Test avec article pÃ©remption proche."""
         from src.ui.domain import stock_alert
         
         articles = [{"nom": "Yaourt", "statut": "peremption_proche"}]
@@ -533,14 +533,14 @@ class TestStockAlert:
                 # Should use default "Article sans nom"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS TABLET_MODE.PY EXTENDED
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestTabletModeExtended:
-    """Tests étendus pour tablet_mode.py."""
+    """Tests Ã©tendus pour tablet_mode.py."""
 
     def test_tablet_mode_import(self):
         """Test import du module."""
@@ -555,9 +555,9 @@ class TestTabletModeExtended:
         assert hasattr(tablet_mode, '__name__')
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS LAYOUT COMPONENTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -580,9 +580,9 @@ class TestLayoutHeader:
         assert header is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # EDGE CASES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -619,7 +619,7 @@ class TestEdgeCases:
         config = ModuleConfig(
             name="test",
             title="Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=mock_service,
             on_view=on_view,
             on_edit=on_edit

@@ -1,8 +1,8 @@
-"""
+﻿"""
 Tests approfondis pour tablet_mode.py
 
 Module: src/ui/tablet_mode.py
-Tests créés: ~70 tests
+Tests crÃ©Ã©s: ~70 tests
 Objectif: Atteindre 80%+ de couverture
 """
 
@@ -20,7 +20,7 @@ class TestTabletModeEnum:
     """Tests pour l'enum TabletMode"""
     
     def test_tablet_mode_values(self):
-        """Vérifie les valeurs de l'enum"""
+        """VÃ©rifie les valeurs de l'enum"""
         from src.ui.tablet_mode import TabletMode
         
         assert TabletMode.NORMAL.value == "normal"
@@ -35,7 +35,7 @@ class TestTabletModeEnum:
         assert TabletMode.NORMAL == "normal"
     
     def test_tablet_mode_from_string(self):
-        """Création depuis string"""
+        """CrÃ©ation depuis string"""
         from src.ui.tablet_mode import TabletMode
         
         assert TabletMode("normal") == TabletMode.NORMAL
@@ -43,7 +43,7 @@ class TestTabletModeEnum:
         assert TabletMode("kitchen") == TabletMode.KITCHEN
     
     def test_tablet_mode_invalid_raises(self):
-        """Valeur invalide lève exception"""
+        """Valeur invalide lÃ¨ve exception"""
         from src.ui.tablet_mode import TabletMode
         
         with pytest.raises(ValueError):
@@ -60,7 +60,7 @@ class TestGetSetTabletMode:
     
     @patch("src.ui.tablet_mode.st")
     def test_get_tablet_mode_default(self, mock_st):
-        """Mode par défaut = NORMAL"""
+        """Mode par dÃ©faut = NORMAL"""
         from src.ui.tablet_mode import get_tablet_mode, TabletMode
         
         mock_st.session_state = {}
@@ -70,7 +70,7 @@ class TestGetSetTabletMode:
     
     @patch("src.ui.tablet_mode.st")
     def test_get_tablet_mode_from_session(self, mock_st):
-        """Récupère mode depuis session"""
+        """RÃ©cupÃ¨re mode depuis session"""
         from src.ui.tablet_mode import get_tablet_mode, TabletMode
         
         mock_st.session_state = {"tablet_mode": TabletMode.TABLET}
@@ -90,7 +90,7 @@ class TestGetSetTabletMode:
     
     @patch("src.ui.tablet_mode.st")
     def test_set_tablet_mode(self, mock_st):
-        """Définit le mode tablette"""
+        """DÃ©finit le mode tablette"""
         from src.ui.tablet_mode import set_tablet_mode, TabletMode
         
         mock_st.session_state = {}
@@ -101,7 +101,7 @@ class TestGetSetTabletMode:
     
     @patch("src.ui.tablet_mode.st")
     def test_set_tablet_mode_normal(self, mock_st):
-        """Définit mode normal"""
+        """DÃ©finit mode normal"""
         from src.ui.tablet_mode import set_tablet_mode, TabletMode
         
         mock_st.session_state = {"tablet_mode": TabletMode.TABLET}
@@ -120,7 +120,7 @@ class TestCSSConstants:
     """Tests pour les constantes CSS"""
     
     def test_tablet_css_exists(self):
-        """TABLET_CSS est défini"""
+        """TABLET_CSS est dÃ©fini"""
         from src.ui.tablet_mode import TABLET_CSS
         
         assert isinstance(TABLET_CSS, str)
@@ -140,14 +140,14 @@ class TestCSSConstants:
         assert "kitchen-mode" in TABLET_CSS
     
     def test_kitchen_mode_css_exists(self):
-        """KITCHEN_MODE_CSS est défini"""
+        """KITCHEN_MODE_CSS est dÃ©fini"""
         from src.ui.tablet_mode import KITCHEN_MODE_CSS
         
         assert isinstance(KITCHEN_MODE_CSS, str)
         assert "<style>" in KITCHEN_MODE_CSS
     
     def test_kitchen_css_contains_kitchen_classes(self):
-        """CSS cuisine contient les classes spécifiques"""
+        """CSS cuisine contient les classes spÃ©cifiques"""
         from src.ui.tablet_mode import KITCHEN_MODE_CSS
         
         assert "kitchen-ingredient" in KITCHEN_MODE_CSS
@@ -173,7 +173,7 @@ class TestApplyTabletMode:
         
         apply_tablet_mode()
         
-        # Vérifie que le CSS de base est appliqué
+        # VÃ©rifie que le CSS de base est appliquÃ©
         mock_st.markdown.assert_called_once()
         call_args = mock_st.markdown.call_args
         assert call_args[0][0] == TABLET_CSS
@@ -189,7 +189,7 @@ class TestApplyTabletMode:
         
         apply_tablet_mode()
         
-        # Vérifie que le div tablet-mode est ajouté
+        # VÃ©rifie que le div tablet-mode est ajoutÃ©
         calls = mock_st.markdown.call_args_list
         assert len(calls) == 2
         assert 'tablet-mode' in calls[1][0][0]
@@ -205,7 +205,7 @@ class TestApplyTabletMode:
         
         apply_tablet_mode()
         
-        # Vérifie que le CSS cuisine et les divs sont ajoutés
+        # VÃ©rifie que le CSS cuisine et les divs sont ajoutÃ©s
         calls = mock_st.markdown.call_args_list
         assert len(calls) == 3
 
@@ -281,15 +281,15 @@ class TestTabletButton:
     
     @patch("src.ui.tablet_mode.st")
     def test_tablet_button_with_icon(self, mock_st):
-        """Bouton avec icône"""
+        """Bouton avec icÃ´ne"""
         from src.ui.tablet_mode import tablet_button
         
         mock_st.button = Mock(return_value=False)
         
-        tablet_button("Valider", key="btn2", icon="✅")
+        tablet_button("Valider", key="btn2", icon="âœ…")
         
         call_args = mock_st.button.call_args[0][0]
-        assert "✅" in call_args
+        assert "âœ…" in call_args
         assert "Valider" in call_args
     
     @patch("src.ui.tablet_mode.st")
@@ -314,11 +314,11 @@ class TestTabletButton:
         tablet_button("Supprimer", key="btn4", type="danger")
         
         call_kwargs = mock_st.button.call_args[1]
-        assert "irréversible" in call_kwargs.get("help", "").lower()
+        assert "irrÃ©versible" in call_kwargs.get("help", "").lower()
     
     @patch("src.ui.tablet_mode.st")
     def test_tablet_button_returns_click_state(self, mock_st):
-        """Retourne True si cliqué"""
+        """Retourne True si cliquÃ©"""
         from src.ui.tablet_mode import tablet_button
         
         mock_st.button = Mock(return_value=True)
@@ -338,7 +338,7 @@ class TestTabletSelectGrid:
     
     @patch("src.ui.tablet_mode.st")
     def test_tablet_select_grid_creates_columns(self, mock_st):
-        """Crée le nombre de colonnes demandé"""
+        """CrÃ©e le nombre de colonnes demandÃ©"""
         from src.ui.tablet_mode import tablet_select_grid
         
         mock_st.session_state = {}
@@ -357,7 +357,7 @@ class TestTabletSelectGrid:
     
     @patch("src.ui.tablet_mode.st")
     def test_tablet_select_grid_returns_selected(self, mock_st):
-        """Retourne la valeur sélectionnée"""
+        """Retourne la valeur sÃ©lectionnÃ©e"""
         from src.ui.tablet_mode import tablet_select_grid
         
         mock_st.session_state = {"grid2_selected": "option_b"}
@@ -373,7 +373,7 @@ class TestTabletSelectGrid:
     
     @patch("src.ui.tablet_mode.st")
     def test_tablet_select_grid_no_selection(self, mock_st):
-        """Retourne None si rien sélectionné"""
+        """Retourne None si rien sÃ©lectionnÃ©"""
         from src.ui.tablet_mode import tablet_select_grid
         
         mock_st.session_state = {}
@@ -398,7 +398,7 @@ class TestTabletNumberInput:
     
     @patch("src.ui.tablet_mode.st")
     def test_tablet_number_input_default(self, mock_st):
-        """Valeur par défaut"""
+        """Valeur par dÃ©faut"""
         from src.ui.tablet_mode import tablet_number_input
         
         mock_st.session_state = {}
@@ -408,14 +408,14 @@ class TestTabletNumberInput:
         mock_cols = [MagicMock() for _ in range(3)]
         mock_st.columns = Mock(return_value=mock_cols)
         
-        result = tablet_number_input("Quantité", key="num1", default=5)
+        result = tablet_number_input("QuantitÃ©", key="num1", default=5)
         
         assert result == 5
         assert mock_st.session_state["num1_value"] == 5
     
     @patch("src.ui.tablet_mode.st")
     def test_tablet_number_input_preserves_state(self, mock_st):
-        """Préserve la valeur en session"""
+        """PrÃ©serve la valeur en session"""
         from src.ui.tablet_mode import tablet_number_input
         
         mock_st.session_state = {"num2_value": 10}
@@ -425,7 +425,7 @@ class TestTabletNumberInput:
         mock_cols = [MagicMock() for _ in range(3)]
         mock_st.columns = Mock(return_value=mock_cols)
         
-        result = tablet_number_input("Quantité", key="num2", default=1)
+        result = tablet_number_input("QuantitÃ©", key="num2", default=1)
         
         assert result == 10
 
@@ -440,7 +440,7 @@ class TestTabletChecklist:
     
     @patch("src.ui.tablet_mode.st")
     def test_tablet_checklist_init_unchecked(self, mock_st):
-        """Items initialisés non cochés"""
+        """Items initialisÃ©s non cochÃ©s"""
         from src.ui.tablet_mode import tablet_checklist
         
         mock_st.session_state = {}
@@ -453,7 +453,7 @@ class TestTabletChecklist:
     
     @patch("src.ui.tablet_mode.st")
     def test_tablet_checklist_preserves_state(self, mock_st):
-        """Préserve l'état des cases"""
+        """PrÃ©serve l'Ã©tat des cases"""
         from src.ui.tablet_mode import tablet_checklist
         
         mock_st.session_state = {
@@ -477,7 +477,7 @@ class TestRenderKitchenRecipeView:
     
     @patch("src.ui.tablet_mode.st")
     def test_render_kitchen_recipe_initial_state(self, mock_st):
-        """État initial = étape 0"""
+        """Ã‰tat initial = Ã©tape 0"""
         from src.ui.tablet_mode import render_kitchen_recipe_view
         
         mock_st.session_state = {}
@@ -491,18 +491,18 @@ class TestRenderKitchenRecipeView:
         
         recette = {
             "nom": "Tarte aux pommes",
-            "instructions": ["Étape 1", "Étape 2"],
+            "instructions": ["Ã‰tape 1", "Ã‰tape 2"],
             "ingredients": ["pommes", "sucre"]
         }
         
         render_kitchen_recipe_view(recette, key="test_recipe")
         
-        # Vérifie l'état initial
+        # VÃ©rifie l'Ã©tat initial
         assert mock_st.session_state["test_recipe_step"] == 0
     
     @patch("src.ui.tablet_mode.st")
     def test_render_kitchen_recipe_with_timer(self, mock_st):
-        """Affiche le timer si défini"""
+        """Affiche le timer si dÃ©fini"""
         from src.ui.tablet_mode import render_kitchen_recipe_view
         
         mock_st.session_state = {
@@ -520,9 +520,9 @@ class TestRenderKitchenRecipeView:
         
         render_kitchen_recipe_view(recette, key="timer_recipe")
         
-        # Vérifie que markdown est appelé avec le timer
+        # VÃ©rifie que markdown est appelÃ© avec le timer
         calls = [str(c) for c in mock_st.markdown.call_args_list]
-        # Le timer devrait apparaître
+        # Le timer devrait apparaÃ®tre
         assert any("5" in str(c) and "min" in str(c) for c in calls)
 
 
@@ -538,7 +538,7 @@ class TestRenderModeSelector:
     @patch("src.ui.tablet_mode.get_tablet_mode")
     @patch("src.ui.tablet_mode.set_tablet_mode")
     def test_render_mode_selector_shows_options(self, mock_set, mock_get, mock_st):
-        """Affiche le sélecteur dans la sidebar"""
+        """Affiche le sÃ©lecteur dans la sidebar"""
         from src.ui.tablet_mode import render_mode_selector, TabletMode
         
         mock_get.return_value = TabletMode.NORMAL
@@ -556,7 +556,7 @@ class TestRenderModeSelector:
     @patch("src.ui.tablet_mode.get_tablet_mode")
     @patch("src.ui.tablet_mode.set_tablet_mode")
     def test_render_mode_selector_changes_mode(self, mock_set, mock_get, mock_st):
-        """Change le mode si sélection différente"""
+        """Change le mode si sÃ©lection diffÃ©rente"""
         from src.ui.tablet_mode import render_mode_selector, TabletMode
         
         mock_get.return_value = TabletMode.NORMAL

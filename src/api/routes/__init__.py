@@ -1,4 +1,4 @@
-"""
+﻿"""
 Routes API - Package.
 
 Contient tous les routeurs FastAPI organisés par domaine.

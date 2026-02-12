@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests du package budget - Schémas Pydantic.
 
 Tests de validation des modèles de données pour le budget familial.
@@ -138,14 +138,14 @@ class TestFactureMaison:
             categorie=CategorieDepense.GAZ,
             montant=120.00,
             consommation=150.5,
-            unite_consommation="m³",
+            unite_consommation="mÂ³",
             mois=12,
             annee=2025,
             fournisseur="Engie"
         )
         
         assert facture.consommation == 150.5
-        assert facture.unite_consommation == "m³"
+        assert facture.unite_consommation == "mÂ³"
         assert facture.fournisseur == "Engie"
     
     def test_prix_unitaire_calcule(self):
@@ -158,7 +158,7 @@ class TestFactureMaison:
             annee=2026
         )
         
-        assert facture.prix_unitaire == 0.2  # 100/500 = 0.20€/kWh
+        assert facture.prix_unitaire == 0.2  # 100/500 = 0.20â‚¬/kWh
     
     def test_prix_unitaire_sans_consommation(self):
         """Prix unitaire None si pas de consommation."""
@@ -241,7 +241,7 @@ class TestBudgetMensuel:
         assert budget.pourcentage_utilise == 50.0
     
     def test_pourcentage_utilise_depasse(self):
-        """Pourcentage plafonné à 999 si dépassé."""
+        """Pourcentage plafonné Ã  999 si dépassé."""
         budget = BudgetMensuel(
             mois=2,
             annee=2026,

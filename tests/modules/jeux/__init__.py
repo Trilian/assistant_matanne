@@ -1,1 +1,1 @@
-"""Tests pour le domaine jeux."""
+﻿"""Tests pour le domaine jeux."""

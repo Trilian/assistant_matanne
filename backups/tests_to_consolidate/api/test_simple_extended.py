@@ -1,4 +1,4 @@
-"""Tests simples pour couvrir les gaps - API endpoints."""
+﻿"""Tests simples pour couvrir les gaps - API endpoints."""
 
 import pytest
 
@@ -8,13 +8,13 @@ class TestAPISimpleExtended:
     """Tests simples pour API endpoints."""
     
     def test_request_validation(self):
-        """Tester validation requêtes."""
+        """Tester validation requÃªtes."""
         request = {"method": "GET", "path": "/api/test"}
         assert request["method"] in ["GET", "POST", "PUT", "DELETE"]
         assert request["path"].startswith("/api")
     
     def test_response_codes(self):
-        """Tester codes réponse."""
+        """Tester codes rÃ©ponse."""
         codes = [200, 201, 400, 404, 500]
         for code in codes:
             if code < 300:
@@ -50,7 +50,7 @@ class TestAPIErrorHandling:
     """Tests gestion erreurs API."""
     
     def test_invalid_request(self):
-        """Tester requête invalide."""
+        """Tester requÃªte invalide."""
         request = {}
         assert "method" not in request or "method" in request
     

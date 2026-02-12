@@ -1,10 +1,10 @@
-﻿"""
-Chargeur de données Loto FDJ - Utilise les données publiques officielles
+"""
+Chargeur de donnees Loto FDJ - Utilise les donnees publiques officielles
 
 Sources:
 - API FDJ publique: https://www.fdj.fr/api/jeux/loto
-- Données publiques structurées
-- Fallback: données de démonstration validées
+- Donnees publiques structurees
+- Fallback: donnees de demonstration validees
 """
 
 import requests
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class ScraperLotoFDJ:
-    """Chargeur de données Loto FDJ - utilise les sources officielles"""
+    """Chargeur de donnees Loto FDJ - utilise les sources officielles"""
     
     # Endpoints FDJ officiels et fiables
     ENDPOINTS_FDJ = [
@@ -34,7 +34,7 @@ class ScraperLotoFDJ:
         "Referer": "https://www.fdj.fr"
     }
     
-    # Données de démonstration fiables (tirages réels FDJ 2025-2026)
+    # Donnees de demonstration fiables (tirages reels FDJ 2025-2026)
     DONNEES_DEMO = [
         {"date": "2026-02-01", "numeros": [7, 14, 23, 31, 45], "numero_chance": 6, "source": "demo"},
         {"date": "2026-01-29", "numeros": [2, 18, 27, 38, 49], "numero_chance": 4, "source": "demo"},
@@ -62,7 +62,7 @@ class ScraperLotoFDJ:
         Charge les derniers tirages de Loto depuis les sources FDJ officielles
         
         Args:
-            limite: Nombre de tirages à récupérer (max 50)
+            limite: Nombre de tirages à recuperer (max 50)
             
         Returns:
             Liste des tirages [date, numeros, numero_chance]
@@ -73,14 +73,14 @@ class ScraperLotoFDJ:
                 logger.info(f"📡 Tentative API FDJ: {endpoint}")
                 tirages = self._charger_depuis_endpoint(endpoint, limite)
                 if tirages:
-                    logger.info(f"✅ {len(tirages)} tirages chargés depuis {endpoint}")
+                    logger.info(f"✅ {len(tirages)} tirages charges depuis {endpoint}")
                     return tirages[:limite]
             except Exception as e:
-                logger.debug(f"Tentative échouée: {e}")
+                logger.debug(f"Tentative echouee: {e}")
                 continue
         
-        # Fallback: données de démonstration fiables
-        logger.warning("⚠️ APIs FDJ non disponibles, utilisation des données de démonstration")
+        # Fallback: donnees de demonstration fiables
+        logger.warning("⚠️ APIs FDJ non disponibles, utilisation des donnees de demonstration")
         return self.DONNEES_DEMO[:limite]
     
     def _charger_depuis_endpoint(self, endpoint: str, limite: int) -> List[Dict[str, Any]]:
@@ -97,7 +97,7 @@ class ScraperLotoFDJ:
         data = response.json()
         tirages = []
         
-        # Parser selon la structure retournée
+        # Parser selon la structure retournee
         results = data.get("results", data.get("tirage", data.get("data", data.get("draws", []))))
         
         for tirage in results:
@@ -116,10 +116,10 @@ class ScraperLotoFDJ:
         return tirages
     
     def _extraire_numeros(self, tirage: Dict) -> List[int]:
-        """Extrait les numéros d'un tirage avec parsing flexible"""
+        """Extrait les numeros d'un tirage avec parsing flexible"""
         numeros = []
         
-        # Chercher dans les clés possibles
+        # Chercher dans les cles possibles
         keys_possibles = [
             "numeroGagnants", "numerosGagnants", "numeros", "numbers",
             "balls", "boules", "draw_numbers", "winning_numbers",
@@ -165,7 +165,7 @@ class ScraperLotoFDJ:
             tirages: Liste des tirages
             
         Returns:
-            Dictionnaire avec fréquences, tendances, etc
+            Dictionnaire avec frequences, tendances, etc
         """
         if not tirages:
             return {}
@@ -187,7 +187,7 @@ class ScraperLotoFDJ:
                 for n2 in numeros[i+1:]:
                     paires.append(tuple(sorted([n1, n2])))
         
-        # Fréquences
+        # Frequences
         freq_numeros = dict(Counter(tous_numeros))
         freq_chances = dict(Counter(tous_chances))
         freq_paires = dict(Counter(paires))
@@ -276,7 +276,7 @@ def inserer_tirages_en_bd(limite: int = 50):
     """
     Charge les tirages FDJ et les insère dans la BD
     
-    À appeler périodiquement (ex: cron job quotidien)
+    À appeler periodiquement (ex: cron job quotidien)
     """
     try:
         from src.core.database import obtenir_contexte_db
@@ -289,7 +289,7 @@ def inserer_tirages_en_bd(limite: int = 50):
         
         with obtenir_contexte_db() as session:
             for tirage_data in tirages:
-                # Vérifier si le tirage existe déjà
+                # Verifier si le tirage existe dejà
                 existing = session.query(TirageLoto).filter(
                     TirageLoto.date == tirage_data["date"]
                 ).first()
@@ -311,7 +311,7 @@ def inserer_tirages_en_bd(limite: int = 50):
             session.add(stats_entry)
             
             session.commit()
-            logger.info(f"✅ {len(tirages)} tirages insérés en BD")
+            logger.info(f"✅ {len(tirages)} tirages inseres en BD")
             return True
     
     except Exception as e:

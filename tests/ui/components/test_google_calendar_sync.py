@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour google_calendar_sync.py
 
 Module: src.ui.components.google_calendar_sync

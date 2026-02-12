@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 sys.path.insert(0, os.path.abspath('.'))
 #!/usr/bin/env python3
@@ -12,7 +12,7 @@ from pathlib import Path
 
 
 def run_cmd(cmd: str, shell: bool = False):
-    """Exécute une commande"""
+    """ExÃ©cute une commande"""
     try:
         if shell:
             subprocess.run(cmd, shell=True, check=True)
@@ -26,7 +26,7 @@ def run_cmd(cmd: str, shell: bool = False):
 
 def run():
     """Lance l'application Streamlit"""
-    print("[RUN] Démarrage de l'application...")
+    print("[RUN] DÃ©marrage de l'application...")
     run_cmd("streamlit run src/app.py")
 
 
@@ -49,8 +49,8 @@ def format_code():
 
 
 def lint():
-    """Vérifie le code avec ruff"""
-    print("[SEARCH] Vérification du code...")
+    """VÃ©rifie le code avec ruff"""
+    print("[SEARCH] VÃ©rification du code...")
     run_cmd("ruff check src tests")
 
 
@@ -61,17 +61,17 @@ def migrate():
 
 
 def create_migration():
-    """Crée une nouvelle migration"""
+    """CrÃ©e une nouvelle migration"""
     message = input("Message de migration: ")
-    print(f"[EDIT] Création migration: {message}")
+    print(f"[EDIT] CrÃ©ation migration: {message}")
     run_cmd(f"alembic revision --autogenerate -m '{message}'", shell=True)
 
 
 def generate_requirements():
-    """Génère requirements.txt depuis pyproject.toml"""
-    print("[PKG] Génération requirements.txt...")
+    """GÃ©nÃ¨re requirements.txt depuis pyproject.toml"""
+    print("[PKG] GÃ©nÃ©ration requirements.txt...")
     if run_cmd("poetry export -f requirements.txt --output requirements.txt --without-hashes"):
-        print("[OK] requirements.txt généré")
+        print("[OK] requirements.txt gÃ©nÃ©rÃ©")
 
 
 def clean():
@@ -92,12 +92,12 @@ def clean():
         for path in Path(".").rglob(pattern):
             if path.is_dir():
                 shutil.rmtree(path)
-                print(f"  Supprimé: {path}")
+                print(f"  SupprimÃ©: {path}")
             elif path.is_file():
                 path.unlink()
-                print(f"  Supprimé: {path}")
+                print(f"  SupprimÃ©: {path}")
 
-    print("[OK] Nettoyage terminé")
+    print("[OK] Nettoyage terminÃ©")
 
 
 def reset_supabase():
@@ -110,23 +110,23 @@ def help_cmd():
     """Affiche l'aide"""
     print(
         """
-🤖 Assistant MaTanne v2 - Commandes disponibles
+ðŸ¤– Assistant MaTanne v2 - Commandes disponibles
 
-Développement:
+DÃ©veloppement:
   run                  Lance l'application Streamlit
   test                 Lance les tests
   coverage             Tests avec couverture
   format               Formate le code (black)
-  lint                 Vérifie le code (ruff)
+  lint                 VÃ©rifie le code (ruff)
   clean                Nettoie les fichiers temporaires
 
-Base de données:
+Base de donnÃ©es:
   migrate              Applique les migrations
-  create-migration     Crée une nouvelle migration
+  create-migration     CrÃ©e une nouvelle migration
   reset-supabase       [FIRE] Reset COMPLET Supabase (DANGER)
 
-Déploiement:
-  requirements         Génère requirements.txt
+DÃ©ploiement:
+  requirements         GÃ©nÃ¨re requirements.txt
 
 Usage:
   python manage.py <command>
@@ -150,7 +150,7 @@ COMMANDS = {
 
 
 def main():
-    """Point d'entrée"""
+    """Point d'entrÃ©e"""
     if len(sys.argv) < 2:
         help_cmd()
         sys.exit(0)

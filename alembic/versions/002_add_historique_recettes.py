@@ -1,4 +1,4 @@
-"""Add HistoriqueRecette table for recipe usage tracking
+﻿"""Add HistoriqueRecette table for recipe usage tracking
 
 Revision ID: 002_add_historique_recettes
 Revises: 001_add_recettes_columns

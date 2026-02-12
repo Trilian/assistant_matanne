@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests complets pour src/ui/components/dashboard_widgets.py
 Couverture cible: >80%
 """
@@ -8,9 +8,9 @@ from unittest.mock import MagicMock, patch
 from datetime import date, datetime, timedelta
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # GRAPHIQUE REPARTITION REPAS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGraphiqueRepartitionRepas:
@@ -64,9 +64,9 @@ class TestGraphiqueRepartitionRepas:
         assert result is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # GRAPHIQUE INVENTAIRE CATEGORIES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGraphiqueInventaireCategories:
@@ -104,7 +104,7 @@ class TestGraphiqueInventaireCategories:
         """Test avec catégorie manquante."""
         from src.ui.components.dashboard_widgets import graphique_inventaire_categories
         
-        data = [{"statut": "ok"}]  # Pas de catégorie → "Autre"
+        data = [{"statut": "ok"}]  # Pas de catégorie â†’ "Autre"
         
         result = graphique_inventaire_categories(data)
         assert result is not None
@@ -120,9 +120,9 @@ class TestGraphiqueInventaireCategories:
         assert result is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # GRAPHIQUE ACTIVITE SEMAINE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGraphiqueActiviteSemaine:
@@ -171,9 +171,9 @@ class TestGraphiqueActiviteSemaine:
         assert result is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # GRAPHIQUE PROGRESSION OBJECTIFS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGraphiqueProgressionObjectifs:
@@ -225,9 +225,9 @@ class TestGraphiqueProgressionObjectifs:
         assert result is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CARTE METRIQUE AVANCEE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCarteMetriqueAvancee:
@@ -247,7 +247,7 @@ class TestCarteMetriqueAvancee:
         carte_metrique_avancee(
             titre="Recettes",
             valeur=42,
-            icone="🍽️"
+            icone="ðŸ½ï¸"
         )
         
         mock_md.assert_called_once()
@@ -263,14 +263,14 @@ class TestCarteMetriqueAvancee:
         carte_metrique_avancee(
             titre="Total",
             valeur=100,
-            icone="📊",
+            icone="ðŸ“Š",
             delta="+5",
             delta_positif=True
         )
         
         html = mock_md.call_args[0][0]
         assert "+5" in html
-        assert "↑" in html
+        assert "â†‘" in html
 
     @patch("streamlit.markdown")
     @patch("streamlit.button", return_value=False)
@@ -281,14 +281,14 @@ class TestCarteMetriqueAvancee:
         carte_metrique_avancee(
             titre="Stock",
             valeur=50,
-            icone="📦",
+            icone="ðŸ“¦",
             delta="-10",
             delta_positif=False
         )
         
         html = mock_md.call_args[0][0]
         assert "-10" in html
-        assert "↓" in html
+        assert "â†“" in html
 
     @patch("streamlit.markdown")
     @patch("streamlit.button", return_value=False)
@@ -299,7 +299,7 @@ class TestCarteMetriqueAvancee:
         carte_metrique_avancee(
             titre="Titre",
             valeur="Val",
-            icone="📌",
+            icone="ðŸ“Œ",
             sous_titre="Description ici"
         )
         
@@ -318,7 +318,7 @@ class TestCarteMetriqueAvancee:
                 carte_metrique_avancee(
                     titre="Recettes",
                     valeur=10,
-                    icone="🍽️",
+                    icone="ðŸ½ï¸",
                     lien_module="cuisine"
                 )
             except Exception:
@@ -327,9 +327,9 @@ class TestCarteMetriqueAvancee:
         mock_btn.assert_called_once()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # INDICATEUR SANTE SYSTEME
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestIndicateurSanteSysteme:
@@ -402,9 +402,9 @@ class TestIndicateurSanteSysteme:
         assert "details" in result
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # AFFICHER SANTE SYSTEME
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAfficherSanteSysteme:
@@ -435,9 +435,9 @@ class TestAfficherSanteSysteme:
         mock_expander.assert_called_once()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # AFFICHER TIMELINE ACTIVITES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAfficherTimelineActivites:
@@ -465,7 +465,7 @@ class TestAfficherTimelineActivites:
         
         activites = [
             {"date": datetime.now(), "action": "Ajout recette", "type": "recette"},
-            {"date": datetime.now(), "action": "Mise à jour", "type": "inventaire"},
+            {"date": datetime.now(), "action": "Mise Ã  jour", "type": "inventaire"},
         ]
         
         afficher_timeline_activites(activites)
@@ -510,12 +510,12 @@ class TestAfficherTimelineActivites:
         
         afficher_timeline_activites(activites)
         
-        # Icône par défaut 📌
+        # Icône par défaut ðŸ“Œ
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # WIDGET JULES APERCU
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestWidgetJulesApercu:
@@ -539,9 +539,9 @@ class TestWidgetJulesApercu:
         assert "mois" in html
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # WIDGET METEO JOUR
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestWidgetMeteoJour:
@@ -561,4 +561,4 @@ class TestWidgetMeteoJour:
         
         mock_md.assert_called_once()
         html = mock_md.call_args[0][0]
-        assert "°C" in html
+        assert "Â°C" in html

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests approfondis pour src/core/cache.py
 
 Cible: Atteindre 80%+ de couverture
@@ -10,16 +10,16 @@ from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime, timedelta
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: Cache - lignes manquantes
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCacheDeep:
     """Tests approfondis pour Cache"""
 
     def test_cache_definir_avec_ttl_none(self):
-        """Test définir avec TTL None (infini)"""
+        """Test dÃ©finir avec TTL None (infini)"""
         from src.core.cache import Cache
 
         Cache.definir("test_infini", "valeur", ttl=None)
@@ -28,7 +28,7 @@ class TestCacheDeep:
         assert result == "valeur"
 
     def test_cache_definir_avec_dependencies(self):
-        """Test définir avec dépendances"""
+        """Test dÃ©finir avec dÃ©pendances"""
         from src.core.cache import Cache
 
         Cache.definir("parent", "parent_value", dependencies=["child1", "child2"])
@@ -38,20 +38,20 @@ class TestCacheDeep:
         assert Cache.obtenir("parent") == "parent_value"
 
     def test_cache_invalider_par_dependencies(self):
-        """Test invalidation par dépendances"""
+        """Test invalidation par dÃ©pendances"""
         from src.core.cache import Cache
 
         Cache.definir("parent", "value", dependencies=["dep1"])
         Cache.definir("dep1", "dep_value")
 
-        # Utiliser la méthode invalider avec dependencies
+        # Utiliser la mÃ©thode invalider avec dependencies
         Cache.invalider(dependencies=["dep1"])
 
-        # Le parent devrait être invalidé
-        # (selon l'implémentation)
+        # Le parent devrait Ãªtre invalidÃ©
+        # (selon l'implÃ©mentation)
 
     def test_cache_obtenir_avec_sentinelle(self):
-        """Test obtenir avec sentinelle personnalisée"""
+        """Test obtenir avec sentinelle personnalisÃ©e"""
         from src.core.cache import Cache
 
         sentinel = object()
@@ -66,16 +66,16 @@ class TestCacheDeep:
         Cache.definir("test1", "val1")
         Cache.definir("test2", "val2")
 
-        Cache.clear()  # La méthode est clear(), pas clear_all()
+        Cache.clear()  # La mÃ©thode est clear(), pas clear_all()
 
         assert Cache.obtenir("test1") is None
         assert Cache.obtenir("test2") is None
 
     def test_cache_nettoyer_expires(self):
-        """Test nettoyage des entrées expirées"""
+        """Test nettoyage des entrÃ©es expirÃ©es"""
         from src.core.cache import Cache
 
-        # Définir avec TTL très court
+        # DÃ©finir avec TTL trÃ¨s court
         Cache.definir("expire_test", "value", ttl=0.001)
 
         import time
@@ -85,9 +85,9 @@ class TestCacheDeep:
         # nettoyer_expires prend age_max_secondes, pas TTL
         Cache.nettoyer_expires(age_max_secondes=0)
 
-        # L'entrée devrait être expirée
+        # L'entrÃ©e devrait Ãªtre expirÃ©e
         result = Cache.obtenir("expire_test")
-        # Peut être None ou la valeur selon le TTL original
+        # Peut Ãªtre None ou la valeur selon le TTL original
 
     def test_cache_obtenir_statistiques(self):
         """Test obtention des statistiques"""
@@ -95,7 +95,7 @@ class TestCacheDeep:
 
         Cache.clear()
 
-        # Générer quelques hits/misses
+        # GÃ©nÃ©rer quelques hits/misses
         Cache.definir("stat_test", "value")
         Cache.obtenir("stat_test")  # Hit
         Cache.obtenir("inexistant")  # Miss
@@ -121,7 +121,7 @@ class TestCacheDeep:
         assert "taille_octets" in stats or "taille_mo" in stats
 
     def test_cache_vider(self):
-        """Test méthode vider"""
+        """Test mÃ©thode vider"""
         from src.core.cache import Cache
 
         Cache.definir("vider_test", "value")
@@ -134,9 +134,9 @@ class TestCacheDeep:
             assert Cache.obtenir("vider_test") is None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: Cache invalidation - lignes 326-353
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCacheInvalidation:
@@ -157,7 +157,7 @@ class TestCacheInvalidation:
         assert Cache.obtenir("autre_3") == "val3"
 
     def test_invalider_cle_exacte(self):
-        """Test invalidation clé exacte"""
+        """Test invalidation clÃ© exacte"""
         from src.core.cache import Cache
 
         Cache.definir("exact_key", "value")
@@ -175,19 +175,19 @@ class TestCacheInvalidation:
 
         Cache.invalider("user_")
 
-        # Les deux devraient être invalidées
+        # Les deux devraient Ãªtre invalidÃ©es
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: Cache nettoyer - lignes 377-378
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCacheNettoyer:
     """Tests pour le nettoyage du cache"""
 
     def test_nettoyer_avec_prefix(self):
-        """Test nettoyage avec préfixe"""
+        """Test nettoyage avec prÃ©fixe"""
         from src.core.cache import Cache
 
         Cache.definir("prefix_1", "val1")
@@ -207,18 +207,18 @@ class TestCacheNettoyer:
         Cache.definir("clean_1", "val1")
         Cache.definir("clean_2", "val2")
 
-        Cache.clear()  # Méthode clear()
+        Cache.clear()  # MÃ©thode clear()
 
         assert Cache.obtenir("clean_1") is None
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS: Cache stats avancées - lignes 398-419
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS: Cache stats avancÃ©es - lignes 398-419
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCacheStatsAdvanced:
-    """Tests avancés pour les statistiques du cache"""
+    """Tests avancÃ©s pour les statistiques du cache"""
 
     def test_stats_taux_hit(self):
         """Test taux de hit dans les stats"""
@@ -226,7 +226,7 @@ class TestCacheStatsAdvanced:
 
         Cache.clear()
 
-        # Définir et accéder
+        # DÃ©finir et accÃ©der
         Cache.definir("hit_stat", "value")
         Cache.obtenir("hit_stat")  # Hit
         Cache.obtenir("hit_stat")  # Hit
@@ -238,7 +238,7 @@ class TestCacheStatsAdvanced:
         assert "taux_hit" in stats
 
     def test_stats_nombre_entrees(self):
-        """Test nombre d'entrées dans les stats"""
+        """Test nombre d'entrÃ©es dans les stats"""
         from src.core.cache import Cache
 
         Cache.clear()
@@ -247,12 +247,12 @@ class TestCacheStatsAdvanced:
 
         stats = Cache.obtenir_statistiques()
 
-        # Vérifier qu'on a des entrées
+        # VÃ©rifier qu'on a des entrÃ©es
         assert isinstance(stats, dict)
         assert "entrees" in stats
 
     def test_stats_memoire(self):
-        """Test utilisation mémoire dans les stats"""
+        """Test utilisation mÃ©moire dans les stats"""
         from src.core.cache import Cache
 
         Cache.definir("mem_test", "x" * 1000)
@@ -263,16 +263,16 @@ class TestCacheStatsAdvanced:
         assert isinstance(stats, dict)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: Cache dependencies - lignes 426-428, 438-439
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCacheDependencies:
-    """Tests pour les dépendances du cache"""
+    """Tests pour les dÃ©pendances du cache"""
 
     def test_dependencies_multiples(self):
-        """Test avec dépendances multiples"""
+        """Test avec dÃ©pendances multiples"""
         from src.core.cache import Cache
 
         Cache.definir("dep_parent", "parent_val", dependencies=["dep_a", "dep_b", "dep_c"])
@@ -286,13 +286,13 @@ class TestCacheDependencies:
         Cache.definir("cascade_parent", "p_val", dependencies=["cascade_child"])
         Cache.definir("cascade_child", "c_val")
 
-        # Utiliser la méthode invalider avec dependencies
+        # Utiliser la mÃ©thode invalider avec dependencies
         Cache.invalider(dependencies=["cascade_child"])
 
-        # Parent devrait être invalidé
+        # Parent devrait Ãªtre invalidÃ©
 
     def test_dependencies_vides(self):
-        """Test avec liste de dépendances vide"""
+        """Test avec liste de dÃ©pendances vide"""
         from src.core.cache import Cache
 
         Cache.definir("no_deps", "value", dependencies=[])
@@ -300,9 +300,9 @@ class TestCacheDependencies:
         assert Cache.obtenir("no_deps") == "value"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: Cache taille - lignes 471-499
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCacheTaille:
@@ -325,7 +325,7 @@ class TestCacheTaille:
         """Test taille en Mo"""
         from src.core.cache import Cache
 
-        # Ajouter beaucoup de données
+        # Ajouter beaucoup de donnÃ©es
         for i in range(100):
             Cache.definir(f"big_data_{i}", "x" * 1000)
 
@@ -334,19 +334,19 @@ class TestCacheTaille:
         assert isinstance(stats, dict)
 
     def test_limite_taille(self):
-        """Test que la limite de taille est respectée"""
+        """Test que la limite de taille est respectÃ©e"""
         from src.core.cache import Cache
 
-        # Ajouter beaucoup d'entrées
+        # Ajouter beaucoup d'entrÃ©es
         for i in range(1000):
             Cache.definir(f"limit_test_{i}", f"value_{i}")
 
-        # Le cache devrait gérer la mémoire
+        # Le cache devrait gÃ©rer la mÃ©moire
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: Cache expiration - lignes 510-529
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCacheExpiration:
@@ -362,9 +362,9 @@ class TestCacheExpiration:
         # Attendre l'expiration
         time.sleep(0.1)
 
-        # L'entrée pourrait être expirée selon l'implémentation du TTL
+        # L'entrÃ©e pourrait Ãªtre expirÃ©e selon l'implÃ©mentation du TTL
         result = Cache.obtenir("auto_expire")
-        # Le résultat dépend de l'implémentation - None si expiré
+        # Le rÃ©sultat dÃ©pend de l'implÃ©mentation - None si expirÃ©
         assert result is None or result == "value"
 
     def test_expiration_avec_ttl_long(self):
@@ -390,21 +390,21 @@ class TestCacheExpiration:
         # Attendre
         time.sleep(0.05)
 
-        # Devrait encore être valide
+        # Devrait encore Ãªtre valide
         result = Cache.obtenir("renew_test")
         assert result == "new_value"
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS: Méthodes diverses
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS: MÃ©thodes diverses
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCacheMisc:
     """Tests divers pour le cache"""
 
     def test_definir_none_value(self):
-        """Test définir avec valeur None"""
+        """Test dÃ©finir avec valeur None"""
         from src.core.cache import Cache
 
         Cache.definir("none_val", None)
@@ -413,7 +413,7 @@ class TestCacheMisc:
         sentinel = object()
         result = Cache.obtenir("none_val", sentinelle=sentinel)
 
-        # Soit None (valeur stockée) soit sentinel (pas stocké selon implémentation)
+        # Soit None (valeur stockÃ©e) soit sentinel (pas stockÃ© selon implÃ©mentation)
         assert result is None or result is sentinel
 
     def test_definir_valeurs_complexes(self):
@@ -432,10 +432,10 @@ class TestCacheMisc:
         assert result == complex_value
 
     def test_cles_speciales(self):
-        """Test avec clés spéciales"""
+        """Test avec clÃ©s spÃ©ciales"""
         from src.core.cache import Cache
 
-        special_keys = ["clé-avec-tiret", "clé.avec.points", "clé/avec/slashes"]
+        special_keys = ["clÃ©-avec-tiret", "clÃ©.avec.points", "clÃ©/avec/slashes"]
 
         for key in special_keys:
             Cache.definir(key, "value")

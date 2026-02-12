@@ -1,8 +1,8 @@
-"""
-Migration 007 - Ajouter modèles pour module Famille refondé
+﻿"""
+Migration 007 - Ajouter modÃ¨les pour module Famille refondÃ©
 - Milestone (jalons Jules)
-- FamilyActivity (activités familiales)
-- HealthRoutine + HealthObjective + HealthEntry (santé/sport)
+- FamilyActivity (activitÃ©s familiales)
+- HealthRoutine + HealthObjective + HealthEntry (santÃ©/sport)
 - FamilyBudget (budget famille)
 """
 
@@ -14,12 +14,12 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import JSONB
 from datetime import datetime
 
-# Migration basique: si les tables n'existent pas, on les crée via ORM
+# Migration basique: si les tables n'existent pas, on les crÃ©e via ORM
 def upgrade():
-    # Les tables seront créées via SQLAlchemy ORM lors du premier démarrage
+    # Les tables seront crÃ©Ã©es via SQLAlchemy ORM lors du premier dÃ©marrage
     # car get_db_context() appelle create_all()
     pass
 
 def downgrade():
-    # À implémenter si besoin de rollback
+    # Ã€ implÃ©menter si besoin de rollback
     pass

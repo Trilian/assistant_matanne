@@ -1,6 +1,6 @@
-﻿"""
-Module Activités - Planning et budget des activités familiales
-Version améliorée avec helpers, caching, graphiques et Plotly
+"""
+Module Activites - Planning et budget des activites familiales
+Version amelioree avec helpers, caching, graphiques et Plotly
 """
 
 import streamlit as st
@@ -12,8 +12,8 @@ import plotly.express as px
 from src.core.database import obtenir_contexte_db
 from src.core.models import FamilyActivity
 
-# Logique métier pure
-from src.domains.famille.logic.helpers import (
+# Logique metier pure
+from src.modules.famille.utilitaires import (
     get_activites_semaine,
     get_budget_activites_mois,
     get_budget_par_period,
@@ -24,7 +24,7 @@ from src.domains.famille.logic.helpers import (
 def ajouter_activite(titre: str, type_activite: str, date_prevue: date, 
                      duree: float, lieu: str, participants: list, 
                      cout_estime: float, notes: str = ""):
-    """Ajoute une nouvelle activité familiale"""
+    """Ajoute une nouvelle activite familiale"""
     try:
         with obtenir_contexte_db() as session:
             activity = FamilyActivity(
@@ -35,30 +35,30 @@ def ajouter_activite(titre: str, type_activite: str, date_prevue: date,
                 lieu=lieu,
                 qui_participe=participants,
                 cout_estime=cout_estime,
-                statut="planifié",
+                statut="planifie",
                 notes=notes
             )
             session.add(activity)
             session.commit()
-            st.success(f"✅ Activité '{titre}' créée!")
+            st.success(f"✅ Activite '{titre}' creee!")
             clear_famille_cache()
             return True
     except Exception as e:
-        st.error(f"❌ Erreur ajout activité: {str(e)}")
+        st.error(f"❌ Erreur ajout activite: {str(e)}")
         return False
 
 
 def marquer_terminee(activity_id: int, cout_reel: float = None, notes: str = ""):
-    """Marque une activité comme terminée"""
+    """Marque une activite comme terminee"""
     try:
         with obtenir_contexte_db() as session:
             activity = session.get(FamilyActivity, activity_id)
             if activity:
-                activity.statut = "terminé"
+                activity.statut = "termine"
                 if cout_reel is not None:
                     activity.cout_reel = cout_reel
                 session.commit()
-                st.success("✅ Activité marquée comme terminée!")
+                st.success("✅ Activite marquee comme terminee!")
                 clear_famille_cache()
                 return True
     except Exception as e:
@@ -68,19 +68,19 @@ def marquer_terminee(activity_id: int, cout_reel: float = None, notes: str = "")
 
 SUGGESTIONS_ACTIVITES = {
     "parc": ["Parc local", "Parc d'attractions (mini)", "Terrain de jeu"],
-    "musée": ["Musée enfants", "Exposition interactive", "Aquarium"],
-    "eau": ["Piscine", "Plage", "Parc aquatique bébé"],
-    "jeu_maison": ["Jeux intérieurs", "Chasse au trésor", "Soirée jeux de société"],
+    "musee": ["Musee enfants", "Exposition interactive", "Aquarium"],
+    "eau": ["Piscine", "Plage", "Parc aquatique bebe"],
+    "jeu_maison": ["Jeux interieurs", "Chasse au tresor", "Soiree jeux de societe"],
     "sport": ["Cours de gym douce", "Équitation enfant", "Skating"],
-    "sortie": ["Restaurant enfant-friendly", "Cinéma familial", "Zoo"]
+    "sortie": ["Restaurant enfant-friendly", "Cinema familial", "Zoo"]
 }
 
 
 def app():
-    """Interface principale du module Activités"""
-    st.title("🎨 Activités Familiales")
+    """Interface principale du module Activites"""
+    st.title("🎨 Activites Familiales")
     
-    tabs = st.tabs(["📱 Planning Semaine", "👶 Idées Activités", "💡 Budget"])
+    tabs = st.tabs(["📱 Planning Semaine", "👶 Idees Activites", "💡 Budget"])
     
     # ═══════════════════════════════════════════════════════════
     # TAB 1: PLANNING SEMAINE
@@ -91,7 +91,7 @@ def app():
         col1, col2 = st.columns([2, 1])
         
         with col1:
-            st.subheader("Activités Prévues")
+            st.subheader("Activites Prevues")
             
             try:
                 activites = get_activites_semaine()
@@ -117,22 +117,22 @@ def app():
                                     st.caption(f"📅 {', '.join(act['participants'])}")
                                 st.caption(f"💡 {act.get('cout_estime', 0):.2f}€")
                 else:
-                    st.info("Aucune activité cette semaine. Planifiez une activité!")
+                    st.info("Aucune activite cette semaine. Planifiez une activite!")
             
             except Exception as e:
                 st.error(f"❌ Erreur chargement: {str(e)}")
         
         with col2:
-            st.subheader("➕ Ajouter Activité")
+            st.subheader("➕ Ajouter Activite")
             
             with st.form("form_activite"):
                 titre = st.text_input("Nom")
                 type_act = st.selectbox("Type", 
-                    ["parc", "musée", "eau", "jeu_maison", "sport", "sortie"])
+                    ["parc", "musee", "eau", "jeu_maison", "sport", "sortie"])
                 date_act = st.date_input("Date")
-                duree = st.number_input("Durée (h)", 0.5, 8.0, 2.0)
+                duree = st.number_input("Duree (h)", 0.5, 8.0, 2.0)
                 lieu = st.text_input("Lieu")
-                cout = st.number_input("Coût estimé (€)", 0.0, 500.0, 0.0)
+                cout = st.number_input("Coût estime (€)", 0.0, 500.0, 0.0)
                 
                 if st.form_submit_button("✅ Ajouter", use_container_width=True):
                     if titre and type_act:
@@ -143,7 +143,7 @@ def app():
     # TAB 2: IDÉES ACTIVITÉS
     # ═══════════════════════════════════════════════════════════
     with tabs[1]:
-        st.header("👶 Idées d'Activités")
+        st.header("👶 Idees d'Activites")
         
         st.subheader("Suggestions par type")
         
@@ -154,7 +154,7 @@ def app():
         
         for i, type_key in enumerate(type_keys[:3]):
             with cols[i]:
-                emoji = "💰" if type_key == "parc" else "🧹" if type_key == "musée" else "📋" if type_key == "eau" else "🎯" if type_key == "jeu_maison" else "⚽" if type_key == "sport" else "🍽️"
+                emoji = "💰" if type_key == "parc" else "🧹" if type_key == "musee" else "📋" if type_key == "eau" else "🎯" if type_key == "jeu_maison" else "⚽" if type_key == "sport" else "🍽️"
                 title = type_key.replace("_", " ").title()
                 
                 st.subheader(f"{emoji} {title}")
@@ -168,7 +168,7 @@ def app():
         
         for i, type_key in enumerate(type_keys[3:]):
             with cols2[i]:
-                emoji = "💰" if type_key == "parc" else "🧹" if type_key == "musée" else "📋" if type_key == "eau" else "🎯" if type_key == "jeu_maison" else "⚽" if type_key == "sport" else "🍽️"
+                emoji = "💰" if type_key == "parc" else "🧹" if type_key == "musee" else "📋" if type_key == "eau" else "🎯" if type_key == "jeu_maison" else "⚽" if type_key == "sport" else "🍽️"
                 title = type_key.replace("_", " ").title()
                 
                 st.subheader(f"{emoji} {title}")
@@ -181,14 +181,14 @@ def app():
     # TAB 3: BUDGET
     # ═══════════════════════════════════════════════════════════
     with tabs[2]:
-        st.header("💡 Budget Activités")
+        st.header("💡 Budget Activites")
         
         # Stats
         col1, col2, col3 = st.columns(3)
         
         try:
             budget_mois = get_budget_activites_mois()
-            budget_semaine = get_budget_par_period("week").get("Activités", 0)
+            budget_semaine = get_budget_par_period("week").get("Activites", 0)
             
             with col1:
                 st.metric("💡 Ce mois", f"{budget_mois:.2f}€")
@@ -203,18 +203,18 @@ def app():
         st.divider()
         
         # Graphique timeline
-        st.subheader("🗑️ Graphique Dépenses")
+        st.subheader("🗑️ Graphique Depenses")
         
         try:
             with obtenir_contexte_db() as session:
-                # Récupérer les 30 derniers jours
+                # Recuperer les 30 derniers jours
                 debut = date.today() - timedelta(days=30)
                 activites = session.query(FamilyActivity).filter(
                     FamilyActivity.date_prevue >= debut
                 ).all()
                 
                 if activites:
-                    # Créer DataFrame
+                    # Creer DataFrame
                     data = []
                     for act in activites:
                         data.append({
@@ -234,19 +234,19 @@ def app():
                         x=df["date"],
                         y=df["cout_estime"],
                         mode="lines+markers",
-                        name="Coût estimé",
+                        name="Coût estime",
                         line_color="blue"
                     ))
                     fig1.add_trace(go.Scatter(
                         x=df["date"],
                         y=df["cout_reel"],
                         mode="lines+markers",
-                        name="Coût réel",
+                        name="Coût reel",
                         line_color="red"
                     ))
                     
                     fig1.update_layout(
-                        title="Dépenses par Date",
+                        title="Depenses par Date",
                         xaxis_title="Date",
                         yaxis_title="Montant (€)",
                         height=400,
@@ -254,7 +254,7 @@ def app():
                     )
                     st.plotly_chart(fig1, width="stretch", key="activities_budget_timeline")
                     
-                    # Graphique 2: Par type d'activité
+                    # Graphique 2: Par type d'activite
                     type_budget = df.groupby("type")["cout_estime"].sum().reset_index()
                     type_budget.columns = ["Type", "Budget"]
                     
@@ -263,14 +263,14 @@ def app():
                                marker_color="lightblue")
                     ])
                     fig2.update_layout(
-                        title="Budget par Type d'Activité",
+                        title="Budget par Type d'Activite",
                         xaxis_title="Type",
                         yaxis_title="Budget (€)",
                         height=400
                     )
                     st.plotly_chart(fig2, width="stretch", key="activities_budget_by_type")
                 else:
-                    st.info("Aucune activité sur 30 jours")
+                    st.info("Aucune activite sur 30 jours")
         
         except Exception as e:
             st.error(f"❌ Erreur graphiques: {str(e)}")

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Performance - Métriques et optimisations.
 
 Fonctionnalités :
@@ -27,9 +27,9 @@ import streamlit as st
 logger = logging.getLogger(__name__)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TYPES ET CONFIGURATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @dataclass
@@ -56,9 +56,9 @@ class StatistiquesFonction:
     errors: int = 0
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # PROFILER DE FONCTIONS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class ProfileurFonction:
@@ -138,7 +138,7 @@ def profiler(func: Callable = None, *, name: str = None):
     Décorateur pour profiler une fonction.
     
     Args:
-        func: Fonction à profiler
+        func: Fonction Ã  profiler
         name: Nom personnalisé (défaut: nom de la fonction)
         
     Example:
@@ -194,12 +194,12 @@ def mesurer_temps(name: str):
     finally:
         duration_ms = (time.perf_counter() - start) * 1000
         ProfileurFonction.enregistrer(name, duration_ms, error)
-        logger.debug(f"⏱️ {name}: {duration_ms:.1f}ms")
+        logger.debug(f"â±ï¸ {name}: {duration_ms:.1f}ms")
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # MONITORING MÉMOIRE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class MoniteurMemoire:
@@ -277,7 +277,7 @@ class MoniteurMemoire:
         # Garder seulement les 20 derniers
         st.session_state[cls.SESSION_KEY] = st.session_state[cls.SESSION_KEY][-20:]
         
-        logger.debug(f"📸 Snapshot mémoire '{label}': {usage['current_mb']}MB")
+        logger.debug(f"ðŸ“¸ Snapshot mémoire '{label}': {usage['current_mb']}MB")
         return usage
     
     @classmethod
@@ -310,7 +310,7 @@ class MoniteurMemoire:
         
         freed_mb = before["current_mb"] - after["current_mb"]
         
-        logger.info(f"🧹 Cleanup: {collected} objets collectés, {freed_mb:.2f}MB libérés")
+        logger.info(f"ðŸ§¹ Cleanup: {collected} objets collectés, {freed_mb:.2f}MB libérés")
         
         return {
             "objects_collected": collected,
@@ -320,9 +320,9 @@ class MoniteurMemoire:
         }
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # OPTIMISEUR SQL
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class OptimiseurSQL:
@@ -421,9 +421,9 @@ def suivre_requete(query_description: str):
         OptimiseurSQL.enregistrer_query(query_description, duration_ms, rows)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # DASHBOARD PERFORMANCE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TableauBordPerformance:
@@ -506,18 +506,18 @@ class TableauBordPerformance:
         
         # Status emoji
         if score >= 80:
-            status = "🟢"
+            status = "ðŸŸ¢"
         elif score >= 60:
-            status = "🟡"
+            status = "ðŸŸ¡"
         else:
-            status = "🔴"
+            status = "ðŸ”´"
         
         return max(0, score), status
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # COMPOSANTS UI
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def afficher_panneau_performance():
@@ -526,10 +526,10 @@ def afficher_panneau_performance():
     summary = TableauBordPerformance.obtenir_resume()
     score, status = TableauBordPerformance.obtenir_score_sante()
     
-    with st.expander(f"📊 Performance {status} {score}/100"):
+    with st.expander(f"ðŸ“Š Performance {status} {score}/100"):
         
         # Tabs pour différentes métriques
-        tab1, tab2, tab3 = st.tabs(["⚡ Général", "🧠 Mémoire", "🗃️ SQL"])
+        tab1, tab2, tab3 = st.tabs(["âš¡ Général", "ðŸ§  Mémoire", "ðŸ—ƒï¸ SQL"])
         
         with tab1:
             col1, col2 = st.columns(2)
@@ -546,9 +546,9 @@ def afficher_panneau_performance():
             
             # Top fonctions lentes
             if summary["functions"]["slowest"]:
-                st.caption("🐌 Fonctions les plus lentes:")
+                st.caption("ðŸŒ Fonctions les plus lentes:")
                 for f in summary["functions"]["slowest"][:3]:
-                    st.caption(f"• {f['name']}: {f['avg_ms']}ms")
+                    st.caption(f"â€¢ {f['name']}: {f['avg_ms']}ms")
         
         with tab2:
             col1, col2 = st.columns(2)
@@ -563,7 +563,7 @@ def afficher_panneau_performance():
                     f"{summary['memory']['total_objects']:,}",
                 )
             
-            if st.button("🧹 Nettoyer mémoire", key="cleanup_mem"):
+            if st.button("ðŸ§¹ Nettoyer mémoire", key="cleanup_mem"):
                 result = MoniteurMemoire.forcer_nettoyage()
                 st.success(f"Libéré: {result['memory_freed_mb']}MB")
         
@@ -581,7 +581,7 @@ def afficher_panneau_performance():
                     delta_color="inverse" if summary["sql"]["slow_count"] > 0 else "off",
                 )
             
-            if st.button("🗑️ Reset stats", key="reset_sql"):
+            if st.button("ðŸ—‘ï¸ Reset stats", key="reset_sql"):
                 OptimiseurSQL.effacer()
                 st.success("Stats SQL réinitialisées")
 
@@ -597,15 +597,15 @@ def afficher_badge_mini_performance():
         f'padding: 0.25rem 0.5rem; background: #f0f2f6; border-radius: 4px; '
         f'font-size: 0.8rem;">'
         f'<span>{status} Perf: {score}%</span>'
-        f'<span>💾 {memory["current_mb"]}MB</span>'
+        f'<span>ðŸ’¾ {memory["current_mb"]}MB</span>'
         f'</div>',
         unsafe_allow_html=True
     )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # UTILITAIRES AVANCÉS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class ChargeurComposant:
@@ -632,7 +632,7 @@ class ChargeurComposant:
             loader_func: Fonction qui rend le composant
             placeholder_text: Texte pendant le chargement
         """
-        # Vérifier si déjà chargé
+        # Vérifier si déjÃ  chargé
         if component_id in cls._loaded:
             with mesurer_temps(f"component_{component_id}"):
                 loader_func()
@@ -720,9 +720,9 @@ def limiter_debit(max_calls: int = 10, period_seconds: int = 60):
     return decorator
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # EXPORTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 __all__ = [

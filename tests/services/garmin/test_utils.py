@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/services/garmin/utils.py
 
 Couvre:
@@ -40,9 +40,9 @@ from src.services.garmin.utils import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS PARSING DONNÉES API
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS PARSING DONNÃ‰ES API
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestParseGarminTimestamp:
@@ -53,7 +53,7 @@ class TestParseGarminTimestamp:
         result = parse_garmin_timestamp(1700000000)
         assert result is not None
         assert isinstance(result, datetime)
-        # 14 novembre 2023 à 22:13:20 UTC
+        # 14 novembre 2023 Ã  22:13:20 UTC
         assert result.year == 2023
         assert result.month == 11
         assert result.day == 14
@@ -150,7 +150,7 @@ class TestParseActivityData:
         assert result["fc_max"] == 175
         assert result["vitesse_moyenne"] == 2.78
         assert result["elevation_gain"] == 100
-        assert result["icon"] == "🏃"
+        assert result["icon"] == "ðŸƒ"
 
     def test_activite_minimale(self):
         """Parsing d'une activité avec données minimales."""
@@ -243,9 +243,9 @@ class TestParseDailySummary:
         assert result["date"] == date(2023, 11, 14)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS TRADUCTION ET AFFICHAGE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestTranslateActivityType:
@@ -272,22 +272,22 @@ class TestGetActivityIcon:
 
     def test_icon_connu(self):
         """Un type connu retourne son icône."""
-        assert get_activity_icon("running") == "🏃"
-        assert get_activity_icon("cycling") == "🚴"
-        assert get_activity_icon("swimming") == "🏊"
+        assert get_activity_icon("running") == "ðŸƒ"
+        assert get_activity_icon("cycling") == "ðŸš´"
+        assert get_activity_icon("swimming") == "ðŸŠ"
 
     def test_icon_inconnu(self):
         """Un type inconnu retourne l'icône par défaut."""
-        assert get_activity_icon("unknown") == "🏅"
+        assert get_activity_icon("unknown") == "ðŸ…"
 
     def test_icon_majuscules(self):
         """Le type est normalisé."""
-        assert get_activity_icon("RUNNING") == "🏃"
+        assert get_activity_icon("RUNNING") == "ðŸƒ"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FORMATAGE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFormatDuration:
@@ -371,7 +371,7 @@ class TestFormatSpeed:
         """Vitesse en m/s convertie en km/h."""
         # 10 m/s = 36 km/h
         assert format_speed(10.0) == "36.0 km/h"
-        # 2.78 m/s ≈ 10 km/h
+        # 2.78 m/s â‰ˆ 10 km/h
         assert format_speed(2.78) == "10.0 km/h"
 
     def test_speed_zero(self):
@@ -383,9 +383,9 @@ class TestFormatSpeed:
         assert format_speed(None) == "0 km/h"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CALCULS STATISTIQUES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalculateDailyStats:
@@ -504,27 +504,27 @@ class TestGetStreakBadge:
     def test_badge_champion(self):
         """Streak >= 100 = Champion."""
         result = get_streak_badge(100)
-        assert result == ("🏆", "Champion du mois")
+        assert result == ("ðŸ†", "Champion du mois")
 
     def test_badge_diamant(self):
         """Streak >= 60 = Diamant."""
         result = get_streak_badge(60)
-        assert result == ("💎", "Diamant")
+        assert result == ("ðŸ’Ž", "Diamant")
 
     def test_badge_on_fire(self):
         """Streak >= 30 = On fire."""
         result = get_streak_badge(30)
-        assert result == ("🔥", "On fire!")
+        assert result == ("ðŸ”¥", "On fire!")
 
     def test_badge_star(self):
         """Streak >= 14 = Star."""
         result = get_streak_badge(14)
-        assert result == ("⭐", "Star")
+        assert result == ("â­", "Star")
 
     def test_badge_semaine(self):
         """Streak >= 7 = 1 semaine."""
         result = get_streak_badge(7)
-        assert result == ("✨", "1 semaine")
+        assert result == ("âœ¨", "1 semaine")
 
     def test_badge_aucun(self):
         """Streak < 7 = pas de badge."""
@@ -545,7 +545,7 @@ class TestCalculateGoalProgress:
         assert color == "green"
 
     def test_objectif_depasse(self):
-        """Objectif dépassé = plafonné à 100%."""
+        """Objectif dépassé = plafonné Ã  100%."""
         percentage, color = calculate_goal_progress(15000, 10000)
         assert percentage == 100.0
         assert color == "green"
@@ -579,13 +579,13 @@ class TestEstimateCaloriesBurned:
     """Tests pour estimate_calories_burned."""
 
     def test_running_1h(self):
-        """Estimation pour 1h de course à 70kg."""
+        """Estimation pour 1h de course Ã  70kg."""
         result = estimate_calories_burned("running", 3600, 70.0)
         # MET 10 * 70kg * 1h = 700 calories
         assert result == 700
 
     def test_walking_30min(self):
-        """Estimation pour 30min de marche à 70kg."""
+        """Estimation pour 30min de marche Ã  70kg."""
         result = estimate_calories_burned("walking", 1800, 70.0)
         # MET 3.5 * 70kg * 0.5h = 122.5 => 122
         assert result == 122
@@ -624,9 +624,9 @@ class TestCalculateWeeklySummary:
         assert result["jours_manquants"] == 4  # 7 - 3
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS VALIDATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestValidateOauthConfig:
@@ -764,9 +764,9 @@ class TestIsSyncNeeded:
         assert is_sync_needed(last_sync, min_interval_minutes=30) is True
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS GÉNÉRATION DATES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS GÃ‰NÃ‰RATION DATES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGetSyncDateRange:

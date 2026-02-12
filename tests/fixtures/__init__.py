@@ -1,1 +1,1 @@
-"""Module d'initialisation pour fixtures."""
+﻿"""Module d'initialisation pour fixtures."""

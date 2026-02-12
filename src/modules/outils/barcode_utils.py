@@ -1,5 +1,5 @@
-﻿"""
-Logique métier du module Barcode (scan codes-barres) - Séparée de l'UI
+"""
+Logique metier du module Barcode (scan codes-barres) - Separee de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
 
@@ -35,7 +35,7 @@ def valider_code_barres(code: str) -> Tuple[bool, Optional[str]]:
     if not code.isdigit():
         return False, "Code-barres doit contenir uniquement des chiffres"
     
-    # Vérifier longueurs standards
+    # Verifier longueurs standards
     longueurs_valides = [8, 12, 13, 14]
     if len(code) not in longueurs_valides:
         return False, f"Longueur invalide: {len(code)} (attendu: {', '.join(map(str, longueurs_valides))})"
@@ -81,7 +81,7 @@ def valider_checksum_ean13(code: str) -> bool:
 
 def detecter_type_code_barres(code: str) -> str:
     """
-    Détecte le type de code-barres.
+    Detecte le type de code-barres.
     
     Args:
         code: Code-barres à analyser
@@ -105,7 +105,7 @@ def detecter_type_code_barres(code: str) -> str:
 
 def detecter_pays_origine(code: str) -> Optional[str]:
     """
-    Détecte le pays d'origine à partir d'un code EAN-13.
+    Detecte le pays d'origine à partir d'un code EAN-13.
     
     Args:
         code: Code EAN-13
@@ -116,7 +116,7 @@ def detecter_pays_origine(code: str) -> Optional[str]:
     if len(code) != 13:
         return None
     
-    # Préfixe GS1 (3 premiers chiffres)
+    # Prefixe GS1 (3 premiers chiffres)
     prefixe = code[:3]
     
     pays_map = {
@@ -130,7 +130,7 @@ def detecter_pays_origine(code: str) -> Optional[str]:
         ("475",): "Lettonie",
         ("476",): "Azerbaïdjan",
         ("477",): "Lituanie",
-        ("478",): "Ouzbékistan",
+        ("478",): "Ouzbekistan",
         ("479",): "Sri Lanka",
         ("480", "489"): "Philippines",
         ("490", "499"): "Japon",
@@ -139,7 +139,7 @@ def detecter_pays_origine(code: str) -> Optional[str]:
         ("528",): "Liban",
         ("529",): "Chypre",
         ("530",): "Albanie",
-        ("531",): "Macédoine",
+        ("531",): "Macedoine",
         ("535",): "Malte",
         ("539",): "Irlande",
         ("540", "549"): "Belgique/Luxembourg",
@@ -154,7 +154,7 @@ def detecter_pays_origine(code: str) -> Optional[str]:
         ("608",): "Bahreïn",
         ("609",): "Maurice",
         ("611",): "Maroc",
-        ("613",): "Algérie",
+        ("613",): "Algerie",
         ("615",): "Nigeria",
         ("616",): "Kenya",
         ("618",): "Côte d'Ivoire",
@@ -178,41 +178,41 @@ def detecter_pays_origine(code: str) -> Optional[str]:
         ("743",): "Nicaragua",
         ("744",): "Costa Rica",
         ("745",): "Panama",
-        ("746",): "République dominicaine",
+        ("746",): "Republique dominicaine",
         ("750",): "Mexique",
         ("754", "755"): "Canada",
         ("759",): "Venezuela",
         ("760", "769"): "Suisse",
         ("770", "771"): "Colombie",
         ("773",): "Uruguay",
-        ("775",): "Pérou",
+        ("775",): "Perou",
         ("777",): "Bolivie",
         ("778", "779"): "Argentine",
         ("780",): "Chili",
         ("784",): "Paraguay",
         ("786",): "Équateur",
-        ("789", "790"): "Brésil",
+        ("789", "790"): "Bresil",
         ("800", "839"): "Italie",
         ("840", "849"): "Espagne",
         ("850",): "Cuba",
         ("858",): "Slovaquie",
-        ("859",): "République tchèque",
+        ("859",): "Republique tchèque",
         ("860",): "Serbie",
         ("865",): "Mongolie",
-        ("867",): "Corée du Nord",
+        ("867",): "Coree du Nord",
         ("868", "869"): "Turquie",
         ("870", "879"): "Pays-Bas",
-        ("880",): "Corée du Sud",
+        ("880",): "Coree du Sud",
         ("884",): "Cambodge",
         ("885",): "Thaïlande",
         ("888",): "Singapour",
         ("890",): "Inde",
         ("893",): "Vietnam",
         ("896",): "Pakistan",
-        ("899",): "Indonésie",
+        ("899",): "Indonesie",
         ("900", "919"): "Autriche",
         ("930", "939"): "Australie",
-        ("940", "949"): "Nouvelle-Zélande",
+        ("940", "949"): "Nouvelle-Zelande",
     }
     
     try:
@@ -242,7 +242,7 @@ def formater_code_barres(code: str) -> str:
         code: Code-barres à formater
         
     Returns:
-        Code formaté avec espaces
+        Code formate avec espaces
     """
     code = code.strip()
     
@@ -274,7 +274,7 @@ def nettoyer_code_barres(code: str) -> str:
         code: Code brut
         
     Returns:
-        Code nettoyé
+        Code nettoye
     """
     return "".join(c for c in code if c.isdigit())
 
@@ -326,23 +326,23 @@ def extraire_infos_produit(code: str) -> Dict[str, Any]:
 
 def suggerer_categorie_produit(code: str) -> Optional[str]:
     """
-    Suggère une catégorie de produit basée sur le préfixe.
-    (Simplifié - en production, utiliser une API comme Open Food Facts)
+    Suggère une categorie de produit basee sur le prefixe.
+    (Simplifie - en production, utiliser une API comme Open Food Facts)
     
     Args:
         code: Code EAN-13
         
     Returns:
-        Catégorie suggérée
+        Categorie suggeree
     """
     if len(code) != 13:
         return None
     
-    # Préfixes courants (approximatif)
+    # Prefixes courants (approximatif)
     prefixe = code[:3]
     
     # France (300-379)
     if 300 <= int(prefixe) <= 379:
         return "Produit français"
     
-    return "Produit importé"
+    return "Produit importe"

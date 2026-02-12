@@ -1,7 +1,7 @@
-﻿"""
-Module Suivi Perso - Imports et constantes partagés
+"""
+Module Suivi Perso - Imports et constantes partages
 
-Dashboard santé/sport pour Anne et Mathieu:
+Dashboard sante/sport pour Anne et Mathieu:
 - Switch utilisateur (Anne / Mathieu)
 - Dashboard perso (stats Garmin, streak, objectifs)
 - Routines sport
@@ -24,7 +24,7 @@ from src.core.models import (
     FoodLog,
     HealthRoutine,
 )
-from src.services.garmin_sync import (
+from src.services.garmin import (
     GarminService,
     get_garmin_service,
     get_or_create_user,

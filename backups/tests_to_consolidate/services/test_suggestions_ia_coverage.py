@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests couverture pour src/services/suggestions_ia.py
 """
 
@@ -7,9 +7,9 @@ from unittest.mock import Mock, MagicMock, patch
 from datetime import datetime, timedelta
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS MODÈLES PYDANTIC
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS MODÃˆLES PYDANTIC
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -17,7 +17,7 @@ class TestProfilCulinaireModel:
     """Tests pour ProfilCulinaire."""
 
     def test_profil_culinaire_defaults(self):
-        """Test valeurs par défaut."""
+        """Test valeurs par dÃ©faut."""
         from src.services.suggestions_ia import ProfilCulinaire
         
         profil = ProfilCulinaire()
@@ -32,11 +32,11 @@ class TestProfilCulinaireModel:
         assert profil.jours_depuis_derniere_recette == {}
 
     def test_profil_culinaire_complete(self):
-        """Test création complète."""
+        """Test crÃ©ation complÃ¨te."""
         from src.services.suggestions_ia import ProfilCulinaire
         
         profil = ProfilCulinaire(
-            categories_preferees=["Italien", "Français"],
+            categories_preferees=["Italien", "FranÃ§ais"],
             ingredients_frequents=["Tomate", "Ail"],
             difficulte_moyenne="facile",
             temps_moyen_minutes=30,
@@ -54,12 +54,12 @@ class TestContexteSuggestionModel:
     """Tests pour ContexteSuggestion."""
 
     def test_contexte_defaults(self):
-        """Test valeurs par défaut."""
+        """Test valeurs par dÃ©faut."""
         from src.services.suggestions_ia import ContexteSuggestion
         
         ctx = ContexteSuggestion()
         
-        assert ctx.type_repas == "dîner"
+        assert ctx.type_repas == "dÃ®ner"
         assert ctx.nb_personnes == 4
         assert ctx.temps_disponible_minutes == 60
         assert ctx.ingredients_disponibles == []
@@ -69,21 +69,21 @@ class TestContexteSuggestionModel:
         assert ctx.budget == "normal"
 
     def test_contexte_complete(self):
-        """Test création complète."""
+        """Test crÃ©ation complÃ¨te."""
         from src.services.suggestions_ia import ContexteSuggestion
         
         ctx = ContexteSuggestion(
-            type_repas="déjeuner",
+            type_repas="dÃ©jeuner",
             nb_personnes=6,
             temps_disponible_minutes=90,
             ingredients_disponibles=["Poulet", "Riz"],
-            ingredients_a_utiliser=["Tomates à utiliser"],
+            ingredients_a_utiliser=["Tomates Ã  utiliser"],
             contraintes=["Sans gluten"],
-            saison="été",
-            budget="économique"
+            saison="Ã©tÃ©",
+            budget="Ã©conomique"
         )
         
-        assert ctx.type_repas == "déjeuner"
+        assert ctx.type_repas == "dÃ©jeuner"
         assert ctx.nb_personnes == 6
         assert "Sans gluten" in ctx.contraintes
 
@@ -93,7 +93,7 @@ class TestSuggestionRecetteModel:
     """Tests pour SuggestionRecette."""
 
     def test_suggestion_defaults(self):
-        """Test valeurs par défaut."""
+        """Test valeurs par dÃ©faut."""
         from src.services.suggestions_ia import SuggestionRecette
         
         sugg = SuggestionRecette()
@@ -109,13 +109,13 @@ class TestSuggestionRecetteModel:
         assert sugg.est_nouvelle is False
 
     def test_suggestion_complete(self):
-        """Test création complète."""
+        """Test crÃ©ation complÃ¨te."""
         from src.services.suggestions_ia import SuggestionRecette
         
         sugg = SuggestionRecette(
             recette_id=42,
-            nom="Poulet rôti",
-            raison="Correspond à vos préférences",
+            nom="Poulet rÃ´ti",
+            raison="Correspond Ã  vos prÃ©fÃ©rences",
             score=0.85,
             tags=["classique", "famille"],
             temps_preparation=60,
@@ -129,9 +129,9 @@ class TestSuggestionRecetteModel:
         assert sugg.est_nouvelle is True
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SERVICE INIT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -142,7 +142,7 @@ class TestSuggestionsIAServiceInit:
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_init_success(self, mock_client_ia, mock_analyseur, mock_cache):
-        """Test initialisation réussie."""
+        """Test initialisation rÃ©ussie."""
         mock_client_ia.return_value = Mock()
         mock_analyseur.return_value = Mock()
         mock_cache.return_value = Mock()
@@ -156,9 +156,9 @@ class TestSuggestionsIAServiceInit:
         assert service.cache is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ANALYSER PROFIL CULINAIRE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -223,9 +223,9 @@ class TestAnalyserProfilCulinaire:
         assert "Italien" in result.categories_preferees
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONSTRUIRE CONTEXTE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -271,7 +271,7 @@ class TestConstruireContexte:
         mock_article = Mock()
         mock_article.nom = "Tomate"
         mock_article.quantite = 5
-        mock_article.date_peremption = None  # Pas de date de péremption
+        mock_article.date_peremption = None  # Pas de date de pÃ©remption
         
         mock_session = MagicMock()
         mock_session.query.return_value.filter.return_value.all.return_value = [mock_article]
@@ -284,7 +284,7 @@ class TestConstruireContexte:
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_construire_contexte_avec_peremption(self, mock_client, mock_analyseur, mock_cache):
-        """Test contexte avec article proche péremption."""
+        """Test contexte avec article proche pÃ©remption."""
         mock_client.return_value = Mock()
         mock_analyseur.return_value = Mock()
         mock_cache.return_value = Mock()
@@ -293,7 +293,7 @@ class TestConstruireContexte:
         
         service = SuggestionsIAService()
         
-        # Mock article avec péremption dans 3 jours
+        # Mock article avec pÃ©remption dans 3 jours
         mock_article = Mock()
         mock_article.nom = "Yaourt"
         mock_article.quantite = 4
@@ -308,9 +308,9 @@ class TestConstruireContexte:
         assert "Yaourt" in result.ingredients_a_utiliser  # Close to expiration
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CALCULER SCORE RECETTE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -358,7 +358,7 @@ class TestCalculerScoreRecette:
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_calculer_score_recette_recente(self, mock_client, mock_analyseur, mock_cache):
-        """Test score pour recette récemment préparée (score plus bas)."""
+        """Test score pour recette rÃ©cemment prÃ©parÃ©e (score plus bas)."""
         mock_client.return_value = Mock()
         mock_analyseur.return_value = Mock()
         mock_cache.return_value = Mock()
@@ -372,14 +372,14 @@ class TestCalculerScoreRecette:
         service = SuggestionsIAService()
         
         mock_recette = Mock()
-        mock_recette.id = 1  # ID présent dans profil avec peu de jours
-        mock_recette.categorie = "Français"
+        mock_recette.id = 1  # ID prÃ©sent dans profil avec peu de jours
+        mock_recette.categorie = "FranÃ§ais"
         mock_recette.difficulte = "moyen"
         mock_recette.temps_preparation = 45
         mock_recette.ingredients = []
         
         profil = ProfilCulinaire(
-            jours_depuis_derniere_recette={1: 2}  # Préparée il y a 2 jours
+            jours_depuis_derniere_recette={1: 2}  # PrÃ©parÃ©e il y a 2 jours
         )
         
         contexte = ContexteSuggestion()
@@ -393,7 +393,7 @@ class TestCalculerScoreRecette:
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_calculer_score_temps_adapte(self, mock_client, mock_analyseur, mock_cache):
-        """Test bonus temps adapté."""
+        """Test bonus temps adaptÃ©."""
         mock_client.return_value = Mock()
         mock_analyseur.return_value = Mock()
         mock_cache.return_value = Mock()
@@ -418,7 +418,7 @@ class TestCalculerScoreRecette:
         
         score, raisons, tags = service._calculer_score_recette(mock_recette, contexte, profil)
         
-        assert "Temps adapté" in raisons
+        assert "Temps adaptÃ©" in raisons
         assert "rapide" in tags
 
     @patch('src.services.suggestions_ia.obtenir_cache')
@@ -440,7 +440,7 @@ class TestCalculerScoreRecette:
         
         mock_recette = Mock()
         mock_recette.id = 10
-        mock_recette.categorie = "Français"
+        mock_recette.categorie = "FranÃ§ais"
         mock_recette.difficulte = "difficile"
         mock_recette.temps_preparation = 120  # > temps disponible + 30
         mock_recette.ingredients = []
@@ -457,7 +457,7 @@ class TestCalculerScoreRecette:
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_calculer_score_ingredients_disponibles(self, mock_client, mock_analyseur, mock_cache):
-        """Test bonus ingrédients en stock."""
+        """Test bonus ingrÃ©dients en stock."""
         mock_client.return_value = Mock()
         mock_analyseur.return_value = Mock()
         mock_cache.return_value = Mock()
@@ -470,7 +470,7 @@ class TestCalculerScoreRecette:
         
         service = SuggestionsIAService()
         
-        # Mock ingrédient
+        # Mock ingrÃ©dient
         mock_ing = Mock()
         mock_ing.ingredient = Mock()
         mock_ing.ingredient.nom = "Tomate"
@@ -490,14 +490,14 @@ class TestCalculerScoreRecette:
         
         score, raisons, tags = service._calculer_score_recette(mock_recette, contexte, profil)
         
-        # Devrait avoir bon score car ingrédient disponible
+        # Devrait avoir bon score car ingrÃ©dient disponible
         assert score >= 50
 
     @patch('src.services.suggestions_ia.obtenir_cache')
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_calculer_score_ingredients_a_consommer(self, mock_client, mock_analyseur, mock_cache):
-        """Test bonus utilisation ingrédients prioritaires."""
+        """Test bonus utilisation ingrÃ©dients prioritaires."""
         mock_client.return_value = Mock()
         mock_analyseur.return_value = Mock()
         mock_cache.return_value = Mock()
@@ -510,7 +510,7 @@ class TestCalculerScoreRecette:
         
         service = SuggestionsIAService()
         
-        # Mock ingrédient
+        # Mock ingrÃ©dient
         mock_ing = Mock()
         mock_ing.ingredient = Mock()
         mock_ing.ingredient.nom = "Lait"
@@ -526,7 +526,7 @@ class TestCalculerScoreRecette:
         contexte = ContexteSuggestion(
             temps_disponible_minutes=60,
             ingredients_disponibles=["Lait"],
-            ingredients_a_utiliser=["Lait"]  # Proche péremption
+            ingredients_a_utiliser=["Lait"]  # Proche pÃ©remption
         )
         
         score, raisons, tags = service._calculer_score_recette(mock_recette, contexte, profil)
@@ -534,9 +534,9 @@ class TestCalculerScoreRecette:
         assert "anti-gaspi" in tags or score > 50
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS TROUVER INGREDIENTS MANQUANTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -547,7 +547,7 @@ class TestTrouverIngredientsManquants:
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_trouver_pas_de_manquants(self, mock_client, mock_analyseur, mock_cache):
-        """Test quand tous les ingrédients sont disponibles."""
+        """Test quand tous les ingrÃ©dients sont disponibles."""
         mock_client.return_value = Mock()
         mock_analyseur.return_value = Mock()
         mock_cache.return_value = Mock()
@@ -556,7 +556,7 @@ class TestTrouverIngredientsManquants:
         
         service = SuggestionsIAService()
         
-        # Mock ingrédient
+        # Mock ingrÃ©dient
         mock_ing = Mock()
         mock_ing.ingredient = Mock(nom="Tomate")
         
@@ -573,7 +573,7 @@ class TestTrouverIngredientsManquants:
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_trouver_avec_manquants(self, mock_client, mock_analyseur, mock_cache):
-        """Test quand des ingrédients manquent."""
+        """Test quand des ingrÃ©dients manquent."""
         mock_client.return_value = Mock()
         mock_analyseur.return_value = Mock()
         mock_cache.return_value = Mock()
@@ -582,7 +582,7 @@ class TestTrouverIngredientsManquants:
         
         service = SuggestionsIAService()
         
-        # Mock ingrédients
+        # Mock ingrÃ©dients
         mock_ing1 = Mock()
         mock_ing1.ingredient = Mock(nom="Tomate")
         
@@ -599,9 +599,9 @@ class TestTrouverIngredientsManquants:
         assert "Poulet" in result
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MIXER SUGGESTIONS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -630,7 +630,7 @@ class TestMixerSuggestions:
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_mixer_suggestions_with_items(self, mock_client, mock_analyseur, mock_cache):
-        """Test mixer avec éléments."""
+        """Test mixer avec Ã©lÃ©ments."""
         mock_client.return_value = Mock()
         mock_analyseur.return_value = Mock()
         mock_cache.return_value = Mock()
@@ -639,7 +639,7 @@ class TestMixerSuggestions:
         
         service = SuggestionsIAService()
         
-        # Créer suggestions avec favoris et découvertes
+        # CrÃ©er suggestions avec favoris et dÃ©couvertes
         all_suggestions = [
             SuggestionRecette(recette_id=1, nom="Recette 1", score=0.9, est_nouvelle=False),
             SuggestionRecette(recette_id=2, nom="Recette 2", score=0.8, est_nouvelle=False),
@@ -652,9 +652,9 @@ class TestMixerSuggestions:
         assert len(result) <= 3
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SUGGERER RECETTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -697,7 +697,7 @@ class TestSuggererRecettes:
         
         service = SuggestionsIAService()
         
-        # Mock recette avec ingrédient
+        # Mock recette avec ingrÃ©dient
         mock_ing = Mock()
         mock_ing.ingredient = Mock()
         mock_ing.ingredient.nom = "Tomate"
@@ -765,9 +765,9 @@ class TestSuggererRecettes:
         assert isinstance(result, list)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SUGGERER AVEC IA
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -779,7 +779,7 @@ class TestSuggererAvecIA:
     @patch('src.services.suggestions_ia.AnalyseurIA')
     @patch('src.services.suggestions_ia.ClientIA')
     def test_suggerer_avec_ia_reponse_vide(self, mock_client, mock_analyseur, mock_cache, mock_db_ctx):
-        """Test avec réponse IA vide."""
+        """Test avec rÃ©ponse IA vide."""
         mock_ia = Mock()
         mock_ia.appeler = Mock(return_value=None)
         mock_client.return_value = mock_ia
@@ -799,16 +799,16 @@ class TestSuggererAvecIA:
         
         contexte = ContexteSuggestion()
         
-        # Appeler avec session injectée pour bypass le décorateur
+        # Appeler avec session injectÃ©e pour bypass le dÃ©corateur
         result = service.suggerer_avec_ia("test requete", contexte, session=mock_session)
         
-        # Retourne liste vide si réponse IA nulle
+        # Retourne liste vide si rÃ©ponse IA nulle
         assert isinstance(result, list)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MODULE EXPORTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -816,21 +816,21 @@ class TestModuleExports:
     """Tests pour les exports du module."""
 
     def test_profil_culinaire_exported(self):
-        """Test ProfilCulinaire exporté."""
+        """Test ProfilCulinaire exportÃ©."""
         from src.services.suggestions_ia import ProfilCulinaire
         assert ProfilCulinaire is not None
 
     def test_contexte_suggestion_exported(self):
-        """Test ContexteSuggestion exporté."""
+        """Test ContexteSuggestion exportÃ©."""
         from src.services.suggestions_ia import ContexteSuggestion
         assert ContexteSuggestion is not None
 
     def test_suggestion_recette_exported(self):
-        """Test SuggestionRecette exporté."""
+        """Test SuggestionRecette exportÃ©."""
         from src.services.suggestions_ia import SuggestionRecette
         assert SuggestionRecette is not None
 
     def test_service_exported(self):
-        """Test SuggestionsIAService exporté."""
+        """Test SuggestionsIAService exportÃ©."""
         from src.services.suggestions_ia import SuggestionsIAService
         assert SuggestionsIAService is not None

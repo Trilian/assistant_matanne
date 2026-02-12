@@ -1,19 +1,19 @@
-"""
-Prédiction des résultats de matchs.
+﻿"""
+PrÃediction des rÃesultats de matchs.
 
-Algorithme de prédiction basé sur:
-- Forme récente (5 derniers matchs)
+Algorithme de prÃediction basÃe sur:
+- Forme rÃecente (5 derniers matchs)
 - Avantage domicile (+12%)
-- Historique face-à-face
-- Régression vers la moyenne
+- Historique face-Ã -face
+- RÃegression vers la moyenne
 - Cotes des bookmakers
 """
 
 from typing import Dict, Any, Optional, List
 import logging
 
-from .constants import AVANTAGE_DOMICILE, SEUIL_CONFIANCE_HAUTE, SEUIL_CONFIANCE_MOYENNE
-from .forme import calculer_bonus_nul_regression
+from src.modules.jeux.paris.constants import AVANTAGE_DOMICILE, SEUIL_CONFIANCE_HAUTE, SEUIL_CONFIANCE_MOYENNE
+from src.modules.jeux.paris.forme import calculer_bonus_nul_regression
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ def predire_resultat_match(
     facteurs_supplementaires: Optional[Dict[str, Any]] = None
 ) -> Dict[str, Any]:
     """
-    Prédit le résultat d'un match en combinant plusieurs facteurs.
+    PrÃedit le rÃesultat d'un match en combinant plusieurs facteurs.
     
     Algorithme:
     1. Score de forme (40% du poids)
@@ -36,9 +36,9 @@ def predire_resultat_match(
     5. Facteurs contextuels (10%)
     
     Returns:
-        Prédiction avec probabilités et confiance
+        PrÃediction avec probabilitÃes et confiance
     """
-    # Étape 1: Probabilités de base selon la forme
+    # Étape 1: ProbabilitÃes de base selon la forme
     score_dom = forme_domicile.get("score", 50)
     score_ext = forme_exterieur.get("score", 50)
     
@@ -64,7 +64,7 @@ def predire_resultat_match(
             proba_dom -= 0.03
             proba_nul -= 0.02
     
-    # Étape 4: Régression vers la moyenne
+    # Étape 4: RÃegression vers la moyenne
     serie_dom = forme_domicile.get("serie_en_cours")
     serie_ext = forme_exterieur.get("serie_en_cours")
     
@@ -88,7 +88,7 @@ def predire_resultat_match(
         if nb_victoires >= 5:
             proba_ext -= 0.02
     
-    # Étape 4b: Régression des nuls
+    # Étape 4b: RÃegression des nuls
     matchs_sans_nul_dom = forme_domicile.get("matchs_sans_nul", 0)
     matchs_sans_nul_ext = forme_exterieur.get("matchs_sans_nul", 0)
     
@@ -123,7 +123,7 @@ def predire_resultat_match(
     proba_nul /= total
     proba_ext /= total
     
-    # Déterminer la prédiction
+    # DÃeterminer la prÃediction
     probas = {"1": proba_dom, "N": proba_nul, "2": proba_ext}
     prediction = max(probas, key=probas.get)
     meilleure_proba = probas[prediction]
@@ -136,7 +136,7 @@ def predire_resultat_match(
     if forme_domicile.get("nb_matchs", 0) < 3 or forme_exterieur.get("nb_matchs", 0) < 3:
         confiance *= 0.8
     
-    # Générer les raisons
+    # GÃenÃerer les raisons
     raisons = _generer_raisons(
         forme_domicile, forme_exterieur, h2h, 
         serie_dom, serie_ext, bonus_nul,
@@ -166,7 +166,7 @@ def _generer_raisons(
     serie_dom: str, serie_ext: str, bonus_nul: float,
     sans_nul_dom: int, sans_nul_ext: int
 ) -> List[str]:
-    """Génère les raisons de la prédiction."""
+    """GÃenère les raisons de la prÃediction."""
     from .constants import SEUIL_SERIE_SANS_NUL
     
     raisons = []
@@ -174,25 +174,25 @@ def _generer_raisons(
     score_ext = forme_ext.get("score", 50)
     
     if score_dom > score_ext + 15:
-        raisons.append(f"Forme domicile supérieure ({forme_dom.get('forme_str', '?')})")
+        raisons.append(f"Forme domicile supÃerieure ({forme_dom.get('forme_str', '?')})")
     elif score_ext > score_dom + 15:
-        raisons.append(f"Forme extérieur supérieure ({forme_ext.get('forme_str', '?')})")
+        raisons.append(f"Forme extÃerieur supÃerieure ({forme_ext.get('forme_str', '?')})")
     
     if serie_dom and "D" in serie_dom and int(serie_dom.replace("D", "")) >= 3:
-        raisons.append(f"Régression attendue après {serie_dom}")
+        raisons.append(f"RÃegression attendue après {serie_dom}")
     
     if h2h.get("avantage") == "domicile":
-        raisons.append("Historique favorable à domicile")
+        raisons.append("Historique favorable Ã  domicile")
     elif h2h.get("avantage") == "exterieur":
-        raisons.append("Historique favorable à l'extérieur")
+        raisons.append("Historique favorable Ã  l'extÃerieur")
     
     raisons.append("Avantage terrain (+12% domicile)")
     
     if bonus_nul > 0.05:
         if sans_nul_dom >= SEUIL_SERIE_SANS_NUL:
-            raisons.append(f"⚠️ {sans_nul_dom} matchs sans nul (dom) → nul probable")
+            raisons.append(f"âš ï¸ {sans_nul_dom} matchs sans nul (dom) â†’ nul probable")
         if sans_nul_ext >= SEUIL_SERIE_SANS_NUL:
-            raisons.append(f"⚠️ {sans_nul_ext} matchs sans nul (ext) → nul probable")
+            raisons.append(f"âš ï¸ {sans_nul_ext} matchs sans nul (ext) â†’ nul probable")
     
     return raisons
 
@@ -204,20 +204,20 @@ def generer_conseil_pari(
     proba_nul: float = 0.25
 ) -> str:
     """
-    Génère un conseil de pari CONCRET basé sur la prédiction et la confiance.
+    GÃenère un conseil de pari CONCRET basÃe sur la prÃediction et la confiance.
     """
-    labels = {"1": "Victoire domicile", "N": "Match nul", "2": "Victoire extérieur"}
+    labels = {"1": "Victoire domicile", "N": "Match nul", "2": "Victoire extÃerieur"}
     conseils = []
     
     if confiance >= SEUIL_CONFIANCE_HAUTE:
-        conseils.append(f"✅ **PARIER**: {labels[prediction]} (confiance {confiance:.0f}%)")
-        conseils.append("💰 Mise suggérée: 3-5% de ta bankroll")
+        conseils.append(f"âœ… **PARIER**: {labels[prediction]} (confiance {confiance:.0f}%)")
+        conseils.append("ðŸ’° Mise suggÃerÃee: 3-5% de ta bankroll")
     elif confiance >= SEUIL_CONFIANCE_MOYENNE:
-        conseils.append(f"⚠️ **PRUDENT**: {labels[prediction]} risqué")
-        conseils.append("💰 Mise suggérée: 1-2% max")
+        conseils.append(f"âš ï¸ **PRUDENT**: {labels[prediction]} risquÃe")
+        conseils.append("ðŸ’° Mise suggÃerÃee: 1-2% max")
     else:
-        conseils.append("❌ **ÉVITER** ce match - trop incertain")
-        conseils.append("💡 Attends un match plus clair")
+        conseils.append("âŒ **ÉVITER** ce match - trop incertain")
+        conseils.append("ðŸ’¡ Attends un match plus clair")
         return " | ".join(conseils)
     
     if cotes:
@@ -227,14 +227,14 @@ def generer_conseil_pari(
         ev = (proba_modele * cote_pred) - 1
         
         if ev > 0.15:
-            conseils.append(f"🔥 **VALUE BET**: Cote {cote_pred:.2f} trop haute! (EV: +{ev:.0%})")
+            conseils.append(f"ðŸ”¥ **VALUE BET**: Cote {cote_pred:.2f} trop haute! (EV: +{ev:.0%})")
         elif ev > 0.05:
-            conseils.append(f"💎 Value détectée (EV: +{ev:.0%})")
+            conseils.append(f"ðŸ’Ž Value dÃetectÃee (EV: +{ev:.0%})")
         elif ev < -0.1:
-            conseils.append(f"⛔ Cote trop basse, pas rentable (EV: {ev:.0%})")
+            conseils.append(f"â›” Cote trop basse, pas rentable (EV: {ev:.0%})")
     
     if proba_nul > 0.30:
-        conseils.append("🎯 **ASTUCE**: Proba nul élevée, regarde la cote nul!")
+        conseils.append("ðŸŽ¯ **ASTUCE**: Proba nul ÃelevÃee, regarde la cote nul!")
     
     return " | ".join(conseils)
 
@@ -245,7 +245,7 @@ def predire_over_under(
     seuil: float = 2.5
 ) -> Dict[str, Any]:
     """
-    Prédit si le match aura plus ou moins de X buts.
+    PrÃedit si le match aura plus ou moins de X buts.
     """
     nb_matchs_dom = forme_domicile.get("nb_matchs", 1) or 1
     nb_matchs_ext = forme_exterieur.get("nb_matchs", 1) or 1
@@ -289,37 +289,37 @@ def generer_conseils_avances(
     cotes: Optional[Dict[str, float]] = None
 ) -> List[Dict[str, str]]:
     """
-    Génère des conseils avancés de paris basés sur l'analyse.
+    GÃenère des conseils avancÃes de paris basÃes sur l'analyse.
     
     Returns:
         Liste de conseils avec type, message et niveau de confiance
     """
     conseils = []
     
-    # 1. Conseil série sans nul
+    # 1. Conseil sÃerie sans nul
     matchs_sans_nul_dom = forme_dom.get("matchs_sans_nul", 0)
     matchs_sans_nul_ext = forme_ext.get("matchs_sans_nul", 0)
     
     if matchs_sans_nul_dom >= 6 or matchs_sans_nul_ext >= 6:
         total_sans_nul = matchs_sans_nul_dom + matchs_sans_nul_ext
         conseils.append({
-            "type": "🎯 MATCH NUL",
-            "message": f"Les équipes n'ont pas fait de nul depuis {matchs_sans_nul_dom}+{matchs_sans_nul_ext} matchs. "
+            "type": "ðŸŽ¯ MATCH NUL",
+            "message": f"Les Ãequipes n'ont pas fait de nul depuis {matchs_sans_nul_dom}+{matchs_sans_nul_ext} matchs. "
                       f"Statistiquement, un nul devient très probable!",
             "niveau": "haute" if total_sans_nul >= 10 else "moyenne",
             "mise_suggere": "2-3%" if total_sans_nul >= 10 else "1-2%"
         })
     
-    # 2. Conseil série défaites → rebond
+    # 2. Conseil sÃerie dÃefaites â†’ rebond
     serie_dom = forme_dom.get("serie_en_cours", "")
     serie_ext = forme_ext.get("serie_en_cours", "")
     
     if serie_dom and "D" in serie_dom and int(serie_dom.replace("D", "")) >= 4:
         nb = int(serie_dom.replace("D", ""))
         conseils.append({
-            "type": "📈 REBOND ATTENDU",
-            "message": f"L'équipe domicile a perdu {nb} matchs d'affilée. "
-                      f"À domicile, un rebond est statistiquement probable.",
+            "type": "ðŸ“ˆ REBOND ATTENDU",
+            "message": f"L'Ãequipe domicile a perdu {nb} matchs d'affilÃee. "
+                      f"Ã€ domicile, un rebond est statistiquement probable.",
             "niveau": "moyenne",
             "mise_suggere": "1-2%"
         })
@@ -331,17 +331,17 @@ def generer_conseils_avances(
     
     if buts_attendus > 3.0:
         conseils.append({
-            "type": "⚽ OVER 2.5",
-            "message": f"Moyenne de {buts_attendus:.1f} buts/match entre ces équipes. "
+            "type": "âš½ OVER 2.5",
+            "message": f"Moyenne de {buts_attendus:.1f} buts/match entre ces Ãequipes. "
                       f"Un Over 2.5 est probable!",
             "niveau": "moyenne",
             "mise_suggere": "1-2%"
         })
     elif buts_attendus < 2.0:
         conseils.append({
-            "type": "🛡️ UNDER 2.5",
-            "message": f"Équipes défensives ({buts_attendus:.1f} buts/match). "
-                      f"Un Under 2.5 est intéressant.",
+            "type": "ðŸ›¡ï¸ UNDER 2.5",
+            "message": f"Équipes dÃefensives ({buts_attendus:.1f} buts/match). "
+                      f"Un Under 2.5 est intÃeressant.",
             "niveau": "moyenne",
             "mise_suggere": "1-2%"
         })
@@ -351,8 +351,8 @@ def generer_conseils_avances(
         cote_nul = cotes.get("nul", 3.5)
         if cote_nul >= 3.8 and (matchs_sans_nul_dom >= 4 or matchs_sans_nul_ext >= 4):
             conseils.append({
-                "type": "💎 VALUE BET NUL",
-                "message": f"Cote nul à {cote_nul:.2f} + série sans nul = opportunité!",
+                "type": "ðŸ’Ž VALUE BET NUL",
+                "message": f"Cote nul Ã  {cote_nul:.2f} + sÃerie sans nul = opportunitÃe!",
                 "niveau": "haute",
                 "mise_suggere": "2-3%"
             })

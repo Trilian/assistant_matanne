@@ -1,6 +1,6 @@
-﻿"""
-Logique métier du module Recettes (sans UI Streamlit).
-Fonctions pures testables indépendamment de Streamlit.
+"""
+Logique metier du module Recettes (sans UI Streamlit).
+Fonctions pures testables independamment de Streamlit.
 """
 from typing import List, Dict, Any, Optional
 from datetime import date, datetime
@@ -16,14 +16,14 @@ from src.core.models import Recette, Repas
 # ═══════════════════════════════════════════════════════════
 
 def get_toutes_recettes(db: Optional[Session] = None) -> List[Recette]:
-    """Récupère toutes les recettes."""
+    """Recupère toutes les recettes."""
     with obtenir_contexte_db() as session:
         service = get_recette_service(session)
         return session.query(Recette).all()
 
 
 def get_recette_by_id(recette_id: int, db: Optional[Session] = None) -> Optional[Recette]:
-    """Récupère une recette par son ID."""
+    """Recupère une recette par son ID."""
     with obtenir_contexte_db() as session:
         return session.query(Recette).filter(Recette.id == recette_id).first()
 
@@ -52,13 +52,13 @@ def rechercher_recettes(
 
 
 def get_recettes_par_categorie(categorie: str, db: Optional[Session] = None) -> List[Recette]:
-    """Récupère recettes d'une catégorie."""
+    """Recupère recettes d'une categorie."""
     with obtenir_contexte_db() as session:
         return session.query(Recette).filter(Recette.categorie == categorie).all()
 
 
 def get_recettes_favorites(db: Optional[Session] = None) -> List[Recette]:
-    """Récupère les recettes favorites."""
+    """Recupère les recettes favorites."""
     with obtenir_contexte_db() as session:
         return session.query(Recette).filter(Recette.favorite == True).all()
 
@@ -78,7 +78,7 @@ def creer_recette(
     calories: Optional[int] = None,
     db: Optional[Session] = None
 ) -> Recette:
-    """Crée une nouvelle recette."""
+    """Cree une nouvelle recette."""
     with obtenir_contexte_db() as session:
         service = get_recette_service(session)
         
@@ -151,7 +151,7 @@ def toggle_favorite(recette_id: int, db: Optional[Session] = None) -> bool:
 # ═══════════════════════════════════════════════════════════
 
 def get_planning_semaine(date_debut: date, date_fin: date, db: Optional[Session] = None) -> List[Repas]:
-    """Récupère le planning de repas pour une période."""
+    """Recupère le planning de repas pour une periode."""
     with obtenir_contexte_db() as session:
         return session.query(Repas).filter(
             Repas.date_repas >= date_debut,
@@ -184,11 +184,11 @@ def ajouter_repas_planning(
 # ═══════════════════════════════════════════════════════════
 
 def calculer_cout_recette(recette: Recette, prix_ingredients: Dict[str, float]) -> float:
-    """Calcule le coût estimé d'une recette."""
+    """Calcule le coût estime d'une recette."""
     cout_total = 0.0
     
     for ingredient in recette.ingredients:
-        # Recherche de l'ingrédient dans le dictionnaire des prix
+        # Recherche de l'ingredient dans le dictionnaire des prix
         for nom_ingredient, prix in prix_ingredients.items():
             if nom_ingredient.lower() in ingredient.lower():
                 cout_total += prix
@@ -227,12 +227,12 @@ def get_statistiques_recettes(db: Optional[Session] = None) -> Dict[str, Any]:
             "favorites": sum(1 for r in recettes if r.favorite)
         }
         
-        # Par catégorie
+        # Par categorie
         for recette in recettes:
             cat = recette.categorie or "autre"
             stats["par_categorie"][cat] = stats["par_categorie"].get(cat, 0) + 1
         
-        # Par difficulté
+        # Par difficulte
         for recette in recettes:
             diff = recette.difficulte or "moyenne"
             stats["par_difficulte"][diff] = stats["par_difficulte"].get(diff, 0) + 1
@@ -241,21 +241,21 @@ def get_statistiques_recettes(db: Optional[Session] = None) -> Dict[str, Any]:
 
 
 def valider_recette(data: Dict[str, Any]) -> tuple[bool, Optional[str]]:
-    """Valide les données d'une recette."""
+    """Valide les donnees d'une recette."""
     if not data.get("nom"):
         return False, "Le nom est requis"
     
     if not data.get("ingredients") or len(data["ingredients"]) == 0:
-        return False, "Au moins un ingrédient est requis"
+        return False, "Au moins un ingredient est requis"
     
     if not data.get("instructions") or len(data["instructions"]) == 0:
         return False, "Au moins une instruction est requise"
     
     if data.get("temps_preparation", 0) < 0:
-        return False, "Le temps de préparation doit être positif"
+        return False, "Le temps de preparation doit être positif"
     
     if data.get("portions", 0) <= 0:
-        return False, "Le nombre de portions doit être supérieur à 0"
+        return False, "Le nombre de portions doit être superieur à 0"
     
     return True, None
 

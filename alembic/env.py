@@ -1,4 +1,4 @@
-"""
+﻿"""
 Alembic Environment - Compatible Streamlit Cloud + Supabase
 """
 import os
@@ -9,10 +9,10 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 from alembic import context
 
-# Ajouter le répertoire parent au path
+# Ajouter le rÃ©pertoire parent au path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-# Import des modèles
+# Import des modÃ¨les
 from src.core.models import Base
 
 # Configuration Alembic
@@ -22,13 +22,13 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Métadonnées des modèles
+# MÃ©tadonnÃ©es des modÃ¨les
 target_metadata = Base.metadata
 
 
 def get_url():
     """
-    Récupère l'URL de connexion depuis les secrets Streamlit
+    RÃ©cupÃ¨re l'URL de connexion depuis les secrets Streamlit
     ou depuis les variables d'environnement
     """
     try:
@@ -42,10 +42,10 @@ def get_url():
             f"?sslmode=require"
         )
     except:
-        # Fallback sur .env (développement local)
+        # Fallback sur .env (dÃ©veloppement local)
         from dotenv import load_dotenv
 
-        # Charger .env.local en priorité
+        # Charger .env.local en prioritÃ©
         env_path = Path(__file__).parent.parent / ".env.local"
         if env_path.exists():
             load_dotenv(env_path)
@@ -60,7 +60,7 @@ def get_url():
 
         if not password:
             raise ValueError(
-                "❌ Configuration DB manquante.\n"
+                "âŒ Configuration DB manquante.\n"
                 "Configure soit :\n"
                 "1. Les secrets Streamlit (.streamlit/secrets.toml)\n"
                 "2. Les variables d'environnement (.env)"
@@ -75,7 +75,7 @@ def run_migrations_offline() -> None:
     context.configure(
         url=url,
         target_metadata=target_metadata,
-        literal_binds=False,  # Désactiver literal_binds en offline
+        literal_binds=False,  # DÃ©sactiver literal_binds en offline
         dialect_opts={"paramstyle": "named"},
         compare_type=True,
         compare_server_default=True,
@@ -108,12 +108,12 @@ def run_migrations_online() -> None:
             context.run_migrations()
 
 
-# Forcer le mode offline si la connexion échoue
+# Forcer le mode offline si la connexion Ã©choue
 try:
     if context.is_offline_mode():
         run_migrations_offline()
     else:
         run_migrations_online()
 except Exception as e:
-    print(f"⚠️ Erreur de connexion, passage en mode offline: {e}")
+    print(f"âš ï¸ Erreur de connexion, passage en mode offline: {e}")
     run_migrations_offline()

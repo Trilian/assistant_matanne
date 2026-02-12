@@ -1,8 +1,8 @@
-﻿"""
+"""
 Module Suivi Perso - Fonctions helper
 """
 
-from ._common import (
+from .utils import (
     st, date, datetime, timedelta,
     obtenir_contexte_db, UserProfile, GarminDailySummary, FoodLog,
     get_or_create_user
@@ -10,25 +10,25 @@ from ._common import (
 
 
 def get_current_user() -> str:
-    """Récupère l'utilisateur courant"""
+    """Recupère l'utilisateur courant"""
     return st.session_state.get("suivi_user", "anne")
 
 
 def set_current_user(username: str):
-    """Définit l'utilisateur courant"""
+    """Definit l'utilisateur courant"""
     st.session_state["suivi_user"] = username
 
 
 def get_user_data(username: str) -> dict:
-    """Récupère les données complètes d'un utilisateur"""
-    from ._common import GarminActivity
+    """Recupère les donnees complètes d'un utilisateur"""
+    from .utils import GarminActivity
     
     try:
         with obtenir_contexte_db() as db:
             user = db.query(UserProfile).filter_by(username=username).first()
             
             if not user:
-                # Créer l'utilisateur
+                # Creer l'utilisateur
                 user = get_or_create_user(
                     username, 
                     "Anne" if username == "anne" else "Mathieu",
@@ -70,7 +70,7 @@ def get_user_data(username: str) -> dict:
                 "objectif_calories": user.objectif_calories_brulees,
             }
     except Exception as e:
-        st.error(f"Erreur chargement données: {e}")
+        st.error(f"Erreur chargement donnees: {e}")
         return {}
 
 
@@ -97,7 +97,7 @@ def _calculate_streak(user: UserProfile, summaries: list) -> int:
 
 
 def get_food_logs_today(username: str) -> list:
-    """Récupère les logs alimentation du jour"""
+    """Recupère les logs alimentation du jour"""
     try:
         with obtenir_contexte_db() as db:
             user = db.query(UserProfile).filter_by(username=username).first()

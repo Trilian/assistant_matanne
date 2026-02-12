@@ -1,4 +1,4 @@
-"""Add HistoriqueInventaire table for tracking inventory modifications.
+﻿"""Add HistoriqueInventaire table for tracking inventory modifications.
 
 Revision ID: 004
 Revises: 003

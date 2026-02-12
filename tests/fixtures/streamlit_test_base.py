@@ -32,14 +32,14 @@ class BaseUITest:
             
             def test_render_liste(self):
                 with self.mock_streamlit() as mock_st:
-                    from src.domains.cuisine.ui.recettes import render_liste
+                    from src.modules.cuisine.recettes import render_liste
                     render_liste()
                     self.assert_called(mock_st, "title")
     """
     
     # À surcharger dans les sous-classes
     domain: str = None
-    module_path: str = None  # e.g., "src.domains.cuisine.ui.recettes"
+    module_path: str = None  # e.g., "src.modules.cuisine.recettes"
     
     @pytest.fixture(autouse=True)
     def setup_ui_test(self):

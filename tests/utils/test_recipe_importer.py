@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/utils/recipe_importer.py
 """
 import pytest
@@ -11,47 +11,47 @@ class TestParseDuration:
     """Tests pour RecipeImporter._parse_duration."""
 
     def test_parse_iso_minutes_only(self):
-        """Parse PT30M → 30 minutes."""
+        """Parse PT30M â†’ 30 minutes."""
         assert RecipeImporter._parse_duration("PT30M") == 30
 
     def test_parse_iso_hours_only(self):
-        """Parse PT1H → 60 minutes."""
+        """Parse PT1H â†’ 60 minutes."""
         assert RecipeImporter._parse_duration("PT1H") == 60
 
     def test_parse_iso_hours_and_minutes(self):
-        """Parse PT1H30M → 90 minutes."""
+        """Parse PT1H30M â†’ 90 minutes."""
         assert RecipeImporter._parse_duration("PT1H30M") == 90
 
     def test_parse_iso_2_hours(self):
-        """Parse PT2H → 120 minutes."""
+        """Parse PT2H â†’ 120 minutes."""
         assert RecipeImporter._parse_duration("PT2H") == 120
 
     def test_parse_french_minutes(self):
-        """Parse '30 min' → 30 minutes."""
+        """Parse '30 min' â†’ 30 minutes."""
         assert RecipeImporter._parse_duration("30 min") == 30
 
     def test_parse_french_hours(self):
-        """Parse '1h' → 60 minutes."""
+        """Parse '1h' â†’ 60 minutes."""
         assert RecipeImporter._parse_duration("1h") == 60
 
     def test_parse_french_hours_minutes(self):
-        """Parse '1h30' → 90 minutes."""
+        """Parse '1h30' â†’ 90 minutes."""
         assert RecipeImporter._parse_duration("1h 30min") == 90
 
     def test_parse_french_heure_minute(self):
-        """Parse '1 heure 30 minutes' → 90."""
+        """Parse '1 heure 30 minutes' â†’ 90."""
         assert RecipeImporter._parse_duration("1 heure 30 minutes") == 90
 
     def test_parse_empty_string(self):
-        """Chaîne vide → 0."""
+        """Chaîne vide â†’ 0."""
         assert RecipeImporter._parse_duration("") == 0
 
     def test_parse_none(self):
-        """None → 0."""
+        """None â†’ 0."""
         assert RecipeImporter._parse_duration(None) == 0
 
     def test_parse_just_number(self):
-        """Juste un nombre → ce nombre."""
+        """Juste un nombre â†’ ce nombre."""
         assert RecipeImporter._parse_duration("45") == 45
 
 
@@ -69,7 +69,7 @@ Ingrédients:
 - 200g de farine
 - 100g de sucre
 
-Étapes:
+Ã‰tapes:
 Préchauffer le four
 Mélanger les ingrédients
 Cuire 30 minutes
@@ -82,7 +82,7 @@ Cuire 30 minutes
         assert len(result["etapes"]) >= 1
 
     def test_from_text_empty(self):
-        """Texte vide → None."""
+        """Texte vide â†’ None."""
         result = RecipeImporter.from_text("")
         assert result is None
 
@@ -150,7 +150,7 @@ class TestFromPdf:
     """Tests pour RecipeImporter.from_pdf."""
 
     def test_from_pdf_file_not_found(self):
-        """Fichier inexistant → None."""
+        """Fichier inexistant â†’ None."""
         result = RecipeImporter.from_pdf("/nonexistent/file.pdf")
         assert result is None
 
@@ -169,9 +169,9 @@ class TestExtractFromText:
         """Parse ingrédients avec puces."""
         text = """Gâteau
 Ingrédients:
-• Farine
-• Sucre
-• Oeufs
+â€¢ Farine
+â€¢ Sucre
+â€¢ Oeufs
 """
         result = RecipeImporter._extract_from_text(text)
 
@@ -195,8 +195,8 @@ Ingrédients:
     def test_extract_etapes(self):
         """Parse les étapes."""
         text = """Pizza
-Étapes:
-Étaler la pâte
+Ã‰tapes:
+Ã‰taler la pâte
 Ajouter la sauce
 Cuire au four
 """
@@ -266,7 +266,7 @@ class TestExtractFromHtml:
                 "description": "Une délicieuse tarte",
                 "recipeIngredient": ["250g fraises", "200g pâte sablée"],
                 "recipeInstructions": [
-                    {"@type": "HowToStep", "text": "Étaler la pâte"},
+                    {"@type": "HowToStep", "text": "Ã‰taler la pâte"},
                     {"@type": "HowToStep", "text": "Ajouter les fraises"}
                 ],
                 "prepTime": "PT20M",

@@ -1,5 +1,5 @@
-﻿"""
-Logique métier du module Routines (famille) - Séparée de l'UI
+"""
+Logique metier du module Routines (famille) - Separee de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
 
@@ -7,16 +7,17 @@ from datetime import date, time, timedelta
 from typing import Optional, Dict, Any, List
 import logging
 
+from src.modules.shared.constantes import JOURS_SEMAINE
+
 logger = logging.getLogger(__name__)
 
 
 # ═══════════════════════════════════════════════════════════
-# CONSTANTES
+# CONSTANTES LOCALES
 # ═══════════════════════════════════════════════════════════
 
 MOMENTS_JOURNEE = ["Matin", "Midi", "Après-midi", "Soir", "Nuit"]
-TYPES_ROUTINE = ["Réveil", "Repas", "Sieste", "Bain", "Coucher", "Soins", "Autre"]
-JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
+TYPES_ROUTINE = ["Reveil", "Repas", "Sieste", "Bain", "Coucher", "Soins", "Autre"]
 
 
 # ═══════════════════════════════════════════════════════════
@@ -24,7 +25,7 @@ JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "D
 # ═══════════════════════════════════════════════════════════
 
 def get_moment_journee(heure: time) -> str:
-    """Détermine le moment de la journée d'après l'heure."""
+    """Determine le moment de la journee d'après l'heure."""
     if isinstance(heure, str):
         from datetime import datetime
         heure = datetime.fromisoformat(heure).time()
@@ -44,7 +45,7 @@ def get_moment_journee(heure: time) -> str:
 
 
 def calculer_duree_routine(routines: List[Dict[str, Any]]) -> int:
-    """Calcule la durée totale d'une séquence de routines (en minutes)."""
+    """Calcule la duree totale d'une sequence de routines (en minutes)."""
     duree_totale = 0
     
     for routine in routines:
@@ -55,7 +56,7 @@ def calculer_duree_routine(routines: List[Dict[str, Any]]) -> int:
 
 
 def calculer_heure_fin(heure_debut: time, duree_minutes: int) -> time:
-    """Calcule l'heure de fin d'après le début et la durée."""
+    """Calcule l'heure de fin d'après le debut et la duree."""
     from datetime import datetime
     
     if isinstance(heure_debut, str):
@@ -72,7 +73,7 @@ def calculer_heure_fin(heure_debut: time, duree_minutes: int) -> time:
 # ═══════════════════════════════════════════════════════════
 
 def filtrer_par_moment(routines: List[Dict[str, Any]], moment: str) -> List[Dict[str, Any]]:
-    """Filtre les routines par moment de la journée."""
+    """Filtre les routines par moment de la journee."""
     return [r for r in routines if r.get("moment") == moment]
 
 
@@ -95,7 +96,7 @@ def get_routines_aujourdhui(routines: List[Dict[str, Any]]) -> List[Dict[str, An
 
 
 def grouper_par_moment(routines: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
-    """Groupe les routines par moment de la journée."""
+    """Groupe les routines par moment de la journee."""
     groupes = {moment: [] for moment in MOMENTS_JOURNEE}
     
     for routine in routines:
@@ -111,7 +112,7 @@ def grouper_par_moment(routines: List[Dict[str, Any]]) -> Dict[str, List[Dict[st
 
 
 def trier_par_heure(routines: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Trie les routines par heure de début."""
+    """Trie les routines par heure de debut."""
     def get_heure_key(routine):
         heure = routine.get("heure")
         if not heure:
@@ -152,7 +153,7 @@ def calculer_statistiques_routines(routines: List[Dict[str, Any]]) -> Dict[str, 
         moment = routine.get("moment", "Autre")
         par_moment[moment] = par_moment.get(moment, 0) + 1
     
-    # Durée totale
+    # Duree totale
     duree_totale = calculer_duree_routine(routines)
     
     return {
@@ -164,7 +165,7 @@ def calculer_statistiques_routines(routines: List[Dict[str, Any]]) -> Dict[str, 
 
 
 def analyser_regularite(historique: List[Dict[str, Any]], routine_id: int, jours: int = 7) -> Dict[str, Any]:
-    """Analyse la régularité d'exécution d'une routine."""
+    """Analyse la regularite d'execution d'une routine."""
     date_limite = date.today() - timedelta(days=jours)
     
     executions = []
@@ -180,7 +181,7 @@ def analyser_regularite(historique: List[Dict[str, Any]], routine_id: int, jours
     
     taux_realisation = (len(executions) / jours * 100) if jours > 0 else 0
     
-    # Régularité
+    # Regularite
     if taux_realisation >= 90:
         regularite = "Excellent"
     elif taux_realisation >= 70:
@@ -203,13 +204,13 @@ def analyser_regularite(historique: List[Dict[str, Any]], routine_id: int, jours
 # ═══════════════════════════════════════════════════════════
 
 def suggerer_routines_age(age_mois: int) -> List[Dict[str, Any]]:
-    """Suggère des routines adaptées à l'âge."""
+    """Suggère des routines adaptees à l'âge."""
     suggestions = []
     
     # Routines communes
     suggestions.append({
-        "titre": "Réveil",
-        "type": "Réveil",
+        "titre": "Reveil",
+        "type": "Reveil",
         "moment": "Matin",
         "heure": "07:00",
         "duree": 15
@@ -239,7 +240,7 @@ def suggerer_routines_age(age_mois: int) -> List[Dict[str, Any]]:
 
 
 def detecter_conflits_horaires(routines: List[Dict[str, Any]]) -> List[tuple[Dict, Dict]]:
-    """Détecte les conflits d'horaires entre routines."""
+    """Detecte les conflits d'horaires entre routines."""
     conflits = []
     routines_triees = trier_par_heure(routines)
     
@@ -268,7 +269,7 @@ def detecter_conflits_horaires(routines: List[Dict[str, Any]]) -> List[tuple[Dic
                 from datetime import datetime
                 heure2 = datetime.fromisoformat(heure2).time()
             
-            # Vérifier chevauchement
+            # Verifier chevauchement
             if heure2 < fin1:
                 conflits.append((r1, r2))
     
@@ -295,7 +296,7 @@ def valider_routine(data: Dict[str, Any]) -> tuple[bool, List[str]]:
     if "duree" in data:
         duree = data["duree"]
         if not isinstance(duree, int) or duree <= 0:
-            erreurs.append("La durée doit être > 0")
+            erreurs.append("La duree doit être > 0")
     
     return len(erreurs) == 0, erreurs
 
@@ -314,7 +315,7 @@ def formater_heure(heure: time) -> str:
 
 
 def formater_duree(minutes: int) -> str:
-    """Formate une durée."""
+    """Formate une duree."""
     if minutes < 60:
         return f"{minutes}min"
     else:

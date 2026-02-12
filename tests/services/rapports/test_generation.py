@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/services/rapports/generation.py
 
 Tests du service de génération de rapports PDF avec couverture complète.

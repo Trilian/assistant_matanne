@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour les composants feedback/feedback.py
 """
 import pytest
@@ -89,7 +89,7 @@ class TestSuccessNotification:
         """Test l'affichage d'une notification succès avec icône"""
         mock_success.return_value = None
         
-        st.success("✅ Succès!")
+        st.success("âœ… Succès!")
         
         assert mock_success.called
 
@@ -156,7 +156,7 @@ class TestWarningNotification:
         """Test l'affichage d'une notification avertissement confirmée"""
         mock_warning.return_value = None
         
-        st.warning("Êtes-vous sûr de continuer?")
+        st.warning("ÃŠtes-vous sûr de continuer?")
         
         assert mock_warning.called
 
@@ -217,7 +217,7 @@ class TestToastNotifications:
         """Test la notification toast avec icône"""
         mock_toast.return_value = None
         
-        st.toast("✅ Opération réussie")
+        st.toast("âœ… Opération réussie")
         
         assert mock_toast.called
 

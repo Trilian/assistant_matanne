@@ -1,8 +1,8 @@
-﻿"""
-Module Éco-Tips - Suivi des actions écologiques et économies.
+"""
+Module Éco-Tips - Suivi des actions ecologiques et economies.
 
-Gestion du passage aux produits réutilisables, suivi des économies mensuelles,
-et conseils éco-responsables.
+Gestion du passage aux produits reutilisables, suivi des economies mensuelles,
+et conseils eco-responsables.
 """
 
 import streamlit as st
@@ -20,14 +20,14 @@ from src.core.models.habitat import EcoActionType
 # ═══════════════════════════════════════════════════════════
 
 TYPE_LABELS = {
-    "lavable": "🧺 Réutilisable",
+    "lavable": "🧺 Reutilisable",
     "energie": "⚡ Énergie",
     "eau": "💧 Eau",
-    "dechets": "♻️ Déchets",
+    "dechets": "♻️ Dechets",
     "alimentation": "🥗 Alimentation"
 }
 
-# Idées d'actions éco avec économies estimées
+# Idees d'actions eco avec economies estimees
 IDEES_ACTIONS = [
     {
         "nom": "Essuie-tout lavables",
@@ -41,21 +41,21 @@ IDEES_ACTIONS = [
         "type": "lavable",
         "economie_estimee": 5,
         "cout_initial": 20,
-        "description": "Serviettes en tissu réutilisables"
+        "description": "Serviettes en tissu reutilisables"
     },
     {
-        "nom": "Lingettes bébé lavables",
+        "nom": "Lingettes bebe lavables",
         "type": "lavable",
         "economie_estimee": 15,
         "cout_initial": 40,
         "description": "Lingettes en coton pour Jules"
     },
     {
-        "nom": "Disques démaquillants lavables",
+        "nom": "Disques demaquillants lavables",
         "type": "lavable",
         "economie_estimee": 5,
         "cout_initial": 15,
-        "description": "Cotons réutilisables"
+        "description": "Cotons reutilisables"
     },
     {
         "nom": "Chauffage intelligent",
@@ -79,7 +79,7 @@ IDEES_ACTIONS = [
         "description": "Remplacer toutes les ampoules par des LED"
     },
     {
-        "nom": "Réducteur de débit douche",
+        "nom": "Reducteur de debit douche",
         "type": "eau",
         "economie_estimee": 12,
         "cout_initial": 15,
@@ -90,14 +90,14 @@ IDEES_ACTIONS = [
         "type": "dechets",
         "economie_estimee": 5,
         "cout_initial": 30,
-        "description": "Réduire les déchets ménagers de 30%"
+        "description": "Reduire les dechets menagers de 30%"
     },
     {
         "nom": "Batch cooking",
         "type": "alimentation",
         "economie_estimee": 40,
         "cout_initial": 0,
-        "description": "Préparer les repas de la semaine = moins de gaspillage"
+        "description": "Preparer les repas de la semaine = moins de gaspillage"
     }
 ]
 
@@ -107,7 +107,7 @@ IDEES_ACTIONS = [
 # ═══════════════════════════════════════════════════════════
 
 def get_all_actions(actif_only: bool = False) -> List[EcoAction]:
-    """Récupère toutes les actions éco"""
+    """Recupère toutes les actions eco"""
     with obtenir_contexte_db() as db:
         query = db.query(EcoAction)
         if actif_only:
@@ -116,13 +116,13 @@ def get_all_actions(actif_only: bool = False) -> List[EcoAction]:
 
 
 def get_action_by_id(action_id: int) -> Optional[EcoAction]:
-    """Récupère une action par son ID"""
+    """Recupère une action par son ID"""
     with obtenir_contexte_db() as db:
         return db.query(EcoAction).filter(EcoAction.id == action_id).first()
 
 
 def create_action(data: dict) -> EcoAction:
-    """Crée une nouvelle action éco"""
+    """Cree une nouvelle action eco"""
     with obtenir_contexte_db() as db:
         action = EcoAction(**data)
         db.add(action)
@@ -132,7 +132,7 @@ def create_action(data: dict) -> EcoAction:
 
 
 def update_action(action_id: int, data: dict) -> Optional[EcoAction]:
-    """Met à jour une action éco"""
+    """Met à jour une action eco"""
     with obtenir_contexte_db() as db:
         action = db.query(EcoAction).filter(EcoAction.id == action_id).first()
         if action:
@@ -144,7 +144,7 @@ def update_action(action_id: int, data: dict) -> Optional[EcoAction]:
 
 
 def delete_action(action_id: int) -> bool:
-    """Supprime une action éco"""
+    """Supprime une action eco"""
     with obtenir_contexte_db() as db:
         action = db.query(EcoAction).filter(EcoAction.id == action_id).first()
         if action:
@@ -166,7 +166,7 @@ def calculate_stats() -> dict:
     # ROI en mois
     roi_mois = cout_initial_total / economie_mensuelle if economie_mensuelle > 0 else 0
     
-    # Économies totales depuis début (estimation)
+    # Économies totales depuis debut (estimation)
     economies_totales = 0
     for action in actions:
         if action.date_debut:
@@ -199,16 +199,16 @@ def render_stats_dashboard():
         st.metric("Actions actives", stats["nb_actions"])
     
     with col2:
-        st.metric("Économie/mois", f"{stats['economie_mensuelle']:.0f}€", delta="récurrent")
+        st.metric("Économie/mois", f"{stats['economie_mensuelle']:.0f}€", delta="recurrent")
     
     with col3:
         st.metric("Économie/an", f"{stats['economie_annuelle']:.0f}€")
     
     with col4:
-        st.metric("Économisé total", f"{stats['economies_totales']:.0f}€", delta="depuis début")
+        st.metric("Économise total", f"{stats['economies_totales']:.0f}€", delta="depuis debut")
     
     if stats["cout_initial"] > 0:
-        st.info(f"💡 Investissement initial: {stats['cout_initial']:.0f}€ | Rentabilisé en {stats['roi_mois']:.1f} mois")
+        st.info(f"💡 Investissement initial: {stats['cout_initial']:.0f}€ | Rentabilise en {stats['roi_mois']:.1f} mois")
 
 
 def render_action_card(action: EcoAction):
@@ -258,7 +258,7 @@ def render_action_card(action: EcoAction):
 
 
 def render_formulaire(action: Optional[EcoAction] = None):
-    """Formulaire d'ajout/édition d'action"""
+    """Formulaire d'ajout/edition d'action"""
     is_edit = action is not None
     prefix = "edit" if is_edit else "new"
     
@@ -284,7 +284,7 @@ def render_formulaire(action: Optional[EcoAction] = None):
             description = st.text_area(
                 "Description",
                 value=action.description if is_edit else "",
-                placeholder="Détails de l'action..."
+                placeholder="Details de l'action..."
             )
         
         with col2:
@@ -303,7 +303,7 @@ def render_formulaire(action: Optional[EcoAction] = None):
             )
             
             date_debut = st.date_input(
-                "Date de début",
+                "Date de debut",
                 value=action.date_debut if is_edit and action.date_debut else date.today()
             )
             
@@ -338,17 +338,17 @@ def render_formulaire(action: Optional[EcoAction] = None):
                 st.success("✅ Action mise à jour!")
             else:
                 create_action(data)
-                st.success("✅ Action ajoutée!")
+                st.success("✅ Action ajoutee!")
             
             st.rerun()
 
 
 def render_idees():
-    """Affiche les idées d'actions avec bouton d'ajout rapide"""
-    st.subheader("💡 Idées d'actions")
+    """Affiche les idees d'actions avec bouton d'ajout rapide"""
+    st.subheader("💡 Idees d'actions")
     st.caption("Cliquez pour ajouter rapidement une action")
     
-    # Récupérer les noms des actions existantes
+    # Recuperer les noms des actions existantes
     actions_existantes = [a.nom.lower() for a in get_all_actions()]
     
     for idee in IDEES_ACTIONS:
@@ -380,10 +380,10 @@ def render_idees():
                             "date_debut": date.today(),
                             "actif": False  # À activer manuellement
                         })
-                        st.success(f"✅ '{idee['nom']}' ajouté! Activez-le quand vous commencez.")
+                        st.success(f"✅ '{idee['nom']}' ajoute! Activez-le quand vous commencez.")
                         st.rerun()
                 else:
-                    st.success("✅ Déjà ajouté")
+                    st.success("✅ Dejà ajoute")
 
 
 # ═══════════════════════════════════════════════════════════
@@ -395,7 +395,7 @@ def render_onglet_mes_actions():
     actions = get_all_actions()
     
     if not actions:
-        st.info("🌿 Aucune action éco pour le moment. Ajoutez-en une!")
+        st.info("🌿 Aucune action eco pour le moment. Ajoutez-en une!")
         return
     
     # Filtrer par type
@@ -418,7 +418,7 @@ def render_onglet_mes_actions():
 
 def render_onglet_ajouter():
     """Onglet ajout"""
-    st.subheader("➕ Nouvelle action éco")
+    st.subheader("➕ Nouvelle action eco")
     render_formulaire(None)
 
 
@@ -427,11 +427,11 @@ def render_onglet_ajouter():
 # ═══════════════════════════════════════════════════════════
 
 def app():
-    """Point d'entrée module Éco-Tips"""
+    """Point d'entree module Éco-Tips"""
     st.title("💡 Éco-Tips")
-    st.caption("Suivez vos actions écologiques et vos économies")
+    st.caption("Suivez vos actions ecologiques et vos economies")
     
-    # Mode édition
+    # Mode edition
     if "edit_action_id" in st.session_state:
         action = get_action_by_id(st.session_state["edit_action_id"])
         if action:
@@ -449,7 +449,7 @@ def app():
     st.divider()
     
     # Onglets
-    tab1, tab2, tab3 = st.tabs(["🌿 Mes actions", "➕ Ajouter", "💡 Idées"])
+    tab1, tab2, tab3 = st.tabs(["🌿 Mes actions", "➕ Ajouter", "💡 Idees"])
     
     with tab1:
         render_onglet_mes_actions()

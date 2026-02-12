@@ -1,4 +1,4 @@
-"""
+﻿"""
 Fonctions utilitaires pures pour le service de backup.
 
 Ces fonctions peuvent être testées sans base de données ni dépendances externes.
@@ -12,9 +12,9 @@ from pathlib import Path
 from typing import Any
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # GÉNÉRATION ET VALIDATION D'IDENTIFIANTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def generate_backup_id(dt: datetime | None = None) -> str:
@@ -22,7 +22,7 @@ def generate_backup_id(dt: datetime | None = None) -> str:
     Génère un ID unique pour le backup basé sur un timestamp.
     
     Args:
-        dt: Date/heure à utiliser (par défaut: maintenant)
+        dt: Date/heure Ã  utiliser (par défaut: maintenant)
         
     Returns:
         ID au format YYYYMMDD_HHMMSS
@@ -61,7 +61,7 @@ def is_valid_backup_id(backup_id: str) -> bool:
     Vérifie si un ID de backup est valide.
     
     Args:
-        backup_id: ID à vérifier
+        backup_id: ID Ã  vérifier
         
     Returns:
         True si le format est valide
@@ -75,9 +75,9 @@ def is_valid_backup_id(backup_id: str) -> bool:
     return parse_backup_id(backup_id) is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CALCUL ET VALIDATION DE CHECKSUMS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def calculate_checksum(data: str) -> str:
@@ -85,7 +85,7 @@ def calculate_checksum(data: str) -> str:
     Calcule le checksum MD5 des données.
     
     Args:
-        data: Chaîne de caractères à hasher
+        data: Chaîne de caractères Ã  hasher
         
     Returns:
         Hash MD5 hexadécimal (32 caractères)
@@ -99,10 +99,10 @@ def calculate_checksum(data: str) -> str:
 
 def verify_checksum(data: str, expected_checksum: str) -> bool:
     """
-    Vérifie que le checksum des données correspond à l'attendu.
+    Vérifie que le checksum des données correspond Ã  l'attendu.
     
     Args:
-        data: Données à vérifier
+        data: Données Ã  vérifier
         expected_checksum: Checksum attendu
         
     Returns:
@@ -111,9 +111,9 @@ def verify_checksum(data: str, expected_checksum: str) -> bool:
     return calculate_checksum(data) == expected_checksum
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONVERSION ET SÉRIALISATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def model_to_dict(obj: Any) -> dict:
@@ -159,7 +159,7 @@ def serialize_value(value: Any) -> Any:
     Sérialise une valeur pour JSON.
     
     Args:
-        value: Valeur à sérialiser
+        value: Valeur Ã  sérialiser
         
     Returns:
         Valeur sérialisable en JSON
@@ -186,7 +186,7 @@ def deserialize_value(value: Any, key: str = "") -> Any:
     Désérialise une valeur JSON (notamment les dates ISO).
     
     Args:
-        value: Valeur à désérialiser
+        value: Valeur Ã  désérialiser
         key: Nom de la clé (pour contexte)
         
     Returns:
@@ -209,9 +209,9 @@ def deserialize_value(value: Any, key: str = "") -> Any:
     return value
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # VALIDATION DE STRUCTURE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def validate_backup_structure(data: dict) -> tuple[bool, str]:
@@ -267,9 +267,9 @@ def validate_backup_metadata(metadata: dict) -> tuple[bool, str]:
     return True, ""
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # GESTION DES FICHIERS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def is_compressed_file(file_path: str | Path) -> bool:
@@ -381,9 +381,9 @@ def format_file_size(size_bytes: int) -> str:
         return f"{size_bytes / (1024 * 1024 * 1024):.1f} GB"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ORDRE DE RESTAURATION (RESPECTE LES FK)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def get_restore_order() -> list[str]:
@@ -448,9 +448,9 @@ def filter_and_order_tables(tables: list[str]) -> list[str]:
     return [t for t in order if t in tables]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # STATISTIQUES DE BACKUP
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def calculate_backup_stats(backup_data: dict) -> dict:
@@ -512,9 +512,9 @@ def compare_backup_stats(original: dict, restored: dict) -> dict:
     return diff
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ROTATION DE BACKUPS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def get_backups_to_rotate(
@@ -526,10 +526,10 @@ def get_backups_to_rotate(
     
     Args:
         backup_files: Liste de tuples (filename, modification_time)
-        max_backups: Nombre maximum de backups à conserver
+        max_backups: Nombre maximum de backups Ã  conserver
         
     Returns:
-        Liste des fichiers à supprimer (les plus anciens)
+        Liste des fichiers Ã  supprimer (les plus anciens)
         
     Examples:
         >>> files = [('a.json', 100), ('b.json', 200), ('c.json', 300)]
@@ -542,7 +542,7 @@ def get_backups_to_rotate(
     # Trier par date (plus récent en premier)
     sorted_files = sorted(backup_files, key=lambda x: x[1], reverse=True)
     
-    # Retourner les plus anciens à supprimer
+    # Retourner les plus anciens Ã  supprimer
     return [f[0] for f in sorted_files[max_backups:]]
 
 

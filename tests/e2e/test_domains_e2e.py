@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests E2E pour les workflows complets des domains.
 Teste les flux utilisateur de bout en bout sans mock de la logique métier.
 """
@@ -7,9 +7,9 @@ from datetime import date, time, timedelta
 from unittest.mock import patch, MagicMock
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # E2E: WORKFLOW CUISINE COMPLET
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.e2e
@@ -25,7 +25,7 @@ class TestWorkflowCuisineE2E:
         4. Grouper par rayon
         5. Trier par priorité
         """
-        from src.domains.cuisine.logic.courses_logic import (
+        from src.modules.cuisine.courses.utils import (
             filtrer_articles,
             grouper_par_rayon,
             trier_par_priorite,
@@ -68,7 +68,7 @@ class TestWorkflowCuisineE2E:
         4. Modifier les préférences
         """
         import json
-        from src.domains.cuisine.logic.schemas import PreferencesUtilisateur
+        from src.modules.cuisine.schemas import PreferencesUtilisateur
 
         # 1. Créer préférences
         prefs = PreferencesUtilisateur(
@@ -93,9 +93,9 @@ class TestWorkflowCuisineE2E:
         assert restored.budget_semaine == prefs.budget_semaine
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # E2E: WORKFLOW FAMILLE COMPLET
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.e2e
@@ -110,7 +110,7 @@ class TestWorkflowFamilleE2E:
         3. Filtrer par type
         4. Calculer le budget
         """
-        from src.domains.famille.logic.activites_logic import (
+        from src.modules.famille.activites_utils import (
             suggerer_activites_age,
             filtrer_par_type,
             calculer_statistiques_activites,
@@ -141,7 +141,7 @@ class TestWorkflowFamilleE2E:
         assert stats["cout_total"] == 35.0
         assert stats["par_type"]["Sport"] == 2
 
-        # 5. Activités à venir
+        # 5. Activités Ã  venir
         a_venir = get_activites_a_venir(activites, jours=7)
         assert len(a_venir) == 4
 
@@ -153,7 +153,7 @@ class TestWorkflowFamilleE2E:
         3. Calculer la durée totale
         4. Filtrer par jour
         """
-        from src.domains.famille.logic.routines_logic import (
+        from src.modules.famille.routines_utils import (
             grouper_par_moment,
             calculer_duree_routine,
             filtrer_par_jour,
@@ -191,9 +191,9 @@ class TestWorkflowFamilleE2E:
         assert get_moment_journee(time(19, 0)) == "Soir"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # E2E: WORKFLOW PLANNING COMPLET
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.e2e
@@ -208,7 +208,7 @@ class TestWorkflowPlanningE2E:
         3. Naviguer vers la semaine suivante
         4. Vérifier les bornes
         """
-        from src.domains.planning.logic.calendrier_unifie_logic import (
+        from src.modules.planning.calendrier_unifie.utils import (
             get_debut_semaine,
             get_fin_semaine,
             get_jours_semaine,
@@ -249,7 +249,7 @@ class TestWorkflowPlanningE2E:
         2. Construire les jours
         3. Vérifier les properties
         """
-        from src.domains.planning.logic.calendrier_unifie_logic import (
+        from src.modules.planning.calendrier_unifie.utils import (
             TypeEvenement,
             EvenementCalendrier,
             JourCalendrier,
@@ -323,9 +323,9 @@ class TestWorkflowPlanningE2E:
         assert mercredi.activites[0].pour_jules is True
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # E2E: WORKFLOW MAISON COMPLET
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.e2e
@@ -340,7 +340,7 @@ class TestWorkflowMaisonE2E:
         3. Grouper par pièce
         4. Calculer les statistiques
         """
-        from src.domains.maison.logic.entretien_logic import (
+        from src.modules.maison.entretien_utils import (
             calculer_jours_avant_tache,
             get_taches_aujourd_hui,
             get_taches_semaine,
@@ -357,11 +357,11 @@ class TestWorkflowMaisonE2E:
             {"titre": "Nettoyer filtres VMC", "piece": "Garage", 
              "frequence": "Mensuelle", "categorie": "Maintenance",
              "derniere_execution": today - timedelta(days=45)},
-            # Tâche à faire cette semaine
+            # Tâche Ã  faire cette semaine
             {"titre": "Aspirateur", "piece": "Salon",
              "frequence": "Hebdomadaire", "categorie": "Ménage",
              "derniere_execution": today - timedelta(days=5)},
-            # Tâche à jour
+            # Tâche Ã  jour
             {"titre": "Nettoyage cuisine", "piece": "Cuisine",
              "frequence": "Quotidienne", "categorie": "Ménage",
              "derniere_execution": today - timedelta(days=1)},
@@ -400,7 +400,7 @@ class TestWorkflowMaisonE2E:
         3. Estimer le temps total
         4. Prioriser
         """
-        from src.domains.maison.logic.entretien_logic import (
+        from src.modules.maison.entretien_utils import (
             PIECES,
             filtrer_par_piece,
             valider_tache,
@@ -431,9 +431,9 @@ class TestWorkflowMaisonE2E:
         assert stats["total_taches"] == 8  # 4 pièces x 2 tâches
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # E2E: WORKFLOW CROSS-DOMAIN
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.e2e
@@ -449,17 +449,17 @@ class TestWorkflowCrossDomainE2E:
         4. Tâches ménage (maison)
         5. Planifier le tout (planning)
         """
-        from src.domains.famille.logic.routines_logic import (
+        from src.modules.famille.routines_utils import (
             get_moment_journee,
             calculer_duree_routine,
         )
-        from src.domains.cuisine.logic.courses_logic import (
+        from src.modules.cuisine.courses.utils import (
             filtrer_par_priorite,
         )
-        from src.domains.maison.logic.entretien_logic import (
+        from src.modules.maison.entretien_utils import (
             get_taches_aujourd_hui,
         )
-        from src.domains.planning.logic.calendrier_unifie_logic import (
+        from src.modules.planning.calendrier_unifie.utils import (
             TypeEvenement,
             EvenementCalendrier,
             JourCalendrier,
@@ -478,7 +478,7 @@ class TestWorkflowCrossDomainE2E:
 
         # 2. Courses urgentes pour le repas
         courses = [
-            {"ingredient_nom": "Pâtes", "priorite": "haute", "rayon_magasin": "Épicerie"},
+            {"ingredient_nom": "Pâtes", "priorite": "haute", "rayon_magasin": "Ã‰picerie"},
             {"ingredient_nom": "Fromage", "priorite": "moyenne", "rayon_magasin": "Laitier"},
         ]
         urgentes = filtrer_par_priorite(courses, "haute")
@@ -535,12 +535,12 @@ class TestWorkflowCrossDomainE2E:
         3. Planifier le batch cooking
         4. Ajouter au calendrier
         """
-        from src.domains.cuisine.logic.schemas import PreferencesUtilisateur
-        from src.domains.cuisine.logic.courses_logic import (
+        from src.modules.cuisine.schemas import PreferencesUtilisateur
+        from src.modules.cuisine.courses.utils import (
             grouper_par_rayon,
             calculer_statistiques,
         )
-        from src.domains.planning.logic.calendrier_unifie_logic import (
+        from src.modules.planning.calendrier_unifie.utils import (
             TypeEvenement,
             EvenementCalendrier,
             JourCalendrier,
@@ -560,8 +560,8 @@ class TestWorkflowCrossDomainE2E:
         courses = [
             {"ingredient_nom": "Saumon", "priorite": "haute", "rayon_magasin": "Poissons"},
             {"ingredient_nom": "Courgettes", "priorite": "haute", "rayon_magasin": "Fruits & Légumes"},
-            {"ingredient_nom": "Riz", "priorite": "moyenne", "rayon_magasin": "Épicerie"},
-            {"ingredient_nom": "Lentilles", "priorite": "moyenne", "rayon_magasin": "Épicerie"},
+            {"ingredient_nom": "Riz", "priorite": "moyenne", "rayon_magasin": "Ã‰picerie"},
+            {"ingredient_nom": "Lentilles", "priorite": "moyenne", "rayon_magasin": "Ã‰picerie"},
             {"ingredient_nom": "Yaourts", "priorite": "basse", "rayon_magasin": "Laitier"},
         ]
 

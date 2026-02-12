@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests du package calendar_sync - Générateur iCal.
 
 Tests de génération et parsing de fichiers .ics.
@@ -109,17 +109,17 @@ class TestICalGeneratorGenerate:
         """Génère un calendrier avec plusieurs événements."""
         events = [
             CalendarEventExternal(
-                title="Événement 1",
+                title="Ã‰vénement 1",
                 start_time=datetime(2026, 2, 10, 10, 0),
                 end_time=datetime(2026, 2, 10, 11, 0)
             ),
             CalendarEventExternal(
-                title="Événement 2",
+                title="Ã‰vénement 2",
                 start_time=datetime(2026, 2, 10, 14, 0),
                 end_time=datetime(2026, 2, 10, 15, 0)
             ),
             CalendarEventExternal(
-                title="Événement 3",
+                title="Ã‰vénement 3",
                 start_time=datetime(2026, 2, 11, 9, 0),
                 end_time=datetime(2026, 2, 11, 10, 0)
             ),
@@ -129,9 +129,9 @@ class TestICalGeneratorGenerate:
         
         assert ical.count("BEGIN:VEVENT") == 3
         assert ical.count("END:VEVENT") == 3
-        assert "Événement 1" in ical
-        assert "Événement 2" in ical
-        assert "Événement 3" in ical
+        assert "Ã‰vénement 1" in ical
+        assert "Ã‰vénement 2" in ical
+        assert "Ã‰vénement 3" in ical
     
     def test_generate_uid_avec_external_id(self):
         """Utilise l'external_id comme UID si fourni."""
@@ -147,7 +147,7 @@ class TestICalGeneratorGenerate:
         assert "UID:custom_uid_123@assistant-matanne" in ical
     
     def test_generate_escape_caracteres_speciaux(self):
-        """Échappe les caractères spéciaux dans le titre."""
+        """Ã‰chappe les caractères spéciaux dans le titre."""
         event = CalendarEventExternal(
             title="Rendez-vous; Dr Martin, clinique",
             start_time=datetime(2026, 2, 12, 9, 30),
@@ -256,13 +256,13 @@ BEGIN:VEVENT
 UID:e1@example.com
 DTSTART:20260210T100000
 DTEND:20260210T110000
-SUMMARY:Événement 1
+SUMMARY:Ã‰vénement 1
 END:VEVENT
 BEGIN:VEVENT
 UID:e2@example.com
 DTSTART:20260210T140000
 DTEND:20260210T150000
-SUMMARY:Événement 2
+SUMMARY:Ã‰vénement 2
 END:VEVENT
 END:VCALENDAR"""
         
@@ -270,8 +270,8 @@ END:VCALENDAR"""
         
         assert len(events) == 2
         titles = [e.title for e in events]
-        assert "Événement 1" in titles
-        assert "Événement 2" in titles
+        assert "Ã‰vénement 1" in titles
+        assert "Ã‰vénement 2" in titles
     
     def test_parse_datetime_utc(self):
         """Parse les dates en UTC (avec Z)."""
@@ -338,7 +338,7 @@ class TestICalRoundTrip:
         originals = [
             CalendarEventExternal(
                 external_id=f"rt{i}",
-                title=f"Événement {i}",
+                title=f"Ã‰vénement {i}",
                 start_time=datetime(2026, 2, 10 + i, 10, 0),
                 end_time=datetime(2026, 2, 10 + i, 11, 0)
             )
@@ -359,20 +359,20 @@ class TestICalEdgeCases:
     
     def test_parse_evenement_invalide_silently_skipped(self):
         """Parse un calendrier avec événement invalide - ignoré silencieusement."""
-        # Événement avec dates invalides qui cause une exception lors du parsing
+        # Ã‰vénement avec dates invalides qui cause une exception lors du parsing
         ical = """BEGIN:VCALENDAR
 VERSION:2.0
 BEGIN:VEVENT
 UID:invalid@example.com
 DTSTART:invalid_date
 DTEND:also_invalid
-SUMMARY:Événement invalide
+SUMMARY:Ã‰vénement invalide
 END:VEVENT
 BEGIN:VEVENT
 UID:valid@example.com
 DTSTART:20260210T140000
 DTEND:20260210T150000
-SUMMARY:Événement valide
+SUMMARY:Ã‰vénement valide
 END:VEVENT
 END:VCALENDAR"""
         
@@ -383,11 +383,11 @@ END:VCALENDAR"""
         assert len(events) >= 1
         # Au moins un événement valide
         titles = [e.title for e in events]
-        assert "Événement valide" in titles
+        assert "Ã‰vénement valide" in titles
     
     def test_parse_datetime_format_inconnu(self):
         """Parse une date avec format inconnu retourne datetime.now()."""
-        # Format qui ne correspond ni à date seule (8 chars) ni à datetime (avec T)
+        # Format qui ne correspond ni Ã  date seule (8 chars) ni Ã  datetime (avec T)
         result = ICalGenerator._parse_ical_datetime("abc")
         
         # Doit retourner une date proche de maintenant

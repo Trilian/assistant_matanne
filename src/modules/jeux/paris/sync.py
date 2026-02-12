@@ -1,8 +1,8 @@
-﻿"""
+"""
 Fonctions de synchronisation avec l'API Football-Data.
 """
 
-from ._common import (
+from .utils import (
     date, Dict, logger,
     obtenir_contexte_db, Equipe, Match,
     CHAMPIONNATS,
@@ -12,14 +12,14 @@ from ._common import (
 
 def sync_equipes_depuis_api(championnat: str) -> int:
     """
-    Synchronise TOUTES les équipes d'un championnat depuis l'API.
+    Synchronise TOUTES les equipes d'un championnat depuis l'API.
     Ajoute les nouvelles, met à jour les existantes.
     
     Returns:
-        Nombre d'équipes ajoutées/mises à jour
+        Nombre d'equipes ajoutees/mises à jour
     """
     try:
-        logger.info(f"🔄 Synchronisation des équipes: {championnat}")
+        logger.info(f"🔄 Synchronisation des equipes: {championnat}")
         
         classement = api_charger_classement(championnat)
         if not classement:
@@ -31,7 +31,7 @@ def sync_equipes_depuis_api(championnat: str) -> int:
         with obtenir_contexte_db() as session:
             for equipe_api in classement:
                 try:
-                    # Chercher si équipe existe déjà
+                    # Chercher si equipe existe dejà
                     equipe = session.query(Equipe).filter(
                         Equipe.nom == equipe_api["nom"],
                         Equipe.championnat == championnat
@@ -46,7 +46,7 @@ def sync_equipes_depuis_api(championnat: str) -> int:
                         equipe.buts_marques = equipe_api.get("buts_marques", equipe.buts_marques)
                         equipe.buts_encaisses = equipe_api.get("buts_encaisses", equipe.buts_encaisses)
                     else:
-                        # Créer nouvelle équipe
+                        # Creer nouvelle equipe
                         equipe = Equipe(
                             nom=equipe_api["nom"],
                             championnat=championnat,
@@ -60,18 +60,18 @@ def sync_equipes_depuis_api(championnat: str) -> int:
                         session.add(equipe)
                     count += 1
                 except Exception as e:
-                    logger.debug(f"Erreur équipe {equipe_api.get('nom')}: {e}")
+                    logger.debug(f"Erreur equipe {equipe_api.get('nom')}: {e}")
                     continue
             
             try:
                 session.commit()
             except Exception as e:
-                logger.error(f"Erreur commit équipes: {e}")
+                logger.error(f"Erreur commit equipes: {e}")
                 session.rollback()
         
         return count
     except Exception as e:
-        logger.error(f"❌ Erreur sync équipes: {e}")
+        logger.error(f"❌ Erreur sync equipes: {e}")
         return 0
 
 
@@ -89,7 +89,7 @@ def sync_matchs_a_venir(jours: int = 7) -> Dict[str, int]:
     Synchronise les matchs à venir depuis l'API pour tous les championnats.
     
     Returns:
-        Dictionnaire {championnat: nb_matchs_ajoutés}
+        Dictionnaire {championnat: nb_matchs_ajoutes}
     """
     resultats = {}
     
@@ -101,7 +101,7 @@ def sync_matchs_a_venir(jours: int = 7) -> Dict[str, int]:
                     count = 0
                     
                     for match_api in matchs_api:
-                        # Chercher les équipes
+                        # Chercher les equipes
                         dom_nom = match_api.get("equipe_domicile", "")
                         ext_nom = match_api.get("equipe_exterieur", "")
                         date_match = match_api.get("date")
@@ -122,7 +122,7 @@ def sync_matchs_a_venir(jours: int = 7) -> Dict[str, int]:
                         if not dom or not ext:
                             continue
                         
-                        # Vérifier si match existe déjà
+                        # Verifier si match existe dejà
                         existing = session.query(Match).filter(
                             Match.equipe_domicile_id == dom.id,
                             Match.equipe_exterieur_id == ext.id,
@@ -132,7 +132,7 @@ def sync_matchs_a_venir(jours: int = 7) -> Dict[str, int]:
                         if existing:
                             continue
                         
-                        # Créer le match
+                        # Creer le match
                         nouveau_match = Match(
                             equipe_domicile_id=dom.id,
                             equipe_exterieur_id=ext.id,
@@ -156,7 +156,7 @@ def sync_matchs_a_venir(jours: int = 7) -> Dict[str, int]:
             
             session.commit()
             total = sum(resultats.values())
-            logger.info(f"✅ {total} nouveaux matchs synchronisés")
+            logger.info(f"✅ {total} nouveaux matchs synchronises")
             
     except Exception as e:
         logger.error(f"❌ Erreur sync matchs: {e}")
@@ -166,7 +166,7 @@ def sync_matchs_a_venir(jours: int = 7) -> Dict[str, int]:
 
 def refresh_scores_matchs() -> int:
     """
-    Met à jour les scores des matchs terminés depuis l'API Football-Data.
+    Met à jour les scores des matchs termines depuis l'API Football-Data.
     
     Returns:
         Nombre de matchs mis à jour
@@ -174,7 +174,7 @@ def refresh_scores_matchs() -> int:
     try:
         count = 0
         with obtenir_contexte_db() as session:
-            # Matchs non joués dans le passé
+            # Matchs non joues dans le passe
             matchs_a_maj = session.query(Match).filter(
                 Match.joue == False,
                 Match.date_match < date.today()
@@ -184,9 +184,9 @@ def refresh_scores_matchs() -> int:
                 logger.info("✅ Tous les matchs sont à jour")
                 return 0
             
-            logger.info(f"ℹ️ {len(matchs_a_maj)} matchs non terminés à vérifier")
+            logger.info(f"ℹ️ {len(matchs_a_maj)} matchs non termines à verifier")
             
-            # Récupérer les scores depuis l'API pour chaque championnat
+            # Recuperer les scores depuis l'API pour chaque championnat
             for champ in CHAMPIONNATS:
                 try:
                     matchs_api = charger_matchs_termines(champ, jours=14)
@@ -223,7 +223,7 @@ def refresh_scores_matchs() -> int:
                 session.commit()
                 logger.info(f"✅ {count} matchs mis à jour avec scores")
             else:
-                logger.info("ℹ️ Aucun score trouvé dans l'API")
+                logger.info("ℹ️ Aucun score trouve dans l'API")
             
             return count
             

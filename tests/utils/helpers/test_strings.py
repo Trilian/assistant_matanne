@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/utils/helpers/strings.py
 """
 import pytest
@@ -71,7 +71,7 @@ class TestRetirerAccents:
 
     def test_retirer_accents_all_vowels(self):
         """Retire les accents sur toutes les voyelles."""
-        assert retirer_accents("àéîöù") == "aeiou"
+        assert retirer_accents("Ã éîÃ¶ù") == "aeiou"
 
     def test_retirer_cedilla(self):
         """Retire la cédille."""
@@ -79,11 +79,11 @@ class TestRetirerAccents:
 
     def test_retirer_tilde(self):
         """Retire le tilde."""
-        assert retirer_accents("señor") == "senor"
+        assert retirer_accents("seÃ±or") == "senor"
 
     def test_retirer_accents_uppercase(self):
         """Gère les majuscules."""
-        assert retirer_accents("CAFÉ") == "CAFE"
+        assert retirer_accents("CAFÃ‰") == "CAFE"
 
     def test_no_accents_unchanged(self):
         """Texte sans accent inchangé."""

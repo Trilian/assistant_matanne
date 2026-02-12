@@ -1,11 +1,11 @@
-"""
+﻿"""
 Tests pour inventaire_logic.py
 Couverture cible: 80%+
 """
 import pytest
 from datetime import date, datetime, timedelta
 
-from src.domains.cuisine.logic.inventaire_logic import (
+from src.modules.cuisine.inventaire.utils import (
     # Constantes
     EMPLACEMENTS,
     CATEGORIES,
@@ -22,9 +22,9 @@ from src.domains.cuisine.logic.inventaire_logic import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONSTANTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestConstantes:
@@ -57,9 +57,9 @@ class TestConstantes:
             assert "label" in config
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CALCUL STATUT STOCK
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalculStatusStock:
@@ -96,9 +96,9 @@ class TestCalculStatusStock:
         assert calculer_status_stock(article) == "critique"
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS CALCUL STATUT PÉREMPTION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS CALCUL STATUT PÃ‰REMPTION
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalculStatusPeremption:
@@ -149,9 +149,9 @@ class TestCalculStatusPeremption:
         assert calculer_status_peremption(article) == "ok"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CALCUL STATUT GLOBAL
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalculStatusGlobal:
@@ -218,9 +218,9 @@ class TestCalculStatusGlobal:
         assert "emoji" in result["config"]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FILTRAGE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFiltrageEmplacement:
@@ -281,7 +281,7 @@ class TestFiltrageRecherche:
         return [
             {"ingredient_nom": "Lait entier", "notes": "Bio"},
             {"ingredient_nom": "Yaourt nature", "notes": ""},
-            {"ingredient_nom": "Crème fraîche", "notes": "Épaisse"},
+            {"ingredient_nom": "Crème fraîche", "notes": "Ã‰paisse"},
         ]
 
     def test_recherche_nom(self, articles):
@@ -290,7 +290,7 @@ class TestFiltrageRecherche:
         assert len(result) == 1
 
     def test_recherche_case_insensitive(self, articles):
-        """Recherche insensible à la casse."""
+        """Recherche insensible Ã  la casse."""
         result = filtrer_par_recherche(articles, "YAOURT")
         assert len(result) == 1
 
@@ -310,9 +310,9 @@ class TestFiltrageRecherche:
         assert len(result) == 1
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS FILTRAGE COMBINÉ
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS FILTRAGE COMBINÃ‰
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFiltrageInventaire:
@@ -324,19 +324,19 @@ class TestFiltrageInventaire:
             {"ingredient_nom": "Lait", "categorie": "Produits laitiers", "emplacement": "Frigo", "quantite": 1, "seuil_critique": 2},
             {"ingredient_nom": "Pommes", "categorie": "Fruits & Légumes", "emplacement": "Frigo", "quantite": 10, "seuil_critique": 2},
             {"ingredient_nom": "Yaourt", "categorie": "Produits laitiers", "emplacement": "Frigo", "quantite": 5, "seuil_critique": 2},
-            {"ingredient_nom": "Pain", "categorie": "Épicerie", "emplacement": "Placard", "quantite": 2, "seuil_critique": 2},
+            {"ingredient_nom": "Pain", "categorie": "Ã‰picerie", "emplacement": "Placard", "quantite": 2, "seuil_critique": 2},
         ]
 
     def test_filtre_unique(self, articles):
         """Un seul filtre appliqué."""
-        from src.domains.cuisine.logic.inventaire_logic import filtrer_inventaire
+        from src.modules.cuisine.inventaire.utils import filtrer_inventaire
         
         result = filtrer_inventaire(articles, categorie="Produits laitiers")
         assert len(result) == 2
 
     def test_filtres_combines(self, articles):
         """Plusieurs filtres combinés."""
-        from src.domains.cuisine.logic.inventaire_logic import filtrer_inventaire
+        from src.modules.cuisine.inventaire.utils import filtrer_inventaire
         
         result = filtrer_inventaire(
             articles, 
@@ -347,22 +347,22 @@ class TestFiltrageInventaire:
 
     def test_sans_filtre(self, articles):
         """Aucun filtre retourne tout."""
-        from src.domains.cuisine.logic.inventaire_logic import filtrer_inventaire
+        from src.modules.cuisine.inventaire.utils import filtrer_inventaire
         
         result = filtrer_inventaire(articles)
         assert len(result) == 4
 
     def test_filtre_avec_recherche(self, articles):
         """Filtre avec recherche textuelle."""
-        from src.domains.cuisine.logic.inventaire_logic import filtrer_inventaire
+        from src.modules.cuisine.inventaire.utils import filtrer_inventaire
         
         result = filtrer_inventaire(articles, recherche="lait")
         assert len(result) == 1
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ALERTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalculerAlertes:
@@ -384,7 +384,7 @@ class TestCalculerAlertes:
 
     def test_alertes_structure(self, articles_varies):
         """Les alertes ont la bonne structure."""
-        from src.domains.cuisine.logic.inventaire_logic import calculer_alertes
+        from src.modules.cuisine.inventaire.utils import calculer_alertes
         
         alertes = calculer_alertes(articles_varies)
         
@@ -395,7 +395,7 @@ class TestCalculerAlertes:
 
     def test_alerte_critique(self, articles_varies):
         """Détecte les articles en stock critique."""
-        from src.domains.cuisine.logic.inventaire_logic import calculer_alertes
+        from src.modules.cuisine.inventaire.utils import calculer_alertes
         
         alertes = calculer_alertes(articles_varies)
         
@@ -404,7 +404,7 @@ class TestCalculerAlertes:
 
     def test_alerte_perime(self, articles_varies):
         """Détecte les articles périmés."""
-        from src.domains.cuisine.logic.inventaire_logic import calculer_alertes
+        from src.modules.cuisine.inventaire.utils import calculer_alertes
         
         alertes = calculer_alertes(articles_varies)
         
@@ -413,7 +413,7 @@ class TestCalculerAlertes:
 
     def test_alerte_bientot_perime(self, articles_varies):
         """Détecte les articles bientôt périmés."""
-        from src.domains.cuisine.logic.inventaire_logic import calculer_alertes
+        from src.modules.cuisine.inventaire.utils import calculer_alertes
         
         alertes = calculer_alertes(articles_varies)
         
@@ -426,7 +426,7 @@ class TestCompterAlertes:
 
     def test_compte_correct(self):
         """Compte les alertes correctement."""
-        from src.domains.cuisine.logic.inventaire_logic import compter_alertes
+        from src.modules.cuisine.inventaire.utils import compter_alertes
         
         alertes = {
             "critique": [1, 2, 3],
@@ -444,7 +444,7 @@ class TestCompterAlertes:
 
     def test_compte_vide(self):
         """Compte des alertes vides."""
-        from src.domains.cuisine.logic.inventaire_logic import compter_alertes
+        from src.modules.cuisine.inventaire.utils import compter_alertes
         
         alertes = {
             "critique": [],
@@ -458,9 +458,9 @@ class TestCompterAlertes:
         assert all(v == 0 for v in result.values())
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS STATISTIQUES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestStatistiquesInventaire:
@@ -477,7 +477,7 @@ class TestStatistiquesInventaire:
 
     def test_statistiques_structure(self, articles):
         """Les statistiques ont la bonne structure."""
-        from src.domains.cuisine.logic.inventaire_logic import calculer_statistiques_inventaire
+        from src.modules.cuisine.inventaire.utils import calculer_statistiques_inventaire
         
         stats = calculer_statistiques_inventaire(articles)
         
@@ -486,7 +486,7 @@ class TestStatistiquesInventaire:
 
     def test_compte_total(self, articles):
         """Compte le total d'articles."""
-        from src.domains.cuisine.logic.inventaire_logic import calculer_statistiques_inventaire
+        from src.modules.cuisine.inventaire.utils import calculer_statistiques_inventaire
         
         stats = calculer_statistiques_inventaire(articles)
         
@@ -494,7 +494,7 @@ class TestStatistiquesInventaire:
 
     def test_liste_vide(self):
         """Statistiques d'une liste vide."""
-        from src.domains.cuisine.logic.inventaire_logic import calculer_statistiques_inventaire
+        from src.modules.cuisine.inventaire.utils import calculer_statistiques_inventaire
         
         stats = calculer_statistiques_inventaire([])
         
@@ -508,13 +508,13 @@ class TestGroupement:
     def articles(self):
         return [
             {"ingredient_nom": "Lait", "emplacement": "Frigo", "categorie": "Produits laitiers"},
-            {"ingredient_nom": "Pain", "emplacement": "Placard", "categorie": "Épicerie"},
+            {"ingredient_nom": "Pain", "emplacement": "Placard", "categorie": "Ã‰picerie"},
             {"ingredient_nom": "Yaourt", "emplacement": "Frigo", "categorie": "Produits laitiers"},
         ]
 
     def test_grouper_par_emplacement(self, articles):
         """Groupe par emplacement."""
-        from src.domains.cuisine.logic.inventaire_logic import grouper_par_emplacement
+        from src.modules.cuisine.inventaire.utils import grouper_par_emplacement
         
         result = grouper_par_emplacement(articles)
         
@@ -525,12 +525,12 @@ class TestGroupement:
 
     def test_grouper_par_categorie(self, articles):
         """Groupe par catégorie."""
-        from src.domains.cuisine.logic.inventaire_logic import grouper_par_categorie
+        from src.modules.cuisine.inventaire.utils import grouper_par_categorie
         
         result = grouper_par_categorie(articles)
         
         assert "Produits laitiers" in result
-        assert "Épicerie" in result
+        assert "Ã‰picerie" in result
         assert len(result["Produits laitiers"]) == 2
 
 
@@ -539,7 +539,7 @@ class TestValidationArticle:
 
     def test_article_valide(self):
         """Article avec tous les champs valides."""
-        from src.domains.cuisine.logic.inventaire_logic import valider_article_inventaire
+        from src.modules.cuisine.inventaire.utils import valider_article_inventaire
         
         article = {
             "ingredient_nom": "Lait",
@@ -555,7 +555,7 @@ class TestValidationArticle:
 
     def test_article_nom_manquant(self):
         """Article sans nom."""
-        from src.domains.cuisine.logic.inventaire_logic import valider_article_inventaire
+        from src.modules.cuisine.inventaire.utils import valider_article_inventaire
         
         article = {
             "quantite": 5,
@@ -569,7 +569,7 @@ class TestValidationArticle:
 
     def test_article_quantite_negative(self):
         """Article avec quantité négative."""
-        from src.domains.cuisine.logic.inventaire_logic import valider_article_inventaire
+        from src.modules.cuisine.inventaire.utils import valider_article_inventaire
         
         article = {
             "ingredient_nom": "Lait",
@@ -586,7 +586,7 @@ class TestFormatage:
 
     def test_formater_article_label(self):
         """Formate l'étiquette d'un article."""
-        from src.domains.cuisine.logic.inventaire_logic import formater_article_label
+        from src.modules.cuisine.inventaire.utils import formater_article_label
         
         article = {
             "ingredient_nom": "Lait",
@@ -601,7 +601,7 @@ class TestFormatage:
 
     def test_formater_inventaire_rapport(self):
         """Formate un rapport d'inventaire."""
-        from src.domains.cuisine.logic.inventaire_logic import formater_inventaire_rapport
+        from src.modules.cuisine.inventaire.utils import formater_inventaire_rapport
         
         articles = [
             {"ingredient_nom": "Lait", "quantite": 2, "unite": "L", "emplacement": "Frigo"},
@@ -619,7 +619,7 @@ class TestCalculJoursPeremption:
 
     def test_jours_positifs(self):
         """Calcule les jours restants."""
-        from src.domains.cuisine.logic.inventaire_logic import calculer_jours_avant_peremption
+        from src.modules.cuisine.inventaire.utils import calculer_jours_avant_peremption
         
         today = date.today()
         article = {"date_peremption": today + timedelta(days=5)}
@@ -630,7 +630,7 @@ class TestCalculJoursPeremption:
 
     def test_jours_negatifs(self):
         """Article périmé (jours négatifs)."""
-        from src.domains.cuisine.logic.inventaire_logic import calculer_jours_avant_peremption
+        from src.modules.cuisine.inventaire.utils import calculer_jours_avant_peremption
         
         today = date.today()
         article = {"date_peremption": today - timedelta(days=3)}
@@ -641,7 +641,7 @@ class TestCalculJoursPeremption:
 
     def test_sans_date_peremption(self):
         """Article sans date de péremption."""
-        from src.domains.cuisine.logic.inventaire_logic import calculer_jours_avant_peremption
+        from src.modules.cuisine.inventaire.utils import calculer_jours_avant_peremption
         
         article = {"ingredient_nom": "Sel"}
         

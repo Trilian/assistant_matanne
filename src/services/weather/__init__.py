@@ -1,4 +1,4 @@
-"""
+﻿"""
 Package d'alertes météo pour le jardin.
 
 Exports:

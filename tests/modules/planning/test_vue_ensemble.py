@@ -1,4 +1,4 @@
-"""Tests pour vue ensemble."""
+﻿"""Tests pour vue ensemble."""
 
 import pytest
 from unittest.mock import patch

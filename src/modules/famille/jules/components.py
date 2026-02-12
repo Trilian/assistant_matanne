@@ -1,13 +1,13 @@
-﻿"""
+"""
 Module Jules - Composants UI
 """
 
-from ._common import (
+from .utils import (
     st, date,
     obtenir_contexte_db, FamilyPurchase,
     CATEGORIES_CONSEILS
 )
-from .helpers import (
+from .utilitaires import (
     get_age_jules, get_activites_pour_age, get_taille_vetements,
     get_achats_jules_en_attente
 )
@@ -33,34 +33,34 @@ def render_dashboard():
     with col3:
         st.metric("👟 Pointure", tailles["chaussures"])
     
-    # Achats suggérés
+    # Achats suggeres
     if achats:
         st.markdown("---")
-        st.markdown("**🛒 Achats suggérés:**")
+        st.markdown("**🛒 Achats suggeres:**")
         for achat in achats[:3]:
             emoji = "🔴" if achat.priorite in ["urgent", "haute"] else "🟡"
             st.write(f"{emoji} {achat.nom} ({achat.categorie.replace('jules_', '')})")
 
 
 def render_activites():
-    """Affiche les activités du jour"""
+    """Affiche les activites du jour"""
     age = get_age_jules()
     activites = get_activites_pour_age(age["mois"])
     
-    st.subheader("🎨 Activités du jour")
+    st.subheader("🎨 Activites du jour")
     
     # Filtres
     col1, col2 = st.columns(2)
     with col1:
-        filtre_lieu = st.selectbox("Lieu", ["Tous", "Intérieur", "Extérieur"], key="filtre_lieu")
+        filtre_lieu = st.selectbox("Lieu", ["Tous", "Interieur", "Exterieur"], key="filtre_lieu")
     with col2:
         if st.button("🤖 Suggestions IA"):
             st.session_state["jules_show_ai_activities"] = True
     
     # Filtrer
-    if filtre_lieu == "Intérieur":
+    if filtre_lieu == "Interieur":
         activites = [a for a in activites if a.get("interieur", True)]
-    elif filtre_lieu == "Extérieur":
+    elif filtre_lieu == "Exterieur":
         activites = [a for a in activites if not a.get("interieur", True)]
     
     # Afficher
@@ -80,11 +80,11 @@ def render_activites():
         st.markdown("---")
         st.markdown("**🤖 Suggestions IA:**")
         
-        with st.spinner("Génération en cours..."):
+        with st.spinner("Generation en cours..."):
             try:
                 import asyncio
                 service = JulesAIService()
-                meteo = "intérieur" if filtre_lieu != "Extérieur" else "extérieur"
+                meteo = "interieur" if filtre_lieu != "Exterieur" else "exterieur"
                 result = asyncio.run(service.suggerer_activites(age["mois"], meteo))
                 st.markdown(result)
             except Exception as e:
@@ -105,7 +105,7 @@ def render_shopping():
     # Info tailles
     st.info(f"📏 Taille actuelle: **{tailles['vetements']}** • Pointure: **{tailles['chaussures']}**")
     
-    # Tabs par catégorie
+    # Tabs par categorie
     tabs = st.tabs(["👕 Vêtements", "🧸 Jouets", "🛠️ Équipement", "➕ Ajouter"])
     
     with tabs[0]:
@@ -115,8 +115,8 @@ def render_shopping():
         render_achats_categorie("jules_jouets")
         
         # Suggestions IA jouets
-        if st.button("🤖 Suggérer des jouets"):
-            with st.spinner("Génération..."):
+        if st.button("🤖 Suggerer des jouets"):
+            with st.spinner("Generation..."):
                 try:
                     import asyncio
                     service = JulesAIService()
@@ -133,7 +133,7 @@ def render_shopping():
 
 
 def render_achats_categorie(categorie: str):
-    """Affiche les achats d'une catégorie"""
+    """Affiche les achats d'une categorie"""
     try:
         with obtenir_contexte_db() as db:
             achats = db.query(FamilyPurchase).filter(
@@ -166,7 +166,7 @@ def render_achats_categorie(categorie: str):
                             achat.achete = True
                             achat.date_achat = date.today()
                             db.commit()
-                            st.success("Acheté!")
+                            st.success("Achete!")
                             st.rerun()
     except Exception as e:
         st.error(f"Erreur: {e}")
@@ -179,18 +179,18 @@ def render_form_ajout_achat():
         
         col1, col2 = st.columns(2)
         with col1:
-            categorie = st.selectbox("Catégorie", [
+            categorie = st.selectbox("Categorie", [
                 ("jules_vetements", "👕 Vêtements"),
                 ("jules_jouets", "🧸 Jouets"),
                 ("jules_equipement", "🛠️ Équipement"),
             ], format_func=lambda x: x[1])
         
         with col2:
-            priorite = st.selectbox("Priorité", ["moyenne", "haute", "urgent", "basse"])
+            priorite = st.selectbox("Priorite", ["moyenne", "haute", "urgent", "basse"])
         
         col3, col4 = st.columns(2)
         with col3:
-            prix = st.number_input("Prix estimé (€)", min_value=0.0, step=5.0)
+            prix = st.number_input("Prix estime (€)", min_value=0.0, step=5.0)
         with col4:
             taille = st.text_input("Taille (optionnel)")
         
@@ -215,20 +215,20 @@ def render_form_ajout_achat():
                         )
                         db.add(achat)
                         db.commit()
-                        st.success(f"✅ {nom} ajouté!")
+                        st.success(f"✅ {nom} ajoute!")
                         st.rerun()
                 except Exception as e:
                     st.error(f"Erreur: {e}")
 
 
 def render_conseils():
-    """Affiche les conseils développement"""
+    """Affiche les conseils developpement"""
     age = get_age_jules()
     
-    st.subheader("💡 Conseils Développement")
-    st.caption(f"Adaptés pour {age['mois']} mois")
+    st.subheader("💡 Conseils Developpement")
+    st.caption(f"Adaptes pour {age['mois']} mois")
     
-    # Sélection du thème
+    # Selection du thème
     cols = st.columns(3)
     themes = list(CATEGORIES_CONSEILS.items())
     
@@ -238,14 +238,14 @@ def render_conseils():
             if st.button(f"{info['emoji']} {info['titre']}", key=f"conseil_{key}", use_container_width=True):
                 st.session_state["jules_conseil_theme"] = key
     
-    # Afficher le conseil sélectionné
+    # Afficher le conseil selectionne
     theme = st.session_state.get("jules_conseil_theme")
     if theme:
         st.markdown("---")
         info = CATEGORIES_CONSEILS[theme]
         st.markdown(f"### {info['emoji']} {info['titre']}")
         
-        with st.spinner("Génération du conseil..."):
+        with st.spinner("Generation du conseil..."):
             try:
                 import asyncio
                 service = JulesAIService()

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests complets pour src/services/io_service.py
 Objectif: couverture >80%
 """
@@ -7,9 +7,9 @@ import pytest
 from datetime import date, datetime
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS IOService.to_csv
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestIOServiceToCsv:
     """Tests for to_csv method."""
@@ -18,7 +18,7 @@ class TestIOServiceToCsv:
         """Test CSV export with empty list."""
         from src.services.io_service import IOService
         
-        result = IOService.to_csv([], {"nom": "Nom", "qty": "Quantité"})
+        result = IOService.to_csv([], {"nom": "Nom", "qty": "QuantitÃ©"})
         
         assert result == ""
     
@@ -27,12 +27,12 @@ class TestIOServiceToCsv:
         from src.services.io_service import IOService
         
         items = [{"nom": "Pommes", "quantite": 5}]
-        mapping = {"nom": "Nom", "quantite": "Quantité"}
+        mapping = {"nom": "Nom", "quantite": "QuantitÃ©"}
         
         result = IOService.to_csv(items, mapping)
         
         assert "Nom" in result
-        assert "Quantité" in result
+        assert "QuantitÃ©" in result
         assert "Pommes" in result
         assert "5" in result
     
@@ -45,7 +45,7 @@ class TestIOServiceToCsv:
             {"nom": "Oranges", "quantite": 3},
             {"nom": "Bananes", "quantite": 7}
         ]
-        mapping = {"nom": "Nom", "quantite": "Quantité"}
+        mapping = {"nom": "Nom", "quantite": "QuantitÃ©"}
         
         result = IOService.to_csv(items, mapping)
         
@@ -60,7 +60,7 @@ class TestIOServiceToCsv:
         from src.services.io_service import IOService
         
         items = [{"nom": "Pommes", "quantite": None}]
-        mapping = {"nom": "Nom", "quantite": "Quantité"}
+        mapping = {"nom": "Nom", "quantite": "QuantitÃ©"}
         
         result = IOService.to_csv(items, mapping)
         
@@ -72,7 +72,7 @@ class TestIOServiceToCsv:
         from src.services.io_service import IOService
         
         items = [{"nom": "Lait", "date_peremption": date(2026, 3, 15)}]
-        mapping = {"nom": "Nom", "date_peremption": "Péremption"}
+        mapping = {"nom": "Nom", "date_peremption": "PÃ©remption"}
         
         result = IOService.to_csv(items, mapping)
         
@@ -117,28 +117,28 @@ class TestIOServiceToCsv:
         """Test CSV export with list values."""
         from src.services.io_service import IOService
         
-        items = [{"nom": "Recette", "tags": ["facile", "rapide", "santé"]}]
+        items = [{"nom": "Recette", "tags": ["facile", "rapide", "santÃ©"]}]
         mapping = {"nom": "Nom", "tags": "Tags"}
         
         result = IOService.to_csv(items, mapping)
         
-        assert "facile, rapide, santé" in result
+        assert "facile, rapide, santÃ©" in result
     
     def test_to_csv_with_tuple_value(self):
         """Test CSV export with tuple values."""
         from src.services.io_service import IOService
         
         items = [{"nom": "Recette", "coords": (1, 2, 3)}]
-        mapping = {"nom": "Nom", "coords": "Coordonnées"}
+        mapping = {"nom": "Nom", "coords": "CoordonnÃ©es"}
         
         result = IOService.to_csv(items, mapping)
         
         assert "1, 2, 3" in result
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS IOService.from_csv
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestIOServiceFromCsv:
     """Tests for from_csv method."""
@@ -147,8 +147,8 @@ class TestIOServiceFromCsv:
         """Test CSV import with simple data."""
         from src.services.io_service import IOService
         
-        csv_str = "Nom,Quantité\nPommes,5\nOranges,3"
-        mapping = {"nom": "Nom", "quantite": "Quantité"}
+        csv_str = "Nom,QuantitÃ©\nPommes,5\nOranges,3"
+        mapping = {"nom": "Nom", "quantite": "QuantitÃ©"}
         required = ["nom"]
         
         items, errors = IOService.from_csv(csv_str, mapping, required)
@@ -162,8 +162,8 @@ class TestIOServiceFromCsv:
         """Test CSV import with missing required field."""
         from src.services.io_service import IOService
         
-        csv_str = "Nom,Quantité\n,5\nOranges,3"  # First row missing name
-        mapping = {"nom": "Nom", "quantite": "Quantité"}
+        csv_str = "Nom,QuantitÃ©\n,5\nOranges,3"  # First row missing name
+        mapping = {"nom": "Nom", "quantite": "QuantitÃ©"}
         required = ["nom"]
         
         items, errors = IOService.from_csv(csv_str, mapping, required)
@@ -326,8 +326,8 @@ class TestIOServiceFromCsv:
         """Test CSV import with integer values."""
         from src.services.io_service import IOService
         
-        csv_str = "Nom,Quantité\nPommes,10"
-        mapping = {"nom": "Nom", "quantite": "Quantité"}
+        csv_str = "Nom,QuantitÃ©\nPommes,10"
+        mapping = {"nom": "Nom", "quantite": "QuantitÃ©"}
         required = ["nom"]
         
         items, errors = IOService.from_csv(csv_str, mapping, required)
@@ -336,9 +336,9 @@ class TestIOServiceFromCsv:
         assert isinstance(items[0]["quantite"], int)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS IOService.to_json
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestIOServiceToJson:
     """Tests for to_json method."""
@@ -408,18 +408,18 @@ class TestIOServiceToJson:
         """Test JSON export preserves non-ASCII characters."""
         from src.services.io_service import IOService
         
-        items = [{"nom": "Pâté français", "description": "Délicieux"}]
+        items = [{"nom": "PÃ¢tÃ© franÃ§ais", "description": "DÃ©licieux"}]
         
         result = IOService.to_json(items)
         
         # Non-ASCII chars should be preserved
-        assert "Pâté français" in result
-        assert "Délicieux" in result
+        assert "PÃ¢tÃ© franÃ§ais" in result
+        assert "DÃ©licieux" in result
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS IOService.from_json
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestIOServiceFromJson:
     """Tests for from_json method."""
@@ -500,9 +500,9 @@ class TestIOServiceFromJson:
         assert len(errors) == 0
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS _format_value
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestIOServiceFormatValue:
     """Tests for _format_value method."""
@@ -532,9 +532,9 @@ class TestIOServiceFormatValue:
         assert IOService._format_value(3.14) == "3.14"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS _parse_value
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestIOServiceParseValue:
     """Tests for _parse_value method."""
@@ -578,9 +578,9 @@ class TestIOServiceParseValue:
         assert result == 3.14
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FIELD MAPPINGS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestFieldMappings:
     """Tests for predefined field mappings."""
@@ -620,18 +620,18 @@ class TestFieldMappings:
         """Test using RECETTE_FIELD_MAPPING for export."""
         from src.services.io_service import IOService, RECETTE_FIELD_MAPPING
         
-        items = [{"nom": "Pâtes", "temps_preparation": 10, "portions": 4}]
+        items = [{"nom": "PÃ¢tes", "temps_preparation": 10, "portions": 4}]
         
         result = IOService.to_csv(items, RECETTE_FIELD_MAPPING)
         
         assert "Nom" in result
-        assert "Temps préparation (min)" in result
+        assert "Temps prÃ©paration (min)" in result
         assert "Portions" in result
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MODULE EXPORTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestModuleExports:
     """Tests for module exports."""

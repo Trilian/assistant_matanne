@@ -1,6 +1,6 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
-Script pour afficher un résumé des tests créés pour src/core
+Script pour afficher un rÃ©sumÃ© des tests crÃ©Ã©s pour src/core
 """
 import subprocess
 import re
@@ -15,10 +15,10 @@ result = subprocess.run(
 output = result.stdout + result.stderr
 
 print("=" * 80)
-print("RÉSUMÉ COUVERTURE SRC/CORE - PHASE 1")
+print("RÃ‰SUMÃ‰ COUVERTURE SRC/CORE - PHASE 1")
 print("=" * 80)
 
-# Extraire le résumé
+# Extraire le rÃ©sumÃ©
 lines = output.split('\n')
 
 # Chercher les stats
@@ -26,7 +26,7 @@ for i, line in enumerate(lines):
     if 'passed' in line or 'failed' in line:
         print(line)
     if 'Name' in line and 'Stmts' in line:
-        # Afficher les 20 lignes suivantes (couverture détaillée)
+        # Afficher les 20 lignes suivantes (couverture dÃ©taillÃ©e)
         for j in range(i, min(i+60, len(lines))):
             if 'src\\core' in lines[j]:
                 print(lines[j])

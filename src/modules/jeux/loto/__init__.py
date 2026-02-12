@@ -1,15 +1,15 @@
-"""
-Module Loto - Analyse statistique et simulation de stratégies
+﻿"""
+Module Loto - Analyse statistique et simulation de stratÃegies
 
-⚠️ DISCLAIMER: Le Loto est un jeu de hasard pur.
-Aucune stratégie ne peut prédire les résultats.
-Ce module est à but éducatif et de divertissement.
+âš ï¸ DISCLAIMER: Le Loto est un jeu de hasard pur.
+Aucune stratÃegie ne peut prÃedire les rÃesultats.
+Ce module est Ã  but Ãeducatif et de divertissement.
 
-Fonctionnalités:
+FonctionnalitÃes:
 - Historique des tirages avec statistiques
-- Analyse des fréquences (curiosité mathématique)
-- Génération de grilles selon différentes stratégies
-- Suivi des "paris virtuels" pour tester les stratégies
+- Analyse des frÃequences (curiositÃe mathÃematique)
+- GÃenÃeration de grilles selon diffÃerentes stratÃegies
+- Suivi des "paris virtuels" pour tester les stratÃegies
 - Simulation et backtesting
 """
 
@@ -17,7 +17,7 @@ from ._common import st
 
 # Import des fonctions pour exposer l'API publique
 from .sync import sync_tirages_loto
-from .helpers import charger_tirages, charger_grilles_utilisateur
+from .utilitaires import charger_tirages, charger_grilles_utilisateur
 from .crud import ajouter_tirage, enregistrer_grille
 from .statistiques import (
     afficher_dernier_tirage,
@@ -29,36 +29,36 @@ from .simulation import afficher_simulation, afficher_gestion_tirages
 
 
 def app():
-    """Point d'entrée du module Loto"""
+    """Point d'entrÃee du module Loto"""
     
-    st.title("🎰 Loto - Analyse & Simulation")
-    st.caption("Analysez les statistiques et testez vos stratégies (virtuellement)")
+    st.title("ðŸŽ° Loto - Analyse & Simulation")
+    st.caption("Analysez les statistiques et testez vos stratÃegies (virtuellement)")
     
     # Avertissement
-    with st.expander("⚠️ Avertissement important", expanded=False):
+    with st.expander("âš ï¸ Avertissement important", expanded=False):
         st.markdown("""
         **Le Loto est un jeu de hasard pur.**
         
-        - Chaque tirage est **totalement indépendant** des précédents
-        - Un numéro "en retard" n'a **pas plus de chances** de sortir
-        - Aucune stratégie ne peut **prédire** les résultats
-        - L'espérance mathématique est **négative** (vous perdez en moyenne)
+        - Chaque tirage est **totalement indÃependant** des prÃecÃedents
+        - Un numÃero "en retard" n'a **pas plus de chances** de sortir
+        - Aucune stratÃegie ne peut **prÃedire** les rÃesultats
+        - L'espÃerance mathÃematique est **nÃegative** (vous perdez en moyenne)
         
-        Ce module est à but **éducatif et de divertissement**. 
+        Ce module est Ã  but **Ãeducatif et de divertissement**. 
         Ne jouez que ce que vous pouvez vous permettre de perdre.
         """)
     
-    # Charger données
+    # Charger donnÃees
     tirages = charger_tirages(limite=200)
     
     # Tabs principaux
     tabs = st.tabs([
-        "📊 Statistiques", 
-        "🎲 Générer Grille",
-        "🎫 Mes Grilles",
-        "🔬 Simulation",
-        "📐 Maths",
-        "⚙️ Tirages"
+        "ðŸ“Š Statistiques", 
+        "ðŸŽ² GÃenÃerer Grille",
+        "ðŸŽ« Mes Grilles",
+        "ðŸ”¬ Simulation",
+        "ðŸ“ Maths",
+        "âš™ï¸ Tirages"
     ])
     
     # TAB 1: STATISTIQUES

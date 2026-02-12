@@ -1,5 +1,5 @@
-﻿"""
-Logique métier du module Rapports (génération rapports) - Séparée de l'UI
+"""
+Logique metier du module Rapports (generation rapports) - Separee de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
 
@@ -16,14 +16,14 @@ logger = logging.getLogger(__name__)
 
 def generer_rapport_synthese(data: Dict[str, Any], periode: str = "mois") -> Dict[str, Any]:
     """
-    Génère un rapport de synthèse.
+    Genère un rapport de synthèse.
     
     Args:
-        data: Données sources
-        periode: Période du rapport (jour, semaine, mois, annee)
+        data: Donnees sources
+        periode: Periode du rapport (jour, semaine, mois, annee)
         
     Returns:
-        Rapport généré
+        Rapport genere
     """
     if periode == "jour":
         jours = 1
@@ -55,15 +55,15 @@ def generer_rapport_synthese(data: Dict[str, Any], periode: str = "mois") -> Dic
 
 def calculer_statistiques_periode(items: List[Dict[str, Any]], date_debut: date, date_fin: date) -> Dict[str, int]:
     """
-    Calcule les statistiques sur une période.
+    Calcule les statistiques sur une periode.
     
     Args:
         items: Liste d'items avec dates
-        date_debut: Date de début
+        date_debut: Date de debut
         date_fin: Date de fin
         
     Returns:
-        Statistiques calculées
+        Statistiques calculees
     """
     resultats = {"total": 0, "par_jour": {}}
     
@@ -82,7 +82,7 @@ def calculer_statistiques_periode(items: List[Dict[str, Any]], date_debut: date,
 
 
 def generer_section_recettes(recettes: List[Dict[str, Any]], periode: str) -> Dict[str, Any]:
-    """Génère la section recettes du rapport."""
+    """Genère la section recettes du rapport."""
     total = len(recettes)
     
     # Par type
@@ -91,7 +91,7 @@ def generer_section_recettes(recettes: List[Dict[str, Any]], periode: str) -> Di
         type_repas = recette.get("type_repas", "Autre")
         par_type[type_repas] = par_type.get(type_repas, 0) + 1
     
-    # Par difficulté
+    # Par difficulte
     par_difficulte = {}
     for recette in recettes:
         diff = recette.get("difficulte", "moyen")
@@ -107,14 +107,14 @@ def generer_section_recettes(recettes: List[Dict[str, Any]], periode: str) -> Di
 
 
 def generer_section_courses(courses: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """Génère la section courses du rapport."""
+    """Genère la section courses du rapport."""
     total = len(courses)
     achetes = len([c for c in courses if c.get("achete", False)])
     
     # Montants
     montant_total = sum(c.get("prix", 0) * c.get("quantite", 1) for c in courses)
     
-    # Par catégorie
+    # Par categorie
     par_categorie = {}
     for course in courses:
         cat = course.get("categorie", "Autre")
@@ -132,7 +132,7 @@ def generer_section_courses(courses: List[Dict[str, Any]]) -> Dict[str, Any]:
 
 
 def generer_section_activites(activites: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """Génère la section activités du rapport."""
+    """Genère la section activites du rapport."""
     total = len(activites)
     
     # Par type
@@ -145,7 +145,7 @@ def generer_section_activites(activites: List[Dict[str, Any]]) -> Dict[str, Any]
     cout_total = sum(act.get("cout", 0) for act in activites)
     
     return {
-        "titre": "🎯 Activités",
+        "titre": "🎯 Activites",
         "total": total,
         "par_type": par_type,
         "cout_total": cout_total,
@@ -159,11 +159,11 @@ def generer_section_activites(activites: List[Dict[str, Any]]) -> Dict[str, Any]
 
 def comparer_periodes(data_periode1: Dict[str, Any], data_periode2: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Compare deux périodes.
+    Compare deux periodes.
     
     Args:
-        data_periode1: Données période 1 (ex: mois précédent)
-        data_periode2: Données période 2 (ex: mois actuel)
+        data_periode1: Donnees periode 1 (ex: mois precedent)
+        data_periode2: Donnees periode 2 (ex: mois actuel)
         
     Returns:
         Comparaison
@@ -216,15 +216,15 @@ def formater_rapport_texte(rapport: Dict[str, Any]) -> str:
         rapport: Rapport à formater
         
     Returns:
-        Texte formaté
+        Texte formate
     """
     lignes = [
         "═══════════════════════════════════════════════════════════" * 60,
         f"[CHART] {rapport.get('titre', 'RAPPORT').upper()}",
         "═══════════════════════════════════════════════════════════" * 60,
-        f"Période: {rapport.get('periode', 'N/A')}",
+        f"Periode: {rapport.get('periode', 'N/A')}",
         f"Du {rapport.get('date_debut')} au {rapport.get('date_fin')}",
-        f"Généré le: {rapport.get('date_generation')}",
+        f"Genere le: {rapport.get('date_generation')}",
         "",
         "STATISTIQUES GLOBALES:",
         "â”€" * 60,
@@ -258,14 +258,14 @@ def formater_rapport_markdown(rapport: Dict[str, Any]) -> str:
         rapport: Rapport à formater
         
     Returns:
-        Markdown formaté
+        Markdown formate
     """
     lignes = [
         f"# [CHART] {rapport.get('titre', 'Rapport')}",
         "",
-        f"**Période:** {rapport.get('periode', 'N/A')}  ",
+        f"**Periode:** {rapport.get('periode', 'N/A')}  ",
         f"**Dates:** Du {rapport.get('date_debut')} au {rapport.get('date_fin')}  ",
-        f"**Généré le:** {rapport.get('date_generation')}",
+        f"**Genere le:** {rapport.get('date_generation')}",
         "",
         "## Statistiques Globales",
         ""
@@ -278,14 +278,14 @@ def formater_rapport_markdown(rapport: Dict[str, Any]) -> str:
     # Sections
     if rapport.get("sections"):
         lignes.append("")
-        lignes.append("## Détails")
+        lignes.append("## Details")
         
         for section in rapport["sections"]:
             lignes.append(f"\n### {section.get('titre', 'Section')}")
             lignes.append(f"\n**Total:** {section.get('total', 0)}")
             
             if "par_type" in section:
-                lignes.append("\n**Répartition:**")
+                lignes.append("\n**Repartition:**")
                 for type_key, count in section["par_type"].items():
                     lignes.append(f"- {type_key}: {count}")
     
@@ -300,7 +300,7 @@ def formater_rapport_html(rapport: Dict[str, Any]) -> str:
         rapport: Rapport à formater
         
     Returns:
-        HTML formaté
+        HTML formate
     """
     html = f"""
 <!DOCTYPE html>
@@ -319,9 +319,9 @@ def formater_rapport_html(rapport: Dict[str, Any]) -> str:
     <h1>[CHART] {rapport.get('titre', 'Rapport')}</h1>
     
     <div class="stats">
-        <p><strong>Période:</strong> {rapport.get('periode', 'N/A')}</p>
+        <p><strong>Periode:</strong> {rapport.get('periode', 'N/A')}</p>
         <p><strong>Dates:</strong> Du {rapport.get('date_debut')} au {rapport.get('date_fin')}</p>
-        <p><strong>Généré le:</strong> {rapport.get('date_generation')}</p>
+        <p><strong>Genere le:</strong> {rapport.get('date_generation')}</p>
     </div>
     
     <h2>Statistiques Globales</h2>
@@ -336,7 +336,7 @@ def formater_rapport_html(rapport: Dict[str, Any]) -> str:
     
     # Sections
     if rapport.get("sections"):
-        html += "    <h2>Détails</h2>\n"
+        html += "    <h2>Details</h2>\n"
         
         for section in rapport["sections"]:
             html += f"""
@@ -360,10 +360,10 @@ def formater_rapport_html(rapport: Dict[str, Any]) -> str:
 
 def preparer_export_csv(data: List[Dict[str, Any]], colonnes: List[str]) -> str:
     """
-    Prépare les données pour export CSV.
+    Prepare les donnees pour export CSV.
     
     Args:
-        data: Données à exporter
+        data: Donnees à exporter
         colonnes: Colonnes à inclure
         
     Returns:

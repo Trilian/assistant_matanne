@@ -14,16 +14,16 @@ def render_historique():
     service = get_inventaire_service()
     
     if service is None:
-        st.error("❌ Service inventaire indisponible")
+        st.error("âŒ Service inventaire indisponible")
         return
     
-    st.subheader("📋 Historique des Modifications")
+    st.subheader("ðŸ“‹ Historique des Modifications")
     
     # Filtres
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        days = st.slider("Période (jours)", 1, 90, 30)
+        days = st.slider("PÃeriode (jours)", 1, 90, 30)
     
     with col2:
         article_id = st.selectbox(
@@ -39,12 +39,12 @@ def render_historique():
             default=["ajout", "modification", "suppression"]
         )
     
-    # Récupérer historique
+    # RÃecupÃerer historique
     try:
         historique = service.get_historique(days=days)
         
         if not historique:
-            st.info("📋 Aucune modification enregistrée dans cette période")
+            st.info("ðŸ“‹ Aucune modification enregistrÃee dans cette pÃeriode")
             return
         
         # Filtrer par type
@@ -61,21 +61,21 @@ def render_historique():
         data = []
         for h in historique_filtres:
             action_icon = {
-                "ajout": "➕",
-                "modification": "✏️",
-                "suppression": "🗑️"
-            }.get(h["type"], "❓")
+                "ajout": "âž•",
+                "modification": "âœï¸",
+                "suppression": "ðŸ—‘ï¸"
+            }.get(h["type"], "â“")
             
-            # Résumer les changements
+            # RÃesumer les changements
             changements = []
             if h["quantite_avant"] is not None:
-                changements.append(f"Qty: {h['quantite_avant']:.1f} → {h['quantite_apres']:.1f}")
+                changements.append(f"Qty: {h['quantite_avant']:.1f} â†’ {h['quantite_apres']:.1f}")
             if h["emplacement_avant"] is not None:
-                changements.append(f"Empl: {h['emplacement_avant']} → {h['emplacement_apres']}")
+                changements.append(f"Empl: {h['emplacement_avant']} â†’ {h['emplacement_apres']}")
             if h["date_peremption_avant"] is not None:
-                changements.append(f"Péremption: {h['date_peremption_avant']} → {h['date_peremption_apres']}")
+                changements.append(f"PÃeremption: {h['date_peremption_avant']} â†’ {h['date_peremption_apres']}")
             
-            changement_text = " | ".join(changements) if changements else "Détails disponibles"
+            changement_text = " | ".join(changements) if changements else "DÃetails disponibles"
             
             data.append({
                 "Date": pd.Timestamp(h["date_modification"]).strftime("%d/%m/%Y %H:%M"),
@@ -101,7 +101,7 @@ def render_historique():
             st.metric("Modifications", modifs)
     
     except Exception as e:
-        st.error(f"❌ Erreur: {str(e)}")
+        st.error(f"âŒ Erreur: {str(e)}")
 
 
 __all__ = ["render_historique"]

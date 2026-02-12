@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Accueil - Dashboard Central
 Vue d'ensemble de l'application avec stats, alertes et raccourcis
 """
@@ -17,8 +17,8 @@ from src.services.planning import get_planning_service
 # Services
 from src.services.recettes import get_recette_service
 
-# Logique métier pure
-from src.domains.utils.logic.accueil_logic import (
+# Logique metier pure
+from src.modules.outils.accueil_utils import (
     calculer_metriques_dashboard,
     compter_alertes_critiques,
     generer_notifications,
@@ -27,9 +27,6 @@ from src.domains.utils.logic.accueil_logic import (
     est_aujourdhui,
     est_en_retard
 )
-
-# UI
-from src.ui.domain import stock_alert
 
 # Dashboard widgets enrichis
 try:
@@ -50,7 +47,7 @@ except ImportError:
 
 
 def app():
-    """Point d'entrée module accueil"""
+    """Point d'entree module accueil"""
 
     # Header
     state = obtenir_etat()
@@ -102,7 +99,7 @@ def app():
         st.markdown("")
         render_courses_summary()
     
-    # Footer avec santé système
+    # Footer avec sante système
     st.markdown("---")
     if WIDGETS_DISPONIBLES:
         col_footer1, col_footer2 = st.columns([3, 1])
@@ -120,17 +117,17 @@ def render_graphiques_enrichis():
     col1, col2 = st.columns(2)
     
     with col1:
-        # Graphique inventaire par catégorie
+        # Graphique inventaire par categorie
         inventaire = get_inventaire_service().get_inventaire_complet()
         fig = graphique_inventaire_categories(inventaire)
         if fig:
-            st.markdown("**📦 Stock par Catégorie**")
+            st.markdown("**📦 Stock par Categorie**")
             st.plotly_chart(fig, width='stretch', key="chart_inventaire")
         else:
-            st.info("Pas de données d'inventaire")
+            st.info("Pas de donnees d'inventaire")
     
     with col2:
-        # Graphique répartition repas
+        # Graphique repartition repas
         planning = get_planning_service().get_planning()
         if planning and planning.repas:
             repas_data = [
@@ -139,7 +136,7 @@ def render_graphiques_enrichis():
             ]
             fig = graphique_repartition_repas(repas_data)
             if fig:
-                st.markdown("**💡 Répartition des Repas**")
+                st.markdown("**💡 Repartition des Repas**")
                 st.plotly_chart(fig, width='stretch', key="chart_repas")
             else:
                 st.info("Pas de planning cette semaine")
@@ -172,7 +169,7 @@ def render_critical_alerts():
             }
         )
 
-    # Péremption proche
+    # Peremption proche
     peremption = [art for art in inventaire if art.get("statut") == "peremption_proche"]
 
     if peremption:
@@ -180,7 +177,7 @@ def render_critical_alerts():
             {
                 "type": "warning",
                 "icon": "⏳",
-                "title": f"{len(peremption)} article(s) périment bientôt",
+                "title": f"{len(peremption)} article(s) periment bientôt",
                 "action": "Voir l'inventaire",
                 "module": "cuisine.inventaire",
             }
@@ -195,12 +192,12 @@ def render_critical_alerts():
                 "type": "info",
                 "icon": "�",
                 "title": "Aucun planning pour cette semaine",
-                "action": "Créer un planning",
+                "action": "Creer un planning",
                 "module": "cuisine.planning_semaine",
             }
         )
 
-    # Tâches ménage en retard
+    # Tâches menage en retard
     try:
         from src.core.database import obtenir_contexte_db
         from src.core.models import MaintenanceTask
@@ -215,12 +212,12 @@ def render_critical_alerts():
                 alerts.append({
                     "type": "warning",
                     "icon": "🧹",
-                    "title": f"{len(taches_retard)} tâche(s) ménage en retard!",
+                    "title": f"{len(taches_retard)} tâche(s) menage en retard!",
                     "action": "Voir Maison",
                     "module": "maison.entretien",
                 })
                 
-                # Détail des tâches critiques
+                # Detail des tâches critiques
                 for t in taches_retard[:3]:
                     jours_retard = (date.today() - t.prochaine_fois).days
                     alerts.append({
@@ -231,7 +228,7 @@ def render_critical_alerts():
                         "module": "maison.entretien",
                     })
     except Exception:
-        pass  # Table pas encore créée
+        pass  # Table pas encore creee
 
     # Afficher alertes
     if not alerts:
@@ -277,7 +274,7 @@ def render_global_stats():
 
     inventaire = get_inventaire_service().get_inventaire_complet()
 
-    # Afficher métriques
+    # Afficher metriques
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
@@ -304,7 +301,7 @@ def render_global_stats():
         planning = get_planning_service().get_planning()
         nb_repas = len(planning.repas) if planning else 0
 
-        st.metric("🧹 Repas Planifiés", nb_repas, help="Cette semaine")
+        st.metric("🧹 Repas Planifies", nb_repas, help="Cette semaine")
 
 
 # ═══════════════════════════════════════════════════════════
@@ -333,7 +330,7 @@ def render_quick_actions():
             st.rerun()
 
     with col3:
-        if st.button("📦 Gérer Inventaire", key="quick_view_inventaire", width='stretch'):
+        if st.button("📦 Gerer Inventaire", key="quick_view_inventaire", width='stretch'):
             GestionnaireEtat.naviguer_vers("cuisine.inventaire")
             st.rerun()
 
@@ -349,7 +346,7 @@ def render_quick_actions():
 
 
 def render_cuisine_summary():
-    """Résumé module Cuisine"""
+    """Resume module Cuisine"""
 
     with st.container():
         st.markdown(
@@ -376,7 +373,7 @@ def render_cuisine_summary():
             st.metric("⚡ Rapides", stats.get("rapides", 0))
 
         with col3:
-            st.metric("🎯 Bébé", stats.get("bebe", 0))
+            st.metric("🎯 Bebe", stats.get("bebe", 0))
 
         if st.button("👶 Voir les recettes", key="nav_recettes", width='stretch'):
             GestionnaireEtat.naviguer_vers("cuisine.recettes")
@@ -386,7 +383,7 @@ def render_cuisine_summary():
 
 
 def render_inventaire_summary():
-    """Résumé inventaire"""
+    """Resume inventaire"""
 
     with st.container():
         st.markdown(
@@ -422,7 +419,7 @@ def render_inventaire_summary():
 
             stock_alert(articles_alert[:3], key="home_inventory_alert")  # Max 3
 
-        if st.button("📦 Gérer l'inventaire", key="nav_inventaire", width='stretch'):
+        if st.button("📦 Gerer l'inventaire", key="nav_inventaire", width='stretch'):
             GestionnaireEtat.naviguer_vers("cuisine.inventaire")
             st.rerun()
 
@@ -430,7 +427,7 @@ def render_inventaire_summary():
 
 
 def render_courses_summary():
-    """Résumé courses"""
+    """Resume courses"""
 
     with st.container():
         st.markdown(
@@ -456,9 +453,9 @@ def render_courses_summary():
         with col3:
             st.metric("🍽️ Moyenne", moyenne)
 
-        # Top priorités
+        # Top priorites
         if haute > 0:
-            st.markdown("**À acheter en priorité:**")
+            st.markdown("**À acheter en priorite:**")
             prioritaires = [a for a in liste if a.get("priorite") == "haute"]
 
             for art in prioritaires[:3]:
@@ -475,7 +472,7 @@ def render_courses_summary():
 
 
 def render_planning_summary():
-    """Résumé planning"""
+    """Resume planning"""
 
     with st.container():
         st.markdown(
@@ -491,7 +488,7 @@ def render_planning_summary():
         if planning and planning.repas:
             total_repas = len(planning.repas)
             
-            # Repas adaptés bébé
+            # Repas adaptes bebe
             repas_bebe = len([r for r in planning.repas if getattr(r, 'compatible_bebe', False)])
 
             col1, col2 = st.columns(2)
@@ -500,7 +497,7 @@ def render_planning_summary():
                 st.metric("Repas", total_repas)
 
             with col2:
-                st.metric("🎯 Bébé", repas_bebe)
+                st.metric("🎯 Bebe", repas_bebe)
 
             # Repas d'aujourd'hui
             aujourd_hui = date.today()
@@ -513,7 +510,7 @@ def render_planning_summary():
                 st.markdown("**Aujourd'hui:**")
                 for repas in repas_aujourdhui[:2]:
                     type_repas = getattr(repas, 'type_repas', 'Repas')
-                    nom_recette = getattr(repas, 'recette_nom', None) or "Non défini"
+                    nom_recette = getattr(repas, 'recette_nom', None) or "Non defini"
                     st.caption(f"• {type_repas}: {nom_recette}")
 
         else:

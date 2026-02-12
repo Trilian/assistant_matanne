@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour courses.py
 
 Module: src.core.models.courses

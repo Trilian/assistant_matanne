@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests approfondis pour src/utils/image_generator.py et src/utils/recipe_importer.py
 Objectif: Atteindre 80%+ de couverture
 
@@ -12,25 +12,25 @@ from unittest.mock import Mock, patch, MagicMock
 from typing import Dict, Any
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS IMAGE GENERATOR
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGetApiKey:
     """Tests pour la fonction _get_api_key"""
     
     def test_get_api_key_from_env(self):
-        """Test récupération clé depuis environnement"""
+        """Test rÃ©cupÃ©ration clÃ© depuis environnement"""
         from src.utils.image_generator import _get_api_key
         
         with patch.dict('os.environ', {'TEST_API_KEY': 'test123'}):
             result = _get_api_key('TEST_API_KEY')
-            # Peut être None si pas de clé, mais ne doit pas lever d'exception
+            # Peut Ãªtre None si pas de clÃ©, mais ne doit pas lever d'exception
             assert result is None or isinstance(result, str)
     
     def test_get_api_key_streamlit_secrets(self):
-        """Test récupération clé depuis Streamlit secrets"""
+        """Test rÃ©cupÃ©ration clÃ© depuis Streamlit secrets"""
         from src.utils.image_generator import _get_api_key
         
         # Mock streamlit module
@@ -52,7 +52,7 @@ class TestConstruireQueryOptimisee:
         assert "cooked" in result or "finished" in result or "fresh" in result
     
     def test_construire_query_avec_ingredients(self):
-        """Test query avec ingrédients"""
+        """Test query avec ingrÃ©dients"""
         from src.utils.image_generator import _construire_query_optimisee
         
         ingredients = [{"nom": "Pommes"}, {"nom": "Sucre"}]
@@ -64,7 +64,7 @@ class TestConstruireQueryOptimisee:
         """Test query pour dessert"""
         from src.utils.image_generator import _construire_query_optimisee
         
-        result = _construire_query_optimisee("Gâteau chocolat", type_plat="dessert")
+        result = _construire_query_optimisee("GÃ¢teau chocolat", type_plat="dessert")
         
         assert "dessert" in result.lower() or "finished" in result or "decorated" in result
     
@@ -72,15 +72,15 @@ class TestConstruireQueryOptimisee:
         """Test query pour soupe"""
         from src.utils.image_generator import _construire_query_optimisee
         
-        result = _construire_query_optimisee("Soupe de légumes", type_plat="soupe")
+        result = _construire_query_optimisee("Soupe de lÃ©gumes", type_plat="soupe")
         
         assert "soup" in result or "bowl" in result or "hot" in result
     
     def test_construire_query_petit_dejeuner(self):
-        """Test query pour petit déjeuner"""
+        """Test query pour petit dÃ©jeuner"""
         from src.utils.image_generator import _construire_query_optimisee
         
-        result = _construire_query_optimisee("Omelette", type_plat="petit_déjeuner")
+        result = _construire_query_optimisee("Omelette", type_plat="petit_dÃ©jeuner")
         
         assert "breakfast" in result or "cooked" in result
 
@@ -90,7 +90,7 @@ class TestRechercherImagePexels:
     
     @patch('src.utils.image_generator.PEXELS_API_KEY', None)
     def test_pexels_sans_cle(self):
-        """Test sans clé API"""
+        """Test sans clÃ© API"""
         from src.utils.image_generator import _rechercher_image_pexels
         
         result = _rechercher_image_pexels("Tarte")
@@ -99,7 +99,7 @@ class TestRechercherImagePexels:
     @patch('src.utils.image_generator.PEXELS_API_KEY', 'test_key')
     @patch('requests.get')
     def test_pexels_avec_resultats(self, mock_get):
-        """Test avec résultats"""
+        """Test avec rÃ©sultats"""
         from src.utils.image_generator import _rechercher_image_pexels
         
         mock_response = Mock()
@@ -120,7 +120,7 @@ class TestRechercherImagePexels:
     @patch('src.utils.image_generator.PEXELS_API_KEY', 'test_key')
     @patch('requests.get')
     def test_pexels_sans_resultats(self, mock_get):
-        """Test sans résultats"""
+        """Test sans rÃ©sultats"""
         from src.utils.image_generator import _rechercher_image_pexels
         
         mock_response = Mock()
@@ -150,7 +150,7 @@ class TestRechercherImagePixabay:
     
     @patch('src.utils.image_generator.PIXABAY_API_KEY', None)
     def test_pixabay_sans_cle(self):
-        """Test sans clé API"""
+        """Test sans clÃ© API"""
         from src.utils.image_generator import _rechercher_image_pixabay
         
         result = _rechercher_image_pixabay("Tarte")
@@ -159,7 +159,7 @@ class TestRechercherImagePixabay:
     @patch('src.utils.image_generator.PIXABAY_API_KEY', 'test_key')
     @patch('requests.get')
     def test_pixabay_avec_resultats(self, mock_get):
-        """Test avec résultats"""
+        """Test avec rÃ©sultats"""
         from src.utils.image_generator import _rechercher_image_pixabay
         
         mock_response = Mock()
@@ -180,7 +180,7 @@ class TestRechercherImagePixabay:
     @patch('src.utils.image_generator.PIXABAY_API_KEY', 'test_key')
     @patch('requests.get')
     def test_pixabay_sans_resultats(self, mock_get):
-        """Test sans résultats"""
+        """Test sans rÃ©sultats"""
         from src.utils.image_generator import _rechercher_image_pixabay
         
         mock_response = Mock()
@@ -198,7 +198,7 @@ class TestRechercherImageUnsplash:
     
     @patch('src.utils.image_generator.UNSPLASH_API_KEY', None)
     def test_unsplash_sans_cle(self):
-        """Test sans clé API"""
+        """Test sans clÃ© API"""
         from src.utils.image_generator import _rechercher_image_unsplash
         
         result = _rechercher_image_unsplash("Tarte", "tarte food")
@@ -207,7 +207,7 @@ class TestRechercherImageUnsplash:
     @patch('src.utils.image_generator.UNSPLASH_API_KEY', 'test_key')
     @patch('requests.get')
     def test_unsplash_avec_resultats(self, mock_get):
-        """Test avec résultats"""
+        """Test avec rÃ©sultats"""
         from src.utils.image_generator import _rechercher_image_unsplash
         
         mock_response = Mock()
@@ -243,7 +243,7 @@ class TestGenererViaPollinations:
     
     @patch('requests.get')
     def test_pollinations_succes(self, mock_get):
-        """Test génération réussie"""
+        """Test gÃ©nÃ©ration rÃ©ussie"""
         from src.utils.image_generator import _generer_via_pollinations
         
         mock_response = Mock()
@@ -251,14 +251,14 @@ class TestGenererViaPollinations:
         mock_response.content = b'image_data'
         mock_get.return_value = mock_response
         
-        result = _generer_via_pollinations("Tarte aux pommes", "Délicieuse tarte")
+        result = _generer_via_pollinations("Tarte aux pommes", "DÃ©licieuse tarte")
         
         # L'URL contient pollinations
         assert result is None or "pollinations" in str(result).lower() or "http" in str(result)
     
     @patch('requests.get')
     def test_pollinations_erreur(self, mock_get):
-        """Test erreur génération"""
+        """Test erreur gÃ©nÃ©ration"""
         from src.utils.image_generator import _generer_via_pollinations
         
         mock_get.side_effect = Exception("Timeout")
@@ -276,7 +276,7 @@ class TestGenererImageRecette:
     @patch('src.utils.image_generator.UNSPLASH_API_KEY', 'test_key')
     @patch('src.utils.image_generator._rechercher_image_unsplash')
     def test_generer_image_unsplash_succes(self, mock_unsplash):
-        """Test génération via Unsplash"""
+        """Test gÃ©nÃ©ration via Unsplash"""
         from src.utils.image_generator import generer_image_recette
         
         mock_unsplash.return_value = "https://unsplash.com/test.jpg"
@@ -298,18 +298,18 @@ class TestGenererImageRecette:
         with patch.dict('os.environ', {'HUGGINGFACE_API_KEY': ''}, clear=False):
             result = generer_image_recette("Tarte")
         
-        # Peut être None ou l'URL selon les fallbacks
+        # Peut Ãªtre None ou l'URL selon les fallbacks
         assert result is None or "http" in result
     
     def test_generer_image_avec_tous_parametres(self):
-        """Test avec tous les paramètres"""
+        """Test avec tous les paramÃ¨tres"""
         from src.utils.image_generator import generer_image_recette
         
         with patch('src.utils.image_generator._rechercher_image_unsplash', return_value="https://test.com/img.jpg"):
             with patch('src.utils.image_generator.UNSPLASH_API_KEY', 'key'):
                 result = generer_image_recette(
-                    nom_recette="Gâteau chocolat",
-                    description="Délicieux gâteau",
+                    nom_recette="GÃ¢teau chocolat",
+                    description="DÃ©licieux gÃ¢teau",
                     ingredients_list=[{"nom": "Chocolat"}, {"nom": "Farine"}],
                     type_plat="dessert"
                 )
@@ -317,9 +317,9 @@ class TestGenererImageRecette:
         assert result is None or "http" in result
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS RECIPE IMPORTER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestRecipeImporterFromUrl:
@@ -327,7 +327,7 @@ class TestRecipeImporterFromUrl:
     
     @patch('requests.get')
     def test_from_url_succes(self, mock_get):
-        """Test import URL réussi"""
+        """Test import URL rÃ©ussi"""
         from src.utils.recipe_importer import RecipeImporter
         
         html_content = """
@@ -337,7 +337,7 @@ class TestRecipeImporterFromUrl:
             {
                 "@type": "Recipe",
                 "name": "Tarte aux pommes",
-                "description": "Délicieuse tarte",
+                "description": "DÃ©licieuse tarte",
                 "recipeIngredient": ["4 pommes", "100g sucre"],
                 "recipeInstructions": [
                     {"@type": "HowToStep", "text": "Couper les pommes"}
@@ -391,7 +391,7 @@ class TestRecipeImporterFromUrl:
     
     @patch('requests.get')
     def test_from_url_erreur_reseau(self, mock_get):
-        """Test erreur réseau"""
+        """Test erreur rÃ©seau"""
         from src.utils.recipe_importer import RecipeImporter
         
         mock_get.side_effect = Exception("Network Error")
@@ -421,7 +421,7 @@ class TestRecipeImporterFromPdf:
     """Tests pour RecipeImporter.from_pdf"""
     
     def test_from_pdf_sans_pypdf2(self):
-        """Test sans PyPDF2 installé"""
+        """Test sans PyPDF2 installÃ©"""
         from src.utils.recipe_importer import RecipeImporter
         
         with patch.dict('sys.modules', {'PyPDF2': None}):
@@ -449,16 +449,16 @@ class TestRecipeImporterFromText:
         from src.utils.recipe_importer import RecipeImporter
         
         text = """Tarte aux pommes
-Une délicieuse tarte maison
+Une dÃ©licieuse tarte maison
 
-Ingrédients:
+IngrÃ©dients:
 - 4 pommes
 - 100g sucre
 - 200g farine
 
-Étapes:
+Ã‰tapes:
 1. Couper les pommes
-2. Préparer la pâte
+2. PrÃ©parer la pÃ¢te
 3. Cuire au four
 """
         
@@ -478,11 +478,11 @@ Temps prep: 10 minutes
 Temps cuisson: 5 minutes
 Portions: 2
 
-Ingrédients:
+IngrÃ©dients:
 - 3 oeufs
 - Sel
 
-Étapes:
+Ã‰tapes:
 1. Battre les oeufs
 2. Cuire
 """
@@ -509,7 +509,7 @@ Ingrédients:
         # Texte qui pourrait causer des erreurs
         result = RecipeImporter.from_text("X")
         
-        # Devrait gérer gracieusement
+        # Devrait gÃ©rer gracieusement
         assert result is None or isinstance(result, dict)
 
 
@@ -521,21 +521,21 @@ class TestRecipeImporterExtractFromText:
         from src.utils.recipe_importer import RecipeImporter
         
         text = """Gateau chocolat
-Un délicieux gâteau
+Un dÃ©licieux gÃ¢teau
 
-Ingrédients
+IngrÃ©dients
 - Chocolat 200g
 - Beurre 100g
 
 Instructions
 - Faire fondre le chocolat
-- Mélanger avec le beurre
+- MÃ©langer avec le beurre
 """
         
         result = RecipeImporter._extract_from_text(text)
         
         assert result["nom"] == "Gateau chocolat"
-        assert result["description"] == "Un délicieux gâteau"
+        assert result["description"] == "Un dÃ©licieux gÃ¢teau"
         assert "Chocolat 200g" in result["ingredients"]
     
     def test_extract_from_text_vide(self):
@@ -572,14 +572,14 @@ class TestRecipeImporterParseDuration:
         assert result == 90
     
     def test_parse_duration_francais_heure(self):
-        """Test format français heure - 1h30 => 90 minutes"""
+        """Test format franÃ§ais heure - 1h30 => 90 minutes"""
         from src.utils.recipe_importer import RecipeImporter
         
         result = RecipeImporter._parse_duration("1h30min")
         assert result == 90
     
     def test_parse_duration_francais_minutes(self):
-        """Test format français minutes"""
+        """Test format franÃ§ais minutes"""
         from src.utils.recipe_importer import RecipeImporter
         
         result = RecipeImporter._parse_duration("45min")
@@ -600,21 +600,21 @@ class TestRecipeImporterParseDuration:
         assert result == 45
     
     def test_parse_duration_vide(self):
-        """Test durée vide"""
+        """Test durÃ©e vide"""
         from src.utils.recipe_importer import RecipeImporter
         
         result = RecipeImporter._parse_duration("")
         assert result == 0
     
     def test_parse_duration_none(self):
-        """Test durée None"""
+        """Test durÃ©e None"""
         from src.utils.recipe_importer import RecipeImporter
         
         result = RecipeImporter._parse_duration(None)
         assert result == 0
     
     def test_parse_duration_invalide(self):
-        """Test durée invalide"""
+        """Test durÃ©e invalide"""
         from src.utils.recipe_importer import RecipeImporter
         
         result = RecipeImporter._parse_duration("invalid")
@@ -636,10 +636,10 @@ class TestRecipeImporterExtractFromHtml:
             {
                 "@type": "Recipe",
                 "name": "Pancakes",
-                "description": "Délicieux pancakes",
+                "description": "DÃ©licieux pancakes",
                 "recipeIngredient": ["Farine", "Oeufs", "Lait"],
                 "recipeInstructions": [
-                    {"@type": "HowToStep", "text": "Mélanger"},
+                    {"@type": "HowToStep", "text": "MÃ©langer"},
                     "Cuire"
                 ],
                 "prepTime": "PT10M",
@@ -775,9 +775,9 @@ class TestRecipeImporterExtractFromHtml:
         assert result["image_url"] == "https://example.com/img.jpg"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MEDIA MODULE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestMediaModule:
@@ -793,5 +793,5 @@ class TestMediaModule:
         """Test que les fonctions existent"""
         import src.utils.media as media
         
-        # Vérifier que le module est importable
+        # VÃ©rifier que le module est importable
         assert hasattr(media, '__file__')

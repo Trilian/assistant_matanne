@@ -1,6 +1,6 @@
-﻿"""
-Module Jardin - Gestion du jardin avec IA intégrée
-Conseils saisonniers, arrosage intelligent, récoltes planifiées
+"""
+Module Jardin - Gestion du jardin avec IA integree
+Conseils saisonniers, arrosage intelligent, recoltes planifiees
 """
 
 from datetime import date, timedelta
@@ -14,8 +14,8 @@ from src.core.decorators import avec_session_db
 from src.services.base import BaseAIService
 from src.core.ai import ClientIA
 
-# Logique métier pure
-from src.domains.maison.logic.jardin_logic import (
+# Logique metier pure
+from src.modules.maison.jardin_utils import (
     get_saison_actuelle,
     calculer_jours_avant_arrosage,
     calculer_jours_avant_recolte,
@@ -24,7 +24,7 @@ from src.domains.maison.logic.jardin_logic import (
     calculer_statistiques_jardin
 )
 
-from src.domains.maison.logic.helpers import (
+from src.modules.maison.utilitaires import (
     charger_plantes,
     get_plantes_a_arroser,
     get_recoltes_proches,
@@ -53,7 +53,7 @@ class JardinService(BaseAIService):
         )
     
     async def generer_conseils_saison(self, saison: str) -> str:
-        """Génère des conseils spécifiques à la saison"""
+        """Genère des conseils specifiques à la saison"""
         prompt = f"""Tu es un expert jardinier. Donne 3-4 conseils pratiques 
 pour les travaux de jardinage en {saison} (maintenant). Sois concis et actionnable."""
         
@@ -63,21 +63,21 @@ pour les travaux de jardinage en {saison} (maintenant). Sois concis et actionnab
             max_tokens=500
         )
     
-    async def suggerer_plantes_saison(self, saison: str, climat: str = "tempéré") -> str:
+    async def suggerer_plantes_saison(self, saison: str, climat: str = "tempere") -> str:
         """Suggère des plantes à planter cette saison"""
-        prompt = f"""Suggère 5 plantes/légumes parfaits à planter en {saison} 
+        prompt = f"""Suggère 5 plantes/legumes parfaits à planter en {saison} 
 sous climat {climat}. Format: "- Nom (type) : description courte"."""
         
         return await self.call_with_cache(
             prompt=prompt,
-            system_prompt="Tu es expert en jardinage et sélection de plantes",
+            system_prompt="Tu es expert en jardinage et selection de plantes",
             max_tokens=600
         )
     
     async def conseil_arrosage(self, nom_plante: str, saison: str) -> str:
-        """Conseil d'arrosage pour une plante spécifique"""
+        """Conseil d'arrosage pour une plante specifique"""
         prompt = f"""Donne un conseil d'arrosage pour {nom_plante} en {saison}. 
-Inclus: fréquence, quantité, moment de la journée."""
+Inclus: frequence, quantite, moment de la journee."""
         
         return await self.call_with_cache(
             prompt=prompt,
@@ -147,7 +147,7 @@ def arroser_plante(item_id: int, notes: str = "", db=None) -> bool:
 
 @avec_session_db
 def ajouter_log(item_id: int, action: str, notes: str = "", db=None) -> bool:
-    """Ajoute une entrée au journal du jardin"""
+    """Ajoute une entree au journal du jardin"""
     try:
         log = GardenLog(
             garden_item_id=item_id,
@@ -170,9 +170,9 @@ def ajouter_log(item_id: int, action: str, notes: str = "", db=None) -> bool:
 
 
 def app():
-    """Point d'entrée module Jardin"""
+    """Point d'entree module Jardin"""
     st.title("💡¿ Mon Jardin")
-    st.caption("Gestion intelligente du jardin avec conseils IA et météo")
+    st.caption("Gestion intelligente du jardin avec conseils IA et meteo")
     
     saison = get_saison()
     st.info(f"💡 Saison actuelle : **{saison}**")
@@ -190,7 +190,7 @@ def app():
             st.caption(f"• {plante['nom']} ({plante['type']})")
     
     if recoltes:
-        st.success(f"💡½ **{len(recoltes)} récolte(s) prévue(s) cette semaine!**")
+        st.success(f"💡½ **{len(recoltes)} recolte(s) prevue(s) cette semaine!**")
         for r in recoltes[:3]:
             jours = (r["recolte"] - date.today()).days
             st.caption(f"• {r['nom']} dans {jours} jour(s)")
@@ -245,7 +245,7 @@ def app():
                 with col2:
                     if row["jours_depuis_arrosage"] is not None:
                         st.metric(
-                            "Arrosé il y a",
+                            "Arrose il y a",
                             f"{row['jours_depuis_arrosage']} j",
                             delta=None
                         )
@@ -253,7 +253,7 @@ def app():
                     if row["recolte"]:
                         jours = (row["recolte"] - date.today()).days
                         if jours > 0:
-                            st.metric("Récolte dans", f"{jours} j")
+                            st.metric("Recolte dans", f"{jours} j")
                 
                 with col3:
                     if st.button("🔔 Arroser", key=f"arroser_{row['id']}"):
@@ -275,7 +275,7 @@ def app():
         
         with col_c1:
             if st.button("🧹 Conseils pour cette saison", use_container_width=True):
-                with st.spinner("Génération des conseils IA..."):
+                with st.spinner("Generation des conseils IA..."):
                     try:
                         import asyncio
                         conseils = asyncio.run(service.generer_conseils_saison(saison))
@@ -297,8 +297,8 @@ def app():
         
         st.markdown("---")
         
-        # Conseil personnalisé pour une plante
-        st.subheader("Conseil spécifique")
+        # Conseil personnalise pour une plante
+        st.subheader("Conseil specifique")
         plante_conseil = st.text_input("Nom de la plante (ex: Tomate)")
         
         if st.button("Obtenir conseil d'arrosage", use_container_width=True):
@@ -327,7 +327,7 @@ def app():
             with col_1:
                 type_plante = st.selectbox(
                     "Type *",
-                    ["Légume", "Fruit", "Herbe aromatique", "Fleur", "Arbre", "Autre"]
+                    ["Legume", "Fruit", "Herbe aromatique", "Fleur", "Arbre", "Autre"]
                 )
                 emplacement = st.text_input(
                     "Emplacement",
@@ -336,11 +336,11 @@ def app():
             
             with col_2:
                 date_plantation = st.date_input("Date de plantation", value=date.today())
-                date_recolte = st.date_input("Date récolte (optionnel)", value=None)
+                date_recolte = st.date_input("Date recolte (optionnel)", value=None)
             
             notes = st.text_area(
                 "Notes",
-                placeholder="Variété, exposition, particularités...",
+                placeholder="Variete, exposition, particularites...",
                 height=80
             )
             
@@ -363,7 +363,7 @@ def app():
             {"nom": "Tomates cerises", "type": "Fruit", "emoji": "🍅"},
             {"nom": "Basilic", "type": "Herbe aromatique", "emoji": "🌿"},
             {"nom": "Fraises", "type": "Fruit", "emoji": "🍓"},
-            {"nom": "Courgettes", "type": "Légume", "emoji": "🥒"},
+            {"nom": "Courgettes", "type": "Legume", "emoji": "🥒"},
         ]
         
         cols = st.columns(2)
@@ -372,7 +372,7 @@ def app():
             with col:
                 if st.button(f"{sugg['emoji']} {sugg['nom']}", use_container_width=True):
                     if ajouter_plante(sugg["nom"], sugg["type"], "Potager"):
-                        st.success(f"✅ {sugg['nom']} ajouté!")
+                        st.success(f"✅ {sugg['nom']} ajoute!")
                         st.rerun()
     
     # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -393,10 +393,10 @@ def app():
             st.metric("À arroser", stats["a_arroser"])
         
         with col3:
-            st.metric("Récoltes proches", stats["recoltes_proches"])
+            st.metric("Recoltes proches", stats["recoltes_proches"])
         
         with col4:
-            st.metric("Catégories", stats["categories"])
+            st.metric("Categories", stats["categories"])
         
         st.markdown("---")
         
@@ -409,7 +409,7 @@ def app():
                 data=[go.Bar(x=type_counts.index, y=type_counts.values, marker_color="green")]
             )
             fig.update_layout(
-                title="Plantes par catégorie",
+                title="Plantes par categorie",
                 xaxis_title="Type",
                 yaxis_title="Nombre",
                 height=400
@@ -429,7 +429,7 @@ def app():
             st.info("Aucune plante pour le moment")
         else:
             plante_selected = st.selectbox(
-                "Sélectionner une plante",
+                "Selectionner une plante",
                 df_plantes["nom"].tolist(),
                 key="journal_plante"
             )
@@ -441,7 +441,7 @@ def app():
             with col_a1:
                 action = st.selectbox(
                     "Action",
-                    ["arrosage", "désherbage", "taille", "traitement", "fertilisation", "récolte"]
+                    ["arrosage", "desherbage", "taille", "traitement", "fertilisation", "recolte"]
                 )
             
             with col_a2:
@@ -449,7 +449,7 @@ def app():
             
             if st.button("🍽️ Enregistrer", use_container_width=True):
                 if ajouter_log(selected_id, action, notes_log):
-                    st.success("✅ Enregistré!")
+                    st.success("✅ Enregistre!")
                     st.rerun()
             
             st.markdown("---")

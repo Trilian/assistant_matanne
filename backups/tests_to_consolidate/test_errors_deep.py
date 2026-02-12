@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests approfondis pour src/core/errors.py
 
 Cible: Atteindre 80%+ de couverture
@@ -10,9 +10,9 @@ from unittest.mock import Mock, patch, MagicMock
 import traceback
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: gerer_erreurs decorator - lignes 101-154
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGererErreursDecorator:
@@ -109,7 +109,7 @@ class TestGererErreursDecorator:
             assert result == "ext_error"
 
     def test_gerer_erreurs_exception_generique_avec_ui(self):
-        """Test exception générique avec affichage UI"""
+        """Test exception gÃ©nÃ©rique avec affichage UI"""
         from src.core.errors import gerer_erreurs
 
         @gerer_erreurs(afficher_dans_ui=True, valeur_fallback="generic_error")
@@ -124,7 +124,7 @@ class TestGererErreursDecorator:
                 assert result == "generic_error"
 
     def test_gerer_erreurs_exception_generique_mode_debug(self):
-        """Test exception générique en mode debug"""
+        """Test exception gÃ©nÃ©rique en mode debug"""
         from src.core.errors import gerer_erreurs
 
         @gerer_erreurs(afficher_dans_ui=True, valeur_fallback="debug")
@@ -176,17 +176,17 @@ class TestGererErreursDecorator:
         def func():
             raise ErreurValidation("Test")
 
-        # st.error ne doit pas être appelé
+        # st.error ne doit pas Ãªtre appelÃ©
         with patch("streamlit.error") as mock_error:
             result = func()
 
-            # Peut être appelé mais on vérifie le résultat
+            # Peut Ãªtre appelÃ© mais on vÃ©rifie le rÃ©sultat
             assert result == "no_ui"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: afficher_erreur_streamlit - lignes 330-361
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAfficherErreurStreamlit:
@@ -197,7 +197,7 @@ class TestAfficherErreurStreamlit:
         from src.core.errors import afficher_erreur_streamlit
         from src.core.errors_base import ErreurValidation
 
-        erreur = ErreurValidation("Test validation", message_utilisateur="Données invalides")
+        erreur = ErreurValidation("Test validation", message_utilisateur="DonnÃ©es invalides")
 
         with patch("streamlit.error") as mock_error:
             with patch("src.core.errors._is_debug_mode", return_value=False):
@@ -210,7 +210,7 @@ class TestAfficherErreurStreamlit:
         from src.core.errors import afficher_erreur_streamlit
         from src.core.errors_base import ErreurNonTrouve
 
-        erreur = ErreurNonTrouve("Not found", message_utilisateur="Élément introuvable")
+        erreur = ErreurNonTrouve("Not found", message_utilisateur="Ã‰lÃ©ment introuvable")
 
         with patch("streamlit.warning") as mock_warning:
             with patch("src.core.errors._is_debug_mode", return_value=False):
@@ -223,7 +223,7 @@ class TestAfficherErreurStreamlit:
         from src.core.errors import afficher_erreur_streamlit
         from src.core.errors_base import ErreurBaseDeDonnees
 
-        erreur = ErreurBaseDeDonnees("DB error", message_utilisateur="Erreur base de données")
+        erreur = ErreurBaseDeDonnees("DB error", message_utilisateur="Erreur base de donnÃ©es")
 
         with patch("streamlit.error") as mock_error:
             with patch("src.core.errors._is_debug_mode", return_value=False):
@@ -249,7 +249,7 @@ class TestAfficherErreurStreamlit:
         from src.core.errors import afficher_erreur_streamlit
         from src.core.errors_base import ErreurLimiteDebit
 
-        erreur = ErreurLimiteDebit("Rate limit", message_utilisateur="Trop de requêtes")
+        erreur = ErreurLimiteDebit("Rate limit", message_utilisateur="Trop de requÃªtes")
 
         with patch("streamlit.warning") as mock_warning:
             with patch("src.core.errors._is_debug_mode", return_value=False):
@@ -271,7 +271,7 @@ class TestAfficherErreurStreamlit:
                 mock_error.assert_called()
 
     def test_afficher_erreur_avec_details_mode_debug(self):
-        """Test affichage erreur avec détails en mode debug"""
+        """Test affichage erreur avec dÃ©tails en mode debug"""
         from src.core.errors import afficher_erreur_streamlit
         from src.core.errors_base import ErreurValidation
 
@@ -312,7 +312,7 @@ class TestAfficherErreurStreamlit:
         with patch("streamlit.error"):
             with patch("streamlit.caption") as mock_caption:
                 with patch("src.core.errors._is_debug_mode", return_value=False):
-                    afficher_erreur_streamlit(erreur, contexte="Lors de la création")
+                    afficher_erreur_streamlit(erreur, contexte="Lors de la crÃ©ation")
 
                     mock_caption.assert_called()
 
@@ -333,9 +333,9 @@ class TestAfficherErreurStreamlit:
                         afficher_erreur_streamlit(erreur)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: GestionnaireErreurs context manager
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGestionnaireErreurs:
@@ -356,7 +356,7 @@ class TestGestionnaireErreurs:
         from src.core.errors_base import ErreurValidation
 
         with patch("src.core.errors.afficher_erreur_streamlit") as mock_afficher:
-            # L'exception est relancée par défaut (return False dans __exit__)
+            # L'exception est relancÃ©e par dÃ©faut (return False dans __exit__)
             with pytest.raises(ErreurValidation):
                 with GestionnaireErreurs("Test", afficher_dans_ui=True):
                     raise ErreurValidation("Test")
@@ -382,13 +382,13 @@ class TestGestionnaireErreurs:
                 with GestionnaireErreurs("Test", afficher_dans_ui=False):
                     raise ValueError("Test")
 
-            # afficher_erreur_streamlit ne devrait pas être appelé
+            # afficher_erreur_streamlit ne devrait pas Ãªtre appelÃ©
             mock_afficher.assert_not_called()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: Helpers de validation - lignes 50-55
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestHelpersValidation:
@@ -463,7 +463,7 @@ class TestHelpersValidation:
         exiger_positif(5, "quantite")
 
     def test_exiger_positif_zero(self):
-        """Test exiger_positif avec zéro"""
+        """Test exiger_positif avec zÃ©ro"""
         from src.core.errors import exiger_positif
         from src.core.errors_base import ErreurValidation
 
@@ -471,7 +471,7 @@ class TestHelpersValidation:
             exiger_positif(0, "quantite")
 
     def test_exiger_positif_negatif(self):
-        """Test exiger_positif négatif"""
+        """Test exiger_positif nÃ©gatif"""
         from src.core.errors import exiger_positif
         from src.core.errors_base import ErreurValidation
 
@@ -479,25 +479,25 @@ class TestHelpersValidation:
             exiger_positif(-5, "quantite")
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: _is_debug_mode
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestIsDebugMode:
     """Tests pour _is_debug_mode"""
 
     def test_debug_mode_default_false(self):
-        """Test mode debug par défaut False"""
+        """Test mode debug par dÃ©faut False"""
         from src.core.errors import _is_debug_mode
 
         # Sans session_state ou avec debug_mode=False
         result = _is_debug_mode()
-        # Par défaut devrait être False
+        # Par dÃ©faut devrait Ãªtre False
         assert isinstance(result, bool)
 
     def test_debug_mode_true(self):
-        """Test mode debug True quand configuré"""
+        """Test mode debug True quand configurÃ©"""
         from src.core.errors import _is_debug_mode
         import streamlit as st
 
@@ -508,10 +508,10 @@ class TestIsDebugMode:
             result = _is_debug_mode()
             assert result is True
         except Exception:
-            # En dehors de Streamlit, le test peut échouer
+            # En dehors de Streamlit, le test peut Ã©chouer
             pass
         finally:
-            # Restaurer l'état
+            # Restaurer l'Ã©tat
             if original_state:
                 st.session_state.clear()
                 st.session_state.update(original_state)

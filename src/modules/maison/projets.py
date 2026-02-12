@@ -1,6 +1,6 @@
-﻿"""
-Module Projets - Gestion des projets maison avec IA intégrée
-Priorisation intelligente, estimation de durée, suivi de progression
+"""
+Module Projets - Gestion des projets maison avec IA integree
+Priorisation intelligente, estimation de duree, suivi de progression
 """
 
 from datetime import date, datetime
@@ -14,14 +14,14 @@ from src.core.decorators import avec_session_db
 from src.services.base import BaseAIService
 from src.core.ai import ClientIA
 
-# Logique métier pure
-from src.domains.maison.logic.projets_logic import (
+# Logique metier pure
+from src.modules.maison.projets_utils import (
     calculer_progression,
     calculer_jours_restants,
     calculer_urgence_projet
 )
 
-from src.domains.maison.logic.helpers import (
+from src.modules.maison.utilitaires import (
     charger_projets,
     get_projets_urgents,
     get_stats_projets,
@@ -50,7 +50,7 @@ class ProjetsService(BaseAIService):
     async def suggerer_taches(self, nom_projet: str, description: str) -> str:
         """Suggère des tâches pour un projet"""
         prompt = f"""Pour le projet "{nom_projet}" : {description}
-Suggère 5-7 tâches concrètes et numérotées. Ordonne par ordre logique."""
+Suggère 5-7 tâches concrètes et numerotees. Ordonne par ordre logique."""
         
         return await self.call_with_cache(
             prompt=prompt,
@@ -59,9 +59,9 @@ Suggère 5-7 tâches concrètes et numérotées. Ordonne par ordre logique."""
         )
     
     async def estimer_duree(self, nom_projet: str, complexite: str = "moyen") -> str:
-        """Estime la durée totale d'un projet"""
-        prompt = f"""Pour un projet "{nom_projet}" de complexité {complexite},
-estime la durée totale et le temps par phase (préparation, exécution, finition)."""
+        """Estime la duree totale d'un projet"""
+        prompt = f"""Pour un projet "{nom_projet}" de complexite {complexite},
+estime la duree totale et le temps par phase (preparation, execution, finition)."""
         
         return await self.call_with_cache(
             prompt=prompt,
@@ -71,7 +71,7 @@ estime la durée totale et le temps par phase (préparation, exécution, finitio
     
     async def prioriser_taches(self, nom_projet: str, taches_texte: str) -> str:
         """Priorise les tâches pour un projet"""
-        prompt = f"""Pour le projet "{nom_projet}", réordonne ces tâches par priorité:
+        prompt = f"""Pour le projet "{nom_projet}", reordonne ces tâches par priorite:
 {taches_texte}
 
 Explique brièvement l'ordre."""
@@ -83,9 +83,9 @@ Explique brièvement l'ordre."""
         )
     
     async def conseil_blocages(self, nom_projet: str, description: str) -> str:
-        """Suggère comment éviter les blocages"""
+        """Suggère comment eviter les blocages"""
         prompt = f"""Pour "{nom_projet}" : {description}
-Quels sont les 3 risques/blocages principaux et comment les éviter?"""
+Quels sont les 3 risques/blocages principaux et comment les eviter?"""
         
         return await self.call_with_cache(
             prompt=prompt,
@@ -113,7 +113,7 @@ def creer_projet(
     date_fin: date = None,
     db=None
 ) -> int:
-    """Crée un nouveau projet"""
+    """Cree un nouveau projet"""
     try:
         projet = Project(
             nom=nom,
@@ -128,7 +128,7 @@ def creer_projet(
         clear_maison_cache()
         return projet.id
     except Exception as e:
-        st.error(f"❌ Erreur création projet: {e}")
+        st.error(f"❌ Erreur creation projet: {e}")
         return None
 
 
@@ -138,7 +138,7 @@ def ajouter_tache(
     nom: str,
     description: str = "",
     priorite: str = "moyenne",
-    date_echéance: date = None,
+    date_echeance: date = None,
     db=None
 ) -> bool:
     """Ajoute une tâche à un projet"""
@@ -148,7 +148,7 @@ def ajouter_tache(
             nom=nom,
             description=description,
             priorite=priorite,
-            date_echéance=date_echéance,
+            date_echeance=date_echeance,
             statut="à_faire"
         )
         db.add(tache)
@@ -162,11 +162,11 @@ def ajouter_tache(
 
 @avec_session_db
 def marquer_tache_done(task_id: int, db=None) -> bool:
-    """Marque une tâche comme terminée"""
+    """Marque une tâche comme terminee"""
     try:
         tache = db.query(ProjectTask).get(task_id)
         if tache:
-            tache.statut = "terminé"
+            tache.statut = "termine"
             db.commit()
             clear_maison_cache()
             return True
@@ -177,11 +177,11 @@ def marquer_tache_done(task_id: int, db=None) -> bool:
 
 @avec_session_db
 def marquer_projet_done(project_id: int, db=None) -> bool:
-    """Marque un projet comme terminé"""
+    """Marque un projet comme termine"""
     try:
         projet = db.query(Project).get(project_id)
         if projet:
-            projet.statut = "terminé"
+            projet.statut = "termine"
             projet.date_fin_reelle = date.today()
             db.commit()
             clear_maison_cache()
@@ -197,7 +197,7 @@ def marquer_projet_done(project_id: int, db=None) -> bool:
 
 
 def app():
-    """Point d'entrée module Projets"""
+    """Point d'entree module Projets"""
     st.title("👶 Projets Maison")
     st.caption("Gestion et priorisation intelligente des projets")
     
@@ -210,7 +210,7 @@ def app():
     urgents = get_projets_urgents()
     
     if urgents:
-        st.warning(f"âš ï¸ **{len(urgents)} projet(s) nécessitent attention**")
+        st.warning(f"âš ï¸ **{len(urgents)} projet(s) necessitent attention**")
         for urgent in urgents[:3]:
             if urgent["type"] == "RETARD":
                 st.error(f"❌ **{urgent['projet']}** : {urgent['message']}")
@@ -233,7 +233,7 @@ def app():
         st.metric("En cours", stats["en_cours"])
     
     with col3:
-        st.metric("Terminés", stats["termines"])
+        st.metric("Termines", stats["termines"])
     
     with col4:
         st.metric("Progression", f"{stats['avg_progress']:.0f}%")
@@ -273,7 +273,7 @@ def app():
                     if projet['description']:
                         st.caption(projet['description'][:100] + "...")
                     
-                    # Priorité et échéance
+                    # Priorite et echeance
                     col_a, col_b = st.columns(2)
                     
                     with col_a:
@@ -293,7 +293,7 @@ def app():
                 with col2:
                     if st.button("✅ Terminer", key=f"done_{projet['id']}", use_container_width=True):
                         if marquer_projet_done(projet['id']):
-                            st.success("Projet marqué comme terminé!")
+                            st.success("Projet marque comme termine!")
                             st.rerun()
                 
                 # Afficher les tâches
@@ -310,15 +310,15 @@ def app():
                                 col_t1, col_t2, col_t3 = st.columns([3, 1, 1])
                                 
                                 with col_t1:
-                                    emoji = "✅" if t.statut == "terminé" else "⏳"
+                                    emoji = "✅" if t.statut == "termine" else "⏳"
                                     st.caption(f"{emoji} {t.nom}")
                                 
                                 with col_t2:
-                                    if t.date_echéance:
-                                        st.caption(t.date_echéance.strftime("%d/%m"))
+                                    if t.date_echeance:
+                                        st.caption(t.date_echeance.strftime("%d/%m"))
                                 
                                 with col_t3:
-                                    if t.statut != "terminé":
+                                    if t.statut != "termine":
                                         if st.button("✅", key=f"task_{t.id}", use_container_width=True):
                                             if marquer_tache_done(t.id):
                                                 st.rerun()
@@ -334,18 +334,18 @@ def app():
         
         col_ia1, col_ia2 = st.columns(2)
         
-        # Suggérer tâches
+        # Suggerer tâches
         with col_ia1:
-            st.markdown("#### 🎯 Suggérer des tâches")
+            st.markdown("#### 🎯 Suggerer des tâches")
             
-            projet_nom_ia = st.text_input("Nom du projet", placeholder="Ex: Rénover cuisine")
+            projet_nom_ia = st.text_input("Nom du projet", placeholder="Ex: Renover cuisine")
             projet_desc_ia = st.text_area(
                 "Description",
-                placeholder="Détails du projet...",
+                placeholder="Details du projet...",
                 height=100
             )
             
-            if st.button("🍽️ Générer tâches", key="ia_taches", use_container_width=True):
+            if st.button("🍽️ Generer tâches", key="ia_taches", use_container_width=True):
                 if projet_nom_ia:
                     with st.spinner("IA analyse le projet..."):
                         try:
@@ -356,18 +356,18 @@ def app():
                         except Exception as e:
                             st.warning(f"âš ï¸ IA indisponible: {e}")
         
-        # Estimer durée
+        # Estimer duree
         with col_ia2:
-            st.markdown("#### ⏱️ Estimer la durée")
+            st.markdown("#### ⏱️ Estimer la duree")
             
             projet_nom_dur = st.text_input("Nom du projet", placeholder="Ex: Repeindre salon", key="dur")
             complexite = st.selectbox(
-                "Complexité",
+                "Complexite",
                 ["simple", "moyen", "complexe"],
                 key="complex"
             )
             
-            if st.button("💰 Estimer durée", key="ia_duree", use_container_width=True):
+            if st.button("💰 Estimer duree", key="ia_duree", use_container_width=True):
                 if projet_nom_dur:
                     with st.spinner("Estimation en cours..."):
                         try:
@@ -405,34 +405,34 @@ def app():
     # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
     
     with tab3:
-        st.subheader("Créer un nouveau projet")
+        st.subheader("Creer un nouveau projet")
         
         with st.form("form_nouveau_projet"):
-            nom = st.text_input("Nom du projet *", placeholder="Ex: Aménagement jardin")
+            nom = st.text_input("Nom du projet *", placeholder="Ex: Amenagement jardin")
             
             description = st.text_area(
                 "Description",
                 height=100,
-                placeholder="Objectifs, détails du projet..."
+                placeholder="Objectifs, details du projet..."
             )
             
             col_p1, col_p2 = st.columns(2)
             
             with col_p1:
-                priorite = st.selectbox("Priorité", ["basse", "moyenne", "haute", "urgente"])
+                priorite = st.selectbox("Priorite", ["basse", "moyenne", "haute", "urgente"])
             
             with col_p2:
-                date_fin = st.date_input("Date d'échéance (optionnel)", value=None)
+                date_fin = st.date_input("Date d'echeance (optionnel)", value=None)
             
-            submitted = st.form_submit_button("📅 Créer le projet", type="primary")
+            submitted = st.form_submit_button("📅 Creer le projet", type="primary")
             
             if submitted:
                 if not nom:
                     st.error("Nom obligatoire")
                 else:
-                    project_id = creer_projet(nom, description, "Général", priorite, date_fin)
+                    project_id = creer_projet(nom, description, "General", priorite, date_fin)
                     if project_id:
-                        st.success(f"✅ Projet '{nom}' créé!")
+                        st.success(f"✅ Projet '{nom}' cree!")
                         st.balloons()
                         st.rerun()
         
@@ -443,26 +443,26 @@ def app():
         
         templates = [
             {
-                "nom": "Rénovation cuisine",
-                "taches": ["Planifier layout", "Acheter matériaux", "Préparer", "Installer", "Finitions"]
+                "nom": "Renovation cuisine",
+                "taches": ["Planifier layout", "Acheter materiaux", "Preparer", "Installer", "Finitions"]
             },
             {
-                "nom": "Aménagement jardin",
-                "taches": ["Préparer sol", "Acheter plants", "Planter", "Installer arrosage", "Entretien"]
+                "nom": "Amenagement jardin",
+                "taches": ["Preparer sol", "Acheter plants", "Planter", "Installer arrosage", "Entretien"]
             },
             {
                 "nom": "Repeindre chambre",
-                "taches": ["Choisir couleurs", "Préparer murs", "Acheter peinture", "Peindre", "Finitions"]
+                "taches": ["Choisir couleurs", "Preparer murs", "Acheter peinture", "Peindre", "Finitions"]
             }
         ]
         
         for templ in templates:
             if st.button(f"🎯 {templ['nom']}", use_container_width=True):
-                p_id = creer_projet(templ["nom"], "", "Général", "moyenne")
+                p_id = creer_projet(templ["nom"], "", "General", "moyenne")
                 if p_id:
                     for tache in templ["taches"]:
                         ajouter_tache(p_id, tache)
-                    st.success("✅ Projet template créé avec tâches!")
+                    st.success("✅ Projet template cree avec tâches!")
                     st.rerun()
     
     # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════

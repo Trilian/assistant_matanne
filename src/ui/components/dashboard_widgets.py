@@ -1,4 +1,4 @@
-"""
+﻿"""
 Dashboard Widgets - Composants enrichis pour le tableau de bord.
 
 Fournit des widgets visuels avancés :
@@ -19,9 +19,9 @@ import streamlit as st
 logger = logging.getLogger(__name__)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # GRAPHIQUES PLOTLY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def graphique_repartition_repas(planning_data: list[dict]) -> go.Figure | None:
@@ -250,9 +250,9 @@ def graphique_progression_objectifs(objectifs: list[dict]) -> go.Figure | None:
     return fig
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CARTES MÉTRIQUES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def carte_metrique_avancee(
@@ -281,7 +281,7 @@ def carte_metrique_avancee(
     delta_html = ""
     if delta:
         delta_color = "#4CAF50" if delta_positif else "#FF5722"
-        delta_arrow = "↑" if delta_positif else "↓"
+        delta_arrow = "â†‘" if delta_positif else "â†“"
         delta_html = f'<span style="color: {delta_color}; font-size: 0.9rem;">{delta_arrow} {delta}</span>'
     
     sous_titre_html = f'<p style="color: #6c757d; margin: 0; font-size: 0.85rem;">{sous_titre}</p>' if sous_titre else ""
@@ -363,18 +363,18 @@ def afficher_sante_systeme():
     status = indicateur_sante_systeme()
     
     # Icône global
-    icon_map = {"ok": "🟢", "warning": "🟡", "error": "🔴"}
-    global_icon = icon_map.get(status["global"], "⚪")
+    icon_map = {"ok": "ðŸŸ¢", "warning": "ðŸŸ¡", "error": "ðŸ”´"}
+    global_icon = icon_map.get(status["global"], "âšª")
     
     with st.expander(f"{global_icon} Santé Système", expanded=False):
         for detail in status["details"]:
-            icon = icon_map.get(detail["status"], "⚪")
+            icon = icon_map.get(detail["status"], "âšª")
             st.write(f"{icon} **{detail['nom']}**: {detail['message']}")
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TIMELINE D'ACTIVITÉ
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def afficher_timeline_activites(activites: list[dict], max_items: int = 5):
@@ -383,7 +383,7 @@ def afficher_timeline_activites(activites: list[dict], max_items: int = 5):
     
     Args:
         activites: Liste {'date': datetime, 'action': str, 'type': str}
-        max_items: Nombre max d'items à afficher
+        max_items: Nombre max d'items Ã  afficher
     """
     if not activites:
         st.info("Aucune activité récente")
@@ -391,18 +391,18 @@ def afficher_timeline_activites(activites: list[dict], max_items: int = 5):
     
     # Icônes par type
     icones = {
-        "recette": "🍽️",
-        "inventaire": "📦",
-        "courses": "🛒",
-        "planning": "📅",
-        "famille": "👨‍👩‍👦",
-        "maison": "🏠",
+        "recette": "ðŸ½ï¸",
+        "inventaire": "ðŸ“¦",
+        "courses": "ðŸ›’",
+        "planning": "ðŸ“…",
+        "famille": "ðŸ‘¨â€ðŸ‘©â€ðŸ‘¦",
+        "maison": "ðŸ ",
     }
     
-    st.markdown("### 📋 Activité Récente")
+    st.markdown("### ðŸ“‹ Activité Récente")
     
     for activite in activites[:max_items]:
-        icone = icones.get(activite.get("type", ""), "📌")
+        icone = icones.get(activite.get("type", ""), "ðŸ“Œ")
         date_str = activite.get("date", "")
         if isinstance(date_str, datetime):
             date_str = date_str.strftime("%d/%m %H:%M")
@@ -422,9 +422,9 @@ def afficher_timeline_activites(activites: list[dict], max_items: int = 5):
         )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # WIDGETS FAMILLE JULES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def widget_jules_apercu():
@@ -445,7 +445,7 @@ def widget_jules_apercu():
             padding: 1.5rem;
             text-align: center;
         ">
-            <span style="font-size: 3rem;">👶</span>
+            <span style="font-size: 3rem;">ðŸ‘¶</span>
             <h3 style="margin: 0.5rem 0;">Jules</h3>
             <p style="margin: 0; color: #1565C0; font-weight: 500;">{age_mois} mois</p>
         </div>
@@ -457,10 +457,10 @@ def widget_jules_apercu():
 def widget_meteo_jour():
     """Widget météo simplifié (données statiques pour demo)."""
     
-    # Données simulées - à remplacer par API météo
+    # Données simulées - Ã  remplacer par API météo
     meteo = {
         "temp": 12,
-        "condition": "☁️ Nuageux",
+        "condition": "â˜ï¸ Nuageux",
         "conseil": "Prévoir une veste légère",
     }
     
@@ -473,7 +473,7 @@ def widget_meteo_jour():
             text-align: center;
         ">
             <span style="font-size: 2rem;">{meteo["condition"].split()[0]}</span>
-            <p style="margin: 0.3rem 0; font-size: 1.5rem; font-weight: 600;">{meteo["temp"]}°C</p>
+            <p style="margin: 0.3rem 0; font-size: 1.5rem; font-weight: 600;">{meteo["temp"]}Â°C</p>
             <small style="color: #6c757d;">{meteo["conseil"]}</small>
         </div>
         ''',

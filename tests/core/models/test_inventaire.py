@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour inventaire.py
 
 Module: src.core.models.inventaire

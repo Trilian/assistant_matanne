@@ -1,4 +1,4 @@
-"""Tests Phase 2 - Recettes (15 tests)."""
+﻿"""Tests Phase 2 - Recettes (15 tests)."""
 
 import pytest
 

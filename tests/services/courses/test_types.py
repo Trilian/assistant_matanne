@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/services/courses/types.py
 
 Tests des modèles Pydantic:
@@ -59,7 +59,7 @@ class TestSuggestionCourses:
     def test_priorite_basse_valide(self):
         """Test priorité basse."""
         suggestion = SuggestionCourses(
-            nom="Sucre", quantite=1.0, unite="kg", priorite="basse", rayon="Épicerie"
+            nom="Sucre", quantite=1.0, unite="kg", priorite="basse", rayon="Ã‰picerie"
         )
         assert suggestion.priorite == "basse"
 
@@ -161,9 +161,9 @@ class TestSuggestionCourses:
 
     def test_model_validate_alias_section(self):
         """Test normalisation champ 'section' -> 'rayon'."""
-        data = {"nom": "Test", "quantite": 1.0, "unite": "kg", "priorite": "haute", "section": "Épicerie"}
+        data = {"nom": "Test", "quantite": 1.0, "unite": "kg", "priorite": "haute", "section": "Ã‰picerie"}
         suggestion = SuggestionCourses.model_validate(data)
-        assert suggestion.rayon == "Épicerie"
+        assert suggestion.rayon == "Ã‰picerie"
 
     def test_model_validate_alias_department(self):
         """Test normalisation champ 'department' -> 'rayon'."""

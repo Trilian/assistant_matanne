@@ -1,4 +1,4 @@
-"""
+﻿"""
 Sidebar avec navigation par modules.
 """
 
@@ -9,61 +9,61 @@ from src.core.state import GestionnaireEtat, obtenir_etat
 from src.core.lazy_loader import ChargeurModuleDiffere, afficher_stats_chargement_differe
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # MENU DES MODULES - Configuration centralisée
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 MODULES_MENU = {
-    "🏠 Accueil": "accueil",
+    "ðŸ  Accueil": "accueil",
     
     # Calendrier unifié - VUE CENTRALE
-    "📅 Calendrier Familial": "planning.calendrier_unifie",
+    "ðŸ“… Calendrier Familial": "planning.calendrier_unifie",
     
-    # Cuisine - Workflow: Plan → Batch → Courses
-    "🍳 Cuisine": {
-        "🍽️ Planifier Repas": "cuisine.planificateur_repas",
-        "🍳 Batch Cooking": "cuisine.batch_cooking_detaille",
-        "🛒 Courses": "cuisine.courses",
-        "───────────": None,  # Séparateur
-        "📚 Recettes": "cuisine.recettes",
-        "🥫 Inventaire": "cuisine.inventaire",
+    # Cuisine - Workflow: Plan â†’ Batch â†’ Courses
+    "ðŸ³ Cuisine": {
+        "ðŸ½ï¸ Planifier Repas": "cuisine.planificateur_repas",
+        "ðŸ³ Batch Cooking": "cuisine.batch_cooking_detaille",
+        "ðŸ›’ Courses": "cuisine.courses",
+        "â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€": None,  # Séparateur
+        "ðŸ“š Recettes": "cuisine.recettes",
+        "ðŸ¥« Inventaire": "cuisine.inventaire",
     },
     
     # Famille - HUB
-    "👨‍👩‍👧‍👦 Famille": {
-        "🏠 Hub Famille": "famille.hub",
-        "👶 Jules": "famille.jules",
-        "📅 Planning Jules": "famille.jules_planning",
-        "💪 Mon Suivi": "famille.suivi_perso",
-        "🎉 Weekend": "famille.weekend",
-        "🛍️ Achats": "famille.achats_famille",
+    "ðŸ‘¨â€ðŸ‘©â€ðŸ‘§â€ðŸ‘¦ Famille": {
+        "ðŸ  Hub Famille": "famille.hub",
+        "ðŸ‘¶ Jules": "famille.jules",
+        "ðŸ“… Planning Jules": "famille.jules_planning",
+        "ðŸ’ª Mon Suivi": "famille.suivi_perso",
+        "ðŸŽ‰ Weekend": "famille.weekend",
+        "ðŸ›ï¸ Achats": "famille.achats_famille",
     },
     
     # Maison
-    "🏠 Maison": {
-        "🏠 Hub Maison": "maison",
-        "🌳 Zones Jardin": "maison.jardin_zones",
-        "🔋 Énergie": "maison.energie",
-        "📸 Scan Factures": "maison.scan_factures",
-        "🧹 Entretien": "maison.entretien",
-        "🛋️ Meubles": "maison.meubles",
-        "💰 Dépenses": "maison.depenses",
-        "🌱 Éco-Tips": "maison.eco",
+    "ðŸ  Maison": {
+        "ðŸ  Hub Maison": "maison",
+        "ðŸŒ³ Zones Jardin": "maison.jardin_zones",
+        "ðŸ”‹ Énergie": "maison.energie",
+        "ðŸ“¸ Scan Factures": "maison.scan_factures",
+        "ðŸ§¹ Entretien": "maison.entretien",
+        "ðŸ›‹ï¸ Meubles": "maison.meubles",
+        "ðŸ’° Dépenses": "maison.depenses",
+        "ðŸŒ± Éco-Tips": "maison.eco",
     },
     
     # Jeux
-    "🎲 Jeux": {
-        "⚽ Paris Sportifs": "jeux.paris",
-        "🎰 Loto": "jeux.loto",
+    "ðŸŽ² Jeux": {
+        "âš½ Paris Sportifs": "jeux.paris",
+        "ðŸŽ° Loto": "jeux.loto",
     },
     
     # Outils & Config
-    "🔧 Outils": {
-        "📱 Code-barres": "barcode",
-        "📊 Rapports": "rapports",
-        "🔔 Notifications": "notifications_push",
+    "ðŸ”§ Outils": {
+        "ðŸ“± Code-barres": "barcode",
+        "ðŸ“Š Rapports": "rapports",
+        "ðŸ”” Notifications": "notifications_push",
     },
-    "⚙️ Paramètres": "parametres",
+    "âš™ï¸ Paramètres": "parametres",
 }
 
 
@@ -77,8 +77,8 @@ def afficher_sidebar():
         # Fil d'Ariane
         fil_ariane = GestionnaireEtat.obtenir_fil_ariane_navigation()
         if len(fil_ariane) > 1:
-            st.caption(" → ".join(fil_ariane[-3:]))
-            if st.button("⬅️ Retour"):
+            st.caption(" â†’ ".join(fil_ariane[-3:]))
+            if st.button("â¬…ï¸ Retour"):
                 GestionnaireEtat.revenir()
                 st.rerun()
             st.markdown("---")
@@ -94,13 +94,13 @@ def afficher_sidebar():
         st.markdown("---")
 
         # Debug
-        etat.mode_debug = st.checkbox("🐛 Debug", value=etat.mode_debug)
+        etat.mode_debug = st.checkbox("ðŸ› Debug", value=etat.mode_debug)
 
         if etat.mode_debug:
             with st.expander("État App"):
                 st.json(GestionnaireEtat.obtenir_resume_etat())
 
-                if st.button("🔄 Reset"):
+                if st.button("ðŸ”„ Reset"):
                     GestionnaireEtat.reinitialiser()
                     Cache.vider()
                     ChargeurModuleDiffere.clear_cache()

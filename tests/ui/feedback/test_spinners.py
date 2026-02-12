@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour spinners.py
 
 Module: src.ui.feedback.spinners

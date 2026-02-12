@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests complets pour src/services/inventaire.py
 
 Couverture cible: >80%
@@ -9,13 +9,13 @@ from datetime import date, datetime, timedelta
 from unittest.mock import Mock, patch, MagicMock
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS SCHÉMAS PYDANTIC
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS SCHÃ‰MAS PYDANTIC
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestSuggestionCourses:
-    """Tests schéma SuggestionCourses."""
+    """Tests schÃ©ma SuggestionCourses."""
 
     def test_import_schema(self):
         from src.services.inventaire import SuggestionCourses
@@ -40,13 +40,13 @@ class TestSuggestionCourses:
         from src.services.inventaire import SuggestionCourses
         from pydantic import ValidationError
         
-        # Priorité valide
+        # PrioritÃ© valide
         s = SuggestionCourses(
             nom="Test", quantite=1, unite="u", priorite="moyenne", rayon="Test"
         )
         assert s.priorite == "moyenne"
         
-        # Priorité invalide
+        # PrioritÃ© invalide
         with pytest.raises(ValidationError):
             SuggestionCourses(
                 nom="Test", quantite=1, unite="u", priorite="invalid", rayon="Test"
@@ -63,7 +63,7 @@ class TestSuggestionCourses:
 
 
 class TestArticleImport:
-    """Tests schéma ArticleImport."""
+    """Tests schÃ©ma ArticleImport."""
 
     def test_creation_basique(self):
         from src.services.inventaire import ArticleImport
@@ -95,9 +95,9 @@ class TestArticleImport:
         assert article.emplacement == "Frigo"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONSTANTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestInventaireConstants:
@@ -107,22 +107,22 @@ class TestInventaireConstants:
         from src.services.inventaire import CATEGORIES
         
         assert len(CATEGORIES) > 0
-        assert "Légumes" in CATEGORIES
+        assert "LÃ©gumes" in CATEGORIES
         assert "Fruits" in CATEGORIES
-        assert "Protéines" in CATEGORIES
+        assert "ProtÃ©ines" in CATEGORIES
 
     def test_emplacements_defined(self):
         from src.services.inventaire import EMPLACEMENTS
         
         assert len(EMPLACEMENTS) > 0
         assert "Frigo" in EMPLACEMENTS
-        assert "Congélateur" in EMPLACEMENTS
+        assert "CongÃ©lateur" in EMPLACEMENTS
         assert "Placard" in EMPLACEMENTS
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SERVICE INVENTAIRE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestInventaireServiceInit:
@@ -137,7 +137,7 @@ class TestInventaireServiceInit:
         
         service = InventaireService()
         
-        # Vérifier que le service est bien créé
+        # VÃ©rifier que le service est bien crÃ©Ã©
         assert service is not None
 
     def test_heritage_multiple(self):
@@ -204,7 +204,7 @@ class TestInventaireServiceCalculerStatut:
         
         service = InventaireService()
         
-        # Péremption dans 5 jours (< 7)
+        # PÃ©remption dans 5 jours (< 7)
         article = Mock()
         article.quantite = 10.0
         article.quantite_min = 5.0
@@ -299,7 +299,7 @@ class TestInventaireServiceGetInventaireComplet:
         
         service = InventaireService()
         
-        # Vérifier que la méthode existe
+        # VÃ©rifier que la mÃ©thode existe
         assert hasattr(service, 'get_inventaire_complet') or hasattr(service, 'get_all')
 
 
@@ -337,9 +337,9 @@ class TestInventaireServiceGetHistorique:
         assert hasattr(service, 'get_historique')
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EDGE CASES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestInventaireEdgeCases:
@@ -369,7 +369,7 @@ class TestInventaireEdgeCases:
         article.quantite_min = 0.0
         article.date_peremption = None
         
-        # Ne devrait pas diviser par zéro
+        # Ne devrait pas diviser par zÃ©ro
         statut = service._calculer_statut(article, date.today())
         
         assert statut == "ok"
@@ -405,14 +405,14 @@ class TestInventaireEdgeCases:
 
 
 class TestInventaireIntegration:
-    """Tests d'intégration."""
+    """Tests d'intÃ©gration."""
 
     def test_workflow_alertes(self):
         from src.services.inventaire import InventaireService
         
         service = InventaireService()
         
-        # Simuler différents articles
+        # Simuler diffÃ©rents articles
         mock_articles = [
             {"id": 1, "statut": "critique", "ingredient_nom": "A"},
             {"id": 2, "statut": "stock_bas", "ingredient_nom": "B"},
@@ -430,22 +430,22 @@ class TestInventaireIntegration:
         
         service = InventaireService()
         
-        # Méthodes héritées de BaseAIService
+        # MÃ©thodes hÃ©ritÃ©es de BaseAIService
         assert hasattr(service, 'call_with_list_parsing_sync')
         
-        # Méthodes héritées de InventoryAIMixin
+        # MÃ©thodes hÃ©ritÃ©es de InventoryAIMixin
         assert hasattr(service, 'build_inventory_summary')
 
 
 class TestInventaireBaseServiceMethods:
-    """Tests méthodes héritées de BaseService."""
+    """Tests mÃ©thodes hÃ©ritÃ©es de BaseService."""
 
     def test_has_crud_methods(self):
         from src.services.inventaire import InventaireService
         
         service = InventaireService()
         
-        # BaseService fournit ces méthodes
+        # BaseService fournit ces mÃ©thodes
         assert hasattr(service, 'get_all')
         assert hasattr(service, 'get_by_id')
         assert hasattr(service, 'create')

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for paris_logic service in maison domain.
 Tests logic for bet management, tracking, and validation.
 """

@@ -1,10 +1,10 @@
-﻿"""
+"""
 Hub Famille - Dashboard principal avec cards cliquables.
 
 Structure:
 ┌─────────────┐ ┌─────────────┐
 │ 👶 Jules    │ │ 🎉 Weekend  │
-│ 19m         │ │ Idées IA    │
+│ 19m         │ │ Idees IA    │
 └─────────────┘ └─────────────┘
 ┌─────────────┐ ┌─────────────┐
 │ 💪 Anne     │ │ 💪 Mathieu  │
@@ -27,7 +27,7 @@ from src.core.models import (
     FamilyPurchase,
     ChildProfile,
 )
-from src.services.garmin_sync import get_user_by_username, init_family_users
+from src.services.garmin import get_user_by_username, init_family_users
 
 
 # ═══════════════════════════════════════════════════════════
@@ -109,7 +109,7 @@ def calculer_age_jules() -> dict:
         with obtenir_contexte_db() as db:
             jules = db.query(ChildProfile).filter_by(name="Jules", actif=True).first()
             if not jules or not jules.date_of_birth:
-                # Valeurs par défaut si pas trouvé
+                # Valeurs par defaut si pas trouve
                 return {"mois": 19, "jours": 0, "texte": "19 mois"}
             
             today = date.today()
@@ -127,14 +127,14 @@ def calculer_age_jules() -> dict:
 
 
 def get_user_streak(username: str) -> int:
-    """Récupère le streak d'un utilisateur"""
+    """Recupère le streak d'un utilisateur"""
     try:
         with obtenir_contexte_db() as db:
             user = db.query(UserProfile).filter_by(username=username).first()
             if not user:
                 return 0
             
-            # Calculer le streak basé sur les résumés quotidiens
+            # Calculer le streak base sur les resumes quotidiens
             end_date = date.today()
             start_date = end_date - timedelta(days=30)
             
@@ -165,7 +165,7 @@ def get_user_streak(username: str) -> int:
 
 
 def get_user_garmin_connected(username: str) -> bool:
-    """Vérifie si Garmin est connecté"""
+    """Verifie si Garmin est connecte"""
     try:
         with obtenir_contexte_db() as db:
             user = db.query(UserProfile).filter_by(username=username).first()
@@ -175,7 +175,7 @@ def get_user_garmin_connected(username: str) -> bool:
 
 
 def count_weekend_activities() -> int:
-    """Compte les activités weekend planifiées"""
+    """Compte les activites weekend planifiees"""
     try:
         with obtenir_contexte_db() as db:
             today = date.today()
@@ -188,7 +188,7 @@ def count_weekend_activities() -> int:
             
             count = db.query(WeekendActivity).filter(
                 WeekendActivity.date_prevue.in_([saturday, sunday]),
-                WeekendActivity.statut == "planifié"
+                WeekendActivity.statut == "planifie"
             ).count()
             return count
     except:
@@ -228,7 +228,7 @@ def render_card_jules():
         st.session_state["famille_page"] = "jules"
         st.rerun()
     
-    st.caption(f"🎂 {age['texte']} • 🎨 Activités adaptées")
+    st.caption(f"🎂 {age['texte']} • 🎨 Activites adaptees")
 
 
 def render_card_weekend():
@@ -240,9 +240,9 @@ def render_card_weekend():
         st.rerun()
     
     if count > 0:
-        st.caption(f"📅 {count} activité(s) planifiée(s)")
+        st.caption(f"📅 {count} activite(s) planifiee(s)")
     else:
-        st.caption("💡 Découvrir des idées IA")
+        st.caption("💡 Decouvrir des idees IA")
 
 
 def render_card_user(username: str, display_name: str, emoji: str):
@@ -263,7 +263,7 @@ def render_card_user(username: str, display_name: str, emoji: str):
     if garmin:
         status_parts.append("⌚ Garmin")
     else:
-        status_parts.append("⌚ Non connecté")
+        status_parts.append("⌚ Non connecte")
     
     st.caption(" • ".join(status_parts))
 
@@ -290,40 +290,40 @@ def render_card_achats():
 # ═══════════════════════════════════════════════════════════
 
 def app():
-    """Point d'entrée du Hub Famille"""
+    """Point d'entree du Hub Famille"""
     st.title("👨‍👩‍👧 Hub Famille")
     
-    # Initialiser les utilisateurs si nécessaire
+    # Initialiser les utilisateurs si necessaire
     try:
         init_family_users()
     except:
         pass
     
-    # Gérer la navigation
+    # Gerer la navigation
     page = st.session_state.get("famille_page", "hub")
     
     if page == "hub":
         render_hub()
     elif page == "jules":
-        from src.domains.famille.ui.jules import app as jules_app
+        from src.modules.famille.jules import app as jules_app
         if st.button("⬅️ Retour au Hub"):
             st.session_state["famille_page"] = "hub"
             st.rerun()
         jules_app()
     elif page == "weekend":
-        from src.domains.famille.ui.weekend import app as weekend_app
+        from src.modules.famille.weekend import app as weekend_app
         if st.button("⬅️ Retour au Hub"):
             st.session_state["famille_page"] = "hub"
             st.rerun()
         weekend_app()
     elif page == "suivi":
-        from src.domains.famille.ui.suivi_perso import app as suivi_app
+        from src.modules.famille.suivi_perso import app as suivi_app
         if st.button("⬅️ Retour au Hub"):
             st.session_state["famille_page"] = "hub"
             st.rerun()
         suivi_app()
     elif page == "achats":
-        from src.domains.famille.ui.achats_famille import app as achats_app
+        from src.modules.famille.achats_famille import app as achats_app
         if st.button("⬅️ Retour au Hub"):
             st.session_state["famille_page"] = "hub"
             st.rerun()
@@ -400,12 +400,12 @@ def render_weekend_preview():
 
 
 def _render_day_activities(day: date):
-    """Affiche les activités d'un jour"""
+    """Affiche les activites d'un jour"""
     try:
         with obtenir_contexte_db() as db:
             activities = db.query(WeekendActivity).filter(
                 WeekendActivity.date_prevue == day,
-                WeekendActivity.statut == "planifié"
+                WeekendActivity.statut == "planifie"
             ).all()
             
             if activities:
@@ -413,11 +413,11 @@ def _render_day_activities(day: date):
                     heure = act.heure_debut or "?"
                     st.write(f"• {heure} - {act.titre}")
             else:
-                st.caption("Rien de prévu")
-                if st.button("💡 Suggérer", key=f"suggest_{day}"):
+                st.caption("Rien de prevu")
+                if st.button("💡 Suggerer", key=f"suggest_{day}"):
                     st.session_state["famille_page"] = "weekend"
                     st.session_state["weekend_suggest_date"] = day
                     st.rerun()
     except:
-        st.caption("Rien de prévu")
+        st.caption("Rien de prevu")
 

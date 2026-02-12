@@ -1,13 +1,13 @@
-"""
+﻿"""
 Tests complets pour src/services/predictions.py
 Objectif: Atteindre 80%+ de couverture
 
 Tests couvrant:
-- analyser_historique_article avec différentes tendances
-- predire_quantite avec valeurs positives/négatives
-- detecter_rupture_risque avec différents scénarios
+- analyser_historique_article avec diffÃ©rentes tendances
+- predire_quantite avec valeurs positives/nÃ©gatives
+- detecter_rupture_risque avec diffÃ©rents scÃ©narios
 - generer_predictions avec/sans historique
-- obtenir_analyse_globale avec prédictions mixtes
+- obtenir_analyse_globale avec prÃ©dictions mixtes
 - generer_recommandations avec articles critiques/croissants
 """
 import pytest
@@ -16,17 +16,17 @@ from statistics import mean
 
 
 class TestPredictionServiceMethods:
-    """Tests des méthodes principales de PredictionService."""
+    """Tests des mÃ©thodes principales de PredictionService."""
 
     @pytest.fixture
     def service(self):
-        """Crée une instance du service."""
+        """CrÃ©e une instance du service."""
         from src.services.predictions import PredictionService
         return PredictionService()
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TESTS analyser_historique_article
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     def test_analyser_historique_tendance_stable(self, service):
         """Historique avec consommation stable."""
@@ -168,9 +168,9 @@ class TestPredictionServiceMethods:
         assert result["tendance"] == "decroissante"
 
     def test_analyser_historique_confiance_calculation(self, service):
-        """Vérifie le calcul de confiance basé sur le nombre de points."""
+        """VÃ©rifie le calcul de confiance basÃ© sur le nombre de points."""
         now = datetime.now()
-        # 5 points → confiance = 0.5
+        # 5 points â†’ confiance = 0.5
         historique = []
         for i in range(5):
             historique.append({
@@ -187,9 +187,9 @@ class TestPredictionServiceMethods:
         assert result["confiance"] == 0.5  # 5/10
 
     def test_analyser_historique_confiance_max(self, service):
-        """Confiance plafonnée à 1.0."""
+        """Confiance plafonnÃ©e Ã  1.0."""
         now = datetime.now()
-        # 15 points → confiance = min(1.0, 15/10) = 1.0
+        # 15 points â†’ confiance = min(1.0, 15/10) = 1.0
         historique = []
         for i in range(15):
             historique.append({
@@ -209,7 +209,7 @@ class TestPredictionServiceMethods:
         """Filtre les types de modification non pertinents."""
         now = datetime.now()
         historique = [
-            # Modification quantité (valide)
+            # Modification quantitÃ© (valide)
             {
                 "article_id": 1,
                 "type_modification": "modification_quantite",
@@ -217,7 +217,7 @@ class TestPredictionServiceMethods:
                 "quantite_apres": 8,
                 "date_modification": (now - timedelta(days=3)).isoformat(),
             },
-            # Autre type (ignoré)
+            # Autre type (ignorÃ©)
             {
                 "article_id": 1,
                 "type_modification": "ajout",
@@ -245,12 +245,12 @@ class TestPredictionServiceMethods:
         assert result is not None
         assert result["nombre_modifications"] == 3  # Seulement les modifications_quantite avec consommation
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TESTS predire_quantite
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     def test_predire_quantite_normal(self, service):
-        """Prédiction normale avec stock suffisant."""
+        """PrÃ©diction normale avec stock suffisant."""
         result = service.predire_quantite(
             quantite_actuelle=100,
             taux_consommation=2.0,
@@ -260,17 +260,17 @@ class TestPredictionServiceMethods:
         assert result == 40
 
     def test_predire_quantite_negative_returns_zero(self, service):
-        """Prédiction négative retourne 0."""
+        """PrÃ©diction nÃ©gative retourne 0."""
         result = service.predire_quantite(
             quantite_actuelle=10,
             taux_consommation=5.0,
             jours=30
         )
-        # 10 - (5 * 30) = 10 - 150 = -140 → 0
+        # 10 - (5 * 30) = 10 - 150 = -140 â†’ 0
         assert result == 0
 
     def test_predire_quantite_zero_consumption(self, service):
-        """Consommation nulle garde la quantité."""
+        """Consommation nulle garde la quantitÃ©."""
         result = service.predire_quantite(
             quantite_actuelle=50,
             taux_consommation=0,
@@ -279,7 +279,7 @@ class TestPredictionServiceMethods:
         assert result == 50
 
     def test_predire_quantite_short_period(self, service):
-        """Prédiction sur période courte (7 jours)."""
+        """PrÃ©diction sur pÃ©riode courte (7 jours)."""
         result = service.predire_quantite(
             quantite_actuelle=100,
             taux_consommation=3.0,
@@ -288,12 +288,12 @@ class TestPredictionServiceMethods:
         # 100 - (3 * 7) = 100 - 21 = 79
         assert result == 79
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TESTS detecter_rupture_risque
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     def test_detecter_rupture_taux_zero(self, service):
-        """Taux consommation 0 → pas de risque."""
+        """Taux consommation 0 â†’ pas de risque."""
         risque, jours = service.detecter_rupture_risque(
             quantite_actuelle=10,
             quantite_min=5,
@@ -303,7 +303,7 @@ class TestPredictionServiceMethods:
         assert jours is None
 
     def test_detecter_rupture_taux_negatif(self, service):
-        """Taux consommation négatif → pas de risque."""
+        """Taux consommation nÃ©gatif â†’ pas de risque."""
         risque, jours = service.detecter_rupture_risque(
             quantite_actuelle=10,
             quantite_min=5,
@@ -313,55 +313,55 @@ class TestPredictionServiceMethods:
         assert jours is None
 
     def test_detecter_rupture_risque_eleve(self, service):
-        """Rupture dans < 14 jours → RISQUE."""
+        """Rupture dans < 14 jours â†’ RISQUE."""
         risque, jours = service.detecter_rupture_risque(
             quantite_actuelle=15,
             quantite_min=5,
             taux_consommation=2.0
         )
-        # (15 - 5) / 2 = 5 jours → risque car < 14
+        # (15 - 5) / 2 = 5 jours â†’ risque car < 14
         assert risque is True
         assert jours == 5
 
     def test_detecter_rupture_limite(self, service):
-        """Rupture dans exactement 14 jours → PAS de risque (< 14)."""
+        """Rupture dans exactement 14 jours â†’ PAS de risque (< 14)."""
         risque, jours = service.detecter_rupture_risque(
             quantite_actuelle=33,
             quantite_min=5,
             taux_consommation=2.0
         )
-        # (33 - 5) / 2 = 14 jours → pas de risque car >= 14
+        # (33 - 5) / 2 = 14 jours â†’ pas de risque car >= 14
         assert risque is False
         assert jours == 14
 
     def test_detecter_rupture_sans_risque(self, service):
-        """Rupture dans > 14 jours → pas de risque."""
+        """Rupture dans > 14 jours â†’ pas de risque."""
         risque, jours = service.detecter_rupture_risque(
             quantite_actuelle=100,
             quantite_min=10,
             taux_consommation=2.0
         )
-        # (100 - 10) / 2 = 45 jours → pas de risque
+        # (100 - 10) / 2 = 45 jours â†’ pas de risque
         assert risque is False
         assert jours == 45
 
     def test_detecter_rupture_deja_en_dessous(self, service):
-        """Quantité déjà en dessous du min → jours = 0."""
+        """QuantitÃ© dÃ©jÃ  en dessous du min â†’ jours = 0."""
         risque, jours = service.detecter_rupture_risque(
             quantite_actuelle=3,
             quantite_min=5,
             taux_consommation=1.0
         )
-        # (3 - 5) / 1 = -2 → 0
+        # (3 - 5) / 1 = -2 â†’ 0
         assert risque is True
         assert jours == 0
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TESTS generer_predictions
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     def test_generer_predictions_avec_historique(self, service):
-        """Génère prédictions avec historique disponible."""
+        """GÃ©nÃ¨re prÃ©dictions avec historique disponible."""
         now = datetime.now()
         
         articles = [
@@ -407,7 +407,7 @@ class TestPredictionServiceMethods:
         assert predictions[0].tendance == "stable"
 
     def test_generer_predictions_sans_historique(self, service):
-        """Génère prédictions sans historique (valeurs par défaut)."""
+        """GÃ©nÃ¨re prÃ©dictions sans historique (valeurs par dÃ©faut)."""
         articles = [
             {
                 "id": 1,
@@ -423,12 +423,12 @@ class TestPredictionServiceMethods:
         assert len(predictions) == 1
         assert predictions[0].article_id == 1
         assert predictions[0].tendance == "stable"
-        assert predictions[0].confiance == 0.3  # Valeur par défaut sans historique
-        # Taux par défaut: max(0.5, quantite_min * 0.1) = max(0.5, 10) = 10
+        assert predictions[0].confiance == 0.3  # Valeur par dÃ©faut sans historique
+        # Taux par dÃ©faut: max(0.5, quantite_min * 0.1) = max(0.5, 10) = 10
         assert predictions[0].taux_consommation_moyen == 10
 
     def test_generer_predictions_sans_quantite_min(self, service):
-        """Génère prédictions sans quantite_min défini."""
+        """GÃ©nÃ¨re prÃ©dictions sans quantite_min dÃ©fini."""
         articles = [
             {
                 "id": 1,
@@ -441,11 +441,11 @@ class TestPredictionServiceMethods:
         predictions = service.generer_predictions(articles, [])
         
         assert len(predictions) == 1
-        # Sans quantite_min, taux par défaut = 0.5
+        # Sans quantite_min, taux par dÃ©faut = 0.5
         assert predictions[0].taux_consommation_moyen == 0.5
 
     def test_generer_predictions_multiple_articles(self, service):
-        """Génère prédictions pour plusieurs articles."""
+        """GÃ©nÃ¨re prÃ©dictions pour plusieurs articles."""
         articles = [
             {
                 "id": 1,
@@ -469,9 +469,9 @@ class TestPredictionServiceMethods:
         assert predictions[0].nom == "Lait"
         assert predictions[1].nom == "Oeufs"
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TESTS obtenir_analyse_globale
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     def test_obtenir_analyse_globale_empty(self, service):
         """Analyse globale avec liste vide."""
@@ -484,7 +484,7 @@ class TestPredictionServiceMethods:
         assert analyse.tendance_globale == "stable"
 
     def test_obtenir_analyse_globale_mixed(self, service):
-        """Analyse globale avec prédictions mixtes."""
+        """Analyse globale avec prÃ©dictions mixtes."""
         from src.services.predictions import PredictionArticle
         
         predictions = [
@@ -560,13 +560,13 @@ class TestPredictionServiceMethods:
         
         analyse = service.obtenir_analyse_globale(predictions)
         
-        # 3 croissantes, 1 stable → croissantes > stables * 1.5 ? Non (3 > 1.5)
+        # 3 croissantes, 1 stable â†’ croissantes > stables * 1.5 ? Non (3 > 1.5)
         # En fait la condition est: croissantes > decroissantes * 1.5
-        # Ici decroissantes = 0, donc 3 > 0 * 1.5 = 3 > 0 → VRAI
+        # Ici decroissantes = 0, donc 3 > 0 * 1.5 = 3 > 0 â†’ VRAI
         assert analyse.tendance_globale == "croissante"
 
     def test_obtenir_analyse_globale_tendance_decroissante(self, service):
-        """Tendance globale décroissante."""
+        """Tendance globale dÃ©croissante."""
         from src.services.predictions import PredictionArticle
         
         predictions = [
@@ -586,7 +586,7 @@ class TestPredictionServiceMethods:
         
         analyse = service.obtenir_analyse_globale(predictions)
         
-        # 3 décroissantes, 0 croissantes → décroissantes > croissantes * 1.5
+        # 3 dÃ©croissantes, 0 croissantes â†’ dÃ©croissantes > croissantes * 1.5
         assert analyse.tendance_globale == "decroissante"
 
     def test_obtenir_analyse_globale_with_zero_consumption(self, service):
@@ -624,9 +624,9 @@ class TestPredictionServiceMethods:
         assert analyse.consommation_min == 2.0
         assert analyse.consommation_max == 2.0
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # TESTS generer_recommandations
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     def test_generer_recommandations_critique(self, service):
         """Recommandation CRITIQUE pour rupture < 14 jours."""
@@ -644,7 +644,7 @@ class TestPredictionServiceMethods:
                 tendance="stable",
                 confiance=0.8,
                 risque_rupture_mois=True,
-                jours_avant_rupture=5,  # < 14 → CRITIQUE
+                jours_avant_rupture=5,  # < 14 â†’ CRITIQUE
             ),
         ]
         
@@ -654,7 +654,7 @@ class TestPredictionServiceMethods:
         assert recommandations[0]["article"] == "Lait"
         assert recommandations[0]["priorite"] == "CRITIQUE"
         assert "5 jours" in recommandations[0]["raison"]
-        assert recommandations[0]["icone"] == "🚨"
+        assert recommandations[0]["icone"] == "ðŸš¨"
 
     def test_generer_recommandations_haute_croissance(self, service):
         """Recommandation HAUTE pour consommation croissante."""
@@ -670,7 +670,7 @@ class TestPredictionServiceMethods:
                 quantite_predite_mois=2,
                 taux_consommation_moyen=2.0,
                 tendance="croissante",
-                confiance=0.7,  # > 0.5 → recommandation
+                confiance=0.7,  # > 0.5 â†’ recommandation
                 risque_rupture_mois=False,
             ),
         ]
@@ -681,7 +681,7 @@ class TestPredictionServiceMethods:
         assert recommandations[0]["article"] == "Oeufs"
         assert recommandations[0]["priorite"] == "HAUTE"
         assert "hausse" in recommandations[0]["raison"].lower()
-        assert recommandations[0]["icone"] == "📈"
+        assert recommandations[0]["icone"] == "ðŸ“ˆ"
 
     def test_generer_recommandations_croissance_confiance_faible(self, service):
         """Pas de recommandation si confiance < 0.5."""
@@ -697,7 +697,7 @@ class TestPredictionServiceMethods:
                 quantite_predite_mois=70,
                 taux_consommation_moyen=1.0,
                 tendance="croissante",
-                confiance=0.4,  # < 0.5 → pas de recommandation
+                confiance=0.4,  # < 0.5 â†’ pas de recommandation
                 risque_rupture_mois=False,
             ),
         ]
@@ -707,7 +707,7 @@ class TestPredictionServiceMethods:
         assert len(recommandations) == 0
 
     def test_generer_recommandations_tri_priorite(self, service):
-        """Recommandations triées par priorité (CRITIQUE avant HAUTE)."""
+        """Recommandations triÃ©es par prioritÃ© (CRITIQUE avant HAUTE)."""
         from src.services.predictions import PredictionArticle
         
         predictions = [
@@ -745,7 +745,7 @@ class TestPredictionServiceMethods:
         assert recommandations[1]["priorite"] == "HAUTE"
 
     def test_generer_recommandations_limite_10(self, service):
-        """Limite les recommandations à 10."""
+        """Limite les recommandations Ã  10."""
         from src.services.predictions import PredictionArticle
         
         predictions = [
@@ -770,7 +770,7 @@ class TestPredictionServiceMethods:
         assert len(recommandations) == 10
 
     def test_generer_recommandations_empty(self, service):
-        """Pas de recommandation si pas de prédictions."""
+        """Pas de recommandation si pas de prÃ©dictions."""
         recommandations = service.generer_recommandations([])
         assert recommandations == []
 
@@ -797,7 +797,7 @@ class TestPredictionServiceMethods:
         recommandations = service.generer_recommandations(predictions)
         
         # Condition: jours_avant_rupture and jours_avant_rupture < 14
-        # None → falsy → pas de recommandation CRITIQUE
+        # None â†’ falsy â†’ pas de recommandation CRITIQUE
         assert len(recommandations) == 0
 
 
@@ -822,10 +822,10 @@ class TestObteniServicePredictionsSingleton:
 
 
 class TestSchemasPrediction:
-    """Tests des schémas Pydantic."""
+    """Tests des schÃ©mas Pydantic."""
 
     def test_prediction_article_with_defaults(self):
-        """PredictionArticle avec valeurs par défaut."""
+        """PredictionArticle avec valeurs par dÃ©faut."""
         from src.services.predictions import PredictionArticle
         
         pred = PredictionArticle(
@@ -844,7 +844,7 @@ class TestSchemasPrediction:
         assert pred.jours_avant_rupture is None
 
     def test_analyse_prediction_date_auto(self):
-        """AnalysePrediction génère date automatiquement."""
+        """AnalysePrediction gÃ©nÃ¨re date automatiquement."""
         from src.services.predictions import AnalysePrediction
         
         analyse = AnalysePrediction(

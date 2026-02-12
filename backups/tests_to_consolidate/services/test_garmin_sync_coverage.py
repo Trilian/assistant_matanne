@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests couverture pour src/services/garmin_sync.py
 """
 
@@ -7,9 +7,9 @@ from unittest.mock import Mock, MagicMock, patch
 from datetime import date, datetime, timedelta
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GARMIN CONFIG
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -17,7 +17,7 @@ class TestGarminConfig:
     """Tests pour GarminConfig dataclass."""
 
     def test_garmin_config_creation(self):
-        """Test création basique."""
+        """Test crÃ©ation basique."""
         from src.services.garmin_sync import GarminConfig
         
         config = GarminConfig(
@@ -30,7 +30,7 @@ class TestGarminConfig:
         assert config.api_base_url == "https://apis.garmin.com"
 
     def test_garmin_config_defaults(self):
-        """Test valeurs par défaut."""
+        """Test valeurs par dÃ©faut."""
         from src.services.garmin_sync import GarminConfig
         
         config = GarminConfig(consumer_key="key", consumer_secret="secret")
@@ -46,7 +46,7 @@ class TestGetGarminConfig:
 
     @patch('src.services.garmin_sync.obtenir_parametres')
     def test_get_garmin_config(self, mock_params):
-        """Test récupération config depuis settings."""
+        """Test rÃ©cupÃ©ration config depuis settings."""
         mock_settings = Mock()
         mock_settings.GARMIN_CONSUMER_KEY = "from_env_key"
         mock_settings.GARMIN_CONSUMER_SECRET = "from_env_secret"
@@ -61,7 +61,7 @@ class TestGetGarminConfig:
 
     @patch('src.services.garmin_sync.obtenir_parametres')
     def test_get_garmin_config_missing_keys(self, mock_params):
-        """Test config sans clés."""
+        """Test config sans clÃ©s."""
         mock_settings = Mock(spec=[])
         mock_params.return_value = mock_settings
         
@@ -73,9 +73,9 @@ class TestGetGarminConfig:
         assert config.consumer_secret == ""
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GARMIN SERVICE INIT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -84,7 +84,7 @@ class TestGarminServiceInit:
 
     @patch('src.services.garmin_sync.get_garmin_config')
     def test_init_with_default_config(self, mock_get_config):
-        """Test initialisation avec config par défaut."""
+        """Test initialisation avec config par dÃ©faut."""
         mock_config = Mock()
         mock_get_config.return_value = mock_config
         
@@ -96,7 +96,7 @@ class TestGarminServiceInit:
         mock_get_config.assert_called_once()
 
     def test_init_with_custom_config(self):
-        """Test initialisation avec config personnalisée."""
+        """Test initialisation avec config personnalisÃ©e."""
         from src.services.garmin_sync import GarminService, GarminConfig
         
         custom_config = GarminConfig(
@@ -110,9 +110,9 @@ class TestGarminServiceInit:
         assert service.config.consumer_key == "custom_key"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GET AUTHORIZATION URL
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -120,18 +120,18 @@ class TestGetAuthorizationUrl:
     """Tests pour get_authorization_url()."""
 
     def test_get_authorization_url_no_keys(self):
-        """Test erreur si clés manquantes."""
+        """Test erreur si clÃ©s manquantes."""
         from src.services.garmin_sync import GarminService, GarminConfig
         
         config = GarminConfig(consumer_key="", consumer_secret="")
         service = GarminService(config=config)
         
-        with pytest.raises(ValueError, match="Clés Garmin non configurées"):
+        with pytest.raises(ValueError, match="ClÃ©s Garmin non configurÃ©es"):
             service.get_authorization_url()
 
     @patch('src.services.garmin_sync.OAuth1Session')
     def test_get_authorization_url_success(self, mock_oauth_class):
-        """Test URL d'autorisation générée."""
+        """Test URL d'autorisation gÃ©nÃ©rÃ©e."""
         from src.services.garmin_sync import GarminService, GarminConfig
         
         # Mock OAuth session
@@ -154,7 +154,7 @@ class TestGetAuthorizationUrl:
 
     @patch('src.services.garmin_sync.OAuth1Session')
     def test_get_authorization_url_with_callback(self, mock_oauth_class):
-        """Test avec URL callback personnalisée."""
+        """Test avec URL callback personnalisÃ©e."""
         from src.services.garmin_sync import GarminService, GarminConfig
         
         mock_session = Mock()
@@ -178,7 +178,7 @@ class TestGetAuthorizationUrl:
 
     @patch('src.services.garmin_sync.OAuth1Session')
     def test_get_authorization_url_exception(self, mock_oauth_class):
-        """Test exception lors de la requête."""
+        """Test exception lors de la requÃªte."""
         from src.services.garmin_sync import GarminService, GarminConfig
         
         mock_session = Mock()
@@ -192,9 +192,9 @@ class TestGetAuthorizationUrl:
             service.get_authorization_url()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS COMPLETE AUTHORIZATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -217,7 +217,7 @@ class TestCompleteAuthorization:
 
     @patch('src.services.garmin_sync.OAuth1Session')
     def test_complete_authorization_user_not_found(self, mock_oauth_class):
-        """Test erreur si utilisateur non trouvé."""
+        """Test erreur si utilisateur non trouvÃ©."""
         from src.services.garmin_sync import GarminService, GarminConfig
         
         mock_session = Mock()
@@ -234,12 +234,12 @@ class TestCompleteAuthorization:
         mock_db = MagicMock()
         mock_db.get.return_value = None  # User not found
         
-        with pytest.raises(ValueError, match="Utilisateur .* non trouvé"):
+        with pytest.raises(ValueError, match="Utilisateur .* non trouvÃ©"):
             service.complete_authorization(user_id=999, oauth_verifier="verifier", db=mock_db)
 
     @patch('src.services.garmin_sync.OAuth1Session')
     def test_complete_authorization_success_new_token(self, mock_oauth_class):
-        """Test création nouveau token."""
+        """Test crÃ©ation nouveau token."""
         from src.services.garmin_sync import GarminService, GarminConfig
         
         mock_session = Mock()
@@ -269,7 +269,7 @@ class TestCompleteAuthorization:
 
     @patch('src.services.garmin_sync.OAuth1Session')
     def test_complete_authorization_update_existing_token(self, mock_oauth_class):
-        """Test mise à jour token existant."""
+        """Test mise Ã  jour token existant."""
         from src.services.garmin_sync import GarminService, GarminConfig
         
         mock_session = Mock()
@@ -305,9 +305,9 @@ class TestCompleteAuthorization:
         assert mock_garmin_token.oauth_token_secret == "new_access_secret"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GET AUTHENTICATED SESSION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -316,7 +316,7 @@ class TestGetAuthenticatedSession:
 
     @patch('src.services.garmin_sync.OAuth1Session')
     def test_get_authenticated_session(self, mock_oauth_class):
-        """Test création session authentifiée."""
+        """Test crÃ©ation session authentifiÃ©e."""
         from src.services.garmin_sync import GarminService, GarminConfig
         
         mock_session = Mock()
@@ -340,9 +340,9 @@ class TestGetAuthenticatedSession:
         assert session == mock_session
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SYNC USER DATA
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -351,7 +351,7 @@ class TestSyncUserData:
 
     @patch('src.services.garmin_sync.get_garmin_config')
     def test_sync_user_data_not_connected(self, mock_get_config):
-        """Test erreur si utilisateur non trouvé."""
+        """Test erreur si utilisateur non trouvÃ©."""
         from src.services.garmin_sync import GarminService
         
         mock_config = Mock()
@@ -362,9 +362,9 @@ class TestSyncUserData:
         service = GarminService()
         
         mock_db = MagicMock()
-        mock_db.get.return_value = None  # Utilisateur non trouvé
+        mock_db.get.return_value = None  # Utilisateur non trouvÃ©
         
-        with pytest.raises(ValueError, match="non trouvé"):
+        with pytest.raises(ValueError, match="non trouvÃ©"):
             service.sync_user_data(user_id=1, db=mock_db)
 
     @patch('src.services.garmin_sync.get_garmin_config')
@@ -387,12 +387,12 @@ class TestSyncUserData:
         mock_db = MagicMock()
         mock_db.get.return_value = mock_user
         
-        with pytest.raises(ValueError, match="non trouvé ou Garmin non connecté"):
+        with pytest.raises(ValueError, match="non trouvÃ© ou Garmin non connectÃ©"):
             service.sync_user_data(user_id=1, db=mock_db)
     
     @patch('src.services.garmin_sync.get_garmin_config')
     def test_sync_user_data_sync_disabled(self, mock_get_config):
-        """Test sync désactivée retourne zéros."""
+        """Test sync dÃ©sactivÃ©e retourne zÃ©ros."""
         from src.services.garmin_sync import GarminService
         
         mock_config = Mock()
@@ -416,9 +416,9 @@ class TestSyncUserData:
         assert result["summaries_synced"] == 0
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FACTORY FUNCTION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -438,9 +438,9 @@ class TestGarminFactoryFunction:
         assert service is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS USER HELPERS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -448,7 +448,7 @@ class TestUserHelpers:
     """Tests pour les fonctions utilitaires utilisateur."""
 
     def test_get_or_create_user_existing(self):
-        """Test récupération utilisateur existant."""
+        """Test rÃ©cupÃ©ration utilisateur existant."""
         from src.services.garmin_sync import get_or_create_user
         
         mock_user = Mock()
@@ -462,7 +462,7 @@ class TestUserHelpers:
         assert result == mock_user
 
     def test_get_or_create_user_new(self):
-        """Test création nouvel utilisateur."""
+        """Test crÃ©ation nouvel utilisateur."""
         from src.services.garmin_sync import get_or_create_user
         
         mock_db = MagicMock()
@@ -474,7 +474,7 @@ class TestUserHelpers:
         mock_db.commit.assert_called_once()
 
     def test_get_user_by_username(self):
-        """Test récupération par username."""
+        """Test rÃ©cupÃ©ration par username."""
         from src.services.garmin_sync import get_user_by_username
         
         mock_user = Mock()
@@ -501,9 +501,9 @@ class TestUserHelpers:
         assert result == mock_users
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS DISCONNECT USER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -512,7 +512,7 @@ class TestDisconnectUser:
 
     @patch('src.services.garmin_sync.get_garmin_config')
     def test_disconnect_user_not_found(self, mock_get_config):
-        """Test utilisateur non trouvé."""
+        """Test utilisateur non trouvÃ©."""
         mock_get_config.return_value = Mock()
         
         from src.services.garmin_sync import GarminService
@@ -528,7 +528,7 @@ class TestDisconnectUser:
 
     @patch('src.services.garmin_sync.get_garmin_config')
     def test_disconnect_user_success(self, mock_get_config):
-        """Test déconnexion réussie."""
+        """Test dÃ©connexion rÃ©ussie."""
         mock_get_config.return_value = Mock()
         
         from src.services.garmin_sync import GarminService
@@ -546,14 +546,14 @@ class TestDisconnectUser:
         result = service.disconnect_user(user_id=1, db=mock_db)
         
         assert result is True
-        # La fonction supprime le token et met garmin_connected à False
+        # La fonction supprime le token et met garmin_connected Ã  False
         mock_db.delete.assert_called_once_with(mock_garmin_token)
         mock_db.commit.assert_called_once()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MODULE EXPORTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -561,27 +561,27 @@ class TestModuleExports:
     """Tests pour les exports du module."""
 
     def test_garmin_config_exported(self):
-        """Test GarminConfig exporté."""
+        """Test GarminConfig exportÃ©."""
         from src.services.garmin_sync import GarminConfig
         assert GarminConfig is not None
 
     def test_garmin_service_exported(self):
-        """Test GarminService exporté."""
+        """Test GarminService exportÃ©."""
         from src.services.garmin_sync import GarminService
         assert GarminService is not None
 
     def test_get_garmin_service_exported(self):
-        """Test get_garmin_service exporté."""
+        """Test get_garmin_service exportÃ©."""
         from src.services.garmin_sync import get_garmin_service
         assert get_garmin_service is not None
 
     def test_get_garmin_config_exported(self):
-        """Test get_garmin_config exporté."""
+        """Test get_garmin_config exportÃ©."""
         from src.services.garmin_sync import get_garmin_config
         assert get_garmin_config is not None
 
     def test_helper_functions_exported(self):
-        """Test fonctions utilitaires exportées."""
+        """Test fonctions utilitaires exportÃ©es."""
         from src.services.garmin_sync import (
             get_or_create_user,
             get_user_by_username,
@@ -591,9 +591,9 @@ class TestModuleExports:
         assert all([get_or_create_user, get_user_by_username, list_all_users, init_family_users])
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FETCH ACTIVITIES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -602,7 +602,7 @@ class TestFetchActivities:
 
     @patch('src.services.garmin_sync.get_garmin_config')
     def test_fetch_activities_success(self, mock_get_config):
-        """Test récupération activités réussie."""
+        """Test rÃ©cupÃ©ration activitÃ©s rÃ©ussie."""
         from src.services.garmin_sync import GarminService, GarminConfig
         from datetime import date, timedelta
         
@@ -624,7 +624,7 @@ class TestFetchActivities:
 
     @patch('src.services.garmin_sync.get_garmin_config')
     def test_fetch_activities_error(self, mock_get_config):
-        """Test erreur lors de récupération activités."""
+        """Test erreur lors de rÃ©cupÃ©ration activitÃ©s."""
         from src.services.garmin_sync import GarminService, GarminConfig
         from datetime import date
         
@@ -639,9 +639,9 @@ class TestFetchActivities:
         assert result == []
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FETCH DAILY SUMMARIES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -650,7 +650,7 @@ class TestFetchDailySummaries:
 
     @patch('src.services.garmin_sync.get_garmin_config')
     def test_fetch_daily_summaries_success(self, mock_get_config):
-        """Test récupération résumés réussie."""
+        """Test rÃ©cupÃ©ration rÃ©sumÃ©s rÃ©ussie."""
         from src.services.garmin_sync import GarminService, GarminConfig
         from datetime import date
         
@@ -669,7 +669,7 @@ class TestFetchDailySummaries:
 
     @patch('src.services.garmin_sync.get_garmin_config')
     def test_fetch_daily_summaries_error(self, mock_get_config):
-        """Test erreur lors de récupération résumés."""
+        """Test erreur lors de rÃ©cupÃ©ration rÃ©sumÃ©s."""
         from src.services.garmin_sync import GarminService, GarminConfig
         from datetime import date
         
@@ -684,9 +684,9 @@ class TestFetchDailySummaries:
         assert result == []
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SAVE ACTIVITY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -695,7 +695,7 @@ class TestSaveActivity:
 
     @patch('src.services.garmin_sync.get_garmin_config')
     def test_save_activity_new(self, mock_get_config):
-        """Test sauvegarde nouvelle activité."""
+        """Test sauvegarde nouvelle activitÃ©."""
         from src.services.garmin_sync import GarminService, GarminConfig
         
         config = GarminConfig(consumer_key="key", consumer_secret="secret")
@@ -720,7 +720,7 @@ class TestSaveActivity:
 
     @patch('src.services.garmin_sync.get_garmin_config')
     def test_save_activity_existing(self, mock_get_config):
-        """Test activité déjà existante."""
+        """Test activitÃ© dÃ©jÃ  existante."""
         from src.services.garmin_sync import GarminService, GarminConfig
         
         config = GarminConfig(consumer_key="key", consumer_secret="secret")
@@ -755,9 +755,9 @@ class TestSaveActivity:
         mock_db.add.assert_called_once()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SAVE DAILY SUMMARY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -766,7 +766,7 @@ class TestSaveDailySummary:
 
     @patch('src.services.garmin_sync.get_garmin_config')
     def test_save_daily_summary_new(self, mock_get_config):
-        """Test sauvegarde nouveau résumé."""
+        """Test sauvegarde nouveau rÃ©sumÃ©."""
         from src.services.garmin_sync import GarminService, GarminConfig
         
         config = GarminConfig(consumer_key="key", consumer_secret="secret")
@@ -790,7 +790,7 @@ class TestSaveDailySummary:
 
     @patch('src.services.garmin_sync.get_garmin_config')
     def test_save_daily_summary_existing(self, mock_get_config):
-        """Test mise à jour résumé existant."""
+        """Test mise Ã  jour rÃ©sumÃ© existant."""
         from src.services.garmin_sync import GarminService, GarminConfig
         
         config = GarminConfig(consumer_key="key", consumer_secret="secret")
@@ -826,9 +826,9 @@ class TestSaveDailySummary:
         mock_db.add.assert_called_once()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GET USER STATS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -837,7 +837,7 @@ class TestGetUserStats:
 
     @patch('src.services.garmin_sync.get_garmin_config')
     def test_get_user_stats_user_not_found(self, mock_get_config):
-        """Test utilisateur non trouvé."""
+        """Test utilisateur non trouvÃ©."""
         from src.services.garmin_sync import GarminService, GarminConfig
         
         config = GarminConfig(consumer_key="key", consumer_secret="secret")
@@ -852,7 +852,7 @@ class TestGetUserStats:
 
     @patch('src.services.garmin_sync.get_garmin_config')
     def test_get_user_stats_success(self, mock_get_config):
-        """Test récupération stats réussie."""
+        """Test rÃ©cupÃ©ration stats rÃ©ussie."""
         from src.services.garmin_sync import GarminService, GarminConfig
         
         config = GarminConfig(consumer_key="key", consumer_secret="secret")
@@ -879,7 +879,7 @@ class TestGetUserStats:
         mock_db.query.return_value.filter.return_value.all.return_value = [mock_summary]
         mock_db.query.return_value.filter.return_value.order_by.return_value.all.return_value = []
         
-        # On utilise side_effect pour différencier les appels
+        # On utilise side_effect pour diffÃ©rencier les appels
         service._calculate_streak = Mock(return_value=5)
         
         result = service.get_user_stats(user_id=1, db=mock_db)
@@ -887,9 +887,9 @@ class TestGetUserStats:
         assert result["garmin_connected"] is True
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CALCULATE STREAK
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -913,7 +913,7 @@ class TestCalculateStreak:
 
     @patch('src.services.garmin_sync.get_garmin_config')
     def test_calculate_streak_with_data(self, mock_get_config):
-        """Test calcul avec données."""
+        """Test calcul avec donnÃ©es."""
         from src.services.garmin_sync import GarminService, GarminConfig
         from datetime import date
         
@@ -937,9 +937,9 @@ class TestCalculateStreak:
         assert result >= 1
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS INIT FAMILY USERS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -964,9 +964,9 @@ class TestInitFamilyUsers:
         assert mathieu.username == "mathieu"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SYNC USER DATA FULL
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -975,7 +975,7 @@ class TestSyncUserDataFull:
 
     @patch('src.services.garmin_sync.get_garmin_config')
     def test_sync_user_data_success(self, mock_get_config):
-        """Test sync complète réussie."""
+        """Test sync complÃ¨te rÃ©ussie."""
         from src.services.garmin_sync import GarminService, GarminConfig
         
         config = GarminConfig(
@@ -997,7 +997,7 @@ class TestSyncUserDataFull:
         mock_db = MagicMock()
         mock_db.get.return_value = mock_user
         
-        # Mock les méthodes fetch
+        # Mock les mÃ©thodes fetch
         service._fetch_activities = Mock(return_value=[{"activityId": "1"}])
         service._fetch_daily_summaries = Mock(return_value=[{"calendarDate": "2024-01-01"}])
         service._save_activity = Mock()

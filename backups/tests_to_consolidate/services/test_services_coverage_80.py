@@ -1,7 +1,7 @@
-"""
-Tests exhaustifs pour améliorer la couverture des services à 80%+
+﻿"""
+Tests exhaustifs pour amÃ©liorer la couverture des services Ã  80%+
 
-Fichiers ciblés (faible couverture):
+Fichiers ciblÃ©s (faible couverture):
 - io_service.py (15.13%)
 - types.py (9.59%) 
 - openfoodfacts.py
@@ -15,9 +15,9 @@ from unittest.mock import Mock, MagicMock, patch
 import json
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS IOService (Pure static methods)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestIOServiceFormatValue:
@@ -189,10 +189,10 @@ class TestIOServiceCSV:
         """Test to_csv with single item"""
         from src.services.io_service import IOService
         items = [{"nom": "Pomme", "quantite": 5}]
-        mapping = {"nom": "Nom", "quantite": "Quantité"}
+        mapping = {"nom": "Nom", "quantite": "QuantitÃ©"}
         result = IOService.to_csv(items, mapping)
         assert "Nom" in result
-        assert "Quantité" in result
+        assert "QuantitÃ©" in result
         assert "Pomme" in result
         assert "5" in result
     
@@ -201,9 +201,9 @@ class TestIOServiceCSV:
         from src.services.io_service import IOService
         items = [
             {"nom": "Pomme", "categorie": "Fruits"},
-            {"nom": "Carotte", "categorie": "Légumes"},
+            {"nom": "Carotte", "categorie": "LÃ©gumes"},
         ]
-        mapping = {"nom": "Nom", "categorie": "Catégorie"}
+        mapping = {"nom": "Nom", "categorie": "CatÃ©gorie"}
         result = IOService.to_csv(items, mapping)
         lines = result.strip().split("\n")
         assert len(lines) == 3  # Header + 2 items
@@ -220,8 +220,8 @@ class TestIOServiceCSV:
     def test_from_csv_valid(self):
         """Test from_csv with valid data"""
         from src.services.io_service import IOService
-        csv_str = "Nom,Quantité\nPomme,5\nOrange,3"
-        mapping = {"nom": "Nom", "quantite": "Quantité"}
+        csv_str = "Nom,QuantitÃ©\nPomme,5\nOrange,3"
+        mapping = {"nom": "Nom", "quantite": "QuantitÃ©"}
         items, errors = IOService.from_csv(csv_str, mapping, ["nom"])
         assert len(items) == 2
         assert len(errors) == 0
@@ -231,8 +231,8 @@ class TestIOServiceCSV:
     def test_from_csv_missing_required(self):
         """Test from_csv with missing required field"""
         from src.services.io_service import IOService
-        csv_str = "Nom,Quantité\n,5\nOrange,3"
-        mapping = {"nom": "Nom", "quantite": "Quantité"}
+        csv_str = "Nom,QuantitÃ©\n,5\nOrange,3"
+        mapping = {"nom": "Nom", "quantite": "QuantitÃ©"}
         items, errors = IOService.from_csv(csv_str, mapping, ["nom"])
         assert len(items) == 1  # Only Orange
         assert len(errors) == 1
@@ -241,8 +241,8 @@ class TestIOServiceCSV:
     def test_from_csv_extra_columns(self):
         """Test from_csv ignores extra columns"""
         from src.services.io_service import IOService
-        csv_str = "Nom,Extra,Quantité\nPomme,ignored,5"
-        mapping = {"nom": "Nom", "quantite": "Quantité"}
+        csv_str = "Nom,Extra,QuantitÃ©\nPomme,ignored,5"
+        mapping = {"nom": "Nom", "quantite": "QuantitÃ©"}
         items, errors = IOService.from_csv(csv_str, mapping, ["nom"])
         assert len(items) == 1
         assert "extra" not in items[0]
@@ -332,9 +332,9 @@ class TestIOServiceFieldMappings:
         assert "priorite" in COURSES_FIELD_MAPPING
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS OpenFoodFacts Service (Dataclasses + parsing)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestNutritionInfoDataclass:
@@ -388,7 +388,7 @@ class TestProduitOpenFoodFactsDataclass:
             nom="Nutella",
             marque="Ferrero",
             quantite="400g",
-            categories=["Pâtes à tartiner", "Chocolat"],
+            categories=["PÃ¢tes Ã  tartiner", "Chocolat"],
             nutrition=nutrition,
             labels=["Sans huile de palme"],
             confiance=0.95
@@ -488,9 +488,9 @@ class TestOpenFoodFactsServiceParser:
         assert len(result.categories) == 2
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS RecipeImport (Pure methods)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestRecipeParserCleanText:
@@ -552,7 +552,7 @@ class TestRecipeParserParseDuration:
 
 
 class TestImportedIngredient:
-    """Tests pour le modèle ImportedIngredient"""
+    """Tests pour le modÃ¨le ImportedIngredient"""
     
     def test_ingredient_minimal(self):
         """Test with minimal data"""
@@ -575,7 +575,7 @@ class TestImportedIngredient:
 
 
 class TestImportedRecipe:
-    """Tests pour le modèle ImportedRecipe"""
+    """Tests pour le modÃ¨le ImportedRecipe"""
     
     def test_recipe_minimal(self):
         """Test with minimal data"""
@@ -591,14 +591,14 @@ class TestImportedRecipe:
         from src.services.recipe_import import ImportedRecipe, ImportedIngredient
         recipe = ImportedRecipe(
             nom="Tarte aux pommes",
-            description="Une délicieuse tarte",
+            description="Une dÃ©licieuse tarte",
             temps_preparation=30,
             temps_cuisson=45,
             portions=8,
             difficulte="facile",
             categorie="Dessert",
             ingredients=[ImportedIngredient(nom="Pommes", quantite=4.0)],
-            etapes=["Éplucher les pommes", "Faire la pâte"],
+            etapes=["Ã‰plucher les pommes", "Faire la pÃ¢te"],
             source_url="https://example.com/recette",
             confiance_score=0.85
         )
@@ -608,7 +608,7 @@ class TestImportedRecipe:
 
 
 class TestImportResult:
-    """Tests pour le modèle ImportResult"""
+    """Tests pour le modÃ¨le ImportResult"""
     
     def test_import_result_default(self):
         """Test default values"""
@@ -625,16 +625,16 @@ class TestImportResult:
         recipe = ImportedRecipe(nom="Test")
         result = ImportResult(
             success=True,
-            message="Import réussi",
+            message="Import rÃ©ussi",
             recipe=recipe
         )
         assert result.success is True
         assert result.recipe is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS rapports_pdf Schemas
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestRapportStocksSchema:
@@ -675,7 +675,7 @@ class TestRapportBudgetSchema:
         from src.services.rapports_pdf import RapportBudget
         rapport = RapportBudget(
             depenses_total=850.0,
-            depenses_par_categorie={"Alimentation": 500.0, "Hygiène": 150.0}
+            depenses_par_categorie={"Alimentation": 500.0, "HygiÃ¨ne": 150.0}
         )
         assert rapport.depenses_total == 850.0
         assert len(rapport.depenses_par_categorie) == 2
@@ -698,7 +698,7 @@ class TestAnalyseGaspillageSchema:
         analyse = AnalyseGaspillage(
             articles_perimes_total=5,
             valeur_perdue=25.50,
-            recommandations=["Réduire les achats de fruits"]
+            recommandations=["RÃ©duire les achats de fruits"]
         )
         assert analyse.articles_perimes_total == 5
         assert analyse.valeur_perdue == 25.50
@@ -727,9 +727,9 @@ class TestRapportPlanningSchema:
         assert rapport.nom_planning == "Semaine 1"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS types.py BaseService (avec mock DB)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBaseServiceInit:
@@ -765,9 +765,9 @@ class TestBaseServiceHelpers:
         service._invalider_cache()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS Constants et imports
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestOpenFoodFactsConstants:

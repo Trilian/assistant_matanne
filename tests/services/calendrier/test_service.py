@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour CalendarSyncService.
 
 Module: src.services.calendrier.service
@@ -23,9 +23,9 @@ from src.services.calendrier.schemas import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
@@ -91,9 +91,9 @@ END:VEVENT
 END:VCALENDAR"""
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS CRÉATION ET FACTORY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS CRÃ‰ATION ET FACTORY
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalendarSyncServiceCreation:
@@ -117,9 +117,9 @@ class TestCalendarSyncServiceCreation:
         assert isinstance(service, CalendarSyncService)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONFIGURATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestConfigurationCalendriers:
@@ -169,9 +169,9 @@ class TestConfigurationCalendriers:
             assert all(c.user_id == "user-001" for c in calendars)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS IMPORT iCAL
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestImportIcal:
@@ -234,7 +234,7 @@ class TestImportIcal:
         assert "aucun" in result.message.lower()
 
     def test_import_from_ical_url_update_existing(self, service, sample_ical_content):
-        """Test import avec mise à jour d'événement existant."""
+        """Test import avec mise Ã  jour d'événement existant."""
         mock_response = MagicMock()
         mock_response.text = sample_ical_content
         mock_response.raise_for_status = MagicMock()
@@ -257,9 +257,9 @@ class TestImportIcal:
                 assert result.success is True
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EXPORT iCAL
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestExportIcal:
@@ -411,9 +411,9 @@ class TestExportIcal:
                 assert expected_time in result, f"Type {meal_type} devrait avoir heure {expected_hour}"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GOOGLE CALENDAR
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGoogleCalendar:
@@ -717,7 +717,7 @@ class TestGoogleImportExport:
             service.http_client.post.assert_called_once()
 
     def test_export_meal_to_google_update_existing(self, service, google_config):
-        """Test mise à jour d'un repas existant."""
+        """Test mise Ã  jour d'un repas existant."""
         mock_repas = MagicMock()
         mock_repas.id = 1
         mock_repas.date_repas = date.today()
@@ -862,9 +862,9 @@ class TestExportPlanningToGoogle:
                 assert result.success is True
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS DB PERSISTENCE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestDatabasePersistence:
@@ -895,7 +895,7 @@ class TestDatabasePersistence:
                 mock_session.commit.assert_called_once()
 
     def test_import_events_to_db_update(self, service):
-        """Test import événements - mise à jour."""
+        """Test import événements - mise Ã  jour."""
         events = [
             CalendarEventExternal(
                 external_id="ext1",
@@ -964,7 +964,7 @@ class TestSaveConfigToDb:
                 mock_session.commit.assert_called_once()
 
     def test_save_config_update(self, service, google_config):
-        """Test mise à jour configuration."""
+        """Test mise Ã  jour configuration."""
         google_config.id = "123"  # ID numérique
         
         existing = MagicMock()
@@ -1018,10 +1018,10 @@ class TestSaveConfigToDb:
             service._remove_config_from_db("not_a_number")
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS MÉTHODES AVEC @avec_session_db
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS MÃ‰THODES AVEC @avec_session_db
 # Ces tests nécessitent une DB avec utilisateurs valides (FK constraints)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.skip(reason="Nécessite fixtures DB avec FK constraints user_id - testé via mocks ci-dessus")
@@ -1104,7 +1104,7 @@ class TestSessionDecoratedMethods:
         assert db_event.uid == "evt123"
 
     def test_sauvegarder_evenement_calendrier_update(self, service, db):
-        """Test sauvegarde événement - mise à jour."""
+        """Test sauvegarde événement - mise Ã  jour."""
         user_id = str(uuid4())
         
         calendrier = service.ajouter_calendrier_externe(
@@ -1128,7 +1128,7 @@ class TestSessionDecoratedMethods:
             db=db
         )
         
-        # Mettre à jour
+        # Mettre Ã  jour
         event2 = CalendarEventExternal(
             external_id="evt123",
             title="Updated",
@@ -1201,7 +1201,7 @@ class TestSessionDecoratedMethods:
             db=db
         )
         
-        # Événements dans cal1
+        # Ã‰vénements dans cal1
         for i in range(3):
             event = CalendarEventExternal(
                 external_id=f"c1evt{i}",
@@ -1216,7 +1216,7 @@ class TestSessionDecoratedMethods:
                 db=db
             )
         
-        # Événement dans cal2
+        # Ã‰vénement dans cal2
         event = CalendarEventExternal(
             external_id="c2evt1",
             title="Cal2 Event",

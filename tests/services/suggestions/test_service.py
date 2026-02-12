@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for src/services/suggestions/service.py
 
 ServiceSuggestions - IA-powered recipe suggestions.
@@ -97,7 +97,7 @@ class TestSuggestionRecette:
         suggestion = SuggestionRecette(
             recette_id=1,
             nom="Pâtes carbonara",
-            raison="Rapide à préparer",
+            raison="Rapide Ã  préparer",
             score=85.0,
             tags=["rapide", "italien"],
             temps_preparation=20,
@@ -130,9 +130,9 @@ class TestServiceSuggestions:
         """Fixture session mock."""
         return MagicMock()
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # analyser_profil_culinaire
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     def test_analyser_profil_culinaire_empty(self, service, mock_session):
         """Test profil vide sans historique."""
@@ -214,9 +214,9 @@ class TestServiceSuggestions:
         
         assert 1 in profil.recettes_favorites
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # construire_contexte
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     def test_construire_contexte_basic(self, service, mock_session):
         """Test construction contexte basique."""
@@ -258,7 +258,7 @@ class TestServiceSuggestions:
         assert "Tomate" in contexte.ingredients_disponibles
 
     def test_construire_contexte_priority_ingredients(self, service, mock_session):
-        """Test ingrédients à utiliser en priorité."""
+        """Test ingrédients Ã  utiliser en priorité."""
         demain = datetime.now() + timedelta(days=2)
         mock_article = MagicMock()
         mock_article.nom = "Yaourt"
@@ -311,9 +311,9 @@ class TestServiceSuggestions:
         
         assert contexte.saison == "hiver"
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # suggerer_recettes
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     @patch.object(ServiceSuggestions, "construire_contexte")
     @patch.object(ServiceSuggestions, "analyser_profil_culinaire")
@@ -445,9 +445,9 @@ class TestServiceSuggestions:
         
         assert isinstance(suggestions, list)
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # _calculer_score_recette
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     def test_calculer_score_recette_basic(self, service, mock_session):
         """Test calcul score basique."""
@@ -626,9 +626,9 @@ class TestServiceSuggestions:
         
         assert "classique" in tags
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # _trouver_ingredients_manquants
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     def test_trouver_ingredients_manquants_none(self, service):
         """Test aucun ingrédient manquant."""
@@ -676,7 +676,7 @@ class TestServiceSuggestions:
         assert manquants == []
 
     def test_trouver_ingredients_manquants_case_insensitive(self, service):
-        """Test insensible à la casse."""
+        """Test insensible Ã  la casse."""
         mock_ingredient = MagicMock()
         mock_ingredient.nom = "Tomate"
         mock_ri = MagicMock()
@@ -689,9 +689,9 @@ class TestServiceSuggestions:
         
         assert len(manquants) == 0
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # _mixer_suggestions
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     def test_mixer_suggestions_basic(self, service):
         """Test mix basique."""
@@ -730,9 +730,9 @@ class TestServiceSuggestions:
         
         assert len(result) == 3
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # suggerer_avec_ia
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     @patch.object(ServiceSuggestions, "construire_contexte")
     @patch.object(ServiceSuggestions, "analyser_profil_culinaire")

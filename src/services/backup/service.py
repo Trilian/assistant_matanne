@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service de Backup Automatique pour l'Assistant Matanne.
 
 Fonctionnalités:
@@ -78,7 +78,7 @@ class ServiceBackup:
     - Rotation automatique des anciens backups
     """
     
-    # Mapping des modèles à exporter
+    # Mapping des modèles Ã  exporter
     MODELS_TO_BACKUP = {
         "ingredients": Ingredient,
         "recettes": Recette,
@@ -116,7 +116,7 @@ class ServiceBackup:
         backup_path = Path(self.config.backup_dir)
         backup_path.mkdir(parents=True, exist_ok=True)
     
-    # Méthodes utilitaires déléguées à utils
+    # Méthodes utilitaires déléguées Ã  utils
     @staticmethod
     def _model_to_dict(obj: Any) -> dict:
         """Convertit un objet SQLAlchemy en dictionnaire."""
@@ -132,9 +132,9 @@ class ServiceBackup:
         """Calcule le checksum MD5 des données."""
         return calculate_checksum(data)
     
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # EXPORT / BACKUP
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     @avec_gestion_erreurs(default_return=None, afficher_erreur=True)
     @avec_session_db
@@ -148,7 +148,7 @@ class ServiceBackup:
         Crée un backup complet ou partiel de la base de données.
         
         Args:
-            tables: Liste des tables à exporter (None = toutes)
+            tables: Liste des tables Ã  exporter (None = toutes)
             compress: Compresser le backup (None = config par défaut)
             db: Session DB injectée
             
@@ -159,9 +159,9 @@ class ServiceBackup:
         backup_id = self._generate_backup_id()
         should_compress = compress if compress is not None else self.config.compress
         
-        logger.info(f"🔄 Création backup {backup_id}...")
+        logger.info(f"ðŸ”„ Création backup {backup_id}...")
         
-        # Déterminer les tables à exporter
+        # Déterminer les tables Ã  exporter
         tables_to_export = tables or list(self.MODELS_TO_BACKUP.keys())
         
         # Structure du backup
@@ -180,7 +180,7 @@ class ServiceBackup:
         # Exporter chaque table
         for table_name in tables_to_export:
             if table_name not in self.MODELS_TO_BACKUP:
-                logger.warning(f"⚠️ Table inconnue: {table_name}")
+                logger.warning(f"âš ï¸ Table inconnue: {table_name}")
                 continue
             
             model_class = self.MODELS_TO_BACKUP[table_name]
@@ -191,9 +191,9 @@ class ServiceBackup:
                     self._model_to_dict(record) for record in records
                 ]
                 total_records += len(records)
-                logger.debug(f"  ✓ {table_name}: {len(records)} enregistrements")
+                logger.debug(f"  âœ“ {table_name}: {len(records)} enregistrements")
             except Exception as e:
-                logger.error(f"  ✗ Erreur export {table_name}: {e}")
+                logger.error(f"  âœ— Erreur export {table_name}: {e}")
                 backup_data["data"][table_name] = []
         
         # Sérialiser
@@ -231,7 +231,7 @@ class ServiceBackup:
         self._rotate_old_backups()
         
         logger.info(
-            f"✅ Backup créé: {filename} "
+            f"âœ… Backup créé: {filename} "
             f"({total_records} enregistrements, {file_size/1024:.1f} KB, {duration:.2f}s)"
         )
         
@@ -244,7 +244,7 @@ class ServiceBackup:
         )
     
     def _rotate_old_backups(self):
-        """Supprime les anciens backups au-delà de max_backups."""
+        """Supprime les anciens backups au-delÃ  de max_backups."""
         backup_path = Path(self.config.backup_dir)
         backups = sorted(
             backup_path.glob("backup_*"),
@@ -255,11 +255,11 @@ class ServiceBackup:
         if len(backups) > self.config.max_backups:
             for old_backup in backups[self.config.max_backups:]:
                 old_backup.unlink()
-                logger.info(f"🗑️ Ancien backup supprimé: {old_backup.name}")
+                logger.info(f"ðŸ—‘ï¸ Ancien backup supprimé: {old_backup.name}")
     
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # IMPORT / RESTORE
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     @avec_gestion_erreurs(default_return=None, afficher_erreur=True)
     @avec_session_db
@@ -275,14 +275,14 @@ class ServiceBackup:
         
         Args:
             file_path: Chemin vers le fichier de backup
-            tables: Tables à restaurer (None = toutes)
+            tables: Tables Ã  restaurer (None = toutes)
             clear_existing: Supprimer les données existantes avant restauration
             db: Session DB injectée
             
         Returns:
             RestoreResult avec le statut de la restauration
         """
-        logger.info(f"🔄 Restauration depuis {file_path}...")
+        logger.info(f"ðŸ”„ Restauration depuis {file_path}...")
         
         path = Path(file_path)
         if not path.exists():
@@ -349,18 +349,18 @@ class ServiceBackup:
                 db.flush()
                 tables_restored.append(table_name)
                 total_records += len(records)
-                logger.debug(f"  ✓ {table_name}: {len(records)} enregistrements restaurés")
+                logger.debug(f"  âœ“ {table_name}: {len(records)} enregistrements restaurés")
                 
             except Exception as e:
                 error_msg = f"Erreur restauration {table_name}: {e}"
-                logger.error(f"  ✗ {error_msg}")
+                logger.error(f"  âœ— {error_msg}")
                 errors.append(error_msg)
                 db.rollback()
         
         db.commit()
         
         logger.info(
-            f"✅ Restauration terminée: {len(tables_restored)} tables, "
+            f"âœ… Restauration terminée: {len(tables_restored)} tables, "
             f"{total_records} enregistrements"
         )
         
@@ -372,9 +372,9 @@ class ServiceBackup:
             errors=errors,
         )
     
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # UTILITAIRES
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     def list_backups(self) -> list[BackupMetadata]:
         """Liste tous les backups disponibles."""
@@ -403,7 +403,7 @@ class ServiceBackup:
         
         for file in backup_path.glob(f"backup_{backup_id}*"):
             file.unlink()
-            logger.info(f"🗑️ Backup supprimé: {file.name}")
+            logger.info(f"ðŸ—‘ï¸ Backup supprimé: {file.name}")
             return True
         
         return False
@@ -438,16 +438,16 @@ class ServiceBackup:
             logger.error(f"Erreur lecture métadonnées: {e}")
             return None
     
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # UPLOAD SUPABASE STORAGE
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     def upload_to_supabase(self, file_path: str, bucket: str = "backups") -> bool:
         """
         Upload un backup vers Supabase Storage.
         
         Args:
-            file_path: Chemin du fichier à uploader
+            file_path: Chemin du fichier Ã  uploader
             bucket: Nom du bucket Supabase Storage
             
         Returns:
@@ -475,7 +475,7 @@ class ServiceBackup:
                     {"content-type": "application/gzip" if path.suffix == '.gz' else "application/json"}
                 )
             
-            logger.info(f"✅ Backup uploadé vers Supabase: {path.name}")
+            logger.info(f"âœ… Backup uploadé vers Supabase: {path.name}")
             return True
             
         except Exception as e:
@@ -487,7 +487,7 @@ class ServiceBackup:
         Télécharge un backup depuis Supabase Storage.
         
         Args:
-            filename: Nom du fichier à télécharger
+            filename: Nom du fichier Ã  télécharger
             bucket: Nom du bucket Supabase Storage
             
         Returns:
@@ -509,16 +509,16 @@ class ServiceBackup:
             with open(local_path, 'wb') as f:
                 f.write(response)
             
-            logger.info(f"✅ Backup téléchargé: {filename}")
+            logger.info(f"âœ… Backup téléchargé: {filename}")
             return str(local_path)
             
         except Exception as e:
             logger.error(f"Erreur téléchargement Supabase: {e}")
             return None
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # PERSISTANCE BASE DE DONNÉES (HISTORIQUE)
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     @avec_session_db
     def enregistrer_backup_historique(
@@ -615,9 +615,9 @@ class ServiceBackup:
 BackupService = ServiceBackup
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FACTORY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 _backup_service: ServiceBackup | None = None
@@ -635,14 +635,14 @@ def obtenir_service_backup(config: BackupConfig | None = None) -> ServiceBackup:
 get_backup_service = obtenir_service_backup
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # COMPOSANT UI STREAMLIT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def render_backup_ui():
     """Affiche l'interface de gestion des backups dans Streamlit."""
-    st.subheader("💾 Sauvegarde & Restauration")
+    st.subheader("ðŸ’¾ Sauvegarde & Restauration")
     
     service = obtenir_service_backup()
     
@@ -653,16 +653,16 @@ def render_backup_ui():
         
         compress = st.checkbox("Compresser (gzip)", value=True, key="backup_compress")
         
-        if st.button("📥 Créer un backup maintenant", use_container_width=True, type="primary"):
+        if st.button("ðŸ“¥ Créer un backup maintenant", use_container_width=True, type="primary"):
             with st.spinner("Création du backup..."):
                 result = service.create_backup(compress=compress)
                 
                 if result and result.success:
-                    st.success(f"✅ {result.message}")
-                    st.info(f"📊 {result.metadata.total_records} enregistrements, "
+                    st.success(f"âœ… {result.message}")
+                    st.info(f"ðŸ“Š {result.metadata.total_records} enregistrements, "
                            f"{result.metadata.file_size_bytes/1024:.1f} KB")
                 else:
-                    st.error("❌ Erreur lors de la création du backup")
+                    st.error("âŒ Erreur lors de la création du backup")
     
     with col2:
         st.markdown("### Backups disponibles")
@@ -673,17 +673,17 @@ def render_backup_ui():
             st.info("Aucun backup disponible")
         else:
             for backup in backups[:5]:  # Afficher les 5 derniers
-                with st.expander(f"📁 {backup.id}"):
+                with st.expander(f"ðŸ“ {backup.id}"):
                     st.write(f"**Date:** {backup.created_at.strftime('%d/%m/%Y %H:%M')}")
                     st.write(f"**Taille:** {backup.file_size_bytes/1024:.1f} KB")
                     st.write(f"**Compressé:** {'Oui' if backup.compressed else 'Non'}")
                     
                     col_a, col_b = st.columns(2)
                     with col_a:
-                        if st.button("🔄 Restaurer", key=f"restore_{backup.id}"):
-                            st.warning("⚠️ Cette action va écraser les données actuelles!")
+                        if st.button("ðŸ”„ Restaurer", key=f"restore_{backup.id}"):
+                            st.warning("âš ï¸ Cette action va écraser les données actuelles!")
                     with col_b:
-                        if st.button("🗑️ Supprimer", key=f"delete_{backup.id}"):
+                        if st.button("ðŸ—‘ï¸ Supprimer", key=f"delete_{backup.id}"):
                             if service.delete_backup(backup.id):
                                 st.success("Backup supprimé")
                                 st.rerun()
@@ -705,7 +705,7 @@ def render_backup_ui():
             key="clear_before_restore"
         )
         
-        if st.button("🔄 Restaurer ce backup", type="secondary"):
+        if st.button("ðŸ”„ Restaurer ce backup", type="secondary"):
             # Sauvegarder temporairement le fichier
             temp_path = Path(service.config.backup_dir) / f"temp_{uploaded_file.name}"
             with open(temp_path, 'wb') as f:
@@ -718,10 +718,10 @@ def render_backup_ui():
                 )
                 
                 if result.success:
-                    st.success(f"✅ {result.message}")
-                    st.info(f"📊 {result.records_restored} enregistrements restaurés")
+                    st.success(f"âœ… {result.message}")
+                    st.info(f"ðŸ“Š {result.records_restored} enregistrements restaurés")
                 else:
-                    st.error(f"❌ {result.message}")
+                    st.error(f"âŒ {result.message}")
                     if result.errors:
                         for error in result.errors:
                             st.warning(error)

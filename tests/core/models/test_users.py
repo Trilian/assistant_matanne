@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour users.py
 
 Module: src.core.models.users

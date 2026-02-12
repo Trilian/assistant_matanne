@@ -1,12 +1,12 @@
-﻿"""
-Dashboard Énergie - Suivi consommation gaz, électricité, eau.
+"""
+Dashboard Énergie - Suivi consommation gaz, electricite, eau.
 
 Visualisation des consommations avec:
-- Graphiques d'évolution sur 12 mois
-- Comparaison année N vs N-1
-- Alertes dépassement
-- Prix unitaire par énergie
-- Estimation du prochain relevé
+- Graphiques d'evolution sur 12 mois
+- Comparaison annee N vs N-1
+- Alertes depassement
+- Prix unitaire par energie
+- Estimation du prochain releve
 """
 
 import streamlit as st
@@ -28,27 +28,27 @@ ENERGIES = {
         "emoji": "⚡",
         "couleur": "#FFEB3B",
         "unite": "kWh",
-        "label": "Électricité",
-        "prix_moyen": 0.22,  # €/kWh estimé
+        "label": "Électricite",
+        "prix_moyen": 0.22,  # €/kWh estime
     },
     "gaz": {
         "emoji": "🔥",
         "couleur": "#FF5722",
         "unite": "m³",
         "label": "Gaz",
-        "prix_moyen": 0.11,  # €/m³ estimé
+        "prix_moyen": 0.11,  # €/m³ estime
     },
     "eau": {
         "emoji": "💧",
         "couleur": "#2196F3",
         "unite": "m³",
         "label": "Eau",
-        "prix_moyen": 4.50,  # €/m³ estimé
+        "prix_moyen": 4.50,  # €/m³ estime
     },
 }
 
-MOIS_FR = ["", "Jan", "Fév", "Mar", "Avr", "Mai", "Juin", 
-           "Juil", "Août", "Sep", "Oct", "Nov", "Déc"]
+MOIS_FR = ["", "Jan", "Fev", "Mar", "Avr", "Mai", "Juin", 
+           "Juil", "Août", "Sep", "Oct", "Nov", "Dec"]
 
 
 # ═══════════════════════════════════════════════════════════
@@ -57,7 +57,7 @@ MOIS_FR = ["", "Jan", "Fév", "Mar", "Avr", "Mai", "Juin",
 
 @st.cache_data(ttl=300)
 def charger_historique_energie(energie: str, nb_mois: int = 24) -> list[dict]:
-    """Charge l'historique d'une énergie sur N mois."""
+    """Charge l'historique d'une energie sur N mois."""
     today = date.today()
     result = []
     
@@ -96,7 +96,7 @@ def charger_historique_energie(energie: str, nb_mois: int = 24) -> list[dict]:
 
 
 def get_stats_energie(energie: str) -> dict:
-    """Calcule les stats pour une énergie."""
+    """Calcule les stats pour une energie."""
     historique = charger_historique_energie(energie, nb_mois=24)
     
     # Filtrer les valeurs non nulles
@@ -114,7 +114,7 @@ def get_stats_energie(energie: str) -> dict:
     conso_totale = sum(h["consommation"] for h in recent_conso) if recent_conso else 0
     conso_moyenne = conso_totale / len(recent_conso) if recent_conso else 0
     
-    # Dernier mois vs précédent
+    # Dernier mois vs precedent
     dernier = recent[-1] if recent else {"montant": 0, "consommation": 0}
     precedent = recent[-2] if len(recent) >= 2 else {"montant": 0, "consommation": 0}
     
@@ -142,7 +142,7 @@ def get_stats_energie(energie: str) -> dict:
 # ═══════════════════════════════════════════════════════════
 
 def graphique_evolution(energie: str, afficher_conso: bool = True):
-    """Graphique d'évolution sur 12 mois."""
+    """Graphique d'evolution sur 12 mois."""
     info = ENERGIES[energie]
     historique = charger_historique_energie(energie, nb_mois=12)
     
@@ -192,20 +192,20 @@ def graphique_evolution(energie: str, afficher_conso: bool = True):
 
 
 def graphique_comparaison_annees(energie: str):
-    """Compare année N vs N-1."""
+    """Compare annee N vs N-1."""
     info = ENERGIES[energie]
     historique = charger_historique_energie(energie, nb_mois=24)
     
     today = date.today()
     annee_courante = today.year
     
-    # Séparer par année
+    # Separer par annee
     donnees_n = [h for h in historique if h["annee"] == annee_courante]
     donnees_n1 = [h for h in historique if h["annee"] == annee_courante - 1]
     
     fig = go.Figure()
     
-    # Année N-1
+    # Annee N-1
     fig.add_trace(go.Bar(
         x=[MOIS_FR[h["mois"]] for h in donnees_n1],
         y=[h["montant"] or 0 for h in donnees_n1],
@@ -213,7 +213,7 @@ def graphique_comparaison_annees(energie: str):
         marker_color="#BDBDBD",
     ))
     
-    # Année N
+    # Annee N
     fig.add_trace(go.Bar(
         x=[MOIS_FR[h["mois"]] for h in donnees_n],
         y=[h["montant"] or 0 for h in donnees_n],
@@ -232,7 +232,7 @@ def graphique_comparaison_annees(energie: str):
 
 
 def graphique_repartition():
-    """Répartition des dépenses énergie."""
+    """Repartition des depenses energie."""
     totaux = {}
     for energie in ENERGIES:
         stats = get_stats_energie(energie)
@@ -251,7 +251,7 @@ def graphique_repartition():
     )])
     
     fig.update_layout(
-        title="🔋 Répartition annuelle",
+        title="🔋 Repartition annuelle",
         height=300,
     )
     
@@ -263,7 +263,7 @@ def graphique_repartition():
 # ═══════════════════════════════════════════════════════════
 
 def render_metric_energie(energie: str):
-    """Affiche les métriques d'une énergie."""
+    """Affiche les metriques d'une energie."""
     info = ENERGIES[energie]
     stats = get_stats_energie(energie)
     
@@ -302,32 +302,32 @@ def render_metric_energie(energie: str):
 
 
 def render_dashboard_global():
-    """Dashboard global toutes énergies."""
+    """Dashboard global toutes energies."""
     st.subheader("📊 Vue d'ensemble")
     
-    # Métriques globales
+    # Metriques globales
     total_annuel = sum(get_stats_energie(e)["total_annuel"] for e in ENERGIES)
     moyenne_mensuelle = total_annuel / 12
     
     col1, col2 = st.columns(2)
     with col1:
-        st.metric("💰 Total annuel énergies", f"{total_annuel:.0f}€")
+        st.metric("💰 Total annuel energies", f"{total_annuel:.0f}€")
     with col2:
         st.metric("📅 Moyenne mensuelle", f"{moyenne_mensuelle:.0f}€")
     
     st.divider()
     
-    # Métriques par énergie
+    # Metriques par energie
     for energie in ENERGIES:
         render_metric_energie(energie)
 
 
 def render_detail_energie(energie: str):
-    """Affiche le détail d'une énergie."""
+    """Affiche le detail d'une energie."""
     info = ENERGIES[energie]
     stats = get_stats_energie(energie)
     
-    st.subheader(f"{info['emoji']} Détail {info['label']}")
+    st.subheader(f"{info['emoji']} Detail {info['label']}")
     
     # KPIs
     col1, col2, col3, col4 = st.columns(4)
@@ -398,14 +398,14 @@ def render_alertes():
 # ═══════════════════════════════════════════════════════════
 
 def app():
-    """Point d'entrée du dashboard énergie."""
+    """Point d'entree du dashboard energie."""
     st.title("🔋 Dashboard Énergie")
-    st.caption("Suivi consommation gaz, électricité, eau")
+    st.caption("Suivi consommation gaz, electricite, eau")
     
     # Tabs
     tabs = st.tabs([
         "📊 Vue globale",
-        "⚡ Électricité",
+        "⚡ Électricite",
         "🔥 Gaz",
         "💧 Eau",
         "⚠️ Alertes"
@@ -416,7 +416,7 @@ def app():
         
         st.divider()
         
-        # Graphique répartition
+        # Graphique repartition
         col1, col2 = st.columns(2)
         with col1:
             fig = graphique_repartition()
@@ -437,12 +437,12 @@ def app():
         render_alertes()
         
         st.divider()
-        st.markdown("### 💡 Conseils économies")
+        st.markdown("### 💡 Conseils economies")
         st.info("""
-        **Électricité:**
-        - Débrancher les appareils en veille
+        **Électricite:**
+        - Debrancher les appareils en veille
         - Utiliser des ampoules LED
-        - Privilégier heures creuses
+        - Privilegier heures creuses
         
         **Gaz:**
         - Baisser chauffage de 1°C = -7% conso
@@ -452,7 +452,7 @@ def app():
         **Eau:**
         - Douche vs bain
         - Mousseurs sur robinets
-        - Réparer les fuites
+        - Reparer les fuites
         """)
 
 

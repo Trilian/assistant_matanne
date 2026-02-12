@@ -1,4 +1,4 @@
-"""
+﻿"""
 Package de synchronisation Garmin Connect.
 
 Exports:

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for src/services/suggestions/utils.py
 
 Pure utility functions - no mocking needed.
@@ -345,7 +345,7 @@ class TestScoring:
         recette = {"id": 1, "temps_preparation": 90, "temps_cuisson": 60, "ingredients": []}
         contexte = {"temps_disponible_minutes": 30}
         score = calculate_recipe_score(recette, contexte)
-        assert score <= 0  # Pénalité (score est cappé à 0 minimum)
+        assert score <= 0  # Pénalité (score est cappé Ã  0 minimum)
 
     def test_calculate_recipe_score_difficulte_adaptee(self):
         """Test score difficulté adaptée."""

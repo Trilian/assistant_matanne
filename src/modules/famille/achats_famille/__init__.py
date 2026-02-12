@@ -1,16 +1,16 @@
 """
-Module Achats Famille - Wishlist centralisée.
+Module Achats Famille - Wishlist centralisee.
 
-Catégories:
-- 👶 Jules (vêtements, jouets, équipement)
-- 👨‍👩‍👧 Nous (jeux, loisirs, équipement)
-- 📋 Wishlist & priorités
+Categories:
+- Jules (vetements, jouets, equipement)
+- Nous (jeux, loisirs, equipement)
+- Wishlist & priorites
 """
 
-from ._common import st
+import streamlit as st
 
 # Import des fonctions pour exposer l'API publique
-from .helpers import (
+from .utilitaires import (
     get_all_purchases, get_purchases_by_category, get_purchases_by_groupe,
     get_stats, mark_as_bought, delete_purchase
 )
@@ -21,30 +21,30 @@ from .components import (
 
 
 def app():
-    """Point d'entrée du module Achats Famille"""
-    st.title("🛍️ Achats Famille")
+    """Point d'entrÃee du module Achats Famille"""
+    st.title("ðŸ›ï¸ Achats Famille")
     
     stats = get_stats()
-    st.caption(f"📋 {stats['en_attente']} en attente • 💰 ~{stats['total_estime']:.0f}€")
+    st.caption(f"ðŸ“‹ {stats['en_attente']} en attente â€¢ ðŸ’° ~{stats['total_estime']:.0f}â‚¬")
     
     # Tabs
     tabs = st.tabs([
-        "📊 Dashboard", 
-        "👶 Jules", 
-        "👨‍👩‍👧 Nous", 
-        "🏪 Par magasin",
-        "➕ Ajouter",
-        "📜 Historique"
+        "ðŸ“Š Dashboard", 
+        "ðŸ‘¶ Jules", 
+        "ðŸ‘¨â€ðŸ‘eâ€ðŸ‘§ Nous", 
+        "ðŸª Par magasin",
+        "âž• Ajouter",
+        "ðŸ“œ Historique"
     ])
     
     with tabs[0]:
         render_dashboard()
     
     with tabs[1]:
-        render_liste_groupe("jules", "👶 Achats pour Jules")
+        render_liste_groupe("jules", "ðŸ‘¶ Achats pour Jules")
     
     with tabs[2]:
-        render_liste_groupe("nous", "👨‍👩‍👧 Achats pour nous")
+        render_liste_groupe("nous", "ðŸ‘¨â€ðŸ‘eâ€ðŸ‘§ Achats pour nous")
     
     with tabs[3]:
         render_par_magasin()

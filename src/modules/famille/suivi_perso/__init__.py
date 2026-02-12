@@ -1,7 +1,7 @@
 """
-Module Suivi Perso - Dashboard santé/sport pour Anne et Mathieu.
+Module Suivi Perso - Dashboard santÃe/sport pour Anne et Mathieu.
 
-Fonctionnalités:
+FonctionnalitÃes:
 - Switch utilisateur (Anne / Mathieu)
 - Dashboard perso (stats Garmin, streak, objectifs)
 - Routines sport
@@ -10,37 +10,37 @@ Fonctionnalités:
 - Sync Garmin
 """
 
-from ._common import st
+from .utils import st
 
 # Import des fonctions pour exposer l'API publique
-from .helpers import (
+from .utilitaires import (
     get_current_user, set_current_user, get_user_data,
     get_food_logs_today
 )
-from .dashboard import render_user_switch, render_dashboard, render_weekly_chart
+from .tableau_bord import render_user_switch, render_dashboard, render_weekly_chart
 from .activities import render_activities
 from .alimentation import render_food_log, render_food_form
 from .settings import render_garmin_settings, render_objectifs
 
 
 def app():
-    """Point d'entrée du module Suivi Perso"""
-    st.title("💪 Mon Suivi")
+    """Point d'entrÃee du module Suivi Perso"""
+    st.title("ðŸ’ª Mon Suivi")
     
     # Switch utilisateur
     render_user_switch()
     
     username = get_current_user()
     display_name = "Anne" if username == "anne" else "Mathieu"
-    emoji = "👩" if username == "anne" else "👨"
+    emoji = "ðŸ‘e" if username == "anne" else "ðŸ‘¨"
     
     st.caption(f"{emoji} {display_name}")
     
-    # Charger les données
+    # Charger les donnÃees
     data = get_user_data(username)
     
     # Tabs
-    tabs = st.tabs(["📊 Dashboard", "🏃 Activités", "🥗 Alimentation", "🎯 Objectifs", "⌚ Garmin"])
+    tabs = st.tabs(["ðŸ“Š Dashboard", "ðŸƒ ActivitÃes", "ðŸ¥— Alimentation", "ðŸŽ¯ Objectifs", "âŒš Garmin"])
     
     with tabs[0]:
         render_dashboard(data)

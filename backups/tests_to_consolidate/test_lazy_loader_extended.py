@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/core/lazy_loader.py
 Cible: ChargeurModuleDiffere, RouteurOptimise
 """
@@ -8,9 +8,9 @@ from unittest.mock import Mock, MagicMock, patch
 import time
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS LAZY MODULE LOADER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -24,7 +24,7 @@ class TestLazyModuleLoader:
         ChargeurModuleDiffere._load_times.clear()
 
     def test_load_caches_module(self):
-        """Vérifie que le module est mis en cache après chargement."""
+        """VÃ©rifie que le module est mis en cache aprÃ¨s chargement."""
         from src.core.lazy_loader import ChargeurModuleDiffere
         
         # Charger un module standard Python
@@ -34,18 +34,18 @@ class TestLazyModuleLoader:
         assert module is not None
 
     def test_load_returns_cached_module(self):
-        """Vérifie que le module est retourné depuis le cache."""
+        """VÃ©rifie que le module est retournÃ© depuis le cache."""
         from src.core.lazy_loader import ChargeurModuleDiffere
         
         # Premier chargement
         module1 = ChargeurModuleDiffere.load("json")
-        # Deuxième chargement (devrait venir du cache)
+        # DeuxiÃ¨me chargement (devrait venir du cache)
         module2 = ChargeurModuleDiffere.load("json")
         
         assert module1 is module2
 
     def test_load_with_reload_reloads_module(self):
-        """Vérifie que reload=True recharge le module."""
+        """VÃ©rifie que reload=True recharge le module."""
         from src.core.lazy_loader import ChargeurModuleDiffere
         
         # Premier chargement
@@ -53,12 +53,12 @@ class TestLazyModuleLoader:
         # Recharger
         module2 = ChargeurModuleDiffere.load("json", reload=True)
         
-        # Les modules devraient être différentes instances
-        # (ou la même si Python optimise, mais le rechargement a eu lieu)
+        # Les modules devraient Ãªtre diffÃ©rentes instances
+        # (ou la mÃªme si Python optimise, mais le rechargement a eu lieu)
         assert module2 is not None
 
     def test_load_records_load_time(self):
-        """Vérifie que le temps de chargement est enregistré."""
+        """VÃ©rifie que le temps de chargement est enregistrÃ©."""
         from src.core.lazy_loader import ChargeurModuleDiffere
         
         ChargeurModuleDiffere.load("os")
@@ -67,14 +67,14 @@ class TestLazyModuleLoader:
         assert ChargeurModuleDiffere._load_times["os"] >= 0
 
     def test_load_raises_on_invalid_module(self):
-        """Vérifie que ModuleNotFoundError est levé pour module invalide."""
+        """VÃ©rifie que ModuleNotFoundError est levÃ© pour module invalide."""
         from src.core.lazy_loader import ChargeurModuleDiffere
         
         with pytest.raises(ModuleNotFoundError):
             ChargeurModuleDiffere.load("module_qui_nexiste_pas_12345")
 
     def test_get_stats_returns_dict(self):
-        """Vérifie que get_stats retourne un dictionnaire."""
+        """VÃ©rifie que get_stats retourne un dictionnaire."""
         from src.core.lazy_loader import ChargeurModuleDiffere
         
         # Charger quelques modules
@@ -89,7 +89,7 @@ class TestLazyModuleLoader:
         assert stats["cached_modules"] == 2
 
     def test_get_stats_empty_cache(self):
-        """Vérifie get_stats avec cache vide."""
+        """VÃ©rifie get_stats avec cache vide."""
         from src.core.lazy_loader import ChargeurModuleDiffere
         
         stats = ChargeurModuleDiffere.get_stats()
@@ -98,19 +98,19 @@ class TestLazyModuleLoader:
         assert stats["total_load_time"] == 0
 
     def test_preload_loads_modules(self):
-        """Vérifie que preload charge les modules."""
+        """VÃ©rifie que preload charge les modules."""
         from src.core.lazy_loader import ChargeurModuleDiffere
         
         modules = ["json", "os", "sys"]
         
-        # Précharger en mode synchrone
+        # PrÃ©charger en mode synchrone
         ChargeurModuleDiffere.preload(modules, background=False)
         
         for mod in modules:
             assert mod in ChargeurModuleDiffere._cache
 
     def test_preload_background_does_not_block(self):
-        """Vérifie que preload en arrière-plan ne bloque pas."""
+        """VÃ©rifie que preload en arriÃ¨re-plan ne bloque pas."""
         from src.core.lazy_loader import ChargeurModuleDiffere
         
         modules = ["json", "os"]
@@ -123,7 +123,7 @@ class TestLazyModuleLoader:
         assert elapsed < 1.0
 
     def test_preload_handles_invalid_modules(self):
-        """Vérifie que preload gère les modules invalides sans crash."""
+        """VÃ©rifie que preload gÃ¨re les modules invalides sans crash."""
         from src.core.lazy_loader import ChargeurModuleDiffere
         
         modules = ["json", "module_invalide_xyz", "os"]
@@ -131,14 +131,14 @@ class TestLazyModuleLoader:
         # Ne devrait pas lever d'exception
         ChargeurModuleDiffere.preload(modules, background=False)
         
-        # Les modules valides devraient être chargés
+        # Les modules valides devraient Ãªtre chargÃ©s
         assert "json" in ChargeurModuleDiffere._cache
         assert "os" in ChargeurModuleDiffere._cache
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CLEAR CACHE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -152,7 +152,7 @@ class TestLazyModuleLoaderCache:
         ChargeurModuleDiffere._load_times.clear()
 
     def test_clear_cache_empties_cache(self):
-        """Vérifie que clear_cache vide le cache."""
+        """VÃ©rifie que clear_cache vide le cache."""
         from src.core.lazy_loader import ChargeurModuleDiffere
         
         # Charger des modules
@@ -167,7 +167,7 @@ class TestLazyModuleLoaderCache:
         assert len(ChargeurModuleDiffere._cache) == 0
 
     def test_cache_isolation_between_calls(self):
-        """Vérifie l'isolation du cache entre différents appels."""
+        """VÃ©rifie l'isolation du cache entre diffÃ©rents appels."""
         from src.core.lazy_loader import ChargeurModuleDiffere
         
         # Charger un module
@@ -180,9 +180,9 @@ class TestLazyModuleLoaderCache:
         assert "datetime" not in ChargeurModuleDiffere._cache
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS OPTIMIZED ROUTER (si présent)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS OPTIMIZED ROUTER (si prÃ©sent)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -190,7 +190,7 @@ class TestOptimizedRouter:
     """Tests pour RouteurOptimise."""
 
     def test_router_exists(self):
-        """Vérifie que RouteurOptimise existe."""
+        """VÃ©rifie que RouteurOptimise existe."""
         try:
             from src.core.lazy_loader import RouteurOptimise
             assert RouteurOptimise is not None
@@ -198,7 +198,7 @@ class TestOptimizedRouter:
             pytest.skip("RouteurOptimise non disponible")
 
     def test_router_module_registry_is_dict(self):
-        """Vérifie que MODULE_REGISTRY est un dictionnaire."""
+        """VÃ©rifie que MODULE_REGISTRY est un dictionnaire."""
         try:
             from src.core.lazy_loader import RouteurOptimise
             assert isinstance(RouteurOptimise.MODULE_REGISTRY, dict)
@@ -220,9 +220,9 @@ class TestOptimizedRouter:
             pytest.skip("charger_module non disponible")
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PERFORMANCE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -236,7 +236,7 @@ class TestLazyLoaderPerformance:
         ChargeurModuleDiffere._load_times.clear()
 
     def test_cached_load_is_faster(self):
-        """Vérifie que le chargement depuis cache est plus rapide."""
+        """VÃ©rifie que le chargement depuis cache est plus rapide."""
         from src.core.lazy_loader import ChargeurModuleDiffere
         
         # Premier chargement (sans cache)
@@ -244,12 +244,12 @@ class TestLazyLoaderPerformance:
         ChargeurModuleDiffere.load("json")
         time1 = time.time() - start1
         
-        # Deuxième chargement (avec cache)
+        # DeuxiÃ¨me chargement (avec cache)
         start2 = time.time()
         ChargeurModuleDiffere.load("json")
         time2 = time.time() - start2
         
-        # Le chargement depuis cache devrait être très rapide
+        # Le chargement depuis cache devrait Ãªtre trÃ¨s rapide
         assert time2 < time1 or time2 < 0.001
 
     def test_load_many_modules(self):
@@ -265,9 +265,9 @@ class TestLazyLoaderPerformance:
         assert stats["cached_modules"] == len(modules)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS THREAD SAFETY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit

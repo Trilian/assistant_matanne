@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
-Tests pour performance_optimizations.py - amélioration de la couverture
+Tests pour performance_optimizations.py - amÃ©lioration de la couverture
 
 Cible:
 - RedisCache class (singleton, get, set, delete, clear_pattern, stats)
@@ -14,10 +14,10 @@ class TestRedisCacheSingleton:
     """Tests pour le pattern singleton de RedisCache."""
     
     def test_singleton_returns_same_instance(self):
-        """Retourne toujours la même instance."""
+        """Retourne toujours la mÃªme instance."""
         from src.core.performance_optimizations import RedisCache
         
-        # Reset singleton pour test isolé
+        # Reset singleton pour test isolÃ©
         RedisCache._instance = None
         
         with patch.object(RedisCache, '_init_redis'):
@@ -30,7 +30,7 @@ class TestRedisCacheSingleton:
 class TestRedisCacheInitialization:
     """Tests pour l'initialisation de RedisCache."""
     
-    # NOTE: Tests supprimés:
+    # NOTE: Tests supprimÃ©s:
     # - test_init_without_redis_package
     # - test_init_without_redis_url
     # Raison: Mock du singleton RedisCache trop complexe
@@ -38,11 +38,11 @@ class TestRedisCacheInitialization:
 
 
 class TestRedisCacheOperations:
-    """Tests pour les opérations RedisCache."""
+    """Tests pour les opÃ©rations RedisCache."""
     
     @pytest.fixture
     def cache(self):
-        """Cache avec fallback mémoire."""
+        """Cache avec fallback mÃ©moire."""
         from src.core.performance_optimizations import RedisCache
         
         RedisCache._instance = None
@@ -64,27 +64,27 @@ class TestRedisCacheOperations:
         assert cache.is_available is True
     
     def test_get_missing_key_returns_none(self, cache):
-        """get retourne None pour clé manquante."""
+        """get retourne None pour clÃ© manquante."""
         result = cache.get("nonexistent")
         assert result is None
     
     def test_set_and_get_fallback(self, cache):
-        """set/get fonctionne avec fallback mémoire."""
+        """set/get fonctionne avec fallback mÃ©moire."""
         cache.set("key1", {"data": "test"}, ttl=60)
         result = cache.get("key1")
         
         assert result == {"data": "test"}
     
     def test_get_expired_returns_none(self, cache):
-        """get retourne None pour valeur expirée."""
-        # Ajouter directement avec expiration passée
+        """get retourne None pour valeur expirÃ©e."""
+        # Ajouter directement avec expiration passÃ©e
         cache._fallback_cache["expired"] = ("value", time.time() - 10)
         
         result = cache.get("expired")
         assert result is None
     
     def test_delete(self, cache):
-        """delete supprime une clé."""
+        """delete supprime une clÃ©."""
         cache.set("to_delete", "value")
         cache.delete("to_delete")
         
@@ -92,12 +92,12 @@ class TestRedisCacheOperations:
         assert result is None
     
     def test_delete_nonexistent(self, cache):
-        """delete sur clé inexistante ne lève pas d'erreur."""
+        """delete sur clÃ© inexistante ne lÃ¨ve pas d'erreur."""
         result = cache.delete("nonexistent")
         assert result is True
     
     def test_clear_pattern(self, cache):
-        """clear_pattern supprime les clés matching."""
+        """clear_pattern supprime les clÃ©s matching."""
         cache.set("prefix:1", "v1")
         cache.set("prefix:2", "v2")
         cache.set("other:1", "v3")
@@ -108,7 +108,7 @@ class TestRedisCacheOperations:
         assert cache.get("other:1") == "v3"
     
     def test_stats_memory_backend(self, cache):
-        """stats retourne les infos pour backend mémoire."""
+        """stats retourne les infos pour backend mÃ©moire."""
         cache.set("key1", "v1")
         cache.set("key2", "v2")
         
@@ -119,11 +119,11 @@ class TestRedisCacheOperations:
 
 
 class TestRedisCacheWithRedisClient:
-    """Tests avec client Redis mocké."""
+    """Tests avec client Redis mockÃ©."""
     
     @pytest.fixture
     def cache_with_redis(self):
-        """Cache avec client Redis mocké."""
+        """Cache avec client Redis mockÃ©."""
         from src.core.performance_optimizations import RedisCache
         
         RedisCache._instance = None
@@ -137,7 +137,7 @@ class TestRedisCacheWithRedisClient:
             return cache
     
     def test_get_from_redis(self, cache_with_redis):
-        """get récupère depuis Redis."""
+        """get rÃ©cupÃ¨re depuis Redis."""
         cache_with_redis._client.get.return_value = '{"data": "from_redis"}'
         
         result = cache_with_redis.get("key")
@@ -146,7 +146,7 @@ class TestRedisCacheWithRedisClient:
         cache_with_redis._client.get.assert_called_with("key")
     
     def test_get_redis_error_falls_back(self, cache_with_redis):
-        """get utilise fallback si Redis échoue."""
+        """get utilise fallback si Redis Ã©choue."""
         cache_with_redis._client.get.side_effect = Exception("Redis error")
         cache_with_redis._fallback_cache["key"] = ("fallback_value", time.time() + 60)
         
@@ -162,7 +162,7 @@ class TestRedisCacheWithRedisClient:
         cache_with_redis._client.setex.assert_called()
     
     def test_set_redis_error_uses_fallback(self, cache_with_redis):
-        """set utilise fallback si Redis échoue."""
+        """set utilise fallback si Redis Ã©choue."""
         cache_with_redis._client.setex.side_effect = Exception("Redis error")
         
         result = cache_with_redis.set("key", "value", ttl=60)

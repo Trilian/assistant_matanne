@@ -1,4 +1,4 @@
-"""
+﻿"""
 Package Service Inventaire.
 
 Ce package gère l'inventaire des articles avec:

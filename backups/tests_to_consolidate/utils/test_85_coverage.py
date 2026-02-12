@@ -1,11 +1,11 @@
-"""Tests pour atteindre 85% de couverture - Utils."""
+﻿"""Tests pour atteindre 85% de couverture - Utils."""
 
 import pytest
 
 
 @pytest.mark.unit
 class TestStringOperationsAdvanced:
-    """Tests avancés opérations chaînes."""
+    """Tests avancÃ©s opÃ©rations chaÃ®nes."""
     
     def test_string_encoding(self): assert True
     def test_string_sanitization(self): assert True
@@ -15,7 +15,7 @@ class TestStringOperationsAdvanced:
 
 @pytest.mark.unit
 class TestDateTimeAdvanced:
-    """Tests avancés date/heure."""
+    """Tests avancÃ©s date/heure."""
     
     def test_datetime_zone_conversion(self): assert True
     def test_datetime_locale_formatting(self): assert True
@@ -24,7 +24,7 @@ class TestDateTimeAdvanced:
 
 @pytest.mark.unit
 class TestNumericOperationsAdvanced:
-    """Tests avancés opérations numériques."""
+    """Tests avancÃ©s opÃ©rations numÃ©riques."""
     
     def test_numeric_precision(self): assert True
     def test_numeric_scaling(self): assert True
@@ -33,7 +33,7 @@ class TestNumericOperationsAdvanced:
 
 @pytest.mark.unit
 class TestDataStructureAdvanced:
-    """Tests avancés structures données."""
+    """Tests avancÃ©s structures donnÃ©es."""
     
     def test_nested_dict_operations(self): assert True
     def test_nested_list_operations(self): assert True

@@ -1,8 +1,8 @@
-﻿"""
+"""
 Module Vue d'Ensemble Planning - Dashboard d'actions prioritaires
 
 Affiche les actions critiques et suggère automatiquement ce qui doit être fait
-Utilise PlanningAIService pour détection intelligente des alertes
+Utilise PlanningAIService pour detection intelligente des alertes
 """
 
 from datetime import date, datetime, timedelta
@@ -10,9 +10,10 @@ from datetime import date, datetime, timedelta
 import streamlit as st
 
 from src.services.planning import get_planning_unified_service
+from src.modules.shared.constantes import JOURS_SEMAINE_LOWER
 
-# Logique métier pure
-from src.domains.planning.logic.vue_ensemble_logic import (
+# Logique metier pure
+from src.modules.planning.vue_ensemble_utils import (
     analyser_charge_globale,
     identifier_taches_urgentes
 )
@@ -29,7 +30,7 @@ logger = __import__("logging").getLogger(__name__)
 def afficher_actions_prioritaires(alertes_semaine: list) -> None:
     """Affiche les actions prioritaires en tableau"""
     if not alertes_semaine:
-        st.success("✅ Semaine bien équilibrée - Aucune action urgente")
+        st.success("✅ Semaine bien equilibree - Aucune action urgente")
         return
 
     st.markdown("### 🎯 Actions à Prendre")
@@ -47,7 +48,7 @@ def afficher_actions_prioritaires(alertes_semaine: list) -> None:
 
         with col_action:
             if "🎯" in emoji:
-                if st.button("→ Activités", key=f"alerte_{alerte[:20]}", use_container_width=True):
+                if st.button("→ Activites", key=f"alerte_{alerte[:20]}", use_container_width=True):
                     st.session_state.planning_view = "activites"
 
             elif "🍽️" in emoji:
@@ -61,7 +62,7 @@ def afficher_actions_prioritaires(alertes_semaine: list) -> None:
 
 def afficher_metriques_cles(stats: dict, charge_globale: str) -> None:
     """Affiche les KPIs principaux"""
-    st.markdown("### 📊 Métriques Clés")
+    st.markdown("### 📊 Metriques Cles")
 
     col_m1, col_m2, col_m3, col_m4, col_m5 = st.columns(5)
 
@@ -69,7 +70,7 @@ def afficher_metriques_cles(stats: dict, charge_globale: str) -> None:
         st.metric("🧹 Repas", stats.get("total_repas", 0))
 
     with col_m2:
-        st.metric("🎨 Activités", stats.get("total_activites", 0))
+        st.metric("🎨 Activites", stats.get("total_activites", 0))
 
     with col_m3:
         st.metric("💡 Pour Jules", stats.get("activites_jules", 0))
@@ -96,11 +97,11 @@ def afficher_metriques_cles(stats: dict, charge_globale: str) -> None:
     st.progress(min(charge_score / 100, 1.0))
 
     if charge_score >= 80:
-        st.warning("⚠️ Charge familiale très élevée - À prendre en compte pour le bien-être")
+        st.warning("⚠️ Charge familiale très elevee - À prendre en compte pour le bien-être")
     elif charge_score >= 70:
-        st.info("ℹ️ Charge normale - Veiller au repos et temps de qualité")
+        st.info("ℹ️ Charge normale - Veiller au repos et temps de qualite")
     else:
-        st.success("✅ Charge faible - Bonne semaine équilibrée")
+        st.success("✅ Charge faible - Bonne semaine equilibree")
 
 
 def afficher_synthese_jours(jours: dict) -> None:
@@ -140,22 +141,22 @@ def afficher_synthese_jours(jours: dict) -> None:
 
 
 def afficher_opportunities(semaine_data: dict) -> None:
-    """Suggère automatiquement des améliorations"""
-    st.markdown("### 🗑️ Suggestions d'Amélioration")
+    """Suggère automatiquement des ameliorations"""
+    st.markdown("### 🗑️ Suggestions d'Amelioration")
 
     suggestions = []
 
-    # Jules: activités
+    # Jules: activites
     activites_jules = semaine_data.get("activites_jules", 0)
     if activites_jules == 0:
         suggestions.append(
-            ("💡 Aucune activité pour Jules", 
-             "Planifier au moins 2-3 activités adaptées à 19m par semaine")
+            ("💡 Aucune activite pour Jules", 
+             "Planifier au moins 2-3 activites adaptees à 19m par semaine")
         )
     elif activites_jules < 2:
         suggestions.append(
-            ("💡 Peu d'activités pour Jules",
-             f"Actuellement {activites_jules} - Recommandé: 3+")
+            ("💡 Peu d'activites pour Jules",
+             f"Actuellement {activites_jules} - Recommande: 3+")
         )
 
     # Budget
@@ -163,15 +164,15 @@ def afficher_opportunities(semaine_data: dict) -> None:
     budget_limite = 500  # À adapter à votre budget
     if budget_total > budget_limite:
         suggestions.append(
-            ("🍽️ Budget elevé",
-             f"{budget_total:.0f}€ > {budget_limite}€ - Revoir les dépenses")
+            ("🍽️ Budget eleve",
+             f"{budget_total:.0f}€ > {budget_limite}€ - Revoir les depenses")
         )
 
     # Pas de repas
     if semaine_data.get("total_repas", 0) == 0:
         suggestions.append(
-            ("🧹 Aucun repas planifié",
-             "Prévoir le planning culinaire de la semaine")
+            ("🧹 Aucun repas planifie",
+             "Prevoir le planning culinaire de la semaine")
         )
 
     if suggestions:
@@ -183,7 +184,7 @@ def afficher_opportunities(semaine_data: dict) -> None:
                 with col2:
                     st.write(f"**{emoji_title}**: {description}")
     else:
-        st.success("✅ Semaine bien équilibrée - Aucune suggestion")
+        st.success("✅ Semaine bien equilibree - Aucune suggestion")
 
 
 # ═══════════════════════════════════════════════════════════
@@ -208,7 +209,7 @@ def app():
     col_nav1, col_nav2, col_nav3 = st.columns([1, 2, 1])
 
     with col_nav1:
-        if st.button("â¬…ï¸ Semaine précédente", key="prev_ensemble"):
+        if st.button("â¬…ï¸ Semaine precedente", key="prev_ensemble"):
             st.session_state.ensemble_week_start -= timedelta(days=7)
             st.rerun()
 
@@ -273,16 +274,16 @@ def app():
     # ONGLETS DÉTAILS
     # ═══════════════════════════════════════════════════════════
 
-    tab1, tab2, tab3 = st.tabs(["🔄 Rééquilibrer", "🤖 Optimiser avec IA", "📅 Détails"])
+    tab1, tab2, tab3 = st.tabs(["🔄 Reequilibrer", "🤖 Optimiser avec IA", "📅 Details"])
 
     with tab1:
-        st.subheader("🔄 Rééquilibrer la semaine")
+        st.subheader("🔄 Reequilibrer la semaine")
 
         st.info(
-            "🗑️ Les jours très chargés peuvent être rééquilibrés en déplaçant certaines activités"
+            "🗑️ Les jours très charges peuvent être reequilibres en deplaçant certaines activites"
         )
 
-        # Identifier jours chargés
+        # Identifier jours charges
         jours_list = list(semaine.jours.values())
         jours_charges = [
             (i, j) for i, j in enumerate(jours_list) if j.charge_score >= 75
@@ -293,39 +294,39 @@ def app():
                 jour_names = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
                 jour_nom = jour_names[idx]
 
-                with st.expander(f"❌ {jour_nom} - Surchargé ({jour_charge.charge_score}/100)"):
-                    st.write(f"Activités: {len(jour_charge.activites)} | Repas: {len(jour_charge.repas)}")
+                with st.expander(f"❌ {jour_nom} - Surcharge ({jour_charge.charge_score}/100)"):
+                    st.write(f"Activites: {len(jour_charge.activites)} | Repas: {len(jour_charge.repas)}")
 
-                    if st.button(f"Proposer répartition", key=f"reequilibrer_{idx}"):
-                        st.info("🗑️ Suggestion: Déplacer 1-2 activités vers jour plus calme")
+                    if st.button(f"Proposer repartition", key=f"reequilibrer_{idx}"):
+                        st.info("🗑️ Suggestion: Deplacer 1-2 activites vers jour plus calme")
 
         else:
-            st.success("✅ Semaine bien équilibrée - Aucun rééquilibrage nécessaire")
+            st.success("✅ Semaine bien equilibree - Aucun reequilibrage necessaire")
 
     with tab2:
         st.subheader("🤖 Optimiser avec IA")
 
-        st.info("L'IA peut générer une semaine optimale basée sur vos contraintes")
+        st.info("L'IA peut generer une semaine optimale basee sur vos contraintes")
 
         with st.form("form_optimize"):
             col_o1, col_o2 = st.columns(2)
 
             with col_o1:
                 budget = st.number_input("Budget semaine (€)", 100, 1000, 400)
-                energie = st.selectbox("Énergie famille", ["faible", "normal", "élevée"])
+                energie = st.selectbox("Énergie famille", ["faible", "normal", "elevee"])
 
             with col_o2:
                 objectifs = st.multiselect(
-                    "Objectifs santé",
-                    ["Cardio", "Yoga", "Détente", "Temps famille", "Sommeil"],
+                    "Objectifs sante",
+                    ["Cardio", "Yoga", "Detente", "Temps famille", "Sommeil"],
                 )
                 priorites = st.multiselect(
-                    "Priorités",
-                    ["Activités Jules", "Repos", "Projets", "Social"],
-                    default=["Activités Jules"],
+                    "Priorites",
+                    ["Activites Jules", "Repos", "Projets", "Social"],
+                    default=["Activites Jules"],
                 )
 
-            submitted = st.form_submit_button("🔔 Générer optimisation", type="primary")
+            submitted = st.form_submit_button("🔔 Generer optimisation", type="primary")
 
             if submitted:
                 with st.spinner("🤖 L'IA analyse..."):
@@ -343,25 +344,23 @@ def app():
                     )
 
                     if result:
-                        st.success("✅ Optimisation générée!")
+                        st.success("✅ Optimisation generee!")
                         st.markdown(f"**Philosophie**: {result.harmonie_description}")
 
                         with st.expander("Pourquoi cette approche?"):
                             for raison in result.raisons:
                                 st.write(f"• {raison}")
 
-                        st.info("🗑️ Vous pouvez créer ces éléments dans votre planning")
+                        st.info("🗑️ Vous pouvez creer ces elements dans votre planning")
                     else:
-                        st.error("❌ Erreur génération")
+                        st.error("❌ Erreur generation")
 
     with tab3:
-        st.subheader("📅 Détails Semaine")
+        st.subheader("📅 Details Semaine")
 
-        jours_semaine = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
+        selected_jour = st.selectbox("Selectionner un jour", JOURS_SEMAINE_LOWER, key="ensemble_jour_select")
 
-        selected_jour = st.selectbox("Sélectionner un jour", jours_semaine, key="ensemble_jour_select")
-
-        jour_idx = jours_semaine.index(selected_jour)
+        jour_idx = JOURS_SEMAINE_LOWER.index(selected_jour)
         jour_date = st.session_state.ensemble_week_start + timedelta(days=jour_idx)
         jour_str = jour_date.isoformat()
 
@@ -383,13 +382,13 @@ def app():
                 st.metric("Charge", f"{charge_emoji} {jour_data_dict['charge_score']}/100")
 
             with col_d2:
-                st.metric("Événements", len(jour_data_dict["repas"]) + len(jour_data_dict["activites"]))
+                st.metric("Évenements", len(jour_data_dict["repas"]) + len(jour_data_dict["activites"]))
 
             with col_d3:
                 st.metric("Budget", f"{jour_data_dict['budget_jour']:.0f}€")
 
             st.write(f"**Repas**: {len(jour_data_dict['repas'])}")
-            st.write(f"**Activités**: {len(jour_data_dict['activites'])}")
+            st.write(f"**Activites**: {len(jour_data_dict['activites'])}")
             st.write(f"**Projets**: {len(jour_data_dict['projets'])}")
 
             if jour_data_dict.get("alertes"):

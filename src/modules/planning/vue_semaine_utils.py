@@ -1,5 +1,5 @@
-﻿"""
-Logique métier du module Vue semaine (planning) - Séparée de l'UI
+"""
+Logique metier du module Vue semaine (planning) - Separee de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
 
@@ -7,33 +7,22 @@ from datetime import date, datetime, time, timedelta
 from typing import Optional, Dict, Any, List, Tuple
 import logging
 
+from src.modules.shared.constantes import JOURS_SEMAINE
+from src.modules.shared.date_utils import obtenir_debut_semaine as get_debut_semaine, obtenir_fin_semaine as get_fin_semaine
+
 logger = logging.getLogger(__name__)
 
 
 # ═══════════════════════════════════════════════════════════
-# CONSTANTES
+# CONSTANTES LOCALES
 # ═══════════════════════════════════════════════════════════
 
-JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
 HEURES_JOURNEE = list(range(0, 24))
 
 
 # ═══════════════════════════════════════════════════════════
-# NAVIGATION SEMAINE
+# NAVIGATION SEMAINE (importe depuis shared avec alias)
 # ═══════════════════════════════════════════════════════════
-
-def get_debut_semaine(date_ref: Optional[date] = None) -> date:
-    """Retourne le lundi de la semaine (début)."""
-    if date_ref is None:
-        date_ref = date.today()
-    
-    return date_ref - timedelta(days=date_ref.weekday())
-
-
-def get_fin_semaine(date_ref: Optional[date] = None) -> date:
-    """Retourne le dimanche de la semaine (fin)."""
-    debut = get_debut_semaine(date_ref)
-    return debut + timedelta(days=6)
 
 
 def get_jours_semaine(date_ref: Optional[date] = None) -> List[date]:
@@ -43,7 +32,7 @@ def get_jours_semaine(date_ref: Optional[date] = None) -> List[date]:
 
 
 def get_semaine_precedente(date_ref: date) -> date:
-    """Retourne une date de la semaine précédente."""
+    """Retourne une date de la semaine precedente."""
     return date_ref - timedelta(days=7)
 
 
@@ -53,7 +42,7 @@ def get_semaine_suivante(date_ref: date) -> date:
 
 
 def get_numero_semaine(date_ref: Optional[date] = None) -> int:
-    """Retourne le numéro de semaine dans l'année."""
+    """Retourne le numero de semaine dans l'annee."""
     if date_ref is None:
         date_ref = date.today()
     
@@ -65,7 +54,7 @@ def get_numero_semaine(date_ref: Optional[date] = None) -> int:
 # ═══════════════════════════════════════════════════════════
 
 def filtrer_evenements_semaine(evenements: List[Dict[str, Any]], date_ref: Optional[date] = None) -> List[Dict[str, Any]]:
-    """Filtre les événements de la semaine."""
+    """Filtre les evenements de la semaine."""
     debut = get_debut_semaine(date_ref)
     fin = get_fin_semaine(date_ref)
     
@@ -82,7 +71,7 @@ def filtrer_evenements_semaine(evenements: List[Dict[str, Any]], date_ref: Optio
 
 
 def filtrer_evenements_jour(evenements: List[Dict[str, Any]], jour: date) -> List[Dict[str, Any]]:
-    """Filtre les événements d'un jour spécifique."""
+    """Filtre les evenements d'un jour specifique."""
     resultats = []
     
     for evt in evenements:
@@ -97,7 +86,7 @@ def filtrer_evenements_jour(evenements: List[Dict[str, Any]], jour: date) -> Lis
 
 
 def grouper_evenements_par_jour(evenements: List[Dict[str, Any]]) -> Dict[date, List[Dict[str, Any]]]:
-    """Groupe les événements par jour."""
+    """Groupe les evenements par jour."""
     groupes = {}
     
     for evt in evenements:
@@ -113,7 +102,7 @@ def grouper_evenements_par_jour(evenements: List[Dict[str, Any]]) -> Dict[date, 
 
 
 def trier_evenements_par_heure(evenements: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Trie les événements par heure."""
+    """Trie les evenements par heure."""
     def get_heure_key(evt):
         heure = evt.get("heure")
         if not heure:
@@ -140,7 +129,7 @@ def calculer_charge_semaine(evenements: List[Dict[str, Any]], date_ref: Optional
         evt_jour = filtrer_evenements_jour(evt_semaine, jour)
         charge_par_jour[jour] = len(evt_jour)
     
-    # Jour le plus chargé
+    # Jour le plus charge
     if charge_par_jour:
         jour_plus_charge = max(charge_par_jour.items(), key=lambda x: x[1])
     else:
@@ -159,7 +148,7 @@ def calculer_charge_semaine(evenements: List[Dict[str, Any]], date_ref: Optional
 
 
 def detecter_conflits_horaires(evenements: List[Dict[str, Any]]) -> List[Tuple[Dict, Dict]]:
-    """Détecte les conflits d'horaires dans la semaine."""
+    """Detecte les conflits d'horaires dans la semaine."""
     conflits = []
     
     # Grouper par jour
@@ -193,7 +182,7 @@ def detecter_conflits_horaires(evenements: List[Dict[str, Any]]) -> List[Tuple[D
                 if isinstance(heure2, str):
                     heure2 = datetime.fromisoformat(heure2).time()
                 
-                # Vérifier chevauchement
+                # Verifier chevauchement
                 if heure2 < fin1:
                     conflits.append((evt1, evt2))
     
@@ -210,7 +199,7 @@ def calculer_temps_libre(evenements: List[Dict[str, Any]], date_ref: Optional[da
     for jour in jours:
         evt_jour = filtrer_evenements_jour(evt_semaine, jour)
         
-        # Calculer temps occupé
+        # Calculer temps occupe
         temps_occupe = sum(evt.get("duree", 60) for evt in evt_jour)
         
         # Temps libre (sur 16h de veille = 960 min)
@@ -241,7 +230,7 @@ def calculer_statistiques_semaine(evenements: List[Dict[str, Any]], date_ref: Op
         type_evt = evt.get("type", "Autre")
         par_type[type_evt] = par_type.get(type_evt, 0) + 1
     
-    # Durées
+    # Durees
     duree_totale = sum(evt.get("duree", 60) for evt in evt_semaine)
     duree_moyenne = duree_totale / len(evt_semaine)
     
@@ -258,7 +247,7 @@ def calculer_statistiques_semaine(evenements: List[Dict[str, Any]], date_ref: Op
 # ═══════════════════════════════════════════════════════════
 
 def suggerer_creneaux_libres(evenements: List[Dict[str, Any]], jour: date, duree_minutes: int = 60) -> List[Dict[str, Any]]:
-    """Suggère des créneaux libres dans la journée."""
+    """Suggère des creneaux libres dans la journee."""
     evt_jour = filtrer_evenements_jour(evenements, jour)
     evt_tries = trier_evenements_par_heure(evt_jour)
     
@@ -278,7 +267,7 @@ def suggerer_creneaux_libres(evenements: List[Dict[str, Any]], jour: date, duree
         if isinstance(heure_evt, str):
             heure_evt = datetime.fromisoformat(heure_evt).time()
         
-        # Si gap suffisant avant l'événement
+        # Si gap suffisant avant l'evenement
         dt_actuelle = datetime.combine(jour, heure_actuelle)
         dt_evt = datetime.combine(jour, heure_evt)
         
@@ -291,12 +280,12 @@ def suggerer_creneaux_libres(evenements: List[Dict[str, Any]], jour: date, duree
                 "duree": int(gap_minutes)
             })
         
-        # Avancer après l'événement
+        # Avancer après l'evenement
         duree_evt = evt.get("duree", 60)
         dt_fin_evt = dt_evt + timedelta(minutes=duree_evt)
         heure_actuelle = dt_fin_evt.time()
     
-    # Vérifier gap jusqu'à la fin de journée
+    # Verifier gap jusqu'à la fin de journee
     dt_actuelle = datetime.combine(jour, heure_actuelle)
     dt_fin = datetime.combine(jour, heure_fin)
     gap_final = (dt_fin - dt_actuelle).total_seconds() / 60
@@ -316,7 +305,7 @@ def suggerer_creneaux_libres(evenements: List[Dict[str, Any]], jour: date, duree
 # ═══════════════════════════════════════════════════════════
 
 def formater_periode_semaine(date_ref: Optional[date] = None) -> str:
-    """Formate la période de la semaine."""
+    """Formate la periode de la semaine."""
     debut = get_debut_semaine(date_ref)
     fin = get_fin_semaine(date_ref)
     

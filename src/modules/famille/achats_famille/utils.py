@@ -1,10 +1,10 @@
-﻿"""
-Module Achats Famille - Imports et constantes partagés
+"""
+Module Achats Famille - Imports et constantes partages
 
-Catégories:
-- 👶 Jules (vêtements, jouets, équipement)
-- 👨‍👩‍👧 Nous (jeux, loisirs, équipement)
-- 📋 Wishlist & priorités
+Categories:
+- 👶 Jules (vêtements, jouets, equipement)
+- 👨‍👩‍👧 Nous (jeux, loisirs, equipement)
+- 📋 Wishlist & priorites
 """
 
 import streamlit as st
@@ -15,7 +15,7 @@ from src.core.database import obtenir_contexte_db
 from src.core.models import FamilyPurchase
 
 
-# Catégories d'achats
+# Categories d'achats
 CATEGORIES = {
     "jules_vetements": {"emoji": "👕", "label": "Jules - Vêtements", "groupe": "jules"},
     "jules_jouets": {"emoji": "🧸", "label": "Jules - Jouets", "groupe": "jules"},
@@ -26,7 +26,7 @@ CATEGORIES = {
     "maison": {"emoji": "🏡", "label": "Maison", "groupe": "maison"},
 }
 
-# Niveaux de priorité
+# Niveaux de priorite
 PRIORITES = {
     "urgent": {"emoji": "🔴", "label": "Urgent", "order": 1},
     "haute": {"emoji": "🟠", "label": "Haute", "order": 2},

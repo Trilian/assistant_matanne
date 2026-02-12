@@ -1,5 +1,5 @@
-"""
-Tests pour src/domains/cuisine/logic/recettes_logic.py
+﻿"""
+Tests pour src/modules/cuisine/logic/recettes_logic.py
 """
 import pytest
 from unittest.mock import Mock, MagicMock, patch
@@ -10,12 +10,12 @@ class TestValiderRecette:
 
     def test_valider_recette_valide(self):
         """Recette valide."""
-        from src.domains.cuisine.logic.recettes_logic import valider_recette
+        from src.modules.cuisine.recettes.utils import valider_recette
         
         data = {
             "nom": "Tarte aux pommes",
             "ingredients": ["pommes", "farine", "sucre"],
-            "instructions": ["Étape 1", "Étape 2"],
+            "instructions": ["Ã‰tape 1", "Ã‰tape 2"],
             "temps_preparation": 30,
             "portions": 4
         }
@@ -25,11 +25,11 @@ class TestValiderRecette:
 
     def test_valider_recette_sans_nom(self):
         """Recette sans nom = invalide."""
-        from src.domains.cuisine.logic.recettes_logic import valider_recette
+        from src.modules.cuisine.recettes.utils import valider_recette
         
         data = {
             "ingredients": ["pommes"],
-            "instructions": ["Étape 1"],
+            "instructions": ["Ã‰tape 1"],
             "portions": 4
         }
         valid, error = valider_recette(data)
@@ -38,12 +38,12 @@ class TestValiderRecette:
 
     def test_valider_recette_sans_ingredients(self):
         """Recette sans ingrédients = invalide."""
-        from src.domains.cuisine.logic.recettes_logic import valider_recette
+        from src.modules.cuisine.recettes.utils import valider_recette
         
         data = {
             "nom": "Test",
             "ingredients": [],
-            "instructions": ["Étape 1"],
+            "instructions": ["Ã‰tape 1"],
             "portions": 4
         }
         valid, error = valider_recette(data)
@@ -52,7 +52,7 @@ class TestValiderRecette:
 
     def test_valider_recette_sans_instructions(self):
         """Recette sans instructions = invalide."""
-        from src.domains.cuisine.logic.recettes_logic import valider_recette
+        from src.modules.cuisine.recettes.utils import valider_recette
         
         data = {
             "nom": "Test",
@@ -66,12 +66,12 @@ class TestValiderRecette:
 
     def test_valider_recette_temps_negatif(self):
         """Temps négatif = invalide."""
-        from src.domains.cuisine.logic.recettes_logic import valider_recette
+        from src.modules.cuisine.recettes.utils import valider_recette
         
         data = {
             "nom": "Test",
             "ingredients": ["pommes"],
-            "instructions": ["Étape 1"],
+            "instructions": ["Ã‰tape 1"],
             "temps_preparation": -10,
             "portions": 4
         }
@@ -81,12 +81,12 @@ class TestValiderRecette:
 
     def test_valider_recette_portions_zero(self):
         """Portions = 0 invalide."""
-        from src.domains.cuisine.logic.recettes_logic import valider_recette
+        from src.modules.cuisine.recettes.utils import valider_recette
         
         data = {
             "nom": "Test",
             "ingredients": ["pommes"],
-            "instructions": ["Étape 1"],
+            "instructions": ["Ã‰tape 1"],
             "portions": 0
         }
         valid, error = valider_recette(data)
@@ -99,7 +99,7 @@ class TestCalculerCaloriesPortion:
 
     def test_calcul_calories_normal(self):
         """Calcul normal de calories par portion."""
-        from src.domains.cuisine.logic.recettes_logic import calculer_calories_portion
+        from src.modules.cuisine.recettes.utils import calculer_calories_portion
         
         recette = Mock()
         recette.calories = 800
@@ -110,7 +110,7 @@ class TestCalculerCaloriesPortion:
 
     def test_calcul_calories_sans_calories(self):
         """Pas de calories = None."""
-        from src.domains.cuisine.logic.recettes_logic import calculer_calories_portion
+        from src.modules.cuisine.recettes.utils import calculer_calories_portion
         
         recette = Mock()
         recette.calories = None
@@ -121,7 +121,7 @@ class TestCalculerCaloriesPortion:
 
     def test_calcul_calories_sans_portions(self):
         """Pas de portions = None."""
-        from src.domains.cuisine.logic.recettes_logic import calculer_calories_portion
+        from src.modules.cuisine.recettes.utils import calculer_calories_portion
         
         recette = Mock()
         recette.calories = 800
@@ -136,7 +136,7 @@ class TestCalculerCoutRecette:
 
     def test_calcul_cout_simple(self):
         """Calcul de coût simple."""
-        from src.domains.cuisine.logic.recettes_logic import calculer_cout_recette
+        from src.modules.cuisine.recettes.utils import calculer_cout_recette
         
         recette = Mock()
         recette.ingredients = ["pommes", "farine", "sucre"]
@@ -152,7 +152,7 @@ class TestCalculerCoutRecette:
 
     def test_calcul_cout_ingredient_manquant(self):
         """Ingrédient non trouvé dans les prix."""
-        from src.domains.cuisine.logic.recettes_logic import calculer_cout_recette
+        from src.modules.cuisine.recettes.utils import calculer_cout_recette
         
         recette = Mock()
         recette.ingredients = ["ingrédient_inconnu"]
@@ -166,7 +166,7 @@ class TestCalculerCoutRecette:
 
     def test_calcul_cout_vide(self):
         """Liste vide d'ingrédients."""
-        from src.domains.cuisine.logic.recettes_logic import calculer_cout_recette
+        from src.modules.cuisine.recettes.utils import calculer_cout_recette
         
         recette = Mock()
         recette.ingredients = []

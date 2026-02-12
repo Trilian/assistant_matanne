@@ -1,9 +1,9 @@
-"""
+﻿"""
 Migration 008 - Ajouter les tables manquantes
 - calendar_events (planification)
 - batch_meals (batch cooking)
 - family_budget (budget famille)
-Toutes les autres tables doivent déjà exister
+Toutes les autres tables doivent dÃ©jÃ  exister
 """
 
 from sqlalchemy import (
@@ -16,7 +16,7 @@ from datetime import datetime
 
 
 def upgrade():
-    """Créer les tables manquantes"""
+    """CrÃ©er les tables manquantes"""
     
     # Table calendar_events
     op.create_table(
@@ -77,7 +77,7 @@ def upgrade():
 
 
 def downgrade():
-    """Supprimer les tables créées"""
+    """Supprimer les tables crÃ©Ã©es"""
     op.drop_table('family_budgets')
     op.drop_table('batch_meals')
     op.drop_table('calendar_events')

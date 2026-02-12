@@ -1,4 +1,4 @@
-"""Tests pour parametres."""
+﻿"""Tests pour parametres."""
 
 import pytest
 from unittest.mock import patch

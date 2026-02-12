@@ -1,9 +1,9 @@
-﻿"""
-Module Loto - Imports et constantes partagés
+"""
+Module Loto - Imports et constantes partages
 
 ⚠️ DISCLAIMER: Le Loto est un jeu de hasard pur.
-Aucune stratégie ne peut prédire les résultats.
-Ce module est à but éducatif et de divertissement.
+Aucune strategie ne peut predire les resultats.
+Ce module est à but educatif et de divertissement.
 """
 
 import streamlit as st
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 from src.core.database import obtenir_contexte_db
 from src.core.models import TirageLoto, GrilleLoto, StatistiquesLoto
 
-from src.domains.jeux.logic.loto_logic import (
+from src.modules.jeux.loto.utils import (
     NUMERO_MIN, NUMERO_MAX, CHANCE_MIN, CHANCE_MAX, NB_NUMEROS,
     COUT_GRILLE, GAINS_PAR_RANG, PROBA_JACKPOT,
     calculer_frequences_numeros,
@@ -36,7 +36,7 @@ from src.domains.jeux.logic.loto_logic import (
     comparer_strategies
 )
 
-from src.domains.jeux.logic.scraper_loto import charger_tirages_loto
+from src.modules.jeux.scraper_loto import charger_tirages_loto
 
 
 __all__ = [

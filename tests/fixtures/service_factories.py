@@ -1,4 +1,4 @@
-"""Fixtures pour services Phase 18."""
+﻿"""Fixtures pour services Phase 18."""
 import pytest
 from unittest.mock import MagicMock, patch
 from sqlalchemy.orm import Session

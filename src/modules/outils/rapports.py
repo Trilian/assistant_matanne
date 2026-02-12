@@ -1,8 +1,8 @@
-﻿"""
+"""
 Module Rapports PDF - Interface Streamlit
 
 ✅ Rapport hebdo stocks
-✅ Rapport budget/dépenses  
+✅ Rapport budget/depenses  
 ✅ Analyse gaspillage
 ✅ Export professionnel
 """
@@ -14,8 +14,8 @@ import pandas as pd
 from src.core.state import GestionnaireEtat, obtenir_etat
 from src.services.rapports import RapportsPDFService
 
-# Logique métier pure
-from src.domains.utils.logic.rapports_logic import (
+# Logique metier pure
+from src.modules.outils.rapports_utils import (
     generer_rapport_synthese,
     calculer_statistiques_periode
 )
@@ -26,7 +26,7 @@ from src.domains.utils.logic.rapports_logic import (
 
 
 def get_rapports_service() -> RapportsPDFService:
-    """Get ou créer service rapports"""
+    """Get ou creer service rapports"""
     if "rapports_service" not in st.session_state:
         st.session_state.rapports_service = RapportsPDFService()
     return st.session_state.rapports_service
@@ -38,14 +38,14 @@ def get_rapports_service() -> RapportsPDFService:
 
 
 def app():
-    """Point d'entrée module rapports PDF"""
+    """Point d'entree module rapports PDF"""
     
     st.markdown(
         "<h1 style='text-align: center;'>📊 Rapports PDF</h1>",
         unsafe_allow_html=True,
     )
     
-    st.markdown("Générez des rapports professionnels pour votre gestion")
+    st.markdown("Generez des rapports professionnels pour votre gestion")
     st.markdown("---")
     
     # Onglets
@@ -82,11 +82,11 @@ def render_rapport_stocks():
     st.subheader("[PKG] Rapport Stocks Hebdomadaire")
     
     st.markdown("""
-    Générez un rapport détaillé de votre stock chaque semaine:
+    Generez un rapport detaille de votre stock chaque semaine:
     - Vue d'ensemble du stock total
     - Articles en faible stock
-    - Articles périmés
-    - Valeur du stock par catégorie
+    - Articles perimes
+    - Valeur du stock par categorie
     """)
     
     st.divider()
@@ -95,7 +95,7 @@ def render_rapport_stocks():
     
     with col1:
         periode = st.selectbox(
-            "Période du rapport:",
+            "Periode du rapport:",
             [(7, "Derniers 7 jours"), (14, "2 semaines"), (30, "1 mois")],
             format_func=lambda x: x[1],
             key="periode_stocks"
@@ -106,7 +106,7 @@ def render_rapport_stocks():
             st.session_state.preview_stocks = True
     
     with col3:
-        if st.button("👶 Télécharger PDF", key="btn_download_stocks", use_container_width=True):
+        if st.button("👶 Telecharger PDF", key="btn_download_stocks", use_container_width=True):
             st.session_state.download_stocks = True
     
     # Aperçu
@@ -114,7 +114,7 @@ def render_rapport_stocks():
         try:
             donnees = service.generer_donnees_rapport_stocks(periode)
             
-            # Résumé général
+            # Resume general
             st.info("📍**RÉSUMÉ GÉNÉRAL**")
             col1, col2, col3, col4 = st.columns(4)
             
@@ -128,7 +128,7 @@ def render_rapport_stocks():
                 st.metric("Faible stock", len(donnees.articles_faible_stock))
             
             with col4:
-                st.metric("Périmés", len(donnees.articles_perimes))
+                st.metric("Perimes", len(donnees.articles_perimes))
             
             # Articles faible stock
             if donnees.articles_faible_stock:
@@ -139,39 +139,39 @@ def render_rapport_stocks():
                         "nom": "Article",
                         "quantite": "Stock",
                         "quantite_min": "Minimum",
-                        "unite": "Unité",
+                        "unite": "Unite",
                         "emplacement": "Emplacement"
                     }),
                     use_container_width=True,
                     hide_index=True
                 )
             
-            # Articles périmés
+            # Articles perimes
             if donnees.articles_perimes:
-                st.subheader("❌ Articles périmés")
+                st.subheader("❌ Articles perimes")
                 df_perimes = pd.DataFrame(donnees.articles_perimes)
                 df_perimes["date_peremption"] = pd.to_datetime(df_perimes["date_peremption"]).dt.strftime('%d/%m/%Y')
                 st.dataframe(
                     df_perimes.rename(columns={
                         "nom": "Article",
-                        "date_peremption": "Date péremption",
-                        "jours_perime": "Jours écart",
-                        "quantite": "Quantité",
-                        "unite": "Unité"
+                        "date_peremption": "Date peremption",
+                        "jours_perime": "Jours ecart",
+                        "quantite": "Quantite",
+                        "unite": "Unite"
                     }),
                     use_container_width=True,
                     hide_index=True
                 )
             
-            # Catégories
+            # Categories
             if donnees.categories_resumee:
-                st.subheader("📊 Stock par catégorie")
+                st.subheader("📊 Stock par categorie")
                 cat_data = []
                 for cat, data in donnees.categories_resumee.items():
                     cat_data.append({
-                        "Catégorie": cat,
+                        "Categorie": cat,
                         "Articles": data["articles"],
-                        "Quantité": data["quantite"],
+                        "Quantite": data["quantite"],
                         "Valeur €": data["valeur"]
                     })
                 df_cat = pd.DataFrame(cat_data)
@@ -184,20 +184,20 @@ def render_rapport_stocks():
         except Exception as e:
             st.error(f"❌ Erreur: {str(e)}")
     
-    # Téléchargement
+    # Telechargement
     if st.session_state.get("download_stocks"):
         try:
             pdf = service.generer_pdf_rapport_stocks(periode)
             filename = f"rapport_stocks_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
             
             st.download_button(
-                label="👶 Télécharger le PDF",
+                label="👶 Telecharger le PDF",
                 data=pdf.getvalue(),
                 file_name=filename,
                 mime="application/pdf",
                 key="download_button_stocks"
             )
-            st.success("✅ PDF généré - Cliquez sur le bouton pour télécharger")
+            st.success("✅ PDF genere - Cliquez sur le bouton pour telecharger")
             st.session_state.download_stocks = False
         
         except Exception as e:
@@ -210,18 +210,18 @@ def render_rapport_stocks():
 
 
 def render_rapport_budget():
-    """Rapport budget/dépenses"""
+    """Rapport budget/depenses"""
     
     service = get_rapports_service()
     
-    st.subheader("💡 Rapport Budget/Dépenses")
+    st.subheader("💡 Rapport Budget/Depenses")
     
     st.markdown("""
-    Analysez vos dépenses alimentaires:
-    - Dépenses totales et par catégorie
+    Analysez vos depenses alimentaires:
+    - Depenses totales et par categorie
     - Articles les plus coûteux
-    - Évolution des dépenses
-    - Budget par catégorie
+    - Évolution des depenses
+    - Budget par categorie
     """)
     
     st.divider()
@@ -230,7 +230,7 @@ def render_rapport_budget():
     
     with col1:
         periode = st.selectbox(
-            "Période du rapport:",
+            "Periode du rapport:",
             [(7, "7 jours"), (14, "2 semaines"), (30, "1 mois"), (90, "3 mois"), (365, "1 an")],
             format_func=lambda x: x[1],
             key="periode_budget",
@@ -242,7 +242,7 @@ def render_rapport_budget():
             st.session_state.preview_budget = True
     
     with col3:
-        if st.button("👶 Télécharger PDF", key="btn_download_budget", use_container_width=True):
+        if st.button("👶 Telecharger PDF", key="btn_download_budget", use_container_width=True):
             st.session_state.download_budget = True
     
     # Aperçu
@@ -250,12 +250,12 @@ def render_rapport_budget():
         try:
             donnees = service.generer_donnees_rapport_budget(periode)
             
-            # Résumé financier
+            # Resume financier
             st.info("📅 **RÉSUMÉ FINANCIER**")
             col1, col2, col3 = st.columns(3)
             
             with col1:
-                st.metric("Dépenses totales", f"€{donnees.depenses_total:.2f}")
+                st.metric("Depenses totales", f"€{donnees.depenses_total:.2f}")
             
             with col2:
                 if donnees.periode_jours > 0:
@@ -263,17 +263,17 @@ def render_rapport_budget():
                     st.metric("Moyenne par jour", f"€{moy_jour:.2f}")
             
             with col3:
-                st.metric("Période", f"{donnees.periode_jours} jours")
+                st.metric("Periode", f"{donnees.periode_jours} jours")
             
-            # Dépenses par catégorie
+            # Depenses par categorie
             if donnees.depenses_par_categorie:
-                st.subheader("📊 Dépenses par catégorie")
+                st.subheader("📊 Depenses par categorie")
                 
                 cat_data = []
                 for cat, montant in donnees.depenses_par_categorie.items():
                     pct = (montant / donnees.depenses_total * 100) if donnees.depenses_total > 0 else 0
                     cat_data.append({
-                        "Catégorie": cat,
+                        "Categorie": cat,
                         "Montant €": f"{montant:.2f}",
                         "% du total": f"{pct:.1f}%"
                     })
@@ -291,8 +291,8 @@ def render_rapport_budget():
                     key=lambda x: x[1],
                     reverse=True
                 )
-                chart_data = pd.DataFrame(cat_values, columns=['Catégorie', 'Montant'])
-                st.bar_chart(chart_data.set_index('Catégorie'))
+                chart_data = pd.DataFrame(cat_values, columns=['Categorie', 'Montant'])
+                st.bar_chart(chart_data.set_index('Categorie'))
             
             # Articles coûteux
             if donnees.articles_couteux:
@@ -301,9 +301,9 @@ def render_rapport_budget():
                 st.dataframe(
                     df_couteux.rename(columns={
                         "nom": "Article",
-                        "categorie": "Catégorie",
-                        "quantite": "Quantité",
-                        "unite": "Unité",
+                        "categorie": "Categorie",
+                        "quantite": "Quantite",
+                        "unite": "Unite",
                         "prix_unitaire": "Prix unitaire €",
                         "cout_total": "Coût total €"
                     }),
@@ -318,20 +318,20 @@ def render_rapport_budget():
         except Exception as e:
             st.error(f"❌ Erreur: {str(e)}")
     
-    # Téléchargement
+    # Telechargement
     if st.session_state.get("download_budget"):
         try:
             pdf = service.generer_pdf_rapport_budget(periode)
             filename = f"rapport_budget_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
             
             st.download_button(
-                label="👶 Télécharger le PDF",
+                label="👶 Telecharger le PDF",
                 data=pdf.getvalue(),
                 file_name=filename,
                 mime="application/pdf",
                 key="download_button_budget"
             )
-            st.success("✅ PDF généré - Cliquez sur le bouton pour télécharger")
+            st.success("✅ PDF genere - Cliquez sur le bouton pour telecharger")
             st.session_state.download_budget = False
         
         except Exception as e:
@@ -351,10 +351,10 @@ def render_analyse_gaspillage():
     st.subheader("🎯 Analyse Gaspillage")
     
     st.markdown("""
-    Identifiez et réduisez le gaspillage:
-    - Articles périmés et valeur perdue
-    - Gaspillage par catégorie
-    - Recommandations de réduction
+    Identifiez et reduisez le gaspillage:
+    - Articles perimes et valeur perdue
+    - Gaspillage par categorie
+    - Recommandations de reduction
     - Tendances et patterns
     """)
     
@@ -364,7 +364,7 @@ def render_analyse_gaspillage():
     
     with col1:
         periode = st.selectbox(
-            "Période d'analyse:",
+            "Periode d'analyse:",
             [(7, "7 jours"), (14, "2 semaines"), (30, "1 mois"), (90, "3 mois")],
             format_func=lambda x: x[1],
             key="periode_gaspillage",
@@ -376,7 +376,7 @@ def render_analyse_gaspillage():
             st.session_state.preview_gaspillage = True
     
     with col3:
-        if st.button("👶 Télécharger PDF", key="btn_download_gaspillage", use_container_width=True):
+        if st.button("👶 Telecharger PDF", key="btn_download_gaspillage", use_container_width=True):
             st.session_state.download_gaspillage = True
     
     # Aperçu
@@ -384,12 +384,12 @@ def render_analyse_gaspillage():
         try:
             analyse = service.generer_analyse_gaspillage(periode)
             
-            # Résumé
+            # Resume
             st.warning("âš ï¸ **RÉSUMÉ GASPILLAGE**")
             col1, col2, col3 = st.columns(3)
             
             with col1:
-                st.metric("Articles périmés", analyse.articles_perimes_total)
+                st.metric("Articles perimes", analyse.articles_perimes_total)
             
             with col2:
                 st.metric("Valeur perdue", f"€{analyse.valeur_perdue:.2f}")
@@ -405,9 +405,9 @@ def render_analyse_gaspillage():
                 for rec in analyse.recommandations:
                     st.info(rec)
             
-            # Gaspillage par catégorie
+            # Gaspillage par categorie
             if analyse.categories_gaspillage:
-                st.subheader("📊 Gaspillage par catégorie")
+                st.subheader("📊 Gaspillage par categorie")
                 
                 cat_data = []
                 for cat, data in sorted(
@@ -416,7 +416,7 @@ def render_analyse_gaspillage():
                     reverse=True
                 ):
                     cat_data.append({
-                        "Catégorie": cat,
+                        "Categorie": cat,
                         "Articles": data["articles"],
                         "Valeur perdue €": f"{data['valeur']:.2f}"
                     })
@@ -428,17 +428,17 @@ def render_analyse_gaspillage():
                     hide_index=True
                 )
             
-            # Articles détail
+            # Articles detail
             if analyse.articles_perimes_detail:
-                st.subheader("❌ Articles périmés (détail)")
+                st.subheader("❌ Articles perimes (detail)")
                 df_detail = pd.DataFrame(analyse.articles_perimes_detail)
                 st.dataframe(
                     df_detail.rename(columns={
                         "nom": "Article",
-                        "date_peremption": "Date péremption",
-                        "jours_perime": "Jours écart",
-                        "quantite": "Quantité",
-                        "unite": "Unité",
+                        "date_peremption": "Date peremption",
+                        "jours_perime": "Jours ecart",
+                        "quantite": "Quantite",
+                        "unite": "Unite",
                         "valeur_perdue": "Valeur perdue €"
                     }),
                     use_container_width=True,
@@ -451,20 +451,20 @@ def render_analyse_gaspillage():
         except Exception as e:
             st.error(f"❌ Erreur: {str(e)}")
     
-    # Téléchargement
+    # Telechargement
     if st.session_state.get("download_gaspillage"):
         try:
             pdf = service.generer_pdf_analyse_gaspillage(periode)
             filename = f"analyse_gaspillage_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
             
             st.download_button(
-                label="👶 Télécharger le PDF",
+                label="👶 Telecharger le PDF",
                 data=pdf.getvalue(),
                 file_name=filename,
                 mime="application/pdf",
                 key="download_button_gaspillage"
             )
-            st.success("✅ PDF généré - Cliquez sur le bouton pour télécharger")
+            st.success("✅ PDF genere - Cliquez sur le bouton pour telecharger")
             st.session_state.download_gaspillage = False
         
         except Exception as e:
@@ -477,12 +477,12 @@ def render_analyse_gaspillage():
 
 
 def render_historique():
-    """Historique rapports générés"""
+    """Historique rapports generes"""
     
     st.subheader("🗑️ Historique & Planification")
     
     st.markdown("""
-    Planifiez la génération automatique de rapports.
+    Planifiez la generation automatique de rapports.
     """)
     
     # Planification
@@ -508,8 +508,8 @@ def render_historique():
     with col2:
         st.subheader("📊 Statistiques")
         
-        st.metric("Rapports générés ce mois", 12)
-        st.metric("Articles analysés", 47)
+        st.metric("Rapports generes ce mois", 12)
+        st.metric("Articles analyses", 47)
         st.metric("Valeur stock totale", "€1,234.56")
     
     # Guide
@@ -519,22 +519,22 @@ def render_historique():
     with st.expander("ℹ️ Comment utiliser les rapports"):
         st.markdown("""
         **Rapport Stocks:**
-        - Généré chaque semaine
+        - Genere chaque semaine
         - Montre articles en faible stock
-        - Identifie articles périmés
+        - Identifie articles perimes
         - Calcule valeur du stock
         
         **Rapport Budget:**
-        - Analyse dépenses par catégorie
+        - Analyse depenses par categorie
         - Identifie articles coûteux
-        - Compare avec semaines précédentes
-        - Aide à budgéter les courses
+        - Compare avec semaines precedentes
+        - Aide à budgeter les courses
         
         **Analyse Gaspillage:**
         - Calcule valeur perdue
         - Identifie patterns de gaspillage
         - Donne recommandations
-        - Aide à réduire pertes
+        - Aide à reduire pertes
         """)
 
 

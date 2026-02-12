@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service OCR Factures - Extraction automatique depuis photos de factures.
 
 Supporte:
@@ -21,9 +21,9 @@ from src.services.base import BaseAIService
 logger = logging.getLogger(__name__)
 
 
-# ═══════════════════════════════════════════════════════════
-# MODÈLES DE DONNÉES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# MODÃˆLES DE DONNÉES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class DonneesFacture(BaseModel):
     """Données extraites d'une facture."""
@@ -36,8 +36,8 @@ class DonneesFacture(BaseModel):
     montant_ht: Optional[float] = Field(default=None, description="Montant HT si disponible")
     
     # Consommation
-    consommation: Optional[float] = Field(default=None, description="Consommation (kWh, m³)")
-    unite_consommation: str = Field(default="", description="Unité: kWh ou m³")
+    consommation: Optional[float] = Field(default=None, description="Consommation (kWh, mÂ³)")
+    unite_consommation: str = Field(default="", description="Unité: kWh ou mÂ³")
     
     # Période
     date_debut: Optional[date] = Field(default=None, description="Début période facturée")
@@ -67,9 +67,9 @@ class ResultatOCR(BaseModel):
     message: str = ""
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SERVICE OCR
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class FactureOCRService(BaseAIService):
     """Service d'extraction OCR de factures via Mistral Vision."""
@@ -99,8 +99,8 @@ class FactureOCRService(BaseAIService):
     "type_energie": "electricite ou gaz ou eau",
     "montant_ttc": montant total TTC en euros (nombre),
     "montant_ht": montant HT si visible (nombre ou null),
-    "consommation": consommation en kWh ou m³ (nombre ou null),
-    "unite_consommation": "kWh" ou "m³",
+    "consommation": consommation en kWh ou mÂ³ (nombre ou null),
+    "unite_consommation": "kWh" ou "mÂ³",
     "date_debut": "YYYY-MM-DD" début période ou null,
     "date_fin": "YYYY-MM-DD" fin période ou null,
     "mois_facturation": mois principal 1-12,
@@ -113,7 +113,7 @@ class FactureOCRService(BaseAIService):
 
 IMPORTANT:
 - Extrais UNIQUEMENT les informations visibles sur la facture
-- Les montants doivent être des nombres (pas de symbole €)
+- Les montants doivent être des nombres (pas de symbole â‚¬)
 - Si une information n'est pas visible, mets null
 - Pour les dates, utilise le format YYYY-MM-DD
 
@@ -200,9 +200,9 @@ Réponds UNIQUEMENT avec le JSON, sans texte autour."""
         return asyncio.run(self.extraire_donnees_facture(image_base64))
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # PATTERNS DE DÉTECTION MANUELLE (fallback)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 PATTERNS_FOURNISSEURS = {
     "edf": {
@@ -224,9 +224,9 @@ PATTERNS_FOURNISSEURS = {
 }
 
 PATTERNS_MONTANTS = {
-    "montant_ttc": r"Total\s*(?:à payer|TTC)[^\d]*(\d+[,\.]\d{2})\s*€?",
+    "montant_ttc": r"Total\s*(?:Ã  payer|TTC)[^\d]*(\d+[,\.]\d{2})\s*â‚¬?",
     "consommation_kwh": r"(\d+(?:\s*\d+)?)\s*kWh",
-    "consommation_m3": r"(\d+(?:[,\.]\d+)?)\s*m[³3]",
+    "consommation_m3": r"(\d+(?:[,\.]\d+)?)\s*m[Â³3]",
 }
 
 
@@ -253,9 +253,9 @@ def extraire_montant(texte: str, pattern: str) -> Optional[float]:
     return None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FACTORY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def get_facture_ocr_service() -> FactureOCRService:
     """Factory pour le service OCR."""

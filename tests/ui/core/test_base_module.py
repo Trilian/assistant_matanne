@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests complets pour src/ui/core/base_module.py
 Couverture cible: >80%
 """
@@ -8,9 +8,9 @@ from unittest.mock import MagicMock, patch
 from dataclasses import dataclass, field
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONFIGURATION MODULE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestConfigurationModule:
@@ -28,13 +28,13 @@ class TestConfigurationModule:
         config = ConfigurationModule(
             name="test",
             title="Test Module",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=MagicMock()
         )
         
         assert config.name == "test"
         assert config.title == "Test Module"
-        assert config.icon == "🧪"
+        assert config.icon == "ðŸ§ª"
 
     def test_configuration_module_defaults(self):
         """Test valeurs par défaut."""
@@ -43,7 +43,7 @@ class TestConfigurationModule:
         config = ConfigurationModule(
             name="test",
             title="Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=MagicMock()
         )
         
@@ -62,7 +62,7 @@ class TestConfigurationModule:
         config = ConfigurationModule(
             name="test",
             title="Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=MagicMock(),
             stats_config=stats
         )
@@ -75,9 +75,9 @@ class TestConfigurationModule:
         assert ModuleConfig is ConfigurationModule
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # MODULE UI BASE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestModuleUIBase:
@@ -96,7 +96,7 @@ class TestModuleUIBase:
         config = ConfigurationModule(
             name="test",
             title="Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=MagicMock()
         )
         
@@ -114,7 +114,7 @@ class TestModuleUIBase:
         config = ConfigurationModule(
             name="init_test",
             title="Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=MagicMock()
         )
         
@@ -130,9 +130,9 @@ class TestModuleUIBase:
         assert BaseModuleUI is ModuleUIBase
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # RENDER METHODS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestModuleUIBaseRender:
@@ -154,7 +154,7 @@ class TestModuleUIBaseRender:
         config = ConfigurationModule(
             name="header_test",
             title="Header Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=MagicMock()
         )
         
@@ -181,7 +181,7 @@ class TestModuleUIBaseRender:
         config = ConfigurationModule(
             name="view_test",
             title="View Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=MagicMock()
         )
         
@@ -203,7 +203,7 @@ class TestModuleUIBaseRender:
         config = ConfigurationModule(
             name="search_test",
             title="Search Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=MagicMock(),
             search_fields=["nom"]
         )
@@ -229,7 +229,7 @@ class TestModuleUIBaseRender:
         config = ConfigurationModule(
             name="action_test",
             title="Action Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=MagicMock()
         )
         
@@ -250,7 +250,7 @@ class TestModuleUIBaseRender:
         config = ConfigurationModule(
             name="grid_test",
             title="Grid Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=MagicMock(),
             display_fields=[{"key": "nom"}]
         )
@@ -273,7 +273,7 @@ class TestModuleUIBaseRender:
         config = ConfigurationModule(
             name="list_test",
             title="List Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=MagicMock(),
             display_fields=[{"key": "nom"}]
         )
@@ -291,7 +291,7 @@ class TestModuleUIBaseRender:
         config = ConfigurationModule(
             name="dict_test",
             title="Dict Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=MagicMock()
         )
         
@@ -303,9 +303,9 @@ class TestModuleUIBaseRender:
         assert result == item
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FACTORY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFactory:
@@ -319,7 +319,7 @@ class TestFactory:
         config = ConfigurationModule(
             name="factory_test",
             title="Factory Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=MagicMock()
         )
         
@@ -334,9 +334,9 @@ class TestFactory:
         assert create_module_ui is creer_module_ui
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # INTEGRATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class MockSessionState(dict):
@@ -392,7 +392,7 @@ class TestRenderFull:
         config = ConfigurationModule(
             name="empty_test",
             title="Empty Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=mock_service
         )
         
@@ -438,7 +438,7 @@ class TestRenderFull:
         config = ConfigurationModule(
             name="grid_full_test",
             title="Grid Full Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=mock_service,
             display_fields=[{"key": "nom"}]
         )
@@ -492,7 +492,7 @@ class TestRenderFull:
         config = ConfigurationModule(
             name="list_full_test",
             title="List Full Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=mock_service,
             display_fields=[{"key": "nom"}]
         )
@@ -520,7 +520,7 @@ class TestRenderStats:
         config = ConfigurationModule(
             name="stats_empty_test",
             title="Stats Empty Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=mock_service,
             stats_config=[]  # Pas de stats
         )
@@ -543,7 +543,7 @@ class TestRenderStats:
         config = ConfigurationModule(
             name="stats_test",
             title="Stats Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=mock_service,
             stats_config=[{"label": "Total", "value_key": "total"}]
         )
@@ -569,7 +569,7 @@ class TestRenderStats:
         config = ConfigurationModule(
             name="stats_filter_test",
             title="Stats Filter Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=mock_service,
             stats_config=[{"label": "Actifs", "filter": {"actif": True}}]
         )
@@ -598,7 +598,7 @@ class TestLoadItems:
         config = ConfigurationModule(
             name="load_test",
             title="Load Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=mock_service
         )
         
@@ -620,7 +620,7 @@ class TestLoadItems:
         config = ConfigurationModule(
             name="search_test",
             title="Search Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=mock_service,
             search_fields=["nom", "description"]
         )
@@ -646,7 +646,7 @@ class TestLoadItems:
         config = ConfigurationModule(
             name="filter_test",
             title="Filter Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=mock_service
         )
         
@@ -671,7 +671,7 @@ class TestLoadItems:
         config = ConfigurationModule(
             name="filter_list_test",
             title="Filter List Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=mock_service
         )
         
@@ -695,7 +695,7 @@ class TestLoadItems:
         config = ConfigurationModule(
             name="tous_test",
             title="Tous Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=mock_service
         )
         
@@ -729,7 +729,7 @@ class TestRenderActions:
         config = ConfigurationModule(
             name="action_callback_test",
             title="Action Callback Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=MagicMock(),
             on_create=mock_callback
         )
@@ -757,7 +757,7 @@ class TestRenderActions:
         config = ConfigurationModule(
             name="action_form_test",
             title="Action Form Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=MagicMock()
         )
         
@@ -785,7 +785,7 @@ class TestRenderActions:
             config = ConfigurationModule(
                 name="cache_test",
                 title="Cache Test",
-                icon="🧪",
+                icon="ðŸ§ª",
                 service=MagicMock()
             )
             
@@ -807,7 +807,7 @@ class TestRenderCarteItem:
         config = ConfigurationModule(
             name="carte_test",
             title="Carte Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=MagicMock(),
             display_fields=[{"key": "nom"}],
             metadata_fields=[]
@@ -837,7 +837,7 @@ class TestRenderCarteItem:
         config = ConfigurationModule(
             name="carte_dict_test",
             title="Carte Dict Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=MagicMock(),
             display_fields=[{"key": "nom"}],
         )
@@ -867,7 +867,7 @@ class TestExportData:
         config = ConfigurationModule(
             name="export_csv_test",
             title="Export CSV Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=mock_service,
             export_formats=["csv"]
         )
@@ -889,7 +889,7 @@ class TestItemToDict:
         config = ConfigurationModule(
             name="dict_test",
             title="Dict Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=MagicMock()
         )
         

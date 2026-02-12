@@ -1,18 +1,18 @@
-"""
+﻿"""
 Module Sorties Weekend - Planning et suggestions IA.
 
-Fonctionnalités:
-- 📅 Planning weekend (samedi/dimanche)
-- 💡 Idées IA (selon météo + âge Jules + budget)
-- 🗺️ Lieux testés & notés
-- 💰 Budget sorties
+FonctionnalitÃes:
+- ðŸ“… Planning weekend (samedi/dimanche)
+- ðŸ’¡ IdÃees IA (selon mÃetÃeo + âge Jules + budget)
+- ðŸ—ºï¸ Lieux testÃes & notÃes
+- ðŸ’° Budget sorties
 """
 
-from ._common import st
+from .utils import st
 
 # Import des fonctions pour exposer l'API publique
 from .ai_service import WeekendAIService
-from .helpers import (
+from .utilitaires import (
     get_next_weekend, get_weekend_activities, get_budget_weekend,
     get_lieux_testes, get_age_jules_mois, mark_activity_done
 )
@@ -23,14 +23,14 @@ from .components import (
 
 
 def app():
-    """Point d'entrée du module Weekend"""
-    st.title("🎉 Sorties Weekend")
+    """Point d'entrÃee du module Weekend"""
+    st.title("ðŸŽ‰ Sorties Weekend")
     
     saturday, sunday = get_next_weekend()
-    st.caption(f"📅 {saturday.strftime('%d/%m')} - {sunday.strftime('%d/%m')}")
+    st.caption(f"ðŸ“… {saturday.strftime('%d/%m')} - {sunday.strftime('%d/%m')}")
     
     # Tabs
-    tabs = st.tabs(["📅 Planning", "💡 Suggestions IA", "🗺️ Lieux testés", "➕ Ajouter", "⭐ Noter"])
+    tabs = st.tabs(["ðŸ“… Planning", "ðŸ’¡ Suggestions IA", "ðŸ—ºï¸ Lieux testÃes", "âž• Ajouter", "â­ Noter"])
     
     with tabs[0]:
         render_planning()

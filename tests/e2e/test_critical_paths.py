@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests E2E pour les scénarios critiques
 """
 import pytest
@@ -23,7 +23,7 @@ class TestE2ECriticalPaths:
         item = st.selectbox("Sélectionner", ["Item 1", "Item 2"])
         
         if st.button("Supprimer"):
-            st.warning("Êtes-vous sûr? Cette action est irréversible.")
+            st.warning("ÃŠtes-vous sûr? Cette action est irréversible.")
             
             if st.button("Confirmer la suppression"):
                 st.success("Supprimé!")

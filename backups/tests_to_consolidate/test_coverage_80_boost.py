@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests additionnels pour atteindre 80% de couverture du module Core.
 Cible: offline.py, performance.py, sql_optimizer.py
 """
@@ -21,7 +21,7 @@ class TestConnectionStatusEnum:
         assert StatutConnexion.ERROR.value == "error"
     
     def test_connection_status_string_inheritance(self):
-        """Test que StatutConnexion hérite de str."""
+        """Test que StatutConnexion hÃ©rite de str."""
         from src.core.offline import StatutConnexion
         
         # Valeur accessible via .value
@@ -45,7 +45,7 @@ class TestPerformanceMetricDataclass:
     """Tests pour la dataclass MetriquePerformance (performance.py)."""
     
     def test_performance_metric_creation(self):
-        """Test création MetriquePerformance avec valeurs par défaut."""
+        """Test crÃ©ation MetriquePerformance avec valeurs par dÃ©faut."""
         from src.core.performance import MetriquePerformance
         
         metric = MetriquePerformance(
@@ -79,21 +79,21 @@ class TestFunctionStatsDataclass:
     """Tests pour la dataclass StatistiquesFonction (performance.py)."""
     
     def test_function_stats_defaults(self):
-        """Test des valeurs par défaut de StatistiquesFonction."""
+        """Test des valeurs par dÃ©faut de StatistiquesFonction."""
         from src.core.performance import StatistiquesFonction
         
         stats = StatistiquesFonction()
         
         assert stats.call_count == 0
         assert stats.total_time_ms == 0
-        assert stats.min_time_ms == float('inf')  # Valeur infinie par défaut
+        assert stats.min_time_ms == float('inf')  # Valeur infinie par dÃ©faut
         assert stats.max_time_ms == 0
         assert stats.avg_time_ms == 0
         assert stats.last_call is None
         assert stats.errors == 0
     
     def test_function_stats_update(self):
-        """Test mise à jour manuelle de StatistiquesFonction."""
+        """Test mise Ã  jour manuelle de StatistiquesFonction."""
         from src.core.performance import StatistiquesFonction
         
         stats = StatistiquesFonction()
@@ -114,7 +114,7 @@ class TestQueryInfoDataclass:
     """Tests pour la dataclass InfoRequete (sql_optimizer.py)."""
     
     def test_query_info_creation(self):
-        """Test création InfoRequete."""
+        """Test crÃ©ation InfoRequete."""
         from src.core.sql_optimizer import InfoRequete
         
         info = InfoRequete(
@@ -132,7 +132,7 @@ class TestQueryInfoDataclass:
         assert info.parameters == {}
     
     def test_query_info_with_parameters(self):
-        """Test InfoRequete avec paramètres."""
+        """Test InfoRequete avec paramÃ¨tres."""
         from src.core.sql_optimizer import InfoRequete
         
         info = InfoRequete(
@@ -148,7 +148,7 @@ class TestN1DetectionDataclass:
     """Tests pour la dataclass DetectionN1 (sql_optimizer.py)."""
     
     def test_n1_detection_creation(self):
-        """Test création DetectionN1."""
+        """Test crÃ©ation DetectionN1."""
         from src.core.sql_optimizer import DetectionN1
         
         detection = DetectionN1(
@@ -165,7 +165,7 @@ class TestN1DetectionDataclass:
         assert isinstance(detection.first_seen, datetime)
     
     def test_n1_detection_defaults(self):
-        """Test DetectionN1 valeurs par défaut."""
+        """Test DetectionN1 valeurs par dÃ©faut."""
         from src.core.sql_optimizer import DetectionN1
         
         detection = DetectionN1(
@@ -178,10 +178,10 @@ class TestN1DetectionDataclass:
 
 
 class TestPendingOperationExtended:
-    """Tests étendus pour OperationEnAttente (offline.py)."""
+    """Tests Ã©tendus pour OperationEnAttente (offline.py)."""
     
     def test_pending_operation_operation_types(self):
-        """Test création avec différents types d'opération."""
+        """Test crÃ©ation avec diffÃ©rents types d'opÃ©ration."""
         from src.core.offline import OperationEnAttente, TypeOperation
         
         for op_type in [TypeOperation.CREATE, TypeOperation.UPDATE, TypeOperation.DELETE]:
@@ -203,7 +203,7 @@ class TestPendingOperationExtended:
         assert d["data"]["nom"] == "Tarte"
     
     def test_pending_operation_to_dict_with_error(self):
-        """Test to_dict avec last_error définie."""
+        """Test to_dict avec last_error dÃ©finie."""
         from src.core.offline import OperationEnAttente
         
         op = OperationEnAttente(
@@ -252,31 +252,31 @@ class TestPendingOperationExtended:
 
 
 class TestSQLAlchemyListenerStatic:
-    """Tests pour les méthodes statiques de EcouteurSQLAlchemy."""
+    """Tests pour les mÃ©thodes statiques de EcouteurSQLAlchemy."""
     
     def test_extract_operation_select(self):
-        """Test extraction opération SELECT."""
+        """Test extraction opÃ©ration SELECT."""
         from src.core.sql_optimizer import EcouteurSQLAlchemy
         
         result = EcouteurSQLAlchemy._extract_operation("SELECT * FROM users")
         assert result == "SELECT"
     
     def test_extract_operation_insert(self):
-        """Test extraction opération INSERT."""
+        """Test extraction opÃ©ration INSERT."""
         from src.core.sql_optimizer import EcouteurSQLAlchemy
         
         result = EcouteurSQLAlchemy._extract_operation("INSERT INTO users VALUES (1)")
         assert result == "INSERT"
     
     def test_extract_operation_update(self):
-        """Test extraction opération UPDATE."""
+        """Test extraction opÃ©ration UPDATE."""
         from src.core.sql_optimizer import EcouteurSQLAlchemy
         
         result = EcouteurSQLAlchemy._extract_operation("UPDATE users SET name='test'")
         assert result == "UPDATE"
     
     def test_extract_operation_delete(self):
-        """Test extraction opération DELETE."""
+        """Test extraction opÃ©ration DELETE."""
         from src.core.sql_optimizer import EcouteurSQLAlchemy
         
         result = EcouteurSQLAlchemy._extract_operation("DELETE FROM users WHERE id=1")

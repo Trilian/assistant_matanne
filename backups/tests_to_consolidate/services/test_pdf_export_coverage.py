@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests couverture pour src/services/pdf_export.py
 """
 
@@ -8,9 +8,9 @@ from datetime import datetime, date, timedelta
 from io import BytesIO
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS MODÈLES PYDANTIC
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS MODÃˆLES PYDANTIC
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -18,7 +18,7 @@ class TestRecettePDFDataModel:
     """Tests pour RecettePDFData."""
 
     def test_recette_pdf_data_minimal(self):
-        """Test création minimale."""
+        """Test crÃ©ation minimale."""
         from src.services.pdf_export import RecettePDFData
         
         data = RecettePDFData(
@@ -33,17 +33,17 @@ class TestRecettePDFDataModel:
         assert data.portions == 4
 
     def test_recette_pdf_data_complete(self):
-        """Test création complète."""
+        """Test crÃ©ation complÃ¨te."""
         from src.services.pdf_export import RecettePDFData
         
         data = RecettePDFData(
             id=1,
-            nom="Poulet rôti",
+            nom="Poulet rÃ´ti",
             ingredients=[
                 {"nom": "Poulet", "quantite": "1.5 kg"},
                 {"nom": "Herbes", "quantite": "1 bouquet"}
             ],
-            etapes=["Préchauffer le four", "Assaisonner", "Cuire 1h30"],
+            etapes=["PrÃ©chauffer le four", "Assaisonner", "Cuire 1h30"],
             temps_preparation=20,
             temps_cuisson=90,
             portions=4,
@@ -56,7 +56,7 @@ class TestRecettePDFDataModel:
         assert data.portions == 4
 
     def test_recette_pdf_data_defaults(self):
-        """Test valeurs par défaut."""
+        """Test valeurs par dÃ©faut."""
         from src.services.pdf_export import RecettePDFData
         
         data = RecettePDFData(id=1, nom="Test", ingredients=[])
@@ -72,7 +72,7 @@ class TestPlanningPDFDataModel:
     """Tests pour PlanningPDFData."""
 
     def test_planning_pdf_data_minimal(self):
-        """Test création minimale."""
+        """Test crÃ©ation minimale."""
         from src.services.pdf_export import PlanningPDFData
         
         debut = datetime.now()
@@ -88,15 +88,15 @@ class TestPlanningPDFDataModel:
         assert data.repas_par_jour == {}
 
     def test_planning_pdf_data_with_repas(self):
-        """Test création avec repas."""
+        """Test crÃ©ation avec repas."""
         from src.services.pdf_export import PlanningPDFData
         
         data = PlanningPDFData(
             semaine_debut=datetime.now(),
             semaine_fin=datetime.now() + timedelta(days=6),
             repas_par_jour={
-                "Lundi": [{"type": "déjeuner", "recette": "Salade"}],
-                "Mardi": [{"type": "dîner", "recette": "Poulet"}]
+                "Lundi": [{"type": "dÃ©jeuner", "recette": "Salade"}],
+                "Mardi": [{"type": "dÃ®ner", "recette": "Poulet"}]
             },
             total_repas=2
         )
@@ -110,7 +110,7 @@ class TestCoursesPDFDataModel:
     """Tests pour CoursesPDFData."""
 
     def test_courses_pdf_data_minimal(self):
-        """Test création minimale."""
+        """Test crÃ©ation minimale."""
         from src.services.pdf_export import CoursesPDFData
         
         data = CoursesPDFData()
@@ -121,7 +121,7 @@ class TestCoursesPDFDataModel:
         assert isinstance(data.date_export, datetime)
 
     def test_courses_pdf_data_with_articles(self):
-        """Test création avec articles."""
+        """Test crÃ©ation avec articles."""
         from src.services.pdf_export import CoursesPDFData
         
         data = CoursesPDFData(
@@ -140,9 +140,9 @@ class TestCoursesPDFDataModel:
         assert len(data.par_categorie) == 2
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SERVICE INIT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -150,7 +150,7 @@ class TestPDFExportServiceInit:
     """Tests pour l'initialisation du service."""
 
     def test_init_success(self):
-        """Test initialisation réussie."""
+        """Test initialisation rÃ©ussie."""
         from src.services.pdf_export import PDFExportService
         
         service = PDFExportService()
@@ -159,12 +159,12 @@ class TestPDFExportServiceInit:
         assert hasattr(service, 'styles')
 
     def test_init_creates_styles(self):
-        """Test que les styles personnalisés sont créés."""
+        """Test que les styles personnalisÃ©s sont crÃ©Ã©s."""
         from src.services.pdf_export import PDFExportService
         
         service = PDFExportService()
         
-        # Vérifie styles personnalisés ajoutés
+        # VÃ©rifie styles personnalisÃ©s ajoutÃ©s
         assert 'TitreRecette' in service.styles
         assert 'SousTitre' in service.styles
         assert 'Etape' in service.styles
@@ -175,7 +175,7 @@ class TestSetupCustomStyles:
     """Tests pour _setup_custom_styles()."""
 
     def test_setup_styles_adds_to_stylesheet(self):
-        """Test ajoute les styles à la feuille de styles."""
+        """Test ajoute les styles Ã  la feuille de styles."""
         from src.services.pdf_export import PDFExportService
         
         service = PDFExportService()
@@ -185,7 +185,7 @@ class TestSetupCustomStyles:
         assert 'SousTitre' in service.styles
         assert 'Etape' in service.styles
         
-        # Vérifier qu'on peut créer un Paragraph
+        # VÃ©rifier qu'on peut crÃ©er un Paragraph
         from reportlab.platypus import Paragraph
         p = Paragraph("Test", service.styles['TitreRecette'])
         assert p is not None
@@ -201,9 +201,9 @@ class TestSetupCustomStyles:
             assert style_name in service.styles
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GENERER PDF RECETTE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -211,7 +211,7 @@ class TestGenererPdfRecette:
     """Tests pour _generer_pdf_recette()."""
 
     def test_generer_pdf_recette_minimal(self):
-        """Test génération PDF recette minimale."""
+        """Test gÃ©nÃ©ration PDF recette minimale."""
         from src.services.pdf_export import PDFExportService, RecettePDFData
         
         service = PDFExportService()
@@ -225,12 +225,12 @@ class TestGenererPdfRecette:
         result = service._generer_pdf_recette(data)
         
         assert isinstance(result, BytesIO)
-        # Vérifie que c'est un PDF valide
+        # VÃ©rifie que c'est un PDF valide
         content = result.getvalue()
         assert content.startswith(b'%PDF')
 
     def test_generer_pdf_recette_complete(self):
-        """Test génération PDF recette complète."""
+        """Test gÃ©nÃ©ration PDF recette complÃ¨te."""
         from src.services.pdf_export import PDFExportService, RecettePDFData
         
         service = PDFExportService()
@@ -238,18 +238,18 @@ class TestGenererPdfRecette:
         data = RecettePDFData(
             id=1,
             nom="Tarte Tatin",
-            description="Délicieuse tarte renversée",
+            description="DÃ©licieuse tarte renversÃ©e",
             ingredients=[
                 {"nom": "Pommes", "quantite": 6, "unite": "pcs"},
                 {"nom": "Sucre", "quantite": 150, "unite": "g"},
-                {"nom": "Pâte feuilletée", "quantite": 1, "unite": ""}
+                {"nom": "PÃ¢te feuilletÃ©e", "quantite": 1, "unite": ""}
             ],
             etapes=[
-                "Éplucher et couper les pommes",
-                "Faire caraméliser le sucre",
+                "Ã‰plucher et couper les pommes",
+                "Faire caramÃ©liser le sucre",
                 "Disposer les pommes dans le caramel",
-                "Recouvrir de pâte",
-                "Cuire 30 min à 180°C"
+                "Recouvrir de pÃ¢te",
+                "Cuire 30 min Ã  180Â°C"
             ],
             temps_preparation=30,
             temps_cuisson=30,
@@ -265,7 +265,7 @@ class TestGenererPdfRecette:
         assert len(content) > 100  # PDF non vide
 
     def test_generer_pdf_recette_sans_etapes(self):
-        """Test génération PDF sans étapes."""
+        """Test gÃ©nÃ©ration PDF sans Ã©tapes."""
         from src.services.pdf_export import PDFExportService, RecettePDFData
         
         service = PDFExportService()
@@ -282,7 +282,7 @@ class TestGenererPdfRecette:
         assert isinstance(result, BytesIO)
 
     def test_generer_pdf_recette_sans_temps(self):
-        """Test génération PDF sans temps."""
+        """Test gÃ©nÃ©ration PDF sans temps."""
         from src.services.pdf_export import PDFExportService, RecettePDFData
         
         service = PDFExportService()
@@ -300,9 +300,9 @@ class TestGenererPdfRecette:
         assert isinstance(result, BytesIO)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EXPORTER RECETTE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -311,14 +311,14 @@ class TestExporterRecette:
 
     @patch('src.services.pdf_export.obtenir_contexte_db')
     def test_exporter_recette_non_trouvee(self, mock_db_context):
-        """Test export recette inexistante retourne None (catché par @with_error_handling)."""
+        """Test export recette inexistante retourne None (catchÃ© par @with_error_handling)."""
         from src.services.pdf_export import PDFExportService
         
         mock_session = Mock()
         mock_query = Mock()
         mock_query.options.return_value = mock_query
         mock_query.filter.return_value = mock_query
-        mock_query.first.return_value = None  # Recette non trouvée
+        mock_query.first.return_value = None  # Recette non trouvÃ©e
         mock_session.query.return_value = mock_query
         
         mock_db_context.return_value.__enter__ = Mock(return_value=mock_session)
@@ -332,11 +332,11 @@ class TestExporterRecette:
 
     @patch('src.services.pdf_export.obtenir_contexte_db')
     def test_exporter_recette_success(self, mock_db_context):
-        """Test export recette réussi."""
+        """Test export recette rÃ©ussi."""
         from src.services.pdf_export import PDFExportService
         from io import BytesIO
         
-        # Créer mocks pour recette avec ingredients et étapes
+        # CrÃ©er mocks pour recette avec ingredients et Ã©tapes
         mock_ingredient = Mock()
         mock_ingredient.nom = "Farine"
         
@@ -346,13 +346,13 @@ class TestExporterRecette:
         mock_ri.unite = "g"
         
         mock_etape = Mock()
-        mock_etape.description = "Étape 1"
+        mock_etape.description = "Ã‰tape 1"
         mock_etape.ordre = 1
         
         mock_recette = Mock()
         mock_recette.id = 1
         mock_recette.nom = "Tarte aux pommes"
-        mock_recette.description = "Délicieuse tarte"
+        mock_recette.description = "DÃ©licieuse tarte"
         mock_recette.temps_preparation = 30
         mock_recette.temps_cuisson = 45
         mock_recette.portions = 6
@@ -378,9 +378,9 @@ class TestExporterRecette:
         assert result.getvalue().startswith(b'%PDF')
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GENERER PDF PLANNING
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -388,7 +388,7 @@ class TestGenererPdfPlanning:
     """Tests pour _generer_pdf_planning()."""
 
     def test_generer_pdf_planning_vide(self):
-        """Test génération PDF planning vide."""
+        """Test gÃ©nÃ©ration PDF planning vide."""
         from src.services.pdf_export import PDFExportService, PlanningPDFData
         
         service = PDFExportService()
@@ -406,7 +406,7 @@ class TestGenererPdfPlanning:
         assert result.getvalue().startswith(b'%PDF')
 
     def test_generer_pdf_planning_avec_repas(self):
-        """Test génération PDF planning avec repas."""
+        """Test gÃ©nÃ©ration PDF planning avec repas."""
         from src.services.pdf_export import PDFExportService, PlanningPDFData
         
         service = PDFExportService()
@@ -416,12 +416,12 @@ class TestGenererPdfPlanning:
             semaine_fin=datetime.now() + timedelta(days=6),
             repas_par_jour={
                 "Lundi": [
-                    {"type": "déjeuner", "recette": "Salade composée", "notes": ""},
-                    {"type": "dîner", "recette": "Gratin", "notes": ""}
+                    {"type": "dÃ©jeuner", "recette": "Salade composÃ©e", "notes": ""},
+                    {"type": "dÃ®ner", "recette": "Gratin", "notes": ""}
                 ],
                 "Mardi": [
-                    {"type": "déjeuner", "recette": "Poulet rôti", "notes": ""},
-                    {"type": "dîner", "recette": "Soupe", "notes": ""}
+                    {"type": "dÃ©jeuner", "recette": "Poulet rÃ´ti", "notes": ""},
+                    {"type": "dÃ®ner", "recette": "Soupe", "notes": ""}
                 ]
             },
             total_repas=4
@@ -432,7 +432,7 @@ class TestGenererPdfPlanning:
         assert isinstance(result, BytesIO)
 
     def test_generer_pdf_planning_semaine_complete(self):
-        """Test génération PDF planning semaine complète."""
+        """Test gÃ©nÃ©ration PDF planning semaine complÃ¨te."""
         from src.services.pdf_export import PDFExportService, PlanningPDFData
         
         service = PDFExportService()
@@ -441,8 +441,8 @@ class TestGenererPdfPlanning:
         repas_par_jour = {}
         for jour in jours:
             repas_par_jour[jour] = [
-                {"type": "déjeuner", "recette": f"Déj {jour}", "notes": ""},
-                {"type": "dîner", "recette": f"Dîn {jour}", "notes": ""}
+                {"type": "dÃ©jeuner", "recette": f"DÃ©j {jour}", "notes": ""},
+                {"type": "dÃ®ner", "recette": f"DÃ®n {jour}", "notes": ""}
             ]
         
         data = PlanningPDFData(
@@ -457,9 +457,9 @@ class TestGenererPdfPlanning:
         assert isinstance(result, BytesIO)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EXPORTER PLANNING SEMAINE  
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -475,7 +475,7 @@ class TestExporterPlanningSemaine:
         mock_query = Mock()
         mock_query.options.return_value = mock_query
         mock_query.filter.return_value = mock_query
-        mock_query.first.return_value = None  # Planning non trouvé
+        mock_query.first.return_value = None  # Planning non trouvÃ©
         mock_session.query.return_value = mock_query
         
         mock_db_context.return_value.__enter__ = Mock(return_value=mock_session)
@@ -489,18 +489,18 @@ class TestExporterPlanningSemaine:
 
     @patch('src.services.pdf_export.obtenir_contexte_db')
     def test_exporter_planning_sans_date(self, mock_db_context):
-        """Test export planning sans date spécifiée utilise semaine courante."""
+        """Test export planning sans date spÃ©cifiÃ©e utilise semaine courante."""
         from src.services.pdf_export import PDFExportService
         from io import BytesIO
         from datetime import datetime, timedelta
         
         # Mock planning avec repas
         mock_recette = Mock()
-        mock_recette.nom = "Poulet rôti"
+        mock_recette.nom = "Poulet rÃ´ti"
         
         mock_repas = Mock()
         mock_repas.date = datetime.now().date()
-        mock_repas.type_repas = "déjeuner"
+        mock_repas.type_repas = "dÃ©jeuner"
         mock_repas.recette = mock_recette
         mock_repas.notes = ""
         
@@ -526,9 +526,9 @@ class TestExporterPlanningSemaine:
         assert result.getvalue().startswith(b'%PDF')
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GENERER PDF COURSES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -536,7 +536,7 @@ class TestGenererPdfCourses:
     """Tests pour _generer_pdf_courses()."""
 
     def test_generer_pdf_courses_vide(self):
-        """Test génération PDF courses vide."""
+        """Test gÃ©nÃ©ration PDF courses vide."""
         from src.services.pdf_export import PDFExportService, CoursesPDFData
         
         service = PDFExportService()
@@ -553,7 +553,7 @@ class TestGenererPdfCourses:
         assert result.getvalue().startswith(b'%PDF')
 
     def test_generer_pdf_courses_avec_articles(self):
-        """Test génération PDF courses avec articles."""
+        """Test gÃ©nÃ©ration PDF courses avec articles."""
         from src.services.pdf_export import PDFExportService, CoursesPDFData
         
         service = PDFExportService()
@@ -579,7 +579,7 @@ class TestGenererPdfCourses:
         assert isinstance(result, BytesIO)
 
     def test_generer_pdf_courses_toutes_categories(self):
-        """Test génération PDF avec toutes les catégories."""
+        """Test gÃ©nÃ©ration PDF avec toutes les catÃ©gories."""
         from src.services.pdf_export import PDFExportService, CoursesPDFData
         
         service = PDFExportService()
@@ -604,7 +604,7 @@ class TestGenererPdfCourses:
         assert isinstance(result, BytesIO)
 
     def test_generer_pdf_courses_articles_urgents(self):
-        """Test génération avec articles urgents."""
+        """Test gÃ©nÃ©ration avec articles urgents."""
         from src.services.pdf_export import PDFExportService, CoursesPDFData
         
         service = PDFExportService()
@@ -624,7 +624,7 @@ class TestGenererPdfCourses:
         assert isinstance(result, BytesIO)
 
     def test_generer_pdf_courses_quantite_zero(self):
-        """Test génération avec quantite = 0 (pas de parenthèse affichée)."""
+        """Test gÃ©nÃ©ration avec quantite = 0 (pas de parenthÃ¨se affichÃ©e)."""
         from src.services.pdf_export import PDFExportService, CoursesPDFData
         
         service = PDFExportService()
@@ -644,7 +644,7 @@ class TestGenererPdfCourses:
         assert isinstance(result, BytesIO)
 
     def test_generer_pdf_courses_multi_articles_par_categorie(self):
-        """Test avec plusieurs articles par catégorie."""
+        """Test avec plusieurs articles par catÃ©gorie."""
         from src.services.pdf_export import PDFExportService, CoursesPDFData
         
         service = PDFExportService()
@@ -678,8 +678,8 @@ class TestExporterListeCourses:
     def test_exporter_liste_vide(self, mock_db_context):
         """Test export liste - retourne None car ArticleCourses n'a pas nom/categorie.
         
-        Note: Bug connu dans pdf_export.py - le modèle ArticleCourses
-        n'a pas les attributs 'nom' et 'categorie' utilisés dans le code.
+        Note: Bug connu dans pdf_export.py - le modÃ¨le ArticleCourses
+        n'a pas les attributs 'nom' et 'categorie' utilisÃ©s dans le code.
         """
         from src.services.pdf_export import PDFExportService
         
@@ -703,8 +703,8 @@ class TestExporterListeCourses:
     def test_exporter_liste_avec_articles(self, mock_db_context):
         """Test export liste - retourne None car ArticleCourses n'a pas nom/categorie.
         
-        Note: Bug connu dans pdf_export.py - le modèle ArticleCourses
-        n'a pas les attributs 'nom' et 'categorie' utilisés dans le code.
+        Note: Bug connu dans pdf_export.py - le modÃ¨le ArticleCourses
+        n'a pas les attributs 'nom' et 'categorie' utilisÃ©s dans le code.
         """
         from src.services.pdf_export import PDFExportService
         
@@ -728,9 +728,9 @@ class TestExporterListeCourses:
         assert result is None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FACTORY FUNCTION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -748,7 +748,7 @@ class TestFactoryFunction:
         assert isinstance(service, PDFExportService)
     
     def test_get_service_singleton(self):
-        """Test factory retourne le même service (singleton)."""
+        """Test factory retourne le mÃªme service (singleton)."""
         from src.services.pdf_export import get_pdf_export_service
         
         service1 = get_pdf_export_service()
@@ -757,7 +757,7 @@ class TestFactoryFunction:
         assert service1 is service2
         
     def test_get_service_first_call_creates_instance(self):
-        """Test première appel crée l'instance."""
+        """Test premiÃ¨re appel crÃ©e l'instance."""
         import src.services.pdf_export as module
         
         # Reset singleton
@@ -769,9 +769,9 @@ class TestFactoryFunction:
         assert module._pdf_export_service is service
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MODULE EXPORTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -779,34 +779,34 @@ class TestModuleExports:
     """Tests pour les exports du module."""
 
     def test_recette_pdf_data_exported(self):
-        """Test RecettePDFData exporté."""
+        """Test RecettePDFData exportÃ©."""
         from src.services.pdf_export import RecettePDFData
         assert RecettePDFData is not None
 
     def test_planning_pdf_data_exported(self):
-        """Test PlanningPDFData exporté."""
+        """Test PlanningPDFData exportÃ©."""
         from src.services.pdf_export import PlanningPDFData
         assert PlanningPDFData is not None
 
     def test_courses_pdf_data_exported(self):
-        """Test CoursesPDFData exporté."""
+        """Test CoursesPDFData exportÃ©."""
         from src.services.pdf_export import CoursesPDFData
         assert CoursesPDFData is not None
 
     def test_service_class_exported(self):
-        """Test PDFExportService exporté."""
+        """Test PDFExportService exportÃ©."""
         from src.services.pdf_export import PDFExportService
         assert PDFExportService is not None
 
     def test_factory_exported(self):
-        """Test get_pdf_export_service exporté."""
+        """Test get_pdf_export_service exportÃ©."""
         from src.services.pdf_export import get_pdf_export_service
         assert get_pdf_export_service is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EDGE CASES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -814,7 +814,7 @@ class TestEdgeCases:
     """Tests pour cas limites."""
 
     def test_pdf_recette_ingredients_speciaux(self):
-        """Test PDF avec caractères spéciaux dans ingrédients."""
+        """Test PDF avec caractÃ¨res spÃ©ciaux dans ingrÃ©dients."""
         from src.services.pdf_export import PDFExportService, RecettePDFData
         
         service = PDFExportService()
@@ -844,7 +844,7 @@ class TestEdgeCases:
             semaine_debut=datetime.now(),
             semaine_fin=datetime.now() + timedelta(days=6),
             repas_par_jour={
-                "Mercredi": [{"type": "déjeuner", "recette": "Pasta", "notes": ""}]
+                "Mercredi": [{"type": "dÃ©jeuner", "recette": "Pasta", "notes": ""}]
             },
             total_repas=1
         )
@@ -854,26 +854,26 @@ class TestEdgeCases:
         assert isinstance(result, BytesIO)
 
     def test_pdf_courses_categorie_inconnue(self):
-        """Test PDF courses avec catégorie non mappée."""
+        """Test PDF courses avec catÃ©gorie non mappÃ©e."""
         from src.services.pdf_export import PDFExportService, CoursesPDFData
         
         service = PDFExportService()
         
         data = CoursesPDFData(
-            articles=[{"nom": "Article mystère", "quantite": 1, "categorie": "categorie_inconnue"}],
+            articles=[{"nom": "Article mystÃ¨re", "quantite": 1, "categorie": "categorie_inconnue"}],
             total_articles=1,
             par_categorie={
-                "categorie_inconnue": [{"nom": "Article mystère", "quantite": 1, "unite": "", "urgent": False}]
+                "categorie_inconnue": [{"nom": "Article mystÃ¨re", "quantite": 1, "unite": "", "urgent": False}]
             }
         )
         
         result = service._generer_pdf_courses(data)
         
-        # Devrait utiliser emoji par défaut
+        # Devrait utiliser emoji par dÃ©faut
         assert isinstance(result, BytesIO)
 
     def test_pdf_recette_longue_liste_ingredients(self):
-        """Test PDF recette avec beaucoup d'ingrédients."""
+        """Test PDF recette avec beaucoup d'ingrÃ©dients."""
         from src.services.pdf_export import PDFExportService, RecettePDFData
         
         service = PDFExportService()

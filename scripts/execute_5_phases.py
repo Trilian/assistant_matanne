@@ -1,12 +1,12 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
-Script d'exécution automatique des 5 phases de réorganisation.
+Script d'exÃ©cution automatique des 5 phases de rÃ©organisation.
 
 Phase 1: Nettoyer les tests redondants (*_deep.py, *_extended.py, *_coverage*.py)
 Phase 2: Diviser les fichiers > 500 lignes
-Phase 3: Créer les tests 1:1 manquants
-Phase 4: Renommer les fichiers en français
-Phase 5: Augmenter la couverture à 80%
+Phase 3: CrÃ©er les tests 1:1 manquants
+Phase 4: Renommer les fichiers en franÃ§ais
+Phase 5: Augmenter la couverture Ã  80%
 """
 
 import os
@@ -23,12 +23,12 @@ TESTS_CONSOLIDATE_DIR = BACKUPS_DIR / "tests_to_consolidate"
 
 
 def phase1_nettoyer_tests_redondants():
-    """Phase 1: Déplacer les tests redondants vers backups/tests_to_consolidate/"""
+    """Phase 1: DÃ©placer les tests redondants vers backups/tests_to_consolidate/"""
     print("\n" + "=" * 60)
     print("PHASE 1: Nettoyage des tests redondants")
     print("=" * 60)
     
-    # Créer le dossier de backup s'il n'existe pas
+    # CrÃ©er le dossier de backup s'il n'existe pas
     TESTS_CONSOLIDATE_DIR.mkdir(parents=True, exist_ok=True)
     
     patterns = ["*_deep.py", "*_extended.py", "*_coverage*.py"]
@@ -36,18 +36,18 @@ def phase1_nettoyer_tests_redondants():
     
     for pattern in patterns:
         for test_file in TESTS_DIR.rglob(pattern):
-            # Ne pas toucher aux fichiers dans tests/core/ (déjà traités)
+            # Ne pas toucher aux fichiers dans tests/core/ (dÃ©jÃ  traitÃ©s)
             if "tests/core" in str(test_file) or "tests\\core" in str(test_file):
                 continue
             
-            # Créer le sous-dossier de destination
+            # CrÃ©er le sous-dossier de destination
             rel_path = test_file.relative_to(TESTS_DIR)
             dest_dir = TESTS_CONSOLIDATE_DIR / rel_path.parent
             dest_dir.mkdir(parents=True, exist_ok=True)
             
             dest_file = dest_dir / test_file.name
             
-            # Éviter les conflits de noms
+            # Ã‰viter les conflits de noms
             if dest_file.exists():
                 base = dest_file.stem
                 ext = dest_file.suffix
@@ -58,14 +58,14 @@ def phase1_nettoyer_tests_redondants():
             
             shutil.move(str(test_file), str(dest_file))
             moved_files.append((str(test_file), str(dest_file)))
-            print(f"  ✓ Déplacé: {rel_path}")
+            print(f"  âœ“ DÃ©placÃ©: {rel_path}")
     
-    print(f"\n  Total: {len(moved_files)} fichiers déplacés")
+    print(f"\n  Total: {len(moved_files)} fichiers dÃ©placÃ©s")
     return moved_files
 
 
 def phase2_identifier_fichiers_volumineux():
-    """Phase 2: Identifier les fichiers > 500 lignes à diviser"""
+    """Phase 2: Identifier les fichiers > 500 lignes Ã  diviser"""
     print("\n" + "=" * 60)
     print("PHASE 2: Identification des fichiers volumineux (> 500 lignes)")
     print("=" * 60)
@@ -80,12 +80,12 @@ def phase2_identifier_fichiers_volumineux():
             if lines > 500:
                 large_files.append((py_file, lines))
         except Exception as e:
-            print(f"  ⚠ Erreur lecture {py_file}: {e}")
+            print(f"  âš  Erreur lecture {py_file}: {e}")
     
-    # Trier par nombre de lignes décroissant
+    # Trier par nombre de lignes dÃ©croissant
     large_files.sort(key=lambda x: x[1], reverse=True)
     
-    print(f"\n  {len(large_files)} fichiers > 500 lignes trouvés:")
+    print(f"\n  {len(large_files)} fichiers > 500 lignes trouvÃ©s:")
     for path, lines in large_files[:15]:
         rel = path.relative_to(SRC_DIR)
         print(f"    - {rel}: {lines} lignes")
@@ -111,7 +111,7 @@ def phase3_identifier_tests_manquants():
         rel_path = py_file.relative_to(SRC_DIR)
         test_name = f"test_{py_file.stem}.py"
         
-        # Chercher le test dans tests/ avec la même structure
+        # Chercher le test dans tests/ avec la mÃªme structure
         expected_test_paths = [
             TESTS_DIR / rel_path.parent / test_name,
             TESTS_DIR / rel_path.parent / py_file.stem / test_name,
@@ -120,7 +120,7 @@ def phase3_identifier_tests_manquants():
         test_exists = any(p.exists() for p in expected_test_paths)
         
         if not test_exists:
-            # Vérifier aussi avec grep si un test mentionne ce module
+            # VÃ©rifier aussi avec grep si un test mentionne ce module
             missing_tests.append(py_file)
     
     print(f"\n  {len(missing_tests)} fichiers source sans test 1:1:")
@@ -134,12 +134,12 @@ def phase3_identifier_tests_manquants():
 
 
 def phase4_identifier_fichiers_anglais():
-    """Phase 4: Identifier les fichiers avec noms anglais à renommer"""
+    """Phase 4: Identifier les fichiers avec noms anglais Ã  renommer"""
     print("\n" + "=" * 60)
-    print("PHASE 4: Identification des fichiers anglais à renommer")
+    print("PHASE 4: Identification des fichiers anglais Ã  renommer")
     print("=" * 60)
     
-    # Mapping de renommage suggéré
+    # Mapping de renommage suggÃ©rÃ©
     rename_suggestions = {
         "config.py": "configuration.py",
         "database.py": "base_donnees.py",
@@ -147,7 +147,7 @@ def phase4_identifier_fichiers_anglais():
         "helpers.py": "utilitaires.py",
         "validators.py": "validateurs.py",
         "formatters.py": "formateurs.py",
-        "service.py": "service.py",  # Garder (terme accepté)
+        "service.py": "service.py",  # Garder (terme acceptÃ©)
         "auth.py": "authentification.py",
         "backup.py": "sauvegarde.py",
         "weather.py": "meteo.py",
@@ -173,10 +173,10 @@ def phase4_identifier_fichiers_anglais():
             if new_name != py_file.name:
                 files_to_rename.append((py_file, new_name))
     
-    print(f"\n  {len(files_to_rename)} fichiers à renommer:")
+    print(f"\n  {len(files_to_rename)} fichiers Ã  renommer:")
     for path, new_name in files_to_rename:
         rel = path.relative_to(SRC_DIR)
-        print(f"    - {rel} → {new_name}")
+        print(f"    - {rel} â†’ {new_name}")
     
     return files_to_rename
 
@@ -187,7 +187,7 @@ def phase5_analyser_couverture():
     print("PHASE 5: Analyse de la couverture (fichiers prioritaires)")
     print("=" * 60)
     
-    # Les fichiers critiques identifiés comme prioritaires
+    # Les fichiers critiques identifiÃ©s comme prioritaires
     priority_files = [
         ("src/core/decorators.py", "21%", "80%"),
         ("src/core/cache.py", "28%", "80%"),
@@ -200,15 +200,15 @@ def phase5_analyser_couverture():
     
     print("\n  Fichiers prioritaires pour atteindre 80% de couverture:")
     for path, current, target in priority_files:
-        print(f"    - {path}: {current} → {target}")
+        print(f"    - {path}: {current} â†’ {target}")
     
     return priority_files
 
 
 def main():
-    """Exécute les 5 phases de réorganisation."""
+    """ExÃ©cute les 5 phases de rÃ©organisation."""
     print("\n" + "=" * 60)
-    print("EXÉCUTION DES 5 PHASES DE RÉORGANISATION")
+    print("EXÃ‰CUTION DES 5 PHASES DE RÃ‰ORGANISATION")
     print("=" * 60)
     print(f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
@@ -221,20 +221,20 @@ def main():
     # Phase 3: Identifier les tests manquants
     missing_tests = phase3_identifier_tests_manquants()
     
-    # Phase 4: Identifier les fichiers à renommer
+    # Phase 4: Identifier les fichiers Ã  renommer
     files_to_rename = phase4_identifier_fichiers_anglais()
     
     # Phase 5: Analyser la couverture
     priority_files = phase5_analyser_couverture()
     
-    # Résumé
+    # RÃ©sumÃ©
     print("\n" + "=" * 60)
-    print("RÉSUMÉ DE L'EXÉCUTION")
+    print("RÃ‰SUMÃ‰ DE L'EXÃ‰CUTION")
     print("=" * 60)
-    print(f"  Phase 1: {len(moved_files)} tests redondants déplacés")
-    print(f"  Phase 2: {len(large_files)} fichiers > 500 lignes identifiés")
-    print(f"  Phase 3: {len(missing_tests)} tests 1:1 manquants identifiés")
-    print(f"  Phase 4: {len(files_to_rename)} fichiers à renommer identifiés")
+    print(f"  Phase 1: {len(moved_files)} tests redondants dÃ©placÃ©s")
+    print(f"  Phase 2: {len(large_files)} fichiers > 500 lignes identifiÃ©s")
+    print(f"  Phase 3: {len(missing_tests)} tests 1:1 manquants identifiÃ©s")
+    print(f"  Phase 4: {len(files_to_rename)} fichiers Ã  renommer identifiÃ©s")
     print(f"  Phase 5: {len(priority_files)} fichiers prioritaires pour couverture")
     
     return {

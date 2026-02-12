@@ -1,5 +1,5 @@
-﻿"""
-Composants réutilisables pour le module planning
+"""
+Composants reutilisables pour le module planning
 """
 
 from datetime import date, datetime
@@ -33,7 +33,7 @@ def afficher_badge_charge(charge_score: int, taille: str = "normal") -> None:
 
 
 def afficher_badge_priorite(priorite: str) -> None:
-    """Affiche badge de priorité (basse, moyenne, haute)"""
+    """Affiche badge de priorite (basse, moyenne, haute)"""
     priorite_emoji = {
         "basse": ("🔔", "Basse"),
         "moyenne": ("💰", "Moyenne"),
@@ -45,11 +45,11 @@ def afficher_badge_priorite(priorite: str) -> None:
 
 
 def afficher_badge_activite_jules(adapte: bool) -> None:
-    """Badge indiquant si activité est adaptée à Jules"""
+    """Badge indiquant si activite est adaptee à Jules"""
     if adapte:
-        st.write("👶 Adapté Jules (19m)")
+        st.write("👶 Adapte Jules (19m)")
     else:
-        st.write("📅 Activité famille")
+        st.write("📅 Activite famille")
 
 
 # ═══════════════════════════════════════════════════════════
@@ -66,7 +66,7 @@ def selecteur_semaine(key_prefix: str = "semaine") -> tuple[date, date]:
     col_nav1, col_nav2, col_nav3 = st.columns([1, 2, 1])
 
     with col_nav1:
-        if st.button("â¬…ï¸ Précédente", key=f"{key_prefix}_prev"):
+        if st.button("â¬…ï¸ Precedente", key=f"{key_prefix}_prev"):
             st.session_state[f"{key_prefix}_start"] -= __import__("datetime").timedelta(days=7)
             st.rerun()
 
@@ -113,7 +113,7 @@ def carte_repas(repas: dict) -> None:
 
 
 def carte_activite(activite: dict) -> None:
-    """Carte pour afficher une activité"""
+    """Carte pour afficher une activite"""
     with st.container():
         label = "👶" if activite.get("pour_jules") else "📅"
         col1, col2 = st.columns([3, 1])
@@ -139,12 +139,12 @@ def carte_projet(projet: dict) -> None:
         st.write(f"{priorite_emoji} **{projet['nom']}**")
         st.caption(f"Statut: {projet.get('statut', 'N/A')}")
 
-        if projet.get("echéance"):
-            st.caption(f"Échéance: {projet['echéance'].strftime('%d/%m')}")
+        if projet.get("echeance"):
+            st.caption(f"Écheance: {projet['echeance'].strftime('%d/%m')}")
 
 
 def carte_event(event: dict) -> None:
-    """Carte pour afficher un événement calendrier"""
+    """Carte pour afficher un evenement calendrier"""
     with st.container():
         debut = (
             event["debut"].strftime("%H:%M")
@@ -181,7 +181,7 @@ def afficher_alerte(alerte: str, type_alerte: str = "warning") -> None:
 
 
 def afficher_liste_alertes(alertes: list[str]) -> None:
-    """Affiche liste d'alertes groupées"""
+    """Affiche liste d'alertes groupees"""
     if not alertes:
         return
 
@@ -203,7 +203,7 @@ def afficher_stats_semaine(stats: dict) -> None:
         st.metric("📷 Repas", stats.get("total_repas", 0))
 
     with col2:
-        st.metric("🎨 Activités", stats.get("total_activites", 0))
+        st.metric("🎨 Activites", stats.get("total_activites", 0))
 
     with col3:
         st.metric("👶 Pour Jules", stats.get("activites_jules", 0))

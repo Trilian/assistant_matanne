@@ -1,11 +1,11 @@
-"""
+﻿"""
 Tests pour batch_cooking_logic.py - Fonctions pures de batch cooking
 """
 
 import pytest
 from datetime import date, time, timedelta
 
-from src.domains.cuisine.logic.batch_cooking_logic import (
+from src.modules.cuisine.batch_cooking_utils import (
     calculer_duree_totale_optimisee,
     estimer_heure_fin,
     formater_duree,
@@ -21,9 +21,9 @@ from src.domains.cuisine.logic.batch_cooking_logic import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Tests Constantes
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestConstantes:
@@ -59,9 +59,9 @@ class TestConstantes:
             assert "conservation_max_jours" in loc_info
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Tests Calculs de Temps
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalculerDureeTotaleOptimisee:
@@ -163,9 +163,9 @@ class TestFormaterDuree:
         assert formater_duree(125) == "2h05"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Tests Validation Session Batch
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestValiderSessionBatch:
@@ -232,9 +232,9 @@ class TestValiderSessionBatch:
         assert any("inconnu" in e.lower() for e in resultat["erreurs"])
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Tests Validation Préparation
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestValiderPreparation:
@@ -317,9 +317,9 @@ class TestValiderPreparation:
         assert resultat["valide"] is True
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Tests Optimisation
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestOptimiserOrdreEtapes:
@@ -343,7 +343,7 @@ class TestOptimiserOrdreEtapes:
     def test_assignation_groupes_paralleles(self):
         """Les groupes parallèles sont assignés."""
         etapes = [
-            {"titre": "Étape 1", "duree_minutes": 20, "est_supervision": False},
+            {"titre": "Ã‰tape 1", "duree_minutes": 20, "est_supervision": False},
         ]
         resultat = optimiser_ordre_etapes(etapes)
         assert "groupe_parallele" in resultat[0]
@@ -353,12 +353,12 @@ class TestOptimiserOrdreEtapes:
         """Parallélise les étapes sans conflit de robot."""
         etapes = [
             {"titre": "Cuisson poulet", "duree_minutes": 45, "est_supervision": True, "robots": ["cookeo"]},
-            {"titre": "Éplucher", "duree_minutes": 15, "est_supervision": False, "robots": []},
+            {"titre": "Ã‰plucher", "duree_minutes": 15, "est_supervision": False, "robots": []},
         ]
         resultat = optimiser_ordre_etapes(etapes)
         # Les deux devraient être dans le même groupe (parallèles)
         groupes = set(e["groupe_parallele"] for e in resultat)
-        # Éplucher peut être fait pendant la cuisson
+        # Ã‰plucher peut être fait pendant la cuisson
         assert len(resultat) == 2
 
 
@@ -368,8 +368,8 @@ class TestDetecterConflitsRobots:
     def test_pas_de_conflit(self):
         """Aucun conflit si robots différents."""
         etapes = [
-            {"titre": "Étape 1", "groupe_parallele": 0, "robots": ["cookeo"]},
-            {"titre": "Étape 2", "groupe_parallele": 0, "robots": ["four"]},
+            {"titre": "Ã‰tape 1", "groupe_parallele": 0, "robots": ["cookeo"]},
+            {"titre": "Ã‰tape 2", "groupe_parallele": 0, "robots": ["four"]},
         ]
         conflits = detecter_conflits_robots(etapes)
         assert len(conflits) == 0
@@ -388,8 +388,8 @@ class TestDetecterConflitsRobots:
     def test_groupes_differents_ok(self):
         """Pas de conflit si groupes différents."""
         etapes = [
-            {"titre": "Étape 1", "groupe_parallele": 0, "robots": ["mixeur"]},
-            {"titre": "Étape 2", "groupe_parallele": 1, "robots": ["mixeur"]},
+            {"titre": "Ã‰tape 1", "groupe_parallele": 0, "robots": ["mixeur"]},
+            {"titre": "Ã‰tape 2", "groupe_parallele": 1, "robots": ["mixeur"]},
         ]
         conflits = detecter_conflits_robots(etapes)
         assert len(conflits) == 0
@@ -397,17 +397,17 @@ class TestDetecterConflitsRobots:
     def test_robot_parallele_ok(self):
         """Pas de conflit si robot peut être parallélisé."""
         etapes = [
-            {"titre": "Étape 1", "groupe_parallele": 0, "robots": ["four"]},
-            {"titre": "Étape 2", "groupe_parallele": 0, "robots": ["four"]},
+            {"titre": "Ã‰tape 1", "groupe_parallele": 0, "robots": ["four"]},
+            {"titre": "Ã‰tape 2", "groupe_parallele": 0, "robots": ["four"]},
         ]
         conflits = detecter_conflits_robots(etapes)
         # Le four peut être parallélisé
         assert len(conflits) == 0
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Tests Mode Jules
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFiltrerEtapesBruyantes:
@@ -419,7 +419,7 @@ class TestFiltrerEtapesBruyantes:
             {"titre": "Mixer", "alerte_bruit": True},
             {"titre": "Cuisson", "alerte_bruit": False},
             {"titre": "Hacher électrique", "alerte_bruit": True},
-            {"titre": "Éplucher", "alerte_bruit": False},
+            {"titre": "Ã‰plucher", "alerte_bruit": False},
         ]
         resultat = filtrer_etapes_bruyantes(etapes)
         assert len(resultat["bruyantes"]) == 2
@@ -452,9 +452,9 @@ class TestFiltrerEtapesBruyantes:
         assert len(resultat["calmes"]) == 0
 
     def test_sans_attribut_bruit(self):
-        """Étapes sans attribut sont considérées calmes."""
+        """Ã‰tapes sans attribut sont considérées calmes."""
         etapes = [
-            {"titre": "Étape sans info"},
+            {"titre": "Ã‰tape sans info"},
             {"titre": "Autre étape"},
         ]
         resultat = filtrer_etapes_bruyantes(etapes)

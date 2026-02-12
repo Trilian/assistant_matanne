@@ -1,21 +1,21 @@
-"""Tests simples pour couvrir les gaps - Domains."""
+﻿"""Tests simples pour couvrir les gaps - Domains."""
 
 import pytest
 
 
 @pytest.mark.unit
 class TestDomainsSimpleExtended:
-    """Tests simples pour domains métier."""
+    """Tests simples pour domains mÃ©tier."""
     
     def test_domain_data_structures(self):
-        """Tester structures données."""
+        """Tester structures donnÃ©es."""
         recipe = {
             "id": 1,
-            "name": "Pâtes",
+            "name": "PÃ¢tes",
             "time": 30
         }
         assert recipe["id"] == 1
-        assert recipe["name"] == "Pâtes"
+        assert recipe["name"] == "PÃ¢tes"
         assert recipe["time"] > 0
     
     def test_planning_calendar(self):
@@ -33,7 +33,7 @@ class TestDomainsSimpleExtended:
             assert len(meal) > 0
     
     def test_family_data(self):
-        """Tester données famille."""
+        """Tester donnÃ©es famille."""
         child = {
             "name": "Jules",
             "age": 2,
@@ -78,7 +78,7 @@ class TestDomainLogicExtended:
         assert total == 30
     
     def test_activity_scheduling(self):
-        """Tester planning activités."""
+        """Tester planning activitÃ©s."""
         activities = [
             {"name": "Football", "duration": 60},
             {"name": "Lecture", "duration": 30},
@@ -87,7 +87,7 @@ class TestDomainLogicExtended:
         assert total_time == 90
     
     def test_health_tracking(self):
-        """Tester suivi santé."""
+        """Tester suivi santÃ©."""
         records = [
             {"date": "2026-02-01", "value": 8},
             {"date": "2026-02-02", "value": 7},

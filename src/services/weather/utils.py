@@ -1,4 +1,4 @@
-"""
+﻿"""
 Fonctions utilitaires pures pour le service météo jardin.
 
 Ces fonctions peuvent être testées sans dépendances HTTP ni base de données.
@@ -9,15 +9,15 @@ from datetime import date, datetime, timedelta
 from typing import Any
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONSTANTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 # Seuils d'alerte météo
-SEUIL_GEL = 2.0  # °C
-SEUIL_GEL_SEVERE = 0.0  # °C
-SEUIL_CANICULE = 35.0  # °C
-SEUIL_CANICULE_SEVERE = 40.0  # °C
+SEUIL_GEL = 2.0  # Â°C
+SEUIL_GEL_SEVERE = 0.0  # Â°C
+SEUIL_CANICULE = 35.0  # Â°C
+SEUIL_CANICULE_SEVERE = 40.0  # Â°C
 SEUIL_SECHERESSE_JOURS = 7  # jours sans pluie significative
 SEUIL_PLUIE_FORTE = 20.0  # mm/jour
 SEUIL_PLUIE_VIOLENTE = 50.0  # mm/jour
@@ -31,33 +31,33 @@ DIRECTIONS_CARDINALES = ["N", "NE", "E", "SE", "S", "SO", "O", "NO"]
 
 # Codes météo WMO (World Meteorological Organization)
 WEATHERCODES = {
-    0: {"condition": "Ensoleillé", "icon": "☀️", "arrosage_factor": 1.2},
-    1: {"condition": "Peu nuageux", "icon": "🌤️", "arrosage_factor": 1.1},
-    2: {"condition": "Partiellement nuageux", "icon": "⛅", "arrosage_factor": 1.0},
-    3: {"condition": "Couvert", "icon": "☁️", "arrosage_factor": 0.8},
-    45: {"condition": "Brouillard", "icon": "🌫️", "arrosage_factor": 0.5},
-    48: {"condition": "Brouillard givrant", "icon": "🌫️", "arrosage_factor": 0.3},
-    51: {"condition": "Bruine légère", "icon": "🌦️", "arrosage_factor": 0.7},
-    53: {"condition": "Bruine", "icon": "🌧️", "arrosage_factor": 0.5},
-    55: {"condition": "Bruine forte", "icon": "🌧️", "arrosage_factor": 0.3},
-    61: {"condition": "Pluie légère", "icon": "🌧️", "arrosage_factor": 0.4},
-    63: {"condition": "Pluie modérée", "icon": "🌧️", "arrosage_factor": 0.2},
-    65: {"condition": "Pluie forte", "icon": "🌧️", "arrosage_factor": 0.0},
-    71: {"condition": "Neige légère", "icon": "🌨️", "arrosage_factor": 0.0},
-    73: {"condition": "Neige modérée", "icon": "❄️", "arrosage_factor": 0.0},
-    75: {"condition": "Neige forte", "icon": "❄️", "arrosage_factor": 0.0},
-    80: {"condition": "Averses légères", "icon": "🌦️", "arrosage_factor": 0.5},
-    81: {"condition": "Averses", "icon": "🌧️", "arrosage_factor": 0.3},
-    82: {"condition": "Averses violentes", "icon": "⛈️", "arrosage_factor": 0.0},
-    95: {"condition": "Orage", "icon": "⛈️", "arrosage_factor": 0.0},
-    96: {"condition": "Orage avec grêle légère", "icon": "⛈️", "arrosage_factor": 0.0},
-    99: {"condition": "Orage avec grêle", "icon": "⛈️", "arrosage_factor": 0.0},
+    0: {"condition": "Ensoleillé", "icon": "â˜€ï¸", "arrosage_factor": 1.2},
+    1: {"condition": "Peu nuageux", "icon": "ðŸŒ¤ï¸", "arrosage_factor": 1.1},
+    2: {"condition": "Partiellement nuageux", "icon": "â›…", "arrosage_factor": 1.0},
+    3: {"condition": "Couvert", "icon": "â˜ï¸", "arrosage_factor": 0.8},
+    45: {"condition": "Brouillard", "icon": "ðŸŒ«ï¸", "arrosage_factor": 0.5},
+    48: {"condition": "Brouillard givrant", "icon": "ðŸŒ«ï¸", "arrosage_factor": 0.3},
+    51: {"condition": "Bruine légère", "icon": "ðŸŒ¦ï¸", "arrosage_factor": 0.7},
+    53: {"condition": "Bruine", "icon": "ðŸŒ§ï¸", "arrosage_factor": 0.5},
+    55: {"condition": "Bruine forte", "icon": "ðŸŒ§ï¸", "arrosage_factor": 0.3},
+    61: {"condition": "Pluie légère", "icon": "ðŸŒ§ï¸", "arrosage_factor": 0.4},
+    63: {"condition": "Pluie modérée", "icon": "ðŸŒ§ï¸", "arrosage_factor": 0.2},
+    65: {"condition": "Pluie forte", "icon": "ðŸŒ§ï¸", "arrosage_factor": 0.0},
+    71: {"condition": "Neige légère", "icon": "ðŸŒ¨ï¸", "arrosage_factor": 0.0},
+    73: {"condition": "Neige modérée", "icon": "â„ï¸", "arrosage_factor": 0.0},
+    75: {"condition": "Neige forte", "icon": "â„ï¸", "arrosage_factor": 0.0},
+    80: {"condition": "Averses légères", "icon": "ðŸŒ¦ï¸", "arrosage_factor": 0.5},
+    81: {"condition": "Averses", "icon": "ðŸŒ§ï¸", "arrosage_factor": 0.3},
+    82: {"condition": "Averses violentes", "icon": "â›ˆï¸", "arrosage_factor": 0.0},
+    95: {"condition": "Orage", "icon": "â›ˆï¸", "arrosage_factor": 0.0},
+    96: {"condition": "Orage avec grêle légère", "icon": "â›ˆï¸", "arrosage_factor": 0.0},
+    99: {"condition": "Orage avec grêle", "icon": "â›ˆï¸", "arrosage_factor": 0.0},
 }
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONVERSION DE DONNÉES MÉTÉO
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def direction_from_degrees(degrees: float | None) -> str:
@@ -84,7 +84,7 @@ def direction_from_degrees(degrees: float | None) -> str:
     # Normaliser entre 0 et 360
     degrees = degrees % 360
     
-    # 8 directions = 45° chacune
+    # 8 directions = 45Â° chacune
     index = round(degrees / 45) % 8
     return DIRECTIONS_CARDINALES[index]
 
@@ -148,15 +148,15 @@ def weathercode_to_icon(code: int | None) -> str:
         
     Examples:
         >>> weathercode_to_icon(0)
-        '☀️'
+        'â˜€ï¸'
         >>> weathercode_to_icon(95)
-        '⛈️'
+        'â›ˆï¸'
     """
     if code is None:
-        return "❓"
+        return "â“"
     
     info = WEATHERCODES.get(code)
-    return info["icon"] if info else "🌡️"
+    return info["icon"] if info else "ðŸŒ¡ï¸"
 
 
 def get_arrosage_factor(code: int | None) -> float:
@@ -180,9 +180,9 @@ def get_arrosage_factor(code: int | None) -> float:
     return info["arrosage_factor"] if info else 1.0
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CALCUL DE TEMPÉRATURES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def calculate_average_temperature(temp_min: float, temp_max: float) -> float:
@@ -230,30 +230,30 @@ def calculate_feels_like(temp: float, humidity: int, wind_speed: float) -> float
     Combine l'effet du vent (refroidissement) et de l'humidité.
     
     Args:
-        temp: Température en °C
+        temp: Température en Â°C
         humidity: Humidité en %
         wind_speed: Vitesse du vent en km/h
         
     Returns:
-        Température ressentie en °C
+        Température ressentie en Â°C
     """
-    # Effet du vent (refroidissement éolien) si temp < 10°C
+    # Effet du vent (refroidissement éolien) si temp < 10Â°C
     if temp < 10 and wind_speed > 5:
         wind_chill = 13.12 + 0.6215 * temp - 11.37 * (wind_speed ** 0.16) + 0.3965 * temp * (wind_speed ** 0.16)
         return round(wind_chill, 1)
     
-    # Effet de l'humidité (chaleur ressentie) si temp > 20°C
+    # Effet de l'humidité (chaleur ressentie) si temp > 20Â°C
     if temp > 20 and humidity > 40:
         # Formule simplifiée de l'indice de chaleur
-        heat_factor = (humidity - 40) * 0.02  # +0.02°C par % d'humidité au-dessus de 40%
+        heat_factor = (humidity - 40) * 0.02  # +0.02Â°C par % d'humidité au-dessus de 40%
         return round(temp + heat_factor, 1)
     
     return round(temp, 1)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # DÉTECTION D'ALERTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def detect_gel_alert(temp_min: float) -> dict | None:
@@ -268,7 +268,7 @@ def detect_gel_alert(temp_min: float) -> dict | None:
         
     Examples:
         >>> detect_gel_alert(-2)
-        {'niveau': 'danger', 'message': 'Gel sévère prévu: -2°C'}
+        {'niveau': 'danger', 'message': 'Gel sévère prévu: -2Â°C'}
     """
     if temp_min > SEUIL_GEL:
         return None
@@ -276,14 +276,14 @@ def detect_gel_alert(temp_min: float) -> dict | None:
     if temp_min <= SEUIL_GEL_SEVERE:
         return {
             "niveau": "danger",
-            "message": f"Gel sévère prévu: {temp_min}°C",
+            "message": f"Gel sévère prévu: {temp_min}Â°C",
             "conseil": "Protégez immédiatement vos plantes sensibles! Rentrez tous les pots.",
             "temperature": temp_min,
         }
     else:
         return {
             "niveau": "attention",
-            "message": f"Risque de gel: {temp_min}°C",
+            "message": f"Risque de gel: {temp_min}Â°C",
             "conseil": "Préparez un voile d'hivernage pour vos plantes fragiles.",
             "temperature": temp_min,
         }
@@ -305,14 +305,14 @@ def detect_canicule_alert(temp_max: float) -> dict | None:
     if temp_max >= SEUIL_CANICULE_SEVERE:
         return {
             "niveau": "danger",
-            "message": f"Canicule extrême: {temp_max}°C",
+            "message": f"Canicule extrême: {temp_max}Â°C",
             "conseil": "Arrosez abondamment matin et soir. Paillez le sol. Ombragez les plantes fragiles.",
             "temperature": temp_max,
         }
     else:
         return {
             "niveau": "attention",
-            "message": f"Forte chaleur: {temp_max}°C",
+            "message": f"Forte chaleur: {temp_max}Â°C",
             "conseil": "Arrosez le soir après le coucher du soleil. Évitez l'arrosage en plein soleil.",
             "temperature": temp_max,
         }
@@ -363,7 +363,7 @@ def detect_vent_fort_alert(wind_speed: float) -> dict | None:
     if wind_speed >= SEUIL_VENT_TEMPETE:
         return {
             "niveau": "danger",
-            "message": f"Tempête: rafales à {wind_speed} km/h",
+            "message": f"Tempête: rafales Ã  {wind_speed} km/h",
             "conseil": "Rentrez tous les objets légers. Attachez les plantes hautes aux tuteurs.",
             "vent": wind_speed,
         }
@@ -400,7 +400,7 @@ def detect_uv_alert(uv_index: int) -> dict | None:
         return {
             "niveau": "attention",
             "message": f"UV élevé: index {uv_index}",
-            "conseil": "Les plantes à feuillage délicat peuvent souffrir. Privilégiez l'arrosage tôt le matin.",
+            "conseil": "Les plantes Ã  feuillage délicat peuvent souffrir. Privilégiez l'arrosage tôt le matin.",
             "uv": uv_index,
         }
 
@@ -459,9 +459,9 @@ def detect_all_alerts(prevision: dict) -> list[dict]:
     return alertes
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CALCUL ARROSAGE INTELLIGENT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def calculate_watering_need(
@@ -476,7 +476,7 @@ def calculate_watering_need(
     Calcule le besoin d'arrosage basé sur les conditions météo.
     
     Args:
-        temp_max: Température maximale en °C
+        temp_max: Température maximale en Â°C
         precipitation_mm: Précipitations prévues en mm
         wind_speed: Vitesse du vent en km/h
         humidity: Humidité relative en %
@@ -495,8 +495,8 @@ def calculate_watering_need(
             "priorite": 0,
         }
     
-    # Calcul du besoin de base (litres par m²)
-    besoin_base = 3.0  # litres/m² en conditions normales
+    # Calcul du besoin de base (litres par mÂ²)
+    besoin_base = 3.0  # litres/mÂ² en conditions normales
     
     # Ajustements
     facteur = 1.0
@@ -597,9 +597,9 @@ def detect_drought_risk(
     return risque, jours_sans_pluie
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONSEILS JARDINAGE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def get_season(dt: date | datetime | None = None) -> str:
@@ -651,14 +651,14 @@ def get_gardening_advice_for_weather(
     if temp_max >= 30:
         conseils.append({
             "priorite": 1,
-            "icone": "💧",
+            "icone": "ðŸ’§",
             "titre": "Arrosage renforcé",
             "description": "Arrosez le soir ou tôt le matin pour limiter l'évaporation",
             "action": "Évitez l'arrosage en plein soleil (risque de brûlure)",
         })
         conseils.append({
             "priorite": 2,
-            "icone": "🌿",
+            "icone": "ðŸŒ¿",
             "titre": "Paillage recommandé",
             "description": "Paillez le sol pour conserver l'humidité",
             "action": "Utilisez de la paille, des feuilles mortes ou du BRF",
@@ -667,7 +667,7 @@ def get_gardening_advice_for_weather(
     if temp_max < 5:
         conseils.append({
             "priorite": 1,
-            "icone": "🧥",
+            "icone": "ðŸ§¥",
             "titre": "Protection hivernale",
             "description": "Protégez les plantes sensibles au froid",
             "action": "Utilisez un voile d'hivernage ou rentrez les pots",
@@ -677,15 +677,15 @@ def get_gardening_advice_for_weather(
     if precipitation_mm > 30:
         conseils.append({
             "priorite": 1,
-            "icone": "🌊",
-            "titre": "Drainage à vérifier",
+            "icone": "ðŸŒŠ",
+            "titre": "Drainage Ã  vérifier",
             "description": "De fortes pluies sont prévues",
             "action": "Vérifiez que l'eau s'écoule bien dans vos pots et jardinières",
         })
     elif precipitation_mm < 1 and temp_max > 20:
         conseils.append({
             "priorite": 2,
-            "icone": "💧",
+            "icone": "ðŸ’§",
             "titre": "Vigilance arrosage",
             "description": "Pas de pluie prévue",
             "action": "Planifiez votre arrosage pour les prochains jours",
@@ -695,7 +695,7 @@ def get_gardening_advice_for_weather(
     if "ensoleillé" in condition.lower() or "soleil" in condition.lower():
         conseils.append({
             "priorite": 3,
-            "icone": "☀️",
+            "icone": "â˜€ï¸",
             "titre": "Journée idéale au jardin",
             "description": "Conditions parfaites pour le jardinage",
             "action": "Profitez-en pour désherber, planter ou tailler",
@@ -704,10 +704,10 @@ def get_gardening_advice_for_weather(
     if "orage" in condition.lower():
         conseils.append({
             "priorite": 1,
-            "icone": "⚡",
+            "icone": "âš¡",
             "titre": "Orages prévus",
             "description": "Risque de grêle et vents forts",
-            "action": "Mettez à l'abri les plantes en pot et les objets légers",
+            "action": "Mettez Ã  l'abri les plantes en pot et les objets légers",
         })
     
     # Trier par priorité
@@ -737,7 +737,7 @@ def format_weather_summary(previsions: list[dict]) -> str:
     nb_jours = len(previsions)
     
     summary = f"Prévisions sur {nb_jours} jours: "
-    summary += f"Températures entre {temp_min:.0f}°C et {temp_max:.0f}°C. "
+    summary += f"Températures entre {temp_min:.0f}Â°C et {temp_max:.0f}Â°C. "
     
     if total_precip > 0:
         summary += f"Cumul de précipitations: {total_precip:.0f}mm."
@@ -747,9 +747,9 @@ def format_weather_summary(previsions: list[dict]) -> str:
     return summary
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # PARSING DE DONNÉES API
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def parse_open_meteo_daily(data: dict) -> list[dict]:
@@ -804,16 +804,16 @@ def parse_open_meteo_daily(data: dict) -> list[dict]:
 
 def _safe_get_index(data: dict, key: str, index: int, default=None) -> Any:
     """
-    Récupère une valeur à un index de façon sécurisée.
+    Récupère une valeur Ã  un index de façon sécurisée.
     
     Args:
         data: Dictionnaire contenant les listes
         key: Clé de la liste
-        index: Index à récupérer
+        index: Index Ã  récupérer
         default: Valeur par défaut
         
     Returns:
-        Valeur à l'index ou default
+        Valeur Ã  l'index ou default
     """
     lst = data.get(key, [])
     if lst and 0 <= index < len(lst):
@@ -826,8 +826,8 @@ def validate_coordinates(latitude: float, longitude: float) -> tuple[bool, str]:
     Valide des coordonnées GPS.
     
     Args:
-        latitude: Latitude (-90 à 90)
-        longitude: Longitude (-180 à 180)
+        latitude: Latitude (-90 Ã  90)
+        longitude: Longitude (-180 Ã  180)
         
     Returns:
         Tuple (valide, message_erreur)

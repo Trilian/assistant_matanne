@@ -1,7 +1,7 @@
-"""Tests pour src/services/inventaire/service.py - ServiceInventaire.
+﻿"""Tests pour src/services/inventaire/service.py - ServiceInventaire.
 
 Couverture des fonctionnalités:
-- CRUD d'articles (ajouter, mettre à jour, supprimer)
+- CRUD d'articles (ajouter, mettre Ã  jour, supprimer)
 - Gestion des quantités et statuts
 - Alertes de stock bas et critique
 - Alertes de péremption
@@ -27,9 +27,9 @@ from src.services.inventaire.service import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
@@ -162,9 +162,9 @@ def sample_article_expiring(db: Session) -> ArticleInventaire:
     return article
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS INITIALISATION & CONSTANTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -220,9 +220,9 @@ class TestServiceInventaireInit:
         assert InventaireService is ServiceInventaire
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CALCUL STATUT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -267,9 +267,9 @@ class TestCalculerStatut:
         assert statut == "stock_bas"  # Pas de péremption, juste stock bas
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS JOURS AVANT PEREMPTION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -302,9 +302,9 @@ class TestJoursAvantPeremption:
         assert jours == -5
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CRUD ARTICLES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -339,14 +339,14 @@ class TestAjouterArticle:
         assert result is None
 
     def test_ajouter_article_existant(self, service, sample_article, db: Session):
-        """Test ajout d'un article déjà existant."""
+        """Test ajout d'un article déjÃ  existant."""
         result = service.ajouter_article(
             ingredient_nom="Tomates",
             quantite=5.0,
             db=db,
         )
         
-        # Devrait retourner None car l'article existe déjà
+        # Devrait retourner None car l'article existe déjÃ 
         assert result is None
 
 
@@ -355,7 +355,7 @@ class TestMettreAJourArticle:
     """Tests pour mettre_a_jour_article."""
 
     def test_mettre_a_jour_quantite(self, service, sample_article, db: Session):
-        """Test mise à jour de la quantité."""
+        """Test mise Ã  jour de la quantité."""
         result = service.mettre_a_jour_article(
             article_id=sample_article.id,
             quantite=15.0,
@@ -369,7 +369,7 @@ class TestMettreAJourArticle:
         assert sample_article.quantite == 15.0
 
     def test_mettre_a_jour_quantite_min(self, service, sample_article, db: Session):
-        """Test mise à jour du seuil minimum."""
+        """Test mise Ã  jour du seuil minimum."""
         result = service.mettre_a_jour_article(
             article_id=sample_article.id,
             quantite_min=5.0,
@@ -382,7 +382,7 @@ class TestMettreAJourArticle:
         assert sample_article.quantite_min == 5.0
 
     def test_mettre_a_jour_emplacement(self, service, sample_article, db: Session):
-        """Test mise à jour de l'emplacement."""
+        """Test mise Ã  jour de l'emplacement."""
         result = service.mettre_a_jour_article(
             article_id=sample_article.id,
             emplacement="Congélateur",
@@ -395,7 +395,7 @@ class TestMettreAJourArticle:
         assert sample_article.emplacement == "Congélateur"
 
     def test_mettre_a_jour_date_peremption(self, service, sample_article, db: Session):
-        """Test mise à jour de la date de péremption."""
+        """Test mise Ã  jour de la date de péremption."""
         new_date = date.today() + timedelta(days=30)
         
         result = service.mettre_a_jour_article(
@@ -410,7 +410,7 @@ class TestMettreAJourArticle:
         assert sample_article.date_peremption == new_date
 
     def test_mettre_a_jour_article_inexistant(self, service, db: Session):
-        """Test mise à jour d'un article inexistant."""
+        """Test mise Ã  jour d'un article inexistant."""
         result = service.mettre_a_jour_article(
             article_id=99999,
             quantite=10.0,
@@ -420,7 +420,7 @@ class TestMettreAJourArticle:
         assert result is False
 
     def test_mettre_a_jour_multiple_champs(self, service, sample_article, db: Session):
-        """Test mise à jour de plusieurs champs à la fois."""
+        """Test mise Ã  jour de plusieurs champs Ã  la fois."""
         new_date = date.today() + timedelta(days=20)
         
         result = service.mettre_a_jour_article(
@@ -464,9 +464,9 @@ class TestSupprimerArticle:
         assert result is False
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS INVENTAIRE COMPLET & ALERTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -542,9 +542,9 @@ class TestGetAlertes:
         assert total_alertes >= 2
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS HISTORIQUE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -661,9 +661,9 @@ class TestGetHistorique:
                 assert (datetime.utcnow() - timedelta(days=30)) <= entry_date
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS STATISTIQUES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -727,7 +727,7 @@ class TestGetArticlesAPrelever:
     """Tests pour get_articles_a_prelever."""
 
     def test_get_articles_a_prelever_sans_articles_expirant(self, service):
-        """Test articles à prélever sans expiration proche."""
+        """Test articles Ã  prélever sans expiration proche."""
         # Mock avec article qui expire dans 10 jours (> 3 jours par défaut)
         mock_inventaire = [
             {"id": 1, "date_peremption": date.today() + timedelta(days=10)},
@@ -741,7 +741,7 @@ class TestGetArticlesAPrelever:
         assert len(result) == 0
 
     def test_get_articles_a_prelever_avec_expiration(self, service):
-        """Test articles à prélever avec expiration proche."""
+        """Test articles Ã  prélever avec expiration proche."""
         # Mock avec article qui expire dans 2 jours (<= 3 jours)
         mock_inventaire = [
             {"id": 1, "date_peremption": date.today() + timedelta(days=2)},
@@ -769,9 +769,9 @@ class TestGetArticlesAPrelever:
         assert len(result) >= 1
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GESTION PHOTOS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -793,7 +793,7 @@ class TestAjouterPhoto:
         assert result["photo_filename"] == "photo.jpg"
 
     def test_ajouter_photo_article_inexistant(self, service, db: Session):
-        """Test ajout photo à un article inexistant."""
+        """Test ajout photo Ã  un article inexistant."""
         from src.core.errors_base import ErreurValidation
         
         with pytest.raises(ErreurValidation, match="introuvable"):
@@ -862,9 +862,9 @@ class TestObtenirPhoto:
         assert result is None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS INVALIDATION CACHE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -883,7 +883,7 @@ class TestInvalidateCache:
             mock_invalidate.assert_called()
 
     def test_invalidate_cache_called_on_update(self, service, sample_article, db: Session):
-        """Test que le cache est invalidé après mise à jour."""
+        """Test que le cache est invalidé après mise Ã  jour."""
         with patch.object(service, "invalidate_cache") as mock_invalidate:
             service.mettre_a_jour_article(
                 article_id=sample_article.id,
@@ -901,9 +901,9 @@ class TestInvalidateCache:
             mock_invalidate.assert_called()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EDGE CASES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -911,7 +911,7 @@ class TestEdgeCases:
     """Tests pour les cas limites."""
 
     def test_quantite_zero(self, service, sample_ingredient, db: Session):
-        """Test avec quantité à zéro."""
+        """Test avec quantité Ã  zéro."""
         result = service.ajouter_article(
             ingredient_nom="Tomates",
             quantite=0.0,
@@ -959,9 +959,9 @@ class TestEdgeCases:
             assert entry["article_id"] == sample_article.id
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS PROPRIÉTÉS MODÈLE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS PROPRIÃ‰TÃ‰S MODÃˆLE
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit

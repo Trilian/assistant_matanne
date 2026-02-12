@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour user_preferences.py
 
 Module: src.core.models.user_preferences

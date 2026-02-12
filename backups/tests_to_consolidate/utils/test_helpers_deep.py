@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests approfondis pour src/utils/helpers/
 Objectif: Atteindre 80%+ de couverture
 
@@ -7,7 +7,7 @@ Couvre:
 - stats.py: calculate_average, calculate_median, calculate_variance, etc.
 - strings.py: generate_id, normalize_whitespace, remove_accents, etc.
 - food.py: fonctions utilitaires pour la nourriture
-- data.py, dates.py: utilitaires généraux
+- data.py, dates.py: utilitaires gÃ©nÃ©raux
 """
 
 import pytest
@@ -15,9 +15,9 @@ from datetime import date, datetime, timedelta
 from unittest.mock import Mock, patch, MagicMock
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS HELPERS STATS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalculateAverage:
@@ -38,7 +38,7 @@ class TestCalculateAverage:
         assert result == 0.0
     
     def test_calculate_average_un_element(self):
-        """Test un seul élément"""
+        """Test un seul Ã©lÃ©ment"""
         from src.utils.helpers.stats import calculate_average
         
         result = calculate_average([42])
@@ -56,14 +56,14 @@ class TestCalculateMedian:
     """Tests pour calculate_median"""
     
     def test_calculate_median_impair(self):
-        """Test médiane liste impaire"""
+        """Test mÃ©diane liste impaire"""
         from src.utils.helpers.stats import calculate_median
         
         result = calculate_median([1, 2, 3, 4, 5])
         assert result == 3.0
     
     def test_calculate_median_pair(self):
-        """Test médiane liste paire"""
+        """Test mÃ©diane liste paire"""
         from src.utils.helpers.stats import calculate_median
         
         result = calculate_median([1, 2, 3, 4])
@@ -77,7 +77,7 @@ class TestCalculateMedian:
         assert result == 0.0
     
     def test_calculate_median_non_trie(self):
-        """Test liste non triée"""
+        """Test liste non triÃ©e"""
         from src.utils.helpers.stats import calculate_median
         
         result = calculate_median([5, 1, 3, 2, 4])
@@ -102,7 +102,7 @@ class TestCalculateVariance:
         assert result == 0.0
     
     def test_calculate_variance_un_element(self):
-        """Test un seul élément"""
+        """Test un seul Ã©lÃ©ment"""
         from src.utils.helpers.stats import calculate_variance
         
         result = calculate_variance([42])
@@ -113,7 +113,7 @@ class TestCalculateStdDev:
     """Tests pour calculate_std_dev"""
     
     def test_calculate_std_dev_normal(self):
-        """Test écart-type normal"""
+        """Test Ã©cart-type normal"""
         from src.utils.helpers.stats import calculate_std_dev
         
         result = calculate_std_dev([1, 2, 3, 4, 5])
@@ -127,7 +127,7 @@ class TestCalculateStdDev:
         assert result == 0.0
     
     def test_calculate_std_dev_un_element(self):
-        """Test un seul élément"""
+        """Test un seul Ã©lÃ©ment"""
         from src.utils.helpers.stats import calculate_std_dev
         
         result = calculate_std_dev([42])
@@ -138,21 +138,21 @@ class TestCalculatePercentile:
     """Tests pour calculate_percentile"""
     
     def test_calculate_percentile_50(self):
-        """Test 50ème percentile"""
+        """Test 50Ã¨me percentile"""
         from src.utils.helpers.stats import calculate_percentile
         
         result = calculate_percentile([1, 2, 3, 4, 5], 50)
         assert result == 3.0
     
     def test_calculate_percentile_25(self):
-        """Test 25ème percentile"""
+        """Test 25Ã¨me percentile"""
         from src.utils.helpers.stats import calculate_percentile
         
         result = calculate_percentile([1, 2, 3, 4, 5], 25)
         assert result == 2.0
     
     def test_calculate_percentile_75(self):
-        """Test 75ème percentile"""
+        """Test 75Ã¨me percentile"""
         from src.utils.helpers.stats import calculate_percentile
         
         result = calculate_percentile([1, 2, 3, 4, 5], 75)
@@ -188,7 +188,7 @@ class TestCalculateMode:
         from src.utils.helpers.stats import calculate_mode
         
         result = calculate_mode([1, 1, 2, 2])
-        # Peut retourner 1 ou 2 selon l'implémentation, ou None
+        # Peut retourner 1 ou 2 selon l'implÃ©mentation, ou None
         assert result in [1, 2, None]
 
 
@@ -196,7 +196,7 @@ class TestCalculateRange:
     """Tests pour calculate_range"""
     
     def test_calculate_range_normal(self):
-        """Test étendue normale"""
+        """Test Ã©tendue normale"""
         from src.utils.helpers.stats import calculate_range
         
         result = calculate_range([1, 2, 3, 4, 5])
@@ -221,23 +221,23 @@ class TestMovingAverage:
         assert result == [2.0, 3.0, 4.0]
     
     def test_moving_average_window_trop_grand(self):
-        """Test fenêtre plus grande que liste"""
+        """Test fenÃªtre plus grande que liste"""
         from src.utils.helpers.stats import moving_average
         
         result = moving_average([1, 2, 3], 5)
         assert result == []
     
     def test_moving_average_window_un(self):
-        """Test fenêtre de 1"""
+        """Test fenÃªtre de 1"""
         from src.utils.helpers.stats import moving_average
         
         result = moving_average([1, 2, 3], 1)
         assert result == [1.0, 2.0, 3.0]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS HELPERS STRINGS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGenerateId:
@@ -252,7 +252,7 @@ class TestGenerateId:
         assert isinstance(result, str)
     
     def test_generate_id_deterministe(self):
-        """Test que l'ID est déterministe"""
+        """Test que l'ID est dÃ©terministe"""
         from src.utils.helpers.strings import generate_id
         
         data = {"a": 1, "b": 2}
@@ -261,7 +261,7 @@ class TestGenerateId:
         assert result1 == result2
     
     def test_generate_id_different_data(self):
-        """Test que données différentes = IDs différents"""
+        """Test que donnÃ©es diffÃ©rentes = IDs diffÃ©rents"""
         from src.utils.helpers.strings import generate_id
         
         result1 = generate_id({"a": 1})
@@ -298,25 +298,25 @@ class TestRemoveAccents:
     """Tests pour remove_accents"""
     
     def test_remove_accents_fr(self):
-        """Test accents français"""
+        """Test accents franÃ§ais"""
         from src.utils.helpers.strings import remove_accents
         
-        result = remove_accents("café crème")
+        result = remove_accents("cafÃ© crÃ¨me")
         assert result == "cafe creme"
     
     def test_remove_accents_tous(self):
         """Test tous les accents"""
         from src.utils.helpers.strings import remove_accents
         
-        result = remove_accents("àáâäãèéêëìíîïòóôöõùúûüçñ")
-        # Note: certains caractères comme ã -> a, õ -> o peuvent varier selon normalisation
+        result = remove_accents("Ã Ã¡Ã¢Ã¤Ã£Ã¨Ã©ÃªÃ«Ã¬Ã­Ã®Ã¯Ã²Ã³Ã´Ã¶ÃµÃ¹ÃºÃ»Ã¼Ã§Ã±")
+        # Note: certains caractÃ¨res comme Ã£ -> a, Ãµ -> o peuvent varier selon normalisation
         assert "a" in result and "e" in result and "i" in result and "o" in result
     
     def test_remove_accents_majuscules(self):
         """Test accents majuscules"""
         from src.utils.helpers.strings import remove_accents
         
-        result = remove_accents("ÉÀÜÇÑ")
+        result = remove_accents("Ã‰Ã€ÃœÃ‡Ã‘")
         assert result == "EAUCN"
 
 
@@ -338,7 +338,7 @@ class TestCamelToSnake:
         assert result == "my_variable_name"
     
     def test_camel_to_snake_deja_snake(self):
-        """Test déjà snake_case"""
+        """Test dÃ©jÃ  snake_case"""
         from src.utils.helpers.strings import camel_to_snake
         
         result = camel_to_snake("my_variable")
@@ -363,16 +363,16 @@ class TestSnakeToCamel:
         assert result == "variable"
     
     def test_snake_to_camel_deja_camel(self):
-        """Test déjà camelCase"""
+        """Test dÃ©jÃ  camelCase"""
         from src.utils.helpers.strings import snake_to_camel
         
         result = snake_to_camel("myVariable")
         assert result == "myVariable"
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS HELPERS HELPERS.PY (MÉTIER)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS HELPERS HELPERS.PY (MÃ‰TIER)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestValidateStockLevel:
@@ -384,7 +384,7 @@ class TestValidateStockLevel:
         
         statut, icon = validate_stock_level(1.0, 5.0, "Tomates")
         assert statut == "critique"
-        assert icon == "🔴"
+        assert icon == "ðŸ”´"
     
     def test_validate_stock_level_sous_seuil(self):
         """Test stock sous seuil"""
@@ -392,7 +392,7 @@ class TestValidateStockLevel:
         
         statut, icon = validate_stock_level(3.0, 5.0, "Tomates")
         assert statut == "sous_seuil"
-        assert icon == "⚠️"
+        assert icon == "âš ï¸"
     
     def test_validate_stock_level_ok(self):
         """Test stock OK"""
@@ -400,7 +400,7 @@ class TestValidateStockLevel:
         
         statut, icon = validate_stock_level(10.0, 5.0, "Tomates")
         assert statut == "ok"
-        assert icon == "✅"
+        assert icon == "âœ…"
 
 
 class TestConsolidateDuplicates:
@@ -431,7 +431,7 @@ class TestConsolidateDuplicates:
         assert len(result) == 2
     
     def test_consolidate_duplicates_avec_strategy(self):
-        """Test avec stratégie de fusion"""
+        """Test avec stratÃ©gie de fusion"""
         from src.utils.helpers.helpers import consolidate_duplicates
         
         def merge_qty(item1, item2):
@@ -447,7 +447,7 @@ class TestConsolidateDuplicates:
         assert result[0]["qty"] == 5
     
     def test_consolidate_duplicates_cle_vide(self):
-        """Test avec clé vide"""
+        """Test avec clÃ© vide"""
         from src.utils.helpers.helpers import consolidate_duplicates
         
         items = [
@@ -463,7 +463,7 @@ class TestFormatRecipeSummary:
     """Tests pour format_recipe_summary"""
     
     def test_format_recipe_summary_complet(self):
-        """Test résumé complet"""
+        """Test rÃ©sumÃ© complet"""
         from src.utils.helpers.helpers import format_recipe_summary
         
         recette = {
@@ -481,7 +481,7 @@ class TestFormatRecipeSummary:
         assert "Moyen" in result
     
     def test_format_recipe_summary_defauts(self):
-        """Test avec valeurs par défaut"""
+        """Test avec valeurs par dÃ©faut"""
         from src.utils.helpers.helpers import format_recipe_summary
         
         recette = {"nom": "Test"}
@@ -495,7 +495,7 @@ class TestFormatInventorySummary:
     """Tests pour format_inventory_summary"""
     
     def test_format_inventory_summary_normal(self):
-        """Test résumé normal"""
+        """Test rÃ©sumÃ© normal"""
         from src.utils.helpers.helpers import format_inventory_summary
         
         inventaire = [
@@ -507,7 +507,7 @@ class TestFormatInventorySummary:
         
         assert "3 articles" in result
         assert "1 stock bas" in result
-        assert "1 péremption proche" in result
+        assert "1 pÃ©remption proche" in result
     
     def test_format_inventory_summary_vide(self):
         """Test inventaire vide"""
@@ -521,7 +521,7 @@ class TestCalculateRecipeCost:
     """Tests pour calculate_recipe_cost"""
     
     def test_calculate_recipe_cost_normal(self):
-        """Test calcul coût normal"""
+        """Test calcul coÃ»t normal"""
         from src.utils.helpers.helpers import calculate_recipe_cost
         
         recette = {
@@ -537,7 +537,7 @@ class TestCalculateRecipeCost:
         assert result == 1.9  # 0.5*3 + 0.2*2
     
     def test_calculate_recipe_cost_ingredient_inconnu(self):
-        """Test avec ingrédient sans prix"""
+        """Test avec ingrÃ©dient sans prix"""
         from src.utils.helpers.helpers import calculate_recipe_cost
         
         recette = {
@@ -553,7 +553,7 @@ class TestCalculateRecipeCost:
         assert result == 1.5  # 0.5*3 + 0.1*0
     
     def test_calculate_recipe_cost_sans_ingredients(self):
-        """Test sans ingrédients"""
+        """Test sans ingrÃ©dients"""
         from src.utils.helpers.helpers import calculate_recipe_cost
         
         recette = {}
@@ -575,7 +575,7 @@ class TestSuggestIngredientSubstitutes:
         assert "huile d'olive" in result
     
     def test_suggest_substitutes_inconnu(self):
-        """Test ingrédient sans substituts"""
+        """Test ingrÃ©dient sans substituts"""
         from src.utils.helpers.helpers import suggest_ingredient_substitutes
         
         result = suggest_ingredient_substitutes("Truffe")
@@ -584,7 +584,7 @@ class TestSuggestIngredientSubstitutes:
     
     @pytest.mark.parametrize("ingredient", ["lait", "oeuf", "sucre", "farine"])
     def test_suggest_substitutes_connus(self, ingredient):
-        """Test substituts pour ingrédients courants"""
+        """Test substituts pour ingrÃ©dients courants"""
         from src.utils.helpers.helpers import suggest_ingredient_substitutes
         
         result = suggest_ingredient_substitutes(ingredient)
@@ -592,9 +592,9 @@ class TestSuggestIngredientSubstitutes:
         assert len(result) > 0
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS HELPERS DATA
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestDataHelpers:
@@ -607,9 +607,9 @@ class TestDataHelpers:
         assert data is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS HELPERS DATES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestDatesHelpers:
@@ -622,16 +622,16 @@ class TestDatesHelpers:
         assert dates is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS HELPERS FOOD
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFoodHelpers:
     """Tests pour les fonctions de food.py"""
     
     def test_batch_find_or_create_ingredients(self):
-        """Test batch création ingrédients"""
+        """Test batch crÃ©ation ingrÃ©dients"""
         from src.utils.helpers.food import batch_find_or_create_ingredients
         
         data = [{"name": "Tomate"}]
@@ -640,7 +640,7 @@ class TestFoodHelpers:
         assert len(result) == 1
     
     def test_calculate_recipe_cost_food(self):
-        """Test calcul coût recette"""
+        """Test calcul coÃ»t recette"""
         from src.utils.helpers.food import calculate_recipe_cost
         
         result = calculate_recipe_cost([])
@@ -661,7 +661,7 @@ class TestFoodHelpers:
         assert len(result) == 1
     
     def test_find_or_create_ingredient_food(self):
-        """Test trouver/créer ingrédient"""
+        """Test trouver/crÃ©er ingrÃ©dient"""
         from src.utils.helpers.food import find_or_create_ingredient
         
         result = find_or_create_ingredient("Tomate")
@@ -682,7 +682,7 @@ class TestFoodHelpers:
         assert "Tarte" in result
     
     def test_get_all_ingredients_cached_food(self):
-        """Test récupération ingrédients cachés"""
+        """Test rÃ©cupÃ©ration ingrÃ©dients cachÃ©s"""
         from src.utils.helpers.food import get_all_ingredients_cached
         
         result = get_all_ingredients_cached()
@@ -706,17 +706,17 @@ class TestFoodHelpers:
         assert result is False
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS HELPERS AVEC MOCKING DB
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestHelpersWithDBMocking:
-    """Tests pour fonctions qui nécessitent la BD"""
+    """Tests pour fonctions qui nÃ©cessitent la BD"""
     
     @patch("src.utils.helpers.helpers.get_db_context")
     def test_find_or_create_ingredient_new(self, mock_db):
-        """Test création nouvel ingrédient"""
+        """Test crÃ©ation nouvel ingrÃ©dient"""
         from src.utils.helpers.helpers import find_or_create_ingredient
         
         # Mock session
@@ -726,7 +726,7 @@ class TestHelpersWithDBMocking:
         mock_session.__exit__ = MagicMock(return_value=False)
         mock_db.return_value = mock_session
         
-        # Mock nouvel ingrédient avec ID
+        # Mock nouvel ingrÃ©dient avec ID
         mock_ingredient = MagicMock()
         mock_ingredient.id = 1
         
@@ -735,16 +735,16 @@ class TestHelpersWithDBMocking:
         mock_session.add = mock_add
         
         # Appel
-        result = find_or_create_ingredient("Tomate", "kg", "Légumes")
+        result = find_or_create_ingredient("Tomate", "kg", "LÃ©gumes")
         
         assert result == 1
     
     @patch("src.utils.helpers.helpers.get_db_context")
     def test_find_or_create_ingredient_existing(self, mock_db):
-        """Test ingrédient existant"""
+        """Test ingrÃ©dient existant"""
         from src.utils.helpers.helpers import find_or_create_ingredient
         
-        # Mock ingrédient existant
+        # Mock ingrÃ©dient existant
         mock_ingredient = MagicMock()
         mock_ingredient.id = 42
         
@@ -773,7 +773,7 @@ class TestHelpersWithDBMocking:
     
     @patch("src.utils.helpers.helpers.get_db_context")
     def test_batch_find_or_create_ingredients(self, mock_db):
-        """Test batch création"""
+        """Test batch crÃ©ation"""
         from src.utils.helpers.helpers import batch_find_or_create_ingredients
         
         mock_ingredient = MagicMock()
@@ -796,14 +796,14 @@ class TestHelpersWithDBMocking:
     
     @patch("src.utils.helpers.helpers.get_db_context")
     def test_get_all_ingredients_cached(self, mock_db):
-        """Test récupération tous ingrédients"""
+        """Test rÃ©cupÃ©ration tous ingrÃ©dients"""
         from src.utils.helpers.helpers import get_all_ingredients_cached
         
         mock_ingredient = MagicMock()
         mock_ingredient.id = 1
         mock_ingredient.nom = "Tomate"
         mock_ingredient.unite = "kg"
-        mock_ingredient.categorie = "Légumes"
+        mock_ingredient.categorie = "LÃ©gumes"
         
         mock_session = MagicMock()
         mock_session.query.return_value.all.return_value = [mock_ingredient]
@@ -816,7 +816,7 @@ class TestHelpersWithDBMocking:
         
         result = get_all_ingredients_cached()
         
-        assert len(result) >= 0  # Le cache peut être vide
+        assert len(result) >= 0  # Le cache peut Ãªtre vide
     
     @patch("src.utils.helpers.helpers.get_db_context")
     def test_enrich_with_ingredient_info(self, mock_db):
@@ -827,7 +827,7 @@ class TestHelpersWithDBMocking:
         mock_ingredient.id = 1
         mock_ingredient.nom = "Tomate"
         mock_ingredient.unite = "kg"
-        mock_ingredient.categorie = "Légumes"
+        mock_ingredient.categorie = "LÃ©gumes"
         
         mock_item = MagicMock()
         mock_item.id = 10

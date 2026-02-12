@@ -1,5 +1,5 @@
-"""
-Tests pour src/domains/cuisine/logic/planning_logic.py
+﻿"""
+Tests pour src/modules/cuisine/logic/planning_logic.py
 """
 import pytest
 from datetime import date, timedelta
@@ -11,7 +11,7 @@ class TestGetDebutSemaine:
 
     def test_debut_semaine_lundi(self):
         """Lundi retourne lui-même."""
-        from src.domains.cuisine.logic.planning_logic import get_debut_semaine
+        from src.modules.cuisine.planning_utils import get_debut_semaine
         
         # 2025-02-03 est un lundi
         lundi = date(2025, 2, 3)
@@ -21,7 +21,7 @@ class TestGetDebutSemaine:
 
     def test_debut_semaine_mercredi(self):
         """Mercredi retourne le lundi précédent."""
-        from src.domains.cuisine.logic.planning_logic import get_debut_semaine
+        from src.modules.cuisine.planning_utils import get_debut_semaine
         
         mercredi = date(2025, 2, 5)  # Mercredi
         result = get_debut_semaine(mercredi)
@@ -29,7 +29,7 @@ class TestGetDebutSemaine:
 
     def test_debut_semaine_dimanche(self):
         """Dimanche retourne le lundi précédent."""
-        from src.domains.cuisine.logic.planning_logic import get_debut_semaine
+        from src.modules.cuisine.planning_utils import get_debut_semaine
         
         dimanche = date(2025, 2, 9)  # Dimanche
         result = get_debut_semaine(dimanche)
@@ -41,7 +41,7 @@ class TestGetFinSemaine:
 
     def test_fin_semaine_dimanche(self):
         """Dimanche retourne lui-même."""
-        from src.domains.cuisine.logic.planning_logic import get_fin_semaine
+        from src.modules.cuisine.planning_utils import get_fin_semaine
         
         dimanche = date(2025, 2, 9)
         result = get_fin_semaine(dimanche)
@@ -50,7 +50,7 @@ class TestGetFinSemaine:
 
     def test_fin_semaine_lundi(self):
         """Lundi retourne le dimanche suivant."""
-        from src.domains.cuisine.logic.planning_logic import get_fin_semaine
+        from src.modules.cuisine.planning_utils import get_fin_semaine
         
         lundi = date(2025, 2, 3)
         result = get_fin_semaine(lundi)
@@ -62,14 +62,14 @@ class TestGetDatesSemaine:
 
     def test_dates_semaine_longueur(self):
         """Retourne 7 dates."""
-        from src.domains.cuisine.logic.planning_logic import get_dates_semaine
+        from src.modules.cuisine.planning_utils import get_dates_semaine
         
         result = get_dates_semaine(date(2025, 2, 5))
         assert len(result) == 7
 
     def test_dates_semaine_ordre(self):
         """Dates du lundi au dimanche."""
-        from src.domains.cuisine.logic.planning_logic import get_dates_semaine
+        from src.modules.cuisine.planning_utils import get_dates_semaine
         
         result = get_dates_semaine(date(2025, 2, 5))
         assert result[0].weekday() == 0  # Lundi
@@ -77,7 +77,7 @@ class TestGetDatesSemaine:
 
     def test_dates_semaine_consecutives(self):
         """Dates consécutives."""
-        from src.domains.cuisine.logic.planning_logic import get_dates_semaine
+        from src.modules.cuisine.planning_utils import get_dates_semaine
         
         result = get_dates_semaine(date(2025, 2, 5))
         for i in range(6):
@@ -89,7 +89,7 @@ class TestGetNumeroSemaine:
 
     def test_numero_semaine_janvier(self):
         """Semaine 1 de janvier."""
-        from src.domains.cuisine.logic.planning_logic import get_numero_semaine
+        from src.modules.cuisine.planning_utils import get_numero_semaine
         
         result = get_numero_semaine(date(2025, 1, 6))
         assert result >= 1 and result <= 53
@@ -100,7 +100,7 @@ class TestOrganiserRepasParJour:
 
     def test_organiser_par_jour_simple(self):
         """Organisation simple par jour."""
-        from src.domains.cuisine.logic.planning_logic import organiser_repas_par_jour
+        from src.modules.cuisine.planning_utils import organiser_repas_par_jour
         
         repas1 = Mock()
         repas1.jour = "Lundi"
@@ -116,7 +116,7 @@ class TestOrganiserRepasParJour:
 
     def test_organiser_par_jour_vide(self):
         """Liste vide."""
-        from src.domains.cuisine.logic.planning_logic import organiser_repas_par_jour
+        from src.modules.cuisine.planning_utils import organiser_repas_par_jour
         
         result = organiser_repas_par_jour([])
         assert result == {}
@@ -127,7 +127,7 @@ class TestOrganiserRepasParType:
 
     def test_organiser_par_type_simple(self):
         """Organisation par type de repas."""
-        from src.domains.cuisine.logic.planning_logic import organiser_repas_par_type
+        from src.modules.cuisine.planning_utils import organiser_repas_par_type
         
         repas1 = Mock()
         repas1.type_repas = "déjeuner"
@@ -147,7 +147,7 @@ class TestCalculerStatistiquesPlanning:
 
     def test_statistiques_planning_vide(self):
         """Planning sans repas."""
-        from src.domains.cuisine.logic.planning_logic import calculer_statistiques_planning
+        from src.modules.cuisine.planning_utils import calculer_statistiques_planning
         
         result = calculer_statistiques_planning(None)
         
@@ -156,7 +156,7 @@ class TestCalculerStatistiquesPlanning:
 
     def test_statistiques_planning_complet(self):
         """Planning avec repas."""
-        from src.domains.cuisine.logic.planning_logic import calculer_statistiques_planning
+        from src.modules.cuisine.planning_utils import calculer_statistiques_planning
         
         repas1 = Mock()
         repas1.jour = "Lundi"
@@ -179,7 +179,7 @@ class TestValiderRepas:
 
     def test_valider_repas_valide(self):
         """Repas valide."""
-        from src.domains.cuisine.logic.planning_logic import valider_repas
+        from src.modules.cuisine.planning_utils import valider_repas
         
         data = {
             "jour": "Lundi",
@@ -192,7 +192,7 @@ class TestValiderRepas:
 
     def test_valider_repas_sans_jour(self):
         """Repas sans jour = invalide."""
-        from src.domains.cuisine.logic.planning_logic import valider_repas
+        from src.modules.cuisine.planning_utils import valider_repas
         
         data = {
             "type_repas": "déjeuner",
@@ -204,7 +204,7 @@ class TestValiderRepas:
 
     def test_valider_repas_type_invalide(self):
         """Type de repas invalide."""
-        from src.domains.cuisine.logic.planning_logic import valider_repas
+        from src.modules.cuisine.planning_utils import valider_repas
         
         data = {
             "jour": "Lundi",
@@ -217,7 +217,7 @@ class TestValiderRepas:
 
     def test_valider_repas_sans_recette(self):
         """Repas sans recette = invalide."""
-        from src.domains.cuisine.logic.planning_logic import valider_repas
+        from src.modules.cuisine.planning_utils import valider_repas
         
         data = {
             "jour": "Lundi",
@@ -233,7 +233,7 @@ class TestValiderPlanning:
 
     def test_valider_planning_valide(self):
         """Planning valide."""
-        from src.domains.cuisine.logic.planning_logic import valider_planning
+        from src.modules.cuisine.planning_utils import valider_planning
         
         data = {
             "semaine_debut": date(2025, 2, 3),
@@ -247,7 +247,7 @@ class TestValiderPlanning:
 
     def test_valider_planning_sans_date(self):
         """Planning sans date = invalide."""
-        from src.domains.cuisine.logic.planning_logic import valider_planning
+        from src.modules.cuisine.planning_utils import valider_planning
         
         data = {
             "repas": []
@@ -262,7 +262,7 @@ class TestCalculerCoutPlanning:
 
     def test_cout_planning_simple(self):
         """Calcul coût simple."""
-        from src.domains.cuisine.logic.planning_logic import calculer_cout_planning
+        from src.modules.cuisine.planning_utils import calculer_cout_planning
         
         repas1 = Mock()
         repas1.recette_id = 1
@@ -279,7 +279,7 @@ class TestCalculerCoutPlanning:
 
     def test_cout_planning_vide(self):
         """Planning vide = coût 0."""
-        from src.domains.cuisine.logic.planning_logic import calculer_cout_planning
+        from src.modules.cuisine.planning_utils import calculer_cout_planning
         
         result = calculer_cout_planning(None, {})
         assert result == 0.0
@@ -290,7 +290,7 @@ class TestCalculerVarietePlanning:
 
     def test_variete_planning_normale(self):
         """Variété normale."""
-        from src.domains.cuisine.logic.planning_logic import calculer_variete_planning
+        from src.modules.cuisine.planning_utils import calculer_variete_planning
         
         repas1 = Mock()
         repas1.recette_id = 1
@@ -309,7 +309,7 @@ class TestCalculerVarietePlanning:
 
     def test_variete_planning_vide(self):
         """Planning vide."""
-        from src.domains.cuisine.logic.planning_logic import calculer_variete_planning
+        from src.modules.cuisine.planning_utils import calculer_variete_planning
         
         result = calculer_variete_planning(None)
         

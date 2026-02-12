@@ -1,10 +1,10 @@
-"""
+﻿"""
 Système d'analyse intelligent des paris.
 
 Classe principale AnalyseurParis pour:
 - Analyse complète de matchs
-- Détection de value bets
-- Génération de résumés pour les parieurs
+- DÃetection de value bets
+- GÃenÃeration de rÃesumÃes pour les parieurs
 - Analyse des tendances de buts
 """
 
@@ -14,7 +14,7 @@ import logging
 
 from .constants import CHAMPIONNATS, SEUIL_CONFIANCE_HAUTE, SEUIL_CONFIANCE_MOYENNE
 from .forme import calculer_forme_equipe, calculer_historique_face_a_face
-from .prediction import predire_resultat_match, predire_over_under
+from src.modules.jeux.logic.paris.prediction import predire_resultat_match, predire_over_under
 from .stats import calculer_performance_paris, analyser_tendances_championnat
 
 logger = logging.getLogger(__name__)
@@ -24,10 +24,10 @@ class AnalyseurParis:
     """
     Classe principale pour l'analyse intelligente des paris sportifs.
     
-    Fournit une interface unifiée pour:
+    Fournit une interface unifiÃee pour:
     - Analyser des matchs individuels
-    - Détecter les value bets
-    - Générer des analyses complètes
+    - DÃetecter les value bets
+    - GÃenÃerer des analyses complètes
     - Calculer les tendances
     """
     
@@ -55,15 +55,15 @@ class AnalyseurParis:
         Analyse complète d'un match.
         
         Args:
-            equipe_dom_id: ID équipe domicile
-            equipe_ext_id: ID équipe extérieur
-            matchs_dom: Derniers matchs équipe domicile
-            matchs_ext: Derniers matchs équipe extérieur
-            matchs_h2h: Historique face-à-face
+            equipe_dom_id: ID Ãequipe domicile
+            equipe_ext_id: ID Ãequipe extÃerieur
+            matchs_dom: Derniers matchs Ãequipe domicile
+            matchs_ext: Derniers matchs Ãequipe extÃerieur
+            matchs_h2h: Historique face-Ã -face
             cotes: Cotes des bookmakers
             
         Returns:
-            Analyse complète avec prédiction
+            Analyse complète avec prÃediction
         """
         forme_dom = calculer_forme_equipe(matchs_dom, equipe_dom_id)
         forme_ext = calculer_forme_equipe(matchs_ext, equipe_ext_id)
@@ -102,14 +102,14 @@ class AnalyseurParis:
         donnees_matchs: Dict[int, Dict]
     ) -> List[Dict[str, Any]]:
         """
-        Analyse une série de matchs (journée de championnat).
+        Analyse une sÃerie de matchs (journÃee de championnat).
         
         Args:
-            matchs_a_analyser: Liste de matchs à analyser
-            donnees_matchs: Données historiques par équipe
+            matchs_a_analyser: Liste de matchs Ã  analyser
+            donnees_matchs: DonnÃees historiques par Ãequipe
             
         Returns:
-            Liste d'analyses triées par confiance
+            Liste d'analyses triÃees par confiance
         """
         analyses = []
         
@@ -138,7 +138,7 @@ class AnalyseurParis:
             except Exception as e:
                 logger.warning(f"Erreur analyse match {eq_dom} vs {eq_ext}: {e}")
         
-        # Trier par confiance décroissante
+        # Trier par confiance dÃecroissante
         analyses.sort(key=lambda x: x["prediction"]["confiance"], reverse=True)
         
         return analyses
@@ -149,10 +149,10 @@ class AnalyseurParis:
         cotes: Dict[str, float]
     ) -> List[Dict[str, Any]]:
         """
-        Identifie les value bets (paris à valeur positive).
+        Identifie les value bets (paris Ã  valeur positive).
         
-        Un value bet existe quand la cote proposée est supérieure
-        à ce que les probabilités réelles suggèrent.
+        Un value bet existe quand la cote proposÃee est supÃerieure
+        Ã  ce que les probabilitÃes rÃeelles suggèrent.
         """
         if not cotes:
             return []
@@ -244,11 +244,11 @@ class AnalyseurParis:
         elif stats["over_2_5"] > 50:
             tendance = "offensif"
         elif stats["over_2_5"] < 35:
-            tendance = "très défensif"
+            tendance = "très dÃefensif"
         elif stats["over_2_5"] < 45:
-            tendance = "défensif"
+            tendance = "dÃefensif"
         else:
-            tendance = "équilibré"
+            tendance = "ÃequilibrÃe"
         
         return {"tendance": tendance, "stats": stats}
 
@@ -262,7 +262,7 @@ def generer_analyse_complete(
     championnat: Optional[str] = None
 ) -> Dict[str, Any]:
     """
-    Génère une analyse complète d'un match pour affichage.
+    GÃenère une analyse complète d'un match pour affichage.
     
     Fonction de haut niveau combinant toutes les analyses.
     """
@@ -291,7 +291,7 @@ def generer_analyse_complete(
         "championnat": championnat or match.get("championnat", "?")
     }
     
-    # Générer le résumé
+    # GÃenÃerer le rÃesumÃe
     analyse["resume"] = generer_resume_parieur(analyse)
     
     return analyse
@@ -299,7 +299,7 @@ def generer_analyse_complete(
 
 def generer_resume_parieur(analyse: Dict[str, Any]) -> str:
     """
-    Génère un résumé textuel concis pour le parieur.
+    GÃenère un rÃesumÃe textuel concis pour le parieur.
     """
     lines = []
     
@@ -309,40 +309,40 @@ def generer_resume_parieur(analyse: Dict[str, Any]) -> str:
     dom = match_info.get("equipe_domicile", "Dom")
     ext = match_info.get("equipe_exterieur", "Ext")
     
-    lines.append(f"## 🎯 {dom} vs {ext}")
+    lines.append(f"## ðŸŽ¯ {dom} vs {ext}")
     lines.append("")
     
-    # Prédiction principale
+    # PrÃediction principale
     pred = prediction.get("prediction", "?")
     confiance = prediction.get("confiance", 0)
     probas = prediction.get("probabilites", {})
     
     labels = {"1": dom, "N": "Nul", "2": ext}
-    lines.append(f"**Prédiction**: {labels.get(pred, pred)} ({confiance:.0f}% confiance)")
+    lines.append(f"**PrÃediction**: {labels.get(pred, pred)} ({confiance:.0f}% confiance)")
     lines.append(f"Probas: {dom} {probas.get('domicile', 0):.0f}% | Nul {probas.get('nul', 0):.0f}% | {ext} {probas.get('exterieur', 0):.0f}%")
     lines.append("")
     
-    # Forme des équipes
+    # Forme des Ãequipes
     formes = analyse.get("formes", {})
     forme_dom = formes.get("domicile", {})
     forme_ext = formes.get("exterieur", {})
     
     lines.append(f"**Forme**: {dom} {forme_dom.get('forme_str', '?')} ({forme_dom.get('score', 0):.0f}pts) vs {ext} {forme_ext.get('forme_str', '?')} ({forme_ext.get('score', 0):.0f}pts)")
     
-    # Séries et alertes
+    # SÃeries et alertes
     alertes = []
     
     if forme_dom.get("matchs_sans_nul", 0) >= 5:
-        alertes.append(f"⚠️ {dom}: {forme_dom['matchs_sans_nul']} matchs sans nul")
+        alertes.append(f"âš ï¸ {dom}: {forme_dom['matchs_sans_nul']} matchs sans nul")
     if forme_ext.get("matchs_sans_nul", 0) >= 5:
-        alertes.append(f"⚠️ {ext}: {forme_ext['matchs_sans_nul']} matchs sans nul")
+        alertes.append(f"âš ï¸ {ext}: {forme_ext['matchs_sans_nul']} matchs sans nul")
     
     if forme_dom.get("serie_en_cours"):
         if "D" in forme_dom["serie_en_cours"] and int(forme_dom["serie_en_cours"].replace("D", "")) >= 3:
-            alertes.append(f"🔻 {dom} en série noire")
+            alertes.append(f"ðŸ”» {dom} en sÃerie noire")
     if forme_ext.get("serie_en_cours"):
         if "V" in forme_ext["serie_en_cours"] and int(forme_ext["serie_en_cours"].replace("V", "")) >= 3:
-            alertes.append(f"🔥 {ext} en forme!")
+            alertes.append(f"ðŸ”¥ {ext} en forme!")
     
     if alertes:
         lines.append("")
@@ -352,7 +352,7 @@ def generer_resume_parieur(analyse: Dict[str, Any]) -> str:
     value_bets = analyse.get("value_bets", [])
     if value_bets:
         lines.append("")
-        lines.append("**💎 Value Bets détectés:**")
+        lines.append("**ðŸ’Ž Value Bets dÃetectÃes:**")
         for vb in value_bets[:2]:
             lines.append(f"  - {vb['type']} @ {vb['cote_actuelle']:.2f} (EV: +{vb['ev']:.0f}%)")
     
@@ -368,6 +368,6 @@ def generer_resume_parieur(analyse: Dict[str, Any]) -> str:
     conseil = prediction.get("conseil", "")
     if conseil:
         lines.append("")
-        lines.append(f"**💡 {conseil}**")
+        lines.append(f"**ðŸ’¡ {conseil}**")
     
     return "\n".join(lines)

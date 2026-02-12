@@ -1,4 +1,4 @@
-"""Tests pour rapports."""
+﻿"""Tests pour rapports."""
 
 import pytest
 from unittest.mock import patch

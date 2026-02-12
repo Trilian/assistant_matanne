@@ -1,5 +1,5 @@
-"""
-Tests étendus pour couverture UI 80%+
+﻿"""
+Tests Ã©tendus pour couverture UI 80%+
 
 Couvre:
 - FormBuilder (base_form.py)
@@ -13,9 +13,9 @@ from unittest.mock import MagicMock, patch
 from datetime import date
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FORM BUILDER (base_form.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFormBuilder:
@@ -57,7 +57,7 @@ class TestFormBuilder:
         from src.ui.core.base_form import FormBuilder
         
         form = FormBuilder("test")
-        form.add_number("qty", "Quantité", min_value=0, max_value=100, step=5)
+        form.add_number("qty", "QuantitÃ©", min_value=0, max_value=100, step=5)
         
         assert form.fields[0]["type"] == "number"
         assert form.fields[0]["min_value"] == 0
@@ -68,7 +68,7 @@ class TestFormBuilder:
         from src.ui.core.base_form import FormBuilder
         
         form = FormBuilder("test")
-        form.add_select("cat", "Catégorie", options=["A", "B", "C"])
+        form.add_select("cat", "CatÃ©gorie", options=["A", "B", "C"])
         
         assert form.fields[0]["type"] == "select"
         assert form.fields[0]["options"] == ["A", "B", "C"]
@@ -133,13 +133,13 @@ class TestFormBuilder:
         assert form.fields[0]["text"] == "Section 1"
     
     def test_fluent_interface(self):
-        """Test chaînage de méthodes."""
+        """Test chaÃ®nage de mÃ©thodes."""
         from src.ui.core.base_form import FormBuilder
         
         form = (
             FormBuilder("test", "Mon Form")
             .add_text("nom", "Nom")
-            .add_number("age", "Âge")
+            .add_number("age", "Ã‚ge")
             .add_divider()
             .add_checkbox("ok", "OK")
         )
@@ -171,9 +171,9 @@ class TestFormBuilder:
         mock_st.form.assert_called_with("test")
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MODAL (dynamic.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestModal:
@@ -248,9 +248,9 @@ class TestModal:
         modal.cancel()  # Ne devrait pas fermer car button retourne False
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS DYNAMIC LIST (dynamic.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestDynamicList:
@@ -284,7 +284,7 @@ class TestDynamicList:
     
     @patch('src.ui.components.dynamic.st')
     def test_dynamic_list_get_items(self, mock_st):
-        """Test récupération items."""
+        """Test rÃ©cupÃ©ration items."""
         mock_st.session_state = {"test_items": [{"a": 1}]}
         
         from src.ui.components.dynamic import DynamicList
@@ -322,9 +322,9 @@ class TestDynamicList:
         assert len(mock_st.session_state["test_items"]) == 1
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS STEPPER (dynamic.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestStepper:
@@ -337,7 +337,7 @@ class TestStepper:
         
         from src.ui.components.dynamic import Stepper
         
-        stepper = Stepper("wizard", ["Étape 1", "Étape 2", "Étape 3"])
+        stepper = Stepper("wizard", ["Ã‰tape 1", "Ã‰tape 2", "Ã‰tape 3"])
         
         assert stepper.key == "wizard"
         assert len(stepper.steps) == 3
@@ -376,7 +376,7 @@ class TestStepper:
     
     @patch('src.ui.components.dynamic.st')
     def test_stepper_previous(self, mock_st):
-        """Test navigation précédent."""
+        """Test navigation prÃ©cÃ©dent."""
         mock_st.session_state = {"wizard_step": 2}
         mock_st.rerun = MagicMock()
         
@@ -401,7 +401,7 @@ class TestStepper:
     
     @patch('src.ui.components.dynamic.st')
     def test_stepper_is_last_step(self, mock_st):
-        """Test vérifier si dernière étape."""
+        """Test vÃ©rifier si derniÃ¨re Ã©tape."""
         mock_st.session_state = {"wizard_step": 2}
         
         from src.ui.components.dynamic import Stepper
@@ -411,9 +411,9 @@ class TestStepper:
         assert stepper.is_last_step() is True
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS LAYOUT HEADER (header.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestLayoutHeader:
@@ -463,9 +463,9 @@ class TestLayoutHeader:
         assert any("#FFC107" in str(c) for c in calls)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS LAYOUT FOOTER (footer.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestLayoutFooter:
@@ -495,9 +495,9 @@ class TestLayoutFooter:
         mock_st.caption.assert_called()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS DATA TABLE (data.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestDataTable:
     """Tests pour data_table."""
@@ -545,7 +545,7 @@ class TestProgressBar:
     
     @patch('src.ui.components.data.st')
     def test_progress_bar_with_label_param(self, mock_st):
-        """Test avec label paramètre."""
+        """Test avec label paramÃ¨tre."""
         mock_st.progress = MagicMock()
         
         from src.ui.components.data import progress_bar
@@ -560,7 +560,7 @@ class TestStatusIndicator:
     
     @patch('src.ui.components.data.st')
     def test_status_indicator_success(self, mock_st):
-        """Test indicateur succès."""
+        """Test indicateur succÃ¨s."""
         mock_st.markdown = MagicMock()
         
         from src.ui.components.data import status_indicator
@@ -589,9 +589,9 @@ class TestStatusIndicator:
         mock_st.markdown.assert_called()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS DASHBOARD WIDGETS ADDITIONNELS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGraphiqueProgressionObjectifs:
@@ -605,7 +605,7 @@ class TestGraphiqueProgressionObjectifs:
         assert result is None
     
     def test_graphique_objectifs_with_data(self):
-        """Test graphique avec données."""
+        """Test graphique avec donnÃ©es."""
         from src.ui.components.dashboard_widgets import graphique_progression_objectifs
         import plotly.graph_objects as go
         
@@ -622,7 +622,7 @@ class TestIndicateurSanteSysteme:
     """Tests pour indicateur_sante_systeme."""
     
     def test_indicateur_sante_systeme(self):
-        """Test indicateur santé."""
+        """Test indicateur santÃ©."""
         from src.ui.components.dashboard_widgets import indicateur_sante_systeme
         
         result = indicateur_sante_systeme()
@@ -637,7 +637,7 @@ class TestAfficherSanteSysteme:
     
     @patch('src.ui.components.dashboard_widgets.st')
     def test_afficher_sante_systeme(self, mock_st):
-        """Test affichage santé système."""
+        """Test affichage santÃ© systÃ¨me."""
         mock_st.session_state = {}
         mock_expander = MagicMock()
         mock_expander.__enter__ = MagicMock(return_value=mock_expander)
@@ -652,9 +652,9 @@ class TestAfficherSanteSysteme:
         mock_st.expander.assert_called()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS DOMAIN UI (domain.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestDomainUI:
@@ -664,13 +664,13 @@ class TestDomainUI:
         """Test import types UI."""
         from src.ui import domain
         
-        # Vérifier que le module existe
+        # VÃ©rifier que le module existe
         assert hasattr(domain, '__file__')
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS QUICK FILTERS (forms.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestQuickFilters:
@@ -697,9 +697,9 @@ class TestQuickFilters:
         assert isinstance(result, dict)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CARD CONTAINER (layouts.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCardContainer:
@@ -725,9 +725,9 @@ class TestCardContainer:
         mock_st.markdown.assert_called()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS BASE_IO (base_io.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBaseIO:

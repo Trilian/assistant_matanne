@@ -1,6 +1,6 @@
-"""
-Script d'initialisation de la base de données
-Crée toutes les tables depuis les modèles SQLAlchemy
+﻿"""
+Script d'initialisation de la base de donnÃ©es
+CrÃ©e toutes les tables depuis les modÃ¨les SQLAlchemy
 
 Usage:
     python scripts/init_db.py
@@ -24,13 +24,13 @@ def drop_all_tables():
     """Supprime toutes les tables existantes"""
     engine = obtenir_moteur()
 
-    logger.warning("🗑️ Suppression de toutes les tables...")
+    logger.warning("ðŸ—‘ï¸ Suppression de toutes les tables...")
 
     with engine.begin() as conn:
-        # Désactiver les contraintes FK temporairement
+        # DÃ©sactiver les contraintes FK temporairement
         conn.execute(text("SET session_replication_role = 'replica';"))
 
-        # Récupérer toutes les tables
+        # RÃ©cupÃ©rer toutes les tables
         result = conn.execute(text("""
             SELECT tablename 
             FROM pg_tables 
@@ -44,7 +44,7 @@ def drop_all_tables():
             logger.info(f"  Suppression: {table}")
             conn.execute(text(f'DROP TABLE IF EXISTS "{table}" CASCADE'))
 
-        # Réactiver les contraintes FK
+        # RÃ©activer les contraintes FK
         conn.execute(text("SET session_replication_role = 'origin';"))
 
         # Supprimer les enums custom si existants
@@ -62,21 +62,21 @@ def drop_all_tables():
         conn.execute(text("DROP TYPE IF EXISTS statutenum CASCADE"))
         conn.execute(text("DROP TYPE IF EXISTS versionrecetteenum CASCADE"))
 
-    logger.info("✅ Toutes les tables supprimées")
+    logger.info("âœ… Toutes les tables supprimÃ©es")
 
 
 def create_all_tables():
-    """Crée toutes les tables depuis les modèles"""
+    """CrÃ©e toutes les tables depuis les modÃ¨les"""
     engine = obtenir_moteur()
 
-    logger.info("📦 Création des tables depuis les modèles...")
+    logger.info("ðŸ“¦ CrÃ©ation des tables depuis les modÃ¨les...")
 
-    # Créer toutes les tables
+    # CrÃ©er toutes les tables
     Base.metadata.create_all(bind=engine)
 
-    logger.info("✅ Tables créées avec succès")
+    logger.info("âœ… Tables crÃ©Ã©es avec succÃ¨s")
 
-    # Afficher les tables créées
+    # Afficher les tables crÃ©Ã©es
     with engine.connect() as conn:
         result = conn.execute(text("""
             SELECT tablename 
@@ -87,16 +87,16 @@ def create_all_tables():
 
         tables = [row[0] for row in result]
 
-        logger.info(f"\n📋 Tables créées ({len(tables)}):")
+        logger.info(f"\nðŸ“‹ Tables crÃ©Ã©es ({len(tables)}):")
         for table in tables:
-            logger.info(f"  ✓ {table}")
+            logger.info(f"  âœ“ {table}")
 
 
 def verify_schema():
-    """Vérifie que le schéma est correct"""
+    """VÃ©rifie que le schÃ©ma est correct"""
     engine = obtenir_moteur()
 
-    logger.info("\n🔍 Vérification du schéma...")
+    logger.info("\nðŸ” VÃ©rification du schÃ©ma...")
 
     expected_tables = [
         'ingredients',
@@ -123,13 +123,13 @@ def verify_schema():
     extra = set(existing_tables) - set(expected_tables)
 
     if missing:
-        logger.warning(f"⚠️ Tables manquantes: {missing}")
+        logger.warning(f"âš ï¸ Tables manquantes: {missing}")
 
     if extra:
-        logger.info(f"ℹ️ Tables supplémentaires: {extra}")
+        logger.info(f"â„¹ï¸ Tables supplÃ©mentaires: {extra}")
 
     if not missing:
-        logger.info("✅ Toutes les tables essentielles sont présentes")
+        logger.info("âœ… Toutes les tables essentielles sont prÃ©sentes")
 
     return len(missing) == 0
 
@@ -138,50 +138,50 @@ def main():
     """Fonction principale"""
     import argparse
 
-    parser = argparse.ArgumentParser(description='Initialiser la base de données')
+    parser = argparse.ArgumentParser(description='Initialiser la base de donnÃ©es')
     parser.add_argument(
         '--drop',
         action='store_true',
-        help='Supprimer toutes les tables avant de créer'
+        help='Supprimer toutes les tables avant de crÃ©er'
     )
     parser.add_argument(
         '--no-verify',
         action='store_true',
-        help='Ne pas vérifier le schéma après création'
+        help='Ne pas vÃ©rifier le schÃ©ma aprÃ¨s crÃ©ation'
     )
 
     args = parser.parse_args()
 
     logger.info("=" * 60)
-    logger.info("🚀 INITIALISATION BASE DE DONNÉES")
+    logger.info("ðŸš€ INITIALISATION BASE DE DONNÃ‰ES")
     logger.info("=" * 60)
 
     try:
-        # Supprimer si demandé
+        # Supprimer si demandÃ©
         if args.drop:
-            confirmation = input("\n⚠️ ATTENTION : Toutes les données seront perdues. Continuer ? (oui/non): ")
+            confirmation = input("\nâš ï¸ ATTENTION : Toutes les donnÃ©es seront perdues. Continuer ? (oui/non): ")
             if confirmation.lower() != 'oui':
-                logger.info("❌ Opération annulée")
+                logger.info("âŒ OpÃ©ration annulÃ©e")
                 return
 
             drop_all_tables()
 
-        # Créer les tables
+        # CrÃ©er les tables
         create_all_tables()
 
-        # Vérifier
+        # VÃ©rifier
         if not args.no_verify:
             success = verify_schema()
 
             if success:
                 logger.info("\n" + "=" * 60)
-                logger.info("✅ INITIALISATION RÉUSSIE !")
+                logger.info("âœ… INITIALISATION RÃ‰USSIE !")
                 logger.info("=" * 60)
             else:
-                logger.warning("\n⚠️ Schéma incomplet, vérifier les erreurs ci-dessus")
+                logger.warning("\nâš ï¸ SchÃ©ma incomplet, vÃ©rifier les erreurs ci-dessus")
 
     except Exception as e:
-        logger.error(f"\n❌ ERREUR: {e}")
+        logger.error(f"\nâŒ ERREUR: {e}")
         import traceback
         traceback.print_exc()
         sys.exit(1)

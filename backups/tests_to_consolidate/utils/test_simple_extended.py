@@ -1,4 +1,4 @@
-"""Tests simples pour couvrir les gaps - Utils helpers."""
+﻿"""Tests simples pour couvrir les gaps - Utils helpers."""
 
 import pytest
 
@@ -8,35 +8,35 @@ class TestUtilsSimpleExtended:
     """Tests simples pour utils helpers."""
     
     def test_string_operations(self):
-        """Tester opérations strings."""
+        """Tester opÃ©rations strings."""
         text = "Hello World"
         assert text.upper() == "HELLO WORLD"
         assert text.lower() == "hello world"
         assert text.replace("World", "Universe") == "Hello Universe"
     
     def test_number_operations(self):
-        """Tester opérations nombres."""
+        """Tester opÃ©rations nombres."""
         numbers = [1, 2, 3, 4, 5]
         assert sum(numbers) == 15
         assert max(numbers) == 5
         assert min(numbers) == 1
     
     def test_date_operations(self):
-        """Tester opérations dates."""
+        """Tester opÃ©rations dates."""
         from datetime import datetime, timedelta
         today = datetime.now()
         tomorrow = today + timedelta(days=1)
         assert tomorrow > today
     
     def test_list_operations(self):
-        """Tester opérations listes."""
+        """Tester opÃ©rations listes."""
         items = [1, 2, 3, 4, 5]
         filtered = [x for x in items if x > 2]
         assert len(filtered) == 3
         assert 1 not in filtered
     
     def test_dict_operations(self):
-        """Tester opérations dicts."""
+        """Tester opÃ©rations dicts."""
         data = {"a": 1, "b": 2, "c": 3}
         keys = list(data.keys())
         assert len(keys) == 3

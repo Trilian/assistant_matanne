@@ -1,10 +1,10 @@
-"""
+﻿"""
 Service Recettes Unifié (REFACTORING PHASE 2)
 
-✅ Utilise @avec_session_db et @avec_cache (Phase 1)
-✅ Validation Pydantic centralisée (RecetteInput, etc.)
-✅ Type hints complets pour meilleur IDE support
-✅ Services testables sans Streamlit
+âœ… Utilise @avec_session_db et @avec_cache (Phase 1)
+âœ… Validation Pydantic centralisée (RecetteInput, etc.)
+âœ… Type hints complets pour meilleur IDE support
+âœ… Services testables sans Streamlit
 
 Service complet pour les recettes fusionnant :
 - recette_service.py (CRUD + recherche)
@@ -46,19 +46,19 @@ from .types import (
 logger = logging.getLogger(__name__)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SERVICE RECETTES UNIFIÉ (AVEC HÉRITAGE MULTIPLE)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class ServiceRecettes(BaseService[Recette], BaseAIService, RecipeAIMixin):
     """
     Service complet pour les recettes.
 
-    ✅ Héritage multiple :
-    - BaseService → CRUD optimisé
-    - BaseAIService → IA avec rate limiting auto
-    - RecipeAIMixin → Contextes métier recettes
+    âœ… Héritage multiple :
+    - BaseService â†’ CRUD optimisé
+    - BaseAIService â†’ IA avec rate limiting auto
+    - RecipeAIMixin â†’ Contextes métier recettes
 
     Fonctionnalités :
     - CRUD optimisé avec cache
@@ -82,9 +82,9 @@ class ServiceRecettes(BaseService[Recette], BaseAIService, RecipeAIMixin):
             service_name="recettes",
         )
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # SECTION 1 : CRUD OPTIMISÉ
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     @avec_cache(ttl=3600, key_func=lambda self, recette_id: f"recette_full_{recette_id}")
     @avec_session_db
@@ -180,7 +180,7 @@ class ServiceRecettes(BaseService[Recette], BaseAIService, RecipeAIMixin):
         
         # Créer recette avec updated_at
         recette_dict = validated.model_dump(exclude={"ingredients", "etapes"})
-        recette_dict["updated_at"] = datetime.utcnow()  # ← Requis par le trigger PostgreSQL
+        recette_dict["updated_at"] = datetime.utcnow()  # â† Requis par le trigger PostgreSQL
         recette = Recette(**recette_dict)
         db.add(recette)
         db.flush()
@@ -212,7 +212,7 @@ class ServiceRecettes(BaseService[Recette], BaseAIService, RecipeAIMixin):
         # Invalider cache
         Cache.invalider(pattern="recettes")
 
-        logger.info(f"✅ Recette créée : {recette.nom} (ID: {recette.id})")
+        logger.info(f"âœ… Recette créée : {recette.nom} (ID: {recette.id})")
         return recette
 
     @avec_session_db
@@ -266,9 +266,9 @@ class ServiceRecettes(BaseService[Recette], BaseAIService, RecipeAIMixin):
             db=db,
         )
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # SECTION 2 : GÉNÉRATION IA (AVEC CACHE ET VALIDATION)
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     @avec_cache(
         ttl=21600,
@@ -331,7 +331,7 @@ RULES:
 6. difficulte values: facile, moyen, difficile
 7. No explanations, no text, ONLY JSON'''
 
-        logger.info(f"🤖 Generating {nb_recettes} recipe suggestions")
+        logger.info(f"ðŸ¤– Generating {nb_recettes} recipe suggestions")
 
         # IA call with auto rate limiting & parsing
         recettes = self.call_with_list_parsing_sync(
@@ -343,7 +343,7 @@ RULES:
             max_tokens=4000,
         )
 
-        logger.info(f"✅ Generated {len(recettes)} recipe suggestions")
+        logger.info(f"âœ… Generated {len(recettes)} recipe suggestions")
         return recettes
 
     def generer_variantes_recette_ia(
@@ -397,7 +397,7 @@ RULES:
             ],
         )
 
-        logger.info(f"🤖 Generating {nb_variantes} variations of '{nom_recette}'")
+        logger.info(f"ðŸ¤– Generating {nb_variantes} variations of '{nom_recette}'")
 
         # Call IA with auto rate limiting & parsing
         variations = self.call_with_list_parsing_sync(
@@ -422,7 +422,7 @@ RULES:
             max_items=nb_variantes,
         )
 
-        logger.info(f"✅ Generated {len(variations)} variations of '{nom_recette}'")
+        logger.info(f"âœ… Generated {len(variations)} variations of '{nom_recette}'")
         return variations
 
     @avec_cache(ttl=3600, key_func=lambda self, rid: f"version_bebe_{rid}")
@@ -458,7 +458,7 @@ RULES:
             print(f"[generer_version_bebe] Recipe {recette_id} not found")
             raise ErreurNonTrouve(f"Recipe {recette_id} not found")
 
-        # Vérifier si version existe déjà
+        # Vérifier si version existe déjÃ 
         existing = (
             db.query(VersionRecette)
             .filter(
@@ -469,10 +469,10 @@ RULES:
         )
         if existing:
             print(f"[generer_version_bebe] Baby version already exists for recipe {recette_id}")
-            logger.info(f"📦 Baby version already exists for recipe {recette_id}")
+            logger.info(f"ðŸ“¦ Baby version already exists for recipe {recette_id}")
             return existing
 
-        logger.info(f"🤖 Generating baby-safe version for recipe {recette_id}")
+        logger.info(f"ðŸ¤– Generating baby-safe version for recipe {recette_id}")
         print(f"[generer_version_bebe] Generating new baby version")
 
         # Construire contexte avec recette complète
@@ -527,7 +527,7 @@ Steps:
 
         if not version_data:
             print(f"[generer_version_bebe] version_data is None after IA call")
-            logger.warning(f"⚠️ Failed to generate baby version for recipe {recette_id}")
+            logger.warning(f"âš ï¸ Failed to generate baby version for recipe {recette_id}")
             raise ErreurValidation("Invalid IA response format for baby version")
 
         print(f"[generer_version_bebe] version_data parsed successfully: {version_data}")
@@ -547,7 +547,7 @@ Steps:
         db.refresh(version)
         print(f"[generer_version_bebe] Version refreshed, id={version.id}")
 
-        logger.info(f"✅ Baby version created for recipe {recette_id}")
+        logger.info(f"âœ… Baby version created for recipe {recette_id}")
         print(f"[generer_version_bebe] END: Returning version {version.id}")
         return version
 
@@ -578,7 +578,7 @@ Steps:
         if not recette:
             raise ErreurNonTrouve(f"Recipe {recette_id} not found")
 
-        # Vérifier si version existe déjà
+        # Vérifier si version existe déjÃ 
         existing = (
             db.query(VersionRecette)
             .filter(
@@ -588,10 +588,10 @@ Steps:
             .first()
         )
         if existing:
-            logger.info(f"📦 Batch cooking version already exists for recipe {recette_id}")
+            logger.info(f"ðŸ“¦ Batch cooking version already exists for recipe {recette_id}")
             return existing
 
-        logger.info(f"🤖 Generating batch cooking version for recipe {recette_id}")
+        logger.info(f"ðŸ¤– Generating batch cooking version for recipe {recette_id}")
 
         # Construire contexte avec recette complète
         ingredients_str = "\n".join(
@@ -659,7 +659,7 @@ Difficulty: {recette.difficulte}"""
         )
 
         if not version_data:
-            logger.warning(f"⚠️ Failed to generate batch cooking version for recipe {recette_id}")
+            logger.warning(f"âš ï¸ Failed to generate batch cooking version for recipe {recette_id}")
             raise ErreurValidation("Invalid IA response format for batch cooking version")
 
         # Créer version en DB
@@ -668,19 +668,19 @@ Difficulty: {recette.difficulte}"""
             type_version="batch cooking",
             instructions_modifiees=version_data.instructions_modifiees,
             notes_bebe=f"""**Portions: {version_data.nombre_portions_recommande}**
-⏱️ Temps total: {version_data.temps_preparation_total_heures}h
+â±ï¸ Temps total: {version_data.temps_preparation_total_heures}h
 
-🧊 Conservation: {version_data.conseils_conservation}
+ðŸ§Š Conservation: {version_data.conseils_conservation}
 
-❄️ Congélation: {version_data.conseils_congelation}
+â„ï¸ Congélation: {version_data.conseils_congelation}
 
-📅 Calendrier: {version_data.calendrier_preparation}""",
+ðŸ“… Calendrier: {version_data.calendrier_preparation}""",
         )
         db.add(version)
         db.commit()
         db.refresh(version)
 
-        logger.info(f"✅ Batch cooking version created for recipe {recette_id}")
+        logger.info(f"âœ… Batch cooking version created for recipe {recette_id}")
         return version
 
     @avec_session_db
@@ -712,7 +712,7 @@ Difficulty: {recette.difficulte}"""
         if not recette:
             raise ErreurNonTrouve(f"Recipe {recette_id} not found")
 
-        # Vérifier si version existe déjà
+        # Vérifier si version existe déjÃ 
         existing = (
             db.query(VersionRecette)
             .filter(
@@ -723,11 +723,11 @@ Difficulty: {recette.difficulte}"""
         )
         if existing:
             logger.info(
-                f"🤖 Robot version ({robot_type}) already exists for recipe {recette_id}"
+                f"ðŸ¤– Robot version ({robot_type}) already exists for recipe {recette_id}"
             )
             return existing
 
-        logger.info(f"🤖 Generating {robot_type} version for recipe {recette_id}")
+        logger.info(f"ðŸ¤– Generating {robot_type} version for recipe {recette_id}")
 
         # Construire contexte avec recette complète
         ingredients_str = "\n".join(
@@ -790,7 +790,7 @@ Difficulty: {recette.difficulte}"""
                 "task": "Adapt this recipe specifically for an air fryer (deep fryer alternative)",
                 "constraints": [
                     "Reduce cooking times by 20-30% compared to oven",
-                    "Lower temperature by 20°C typically",
+                    "Lower temperature by 20Â°C typically",
                     "Specify basket arrangement and stirring frequency",
                     "Account for reduced oil requirements",
                     "Include portion/batch information",
@@ -857,7 +857,7 @@ Difficulty: {recette.difficulte}"""
         )
 
         if not version_data:
-            logger.warning(f"⚠️ Failed to generate {robot_type} version for recipe {recette_id}")
+            logger.warning(f"âš ï¸ Failed to generate {robot_type} version for recipe {recette_id}")
             raise ErreurValidation(f"Invalid IA response format for {robot_type} version")
 
         # Créer version en DB
@@ -868,23 +868,23 @@ Difficulty: {recette.difficulte}"""
             notes_bebe=f"""**Réglages {robot_type.capitalize()}:**
 {version_data.reglages_robot}
 
-⏱️ Temps de cuisson: {version_data.temps_cuisson_adapte_minutes} minutes
+â±ï¸ Temps de cuisson: {version_data.temps_cuisson_adapte_minutes} minutes
 
-📋 Préparation: {version_data.conseils_preparation}
+ðŸ“‹ Préparation: {version_data.conseils_preparation}
 
-🔧 Étapes spécifiques:
-{chr(10).join(f"• {etape}" for etape in version_data.etapes_specifiques)}""",
+ðŸ”§ Étapes spécifiques:
+{chr(10).join(f"â€¢ {etape}" for etape in version_data.etapes_specifiques)}""",
         )
         db.add(version)
         db.commit()
         db.refresh(version)
 
-        logger.info(f"✅ {robot_type} version created for recipe {recette_id}")
+        logger.info(f"âœ… {robot_type} version created for recipe {recette_id}")
         return version
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # SECTION 3 : HISTORIQUE & VERSIONS
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     @avec_session_db
     def enregistrer_cuisson(
@@ -920,7 +920,7 @@ Difficulty: {recette.difficulte}"""
             )
             db.add(historique)
             db.commit()
-            logger.info(f"✅ Cuisson enregistrée pour recette {recette_id}")
+            logger.info(f"âœ… Cuisson enregistrée pour recette {recette_id}")
             return True
         except Exception as e:
             logger.error(f"Erreur enregistrement cuisson: {e}")
@@ -937,7 +937,7 @@ Difficulty: {recette.difficulte}"""
         
         Args:
             recette_id: ID de la recette
-            nb_dernieres: Nombre d'entrées à retourner
+            nb_dernieres: Nombre d'entrées Ã  retourner
             db: Session DB injectée
             
         Returns:
@@ -1022,9 +1022,9 @@ Difficulty: {recette.difficulte}"""
             logger.error(f"Erreur récupération versions: {e}")
             return []
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # SECTION 4 : IMPORT/EXPORT (REFACTORED)
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     def export_to_csv(self, recettes: list[Recette], separator: str = ",") -> str:
         """Exporte des recettes en CSV.
@@ -1067,7 +1067,7 @@ Difficulty: {recette.difficulte}"""
                 }
             )
 
-        logger.info(f"✅ Exported {len(recettes)} recipes to CSV")
+        logger.info(f"âœ… Exported {len(recettes)} recipes to CSV")
         return output.getvalue()
 
     def export_to_json(self, recettes: list[Recette], indent: int = 2) -> str:
@@ -1100,12 +1100,12 @@ Difficulty: {recette.difficulte}"""
                 }
             )
 
-        logger.info(f"✅ Exported {len(recettes)} recipes to JSON")
+        logger.info(f"âœ… Exported {len(recettes)} recipes to JSON")
         return json.dumps(data, indent=indent, ensure_ascii=False)
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # SECTION 5 : HELPERS PRIVÉS (REFACTORED)
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     def _find_or_create_ingredient(self, db: Session, nom: str) -> Ingredient:
         """Finds or creates an ingredient.
@@ -1126,16 +1126,16 @@ Difficulty: {recette.difficulte}"""
         return ingredient
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ALIASES (compatibilité avec l'ancien code)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 RecetteService = ServiceRecettes
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # INSTANCE SINGLETON - LAZY LOADING
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 _service_recettes = None
 

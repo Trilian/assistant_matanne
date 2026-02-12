@@ -1,11 +1,11 @@
-"""Tests pour atteindre 85% de couverture - API."""
+﻿"""Tests pour atteindre 85% de couverture - API."""
 
 import pytest
 
 
 @pytest.mark.unit
 class TestRecipeAPIAdvanced:
-    """Tests avancés API recettes."""
+    """Tests avancÃ©s API recettes."""
     
     def test_recipe_batch_endpoints(self): assert True
     def test_recipe_search_filters(self): assert True
@@ -14,7 +14,7 @@ class TestRecipeAPIAdvanced:
 
 @pytest.mark.unit
 class TestMealPlanAPIAdvanced:
-    """Tests avancés API planification."""
+    """Tests avancÃ©s API planification."""
     
     def test_meal_plan_sync_endpoint(self): assert True
     def test_meal_plan_export_formats(self): assert True
@@ -23,7 +23,7 @@ class TestMealPlanAPIAdvanced:
 
 @pytest.mark.unit
 class TestShoppingAPIAdvanced:
-    """Tests avancés API courses."""
+    """Tests avancÃ©s API courses."""
     
     def test_shopping_sync_endpoint(self): assert True
     def test_shopping_price_updates(self): assert True
@@ -33,7 +33,7 @@ class TestShoppingAPIAdvanced:
 
 @pytest.mark.unit
 class TestFamilyAPIAdvanced:
-    """Tests avancés API famille."""
+    """Tests avancÃ©s API famille."""
     
     def test_family_permissions_endpoint(self): assert True
     def test_child_export_endpoint(self): assert True
@@ -41,7 +41,7 @@ class TestFamilyAPIAdvanced:
 
 @pytest.mark.unit
 class TestAnalyticsAPIAdvanced:
-    """Tests avancés API analytics."""
+    """Tests avancÃ©s API analytics."""
     
     def test_analytics_summary_endpoint(self): assert True
     def test_analytics_trends_endpoint(self): assert True

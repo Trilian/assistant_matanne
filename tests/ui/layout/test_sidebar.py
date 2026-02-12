@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour src/ui/layout/sidebar.py
 """
 
@@ -18,16 +18,16 @@ class TestModulesMenu:
         """Test structure du menu."""
         from src.ui.layout.sidebar import MODULES_MENU
         
-        assert "🏠 Accueil" in MODULES_MENU
-        assert "🍳 Cuisine" in MODULES_MENU
-        assert "👨‍👩‍👧‍👦 Famille" in MODULES_MENU
+        assert "ðŸ  Accueil" in MODULES_MENU
+        assert "ðŸ³ Cuisine" in MODULES_MENU
+        assert "ðŸ‘¨â€ðŸ‘©â€ðŸ‘§â€ðŸ‘¦ Famille" in MODULES_MENU
 
     def test_menu_values(self):
         """Test valeurs du menu."""
         from src.ui.layout.sidebar import MODULES_MENU
         
-        assert MODULES_MENU["🏠 Accueil"] == "accueil"
-        assert isinstance(MODULES_MENU["🍳 Cuisine"], dict)
+        assert MODULES_MENU["ðŸ  Accueil"] == "accueil"
+        assert isinstance(MODULES_MENU["ðŸ³ Cuisine"], dict)
 
     def test_modules_menu_valid_values(self):
         """Test que toutes les valeurs du menu sont valides."""
@@ -110,7 +110,7 @@ class TestRendreMenu:
         from src.ui.layout.sidebar import _rendre_menu
         
         etat = MagicMock(module_actuel="accueil")
-        menu = {"🏠 Accueil": "accueil"}
+        menu = {"ðŸ  Accueil": "accueil"}
         mock_st.button.return_value = False
         
         _rendre_menu(menu, etat)
@@ -123,7 +123,7 @@ class TestRendreMenu:
         from src.ui.layout.sidebar import _rendre_menu
         
         etat = MagicMock(module_actuel="cuisine.recettes")
-        menu = {"🍳 Cuisine": {"📚 Recettes": "cuisine.recettes"}}
+        menu = {"ðŸ³ Cuisine": {"ðŸ“š Recettes": "cuisine.recettes"}}
         mock_st.expander.return_value.__enter__ = MagicMock()
         mock_st.expander.return_value.__exit__ = MagicMock()
         mock_st.button.return_value = False
@@ -139,7 +139,7 @@ class TestRendreMenu:
         from src.ui.layout.sidebar import _rendre_menu
         
         etat = MagicMock(module_actuel="accueil")
-        menu = {"🍳 Cuisine": {"───────": None, "📚 Recettes": "cuisine.recettes"}}
+        menu = {"ðŸ³ Cuisine": {"â”€â”€â”€â”€â”€â”€â”€": None, "ðŸ“š Recettes": "cuisine.recettes"}}
         mock_st.expander.return_value.__enter__ = MagicMock()
         mock_st.expander.return_value.__exit__ = MagicMock()
         mock_st.button.return_value = False
@@ -155,7 +155,7 @@ class TestRendreMenu:
         from src.ui.layout.sidebar import _rendre_menu
         
         etat = MagicMock(module_actuel="accueil")
-        menu = {"📚 Recettes": "cuisine.recettes"}
+        menu = {"ðŸ“š Recettes": "cuisine.recettes"}
         mock_st.button.return_value = True  # Simule un clic
         
         try:
@@ -172,7 +172,7 @@ class TestRendreMenu:
         from src.ui.layout.sidebar import _rendre_menu
         
         etat = MagicMock(module_actuel="accueil")
-        menu = {"🍳 Cuisine": {"📚 Recettes": "cuisine.recettes"}}
+        menu = {"ðŸ³ Cuisine": {"ðŸ“š Recettes": "cuisine.recettes"}}
         mock_st.expander.return_value.__enter__ = MagicMock()
         mock_st.expander.return_value.__exit__ = MagicMock()
         mock_st.button.return_value = True  # Simule clic

@@ -1,5 +1,5 @@
-﻿"""
-Module Routines avec Agent IA intégré
+"""
+Module Routines avec Agent IA integre
 Gestion des routines quotidiennes avec rappels intelligents
 """
 
@@ -13,8 +13,8 @@ from src.core.ai import AgentIA
 from src.core.database import obtenir_contexte_db
 from src.core.models import ChildProfile, Routine, RoutineTask
 
-# Logique métier pure
-from src.domains.famille.logic.routines_logic import (
+# Logique metier pure
+from src.modules.famille.routines_utils import (
     get_routines_aujourdhui,
     grouper_par_moment,
     calculer_duree_routine,
@@ -84,9 +84,9 @@ def charger_taches_routine(routine_id: int) -> pd.DataFrame:
 
 
 def creer_routine(nom: str, description: str, pour_qui: str, frequence: str) -> int:
-    """Crée une nouvelle routine"""
+    """Cree une nouvelle routine"""
     with obtenir_contexte_db() as db:
-        # Vérifier si c'est pour un enfant
+        # Verifier si c'est pour un enfant
         child_id = None
         if pour_qui != "Famille":
             child = db.query(ChildProfile).filter(ChildProfile.name == pour_qui).first()
@@ -117,19 +117,19 @@ def ajouter_tache(routine_id: int, nom: str, heure: str = None):
 
 
 def marquer_complete(task_id: int):
-    """Marque une tâche comme terminée"""
+    """Marque une tâche comme terminee"""
     with obtenir_contexte_db() as db:
         task = db.query(RoutineTask).filter(RoutineTask.id == task_id).first()
         if task:
-            task.status = "terminé"
+            task.status = "termine"
             task.completed_at = datetime.now()
             db.commit()
 
 
 def reinitialiser_taches_jour():
-    """Réinitialise les tâches du jour"""
+    """Reinitialise les tâches du jour"""
     with obtenir_contexte_db() as db:
-        tasks = db.query(RoutineTask).filter(RoutineTask.status == "terminé").all()
+        tasks = db.query(RoutineTask).filter(RoutineTask.status == "termine").all()
 
         for task in tasks:
             task.status = "à faire"
@@ -146,7 +146,7 @@ def supprimer_routine(routine_id: int):
 
 
 def get_taches_en_retard() -> list[dict]:
-    """Détecte les tâches en retard"""
+    """Detecte les tâches en retard"""
     taches_retard = []
     now = datetime.now().time()
 
@@ -175,7 +175,7 @@ def get_taches_en_retard() -> list[dict]:
                         }
                     )
             except Exception:
-                # Ignorer tâches mal formées
+                # Ignorer tâches mal formees
                 continue
 
     return taches_retard
@@ -187,12 +187,12 @@ def get_taches_en_retard() -> list[dict]:
 
 
 def app():
-    """Module Routines avec IA intégrée"""
+    """Module Routines avec IA integree"""
 
     st.title("â° Routines Quotidiennes")
     st.caption("Gestion intelligente des routines familiales")
 
-    # Récupérer l'agent IA
+    # Recuperer l'agent IA
     agent: AgentIA = st.session_state.get("agent_ia")
 
     # ===================================
@@ -212,12 +212,12 @@ def app():
             col_r1, col_r2 = st.columns([3, 1])
 
             with col_r1:
-                st.write(f"• **{tache['routine']}** : {tache['tache']} (prévu {tache['heure']})")
+                st.write(f"• **{tache['routine']}** : {tache['tache']} (prevu {tache['heure']})")
 
             with col_r2:
                 if st.button("✅ Fait", key=f"late_{tache['id']}", use_container_width=True):
                     marquer_complete(tache["id"])
-                    st.success("Terminé !")
+                    st.success("Termine !")
                     st.rerun()
 
     st.markdown("---")
@@ -227,7 +227,7 @@ def app():
     # ===================================
 
     tab1, tab2, tab3, tab4 = st.tabs(
-        ["🎯 Mes Routines", "– Rappels IA", "➕ Créer Routine", "📊 Suivi"]
+        ["🎯 Mes Routines", "– Rappels IA", "➕ Creer Routine", "📊 Suivi"]
     )
 
     # ===================================
@@ -245,9 +245,9 @@ def app():
                 st.rerun()
 
         with col_a2:
-            if st.button("🔄 Réinitialiser jour", use_container_width=True):
+            if st.button("🔄 Reinitialiser jour", use_container_width=True):
                 reinitialiser_taches_jour()
-                st.success("Tâches réinitialisées")
+                st.success("Tâches reinitialisees")
                 st.rerun()
 
         # Charger routines
@@ -255,7 +255,7 @@ def app():
 
         if df_routines.empty:
             st.info(
-                "Aucune routine active. Crée-en une ou utilise l'IA pour générer des suggestions !"
+                "Aucune routine active. Cree-en une ou utilise l'IA pour generer des suggestions !"
             )
         else:
             # Liste des routines
@@ -265,7 +265,7 @@ def app():
                     expanded=True,
                 ):
                     st.caption(routine["description"])
-                    st.caption(f"📋 Fréquence : {routine['frequence']}")
+                    st.caption(f"📋 Frequence : {routine['frequence']}")
 
                     # Charger les tâches
                     df_taches = charger_taches_routine(routine["id"])
@@ -277,18 +277,18 @@ def app():
                             col_t1, col_t2, col_t3 = st.columns([2, 1, 1])
 
                             with col_t1:
-                                statut_emoji = "✅" if tache["statut"] == "terminé" else "⏳"
+                                statut_emoji = "✅" if tache["statut"] == "termine" else "⏳"
                                 st.write(f"{statut_emoji} **{tache['heure']}** â€” {tache['nom']}")
 
                             with col_t2:
                                 if tache["statut"] == "à faire":
                                     if st.button(
-                                        "✅ Terminé",
+                                        "✅ Termine",
                                         key=f"done_{tache['id']}",
                                         use_container_width=True,
                                     ):
                                         marquer_complete(tache["id"])
-                                        st.success("Tâche terminée !")
+                                        st.success("Tâche terminee !")
                                         st.rerun()
                                 else:
                                     st.caption(
@@ -303,7 +303,7 @@ def app():
                                 ):
                                     st.session_state["adding_task_to"] = routine["id"]
 
-                        # Ajouter tâche (si activé)
+                        # Ajouter tâche (si active)
                         if st.session_state.get("adding_task_to") == routine["id"]:
                             with st.form(f"form_add_task_{routine['id']}"):
                                 new_task_name = st.text_input("Nom de la tâche")
@@ -320,7 +320,7 @@ def app():
                                                 else None
                                             )
                                             ajouter_tache(routine["id"], new_task_name, time_str)
-                                            st.success("Tâche ajoutée")
+                                            st.success("Tâche ajoutee")
                                             del st.session_state["adding_task_to"]
                                             st.rerun()
 
@@ -334,7 +334,7 @@ def app():
 
                     with col_act1:
                         if st.button(
-                            "â¸ï¸ Désactiver",
+                            "â¸ï¸ Desactiver",
                             key=f"disable_{routine['id']}",
                             use_container_width=True,
                         ):
@@ -342,7 +342,7 @@ def app():
                                 r = db.query(Routine).get(routine["id"])
                                 r.is_active = False
                                 db.commit()
-                            st.success("Routine désactivée")
+                            st.success("Routine desactivee")
                             st.rerun()
 
                     with col_act2:
@@ -353,7 +353,7 @@ def app():
                             use_container_width=True,
                         ):
                             supprimer_routine(routine["id"])
-                            st.success("Routine supprimée")
+                            st.success("Routine supprimee")
                             st.rerun()
 
     # ===================================
@@ -373,7 +373,7 @@ def app():
             if st.button("– Demander rappels IA", type="primary", use_container_width=True):
                 with st.spinner("– Analyse des routines..."):
                     try:
-                        # Récupérer toutes les tâches
+                        # Recuperer toutes les tâches
                         with obtenir_contexte_db() as db:
                             tasks = (
                                 db.query(RoutineTask, Routine)
@@ -400,7 +400,7 @@ def app():
                         )
 
                         st.session_state["rappels_ia"] = rappels
-                        st.success("✅ Rappels générés")
+                        st.success("✅ Rappels generes")
 
                     except Exception as e:
                         st.error(f"Erreur IA : {e}")
@@ -427,12 +427,12 @@ def app():
 
             # Suggestions de routines
             st.markdown("---")
-            st.markdown("### 💰 Routines suggérées par l'IA")
+            st.markdown("### 💰 Routines suggerees par l'IA")
 
             suggestions_base = [
                 {
                     "nom": "Routine du matin",
-                    "taches": ["Réveil", "Petit-déjeuner", "Préparation", "Départ"],
+                    "taches": ["Reveil", "Petit-dejeuner", "Preparation", "Depart"],
                 },
                 {
                     "nom": "Routine du soir (Jules)",
@@ -440,29 +440,29 @@ def app():
                 },
                 {
                     "nom": "Routine coucher (adultes)",
-                    "taches": ["Préparation lendemain", "Rangement", "Lecture", "Coucher"],
+                    "taches": ["Preparation lendemain", "Rangement", "Lecture", "Coucher"],
                 },
                 {
                     "nom": "Routine weekend",
-                    "taches": ["Grasse matinée", "Activité famille", "Repas ensemble", "Détente"],
+                    "taches": ["Grasse matinee", "Activite famille", "Repas ensemble", "Detente"],
                 },
             ]
 
             for sugg in suggestions_base[:2]:
                 with st.expander(f"✨ {sugg['nom']}", expanded=False):
-                    st.write("**Tâches suggérées :**")
+                    st.write("**Tâches suggerees :**")
                     for tache in sugg["taches"]:
                         st.write(f"• {tache}")
 
-                    if st.button("➕ Créer cette routine", key=f"create_{sugg['nom']}"):
+                    if st.button("➕ Creer cette routine", key=f"create_{sugg['nom']}"):
                         routine_id = creer_routine(
-                            sugg["nom"], "Routine suggérée par l'IA", "Famille", "quotidien"
+                            sugg["nom"], "Routine suggeree par l'IA", "Famille", "quotidien"
                         )
 
                         for tache in sugg["taches"]:
                             ajouter_tache(routine_id, tache)
 
-                        st.success(f"✅ Routine '{sugg['nom']}' créée !")
+                        st.success(f"✅ Routine '{sugg['nom']}' creee !")
                         st.rerun()
 
     # ===================================
@@ -470,7 +470,7 @@ def app():
     # ===================================
 
     with tab3:
-        st.subheader("➕ Créer une nouvelle routine")
+        st.subheader("➕ Creer une nouvelle routine")
 
         with st.form("form_create_routine"):
             nom = st.text_input("Nom de la routine *", placeholder="Ex: Routine du soir")
@@ -491,7 +491,7 @@ def app():
                 pour_qui = st.selectbox("Pour qui ?", personnes)
 
                 frequence = st.selectbox(
-                    "Fréquence", ["quotidien", "semaine", "weekend", "occasionnel"]
+                    "Frequence", ["quotidien", "semaine", "weekend", "occasionnel"]
                 )
 
             # Tâches
@@ -519,7 +519,7 @@ def app():
                         }
                     )
 
-            submitted = st.form_submit_button("📅 Créer la routine", type="primary")
+            submitted = st.form_submit_button("📅 Creer la routine", type="primary")
 
             if submitted:
                 if not nom:
@@ -527,14 +527,14 @@ def app():
                 elif not taches:
                     st.error("Ajoute au moins une tâche")
                 else:
-                    # Créer routine
+                    # Creer routine
                     routine_id = creer_routine(nom, description, pour_qui, frequence)
 
                     # Ajouter tâches
                     for tache in taches:
                         ajouter_tache(routine_id, tache["nom"], tache["heure"])
 
-                    st.success(f"✅ Routine '{nom}' créée avec {len(taches)} tâches !")
+                    st.success(f"✅ Routine '{nom}' creee avec {len(taches)} tâches !")
                     st.balloons()
                     st.rerun()
 
@@ -550,7 +550,7 @@ def app():
         if df_all.empty:
             st.info("Aucune routine à analyser")
         else:
-            # Métriques
+            # Metriques
             col_m1, col_m2, col_m3, col_m4 = st.columns(4)
 
             with col_m1:
@@ -562,10 +562,10 @@ def app():
 
             with col_m3:
                 ia_count = len(df_all[df_all["ia"] == "–"])
-                st.metric("Suggérées IA", ia_count)
+                st.metric("Suggerees IA", ia_count)
 
             with col_m4:
-                # Taux de complétion aujourd'hui
+                # Taux de completion aujourd'hui
                 with obtenir_contexte_db() as db:
                     tasks_today = (
                         db.query(RoutineTask)
@@ -575,18 +575,18 @@ def app():
                         .count()
                     )
 
-                st.metric("Complétées aujourd'hui", tasks_today)
+                st.metric("Completees aujourd'hui", tasks_today)
 
             st.markdown("---")
 
             # Statistiques par routine
-            st.markdown("### 🧹 Détails par routine")
+            st.markdown("### 🧹 Details par routine")
 
             for _, routine in df_all.iterrows():
                 df_taches = charger_taches_routine(routine["id"])
 
                 if not df_taches.empty:
-                    terminees = len(df_taches[df_taches["statut"] == "terminé"])
+                    terminees = len(df_taches[df_taches["statut"] == "termine"])
                     total = len(df_taches)
                     pct = (terminees / total) * 100 if total > 0 else 0
 
@@ -605,5 +605,5 @@ def app():
             st.markdown("---")
             st.markdown("### 📋 Historique de la semaine")
 
-            st.info("Fonctionnalité en développement : graphique d'historique sur 7 jours")
+            st.info("Fonctionnalite en developpement : graphique d'historique sur 7 jours")
 

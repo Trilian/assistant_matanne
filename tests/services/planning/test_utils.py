@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/services/planning/utils.py
 
 Tests des fonctions utilitaires pures pour le planning.
@@ -93,7 +93,7 @@ class TestGetWeekdayIndex:
         assert get_weekday_index("Dimanche") == 6
     
     def test_get_weekday_index_case_insensitive(self):
-        """Vérifie que la recherche est insensible à la casse."""
+        """Vérifie que la recherche est insensible Ã  la casse."""
         assert get_weekday_index("lundi") == 0
         assert get_weekday_index("LUNDI") == 0
         assert get_weekday_index("LuNdI") == 0
@@ -219,28 +219,28 @@ class TestDetermineProteinType:
         """Vérifie la détection poisson."""
         result = determine_protein_type("lundi", ["lundi"], [], [])
         assert result[0] == "poisson"
-        assert "🐟" in result[1]
+        assert "ðŸŸ" in result[1]
     
     def test_determine_protein_type_viande_rouge(self):
         """Vérifie la détection viande rouge."""
         result = determine_protein_type("mardi", [], ["mardi"], [])
         assert result[0] == "viande_rouge"
-        assert "🥩" in result[1]
+        assert "ðŸ¥©" in result[1]
     
     def test_determine_protein_type_vegetarien(self):
         """Vérifie la détection végétarien."""
         result = determine_protein_type("mercredi", [], [], ["mercredi"])
         assert result[0] == "vegetarien"
-        assert "🥬" in result[1]
+        assert "ðŸ¥¬" in result[1]
     
     def test_determine_protein_type_default_volaille(self):
         """Vérifie le fallback volaille."""
         result = determine_protein_type("jeudi", [], [], [])
         assert result[0] == "volaille"
-        assert "🍗" in result[1]
+        assert "ðŸ—" in result[1]
     
     def test_determine_protein_type_case_insensitive(self):
-        """Vérifie l'insensibilité à la casse."""
+        """Vérifie l'insensibilité Ã  la casse."""
         # La fonction compare jour_lower donc "Lundi" devient "lundi"
         # Les jours dans poisson_jours doivent aussi être en minuscules
         result = determine_protein_type("lundi", ["lundi"], [], [])
@@ -276,9 +276,9 @@ class TestGetDefaultProteinSchedule:
             assert protein in valid_types, f"{day} a un type invalide: {protein}"
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS ÉQUILIBRE NUTRITIONNEL (NOUVELLES FONCTIONS)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS Ã‰QUILIBRE NUTRITIONNEL (NOUVELLES FONCTIONS)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 from src.services.planning.utils import (
     calculate_week_balance,
@@ -387,9 +387,9 @@ class TestIsBalancedWeek:
         assert any("végétarien" in issue.lower() for issue in issues)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FORMATAGE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 from src.services.planning.utils import (
     format_meal_for_display,
@@ -413,31 +413,31 @@ class TestFormatMealForDisplay:
         """Emoji pour déjeuner."""
         repas = {"type_repas": "dejeuner"}
         result = format_meal_for_display(repas)
-        assert result["emoji"] == "☀️"
+        assert result["emoji"] == "â˜€ï¸"
     
     def test_emoji_for_diner(self):
         """Emoji pour dîner."""
         repas = {"type_repas": "diner"}
         result = format_meal_for_display(repas)
-        assert result["emoji"] == "🌙"
+        assert result["emoji"] == "ðŸŒ™"
     
     def test_emoji_for_petit_dejeuner(self):
         """Emoji pour petit-déjeuner."""
         repas = {"type_repas": "petit-dejeuner"}
         result = format_meal_for_display(repas)
-        assert result["emoji"] == "🌅"
+        assert result["emoji"] == "ðŸŒ…"
     
     def test_emoji_for_gouter(self):
         """Emoji pour goûter."""
         repas = {"type_repas": "gouter"}
         result = format_meal_for_display(repas)
-        assert result["emoji"] == "🍪"
+        assert result["emoji"] == "ðŸª"
     
     def test_emoji_default(self):
         """Emoji par défaut."""
         repas = {"type_repas": "autre"}
         result = format_meal_for_display(repas)
-        assert result["emoji"] == "🍽️"
+        assert result["emoji"] == "ðŸ½ï¸"
     
     def test_fallback_to_notes(self):
         """Fallback sur notes si pas de recette_nom."""
@@ -529,9 +529,9 @@ class TestGroupMealsByType:
         assert "autre" in result
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS AGRÉGATION COURSES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS AGRÃ‰GATION COURSES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 from src.services.planning.utils import (
     aggregate_ingredients,
@@ -661,9 +661,9 @@ class TestGetRayonOrder:
         assert result[-1] == "autre"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS VALIDATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 from src.services.planning.utils import (
     validate_planning_dates,
@@ -675,7 +675,7 @@ class TestValidatePlanningDates:
     """Tests pour validate_planning_dates."""
     
     def test_valid_week(self):
-        """Semaine valide (lundi à dimanche)."""
+        """Semaine valide (lundi Ã  dimanche)."""
         result, msg = validate_planning_dates(date(2024, 1, 15), date(2024, 1, 21))
         assert result is True
         assert msg == ""
@@ -726,9 +726,9 @@ class TestValidateMealSelection:
         assert len(errors) == 0
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS GÉNÉRATION PROMPT IA
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS GÃ‰NÃ‰RATION PROMPT IA
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 from src.services.planning.utils import (
     build_planning_prompt_context,
@@ -749,7 +749,7 @@ class TestBuildPlanningPromptContext:
         """Avec préférences."""
         prefs = {
             "nb_personnes": 4,
-            "budget": "100€",
+            "budget": "100â‚¬",
             "allergies": ["arachides", "gluten"],
             "preferences_cuisine": ["italien", "français"],
         }

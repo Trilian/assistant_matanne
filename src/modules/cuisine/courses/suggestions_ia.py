@@ -1,4 +1,4 @@
-"""
+﻿"""
 Suggestions IA pour les courses.
 """
 
@@ -17,32 +17,32 @@ def render_suggestions_ia():
     inventaire_service = get_inventaire_service()
     recettes_service = get_recette_service()
     
-    st.subheader("✨ Suggestions intelligentes")
+    st.subheader("âœ¨ Suggestions intelligentes")
     
-    tab_inventaire, tab_recettes = st.tabs(["📦 Depuis inventaire", "🍽️ Par recettes"])
+    tab_inventaire, tab_recettes = st.tabs(["ðŸ“¦ Depuis inventaire", "ðŸ½ï¸ Par recettes"])
     
     with tab_inventaire:
-        st.write("**Générer suggestions depuis stock bas**")
+        st.write("**GÃenÃerer suggestions depuis stock bas**")
         
-        if st.button("🤖 Analyser inventaire & générer suggestions"):
-            with st.spinner("⏳ Analyse en cours..."):
+        if st.button("ðŸ¤– Analyser inventaire & gÃenÃerer suggestions"):
+            with st.spinner("â³ Analyse en cours..."):
                 try:
                     suggestions = service.generer_suggestions_ia_depuis_inventaire()
                     
                     if suggestions:
-                        st.success(f"✅ {len(suggestions)} suggestions générées!")
+                        st.success(f"âœ… {len(suggestions)} suggestions gÃenÃerÃees!")
                         
                         # Afficher suggestions
                         df = pd.DataFrame([{
                             "Article": s.nom,
-                            "Quantité": f"{s.quantite} {s.unite}",
-                            "Priorité": s.priorite,
+                            "QuantitÃe": f"{s.quantite} {s.unite}",
+                            "PrioritÃe": s.priorite,
                             "Rayon": s.rayon
                         } for s in suggestions])
                         
                         st.dataframe(df, use_container_width=True)
                         
-                        if st.button("✅ Ajouter toutes les suggestions"):
+                        if st.button("âœ… Ajouter toutes les suggestions"):
                             try:
                                 from src.core.models import Ingredient
                                 
@@ -50,7 +50,7 @@ def render_suggestions_ia():
                                 count = 0
                                 
                                 for suggestion in suggestions:
-                                    # Trouver ou créer ingrédient
+                                    # Trouver ou crÃeer ingrÃedient
                                     ingredient = db.query(Ingredient).filter(
                                         Ingredient.nom == suggestion.nom
                                     ).first()
@@ -63,7 +63,7 @@ def render_suggestions_ia():
                                         db.add(ingredient)
                                         db.commit()
                                     
-                                    # Ajouter à la liste
+                                    # Ajouter Ã  la liste
                                     data = {
                                         "ingredient_id": ingredient.id,
                                         "quantite_necessaire": suggestion.quantite,
@@ -74,22 +74,22 @@ def render_suggestions_ia():
                                     service.create(data)
                                     count += 1
                                 
-                                st.success(f"✅ {count} articles ajoutés!")
+                                st.success(f"âœ… {count} articles ajoutÃes!")
                                 st.session_state.courses_refresh += 1
                                 # Pas de rerun pour rester sur cet onglet
                                 time.sleep(0.5)
                             except Exception as e:
-                                st.error(f"❌ Erreur sauvegarde: {str(e)}")
+                                st.error(f"âŒ Erreur sauvegarde: {str(e)}")
                     else:
                         st.info("Aucune suggestion (inventaire OK)")
                 except Exception as e:
-                    st.error(f"❌ Erreur: {str(e)}")
+                    st.error(f"âŒ Erreur: {str(e)}")
     
     with tab_recettes:
-        st.write("**Ajouter ingrédients manquants pour recettes**")
+        st.write("**Ajouter ingrÃedients manquants pour recettes**")
         
         if recettes_service is None:
-            st.warning("⚠️ Service recettes indisponible")
+            st.warning("âš ï¸ Service recettes indisponible")
         else:
             # Lister recettes
             try:
@@ -100,7 +100,7 @@ def render_suggestions_ia():
                 else:
                     recette_names = {r.id: r.nom for r in recettes}
                     selected_recette_id = st.selectbox(
-                        "Sélectionner une recette",
+                        "SÃelectionner une recette",
                         options=list(recette_names.keys()),
                         format_func=lambda x: recette_names[x],
                         key="select_recette_courses"
@@ -110,26 +110,26 @@ def render_suggestions_ia():
                         recette = recettes_service.get_by_id_full(selected_recette_id)
                         
                         if recette:
-                            # Afficher ingrédients de la recette
+                            # Afficher ingrÃedients de la recette
                             nb_ingredients = len(recette.ingredients) if recette.ingredients else 0
-                            st.caption(f"📝 {nb_ingredients} ingrédients")
+                            st.caption(f"ðŸ“ {nb_ingredients} ingrÃedients")
                             
-                            if st.button("🔍 Ajouter ingrédients manquants", key="btn_add_missing_ingredients"):
+                            if st.button("ðŸ” Ajouter ingrÃedients manquants", key="btn_add_missing_ingredients"):
                                 try:
                                     from src.core.models import Ingredient
                                     from src.core.database import obtenir_contexte_db
                                     
-                                    # Récupérer ingrédients de la recette
+                                    # RÃecupÃerer ingrÃedients de la recette
                                     ingredients_recette = recette.ingredients if recette.ingredients else []
                                     
                                     if not ingredients_recette:
-                                        st.warning("Aucun ingrédient dans cette recette")
+                                        st.warning("Aucun ingrÃedient dans cette recette")
                                     else:
                                         count_added = 0
                                         
                                         with obtenir_contexte_db() as db:
                                             for ing_obj in ingredients_recette:
-                                                # Récupérer ingrédient
+                                                # RÃecupÃerer ingrÃedient
                                                 ing_nom = ing_obj.ingredient.nom if hasattr(ing_obj, 'ingredient') else ing_obj.nom
                                                 ing_quantite = ing_obj.quantite if hasattr(ing_obj, 'quantite') else 1
                                                 ing_unite = ing_obj.ingredient.unite if hasattr(ing_obj, 'ingredient') and hasattr(ing_obj.ingredient, 'unite') else 'pièce'
@@ -150,7 +150,7 @@ def render_suggestions_ia():
                                                     db.flush()
                                                     db.refresh(ingredient)
                                                 
-                                                # Ajouter à la liste courses
+                                                # Ajouter Ã  la liste courses
                                                 data = {
                                                     "ingredient_id": ingredient.id,
                                                     "quantite_necessaire": ing_quantite,
@@ -161,15 +161,15 @@ def render_suggestions_ia():
                                                 service.create(data)
                                                 count_added += 1
                                         
-                                        st.success(f"✅ {count_added} ingrédient(s) ajouté(s) à la liste!")
+                                        st.success(f"âœ… {count_added} ingrÃedient(s) ajoutÃe(s) Ã  la liste!")
                                         st.session_state.courses_refresh += 1
                                         # Pas de rerun pour rester sur cet onglet
                                         time.sleep(0.5)
                                 except Exception as e:
-                                    st.error(f"❌ Erreur: {str(e)}")
-                                    logger.error(f"Erreur ajout ingrédients recette: {e}")
+                                    st.error(f"âŒ Erreur: {str(e)}")
+                                    logger.error(f"Erreur ajout ingrÃedients recette: {e}")
             except Exception as e:
-                st.error(f"❌ Erreur: {str(e)}")
+                st.error(f"âŒ Erreur: {str(e)}")
                 logger.error(f"Erreur render tab recettes: {e}")
 
 

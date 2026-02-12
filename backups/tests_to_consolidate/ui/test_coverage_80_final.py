@@ -1,5 +1,5 @@
-"""
-Tests étendus pour couverture UI 80%+ - Partie 3
+﻿"""
+Tests Ã©tendus pour couverture UI 80%+ - Partie 3
 
 Couvre:
 - FormBuilder render et validation (base_form.py)  
@@ -16,9 +16,9 @@ from datetime import date
 import pandas as pd
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FORM BUILDER RENDER (base_form.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFormBuilderRender:
@@ -75,7 +75,7 @@ class TestFormBuilderRender:
         field = {
             "type": "number",
             "name": "qty",
-            "label": "Quantité",
+            "label": "QuantitÃ©",
             "default": 0,
             "min_value": None,
             "max_value": None,
@@ -97,7 +97,7 @@ class TestFormBuilderRender:
         field = {
             "type": "select",
             "name": "cat",
-            "label": "Catégorie",
+            "label": "CatÃ©gorie",
             "options": ["Option 1", "Option 2", "Option 3"],
             "default": "Option 1",
             "help": None
@@ -217,7 +217,7 @@ class TestFormBuilderValidation:
     """Tests pour FormBuilder._validate."""
     
     def test_validate_success(self):
-        """Test validation réussie."""
+        """Test validation rÃ©ussie."""
         from src.ui.core.base_form import FormBuilder
         
         form = FormBuilder("test")
@@ -230,7 +230,7 @@ class TestFormBuilderValidation:
         assert form._validate() is True
     
     def test_validate_fail_empty_string(self):
-        """Test validation échoue avec chaîne vide."""
+        """Test validation Ã©choue avec chaÃ®ne vide."""
         from src.ui.core.base_form import FormBuilder
         
         form = FormBuilder("test")
@@ -240,7 +240,7 @@ class TestFormBuilderValidation:
         assert form._validate() is False
     
     def test_validate_fail_none(self):
-        """Test validation échoue avec None."""
+        """Test validation Ã©choue avec None."""
         from src.ui.core.base_form import FormBuilder
         
         form = FormBuilder("test")
@@ -250,7 +250,7 @@ class TestFormBuilderValidation:
         assert form._validate() is False
     
     def test_validate_fail_empty_list(self):
-        """Test validation échoue avec liste vide."""
+        """Test validation Ã©choue avec liste vide."""
         from src.ui.core.base_form import FormBuilder
         
         form = FormBuilder("test")
@@ -260,7 +260,7 @@ class TestFormBuilderValidation:
         assert form._validate() is False
     
     def test_get_data(self):
-        """Test récupération données."""
+        """Test rÃ©cupÃ©ration donnÃ©es."""
         from src.ui.core.base_form import FormBuilder
         
         form = FormBuilder("test")
@@ -270,20 +270,20 @@ class TestFormBuilderValidation:
         assert data == {"nom": "Test", "qty": 5}
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS BASE IO SERVICE (base_io.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestIOConfig:
     """Tests pour IOConfig."""
     
     def test_io_config_init(self):
-        """Test création config IO."""
+        """Test crÃ©ation config IO."""
         from src.ui.core.base_io import IOConfig
         
         config = IOConfig(
-            field_mapping={"nom": "Nom", "qty": "Quantité"},
+            field_mapping={"nom": "Nom", "qty": "QuantitÃ©"},
             required_fields=["nom"]
         )
         
@@ -320,9 +320,9 @@ class TestBaseIOService:
         assert io.config == config
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS INITIALISER APP (init.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestInitialiserApp:
@@ -333,7 +333,7 @@ class TestInitialiserApp:
     @patch('src.ui.layout.init.obtenir_etat')
     @patch('src.ui.layout.init.st')
     def test_initialiser_app_success(self, mock_st, mock_get_etat, mock_gest, mock_db):
-        """Test init réussie."""
+        """Test init rÃ©ussie."""
         mock_db.return_value = True
         mock_get_etat.return_value = MagicMock(agent_ia=True)
         
@@ -348,7 +348,7 @@ class TestInitialiserApp:
     @patch('src.ui.layout.init.GestionnaireEtat')
     @patch('src.ui.layout.init.st')
     def test_initialiser_app_db_fail(self, mock_st, mock_gest, mock_db):
-        """Test init échoue si DB indisponible."""
+        """Test init Ã©choue si DB indisponible."""
         mock_db.return_value = False
         mock_st.error = MagicMock()
         mock_st.stop = MagicMock(side_effect=SystemExit)
@@ -361,9 +361,9 @@ class TestInitialiserApp:
         mock_st.error.assert_called()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SIDEBAR (sidebar.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestSidebar:
@@ -403,7 +403,7 @@ class TestRendreMenu:
         
         from src.ui.layout.sidebar import _rendre_menu
         
-        menu = {"🏠 Accueil": "accueil"}
+        menu = {"ðŸ  Accueil": "accueil"}
         etat = MagicMock(module_actuel="accueil")
         
         _rendre_menu(menu, etat)
@@ -423,10 +423,10 @@ class TestRendreMenu:
         from src.ui.layout.sidebar import _rendre_menu
         
         menu = {
-            "🍳 Cuisine": {
-                "🍽️ Recettes": "cuisine.recettes",
-                "───────────": None,  # Séparateur
-                "🛒 Courses": "cuisine.courses"
+            "ðŸ³ Cuisine": {
+                "ðŸ½ï¸ Recettes": "cuisine.recettes",
+                "â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€": None,  # SÃ©parateur
+                "ðŸ›’ Courses": "cuisine.courses"
             }
         }
         etat = MagicMock(module_actuel="cuisine.recettes")
@@ -436,28 +436,28 @@ class TestRendreMenu:
         mock_st.expander.assert_called()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CAMERA SCANNER (camera_scanner.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCameraScannerDetection:
-    """Tests pour fonctions de détection."""
+    """Tests pour fonctions de dÃ©tection."""
     
     def test_detect_barcode_pyzbar_not_installed(self):
-        """Test détection sans pyzbar."""
+        """Test dÃ©tection sans pyzbar."""
         from src.ui.components.camera_scanner import _detect_barcode_pyzbar
         
-        # Crée un faux frame numpy
+        # CrÃ©e un faux frame numpy
         import numpy as np
         frame = np.zeros((100, 100, 3), dtype=np.uint8)
         
-        # Devrait retourner liste vide si pyzbar pas installé
+        # Devrait retourner liste vide si pyzbar pas installÃ©
         result = _detect_barcode_pyzbar(frame)
         assert isinstance(result, list)
     
     def test_detect_barcode_zxing_not_installed(self):
-        """Test détection sans zxing."""
+        """Test dÃ©tection sans zxing."""
         from src.ui.components.camera_scanner import _detect_barcode_zxing
         
         import numpy as np
@@ -467,7 +467,7 @@ class TestCameraScannerDetection:
         assert isinstance(result, list)
     
     def test_detect_barcodes(self):
-        """Test détection barcodes (wrapper)."""
+        """Test dÃ©tection barcodes (wrapper)."""
         from src.ui.components.camera_scanner import detect_barcodes
         
         import numpy as np
@@ -477,9 +477,9 @@ class TestCameraScannerDetection:
         assert isinstance(result, list)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS DOMAIN UI (domain.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestDomainUITypes:
@@ -493,9 +493,9 @@ class TestDomainUITypes:
         assert domain is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ATOMS ADDITIONNELS (atoms.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAtomsToast:
@@ -564,7 +564,7 @@ class TestAtomsDivider:
         
         divider("OU")
         
-        # Vérifier que markdown est appelé avec le texte
+        # VÃ©rifier que markdown est appelÃ© avec le texte
         call_args = mock_st.markdown.call_args[0][0]
         assert "OU" in call_args
 
@@ -579,16 +579,16 @@ class TestAtomsInfoBox:
         
         from src.ui.components.atoms import info_box
         
-        info_box("Titre", "Contenu", "💡")
+        info_box("Titre", "Contenu", "ðŸ’¡")
         
         call_args = mock_st.markdown.call_args[0][0]
         assert "Titre" in call_args
         assert "Contenu" in call_args
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS DYNAMIC LIST RENDER (dynamic.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestDynamicListRender:
@@ -627,7 +627,7 @@ class TestStepperEdgeCases:
     
     @patch('src.ui.components.dynamic.st')
     def test_stepper_next_at_last(self, mock_st):
-        """Test next à la dernière étape."""
+        """Test next Ã  la derniÃ¨re Ã©tape."""
         mock_st.session_state = {"wizard_step": 2}
         mock_st.rerun = MagicMock()
         
@@ -636,13 +636,13 @@ class TestStepperEdgeCases:
         stepper = Stepper("wizard", ["S1", "S2", "S3"])
         stepper.next()
         
-        # Ne doit pas dépasser le max
+        # Ne doit pas dÃ©passer le max
         assert mock_st.session_state["wizard_step"] == 2
         mock_st.rerun.assert_not_called()
     
     @patch('src.ui.components.dynamic.st')
     def test_stepper_previous_at_first(self, mock_st):
-        """Test previous à la première étape."""
+        """Test previous Ã  la premiÃ¨re Ã©tape."""
         mock_st.session_state = {"wizard_step": 0}
         mock_st.rerun = MagicMock()
         
@@ -651,13 +651,13 @@ class TestStepperEdgeCases:
         stepper = Stepper("wizard", ["S1", "S2", "S3"])
         stepper.previous()
         
-        # Ne doit pas aller en négatif
+        # Ne doit pas aller en nÃ©gatif
         assert mock_st.session_state["wizard_step"] == 0
         mock_st.rerun.assert_not_called()
     
     @patch('src.ui.components.dynamic.st')
     def test_stepper_is_last_step_false(self, mock_st):
-        """Test is_last_step quand pas à la fin."""
+        """Test is_last_step quand pas Ã  la fin."""
         mock_st.session_state = {"wizard_step": 0}
         
         from src.ui.components.dynamic import Stepper
@@ -667,9 +667,9 @@ class TestStepperEdgeCases:
         assert stepper.is_last_step() is False
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS DATA ADDITIONNELS (data.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestDataTableEdgeCases:
@@ -703,13 +703,13 @@ class TestExportButtonsFormats:
         data = [{"a": 1}]
         export_buttons(data, "test", formats=["json"])
         
-        # Vérifier appel download_button avec JSON
+        # VÃ©rifier appel download_button avec JSON
         assert mock_st.download_button.called
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS LAYOUTS ADDITIONNELS (layouts.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestTabsLayoutContent:
@@ -732,7 +732,7 @@ class TestTabsLayoutContent:
         
         tabs_layout(tab_data)
         
-        # Contenu devrait être appelé
+        # Contenu devrait Ãªtre appelÃ©
         assert 1 in content_called
 
 
@@ -741,7 +741,7 @@ class TestCardContainerColor:
     
     @patch('src.ui.components.layouts.st')
     def test_card_container_custom_color(self, mock_st):
-        """Test carte avec couleur personnalisée."""
+        """Test carte avec couleur personnalisÃ©e."""
         mock_container = MagicMock()
         mock_container.__enter__ = MagicMock(return_value=mock_container)
         mock_container.__exit__ = MagicMock(return_value=False)
@@ -752,6 +752,6 @@ class TestCardContainerColor:
         
         card_container(lambda: None, color="#FFCCCC")
         
-        # Vérifier que markdown est appelé avec la couleur
+        # VÃ©rifier que markdown est appelÃ© avec la couleur
         calls = mock_st.markdown.call_args_list
         assert any("#FFCCCC" in str(c) for c in calls)

@@ -1,8 +1,8 @@
-"""
+﻿"""
 Tests couverture complets pour src/services/batch_cooking.py
 
 Objectif: Atteindre 80%+ de couverture sur BatchCookingService.
-Stratégie: Tests directs sur schémas Pydantic, constantes, et tests d'intégration
+StratÃ©gie: Tests directs sur schÃ©mas Pydantic, constantes, et tests d'intÃ©gration
            avec la fixture patch_db_context.
 """
 
@@ -12,9 +12,9 @@ from datetime import date, time, datetime, timedelta
 import pydantic
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS SCHÉMAS PYDANTIC - EtapeBatchIA
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS SCHÃ‰MAS PYDANTIC - EtapeBatchIA
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -22,19 +22,19 @@ class TestEtapeBatchIA:
     """Tests complets pour EtapeBatchIA schema."""
 
     def test_etape_batch_ia_minimal(self):
-        """Test création minimale."""
+        """Test crÃ©ation minimale."""
         from src.services.batch_cooking import EtapeBatchIA
         
         etape = EtapeBatchIA(
             ordre=1,
-            titre="Couper les légumes",
-            description="Couper les carottes et oignons en dés",
+            titre="Couper les lÃ©gumes",
+            description="Couper les carottes et oignons en dÃ©s",
             duree_minutes=15
         )
         
         assert etape.ordre == 1
-        assert etape.titre == "Couper les légumes"
-        assert etape.description == "Couper les carottes et oignons en dés"
+        assert etape.titre == "Couper les lÃ©gumes"
+        assert etape.description == "Couper les carottes et oignons en dÃ©s"
         assert etape.duree_minutes == 15
         assert etape.robots == []
         assert etape.groupe_parallele == 0
@@ -44,20 +44,20 @@ class TestEtapeBatchIA:
         assert etape.recette_nom is None
 
     def test_etape_batch_ia_complete(self):
-        """Test création avec tous les champs."""
+        """Test crÃ©ation avec tous les champs."""
         from src.services.batch_cooking import EtapeBatchIA
         
         etape = EtapeBatchIA(
             ordre=2,
             titre="Cuisson au Cookeo",
-            description="Faire cuire les légumes pendant 20 min",
+            description="Faire cuire les lÃ©gumes pendant 20 min",
             duree_minutes=20,
             robots=["cookeo"],
             groupe_parallele=1,
             est_supervision=True,
             alerte_bruit=True,
             temperature=180,
-            recette_nom="Mijoté de légumes"
+            recette_nom="MijotÃ© de lÃ©gumes"
         )
         
         assert etape.robots == ["cookeo"]
@@ -65,7 +65,7 @@ class TestEtapeBatchIA:
         assert etape.est_supervision is True
         assert etape.alerte_bruit is True
         assert etape.temperature == 180
-        assert etape.recette_nom == "Mijoté de légumes"
+        assert etape.recette_nom == "MijotÃ© de lÃ©gumes"
 
     def test_etape_batch_ia_multiple_robots(self):
         """Test avec plusieurs robots."""
@@ -74,7 +74,7 @@ class TestEtapeBatchIA:
         etape = EtapeBatchIA(
             ordre=1,
             titre="Multi cuisson",
-            description="Cuisson simultanée",
+            description="Cuisson simultanÃ©e",
             duree_minutes=45,
             robots=["four", "plaques", "cookeo"]
         )
@@ -96,7 +96,7 @@ class TestEtapeBatchIA:
             )
 
     def test_etape_batch_ia_validation_duree_max(self):
-        """Test validation durée maximum (1-180)."""
+        """Test validation durÃ©e maximum (1-180)."""
         from src.services.batch_cooking import EtapeBatchIA
         
         with pytest.raises(pydantic.ValidationError):
@@ -108,7 +108,7 @@ class TestEtapeBatchIA:
             )
 
     def test_etape_batch_ia_validation_duree_min(self):
-        """Test validation durée minimum."""
+        """Test validation durÃ©e minimum."""
         from src.services.batch_cooking import EtapeBatchIA
         
         with pytest.raises(pydantic.ValidationError):
@@ -120,26 +120,26 @@ class TestEtapeBatchIA:
             )
 
     def test_etape_batch_ia_duree_limite(self):
-        """Test durée à la limite 180 min."""
+        """Test durÃ©e Ã  la limite 180 min."""
         from src.services.batch_cooking import EtapeBatchIA
         
         etape = EtapeBatchIA(
             ordre=1,
             titre="Longue cuisson",
-            description="Cuisson très longue",
+            description="Cuisson trÃ¨s longue",
             duree_minutes=180
         )
         
         assert etape.duree_minutes == 180
 
     def test_etape_batch_ia_groupe_parallele(self):
-        """Test groupe parallèle."""
+        """Test groupe parallÃ¨le."""
         from src.services.batch_cooking import EtapeBatchIA
         
         etape = EtapeBatchIA(
             ordre=1,
-            titre="Étape groupée",
-            description="Étape en parallèle",
+            titre="Ã‰tape groupÃ©e",
+            description="Ã‰tape en parallÃ¨le",
             duree_minutes=20,
             groupe_parallele=3
         )
@@ -147,9 +147,9 @@ class TestEtapeBatchIA:
         assert etape.groupe_parallele == 3
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS SCHÉMAS PYDANTIC - SessionBatchIA
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS SCHÃ‰MAS PYDANTIC - SessionBatchIA
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -157,60 +157,60 @@ class TestSessionBatchIA:
     """Tests complets pour SessionBatchIA schema."""
 
     def test_session_batch_ia_minimal(self):
-        """Test création minimale."""
+        """Test crÃ©ation minimale."""
         from src.services.batch_cooking import SessionBatchIA, EtapeBatchIA
         
         etape = EtapeBatchIA(
             ordre=1,
-            titre="Préparer",
-            description="Préparer les ingrédients",
+            titre="PrÃ©parer",
+            description="PrÃ©parer les ingrÃ©dients",
             duree_minutes=10
         )
         
         session = SessionBatchIA(
-            recettes=["Poulet rôti"],
+            recettes=["Poulet rÃ´ti"],
             duree_totale_estimee=60,
             etapes=[etape]
         )
         
-        assert session.recettes == ["Poulet rôti"]
+        assert session.recettes == ["Poulet rÃ´ti"]
         assert session.duree_totale_estimee == 60
         assert len(session.etapes) == 1
         assert session.conseils_jules == []
         assert session.ordre_optimal == ""
 
     def test_session_batch_ia_complete(self):
-        """Test création avec tous les champs."""
+        """Test crÃ©ation avec tous les champs."""
         from src.services.batch_cooking import SessionBatchIA, EtapeBatchIA
         
         etape1 = EtapeBatchIA(
             ordre=1,
-            titre="Étape 1",
-            description="Première étape",
+            titre="Ã‰tape 1",
+            description="PremiÃ¨re Ã©tape",
             duree_minutes=15
         )
         
         session = SessionBatchIA(
-            recettes=["Poulet", "Légumes grillés"],
+            recettes=["Poulet", "LÃ©gumes grillÃ©s"],
             duree_totale_estimee=120,
             etapes=[etape1],
-            conseils_jules=["Proposer à Jules de mélanger", "Attention four chaud"],
-            ordre_optimal="Poulet d'abord, légumes ensuite"
+            conseils_jules=["Proposer Ã  Jules de mÃ©langer", "Attention four chaud"],
+            ordre_optimal="Poulet d'abord, lÃ©gumes ensuite"
         )
         
         assert len(session.recettes) == 2
         assert len(session.conseils_jules) == 2
-        assert session.ordre_optimal == "Poulet d'abord, légumes ensuite"
+        assert session.ordre_optimal == "Poulet d'abord, lÃ©gumes ensuite"
 
     def test_session_batch_ia_multiple_etapes(self):
-        """Test session avec plusieurs étapes."""
+        """Test session avec plusieurs Ã©tapes."""
         from src.services.batch_cooking import SessionBatchIA, EtapeBatchIA
         
         etapes = [
-            EtapeBatchIA(ordre=1, titre="Prep", description="Préparation", duree_minutes=10),
+            EtapeBatchIA(ordre=1, titre="Prep", description="PrÃ©paration", duree_minutes=10),
             EtapeBatchIA(ordre=2, titre="Cuisson", description="Cuisson", duree_minutes=30),
             EtapeBatchIA(ordre=3, titre="Finition", description="Finition", duree_minutes=5),
-            EtapeBatchIA(ordre=4, titre="Service", description="Mise en boîte", duree_minutes=10)
+            EtapeBatchIA(ordre=4, titre="Service", description="Mise en boÃ®te", duree_minutes=10)
         ]
         
         session = SessionBatchIA(
@@ -258,18 +258,18 @@ class TestSessionBatchIA:
             etapes=[etape],
             conseils_jules=[
                 "Conseil 1: faire participer",
-                "Conseil 2: sécurité four",
-                "Conseil 3: laver les légumes",
-                "Conseil 4: mélanger la sauce"
+                "Conseil 2: sÃ©curitÃ© four",
+                "Conseil 3: laver les lÃ©gumes",
+                "Conseil 4: mÃ©langer la sauce"
             ]
         )
         
         assert len(session.conseils_jules) == 4
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS SCHÉMAS PYDANTIC - PreparationIA
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS SCHÃ‰MAS PYDANTIC - PreparationIA
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -277,7 +277,7 @@ class TestPreparationIA:
     """Tests complets pour PreparationIA schema."""
 
     def test_preparation_ia_minimal(self):
-        """Test création minimale."""
+        """Test crÃ©ation minimale."""
         from src.services.batch_cooking import PreparationIA
         
         prep = PreparationIA(
@@ -293,26 +293,26 @@ class TestPreparationIA:
         assert prep.container_suggere == ""
 
     def test_preparation_ia_complete(self):
-        """Test création avec tous les champs."""
+        """Test crÃ©ation avec tous les champs."""
         from src.services.batch_cooking import PreparationIA
         
         prep = PreparationIA(
-            nom="Boulettes congelées",
+            nom="Boulettes congelÃ©es",
             portions=8,
             conservation_jours=30,
             localisation="congelateur",
-            container_suggere="Sac congélation"
+            container_suggere="Sac congÃ©lation"
         )
         
         assert prep.localisation == "congelateur"
-        assert prep.container_suggere == "Sac congélation"
+        assert prep.container_suggere == "Sac congÃ©lation"
 
     def test_preparation_ia_frigo(self):
-        """Test préparation au frigo."""
+        """Test prÃ©paration au frigo."""
         from src.services.batch_cooking import PreparationIA
         
         prep = PreparationIA(
-            nom="Sauce béchamel",
+            nom="Sauce bÃ©chamel",
             portions=3,
             conservation_jours=4,
             localisation="frigo",
@@ -345,11 +345,11 @@ class TestPreparationIA:
             )
 
     def test_preparation_ia_longue_conservation(self):
-        """Test longue durée de conservation."""
+        """Test longue durÃ©e de conservation."""
         from src.services.batch_cooking import PreparationIA
         
         prep = PreparationIA(
-            nom="Plat congelé",
+            nom="Plat congelÃ©",
             portions=6,
             conservation_jours=90,
             localisation="congelateur"
@@ -358,11 +358,11 @@ class TestPreparationIA:
         assert prep.conservation_jours == 90
 
     def test_preparation_ia_portion_limite(self):
-        """Test portions à la limite (20)."""
+        """Test portions Ã  la limite (20)."""
         from src.services.batch_cooking import PreparationIA
         
         prep = PreparationIA(
-            nom="Grande préparation",
+            nom="Grande prÃ©paration",
             portions=20,
             conservation_jours=14
         )
@@ -370,9 +370,9 @@ class TestPreparationIA:
         assert prep.portions == 20
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONSTANTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -393,14 +393,14 @@ class TestConstantes:
         assert JOURS_SEMAINE[6] == "Dimanche"
 
     def test_jours_semaine_all_days(self):
-        """Test tous les jours présents."""
+        """Test tous les jours prÃ©sents."""
         from src.services.batch_cooking import JOURS_SEMAINE
         
         expected = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
         assert JOURS_SEMAINE == expected
 
     def test_robots_disponibles_keys(self):
-        """Test clés des robots."""
+        """Test clÃ©s des robots."""
         from src.services.batch_cooking import ROBOTS_DISPONIBLES
         
         assert "cookeo" in ROBOTS_DISPONIBLES
@@ -412,7 +412,7 @@ class TestConstantes:
         from src.services.batch_cooking import ROBOTS_DISPONIBLES
         
         assert ROBOTS_DISPONIBLES["cookeo"]["nom"] == "Cookeo"
-        assert ROBOTS_DISPONIBLES["cookeo"]["emoji"] == "🍲"
+        assert ROBOTS_DISPONIBLES["cookeo"]["emoji"] == "ðŸ²"
         assert ROBOTS_DISPONIBLES["cookeo"]["parallele"] is True
 
     def test_robots_disponibles_four(self):
@@ -435,9 +435,9 @@ class TestConstantes:
             assert isinstance(robot_info["parallele"], bool)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SERVICE - INITIALISATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -460,7 +460,7 @@ class TestBatchCookingServiceInit:
 
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_init_service_client_ia(self, mock_client):
-        """Test client IA initialisé."""
+        """Test client IA initialisÃ©."""
         from src.services.batch_cooking import BatchCookingService
         
         mock_ia = Mock()
@@ -468,8 +468,8 @@ class TestBatchCookingServiceInit:
         
         service = BatchCookingService()
         
-        # Le client IA est appelé via obtenir_client_ia(), non stocké comme attribut
-        # On vérifie que le service s'initialise correctement
+        # Le client IA est appelÃ© via obtenir_client_ia(), non stockÃ© comme attribut
+        # On vÃ©rifie que le service s'initialise correctement
         assert service is not None
 
     @patch('src.services.batch_cooking.obtenir_client_ia')
@@ -484,14 +484,14 @@ class TestBatchCookingServiceInit:
         assert service.cache_prefix == "batch_cooking"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SERVICE - MOCKED METHODS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestServiceMethodsMocked:
-    """Tests pour les méthodes avec mock au niveau service."""
+    """Tests pour les mÃ©thodes avec mock au niveau service."""
 
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_get_config_returns_none(self, mock_client):
@@ -529,7 +529,7 @@ class TestServiceMethodsMocked:
 
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_update_config_success(self, mock_client):
-        """Test update_config réussit."""
+        """Test update_config rÃ©ussit."""
         from src.services.batch_cooking import BatchCookingService
         
         mock_client.return_value = Mock()
@@ -564,7 +564,7 @@ class TestServiceMethodsMocked:
 
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_get_session_returns_none(self, mock_client):
-        """Test get_session non trouvée."""
+        """Test get_session non trouvÃ©e."""
         from src.services.batch_cooking import BatchCookingService
         
         mock_client.return_value = Mock()
@@ -609,7 +609,7 @@ class TestServiceMethodsMocked:
 
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_creer_session_success(self, mock_client):
-        """Test creer_session réussit."""
+        """Test creer_session rÃ©ussit."""
         from src.services.batch_cooking import BatchCookingService
         
         mock_client.return_value = Mock()
@@ -727,14 +727,14 @@ class TestServiceMethodsMocked:
         assert result.statut == "passee"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PREPARATIONS MOCKED
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestPreparationsMocked:
-    """Tests pour les méthodes de préparations."""
+    """Tests pour les mÃ©thodes de prÃ©parations."""
 
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_get_preparations(self, mock_client):
@@ -758,7 +758,7 @@ class TestPreparationsMocked:
         
         mock_client.return_value = Mock()
         
-        mock_preps = [Mock(nom="Sauce périmée")]
+        mock_preps = [Mock(nom="Sauce pÃ©rimÃ©e")]
         
         service = BatchCookingService()
         service.get_preparations_alertes = Mock(return_value=mock_preps)
@@ -805,14 +805,14 @@ class TestPreparationsMocked:
         assert result.portions_restantes == 4
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS IA MOCKED
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestIAMocked:
-    """Tests pour les méthodes IA."""
+    """Tests pour les mÃ©thodes IA."""
 
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_generer_plan_ia(self, mock_client):
@@ -822,12 +822,12 @@ class TestIAMocked:
         mock_client.return_value = Mock()
         
         mock_session = SessionBatchIA(
-            recettes=["Poulet rôti"],
+            recettes=["Poulet rÃ´ti"],
             duree_totale_estimee=90,
             etapes=[EtapeBatchIA(
                 ordre=1,
                 titre="Prep",
-                description="Préparer",
+                description="PrÃ©parer",
                 duree_minutes=15
             )]
         )
@@ -841,7 +841,7 @@ class TestIAMocked:
             duree_max=180
         )
         
-        assert result.recettes == ["Poulet rôti"]
+        assert result.recettes == ["Poulet rÃ´ti"]
         assert len(result.etapes) == 1
 
     @patch('src.services.batch_cooking.obtenir_client_ia')
@@ -853,7 +853,7 @@ class TestIAMocked:
         
         mock_suggestions = [
             {"nom": "Poulet", "portions": 4},
-            {"nom": "Légumes", "portions": 6}
+            {"nom": "LÃ©gumes", "portions": 6}
         ]
         
         service = BatchCookingService()
@@ -880,9 +880,9 @@ class TestIAMocked:
         assert result == 3
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FACTORY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -906,7 +906,7 @@ class TestFactory:
 
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_get_batch_cooking_service_singleton(self, mock_client):
-        """Test factory retourne le même service."""
+        """Test factory retourne le mÃªme service."""
         import src.services.batch_cooking as module
         from src.services.batch_cooking import get_batch_cooking_service
         
@@ -921,9 +921,9 @@ class TestFactory:
         assert service1 is service2
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS STATUT ENUM
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -947,9 +947,9 @@ class TestStatutSessionEnum:
         assert "en_cours" in [s.value for s in StatutSessionEnum]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EDGE CASES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -974,7 +974,7 @@ class TestEdgeCases:
         """Test nom long."""
         from src.services.batch_cooking import PreparationIA
         
-        long_name = "Préparation avec un nom très très très long"
+        long_name = "PrÃ©paration avec un nom trÃ¨s trÃ¨s trÃ¨s long"
         prep = PreparationIA(
             nom=long_name,
             portions=4,
@@ -1005,20 +1005,20 @@ class TestEdgeCases:
         assert len(session.recettes) == 10
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS D'INTÉGRATION AVEC patch_db_context
-# Tests skippés car les décorateurs @with_cache et @with_db_session
-# ne peuvent pas être facilement mockés sans une vraie BD de test.
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS D'INTÃ‰GRATION AVEC patch_db_context
+# Tests skippÃ©s car les dÃ©corateurs @with_cache et @with_db_session
+# ne peuvent pas Ãªtre facilement mockÃ©s sans une vraie BD de test.
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestBatchCookingIntegration:
-    """Tests d'intégration utilisant la fixture patch_db_context."""
+    """Tests d'intÃ©gration utilisant la fixture patch_db_context."""
 
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_get_config_creates_default(self, mock_client, patch_db_context):
-        """Test get_config crée une config par défaut si inexistante."""
+        """Test get_config crÃ©e une config par dÃ©faut si inexistante."""
         from src.services.batch_cooking import BatchCookingService
         
         mock_client.return_value = Mock()
@@ -1026,12 +1026,12 @@ class TestBatchCookingIntegration:
         service = BatchCookingService()
         result = service.get_config()
         
-        # Peut créer une config par défaut ou retourner None en cas d'erreur
+        # Peut crÃ©er une config par dÃ©faut ou retourner None en cas d'erreur
         assert result is None or hasattr(result, 'jours_batch')
 
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_update_config_integration(self, mock_client, patch_db_context):
-        """Test update_config crée et met à jour la config."""
+        """Test update_config crÃ©e et met Ã  jour la config."""
         from src.services.batch_cooking import BatchCookingService
         
         mock_client.return_value = Mock()
@@ -1043,7 +1043,7 @@ class TestBatchCookingIntegration:
 
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_get_session_not_found(self, mock_client, patch_db_context):
-        """Test get_session retourne None si non trouvée."""
+        """Test get_session retourne None si non trouvÃ©e."""
         from src.services.batch_cooking import BatchCookingService
         
         mock_client.return_value = Mock()
@@ -1103,7 +1103,7 @@ class TestBatchCookingIntegration:
 
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_creer_session_empty_recettes(self, mock_client, patch_db_context):
-        """Test creer_session avec recettes vides lève ErreurValidation."""
+        """Test creer_session avec recettes vides lÃ¨ve ErreurValidation."""
         from src.services.batch_cooking import BatchCookingService
         from src.core.errors_base import ErreurValidation
         
@@ -1118,7 +1118,7 @@ class TestBatchCookingIntegration:
 
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_demarrer_session_not_found(self, mock_client, patch_db_context):
-        """Test demarrer_session session inexistante lève ErreurNonTrouve."""
+        """Test demarrer_session session inexistante lÃ¨ve ErreurNonTrouve."""
         from src.services.batch_cooking import BatchCookingService
         from src.core.errors_base import ErreurNonTrouve
         
@@ -1130,7 +1130,7 @@ class TestBatchCookingIntegration:
 
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_terminer_session_not_found(self, mock_client, patch_db_context):
-        """Test terminer_session session inexistante lève ErreurNonTrouve."""
+        """Test terminer_session session inexistante lÃ¨ve ErreurNonTrouve."""
         from src.services.batch_cooking import BatchCookingService
         from src.core.errors_base import ErreurNonTrouve
         
@@ -1142,7 +1142,7 @@ class TestBatchCookingIntegration:
 
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_demarrer_etape_not_found(self, mock_client, patch_db_context):
-        """Test demarrer_etape étape inexistante lève ErreurNonTrouve."""
+        """Test demarrer_etape Ã©tape inexistante lÃ¨ve ErreurNonTrouve."""
         from src.services.batch_cooking import BatchCookingService
         from src.core.errors_base import ErreurNonTrouve
         
@@ -1154,7 +1154,7 @@ class TestBatchCookingIntegration:
 
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_terminer_etape_not_found(self, mock_client, patch_db_context):
-        """Test terminer_etape étape inexistante lève ErreurNonTrouve."""
+        """Test terminer_etape Ã©tape inexistante lÃ¨ve ErreurNonTrouve."""
         from src.services.batch_cooking import BatchCookingService
         from src.core.errors_base import ErreurNonTrouve
         
@@ -1166,7 +1166,7 @@ class TestBatchCookingIntegration:
 
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_passer_etape_not_found(self, mock_client, patch_db_context):
-        """Test passer_etape étape inexistante lève ErreurNonTrouve."""
+        """Test passer_etape Ã©tape inexistante lÃ¨ve ErreurNonTrouve."""
         from src.services.batch_cooking import BatchCookingService
         from src.core.errors_base import ErreurNonTrouve
         
@@ -1178,7 +1178,7 @@ class TestBatchCookingIntegration:
 
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_consommer_preparation_not_found(self, mock_client, patch_db_context):
-        """Test consommer_preparation préparation inexistante lève ErreurNonTrouve."""
+        """Test consommer_preparation prÃ©paration inexistante lÃ¨ve ErreurNonTrouve."""
         from src.services.batch_cooking import BatchCookingService
         from src.core.errors_base import ErreurNonTrouve
         
@@ -1190,7 +1190,7 @@ class TestBatchCookingIntegration:
 
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_ajouter_etapes_session_not_found(self, mock_client, patch_db_context):
-        """Test ajouter_etapes session inexistante lève ErreurNonTrouve."""
+        """Test ajouter_etapes session inexistante lÃ¨ve ErreurNonTrouve."""
         from src.services.batch_cooking import BatchCookingService, EtapeBatchIA
         from src.core.errors_base import ErreurNonTrouve
         
@@ -1224,9 +1224,9 @@ class TestBatchCookingIntegration:
         assert result is None or result == 0
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS WORKFLOW COMPLET
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -1235,7 +1235,7 @@ class TestBatchCookingWorkflow:
 
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_creer_preparation_integration(self, mock_client, patch_db_context):
-        """Test creer_preparation crée une préparation."""
+        """Test creer_preparation crÃ©e une prÃ©paration."""
         from src.services.batch_cooking import BatchCookingService
         
         mock_client.return_value = Mock()
@@ -1247,7 +1247,7 @@ class TestBatchCookingWorkflow:
             conservation_jours=7
         )
         
-        # Peut retourner None ou la préparation créée
+        # Peut retourner None ou la prÃ©paration crÃ©Ã©e
         assert result is None or hasattr(result, 'nom')
 
     @patch('src.services.batch_cooking.obtenir_client_ia')
@@ -1278,9 +1278,9 @@ class TestBatchCookingWorkflow:
         assert result == [] or isinstance(result, list)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS METHODES IA SPECIFIQUES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -1289,7 +1289,7 @@ class TestGenererPlanIAIntegration:
 
     @patch('src.services.batch_cooking.obtenir_client_ia')
     def test_generer_plan_ia_empty_recettes(self, mock_client, patch_db_context):
-        """Test generer_plan_ia avec recettes vides lève ErreurValidation."""
+        """Test generer_plan_ia avec recettes vides lÃ¨ve ErreurValidation."""
         from src.services.batch_cooking import BatchCookingService
         from src.core.errors_base import ErreurValidation
         
@@ -1297,7 +1297,7 @@ class TestGenererPlanIAIntegration:
         
         service = BatchCookingService()
         
-        # Appel avec liste vide d'IDs devrait lever ErreurValidation (aucune recette trouvée)
+        # Appel avec liste vide d'IDsÂ devrait lever ErreurValidation (aucune recette trouvÃ©e)
         with pytest.raises(ErreurValidation):
             service.generer_plan_ia(
                 recettes_ids=[999999],  # ID inexistant

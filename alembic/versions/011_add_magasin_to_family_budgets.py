@@ -1,4 +1,4 @@
-"""Add magasin column to family_budgets table.
+﻿"""Add magasin column to family_budgets table.
 
 Revision ID: 011
 Revises: 010
@@ -23,7 +23,7 @@ def upgrade():
             sa.Column('magasin', sa.String(200), nullable=True)
         )
     except Exception:
-        # La colonne existe déjà, on ignore
+        # La colonne existe dÃ©jÃ , on ignore
         pass
 
 

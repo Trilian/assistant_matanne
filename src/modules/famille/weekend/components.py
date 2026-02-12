@@ -1,13 +1,13 @@
-﻿"""
+"""
 Module Sorties Weekend - Composants UI
 """
 
-from ._common import (
+from .utils import (
     st, date,
     obtenir_contexte_db, WeekendActivity,
     TYPES_ACTIVITES, METEO_OPTIONS
 )
-from .helpers import (
+from .utilitaires import (
     get_next_weekend, get_weekend_activities, get_budget_weekend,
     get_lieux_testes, get_age_jules_mois, mark_activity_done
 )
@@ -36,15 +36,15 @@ def render_planning():
     st.markdown("---")
     col1, col2 = st.columns(2)
     with col1:
-        st.metric("💰 Budget estimé", f"{budget['estime']:.0f}€")
+        st.metric("💰 Budget estime", f"{budget['estime']:.0f}€")
     with col2:
-        st.metric("💸 Dépensé", f"{budget['reel']:.0f}€")
+        st.metric("💸 Depense", f"{budget['reel']:.0f}€")
 
 
 def render_day_activities(day: date, activities: list):
-    """Affiche les activités d'un jour"""
+    """Affiche les activites d'un jour"""
     if not activities:
-        st.caption("Rien de prévu")
+        st.caption("Rien de prevu")
         if st.button(f"➕ Ajouter", key=f"add_{day}"):
             st.session_state["weekend_add_date"] = day
             st.session_state["weekend_tab"] = "add"
@@ -66,11 +66,11 @@ def render_day_activities(day: date, activities: list):
                     st.caption(f"💰 ~{act.cout_estime:.0f}€")
             
             with col2:
-                if act.statut == "planifié":
+                if act.statut == "planifie":
                     if st.button("✅", key=f"done_{act.id}", help="Marquer fait"):
                         mark_activity_done(act.id)
                         st.rerun()
-                elif act.statut == "terminé":
+                elif act.statut == "termine":
                     if act.note_lieu:
                         st.write("⭐" * act.note_lieu)
                     else:
@@ -84,19 +84,19 @@ def render_suggestions():
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        meteo = st.selectbox("🌤️ Météo", METEO_OPTIONS)
+        meteo = st.selectbox("🌤️ Meteo", METEO_OPTIONS)
     
     with col2:
         budget = st.slider("💰 Budget max", 0, 200, 50, step=10)
     
     with col3:
-        region = st.text_input("📍 Région", "Île-de-France")
+        region = st.text_input("📍 Region", "Île-de-France")
     
     age_jules = get_age_jules_mois()
     st.caption(f"👶 Jules: {age_jules} mois")
     
-    if st.button("🤖 Générer des idées", type="primary"):
-        with st.spinner("Réflexion en cours..."):
+    if st.button("🤖 Generer des idees", type="primary"):
+        with st.spinner("Reflexion en cours..."):
             try:
                 import asyncio
                 service = WeekendAIService()
@@ -117,13 +117,13 @@ def render_suggestions():
 
 
 def render_lieux_testes():
-    """Affiche les lieux déjà testés"""
-    st.subheader("🗺️ Lieux testés")
+    """Affiche les lieux dejà testes"""
+    st.subheader("🗺️ Lieux testes")
     
     lieux = get_lieux_testes()
     
     if not lieux:
-        st.info("Aucun lieu noté pour l'instant. Notez vos sorties pour les retrouver ici!")
+        st.info("Aucun lieu note pour l'instant. Notez vos sorties pour les retrouver ici!")
         return
     
     # Filtres
@@ -158,12 +158,12 @@ def render_lieux_testes():
 
 
 def render_add_activity():
-    """Formulaire d'ajout d'activité"""
-    st.subheader("➕ Ajouter une activité")
+    """Formulaire d'ajout d'activite"""
+    st.subheader("➕ Ajouter une activite")
     
     saturday, sunday = get_next_weekend()
     
-    # Préremplir avec la date si sélectionnée
+    # Preremplir avec la date si selectionnee
     default_date = st.session_state.get("weekend_add_date", saturday)
     
     with st.form("add_weekend_activity"):
@@ -187,21 +187,21 @@ def render_add_activity():
             heure = st.time_input("Heure", value=None)
         
         with col4:
-            duree = st.number_input("Durée (heures)", min_value=0.5, max_value=8.0, value=2.0, step=0.5)
+            duree = st.number_input("Duree (heures)", min_value=0.5, max_value=8.0, value=2.0, step=0.5)
         
         lieu = st.text_input("Lieu / Adresse", placeholder="Ex: 211 Av. Jean Jaurès, Paris")
         
         col5, col6 = st.columns(2)
         
         with col5:
-            cout = st.number_input("Coût estimé (€)", min_value=0.0, step=5.0)
+            cout = st.number_input("Coût estime (€)", min_value=0.0, step=5.0)
         
         with col6:
-            meteo = st.selectbox("Météo requise", ["", "ensoleillé", "couvert", "intérieur"])
+            meteo = st.selectbox("Meteo requise", ["", "ensoleille", "couvert", "interieur"])
         
         description = st.text_area("Notes", height=80)
         
-        adapte_jules = st.checkbox("Adapté à Jules", value=True)
+        adapte_jules = st.checkbox("Adapte à Jules", value=True)
         
         if st.form_submit_button("✅ Ajouter", type="primary"):
             if not titre:
@@ -220,12 +220,12 @@ def render_add_activity():
                             meteo_requise=meteo or None,
                             description=description or None,
                             adapte_jules=adapte_jules,
-                            statut="planifié",
+                            statut="planifie",
                             participants=["Anne", "Mathieu", "Jules"]
                         )
                         db.add(activity)
                         db.commit()
-                        st.success(f"✅ {titre} ajouté!")
+                        st.success(f"✅ {titre} ajoute!")
                         st.session_state.pop("weekend_add_date", None)
                         st.rerun()
                 except Exception as e:
@@ -233,14 +233,14 @@ def render_add_activity():
 
 
 def render_noter_sortie():
-    """Permet de noter une sortie terminée"""
+    """Permet de noter une sortie terminee"""
     st.subheader("⭐ Noter une sortie")
     
     try:
         with obtenir_contexte_db() as db:
-            # Activités terminées non notées
+            # Activites terminees non notees
             activities = db.query(WeekendActivity).filter(
-                WeekendActivity.statut == "terminé",
+                WeekendActivity.statut == "termine",
                 WeekendActivity.note_lieu.is_(None)
             ).all()
             
@@ -262,7 +262,7 @@ def render_noter_sortie():
                         a_refaire = st.checkbox("À refaire ?", key=f"refaire_{act.id}")
                     
                     with col2:
-                        cout_reel = st.number_input("Coût réel (€)", min_value=0.0, key=f"cout_{act.id}")
+                        cout_reel = st.number_input("Coût reel (€)", min_value=0.0, key=f"cout_{act.id}")
                         commentaire = st.text_input("Commentaire", key=f"comm_{act.id}")
                     
                     if st.button("💾 Sauvegarder", key=f"save_{act.id}"):
@@ -271,7 +271,7 @@ def render_noter_sortie():
                         act.cout_reel = cout_reel if cout_reel > 0 else None
                         act.commentaire = commentaire or None
                         db.commit()
-                        st.success("✅ Noté!")
+                        st.success("✅ Note!")
                         st.rerun()
     
     except Exception as e:

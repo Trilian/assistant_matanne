@@ -1,11 +1,11 @@
-﻿"""
-Module Planning Semaine Jules - Activités d'éveil organisées par jour.
+"""
+Module Planning Semaine Jules - Activites d'eveil organisees par jour.
 
 Pour un enfant de ~19 mois:
-- Planning hebdomadaire d'activités
-- Répartition équilibrée (motricité, langage, créativité, extérieur)
-- Suivi de ce qui a été fait
-- Suggestions IA personnalisées
+- Planning hebdomadaire d'activites
+- Repartition equilibree (motricite, langage, creativite, exterieur)
+- Suivi de ce qui a ete fait
+- Suggestions IA personnalisees
 """
 
 import streamlit as st
@@ -15,6 +15,7 @@ import random
 
 from src.core.database import obtenir_contexte_db
 from src.core.models import ChildProfile
+from src.modules.shared.constantes import JOURS_SEMAINE
 
 
 # ═══════════════════════════════════════════════════════════
@@ -30,8 +31,8 @@ CATEGORIES_ACTIVITES = {
             {"nom": "Danse sur musique", "duree": 10, "desc": "Bouger librement sur comptines"},
             {"nom": "Jeu de ballon", "duree": 15, "desc": "Rouler, lancer, attraper"},
             {"nom": "Monter/descendre escalier", "duree": 10, "desc": "Avec aide, alterner les pieds"},
-            {"nom": "Porteur/trotteur", "duree": 20, "desc": "Se déplacer dans la maison"},
-            {"nom": "Yoga bébé", "duree": 10, "desc": "Imiter des postures animaux"},
+            {"nom": "Porteur/trotteur", "duree": 20, "desc": "Se deplacer dans la maison"},
+            {"nom": "Yoga bebe", "duree": 10, "desc": "Imiter des postures animaux"},
         ]
     },
     "langage": {
@@ -41,9 +42,9 @@ CATEGORIES_ACTIVITES = {
             {"nom": "Lecture interactive", "duree": 15, "desc": "Pointer et nommer les images"},
             {"nom": "Comptines gestuelles", "duree": 10, "desc": "Ainsi font font, Petit escargot..."},
             {"nom": "Nommer les objets", "duree": 10, "desc": "Lors du bain, repas, habillage"},
-            {"nom": "Imagier sonore", "duree": 10, "desc": "Sons animaux, véhicules"},
-            {"nom": "Téléphone jouet", "duree": 10, "desc": "Faire semblant de parler"},
-            {"nom": "Chansons répétitives", "duree": 10, "desc": "La même chanson plusieurs fois"},
+            {"nom": "Imagier sonore", "duree": 10, "desc": "Sons animaux, vehicules"},
+            {"nom": "Telephone jouet", "duree": 10, "desc": "Faire semblant de parler"},
+            {"nom": "Chansons repetitives", "duree": 10, "desc": "La même chanson plusieurs fois"},
         ]
     },
     "creativite": {
@@ -51,9 +52,9 @@ CATEGORIES_ACTIVITES = {
         "couleur": "#FF9800",
         "activites": [
             {"nom": "Peinture au doigt", "duree": 20, "desc": "Sur grande feuille ou carton"},
-            {"nom": "Pâte à modeler", "duree": 20, "desc": "Manipuler, écraser, rouler"},
+            {"nom": "Pâte à modeler", "duree": 20, "desc": "Manipuler, ecraser, rouler"},
             {"nom": "Gommettes", "duree": 15, "desc": "Coller sur une feuille"},
-            {"nom": "Dessin aux crayons", "duree": 15, "desc": "Gros crayons adaptés"},
+            {"nom": "Dessin aux crayons", "duree": 15, "desc": "Gros crayons adaptes"},
             {"nom": "Pâte à sel", "duree": 20, "desc": "Faire des formes simples"},
             {"nom": "Collage", "duree": 15, "desc": "Coller des morceaux de papier"},
         ]
@@ -63,11 +64,11 @@ CATEGORIES_ACTIVITES = {
         "couleur": "#9C27B0",
         "activites": [
             {"nom": "Bac sensoriel", "duree": 20, "desc": "Riz, pâtes, sable kinetic"},
-            {"nom": "Jeux d'eau", "duree": 20, "desc": "Transvaser, verser, éclabousser"},
+            {"nom": "Jeux d'eau", "duree": 20, "desc": "Transvaser, verser, eclabousser"},
             {"nom": "Textures à toucher", "duree": 10, "desc": "Doux, rugueux, lisse..."},
-            {"nom": "Boîte à trésors", "duree": 15, "desc": "Explorer objets du quotidien"},
+            {"nom": "Boîte à tresors", "duree": 15, "desc": "Explorer objets du quotidien"},
             {"nom": "Bulles de savon", "duree": 10, "desc": "Attraper, observer"},
-            {"nom": "Cuisine sensorielle", "duree": 15, "desc": "Toucher fruits, légumes"},
+            {"nom": "Cuisine sensorielle", "duree": 15, "desc": "Toucher fruits, legumes"},
         ]
     },
     "exterieur": {
@@ -78,25 +79,25 @@ CATEGORIES_ACTIVITES = {
             {"nom": "Bac à sable", "duree": 30, "desc": "Creuser, construire"},
             {"nom": "Arrosage plantes", "duree": 15, "desc": "Avec petit arrosoir"},
             {"nom": "Jeux au parc", "duree": 45, "desc": "Toboggan, balançoire"},
-            {"nom": "Vélo/draisienne", "duree": 20, "desc": "Dans le jardin ou parc"},
-            {"nom": "Chasse aux trésors", "duree": 20, "desc": "Trouver des objets dehors"},
+            {"nom": "Velo/draisienne", "duree": 20, "desc": "Dans le jardin ou parc"},
+            {"nom": "Chasse aux tresors", "duree": 20, "desc": "Trouver des objets dehors"},
         ]
     },
     "imitation": {
         "emoji": "🎭",
         "couleur": "#E91E63",
         "activites": [
-            {"nom": "Dînette", "duree": 20, "desc": "Préparer à manger, servir"},
-            {"nom": "Poupée/doudou", "duree": 15, "desc": "Nourrir, coucher, promener"},
-            {"nom": "Ménage avec balai", "duree": 10, "desc": "Imiter papa/maman"},
-            {"nom": "Téléphone", "duree": 10, "desc": "Faire semblant d'appeler"},
+            {"nom": "Dînette", "duree": 20, "desc": "Preparer à manger, servir"},
+            {"nom": "Poupee/doudou", "duree": 15, "desc": "Nourrir, coucher, promener"},
+            {"nom": "Menage avec balai", "duree": 10, "desc": "Imiter papa/maman"},
+            {"nom": "Telephone", "duree": 10, "desc": "Faire semblant d'appeler"},
             {"nom": "Voitures/garage", "duree": 20, "desc": "Faire rouler, garer"},
             {"nom": "Docteur", "duree": 15, "desc": "Soigner les doudous"},
         ]
     },
 }
 
-# Planning type de la semaine (équilibré)
+# Planning type de la semaine (equilibre)
 PLANNING_SEMAINE_TYPE = {
     0: ["motricite", "langage", "creativite"],  # Lundi
     1: ["sensoriel", "imitation", "exterieur"],  # Mardi
@@ -106,8 +107,6 @@ PLANNING_SEMAINE_TYPE = {
     5: ["exterieur", "imitation", "sensoriel"],  # Samedi
     6: ["creativite", "langage", "exterieur"],  # Dimanche
 }
-
-JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
 
 
 # ═══════════════════════════════════════════════════════════
@@ -124,12 +123,12 @@ def get_age_jules_mois() -> int:
                 return delta.days // 30
     except:
         pass
-    # Défaut: né le 22/06/2024
+    # Defaut: ne le 22/06/2024
     return (date.today() - date(2024, 6, 22)).days // 30
 
 
 def generer_activites_jour(jour_semaine: int, seed: Optional[int] = None) -> list[dict]:
-    """Génère les activités pour un jour de la semaine."""
+    """Genère les activites pour un jour de la semaine."""
     if seed:
         random.seed(seed)
     
@@ -151,9 +150,9 @@ def generer_activites_jour(jour_semaine: int, seed: Optional[int] = None) -> lis
 
 
 def get_planning_semaine() -> dict[int, list[dict]]:
-    """Génère le planning de la semaine courante."""
+    """Genère le planning de la semaine courante."""
     today = date.today()
-    # Seed basé sur la semaine pour consistance
+    # Seed base sur la semaine pour consistance
     week_seed = today.isocalendar()[1] * 100 + today.year
     
     planning = {}
@@ -168,19 +167,19 @@ def get_planning_semaine() -> dict[int, list[dict]]:
 # ═══════════════════════════════════════════════════════════
 
 def init_tracking():
-    """Initialise le tracking des activités faites."""
+    """Initialise le tracking des activites faites."""
     if "jules_activites_faites" not in st.session_state:
         st.session_state["jules_activites_faites"] = {}
 
 
 def marquer_fait(jour: int, activite_nom: str):
-    """Marque une activité comme faite."""
+    """Marque une activite comme faite."""
     key = f"{date.today().isocalendar()[1]}_{jour}_{activite_nom}"
     st.session_state["jules_activites_faites"][key] = True
 
 
 def est_fait(jour: int, activite_nom: str) -> bool:
-    """Vérifie si une activité est faite."""
+    """Verifie si une activite est faite."""
     key = f"{date.today().isocalendar()[1]}_{jour}_{activite_nom}"
     return st.session_state.get("jules_activites_faites", {}).get(key, False)
 
@@ -190,7 +189,7 @@ def est_fait(jour: int, activite_nom: str) -> bool:
 # ═══════════════════════════════════════════════════════════
 
 def render_activite_card(jour: int, activite: dict, index: int):
-    """Affiche une carte d'activité."""
+    """Affiche une carte d'activite."""
     fait = est_fait(jour, activite["nom"])
     
     with st.container(border=True):
@@ -221,17 +220,17 @@ def render_jour(jour_idx: int, nom_jour: str, activites: list[dict], est_aujourd
     
     with st.expander(header, expanded=est_aujourd_hui):
         if not activites:
-            st.caption("Pas d'activités planifiées")
+            st.caption("Pas d'activites planifiees")
             return
         
         # Stats du jour
         nb_faites = sum(1 for a in activites if est_fait(jour_idx, a["nom"]))
         if nb_faites == len(activites):
-            st.success(f"🎉 Toutes les activités sont faites ! ({nb_faites}/{len(activites)})")
+            st.success(f"🎉 Toutes les activites sont faites ! ({nb_faites}/{len(activites)})")
         else:
             st.progress(nb_faites / len(activites), text=f"{nb_faites}/{len(activites)} faites")
         
-        # Activités
+        # Activites
         for i, act in enumerate(activites):
             render_activite_card(jour_idx, act, i)
 
@@ -241,7 +240,7 @@ def render_vue_semaine():
     st.subheader("📅 Planning de la semaine")
     
     age = get_age_jules_mois()
-    st.caption(f"Activités adaptées pour {age} mois")
+    st.caption(f"Activites adaptees pour {age} mois")
     
     planning = get_planning_semaine()
     today = date.today()
@@ -261,7 +260,7 @@ def render_vue_semaine():
 
 
 def render_vue_aujourd_hui():
-    """Affiche les activités du jour."""
+    """Affiche les activites du jour."""
     st.subheader("🌟 Aujourd'hui")
     
     today = date.today()
@@ -272,30 +271,30 @@ def render_vue_aujourd_hui():
     st.markdown(f"**{JOURS_SEMAINE[jour_actuel]} {today.strftime('%d/%m')}**")
     
     if not activites:
-        st.info("Pas d'activités planifiées pour aujourd'hui")
+        st.info("Pas d'activites planifiees pour aujourd'hui")
         return
     
     # Stats
     nb_faites = sum(1 for a in activites if est_fait(jour_actuel, a["nom"]))
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric("Activités", len(activites))
+        st.metric("Activites", len(activites))
     with col2:
         st.metric("Faites", nb_faites)
     with col3:
         duree_totale = sum(a["duree"] for a in activites)
-        st.metric("Durée totale", f"{duree_totale} min")
+        st.metric("Duree totale", f"{duree_totale} min")
     
     st.divider()
     
-    # Activités
+    # Activites
     for i, act in enumerate(activites):
         render_activite_card(jour_actuel, act, i)
 
 
 def render_categories():
-    """Affiche toutes les catégories d'activités."""
-    st.subheader("📚 Toutes les activités par catégorie")
+    """Affiche toutes les categories d'activites."""
+    st.subheader("📚 Toutes les activites par categorie")
     
     tabs = st.tabs([
         f"{info['emoji']} {cat.capitalize()}" 
@@ -328,17 +327,17 @@ def render_stats_semaine():
     
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric("Total activités", total_activites)
+        st.metric("Total activites", total_activites)
     with col2:
-        st.metric("Réalisées", total_faites)
+        st.metric("Realisees", total_faites)
     with col3:
         pct = (total_faites / total_activites * 100) if total_activites > 0 else 0
         st.metric("Progression", f"{pct:.0f}%")
     
     st.progress(total_faites / total_activites if total_activites > 0 else 0)
     
-    # Par catégorie
-    st.markdown("**Par catégorie:**")
+    # Par categorie
+    st.markdown("**Par categorie:**")
     cat_stats = {}
     for acts in planning.values():
         for act in acts:
@@ -370,13 +369,13 @@ def render_stats_semaine():
 # ═══════════════════════════════════════════════════════════
 
 def app():
-    """Point d'entrée du module Planning Jules."""
+    """Point d'entree du module Planning Jules."""
     init_tracking()
     
-    st.title("📅 Planning Activités Jules")
+    st.title("📅 Planning Activites Jules")
     
     age = get_age_jules_mois()
-    st.caption(f"🎂 {age} mois • Planning d'éveil hebdomadaire")
+    st.caption(f"🎂 {age} mois • Planning d'eveil hebdomadaire")
     
     # Tabs principaux
     tabs = st.tabs(["🌟 Aujourd'hui", "📅 Semaine", "📊 Bilan", "📚 Catalogue"])

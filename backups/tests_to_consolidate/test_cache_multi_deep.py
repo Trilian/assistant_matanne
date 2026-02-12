@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
-Tests pour cache_multi.py - amélioration de la couverture
+Tests pour cache_multi.py - amÃ©lioration de la couverture
 
 Cible:
 - EntreeCache dataclass
@@ -18,7 +18,7 @@ class TestCacheEntry:
     """Tests pour EntreeCache dataclass."""
     
     def test_default_values(self):
-        """Valeurs par défaut correctes."""
+        """Valeurs par dÃ©faut correctes."""
         from src.core.cache_multi import EntreeCache
         
         entry = EntreeCache(value="test")
@@ -30,25 +30,25 @@ class TestCacheEntry:
         assert entry.created_at > 0
     
     def test_is_expired_false_for_new_entry(self):
-        """is_expired retourne False pour entrée fraîche."""
+        """is_expired retourne False pour entrÃ©e fraÃ®che."""
         from src.core.cache_multi import EntreeCache
         
         entry = EntreeCache(value="test", ttl=300)
         assert entry.is_expired is False
     
     def test_is_expired_true_after_ttl(self):
-        """is_expired retourne True après expiration TTL."""
+        """is_expired retourne True aprÃ¨s expiration TTL."""
         from src.core.cache_multi import EntreeCache
         
         entry = EntreeCache(
             value="test", 
-            ttl=0,  # Expire immédiatement
+            ttl=0,  # Expire immÃ©diatement
             created_at=time.time() - 1
         )
         assert entry.is_expired is True
     
     def test_age_seconds(self):
-        """age_seconds retourne l'âge correct."""
+        """age_seconds retourne l'Ã¢ge correct."""
         from src.core.cache_multi import EntreeCache
         
         entry = EntreeCache(
@@ -63,7 +63,7 @@ class TestCacheStats:
     """Tests pour StatistiquesCache dataclass."""
     
     def test_default_values(self):
-        """Valeurs par défaut à zéro."""
+        """Valeurs par dÃ©faut Ã  zÃ©ro."""
         from src.core.cache_multi import StatistiquesCache
         
         stats = StatistiquesCache()
@@ -83,7 +83,7 @@ class TestCacheStats:
         assert stats.total_hits == 17
     
     def test_hit_rate_zero_when_no_access(self):
-        """hit_rate retourne 0 si pas d'accès."""
+        """hit_rate retourne 0 si pas d'accÃ¨s."""
         from src.core.cache_multi import StatistiquesCache
         
         stats = StatistiquesCache()
@@ -114,7 +114,7 @@ class TestL1MemoryCache:
     """Tests pour CacheMemoireN1."""
     
     def test_get_missing_key_returns_none(self):
-        """get retourne None si clé absente."""
+        """get retourne None si clÃ© absente."""
         from src.core.cache_multi import CacheMemoireN1
         
         cache = CacheMemoireN1()
@@ -134,7 +134,7 @@ class TestL1MemoryCache:
         assert result.value == "hello"
     
     def test_get_updates_hits(self):
-        """get incrémente le compteur hits."""
+        """get incrÃ©mente le compteur hits."""
         from src.core.cache_multi import CacheMemoireN1, EntreeCache
         
         cache = CacheMemoireN1()
@@ -147,7 +147,7 @@ class TestL1MemoryCache:
         assert result2.hits >= 2
     
     def test_get_expired_returns_none(self):
-        """get retourne None pour entrée expirée."""
+        """get retourne None pour entrÃ©e expirÃ©e."""
         from src.core.cache_multi import CacheMemoireN1, EntreeCache
         
         cache = CacheMemoireN1()
@@ -158,7 +158,7 @@ class TestL1MemoryCache:
         assert result is None
     
     def test_lru_eviction(self):
-        """Éviction LRU quand max atteint."""
+        """Ã‰viction LRU quand max atteint."""
         from src.core.cache_multi import CacheMemoireN1, EntreeCache
         
         cache = CacheMemoireN1(max_entries=3)
@@ -166,7 +166,7 @@ class TestL1MemoryCache:
         cache.set("key1", EntreeCache(value="1"))
         cache.set("key2", EntreeCache(value="2"))
         cache.set("key3", EntreeCache(value="3"))
-        cache.set("key4", EntreeCache(value="4"))  # Devrait évincer key1
+        cache.set("key4", EntreeCache(value="4"))  # Devrait Ã©vincer key1
         
         assert cache.get("key1") is None
         assert cache.get("key4") is not None
@@ -213,7 +213,7 @@ class TestL1MemoryCache:
         assert cache.size == 0
     
     def test_size_property(self):
-        """size retourne le nombre d'entrées."""
+        """size retourne le nombre d'entrÃ©es."""
         from src.core.cache_multi import CacheMemoireN1, EntreeCache
         
         cache = CacheMemoireN1()
@@ -245,17 +245,17 @@ class TestL2SessionCache:
         """Mock streamlit session_state directement."""
         import streamlit as st
         
-        # Sauvegarder l'état original si existe
+        # Sauvegarder l'Ã©tat original si existe
         had_key = hasattr(st, 'session_state') and isinstance(st.session_state, dict)
         
-        # Créer un dict mock pour session_state
+        # CrÃ©er un dict mock pour session_state
         mock_state = {}
         
         with patch.object(st, 'session_state', mock_state):
             yield mock_state
     
     def test_get_missing_returns_none(self, mock_streamlit):
-        """get retourne None si clé absente."""
+        """get retourne None si clÃ© absente."""
         from src.core.cache_multi import CacheSessionN2
         
         cache = CacheSessionN2()
@@ -275,12 +275,12 @@ class TestL2SessionCache:
         assert result.value == {"data": "test"}
     
     def test_get_expired_returns_none(self, mock_streamlit):
-        """get retourne None pour entrée expirée."""
+        """get retourne None pour entrÃ©e expirÃ©e."""
         from src.core.cache_multi import CacheSessionN2
         
         cache = CacheSessionN2()
         
-        # Ajouter directement une entrée expirée
+        # Ajouter directement une entrÃ©e expirÃ©e
         mock_streamlit["_cache_l2_data"] = {
             "expired": {
                 "value": "old",
@@ -295,7 +295,7 @@ class TestL2SessionCache:
         assert result is None
     
     def test_remove(self, mock_streamlit):
-        """remove supprime une entrée."""
+        """remove supprime une entrÃ©e."""
         from src.core.cache_multi import CacheSessionN2, EntreeCache
         
         cache = CacheSessionN2()
@@ -330,7 +330,7 @@ class TestL2SessionCache:
         assert cache.size == 0
     
     def test_size_property(self, mock_streamlit):
-        """size retourne le nombre d'entrées."""
+        """size retourne le nombre d'entrÃ©es."""
         from src.core.cache_multi import CacheSessionN2, EntreeCache
         
         cache = CacheSessionN2()
@@ -344,11 +344,11 @@ class TestL2SessionCacheNoStreamlit:
     """Tests L2 sans contexte Streamlit."""
     
     def test_handles_no_streamlit_context(self):
-        """Gère l'absence de Streamlit gracieusement."""
+        """GÃ¨re l'absence de Streamlit gracieusement."""
         from src.core.cache_multi import CacheSessionN2, EntreeCache
         import streamlit as st
         
-        # Simuler une erreur lors de l'accès à session_state
+        # Simuler une erreur lors de l'accÃ¨s Ã  session_state
         class RaisingState:
             def __getitem__(self, key):
                 raise Exception("No ScriptRunContext")
@@ -367,4 +367,4 @@ class TestL2SessionCacheNoStreamlit:
             
             # set ne doit pas lever d'exception non plus  
             cache.set("key", EntreeCache(value="test"))
-            # Pas d'exception = succès
+            # Pas d'exception = succÃ¨s

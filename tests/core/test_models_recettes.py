@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour models/recettes.py (src/core/models/recettes.py).
 
 Tests couvrant:
@@ -25,9 +25,9 @@ from src.core.models.recettes import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 1: TESTS INGREDIENT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -86,9 +86,9 @@ class TestIngredient:
         assert hasattr(ingredient, "inventaire")
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 2: TESTS RECETTE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -99,7 +99,7 @@ class TestRecette:
         """Test création d'une recette."""
         recette = Recette(
             nom="Pâtes Carbonara",
-            description="Pâtes à l'italienne",
+            description="Pâtes Ã  l'italienne",
             temps_preparation=10,
             temps_cuisson=15,
             portions=4,
@@ -187,9 +187,9 @@ class TestRecette:
         assert isinstance(recette.cree_le, datetime)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 3: TESTS RECETTE_INGREDIENT (Association)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -225,9 +225,9 @@ class TestRecetteIngredient:
 
     def test_recette_ingredient_cascade_delete(self, db: Session):
         """Test la suppression en cascade."""
-        ingredient = Ingredient(nom="Tomate à Supprimer")
+        ingredient = Ingredient(nom="Tomate Ã  Supprimer")
         recette = Recette(
-            nom="Recette à Supprimer",
+            nom="Recette Ã  Supprimer",
             temps_preparation=10,
             temps_cuisson=20,
             portions=2,
@@ -255,9 +255,9 @@ class TestRecetteIngredient:
         assert result is None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 4: TESTS ETAPE_RECETTE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -267,7 +267,7 @@ class TestEtapeRecette:
     def test_etape_creation(self, db: Session):
         """Test création d'une étape."""
         recette = Recette(
-            nom="Recette avec Étapes",
+            nom="Recette avec Ã‰tapes",
             temps_preparation=10,
             temps_cuisson=20,
             portions=2,
@@ -298,9 +298,9 @@ class TestEtapeRecette:
         db.add(recette)
         db.commit()
         
-        etape1 = EtapeRecette(recette_id=recette.id, ordre=1, description="Étape 1")
-        etape2 = EtapeRecette(recette_id=recette.id, ordre=2, description="Étape 2")
-        etape3 = EtapeRecette(recette_id=recette.id, ordre=3, description="Étape 3")
+        etape1 = EtapeRecette(recette_id=recette.id, ordre=1, description="Ã‰tape 1")
+        etape2 = EtapeRecette(recette_id=recette.id, ordre=2, description="Ã‰tape 2")
+        etape3 = EtapeRecette(recette_id=recette.id, ordre=3, description="Ã‰tape 3")
         
         db.add_all([etape1, etape2, etape3])
         db.commit()
@@ -312,9 +312,9 @@ class TestEtapeRecette:
         assert etapes[2].ordre == 3
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 5: TESTS VERSION_RECETTE (Variantes)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -365,9 +365,9 @@ class TestVersionRecette:
         assert len(versions) == 3
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 6: TESTS HISTORIQUE_RECETTE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -422,9 +422,9 @@ class TestHistoriqueRecette:
         assert moyenne == 4.0
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 7: TESTS BATCH_MEAL
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -470,9 +470,9 @@ class TestBatchMeal:
         assert batch.recette_id == recette1.id
 
 
-# ═══════════════════════════════════════════════════════════
-# SECTION 8: TESTS D'INTÉGRATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# SECTION 8: TESTS D'INTÃ‰GRATION
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.integration
@@ -526,8 +526,8 @@ class TestRecettesIntegration:
         db.commit()
         
         # 2. Ajouter étapes
-        etape1 = EtapeRecette(recette_id=recette.id, ordre=1, description="Étape 1")
-        etape2 = EtapeRecette(recette_id=recette.id, ordre=2, description="Étape 2")
+        etape1 = EtapeRecette(recette_id=recette.id, ordre=1, description="Ã‰tape 1")
+        etape2 = EtapeRecette(recette_id=recette.id, ordre=2, description="Ã‰tape 2")
         db.add_all([etape1, etape2])
         db.commit()
         
@@ -547,9 +547,9 @@ class TestRecettesIntegration:
         assert historique.recette_id == recette.id
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SECTION 9: TESTS ADDITIONNELS POUR COUVERTURE 85%+
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -696,7 +696,7 @@ class TestRecetteNutrition:
 
 @pytest.mark.unit
 class TestRecetteIA:
-    """Tests pour les attributs liés à l'IA."""
+    """Tests pour les attributs liés Ã  l'IA."""
 
     def test_recette_genere_par_ia(self, db: Session):
         """Test flag généré par IA."""
@@ -960,7 +960,7 @@ class TestBatchMealAdvanced:
     """Tests avancés pour BatchMeal."""
 
     def test_batch_meal_portions_update(self, db: Session):
-        """Test mise à jour des portions restantes."""
+        """Test mise Ã  jour des portions restantes."""
         batch = BatchMeal(
             nom="Batch Test",
             portions_creees=10,

@@ -1,5 +1,5 @@
-﻿"""
-Module Service pour Paris Sportifs avec intégration API Football-Data
+"""
+Module Service pour Paris Sportifs avec integration API Football-Data
 """
 
 from typing import List, Dict, Any, Optional
@@ -21,7 +21,7 @@ def charger_matchs_depuis_api(championnat: str, jours: int = 7) -> List[Dict[str
         Liste des matchs au format application
     """
     try:
-        from src.domains.jeux.logic.api_football import charger_matchs_a_venir
+        from src.modules.jeux.api_football import charger_matchs_a_venir
         
         matchs_api = charger_matchs_a_venir(championnat, jours)
         
@@ -35,13 +35,13 @@ def charger_matchs_depuis_api(championnat: str, jours: int = 7) -> List[Dict[str
                 "championnat": m.get("championnat"),
                 "dom_nom": m.get("equipe_domicile"),
                 "ext_nom": m.get("equipe_exterieur"),
-                "cote_dom": 1.8,  # À récupérer depuis odds si disponibles
+                "cote_dom": 1.8,  # À recuperer depuis odds si disponibles
                 "cote_nul": 3.5,
                 "cote_ext": 4.2,
                 "source": "Football-Data API"
             })
         
-        logger.info(f"✅ {len(matchs_convertis)} matchs chargés depuis API")
+        logger.info(f"✅ {len(matchs_convertis)} matchs charges depuis API")
         return matchs_convertis
     
     except Exception as e:
@@ -57,13 +57,13 @@ def charger_classement_depuis_api(championnat: str) -> List[Dict[str, Any]]:
         championnat: Nom du championnat
         
     Returns:
-        Liste des équipes avec leurs stats
+        Liste des equipes avec leurs stats
     """
     try:
-        from src.domains.jeux.logic.api_football import charger_classement
+        from src.modules.jeux.api_football import charger_classement
         
         equipes = charger_classement(championnat)
-        logger.info(f"✅ Classement {championnat} chargé: {len(equipes)} équipes")
+        logger.info(f"✅ Classement {championnat} charge: {len(equipes)} equipes")
         return equipes
     
     except Exception as e:
@@ -73,16 +73,16 @@ def charger_classement_depuis_api(championnat: str) -> List[Dict[str, Any]]:
 
 def charger_historique_equipe_depuis_api(nom_equipe: str) -> List[Dict[str, Any]]:
     """
-    Charge l'historique des matchs d'une équipe
+    Charge l'historique des matchs d'une equipe
     
     Args:
-        nom_equipe: Nom de l'équipe
+        nom_equipe: Nom de l'equipe
         
     Returns:
-        Liste des matchs récents
+        Liste des matchs recents
     """
     try:
-        from src.domains.jeux.logic.api_football import charger_historique_equipe
+        from src.modules.jeux.api_football import charger_historique_equipe
         
         matchs = charger_historique_equipe(nom_equipe, limite=10)
         logger.info(f"✅ Historique {nom_equipe}: {len(matchs)} matchs")
@@ -95,20 +95,20 @@ def charger_historique_equipe_depuis_api(nom_equipe: str) -> List[Dict[str, Any]
 
 def synchroniser_matchs_api_vers_bd(championnat: str, jours: int = 7):
     """
-    Synchronise les matchs de l'API vers la base de données
+    Synchronise les matchs de l'API vers la base de donnees
     
-    À appeler régulièrement pour maintenir les données à jour
+    À appeler regulièrement pour maintenir les donnees à jour
     """
     try:
         from src.core.database import obtenir_contexte_db
         from src.core.models import Equipe, Match
-        from src.domains.jeux.logic.api_football import charger_matchs_a_venir
+        from src.modules.jeux.api_football import charger_matchs_a_venir
         
         matchs_api = charger_matchs_a_venir(championnat, jours)
         
         with obtenir_contexte_db() as session:
             for m_data in matchs_api:
-                # Chercher/créer les équipes
+                # Chercher/creer les equipes
                 equipe_dom = session.query(Equipe).filter_by(
                     nom=m_data.get("equipe_domicile")
                 ).first()
@@ -147,7 +147,7 @@ def synchroniser_matchs_api_vers_bd(championnat: str, jours: int = 7):
                     session.add(equipe_ext)
                     session.flush()
                 
-                # Vérifier si le match existe
+                # Verifier si le match existe
                 match_existing = session.query(Match).filter_by(
                     api_id=m_data.get("id"),
                     championnat=championnat
@@ -161,7 +161,7 @@ def synchroniser_matchs_api_vers_bd(championnat: str, jours: int = 7):
                         championnat=championnat,
                         equipe_domicile_id=equipe_dom.id,
                         equipe_exterieur_id=equipe_ext.id,
-                        cote_domicile=1.8,  # À optimiser avec les odds réels
+                        cote_domicile=1.8,  # À optimiser avec les odds reels
                         cote_nul=3.5,
                         cote_exterieur=4.2,
                         statut_match="SCHEDULED",
@@ -171,7 +171,7 @@ def synchroniser_matchs_api_vers_bd(championnat: str, jours: int = 7):
                     session.add(match)
             
             session.commit()
-            logger.info(f"✅ BD synchronisée avec API pour {championnat}")
+            logger.info(f"✅ BD synchronisee avec API pour {championnat}")
             return True
     
     except Exception as e:
@@ -181,12 +181,12 @@ def synchroniser_matchs_api_vers_bd(championnat: str, jours: int = 7):
 
 def synchroniser_resultats_matches_api(championnat: str):
     """
-    Met à jour les résultats des matchs joués
+    Met à jour les resultats des matchs joues
     """
     try:
         from src.core.database import obtenir_contexte_db
         from src.core.models import Match
-        from src.domains.jeux.logic.api_football import charger_matchs_a_venir
+        from src.modules.jeux.api_football import charger_matchs_a_venir
         
         # Charger les matchs "FINISHED" depuis l'API
         matchs_api = charger_matchs_a_venir(
@@ -209,10 +209,10 @@ def synchroniser_resultats_matches_api(championnat: str):
                     session.add(match)
             
             session.commit()
-            logger.info(f"✅ Résultats mis à jour pour {championnat}")
+            logger.info(f"✅ Resultats mis à jour pour {championnat}")
             return True
     
     except Exception as e:
-        logger.error(f"❌ Erreur mise à jour résultats: {e}")
+        logger.error(f"❌ Erreur mise à jour resultats: {e}")
         return False
 

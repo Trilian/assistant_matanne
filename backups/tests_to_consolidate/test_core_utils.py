@@ -1,4 +1,4 @@
-"""Phase 17: Tests pour modules core (constantes, erreurs, validateurs).
+﻿"""Phase 17: Tests pour modules core (constantes, erreurs, validateurs).
 
 Ces tests couvrent:
 - Classes d'erreur personnalisees
@@ -37,7 +37,7 @@ class TestErrorClasses:
 
 
 # NOTE: Les classes TestValidationFunctions, TestConstants, TestUtilityFunctions
-# ont été supprimées car elles testaient des modules inexistants:
+# ont Ã©tÃ© supprimÃ©es car elles testaient des modules inexistants:
 # - src.core.validators
 # - src.core.utils  
 # - Constantes MAX_BATCH_SIZE, TIMEOUT_SECONDES

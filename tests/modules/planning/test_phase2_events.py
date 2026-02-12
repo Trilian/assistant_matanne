@@ -1,4 +1,4 @@
-"""Tests Phase 2 - Planning Events (33 tests)."""
+﻿"""Tests Phase 2 - Planning Events (33 tests)."""
 
 import pytest
 

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests de couverture additionnels pour src/services/auth.py
 """
 
@@ -7,9 +7,9 @@ from unittest.mock import Mock, MagicMock, patch
 from datetime import datetime
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS INIT CLIENT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -17,7 +17,7 @@ class TestInitClient:
     """Tests pour _init_client."""
 
     def test_init_client_no_supabase_package(self):
-        """Test quand le package supabase n'est pas installé."""
+        """Test quand le package supabase n'est pas installÃ©."""
         from src.services.auth import AuthService
         
         with patch.dict('sys.modules', {'supabase': None}):
@@ -43,22 +43,22 @@ class TestInitClient:
                 assert service.is_configured is False
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS LOGIN DEMO MODE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestLoginDemoMode:
-    """Tests pour login en mode démo."""
+    """Tests pour login en mode dÃ©mo."""
 
     def test_login_demo_admin_account(self):
-        """Test login avec compte admin démo."""
+        """Test login avec compte admin dÃ©mo."""
         from src.services.auth import AuthService, Role
         
         with patch.object(AuthService, '_init_client'):
             service = AuthService()
-            service._client = None  # Mode démo
+            service._client = None  # Mode dÃ©mo
             
             with patch('src.services.auth.st') as mock_st:
                 mock_st.session_state = {}
@@ -72,12 +72,12 @@ class TestLoginDemoMode:
         assert result.user.role == Role.ADMIN
 
     def test_login_demo_membre_account(self):
-        """Test login avec compte membre démo."""
+        """Test login avec compte membre dÃ©mo."""
         from src.services.auth import AuthService, Role
         
         with patch.object(AuthService, '_init_client'):
             service = AuthService()
-            service._client = None  # Mode démo
+            service._client = None  # Mode dÃ©mo
             
             with patch('src.services.auth.st') as mock_st:
                 mock_st.session_state = {}
@@ -91,12 +91,12 @@ class TestLoginDemoMode:
         assert result.user.role == Role.MEMBRE
 
     def test_login_demo_invalid_password(self):
-        """Test login démo avec mauvais mot de passe."""
+        """Test login dÃ©mo avec mauvais mot de passe."""
         from src.services.auth import AuthService
         
         with patch.object(AuthService, '_init_client'):
             service = AuthService()
-            service._client = None  # Mode démo
+            service._client = None  # Mode dÃ©mo
             
             result = service.login(
                 email="anne@matanne.fr",
@@ -104,15 +104,15 @@ class TestLoginDemoMode:
             )
         
         assert result.success is False
-        assert "démo" in result.message.lower() or "demo" in result.message.lower()
+        assert "dÃ©mo" in result.message.lower() or "demo" in result.message.lower()
 
     def test_login_demo_unknown_email(self):
-        """Test login démo avec email inconnu."""
+        """Test login dÃ©mo avec email inconnu."""
         from src.services.auth import AuthService
         
         with patch.object(AuthService, '_init_client'):
             service = AuthService()
-            service._client = None  # Mode démo
+            service._client = None  # Mode dÃ©mo
             
             result = service.login(
                 email="unknown@email.com",
@@ -122,22 +122,22 @@ class TestLoginDemoMode:
         assert result.success is False
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SIGNUP
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestSignupCoverage:
-    """Tests supplémentaires pour signup."""
+    """Tests supplÃ©mentaires pour signup."""
 
     def test_signup_not_configured(self):
-        """Test signup quand service non configuré."""
+        """Test signup quand service non configurÃ©."""
         from src.services.auth import AuthService
         
         with patch.object(AuthService, '_init_client'):
             service = AuthService()
-            service._client = None  # Non configuré
+            service._client = None  # Non configurÃ©
             
             result = service.signup(
                 email="test@example.com",
@@ -148,7 +148,7 @@ class TestSignupCoverage:
         assert result.error_code == "NOT_CONFIGURED"
 
     def test_signup_response_no_user(self):
-        """Test signup avec réponse sans user."""
+        """Test signup avec rÃ©ponse sans user."""
         from src.services.auth import AuthService
         
         with patch.object(AuthService, '_init_client'):
@@ -167,9 +167,9 @@ class TestSignupCoverage:
         assert result.success is False
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS LOGOUT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -177,7 +177,7 @@ class TestLogoutCoverage:
     """Tests pour logout."""
 
     def test_logout_success(self):
-        """Test déconnexion réussie."""
+        """Test dÃ©connexion rÃ©ussie."""
         from src.services.auth import AuthService
         
         with patch.object(AuthService, '_init_client'):
@@ -192,7 +192,7 @@ class TestLogoutCoverage:
         assert result.success is True
 
     def test_logout_not_configured(self):
-        """Test déconnexion sans configuration."""
+        """Test dÃ©connexion sans configuration."""
         from src.services.auth import AuthService
         
         with patch.object(AuthService, '_init_client'):
@@ -208,9 +208,9 @@ class TestLogoutCoverage:
         assert result is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS JWT VALIDATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -230,7 +230,7 @@ class TestJWTValidation:
         assert result is None
 
     def test_validate_token_success(self):
-        """Test validation token réussie."""
+        """Test validation token rÃ©ussie."""
         from src.services.auth import AuthService
         
         with patch.object(AuthService, '_init_client'):
@@ -267,7 +267,7 @@ class TestJWTValidation:
         assert result is None
 
     def test_decode_jwt_payload(self):
-        """Test décodage payload JWT."""
+        """Test dÃ©codage payload JWT."""
         from src.services.auth import AuthService
         import base64
         import json
@@ -275,20 +275,20 @@ class TestJWTValidation:
         with patch.object(AuthService, '_init_client'):
             service = AuthService()
             
-            # Créer un token JWT factice (header.payload.signature)
+            # CrÃ©er un token JWT factice (header.payload.signature)
             payload = {"sub": "user123", "email": "test@example.com"}
             payload_b64 = base64.urlsafe_b64encode(json.dumps(payload).encode()).decode().rstrip("=")
             fake_token = f"header.{payload_b64}.signature"
             
             result = service.decode_jwt_payload(fake_token)
         
-        # Le résultat devrait être le payload décodé ou None
+        # Le rÃ©sultat devrait Ãªtre le payload dÃ©codÃ© ou None
         assert result is None or isinstance(result, dict)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SESSION MANAGEMENT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -331,7 +331,7 @@ class TestSessionManagement:
                 
                 service._clear_session()
                 
-                # Les clés devraient être supprimées
+                # Les clÃ©s devraient Ãªtre supprimÃ©es
                 assert service.SESSION_KEY not in mock_st.session_state
                 assert service.USER_KEY not in mock_st.session_state
 
@@ -363,9 +363,9 @@ class TestSessionManagement:
         assert result is False
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FACTORY FUNCTION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -380,21 +380,21 @@ class TestFactoryFunction:
             service1 = get_auth_service()
             service2 = get_auth_service()
         
-        # Devrait être la même instance (singleton)
+        # Devrait Ãªtre la mÃªme instance (singleton)
         assert service1 is service2
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS DECORATORS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestDecorators:
-    """Tests pour les décorateurs."""
+    """Tests pour les dÃ©corateurs."""
 
     def test_require_authenticated_decorator_authenticated(self):
-        """Test décorateur require_authenticated avec utilisateur."""
+        """Test dÃ©corateur require_authenticated avec utilisateur."""
         from src.services.auth import require_authenticated, AuthService, UserProfile, Role
         
         @require_authenticated
@@ -413,7 +413,7 @@ class TestDecorators:
         assert result == "success"
 
     def test_require_authenticated_decorator_not_authenticated(self):
-        """Test décorateur require_authenticated sans utilisateur."""
+        """Test dÃ©corateur require_authenticated sans utilisateur."""
         from src.services.auth import require_authenticated
         
         @require_authenticated
@@ -432,7 +432,7 @@ class TestDecorators:
         assert result is None
 
     def test_require_role_decorator_has_role(self):
-        """Test décorateur require_role avec bon rôle."""
+        """Test dÃ©corateur require_role avec bon rÃ´le."""
         from src.services.auth import require_role, Role, UserProfile
         
         @require_role(Role.ADMIN)
@@ -451,7 +451,7 @@ class TestDecorators:
         assert result == "admin_success"
 
     def test_require_role_decorator_wrong_role(self):
-        """Test décorateur require_role avec mauvais rôle."""
+        """Test dÃ©corateur require_role avec mauvais rÃ´le."""
         from src.services.auth import require_role, Role, UserProfile
         
         @require_role(Role.ADMIN)  
@@ -471,9 +471,9 @@ class TestDecorators:
         assert result is None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS UI RENDER FUNCTIONS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -508,9 +508,9 @@ class TestRenderFunctions:
                 render_login_form()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS UPDATE PROFILE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -531,7 +531,7 @@ class TestUpdateProfile:
         assert result.error_code == "NOT_CONFIGURED"
 
     def test_update_profile_not_authenticated(self):
-        """Test update_profile sans être connecté."""
+        """Test update_profile sans Ãªtre connectÃ©."""
         from src.services.auth import AuthService
         
         with patch.object(AuthService, '_init_client'):
@@ -544,7 +544,7 @@ class TestUpdateProfile:
         assert result.success is False
 
     def test_update_profile_success(self):
-        """Test update_profile réussi."""
+        """Test update_profile rÃ©ussi."""
         from src.services.auth import AuthService, UserProfile, Role
         
         user = UserProfile(id="user1", email="test@example.com", role=Role.MEMBRE)
@@ -590,9 +590,9 @@ class TestUpdateProfile:
         assert result.success is False
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS DELETE ACCOUNT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -616,7 +616,7 @@ class TestDeleteAccount:
                 assert True
 
     def test_delete_account_not_authenticated(self):
-        """Test delete_account sans être connecté."""
+        """Test delete_account sans Ãªtre connectÃ©."""
         from src.services.auth import AuthService
         
         with patch.object(AuthService, '_init_client'):
@@ -631,9 +631,9 @@ class TestDeleteAccount:
                 assert True
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CHANGE PASSWORD
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -653,7 +653,7 @@ class TestChangePassword:
         assert result.success is False
 
     def test_change_password_success(self):
-        """Test change_password réussi."""
+        """Test change_password rÃ©ussi."""
         from src.services.auth import AuthService
         
         with patch.object(AuthService, '_init_client'):
@@ -678,9 +678,9 @@ class TestChangePassword:
         assert result.success is False
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS RENDER USER MENU
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -688,7 +688,7 @@ class TestRenderUserMenu:
     """Tests pour render_user_menu."""
 
     def test_render_user_menu_authenticated(self):
-        """Test render_user_menu avec utilisateur connecté."""
+        """Test render_user_menu avec utilisateur connectÃ©."""
         from src.services.auth import render_user_menu, UserProfile, Role
         
         user = UserProfile(id="user1", email="test@example.com", role=Role.MEMBRE, prenom="Test")
@@ -729,9 +729,9 @@ class TestRenderUserMenu:
                 render_user_menu()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS RENDER PROFILE SETTINGS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -778,17 +778,17 @@ class TestRenderProfileSettings:
                 render_profile_settings()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS LOGIN NORMAL MODE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestLoginNormalMode:
-    """Tests pour login en mode normal (Supabase configuré)."""
+    """Tests pour login en mode normal (Supabase configurÃ©)."""
 
     def test_login_normal_success(self):
-        """Test login via Supabase réussi."""
+        """Test login via Supabase rÃ©ussi."""
         from src.services.auth import AuthService
         
         with patch.object(AuthService, '_init_client'):
@@ -813,7 +813,7 @@ class TestLoginNormalMode:
         assert result.user is not None
 
     def test_login_normal_no_user_response(self):
-        """Test login via Supabase sans user dans réponse."""
+        """Test login via Supabase sans user dans rÃ©ponse."""
         from src.services.auth import AuthService
         
         with patch.object(AuthService, '_init_client'):
@@ -844,17 +844,17 @@ class TestLoginNormalMode:
         assert result.success is False
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ADDITIONAL COVERAGE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestAdditionalCoverage:
-    """Tests supplémentaires pour atteindre 80%."""
+    """Tests supplÃ©mentaires pour atteindre 80%."""
 
     def test_signup_no_data_to_update(self):
-        """Test update_profile sans données."""
+        """Test update_profile sans donnÃ©es."""
         from src.services.auth import AuthService, UserProfile, Role
         
         user = UserProfile(id="user1", email="test@example.com", role=Role.MEMBRE)
@@ -876,14 +876,14 @@ class TestAdditionalCoverage:
         
         with patch.object(AuthService, '_init_client'):
             service = AuthService()
-            service._client = None  # Mode démo
+            service._client = None  # Mode dÃ©mo
             
             # Email vide
             result = service.login("", "password123")
             assert result.success is False
 
     def test_validate_token_response_no_user(self):
-        """Test validate_token avec réponse sans user."""
+        """Test validate_token avec rÃ©ponse sans user."""
         from src.services.auth import AuthService
         
         with patch.object(AuthService, '_init_client'):
@@ -899,7 +899,7 @@ class TestAdditionalCoverage:
         assert result is None
 
     def test_get_user_history_placeholder(self):
-        """Test placeholder pour couverture supplémentaire."""
+        """Test placeholder pour couverture supplÃ©mentaire."""
         from src.services.auth import AuthService, Role, UserProfile
         
         with patch.object(AuthService, '_init_client'):
@@ -944,7 +944,7 @@ class TestAdditionalCoverage:
         assert result is True
 
     def test_update_profile_response_no_user(self):
-        """Test update_profile sans user dans réponse."""
+        """Test update_profile sans user dans rÃ©ponse."""
         from src.services.auth import AuthService, UserProfile, Role
         
         user = UserProfile(id="user1", email="test@example.com", role=Role.MEMBRE)
@@ -964,12 +964,12 @@ class TestAdditionalCoverage:
         assert result.success is False
 
     def test_login_invite_account(self):
-        """Test login avec compte invite démo."""
+        """Test login avec compte invite dÃ©mo."""
         from src.services.auth import AuthService, Role
         
         with patch.object(AuthService, '_init_client'):
             service = AuthService()
-            service._client = None  # Mode démo
+            service._client = None  # Mode dÃ©mo
             
             with patch('src.services.auth.st') as mock_st:
                 mock_st.session_state = {}
@@ -983,7 +983,7 @@ class TestAdditionalCoverage:
         assert result.user.role == Role.INVITE
 
     def test_signup_creates_user_correctly(self):
-        """Test signup crée correctement l'utilisateur."""
+        """Test signup crÃ©e correctement l'utilisateur."""
         from src.services.auth import AuthService
         
         with patch.object(AuthService, '_init_client'):

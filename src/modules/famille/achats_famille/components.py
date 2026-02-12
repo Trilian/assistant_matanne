@@ -1,13 +1,13 @@
-﻿"""
+"""
 Module Achats Famille - Composants UI
 """
 
-from ._common import (
+from .utils import (
     st, date,
     obtenir_contexte_db, FamilyPurchase,
     CATEGORIES, PRIORITES
 )
-from .helpers import (
+from .utilitaires import (
     get_all_purchases, get_purchases_by_groupe, get_stats,
     mark_as_bought, delete_purchase
 )
@@ -28,14 +28,14 @@ def render_dashboard():
         st.metric("⚠️ Urgents", stats["urgents"])
     
     with col3:
-        st.metric("💰 Budget estimé", f"{stats['total_estime']:.0f}€")
+        st.metric("💰 Budget estime", f"{stats['total_estime']:.0f}€")
     
     with col4:
-        st.metric("✅ Achetés", stats["achetes"])
+        st.metric("✅ Achetes", stats["achetes"])
     
     # Liste des urgents
     st.markdown("---")
-    st.markdown("**🔴 À acheter en priorité:**")
+    st.markdown("**🔴 À acheter en priorite:**")
     
     try:
         with obtenir_contexte_db() as db:
@@ -68,10 +68,10 @@ def render_liste_groupe(groupe: str, titre: str):
     achats = get_purchases_by_groupe(groupe, achete=False)
     
     if not achats:
-        st.info("Aucun article en attente dans cette catégorie")
+        st.info("Aucun article en attente dans cette categorie")
         return
     
-    # Grouper par priorité
+    # Grouper par priorite
     for prio_key in ["urgent", "haute", "moyenne", "basse", "optionnel"]:
         achats_prio = [a for a in achats if a.priorite == prio_key]
         if not achats_prio:
@@ -113,7 +113,7 @@ def render_achat_card(achat: FamilyPurchase):
                 st.write(f"~{achat.prix_estime:.0f}€")
         
         with col3:
-            if st.button("✅", key=f"buy_{achat.id}", help="Marquer acheté"):
+            if st.button("✅", key=f"buy_{achat.id}", help="Marquer achete"):
                 mark_as_bought(achat.id)
                 st.rerun()
             
@@ -133,23 +133,23 @@ def render_add_form():
         
         with col1:
             categorie = st.selectbox(
-                "Catégorie *",
+                "Categorie *",
                 list(CATEGORIES.keys()),
                 format_func=lambda x: f"{CATEGORIES[x]['emoji']} {CATEGORIES[x]['label']}"
             )
         
         with col2:
             priorite = st.selectbox(
-                "Priorité",
+                "Priorite",
                 list(PRIORITES.keys()),
-                index=2,  # Moyenne par défaut
+                index=2,  # Moyenne par defaut
                 format_func=lambda x: f"{PRIORITES[x]['emoji']} {PRIORITES[x]['label']}"
             )
         
         col3, col4 = st.columns(2)
         
         with col3:
-            prix = st.number_input("Prix estimé (€)", min_value=0.0, step=5.0)
+            prix = st.number_input("Prix estime (€)", min_value=0.0, step=5.0)
         
         with col4:
             taille = st.text_input("Taille (optionnel)")
@@ -167,7 +167,7 @@ def render_add_form():
         # Pour jouets Jules
         if "jouets" in categorie:
             age_recommande = st.number_input(
-                "Âge recommandé (mois)", 
+                "Âge recommande (mois)", 
                 min_value=0, 
                 max_value=120,
                 value=18
@@ -195,7 +195,7 @@ def render_add_form():
                         )
                         db.add(purchase)
                         db.commit()
-                        st.success(f"✅ {nom} ajouté!")
+                        st.success(f"✅ {nom} ajoute!")
                         st.rerun()
                 except Exception as e:
                     st.error(f"Erreur: {e}")
@@ -208,15 +208,15 @@ def render_historique():
     achats = get_all_purchases(achete=True)
     
     if not achats:
-        st.info("Aucun achat enregistré")
+        st.info("Aucun achat enregistre")
         return
     
-    # Trier par date d'achat (plus récent d'abord)
+    # Trier par date d'achat (plus recent d'abord)
     achats_tries = sorted(achats, key=lambda x: x.date_achat or date.min, reverse=True)
     
     # Stats
     total = sum(a.prix_reel or a.prix_estime or 0 for a in achats_tries)
-    st.metric("💰 Total dépensé", f"{total:.0f}€")
+    st.metric("💰 Total depense", f"{total:.0f}€")
     
     st.markdown("---")
     

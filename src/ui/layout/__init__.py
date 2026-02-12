@@ -1,4 +1,4 @@
-"""
+﻿"""
 Layout - Header, Sidebar, Footer, CSS
 Extraits de app.py pour meilleure maintenabilité
 """

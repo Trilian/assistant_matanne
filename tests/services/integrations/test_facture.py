@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour le service OCR de factures.
 
 Couverture cible: >80%
@@ -26,9 +26,9 @@ from src.services.integrations.facture import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
@@ -58,9 +58,9 @@ def donnees_facture_valides():
     }
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS MODÈLES DE DONNÉES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS MODÃˆLES DE DONNÃ‰ES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestDonneesFacture:
@@ -166,9 +166,9 @@ class TestResultatOCR:
         assert result.message == ""
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS PARSER DE RÉPONSES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS PARSER DE RÃ‰PONSES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestParserReponse:
@@ -269,9 +269,9 @@ class TestParserReponse:
         assert result.confiance >= 0.7
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EXTRACTION OCR
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestExtractionOCR:
@@ -326,9 +326,9 @@ class TestExtractionOCR:
             assert result.donnees is not None
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS DÉTECTION FOURNISSEUR
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS DÃ‰TECTION FOURNISSEUR
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestDetectionFournisseur:
@@ -343,8 +343,8 @@ class TestDetectionFournisseur:
         assert type_energie == "electricite"
 
     def test_detecter_electricite_de_france(self):
-        """Test détection Électricité de France."""
-        texte = "ÉLECTRICITÉ DE FRANCE - Votre facture"
+        """Test détection Ã‰lectricité de France."""
+        texte = "Ã‰LECTRICITÃ‰ DE FRANCE - Votre facture"
         nom, type_energie = detecter_fournisseur(texte)
         
         assert nom == "EDF"
@@ -415,9 +415,9 @@ class TestDetectionFournisseur:
         assert type_energie == "autre"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EXTRACTION MONTANTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestExtractionMontants:
@@ -425,14 +425,14 @@ class TestExtractionMontants:
 
     def test_extraire_montant_ttc(self):
         """Test extraction montant TTC."""
-        texte = "Total à payer: 156,78 €"
+        texte = "Total Ã  payer: 156,78 â‚¬"
         montant = extraire_montant(texte, PATTERNS_MONTANTS["montant_ttc"])
         
         assert montant == 156.78
 
     def test_extraire_montant_ttc_variante(self):
         """Test extraction montant TTC variante."""
-        texte = "Total TTC 123.45€"
+        texte = "Total TTC 123.45â‚¬"
         montant = extraire_montant(texte, PATTERNS_MONTANTS["montant_ttc"])
         
         assert montant == 123.45
@@ -452,8 +452,8 @@ class TestExtractionMontants:
         assert montant == 1250.0
 
     def test_extraire_consommation_m3(self):
-        """Test extraction consommation m³."""
-        texte = "Volume consommé: 45,5 m³"
+        """Test extraction consommation mÂ³."""
+        texte = "Volume consommé: 45,5 mÂ³"
         montant = extraire_montant(texte, PATTERNS_MONTANTS["consommation_m3"])
         
         assert montant == 45.5
@@ -474,15 +474,15 @@ class TestExtractionMontants:
 
     def test_extraire_montant_invalide(self):
         """Test montant avec format invalide."""
-        texte = "Total: ABC €"
+        texte = "Total: ABC â‚¬"
         montant = extraire_montant(texte, PATTERNS_MONTANTS["montant_ttc"])
         
         assert montant is None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PATTERNS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPatterns:
@@ -509,9 +509,9 @@ class TestPatterns:
         assert "consommation_m3" in PATTERNS_MONTANTS
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FACTORY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFactory:
@@ -523,16 +523,16 @@ class TestFactory:
         assert isinstance(service, FactureOCRService)
 
     def test_factory_nouvelle_instance(self):
-        """Test que la factory crée une nouvelle instance à chaque appel."""
+        """Test que la factory crée une nouvelle instance Ã  chaque appel."""
         s1 = get_facture_ocr_service()
         s2 = get_facture_ocr_service()
-        # La factory crée une nouvelle instance à chaque appel (pas de singleton)
+        # La factory crée une nouvelle instance Ã  chaque appel (pas de singleton)
         assert s1 is not s2
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SERVICE INIT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestServiceInit:

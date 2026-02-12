@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests complets pour src/services/planning.py
 Objectif: couverture >80%
 """
@@ -8,9 +8,9 @@ from unittest.mock import Mock, MagicMock, patch
 from datetime import date, datetime, timedelta
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MODELES PYDANTIC
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestJourPlanning:
     """Tests pour JourPlanning model."""
@@ -21,13 +21,13 @@ class TestJourPlanning:
         
         jour = JourPlanning(
             jour="Samedi",  # min 6 chars
-            dejeuner="Pâtes carbonara",
-            diner="Salade niçoise"
+            dejeuner="PÃ¢tes carbonara",
+            diner="Salade niÃ§oise"
         )
         
         assert jour.jour == "Samedi"
-        assert jour.dejeuner == "Pâtes carbonara"
-        assert jour.diner == "Salade niçoise"
+        assert jour.dejeuner == "PÃ¢tes carbonara"
+        assert jour.diner == "Salade niÃ§oise"
     
     def test_jour_planning_all_days(self):
         """Test JourPlanning for all valid days of week (min 6 chars)."""
@@ -52,7 +52,7 @@ class TestJourPlanning:
         with pytest.raises(ValidationError):
             JourPlanning(
                 jour="Lu",  # Too short
-                dejeuner="Pâtes",
+                dejeuner="PÃ¢tes",
                 diner="Soupe"
             )
     
@@ -78,14 +78,14 @@ class TestSuggestionRecettesDay:
         
         suggestion = SuggestionRecettesDay(
             jour_name="Lundi",
-            type_repas="déjeuner",
+            type_repas="dÃ©jeuner",
             suggestions=[
-                {"nom": "Poulet rôti", "description": "Délicieux", "type_proteines": "volaille"}
+                {"nom": "Poulet rÃ´ti", "description": "DÃ©licieux", "type_proteines": "volaille"}
             ]
         )
         
         assert suggestion.jour_name == "Lundi"
-        assert suggestion.type_repas == "déjeuner"
+        assert suggestion.type_repas == "dÃ©jeuner"
         assert len(suggestion.suggestions) == 1
     
     def test_suggestion_recettes_day_multiple_suggestions(self):
@@ -94,7 +94,7 @@ class TestSuggestionRecettesDay:
         
         suggestion = SuggestionRecettesDay(
             jour_name="Mardi",
-            type_repas="dîner",
+            type_repas="dÃ®ner",
             suggestions=[
                 {"nom": "Recette 1", "description": "Desc 1", "type_proteines": "poisson"},
                 {"nom": "Recette 2", "description": "Desc 2", "type_proteines": "viande"},
@@ -155,9 +155,9 @@ class TestParametresEquilibre:
             ParametresEquilibre(pates_riz_count=6)  # More than 5
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PLANNING SERVICE INIT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestPlanningServiceInit:
     """Tests for PlanningService initialization."""
@@ -184,9 +184,9 @@ class TestPlanningServiceInit:
         assert service is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PLANNING SERVICE CRUD
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestPlanningServiceCRUD:
     """Tests for CRUD operations."""
@@ -251,11 +251,11 @@ class TestPlanningServiceCRUD:
         
         mock_repas = Mock()
         mock_repas.id = 1
-        mock_repas.type_repas = "déjeuner"
+        mock_repas.type_repas = "dÃ©jeuner"
         mock_repas.date_repas = date(2026, 2, 7)
         mock_repas.recette_id = 1
         mock_repas.recette = Mock()
-        mock_repas.recette.nom = "Poulet rôti"
+        mock_repas.recette.nom = "Poulet rÃ´ti"
         mock_repas.prepare = False
         mock_repas.notes = ""
         
@@ -297,9 +297,9 @@ class TestPlanningServiceCRUD:
         result = service.get_planning_complet(planning_id=999, db=mock_session)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SUGGESTIONS EQUILIBREES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestPlanningServiceSuggestionsEquilibrees:
     """Tests for suggerer_recettes_equilibrees method."""
@@ -315,8 +315,8 @@ class TestPlanningServiceSuggestionsEquilibrees:
         # Mock recettes
         mock_recette = Mock()
         mock_recette.id = 1
-        mock_recette.nom = "Saumon grillé"
-        mock_recette.description = "Délicieux saumon"
+        mock_recette.nom = "Saumon grillÃ©"
+        mock_recette.description = "DÃ©licieux saumon"
         mock_recette.temps_preparation = 15
         mock_recette.temps_cuisson = 20
         mock_recette.type_proteines = "poisson"
@@ -380,8 +380,8 @@ class TestPlanningServiceSuggestionsEquilibrees:
         
         mock_recette = Mock()
         mock_recette.id = 1
-        mock_recette.nom = "Légumes grillés"
-        mock_recette.description = "Légumes frais"
+        mock_recette.nom = "LÃ©gumes grillÃ©s"
+        mock_recette.description = "LÃ©gumes frais"
         mock_recette.temps_preparation = 15
         mock_recette.temps_cuisson = 25
         mock_recette.type_proteines = "vegetarien"
@@ -429,9 +429,9 @@ class TestPlanningServiceSuggestionsEquilibrees:
         assert isinstance(result, list)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CREER PLANNING AVEC CHOIX
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestPlanningServiceCreerAvecChoix:
     """Tests for creer_planning_avec_choix method."""
@@ -446,7 +446,7 @@ class TestPlanningServiceCreerAvecChoix:
         
         mock_recette = Mock()
         mock_recette.id = 1
-        mock_recette.nom = "Poulet rôti"
+        mock_recette.nom = "Poulet rÃ´ti"
         
         mock_query = Mock()
         mock_query.filter.return_value = mock_query
@@ -486,12 +486,12 @@ class TestPlanningServiceCreerAvecChoix:
         )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS AGREGER COURSES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestPlanningServiceAgregerCourses:
-    """Tests for agréger_courses_pour_planning method."""
+    """Tests for agrÃ©ger_courses_pour_planning method."""
     
     def test_agreger_courses_basic(self):
         """Test aggregating shopping list from planning."""
@@ -504,7 +504,7 @@ class TestPlanningServiceAgregerCourses:
         mock_ingredient = Mock()
         mock_ingredient.nom = "Tomate"
         mock_ingredient.unite = "kg"
-        mock_ingredient.categorie = "légumes"
+        mock_ingredient.categorie = "lÃ©gumes"
         
         mock_recette_ingredient = Mock()
         mock_recette_ingredient.quantite = 0.5
@@ -528,7 +528,7 @@ class TestPlanningServiceAgregerCourses:
         mock_session = Mock()
         mock_session.query.return_value = mock_query
         
-        result = service.agréger_courses_pour_planning(planning_id=1, db=mock_session)
+        result = service.agrÃ©ger_courses_pour_planning(planning_id=1, db=mock_session)
         
         assert isinstance(result, list)
     
@@ -547,7 +547,7 @@ class TestPlanningServiceAgregerCourses:
         mock_session = Mock()
         mock_session.query.return_value = mock_query
         
-        result = service.agréger_courses_pour_planning(planning_id=999, db=mock_session)
+        result = service.agrÃ©ger_courses_pour_planning(planning_id=999, db=mock_session)
         
         assert result == []
     
@@ -569,14 +569,14 @@ class TestPlanningServiceAgregerCourses:
         mock_session = Mock()
         mock_session.query.return_value = mock_query
         
-        result = service.agréger_courses_pour_planning(planning_id=1, db=mock_session)
+        result = service.agrÃ©ger_courses_pour_planning(planning_id=1, db=mock_session)
         
         assert result == []
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GENERER PLANNING IA
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestPlanningServiceGenererIA:
     """Tests for generer_planning_ia method."""
@@ -595,7 +595,7 @@ class TestPlanningServiceGenererIA:
         with patch.object(service, 'call_with_list_parsing_sync') as mock_ia:
             mock_jour = Mock()
             mock_jour.jour = "Lundi"
-            mock_jour.dejeuner = "Pâtes"
+            mock_jour.dejeuner = "PÃ¢tes"
             mock_jour.diner = "Soupe"
             mock_ia.return_value = [mock_jour] * 7
             
@@ -649,9 +649,9 @@ class TestPlanningServiceGenererIA:
                 )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MODULE EXPORTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestModuleExports:
     """Tests for module exports."""

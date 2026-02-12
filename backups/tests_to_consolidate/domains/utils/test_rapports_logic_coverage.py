@@ -1,13 +1,13 @@
-"""
+﻿"""
 Tests de couverture pour rapports_logic.py
-Objectif: Atteindre ≥80% de couverture
+Objectif: Atteindre â‰¥80% de couverture
 """
 
 import pytest
 from datetime import date, timedelta
 from typing import Dict, Any, List
 
-from src.domains.utils.logic.rapports_logic import (
+from src.modules.outils.logic.rapports_logic import (
     generer_rapport_synthese,
     calculer_statistiques_periode,
     generer_section_recettes,
@@ -21,16 +21,16 @@ from src.domains.utils.logic.rapports_logic import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GENERER RAPPORT SYNTHESE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGenererRapportSynthese:
     """Tests pour generer_rapport_synthese."""
     
     def test_rapport_jour(self):
-        """Génère rapport journalier."""
+        """GÃ©nÃ¨re rapport journalier."""
         data = {"recettes": [1, 2], "courses": [1]}
         
         result = generer_rapport_synthese(data, "jour")
@@ -41,7 +41,7 @@ class TestGenererRapportSynthese:
         assert result["date_debut"] == date.today() - timedelta(days=1)
         
     def test_rapport_semaine(self):
-        """Génère rapport hebdomadaire."""
+        """GÃ©nÃ¨re rapport hebdomadaire."""
         data = {"recettes": [1, 2, 3]}
         
         result = generer_rapport_synthese(data, "semaine")
@@ -50,7 +50,7 @@ class TestGenererRapportSynthese:
         assert result["date_debut"] == date.today() - timedelta(days=7)
         
     def test_rapport_mois(self):
-        """Génère rapport mensuel (défaut)."""
+        """GÃ©nÃ¨re rapport mensuel (dÃ©faut)."""
         data = {"recettes": [], "activites": [1, 2]}
         
         result = generer_rapport_synthese(data, "mois")
@@ -59,7 +59,7 @@ class TestGenererRapportSynthese:
         assert result["date_debut"] == date.today() - timedelta(days=30)
         
     def test_rapport_annee(self):
-        """Génère rapport annuel."""
+        """GÃ©nÃ¨re rapport annuel."""
         data = {"inventaire": [1, 2, 3, 4]}
         
         result = generer_rapport_synthese(data, "annee")
@@ -68,7 +68,7 @@ class TestGenererRapportSynthese:
         assert result["date_debut"] == date.today() - timedelta(days=365)
         
     def test_statistiques_comptees(self):
-        """Statistiques comptent les éléments."""
+        """Statistiques comptent les Ã©lÃ©ments."""
         data = {
             "recettes": [1, 2, 3],
             "courses": [1, 2],
@@ -84,29 +84,29 @@ class TestGenererRapportSynthese:
         assert result["statistiques"]["inventaire"] == 0
         
     def test_data_vide(self):
-        """Data vide génère zéros."""
+        """Data vide gÃ©nÃ¨re zÃ©ros."""
         result = generer_rapport_synthese({})
         
         assert result["statistiques"]["recettes"] == 0
         assert result["statistiques"]["courses"] == 0
         
     def test_contient_date_generation(self):
-        """Contient date de génération."""
+        """Contient date de gÃ©nÃ©ration."""
         result = generer_rapport_synthese({})
         
         assert result["date_generation"] == date.today()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CALCULER STATISTIQUES PERIODE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalculerStatistiquesPeriode:
     """Tests pour calculer_statistiques_periode."""
     
     def test_items_dans_periode(self):
-        """Compte les items dans la période."""
+        """Compte les items dans la pÃ©riode."""
         items = [
             {"date": date(2024, 1, 15)},
             {"date": date(2024, 1, 16)},
@@ -122,7 +122,7 @@ class TestCalculerStatistiquesPeriode:
         assert result["total"] == 2  # 15 et 16
         
     def test_items_hors_periode(self):
-        """Items hors période non comptés."""
+        """Items hors pÃ©riode non comptÃ©s."""
         items = [
             {"date": date(2024, 1, 10)},
             {"date": date(2024, 1, 20)},
@@ -168,7 +168,7 @@ class TestCalculerStatistiquesPeriode:
         assert result["total"] == 1
         
     def test_items_sans_date(self):
-        """Items sans date ignorés."""
+        """Items sans date ignorÃ©s."""
         items = [
             {"nom": "test"},
             {"date": date(2024, 1, 15)},
@@ -183,9 +183,9 @@ class TestCalculerStatistiquesPeriode:
         assert result["total"] == 1
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GENERER SECTION RECETTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGenererSectionRecettes:
@@ -201,7 +201,7 @@ class TestGenererSectionRecettes:
     def test_compte_total(self):
         """Compte le total des recettes."""
         recettes = [
-            {"nom": "Pâtes"},
+            {"nom": "PÃ¢tes"},
             {"nom": "Riz"},
             {"nom": "Salade"}
         ]
@@ -213,18 +213,18 @@ class TestGenererSectionRecettes:
     def test_par_type(self):
         """Groupe par type de repas."""
         recettes = [
-            {"type_repas": "déjeuner"},
-            {"type_repas": "déjeuner"},
-            {"type_repas": "dîner"},
+            {"type_repas": "dÃ©jeuner"},
+            {"type_repas": "dÃ©jeuner"},
+            {"type_repas": "dÃ®ner"},
         ]
         
         result = generer_section_recettes(recettes, "mois")
         
-        assert result["par_type"]["déjeuner"] == 2
-        assert result["par_type"]["dîner"] == 1
+        assert result["par_type"]["dÃ©jeuner"] == 2
+        assert result["par_type"]["dÃ®ner"] == 1
         
     def test_par_difficulte(self):
-        """Groupe par difficulté."""
+        """Groupe par difficultÃ©."""
         recettes = [
             {"difficulte": "facile"},
             {"difficulte": "facile"},
@@ -253,7 +253,7 @@ class TestGenererSectionRecettes:
         assert result["moyenne_par_jour"] == 1.0
         
     def test_moyenne_autre_periode(self):
-        """Moyenne = total pour autre période."""
+        """Moyenne = total pour autre pÃ©riode."""
         recettes = [{"nom": "Test"}]
         
         result = generer_section_recettes(recettes, "semaine")
@@ -261,9 +261,9 @@ class TestGenererSectionRecettes:
         assert result["moyenne_par_jour"] == 1
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GENERER SECTION COURSES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGenererSectionCourses:
@@ -278,7 +278,7 @@ class TestGenererSectionCourses:
         assert result["taux_completion"] == 0
         
     def test_compte_achetes(self):
-        """Compte les articles achetés."""
+        """Compte les articles achetÃ©s."""
         courses = [
             {"achete": True},
             {"achete": True},
@@ -315,7 +315,7 @@ class TestGenererSectionCourses:
         assert result["montant_total"] == 35.0  # 10*2 + 5*3
         
     def test_montant_sans_quantite(self):
-        """Quantité par défaut = 1."""
+        """QuantitÃ© par dÃ©faut = 1."""
         courses = [
             {"prix": 10.0},
         ]
@@ -325,22 +325,22 @@ class TestGenererSectionCourses:
         assert result["montant_total"] == 10.0
         
     def test_par_categorie(self):
-        """Groupe par catégorie."""
+        """Groupe par catÃ©gorie."""
         courses = [
             {"categorie": "Fruits"},
             {"categorie": "Fruits"},
-            {"categorie": "Légumes"},
+            {"categorie": "LÃ©gumes"},
         ]
         
         result = generer_section_courses(courses)
         
         assert result["par_categorie"]["Fruits"] == 2
-        assert result["par_categorie"]["Légumes"] == 1
+        assert result["par_categorie"]["LÃ©gumes"] == 1
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GENERER SECTION ACTIVITES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGenererSectionActivites:
@@ -354,7 +354,7 @@ class TestGenererSectionActivites:
         assert result["cout_moyen"] == 0
         
     def test_par_type(self):
-        """Groupe par type d'activité."""
+        """Groupe par type d'activitÃ©."""
         activites = [
             {"type": "sport"},
             {"type": "sport"},
@@ -367,7 +367,7 @@ class TestGenererSectionActivites:
         assert result["par_type"]["culture"] == 1
         
     def test_cout_total(self):
-        """Calcule le coût total."""
+        """Calcule le coÃ»t total."""
         activites = [
             {"cout": 20.0},
             {"cout": 30.0},
@@ -378,7 +378,7 @@ class TestGenererSectionActivites:
         assert result["cout_total"] == 50.0
         
     def test_cout_moyen(self):
-        """Calcule le coût moyen."""
+        """Calcule le coÃ»t moyen."""
         activites = [
             {"cout": 20.0},
             {"cout": 40.0},
@@ -389,16 +389,16 @@ class TestGenererSectionActivites:
         assert result["cout_moyen"] == 30.0
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS COMPARER PERIODES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestComparerPeriodes:
     """Tests pour comparer_periodes."""
     
     def test_hausse(self):
-        """Détecte une hausse > 10%."""
+        """DÃ©tecte une hausse > 10%."""
         periode1 = {"recettes": [1, 2, 3, 4, 5]}  # 5
         periode2 = {"recettes": [1, 2, 3, 4, 5, 6, 7]}  # 7
         
@@ -408,7 +408,7 @@ class TestComparerPeriodes:
         assert result["recettes"]["evolution"] == 2
         
     def test_baisse(self):
-        """Détecte une baisse > 10%."""
+        """DÃ©tecte une baisse > 10%."""
         periode1 = {"recettes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}  # 10
         periode2 = {"recettes": [1, 2, 3, 4, 5]}  # 5
         
@@ -418,7 +418,7 @@ class TestComparerPeriodes:
         assert result["recettes"]["pourcentage"] == -50.0
         
     def test_stable(self):
-        """Détecte stabilité (-10% à +10%)."""
+        """DÃ©tecte stabilitÃ© (-10% Ã  +10%)."""
         periode1 = {"recettes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}  # 10
         periode2 = {"recettes": [1, 2, 3, 4, 5, 6, 7, 8, 9]}  # 9 = -10%
         
@@ -427,7 +427,7 @@ class TestComparerPeriodes:
         assert result["recettes"]["tendance"] == "stable"
         
     def test_periode1_vide(self):
-        """Période 1 vide = pas d'évolution."""
+        """PÃ©riode 1 vide = pas d'Ã©volution."""
         periode1 = {"recettes": []}
         periode2 = {"recettes": [1, 2, 3]}
         
@@ -437,7 +437,7 @@ class TestComparerPeriodes:
         assert result["recettes"]["evolution"] == 0
         
     def test_compare_toutes_categories(self):
-        """Compare recettes, courses et activités."""
+        """Compare recettes, courses et activitÃ©s."""
         periode1 = {
             "recettes": [1, 2],
             "courses": [1],
@@ -456,9 +456,9 @@ class TestComparerPeriodes:
         assert "activites" in result
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FORMATER RAPPORT TEXTE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFormaterRapportTexte:
@@ -478,7 +478,7 @@ class TestFormaterRapportTexte:
                 "courses": 15
             },
             "sections": [
-                {"titre": "📅 Recettes", "total": 30}
+                {"titre": "ðŸ“… Recettes", "total": 30}
             ]
         }
     
@@ -489,7 +489,7 @@ class TestFormaterRapportTexte:
         assert "RAPPORT TEST" in result
         
     def test_contient_periode(self, rapport_test):
-        """Texte contient la période."""
+        """Texte contient la pÃ©riode."""
         result = formater_rapport_texte(rapport_test)
         
         assert "mois" in result
@@ -505,7 +505,7 @@ class TestFormaterRapportTexte:
         """Texte contient les sections."""
         result = formater_rapport_texte(rapport_test)
         
-        assert "DÉTAILS PAR SECTION" in result
+        assert "DÃ‰TAILS PAR SECTION" in result
         
     def test_rapport_sans_sections(self):
         """Rapport sans sections."""
@@ -520,9 +520,9 @@ class TestFormaterRapportTexte:
         assert "TEST" in result
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FORMATER RAPPORT MARKDOWN
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFormaterRapportMarkdown:
@@ -542,7 +542,7 @@ class TestFormaterRapportMarkdown:
                 "activites": 5
             },
             "sections": [
-                {"titre": "Cuisine", "total": 14, "par_type": {"déjeuner": 7, "dîner": 7}}
+                {"titre": "Cuisine", "total": 14, "par_type": {"dÃ©jeuner": 7, "dÃ®ner": 7}}
             ]
         }
     
@@ -554,10 +554,10 @@ class TestFormaterRapportMarkdown:
         assert "Rapport MD" in result
         
     def test_contient_periode_bold(self, rapport_test):
-        """Période en gras."""
+        """PÃ©riode en gras."""
         result = formater_rapport_markdown(rapport_test)
         
-        assert "**Période:**" in result
+        assert "**PÃ©riode:**" in result
         
     def test_statistiques_liste(self, rapport_test):
         """Statistiques en liste."""
@@ -572,15 +572,15 @@ class TestFormaterRapportMarkdown:
         assert "### Cuisine" in result
         
     def test_repartition(self, rapport_test):
-        """Répartition affichée."""
+        """RÃ©partition affichÃ©e."""
         result = formater_rapport_markdown(rapport_test)
         
-        assert "déjeuner: 7" in result
+        assert "dÃ©jeuner: 7" in result
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FORMATER RAPPORT HTML
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFormaterRapportHtml:
@@ -642,9 +642,9 @@ class TestFormaterRapportHtml:
         assert "<html>" in result
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PREPARER EXPORT CSV
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPreparerExportCsv:
@@ -677,7 +677,7 @@ class TestPreparerExportCsv:
         assert "A;" in result
         
     def test_liste_vide(self):
-        """Liste vide = seulement en-têtes."""
+        """Liste vide = seulement en-tÃªtes."""
         data = []
         colonnes = ["col1", "col2"]
         
@@ -686,11 +686,11 @@ class TestPreparerExportCsv:
         assert result == "col1;col2"
         
     def test_separateur_point_virgule(self):
-        """Utilise point-virgule comme séparateur."""
+        """Utilise point-virgule comme sÃ©parateur."""
         data = [{"a": 1, "b": 2}]
         colonnes = ["a", "b"]
         
         result = preparer_export_csv(data, colonnes)
         
         assert ";" in result
-        assert "," not in result.replace(",", "")  # Pas de virgule comme séparateur
+        assert "," not in result.replace(",", "")  # Pas de virgule comme sÃ©parateur

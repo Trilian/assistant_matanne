@@ -1,10 +1,10 @@
-"""
-Module Planificateur de Repas - Imports et constantes partagés
+﻿"""
+Module Planificateur de Repas - Imports et constantes partagÃes
 
 Interface style Jow:
-- Générateur IA de menus équilibrés
-- Apprentissage des goûts (👍/👎) persistant en DB
-- Versions Jules intégrées
+- GÃenÃerateur IA de menus ÃequilibrÃes
+- Apprentissage des goûts (ðŸ‘/ðŸ‘Ž) persistant en DB
+- Versions Jules intÃegrÃees
 - Suggestions alternatives
 """
 
@@ -26,8 +26,8 @@ from src.services.recettes import get_recette_service
 from src.services.planning import get_planning_service
 from src.services.utilisateur import get_user_preference_service
 
-# Logique métier pure
-from src.domains.cuisine.logic.planificateur_repas_logic import (
+# Logique mÃetier pure
+from src.modules.cuisine.planificateur_repas.utils import (
     JOURS_SEMAINE,
     PROTEINES,
     ROBOTS_CUISINE,

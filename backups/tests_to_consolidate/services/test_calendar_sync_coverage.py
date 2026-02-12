@@ -1,10 +1,10 @@
-"""
-Tests supplémentaires pour améliorer la couverture de calendar_sync.py.
+﻿"""
+Tests supplÃ©mentaires pour amÃ©liorer la couverture de calendar_sync.py.
 
 Couvre:
 - Factory get_calendar_sync_service
-- Méthodes Google Calendar (sync, refresh, import, export)  
-- Méthodes DB (@with_db_session)
+- MÃ©thodes Google Calendar (sync, refresh, import, export)  
+- MÃ©thodes DB (@with_db_session)
 - Render UI function
 """
 
@@ -25,9 +25,9 @@ from src.services.calendar_sync import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FACTORY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFactory:
@@ -39,15 +39,15 @@ class TestFactory:
         assert isinstance(service, CalendarSyncService)
     
     def test_get_calendar_sync_service_singleton(self):
-        """La factory retourne la même instance."""
+        """La factory retourne la mÃªme instance."""
         service1 = get_calendar_sync_service()
         service2 = get_calendar_sync_service()
         assert service1 is service2
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GOOGLE CALENDAR SYNC
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGoogleCalendarSync:
@@ -69,7 +69,7 @@ class TestGoogleCalendarSync:
         )
     
     def test_sync_google_calendar_wrong_provider(self, service):
-        """Sync échoue si provider n'est pas Google."""
+        """Sync Ã©choue si provider n'est pas Google."""
         config = ExternalCalendarConfig(
             user_id="test",
             provider=CalendarProvider.APPLE,
@@ -86,7 +86,7 @@ class TestGoogleCalendarSync:
     def test_sync_google_calendar_success(
         self, mock_save, mock_export, mock_import, mock_refresh, service, google_config
     ):
-        """Sync Google réussit avec import et export."""
+        """Sync Google rÃ©ussit avec import et export."""
         result = service.sync_google_calendar(google_config)
         
         assert result.success is True
@@ -97,7 +97,7 @@ class TestGoogleCalendarSync:
     @patch.object(CalendarSyncService, '_refresh_google_token')
     @patch.object(CalendarSyncService, '_import_from_google', side_effect=Exception("API Error"))
     def test_sync_google_calendar_error(self, mock_import, mock_refresh, service, google_config):
-        """Sync Google gère les erreurs."""
+        """Sync Google gÃ¨re les erreurs."""
         result = service.sync_google_calendar(google_config)
         
         assert result.success is False
@@ -122,12 +122,12 @@ class TestGoogleCalendarSync:
     
     @patch.object(CalendarSyncService, '_refresh_google_token')
     def test_sync_google_refreshes_expired_token(self, mock_refresh, service):
-        """Sync rafraîchit le token expiré."""
+        """Sync rafraÃ®chit le token expirÃ©."""
         config = ExternalCalendarConfig(
             user_id="test",
             provider=CalendarProvider.GOOGLE,
             access_token="old_token",
-            token_expiry=datetime.now() - timedelta(hours=1),  # Expiré
+            token_expiry=datetime.now() - timedelta(hours=1),  # ExpirÃ©
             sync_direction=SyncDirection.EXPORT_ONLY,
         )
         
@@ -155,7 +155,7 @@ class TestImportFromGoogle:
     
     @patch.object(CalendarSyncService, '_import_events_to_db', return_value=2)
     def test_import_from_google_success(self, mock_import_db, service, google_config):
-        """Import depuis Google API réussit."""
+        """Import depuis Google API rÃ©ussit."""
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {
@@ -205,7 +205,7 @@ class TestExportToGoogle:
     def test_export_to_google_success(
         self, mock_export_activity, mock_export_meal, mock_db, service, google_config
     ):
-        """Export vers Google réussit."""
+        """Export vers Google rÃ©ussit."""
         mock_session = MagicMock()
         mock_db.return_value.__enter__ = Mock(return_value=mock_session)
         mock_db.return_value.__exit__ = Mock(return_value=False)
@@ -244,7 +244,7 @@ class TestRefreshGoogleToken:
     
     @patch.object(CalendarSyncService, '_save_config_to_db')
     def test_refresh_google_token_success(self, mock_save, service, google_config):
-        """Rafraîchissement du token réussit."""
+        """RafraÃ®chissement du token rÃ©ussit."""
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {
@@ -265,7 +265,7 @@ class TestRefreshGoogleToken:
         mock_save.assert_called_once()
     
     def test_refresh_google_token_error(self, service, google_config):
-        """Erreur de refresh est gérée."""
+        """Erreur de refresh est gÃ©rÃ©e."""
         service.http_client.post = Mock(side_effect=Exception("Network error"))
         
         mock_params = MagicMock()
@@ -285,7 +285,7 @@ class TestFindGoogleEvent:
         return CalendarSyncService()
     
     def test_find_google_event_found(self, service):
-        """Trouve un événement existant."""
+        """Trouve un Ã©vÃ©nement existant."""
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {
@@ -303,7 +303,7 @@ class TestFindGoogleEvent:
         assert result["id"] == "google_123"
     
     def test_find_google_event_not_found(self, service):
-        """Retourne None si non trouvé."""
+        """Retourne None si non trouvÃ©."""
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"items": []}
@@ -346,14 +346,14 @@ class TestExportMealToGoogle:
     
     @patch.object(CalendarSyncService, '_find_google_event_by_matanne_id', return_value=None)
     def test_export_new_meal(self, mock_find, service, google_config):
-        """Crée un nouvel événement pour un repas."""
+        """CrÃ©e un nouvel Ã©vÃ©nement pour un repas."""
         mock_repas = Mock()
         mock_repas.id = 1
         mock_repas.date_repas = date(2026, 2, 10)
-        mock_repas.type_repas = "déjeuner"
+        mock_repas.type_repas = "dÃ©jeuner"
         mock_repas.notes = "Notes test"
         mock_repas.recette = Mock()
-        mock_repas.recette.nom = "Poulet rôti"
+        mock_repas.recette.nom = "Poulet rÃ´ti"
         mock_repas.recette.description = "Description"
         
         mock_response = Mock()
@@ -372,13 +372,13 @@ class TestExportMealToGoogle:
     
     @patch.object(CalendarSyncService, '_find_google_event_by_matanne_id')
     def test_export_update_existing_meal(self, mock_find, service, google_config):
-        """Met à jour un événement existant."""
+        """Met Ã  jour un Ã©vÃ©nement existant."""
         mock_find.return_value = {"id": "existing_event"}
         
         mock_repas = Mock()
         mock_repas.id = 1
         mock_repas.date_repas = date(2026, 2, 10)
-        mock_repas.type_repas = "dîner"
+        mock_repas.type_repas = "dÃ®ner"
         mock_repas.notes = ""
         mock_repas.recette = None
         
@@ -414,12 +414,12 @@ class TestExportActivityToGoogle:
     
     @patch.object(CalendarSyncService, '_find_google_event_by_matanne_id', return_value=None)
     def test_export_new_activity(self, mock_find, service, google_config):
-        """Crée un nouvel événement pour une activité."""
+        """CrÃ©e un nouvel Ã©vÃ©nement pour une activitÃ©."""
         mock_activity = Mock()
         mock_activity.id = 1
         mock_activity.titre = "Sortie au parc"
         mock_activity.description = "Pique-nique"
-        mock_activity.lieu = "Parc de la Tête d'Or"
+        mock_activity.lieu = "Parc de la TÃªte d'Or"
         mock_activity.date_prevue = date(2026, 2, 15)
         mock_activity.duree_heures = 3
         
@@ -454,7 +454,7 @@ class TestExportPlanningToGoogle:
         )
     
     def test_export_planning_wrong_provider(self, service):
-        """Export échoue si pas Google."""
+        """Export Ã©choue si pas Google."""
         config = ExternalCalendarConfig(
             user_id="test",
             provider=CalendarProvider.APPLE,
@@ -465,7 +465,7 @@ class TestExportPlanningToGoogle:
     
     @patch.object(CalendarSyncService, '_export_to_google', return_value=10)
     def test_export_planning_success(self, mock_export, service, google_config):
-        """Export du planning réussit."""
+        """Export du planning rÃ©ussit."""
         result = service.export_planning_to_google("user", google_config)
         
         assert result.success is True
@@ -473,7 +473,7 @@ class TestExportPlanningToGoogle:
 
 
 class TestDBMethods:
-    """Tests pour les méthodes avec @with_db_session."""
+    """Tests pour les mÃ©thodes avec @with_db_session."""
     
     @pytest.fixture
     def service(self):
@@ -516,7 +516,7 @@ class TestDBMethods:
     
     @patch('src.services.calendar_sync.obtenir_contexte_db')
     def test_remove_config_not_digit(self, mock_db, service):
-        """Ne supprime pas si ID non numérique."""
+        """Ne supprime pas si ID non numÃ©rique."""
         mock_session = MagicMock()
         mock_db.return_value.__enter__ = Mock(return_value=mock_session)
         mock_db.return_value.__exit__ = Mock(return_value=False)
@@ -536,7 +536,7 @@ class TestImportEventsToDb:
     @patch('src.services.calendar_sync.CalendarEvent')
     @patch('src.services.calendar_sync.obtenir_contexte_db')
     def test_import_new_events(self, mock_db, mock_event_class, service):
-        """Importe de nouveaux événements."""
+        """Importe de nouveaux Ã©vÃ©nements."""
         mock_session = MagicMock()
         mock_db.return_value.__enter__ = Mock(return_value=mock_session)
         mock_db.return_value.__exit__ = Mock(return_value=False)
@@ -608,7 +608,7 @@ class TestExportToIcalEdgeCases:
     
     @patch('src.services.calendar_sync.obtenir_contexte_db')
     def test_export_to_ical_with_activity(self, mock_db, service):
-        """Export avec activités familiales."""
+        """Export avec activitÃ©s familiales."""
         mock_session = MagicMock()
         mock_db.return_value.__enter__ = Mock(return_value=mock_session)
         mock_db.return_value.__exit__ = Mock(return_value=False)
@@ -621,7 +621,7 @@ class TestExportToIcalEdgeCases:
         mock_activity.date_prevue = date(2026, 2, 10)  # Real date object
         mock_activity.duree_heures = 2
         mock_activity.lieu = "Lyon"
-        mock_activity.statut = "planifié"
+        mock_activity.statut = "planifiÃ©"
         
         # First call is for meals (join), return empty
         # Second call is for activities (filter), return our activity
@@ -646,10 +646,10 @@ class TestExportToIcalEdgeCases:
 
 
 class TestICalGeneratorEdgeCases:
-    """Tests supplémentaires pour ICalGenerator."""
+    """Tests supplÃ©mentaires pour ICalGenerator."""
     
     def test_parse_ical_invalid_event(self):
-        """Parse gère les événements invalides."""
+        """Parse gÃ¨re les Ã©vÃ©nements invalides."""
         ical = """BEGIN:VCALENDAR
 VERSION:2.0
 BEGIN:VEVENT
@@ -659,7 +659,7 @@ END:VCALENDAR"""
         
         # DTSTART manquant cause une erreur de parsing
         events = ICalGenerator.parse_ical(ical)
-        # Devrait être 0 car l'événement est invalide
+        # Devrait Ãªtre 0 car l'Ã©vÃ©nement est invalide
         assert len(events) >= 0
     
     def test_parse_ical_datetime_z_format(self):
@@ -682,8 +682,8 @@ END:VCALENDAR"""
         assert isinstance(result, datetime)
     
     def test_parse_ical_malformed_triggers_exception(self):
-        """Parse événement malformé déclenche exception logging."""
-        # Créer un contenu iCal avec données invalides pour forcer exception
+        """Parse Ã©vÃ©nement malformÃ© dÃ©clenche exception logging."""
+        # CrÃ©er un contenu iCal avec donnÃ©es invalides pour forcer exception
         ical = """BEGIN:VCALENDAR
 VERSION:2.0
 BEGIN:VEVENT
@@ -700,25 +700,25 @@ END:VCALENDAR"""
 
 
 class TestAdditionalCoverage:
-    """Tests supplémentaires pour améliorer la couverture."""
+    """Tests supplÃ©mentaires pour amÃ©liorer la couverture."""
     
     @pytest.fixture
     def service(self):
         return CalendarSyncService()
     
     def test_export_meal_types(self, service):
-        """Test différents types de repas."""
+        """Test diffÃ©rents types de repas."""
         google_config = ExternalCalendarConfig(
             user_id="test",
             provider=CalendarProvider.GOOGLE,
             access_token="token",
         )
         
-        # Test petit_déjeuner
+        # Test petit_dÃ©jeuner
         mock_repas = Mock()
         mock_repas.id = 1
         mock_repas.date_repas = date(2026, 2, 10)
-        mock_repas.type_repas = "petit_déjeuner"
+        mock_repas.type_repas = "petit_dÃ©jeuner"
         mock_repas.notes = ""
         mock_repas.recette = None
         
@@ -731,15 +731,15 @@ class TestAdditionalCoverage:
             result = service._export_meal_to_google(mock_repas, google_config, {}, Mock())
             assert result == "event1"
         
-        # Test goûter
-        mock_repas.type_repas = "goûter"
+        # Test goÃ»ter
+        mock_repas.type_repas = "goÃ»ter"
         with patch.object(service, '_find_google_event_by_matanne_id', return_value=None):
             result = service._export_meal_to_google(mock_repas, google_config, {}, Mock())
             assert result == "event1"
     
     @patch.object(CalendarSyncService, '_find_google_event_by_matanne_id')
     def test_export_activity_update_existing(self, mock_find, service):
-        """Met à jour une activité existante."""
+        """Met Ã  jour une activitÃ© existante."""
         mock_find.return_value = {"id": "existing_id"}
         
         google_config = ExternalCalendarConfig(
@@ -767,7 +767,7 @@ class TestAdditionalCoverage:
     
     @patch('src.services.calendar_sync.obtenir_contexte_db')
     def test_import_events_update_existing(self, mock_db, service):
-        """Import met à jour les événements existants."""
+        """Import met Ã  jour les Ã©vÃ©nements existants."""
         mock_session = MagicMock()
         mock_db.return_value.__enter__ = Mock(return_value=mock_session)
         mock_db.return_value.__exit__ = Mock(return_value=False)
@@ -795,7 +795,7 @@ class TestAdditionalCoverage:
     
     @patch('src.services.calendar_sync.obtenir_contexte_db')
     def test_import_events_handles_exception(self, mock_db, service):
-        """Import gère les exceptions par événement."""
+        """Import gÃ¨re les exceptions par Ã©vÃ©nement."""
         mock_session = MagicMock()
         mock_db.return_value.__enter__ = Mock(return_value=mock_session)
         mock_db.return_value.__exit__ = Mock(return_value=False)
@@ -817,7 +817,7 @@ class TestAdditionalCoverage:
         assert result == 0
     
     def test_import_from_google_empty_items(self, service):
-        """Import Google avec pas d'événements."""
+        """Import Google avec pas d'Ã©vÃ©nements."""
         mock_response = Mock()
         mock_response.json.return_value = {"items": []}
         mock_response.raise_for_status = Mock()
@@ -835,7 +835,7 @@ class TestAdditionalCoverage:
         assert result == 0
     
     def test_import_from_google_skips_invalid_start(self, service):
-        """Import Google ignore événements sans date de début."""
+        """Import Google ignore Ã©vÃ©nements sans date de dÃ©but."""
         mock_response = Mock()
         mock_response.json.return_value = {
             "items": [
@@ -866,14 +866,14 @@ class TestAdditionalCoverage:
 
 
 class TestMoreCoverage:
-    """Tests supplémentaires pour atteindre 80% de couverture."""
+    """Tests supplÃ©mentaires pour atteindre 80% de couverture."""
     
     @pytest.fixture
     def service(self):
         return CalendarSyncService()
     
     def test_import_from_ical_url_no_events(self, service):
-        """Import depuis URL iCal sans événements."""
+        """Import depuis URL iCal sans Ã©vÃ©nements."""
         mock_response = Mock()
         mock_response.text = """BEGIN:VCALENDAR
 VERSION:2.0
@@ -888,12 +888,12 @@ END:VCALENDAR"""
         
         # Should fail because no events found
         assert result.success is False
-        assert "Aucun événement" in result.message
+        assert "Aucun Ã©vÃ©nement" in result.message
     
     @patch('src.services.calendar_sync.CalendarEvent')
     @patch('src.services.calendar_sync.obtenir_contexte_db')
     def test_import_from_ical_url_with_events(self, mock_db, mock_cal_event, service):
-        """Import depuis URL iCal avec événements."""
+        """Import depuis URL iCal avec Ã©vÃ©nements."""
         mock_session = MagicMock()
         mock_db.return_value.__enter__ = Mock(return_value=mock_session)
         mock_db.return_value.__exit__ = Mock(return_value=False)
@@ -923,12 +923,12 @@ END:VCALENDAR"""
     @patch('src.services.calendar_sync.CalendarEvent')
     @patch('src.services.calendar_sync.obtenir_contexte_db')
     def test_import_from_ical_url_update_existing(self, mock_db, mock_cal_event, service):
-        """Import met à jour un événement existant."""
+        """Import met Ã  jour un Ã©vÃ©nement existant."""
         mock_session = MagicMock()
         mock_db.return_value.__enter__ = Mock(return_value=mock_session)
         mock_db.return_value.__exit__ = Mock(return_value=False)
         
-        # Événement existant
+        # Ã‰vÃ©nement existant
         existing = Mock()
         existing.titre = "Old Title"
         mock_session.query.return_value.filter.return_value.first.return_value = existing
@@ -959,7 +959,7 @@ END:VCALENDAR"""
     @patch('src.services.calendar_sync.CalendarEvent')
     @patch('src.services.calendar_sync.obtenir_contexte_db')
     def test_import_from_ical_url_handles_event_error(self, mock_db, mock_cal_event, service):
-        """Import gère les erreurs par événement."""
+        """Import gÃ¨re les erreurs par Ã©vÃ©nement."""
         mock_session = MagicMock()
         mock_db.return_value.__enter__ = Mock(return_value=mock_session)
         mock_db.return_value.__exit__ = Mock(return_value=False)
@@ -987,7 +987,7 @@ END:VCALENDAR"""
         assert len(result.errors) > 0
     
     def test_export_to_google_handles_meal_error(self, service):
-        """Export gère les erreurs de repas."""
+        """Export gÃ¨re les erreurs de repas."""
         google_config = ExternalCalendarConfig(
             user_id="test",
             provider=CalendarProvider.GOOGLE,
@@ -997,7 +997,7 @@ END:VCALENDAR"""
         mock_repas = Mock()
         mock_repas.id = 1
         mock_repas.date_repas = date(2026, 2, 10)
-        mock_repas.type_repas = "déjeuner"
+        mock_repas.type_repas = "dÃ©jeuner"
         
         mock_session = MagicMock()
         mock_session.query.return_value.join.return_value.filter.return_value.all.return_value = [mock_repas]
@@ -1015,7 +1015,7 @@ END:VCALENDAR"""
         assert result == 0
     
     def test_export_to_google_handles_activity_error(self, service):
-        """Export gère les erreurs d'activités."""
+        """Export gÃ¨re les erreurs d'activitÃ©s."""
         google_config = ExternalCalendarConfig(
             user_id="test",
             provider=CalendarProvider.GOOGLE,
@@ -1042,7 +1042,7 @@ END:VCALENDAR"""
         assert result == 0
     
     def test_handle_google_callback_no_credentials(self, service):
-        """Callback Google échoue sans credentials."""
+        """Callback Google Ã©choue sans credentials."""
         mock_params = MagicMock()
         mock_params.GOOGLE_CLIENT_ID = ""
         mock_params.GOOGLE_CLIENT_SECRET = ""
@@ -1057,7 +1057,7 @@ END:VCALENDAR"""
         assert result is None
     
     def test_handle_google_callback_error(self, service):
-        """Callback Google gère les erreurs API."""
+        """Callback Google gÃ¨re les erreurs API."""
         mock_params = MagicMock()
         mock_params.GOOGLE_CLIENT_ID = "id"
         mock_params.GOOGLE_CLIENT_SECRET = "secret"
@@ -1074,7 +1074,7 @@ END:VCALENDAR"""
         assert result is None
     
     def test_get_google_auth_url_no_client_id(self, service):
-        """Auth URL échoue sans client ID."""
+        """Auth URL Ã©choue sans client ID."""
         mock_params = MagicMock()
         mock_params.GOOGLE_CLIENT_ID = ""
         

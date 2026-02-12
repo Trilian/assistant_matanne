@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour src/ui/layout/footer.py
 """
 
@@ -68,7 +68,7 @@ class TestAfficherFooter:
     @patch("src.ui.layout.footer.st")
     @patch("src.ui.layout.footer.obtenir_parametres")
     def test_footer_about_expander(self, mock_params, mock_st):
-        """Test expander À propos."""
+        """Test expander Ã€ propos."""
         from src.ui.layout.footer import afficher_footer
         
         mock_params.return_value = MagicMock(APP_NAME="T", APP_VERSION="1")

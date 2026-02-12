@@ -1,7 +1,7 @@
-"""
+﻿"""
 Statistiques et analyse des performances de paris.
 
-Fonctionnalités:
+FonctionnalitÃes:
 - Calcul des performances (gains, ROI)
 - Analyse des tendances par championnat
 - Suivi des streaks
@@ -17,14 +17,14 @@ logger = logging.getLogger(__name__)
 
 def calculer_performance_paris(paris: List[Dict[str, Any]], periode_jours: int = 30) -> Dict[str, Any]:
     """
-    Calcule les statistiques de performance sur une période.
+    Calcule les statistiques de performance sur une pÃeriode.
     
     Args:
-        paris: Liste des paris effectués
-        periode_jours: Nombre de jours à analyser
+        paris: Liste des paris effectuÃes
+        periode_jours: Nombre de jours Ã  analyser
         
     Returns:
-        Métriques de performance
+        MÃetriques de performance
     """
     if not paris:
         return {
@@ -73,7 +73,7 @@ def calculer_performance_paris(paris: List[Dict[str, Any]], periode_jours: int =
             else:
                 break
         if count >= 2:
-            streak = f"{count} {'gagnés' if premier_resultat == 'gagne' else 'perdus'}"
+            streak = f"{count} {'gagnÃes' if premier_resultat == 'gagne' else 'perdus'}"
     
     nb_paris = len(paris_recents)
     return {
@@ -104,7 +104,7 @@ def analyser_tendances_championnat(
         championnat: Nom du championnat
         
     Returns:
-        Tendances détectées
+        Tendances dÃetectÃees
     """
     if not matchs:
         return {
@@ -145,7 +145,7 @@ def analyser_tendances_championnat(
         if score_dom > 0 and score_ext > 0:
             stats["matchs_btts"] += 1
         
-        # Stats par équipe
+        # Stats par Ãequipe
         eq_dom = match.get("equipe_domicile_id")
         eq_ext = match.get("equipe_exterieur_id")
         
@@ -178,24 +178,24 @@ def analyser_tendances_championnat(
     stats["pct_over_2_5"] = round(stats["matchs_over_2_5"] / nb_matchs * 100, 1)
     stats["pct_btts"] = round(stats["matchs_btts"] / nb_matchs * 100, 1)
     
-    # Détecter les tendances
+    # DÃetecter les tendances
     tendances = []
     
     if stats["pct_victoires_dom"] > 50:
-        tendances.append(f"🏠 Forte domination domicile ({stats['pct_victoires_dom']}%)")
+        tendances.append(f"ðŸ  Forte domination domicile ({stats['pct_victoires_dom']}%)")
     elif stats["pct_victoires_dom"] < 35:
-        tendances.append(f"✈️ Bons résultats extérieurs ({stats['pct_victoires_ext']}%)")
+        tendances.append(f"âœˆï¸ Bons rÃesultats extÃerieurs ({stats['pct_victoires_ext']}%)")
     
     if stats["pct_nuls"] > 30:
-        tendances.append(f"🤝 Beaucoup de nuls ({stats['pct_nuls']}%)")
+        tendances.append(f"ðŸ¤ Beaucoup de nuls ({stats['pct_nuls']}%)")
     
     if stats["pct_over_2_5"] > 55:
-        tendances.append(f"⚽ Championnat offensif ({stats['buts_par_match']:.1f} buts/match)")
+        tendances.append(f"âš½ Championnat offensif ({stats['buts_par_match']:.1f} buts/match)")
     elif stats["pct_over_2_5"] < 40:
-        tendances.append(f"🛡️ Championnat défensif ({stats['buts_par_match']:.1f} buts/match)")
+        tendances.append(f"ðŸ›¡ï¸ Championnat dÃefensif ({stats['buts_par_match']:.1f} buts/match)")
     
     if stats["pct_btts"] > 55:
-        tendances.append(f"✅ BTTS fréquent ({stats['pct_btts']}%)")
+        tendances.append(f"âœ… BTTS frÃequent ({stats['pct_btts']}%)")
     
     return {
         "championnat": championnat,
@@ -208,9 +208,9 @@ def analyser_tendances_championnat(
 
 def calculer_regularite_equipe(matchs: List[Dict[str, Any]], equipe_id: int) -> Dict[str, Any]:
     """
-    Calcule la régularité d'une équipe (variance des performances).
+    Calcule la rÃegularitÃe d'une Ãequipe (variance des performances).
     
-    Une équipe régulière est plus prévisible pour les paris.
+    Une Ãequipe rÃegulière est plus prÃevisible pour les paris.
     """
     if not matchs:
         return {"regularite": 0, "niveau": "inconnu"}
@@ -232,17 +232,17 @@ def calculer_regularite_equipe(matchs: List[Dict[str, Any]], equipe_id: int) -> 
     variance = sum((r - moyenne) ** 2 for r in resultats) / len(resultats)
     ecart_type = variance ** 0.5
     
-    # Score de régularité (inverse de la variance)
+    # Score de rÃegularitÃe (inverse de la variance)
     regularite = max(0, 100 - ecart_type * 20)
     
     if regularite > 70:
-        niveau = "très régulier"
+        niveau = "très rÃegulier"
     elif regularite > 50:
-        niveau = "régulier"
+        niveau = "rÃegulier"
     elif regularite > 30:
-        niveau = "irrégulier"
+        niveau = "irrÃegulier"
     else:
-        niveau = "très irrégulier"
+        niveau = "très irrÃegulier"
     
     return {
         "regularite": round(regularite, 1),

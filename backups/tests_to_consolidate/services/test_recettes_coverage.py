@@ -1,8 +1,8 @@
-"""
+﻿"""
 Tests couverture complets pour src/services/recettes.py
 
-Objectif: Améliorer la couverture de RecetteService.
-Stratégie: Tests des schémas Pydantic et mocking du service.
+Objectif: AmÃ©liorer la couverture de RecetteService.
+StratÃ©gie: Tests des schÃ©mas Pydantic et mocking du service.
 """
 
 import pytest
@@ -11,9 +11,9 @@ from datetime import date, time, datetime
 import pydantic
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS SCHÉMAS PYDANTIC - RecetteSuggestion
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS SCHÃ‰MAS PYDANTIC - RecetteSuggestion
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -21,52 +21,52 @@ class TestRecetteSuggestion:
     """Tests complets pour RecetteSuggestion schema."""
 
     def test_recette_suggestion_minimal(self):
-        """Test création minimale."""
+        """Test crÃ©ation minimale."""
         from src.services.recettes import RecetteSuggestion
         
         suggestion = RecetteSuggestion(
-            nom="Poulet rôti au thym",
-            description="Un délicieux poulet rôti avec des herbes de Provence",
+            nom="Poulet rÃ´ti au thym",
+            description="Un dÃ©licieux poulet rÃ´ti avec des herbes de Provence",
             temps_preparation=20,
             temps_cuisson=90,
-            type_repas="déjeuner",
+            type_repas="dÃ©jeuner",
             ingredients=[{"nom": "poulet", "quantite": "1"}],
-            etapes=[{"description": "Préchauffer le four à 180°C"}]
+            etapes=[{"description": "PrÃ©chauffer le four Ã  180Â°C"}]
         )
         
-        assert suggestion.nom == "Poulet rôti au thym"
+        assert suggestion.nom == "Poulet rÃ´ti au thym"
         assert suggestion.temps_preparation == 20
         assert suggestion.temps_cuisson == 90
         assert suggestion.portions == 4  # default
         assert suggestion.difficulte == "moyen"  # default
-        assert suggestion.saison == "toute_année"  # default
+        assert suggestion.saison == "toute_annÃ©e"  # default
 
     def test_recette_suggestion_complete(self):
-        """Test création avec tous les champs."""
+        """Test crÃ©ation avec tous les champs."""
         from src.services.recettes import RecetteSuggestion
         
         suggestion = RecetteSuggestion(
-            nom="Salade d'été rafraîchissante",
-            description="Une salade légère et colorée pour les journées chaudes",
+            nom="Salade d'Ã©tÃ© rafraÃ®chissante",
+            description="Une salade lÃ©gÃ¨re et colorÃ©e pour les journÃ©es chaudes",
             temps_preparation=15,
             temps_cuisson=0,
             portions=6,
             difficulte="facile",
-            type_repas="déjeuner",
-            saison="été",
+            type_repas="dÃ©jeuner",
+            saison="Ã©tÃ©",
             ingredients=[
                 {"nom": "laitue", "quantite": "1"},
                 {"nom": "tomates", "quantite": "3"}
             ],
             etapes=[
-                {"description": "Laver les légumes"},
+                {"description": "Laver les lÃ©gumes"},
                 {"description": "Couper en morceaux"}
             ]
         )
         
         assert suggestion.portions == 6
         assert suggestion.difficulte == "facile"
-        assert suggestion.saison == "été"
+        assert suggestion.saison == "Ã©tÃ©"
         assert len(suggestion.ingredients) == 2
         assert len(suggestion.etapes) == 2
 
@@ -79,9 +79,9 @@ class TestRecetteSuggestion:
             nom="Test recette conversion",
             description="Test de la conversion des floats en entiers",
             temps_preparation=20.0,  # float
-            temps_cuisson=45.5,  # float avec décimales
+            temps_cuisson=45.5,  # float avec dÃ©cimales
             portions=4.0,  # float
-            type_repas="dîner",
+            type_repas="dÃ®ner",
             ingredients=[],
             etapes=[]
         )
@@ -97,11 +97,11 @@ class TestRecetteSuggestion:
         # facile
         suggestion = RecetteSuggestion(
             nom="Recette facile test",
-            description="Une recette très simple pour tester",
+            description="Une recette trÃ¨s simple pour tester",
             temps_preparation=10,
             temps_cuisson=20,
             difficulte="facile",
-            type_repas="déjeuner",
+            type_repas="dÃ©jeuner",
             ingredients=[],
             etapes=[]
         )
@@ -114,7 +114,7 @@ class TestRecetteSuggestion:
             temps_preparation=60,
             temps_cuisson=120,
             difficulte="difficile",
-            type_repas="dîner",
+            type_repas="dÃ®ner",
             ingredients=[],
             etapes=[]
         )
@@ -127,33 +127,33 @@ class TestRecetteSuggestion:
         with pytest.raises(pydantic.ValidationError):
             RecetteSuggestion(
                 nom="AB",  # trop court
-                description="Description valide avec suffisamment de caractères",
+                description="Description valide avec suffisamment de caractÃ¨res",
                 temps_preparation=20,
                 temps_cuisson=30,
-                type_repas="déjeuner",
+                type_repas="dÃ©jeuner",
                 ingredients=[],
                 etapes=[]
             )
 
     def test_recette_suggestion_validation_temps_negatif(self):
-        """Test validation temps préparation négatif."""
+        """Test validation temps prÃ©paration nÃ©gatif."""
         from src.services.recettes import RecetteSuggestion
         
         with pytest.raises(pydantic.ValidationError):
             RecetteSuggestion(
                 nom="Recette test invalide",
-                description="Description valide avec suffisamment de caractères",
+                description="Description valide avec suffisamment de caractÃ¨res",
                 temps_preparation=-10,  # invalide
                 temps_cuisson=30,
-                type_repas="déjeuner",
+                type_repas="dÃ©jeuner",
                 ingredients=[],
                 etapes=[]
             )
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS SCHÉMAS PYDANTIC - VersionBebeGeneree
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS SCHÃ‰MAS PYDANTIC - VersionBebeGeneree
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -161,25 +161,25 @@ class TestVersionBebeGeneree:
     """Tests complets pour VersionBebeGeneree schema."""
 
     def test_version_bebe_minimal(self):
-        """Test création minimale."""
+        """Test crÃ©ation minimale."""
         from src.services.recettes import VersionBebeGeneree
         
         version = VersionBebeGeneree(
-            instructions_modifiees="Mixer finement les légumes",
-            notes_bebe="Adapté pour bébé de 8 mois"
+            instructions_modifiees="Mixer finement les lÃ©gumes",
+            notes_bebe="AdaptÃ© pour bÃ©bÃ© de 8 mois"
         )
         
-        assert version.instructions_modifiees == "Mixer finement les légumes"
-        assert version.notes_bebe == "Adapté pour bébé de 8 mois"
+        assert version.instructions_modifiees == "Mixer finement les lÃ©gumes"
+        assert version.notes_bebe == "AdaptÃ© pour bÃ©bÃ© de 8 mois"
         assert version.age_minimum_mois == 6  # default
 
     def test_version_bebe_complete(self):
-        """Test création avec âge spécifique."""
+        """Test crÃ©ation avec Ã¢ge spÃ©cifique."""
         from src.services.recettes import VersionBebeGeneree
         
         version = VersionBebeGeneree(
             instructions_modifiees="Cuire plus longtemps et mixer",
-            notes_bebe="Éviter les morceaux pour les premiers mois",
+            notes_bebe="Ã‰viter les morceaux pour les premiers mois",
             age_minimum_mois=12
         )
         
@@ -190,17 +190,17 @@ class TestVersionBebeGeneree:
         from src.services.recettes import VersionBebeGeneree
         
         version = VersionBebeGeneree(
-            instructions_modifiees="Instructions modifiées",
-            notes_bebe="Notes pour bébé",
+            instructions_modifiees="Instructions modifiÃ©es",
+            notes_bebe="Notes pour bÃ©bÃ©",
             age_minimum_mois=9.0  # float
         )
         
         assert version.age_minimum_mois == 9
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS SCHÉMAS PYDANTIC - VersionBatchCookingGeneree
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS SCHÃ‰MAS PYDANTIC - VersionBatchCookingGeneree
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -208,30 +208,30 @@ class TestVersionBatchCookingGeneree:
     """Tests complets pour VersionBatchCookingGeneree schema."""
 
     def test_version_batch_minimal(self):
-        """Test création minimale."""
+        """Test crÃ©ation minimale."""
         from src.services.recettes import VersionBatchCookingGeneree
         
         version = VersionBatchCookingGeneree(
-            instructions_modifiees="Préparer en grande quantité",
+            instructions_modifiees="PrÃ©parer en grande quantitÃ©",
             conseils_conservation="Au frigo 5 jours max",
-            conseils_congelation="Se congèle très bien",
-            calendrier_preparation="Préparer le dimanche"
+            conseils_congelation="Se congÃ¨le trÃ¨s bien",
+            calendrier_preparation="PrÃ©parer le dimanche"
         )
         
         assert version.nombre_portions_recommande == 12  # default
         assert version.temps_preparation_total_heures == 2.0  # default
 
     def test_version_batch_complete(self):
-        """Test création avec tous les champs."""
+        """Test crÃ©ation avec tous les champs."""
         from src.services.recettes import VersionBatchCookingGeneree
         
         version = VersionBatchCookingGeneree(
-            instructions_modifiees="Tripler les quantités et utiliser des grands plats",
+            instructions_modifiees="Tripler les quantitÃ©s et utiliser des grands plats",
             nombre_portions_recommande=24,
             temps_preparation_total_heures=4.5,
-            conseils_conservation="Séparer en portions individuelles",
-            conseils_congelation="Congeler immédiatement après refroidissement",
-            calendrier_preparation="Dimanche matin: 2h, Dimanche après-midi: 2.5h"
+            conseils_conservation="SÃ©parer en portions individuelles",
+            conseils_congelation="Congeler immÃ©diatement aprÃ¨s refroidissement",
+            calendrier_preparation="Dimanche matin: 2h, Dimanche aprÃ¨s-midi: 2.5h"
         )
         
         assert version.nombre_portions_recommande == 24
@@ -245,16 +245,16 @@ class TestVersionBatchCookingGeneree:
             instructions_modifiees="Instructions batch",
             nombre_portions_recommande=18.0,  # float
             conseils_conservation="Conservation",
-            conseils_congelation="Congélation",
+            conseils_congelation="CongÃ©lation",
             calendrier_preparation="Calendrier"
         )
         
         assert version.nombre_portions_recommande == 18
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS SCHÉMAS PYDANTIC - VersionRobotGeneree
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS SCHÃ‰MAS PYDANTIC - VersionRobotGeneree
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -262,31 +262,31 @@ class TestVersionRobotGeneree:
     """Tests complets pour VersionRobotGeneree schema."""
 
     def test_version_robot_minimal(self):
-        """Test création minimale."""
+        """Test crÃ©ation minimale."""
         from src.services.recettes import VersionRobotGeneree
         
         version = VersionRobotGeneree(
-            instructions_modifiees="Utiliser le mode pétrissage",
+            instructions_modifiees="Utiliser le mode pÃ©trissage",
             reglages_robot="Vitesse 6, 10 minutes",
-            conseils_preparation="Couper les légumes en morceaux"
+            conseils_preparation="Couper les lÃ©gumes en morceaux"
         )
         
         assert version.temps_cuisson_adapte_minutes == 30  # default
         assert version.etapes_specifiques == []  # default
 
     def test_version_robot_complete(self):
-        """Test création avec tous les champs."""
+        """Test crÃ©ation avec tous les champs."""
         from src.services.recettes import VersionRobotGeneree
         
         version = VersionRobotGeneree(
             instructions_modifiees="Adapter pour Cookeo",
-            reglages_robot="Mode cuisson rapide, 180°C",
+            reglages_robot="Mode cuisson rapide, 180Â°C",
             temps_cuisson_adapte_minutes=45,
-            conseils_preparation="Préchauffer 5 minutes avant",
+            conseils_preparation="PrÃ©chauffer 5 minutes avant",
             etapes_specifiques=[
-                "Mettre les ingrédients dans le bol",
+                "Mettre les ingrÃ©dients dans le bol",
                 "Lancer le programme",
-                "Mélanger à mi-cuisson"
+                "MÃ©langer Ã  mi-cuisson"
             ]
         )
         
@@ -299,7 +299,7 @@ class TestVersionRobotGeneree:
         
         version = VersionRobotGeneree(
             instructions_modifiees="Instructions robot",
-            reglages_robot="Réglages",
+            reglages_robot="RÃ©glages",
             temps_cuisson_adapte_minutes=60.0,  # float
             conseils_preparation="Conseils"
         )
@@ -307,9 +307,9 @@ class TestVersionRobotGeneree:
         assert version.temps_cuisson_adapte_minutes == 60
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SERVICE - INITIALISATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -341,14 +341,14 @@ class TestRecetteServiceInit:
         assert hasattr(service, 'model_name')
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS SERVICE - MÉTHODES MOCKÉES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS SERVICE - MÃ‰THODES MOCKÃ‰ES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestRecetteServiceMethodsMocked:
-    """Tests pour les méthodes avec mock au niveau service."""
+    """Tests pour les mÃ©thodes avec mock au niveau service."""
 
     @patch('src.services.recettes.obtenir_client_ia')
     def test_get_recette_by_id(self, mock_client):
@@ -359,14 +359,14 @@ class TestRecetteServiceMethodsMocked:
         
         mock_recette = Mock()
         mock_recette.id = 1
-        mock_recette.nom = "Poulet rôti"
+        mock_recette.nom = "Poulet rÃ´ti"
         
         service = RecetteService()
         service.get = Mock(return_value=mock_recette)
         
         result = service.get(1)
         assert result.id == 1
-        assert result.nom == "Poulet rôti"
+        assert result.nom == "Poulet rÃ´ti"
 
     @patch('src.services.recettes.obtenir_client_ia')
     def test_lister_recettes(self, mock_client):
@@ -400,7 +400,7 @@ class TestRecetteServiceMethodsMocked:
 
     @patch('src.services.recettes.obtenir_client_ia')
     def test_creer_recette(self, mock_client):
-        """Test créer avec mock."""
+        """Test crÃ©er avec mock."""
         from src.services.recettes import RecetteService
         
         mock_client.return_value = Mock()
@@ -427,13 +427,13 @@ class TestRecetteServiceMethodsMocked:
         
         mock_recette = Mock()
         mock_recette.id = 1
-        mock_recette.nom = "Recette modifiée"
+        mock_recette.nom = "Recette modifiÃ©e"
         
         service = RecetteService()
         service.modifier = Mock(return_value=mock_recette)
         
-        result = service.modifier(1, {"nom": "Recette modifiée"})
-        assert result.nom == "Recette modifiée"
+        result = service.modifier(1, {"nom": "Recette modifiÃ©e"})
+        assert result.nom == "Recette modifiÃ©e"
 
     @patch('src.services.recettes.obtenir_client_ia')
     def test_supprimer_recette(self, mock_client):
@@ -449,9 +449,9 @@ class TestRecetteServiceMethodsMocked:
         assert result is True
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FACTORY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -475,7 +475,7 @@ class TestFactory:
 
     @patch('src.services.recettes.obtenir_client_ia')
     def test_get_recette_service_singleton(self, mock_client):
-        """Test factory retourne le même service."""
+        """Test factory retourne le mÃªme service."""
         import src.services.recettes as module
         from src.services.recettes import get_recette_service
         
@@ -490,9 +490,9 @@ class TestFactory:
         assert service1 is service2
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EDGE CASES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -504,11 +504,11 @@ class TestEdgeCases:
         from src.services.recettes import RecetteSuggestion
         
         suggestion = RecetteSuggestion(
-            nom="Recette très longue à préparer",
+            nom="Recette trÃ¨s longue Ã  prÃ©parer",
             description="Une recette qui prend beaucoup de temps pour tester les limites",
             temps_preparation=300,
             temps_cuisson=300,
-            type_repas="dîner",
+            type_repas="dÃ®ner",
             ingredients=[],
             etapes=[]
         )
@@ -517,10 +517,10 @@ class TestEdgeCases:
         assert suggestion.temps_cuisson == 300
 
     def test_version_bebe_age_limite(self):
-        """Test âge aux limites."""
+        """Test Ã¢ge aux limites."""
         from src.services.recettes import VersionBebeGeneree
         
-        # Âge minimum 6 mois
+        # Ã‚ge minimum 6 mois
         version_min = VersionBebeGeneree(
             instructions_modifiees="Instructions",
             notes_bebe="Notes",
@@ -528,7 +528,7 @@ class TestEdgeCases:
         )
         assert version_min.age_minimum_mois == 6
         
-        # Âge maximum 36 mois
+        # Ã‚ge maximum 36 mois
         version_max = VersionBebeGeneree(
             instructions_modifiees="Instructions",
             notes_bebe="Notes",
@@ -545,7 +545,7 @@ class TestEdgeCases:
             instructions_modifiees="Instructions",
             nombre_portions_recommande=4,
             conseils_conservation="Conservation",
-            conseils_congelation="Congélation",
+            conseils_congelation="CongÃ©lation",
             calendrier_preparation="Calendrier"
         )
         assert version_min.nombre_portions_recommande == 4
@@ -555,7 +555,7 @@ class TestEdgeCases:
             instructions_modifiees="Instructions",
             nombre_portions_recommande=100,
             conseils_conservation="Conservation",
-            conseils_congelation="Congélation",
+            conseils_congelation="CongÃ©lation",
             calendrier_preparation="Calendrier"
         )
         assert version_max.nombre_portions_recommande == 100
@@ -567,7 +567,7 @@ class TestEdgeCases:
         # Temps minimum 5 min
         version_min = VersionRobotGeneree(
             instructions_modifiees="Instructions",
-            reglages_robot="Réglages",
+            reglages_robot="RÃ©glages",
             temps_cuisson_adapte_minutes=5,
             conseils_preparation="Conseils"
         )
@@ -576,7 +576,7 @@ class TestEdgeCases:
         # Temps maximum 300 min
         version_max = VersionRobotGeneree(
             instructions_modifiees="Instructions",
-            reglages_robot="Réglages",
+            reglages_robot="RÃ©glages",
             temps_cuisson_adapte_minutes=300,
             conseils_preparation="Conseils"
         )

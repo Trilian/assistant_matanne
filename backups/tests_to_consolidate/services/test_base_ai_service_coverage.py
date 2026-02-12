@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests couverture pour src/services/base_ai_service.py
 """
 
@@ -7,26 +7,26 @@ from unittest.mock import Mock, MagicMock, patch, AsyncMock
 from pydantic import BaseModel
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # MODELS DE TEST
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class MockResponseModel(BaseModel):
-    """Modèle de test pour parsing."""
+    """ModÃ¨le de test pour parsing."""
     nom: str = ""
     valeur: int = 0
 
 
 class MockItemModel(BaseModel):
-    """Modèle d'item pour listes."""
+    """ModÃ¨le d'item pour listes."""
     id: int
     titre: str = ""
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS INIT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -34,7 +34,7 @@ class TestBaseAIServiceInit:
     """Tests pour l'initialisation du service."""
 
     def test_init_defaults(self):
-        """Test initialisation avec valeurs par défaut."""
+        """Test initialisation avec valeurs par dÃ©faut."""
         mock_client = Mock()
         
         from src.services.base_ai_service import BaseAIService
@@ -48,7 +48,7 @@ class TestBaseAIServiceInit:
         assert service.service_name == "unknown"
 
     def test_init_custom(self):
-        """Test initialisation avec valeurs personnalisées."""
+        """Test initialisation avec valeurs personnalisÃ©es."""
         mock_client = Mock()
         
         from src.services.base_ai_service import BaseAIService
@@ -67,9 +67,9 @@ class TestBaseAIServiceInit:
         assert service.service_name == "recette_service"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS BUILD PROMPTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -85,12 +85,12 @@ class TestBuildJsonPrompt:
         service = BaseAIService(client=mock_client)
         
         result = service.build_json_prompt(
-            context="Génère des recettes",
+            context="GÃ©nÃ¨re des recettes",
             task="3 recettes de saison",
             json_schema='{"recettes": [{"nom": "string"}]}'
         )
         
-        assert "Génère des recettes" in result
+        assert "GÃ©nÃ¨re des recettes" in result
         assert "3 recettes de saison" in result
         assert '{"recettes":' in result
         assert "JSON valide" in result
@@ -105,14 +105,14 @@ class TestBuildJsonPrompt:
         
         result = service.build_json_prompt(
             context="Contexte",
-            task="Tâche",
+            task="TÃ¢che",
             json_schema="{}",
-            constraints=["Moins de 30 minutes", "Végétarien"]
+            constraints=["Moins de 30 minutes", "VÃ©gÃ©tarien"]
         )
         
         assert "CONTRAINTES" in result
         assert "Moins de 30 minutes" in result
-        assert "Végétarien" in result
+        assert "VÃ©gÃ©tarien" in result
 
 
 @pytest.mark.unit
@@ -129,17 +129,17 @@ class TestBuildSystemPrompt:
         
         result = service.build_system_prompt(
             role="un chef cuisinier expert",
-            expertise=["Cuisine française", "Pâtisserie"]
+            expertise=["Cuisine franÃ§aise", "PÃ¢tisserie"]
         )
         
         assert "chef cuisinier expert" in result
         assert "EXPERTISE" in result
-        assert "Cuisine française" in result
-        assert "Pâtisserie" in result
-        assert "français" in result
+        assert "Cuisine franÃ§aise" in result
+        assert "PÃ¢tisserie" in result
+        assert "franÃ§ais" in result
 
     def test_build_system_prompt_with_rules(self):
-        """Test avec règles."""
+        """Test avec rÃ¨gles."""
         mock_client = Mock()
         
         from src.services.base_ai_service import BaseAIService
@@ -149,26 +149,26 @@ class TestBuildSystemPrompt:
         result = service.build_system_prompt(
             role="un assistant",
             expertise=["cuisine"],
-            rules=["Répondre en bullet points", "Être concis"]
+            rules=["RÃ©pondre en bullet points", "ÃŠtre concis"]
         )
         
-        assert "RÈGLES" in result
+        assert "RÃˆGLES" in result
         assert "bullet points" in result
         assert "concis" in result
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CACHE & RATE LIMIT STATS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestStatsAndCache:
-    """Tests pour les méthodes de stats."""
+    """Tests pour les mÃ©thodes de stats."""
 
     @patch('src.services.base_ai_service.CacheIA')
     def test_get_cache_stats(self, mock_cache_ia):
-        """Test récupération stats cache."""
+        """Test rÃ©cupÃ©ration stats cache."""
         mock_cache_ia.obtenir_statistiques.return_value = {"hits": 10, "misses": 5}
         mock_client = Mock()
         
@@ -182,7 +182,7 @@ class TestStatsAndCache:
 
     @patch('src.services.base_ai_service.RateLimitIA')
     def test_get_rate_limit_stats(self, mock_rate_limit):
-        """Test récupération stats rate limit."""
+        """Test rÃ©cupÃ©ration stats rate limit."""
         mock_rate_limit.obtenir_statistiques.return_value = {"appels_jour": 50}
         mock_client = Mock()
         
@@ -207,9 +207,9 @@ class TestStatsAndCache:
         mock_cache_ia.invalider_tout.assert_called_once()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CALL WITH CACHE (ASYNC)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -233,7 +233,7 @@ class TestCallWithCacheAsync:
     @patch('src.services.base_ai_service.CacheIA')
     async def test_call_with_cache_hit(self, mock_cache, mock_rate):
         """Test cache hit."""
-        mock_cache.obtenir.return_value = "Réponse cachée"
+        mock_cache.obtenir.return_value = "RÃ©ponse cachÃ©e"
         mock_client = Mock()
         
         from src.services.base_ai_service import BaseAIService
@@ -242,36 +242,36 @@ class TestCallWithCacheAsync:
         
         result = await service.call_with_cache("prompt", "system", use_cache=True)
         
-        assert result == "Réponse cachée"
+        assert result == "RÃ©ponse cachÃ©e"
         mock_client.appeler.assert_not_called()
 
     @patch('src.services.base_ai_service.RateLimitIA')
     @patch('src.services.base_ai_service.CacheIA')
     async def test_call_with_cache_rate_limit_exceeded(self, mock_cache, mock_rate):
-        """Test rate limit dépassé - lève ErreurLimiteDebit."""
+        """Test rate limit dÃ©passÃ© - lÃ¨ve ErreurLimiteDebit."""
         from src.core.errors import ErreurLimiteDebit
         
         mock_cache.obtenir.return_value = None
-        mock_rate.peut_appeler.return_value = (False, "Quota dépassé")
+        mock_rate.peut_appeler.return_value = (False, "Quota dÃ©passÃ©")
         mock_client = Mock()
         
         from src.services.base_ai_service import BaseAIService
         
         service = BaseAIService(client=mock_client, service_name="test")
         
-        # La méthode lève l'exception ErreurLimiteDebit
+        # La mÃ©thode lÃ¨ve l'exception ErreurLimiteDebit
         with pytest.raises(ErreurLimiteDebit):
             await service.call_with_cache("prompt", "system")
 
     @patch('src.services.base_ai_service.RateLimitIA')
     @patch('src.services.base_ai_service.CacheIA')
     async def test_call_with_cache_api_call_success(self, mock_cache, mock_rate):
-        """Test appel API réussi (cache miss)."""
+        """Test appel API rÃ©ussi (cache miss)."""
         mock_cache.obtenir.return_value = None
         mock_rate.peut_appeler.return_value = (True, "OK")
         
         mock_client = AsyncMock()
-        mock_client.appeler = AsyncMock(return_value="Réponse IA")
+        mock_client.appeler = AsyncMock(return_value="RÃ©ponse IA")
         
         from src.services.base_ai_service import BaseAIService
         
@@ -279,7 +279,7 @@ class TestCallWithCacheAsync:
         
         result = await service.call_with_cache("prompt", "system", use_cache=True)
         
-        assert result == "Réponse IA"
+        assert result == "RÃ©ponse IA"
         mock_client.appeler.assert_called_once()
         mock_cache.definir.assert_called_once()
 
@@ -290,7 +290,7 @@ class TestCallWithCacheAsync:
         mock_rate.peut_appeler.return_value = (True, "OK")
         
         mock_client = AsyncMock()
-        mock_client.appeler = AsyncMock(return_value="Réponse IA")
+        mock_client.appeler = AsyncMock(return_value="RÃ©ponse IA")
         
         from src.services.base_ai_service import BaseAIService
         
@@ -298,13 +298,13 @@ class TestCallWithCacheAsync:
         
         result = await service.call_with_cache("prompt", "system", use_cache=False)
         
-        assert result == "Réponse IA"
+        assert result == "RÃ©ponse IA"
         mock_cache.obtenir.assert_not_called()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CALL WITH PARSING (ASYNC)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -316,7 +316,7 @@ class TestCallWithParsingAsync:
     @patch('src.services.base_ai_service.RateLimitIA')
     @patch('src.services.base_ai_service.CacheIA')
     async def test_call_with_parsing_success(self, mock_cache, mock_rate, mock_analyseur):
-        """Test parsing réussi."""
+        """Test parsing rÃ©ussi."""
         mock_cache.obtenir.return_value = '{"nom": "Test", "valeur": 42}'
         mock_rate.peut_appeler.return_value = (True, "OK")
         
@@ -340,7 +340,7 @@ class TestCallWithParsingAsync:
     @patch('src.services.base_ai_service.RateLimitIA')
     @patch('src.services.base_ai_service.CacheIA')
     async def test_call_with_parsing_no_response(self, mock_cache, mock_rate):
-        """Test parsing sans réponse."""
+        """Test parsing sans rÃ©ponse."""
         mock_cache.obtenir.return_value = None
         mock_rate.peut_appeler.return_value = (True, "OK")
         
@@ -385,7 +385,7 @@ class TestCallWithParsingAsync:
             fallback={"nom": "Fallback", "valeur": 0}
         )
         
-        # Le fallback devrait être utilisé
+        # Le fallback devrait Ãªtre utilisÃ©
         assert result is not None
         assert result.nom == "Fallback"
 
@@ -420,9 +420,9 @@ class TestCallWithParsingAsync:
         assert result is None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CALL WITH LIST PARSING (ASYNC)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -434,7 +434,7 @@ class TestCallWithListParsingAsync:
     @patch('src.services.base_ai_service.RateLimitIA')
     @patch('src.services.base_ai_service.CacheIA')
     async def test_call_with_list_parsing_success(self, mock_cache, mock_rate, mock_parser):
-        """Test liste parsing réussi."""
+        """Test liste parsing rÃ©ussi."""
         mock_cache.obtenir.return_value = '[{"id": 1, "titre": "Item1"}]'
         mock_rate.peut_appeler.return_value = (True, "OK")
         
@@ -527,9 +527,9 @@ class TestCallWithListParsingAsync:
         assert result == []
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CALL WITH JSON PARSING (ASYNC)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -540,7 +540,7 @@ class TestCallWithJsonParsingAsync:
     @patch('src.services.base_ai_service.RateLimitIA')
     @patch('src.services.base_ai_service.CacheIA')
     async def test_call_with_json_parsing_success(self, mock_cache, mock_rate):
-        """Test JSON parsing réussi."""
+        """Test JSON parsing rÃ©ussi."""
         mock_cache.obtenir.return_value = '{"nom": "Test", "valeur": 42}'
         mock_rate.peut_appeler.return_value = (True, "OK")
         
@@ -583,7 +583,7 @@ class TestCallWithJsonParsingAsync:
     @patch('src.services.base_ai_service.RateLimitIA')
     @patch('src.services.base_ai_service.CacheIA')
     async def test_call_with_json_parsing_no_response(self, mock_cache, mock_rate):
-        """Test JSON parsing sans réponse."""
+        """Test JSON parsing sans rÃ©ponse."""
         mock_cache.obtenir.return_value = None
         mock_rate.peut_appeler.return_value = (True, "OK")
         
@@ -625,7 +625,7 @@ class TestCallWithJsonParsingAsync:
     @patch('src.services.base_ai_service.CacheIA')
     async def test_call_with_json_parsing_validation_error(self, mock_cache, mock_rate):
         """Test JSON parsing avec erreur de validation Pydantic."""
-        # JSON valide mais données invalides pour le modèle
+        # JSON valide mais donnÃ©es invalides pour le modÃ¨le
         mock_cache.obtenir.return_value = '{"unknown_field": "value"}'
         mock_rate.peut_appeler.return_value = (True, "OK")
         
@@ -633,7 +633,7 @@ class TestCallWithJsonParsingAsync:
         
         from src.services.base_ai_service import BaseAIService
         
-        # Modèle avec champ obligatoire
+        # ModÃ¨le avec champ obligatoire
         class StrictModel(BaseModel):
             required_field: str  # Obligatoire
         
@@ -644,13 +644,13 @@ class TestCallWithJsonParsingAsync:
             response_model=StrictModel
         )
         
-        # Retourne None car validation échoue
+        # Retourne None car validation Ã©choue
         assert result is None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CALL WITH PARSING SYNC
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -668,14 +668,14 @@ class TestCallWithParsingSync:
         
         service = BaseAIService(client=mock_client)
         
-        # Note: Cette méthode fait un asyncio.run(), difficile à tester en unitaire
-        # On teste juste que la méthode existe et est callable
+        # Note: Cette mÃ©thode fait un asyncio.run(), difficile Ã  tester en unitaire
+        # On teste juste que la mÃ©thode existe et est callable
         assert callable(service.call_with_parsing_sync)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS RECIPE AI MIXIN
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -689,16 +689,16 @@ class TestRecipeAIMixin:
         mixin = RecipeAIMixin()
         
         result = mixin.build_recipe_context(
-            filters={"saison": "été", "type_repas": "dîner"},
+            filters={"saison": "Ã©tÃ©", "type_repas": "dÃ®ner"},
             nb_recettes=5
         )
         
         assert "5 recettes" in result
-        assert "été" in result
-        assert "dîner" in result
+        assert "Ã©tÃ©" in result
+        assert "dÃ®ner" in result
 
     def test_build_recipe_context_with_ingredients(self):
-        """Test avec ingrédients disponibles."""
+        """Test avec ingrÃ©dients disponibles."""
         from src.services.base_ai_service import RecipeAIMixin
         
         mixin = RecipeAIMixin()
@@ -730,7 +730,7 @@ class TestPlanningAIMixin:
         )
         
         assert "2024-01-15" in result
-        # Vérifie que le contexte contient les infos foyer
+        # VÃ©rifie que le contexte contient les infos foyer
         assert "adultes" in result.lower() or "FOYER" in result
 
 
@@ -739,13 +739,13 @@ class TestInventoryAIMixin:
     """Tests pour InventoryAIMixin."""
 
     def test_build_inventory_summary(self):
-        """Test résumé inventaire."""
+        """Test rÃ©sumÃ© inventaire."""
         from src.services.base_ai_service import InventoryAIMixin
         
         mixin = InventoryAIMixin()
         
         inventaire = [
-            {"nom": "Tomate", "quantite": 5, "unite": "pièces", "categorie": "Légumes"},
+            {"nom": "Tomate", "quantite": 5, "unite": "piÃ¨ces", "categorie": "LÃ©gumes"},
             {"nom": "Lait", "quantite": 2, "unite": "L", "categorie": "Produits laitiers"}
         ]
         
@@ -755,32 +755,32 @@ class TestInventoryAIMixin:
         assert "Lait" in result
 
     def test_build_inventory_summary_with_status(self):
-        """Test résumé inventaire avec différents statuts."""
+        """Test rÃ©sumÃ© inventaire avec diffÃ©rents statuts."""
         from src.services.base_ai_service import InventoryAIMixin
         
         mixin = InventoryAIMixin()
         
         inventaire = [
             {"nom": "Lait", "quantite": 0, "unite": "L", "categorie": "Produits laitiers", "statut": "critique"},
-            {"nom": "Oeufs", "quantite": 2, "unite": "pièces", "categorie": "Produits laitiers", "statut": "sous_seuil"},
-            {"nom": "Beurre", "quantite": 1, "unite": "pièces", "categorie": "Produits laitiers", "statut": "ok"}
+            {"nom": "Oeufs", "quantite": 2, "unite": "piÃ¨ces", "categorie": "Produits laitiers", "statut": "sous_seuil"},
+            {"nom": "Beurre", "quantite": 1, "unite": "piÃ¨ces", "categorie": "Produits laitiers", "statut": "ok"}
         ]
         
         result = mixin.build_inventory_summary(inventaire)
         
         assert "Lait" in result
-        assert "🔴" in result  # Critique
+        assert "ðŸ”´" in result  # Critique
         assert "STATUTS" in result
 
     def test_build_inventory_summary_many_items(self):
-        """Test résumé avec beaucoup d'items par catégorie."""
+        """Test rÃ©sumÃ© avec beaucoup d'items par catÃ©gorie."""
         from src.services.base_ai_service import InventoryAIMixin
         
         mixin = InventoryAIMixin()
         
-        # Plus de 5 items dans une catégorie (trigger "et X autres")
+        # Plus de 5 items dans une catÃ©gorie (trigger "et X autres")
         inventaire = [
-            {"nom": f"Légume{i}", "quantite": i, "unite": "pcs", "categorie": "Légumes"}
+            {"nom": f"LÃ©gume{i}", "quantite": i, "unite": "pcs", "categorie": "LÃ©gumes"}
             for i in range(8)
         ]
         
@@ -790,9 +790,9 @@ class TestInventoryAIMixin:
         assert "8" in result  # 8 articles
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MODULE EXPORTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -800,16 +800,16 @@ class TestModuleExports:
     """Tests pour les exports du module."""
 
     def test_base_ai_service_exported(self):
-        """Test BaseAIService exporté."""
+        """Test BaseAIService exportÃ©."""
         from src.services.base_ai_service import BaseAIService
         assert BaseAIService is not None
 
     def test_recipe_ai_mixin_exported(self):
-        """Test RecipeAIMixin exporté."""
+        """Test RecipeAIMixin exportÃ©."""
         from src.services.base_ai_service import RecipeAIMixin
         assert RecipeAIMixin is not None
 
     def test_planning_ai_mixin_exported(self):
-        """Test PlanningAIMixin exporté."""
+        """Test PlanningAIMixin exportÃ©."""
         from src.services.base_ai_service import PlanningAIMixin
         assert PlanningAIMixin is not None

@@ -1,5 +1,5 @@
-"""
-Module Planificateur de Repas - Génération PDF
+﻿"""
+Module Planificateur de Repas - GÃenÃeration PDF
 """
 
 from ._common import (
@@ -14,11 +14,11 @@ def generer_pdf_planning_session(
     suggestions_bio: list = None
 ) -> BytesIO | None:
     """
-    Génère un PDF du planning depuis les données en session.
+    GÃenère un PDF du planning depuis les donnÃees en session.
     
     Args:
-        planning_data: Données du planning {jour: {midi, soir, gouter}}
-        date_debut: Date de début du planning
+        planning_data: DonnÃees du planning {jour: {midi, soir, gouter}}
+        date_debut: Date de dÃebut du planning
         conseils: Conseils batch cooking
         suggestions_bio: Liste de suggestions bio/local
         
@@ -75,7 +75,7 @@ def generer_pdf_planning_session(
         # En-tête
         date_fin = date_debut + timedelta(days=len(planning_data) - 1)
         elements.append(Paragraph(
-            "🍽️ Planning Repas Famille Matanne",
+            "ðŸ½ï¸ Planning Repas Famille Matanne",
             title_style
         ))
         elements.append(Paragraph(
@@ -86,24 +86,24 @@ def generer_pdf_planning_session(
         
         # Table repas par jour
         type_repas_emoji = {
-            "midi": "☀️",
-            "soir": "🌙",
-            "gouter": "🍪",
+            "midi": "â˜€ï¸",
+            "soir": "ðŸŒ™",
+            "gouter": "ðŸª",
         }
         
         for i, (jour, repas) in enumerate(planning_data.items()):
             jour_date = date_debut + timedelta(days=i)
             
             # Tableau pour ce jour
-            day_data = [[f"📆 {jour} {jour_date.strftime('%d/%m')}", "Repas"]]
+            day_data = [[f"ðŸ“† {jour} {jour_date.strftime('%d/%m')}", "Repas"]]
             
             for type_repas in ["midi", "soir", "gouter"]:
                 if type_repas in repas and repas[type_repas]:
                     recette_nom = repas[type_repas]
                     if isinstance(recette_nom, dict):
                         recette_nom = recette_nom.get("nom", str(recette_nom))
-                    emoji = type_repas_emoji.get(type_repas, "🍴")
-                    label = {"midi": "Déjeuner", "soir": "Dîner", "gouter": "Goûter"}.get(type_repas, type_repas)
+                    emoji = type_repas_emoji.get(type_repas, "ðŸ´")
+                    label = {"midi": "DÃejeuner", "soir": "Dîner", "gouter": "Goûter"}.get(type_repas, type_repas)
                     day_data.append([
                         f"{emoji} {label}",
                         str(recette_nom)[:40]
@@ -126,20 +126,20 @@ def generer_pdf_planning_session(
         # Conseils batch cooking
         if conseils:
             elements.append(Spacer(1, 0.2*inch))
-            elements.append(Paragraph("🍳 Conseils Batch Cooking", day_style))
+            elements.append(Paragraph("ðŸ³ Conseils Batch Cooking", day_style))
             elements.append(Paragraph(conseils, styles['Normal']))
         
         # Suggestions bio
         if suggestions_bio:
             elements.append(Spacer(1, 0.2*inch))
-            elements.append(Paragraph("🌿 Suggestions Bio/Local", day_style))
+            elements.append(Paragraph("ðŸŒ¿ Suggestions Bio/Local", day_style))
             for sug in suggestions_bio:
-                elements.append(Paragraph(f"• {sug}", styles['Normal']))
+                elements.append(Paragraph(f"â€¢ {sug}", styles['Normal']))
         
         # Footer
         elements.append(Spacer(1, 0.5*inch))
         elements.append(Paragraph(
-            f"Généré le {datetime.now().strftime('%d/%m/%Y à %H:%M')} • Assistant Matanne 🏠",
+            f"GÃenÃerÃe le {datetime.now().strftime('%d/%m/%Y Ã  %H:%M')} â€¢ Assistant Matanne ðŸ ",
             ParagraphStyle('Footer', parent=styles['Normal'], fontSize=8, textColor=colors.grey, alignment=TA_CENTER)
         ))
         
@@ -149,5 +149,5 @@ def generer_pdf_planning_session(
         return buffer
         
     except Exception as e:
-        logger.error(f"❌ Erreur génération PDF planning: {e}")
+        logger.error(f"âŒ Erreur gÃenÃeration PDF planning: {e}")
         return None

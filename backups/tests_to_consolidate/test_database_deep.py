@@ -1,13 +1,13 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
-Tests supplémentaires pour database.py - amélioration de la couverture
+Tests supplÃ©mentaires pour database.py - amÃ©lioration de la couverture
 
 Cible les fonctions non couvertes:
 - obtenir_moteur() - retry et erreurs
 - obtenir_moteur_securise()
-- obtenir_contexte_db() - différentes branches d'erreur  
+- obtenir_contexte_db() - diffÃ©rentes branches d'erreur  
 - obtenir_db_securise()
-- GestionnaireMigrations - toutes les méthodes statiques
+- GestionnaireMigrations - toutes les mÃ©thodes statiques
 - verifier_connexion()
 - obtenir_infos_db()
 - initialiser_database()
@@ -24,7 +24,7 @@ class TestObtenirMoteur:
     """Tests pour obtenir_moteur()."""
     
     def test_obtenir_moteur_success(self):
-        """Retourne un engine après connexion réussie."""
+        """Retourne un engine aprÃ¨s connexion rÃ©ussie."""
         from src.core import database
         
         # Mock l'engine et la connexion
@@ -42,12 +42,12 @@ class TestObtenirMoteur:
                 database.obtenir_moteur.clear()
                 try:
                     engine = database.obtenir_moteur()
-                    # L'engine doit être retourné
+                    # L'engine doit Ãªtre retournÃ©
                 except Exception:
-                    pass  # Ignorer les erreurs de config réelle
+                    pass  # Ignorer les erreurs de config rÃ©elle
     
     def test_obtenir_moteur_retry_on_failure(self):
-        """Réessaye après un échec de connexion."""
+        """RÃ©essaye aprÃ¨s un Ã©chec de connexion."""
         from src.core import database
         from src.core.errors import ErreurBaseDeDonnees
         
@@ -67,13 +67,13 @@ class TestObtenirMoteur:
                 
                 database.obtenir_moteur.clear()
                 try:
-                    # Devrait lever une erreur après les tentatives
+                    # Devrait lever une erreur aprÃ¨s les tentatives
                     database.obtenir_moteur(nombre_tentatives=2, delai_tentative=0)
                 except ErreurBaseDeDonnees:
-                    pass  # Attendu après les tentatives
+                    pass  # Attendu aprÃ¨s les tentatives
     
     def test_obtenir_moteur_raises_after_max_retries(self):
-        """Lève ErreurBaseDeDonnees après max tentatives."""
+        """LÃ¨ve ErreurBaseDeDonnees aprÃ¨s max tentatives."""
         from src.core import database
         from src.core.errors import ErreurBaseDeDonnees
         
@@ -107,7 +107,7 @@ class TestObtenirMoteurSecurise:
             assert result is None
     
     def test_returns_engine_on_success(self):
-        """Retourne l'engine si connexion réussie."""
+        """Retourne l'engine si connexion rÃ©ussie."""
         from src.core import database
         
         mock_engine = MagicMock()
@@ -120,7 +120,7 @@ class TestObtenirContexteDb:
     """Tests pour obtenir_contexte_db()."""
     
     def test_context_manager_commits_on_success(self):
-        """Commit la session après succès."""
+        """Commit la session aprÃ¨s succÃ¨s."""
         from src.core import database
         
         mock_session = MagicMock()
@@ -165,7 +165,7 @@ class TestObtenirContexteDb:
             mock_session.rollback.assert_called_once()
     
     def test_context_manager_rollback_on_generic_exception(self):
-        """Rollback sur exception générique."""
+        """Rollback sur exception gÃ©nÃ©rique."""
         from src.core import database
         
         mock_session = MagicMock()
@@ -208,7 +208,7 @@ class TestObtenirDbSecurise:
                 assert db is None
     
     def test_returns_none_on_generic_error(self):
-        """Retourne None sur erreur générique."""
+        """Retourne None sur erreur gÃ©nÃ©rique."""
         from src.core import database
         
         with patch('src.core.database.obtenir_fabrique_session') as mock_factory:
@@ -222,7 +222,7 @@ class TestGestionnaireMigrations:
     """Tests pour GestionnaireMigrations."""
     
     def test_initialiser_table_migrations(self):
-        """Crée la table de migrations."""
+        """CrÃ©e la table de migrations."""
         from src.core.database import GestionnaireMigrations
         
         mock_conn = MagicMock()
@@ -275,7 +275,7 @@ class TestGestionnaireMigrations:
             assert version == 0
     
     def test_appliquer_migration_success(self):
-        """Applique une migration avec succès."""
+        """Applique une migration avec succÃ¨s."""
         from src.core.database import GestionnaireMigrations
         
         mock_conn = MagicMock()
@@ -294,7 +294,7 @@ class TestGestionnaireMigrations:
             assert mock_conn.execute.call_count == 2  # SQL + INSERT
     
     def test_appliquer_migration_raises_on_error(self):
-        """Lève ErreurBaseDeDonnees en cas d'erreur."""
+        """LÃ¨ve ErreurBaseDeDonnees en cas d'erreur."""
         from src.core.database import GestionnaireMigrations
         from src.core.errors import ErreurBaseDeDonnees
         
@@ -309,7 +309,7 @@ class TestGestionnaireMigrations:
                     sql="INVALID SQL"
                 )
             
-            assert "Échec migration v1" in str(exc_info.value)
+            assert "Ã‰chec migration v1" in str(exc_info.value)
     
     def test_obtenir_migrations_disponibles(self):
         """Retourne la liste des migrations."""
@@ -357,7 +357,7 @@ class TestVerifierConnexion:
     """Tests pour verifier_connexion()."""
     
     def test_returns_true_on_success(self):
-        """Retourne (True, "Connexion OK") si connexion réussie."""
+        """Retourne (True, "Connexion OK") si connexion rÃ©ussie."""
         from src.core import database
         
         mock_conn = MagicMock()
@@ -428,7 +428,7 @@ class TestObtenirInfosDb:
                     assert info["version_schema"] == 3
     
     def test_returns_error_dict_on_failure(self):
-        """Retourne un dict d'erreur en cas de problème."""
+        """Retourne un dict d'erreur en cas de problÃ¨me."""
         from src.core import database
         
         with patch('src.core.database.obtenir_moteur') as mock_get_engine:
@@ -445,7 +445,7 @@ class TestInitialiserDatabase:
     """Tests pour initialiser_database()."""
     
     def test_initialiser_database_success(self):
-        """Initialise la DB avec succès."""
+        """Initialise la DB avec succÃ¨s."""
         from src.core import database
         
         mock_conn = MagicMock()
@@ -463,7 +463,7 @@ class TestInitialiserDatabase:
                     assert result is True
     
     def test_initialiser_database_skip_migrations(self):
-        """Peut initialiser sans exécuter les migrations."""
+        """Peut initialiser sans exÃ©cuter les migrations."""
         from src.core import database
         
         mock_conn = MagicMock()
@@ -500,7 +500,7 @@ class TestCreerToutesTableS:
     """Tests pour creer_toutes_tables()."""
     
     def test_creer_tables_skipped_in_production(self):
-        """Ne crée pas les tables en production."""
+        """Ne crÃ©e pas les tables en production."""
         from src.core import database
         
         with patch('src.core.database.obtenir_parametres') as mock_params:
@@ -510,7 +510,7 @@ class TestCreerToutesTableS:
             database.creer_toutes_tables()
     
     def test_creer_tables_in_dev(self):
-        """Crée les tables en dev."""
+        """CrÃ©e les tables en dev."""
         from src.core import database
         
         mock_engine = MagicMock()

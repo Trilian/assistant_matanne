@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour famille.py
 
 Module: src.core.models.famille

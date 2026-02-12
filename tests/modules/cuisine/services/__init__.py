@@ -1,1 +1,1 @@
-"""Package de tests pour src.domains.cuisine.services."""
+﻿"""Package de tests pour src.modules.cuisine.services."""

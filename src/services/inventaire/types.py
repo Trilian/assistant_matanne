@@ -1,4 +1,4 @@
-"""
+﻿"""
 Types et schémas Pydantic pour le service inventaire.
 
 Ce module contient les modèles de validation utilisés pour:

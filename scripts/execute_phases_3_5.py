@@ -1,7 +1,7 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
-Phase 2-5: Division des fichiers volumineux, création de tests 1:1,
-renommage français et amélioration de couverture.
+Phase 2-5: Division des fichiers volumineux, crÃ©ation de tests 1:1,
+renommage franÃ§ais et amÃ©lioration de couverture.
 """
 
 import os
@@ -16,7 +16,7 @@ TESTS_DIR = PROJET_ROOT / "tests"
 
 
 def creer_test_template(source_path: Path) -> str:
-    """Génère un template de test pour un fichier source."""
+    """GÃ©nÃ¨re un template de test pour un fichier source."""
     
     # Lire le fichier source pour extraire classes/fonctions
     try:
@@ -37,7 +37,7 @@ def creer_test_template(source_path: Path) -> str:
     else:
         import_path = f".{import_path}"
     
-    # Générer le template
+    # GÃ©nÃ©rer le template
     template = f'''"""
 Tests unitaires pour {source_path.name}
 
@@ -63,13 +63,13 @@ class Test{module_name.title().replace("_", "")}:
         """Tests pour la classe {cls}."""
 
         def test_{cls.lower()}_creation(self):
-            """Test de création de {cls}."""
-            # TODO: Implémenter
+            """Test de crÃ©ation de {cls}."""
+            # TODO: ImplÃ©menter
             pass
 
         def test_{cls.lower()}_methode_principale(self):
-            """Test de la méthode principale."""
-            # TODO: Implémenter
+            """Test de la mÃ©thode principale."""
+            # TODO: ImplÃ©menter
             pass
 
 '''
@@ -79,7 +79,7 @@ class Test{module_name.title().replace("_", "")}:
         template += f'''
     def test_{func}(self):
         """Test de la fonction {func}."""
-        # TODO: Implémenter
+        # TODO: ImplÃ©menter
         pass
 
 '''
@@ -88,9 +88,9 @@ class Test{module_name.title().replace("_", "")}:
 
 
 def phase3_creer_tests_manquants():
-    """Phase 3: Créer les fichiers de test 1:1 manquants."""
+    """Phase 3: CrÃ©er les fichiers de test 1:1 manquants."""
     print("\n" + "=" * 60)
-    print("PHASE 3: Création des tests 1:1 manquants")
+    print("PHASE 3: CrÃ©ation des tests 1:1 manquants")
     print("=" * 60)
     
     created_tests = []
@@ -109,40 +109,40 @@ def phase3_creer_tests_manquants():
         
         expected_test_path = TESTS_DIR / rel_path.parent / test_name
         
-        # Vérifier si le test existe
+        # VÃ©rifier si le test existe
         if expected_test_path.exists():
             continue
         
-        # Créer le dossier si nécessaire
+        # CrÃ©er le dossier si nÃ©cessaire
         expected_test_path.parent.mkdir(parents=True, exist_ok=True)
         
-        # Générer le template de test
+        # GÃ©nÃ©rer le template de test
         template = creer_test_template(py_file)
         expected_test_path.write_text(template, encoding="utf-8")
         
         created_tests.append(expected_test_path)
-        print(f"  ✓ Créé: {expected_test_path.relative_to(TESTS_DIR)}")
+        print(f"  âœ“ CrÃ©Ã©: {expected_test_path.relative_to(TESTS_DIR)}")
     
-    print(f"\n  Total: {len(created_tests)} fichiers de test créés")
+    print(f"\n  Total: {len(created_tests)} fichiers de test crÃ©Ã©s")
     return created_tests
 
 
 def phase4_renommer_fichiers_francais():
-    """Phase 4: Renommer les fichiers anglais en français."""
+    """Phase 4: Renommer les fichiers anglais en franÃ§ais."""
     print("\n" + "=" * 60)
-    print("PHASE 4: Renommage des fichiers en français")
+    print("PHASE 4: Renommage des fichiers en franÃ§ais")
     print("=" * 60)
     
     # Mapping de renommage (fichier -> nouveau nom)
-    # Note: Ne renomme que les fichiers qui peuvent être renommés sans casser les imports
+    # Note: Ne renomme que les fichiers qui peuvent Ãªtre renommÃ©s sans casser les imports
     rename_mapping = {
-        # À activer progressivement - pour l'instant, on documente seulement
+        # Ã€ activer progressivement - pour l'instant, on documente seulement
     }
     
     renamed_files = []
     
-    print("  ⚠ Renommage désactivé pour éviter de casser les imports")
-    print("  Les fichiers suivants devraient être renommés manuellement:")
+    print("  âš  Renommage dÃ©sactivÃ© pour Ã©viter de casser les imports")
+    print("  Les fichiers suivants devraient Ãªtre renommÃ©s manuellement:")
     
     suggestions = [
         ("src/core/config.py", "configuration.py"),
@@ -156,7 +156,7 @@ def phase4_renommer_fichiers_francais():
     ]
     
     for src, dest in suggestions:
-        print(f"    - {src} → {dest}")
+        print(f"    - {src} â†’ {dest}")
     
     return renamed_files
 
@@ -172,12 +172,12 @@ def phase5_plan_couverture():
             "Test @with_db_session avec mock session",
             "Test @with_cache avec TTL",
             "Test @with_error_handling capture exceptions",
-            "Test @gerer_erreurs avec différents types d'erreurs",
+            "Test @gerer_erreurs avec diffÃ©rents types d'erreurs",
         ]),
         ("src/core/cache.py", "28%", [
-            "Test Cache.charger() avec données valides",
+            "Test Cache.charger() avec donnÃ©es valides",
             "Test Cache.sauvegarder() avec serialisation",
-            "Test Cache.nettoyer() par préfixe",
+            "Test Cache.nettoyer() par prÃ©fixe",
             "Test expiration automatique",
         ]),
         ("src/core/cache_multi.py", "35%", [
@@ -194,11 +194,11 @@ def phase5_plan_couverture():
         ("src/services/inventaire.py", "30%", [
             "Test InventaireService CRUD complet",
             "Test alertes stock bas",
-            "Test synchronisation quantités",
+            "Test synchronisation quantitÃ©s",
         ]),
     ]
     
-    print("\n  Fichiers prioritaires avec tests à ajouter:")
+    print("\n  Fichiers prioritaires avec tests Ã  ajouter:")
     for path, current_cov, tests in priority_files:
         print(f"\n  {path} ({current_cov} actuel):")
         for test in tests:
@@ -208,9 +208,9 @@ def phase5_plan_couverture():
 
 
 def main():
-    """Exécute les phases 3-5."""
+    """ExÃ©cute les phases 3-5."""
     print("\n" + "=" * 60)
-    print("EXÉCUTION DES PHASES 3-5")
+    print("EXÃ‰CUTION DES PHASES 3-5")
     print("=" * 60)
     
     # Phase 3
@@ -223,11 +223,11 @@ def main():
     coverage_plan = phase5_plan_couverture()
     
     print("\n" + "=" * 60)
-    print("RÉSUMÉ")
+    print("RÃ‰SUMÃ‰")
     print("=" * 60)
-    print(f"  Phase 3: {len(created_tests)} tests créés")
-    print(f"  Phase 4: {len(renamed_files)} fichiers renommés")
-    print(f"  Phase 5: {len(coverage_plan)} fichiers prioritaires identifiés")
+    print(f"  Phase 3: {len(created_tests)} tests crÃ©Ã©s")
+    print(f"  Phase 4: {len(renamed_files)} fichiers renommÃ©s")
+    print(f"  Phase 5: {len(coverage_plan)} fichiers prioritaires identifiÃ©s")
 
 
 if __name__ == "__main__":

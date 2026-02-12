@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests complets pour src/services/barcode.py
 
 Couverture cible: >80%
@@ -9,13 +9,13 @@ from datetime import datetime
 from unittest.mock import Mock, patch, MagicMock
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS SCHÉMAS PYDANTIC
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS SCHÃ‰MAS PYDANTIC
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBarcodeData:
-    """Tests schéma BarcodeData."""
+    """Tests schÃ©ma BarcodeData."""
 
     def test_import_schema(self):
         from src.services.barcode import BarcodeData
@@ -86,7 +86,7 @@ class TestBarcodeData:
 
 
 class TestBarcodeArticle:
-    """Tests schéma BarcodeArticle."""
+    """Tests schÃ©ma BarcodeArticle."""
 
     def test_creation_basique(self):
         from src.services.barcode import BarcodeArticle
@@ -95,14 +95,14 @@ class TestBarcodeArticle:
             barcode="3017620422003",
             article_id=1,
             nom_article="Nutella 500g",
-            categorie="Épicerie"
+            categorie="Ã‰picerie"
         )
         
         assert article.barcode == "3017620422003"
         assert article.article_id == 1
         assert article.nom_article == "Nutella 500g"
         assert article.quantite_defaut == 1.0
-        assert article.unite_defaut == "unité"
+        assert article.unite_defaut == "unitÃ©"
 
     def test_avec_prix(self):
         from src.services.barcode import BarcodeArticle
@@ -137,15 +137,15 @@ class TestBarcodeArticle:
             barcode="3017620422003",
             article_id=1,
             nom_article="Glace",
-            categorie="Surgelés",
-            lieu_stockage="Congélateur"
+            categorie="SurgelÃ©s",
+            lieu_stockage="CongÃ©lateur"
         )
         
-        assert article.lieu_stockage == "Congélateur"
+        assert article.lieu_stockage == "CongÃ©lateur"
 
 
 class TestBarcodeRecette:
-    """Tests schéma BarcodeRecette."""
+    """Tests schÃ©ma BarcodeRecette."""
 
     def test_creation_basique(self):
         from src.services.barcode import BarcodeRecette
@@ -174,7 +174,7 @@ class TestBarcodeRecette:
 
 
 class TestScanResultat:
-    """Tests schéma ScanResultat."""
+    """Tests schÃ©ma ScanResultat."""
 
     def test_creation_article(self):
         from src.services.barcode import ScanResultat
@@ -211,9 +211,9 @@ class TestScanResultat:
         assert result.type_scan == "inconnu"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SERVICE BARCODE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBarcodeServiceInit:
@@ -232,9 +232,9 @@ class TestBarcodeServiceInit:
         assert service.barcode_mappings == {}
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS VALIDATION BARCODES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBarcodeValidation:
@@ -263,7 +263,7 @@ class TestBarcodeValidation:
         from src.services.barcode import BarcodeService
         
         service = BarcodeService()
-        # Test avec EAN-8 calculé correctement
+        # Test avec EAN-8 calculÃ© correctement
         valide, type_code = service.valider_barcode("96385074")
         
         # Si checksum correct
@@ -293,7 +293,7 @@ class TestBarcodeValidation:
         from src.services.barcode import BarcodeService
         
         service = BarcodeService()
-        # CODE128 est alphanumérique 8+, mais QR est 10+ donc utiliser un code court
+        # CODE128 est alphanumÃ©rique 8+, mais QR est 10+ donc utiliser un code court
         valide, type_code = service.valider_barcode("PRODUCT1")
         
         assert valide is True
@@ -312,20 +312,20 @@ class TestBarcodeValidation:
         from src.services.barcode import BarcodeService
         
         service = BarcodeService()
-        # Caractères spéciaux non supportés
+        # CaractÃ¨res spÃ©ciaux non supportÃ©s
         valide, message = service.valider_barcode("@#!")
         
         # Peut ne pas matcher si aucun pattern
         # Le service retourne un type ou une erreur
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CHECKSUMS STATIQUES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBarcodeChecksums:
-    """Tests méthodes de checksum."""
+    """Tests mÃ©thodes de checksum."""
 
     def test_checksum_ean13_valide(self):
         from src.services.barcode import BarcodeService
@@ -389,9 +389,9 @@ class TestBarcodeChecksums:
         assert result is False
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EDGE CASES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBarcodeEdgeCases:
@@ -420,9 +420,9 @@ class TestBarcodeEdgeCases:
         service = BarcodeService()
         valide, message = service.valider_barcode("123456789")
         
-        # 9 chiffres: peut matcher un pattern alphanumérique
-        # Le comportement dépend de l'implémentation
-        assert valide is not None  # Juste vérifier qu'on a un résultat
+        # 9 chiffres: peut matcher un pattern alphanumÃ©rique
+        # Le comportement dÃ©pend de l'implÃ©mentation
+        assert valide is not None  # Juste vÃ©rifier qu'on a un rÃ©sultat
 
     def test_barcode_vide(self):
         from src.services.barcode import BarcodeService
@@ -444,7 +444,7 @@ class TestBarcodeEdgeCases:
 
 
 class TestBarcodeIntegration:
-    """Tests d'intégration."""
+    """Tests d'intÃ©gration."""
 
     def test_workflow_scan_article(self):
         from src.services.barcode import BarcodeService, BarcodeArticle
@@ -455,12 +455,12 @@ class TestBarcodeIntegration:
         valide, type_code = service.valider_barcode("3017620422003")
         assert valide is True
         
-        # Créer l'article associé
+        # CrÃ©er l'article associÃ©
         article = BarcodeArticle(
             barcode="3017620422003",
             article_id=1,
             nom_article="Nutella 500g",
-            categorie="Épicerie",
+            categorie="Ã‰picerie",
             prix_unitaire=4.50
         )
         
@@ -479,8 +479,8 @@ class TestBarcodeIntegration:
         
         for code, expected_type in codes_test:
             valide, type_code = service.valider_barcode(code)
-            assert valide is True, f"Code {code} devrait être valide"
-            assert type_code == expected_type, f"Code {code} devrait être {expected_type}"
+            assert valide is True, f"Code {code} devrait Ãªtre valide"
+            assert type_code == expected_type, f"Code {code} devrait Ãªtre {expected_type}"
 
 
 class TestBarcodeImports:

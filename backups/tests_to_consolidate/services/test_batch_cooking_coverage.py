@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests complets pour src/services/batch_cooking.py
 
 Couverture cible: >80%
@@ -9,13 +9,13 @@ from datetime import date, datetime, time, timedelta
 from unittest.mock import Mock, patch, MagicMock
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS SCHÉMAS PYDANTIC
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS SCHÃ‰MAS PYDANTIC
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestEtapeBatchIA:
-    """Tests schéma EtapeBatchIA."""
+    """Tests schÃ©ma EtapeBatchIA."""
 
     def test_import_schema(self):
         from src.services.batch_cooking import EtapeBatchIA
@@ -26,13 +26,13 @@ class TestEtapeBatchIA:
         
         etape = EtapeBatchIA(
             ordre=1,
-            titre="Préparer les légumes",
-            description="Éplucher et couper les légumes",
+            titre="PrÃ©parer les lÃ©gumes",
+            description="Ã‰plucher et couper les lÃ©gumes",
             duree_minutes=15
         )
         
         assert etape.ordre == 1
-        assert etape.titre == "Préparer les légumes"
+        assert etape.titre == "PrÃ©parer les lÃ©gumes"
         assert etape.duree_minutes == 15
 
     def test_champs_optionnels(self):
@@ -62,7 +62,7 @@ class TestEtapeBatchIA:
         
         with pytest.raises(ValidationError):
             EtapeBatchIA(
-                ordre=0,  # Doit être >= 1
+                ordre=0,  # Doit Ãªtre >= 1
                 titre="Test",
                 description="Test description",
                 duree_minutes=10
@@ -82,19 +82,19 @@ class TestEtapeBatchIA:
 
 
 class TestSessionBatchIA:
-    """Tests schéma SessionBatchIA."""
+    """Tests schÃ©ma SessionBatchIA."""
 
     def test_creation_valide(self):
         from src.services.batch_cooking import SessionBatchIA, EtapeBatchIA
         
         session = SessionBatchIA(
-            recettes=["Poulet rôti", "Gratin dauphinois"],
+            recettes=["Poulet rÃ´ti", "Gratin dauphinois"],
             duree_totale_estimee=120,
             etapes=[
                 EtapeBatchIA(
                     ordre=1,
-                    titre="Préparation",
-                    description="Préparer ingrédients",
+                    titre="PrÃ©paration",
+                    description="PrÃ©parer ingrÃ©dients",
                     duree_minutes=30
                 )
             ]
@@ -124,7 +124,7 @@ class TestSessionBatchIA:
 
 
 class TestPreparationIA:
-    """Tests schéma PreparationIA."""
+    """Tests schÃ©ma PreparationIA."""
 
     def test_creation_valide(self):
         from src.services.batch_cooking import PreparationIA
@@ -154,9 +154,9 @@ class TestPreparationIA:
         assert prep.container_suggere == ""
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONSTANTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBatchCookingConstants:
@@ -177,16 +177,16 @@ class TestBatchCookingConstants:
         assert "four" in ROBOTS_DISPONIBLES
         assert "airfryer" in ROBOTS_DISPONIBLES
         
-        # Vérifier structure
+        # VÃ©rifier structure
         cookeo = ROBOTS_DISPONIBLES["cookeo"]
         assert "nom" in cookeo
         assert "emoji" in cookeo
         assert "parallele" in cookeo
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SERVICE BATCH COOKING
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBatchCookingServiceInit:
@@ -201,7 +201,7 @@ class TestBatchCookingServiceInit:
         
         service = BatchCookingService()
         
-        # Vérifier que le service est bien créé
+        # VÃ©rifier que le service est bien crÃ©Ã©
         assert service is not None
 
     def test_heritage_multiple(self):
@@ -228,31 +228,31 @@ class TestBatchCookingServiceGetConfig:
 
 
 class TestBatchCookingServiceMethods:
-    """Tests des méthodes du service."""
+    """Tests des mÃ©thodes du service."""
 
     def test_service_has_expected_methods(self):
         from src.services.batch_cooking import BatchCookingService
         
         service = BatchCookingService()
         
-        # Méthodes héritées de BaseService
+        # MÃ©thodes hÃ©ritÃ©es de BaseService
         assert hasattr(service, 'get_all')
         assert hasattr(service, 'get_by_id')
         assert hasattr(service, 'create')
         assert hasattr(service, 'update')
         assert hasattr(service, 'delete')
         
-        # Méthodes héritées de BaseAIService
+        # MÃ©thodes hÃ©ritÃ©es de BaseAIService
         assert hasattr(service, 'call_with_list_parsing_sync')
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MODELS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBatchCookingModels:
-    """Tests imports des modèles."""
+    """Tests imports des modÃ¨les."""
 
     def test_import_models(self):
         from src.core.models import (
@@ -273,7 +273,7 @@ class TestBatchCookingModels:
     def test_statut_session_enum(self):
         from src.core.models import StatutSessionEnum
         
-        # Vérifier que l'enum a des valeurs
+        # VÃ©rifier que l'enum a des valeurs
         assert len(StatutSessionEnum) > 0
 
     def test_type_robot_enum(self):
@@ -282,9 +282,9 @@ class TestBatchCookingModels:
         assert len(TypeRobotEnum) > 0
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EDGE CASES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBatchCookingEdgeCases:
@@ -296,7 +296,7 @@ class TestBatchCookingEdgeCases:
         etape = EtapeBatchIA(
             ordre=1,
             titre="Test rapide",
-            description="Une étape très courte",
+            description="Une Ã©tape trÃ¨s courte",
             duree_minutes=1  # Minimum
         )
         
@@ -382,7 +382,7 @@ class TestBatchCookingEdgeCases:
         from src.services.batch_cooking import EtapeBatchIA
         from pydantic import ValidationError
         
-        # Température valide
+        # TempÃ©rature valide
         etape = EtapeBatchIA(
             ordre=1,
             titre="Cuisson",
@@ -392,17 +392,17 @@ class TestBatchCookingEdgeCases:
         )
         assert etape.temperature == 200
         
-        # Température 0 (valide - ex: congélation)
+        # TempÃ©rature 0 (valide - ex: congÃ©lation)
         etape = EtapeBatchIA(
             ordre=1,
-            titre="Congélation",
+            titre="CongÃ©lation",
             description="Description test",
             duree_minutes=30,
             temperature=0
         )
         assert etape.temperature == 0
         
-        # Température trop élevée
+        # TempÃ©rature trop Ã©levÃ©e
         with pytest.raises(ValidationError):
             EtapeBatchIA(
                 ordre=1,
@@ -414,17 +414,17 @@ class TestBatchCookingEdgeCases:
 
 
 class TestBatchCookingIntegration:
-    """Tests d'intégration."""
+    """Tests d'intÃ©gration."""
 
-    def test_workflow_session_complète(self):
+    def test_workflow_session_complÃ¨te(self):
         from src.services.batch_cooking import SessionBatchIA, EtapeBatchIA
         
-        # Créer une session complète avec plusieurs étapes
+        # CrÃ©er une session complÃ¨te avec plusieurs Ã©tapes
         etapes = [
             EtapeBatchIA(
                 ordre=1,
-                titre="Préparation légumes",
-                description="Éplucher et couper tous les légumes",
+                titre="PrÃ©paration lÃ©gumes",
+                description="Ã‰plucher et couper tous les lÃ©gumes",
                 duree_minutes=20,
                 robots=["hachoir"],
                 groupe_parallele=0
@@ -441,20 +441,20 @@ class TestBatchCookingIntegration:
             EtapeBatchIA(
                 ordre=3,
                 titre="Sauce",
-                description="Préparer la sauce au Cookeo",
+                description="PrÃ©parer la sauce au Cookeo",
                 duree_minutes=30,
                 robots=["cookeo"],
-                groupe_parallele=1,  # En parallèle avec le four
+                groupe_parallele=1,  # En parallÃ¨le avec le four
                 est_supervision=True
             ),
         ]
         
         session = SessionBatchIA(
-            recettes=["Poulet rôti", "Sauce aux champignons"],
+            recettes=["Poulet rÃ´ti", "Sauce aux champignons"],
             duree_totale_estimee=95,
             etapes=etapes,
-            conseils_jules=["Faire participer Jules à la préparation des légumes"],
-            ordre_optimal="Commencer par les légumes puis lancer four et Cookeo en parallèle"
+            conseils_jules=["Faire participer Jules Ã  la prÃ©paration des lÃ©gumes"],
+            ordre_optimal="Commencer par les lÃ©gumes puis lancer four et Cookeo en parallÃ¨le"
         )
         
         assert len(session.etapes) == 3
@@ -464,13 +464,13 @@ class TestBatchCookingIntegration:
     def test_robots_paralleles(self):
         from src.services.batch_cooking import ROBOTS_DISPONIBLES
         
-        # Vérifier quels robots peuvent tourner en parallèle
+        # VÃ©rifier quels robots peuvent tourner en parallÃ¨le
         robots_paralleles = [k for k, v in ROBOTS_DISPONIBLES.items() if v["parallele"]]
         robots_non_paralleles = [k for k, v in ROBOTS_DISPONIBLES.items() if not v["parallele"]]
         
-        # La plupart des robots peuvent être en parallèle
+        # La plupart des robots peuvent Ãªtre en parallÃ¨le
         assert len(robots_paralleles) > len(robots_non_paralleles)
         
-        # Plaques et hachoir ne sont pas parallèles (nécessitent attention)
+        # Plaques et hachoir ne sont pas parallÃ¨les (nÃ©cessitent attention)
         assert "plaques" in robots_non_paralleles
         assert "mixeur" in robots_non_paralleles

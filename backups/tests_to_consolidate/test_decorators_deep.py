@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests approfondis pour src/core/decorators.py
 
 Cible: Atteindre 80%+ de couverture
@@ -10,16 +10,16 @@ from unittest.mock import Mock, patch, MagicMock
 import inspect
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: with_db_session - lignes 63-72
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestWithDbSessionDeep:
     """Tests approfondis pour @with_db_session"""
 
     def test_with_db_session_creates_session_when_none_provided(self):
-        """Test création de session quand aucune n'est fournie"""
+        """Test crÃ©ation de session quand aucune n'est fournie"""
         from src.core.decorators import with_db_session
 
         called_with_session = []
@@ -53,7 +53,7 @@ class TestWithDbSessionDeep:
         assert result == mock_db
 
     def test_with_db_session_with_session_param(self):
-        """Test avec paramètre nommé 'session' au lieu de 'db'"""
+        """Test avec paramÃ¨tre nommÃ© 'session' au lieu de 'db'"""
         from src.core.decorators import with_db_session
 
         @with_db_session
@@ -66,7 +66,7 @@ class TestWithDbSessionDeep:
         assert result == mock_session
 
     def test_with_db_session_auto_injects_session_param(self):
-        """Test injection auto du paramètre 'session'"""
+        """Test injection auto du paramÃ¨tre 'session'"""
         from src.core.decorators import with_db_session
 
         injected_session = []
@@ -85,10 +85,10 @@ class TestWithDbSessionDeep:
 
             assert result == {"test": 1}
             assert len(injected_session) == 1
-            # La session devrait être injectée (mock ou vraie)
+            # La session devrait Ãªtre injectÃ©e (mock ou vraie)
 
     def test_with_db_session_preserves_function_metadata(self):
-        """Test préservation des métadonnées de fonction"""
+        """Test prÃ©servation des mÃ©tadonnÃ©es de fonction"""
         from src.core.decorators import with_db_session
 
         @with_db_session
@@ -100,13 +100,13 @@ class TestWithDbSessionDeep:
         assert "Ma docstring" in (ma_super_fonction.__doc__ or "")
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: with_cache key_func - lignes 126-152
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestWithCacheKeyFunc:
-    """Tests pour with_cache avec key_func personnalisée"""
+    """Tests pour with_cache avec key_func personnalisÃ©e"""
 
     def test_with_cache_key_func_simple(self):
         """Test key_func simple"""
@@ -137,13 +137,13 @@ class TestWithCacheKeyFunc:
         assert result == "42_hello"
 
     def test_with_cache_key_func_type_error_fallback(self):
-        """Test fallback quand key_func échoue avec TypeError"""
+        """Test fallback quand key_func Ã©choue avec TypeError"""
         from src.core.decorators import with_cache
         from src.core.cache import Cache
 
         Cache.clear()
 
-        # Key func qui attend des paramètres différents
+        # Key func qui attend des paramÃ¨tres diffÃ©rents
         def bad_key_func(self, nom=None):
             return f"key_{nom}"
 
@@ -158,7 +158,7 @@ class TestWithCacheKeyFunc:
         assert "test" in result
 
     def test_with_cache_without_key_func_uses_prefix(self):
-        """Test sans key_func utilise le préfixe"""
+        """Test sans key_func utilise le prÃ©fixe"""
         from src.core.decorators import with_cache
         from src.core.cache import Cache
 
@@ -172,7 +172,7 @@ class TestWithCacheKeyFunc:
         assert result == 3
 
     def test_with_cache_excludes_db_from_key(self):
-        """Test que db est exclu de la clé de cache"""
+        """Test que db est exclu de la clÃ© de cache"""
         from src.core.decorators import with_cache
         from src.core.cache import Cache
 
@@ -202,25 +202,25 @@ class TestWithCacheKeyFunc:
         # Premier appel - cache miss
         result1 = my_func(5)
 
-        # Deuxième appel - cache hit
+        # DeuxiÃ¨me appel - cache hit
         result2 = my_func(5)
 
         assert result1 == 10
         assert result2 == 10
-        # La fonction devrait n'être appelée qu'une fois grâce au cache
+        # La fonction devrait n'Ãªtre appelÃ©e qu'une fois grÃ¢ce au cache
         assert call_count[0] == 1
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: with_validation - lignes 268-298
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestWithValidation:
     """Tests pour @with_validation"""
 
     def test_with_validation_success(self):
-        """Test validation réussie"""
+        """Test validation rÃ©ussie"""
         from src.core.decorators import with_validation
         from pydantic import BaseModel
 
@@ -238,7 +238,7 @@ class TestWithValidation:
         assert result["prix"] == 10.5
 
     def test_with_validation_echec(self):
-        """Test validation échouée lève ErreurValidation"""
+        """Test validation Ã©chouÃ©e lÃ¨ve ErreurValidation"""
         from src.core.decorators import with_validation
         from src.core.errors_base import ErreurValidation
         from pydantic import BaseModel
@@ -271,7 +271,7 @@ class TestWithValidation:
         assert result["valeur"] == 42
 
     def test_with_validation_preserves_function_name(self):
-        """Test préservation du nom de fonction"""
+        """Test prÃ©servation du nom de fonction"""
         from src.core.decorators import with_validation
         from pydantic import BaseModel
 
@@ -285,16 +285,16 @@ class TestWithValidation:
         assert ma_super_fonction.__name__ == "ma_super_fonction"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: with_error_handling - lignes 227-228
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestWithErrorHandlingDeep:
     """Tests approfondis pour @with_error_handling"""
 
     def test_with_error_handling_no_args(self):
-        """Test décorateur sans arguments"""
+        """Test dÃ©corateur sans arguments"""
         from src.core.decorators import with_error_handling
 
         @with_error_handling()
@@ -305,7 +305,7 @@ class TestWithErrorHandlingDeep:
         assert result == 42
 
     def test_with_error_handling_with_exception(self):
-        """Test décorateur avec exception"""
+        """Test dÃ©corateur avec exception"""
         from src.core.decorators import with_error_handling
 
         @with_error_handling()
@@ -313,10 +313,10 @@ class TestWithErrorHandlingDeep:
             raise ValueError("Test error")
 
         result = ma_fonction()
-        assert result is None  # Valeur par défaut
+        assert result is None  # Valeur par dÃ©faut
 
     def test_with_error_handling_custom_default(self):
-        """Test décorateur avec valeur par défaut personnalisée"""
+        """Test dÃ©corateur avec valeur par dÃ©faut personnalisÃ©e"""
         from src.core.decorators import with_error_handling
 
         @with_error_handling(default_return="fallback")
@@ -327,7 +327,7 @@ class TestWithErrorHandlingDeep:
         assert result == "fallback"
 
     def test_with_error_handling_app_exception_raised(self):
-        """Test que les exceptions app sont relancées"""
+        """Test que les exceptions app sont relancÃ©es"""
         from src.core.decorators import with_error_handling
         from src.core.errors_base import ExceptionApp
 
@@ -339,16 +339,16 @@ class TestWithErrorHandlingDeep:
             ma_fonction()
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS: Intégration complète
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS: IntÃ©gration complÃ¨te
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestDecoratorsIntegration:
-    """Tests d'intégration des décorateurs"""
+    """Tests d'intÃ©gration des dÃ©corateurs"""
 
     def test_combining_decorators(self):
-        """Test combinaison de décorateurs"""
+        """Test combinaison de dÃ©corateurs"""
         from src.core.decorators import with_cache, with_error_handling
         from src.core.cache import Cache
 
@@ -363,7 +363,7 @@ class TestDecoratorsIntegration:
         assert result == 10
 
     def test_decorator_with_class_method(self):
-        """Test décorateur avec méthode de classe"""
+        """Test dÃ©corateur avec mÃ©thode de classe"""
         from src.core.decorators import with_cache
         from src.core.cache import Cache
 

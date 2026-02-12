@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour augmenter la couverture du module UI.
 Cible: dashboard_widgets.py, data.py, forms.py, layouts.py
 """
@@ -9,38 +9,38 @@ from unittest.mock import MagicMock, patch, PropertyMock
 import pandas as pd
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS DASHBOARD_WIDGETS.PY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGraphiqueRepartitionRepas:
     """Tests pour graphique_repartition_repas."""
     
     def test_graphique_repartition_repas_empty(self):
-        """Retourne None si données vides."""
+        """Retourne None si donnÃ©es vides."""
         from src.ui.components.dashboard_widgets import graphique_repartition_repas
         
         result = graphique_repartition_repas([])
         assert result is None
     
     def test_graphique_repartition_repas_with_data(self):
-        """Crée un graphique avec des données."""
+        """CrÃ©e un graphique avec des donnÃ©es."""
         from src.ui.components.dashboard_widgets import graphique_repartition_repas
         
         planning_data = [
-            {"type_repas": "déjeuner"},
-            {"type_repas": "déjeuner"},
-            {"type_repas": "dîner"},
-            {"type_repas": "petit_déjeuner"},
-            {"type_repas": "goûter"},
+            {"type_repas": "dÃ©jeuner"},
+            {"type_repas": "dÃ©jeuner"},
+            {"type_repas": "dÃ®ner"},
+            {"type_repas": "petit_dÃ©jeuner"},
+            {"type_repas": "goÃ»ter"},
         ]
         
         result = graphique_repartition_repas(planning_data)
         assert result is not None
     
     def test_graphique_repartition_repas_unknown_type(self):
-        """Gère les types de repas inconnus."""
+        """GÃ¨re les types de repas inconnus."""
         from src.ui.components.dashboard_widgets import graphique_repartition_repas
         
         planning_data = [
@@ -63,13 +63,13 @@ class TestGraphiqueInventaireCategories:
         assert result is None
     
     def test_graphique_inventaire_with_data(self):
-        """Crée le graphique avec des données."""
+        """CrÃ©e le graphique avec des donnÃ©es."""
         from src.ui.components.dashboard_widgets import graphique_inventaire_categories
         
         inventaire = [
             {"categorie": "Fruits", "statut": "ok"},
             {"categorie": "Fruits", "statut": "critique"},
-            {"categorie": "Légumes", "statut": "sous_seuil"},
+            {"categorie": "LÃ©gumes", "statut": "sous_seuil"},
             {"categorie": "Viandes", "statut": "ok"},
         ]
         
@@ -77,7 +77,7 @@ class TestGraphiqueInventaireCategories:
         assert result is not None
     
     def test_graphique_inventaire_missing_categorie(self):
-        """Gère les articles sans catégorie."""
+        """GÃ¨re les articles sans catÃ©gorie."""
         from src.ui.components.dashboard_widgets import graphique_inventaire_categories
         
         inventaire = [
@@ -93,16 +93,16 @@ class TestGraphiqueActiviteSemaine:
     """Tests pour graphique_activite_semaine."""
     
     def test_graphique_activite_empty(self):
-        """Retourne un Figure avec des zéros si vide."""
+        """Retourne un Figure avec des zÃ©ros si vide."""
         from src.ui.components.dashboard_widgets import graphique_activite_semaine
         import plotly.graph_objects as go
         
         result = graphique_activite_semaine([])
-        # La fonction retourne une Figure même si vide (avec valeurs 0)
+        # La fonction retourne une Figure mÃªme si vide (avec valeurs 0)
         assert isinstance(result, go.Figure)
     
     def test_graphique_activite_with_data(self):
-        """Crée le graphique avec des données."""
+        """CrÃ©e le graphique avec des donnÃ©es."""
         from src.ui.components.dashboard_widgets import graphique_activite_semaine
         
         today = date.today()
@@ -120,7 +120,7 @@ class TestCarteMetriqueAvancee:
     
     @patch('src.ui.components.dashboard_widgets.st')
     def test_carte_metrique_basic(self, mock_st):
-        """Test carte métrique basique."""
+        """Test carte mÃ©trique basique."""
         mock_st.session_state = {}
         mock_st.markdown = MagicMock()
         
@@ -129,7 +129,7 @@ class TestCarteMetriqueAvancee:
         carte_metrique_avancee(
             titre="Total",
             valeur=42,
-            icone="📊"
+            icone="ðŸ“Š"
         )
         
         mock_st.markdown.assert_called()
@@ -145,7 +145,7 @@ class TestCarteMetriqueAvancee:
         carte_metrique_avancee(
             titre="Score",
             valeur=85,
-            icone="📈",
+            icone="ðŸ“ˆ",
             delta="+5",
             delta_positif=True
         )
@@ -163,7 +163,7 @@ class TestCarteMetriqueAvancee:
         carte_metrique_avancee(
             titre="Progress",
             valeur="80%",
-            icone="🎯",
+            icone="ðŸŽ¯",
             sous_titre="Cette semaine"
         )
         
@@ -186,7 +186,7 @@ class TestAfficherTimelineActivites:
     
     @patch('src.ui.components.dashboard_widgets.st')
     def test_timeline_with_activities(self, mock_st):
-        """Test timeline avec activités."""
+        """Test timeline avec activitÃ©s."""
         mock_st.session_state = {}
         mock_st.markdown = MagicMock()
         mock_container = MagicMock()
@@ -200,17 +200,17 @@ class TestAfficherTimelineActivites:
             {
                 "timestamp": datetime.now(),
                 "type": "recette",
-                "description": "Nouvelle recette ajoutée",
-                "icon": "🍽️"
+                "description": "Nouvelle recette ajoutÃ©e",
+                "icon": "ðŸ½ï¸"
             }
         ]
         
         afficher_timeline_activites(activities)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS DATA.PY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPagination:
@@ -252,11 +252,11 @@ class TestMetricsRow:
         from src.ui.components.data import metrics_row
         
         metrics_row([])
-        # Pas d'appel à st.columns
+        # Pas d'appel Ã  st.columns
     
     @patch('src.ui.components.data.st')
     def test_metrics_row_with_stats(self, mock_st):
-        """Affiche les métriques."""
+        """Affiche les mÃ©triques."""
         mock_col = MagicMock()
         mock_col.__enter__ = MagicMock(return_value=mock_col)
         mock_col.__exit__ = MagicMock(return_value=False)
@@ -308,9 +308,9 @@ class TestExportButtons:
         mock_st.download_button.assert_called()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FORMS.PY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFormField:
@@ -331,12 +331,12 @@ class TestFormField:
     
     @patch('src.ui.components.forms.st')
     def test_form_field_number(self, mock_st):
-        """Test champ numérique."""
+        """Test champ numÃ©rique."""
         mock_st.number_input = MagicMock(return_value=42.0)
         
         from src.ui.components.forms import form_field
         
-        config = {"type": "number", "name": "qty", "label": "Quantité", "default": 0}
+        config = {"type": "number", "name": "qty", "label": "QuantitÃ©", "default": 0}
         result = form_field(config, "item")
         
         assert result == 42.0
@@ -348,7 +348,7 @@ class TestFormField:
         
         from src.ui.components.forms import form_field
         
-        config = {"type": "select", "name": "cat", "label": "Catégorie", "options": ["option1", "option2"]}
+        config = {"type": "select", "name": "cat", "label": "CatÃ©gorie", "options": ["option1", "option2"]}
         result = form_field(config, "item")
         
         assert result == "option1"
@@ -404,7 +404,7 @@ class TestFormField:
     
     @patch('src.ui.components.forms.st')
     def test_form_field_required(self, mock_st):
-        """Test champ requis ajoute astérisque."""
+        """Test champ requis ajoute astÃ©risque."""
         mock_st.text_input = MagicMock(return_value="")
         
         from src.ui.components.forms import form_field
@@ -412,7 +412,7 @@ class TestFormField:
         config = {"type": "text", "name": "nom", "label": "Nom", "required": True}
         form_field(config, "recipe")
         
-        # Vérifier que le label contient *
+        # VÃ©rifier que le label contient *
         call_args = mock_st.text_input.call_args
         assert "*" in call_args[0][0]
 
@@ -463,9 +463,9 @@ class TestFilterPanel:
         assert isinstance(result, dict)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS LAYOUTS.PY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGridLayout:
@@ -479,7 +479,7 @@ class TestGridLayout:
         from src.ui.components.layouts import grid_layout
         
         grid_layout([], cols_per_row=3)
-        mock_st.info.assert_called_with("Aucun élément")
+        mock_st.info.assert_called_with("Aucun Ã©lÃ©ment")
     
     @patch('src.ui.components.layouts.st')
     def test_grid_layout_with_items(self, mock_st):
@@ -499,7 +499,7 @@ class TestGridLayout:
     
     @patch('src.ui.components.layouts.st')
     def test_grid_layout_with_custom_renderer(self, mock_st):
-        """Test grille avec renderer personnalisé."""
+        """Test grille avec renderer personnalisÃ©."""
         mock_col = MagicMock()
         mock_col.__enter__ = MagicMock(return_value=mock_col)
         mock_col.__exit__ = MagicMock(return_value=False)
@@ -608,7 +608,7 @@ class TestCollapsibleSection:
     
     @patch('src.ui.components.layouts.st')
     def test_collapsible_section(self, mock_st):
-        """Test section dépliable."""
+        """Test section dÃ©pliable."""
         mock_expander = MagicMock()
         mock_expander.__enter__ = MagicMock(return_value=mock_expander)
         mock_expander.__exit__ = MagicMock(return_value=False)

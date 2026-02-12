@@ -1,8 +1,8 @@
-"""
-Tests complets pour api_football.py - Couverture ≥80%
+﻿"""
+Tests complets pour api_football.py - Couverture â‰¥80%
 
-Ce module teste l'intégration avec l'API Football-Data.org.
-Tous les appels HTTP sont mockés pour éviter les dépendances externes.
+Ce module teste l'intÃ©gration avec l'API Football-Data.org.
+Tous les appels HTTP sont mockÃ©s pour Ã©viter les dÃ©pendances externes.
 """
 
 import pytest
@@ -10,7 +10,7 @@ from datetime import date, timedelta
 from unittest.mock import patch, MagicMock, PropertyMock
 import requests
 
-from src.domains.jeux.logic.api_football import (
+from src.modules.jeux.logic.api_football import (
     # Configuration
     API_BASE_URL,
     CHAMP_MAPPING,
@@ -29,24 +29,24 @@ from src.domains.jeux.logic.api_football import (
 )
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
 def mock_api_key():
-    """Configure une clé API mock."""
+    """Configure une clÃ© API mock."""
     configurer_api_key("test_api_key_12345")
     yield
     # Reset
-    import src.domains.jeux.logic.api_football as module
+    import src.modules.jeux.logic.api_football as module
     module.API_KEY = None
 
 
 @pytest.fixture
 def mock_match_response():
-    """Réponse mock pour les matchs."""
+    """RÃ©ponse mock pour les matchs."""
     return {
         "matches": [
             {
@@ -73,7 +73,7 @@ def mock_match_response():
 
 @pytest.fixture
 def mock_finished_match_response():
-    """Réponse mock pour les matchs terminés."""
+    """RÃ©ponse mock pour les matchs terminÃ©s."""
     return {
         "matches": [
             {
@@ -89,7 +89,7 @@ def mock_finished_match_response():
 
 @pytest.fixture
 def mock_team_response():
-    """Réponse mock pour la recherche d'équipe."""
+    """RÃ©ponse mock pour la recherche d'Ã©quipe."""
     return {
         "teams": [
             {
@@ -106,7 +106,7 @@ def mock_team_response():
 
 @pytest.fixture
 def mock_standings_response():
-    """Réponse mock pour le classement."""
+    """RÃ©ponse mock pour le classement."""
     return {
         "standings": [
             {
@@ -139,54 +139,54 @@ def mock_standings_response():
 
 @pytest.fixture
 def mock_teams_fallback_response():
-    """Réponse mock pour le fallback équipes sans standings."""
+    """RÃ©ponse mock pour le fallback Ã©quipes sans standings."""
     return {
         "teams": [
-            {"name": "Équipe A"},
-            {"name": "Équipe B"},
-            {"name": "Équipe C"}
+            {"name": "Ã‰quipe A"},
+            {"name": "Ã‰quipe B"},
+            {"name": "Ã‰quipe C"}
         ]
     }
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONSTANTES
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestConstantes:
     """Tests des constantes du module."""
     
     def test_api_base_url(self):
-        """Vérifie l'URL de base de l'API."""
+        """VÃ©rifie l'URL de base de l'API."""
         assert API_BASE_URL == "https://api.football-data.org/v4"
     
     def test_championnats_mapping(self):
-        """Vérifie le mapping des championnats."""
+        """VÃ©rifie le mapping des championnats."""
         assert "Ligue 1" in CHAMP_MAPPING
         assert "Premier League" in CHAMP_MAPPING
         assert CHAMP_MAPPING["Ligue 1"] == "FL1"
         assert CHAMP_MAPPING["Premier League"] == "PL"
     
     def test_comp_ids(self):
-        """Vérifie les IDs de compétitions."""
+        """VÃ©rifie les IDs de compÃ©titions."""
         assert "FL1" in COMP_IDS
         assert "PL" in COMP_IDS
         assert COMP_IDS["FL1"] == 2015
         assert COMP_IDS["PL"] == 2021
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS configurer_api_key / obtenir_cle_api
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestConfigurationApiKey:
-    """Tests pour la gestion de la clé API."""
+    """Tests pour la gestion de la clÃ© API."""
     
     def test_configurer_api_key(self):
-        """Test configuration de la clé API."""
-        import src.domains.jeux.logic.api_football as module
+        """Test configuration de la clÃ© API."""
+        import src.modules.jeux.logic.api_football as module
         
         original = module.API_KEY
         try:
@@ -196,66 +196,66 @@ class TestConfigurationApiKey:
             module.API_KEY = original
     
     def test_obtenir_cle_api_depuis_module(self, mock_api_key):
-        """Obtient la clé configurée dans le module."""
+        """Obtient la clÃ© configurÃ©e dans le module."""
         cle = obtenir_cle_api()
         assert cle == "test_api_key_12345"
     
     def test_obtenir_cle_api_sans_config(self):
-        """Sans clé configurée, essaie les paramètres."""
-        import src.domains.jeux.logic.api_football as module
+        """Sans clÃ© configurÃ©e, essaie les paramÃ¨tres."""
+        import src.modules.jeux.logic.api_football as module
         original = module.API_KEY
         module.API_KEY = None
         
         try:
-            # Mock au niveau du module où l'import est fait
+            # Mock au niveau du module oÃ¹ l'import est fait
             mock_params = MagicMock()
             mock_params.FOOTBALL_DATA_API_KEY = "cle_from_settings"
             with patch.dict('sys.modules', {'src.core.config': MagicMock()}):
                 with patch("src.core.config.obtenir_parametres", return_value=mock_params):
                     cle = obtenir_cle_api()
-                    # Si la clé est trouvée ou pas, le test vérifie que ça ne crashe pas
+                    # Si la clÃ© est trouvÃ©e ou pas, le test vÃ©rifie que Ã§a ne crashe pas
                     assert cle is None or cle == "cle_from_settings"
         finally:
             module.API_KEY = original
     
     def test_obtenir_cle_api_exception(self):
-        """Retourne None si aucune clé disponible."""
-        import src.domains.jeux.logic.api_football as module
+        """Retourne None si aucune clÃ© disponible."""
+        import src.modules.jeux.logic.api_football as module
         original = module.API_KEY
         module.API_KEY = None
         
         try:
-            # Force la config à ne pas exister
+            # Force la config Ã  ne pas exister
             cle = obtenir_cle_api()
-            # Quand pas de clé, retourne None (config peut lever une exception)
+            # Quand pas de clÃ©, retourne None (config peut lever une exception)
             assert cle is None or isinstance(cle, str)
         finally:
             module.API_KEY = original
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS faire_requete
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFaireRequete:
     """Tests pour faire_requete."""
     
     def test_requete_sans_api_key(self):
-        """Sans clé API, retourne None."""
-        import src.domains.jeux.logic.api_football as module
+        """Sans clÃ© API, retourne None."""
+        import src.modules.jeux.logic.api_football as module
         original = module.API_KEY
         module.API_KEY = None
         
         try:
-            with patch("src.domains.jeux.logic.api_football.obtenir_cle_api", return_value=None):
+            with patch("src.modules.jeux.logic.api_football.obtenir_cle_api", return_value=None):
                 result = faire_requete("/test")
                 assert result is None
         finally:
             module.API_KEY = original
     
     def test_requete_reussie(self, mock_api_key):
-        """Test d'une requête réussie."""
+        """Test d'une requÃªte rÃ©ussie."""
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"data": "test"}
@@ -266,7 +266,7 @@ class TestFaireRequete:
             assert result == {"data": "test"}
     
     def test_requete_avec_params(self, mock_api_key):
-        """Test d'une requête avec paramètres."""
+        """Test d'une requÃªte avec paramÃ¨tres."""
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"result": "ok"}
@@ -313,7 +313,7 @@ class TestFaireRequete:
             assert result is None
     
     def test_requete_exception_generale(self, mock_api_key):
-        """Test exception générale."""
+        """Test exception gÃ©nÃ©rale."""
         with patch("requests.get", side_effect=Exception("Network error")):
             result = faire_requete("/test")
             assert result is None
@@ -327,25 +327,25 @@ class TestFaireRequete:
         
         with patch("requests.get", return_value=mock_response):
             result = faire_requete("/bad-request")
-            # Le log est fait mais la réponse est retournée
+            # Le log est fait mais la rÃ©ponse est retournÃ©e
             assert result == {"error": "Bad Request"}
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS charger_matchs_a_venir
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestChargerMatchsAVenir:
     """Tests pour charger_matchs_a_venir."""
     
     def test_championnat_non_supporte(self):
-        """Championnat non supporté retourne liste vide."""
+        """Championnat non supportÃ© retourne liste vide."""
         result = charger_matchs_a_venir("Liga MX")
         assert result == []
     
     def test_charger_matchs_ok(self, mock_api_key, mock_match_response):
-        """Test chargement réussi des matchs."""
+        """Test chargement rÃ©ussi des matchs."""
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = mock_match_response
@@ -362,12 +362,12 @@ class TestChargerMatchsAVenir:
     
     def test_charger_matchs_pas_de_data(self, mock_api_key):
         """Test quand l'API ne retourne pas de data."""
-        with patch("src.domains.jeux.logic.api_football.faire_requete", return_value=None):
+        with patch("src.modules.jeux.logic.api_football.faire_requete", return_value=None):
             matchs = charger_matchs_a_venir("Ligue 1")
             assert matchs == []
     
     def test_charger_matchs_parsing_error(self, mock_api_key):
-        """Test robustesse au parsing de matchs mal formés."""
+        """Test robustesse au parsing de matchs mal formÃ©s."""
         mock_response = {
             "matches": [
                 {"id": 1, "utcDate": "2025-02-15"},  # Pas de "T"
@@ -376,33 +376,33 @@ class TestChargerMatchsAVenir:
             ]
         }
         
-        with patch("src.domains.jeux.logic.api_football.faire_requete", return_value=mock_response):
+        with patch("src.modules.jeux.logic.api_football.faire_requete", return_value=mock_response):
             matchs = charger_matchs_a_venir("Premier League")
             assert isinstance(matchs, list)
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS charger_historique_equipe
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestChargerHistoriqueEquipe:
     """Tests pour charger_historique_equipe."""
     
     def test_equipe_non_trouvee(self, mock_api_key):
-        """Équipe non trouvée retourne liste vide."""
-        with patch("src.domains.jeux.logic.api_football.faire_requete", return_value=None):
-            result = charger_historique_equipe("Équipe Inconnue")
+        """Ã‰quipe non trouvÃ©e retourne liste vide."""
+        with patch("src.modules.jeux.logic.api_football.faire_requete", return_value=None):
+            result = charger_historique_equipe("Ã‰quipe Inconnue")
             assert result == []
     
     def test_equipe_pas_de_teams(self, mock_api_key):
-        """Réponse sans teams retourne liste vide."""
-        with patch("src.domains.jeux.logic.api_football.faire_requete", return_value={"teams": []}):
-            result = charger_historique_equipe("Équipe Inconnue")
+        """RÃ©ponse sans teams retourne liste vide."""
+        with patch("src.modules.jeux.logic.api_football.faire_requete", return_value={"teams": []}):
+            result = charger_historique_equipe("Ã‰quipe Inconnue")
             assert result == []
     
     def test_charger_historique_ok(self, mock_api_key):
-        """Test chargement réussi de l'historique."""
+        """Test chargement rÃ©ussi de l'historique."""
         team_response = {"teams": [{"id": 10, "name": "PSG"}]}
         matches_response = {
             "matches": [
@@ -418,14 +418,14 @@ class TestChargerHistoriqueEquipe:
         call_count = [0]
         def mock_faire_requete(endpoint, params=None):
             call_count[0] += 1
-            # Premier appel: recherche équipe
+            # Premier appel: recherche Ã©quipe
             if call_count[0] == 1:
                 return team_response
-            # Deuxième appel: matchs de l'équipe
+            # DeuxiÃ¨me appel: matchs de l'Ã©quipe
             else:
                 return matches_response
         
-        with patch("src.domains.jeux.logic.api_football.faire_requete", side_effect=mock_faire_requete):
+        with patch("src.modules.jeux.logic.api_football.faire_requete", side_effect=mock_faire_requete):
             matchs = charger_historique_equipe("PSG", limite=5)
             
             assert len(matchs) == 1
@@ -433,10 +433,10 @@ class TestChargerHistoriqueEquipe:
             assert matchs[0]["score_domicile"] == 3
     
     def test_charger_historique_sans_id(self, mock_api_key):
-        """Équipe sans ID retourne liste vide."""
+        """Ã‰quipe sans ID retourne liste vide."""
         team_response = {"teams": [{"name": "Team without ID"}]}  # Pas d'id
         
-        with patch("src.domains.jeux.logic.api_football.faire_requete", return_value=team_response):
+        with patch("src.modules.jeux.logic.api_football.faire_requete", return_value=team_response):
             result = charger_historique_equipe("Team")
             assert result == []
     
@@ -447,26 +447,26 @@ class TestChargerHistoriqueEquipe:
                 return {"teams": [{"id": 10}]}
             return None  # Pas de matchs
         
-        with patch("src.domains.jeux.logic.api_football.faire_requete", side_effect=mock_faire_requete):
+        with patch("src.modules.jeux.logic.api_football.faire_requete", side_effect=mock_faire_requete):
             result = charger_historique_equipe("PSG")
             assert result == []
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS charger_classement
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestChargerClassement:
     """Tests pour charger_classement."""
     
     def test_championnat_non_supporte(self):
-        """Championnat non supporté retourne liste vide."""
+        """Championnat non supportÃ© retourne liste vide."""
         result = charger_classement("MLS")
         assert result == []
     
     def test_charger_standings_ok(self, mock_api_key, mock_standings_response):
-        """Test chargement réussi du classement."""
+        """Test chargement rÃ©ussi du classement."""
         mock_resp = MagicMock()
         mock_resp.status_code = 200
         mock_resp.json.return_value = mock_standings_response
@@ -490,16 +490,16 @@ class TestChargerClassement:
                 return mock_teams_fallback_response
             return None
         
-        with patch("src.domains.jeux.logic.api_football.faire_requete", side_effect=mock_faire_requete):
+        with patch("src.modules.jeux.logic.api_football.faire_requete", side_effect=mock_faire_requete):
             equipes = charger_classement("La Liga")
             
             assert len(equipes) == 3
-            assert equipes[0]["nom"] == "Équipe A"
+            assert equipes[0]["nom"] == "Ã‰quipe A"
             assert equipes[0]["points"] == 0  # Fallback n'a pas de stats
     
     def test_charger_classement_vide(self, mock_api_key):
-        """Pas de données retourne liste vide."""
-        with patch("src.domains.jeux.logic.api_football.faire_requete", return_value=None):
+        """Pas de donnÃ©es retourne liste vide."""
+        with patch("src.modules.jeux.logic.api_football.faire_requete", return_value=None):
             result = charger_classement("Ligue 1")
             assert result == []
     
@@ -510,34 +510,34 @@ class TestChargerClassement:
                 return {"standings": []}  # Vide
             return None
         
-        with patch("src.domains.jeux.logic.api_football.faire_requete", side_effect=mock_faire_requete):
+        with patch("src.modules.jeux.logic.api_football.faire_requete", side_effect=mock_faire_requete):
             result = charger_classement("Bundesliga")
             assert result == []
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS chercher_equipe
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestChercherEquipe:
     """Tests pour chercher_equipe."""
     
     def test_equipe_non_trouvee(self, mock_api_key):
-        """Équipe non trouvée retourne None."""
-        with patch("src.domains.jeux.logic.api_football.faire_requete", return_value=None):
+        """Ã‰quipe non trouvÃ©e retourne None."""
+        with patch("src.modules.jeux.logic.api_football.faire_requete", return_value=None):
             result = chercher_equipe("Unknown FC")
             assert result is None
     
     def test_equipe_liste_vide(self, mock_api_key):
-        """Liste d'équipes vide retourne None."""
-        with patch("src.domains.jeux.logic.api_football.faire_requete", return_value={"teams": []}):
+        """Liste d'Ã©quipes vide retourne None."""
+        with patch("src.modules.jeux.logic.api_football.faire_requete", return_value={"teams": []}):
             result = chercher_equipe("Unknown FC")
             assert result is None
     
     def test_chercher_equipe_ok(self, mock_api_key, mock_team_response):
-        """Test recherche réussie d'équipe."""
-        with patch("src.domains.jeux.logic.api_football.faire_requete", return_value=mock_team_response):
+        """Test recherche rÃ©ussie d'Ã©quipe."""
+        with patch("src.modules.jeux.logic.api_football.faire_requete", return_value=mock_team_response):
             equipe = chercher_equipe("Paris")
             
             assert equipe is not None
@@ -548,21 +548,21 @@ class TestChercherEquipe:
             assert equipe["founded"] == 1970
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS charger_matchs_termines
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestChargerMatchsTermines:
     """Tests pour charger_matchs_termines."""
     
     def test_championnat_non_supporte(self):
-        """Championnat non supporté retourne liste vide."""
+        """Championnat non supportÃ© retourne liste vide."""
         result = charger_matchs_termines("J-League")
         assert result == []
     
     def test_charger_matchs_termines_ok(self, mock_api_key, mock_finished_match_response):
-        """Test chargement réussi des matchs terminés."""
+        """Test chargement rÃ©ussi des matchs terminÃ©s."""
         mock_resp = MagicMock()
         mock_resp.status_code = 200
         mock_resp.json.return_value = mock_finished_match_response
@@ -577,18 +577,18 @@ class TestChargerMatchsTermines:
     
     def test_charger_matchs_termines_pas_de_data(self, mock_api_key):
         """Test quand l'API ne retourne pas de data."""
-        with patch("src.domains.jeux.logic.api_football.faire_requete", return_value=None):
+        with patch("src.modules.jeux.logic.api_football.faire_requete", return_value=None):
             matchs = charger_matchs_termines("Serie A")
             assert matchs == []
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS cache
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCache:
-    """Tests pour le système de cache."""
+    """Tests pour le systÃ¨me de cache."""
     
     def test_vider_cache(self):
         """Test vidage du cache."""
@@ -597,7 +597,7 @@ class TestCache:
         assert True
     
     def test_charger_matchs_cache(self, mock_api_key, mock_match_response):
-        """Test version cachée de charger_matchs."""
+        """Test version cachÃ©e de charger_matchs."""
         # Vider le cache d'abord
         vider_cache()
         
@@ -612,5 +612,5 @@ class TestCache:
             assert isinstance(result1, tuple)
             assert len(result1) == 2
         
-        # Nettoyer après le test
+        # Nettoyer aprÃ¨s le test
         vider_cache()

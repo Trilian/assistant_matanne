@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests d'intégration E2E (End-to-End)
 Testent les flux complets de l'application
 """
@@ -8,11 +8,11 @@ from sqlalchemy.orm import Session
 
 
 class TestCuisineFlowE2E:
-    """Flux complet: Créer une recette → Planifier → Générer liste courses"""
+    """Flux complet: Créer une recette â†’ Planifier â†’ Générer liste courses"""
     
     @pytest.mark.e2e
     def test_complete_recipe_planning_flow(self, test_db: Session):
-        """Test du flux complet: recette → planning → courses"""
+        """Test du flux complet: recette â†’ planning â†’ courses"""
         # 1. Créer une recette
         # 2. Planifier la recette
         # 3. Générer liste de courses
@@ -26,7 +26,7 @@ class TestCuisineFlowE2E:
 
 
 class TestFamilleFlowE2E:
-    """Flux familial: Ajouter membre → Suivi activités"""
+    """Flux familial: Ajouter membre â†’ Suivi activités"""
     
     @pytest.mark.e2e
     def test_add_family_member_flow(self, test_db: Session):
@@ -40,7 +40,7 @@ class TestFamilleFlowE2E:
 
 
 class TestPlanningFlowE2E:
-    """Flux de planification: Créer événement → Synchroniser"""
+    """Flux de planification: Créer événement â†’ Synchroniser"""
     
     @pytest.mark.e2e
     def test_create_event_flow(self, test_db: Session):
@@ -68,7 +68,7 @@ class TestAuthFlowE2E:
 
 
 class TestMaisonFlowE2E:
-    """Flux maison: Ajouter projet → Gérer budget"""
+    """Flux maison: Ajouter projet â†’ Gérer budget"""
     
     @pytest.mark.e2e
     def test_house_project_flow(self, test_db: Session):

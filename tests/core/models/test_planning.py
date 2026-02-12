@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour planning.py
 
 Module: src.core.models.planning

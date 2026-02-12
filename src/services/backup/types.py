@@ -1,4 +1,4 @@
-"""
+﻿"""
 Types et schémas Pydantic pour le service de backup.
 
 Définit les modèles de configuration, métadonnées et résultats.
@@ -13,7 +13,7 @@ class BackupConfig(BaseModel):
     """Configuration du service de backup."""
     
     backup_dir: str = "backups"
-    max_backups: int = 10  # Nombre max de backups à conserver
+    max_backups: int = 10  # Nombre max de backups Ã  conserver
     compress: bool = True
     include_timestamps: bool = True
     auto_backup_enabled: bool = True

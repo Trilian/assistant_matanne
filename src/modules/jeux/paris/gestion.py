@@ -1,35 +1,35 @@
-﻿"""
-Interface de gestion des équipes et matchs.
+"""
+Interface de gestion des equipes et matchs.
 """
 
-from ._common import (
+from .utils import (
     st, date, timedelta,
     obtenir_contexte_db, Match,
     CHAMPIONNATS,
 )
-from .helpers import charger_equipes
+from .utilitaires import charger_equipes
 from .crud import ajouter_equipe, ajouter_match, enregistrer_resultat_match, supprimer_match
 
 
 def afficher_gestion_donnees():
-    """Interface pour gérer les équipes et matchs"""
+    """Interface pour gerer les equipes et matchs"""
     
-    tab1, tab2, tab3, tab4 = st.tabs(["➕ Ajouter Équipe", "➕ Ajouter Match", "📝 Résultats", "🗑️ Supprimer"])
+    tab1, tab2, tab3, tab4 = st.tabs(["➕ Ajouter Équipe", "➕ Ajouter Match", "📝 Resultats", "🗑️ Supprimer"])
     
     with tab1:
-        st.subheader("Ajouter une équipe")
+        st.subheader("Ajouter une equipe")
         
         col1, col2 = st.columns(2)
         with col1:
-            nom_equipe = st.text_input("Nom de l'équipe", key="new_team_name")
+            nom_equipe = st.text_input("Nom de l'equipe", key="new_team_name")
         with col2:
             championnat = st.selectbox("Championnat", CHAMPIONNATS, key="new_team_champ")
         
-        if st.button("Ajouter l'équipe", type="primary"):
+        if st.button("Ajouter l'equipe", type="primary"):
             if nom_equipe:
                 ajouter_equipe(nom_equipe, championnat)
             else:
-                st.warning("Veuillez entrer un nom d'équipe")
+                st.warning("Veuillez entrer un nom d'equipe")
     
     with tab2:
         st.subheader("Ajouter un match")
@@ -45,7 +45,7 @@ def afficher_gestion_donnees():
                 dom_nom = st.selectbox("Équipe domicile", list(options.keys()), key="dom_sel")
             with col2:
                 ext_options = [n for n in options.keys() if n != dom_nom]
-                ext_nom = st.selectbox("Équipe extérieur", ext_options, key="ext_sel")
+                ext_nom = st.selectbox("Équipe exterieur", ext_options, key="ext_sel")
             
             col3, col4 = st.columns(2)
             with col3:
@@ -62,10 +62,10 @@ def afficher_gestion_donnees():
                     heure_m
                 )
         else:
-            st.warning("Ajoutez au moins 2 équipes pour créer un match")
+            st.warning("Ajoutez au moins 2 equipes pour creer un match")
     
     with tab3:
-        st.subheader("Enregistrer un résultat")
+        st.subheader("Enregistrer un resultat")
         
         try:
             with obtenir_contexte_db() as session:
@@ -91,13 +91,13 @@ def afficher_gestion_donnees():
                                     enregistrer_resultat_match(m.id, score_d, score_e)
                                     st.rerun()
                 else:
-                    st.info("Aucun match en attente de résultat")
+                    st.info("Aucun match en attente de resultat")
         except Exception as e:
             st.error(f"Erreur: {e}")
     
     with tab4:
         st.subheader("🗑️ Supprimer des matchs")
-        st.caption("Supprime un match et tous les paris associés")
+        st.caption("Supprime un match et tous les paris associes")
         
         try:
             with obtenir_contexte_db() as session:
@@ -119,7 +119,7 @@ def afficher_gestion_donnees():
                         for m in matchs_affiches:
                             dom = m.equipe_domicile.nom if m.equipe_domicile else "?"
                             ext = m.equipe_exterieur.nom if m.equipe_exterieur else "?"
-                            statut = "✅ Joué" if m.joue else "⏳ À venir"
+                            statut = "✅ Joue" if m.joue else "⏳ À venir"
                             score = f"({m.score_domicile}-{m.score_exterieur})" if m.joue else ""
                             
                             col1, col2 = st.columns([4, 1])
@@ -129,7 +129,7 @@ def afficher_gestion_donnees():
                             with col2:
                                 if st.button("🗑️", key=f"del_{m.id}", help="Supprimer ce match"):
                                     if supprimer_match(m.id):
-                                        st.success("Match supprimé!")
+                                        st.success("Match supprime!")
                                         st.rerun()
                                     else:
                                         st.error("Erreur lors de la suppression")
@@ -137,7 +137,7 @@ def afficher_gestion_donnees():
                     else:
                         st.info(f"Aucun match pour {champ_filter}")
                 else:
-                    st.info("Aucun match enregistré")
+                    st.info("Aucun match enregistre")
         except Exception as e:
             st.error(f"Erreur: {e}")
 

@@ -1,37 +1,13 @@
-"""Domaine Cuisine - Gestion recettes, planning repas, inventaire et courses.
+﻿"""Module Cuisine - Structure Feature-First avec lazy loading."""
 
-Modules disponibles (chargement différé via RouteurOptimise):
-- recettes: Gestion des recettes
-- inventaire: Gestion du stock
-- planificateur_repas: Planning hebdomadaire intelligent
-- courses: Liste de courses
-- recettes_import: Import de recettes
-
-Pour éviter les imports circulaires, les modules sont chargés à la demande.
-"""
-
-# Exports principaux - imports différés via __getattr__
-__all__ = [
-    # UI
-    "recettes",
-    "planificateur_repas",
-    "inventaire", 
-    "courses",
-    "recettes_import",
-    # Logic
-    "recettes_logic",
-    "planning_logic",
-    "inventaire_logic",
-    "courses_logic",
-]
+__all__ = ['courses', 'inventaire', 'planificateur_repas', 'recettes', 'schemas']
 
 
 def __getattr__(name: str):
-    """Import différé pour éviter les imports circulaires."""
-    if name in ("recettes", "inventaire", "courses", "recettes_import", "planificateur_repas"):
-        from . import ui
-        return getattr(ui, name)
-    elif name in ("recettes_logic", "planning_logic", "inventaire_logic", "courses_logic"):
-        from . import logic
-        return getattr(logic, name)
-    raise AttributeError(f"module 'src.domains.cuisine' has no attribute '{name}'")
+    """Import differe pour eviter les imports circulaires."""
+    if name in __all__:
+        from importlib import import_module
+        module = import_module(f".{name}", __package__)
+        globals()[name] = module
+        return module
+    raise AttributeError(f"module 'src.modules.cuisine' has no attribute '{name}'")

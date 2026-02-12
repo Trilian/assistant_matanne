@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour atoms.py
 
 Module: src.ui.components.atoms
@@ -59,17 +59,17 @@ class TestEtatVide:
         mock_markdown.assert_called_once()
         call_args = mock_markdown.call_args[0][0]
         assert "Aucune recette" in call_args
-        assert "📭" in call_args  # Icône par défaut
+        assert "ðŸ“­" in call_args  # Icône par défaut
 
     @patch("streamlit.markdown")
     def test_etat_vide_avec_icone(self, mock_markdown):
         """Test etat_vide avec icône personnalisée."""
         from src.ui.components.atoms import etat_vide
 
-        etat_vide("Aucune recette", icone="🍽️")
+        etat_vide("Aucune recette", icone="ðŸ½ï¸")
 
         call_args = mock_markdown.call_args[0][0]
-        assert "🍽️" in call_args
+        assert "ðŸ½ï¸" in call_args
 
     @patch("streamlit.markdown")
     def test_etat_vide_avec_sous_texte(self, mock_markdown):
@@ -226,17 +226,17 @@ class TestBoiteInfo:
         call_args = mock_markdown.call_args[0][0]
         assert "Astuce" in call_args
         assert "Conseil utile" in call_args
-        assert "ℹ️" in call_args  # Icône par défaut
+        assert "â„¹ï¸" in call_args  # Icône par défaut
 
     @patch("streamlit.markdown")
     def test_boite_info_icone_personnalisee(self, mock_markdown):
         """Test boite_info avec icône personnalisée."""
         from src.ui.components.atoms import boite_info
 
-        boite_info("Astuce", "Conseil", icone="💡")
+        boite_info("Astuce", "Conseil", icone="ðŸ’¡")
 
         call_args = mock_markdown.call_args[0][0]
-        assert "💡" in call_args
+        assert "ðŸ’¡" in call_args
 
     @patch("streamlit.markdown")
     def test_boite_info_html_valide(self, mock_markdown):

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests complets pour src/services/notifications_push.py
 Objectif: couverture >80%
 """
@@ -9,9 +9,9 @@ from datetime import date, timedelta
 import asyncio
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MODELES PYDANTIC
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestNotificationPushConfig:
     """Tests pour NotificationPushConfig model."""
@@ -153,9 +153,9 @@ class TestResultatEnvoiPush:
         assert res.notification_id is None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS NOTIFICATION PUSH SERVICE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestNotificationPushServiceInit:
     """Tests for service initialization."""
@@ -198,7 +198,7 @@ class TestNotificationPushServiceEnvoyer:
         result = await service.envoyer(notif)
         
         assert result.succes is False
-        assert "désactivées" in result.message
+        assert "dÃ©sactivÃ©es" in result.message
     
     @pytest.mark.asyncio
     async def test_envoyer_success(self):
@@ -362,7 +362,7 @@ class TestNotificationPushServiceSync:
         result = service.envoyer_sync(notif)
         
         assert result.succes is False
-        assert "désactivées" in result.message
+        assert "dÃ©sactivÃ©es" in result.message
     
     def test_test_connexion_sync(self):
         """Test synchronous connection test wrapper."""
@@ -542,7 +542,7 @@ class TestNotificationPushServiceDigest:
                 result = await service.envoyer_digest_quotidien()
         
         assert result.succes is True
-        assert "tâches" in result.message
+        assert "tÃ¢ches" in result.message
     
     @pytest.mark.asyncio
     async def test_envoyer_digest_quotidien_with_overdue(self):
@@ -717,9 +717,9 @@ class TestNotificationPushServiceURLs:
         assert "qr-topic" in url
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS NOTIFICATION PUSH SCHEDULER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestNotificationPushScheduler:
     """Tests for NotificationPushScheduler class."""
@@ -818,9 +818,9 @@ class TestNotificationPushScheduler:
         assert results == []
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FACTORY FUNCTIONS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestFactoryFunctions:
     """Tests for factory functions."""
@@ -856,9 +856,9 @@ class TestFactoryFunctions:
         assert scheduler.service is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONSTANTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestConstants:
     """Tests for module constants."""

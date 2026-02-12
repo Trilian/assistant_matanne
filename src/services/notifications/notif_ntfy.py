@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service de notifications push via ntfy.sh.
 
 Fonctionnalités:
@@ -40,7 +40,7 @@ class ServiceNtfy:
         Envoie une notification push via ntfy.sh.
         
         Args:
-            notification: Notification à envoyer
+            notification: Notification Ã  envoyer
             
         Returns:
             ResultatEnvoiNtfy avec statut
@@ -149,8 +149,8 @@ class ServiceNtfy:
             tags = ["calendar"]
         
         notification = NotificationNtfy(
-            titre=f"⏰ Tâche en retard: {tache.nom}",
-            message=f"{tache.nom}\n\n📅 Prévue le {tache.prochaine_fois.strftime('%d/%m')}\n⚠️ {jours_retard} jour(s) de retard\n\n{tache.description or ''}",
+            titre=f"â° Tâche en retard: {tache.nom}",
+            message=f"{tache.nom}\n\nðŸ“… Prévue le {tache.prochaine_fois.strftime('%d/%m')}\nâš ï¸ {jours_retard} jour(s) de retard\n\n{tache.description or ''}",
             priorite=priorite,
             tags=tags
         )
@@ -163,23 +163,23 @@ class ServiceNtfy:
         taches_jour = self.obtenir_taches_du_jour()
         
         if not taches_retard and not taches_jour:
-            return ResultatEnvoiNtfy(succes=True, message="Pas de tâches à notifier")
+            return ResultatEnvoiNtfy(succes=True, message="Pas de tâches Ã  notifier")
         
         # Construire message
-        lines = ["📋 Résumé du jour\n"]
+        lines = ["ðŸ“‹ Résumé du jour\n"]
         
         if taches_retard:
-            lines.append(f"⚠️ {len(taches_retard)} tâche(s) en retard:")
+            lines.append(f"âš ï¸ {len(taches_retard)} tâche(s) en retard:")
             for t in taches_retard[:3]:
-                lines.append(f"  • {t.nom}")
+                lines.append(f"  â€¢ {t.nom}")
         
         if taches_jour:
-            lines.append(f"\n📅 {len(taches_jour)} tâche(s) aujourd'hui:")
+            lines.append(f"\nðŸ“… {len(taches_jour)} tâche(s) aujourd'hui:")
             for t in taches_jour[:5]:
-                lines.append(f"  • {t.nom}")
+                lines.append(f"  â€¢ {t.nom}")
         
         notification = NotificationNtfy(
-            titre="📋 Digest Matanne",
+            titre="ðŸ“‹ Digest Matanne",
             message="\n".join(lines),
             priorite=3 if not taches_retard else 4,
             tags=["house", "clipboard"]
@@ -197,8 +197,8 @@ class ServiceNtfy:
         articles_noms = [c.nom for c in courses_urgentes[:5]]
         
         notification = NotificationNtfy(
-            titre=f"🛒 {nb_articles} articles en attente",
-            message=f"Articles prioritaires:\n• " + "\n• ".join(articles_noms),
+            titre=f"ðŸ›’ {nb_articles} articles en attente",
+            message=f"Articles prioritaires:\nâ€¢ " + "\nâ€¢ ".join(articles_noms),
             priorite=2,
             tags=["shopping_cart"]
         )
@@ -208,7 +208,7 @@ class ServiceNtfy:
     async def test_connexion(self) -> ResultatEnvoiNtfy:
         """Teste la connexion au serveur ntfy."""
         notification = NotificationNtfy(
-            titre="🔔 Test Matanne",
+            titre="ðŸ”” Test Matanne",
             message="Les notifications sont correctement configurées!",
             priorite=3,
             tags=["white_check_mark"]
@@ -246,7 +246,7 @@ class PlanificateurNtfy:
         taches = self.service.obtenir_taches_en_retard()
         
         resultats = []
-        for tache in taches[:5]:  # Max 5 notifications à la fois
+        for tache in taches[:5]:  # Max 5 notifications Ã  la fois
             resultat = await self.service.envoyer_alerte_tache_retard(tache)
             resultats.append(resultat)
         
@@ -257,9 +257,9 @@ class PlanificateurNtfy:
         return asyncio.run(self.verifier_et_envoyer_alertes())
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FACTORIES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def obtenir_service_ntfy(config: ConfigurationNtfy | None = None) -> ServiceNtfy:
     """Factory pour le service de notifications ntfy."""

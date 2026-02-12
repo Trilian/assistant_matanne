@@ -1,4 +1,4 @@
-"""Tests simples pour couvrir les gaps - Modules métier (réorganisé depuis tests/modules/)."""
+﻿"""Tests simples pour couvrir les gaps - Modules métier (réorganisé depuis tests/modules/)."""
 
 import pytest
 

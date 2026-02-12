@@ -1,11 +1,11 @@
-"""Tests pour atteindre 85% de couverture - Services."""
+﻿"""Tests pour atteindre 85% de couverture - Services."""
 
 import pytest
 
 
 @pytest.mark.unit
 class TestRecipeServiceAdvanced:
-    """Tests avancés service recettes."""
+    """Tests avancÃ©s service recettes."""
     
     def test_recipe_caching_strategy(self): assert True
     def test_recipe_batch_operations(self): assert True
@@ -14,7 +14,7 @@ class TestRecipeServiceAdvanced:
 
 @pytest.mark.unit
 class TestMealPlanServiceAdvanced:
-    """Tests avancés service planification."""
+    """Tests avancÃ©s service planification."""
     
     def test_meal_plan_algorithm_efficiency(self): assert True
     def test_meal_plan_constraint_satisfaction(self): assert True
@@ -23,7 +23,7 @@ class TestMealPlanServiceAdvanced:
 
 @pytest.mark.unit
 class TestShoppingServiceAdvanced:
-    """Tests avancés service courses."""
+    """Tests avancÃ©s service courses."""
     
     def test_shopping_aggregation(self): assert True
     def test_shopping_deduplication(self): assert True
@@ -31,7 +31,7 @@ class TestShoppingServiceAdvanced:
 
 @pytest.mark.unit
 class TestFamilyServiceAdvanced:
-    """Tests avancés service famille."""
+    """Tests avancÃ©s service famille."""
     
     def test_family_data_consistency(self): assert True
     def test_family_access_control(self): assert True
@@ -40,7 +40,7 @@ class TestFamilyServiceAdvanced:
 
 @pytest.mark.unit
 class TestIntegrationServiceAdvanced:
-    """Tests avancés intégrations."""
+    """Tests avancÃ©s intÃ©grations."""
     
     def test_external_api_resilience(self): assert True
     def test_data_synchronization_workflow(self): assert True

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour base.py
 
 Module: src.core.models.base

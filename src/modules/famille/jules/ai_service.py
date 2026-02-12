@@ -1,8 +1,8 @@
-"""
+﻿"""
 Module Jules - Service IA pour suggestions
 """
 
-from ._common import BaseAIService, ClientIA
+from .utils import BaseAIService, ClientIA
 
 
 class JulesAIService(BaseAIService):
@@ -16,33 +16,33 @@ class JulesAIService(BaseAIService):
             service_name="jules_ai"
         )
     
-    async def suggerer_activites(self, age_mois: int, meteo: str = "intérieur", nb: int = 3) -> str:
-        """Suggère des activités adaptées à l'âge"""
-        prompt = f"""Pour un enfant de {age_mois} mois, suggère {nb} activités {meteo}.
+    async def suggerer_activites(self, age_mois: int, meteo: str = "intÃerieur", nb: int = 3) -> str:
+        """Suggère des activitÃes adaptÃees Ã  l'âge"""
+        prompt = f"""Pour un enfant de {age_mois} mois, suggère {nb} activitÃes {meteo}.
 
-Format pour chaque activité:
-🎯 [Nom de l'activité]
-⏱️ Durée: X min
-📝 Description: Une phrase
-✨ Bénéfice: Ce que ça développe
+Format pour chaque activitÃe:
+ðŸŽ¯ [Nom de l'activitÃe]
+â±ï¸ DurÃee: X min
+ðŸ“ Description: Une phrase
+âœ¨ BÃenÃefice: Ce que ça dÃeveloppe
 
-Activités adaptées à cet âge, stimulantes et réalisables à la maison."""
+ActivitÃes adaptÃees Ã  cet âge, stimulantes et rÃealisables Ã  la maison."""
         
         return await self.call_with_cache(
             prompt=prompt,
-            system_prompt="Tu es expert en développement de la petite enfance. Réponds en français.",
+            system_prompt="Tu es expert en dÃeveloppement de la petite enfance. RÃeponds en français.",
             max_tokens=600
         )
     
     async def conseil_developpement(self, age_mois: int, theme: str) -> str:
-        """Donne un conseil sur un thème de développement"""
+        """Donne un conseil sur un thème de dÃeveloppement"""
         themes_detail = {
-            "proprete": "l'apprentissage de la propreté et du pot",
+            "proprete": "l'apprentissage de la propretÃe et du pot",
             "sommeil": "le sommeil et les routines du coucher",
-            "alimentation": "l'alimentation et l'autonomie à table",
-            "langage": "le développement du langage et la parole",
-            "motricite": "la motricité (marche, coordination, équilibre)",
-            "social": "le développement social et la gestion des émotions",
+            "alimentation": "l'alimentation et l'autonomie Ã  table",
+            "langage": "le dÃeveloppement du langage et la parole",
+            "motricite": "la motricitÃe (marche, coordination, Ãequilibre)",
+            "social": "le dÃeveloppement social et la gestion des Ãemotions",
         }
         
         detail = themes_detail.get(theme, theme)
@@ -50,33 +50,33 @@ Activités adaptées à cet âge, stimulantes et réalisables à la maison."""
         prompt = f"""Pour un enfant de {age_mois} mois, donne des conseils pratiques sur {detail}.
 
 Inclure:
-1. Ce qui est normal à cet âge
+1. Ce qui est normal Ã  cet âge
 2. 3 conseils pratiques
-3. Ce qu'il faut éviter
+3. Ce qu'il faut Ãeviter
 4. Quand consulter si besoin
 
 Ton bienveillant, rassurant et pratique."""
         
         return await self.call_with_cache(
             prompt=prompt,
-            system_prompt="Tu es pédiatre et expert en développement de l'enfant. Réponds en français de manière concise.",
+            system_prompt="Tu es pÃediatre et expert en dÃeveloppement de l'enfant. RÃeponds en français de manière concise.",
             max_tokens=700
         )
     
     async def suggerer_jouets(self, age_mois: int, budget: int = 30) -> str:
-        """Suggère des jouets adaptés à l'âge"""
-        prompt = f"""Pour un enfant de {age_mois} mois, suggère 5 jouets éducatifs avec un budget de {budget}€ max par jouet.
+        """Suggère des jouets adaptÃes Ã  l'âge"""
+        prompt = f"""Pour un enfant de {age_mois} mois, suggère 5 jouets Ãeducatifs avec un budget de {budget}â‚¬ max par jouet.
 
 Format:
-🎁 [Nom du jouet]
-💰 Prix estimé: X€
-🎯 Développe: [compétence]
-📝 Pourquoi: Une phrase
+ðŸŽ [Nom du jouet]
+ðŸ’° Prix estimÃe: Xâ‚¬
+ðŸŽ¯ DÃeveloppe: [compÃetence]
+ðŸ“ Pourquoi: Une phrase
 
-Jouets sûrs, éducatifs et adaptés à cet âge."""
+Jouets sûrs, Ãeducatifs et adaptÃes Ã  cet âge."""
         
         return await self.call_with_cache(
             prompt=prompt,
-            system_prompt="Tu es expert en jouets éducatifs pour enfants. Réponds en français.",
+            system_prompt="Tu es expert en jouets Ãeducatifs pour enfants. RÃeponds en français.",
             max_tokens=600
         )

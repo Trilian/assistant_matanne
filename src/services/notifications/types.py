@@ -1,4 +1,4 @@
-"""
+﻿"""
 Types et modèles pour le package notifications.
 
 Centralise toutes les enums et modèles Pydantic pour les services de notifications.
@@ -14,9 +14,9 @@ from pydantic import BaseModel, Field
 logger = logging.getLogger(__name__)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ENUMS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TypeAlerte(str, Enum):
@@ -64,9 +64,9 @@ class TypeNotification(str, Enum):
     SYNC_COMPLETE = "sync_complete"  # Alias rétrocompat
 
 
-# ═══════════════════════════════════════════════════════════
-# MODÈLES - NOTIFICATIONS INVENTAIRE (locales)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# MODÃˆLES - NOTIFICATIONS INVENTAIRE (locales)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class NotificationInventaire(BaseModel):
@@ -77,7 +77,7 @@ class NotificationInventaire(BaseModel):
     ingredient_id: int
     titre: str = Field(..., min_length=5)
     message: str = Field(..., min_length=10)
-    icone: str = "ℹ️"
+    icone: str = "â„¹ï¸"
     date_creation: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     lue: bool = False
     priorite: Literal["haute", "moyenne", "basse"] = "moyenne"
@@ -85,9 +85,9 @@ class NotificationInventaire(BaseModel):
     push_envoyee: bool = False
 
 
-# ═══════════════════════════════════════════════════════════
-# MODÈLES - NOTIFICATIONS NTFY.SH
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# MODÃˆLES - NOTIFICATIONS NTFY.SH
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class ConfigurationNtfy(BaseModel):
@@ -101,7 +101,7 @@ class ConfigurationNtfy(BaseModel):
 
 
 class NotificationNtfy(BaseModel):
-    """Une notification à envoyer via ntfy.sh."""
+    """Une notification Ã  envoyer via ntfy.sh."""
     titre: str
     message: str
     priorite: int = Field(default=3, ge=1, le=5)
@@ -117,9 +117,9 @@ class ResultatEnvoiNtfy(BaseModel):
     notification_id: str | None = None
 
 
-# ═══════════════════════════════════════════════════════════
-# MODÈLES - NOTIFICATIONS WEB PUSH
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# MODÃˆLES - NOTIFICATIONS WEB PUSH
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class AbonnementPush(BaseModel):
@@ -136,7 +136,7 @@ class AbonnementPush(BaseModel):
 
 
 class NotificationPush(BaseModel):
-    """Notification push à envoyer via Web Push API."""
+    """Notification push Ã  envoyer via Web Push API."""
     id: int | None = None
     title: str
     body: str
@@ -174,7 +174,7 @@ class PreferencesNotification(BaseModel):
     max_par_heure: int = Field(default=5, alias="max_per_hour")
     mode_digest: bool = Field(default=False, alias="digest_mode")
     
-    # Permettre à la fois les noms français et anglais lors de l'initialisation
+    # Permettre Ã  la fois les noms français et anglais lors de l'initialisation
     model_config = {"populate_by_name": True}
     
     # Propriétés d'accès avec les noms anglais pour rétrocompatibilité
@@ -223,9 +223,9 @@ class PreferencesNotification(BaseModel):
         return self.mode_digest
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONSTANTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 NTFY_BASE_URL = "https://ntfy.sh"
 DEFAULT_TOPIC = "matanne-famille"
@@ -240,13 +240,13 @@ PRIORITY_MAPPING = {
 
 # Clés VAPID pour Web Push
 VAPID_PUBLIC_KEY = "BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U"
-VAPID_PRIVATE_KEY = ""  # À configurer via variable d'environnement
+VAPID_PRIVATE_KEY = ""  # Ã€ configurer via variable d'environnement
 VAPID_EMAIL = "mailto:contact@assistant-matanne.fr"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # EXPORTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 __all__ = [
     # Enums

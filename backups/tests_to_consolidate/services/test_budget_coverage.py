@@ -1,7 +1,7 @@
-"""
-Tests supplémentaires pour améliorer la couverture de budget.py
+﻿"""
+Tests supplÃ©mentaires pour amÃ©liorer la couverture de budget.py
 
-Couvre les edge cases des propriétés Pydantic et les constantes.
+Couvre les edge cases des propriÃ©tÃ©s Pydantic et les constantes.
 """
 
 import pytest
@@ -21,9 +21,9 @@ from src.services.budget import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONSTANTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestConstantes:
@@ -46,34 +46,34 @@ class TestConstantes:
         assert BudgetService.BUDGETS_DEFAUT[CategorieDepense.SANTE] == 100
 
 
-# ═══════════════════════════════════════════════════════════
-# CATÉGORIES ENUM COMPLÈTEMENT TESTÉES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# CATÃ‰GORIES ENUM COMPLÃˆTEMENT TESTÃ‰ES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCategorieDepenseComplete:
-    """Tests complets pour toutes les catégories."""
+    """Tests complets pour toutes les catÃ©gories."""
     
     def test_maison(self):
         assert CategorieDepense.MAISON.value == "maison"
     
     def test_vetements(self):
-        assert CategorieDepense.VETEMENTS.value == "vêtements"
+        assert CategorieDepense.VETEMENTS.value == "vÃªtements"
     
     def test_enfant(self):
         assert CategorieDepense.ENFANT.value == "enfant"
     
     def test_education(self):
-        assert CategorieDepense.EDUCATION.value == "éducation"
+        assert CategorieDepense.EDUCATION.value == "Ã©ducation"
     
     def test_services(self):
         assert CategorieDepense.SERVICES.value == "services"
     
     def test_impots(self):
-        assert CategorieDepense.IMPOTS.value == "impôts"
+        assert CategorieDepense.IMPOTS.value == "impÃ´ts"
     
     def test_epargne(self):
-        assert CategorieDepense.EPARGNE.value == "épargne"
+        assert CategorieDepense.EPARGNE.value == "Ã©pargne"
     
     def test_gaz(self):
         assert CategorieDepense.GAZ.value == "gaz"
@@ -104,22 +104,22 @@ class TestCategorieDepenseComplete:
 
 
 class TestFrequenceRecurrenceComplete:
-    """Tests complets pour les fréquences."""
+    """Tests complets pour les frÃ©quences."""
     
     def test_trimestriel(self):
         assert FrequenceRecurrence.TRIMESTRIEL.value == "trimestriel"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FACTURE MAISON - EDGE CASES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFactureMaisonEdgeCases:
     """Tests edge cases pour FactureMaison."""
     
     def test_prix_unitaire_consommation_zero(self):
-        """Consommation à 0 devrait retourner None."""
+        """Consommation Ã  0 devrait retourner None."""
         facture = FactureMaison(
             categorie=CategorieDepense.GAZ,
             montant=100.0,
@@ -130,7 +130,7 @@ class TestFactureMaisonEdgeCases:
         assert facture.prix_unitaire is None
     
     def test_prix_unitaire_consommation_negative(self):
-        """Consommation négative devrait retourner None."""
+        """Consommation nÃ©gative devrait retourner None."""
         facture = FactureMaison(
             categorie=CategorieDepense.ELECTRICITE,
             montant=50.0,
@@ -141,10 +141,10 @@ class TestFactureMaisonEdgeCases:
         assert facture.prix_unitaire is None
     
     def test_periode_tous_mois(self):
-        """Test de tous les mois formatés."""
+        """Test de tous les mois formatÃ©s."""
         mois_attendus = [
-            "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
-            "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+            "Janvier", "FÃ©vrier", "Mars", "Avril", "Mai", "Juin",
+            "Juillet", "AoÃ»t", "Septembre", "Octobre", "Novembre", "DÃ©cembre"
         ]
         for i, nom in enumerate(mois_attendus, 1):
             facture = FactureMaison(
@@ -157,7 +157,7 @@ class TestFactureMaisonEdgeCases:
             assert "2025" in facture.periode
     
     def test_facture_avec_tous_champs(self):
-        """Facture complète avec tous les champs."""
+        """Facture complÃ¨te avec tous les champs."""
         facture = FactureMaison(
             id=1,
             categorie=CategorieDepense.ELECTRICITE,
@@ -169,24 +169,24 @@ class TestFactureMaisonEdgeCases:
             date_facture=date(2026, 6, 15),
             fournisseur="EDF",
             numero_facture="EDF-2026-001",
-            note="Facture été",
+            note="Facture Ã©tÃ©",
         )
         assert facture.fournisseur == "EDF"
         assert facture.numero_facture == "EDF-2026-001"
-        assert facture.note == "Facture été"
+        assert facture.note == "Facture Ã©tÃ©"
         assert facture.date_facture == date(2026, 6, 15)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # BUDGET MENSUEL - EDGE CASES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBudgetMensuelEdgeCases:
     """Tests edge cases pour BudgetMensuel."""
     
     def test_pourcentage_utilise_negatif_prevu(self):
-        """Budget prévu négatif retourne 0%."""
+        """Budget prÃ©vu nÃ©gatif retourne 0%."""
         budget = BudgetMensuel(
             mois=1,
             annee=2026,
@@ -197,7 +197,7 @@ class TestBudgetMensuelEdgeCases:
         assert budget.pourcentage_utilise == 0.0
     
     def test_pourcentage_utilise_max_capped(self):
-        """Pourcentage plafonné à 999%."""
+        """Pourcentage plafonnÃ© Ã  999%."""
         budget = BudgetMensuel(
             mois=1,
             annee=2026,
@@ -208,7 +208,7 @@ class TestBudgetMensuelEdgeCases:
         assert budget.pourcentage_utilise == 999
     
     def test_reste_disponible_deficitaire(self):
-        """Reste disponible avec dépassement."""
+        """Reste disponible avec dÃ©passement."""
         budget = BudgetMensuel(
             mois=2,
             annee=2026,
@@ -219,7 +219,7 @@ class TestBudgetMensuelEdgeCases:
         assert budget.reste_disponible == 0
     
     def test_est_depasse_egal(self):
-        """Budget égal n'est pas dépassé."""
+        """Budget Ã©gal n'est pas dÃ©passÃ©."""
         budget = BudgetMensuel(
             mois=3,
             annee=2026,
@@ -230,9 +230,9 @@ class TestBudgetMensuelEdgeCases:
         assert budget.est_depasse is False
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # DEPENSE - CHAMPS SUPPLEMENTAIRES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestDepenseComplete:
@@ -251,7 +251,7 @@ class TestDepenseComplete:
         depense = Depense(
             montant=150.0,
             categorie=CategorieDepense.VETEMENTS,
-            description="Vêtements enfant",
+            description="VÃªtements enfant",
             moyen_paiement="CB",
         )
         assert depense.moyen_paiement == "CB"
@@ -260,7 +260,7 @@ class TestDepenseComplete:
         depense = Depense(
             montant=50.0,
             categorie=CategorieDepense.SANTE,
-            description="Médecin",
+            description="MÃ©decin",
             remboursable=True,
             rembourse=False,
         )
@@ -271,7 +271,7 @@ class TestDepenseComplete:
         depense = Depense(
             montant=50.0,
             categorie=CategorieDepense.SANTE,
-            description="Médecin",
+            description="MÃ©decin",
             remboursable=True,
             rembourse=True,
         )
@@ -295,9 +295,9 @@ class TestDepenseComplete:
         assert depense.cree_le is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # RESUME FINANCIER - EDGE CASES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestResumeFinancierComplete:
@@ -339,9 +339,9 @@ class TestResumeFinancierComplete:
         assert len(resume.categories_a_risque) == 1
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # PREVISION DEPENSE - EDGE CASES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPrevisionDepenseComplete:
@@ -364,7 +364,7 @@ class TestPrevisionDepenseComplete:
         assert prev.confiance == 1.0
     
     def test_prevision_toutes_categories(self):
-        """Test qu'on peut créer une prévision pour chaque catégorie."""
+        """Test qu'on peut crÃ©er une prÃ©vision pour chaque catÃ©gorie."""
         for cat in CategorieDepense:
             prev = PrevisionDepense(
                 categorie=cat,
@@ -373,9 +373,9 @@ class TestPrevisionDepenseComplete:
             assert prev.categorie == cat
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FACTORY TESTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFactory:
@@ -398,9 +398,9 @@ class TestFactory:
         assert isinstance(service, BudgetService)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SERVICE INITIALIZATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBudgetServiceInit:
@@ -412,7 +412,7 @@ class TestBudgetServiceInit:
         assert isinstance(service._depenses_cache, dict)
     
     def test_service_has_all_methods(self):
-        """Vérifie que le service a toutes les méthodes attendues."""
+        """VÃ©rifie que le service a toutes les mÃ©thodes attendues."""
         service = BudgetService()
         
         methods = [
@@ -429,4 +429,4 @@ class TestBudgetServiceInit:
         ]
         
         for method in methods:
-            assert hasattr(service, method), f"Méthode {method} manquante"
+            assert hasattr(service, method), f"MÃ©thode {method} manquante"

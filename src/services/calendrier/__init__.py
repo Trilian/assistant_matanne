@@ -1,4 +1,4 @@
-"""
+﻿"""
 Package de synchronisation des calendriers externes.
 
 Exports:
@@ -28,10 +28,10 @@ def render_calendar_sync_ui():
     """
     Interface Streamlit pour la synchronisation des calendriers.
     
-    Déplacé vers src/domains/planning/ui/calendar_sync_ui.py
+    Déplacé vers src/modules/planning/ui/calendar_sync_ui.py
     Cette fonction assure la rétrocompatibilité.
     """
-    from src.domains.planning.ui.calendar_sync_ui import render_calendar_sync_ui as _render
+    from src.modules.planning.calendar_sync_ui import render_calendar_sync_ui as _render
     return _render()
 
 

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/services/rapports/export.py
 
 Tests du service d'export PDF avec couverture complète.
@@ -87,7 +87,7 @@ class TestDonneesRecettePDF:
                 {"nom": "Farine", "quantite": 200, "unite": "g"},
                 {"nom": "Sucre", "quantite": 100, "unite": "g"}
             ],
-            etapes=["Étape 1", "Étape 2"],
+            etapes=["Ã‰tape 1", "Ã‰tape 2"],
             tags=["dessert"]
         )
         assert len(data.ingredients) == 2
@@ -118,7 +118,7 @@ class TestServiceExportPDFRecette:
             ],
             etapes=[
                 "Préparer la pâte",
-                "Éplucher les pommes",
+                "Ã‰plucher les pommes",
                 "Assembler et cuire"
             ],
             tags=["dessert", "fruits"]
@@ -167,7 +167,7 @@ class TestServiceExportPDFRecette:
         """Vérifie l'export avec mock DB complet."""
         # Créer un mock complet de la recette
         mock_etape = MagicMock()
-        mock_etape.description = "Étape de test"
+        mock_etape.description = "Ã‰tape de test"
         mock_etape.ordre = 1
         
         mock_ingredient = MagicMock()

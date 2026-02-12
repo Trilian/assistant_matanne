@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service de suggestions IA avec historique.
 
 Améliore les suggestions en utilisant:
@@ -49,9 +49,9 @@ class ServiceSuggestions:
         self.analyseur = AnalyseurIA()
         self.cache = obtenir_cache()
     
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # ANALYSE DU PROFIL
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     @avec_session_db
     def analyser_profil_culinaire(
@@ -63,7 +63,7 @@ class ServiceSuggestions:
         Analyse l'historique pour construire un profil culinaire.
         
         Args:
-            jours_historique: Nombre de jours à analyser
+            jours_historique: Nombre de jours Ã  analyser
             session: Session DB
             
         Returns:
@@ -153,9 +153,9 @@ class ServiceSuggestions:
         logger.info(f"Profil culinaire analysé: {len(profil.categories_preferees)} catégories préférées")
         return profil
     
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # CONTEXTE INTELLIGENT
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     @avec_session_db
     def construire_contexte(
@@ -170,7 +170,7 @@ class ServiceSuggestions:
         
         Inclut automatiquement:
         - Ingrédients disponibles en stock
-        - Ingrédients à consommer en priorité (péremption proche)
+        - Ingrédients Ã  consommer en priorité (péremption proche)
         - Saison actuelle
         
         Args:
@@ -210,18 +210,18 @@ class ServiceSuggestions:
         for article in articles:
             contexte.ingredients_disponibles.append(article.nom)
             
-            # Ingrédients à utiliser en priorité (péremption dans 5 jours)
+            # Ingrédients Ã  utiliser en priorité (péremption dans 5 jours)
             if article.date_peremption and article.date_peremption <= dans_5_jours:
                 contexte.ingredients_a_utiliser.append(article.nom)
         
         logger.debug(f"Contexte: {len(contexte.ingredients_disponibles)} ingrédients disponibles, "
-                    f"{len(contexte.ingredients_a_utiliser)} à utiliser en priorité")
+                    f"{len(contexte.ingredients_a_utiliser)} Ã  utiliser en priorité")
         
         return contexte
     
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # GÉNÉRATION DE SUGGESTIONS
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     @avec_session_db
     def suggerer_recettes(
@@ -334,7 +334,7 @@ class ServiceSuggestions:
             elif recette.temps_preparation > contexte.temps_disponible_minutes + 30:
                 score -= 20  # Trop long
         
-        # Bonus utilisation ingrédients à consommer
+        # Bonus utilisation ingrédients Ã  consommer
         ingredients_recette = []
         if hasattr(recette, 'ingredients'):
             ingredients_recette = [
@@ -349,7 +349,7 @@ class ServiceSuggestions:
         )
         if ingredients_prioritaires_utilises > 0:
             score += ingredients_prioritaires_utilises * 15
-            raisons.append(f"Utilise {ingredients_prioritaires_utilises} ingrédient(s) à consommer")
+            raisons.append(f"Utilise {ingredients_prioritaires_utilises} ingrédient(s) Ã  consommer")
             tags.append("anti-gaspi")
         
         # Bonus ingrédients disponibles
@@ -448,9 +448,9 @@ class ServiceSuggestions:
         
         return resultat[:nb_total]
     
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # SUGGESTIONS IA AVANCÉES
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     
     @avec_session_db
     def suggerer_avec_ia(
@@ -489,7 +489,7 @@ CONTEXTE:
 INGRÉDIENTS DISPONIBLES:
 {', '.join(contexte.ingredients_disponibles[:20]) if contexte.ingredients_disponibles else 'Non spécifié'}
 
-INGRÉDIENTS À UTILISER EN PRIORITÉ (péremption proche):
+INGRÉDIENTS Ã€ UTILISER EN PRIORITÉ (péremption proche):
 {', '.join(contexte.ingredients_a_utiliser) if contexte.ingredients_a_utiliser else 'Aucun'}
 
 PRÉFÉRENCES DÉTECTÉES:
@@ -522,9 +522,9 @@ Réponds avec 3 suggestions au format JSON:
         return []
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FACTORY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 _suggestions_service: ServiceSuggestions | None = None

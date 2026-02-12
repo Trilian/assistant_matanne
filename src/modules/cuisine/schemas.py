@@ -1,8 +1,8 @@
-"""
+﻿"""
 Schemas/Dataclasses pour le domaine Cuisine.
 
-Fichier séparé pour éviter les imports circulaires.
-Contient les structures de données partagées entre:
+Fichier sÃeparÃe pour Ãeviter les imports circulaires.
+Contient les structures de donnÃees partagÃees entre:
 - planificateur_repas_logic.py
 - user_preferences.py (services)
 """
@@ -14,9 +14,9 @@ from typing import Optional, List
 
 @dataclass
 class PreferencesUtilisateur:
-    """Préférences alimentaires et contraintes de l'utilisateur."""
+    """PrÃefÃerences alimentaires et contraintes de l'utilisateur."""
     
-    # Personnes à table
+    # Personnes Ã  table
     nb_adultes: int = 2
     jules_present: bool = True
     jules_age_mois: int = 19
@@ -29,7 +29,7 @@ class PreferencesUtilisateur:
     aliments_exclus: List[str] = field(default_factory=list)
     aliments_favoris: List[str] = field(default_factory=list)
     
-    # Équilibre souhaité
+    # Équilibre souhaitÃe
     poisson_par_semaine: int = 2
     vegetarien_par_semaine: int = 1
     viande_rouge_max: int = 2
@@ -72,9 +72,9 @@ class FeedbackRecette:
     recette_nom: str
     feedback: str  # "like", "dislike", "neutral"
     date_feedback: Optional[date] = field(default_factory=date.today)
-    contexte: Optional[str] = None  # "trop long", "jules n'a pas aimé", etc.
+    contexte: Optional[str] = None  # "trop long", "jules n'a pas aimÃe", etc.
     
     @property
     def score(self) -> int:
-        """Score numérique pour l'apprentissage."""
+        """Score numÃerique pour l'apprentissage."""
         return {"like": 1, "neutral": 0, "dislike": -1}.get(self.feedback, 0)

@@ -1,9 +1,9 @@
-"""
+﻿"""
 Dashboard de performance des paris.
 """
 
-from ._common import st, pd, calculer_performance_paris
-from .helpers import charger_paris_utilisateur
+from .utils import st, pd, calculer_performance_paris
+from .utilitaires import charger_paris_utilisateur
 
 
 def afficher_dashboard_performance():
@@ -11,35 +11,35 @@ def afficher_dashboard_performance():
     paris = charger_paris_utilisateur()
     
     if not paris:
-        st.info("📊 Aucun pari enregistré. Commencez par faire des prédictions!")
+        st.info("ðŸ“Š Aucun pari enregistrÃe. Commencez par faire des prÃedictions!")
         return
     
     # Calculs
     perf = calculer_performance_paris(paris)
     
-    # Métriques principales
+    # MÃetriques principales
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        st.metric("🎯 Total Paris", perf["nb_paris"])
+        st.metric("ðŸŽ¯ Total Paris", perf["nb_paris"])
     
     with col2:
         taux = perf.get("taux_reussite", 0)
-        st.metric("✅ Taux Réussite", f"{taux:.1f}%")
+        st.metric("âœ… Taux RÃeussite", f"{taux:.1f}%")
     
     with col3:
         profit = perf.get("profit", 0)
-        st.metric("💰 Profit/Perte", f"{profit:+.2f}€", 
+        st.metric("ðŸ’° Profit/Perte", f"{profit:+.2f}â‚¬", 
                   delta_color="normal" if profit >= 0 else "inverse")
     
     with col4:
         roi = perf.get("roi", 0)
-        st.metric("📈 ROI", f"{roi:+.1f}%",
+        st.metric("ðŸ“ˆ ROI", f"{roi:+.1f}%",
                   delta_color="normal" if roi >= 0 else "inverse")
     
     st.divider()
     
-    # Graphique évolution
+    # Graphique Ãevolution
     if len(paris) > 1:
         df = pd.DataFrame(paris)
         df = df[df["statut"] != "en_attente"]
@@ -51,18 +51,18 @@ def afficher_dashboard_performance():
             ).cumsum()
             
             st.line_chart(df["profit_cumul"])
-            st.caption("📈 Évolution du profit cumulé")
+            st.caption("ðŸ“ˆ Évolution du profit cumulÃe")
     
     st.divider()
     
     # Historique des paris
-    st.subheader("📋 Historique récent")
+    st.subheader("ðŸ“‹ Historique rÃecent")
     
     for pari in paris[:10]:
         statut_emoji = {
-            "en_attente": "⏳",
-            "gagne": "✅",
-            "perdu": "❌"
+            "en_attente": "â³",
+            "gagne": "âœ…",
+            "perdu": "âŒ"
         }.get(pari["statut"], "?")
         
         pred_label = {"1": "Dom", "N": "Nul", "2": "Ext"}.get(pari["prediction"], "?")
@@ -71,14 +71,14 @@ def afficher_dashboard_performance():
         with col1:
             st.write(f"{statut_emoji} Match #{pari['match_id']}")
         with col2:
-            st.write(f"Préd: {pred_label}")
+            st.write(f"PrÃed: {pred_label}")
         with col3:
             st.write(f"Cote: {pari['cote']:.2f}")
         with col4:
             if pari["statut"] == "gagne":
-                st.write(f"💰 +{pari['gain']:.2f}€")
+                st.write(f"ðŸ’° +{pari['gain']:.2f}â‚¬")
             elif pari["statut"] == "perdu":
-                st.write(f"📉 -{pari['mise']:.2f}€")
+                st.write(f"ðŸ“‰ -{pari['mise']:.2f}â‚¬")
 
 
 __all__ = ["afficher_dashboard_performance"]

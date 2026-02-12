@@ -1,9 +1,9 @@
-﻿"""
+"""
 Module Scanner Barcode/QR - Interface Streamlit
 
 ✅ Scanner codes-barres
 ✅ Ajout rapide articles
-✅ Vérification stock
+✅ Verification stock
 ✅ Import/Export
 """
 
@@ -16,8 +16,8 @@ from src.services.integrations import BarcodeService
 from src.services.inventaire import InventaireService
 from src.core.errors_base import ErreurValidation, ErreurNonTrouve
 
-# Logique métier pure
-from src.domains.utils.logic.barcode_logic import (
+# Logique metier pure
+from src.modules.outils.barcode_utils import (
     valider_code_barres,
     detecter_type_code_barres,
     extraire_infos_produit
@@ -29,7 +29,7 @@ from src.domains.utils.logic.barcode_logic import (
 
 
 def get_barcode_service() -> BarcodeService:
-    """Get ou créer service barcode"""
+    """Get ou creer service barcode"""
     if "barcode_service" not in st.session_state:
         st.session_state.barcode_service = BarcodeService()
     return st.session_state.barcode_service
@@ -41,7 +41,7 @@ def get_barcode_service() -> BarcodeService:
 
 
 def app():
-    """Point d'entrée module scanner barcode"""
+    """Point d'entree module scanner barcode"""
     
     st.markdown(
         "<h1 style='text-align: center;'>💰 Scanner Code-Barres/QR</h1>",
@@ -55,7 +55,7 @@ def app():
     tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "👶 Scanner",
         "➕ Ajout rapide",
-        "✅ Vérifier stock",
+        "✅ Verifier stock",
         "📊 Gestion",
         "💰¥ Import/Export"
     ])
@@ -117,9 +117,9 @@ def render_scanner():
             # Scanner
             resultat = service.scanner_code(code_input)
             
-            st.success("✅ Scan réussi!")
+            st.success("✅ Scan reussi!")
             
-            # Afficher résultats
+            # Afficher resultats
             col1, col2 = st.columns(2)
             
             with col1:
@@ -127,11 +127,11 @@ def render_scanner():
                 st.metric("Type", resultat.type_scan.upper())
             
             with col2:
-                st.info(f"â° Scannée: {resultat.timestamp.strftime('%H:%M:%S')}")
+                st.info(f"â° Scannee: {resultat.timestamp.strftime('%H:%M:%S')}")
             
-            # Détails
+            # Details
             if resultat.type_scan == "article":
-                st.subheader("[PKG] Article trouvé")
+                st.subheader("[PKG] Article trouve")
                 details = resultat.details
                 
                 col1, col2, col3 = st.columns(3)
@@ -147,7 +147,7 @@ def render_scanner():
                 col1, col2, col3 = st.columns(3)
                 
                 with col1:
-                    if st.button("➕ Ajouter quantité", key="btn_add_qty"):
+                    if st.button("➕ Ajouter quantite", key="btn_add_qty"):
                         st.session_state.article_id_to_add = details["id"]
                         st.session_state.article_name_to_add = details["nom"]
                         st.switch_page("pages/0_accueil.py")
@@ -162,7 +162,7 @@ def render_scanner():
                         st.warning("Action non disponible ici")
             
             else:
-                st.warning("âš ï¸ Code non reconnu - doit être ajouté dans le système")
+                st.warning("âš ï¸ Code non reconnu - doit être ajoute dans le système")
                 if st.button("➕ Ajouter ce code", key="btn_add_new_barcode"):
                     st.session_state.new_barcode_to_add = code_input
                     st.rerun()
@@ -172,7 +172,7 @@ def render_scanner():
     
     # Info
     st.info("""
-    💰š **Formats supportés:**
+    💰š **Formats supportes:**
     - EAN-13 (13 chiffres)
     - EAN-8 (8 chiffres)
     - UPC (12 chiffres)
@@ -195,7 +195,7 @@ def render_ajout_rapide():
     st.subheader("➕ Ajouter Article Rapide")
     
     st.markdown("""
-    Créez un nouvel article avec code-barres en quelques secondes.
+    Creez un nouvel article avec code-barres en quelques secondes.
     """)
     
     # Formulaire
@@ -212,7 +212,7 @@ def render_ajout_rapide():
                 placeholder="ex: Tomates cerises"
             )
             quantite = st.number_input(
-                "Quantité",
+                "Quantite",
                 min_value=0.1,
                 value=1.0,
                 step=0.5
@@ -220,20 +220,20 @@ def render_ajout_rapide():
         
         with col2:
             unite = st.selectbox(
-                "Unité",
-                ["unité", "kg", "g", "L", "ml", "paquet", "boîte", "litre", "portion"]
+                "Unite",
+                ["unite", "kg", "g", "L", "ml", "paquet", "boîte", "litre", "portion"]
             )
             categorie = st.selectbox(
-                "Catégorie",
+                "Categorie",
                 [
-                    "Légumes", "Fruits", "Féculents", "Protéines",
+                    "Legumes", "Fruits", "Feculents", "Proteines",
                     "Laitier", "Épices & Condiments", "Conserves",
-                    "Surgelés", "Autre"
+                    "Surgeles", "Autre"
                 ]
             )
             emplacement = st.selectbox(
                 "Emplacement",
-                ["Frigo", "Congélateur", "Placard", "Cave", "Garde-manger"]
+                ["Frigo", "Congelateur", "Placard", "Cave", "Garde-manger"]
             )
         
         col1, col2 = st.columns(2)
@@ -247,7 +247,7 @@ def render_ajout_rapide():
         
         with col2:
             jours_peremption = st.number_input(
-                "Jours avant péremption (optionnel)",
+                "Jours avant peremption (optionnel)",
                 min_value=0,
                 value=0,
                 step=1
@@ -273,17 +273,17 @@ def render_ajout_rapide():
                 emplacement=emplacement
             )
             
-            st.success(f"✅ Article créé: {nom}")
+            st.success(f"✅ Article cree: {nom}")
             st.balloons()
             
-            # Afficher résumé
+            # Afficher resume
             st.info(f"""
-            💰 **Article créé:**
+            💰 **Article cree:**
             - Code: {barcode}
             - Nom: {nom}
             - Stock: {quantite} {unite}
             - Emplacement: {emplacement}
-            - Catégorie: {categorie}
+            - Categorie: {categorie}
             """)
             
             st.session_state.clear()
@@ -300,13 +300,13 @@ def render_ajout_rapide():
 
 
 def render_verifier_stock():
-    """Vérifier stock par code-barres"""
+    """Verifier stock par code-barres"""
     
     service = get_barcode_service()
     
-    st.subheader("✅ Vérifier Stock par Code")
+    st.subheader("✅ Verifier Stock par Code")
     
-    st.markdown("Scannez un code pour vérifier instantanément le stock")
+    st.markdown("Scannez un code pour verifier instantanement le stock")
     
     col1, col2 = st.columns([3, 1])
     
@@ -318,7 +318,7 @@ def render_verifier_stock():
         )
     
     with col2:
-        if st.button("📍Vérifier", key="btn_check_stock", use_container_width=True):
+        if st.button("📍Verifier", key="btn_check_stock", use_container_width=True):
             check_clicked = True
         else:
             check_clicked = False
@@ -349,7 +349,7 @@ def render_verifier_stock():
                 else:
                     st.metric("État", "❌ CRITIQUE", delta="Urgent!")
             
-            # Détails
+            # Details
             st.divider()
             
             col1, col2, col3 = st.columns(3)
@@ -364,17 +364,17 @@ def render_verifier_stock():
             with col3:
                 etat_perem = info_stock["peremption_etat"]
                 emoji = "✅" if etat_perem == "OK" else "âš ï¸"
-                st.metric("Péremption", f"{emoji} {etat_perem}")
+                st.metric("Peremption", f"{emoji} {etat_perem}")
             
             # Actions
             if info_stock["etat_stock"] != "OK":
-                st.warning(f"[PKG] Stock faible - Considérer l'ajout de stock")
+                st.warning(f"[PKG] Stock faible - Considerer l'ajout de stock")
             
             if info_stock["peremption_etat"] in ["URGENT", "PÉRIMÉ"]:
-                st.error(f"❌ Problème péremption - Action requise")
+                st.error(f"❌ Problème peremption - Action requise")
         
         except ErreurNonTrouve:
-            st.error("❌ Code non trouvé dans la base")
+            st.error("❌ Code non trouve dans la base")
         except Exception as e:
             st.error(f"❌ Erreur: {str(e)}")
 
@@ -406,8 +406,8 @@ def render_gestion_barcodes():
                 "nom": "Article",
                 "barcode": "Code-barres",
                 "quantite": "Stock",
-                "unite": "Unité",
-                "categorie": "Catégorie"
+                "unite": "Unite",
+                "categorie": "Categorie"
             })
             
             st.dataframe(
@@ -477,17 +477,17 @@ def render_import_export():
     with col1:
         st.subheader("💡 Exporter")
         
-        if st.button("â¬‡ï¸ Télécharger CSV", key="btn_export_barcode"):
+        if st.button("â¬‡ï¸ Telecharger CSV", key="btn_export_barcode"):
             try:
                 csv_data = service.exporter_barcodes()
                 st.download_button(
-                    label="💰¥ Télécharger codes-barres.csv",
+                    label="💰¥ Telecharger codes-barres.csv",
                     data=csv_data,
                     file_name=f"codes_barres_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                     mime="text/csv",
                     key="download_barcode_csv"
                 )
-                st.success("✅ CSV généré")
+                st.success("✅ CSV genere")
             except Exception as e:
                 st.error(f"❌ Erreur: {str(e)}")
     
@@ -508,7 +508,7 @@ def render_import_export():
                 try:
                     resultats = service.importer_barcodes(csv_content)
                     
-                    st.success(f"✅ {resultats['success']} articles importés")
+                    st.success(f"✅ {resultats['success']} articles importes")
                     
                     if resultats['errors']:
                         st.warning(f"âš ï¸ {len(resultats['errors'])} erreurs")

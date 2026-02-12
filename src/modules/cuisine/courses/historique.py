@@ -13,7 +13,7 @@ def render_historique():
     """Historique des listes de courses"""
     service = get_courses_service()
     
-    st.subheader("📚 Historique des courses")
+    st.subheader("ðŸ“š Historique des courses")
     
     col1, col2 = st.columns(2)
     with col1:
@@ -22,7 +22,7 @@ def render_historique():
         date_fin = st.date_input("Au", value=datetime.now())
     
     try:
-        # Récupérer les articles achetés dans la période
+        # RÃecupÃerer les articles achetÃes dans la pÃeriode
         from src.core.models import ArticleCourses
         from sqlalchemy.orm import joinedload
         
@@ -36,7 +36,7 @@ def render_historique():
             ).all()
         
         if not articles_achetes:
-            st.info("Aucun achat pendant cette période")
+            st.info("Aucun achat pendant cette pÃeriode")
             return
         
         # Statistiques
@@ -45,25 +45,25 @@ def render_historique():
         
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.metric("📊 Articles achetés", total_articles)
+            st.metric("ðŸ“Š Articles achetÃes", total_articles)
         with col2:
-            st.metric("🪑 Rayons différents", len(rayons_utilises))
+            st.metric("ðŸª‘ Rayons diffÃerents", len(rayons_utilises))
         with col3:
             priorite_haute = len([a for a in articles_achetes if a.priorite == "haute"])
-            st.metric("🔴 Haute priorité", priorite_haute)
+            st.metric("ðŸ”´ Haute prioritÃe", priorite_haute)
         
         st.divider()
         
-        # Tableau détaillé
-        st.subheader("📋 Détail des achats")
+        # Tableau dÃetaillÃe
+        st.subheader("ðŸ“‹ DÃetail des achats")
         
         df = pd.DataFrame([{
             "Article": a.ingredient.nom if a.ingredient else "N/A",
-            "Quantité": f"{a.quantite_necessaire} {a.ingredient.unite if a.ingredient else ''}",
-            "Priorité": PRIORITY_EMOJIS.get(a.priorite, "⚫") + " " + a.priorite,
+            "QuantitÃe": f"{a.quantite_necessaire} {a.ingredient.unite if a.ingredient else ''}",
+            "PrioritÃe": PRIORITY_EMOJIS.get(a.priorite, "âš«") + " " + a.priorite,
             "Rayon": a.rayon_magasin or "N/A",
-            "Acheté le": a.achete_le.strftime("%d/%m/%Y %H:%M") if a.achete_le else "N/A",
-            "IA": "✨" if a.suggere_par_ia else ""
+            "AchetÃe le": a.achete_le.strftime("%d/%m/%Y %H:%M") if a.achete_le else "N/A",
+            "IA": "âœ¨" if a.suggere_par_ia else ""
         } for a in articles_achetes])
         
         st.dataframe(df, use_container_width=True)
@@ -72,14 +72,14 @@ def render_historique():
         if df is not None and not df.empty:
             csv = df.to_csv(index=False)
             st.download_button(
-                label="📥 Télécharger en CSV",
+                label="ðŸ“¥ TÃelÃecharger en CSV",
                 data=csv,
                 file_name=f"historique_courses_{date_debut}_{date_fin}.csv",
                 mime="text/csv"
             )
         
     except Exception as e:
-        st.error(f"❌ Erreur: {str(e)}")
+        st.error(f"âŒ Erreur: {str(e)}")
         logger.error(f"Erreur historique: {e}")
 
 

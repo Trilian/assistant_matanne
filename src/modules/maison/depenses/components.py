@@ -1,8 +1,8 @@
-﻿"""
-Module Dépenses Maison - Composants UI
+"""
+Module Depenses Maison - Composants UI
 """
 
-from ._common import (
+from .utils import (
     st, date, Decimal, Optional,
     obtenir_contexte_db, HouseExpense,
     CATEGORY_LABELS, CATEGORIES_AVEC_CONSO, MOIS_FR
@@ -18,7 +18,7 @@ def render_stats_dashboard():
     stats = get_stats_globales()
     today = date.today()
     
-    st.subheader(f"📊 Résumé {MOIS_FR[today.month]} {today.year}")
+    st.subheader(f"📊 Resume {MOIS_FR[today.month]} {today.year}")
     
     col1, col2, col3, col4 = st.columns(4)
     
@@ -27,17 +27,17 @@ def render_stats_dashboard():
         st.metric("Ce mois", f"{stats['total_mois']:.0f}€", delta=delta_str, delta_color="inverse")
     
     with col2:
-        st.metric("Mois précédent", f"{stats['total_prec']:.0f}€")
+        st.metric("Mois precedent", f"{stats['total_prec']:.0f}€")
     
     with col3:
         st.metric("Moyenne mensuelle", f"{stats['moyenne_mensuelle']:.0f}€")
     
     with col4:
-        st.metric("Catégories", stats["nb_categories"])
+        st.metric("Categories", stats["nb_categories"])
 
 
 def render_depense_card(depense: HouseExpense):
-    """Affiche une card de dépense"""
+    """Affiche une card de depense"""
     with st.container(border=True):
         col1, col2, col3 = st.columns([2, 1, 1])
         
@@ -68,7 +68,7 @@ def render_depense_card(depense: HouseExpense):
 
 
 def render_formulaire(depense: Optional[HouseExpense] = None):
-    """Formulaire d'ajout/édition"""
+    """Formulaire d'ajout/edition"""
     is_edit = depense is not None
     prefix = "edit" if is_edit else "new"
     today = date.today()
@@ -80,7 +80,7 @@ def render_formulaire(depense: Optional[HouseExpense] = None):
             categories = list(CATEGORY_LABELS.keys())
             cat_index = categories.index(depense.categorie) if is_edit and depense.categorie in categories else 0
             categorie = st.selectbox(
-                "Catégorie *",
+                "Categorie *",
                 options=categories,
                 format_func=lambda x: CATEGORY_LABELS.get(x, x),
                 index=cat_index
@@ -93,7 +93,7 @@ def render_formulaire(depense: Optional[HouseExpense] = None):
                 step=0.01
             )
             
-            # Consommation (pour gaz, eau, électricité)
+            # Consommation (pour gaz, eau, electricite)
             if categorie in ["gaz", "eau", "electricite"]:
                 unite = "kWh" if categorie == "electricite" else "m³"
                 consommation = st.number_input(
@@ -116,7 +116,7 @@ def render_formulaire(depense: Optional[HouseExpense] = None):
                 )
             with col_annee:
                 annee = st.number_input(
-                    "Année",
+                    "Annee",
                     min_value=2020,
                     max_value=2030,
                     value=depense.annee if is_edit else today.year
@@ -125,7 +125,7 @@ def render_formulaire(depense: Optional[HouseExpense] = None):
             note = st.text_area(
                 "Note",
                 value=depense.note if is_edit else "",
-                placeholder="Commentaire, référence facture..."
+                placeholder="Commentaire, reference facture..."
             )
         
         submitted = st.form_submit_button(
@@ -136,7 +136,7 @@ def render_formulaire(depense: Optional[HouseExpense] = None):
         
         if submitted:
             if montant <= 0:
-                st.error("Le montant doit être supérieur à 0!")
+                st.error("Le montant doit être superieur à 0!")
                 return
             
             data = {
@@ -150,23 +150,23 @@ def render_formulaire(depense: Optional[HouseExpense] = None):
             
             if is_edit:
                 update_depense(depense.id, data)
-                st.success("✅ Dépense mise à jour!")
+                st.success("✅ Depense mise à jour!")
             else:
                 create_depense(data)
-                st.success("✅ Dépense ajoutée!")
+                st.success("✅ Depense ajoutee!")
             
             st.rerun()
 
 
 def render_graphique_evolution():
-    """Affiche le graphique d'évolution"""
+    """Affiche le graphique d'evolution"""
     st.subheader("📈 Évolution")
     
-    # Sélection catégorie
+    # Selection categorie
     categorie = st.selectbox(
-        "Catégorie à afficher",
+        "Categorie à afficher",
         options=["total"] + list(CATEGORY_LABELS.keys()),
-        format_func=lambda x: "📊 Total toutes catégories" if x == "total" else CATEGORY_LABELS.get(x, x)
+        format_func=lambda x: "📊 Total toutes categories" if x == "total" else CATEGORY_LABELS.get(x, x)
     )
     
     today = date.today()
@@ -199,7 +199,7 @@ def render_graphique_evolution():
 
 
 def render_comparaison_mois():
-    """Compare les dépenses de 2 mois"""
+    """Compare les depenses de 2 mois"""
     st.subheader("⚖️ Comparaison")
     
     today = date.today()
@@ -209,20 +209,20 @@ def render_comparaison_mois():
     with col1:
         st.caption("Mois 1")
         mois1 = st.selectbox("Mois", range(1, 13), format_func=lambda x: MOIS_FR[x], index=today.month - 1, key="mois1")
-        annee1 = st.number_input("Année", 2020, 2030, today.year, key="annee1")
+        annee1 = st.number_input("Annee", 2020, 2030, today.year, key="annee1")
     
     with col2:
         st.caption("Mois 2")
         mois_prec = today.month - 1 if today.month > 1 else 12
         annee_prec = today.year if today.month > 1 else today.year - 1
         mois2 = st.selectbox("Mois", range(1, 13), format_func=lambda x: MOIS_FR[x], index=mois_prec - 1, key="mois2")
-        annee2 = st.number_input("Année", 2020, 2030, annee_prec, key="annee2")
+        annee2 = st.number_input("Annee", 2020, 2030, annee_prec, key="annee2")
     
     if st.button("Comparer", type="primary"):
         dep1 = get_depenses_mois(mois1, int(annee1))
         dep2 = get_depenses_mois(mois2, int(annee2))
         
-        # Grouper par catégorie
+        # Grouper par categorie
         par_cat1 = {d.categorie: float(d.montant) for d in dep1}
         par_cat2 = {d.categorie: float(d.montant) for d in dep2}
         
@@ -255,7 +255,7 @@ def render_comparaison_mois():
 
 
 def render_onglet_mois():
-    """Onglet dépenses du mois"""
+    """Onglet depenses du mois"""
     today = date.today()
     
     col1, col2 = st.columns(2)
@@ -268,7 +268,7 @@ def render_onglet_mois():
         )
     with col2:
         annee = st.number_input(
-            "Année",
+            "Annee",
             min_value=2020,
             max_value=2030,
             value=today.year
@@ -277,7 +277,7 @@ def render_onglet_mois():
     depenses = get_depenses_mois(mois, int(annee))
     
     if not depenses:
-        st.info(f"Aucune dépense enregistrée pour {MOIS_FR[mois]} {annee}")
+        st.info(f"Aucune depense enregistree pour {MOIS_FR[mois]} {annee}")
         return
     
     # Total
@@ -292,7 +292,7 @@ def render_onglet_mois():
 
 def render_onglet_ajouter():
     """Onglet ajout"""
-    st.subheader("➕ Ajouter une dépense")
+    st.subheader("➕ Ajouter une depense")
     render_formulaire(None)
 
 

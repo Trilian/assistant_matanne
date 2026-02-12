@@ -1,13 +1,13 @@
-"""
+﻿"""
 Tests de couverture pour parametres_logic.py
-Objectif: Atteindre ≥80% de couverture
+Objectif: Atteindre â‰¥80% de couverture
 """
 
 import pytest
 import json
 from typing import Dict, Any, List
 
-from src.domains.utils.logic.parametres_logic import (
+from src.modules.outils.logic.parametres_logic import (
     valider_parametres,
     valider_email,
     generer_config_defaut,
@@ -22,16 +22,16 @@ from src.domains.utils.logic.parametres_logic import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS VALIDER PARAMETRES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestValiderParametres:
     """Tests pour valider_parametres."""
     
     def test_parametres_valides(self):
-        """Paramètres valides passent."""
+        """ParamÃ¨tres valides passent."""
         data = {
             "nom_famille": "Dupont",
             "email": "test@example.com",
@@ -44,89 +44,89 @@ class TestValiderParametres:
         assert len(erreurs) == 0
         
     def test_nom_trop_court(self):
-        """Nom trop court génère erreur."""
+        """Nom trop court gÃ©nÃ¨re erreur."""
         data = {"nom_famille": "A"}
         valide, erreurs = valider_parametres(data)
         assert valide is False
-        assert any("2 caractères" in e for e in erreurs)
+        assert any("2 caractÃ¨res" in e for e in erreurs)
         
     def test_nom_trop_long(self):
-        """Nom trop long génère erreur."""
+        """Nom trop long gÃ©nÃ¨re erreur."""
         data = {"nom_famille": "A" * 51}
         valide, erreurs = valider_parametres(data)
         assert valide is False
-        assert any("50 caractères" in e for e in erreurs)
+        assert any("50 caractÃ¨res" in e for e in erreurs)
         
     def test_nom_vide(self):
-        """Nom vide génère erreur."""
+        """Nom vide gÃ©nÃ¨re erreur."""
         data = {"nom_famille": ""}
         valide, erreurs = valider_parametres(data)
         assert valide is False
         
     def test_email_sans_arobase(self):
-        """Email sans @ génère erreur."""
+        """Email sans @ gÃ©nÃ¨re erreur."""
         data = {"email": "testexample.com"}
         valide, erreurs = valider_parametres(data)
         assert valide is False
         assert any("@" in e for e in erreurs)
         
     def test_email_domaine_invalide(self):
-        """Email avec domaine invalide génère erreur."""
+        """Email avec domaine invalide gÃ©nÃ¨re erreur."""
         data = {"email": "test@invalid"}
         valide, erreurs = valider_parametres(data)
         assert valide is False
         assert any("domaine" in e for e in erreurs)
         
     def test_email_vide_ok(self):
-        """Email vide est accepté (optionnel)."""
+        """Email vide est acceptÃ© (optionnel)."""
         data = {"email": ""}
         valide, erreurs = valider_parametres(data)
         assert valide is True
         
     def test_devise_invalide(self):
-        """Devise non supportée génère erreur."""
+        """Devise non supportÃ©e gÃ©nÃ¨re erreur."""
         data = {"devise": "XYZ"}
         valide, erreurs = valider_parametres(data)
         assert valide is False
         assert any("Devise" in e for e in erreurs)
         
     def test_devises_valides(self):
-        """Toutes les devises supportées passent."""
+        """Toutes les devises supportÃ©es passent."""
         for devise in ["EUR", "USD", "GBP", "CHF", "CAD"]:
             data = {"devise": devise}
             valide, erreurs = valider_parametres(data)
-            assert valide is True, f"Devise {devise} devrait être valide"
+            assert valide is True, f"Devise {devise} devrait Ãªtre valide"
             
     def test_langue_invalide(self):
-        """Langue non supportée génère erreur."""
+        """Langue non supportÃ©e gÃ©nÃ¨re erreur."""
         data = {"langue": "xx"}
         valide, erreurs = valider_parametres(data)
         assert valide is False
         assert any("Langue" in e for e in erreurs)
         
     def test_langues_valides(self):
-        """Toutes les langues supportées passent."""
+        """Toutes les langues supportÃ©es passent."""
         for langue in ["fr", "en", "es", "de"]:
             data = {"langue": langue}
             valide, erreurs = valider_parametres(data)
             assert valide is True
             
     def test_theme_invalide(self):
-        """Thème non supporté génère erreur."""
+        """ThÃ¨me non supportÃ© gÃ©nÃ¨re erreur."""
         data = {"theme": "neon"}
         valide, erreurs = valider_parametres(data)
         assert valide is False
-        assert any("Thème" in e for e in erreurs)
+        assert any("ThÃ¨me" in e for e in erreurs)
         
     def test_themes_valides(self):
-        """Tous les thèmes supportés passent."""
+        """Tous les thÃ¨mes supportÃ©s passent."""
         for theme in ["light", "dark", "auto"]:
             data = {"theme": theme}
             valide, erreurs = valider_parametres(data)
             assert valide is True
             
     def test_multiples_erreurs(self):
-        """Plusieurs erreurs accumulées."""
+        """Plusieurs erreurs accumulÃ©es."""
         data = {
             "nom_famille": "A",
             "email": "invalid",
@@ -138,9 +138,9 @@ class TestValiderParametres:
         assert len(erreurs) >= 3
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS VALIDER EMAIL
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestValiderEmail:
@@ -195,16 +195,16 @@ class TestValiderEmail:
         assert valide is True
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GENERER CONFIG DEFAUT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGenererConfigDefaut:
     """Tests pour generer_config_defaut."""
     
     def test_contient_cles_essentielles(self):
-        """Config contient les clés essentielles."""
+        """Config contient les clÃ©s essentielles."""
         config = generer_config_defaut()
         
         assert "nom_famille" in config
@@ -213,7 +213,7 @@ class TestGenererConfigDefaut:
         assert "theme" in config
         
     def test_valeurs_defaut_fr(self):
-        """Valeurs françaises par défaut."""
+        """Valeurs franÃ§aises par dÃ©faut."""
         config = generer_config_defaut()
         
         assert config["devise"] == "EUR"
@@ -221,16 +221,16 @@ class TestGenererConfigDefaut:
         assert config["fuseau_horaire"] == "Europe/Paris"
         
     def test_notifications_par_defaut(self):
-        """Notifications activées par défaut."""
+        """Notifications activÃ©es par dÃ©faut."""
         config = generer_config_defaut()
         
         assert config["notifications_actives"] is True
         assert config["notifications_email"] is False
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FUSIONNER CONFIG
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFusionnerConfig:
@@ -243,9 +243,9 @@ class TestFusionnerConfig:
         
         result = fusionner_config(actuelle, nouvelle)
         
-        assert result["a"] == 1  # Gardé
-        assert result["b"] == 3  # Écrasé
-        assert result["c"] == 4  # Ajouté
+        assert result["a"] == 1  # GardÃ©
+        assert result["b"] == 3  # Ã‰crasÃ©
+        assert result["c"] == 4  # AjoutÃ©
         
     def test_ne_modifie_pas_origine(self):
         """Ne modifie pas la config originale."""
@@ -258,33 +258,33 @@ class TestFusionnerConfig:
         assert "b" in result
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS COMPARER VERSIONS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestComparerVersions:
     """Tests pour comparer_versions."""
     
     def test_versions_egales(self):
-        """Versions égales retourne 0."""
+        """Versions Ã©gales retourne 0."""
         assert comparer_versions("1.0.0", "1.0.0") == 0
         assert comparer_versions("2.1.5", "2.1.5") == 0
         
     def test_version_inferieure(self):
-        """Version inférieure retourne -1."""
+        """Version infÃ©rieure retourne -1."""
         assert comparer_versions("1.0.0", "1.0.1") == -1
         assert comparer_versions("1.0.0", "1.1.0") == -1
         assert comparer_versions("1.0.0", "2.0.0") == -1
         
     def test_version_superieure(self):
-        """Version supérieure retourne 1."""
+        """Version supÃ©rieure retourne 1."""
         assert comparer_versions("1.0.1", "1.0.0") == 1
         assert comparer_versions("1.1.0", "1.0.0") == 1
         assert comparer_versions("2.0.0", "1.0.0") == 1
         
     def test_longueurs_differentes(self):
-        """Versions de longueurs différentes."""
+        """Versions de longueurs diffÃ©rentes."""
         assert comparer_versions("1.0", "1.0.0") == -1
         assert comparer_versions("1.0.0.1", "1.0.0") == 1
         
@@ -294,30 +294,30 @@ class TestComparerVersions:
         assert comparer_versions("1.0.0", None) == 0
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS VERSION EST SUPERIEURE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestVersionEstSuperieure:
     """Tests pour version_est_superieure."""
     
     def test_version_egale(self):
-        """Version égale est considérée supérieure."""
+        """Version Ã©gale est considÃ©rÃ©e supÃ©rieure."""
         assert version_est_superieure("1.0.0", "1.0.0") is True
         
     def test_version_superieure(self):
-        """Version supérieure retourne True."""
+        """Version supÃ©rieure retourne True."""
         assert version_est_superieure("2.0.0", "1.0.0") is True
         
     def test_version_inferieure(self):
-        """Version inférieure retourne False."""
+        """Version infÃ©rieure retourne False."""
         assert version_est_superieure("1.0.0", "2.0.0") is False
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FORMATER VERSION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFormaterVersion:
@@ -328,20 +328,20 @@ class TestFormaterVersion:
         assert formater_version("1.0.0") == "v1.0.0"
         
     def test_garde_v_existant(self):
-        """Garde 'v' si déjà présent."""
+        """Garde 'v' si dÃ©jÃ  prÃ©sent."""
         assert formater_version("v1.0.0") == "v1.0.0"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GET PREFERENCES PAR CATEGORIE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGetPreferencesParCategorie:
     """Tests pour get_preferences_par_categorie."""
     
     def test_groupement_general(self):
-        """Groupe les préférences générales."""
+        """Groupe les prÃ©fÃ©rences gÃ©nÃ©rales."""
         prefs = {
             "nom_famille": "Dupont",
             "langue": "fr",
@@ -355,7 +355,7 @@ class TestGetPreferencesParCategorie:
         assert result["general"]["langue"] == "fr"
         
     def test_groupement_affichage(self):
-        """Groupe les préférences d'affichage."""
+        """Groupe les prÃ©fÃ©rences d'affichage."""
         prefs = {
             "theme": "dark",
             "format_date": "DD/MM/YYYY",
@@ -368,7 +368,7 @@ class TestGetPreferencesParCategorie:
         assert result["affichage"]["theme"] == "dark"
         
     def test_groupement_notifications(self):
-        """Groupe les préférences notifications."""
+        """Groupe les prÃ©fÃ©rences notifications."""
         prefs = {
             "notifications_actives": True,
             "notifications_email": False
@@ -380,7 +380,7 @@ class TestGetPreferencesParCategorie:
         assert result["notifications"]["notifications_actives"] is True
         
     def test_groupement_integration(self):
-        """Groupe les préférences intégration."""
+        """Groupe les prÃ©fÃ©rences intÃ©gration."""
         prefs = {
             "sync_calendrier": True,
             "api_externe": "https://api.example.com"
@@ -392,7 +392,7 @@ class TestGetPreferencesParCategorie:
         assert result["integration"]["sync_calendrier"] is True
         
     def test_preference_absente(self):
-        """Préférence absente n'est pas incluse."""
+        """PrÃ©fÃ©rence absente n'est pas incluse."""
         prefs = {"nom_famille": "Test"}
         
         result = get_preferences_par_categorie(prefs)
@@ -400,9 +400,9 @@ class TestGetPreferencesParCategorie:
         assert "langue" not in result["general"]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EXPORTER CONFIG
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestExporterConfig:
@@ -420,7 +420,7 @@ class TestExporterConfig:
         assert parsed["nom"] == "Test"
         
     def test_export_yaml(self):
-        """Export en YAML simulé."""
+        """Export en YAML simulÃ©."""
         config = {"nom": "Test", "actif": True}
         
         result = exporter_config(config, "yaml")
@@ -430,7 +430,7 @@ class TestExporterConfig:
         assert "true" in result  # bool en lowercase
         
     def test_export_ini(self):
-        """Export en INI simulé."""
+        """Export en INI simulÃ©."""
         config = {"nom": "Test", "valeur": 42}
         
         result = exporter_config(config, "ini")
@@ -447,9 +447,9 @@ class TestExporterConfig:
         assert "nom" in result
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS VERIFIER SANTE CONFIG
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestVerifierSanteConfig:
@@ -470,7 +470,7 @@ class TestVerifierSanteConfig:
         assert result["score"] == 100
         
     def test_parametre_manquant(self):
-        """Paramètre obligatoire manquant."""
+        """ParamÃ¨tre obligatoire manquant."""
         config = {"devise": "EUR", "langue": "fr"}
         # Manque nom_famille
         
@@ -481,7 +481,7 @@ class TestVerifierSanteConfig:
         assert result["score"] < 100
         
     def test_notifications_sans_email(self):
-        """Notifications email sans email configuré."""
+        """Notifications email sans email configurÃ©."""
         config = {
             "nom_famille": "Test",
             "devise": "EUR",
@@ -496,7 +496,7 @@ class TestVerifierSanteConfig:
         assert len(result["avertissements"]) >= 1
         
     def test_sync_sans_api(self):
-        """Sync calendrier sans API configurée."""
+        """Sync calendrier sans API configurÃ©e."""
         config = {
             "nom_famille": "Test",
             "devise": "EUR",
@@ -510,48 +510,48 @@ class TestVerifierSanteConfig:
         assert len(result["avertissements"]) >= 1
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FORMATER PARAMETRE AFFICHAGE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFormaterParametreAffichage:
     """Tests pour formater_parametre_affichage."""
     
     def test_boolean_true(self):
-        """Boolean True affiché avec ✅."""
+        """Boolean True affichÃ© avec âœ…."""
         result = formater_parametre_affichage("actif", True)
-        assert "✅" in result
-        assert "Activé" in result
+        assert "âœ…" in result
+        assert "ActivÃ©" in result
         
     def test_boolean_false(self):
-        """Boolean False affiché avec ❌."""
+        """Boolean False affichÃ© avec âŒ."""
         result = formater_parametre_affichage("actif", False)
-        assert "❌" in result
-        assert "Désactivé" in result
+        assert "âŒ" in result
+        assert "DÃ©sactivÃ©" in result
         
     def test_devise_eur(self):
-        """Devise EUR affichée avec symbole."""
+        """Devise EUR affichÃ©e avec symbole."""
         result = formater_parametre_affichage("devise", "EUR")
         assert "EUR" in result
-        assert "€" in result
+        assert "â‚¬" in result
         
     def test_devise_usd(self):
-        """Devise USD affichée avec symbole."""
+        """Devise USD affichÃ©e avec symbole."""
         result = formater_parametre_affichage("devise", "USD")
         assert "$" in result
         
     def test_langue_fr(self):
-        """Langue française affichée avec drapeau."""
+        """Langue franÃ§aise affichÃ©e avec drapeau."""
         result = formater_parametre_affichage("langue", "fr")
-        assert "Français" in result
+        assert "FranÃ§ais" in result
         
     def test_valeur_standard(self):
-        """Valeur standard retournée en string."""
+        """Valeur standard retournÃ©e en string."""
         result = formater_parametre_affichage("autre", "valeur")
         assert result == "valeur"
         
     def test_valeur_numerique(self):
-        """Valeur numérique convertie en string."""
+        """Valeur numÃ©rique convertie en string."""
         result = formater_parametre_affichage("nombre", 42)
         assert result == "42"

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests couverture pour src/services/realtime_sync.py
 """
 
@@ -7,9 +7,9 @@ from unittest.mock import Mock, MagicMock, patch
 from datetime import datetime
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ENUMS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -17,7 +17,7 @@ class TestSyncEventType:
     """Tests pour SyncEventType enum."""
 
     def test_all_event_types_exist(self):
-        """Test tous les types d'événements."""
+        """Test tous les types d'Ã©vÃ©nements."""
         from src.services.realtime_sync import SyncEventType
         
         assert SyncEventType.ITEM_ADDED == "item_added"
@@ -31,9 +31,9 @@ class TestSyncEventType:
         assert SyncEventType.USER_TYPING == "user_typing"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PYDANTIC MODELS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -41,7 +41,7 @@ class TestSyncEventModel:
     """Tests pour SyncEvent model."""
 
     def test_sync_event_minimal(self):
-        """Test création minimale."""
+        """Test crÃ©ation minimale."""
         from src.services.realtime_sync import SyncEvent, SyncEventType
         
         event = SyncEvent(
@@ -58,7 +58,7 @@ class TestSyncEventModel:
         assert event.data == {}
 
     def test_sync_event_with_data(self):
-        """Test création avec données."""
+        """Test crÃ©ation avec donnÃ©es."""
         from src.services.realtime_sync import SyncEvent, SyncEventType
         
         event = SyncEvent(
@@ -78,7 +78,7 @@ class TestPresenceInfoModel:
     """Tests pour PresenceInfo model."""
 
     def test_presence_info_minimal(self):
-        """Test création minimale."""
+        """Test crÃ©ation minimale."""
         from src.services.realtime_sync import PresenceInfo
         
         presence = PresenceInfo(
@@ -93,7 +93,7 @@ class TestPresenceInfoModel:
         assert presence.current_item is None
 
     def test_presence_info_complete(self):
-        """Test création complète."""
+        """Test crÃ©ation complÃ¨te."""
         from src.services.realtime_sync import PresenceInfo
         
         now = datetime.now()
@@ -118,7 +118,7 @@ class TestSyncStateDataclass:
     """Tests pour SyncState dataclass."""
 
     def test_sync_state_defaults(self):
-        """Test valeurs par défaut."""
+        """Test valeurs par dÃ©faut."""
         from src.services.realtime_sync import SyncState
         
         state = SyncState()
@@ -131,7 +131,7 @@ class TestSyncStateDataclass:
         assert state.conflict_count == 0
 
     def test_sync_state_initialized(self):
-        """Test état initialisé."""
+        """Test Ã©tat initialisÃ©."""
         from src.services.realtime_sync import SyncState, PresenceInfo
         
         now = datetime.now()
@@ -148,9 +148,9 @@ class TestSyncStateDataclass:
         assert state.conflict_count == 3
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS REALTIME SYNC SERVICE INIT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -196,7 +196,7 @@ class TestRealtimeSyncServiceInit:
                 
                 service = RealtimeSyncService()
                 
-                # Vérifie que client est initialisé
+                # VÃ©rifie que client est initialisÃ©
                 assert service._client is not None
         finally:
             # Nettoyer
@@ -220,9 +220,9 @@ class TestRealtimeSyncServiceInit:
             assert service._client is None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS IS_CONFIGURED PROPERTY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -231,7 +231,7 @@ class TestIsConfigured:
 
     @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
     def test_is_configured_false(self, mock_init):
-        """Test non configuré."""
+        """Test non configurÃ©."""
         from src.services.realtime_sync import RealtimeSyncService
         
         service = RealtimeSyncService()
@@ -241,7 +241,7 @@ class TestIsConfigured:
 
     @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
     def test_is_configured_true(self, mock_init):
-        """Test configuré."""
+        """Test configurÃ©."""
         from src.services.realtime_sync import RealtimeSyncService
         
         service = RealtimeSyncService()
@@ -250,9 +250,9 @@ class TestIsConfigured:
         assert service.is_configured is True
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS JOIN LIST
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -277,7 +277,7 @@ class TestJoinList:
     @patch('src.services.realtime_sync.st')
     @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
     def test_join_list_success(self, mock_init, mock_st):
-        """Test join réussi."""
+        """Test join rÃ©ussi."""
         from src.services.realtime_sync import RealtimeSyncService, SyncState
         
         mock_st.session_state = {RealtimeSyncService.STATE_KEY: SyncState()}
@@ -299,9 +299,9 @@ class TestJoinList:
         mock_channel.subscribe.assert_called_once()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS LEAVE LIST
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -325,7 +325,7 @@ class TestLeaveList:
     @patch('src.services.realtime_sync.st')
     @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
     def test_leave_list_success(self, mock_init, mock_st):
-        """Test leave réussi."""
+        """Test leave rÃ©ussi."""
         from src.services.realtime_sync import RealtimeSyncService, SyncState
         
         state = SyncState(liste_id=42, connected=True)
@@ -346,9 +346,9 @@ class TestLeaveList:
         assert state.connected is False
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS BROADCAST EVENT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -377,9 +377,9 @@ class TestBroadcastEvent:
         service.broadcast_event(event)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS BROADCAST HELPERS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -463,9 +463,9 @@ class TestBroadcastHelpers:
         assert call_args.event_type == SyncEventType.USER_TYPING
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ON_EVENT CALLBACKS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -519,9 +519,9 @@ class TestOnEventCallbacks:
         assert SyncEventType.ITEM_CHECKED in service._callbacks
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS RESOLVE CONFLICT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -531,7 +531,7 @@ class TestResolveConflict:
     @patch('src.services.realtime_sync.st')
     @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
     def test_resolve_conflict_remote_newer(self, mock_init, mock_st):
-        """Test résolution conflit - remote plus récent."""
+        """Test rÃ©solution conflit - remote plus rÃ©cent."""
         from src.services.realtime_sync import RealtimeSyncService, SyncState
         
         state = SyncState()
@@ -549,7 +549,7 @@ class TestResolveConflict:
     @patch('src.services.realtime_sync.st')
     @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
     def test_resolve_conflict_local_newer(self, mock_init, mock_st):
-        """Test résolution conflit - local plus récent."""
+        """Test rÃ©solution conflit - local plus rÃ©cent."""
         from src.services.realtime_sync import RealtimeSyncService, SyncState
         
         state = SyncState()
@@ -567,7 +567,7 @@ class TestResolveConflict:
     @patch('src.services.realtime_sync.st')
     @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
     def test_resolve_conflict_increments_counter(self, mock_init, mock_st):
-        """Test que le compteur de conflits est incrémenté."""
+        """Test que le compteur de conflits est incrÃ©mentÃ©."""
         from src.services.realtime_sync import RealtimeSyncService, SyncState
         
         state = SyncState(conflict_count=5)
@@ -583,20 +583,20 @@ class TestResolveConflict:
         assert state.conflict_count == 6
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PRIVATE HELPERS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestPrivateHelpers:
-    """Tests pour les méthodes privées."""
+    """Tests pour les mÃ©thodes privÃ©es."""
 
     @patch('src.services.realtime_sync.st')
     @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
     @patch('src.services.auth.get_auth_service')
     def test_get_current_user_id(self, mock_get_auth, mock_init, mock_st):
-        """Test récupération user_id depuis auth service."""
+        """Test rÃ©cupÃ©ration user_id depuis auth service."""
         mock_st.session_state = {}
         
         mock_user = Mock()
@@ -617,7 +617,7 @@ class TestPrivateHelpers:
     @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
     @patch('src.services.auth.get_auth_service')
     def test_get_current_user_id_default(self, mock_get_auth, mock_init, mock_st):
-        """Test user_id par défaut."""
+        """Test user_id par dÃ©faut."""
         mock_st.session_state = {}
         
         mock_auth = Mock()
@@ -636,7 +636,7 @@ class TestPrivateHelpers:
     @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
     @patch('src.services.auth.get_auth_service')
     def test_get_current_user_name(self, mock_get_auth, mock_init, mock_st):
-        """Test récupération user_name depuis auth service."""
+        """Test rÃ©cupÃ©ration user_name depuis auth service."""
         mock_st.session_state = {}
         
         mock_user = Mock()
@@ -654,9 +654,9 @@ class TestPrivateHelpers:
         assert result == "Alice"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MODULE EXPORTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -664,45 +664,45 @@ class TestModuleExports:
     """Tests pour les exports du module."""
 
     def test_sync_event_type_exported(self):
-        """Test SyncEventType exporté."""
+        """Test SyncEventType exportÃ©."""
         from src.services.realtime_sync import SyncEventType
         assert SyncEventType is not None
 
     def test_sync_event_exported(self):
-        """Test SyncEvent exporté."""
+        """Test SyncEvent exportÃ©."""
         from src.services.realtime_sync import SyncEvent
         assert SyncEvent is not None
 
     def test_presence_info_exported(self):
-        """Test PresenceInfo exporté."""
+        """Test PresenceInfo exportÃ©."""
         from src.services.realtime_sync import PresenceInfo
         assert PresenceInfo is not None
 
     def test_sync_state_exported(self):
-        """Test SyncState exporté."""
+        """Test SyncState exportÃ©."""
         from src.services.realtime_sync import SyncState
         assert SyncState is not None
 
     def test_service_exported(self):
-        """Test RealtimeSyncService exporté."""
+        """Test RealtimeSyncService exportÃ©."""
         from src.services.realtime_sync import RealtimeSyncService
         assert RealtimeSyncService is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS HANDLERS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestHandlers:
-    """Tests pour les handlers d'événements."""
+    """Tests pour les handlers d'Ã©vÃ©nements."""
 
     @patch('src.services.realtime_sync.st')
     @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
     @patch('src.services.auth.get_auth_service')
     def test_handle_broadcast_own_event(self, mock_get_auth, mock_init, mock_st):
-        """Test ignorer nos propres événements."""
+        """Test ignorer nos propres Ã©vÃ©nements."""
         mock_st.session_state = {}
         
         mock_user = Mock()
@@ -723,7 +723,7 @@ class TestHandlers:
             "data": {}
         }
         
-        # Ne devrait pas déclencher st.rerun
+        # Ne devrait pas dÃ©clencher st.rerun
         service._handle_broadcast(payload)
         mock_st.rerun.assert_not_called()
 
@@ -762,7 +762,7 @@ class TestHandlers:
     @patch('src.services.realtime_sync.st')
     @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
     def test_handle_presence_sync(self, mock_init, mock_st):
-        """Test synchronisation des présences."""
+        """Test synchronisation des prÃ©sences."""
         from src.services.realtime_sync import RealtimeSyncService, SyncState
         
         state = SyncState()
@@ -786,7 +786,7 @@ class TestHandlers:
     @patch('src.services.realtime_sync.st')
     @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
     def test_handle_presence_join(self, mock_init, mock_st):
-        """Test arrivée d'un utilisateur."""
+        """Test arrivÃ©e d'un utilisateur."""
         from src.services.realtime_sync import RealtimeSyncService, SyncState
         
         state = SyncState()
@@ -807,7 +807,7 @@ class TestHandlers:
     @patch('src.services.realtime_sync.st')
     @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
     def test_handle_presence_leave(self, mock_init, mock_st):
-        """Test départ d'un utilisateur."""
+        """Test dÃ©part d'un utilisateur."""
         from src.services.realtime_sync import RealtimeSyncService, SyncState, PresenceInfo
         
         state = SyncState()
@@ -826,9 +826,9 @@ class TestHandlers:
         assert "leaving_user" not in state.users_present
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONNECTED USERS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -838,7 +838,7 @@ class TestConnectedUsers:
     @patch('src.services.realtime_sync.st')
     @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
     def test_get_connected_users(self, mock_init, mock_st):
-        """Test récupération utilisateurs connectés."""
+        """Test rÃ©cupÃ©ration utilisateurs connectÃ©s."""
         from src.services.realtime_sync import RealtimeSyncService, SyncState, PresenceInfo
         
         state = SyncState()
@@ -853,9 +853,9 @@ class TestConnectedUsers:
         assert len(result) == 2
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SYNC PENDING EVENTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -879,7 +879,7 @@ class TestSyncPendingEvents:
     @patch('src.services.realtime_sync.st')
     @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
     def test_sync_pending_events_no_events(self, mock_init, mock_st):
-        """Test sync sans événements."""
+        """Test sync sans Ã©vÃ©nements."""
         from src.services.realtime_sync import RealtimeSyncService, SyncState
         
         state = SyncState()
@@ -892,9 +892,9 @@ class TestSyncPendingEvents:
         service.sync_pending_events()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS BROADCAST ITEM UNCHECKED
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -921,35 +921,35 @@ class TestBroadcastItemUnchecked:
         assert call_args.event_type == SyncEventType.ITEM_UNCHECKED
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS STATE PROPERTY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestStateProperty:
-    """Tests pour la propriété state."""
+    """Tests pour la propriÃ©tÃ© state."""
 
     @patch('src.services.realtime_sync.st')
     @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
     def test_state_creates_default(self, mock_init, mock_st):
-        """Test création état par défaut."""
+        """Test crÃ©ation Ã©tat par dÃ©faut."""
         from src.services.realtime_sync import RealtimeSyncService, SyncState
         
         mock_st.session_state = {}
         
         service = RealtimeSyncService()
         
-        # Accéder à state devrait créer un SyncState par défaut
+        # AccÃ©der Ã  state devrait crÃ©er un SyncState par dÃ©faut
         state = service.state
         
         assert state is not None
         assert mock_st.session_state[RealtimeSyncService.STATE_KEY] is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS INIT CLIENT EXCEPTIONS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -965,16 +965,16 @@ class TestInitClientExceptions:
         
         # Simuler l'erreur d'import en patchant create_client
         with patch.dict('sys.modules', {'supabase': None}):
-            # Créer le service - _init_client sera appelé
+            # CrÃ©er le service - _init_client sera appelÃ©
             service = RealtimeSyncService()
             
-            # Doit échouer gracieusement
+            # Doit Ã©chouer gracieusement
             assert service._client is None
 
     @patch('src.services.realtime_sync.st')
     @patch('src.core.config.obtenir_parametres')
     def test_init_client_generic_exception(self, mock_params, mock_st):
-        """Test initialisation avec exception générique."""
+        """Test initialisation avec exception gÃ©nÃ©rique."""
         from src.services.realtime_sync import RealtimeSyncService
         
         mock_st.session_state = {}
@@ -985,9 +985,9 @@ class TestInitClientExceptions:
         assert service._client is None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS LEAVE LIST EXCEPTION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -997,7 +997,7 @@ class TestLeaveListException:
     @patch('src.services.realtime_sync.st')
     @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
     def test_leave_list_with_exception(self, mock_init, mock_st):
-        """Test leave_list gère les exceptions."""
+        """Test leave_list gÃ¨re les exceptions."""
         from src.services.realtime_sync import RealtimeSyncService, SyncState
         
         state = SyncState(liste_id=1)
@@ -1017,19 +1017,19 @@ class TestLeaveListException:
         service.leave_list()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SYNC PENDING EVENTS SUCCESS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestSyncPendingEventsSuccess:
-    """Tests pour sync_pending_events avec succès."""
+    """Tests pour sync_pending_events avec succÃ¨s."""
 
     @patch('src.services.realtime_sync.st')
     @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
     def test_sync_pending_events_success(self, mock_init, mock_st):
-        """Test sync avec événements."""
+        """Test sync avec Ã©vÃ©nements."""
         from src.services.realtime_sync import RealtimeSyncService, SyncState, SyncEvent, SyncEventType
         
         event = SyncEvent(
@@ -1054,9 +1054,9 @@ class TestSyncPendingEventsSuccess:
         assert len(state.pending_events) == 0
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS RENDER PRESENCE INDICATOR
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -1073,7 +1073,7 @@ class TestRenderPresenceIndicatorUI:
         
         render_presence_indicator()
         
-        # st.markdown ne doit pas être appelé avec "Connectés"
+        # st.markdown ne doit pas Ãªtre appelÃ© avec "ConnectÃ©s"
         mock_st.markdown.assert_not_called()
 
     @patch('src.services.realtime_sync.st')
@@ -1117,9 +1117,9 @@ class TestRenderPresenceIndicatorUI:
         mock_st.caption.assert_called()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS RENDER TYPING INDICATOR
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -1190,14 +1190,14 @@ class TestRenderTypingIndicatorUI:
         render_typing_indicator()
         
         mock_st.caption.assert_called_once()
-        # Vérifier que le message contient "écrivent" pour le pluriel
+        # VÃ©rifier que le message contient "Ã©crivent" pour le pluriel
         call_arg = mock_st.caption.call_args[0][0]
-        assert "écrivent" in call_arg
+        assert "Ã©crivent" in call_arg
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS RENDER SYNC STATUS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -1207,7 +1207,7 @@ class TestRenderSyncStatusUI:
     @patch('src.services.realtime_sync.st')
     @patch('src.services.realtime_sync.get_realtime_sync_service')
     def test_render_sync_status_connected(self, mock_service, mock_st):
-        """Test render_sync_status quand connecté."""
+        """Test render_sync_status quand connectÃ©."""
         from src.services.realtime_sync import render_sync_status
         
         mock_state = Mock()
@@ -1224,7 +1224,7 @@ class TestRenderSyncStatusUI:
     @patch('src.services.realtime_sync.st')
     @patch('src.services.realtime_sync.get_realtime_sync_service')
     def test_render_sync_status_pending(self, mock_service, mock_st):
-        """Test render_sync_status avec événements en attente."""
+        """Test render_sync_status avec Ã©vÃ©nements en attente."""
         from src.services.realtime_sync import render_sync_status
         
         mock_state = Mock()
@@ -1254,9 +1254,9 @@ class TestRenderSyncStatusUI:
         mock_st.info.assert_called_once()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FACTORY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -1265,7 +1265,7 @@ class TestGetRealtimeSyncService:
 
     @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
     def test_get_service_creates_instance(self, mock_init):
-        """Test création d'instance."""
+        """Test crÃ©ation d'instance."""
         import src.services.realtime_sync as module
         from src.services.realtime_sync import get_realtime_sync_service, RealtimeSyncService
         
@@ -1291,9 +1291,9 @@ class TestGetRealtimeSyncService:
         assert service1 is service2
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS HANDLE BROADCAST EXCEPTIONS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -1318,7 +1318,7 @@ class TestHandleBroadcastExceptions:
     @patch('src.services.realtime_sync.st')
     @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
     def test_handle_broadcast_callback_exception(self, mock_init, mock_st):
-        """Test _handle_broadcast gère les exceptions des callbacks."""
+        """Test _handle_broadcast gÃ¨re les exceptions des callbacks."""
         from src.services.realtime_sync import RealtimeSyncService, SyncState, SyncEventType
         
         state = SyncState()
@@ -1330,7 +1330,7 @@ class TestHandleBroadcastExceptions:
         # Mock _get_current_user_id
         service._get_current_user_id = Mock(return_value="me")
         
-        # Callback qui échoue
+        # Callback qui Ã©choue
         bad_callback = Mock(side_effect=Exception("Callback error"))
         service._callbacks[SyncEventType.ITEM_ADDED] = [bad_callback]
         
@@ -1347,58 +1347,58 @@ class TestHandleBroadcastExceptions:
         service._handle_broadcast(payload)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PRESENCE HANDLERS EXCEPTIONS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestPresenceHandlersExceptions:
-    """Tests pour les handlers de présence avec exceptions."""
+    """Tests pour les handlers de prÃ©sence avec exceptions."""
 
     @patch('src.services.realtime_sync.st')
     @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
     def test_handle_presence_sync_exception(self, mock_init, mock_st):
-        """Test _handle_presence_sync gère les exceptions."""
+        """Test _handle_presence_sync gÃ¨re les exceptions."""
         from src.services.realtime_sync import RealtimeSyncService
         
         mock_st.session_state = {}
         
         service = RealtimeSyncService()
         
-        # Payload None devrait être géré gracieusement
+        # Payload None devrait Ãªtre gÃ©rÃ© gracieusement
         service._handle_presence_sync(None)
 
     @patch('src.services.realtime_sync.st')
     @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
     def test_handle_presence_join_exception(self, mock_init, mock_st):
-        """Test _handle_presence_join gère les exceptions."""
+        """Test _handle_presence_join gÃ¨re les exceptions."""
         from src.services.realtime_sync import RealtimeSyncService
         
         mock_st.session_state = {}
         
         service = RealtimeSyncService()
         
-        # Payload None devrait être géré gracieusement
+        # Payload None devrait Ãªtre gÃ©rÃ© gracieusement
         service._handle_presence_join(None)
 
     @patch('src.services.realtime_sync.st')
     @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
     def test_handle_presence_leave_exception(self, mock_init, mock_st):
-        """Test _handle_presence_leave gère les exceptions."""
+        """Test _handle_presence_leave gÃ¨re les exceptions."""
         from src.services.realtime_sync import RealtimeSyncService
         
         mock_st.session_state = {}
         
         service = RealtimeSyncService()
         
-        # Payload None devrait être géré gracieusement
+        # Payload None devrait Ãªtre gÃ©rÃ© gracieusement
         service._handle_presence_leave(None)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS BROADCAST EVENT WITH CHANNEL
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -1433,7 +1433,7 @@ class TestBroadcastEventWithChannel:
     @patch('src.services.realtime_sync.st')
     @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
     def test_broadcast_event_with_channel_exception(self, mock_init, mock_st):
-        """Test broadcast_event gère exception et stocke localement."""
+        """Test broadcast_event gÃ¨re exception et stocke localement."""
         from src.services.realtime_sync import RealtimeSyncService, SyncState, SyncEvent, SyncEventType
         
         state = SyncState()
@@ -1454,13 +1454,13 @@ class TestBroadcastEventWithChannel:
         
         service.broadcast_event(event)
         
-        # L'événement doit être stocké localement
+        # L'Ã©vÃ©nement doit Ãªtre stockÃ© localement
         assert len(state.pending_events) == 1
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS JOIN LIST EXCEPTION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -1470,7 +1470,7 @@ class TestJoinListException:
     @patch('src.services.realtime_sync.st')
     @patch('src.services.realtime_sync.RealtimeSyncService._init_client')
     def test_join_list_exception(self, mock_init, mock_st):
-        """Test join_list gère les exceptions."""
+        """Test join_list gÃ¨re les exceptions."""
         from src.services.realtime_sync import RealtimeSyncService, SyncState
         
         state = SyncState()

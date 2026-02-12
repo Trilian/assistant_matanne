@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 Script de reset complet de la base Supabase
 Usage: python scripts/reset_supabase.py
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_supabase_url():
-    """Récupère l'URL Supabase depuis les secrets"""
+    """RÃ©cupÃ¨re l'URL Supabase depuis les secrets"""
     try:
         db = st.secrets["db"]
         return (
@@ -44,14 +44,14 @@ password = "ton_mot_de_passe"
 
 
 def drop_all_tables(engine):
-    """Supprime TOUTES les tables (même celles créées par Supabase)"""
-    logger.info("🗑️  Suppression de toutes les tables...")
+    """Supprime TOUTES les tables (mÃªme celles crÃ©Ã©es par Supabase)"""
+    logger.info("ðŸ—‘ï¸  Suppression de toutes les tables...")
 
     with engine.connect() as conn:
-        # Désactiver les contraintes FK temporairement
+        # DÃ©sactiver les contraintes FK temporairement
         conn.execute(text("SET session_replication_role = 'replica';"))
 
-        # Récupérer toutes les tables du schéma public
+        # RÃ©cupÃ©rer toutes les tables du schÃ©ma public
         result = conn.execute(
             text(
                 """
@@ -69,23 +69,23 @@ def drop_all_tables(engine):
             logger.info(f"  - Suppression: {table}")
             conn.execute(text(f'DROP TABLE IF EXISTS "{table}" CASCADE'))
 
-        # Réactiver les contraintes
+        # RÃ©activer les contraintes
         conn.execute(text("SET session_replication_role = 'origin';"))
 
         conn.commit()
 
-    logger.info("✅ Toutes les tables supprimées")
+    logger.info("âœ… Toutes les tables supprimÃ©es")
 
 
 def create_all_tables(engine):
-    """Crée toutes les tables depuis models.py"""
-    logger.info("🏗️  Création des tables depuis models.py...")
+    """CrÃ©e toutes les tables depuis models.py"""
+    logger.info("ðŸ—ï¸  CrÃ©ation des tables depuis models.py...")
 
     Base.metadata.create_all(bind=engine)
 
-    logger.info("✅ Tables créées")
+    logger.info("âœ… Tables crÃ©Ã©es")
 
-    # Lister les tables créées
+    # Lister les tables crÃ©Ã©es
     with engine.connect() as conn:
         result = conn.execute(
             text(
@@ -99,14 +99,14 @@ def create_all_tables(engine):
         )
 
         tables = [row[0] for row in result]
-        logger.info(f"📋 {len(tables)} tables créées:")
+        logger.info(f"ðŸ“‹ {len(tables)} tables crÃ©Ã©es:")
         for table in tables:
-            logger.info(f"  ✓ {table}")
+            logger.info(f"  âœ“ {table}")
 
 
 def seed_minimal_data(engine):
-    """Ajoute des données minimales pour tester"""
-    logger.info("🌱 Ajout de données de test...")
+    """Ajoute des donnÃ©es minimales pour tester"""
+    logger.info("ðŸŒ± Ajout de donnÃ©es de test...")
 
     with engine.connect() as conn:
         # Utilisateur de test
@@ -119,11 +119,11 @@ def seed_minimal_data(engine):
             )
         )
 
-        # Quelques ingrédients de base
+        # Quelques ingrÃ©dients de base
         ingredients = [
-            ("Tomates", "kg", "Légumes"),
-            ("Pâtes", "g", "Féculents"),
-            ("Oeufs", "pcs", "Protéines"),
+            ("Tomates", "kg", "LÃ©gumes"),
+            ("PÃ¢tes", "g", "FÃ©culents"),
+            ("Oeufs", "pcs", "ProtÃ©ines"),
             ("Fromage", "g", "Laitier"),
         ]
 
@@ -140,28 +140,28 @@ def seed_minimal_data(engine):
 
         conn.commit()
 
-    logger.info("✅ Données de test ajoutées")
+    logger.info("âœ… DonnÃ©es de test ajoutÃ©es")
 
 
 def main():
-    """Point d'entrée principal"""
+    """Point d'entrÃ©e principal"""
     print("=" * 70)
-    print("🔥 RESET COMPLET DE LA BASE SUPABASE")
+    print("ðŸ”¥ RESET COMPLET DE LA BASE SUPABASE")
     print("=" * 70)
     print()
-    print("⚠️  ATTENTION: Cette action est IRRÉVERSIBLE !")
-    print("   Toutes les données seront DÉFINITIVEMENT SUPPRIMÉES.")
+    print("âš ï¸  ATTENTION: Cette action est IRRÃ‰VERSIBLE !")
+    print("   Toutes les donnÃ©es seront DÃ‰FINITIVEMENT SUPPRIMÃ‰ES.")
     print()
 
     # Demander confirmation
     confirmation = input("Taper 'RESET' en majuscules pour confirmer: ")
 
     if confirmation != "RESET":
-        print("❌ Annulé")
+        print("âŒ AnnulÃ©")
         sys.exit(0)
 
     print()
-    logger.info("Démarrage du reset...")
+    logger.info("DÃ©marrage du reset...")
 
     try:
         # Connexion
@@ -173,34 +173,34 @@ def main():
         # Test connexion
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
-        logger.info("✅ Connexion Supabase OK")
+        logger.info("âœ… Connexion Supabase OK")
 
         # 1. Supprimer toutes les tables
         drop_all_tables(engine)
 
-        # 2. Créer les nouvelles tables
+        # 2. CrÃ©er les nouvelles tables
         create_all_tables(engine)
 
-        # 3. Ajouter données minimales
+        # 3. Ajouter donnÃ©es minimales
         seed_minimal_data(engine)
 
         print()
         print("=" * 70)
-        print("✅ RESET TERMINÉ AVEC SUCCÈS")
+        print("âœ… RESET TERMINÃ‰ AVEC SUCCÃˆS")
         print("=" * 70)
         print()
-        print("📊 Base de données recréée avec:")
-        print("  • Toutes les tables en français")
-        print("  • 1 utilisateur de test (Anne)")
-        print("  • 4 ingrédients de base")
+        print("ðŸ“Š Base de donnÃ©es recrÃ©Ã©e avec:")
+        print("  â€¢ Toutes les tables en franÃ§ais")
+        print("  â€¢ 1 utilisateur de test (Anne)")
+        print("  â€¢ 4 ingrÃ©dients de base")
         print()
-        print("🚀 Tu peux maintenant:")
+        print("ðŸš€ Tu peux maintenant:")
         print("  1. Lancer l'app: streamlit run src/app.py")
-        print("  2. Générer des recettes avec l'IA")
+        print("  2. GÃ©nÃ©rer des recettes avec l'IA")
         print()
 
     except Exception as e:
-        logger.error(f"❌ Erreur: {e}")
+        logger.error(f"âŒ Erreur: {e}")
         sys.exit(1)
 
 

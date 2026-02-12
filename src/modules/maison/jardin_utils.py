@@ -1,5 +1,5 @@
-﻿"""
-Logique métier du module Jardin (maison) - Séparée de l'UI
+"""
+Logique metier du module Jardin (maison) - Separee de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
 
@@ -14,9 +14,9 @@ logger = logging.getLogger(__name__)
 # CONSTANTES
 # ═══════════════════════════════════════════════════════════
 
-CATEGORIES_PLANTES = ["Légumes", "Fruits", "Herbes", "Fleurs", "Arbres"]
-SAISONS = ["Printemps", "Été", "Automne", "Hiver"]
-STATUS_PLANTES = ["Semis", "Pousse", "Mature", "Récolte", "Dormant"]
+CATEGORIES_PLANTES = ["Legumes", "Fruits", "Herbes", "Fleurs", "Arbres"]
+SAISONS = ["Printemps", "Éte", "Automne", "Hiver"]
+STATUS_PLANTES = ["Semis", "Pousse", "Mature", "Recolte", "Dormant"]
 
 
 # ═══════════════════════════════════════════════════════════
@@ -36,7 +36,7 @@ def get_saison_actuelle() -> str:
     if mois in [3, 4, 5]:
         return "Printemps"
     elif mois in [6, 7, 8]:
-        return "Été"
+        return "Éte"
     elif mois in [9, 10, 11]:
         return "Automne"
     else:
@@ -48,10 +48,10 @@ def calculer_jours_avant_arrosage(plante: Dict[str, Any]) -> Optional[int]:
     Calcule combien de jours avant le prochain arrosage.
     
     Args:
-        plante: Données de la plante
+        plante: Donnees de la plante
         
     Returns:
-        Nombre de jours (négatif si retard)
+        Nombre de jours (negatif si retard)
     """
     if "dernier_arrosage" not in plante or not plante["dernier_arrosage"]:
         return 0
@@ -71,10 +71,10 @@ def calculer_jours_avant_arrosage(plante: Dict[str, Any]) -> Optional[int]:
 
 def calculer_jours_avant_recolte(plante: Dict[str, Any]) -> Optional[int]:
     """
-    Calcule combien de jours avant la récolte.
+    Calcule combien de jours avant la recolte.
     
     Args:
-        plante: Données de la plante
+        plante: Donnees de la plante
         
     Returns:
         Nombre de jours
@@ -123,14 +123,14 @@ def get_plantes_a_arroser(plantes: List[Dict[str, Any]], jours_avance: int = 1) 
 
 def get_recoltes_proches(plantes: List[Dict[str, Any]], jours_avance: int = 7) -> List[Dict[str, Any]]:
     """
-    Retourne les plantes prêtes pour récolte.
+    Retourne les plantes prêtes pour recolte.
     
     Args:
         plantes: Liste des plantes
         jours_avance: Nombre de jours d'anticipation
         
     Returns:
-        Liste des plantes à récolter
+        Liste des plantes à recolter
     """
     resultat = []
     
@@ -161,7 +161,7 @@ def calculer_statistiques_jardin(plantes: List[Dict[str, Any]]) -> Dict[str, Any
     """
     total = len(plantes)
     
-    # Par catégorie
+    # Par categorie
     par_categorie = {}
     for plante in plantes:
         cat = plante.get("categorie", "Autre")
@@ -191,7 +191,7 @@ def calculer_statistiques_jardin(plantes: List[Dict[str, Any]]) -> Dict[str, Any
 # ═══════════════════════════════════════════════════════════
 
 def filtrer_par_categorie(plantes: List[Dict[str, Any]], categorie: str) -> List[Dict[str, Any]]:
-    """Filtre les plantes par catégorie."""
+    """Filtre les plantes par categorie."""
     return [p for p in plantes if p.get("categorie") == categorie]
 
 
@@ -211,10 +211,10 @@ def filtrer_par_saison(plantes: List[Dict[str, Any]], saison: str) -> List[Dict[
 
 def valider_plante(data: Dict[str, Any]) -> tuple[bool, List[str]]:
     """
-    Valide les données d'une plante.
+    Valide les donnees d'une plante.
     
     Args:
-        data: Données de la plante
+        data: Donnees de la plante
         
     Returns:
         (est_valide, liste_erreurs)
@@ -225,11 +225,11 @@ def valider_plante(data: Dict[str, Any]) -> tuple[bool, List[str]]:
         erreurs.append("Le nom est requis")
     
     if "categorie" in data and data["categorie"] not in CATEGORIES_PLANTES:
-        erreurs.append(f"Catégorie invalide. Valeurs autorisées: {', '.join(CATEGORIES_PLANTES)}")
+        erreurs.append(f"Categorie invalide. Valeurs autorisees: {', '.join(CATEGORIES_PLANTES)}")
     
     if "frequence_arrosage" in data:
         freq = data["frequence_arrosage"]
         if not isinstance(freq, int) or freq < 1:
-            erreurs.append("La fréquence d'arrosage doit être >= 1 jour")
+            erreurs.append("La frequence d'arrosage doit être >= 1 jour")
     
     return len(erreurs) == 0, erreurs

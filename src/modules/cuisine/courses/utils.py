@@ -1,5 +1,5 @@
-﻿"""
-Logique métier du module Courses - Séparée de l'UI
+"""
+Logique metier du module Courses - Separee de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
 
@@ -23,12 +23,12 @@ PRIORITY_EMOJIS = {
 PRIORITY_ORDER = {"haute": 0, "moyenne": 1, "basse": 2}
 
 RAYONS_DEFAULT = [
-    "Fruits & Légumes",
+    "Fruits & Legumes",
     "Laitier",
     "Boulangerie",
     "Viandes",
     "Poissons",
-    "Surgelés",
+    "Surgeles",
     "Épices",
     "Boissons",
     "Autre"
@@ -41,14 +41,14 @@ RAYONS_DEFAULT = [
 
 def filtrer_par_priorite(articles: list[dict], priorite: str) -> list[dict]:
     """
-    Filtre les articles par priorité.
+    Filtre les articles par priorite.
     
     Args:
         articles: Liste des articles
         priorite: 'haute', 'moyenne', 'basse' ou None pour tout garder
         
     Returns:
-        Liste filtrée
+        Liste filtree
     """
     if not priorite or priorite.lower() == "toutes":
         return articles
@@ -65,7 +65,7 @@ def filtrer_par_rayon(articles: list[dict], rayon: str) -> list[dict]:
         rayon: Nom du rayon ou None pour tout garder
         
     Returns:
-        Liste filtrée
+        Liste filtree
     """
     if not rayon or rayon.lower() == "tous les rayons":
         return articles
@@ -82,7 +82,7 @@ def filtrer_par_recherche(articles: list[dict], terme: str) -> list[dict]:
         terme: Terme de recherche
         
     Returns:
-        Liste filtrée (correspondance insensible à la casse)
+        Liste filtree (correspondance insensible à la casse)
     """
     if not terme:
         return articles
@@ -106,12 +106,12 @@ def filtrer_articles(
     
     Args:
         articles: Liste des articles
-        priorite: Filtre par priorité
+        priorite: Filtre par priorite
         rayon: Filtre par rayon
         recherche: Terme de recherche
         
     Returns:
-        Liste filtrée
+        Liste filtree
     """
     result = articles.copy()
     
@@ -131,14 +131,14 @@ def filtrer_articles(
 
 def trier_par_priorite(articles: list[dict], reverse: bool = False) -> list[dict]:
     """
-    Trie les articles par priorité (haute -> moyenne -> basse).
+    Trie les articles par priorite (haute -> moyenne -> basse).
     
     Args:
         articles: Liste des articles
         reverse: Si True, inverse l'ordre
         
     Returns:
-        Liste triée
+        Liste triee
     """
     return sorted(
         articles,
@@ -149,26 +149,26 @@ def trier_par_priorite(articles: list[dict], reverse: bool = False) -> list[dict
 
 def trier_par_rayon(articles: list[dict]) -> list[dict]:
     """
-    Trie les articles par rayon de magasin (alphabétique).
+    Trie les articles par rayon de magasin (alphabetique).
     
     Args:
         articles: Liste des articles
         
     Returns:
-        Liste triée
+        Liste triee
     """
     return sorted(articles, key=lambda a: a.get("rayon_magasin", "Autre"))
 
 
 def trier_par_nom(articles: list[dict]) -> list[dict]:
     """
-    Trie les articles par nom d'ingrédient (alphabétique).
+    Trie les articles par nom d'ingredient (alphabetique).
     
     Args:
         articles: Liste des articles
         
     Returns:
-        Liste triée
+        Liste triee
     """
     return sorted(articles, key=lambda a: a.get("ingredient_nom", "").lower())
 
@@ -199,7 +199,7 @@ def grouper_par_rayon(articles: list[dict]) -> dict[str, list[dict]]:
 
 def grouper_par_priorite(articles: list[dict]) -> dict[str, list[dict]]:
     """
-    Groupe les articles par priorité.
+    Groupe les articles par priorite.
     
     Args:
         articles: Liste des articles
@@ -229,7 +229,7 @@ def calculer_statistiques(articles: list[dict], articles_achetes: list[dict] = N
     
     Args:
         articles: Liste des articles à acheter
-        articles_achetes: Liste des articles achetés (optionnel)
+        articles_achetes: Liste des articles achetes (optionnel)
         
     Returns:
         Dictionnaire des statistiques
@@ -246,7 +246,7 @@ def calculer_statistiques(articles: list[dict], articles_achetes: list[dict] = N
         "rayons_uniques": len(set(a.get("rayon_magasin", "Autre") for a in articles)),
     }
     
-    # Calcul du taux de complétion
+    # Calcul du taux de completion
     total = stats["total_a_acheter"] + stats["total_achetes"]
     stats["taux_completion"] = (stats["total_achetes"] / total * 100) if total > 0 else 0
     
@@ -282,10 +282,10 @@ def calculer_statistiques_par_rayon(articles: list[dict]) -> dict[str, dict]:
 
 def valider_article(article: dict) -> tuple[bool, list[str]]:
     """
-    Valide les données d'un article de courses.
+    Valide les donnees d'un article de courses.
     
     Args:
-        article: Dictionnaire des données de l'article
+        article: Dictionnaire des donnees de l'article
         
     Returns:
         Tuple (est_valide, liste_erreurs)
@@ -294,19 +294,19 @@ def valider_article(article: dict) -> tuple[bool, list[str]]:
     
     # Nom requis
     if not article.get("ingredient_nom"):
-        erreurs.append("Le nom de l'ingrédient est requis")
+        erreurs.append("Le nom de l'ingredient est requis")
     elif len(article["ingredient_nom"]) < 2:
         erreurs.append("Le nom doit contenir au moins 2 caractères")
     
-    # Quantité positive
+    # Quantite positive
     quantite = article.get("quantite_necessaire", 0)
     if quantite is not None and quantite <= 0:
-        erreurs.append("La quantité doit être positive")
+        erreurs.append("La quantite doit être positive")
     
-    # Priorité valide
+    # Priorite valide
     priorite = article.get("priorite")
     if priorite and priorite not in PRIORITY_ORDER:
-        erreurs.append(f"Priorité invalide: {priorite}")
+        erreurs.append(f"Priorite invalide: {priorite}")
     
     # Rayon valide (si fourni)
     rayon = article.get("rayon_magasin")
@@ -325,13 +325,13 @@ def valider_nouvel_article(
     rayon: str = "Autre"
 ) -> tuple[bool, dict | list[str]]:
     """
-    Valide et prépare les données d'un nouvel article.
+    Valide et prepare les donnees d'un nouvel article.
     
     Args:
-        nom: Nom de l'ingrédient
-        quantite: Quantité nécessaire
-        unite: Unité de mesure
-        priorite: Priorité (haute, moyenne, basse)
+        nom: Nom de l'ingredient
+        quantite: Quantite necessaire
+        unite: Unite de mesure
+        priorite: Priorite (haute, moyenne, basse)
         rayon: Rayon du magasin
         
     Returns:
@@ -366,7 +366,7 @@ def formater_article_label(article: dict) -> str:
         article: Dictionnaire de l'article
         
     Returns:
-        Label formaté
+        Label formate
     """
     priorite_emoji = PRIORITY_EMOJIS.get(article.get("priorite", "moyenne"), "[BLACK]")
     nom = article.get("ingredient_nom", "???")
@@ -392,7 +392,7 @@ def formater_liste_impression(articles: list[dict]) -> str:
         articles: Liste des articles
         
     Returns:
-        Texte formaté pour impression
+        Texte formate pour impression
     """
     lignes = ["=" * 40, "LISTE DE COURSES", "=" * 40, ""]
     
@@ -423,7 +423,7 @@ def formater_liste_impression(articles: list[dict]) -> str:
 
 def generer_suggestions_depuis_stock_bas(alertes: dict) -> list[dict]:
     """
-    Génère des suggestions d'articles depuis les alertes de stock.
+    Genère des suggestions d'articles depuis les alertes de stock.
     
     Args:
         alertes: Dictionnaire des alertes de l'inventaire
@@ -433,7 +433,7 @@ def generer_suggestions_depuis_stock_bas(alertes: dict) -> list[dict]:
     """
     suggestions = []
     
-    # Stock critique = haute priorité
+    # Stock critique = haute priorite
     for item in alertes.get("critique", []):
         suggestions.append({
             "ingredient_nom": item.get("ingredient_nom"),
@@ -445,7 +445,7 @@ def generer_suggestions_depuis_stock_bas(alertes: dict) -> list[dict]:
             "suggere_par_ia": False,
         })
     
-    # Stock bas = moyenne priorité
+    # Stock bas = moyenne priorite
     for item in alertes.get("stock_bas", []):
         suggestions.append({
             "ingredient_nom": item.get("ingredient_nom"),
@@ -465,10 +465,10 @@ def generer_suggestions_depuis_recettes(
     inventaire: list[dict]
 ) -> list[dict]:
     """
-    Génère des suggestions d'articles depuis les recettes sélectionnées.
+    Genère des suggestions d'articles depuis les recettes selectionnees.
     
     Args:
-        recettes_selectionnees: Liste des recettes à préparer
+        recettes_selectionnees: Liste des recettes à preparer
         inventaire: Liste de l'inventaire actuel
         
     Returns:
@@ -476,7 +476,7 @@ def generer_suggestions_depuis_recettes(
     """
     suggestions = []
     
-    # Créer un index de l'inventaire par nom d'ingrédient
+    # Creer un index de l'inventaire par nom d'ingredient
     stock_index = {
         item.get("ingredient_nom", "").lower(): item
         for item in inventaire
@@ -487,7 +487,7 @@ def generer_suggestions_depuis_recettes(
             nom = ingredient.get("nom", "").lower()
             quantite_requise = ingredient.get("quantite", 0)
             
-            # Vérifier le stock
+            # Verifier le stock
             stock = stock_index.get(nom, {})
             quantite_en_stock = stock.get("quantite", 0)
             
@@ -509,13 +509,13 @@ def generer_suggestions_depuis_recettes(
 
 def deduper_suggestions(suggestions: list[dict]) -> list[dict]:
     """
-    Déduplique les suggestions en gardant la plus haute priorité et cumulant les quantités.
+    Deduplique les suggestions en gardant la plus haute priorite et cumulant les quantites.
     
     Args:
         suggestions: Liste des suggestions
         
     Returns:
-        Liste dédupliquée avec quantités cumulées
+        Liste dedupliquee avec quantites cumulees
     """
     index = {}
     
@@ -524,9 +524,9 @@ def deduper_suggestions(suggestions: list[dict]) -> list[dict]:
         
         if nom in index:
             existing = index[nom]
-            # Toujours cumuler les quantités
+            # Toujours cumuler les quantites
             existing["quantite_necessaire"] += suggestion.get("quantite_necessaire", 0)
-            # Garder la plus haute priorité
+            # Garder la plus haute priorite
             if PRIORITY_ORDER.get(suggestion.get("priorite"), 99) < PRIORITY_ORDER.get(existing.get("priorite"), 99):
                 existing["priorite"] = suggestion["priorite"]
         else:
@@ -541,10 +541,10 @@ def deduper_suggestions(suggestions: list[dict]) -> list[dict]:
 
 def analyser_historique(historique: list[dict], jours: int = 30) -> dict:
     """
-    Analyse l'historique d'achats pour détecter les patterns.
+    Analyse l'historique d'achats pour detecter les patterns.
     
     Args:
-        historique: Liste des achats passés
+        historique: Liste des achats passes
         jours: Nombre de jours à analyser
         
     Returns:
@@ -558,7 +558,7 @@ def analyser_historique(historique: list[dict], jours: int = 30) -> dict:
         if a.get("achete_le") and a["achete_le"] >= date_limite
     ]
     
-    # Compter les fréquences
+    # Compter les frequences
     frequences = {}
     for achat in achats_recents:
         nom = achat.get("ingredient_nom", "").lower()
@@ -568,7 +568,7 @@ def analyser_historique(historique: list[dict], jours: int = 30) -> dict:
         frequences[nom]["quantites"].append(achat.get("quantite_necessaire", 0))
         frequences[nom]["rayons"].add(achat.get("rayon_magasin", "Autre"))
     
-    # Identifier les articles récurrents (achetés plus de 2 fois)
+    # Identifier les articles recurrents (achetes plus de 2 fois)
     recurrents = [
         {
             "ingredient_nom": nom,
@@ -590,11 +590,11 @@ def analyser_historique(historique: list[dict], jours: int = 30) -> dict:
 
 def generer_modele_depuis_historique(analyse: dict, seuil_frequence: int = 3) -> list[dict]:
     """
-    Génère un modèle de liste à partir de l'analyse d'historique.
+    Genère un modèle de liste à partir de l'analyse d'historique.
     
     Args:
-        analyse: Résultat de analyser_historique()
-        seuil_frequence: Fréquence minimum pour inclusion
+        analyse: Resultat de analyser_historique()
+        seuil_frequence: Frequence minimum pour inclusion
         
     Returns:
         Liste d'articles pour le modèle

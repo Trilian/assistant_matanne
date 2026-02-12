@@ -1,11 +1,11 @@
-﻿"""
-Module Scan Factures - Interface pour scanner et extraire les données de factures.
+"""
+Module Scan Factures - Interface pour scanner et extraire les donnees de factures.
 
-Fonctionnalités:
+Fonctionnalites:
 - Upload photo de facture
 - Extraction OCR via Mistral Vision
-- Prévisualisation des données extraites
-- Enregistrement dans les dépenses maison
+- Previsualisation des donnees extraites
+- Enregistrement dans les depenses maison
 """
 
 import streamlit as st
@@ -33,13 +33,13 @@ FOURNISSEURS_CONNUS = {
 }
 
 TYPE_ENERGIE_LABELS = {
-    "electricite": "⚡ Électricité",
+    "electricite": "⚡ Électricite",
     "gaz": "🔥 Gaz",
     "eau": "💧 Eau",
 }
 
-MOIS_FR = ["", "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
-           "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"]
+MOIS_FR = ["", "Janvier", "Fevrier", "Mars", "Avril", "Mai", "Juin",
+           "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Decembre"]
 
 
 # ═══════════════════════════════════════════════════════════
@@ -47,13 +47,13 @@ MOIS_FR = ["", "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
 # ═══════════════════════════════════════════════════════════
 
 def image_to_base64(uploaded_file: Any) -> str:
-    """Convertit un fichier uploadé en base64."""
+    """Convertit un fichier uploade en base64."""
     bytes_data = uploaded_file.getvalue()
     return base64.b64encode(bytes_data).decode("utf-8")
 
 
 def sauvegarder_facture(donnees: DonneesFacture) -> bool:
-    """Sauvegarde la facture en base de données."""
+    """Sauvegarde la facture en base de donnees."""
     try:
         # Mapper le type vers CategorieDepense
         type_mapping = {
@@ -63,7 +63,7 @@ def sauvegarder_facture(donnees: DonneesFacture) -> bool:
         }
         categorie = type_mapping.get(donnees.type_energie, "autre")
         
-        # Créer via service budget
+        # Creer via service budget
         service = get_budget_service()
         facture = FactureMaison(
             categorie=CategorieDepense(categorie),
@@ -75,11 +75,11 @@ def sauvegarder_facture(donnees: DonneesFacture) -> bool:
             date_facture=donnees.date_fin,
             fournisseur=donnees.fournisseur,
             numero_facture=donnees.numero_facture,
-            note=f"Importé par OCR - Confiance: {donnees.confiance:.0%}",
+            note=f"Importe par OCR - Confiance: {donnees.confiance:.0%}",
         )
         service.ajouter_facture_maison(facture)
         
-        # Aussi dans HouseExpense pour compatibilité
+        # Aussi dans HouseExpense pour compatibilite
         with obtenir_contexte_db() as db:
             expense = HouseExpense(
                 categorie=categorie,
@@ -88,7 +88,7 @@ def sauvegarder_facture(donnees: DonneesFacture) -> bool:
                 mois=donnees.mois_facturation or date.today().month,
                 annee=donnees.annee_facturation or date.today().year,
                 fournisseur=donnees.fournisseur,
-                notes=f"Importé OCR ({donnees.confiance:.0%})",
+                notes=f"Importe OCR ({donnees.confiance:.0%})",
             )
             db.add(expense)
             db.commit()
@@ -108,18 +108,18 @@ def render_upload():
     st.subheader("📸 Scanner une facture")
     
     st.info("""
-    **Fournisseurs supportés:** EDF, Engie, TotalEnergies, Veolia, Eau de Paris
+    **Fournisseurs supportes:** EDF, Engie, TotalEnergies, Veolia, Eau de Paris
     
     **Conseils pour une bonne extraction:**
-    - Photo nette et bien cadrée
+    - Photo nette et bien cadree
     - Toute la facture visible
-    - Bonne luminosité
+    - Bonne luminosite
     """)
     
     uploaded_file = st.file_uploader(
         "Choisir une photo de facture",
         type=["jpg", "jpeg", "png", "webp"],
-        help="Formats acceptés: JPG, PNG, WebP"
+        help="Formats acceptes: JPG, PNG, WebP"
     )
     
     if uploaded_file:
@@ -127,7 +127,7 @@ def render_upload():
         col1, col2 = st.columns([1, 1])
         
         with col1:
-            st.image(uploaded_file, caption="Facture uploadée", use_container_width=True)
+            st.image(uploaded_file, caption="Facture uploadee", use_container_width=True)
         
         with col2:
             st.markdown("**Informations fichier:**")
@@ -143,7 +143,7 @@ def render_upload():
                     service = get_facture_ocr_service()
                     resultat = service.extraire_donnees_facture_sync(image_b64)
                     
-                    # Stocker le résultat en session
+                    # Stocker le resultat en session
                     st.session_state["ocr_resultat"] = resultat
                     st.rerun()
     
@@ -151,17 +151,17 @@ def render_upload():
 
 
 def render_resultat(resultat: ResultatOCR):
-    """Affiche le résultat de l'extraction."""
+    """Affiche le resultat de l'extraction."""
     if not resultat.succes:
         st.error(f"❌ {resultat.message}")
         return
     
     donnees = resultat.donnees
     if not donnees:
-        st.warning("Aucune donnée extraite")
+        st.warning("Aucune donnee extraite")
         return
     
-    st.subheader("✅ Données extraites")
+    st.subheader("✅ Donnees extraites")
     
     # Score de confiance
     confiance_color = "🟢" if donnees.confiance > 0.7 else "🟡" if donnees.confiance > 0.4 else "🔴"
@@ -171,7 +171,7 @@ def render_resultat(resultat: ResultatOCR):
         for err in donnees.erreurs:
             st.warning(f"⚠️ {err}")
     
-    # Données principales
+    # Donnees principales
     st.divider()
     
     col1, col2 = st.columns(2)
@@ -191,17 +191,17 @@ def render_resultat(resultat: ResultatOCR):
                 f"{donnees.consommation:.0f} {donnees.unite_consommation}"
             )
     
-    # Période
+    # Periode
     if donnees.mois_facturation and donnees.annee_facturation:
-        st.markdown(f"**Période:** {MOIS_FR[donnees.mois_facturation]} {donnees.annee_facturation}")
+        st.markdown(f"**Periode:** {MOIS_FR[donnees.mois_facturation]} {donnees.annee_facturation}")
     
     if donnees.date_debut and donnees.date_fin:
         st.caption(f"Du {donnees.date_debut.strftime('%d/%m/%Y')} au {donnees.date_fin.strftime('%d/%m/%Y')}")
     
-    # Détails tarif
+    # Details tarif
     if donnees.prix_kwh or donnees.abonnement:
         st.divider()
-        st.markdown("**Détails tarif:**")
+        st.markdown("**Details tarif:**")
         if donnees.prix_kwh:
             st.caption(f"Prix unitaire: {donnees.prix_kwh:.4f}€/{donnees.unite_consommation}")
         if donnees.abonnement:
@@ -209,8 +209,8 @@ def render_resultat(resultat: ResultatOCR):
 
 
 def render_formulaire_correction(donnees: DonneesFacture) -> DonneesFacture:
-    """Formulaire pour corriger les données extraites."""
-    st.subheader("✏️ Vérifier et corriger")
+    """Formulaire pour corriger les donnees extraites."""
+    st.subheader("✏️ Verifier et corriger")
     
     with st.form("correction_facture"):
         col1, col2 = st.columns(2)
@@ -221,7 +221,7 @@ def render_formulaire_correction(donnees: DonneesFacture) -> DonneesFacture:
             type_options = ["electricite", "gaz", "eau"]
             type_index = type_options.index(donnees.type_energie) if donnees.type_energie in type_options else 0
             type_energie = st.selectbox(
-                "Type d'énergie",
+                "Type d'energie",
                 options=type_options,
                 format_func=lambda x: TYPE_ENERGIE_LABELS.get(x, x) or x,
                 index=type_index
@@ -249,7 +249,7 @@ def render_formulaire_correction(donnees: DonneesFacture) -> DonneesFacture:
             )
             
             annee = st.number_input(
-                "Année",
+                "Annee",
                 value=donnees.annee_facturation or date.today().year,
                 min_value=2020,
                 max_value=2030
@@ -266,7 +266,7 @@ def render_formulaire_correction(donnees: DonneesFacture) -> DonneesFacture:
             cancelled = st.form_submit_button("❌ Annuler", use_container_width=True)
         
         if submitted:
-            # Créer les données corrigées
+            # Creer les donnees corrigees
             donnees_corrigees = DonneesFacture(
                 fournisseur=fournisseur,
                 type_energie=type_energie,
@@ -276,11 +276,11 @@ def render_formulaire_correction(donnees: DonneesFacture) -> DonneesFacture:
                 mois_facturation=mois,
                 annee_facturation=annee,
                 numero_facture=numero_facture,
-                confiance=1.0,  # Validé manuellement
+                confiance=1.0,  # Valide manuellement
             )
             
             if sauvegarder_facture(donnees_corrigees):
-                st.success("✅ Facture enregistrée avec succès!")
+                st.success("✅ Facture enregistree avec succès!")
                 # Reset session
                 if "ocr_resultat" in st.session_state:
                     del st.session_state["ocr_resultat"]
@@ -295,8 +295,8 @@ def render_formulaire_correction(donnees: DonneesFacture) -> DonneesFacture:
 
 
 def render_historique():
-    """Affiche l'historique des factures scannées."""
-    st.subheader("📋 Dernières factures importées")
+    """Affiche l'historique des factures scannees."""
+    st.subheader("📋 Dernières factures importees")
     
     try:
         with obtenir_contexte_db() as db:
@@ -305,7 +305,7 @@ def render_historique():
             ).order_by(HouseExpense.id.desc()).limit(5).all()
             
             if not factures:
-                st.caption("Aucune facture importée par OCR")
+                st.caption("Aucune facture importee par OCR")
                 return
             
             for f in factures:
@@ -332,19 +332,19 @@ def render_historique():
 # ═══════════════════════════════════════════════════════════
 
 def app():
-    """Point d'entrée du module scan factures."""
+    """Point d'entree du module scan factures."""
     st.title("📸 Scan Factures")
-    st.caption("Extraction automatique des données de factures énergie")
+    st.caption("Extraction automatique des donnees de factures energie")
     
     # Tabs
     tabs = st.tabs(["📤 Scanner", "📋 Historique"])
     
     with tabs[0]:
-        # Vérifier si on a un résultat en session
+        # Verifier si on a un resultat en session
         resultat = st.session_state.get("ocr_resultat")
         
         if resultat and resultat.succes and resultat.donnees:
-            # Afficher résultat et formulaire correction
+            # Afficher resultat et formulaire correction
             render_resultat(resultat)
             st.divider()
             render_formulaire_correction(resultat.donnees)

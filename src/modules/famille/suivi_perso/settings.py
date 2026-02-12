@@ -1,8 +1,8 @@
-﻿"""
+"""
 Module Suivi Perso - Paramètres Garmin et objectifs
 """
 
-from ._common import (
+from .utils import (
     st, obtenir_contexte_db, UserProfile,
     get_garmin_service
 )
@@ -17,7 +17,7 @@ def render_garmin_settings(data: dict):
         return
     
     if data.get("garmin_connected"):
-        st.success("✅ Garmin connecté")
+        st.success("✅ Garmin connecte")
         
         # Dernière sync
         if user.garmin_token and user.garmin_token.derniere_sync:
@@ -31,23 +31,23 @@ def render_garmin_settings(data: dict):
                     try:
                         service = get_garmin_service()
                         result = service.sync_user_data(user.id, days_back=7)
-                        st.success(f"✅ {result['activities_synced']} activités, {result['summaries_synced']} jours sync")
+                        st.success(f"✅ {result['activities_synced']} activites, {result['summaries_synced']} jours sync")
                         st.rerun()
                     except Exception as e:
                         st.error(f"Erreur sync: {e}")
         
         with col2:
-            if st.button("🔌 Déconnecter", type="secondary"):
+            if st.button("🔌 Deconnecter", type="secondary"):
                 try:
                     service = get_garmin_service()
                     service.disconnect_user(user.id)
-                    st.success("Garmin déconnecté")
+                    st.success("Garmin deconnecte")
                     st.rerun()
                 except Exception as e:
                     st.error(f"Erreur: {e}")
     
     else:
-        st.info("Connectez votre montre Garmin pour synchroniser vos données.")
+        st.info("Connectez votre montre Garmin pour synchroniser vos donnees.")
         
         if st.button("🔗 Connecter Garmin", type="primary"):
             st.session_state["garmin_auth_user"] = user.id
@@ -63,10 +63,10 @@ def render_garmin_settings(data: dict):
                 1. [Cliquez ici pour autoriser]({auth_url})
                 2. Connectez-vous à Garmin Connect
                 3. Autorisez l'accès
-                4. Copiez le code de vérification ci-dessous
+                4. Copiez le code de verification ci-dessous
                 """)
                 
-                verifier = st.text_input("Code de vérification")
+                verifier = st.text_input("Code de verification")
                 
                 if st.button("✅ Valider"):
                     if verifier:
@@ -76,18 +76,18 @@ def render_garmin_settings(data: dict):
                                 verifier, 
                                 request_token
                             )
-                            st.success("✅ Garmin connecté!")
+                            st.success("✅ Garmin connecte!")
                             st.rerun()
                         except Exception as e:
                             st.error(f"Erreur: {e}")
                     else:
-                        st.error("Entrez le code de vérification")
+                        st.error("Entrez le code de verification")
             
             except ValueError as e:
                 st.error(str(e))
                 st.info("""
                 Pour configurer Garmin:
-                1. Créez une app sur developer.garmin.com
+                1. Creez une app sur developer.garmin.com
                 2. Ajoutez dans .env.local:
                    - GARMIN_CONSUMER_KEY=xxx
                    - GARMIN_CONSUMER_SECRET=xxx

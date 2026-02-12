@@ -1,4 +1,4 @@
-"""
+﻿"""
 Types et schémas Pydantic pour le package courses.
 
 Module unifié avec tous les modèles de données pour les services de courses.

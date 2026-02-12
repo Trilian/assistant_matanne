@@ -1,5 +1,5 @@
-"""
-Module Planificateur de Repas - Génération IA
+﻿"""
+Module Planificateur de Repas - GÃenÃeration IA
 """
 
 from ._common import (
@@ -10,7 +10,7 @@ from .preferences import charger_preferences, charger_feedbacks
 
 
 def generer_semaine_ia(date_debut: date) -> dict:
-    """Génère une semaine complète avec l'IA."""
+    """GÃenère une semaine complète avec l'IA."""
     
     prefs = charger_preferences()
     feedbacks = charger_feedbacks()
@@ -20,12 +20,12 @@ def generer_semaine_ia(date_debut: date) -> dict:
     try:
         client = obtenir_client_ia()
         if not client:
-            st.error("❌ Client IA non disponible")
+            st.error("âŒ Client IA non disponible")
             return {}
         
         response = client.generer_json(
             prompt=prompt,
-            system_prompt="Tu es un assistant culinaire familial. Réponds UNIQUEMENT en JSON valide.",
+            system_prompt="Tu es un assistant culinaire familial. RÃeponds UNIQUEMENT en JSON valide.",
         )
         
         if response and isinstance(response, dict):
@@ -36,7 +36,7 @@ def generer_semaine_ia(date_debut: date) -> dict:
             return json.loads(response)
         
     except Exception as e:
-        logger.error(f"Erreur génération IA: {e}")
-        st.error(f"❌ Erreur IA: {str(e)}")
+        logger.error(f"Erreur gÃenÃeration IA: {e}")
+        st.error(f"âŒ Erreur IA: {str(e)}")
     
     return {}

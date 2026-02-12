@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
-Tests supplémentaires pour validators_pydantic.py
+Tests supplÃ©mentaires pour validators_pydantic.py
 
 Cible les lignes non couvertes: 136-138, 171, 175, 211-213, 241-251, 
 275, 281-286, 301, 326-331, 336, 361, 367-372, 377-383
@@ -14,7 +14,7 @@ class TestRecetteInputValidators:
     """Tests pour les validateurs de RecetteInput."""
     
     def test_recette_nom_trop_court(self):
-        """Nom avec moins de 2 caractères lève une erreur."""
+        """Nom avec moins de 2 caractÃ¨res lÃ¨ve une erreur."""
         from src.core.validators_pydantic import RecetteInput
         
         with pytest.raises(ValidationError) as exc_info:
@@ -24,12 +24,12 @@ class TestRecetteInputValidators:
                 temps_cuisson=20,
                 portions=4,
                 difficulte="facile",
-                type_repas="déjeuner"
+                type_repas="dÃ©jeuner"
             )
-        assert "au moins 2 caractères" in str(exc_info.value)
+        assert "au moins 2 caractÃ¨res" in str(exc_info.value)
     
     def test_recette_difficulte_invalide(self):
-        """Difficulté invalide lève une erreur."""
+        """DifficultÃ© invalide lÃ¨ve une erreur."""
         from src.core.validators_pydantic import RecetteInput
         
         with pytest.raises(ValidationError) as exc_info:
@@ -39,12 +39,12 @@ class TestRecetteInputValidators:
                 temps_cuisson=20,
                 portions=4,
                 difficulte="expert",  # Invalide
-                type_repas="déjeuner"
+                type_repas="dÃ©jeuner"
             )
-        assert "Difficulté invalide" in str(exc_info.value)
+        assert "DifficultÃ© invalide" in str(exc_info.value)
     
     def test_recette_type_repas_invalide(self):
-        """Type de repas invalide lève une erreur."""
+        """Type de repas invalide lÃ¨ve une erreur."""
         from src.core.validators_pydantic import RecetteInput
         
         with pytest.raises(ValidationError) as exc_info:
@@ -59,7 +59,7 @@ class TestRecetteInputValidators:
         assert "Type de repas invalide" in str(exc_info.value)
     
     def test_recette_saison_invalide(self):
-        """Saison invalide lève une erreur."""
+        """Saison invalide lÃ¨ve une erreur."""
         from src.core.validators_pydantic import RecetteInput
         
         with pytest.raises(ValidationError) as exc_info:
@@ -69,13 +69,13 @@ class TestRecetteInputValidators:
                 temps_cuisson=20,
                 portions=4,
                 difficulte="facile",
-                type_repas="déjeuner",
+                type_repas="dÃ©jeuner",
                 saison="pluvieuse"  # Invalide
             )
         assert "Saison invalide" in str(exc_info.value)
     
     def test_recette_saison_none(self):
-        """Saison None est acceptée."""
+        """Saison None est acceptÃ©e."""
         from src.core.validators_pydantic import RecetteInput, IngredientInput, EtapeInput
         
         recette = RecetteInput(
@@ -84,15 +84,15 @@ class TestRecetteInputValidators:
             temps_cuisson=20,
             portions=4,
             difficulte="facile",
-            type_repas="déjeuner",
-            ingredients=[IngredientInput(nom="Pommes", quantite=3, unite="pièces")],
-            etapes=[EtapeInput(numero=1, description="Préparer les pommes")],
+            type_repas="dÃ©jeuner",
+            ingredients=[IngredientInput(nom="Pommes", quantite=3, unite="piÃ¨ces")],
+            etapes=[EtapeInput(numero=1, description="PrÃ©parer les pommes")],
             saison=None
         )
         assert recette.saison is None
     
     def test_recette_saison_valide(self):
-        """Saison valide est normalisée."""
+        """Saison valide est normalisÃ©e."""
         from src.core.validators_pydantic import RecetteInput, IngredientInput, EtapeInput
         
         recette = RecetteInput(
@@ -101,19 +101,19 @@ class TestRecetteInputValidators:
             temps_cuisson=20,
             portions=4,
             difficulte="facile",
-            type_repas="déjeuner",
-            ingredients=[IngredientInput(nom="Pommes", quantite=3, unite="pièces")],
-            etapes=[EtapeInput(numero=1, description="Préparer les pommes")],
-            saison="ÉTÉ"  # En majuscules
+            type_repas="dÃ©jeuner",
+            ingredients=[IngredientInput(nom="Pommes", quantite=3, unite="piÃ¨ces")],
+            etapes=[EtapeInput(numero=1, description="PrÃ©parer les pommes")],
+            saison="Ã‰TÃ‰"  # En majuscules
         )
-        assert recette.saison == "été"
+        assert recette.saison == "Ã©tÃ©"
 
 
 class TestIngredientInput:
     """Tests pour IngredientInput."""
     
     def test_nom_nettoye(self):
-        """Nom est nettoyé et capitalisé."""
+        """Nom est nettoyÃ© et capitalisÃ©."""
         from src.core.validators_pydantic import IngredientInput
         
         ingredient = IngredientInput(
@@ -124,7 +124,7 @@ class TestIngredientInput:
         assert ingredient.nom == "Farine"
     
     def test_quantite_valide(self):
-        """Quantité valide est acceptée."""
+        """QuantitÃ© valide est acceptÃ©e."""
         from src.core.validators_pydantic import IngredientInput
         
         ingredient = IngredientInput(
@@ -139,18 +139,18 @@ class TestRepasInput:
     """Tests pour RepasInput."""
     
     def test_type_repas_valide(self):
-        """Type de repas valide est normalisé."""
+        """Type de repas valide est normalisÃ©."""
         from src.core.validators_pydantic import RepasInput
         
         repas = RepasInput(
             date=date.today(),
-            type_repas="DÉJEUNER",
+            type_repas="DÃ‰JEUNER",
             portions=4
         )
-        assert repas.type_repas == "déjeuner"
+        assert repas.type_repas == "dÃ©jeuner"
     
     def test_type_repas_invalide(self):
-        """Type de repas invalide lève une erreur."""
+        """Type de repas invalide lÃ¨ve une erreur."""
         from src.core.validators_pydantic import RepasInput
         
         with pytest.raises(ValidationError) as exc_info:
@@ -166,7 +166,7 @@ class TestRoutineInput:
     """Tests pour RoutineInput."""
     
     def test_frequence_valide(self):
-        """Fréquence valide est normalisée."""
+        """FrÃ©quence valide est normalisÃ©e."""
         from src.core.validators_pydantic import RoutineInput
         
         routine = RoutineInput(
@@ -178,7 +178,7 @@ class TestRoutineInput:
         assert routine.frequence == "quotidien"
     
     def test_frequence_invalide(self):
-        """Fréquence invalide lève une erreur."""
+        """FrÃ©quence invalide lÃ¨ve une erreur."""
         from src.core.validators_pydantic import RoutineInput
         
         with pytest.raises(ValidationError) as exc_info:
@@ -188,14 +188,14 @@ class TestRoutineInput:
                 pour_qui="Jules",
                 frequence="annuel"  # Invalide
             )
-        assert "Fréquence invalide" in str(exc_info.value)
+        assert "FrÃ©quence invalide" in str(exc_info.value)
 
 
 class TestTacheRoutineInput:
     """Tests pour TacheRoutineInput."""
     
     def test_nom_nettoye(self):
-        """Nom est nettoyé et capitalisé."""
+        """Nom est nettoyÃ© et capitalisÃ©."""
         from src.core.validators_pydantic import TacheRoutineInput
         
         tache = TacheRoutineInput(
@@ -205,12 +205,12 @@ class TestTacheRoutineInput:
         assert tache.nom == "Se brosser les dents"
     
     def test_heure_format_invalide(self):
-        """Format heure invalide lève une erreur."""
+        """Format heure invalide lÃ¨ve une erreur."""
         from src.core.validators_pydantic import TacheRoutineInput
         
         with pytest.raises(ValidationError):
             TacheRoutineInput(
-                nom="Tâche",
+                nom="TÃ¢che",
                 heure="8h30"  # Format invalide
             )
 
@@ -219,49 +219,49 @@ class TestEntreeJournalInput:
     """Tests pour EntreeJournalInput."""
     
     def test_domaine_valide(self):
-        """Domaine valide est normalisé."""
+        """Domaine valide est normalisÃ©."""
         from src.core.validators_pydantic import EntreeJournalInput
         
         entree = EntreeJournalInput(
-            domaine="SANTÉ",
-            titre="Ma journée",
-            contenu="Contenu de l'entrée"
+            domaine="SANTÃ‰",
+            titre="Ma journÃ©e",
+            contenu="Contenu de l'entrÃ©e"
         )
-        assert entree.domaine == "santé"
+        assert entree.domaine == "santÃ©"
     
     def test_domaine_invalide(self):
-        """Domaine invalide lève une erreur."""
+        """Domaine invalide lÃ¨ve une erreur."""
         from src.core.validators_pydantic import EntreeJournalInput
         
         with pytest.raises(ValidationError) as exc_info:
             EntreeJournalInput(
                 domaine="travail",  # Invalide
-                titre="Ma journée",
+                titre="Ma journÃ©e",
                 contenu="Contenu"
             )
         assert "Domaine invalide" in str(exc_info.value)
     
     def test_titre_nettoye(self):
-        """Titre est nettoyé et capitalisé."""
+        """Titre est nettoyÃ© et capitalisÃ©."""
         from src.core.validators_pydantic import EntreeJournalInput
         
         entree = EntreeJournalInput(
             domaine="humeur",
-            titre="  ma super journée  ",
+            titre="  ma super journÃ©e  ",
             contenu="Contenu"
         )
-        assert entree.titre == "Ma super journée"
+        assert entree.titre == "Ma super journÃ©e"
 
 
 class TestProjetInput:
     """Tests pour ProjetInput."""
     
     def test_priorite_valide(self):
-        """Priorité valide est normalisée."""
+        """PrioritÃ© valide est normalisÃ©e."""
         from src.core.validators_pydantic import ProjetInput
         
         projet = ProjetInput(
-            nom="Rénovation cuisine",
+            nom="RÃ©novation cuisine",
             description="Refaire la cuisine",
             categorie="renovation",
             priorite="HAUTE"
@@ -269,7 +269,7 @@ class TestProjetInput:
         assert projet.priorite == "haute"
     
     def test_priorite_invalide(self):
-        """Priorité invalide lève une erreur."""
+        """PrioritÃ© invalide lÃ¨ve une erreur."""
         from src.core.validators_pydantic import ProjetInput
         
         with pytest.raises(ValidationError) as exc_info:
@@ -279,10 +279,10 @@ class TestProjetInput:
                 categorie="travaux",
                 priorite="urgente"  # Invalide
             )
-        assert "Priorité invalide" in str(exc_info.value)
+        assert "PrioritÃ© invalide" in str(exc_info.value)
     
     def test_dates_invalides(self):
-        """Date fin avant date début lève une erreur."""
+        """Date fin avant date dÃ©but lÃ¨ve une erreur."""
         from src.core.validators_pydantic import ProjetInput
         
         with pytest.raises(ValidationError) as exc_info:
@@ -294,10 +294,10 @@ class TestProjetInput:
                 date_debut=date(2026, 6, 1),
                 date_fin_estimee=date(2026, 5, 1)  # Avant date_debut
             )
-        assert "date de fin doit être après" in str(exc_info.value)
+        assert "date de fin doit Ãªtre aprÃ¨s" in str(exc_info.value)
     
     def test_dates_valides(self):
-        """Dates valides sont acceptées."""
+        """Dates valides sont acceptÃ©es."""
         from src.core.validators_pydantic import ProjetInput
         
         projet = ProjetInput(
@@ -311,13 +311,13 @@ class TestProjetInput:
         assert projet.date_debut < projet.date_fin_estimee
     
     def test_nom_nettoye(self):
-        """Nom du projet est nettoyé."""
+        """Nom du projet est nettoyÃ©."""
         from src.core.validators_pydantic import ProjetInput
         
         projet = ProjetInput(
-            nom="  rénovation salle de bain  ",
+            nom="  rÃ©novation salle de bain  ",
             description="Description",
             categorie="renovation",
             priorite="basse"
         )
-        assert projet.nom == "Rénovation salle de bain"
+        assert projet.nom == "RÃ©novation salle de bain"

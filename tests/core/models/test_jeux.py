@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour jeux.py
 
 Module: src.core.models.jeux

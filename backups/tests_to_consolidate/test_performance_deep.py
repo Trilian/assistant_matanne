@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
-Tests pour performance.py - amélioration de la couverture
+Tests pour performance.py - amÃ©lioration de la couverture
 
 Cible:
 - MetriquePerformance dataclass
@@ -22,7 +22,7 @@ class TestPerformanceMetric:
     """Tests pour MetriquePerformance dataclass."""
     
     def test_default_values(self):
-        """Valeurs par défaut correctes."""
+        """Valeurs par dÃ©faut correctes."""
         from src.core.performance import MetriquePerformance
         
         metric = MetriquePerformance(name="test", duration_ms=50.0)
@@ -34,7 +34,7 @@ class TestPerformanceMetric:
         assert metric.timestamp is not None
     
     def test_with_all_fields(self):
-        """Création avec tous les champs."""
+        """CrÃ©ation avec tous les champs."""
         from src.core.performance import MetriquePerformance
         
         metric = MetriquePerformance(
@@ -52,7 +52,7 @@ class TestFunctionStats:
     """Tests pour StatistiquesFonction dataclass."""
     
     def test_default_values(self):
-        """Valeurs par défaut correctes."""
+        """Valeurs par dÃ©faut correctes."""
         from src.core.performance import StatistiquesFonction
         
         stats = StatistiquesFonction()
@@ -77,7 +77,7 @@ class TestFunctionProfiler:
             yield mock_st
     
     def test_record_first_call(self, mock_streamlit):
-        """record crée les stats pour nouvelle fonction."""
+        """record crÃ©e les stats pour nouvelle fonction."""
         from src.core.performance import ProfileurFonction
         
         ProfileurFonction.record("my_function", 50.0)
@@ -128,7 +128,7 @@ class TestFunctionProfiler:
         assert slowest[1][0] == "medium"
     
     def test_get_most_called(self, mock_streamlit):
-        """get_most_called retourne les plus appelées."""
+        """get_most_called retourne les plus appelÃ©es."""
         from src.core.performance import ProfileurFonction
         
         ProfileurFonction.record("rare", 10.0)
@@ -144,7 +144,7 @@ class TestFunctionProfiler:
         assert most_called[1][0] == "common"
     
     def test_clear(self, mock_streamlit):
-        """clear réinitialise les stats."""
+        """clear rÃ©initialise les stats."""
         from src.core.performance import ProfileurFonction
         
         ProfileurFonction.record("func", 10.0)
@@ -155,7 +155,7 @@ class TestFunctionProfiler:
 
 
 class TestProfileDecorator:
-    """Tests pour le décorateur @profile."""
+    """Tests pour le dÃ©corateur @profile."""
     
     @pytest.fixture(autouse=True)
     def mock_streamlit(self):
@@ -165,7 +165,7 @@ class TestProfileDecorator:
             yield mock_st
     
     def test_profile_records_execution(self, mock_streamlit):
-        """@profile enregistre l'exécution."""
+        """@profile enregistre l'exÃ©cution."""
         from src.core.performance import profile, ProfileurFonction
         
         @profile
@@ -180,7 +180,7 @@ class TestProfileDecorator:
         assert any("my_func" in k for k in stats.keys())
     
     def test_profile_with_custom_name(self, mock_streamlit):
-        """@profile avec nom personnalisé."""
+        """@profile avec nom personnalisÃ©."""
         from src.core.performance import profile, ProfileurFonction
         
         @profile(name="custom_name")
@@ -251,7 +251,7 @@ class TestMemoryMonitor:
             yield mock_st
     
     def test_start_tracking(self, mock_streamlit):
-        """start_tracking démarre tracemalloc."""
+        """start_tracking dÃ©marre tracemalloc."""
         from src.core.performance import MoniteurMemoire
         
         MoniteurMemoire._tracking_active = False
@@ -263,7 +263,7 @@ class TestMemoryMonitor:
             assert MoniteurMemoire._tracking_active is True
     
     def test_start_tracking_already_active(self, mock_streamlit):
-        """start_tracking ne redémarre pas si déjà actif."""
+        """start_tracking ne redÃ©marre pas si dÃ©jÃ  actif."""
         from src.core.performance import MoniteurMemoire
         
         MoniteurMemoire._tracking_active = True
@@ -274,7 +274,7 @@ class TestMemoryMonitor:
             mock_trace.start.assert_not_called()
     
     def test_stop_tracking(self, mock_streamlit):
-        """stop_tracking arrête tracemalloc."""
+        """stop_tracking arrÃªte tracemalloc."""
         from src.core.performance import MoniteurMemoire
         
         MoniteurMemoire._tracking_active = True
@@ -286,7 +286,7 @@ class TestMemoryMonitor:
             assert MoniteurMemoire._tracking_active is False
     
     def test_get_current_usage(self, mock_streamlit):
-        """get_current_usage retourne les infos mémoire."""
+        """get_current_usage retourne les infos mÃ©moire."""
         from src.core.performance import MoniteurMemoire
         
         MoniteurMemoire._tracking_active = False
@@ -339,7 +339,7 @@ class TestMemoryMonitor:
         assert len(snapshots) <= 20
     
     def test_force_cleanup(self, mock_streamlit):
-        """force_cleanup déclenche gc."""
+        """force_cleanup dÃ©clenche gc."""
         from src.core.performance import MoniteurMemoire
         
         MoniteurMemoire._tracking_active = False
@@ -365,7 +365,7 @@ class TestSQLOptimizer:
             yield mock_st
     
     def test_get_stats_empty(self, mock_streamlit):
-        """_get_stats retourne structure vide par défaut."""
+        """_get_stats retourne structure vide par dÃ©faut."""
         from src.core.performance import OptimiseurSQL
         
         stats = OptimiseurSQL._get_stats()

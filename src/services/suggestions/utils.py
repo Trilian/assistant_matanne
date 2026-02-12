@@ -1,4 +1,4 @@
-"""
+﻿"""
 Fonctions utilitaires pures pour le service de suggestions IA.
 
 Ces fonctions peuvent être testées sans base de données ni clients IA.
@@ -10,9 +10,9 @@ from datetime import date, datetime
 from typing import Any
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONSTANTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 # Saisons et mois associés
 SAISONS = {
@@ -50,7 +50,7 @@ PROTEINES_VEGETARIEN = ["tofu", "tempeh", "seitan", "légumineuse", "lentille", 
 
 # Scores de pertinence
 SCORE_INGREDIENT_DISPONIBLE = 10
-SCORE_INGREDIENT_PRIORITAIRE = 25  # À consommer vite
+SCORE_INGREDIENT_PRIORITAIRE = 25  # Ã€ consommer vite
 SCORE_INGREDIENT_SAISON = 5
 SCORE_CATEGORIE_PREFEREE = 15
 SCORE_JAMAIS_PREPAREE = 20
@@ -59,9 +59,9 @@ SCORE_TEMPS_ADAPTE = 15
 SCORE_VARIETE = 10  # Pas préparée récemment
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # DÉTERMINATION DE LA SAISON
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def get_current_season(dt: date | datetime | None = None) -> str:
@@ -137,14 +137,14 @@ def is_ingredient_in_season(ingredient: str, saison: str | None = None) -> bool:
     return any(ing in ingredient_lower or ingredient_lower in ing for ing in ingredients_saison)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ANALYSE DU PROFIL CULINAIRE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def analyze_categories(historique: list[dict]) -> list[str]:
     """
-    Analyse les catégories préférées à partir de l'historique.
+    Analyse les catégories préférées Ã  partir de l'historique.
     
     Args:
         historique: Liste de dicts avec clé 'categorie'
@@ -295,9 +295,9 @@ def days_since_last_preparation(
     return (reference_date - derniere).days
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SCORING DES RECETTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def calculate_recipe_score(
@@ -399,7 +399,7 @@ def rank_recipes(
     Classe les recettes par pertinence.
     
     Args:
-        recettes: Liste de recettes à scorer
+        recettes: Liste de recettes Ã  scorer
         contexte: Contexte de suggestion
         profil: Profil culinaire
         historique: Historique des préparations
@@ -436,13 +436,13 @@ def generate_suggestion_reason(recette: dict, contexte: dict) -> str:
     """
     raisons = []
     
-    # Ingrédients à utiliser
+    # Ingrédients Ã  utiliser
     ingredients_prioritaires = set(i.lower() for i in contexte.get("ingredients_a_utiliser", []))
     recette_ingredients = recette.get("ingredients", [])
     
     matching = [ing for ing in recette_ingredients if ing.lower() in ingredients_prioritaires]
     if matching:
-        raisons.append(f"Utilise {', '.join(matching[:2])} à consommer rapidement")
+        raisons.append(f"Utilise {', '.join(matching[:2])} Ã  consommer rapidement")
     
     # Saison
     saison = contexte.get("saison") or get_current_season()
@@ -454,13 +454,13 @@ def generate_suggestion_reason(recette: dict, contexte: dict) -> str:
     # Score
     score = recette.get("score", 0)
     if score >= 80:
-        raisons.append("Parfaitement adapté à vos préférences")
+        raisons.append("Parfaitement adapté Ã  vos préférences")
     elif score >= 60:
-        raisons.append("Correspond à vos habitudes")
+        raisons.append("Correspond Ã  vos habitudes")
     
     # Jamais préparée
     if recette.get("est_nouvelle"):
-        raisons.append("Recette à découvrir")
+        raisons.append("Recette Ã  découvrir")
     
     if not raisons:
         raisons.append("Suggestion basée sur votre profil")
@@ -468,9 +468,9 @@ def generate_suggestion_reason(recette: dict, contexte: dict) -> str:
     return ". ".join(raisons[:2])
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # DÉTECTION DE TYPE DE PROTÉINE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def detect_protein_type(recette: dict) -> str:
@@ -580,9 +580,9 @@ def is_week_balanced(repas: list[dict]) -> tuple[bool, list[str]]:
     return len(problemes) == 0, problemes
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CALCUL DE VARIÉTÉ
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def calculate_variety_score(
@@ -661,9 +661,9 @@ def get_least_prepared_recipes(
     return [r for r, _ in scored[:limit]]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FORMATAGE ET AFFICHAGE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def format_suggestion(recette: dict, raison: str = "") -> dict:

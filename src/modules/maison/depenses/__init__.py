@@ -1,11 +1,11 @@
 """
-Module Dépenses Maison - Suivi des factures (gaz, eau, électricité, etc.)
+Module DÃepenses Maison - Suivi des factures (gaz, eau, ÃelectricitÃe, etc.)
 
-Focus sur les dépenses récurrentes de la maison avec consommation.
-Utilise le service Budget unifié (src/services/budget.py).
+Focus sur les dÃepenses rÃecurrentes de la maison avec consommation.
+Utilise le service Budget unifiÃe (src/services/budget.py).
 """
 
-from ._common import st, CATEGORY_LABELS
+from .utils import st, CATEGORY_LABELS
 
 # Import des fonctions pour exposer l'API publique
 from .crud import (
@@ -21,16 +21,16 @@ from .components import (
 
 
 def app():
-    """Point d'entrée module Dépenses"""
-    st.title("💰 Dépenses Maison")
-    st.caption("Suivez vos dépenses: gaz, eau, électricité, loyer...")
+    """Point d'entrÃee module DÃepenses"""
+    st.title("ðŸ’° DÃepenses Maison")
+    st.caption("Suivez vos dÃepenses: gaz, eau, ÃelectricitÃe, loyer...")
     
-    # Mode édition
+    # Mode Ãedition
     if "edit_depense_id" in st.session_state:
         depense = get_depense_by_id(st.session_state["edit_depense_id"])
         if depense:
-            st.subheader(f"✏️ Modifier: {CATEGORY_LABELS.get(depense.categorie, depense.categorie)}")
-            if st.button("❌ Annuler"):
+            st.subheader(f"âœï¸ Modifier: {CATEGORY_LABELS.get(depense.categorie, depense.categorie)}")
+            if st.button("âŒ Annuler"):
                 del st.session_state["edit_depense_id"]
                 st.rerun()
             render_formulaire(depense)
@@ -43,7 +43,7 @@ def app():
     st.divider()
     
     # Onglets
-    tab1, tab2, tab3 = st.tabs(["📅 Ce mois", "➕ Ajouter", "📈 Analyse"])
+    tab1, tab2, tab3 = st.tabs(["ðŸ“… Ce mois", "âž• Ajouter", "ðŸ“ˆ Analyse"])
     
     with tab1:
         render_onglet_mois()

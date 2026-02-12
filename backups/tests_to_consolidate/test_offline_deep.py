@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
-Tests pour offline.py - amélioration de la couverture
+Tests pour offline.py - amÃ©lioration de la couverture
 
 Cible:
 - StatutConnexion, TypeOperation enums
@@ -62,7 +62,7 @@ class TestPendingOperation:
     """Tests pour OperationEnAttente dataclass."""
     
     def test_default_values(self):
-        """Valeurs par défaut correctes."""
+        """Valeurs par dÃ©faut correctes."""
         from src.core.offline import OperationEnAttente, TypeOperation
         
         op = OperationEnAttente()
@@ -93,7 +93,7 @@ class TestPendingOperation:
         assert "id" in d
     
     def test_from_dict(self):
-        """from_dict crée correctement."""
+        """from_dict crÃ©e correctement."""
         from src.core.offline import OperationEnAttente, TypeOperation
         
         data = {
@@ -126,7 +126,7 @@ class TestConnectionManager:
             yield mock_st
     
     def test_get_status_default_online(self, mock_streamlit):
-        """get_status retourne ONLINE par défaut."""
+        """get_status retourne ONLINE par dÃ©faut."""
         from src.core.offline import GestionnaireConnexion, StatutConnexion
         
         status = GestionnaireConnexion.get_status()
@@ -191,10 +191,10 @@ class TestConnectionManager:
             assert GestionnaireConnexion.get_status() == StatutConnexion.ERROR
     
     def test_check_connection_uses_cache(self, mock_streamlit):
-        """check_connection utilise le cache si récent."""
+        """check_connection utilise le cache si rÃ©cent."""
         from src.core.offline import GestionnaireConnexion, StatutConnexion
         
-        # Simuler un check récent
+        # Simuler un check rÃ©cent
         mock_streamlit.session_state["_connection_status"] = StatutConnexion.ONLINE
         mock_streamlit.session_state["_connection_last_check"] = time.time()
         
@@ -231,7 +231,7 @@ class TestOfflineQueue:
                 yield mock_st, tmp_path
     
     def test_add_operation(self, mock_streamlit_and_file):
-        """add ajoute une opération."""
+        """add ajoute une opÃ©ration."""
         from src.core.offline import FileAttenteHorsLigne, TypeOperation
         
         mock_st, _ = mock_streamlit_and_file
@@ -247,7 +247,7 @@ class TestOfflineQueue:
         assert FileAttenteHorsLigne.get_count() == 1
     
     def test_get_pending(self, mock_streamlit_and_file):
-        """get_pending retourne les opérations."""
+        """get_pending retourne les opÃ©rations."""
         from src.core.offline import FileAttenteHorsLigne, TypeOperation
         
         mock_st, _ = mock_streamlit_and_file
@@ -260,7 +260,7 @@ class TestOfflineQueue:
         assert len(pending) == 2
     
     def test_remove(self, mock_streamlit_and_file):
-        """remove supprime une opération."""
+        """remove supprime une opÃ©ration."""
         from src.core.offline import FileAttenteHorsLigne, TypeOperation
         
         mock_st, _ = mock_streamlit_and_file
@@ -282,7 +282,7 @@ class TestOfflineQueue:
         assert result is False
     
     def test_update_retry(self, mock_streamlit_and_file):
-        """update_retry incrémente le compteur."""
+        """update_retry incrÃ©mente le compteur."""
         from src.core.offline import FileAttenteHorsLigne, TypeOperation
         
         mock_st, _ = mock_streamlit_and_file
@@ -315,7 +315,7 @@ class TestOfflineSynchronizer:
     
     @pytest.fixture(autouse=True)
     def mock_dependencies(self, tmp_path):
-        """Mock toutes les dépendances."""
+        """Mock toutes les dÃ©pendances."""
         with patch('src.core.offline.st') as mock_st:
             mock_st.session_state = {}
             

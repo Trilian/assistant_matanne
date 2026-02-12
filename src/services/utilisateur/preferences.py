@@ -17,7 +17,7 @@ from sqlalchemy import select
 
 from src.core.decorators import avec_session_db
 from src.core.models import UserPreference, RecipeFeedback
-from src.domains.cuisine.logic.schemas import (
+from src.modules.cuisine.schemas import (
     PreferencesUtilisateur,
     FeedbackRecette,
 )

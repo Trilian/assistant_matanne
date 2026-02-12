@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour progress.py
 
 Module: src.ui.feedback.progress
@@ -40,7 +40,7 @@ class TestSuiviProgression:
         mock_progress.return_value = MagicMock()
 
         suivi = SuiviProgression("Test", total=10)
-        suivi.mettre_a_jour(5, "Étape 5")
+        suivi.mettre_a_jour(5, "Ã‰tape 5")
 
         assert suivi.courant == 5
 
@@ -165,7 +165,7 @@ class TestSuiviProgression:
         mock_progress.return_value = MagicMock()
 
         suivi = SuiviProgression("Test", total=10)
-        # Simule une progression à mi-chemin
+        # Simule une progression Ã  mi-chemin
         suivi.mettre_a_jour(5, "Traitement...")
 
         # Le caption devrait être appelé avec l'estimation
@@ -210,8 +210,8 @@ class TestEtatChargement:
         mock_empty.return_value = MagicMock()
 
         etat = EtatChargement("Test")
-        etat.ajouter_etape("Étape 1")
-        etat.terminer_etape("Étape 1")
+        etat.ajouter_etape("Ã‰tape 1")
+        etat.terminer_etape("Ã‰tape 1")
 
         assert etat.etapes[0]["completed"] is True
         assert "OK" in etat.etapes[0]["status"]
@@ -224,7 +224,7 @@ class TestEtatChargement:
         mock_empty.return_value = MagicMock()
 
         etat = EtatChargement("Test")
-        etat.ajouter_etape("Étape 1")
+        etat.ajouter_etape("Ã‰tape 1")
         etat.terminer_etape()
 
         assert etat.etapes[0]["completed"] is True
@@ -237,8 +237,8 @@ class TestEtatChargement:
         mock_empty.return_value = MagicMock()
 
         etat = EtatChargement("Test")
-        etat.ajouter_etape("Étape 1")
-        etat.terminer_etape("Étape 1", succes=False)
+        etat.ajouter_etape("Ã‰tape 1")
+        etat.terminer_etape("Ã‰tape 1", succes=False)
 
         assert etat.etapes[0]["completed"] is True
         assert "Erreur" in etat.etapes[0]["status"]
@@ -251,8 +251,8 @@ class TestEtatChargement:
         mock_empty.return_value = MagicMock()
 
         etat = EtatChargement("Test")
-        etat.ajouter_etape("Étape 1")
-        etat.erreur_etape("Étape 1", "Timeout")
+        etat.ajouter_etape("Ã‰tape 1")
+        etat.erreur_etape("Ã‰tape 1", "Timeout")
 
         assert etat.etapes[0]["completed"] is True
         assert "Timeout" in etat.etapes[0]["status"]
@@ -265,7 +265,7 @@ class TestEtatChargement:
         mock_empty.return_value = MagicMock()
 
         etat = EtatChargement("Test")
-        etat.ajouter_etape("Étape 1")
+        etat.ajouter_etape("Ã‰tape 1")
         etat.erreur_etape()
 
         assert etat.etapes[0]["completed"] is True
@@ -281,8 +281,8 @@ class TestEtatChargement:
         mock_empty.return_value = mock_placeholder
 
         etat = EtatChargement("Test")
-        etat.ajouter_etape("Étape 1")
-        etat.terminer_etape("Étape 1")
+        etat.ajouter_etape("Ã‰tape 1")
+        etat.terminer_etape("Ã‰tape 1")
         etat.finaliser("Tout est prêt")
 
         mock_placeholder.success.assert_called()

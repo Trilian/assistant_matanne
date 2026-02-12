@@ -1,11 +1,11 @@
-﻿"""
+"""
 Module Dashboard Zones Jardin - Vue 2600m² avec photos avant/après
 
-Affiche l'état des zones du jardin avec:
+Affiche l'etat des zones du jardin avec:
 - Vue d'ensemble des 8 zones
 - Photos avant/après par zone
 - Progression des objectifs
-- Alertes par état
+- Alertes par etat
 """
 
 from datetime import date
@@ -156,11 +156,11 @@ def render_carte_zone(zone: dict[str, Any]):
         # Surface
         st.caption(f"📐 {zone['surface_m2']}m²")
         
-        # Description de l'état
+        # Description de l'etat
         if zone["etat_description"]:
             st.markdown(zone["etat_description"][:100])
         
-        # Barre de progression état
+        # Barre de progression etat
         st.progress(etat / 5, text=f"État: {etat}/5")
         
         # Actions
@@ -187,10 +187,10 @@ def render_vue_ensemble():
     zones = charger_zones()
     
     if not zones:
-        st.warning("🌱 Aucune zone configurée. Exécutez la migration SQL 016.")
+        st.warning("🌱 Aucune zone configuree. Executez la migration SQL 016.")
         return
     
-    # Métriques globales
+    # Metriques globales
     total_surface = sum(z["surface_m2"] for z in zones)
     etat_moyen = sum(z["etat_note"] for z in zones) / len(zones)
     zones_critiques = len([z for z in zones if z["etat_note"] <= 2])
@@ -207,7 +207,7 @@ def render_vue_ensemble():
     
     st.divider()
     
-    # Graphique état par zone
+    # Graphique etat par zone
     fig = go.Figure()
     
     noms = [z["nom"] for z in zones]
@@ -234,15 +234,15 @@ def render_vue_ensemble():
     # Alertes
     alertes = [z for z in zones if z["etat_note"] <= 2]
     if alertes:
-        st.error(f"⚠️ **{len(alertes)} zone(s) nécessitent une attention urgente:**")
+        st.error(f"⚠️ **{len(alertes)} zone(s) necessitent une attention urgente:**")
         for z in alertes:
             emoji = EMOJI_ZONE.get(z["type_zone"], "📍")
-            action = z["prochaine_action"] or "Évaluer l'état"
+            action = z["prochaine_action"] or "Évaluer l'etat"
             st.markdown(f"- {emoji} **{z['nom']}**: {action}")
 
 
 def render_detail_zone(zone: dict[str, Any]):
-    """Affiche le détail d'une zone avec formulaire d'édition."""
+    """Affiche le detail d'une zone avec formulaire d'edition."""
     emoji = EMOJI_ZONE.get(zone["type_zone"], "📍")
     
     st.markdown(f"## {emoji} {zone['nom']}")
@@ -257,7 +257,7 @@ def render_detail_zone(zone: dict[str, Any]):
         st.progress(zone["etat_note"] / 5)
         
         if zone["etat_description"]:
-            st.markdown("**Description de l'état:**")
+            st.markdown("**Description de l'etat:**")
             st.info(zone["etat_description"])
         
         if zone["objectif"]:
@@ -284,7 +284,7 @@ def render_detail_zone(zone: dict[str, Any]):
             photo_avant = st.text_input("URL photo avant", key=f"photo_avant_{zone['id']}")
             if st.button("➕ Ajouter", key=f"add_avant_{zone['id']}"):
                 if photo_avant and ajouter_photo_zone(zone["id"], photo_avant, est_avant=True):
-                    st.success("✅ Photo ajoutée!")
+                    st.success("✅ Photo ajoutee!")
                     st.rerun()
         
         with tab_apres:
@@ -297,7 +297,7 @@ def render_detail_zone(zone: dict[str, Any]):
             photo_apres = st.text_input("URL photo après", key=f"photo_apres_{zone['id']}")
             if st.button("➕ Ajouter", key=f"add_apres_{zone['id']}"):
                 if photo_apres and ajouter_photo_zone(zone["id"], photo_apres, est_avant=False):
-                    st.success("✅ Photo ajoutée!")
+                    st.success("✅ Photo ajoutee!")
                     st.rerun()
     
     st.divider()
@@ -310,7 +310,7 @@ def render_detail_zone(zone: dict[str, Any]):
         
         with col_f1:
             nouvel_etat = st.slider(
-                "Nouvel état",
+                "Nouvel etat",
                 min_value=1,
                 max_value=5,
                 value=zone["etat_note"],
@@ -325,7 +325,7 @@ def render_detail_zone(zone: dict[str, Any]):
         
         with col_f2:
             nouvelle_description = st.text_area(
-                "Description de l'état",
+                "Description de l'etat",
                 value=zone["etat_description"],
                 height=100
             )
@@ -350,8 +350,8 @@ def render_detail_zone(zone: dict[str, Any]):
 
 
 def render_conseils_amelioration():
-    """Affiche les conseils pour améliorer la terre."""
-    st.markdown("## 🌱 Conseils amélioration terre")
+    """Affiche les conseils pour ameliorer la terre."""
+    st.markdown("## 🌱 Conseils amelioration terre")
     
     st.info("""
     **Votre jardin de 2600m² a besoin d'amour!** Voici le plan d'action:
@@ -359,23 +359,23 @@ def render_conseils_amelioration():
     
     with st.expander("🔬 ÉTAPE 1: Diagnostic", expanded=True):
         st.markdown("""
-        - **Sol argileux**: Compact, mal drainé → Ajouter sable + compost
+        - **Sol argileux**: Compact, mal draine → Ajouter sable + compost
         - **Sol sableux**: Ne retient pas l'eau → Ajouter matière organique
         - **Sol calcaire**: Bloque nutriments → Acidifier avec soufre
         
-        💡 **Test maison**: Prendre une poignée de terre humide, si elle forme une boule compacte = argileux
+        💡 **Test maison**: Prendre une poignee de terre humide, si elle forme une boule compacte = argileux
         """)
     
     with st.expander("♻️ ÉTAPE 2: Compost (ESSENTIEL)", expanded=True):
         st.markdown("""
-        **Créez votre "or noir" en 6-12 mois:**
+        **Creez votre "or noir" en 6-12 mois:**
         
-        | Déchets VERTS (1/3) | Déchets BRUNS (2/3) |
+        | Dechets VERTS (1/3) | Dechets BRUNS (2/3) |
         |---------------------|---------------------|
-        | Tontes de gazon | Carton non imprimé |
-        | Épluchures | Branches broyées |
+        | Tontes de gazon | Carton non imprime |
+        | Épluchures | Branches broyees |
         | Feuilles vertes | Paille, foin |
-        | Marc de café | Feuilles mortes |
+        | Marc de cafe | Feuilles mortes |
         
         ⚠️ **JAMAIS**: viande, poisson, produits laitiers, agrumes en excès
         """)
@@ -384,21 +384,21 @@ def render_conseils_amelioration():
         st.markdown("""
         Le paillage protège le sol et le nourrit:
         
-        - **BRF** (Bois Raméal Fragmenté): Branches < 7cm broyées
-        - **Paille**: 10-15cm d'épaisseur
+        - **BRF** (Bois Rameal Fragmente): Branches < 7cm broyees
+        - **Paille**: 10-15cm d'epaisseur
         - **Feuilles mortes**: Gratuit et efficace!
-        - **Tontes séchées**: Ne pas mettre en couche épaisse humide
+        - **Tontes sechees**: Ne pas mettre en couche epaisse humide
         
-        ✅ **Avantages**: Limite évaporation, nourrit le sol, réduit désherbage
+        ✅ **Avantages**: Limite evaporation, nourrit le sol, reduit desherbage
         """)
     
     with st.expander("🌾 ÉTAPE 4: Engrais verts (hiver)"):
         st.markdown("""
         **Semer en automne, faucher au printemps:**
         
-        - **Moutarde**: Rapide, décompacte le sol
-        - **Phacélie**: Fleurs pour les abeilles
-        - **Trèfle**: Fixe l'azote (légumineuse)
+        - **Moutarde**: Rapide, decompacte le sol
+        - **Phacelie**: Fleurs pour les abeilles
+        - **Trèfle**: Fixe l'azote (legumineuse)
         - **Seigle**: Structurant, racines profondes
         """)
     
@@ -407,7 +407,7 @@ def render_conseils_amelioration():
         | Mois | Action |
         |------|--------|
         | **Mars** | Scarifier (arracher mousse) |
-        | **Avril** | Aérer + ressemer zones nues |
+        | **Avril** | Aerer + ressemer zones nues |
         | **Mai-Sept** | Tonte mulching (laisser l'herbe au sol) |
         | **Automne** | Épandre compost fin (1-2cm) |
         | **Hiver** | Laisser reposer |
@@ -422,7 +422,7 @@ def render_conseils_amelioration():
 
 
 def app():
-    """Point d'entrée du module Dashboard Zones Jardin."""
+    """Point d'entree du module Dashboard Zones Jardin."""
     
     st.title("🌳 Jardin - Dashboard Zones")
     st.caption("Votre terrain de 2600m² en un coup d'œil")
@@ -431,8 +431,8 @@ def app():
     
     tab1, tab2, tab3 = st.tabs([
         "📊 Vue d'ensemble",
-        "🔍 Détail par zone",
-        "🌱 Conseils amélioration",
+        "🔍 Detail par zone",
+        "🌱 Conseils amelioration",
     ])
     
     with tab1:
@@ -449,10 +449,10 @@ def app():
     
     with tab2:
         if not zones:
-            st.warning("Aucune zone configurée")
+            st.warning("Aucune zone configuree")
         else:
             zone_selectionnee = st.selectbox(
-                "Sélectionner une zone",
+                "Selectionner une zone",
                 options=[z["nom"] for z in zones],
                 format_func=lambda x: f"{EMOJI_ZONE.get(next((z['type_zone'] for z in zones if z['nom']==x), 'autre'), '📍')} {x}"
             )

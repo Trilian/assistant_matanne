@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/services/weather/utils.py
 
 Couvre les fonctions utilitaires pures du service météo.
@@ -55,9 +55,9 @@ from src.services.weather.utils import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONSTANTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestConstantes:
@@ -98,45 +98,45 @@ class TestConstantes:
         assert 65 in WEATHERCODES  # Pluie forte
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONVERSIONS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestDirectionFromDegrees:
     """Tests de la fonction direction_from_degrees."""
 
     def test_nord(self):
-        """0° = Nord."""
+        """0Â° = Nord."""
         assert direction_from_degrees(0) == "N"
         assert direction_from_degrees(360) == "N"
 
     def test_est(self):
-        """90° = Est."""
+        """90Â° = Est."""
         assert direction_from_degrees(90) == "E"
 
     def test_sud(self):
-        """180° = Sud."""
+        """180Â° = Sud."""
         assert direction_from_degrees(180) == "S"
 
     def test_ouest(self):
-        """270° = Ouest."""
+        """270Â° = Ouest."""
         assert direction_from_degrees(270) == "O"
 
     def test_nord_est(self):
-        """45° = Nord-Est."""
+        """45Â° = Nord-Est."""
         assert direction_from_degrees(45) == "NE"
 
     def test_sud_ouest(self):
-        """225° = Sud-Ouest."""
+        """225Â° = Sud-Ouest."""
         assert direction_from_degrees(225) == "SO"
 
     def test_valeurs_limites(self):
         """Test valeurs aux frontières."""
-        # Autour de Est (90°) - 8 directions = 45° chacune
-        # 67° / 45 = 1.49 → arrondi 1 = NE
+        # Autour de Est (90Â°) - 8 directions = 45Â° chacune
+        # 67Â° / 45 = 1.49 â†’ arrondi 1 = NE
         assert direction_from_degrees(67) == "NE"
-        # 112° / 45 = 2.49 → arrondi 2 = E  
+        # 112Â° / 45 = 2.49 â†’ arrondi 2 = E  
         assert direction_from_degrees(112) == "E"
 
     def test_negatif_normalise(self):
@@ -152,23 +152,23 @@ class TestDegreesFromDirection:
     """Tests de la fonction degrees_from_direction."""
 
     def test_nord(self):
-        """Nord = 0°."""
+        """Nord = 0Â°."""
         assert degrees_from_direction("N") == 0.0
 
     def test_est(self):
-        """Est = 90°."""
+        """Est = 90Â°."""
         assert degrees_from_direction("E") == 90.0
 
     def test_sud(self):
-        """Sud = 180°."""
+        """Sud = 180Â°."""
         assert degrees_from_direction("S") == 180.0
 
     def test_ouest(self):
-        """Ouest = 270°."""
+        """Ouest = 270Â°."""
         assert degrees_from_direction("O") == 270.0
 
     def test_nord_est(self):
-        """Nord-Est = 45°."""
+        """Nord-Est = 45Â°."""
         assert degrees_from_direction("NE") == 45.0
 
     def test_minuscule_accepte(self):
@@ -215,24 +215,24 @@ class TestWeathercodeToIcon:
     """Tests de weathercode_to_icon."""
 
     def test_ensoleille(self):
-        """Code 0 = ☀️."""
-        assert weathercode_to_icon(0) == "☀️"
+        """Code 0 = â˜€ï¸."""
+        assert weathercode_to_icon(0) == "â˜€ï¸"
 
     def test_orage(self):
-        """Code 95 = ⛈️."""
-        assert weathercode_to_icon(95) == "⛈️"
+        """Code 95 = â›ˆï¸."""
+        assert weathercode_to_icon(95) == "â›ˆï¸"
 
     def test_neige(self):
-        """Code 73 = ❄️."""
-        assert weathercode_to_icon(73) == "❄️"
+        """Code 73 = â„ï¸."""
+        assert weathercode_to_icon(73) == "â„ï¸"
 
     def test_code_inconnu(self):
         """Code inconnu retourne emoji par défaut."""
-        assert weathercode_to_icon(999) == "🌡️"
+        assert weathercode_to_icon(999) == "ðŸŒ¡ï¸"
 
     def test_none_retourne_question(self):
-        """None retourne ❓."""
-        assert weathercode_to_icon(None) == "❓"
+        """None retourne â“."""
+        assert weathercode_to_icon(None) == "â“"
 
 
 class TestGetArrosageFactor:
@@ -259,9 +259,9 @@ class TestGetArrosageFactor:
         assert get_arrosage_factor(None) == 1.0
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS TEMPÉRATURES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS TEMPÃ‰RATURES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalculateAverageTemperature:
@@ -300,15 +300,15 @@ class TestCelsiusToFahrenheit:
     """Tests de celsius_to_fahrenheit."""
 
     def test_zero_celsius(self):
-        """0°C = 32°F."""
+        """0Â°C = 32Â°F."""
         assert celsius_to_fahrenheit(0) == 32
 
     def test_cent_celsius(self):
-        """100°C = 212°F."""
+        """100Â°C = 212Â°F."""
         assert celsius_to_fahrenheit(100) == 212
 
     def test_negatif(self):
-        """-40°C = -40°F (point d'intersection)."""
+        """-40Â°C = -40Â°F (point d'intersection)."""
         assert celsius_to_fahrenheit(-40) == -40
 
 
@@ -316,15 +316,15 @@ class TestFahrenheitToCelsius:
     """Tests de fahrenheit_to_celsius."""
 
     def test_32_fahrenheit(self):
-        """32°F = 0°C."""
+        """32Â°F = 0Â°C."""
         assert fahrenheit_to_celsius(32) == 0
 
     def test_212_fahrenheit(self):
-        """212°F = 100°C."""
+        """212Â°F = 100Â°C."""
         assert fahrenheit_to_celsius(212) == 100
 
     def test_negatif(self):
-        """-40°F = -40°C."""
+        """-40Â°F = -40Â°C."""
         assert fahrenheit_to_celsius(-40) == -40
 
 
@@ -352,29 +352,29 @@ class TestCalculateFeelsLike:
         assert feels_like == 5.0
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ALERTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestDetectGelAlert:
     """Tests de detect_gel_alert."""
 
     def test_gel_severe(self):
-        """Gel sévère sous 0°C."""
+        """Gel sévère sous 0Â°C."""
         alerte = detect_gel_alert(-2)
         assert alerte is not None
         assert alerte["niveau"] == "danger"
         assert alerte["temperature"] == -2
 
     def test_risque_gel(self):
-        """Risque de gel entre 0 et 2°C."""
+        """Risque de gel entre 0 et 2Â°C."""
         alerte = detect_gel_alert(1)
         assert alerte is not None
         assert alerte["niveau"] == "attention"
 
     def test_pas_dalerte(self):
-        """Pas d'alerte au-dessus de 2°C."""
+        """Pas d'alerte au-dessus de 2Â°C."""
         alerte = detect_gel_alert(5)
         assert alerte is None
 
@@ -388,19 +388,19 @@ class TestDetectCaniculeAlert:
     """Tests de detect_canicule_alert."""
 
     def test_canicule_extreme(self):
-        """Canicule extrême >= 40°C."""
+        """Canicule extrême >= 40Â°C."""
         alerte = detect_canicule_alert(42)
         assert alerte is not None
         assert alerte["niveau"] == "danger"
 
     def test_forte_chaleur(self):
-        """Forte chaleur entre 35 et 40°C."""
+        """Forte chaleur entre 35 et 40Â°C."""
         alerte = detect_canicule_alert(37)
         assert alerte is not None
         assert alerte["niveau"] == "attention"
 
     def test_pas_dalerte(self):
-        """Pas d'alerte sous 35°C."""
+        """Pas d'alerte sous 35Â°C."""
         alerte = detect_canicule_alert(30)
         assert alerte is None
 
@@ -514,9 +514,9 @@ class TestDetectAllAlerts:
         assert "canicule" in types
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ARROSAGE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalculateWateringNeed:
@@ -597,9 +597,9 @@ class TestDetectDroughtRisk:
         assert jours == 5
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONSEILS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGetSeason:
@@ -675,9 +675,9 @@ class TestGetGardeningAdviceForWeather:
             assert conseils[0]["priorite"] <= conseils[-1]["priorite"]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PARSING
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFormatWeatherSummary:
@@ -692,8 +692,8 @@ class TestFormatWeatherSummary:
         summary = format_weather_summary(previsions)
         assert "2 jours" in summary
         assert "15mm" in summary  # Total précipitations
-        assert "10°C" in summary  # Min
-        assert "22°C" in summary  # Max
+        assert "10Â°C" in summary  # Min
+        assert "22Â°C" in summary  # Max
 
     def test_summary_sans_pluie(self):
         """Résumé sans précipitations."""
@@ -710,7 +710,7 @@ class TestFormatWeatherSummary:
         """Supporte les clés alternatives."""
         previsions = [{"temperature_min": 10, "temperature_max": 20, "precipitation_mm": 0}]
         summary = format_weather_summary(previsions)
-        assert "10°C" in summary
+        assert "10Â°C" in summary
 
 
 class TestParseOpenMeteoDaily:
@@ -772,7 +772,7 @@ class TestSafeGetIndex:
     """Tests de _safe_get_index."""
 
     def test_acces_valide(self):
-        """Accès à un index valide."""
+        """Accès Ã  un index valide."""
         data = {"values": [10, 20, 30]}
         assert _safe_get_index(data, "values", 1) == 20
 

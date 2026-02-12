@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service Multi-utilisateurs - Isolation des données par utilisateur
 
 [OK] Filtrage automatique par user_id
@@ -19,9 +19,9 @@ logger = logging.getLogger(__name__)
 T = TypeVar("T")
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONTEXT UTILISATEUR
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class ContexteUtilisateur:
@@ -103,9 +103,9 @@ def admin_context():
         ContexteUtilisateur.set_bypass(previous_bypass)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # DÉCORATEURS MULTI-TENANT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def avec_isolation_utilisateur(user_id_param: str = "user_id"):
@@ -155,9 +155,9 @@ def exiger_utilisateur():
     return decorator
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # QUERY HELPERS MULTI-TENANT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class RequeteMultiLocataire:
@@ -168,7 +168,7 @@ class RequeteMultiLocataire:
     @staticmethod
     def filtrer_par_utilisateur(query: Query, model: type, user_id: str = None) -> Query:
         """
-        Ajoute un filtre user_id à une requête.
+        Ajoute un filtre user_id Ã  une requête.
         
         Args:
             query: Requête SQLAlchemy
@@ -274,7 +274,7 @@ class ServiceMultiLocataire:
         return entity
     
     def mettre_a_jour(self, db: Session, id: int, data: dict):
-        """Met à jour (vérifie appartenance user)"""
+        """Met Ã  jour (vérifie appartenance user)"""
         entity = self.obtenir_par_id(db, id)
         if not entity:
             return None
@@ -321,7 +321,7 @@ def initialiser_contexte_utilisateur_streamlit():
     """
     Initialise le contexte utilisateur depuis Streamlit session.
     
-    À appeler au début de chaque page/module Streamlit.
+    Ã€ appeler au début de chaque page/module Streamlit.
     
     Example:
         # Dans app.py ou chaque module
@@ -362,9 +362,9 @@ def definir_utilisateur_from_auth(user_data: dict):
             pass
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FACTORY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def creer_multi_tenant_service(model: type) -> ServiceMultiLocataire:

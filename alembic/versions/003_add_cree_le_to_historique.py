@@ -1,4 +1,4 @@
-"""Add cree_le column to historique_recettes table
+﻿"""Add cree_le column to historique_recettes table
 
 Revision ID: 003
 Revises: 002_add_historique_recettes

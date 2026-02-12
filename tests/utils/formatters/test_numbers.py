@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/utils/formatters/numbers.py
 Données réelles de cuisine et courses
 """
@@ -99,20 +99,20 @@ class TestFormaterPrix:
     """Tests pour formater_prix avec prix courses réels."""
 
     def test_prix_1_baguette(self):
-        """Baguette 1€."""
-        assert formater_prix(1) == "1€"
+        """Baguette 1â‚¬."""
+        assert formater_prix(1) == "1â‚¬"
 
     def test_prix_2_50_camembert(self):
-        """Camembert 2.50€."""
-        assert formater_prix(2.50) == "2.50€"
+        """Camembert 2.50â‚¬."""
+        assert formater_prix(2.50) == "2.50â‚¬"
 
     def test_prix_4_99_poulet(self):
-        """Poulet 4.99€."""
-        assert formater_prix(4.99) == "4.99€"
+        """Poulet 4.99â‚¬."""
+        assert formater_prix(4.99) == "4.99â‚¬"
 
     def test_prix_12_viande(self):
-        """Viande hachée 12€."""
-        assert formater_prix(12.0) == "12€"
+        """Viande hachée 12â‚¬."""
+        assert formater_prix(12.0) == "12â‚¬"
 
     def test_prix_en_dollars(self):
         """Prix en dollars."""
@@ -120,15 +120,15 @@ class TestFormaterPrix:
 
     def test_prix_0(self):
         """Prix 0."""
-        assert formater_prix(0) == "0€"
+        assert formater_prix(0) == "0â‚¬"
 
     def test_prix_none(self):
         """Prix None."""
-        assert formater_prix(None) == "0€"
+        assert formater_prix(None) == "0â‚¬"
 
     def test_prix_invalid(self):
         """Prix invalide."""
-        assert formater_prix("abc") == "0€"
+        assert formater_prix("abc") == "0â‚¬"
 
 
 @pytest.mark.unit
@@ -136,19 +136,19 @@ class TestFormaterMonnaie:
     """Tests pour formater_monnaie avec budget famille."""
 
     def test_monnaie_budget_courses(self):
-        """Budget courses 150€."""
+        """Budget courses 150â‚¬."""
         result = formater_monnaie(150)
         assert "150" in result
-        assert "€" in result
+        assert "â‚¬" in result
 
     def test_monnaie_budget_mensuel(self):
-        """Budget mensuel 1234.56€."""
+        """Budget mensuel 1234.56â‚¬."""
         result = formater_monnaie(1234.56, "EUR", "fr_FR")
         assert "1 234" in result
-        assert "€" in result
+        assert "â‚¬" in result
 
     def test_monnaie_gros_budget(self):
-        """Gros budget 12500€."""
+        """Gros budget 12500â‚¬."""
         result = formater_monnaie(12500, "EUR", "fr_FR")
         assert "12 500" in result
 
@@ -160,10 +160,10 @@ class TestFormaterMonnaie:
     def test_monnaie_en_livres(self):
         """Budget en livres."""
         result = formater_monnaie(100, "GBP", "en_GB")
-        assert "£" in result
+        assert "Â£" in result
 
     def test_monnaie_0(self):
-        """0€."""
+        """0â‚¬."""
         result = formater_monnaie(0)
         assert "0" in result
 
@@ -293,11 +293,11 @@ class TestFormaterPlage:
         assert "min" in result
 
     def test_plage_prix(self):
-        """Prix 10-20€."""
-        result = formater_plage(10, 20, "€")
+        """Prix 10-20â‚¬."""
+        result = formater_plage(10, 20, "â‚¬")
         assert "10" in result
         assert "20" in result
-        assert "€" in result
+        assert "â‚¬" in result
 
     def test_plage_portions(self):
         """Portions 4-6."""

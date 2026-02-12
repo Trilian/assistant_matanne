@@ -1,12 +1,12 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
-Script de migration finale: Supprime les alias et met à jour tous les imports.
+Script de migration finale: Supprime les alias et met Ã  jour tous les imports.
 """
 import re
 from pathlib import Path
 from typing import Dict, List, Tuple
 
-# Mapping complet anglais -> français
+# Mapping complet anglais -> franÃ§ais
 MAPPINGS: Dict[str, str] = {
     # lazy_loader.py
     "LazyModuleLoader": "ChargeurModuleDiffere",
@@ -66,7 +66,7 @@ MAPPINGS: Dict[str, str] = {
     "create_multi_tenant_service": "creer_multi_tenant_service",
 }
 
-# Fichiers à exclure (déjà migrés ou à ignorer)
+# Fichiers Ã  exclure (dÃ©jÃ  migrÃ©s ou Ã  ignorer)
 EXCLUDE_PATTERNS = [
     "backups/",
     "__pycache__",
@@ -77,25 +77,25 @@ EXCLUDE_PATTERNS = [
 ]
 
 def should_exclude(path: Path) -> bool:
-    """Vérifie si le fichier doit être exclu."""
+    """VÃ©rifie si le fichier doit Ãªtre exclu."""
     path_str = str(path)
     return any(excl in path_str for excl in EXCLUDE_PATTERNS)
 
 def remove_alias_sections(content: str) -> Tuple[str, int]:
-    """Supprime les sections d'alias de compatibilité."""
+    """Supprime les sections d'alias de compatibilitÃ©."""
     lines = content.split('\n')
     new_lines = []
     in_alias_section = False
     removed_count = 0
     
     for i, line in enumerate(lines):
-        # Détection du début de section alias
-        if 'ALIAS DE COMPATIBILITÉ' in line.upper() or 'ALIAS DE COMPATIBILITE' in line.upper():
+        # DÃ©tection du dÃ©but de section alias
+        if 'ALIAS DE COMPATIBILITÃ‰' in line.upper() or 'ALIAS DE COMPATIBILITE' in line.upper():
             in_alias_section = True
-            # Supprimer aussi le commentaire de séparation précédent si présent
+            # Supprimer aussi le commentaire de sÃ©paration prÃ©cÃ©dent si prÃ©sent
             while new_lines and (new_lines[-1].strip().startswith('#') or 
                                  new_lines[-1].strip() == '' or
-                                 '═' in new_lines[-1]):
+                                 'â•' in new_lines[-1]):
                 new_lines.pop()
             removed_count += 1
             continue
@@ -115,18 +115,18 @@ def remove_alias_sections(content: str) -> Tuple[str, int]:
         else:
             new_lines.append(line)
     
-    # Nettoyer les lignes vides multiples à la fin
+    # Nettoyer les lignes vides multiples Ã  la fin
     while len(new_lines) > 1 and new_lines[-1].strip() == '' and new_lines[-2].strip() == '':
         new_lines.pop()
     
     return '\n'.join(new_lines), removed_count
 
 def replace_names(content: str, file_path: str) -> Tuple[str, int]:
-    """Remplace les noms anglais par les noms français."""
+    """Remplace les noms anglais par les noms franÃ§ais."""
     changes = 0
     
     for eng, fr in MAPPINGS.items():
-        # Utiliser word boundary pour éviter les faux positifs
+        # Utiliser word boundary pour Ã©viter les faux positifs
         pattern = r'\b' + re.escape(eng) + r'\b'
         new_content = re.sub(pattern, fr, content)
         if new_content != content:
@@ -156,11 +156,11 @@ def process_file(file_path: Path) -> Tuple[int, int]:
         try:
             file_path.write_text(content, encoding='utf-8')
             if alias_removed > 0:
-                print(f"  {file_path}: {name_changes} remplacements, {alias_removed} sections alias supprimées")
+                print(f"  {file_path}: {name_changes} remplacements, {alias_removed} sections alias supprimÃ©es")
             elif name_changes > 0:
                 print(f"  {file_path}: {name_changes} remplacements")
         except Exception as e:
-            print(f"  Erreur écriture {file_path}: {e}")
+            print(f"  Erreur Ã©criture {file_path}: {e}")
             return 0, 0
     
     return name_changes, alias_removed
@@ -181,7 +181,7 @@ def main():
         if not dir_path.exists():
             continue
             
-        print(f"\n📁 Traitement {directory}/")
+        print(f"\nðŸ“ Traitement {directory}/")
         
         for py_file in dir_path.rglob("*.py"):
             if should_exclude(py_file):
@@ -194,8 +194,8 @@ def main():
                 files_modified += 1
     
     print("\n" + "=" * 60)
-    print(f"✅ TERMINÉ: {total_changes} remplacements dans {files_modified} fichiers")
-    print(f"   {total_alias} sections d'alias supprimées")
+    print(f"âœ… TERMINÃ‰: {total_changes} remplacements dans {files_modified} fichiers")
+    print(f"   {total_alias} sections d'alias supprimÃ©es")
     print("=" * 60)
 
 if __name__ == "__main__":

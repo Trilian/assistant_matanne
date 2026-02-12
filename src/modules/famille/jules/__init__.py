@@ -1,18 +1,18 @@
-"""
-Module Jules - Activités adaptées, achats suggérés, conseils développement.
+﻿"""
+Module Jules - ActivitÃes adaptÃees, achats suggÃerÃes, conseils dÃeveloppement.
 
-Fonctionnalités:
-- 📊 Dashboard: âge, prochains achats suggérés
-- 🎨 Activités du jour (adaptées 19 mois)
-- 🛒 Shopping Jules (vêtements taille actuelle, jouets recommandés)
-- 💡 Conseils (propreté, sommeil, alimentation) - IA
+FonctionnalitÃes:
+- ðŸ“Š Dashboard: âge, prochains achats suggÃerÃes
+- ðŸŽ¨ ActivitÃes du jour (adaptÃees 19 mois)
+- ðŸ›’ Shopping Jules (vêtements taille actuelle, jouets recommandÃes)
+- ðŸ’¡ Conseils (propretÃe, sommeil, alimentation) - IA
 """
 
-from ._common import st
+from .utils import st
 
 # Import des fonctions pour exposer l'API publique
 from .ai_service import JulesAIService
-from .helpers import (
+from .utilitaires import (
     get_age_jules, get_activites_pour_age, get_taille_vetements,
     get_achats_jules_en_attente
 )
@@ -23,14 +23,14 @@ from .components import (
 
 
 def app():
-    """Point d'entrée du module Jules"""
-    st.title("👶 Jules")
+    """Point d'entrÃee du module Jules"""
+    st.title("ðŸ‘¶ Jules")
     
     age = get_age_jules()
-    st.caption(f"🎂 {age['mois']} mois • Né le {age['date_naissance'].strftime('%d/%m/%Y')}")
+    st.caption(f"ðŸŽ‚ {age['mois']} mois â€¢ NÃe le {age['date_naissance'].strftime('%d/%m/%Y')}")
     
     # Tabs principaux
-    tabs = st.tabs(["📊 Dashboard", "🎨 Activités", "🛒 Shopping", "💡 Conseils"])
+    tabs = st.tabs(["ðŸ“Š Dashboard", "ðŸŽ¨ ActivitÃes", "ðŸ›’ Shopping", "ðŸ’¡ Conseils"])
     
     with tabs[0]:
         render_dashboard()

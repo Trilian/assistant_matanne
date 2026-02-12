@@ -1,15 +1,15 @@
-"""
-Logique métier Loto - Analyses statistiques et simulations
+﻿"""
+Logique mÃetier Loto - Analyses statistiques et simulations
 Ce module contient toute la logique pure, testable sans Streamlit.
 
-⚠️ DISCLAIMER IMPORTANT:
-Le Loto est un jeu de hasard pur. Les tirages sont parfaitement aléatoires
-et indépendants. Aucune analyse statistique ne peut prédire les résultats.
+âš ï¸ DISCLAIMER IMPORTANT:
+Le Loto est un jeu de hasard pur. Les tirages sont parfaitement alÃeatoires
+et indÃependants. Aucune analyse statistique ne peut prÃedire les rÃesultats.
 
 Ce module propose:
-- Analyse des fréquences historiques (à titre informatif)
-- Détection des numéros "chauds/froids" (curiosité statistique)
-- Simulation de stratégies pour éviter les numéros populaires
+- Analyse des frÃequences historiques (Ã  titre informatif)
+- DÃetection des numÃeros "chauds/froids" (curiositÃe statistique)
+- Simulation de stratÃegies pour Ãeviter les numÃeros populaires
 - Suivi des performances de "paris virtuels"
 """
 
@@ -23,11 +23,11 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# ═══════════════════════════════════════════════════════════════════
-# CONSTANTES LOTO FRANÇAIS
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# CONSTANTES LOTO FRANÃ‡AIS
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-# Loto FDJ: 5 numéros parmi 49 + 1 numéro chance parmi 10
+# Loto FDJ: 5 numÃeros parmi 49 + 1 numÃero chance parmi 10
 NUMERO_MIN = 1
 NUMERO_MAX = 49
 CHANCE_MIN = 1
@@ -50,26 +50,26 @@ GAINS_PAR_RANG = {
 # Coût d'une grille simple
 COUT_GRILLE = Decimal("2.20")
 
-# Numéros populaires (dates anniversaires, à éviter pour maximiser gains potentiels)
+# NumÃeros populaires (dates anniversaires, Ã  Ãeviter pour maximiser gains potentiels)
 NUMEROS_POPULAIRES = set(range(1, 32))  # 1-31 = dates
 
-# Probabilité de gagner le jackpot (5 bons + chance)
+# ProbabilitÃe de gagner le jackpot (5 bons + chance)
 PROBA_JACKPOT = 1 / 19_068_840  # ~1 sur 19 millions
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ANALYSE DES FRÉQUENCES
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def calculer_frequences_numeros(tirages: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
-    Calcule la fréquence d'apparition de chaque numéro.
+    Calcule la frÃequence d'apparition de chaque numÃero.
     
     Args:
         tirages: Liste des tirages historiques
         
     Returns:
-        Statistiques de fréquence par numéro
+        Statistiques de frÃequence par numÃero
     """
     if not tirages:
         return {
@@ -85,21 +85,21 @@ def calculer_frequences_numeros(tirages: List[Dict[str, Any]]) -> Dict[str, Any]
     for tirage in tirages:
         date_t = tirage.get("date_tirage")
         
-        # Compter les 5 numéros principaux
+        # Compter les 5 numÃeros principaux
         for i in range(1, 6):
             num = tirage.get(f"numero_{i}")
             if num:
                 compteur_numeros[num] += 1
                 dernier_tirage[num] = date_t
         
-        # Numéro chance
+        # NumÃero chance
         chance = tirage.get("numero_chance")
         if chance:
             compteur_chance[chance] += 1
     
     nb_tirages = len(tirages)
     
-    # Calculer stats par numéro
+    # Calculer stats par numÃero
     frequences = {}
     for num in range(NUMERO_MIN, NUMERO_MAX + 1):
         freq = compteur_numeros.get(num, 0)
@@ -127,11 +127,11 @@ def calculer_frequences_numeros(tirages: List[Dict[str, Any]]) -> Dict[str, Any]
 
 def calculer_ecart(tirages: List[Dict[str, Any]], numero: int) -> int:
     """
-    Calcule l'écart (nombre de tirages depuis la dernière apparition).
+    Calcule l'Ãecart (nombre de tirages depuis la dernière apparition).
     
     Args:
-        tirages: Liste des tirages (du plus ancien au plus récent)
-        numero: Numéro à analyser
+        tirages: Liste des tirages (du plus ancien au plus rÃecent)
+        numero: NumÃero Ã  analyser
         
     Returns:
         Nombre de tirages depuis dernière apparition
@@ -146,28 +146,28 @@ def calculer_ecart(tirages: List[Dict[str, Any]], numero: int) -> int:
 def identifier_numeros_chauds_froids(frequences: Dict[int, Dict], 
                                       nb_top: int = 10) -> Dict[str, List[int]]:
     """
-    Identifie les numéros les plus et moins fréquents.
+    Identifie les numÃeros les plus et moins frÃequents.
     
-    ⚠️ Rappel: Ceci est purement informatif. Les tirages sont indépendants.
+    âš ï¸ Rappel: Ceci est purement informatif. Les tirages sont indÃependants.
     
     Args:
-        frequences: Dict des fréquences par numéro
-        nb_top: Nombre de numéros à retourner par catégorie
+        frequences: Dict des frÃequences par numÃero
+        nb_top: Nombre de numÃeros Ã  retourner par catÃegorie
         
     Returns:
-        Numéros chauds et froids
+        NumÃeros chauds et froids
     """
     if not frequences:
         return {"chauds": [], "froids": [], "retard": []}
     
-    # Trier par fréquence
+    # Trier par frÃequence
     tries_freq = sorted(
         frequences.items(), 
         key=lambda x: x[1].get("frequence", 0), 
         reverse=True
     )
     
-    # Trier par écart (retard)
+    # Trier par Ãecart (retard)
     tries_ecart = sorted(
         frequences.items(),
         key=lambda x: x[1].get("ecart", 0),
@@ -181,9 +181,9 @@ def identifier_numeros_chauds_froids(frequences: Dict[int, Dict],
     }
 
 
-# ═══════════════════════════════════════════════════════════════════
-# ANALYSE DE PATTERNS (Curiosité statistique)
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ANALYSE DE PATTERNS (CuriositÃe statistique)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def analyser_patterns_tirages(tirages: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
@@ -214,7 +214,7 @@ def analyser_patterns_tirages(tirages: List[Dict[str, Any]]) -> Dict[str, Any]:
         # Somme
         sommes.append(sum(numeros))
         
-        # Parité
+        # ParitÃe
         pairs = sum(1 for n in numeros if n % 2 == 0)
         nb_pairs.append(pairs)
         nb_impairs.append(5 - pairs)
@@ -222,7 +222,7 @@ def analyser_patterns_tirages(tirages: List[Dict[str, Any]]) -> Dict[str, Any]:
         # Écart min-max
         ecarts_min_max.append(numeros[-1] - numeros[0])
         
-        # Paires fréquentes
+        # Paires frÃequentes
         for i in range(len(numeros)):
             for j in range(i + 1, len(numeros)):
                 paires_frequentes[(numeros[i], numeros[j])] += 1
@@ -230,7 +230,7 @@ def analyser_patterns_tirages(tirages: List[Dict[str, Any]]) -> Dict[str, Any]:
     if not sommes:
         return {}
     
-    # Top 10 paires les plus fréquentes
+    # Top 10 paires les plus frÃequentes
     top_paires = paires_frequentes.most_common(10)
     
     return {
@@ -254,16 +254,16 @@ def analyser_patterns_tirages(tirages: List[Dict[str, Any]]) -> Dict[str, Any]:
     }
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # GÉNÉRATION DE GRILLES
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def generer_grille_aleatoire() -> Dict[str, Any]:
     """
-    Génère une grille complètement aléatoire.
+    GÃenère une grille complètement alÃeatoire.
     
     Returns:
-        Grille avec 5 numéros + numéro chance
+        Grille avec 5 numÃeros + numÃero chance
     """
     numeros = sorted(random.sample(range(NUMERO_MIN, NUMERO_MAX + 1), NB_NUMEROS))
     chance = random.randint(CHANCE_MIN, CHANCE_MAX)
@@ -277,18 +277,18 @@ def generer_grille_aleatoire() -> Dict[str, Any]:
 
 def generer_grille_eviter_populaires() -> Dict[str, Any]:
     """
-    Génère une grille en évitant les numéros populaires (1-31).
+    GÃenère une grille en Ãevitant les numÃeros populaires (1-31).
     
-    Stratégie: En cas de gain, partager avec moins de gagnants.
+    StratÃegie: En cas de gain, partager avec moins de gagnants.
     
     Returns:
-        Grille avec numéros moins populaires
+        Grille avec numÃeros moins populaires
     """
-    # Privilégier les numéros 32-49 (moins joués)
-    pool_prioritaire = list(range(32, NUMERO_MAX + 1))  # 18 numéros
-    pool_secondaire = list(range(NUMERO_MIN, 32))  # 31 numéros
+    # PrivilÃegier les numÃeros 32-49 (moins jouÃes)
+    pool_prioritaire = list(range(32, NUMERO_MAX + 1))  # 18 numÃeros
+    pool_secondaire = list(range(NUMERO_MIN, 32))  # 31 numÃeros
     
-    # Prendre 3-4 numéros du pool prioritaire, 1-2 du secondaire
+    # Prendre 3-4 numÃeros du pool prioritaire, 1-2 du secondaire
     nb_prioritaire = random.randint(3, 4)
     nb_secondaire = NB_NUMEROS - nb_prioritaire
     
@@ -309,16 +309,16 @@ def generer_grille_eviter_populaires() -> Dict[str, Any]:
 
 def generer_grille_equilibree(patterns: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Génère une grille "équilibrée" basée sur les patterns historiques.
+    GÃenère une grille "ÃequilibrÃee" basÃee sur les patterns historiques.
     
-    ⚠️ Ceci n'augmente PAS les chances de gagner, mais produit
+    âš ï¸ Ceci n'augmente PAS les chances de gagner, mais produit
     une grille statistiquement "typique".
     
     Args:
-        patterns: Résultat de analyser_patterns_tirages()
+        patterns: RÃesultat de analyser_patterns_tirages()
         
     Returns:
-        Grille équilibrée
+        Grille ÃequilibrÃee
     """
     # Viser une somme proche de la moyenne
     somme_cible = patterns.get("somme_moyenne", 125)
@@ -333,7 +333,7 @@ def generer_grille_equilibree(patterns: Dict[str, Any]) -> Dict[str, Any]:
         somme = sum(numeros)
         ecart = numeros[-1] - numeros[0]
         
-        # Score = proximité avec les moyennes
+        # Score = proximitÃe avec les moyennes
         score = abs(somme - somme_cible) + abs(ecart - ecart_cible) * 0.5
         
         if score < meilleur_ecart:
@@ -355,16 +355,16 @@ def generer_grille_equilibree(patterns: Dict[str, Any]) -> Dict[str, Any]:
 def generer_grille_chauds_froids(frequences: Dict[int, Dict], 
                                   strategie: str = "mixte") -> Dict[str, Any]:
     """
-    Génère une grille basée sur les numéros chauds ou froids.
+    GÃenère une grille basÃee sur les numÃeros chauds ou froids.
     
-    ⚠️ Rappel: Statistiquement inutile, mais psychologiquement satisfaisant.
+    âš ï¸ Rappel: Statistiquement inutile, mais psychologiquement satisfaisant.
     
     Args:
-        frequences: Fréquences des numéros
+        frequences: FrÃequences des numÃeros
         strategie: "chauds", "froids", ou "mixte"
         
     Returns:
-        Grille basée sur la stratégie
+        Grille basÃee sur la stratÃegie
     """
     chauds_froids = identifier_numeros_chauds_froids(frequences)
     
@@ -375,14 +375,14 @@ def generer_grille_chauds_froids(frequences: Dict[int, Dict],
     else:  # mixte
         pool = chauds_froids["chauds"][:10] + chauds_froids["froids"][:10]
     
-    # Compléter si pas assez
+    # ComplÃeter si pas assez
     while len(pool) < NB_NUMEROS:
         pool.append(random.randint(NUMERO_MIN, NUMERO_MAX))
     pool = list(set(pool))
     
     numeros = sorted(random.sample(pool, min(NB_NUMEROS, len(pool))))
     
-    # Compléter si besoin
+    # ComplÃeter si besoin
     while len(numeros) < NB_NUMEROS:
         n = random.randint(NUMERO_MIN, NUMERO_MAX)
         if n not in numeros:
@@ -395,38 +395,38 @@ def generer_grille_chauds_froids(frequences: Dict[int, Dict],
         "numeros": numeros,
         "numero_chance": chance,
         "source": f"strategie_{strategie}",
-        "note": f"Basé sur numéros {strategie}"
+        "note": f"BasÃe sur numÃeros {strategie}"
     }
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # VÉRIFICATION DES GAINS
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def verifier_grille(grille: Dict[str, Any], tirage: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Vérifie une grille contre un tirage et calcule les gains.
+    VÃerifie une grille contre un tirage et calcule les gains.
     
     Args:
-        grille: Grille jouée
-        tirage: Résultat du tirage
+        grille: Grille jouÃee
+        tirage: RÃesultat du tirage
         
     Returns:
-        Résultat avec rang et gain
+        RÃesultat avec rang et gain
     """
-    # Numéros du tirage
+    # NumÃeros du tirage
     numeros_tirage = set([tirage.get(f"numero_{i}") for i in range(1, 6)])
     chance_tirage = tirage.get("numero_chance")
     
-    # Numéros de la grille
+    # NumÃeros de la grille
     numeros_grille = set(grille.get("numeros", []))
     chance_grille = grille.get("numero_chance")
     
-    # Compter les bons numéros
+    # Compter les bons numÃeros
     bons_numeros = len(numeros_tirage & numeros_grille)
     chance_ok = chance_grille == chance_tirage
     
-    # Déterminer le rang
+    # DÃeterminer le rang
     rang = None
     gain = Decimal("0.00")
     
@@ -464,13 +464,13 @@ def verifier_grille(grille: Dict[str, Any], tirage: Dict[str, Any]) -> Dict[str,
         "rang": rang,
         "gain": gain,
         "gagnant": rang is not None,
-        "description": f"{bons_numeros} numéros" + (" + chance" if chance_ok else "")
+        "description": f"{bons_numeros} numÃeros" + (" + chance" if chance_ok else "")
     }
 
 
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SIMULATION & PERFORMANCE
-# ═══════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def simuler_strategie(
     tirages: List[Dict[str, Any]],
@@ -480,17 +480,17 @@ def simuler_strategie(
     patterns: Optional[Dict] = None
 ) -> Dict[str, Any]:
     """
-    Simule une stratégie sur l'historique des tirages.
+    Simule une stratÃegie sur l'historique des tirages.
     
     Args:
         tirages: Historique des tirages
         strategie: "aleatoire", "eviter_populaires", "equilibree", "chauds", "froids"
-        nb_grilles_par_tirage: Nombre de grilles jouées par tirage
-        frequences: Fréquences pré-calculées
-        patterns: Patterns pré-calculés
+        nb_grilles_par_tirage: Nombre de grilles jouÃees par tirage
+        frequences: FrÃequences prÃe-calculÃees
+        patterns: Patterns prÃe-calculÃes
         
     Returns:
-        Résultats de la simulation
+        RÃesultats de la simulation
     """
     if not tirages:
         return {"erreur": "Aucun tirage disponible"}
@@ -501,7 +501,7 @@ def simuler_strategie(
     
     for tirage in tirages:
         for _ in range(nb_grilles_par_tirage):
-            # Générer grille selon stratégie
+            # GÃenÃerer grille selon stratÃegie
             if strategie == "aleatoire":
                 grille = generer_grille_aleatoire()
             elif strategie == "eviter_populaires":
@@ -513,7 +513,7 @@ def simuler_strategie(
             else:
                 grille = generer_grille_aleatoire()
             
-            # Vérifier contre le tirage
+            # VÃerifier contre le tirage
             resultat = verifier_grille(grille, tirage)
             
             mises_totales += COUT_GRILLE
@@ -546,14 +546,14 @@ def simuler_strategie(
 
 def calculer_esperance_mathematique() -> Dict[str, Any]:
     """
-    Calcule l'espérance mathématique du Loto.
+    Calcule l'espÃerance mathÃematique du Loto.
     
-    Spoiler: Elle est négative (c'est un jeu d'argent).
+    Spoiler: Elle est nÃegative (c'est un jeu d'argent).
     
     Returns:
-        Espérance et probabilités
+        EspÃerance et probabilitÃes
     """
-    # Probabilités exactes du Loto français
+    # ProbabilitÃes exactes du Loto français
     probas = {
         1: 1 / 19_068_840,      # 5 + chance
         2: 1 / 2_118_760,       # 5
@@ -566,7 +566,7 @@ def calculer_esperance_mathematique() -> Dict[str, Any]:
         9: 1 / 16,              # 1 + chance
     }
     
-    # Calcul espérance (jackpot moyen estimé à 5M€)
+    # Calcul espÃerance (jackpot moyen estimÃe Ã  5Mâ‚¬)
     jackpot_moyen = 5_000_000
     gains_esperes = (
         probas[1] * jackpot_moyen +
@@ -589,7 +589,7 @@ def calculer_esperance_mathematique() -> Dict[str, Any]:
         "perte_moyenne_pct": round((1 - gains_esperes / float(COUT_GRILLE)) * 100, 1),
         "probabilites": {rang: f"1/{int(1/p):,}" for rang, p in probas.items()},
         "conclusion": (
-            f"En moyenne, vous perdez {abs(esperance):.2f}€ par grille jouée. "
+            f"En moyenne, vous perdez {abs(esperance):.2f}â‚¬ par grille jouÃee. "
             f"Le Loto reverse environ {gains_esperes/float(COUT_GRILLE)*100:.0f}% des mises."
         )
     }
@@ -598,11 +598,11 @@ def calculer_esperance_mathematique() -> Dict[str, Any]:
 def comparer_strategies(tirages: List[Dict[str, Any]], 
                         nb_simulations: int = 100) -> Dict[str, Any]:
     """
-    Compare plusieurs stratégies sur les mêmes tirages.
+    Compare plusieurs stratÃegies sur les mêmes tirages.
     
     Args:
         tirages: Historique des tirages
-        nb_simulations: Nombre de simulations par stratégie
+        nb_simulations: Nombre de simulations par stratÃegie
         
     Returns:
         Comparaison des performances
@@ -610,7 +610,7 @@ def comparer_strategies(tirages: List[Dict[str, Any]],
     if not tirages:
         return {"erreur": "Aucun tirage"}
     
-    # Pré-calculer stats
+    # PrÃe-calculer stats
     freq_data = calculer_frequences_numeros(tirages)
     patterns = analyser_patterns_tirages(tirages)
     
@@ -639,5 +639,5 @@ def comparer_strategies(tirages: List[Dict[str, Any]],
         "resultats": resultats,
         "classement": [s[0] for s in classement],
         "meilleure_strategie": classement[0][0] if classement else None,
-        "note": "⚠️ Ces résultats varient aléatoirement. Aucune stratégie n'est meilleure à long terme."
+        "note": "âš ï¸ Ces rÃesultats varient alÃeatoirement. Aucune stratÃegie n'est meilleure Ã  long terme."
     }

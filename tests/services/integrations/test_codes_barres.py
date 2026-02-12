@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour le service de codes-barres.
 
 Couverture cible: >80%
@@ -23,9 +23,9 @@ from src.services.integrations.codes_barres import (
 from src.core.errors_base import ErreurValidation, ErreurNonTrouve
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
@@ -49,9 +49,9 @@ def mock_session():
     return session
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS SCHÉMAS PYDANTIC
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS SCHÃ‰MAS PYDANTIC
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBarcodeData:
@@ -96,7 +96,7 @@ class TestBarcodeArticle:
             nom_article="Nutella 400g",
             quantite_defaut=1.5,
             unite_defaut="pot",
-            categorie="Épicerie",
+            categorie="Ã‰picerie",
             prix_unitaire=4.50,
             date_peremption_jours=365,
             lieu_stockage="Placard"
@@ -140,9 +140,9 @@ class TestScanResultat:
             ScanResultat(barcode="12345678", type_scan="invalid", details={})
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS VALIDATION BARCODE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestValidationBarcode:
@@ -219,9 +219,9 @@ class TestValidationBarcode:
         assert type_code == "QR"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CHECKSUM INDIVIDUELS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestChecksumFunctions:
@@ -276,9 +276,9 @@ class TestChecksumFunctions:
         assert BarcodeService._valider_checksum_upc("01234567890A") is False
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SCANNER CODE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestScannerCode:
@@ -331,9 +331,9 @@ class TestScannerCode:
         assert "non reconnu" in result.details["message"]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS AJOUT ARTICLE PAR BARCODE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAjouterArticle:
@@ -350,7 +350,7 @@ class TestAjouterArticle:
                 )
 
     def test_ajout_barcode_existant(self, service, mock_session):
-        """Test ajout avec code déjà existant."""
+        """Test ajout avec code déjÃ  existant."""
         existing_article = Mock()
         existing_article.nom = "Article existant"
         mock_session.query.return_value.filter.return_value.first.return_value = existing_article
@@ -362,7 +362,7 @@ class TestAjouterArticle:
                 nom="Nouveau",
                 session=mock_session
             )
-        assert "déjà assigné" in str(exc_info.value)
+        assert "déjÃ  assigné" in str(exc_info.value)
 
     def test_ajout_succes(self, service, mock_session):
         """Test ajout réussi - vérifie que add et commit sont appelés."""
@@ -377,7 +377,7 @@ class TestAjouterArticle:
                 nom="Nutella",
                 quantite=2.0,
                 unite="pot",
-                categorie="Épicerie",
+                categorie="Ã‰picerie",
                 prix_unitaire=4.50,
                 emplacement="Placard",
                 session=mock_session
@@ -410,9 +410,9 @@ class TestAjouterArticle:
         mock_session.query.assert_called()
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS INCREMENT/VÉRIFICATION STOCK
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS INCREMENT/VÃ‰RIFICATION STOCK
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGestionStock:
@@ -541,7 +541,7 @@ class TestGestionStock:
             session=mock_session
         )
 
-        assert result["peremption_etat"] == "PÉRIMÉ"
+        assert result["peremption_etat"] == "PÃ‰RIMÃ‰"
 
     def test_verifier_stock_peremption_urgente(self, service, mock_session):
         """Test péremption urgente (< 7 jours)."""
@@ -583,19 +583,19 @@ class TestGestionStock:
             session=mock_session
         )
 
-        assert result["peremption_etat"] == "BIENTÔT"
+        assert result["peremption_etat"] == "BIENTÃ”T"
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS MISE À JOUR BARCODE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS MISE Ã€ JOUR BARCODE
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestMiseAJourBarcode:
-    """Tests de mise à jour des codes-barres."""
+    """Tests de mise Ã  jour des codes-barres."""
 
     def test_update_code_invalide(self, service, mock_session):
-        """Test mise à jour avec code invalide."""
+        """Test mise Ã  jour avec code invalide."""
         with patch.object(service, 'valider_barcode', return_value=(False, "Invalide")):
             with pytest.raises(ErreurValidation):
                 service.mettre_a_jour_barcode.__wrapped__(
@@ -606,7 +606,7 @@ class TestMiseAJourBarcode:
                 )
 
     def test_update_article_non_trouve(self, service, mock_session):
-        """Test mise à jour article inexistant."""
+        """Test mise Ã  jour article inexistant."""
         mock_session.query.return_value.filter.return_value.first.return_value = None
 
         with pytest.raises(ErreurNonTrouve):
@@ -618,7 +618,7 @@ class TestMiseAJourBarcode:
             )
 
     def test_update_succes(self, service, mock_session):
-        """Test mise à jour réussie."""
+        """Test mise Ã  jour réussie."""
         mock_article = Mock()
         mock_article.code_barres = "old_code"
         mock_session.query.return_value.filter.return_value.first.return_value = mock_article
@@ -634,9 +634,9 @@ class TestMiseAJourBarcode:
         mock_session.commit.assert_called_once()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS LISTER/EXPORTER/IMPORTER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestListeExportImport:
@@ -674,7 +674,7 @@ class TestListeExportImport:
 
     def test_importer_barcodes_csv_succes(self, service, mock_session):
         """Test import CSV réussi."""
-        csv_content = "barcode,nom,quantite,unite,categorie\n3017620422003,Nutella,2,pot,Épicerie"
+        csv_content = "barcode,nom,quantite,unite,categorie\n3017620422003,Nutella,2,pot,Ã‰picerie"
         
         # Mock ajouter_article_par_barcode pour ne pas lever d'exception
         with patch.object(service, 'ajouter_article_par_barcode'):
@@ -708,9 +708,9 @@ class TestListeExportImport:
             assert result["errors"][0]["barcode"] == "123"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FACTORY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFactory:

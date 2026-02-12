@@ -1,20 +1,20 @@
 """
-Gestion des catégories - Onglet catégories de l'inventaire.
-Affiche les articles groupés par catégorie.
+Gestion des catÃegories - Onglet catÃegories de l'inventaire.
+Affiche les articles groupÃes par catÃegorie.
 """
 
 import streamlit as st
 
 from src.services.inventaire import get_inventaire_service
-from .helpers import _prepare_inventory_dataframe
+from .utilitaires import _prepare_inventory_dataframe
 
 
 def render_categories():
-    """Gestion des catégories d'ingrédients"""
+    """Gestion des catÃegories d'ingrÃedients"""
     service = get_inventaire_service()
     
     if service is None:
-        st.error("❌ Service inventaire indisponible")
+        st.error("âŒ Service inventaire indisponible")
         return
     
     try:
@@ -24,7 +24,7 @@ def render_categories():
             st.info("Inventaire vide")
             return
         
-        # Grouper par catégorie
+        # Grouper par catÃegorie
         categories = {}
         for article in inventaire:
             cat = article["ingredient_categorie"]
@@ -33,30 +33,30 @@ def render_categories():
             categories[cat].append(article)
         
         # Afficher par onglet
-        tabs = st.tabs([f"🏷️ {cat} ({len(articles)})" for cat, articles in sorted(categories.items())])
+        tabs = st.tabs([f"ðŸ·ï¸ {cat} ({len(articles)})" for cat, articles in sorted(categories.items())])
         
         for (cat, articles), tab in zip(sorted(categories.items()), tabs):
             with tab:
-                # Statistiques catégorie
+                # Statistiques catÃegorie
                 col1, col2, col3 = st.columns(3)
                 with col1:
                     st.metric("Articles", len(articles))
                 with col2:
                     total_qty = sum(a["quantite"] for a in articles)
-                    st.metric("Quantité totale", f"{total_qty:.1f}")
+                    st.metric("QuantitÃe totale", f"{total_qty:.1f}")
                 with col3:
                     alertes = service.get_alertes()
                     cat_alertes = len([a for a in articles if a["statut"] in ["critique", "stock_bas"]])
-                    st.metric("⚠️ Alertes", cat_alertes)
+                    st.metric("âš ï¸ Alertes", cat_alertes)
                 
                 st.divider()
                 
-                # Tableau catégorie
+                # Tableau catÃegorie
                 df = _prepare_inventory_dataframe(articles)
                 st.dataframe(df, width='stretch', hide_index=True)
     
     except Exception as e:
-        st.error(f"❌ Erreur: {str(e)}")
+        st.error(f"âŒ Erreur: {str(e)}")
 
 
 __all__ = ["render_categories"]

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/services/web/synchronisation.py
 """
 import pytest
@@ -1113,7 +1113,7 @@ class TestGetCurrentUser:
             service = RealtimeSyncService()
             
             with patch.object(service, "_get_current_user_id", wraps=service._get_current_user_id):
-                # Appeler à travers un wrapper pour tester
+                # Appeler Ã  travers un wrapper pour tester
                 pass
     
     @patch("src.services.web.synchronisation.st")

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 """
 Script d'audit des tests - Analyse de couverture et mapping source/test.
 
@@ -6,7 +6,7 @@ Ce script:
 1. Scanne tous les fichiers Python source dans src/
 2. Identifie les fichiers de test correspondants dans tests/
 3. Calcule la couverture par fichier
-4. Génère un rapport CSV avec métriques de couverture
+4. GÃ©nÃ¨re un rapport CSV avec mÃ©triques de couverture
 5. Identifie les tests inefficaces (hasattr, import-only)
 
 Usage:
@@ -36,7 +36,7 @@ if sys.platform == "win32":
 
 @dataclass
 class SourceFile:
-    """Représente un fichier source."""
+    """ReprÃ©sente un fichier source."""
     path: Path
     lines: int
     functions: List[str]
@@ -45,24 +45,24 @@ class SourceFile:
 
 @dataclass
 class TestFile:
-    """Représente un fichier de test."""
+    """ReprÃ©sente un fichier de test."""
     path: Path
     lines: int
     test_functions: List[str]
-    test_patterns: Dict[str, int]  # Patterns détectés (hasattr, import, etc.)
+    test_patterns: Dict[str, int]  # Patterns dÃ©tectÃ©s (hasattr, import, etc.)
     
 
 @dataclass
 class CoverageResult:
-    """Résultat de couverture pour un fichier source."""
+    """RÃ©sultat de couverture pour un fichier source."""
     source_path: str
     test_paths: List[str]
     coverage_percent: float
     covered_lines: int
     total_lines: int
     missing_lines: List[int]
-    is_effective: bool  # Tests considérés efficaces?
-    issues: List[str]  # Problèmes détectés
+    is_effective: bool  # Tests considÃ©rÃ©s efficaces?
+    issues: List[str]  # ProblÃ¨mes dÃ©tectÃ©s
 
 
 class TestAuditor:
@@ -88,7 +88,7 @@ class TestAuditor:
     
     def scan_source_files(self) -> Dict[str, SourceFile]:
         """Scanne tous les fichiers Python source."""
-        print("🔍 Scan des fichiers source...")
+        print("ðŸ” Scan des fichiers source...")
         
         for py_file in self.src_dir.rglob("*.py"):
             if "__pycache__" in str(py_file):
@@ -116,14 +116,14 @@ class TestAuditor:
                     classes=classes
                 )
             except Exception as e:
-                print(f"  ⚠️ Erreur parsing {py_file}: {e}")
+                print(f"  âš ï¸ Erreur parsing {py_file}: {e}")
         
-        print(f"  ✓ {len(self.source_files)} fichiers source détectés")
+        print(f"  âœ“ {len(self.source_files)} fichiers source dÃ©tectÃ©s")
         return self.source_files
     
     def scan_test_files(self) -> Dict[str, TestFile]:
         """Scanne tous les fichiers de test."""
-        print("🔍 Scan des fichiers de test...")
+        print("ðŸ” Scan des fichiers de test...")
         
         for py_file in self.tests_dir.rglob("test_*.py"):
             if "__pycache__" in str(py_file):
@@ -135,7 +135,7 @@ class TestAuditor:
                 # Trouver les fonctions de test
                 test_funcs = re.findall(r'def (test_\w+)\s*\(', content)
                 
-                # Détecter les patterns inefficaces
+                # DÃ©tecter les patterns inefficaces
                 patterns = {}
                 for pattern_name, pattern_regex in self.INEFFECTIVE_PATTERNS.items():
                     matches = re.findall(pattern_regex, content, re.MULTILINE)
@@ -150,13 +150,13 @@ class TestAuditor:
                     test_patterns=patterns
                 )
             except Exception as e:
-                print(f"  ⚠️ Erreur parsing {py_file}: {e}")
+                print(f"  âš ï¸ Erreur parsing {py_file}: {e}")
         
-        print(f"  ✓ {len(self.test_files)} fichiers de test détectés")
+        print(f"  âœ“ {len(self.test_files)} fichiers de test dÃ©tectÃ©s")
         return self.test_files
     
     def find_matching_tests(self, source_path: str) -> List[str]:
-        """Trouve les fichiers de test correspondant à un fichier source."""
+        """Trouve les fichiers de test correspondant Ã  un fichier source."""
         matches = []
         
         # Extraire le nom du module
@@ -179,7 +179,7 @@ class TestAuditor:
         return list(set(matches))
     
     def run_coverage_for_file(self, source_path: str) -> Optional[CoverageResult]:
-        """Exécute la couverture pour un fichier spécifique."""
+        """ExÃ©cute la couverture pour un fichier spÃ©cifique."""
         test_paths = self.find_matching_tests(source_path)
         
         if not test_paths:
@@ -191,10 +191,10 @@ class TestAuditor:
                 total_lines=self.source_files.get(source_path, SourceFile(Path(), 0, [], [])).lines,
                 missing_lines=[],
                 is_effective=False,
-                issues=["Aucun fichier de test trouvé"]
+                issues=["Aucun fichier de test trouvÃ©"]
             )
         
-        # Exécuter pytest avec coverage sur les tests correspondants
+        # ExÃ©cuter pytest avec coverage sur les tests correspondants
         try:
             cmd = [
                 "python", "-m", "pytest",
@@ -226,7 +226,7 @@ class TestAuditor:
                 missing = file_data.get("missing_lines", [])
                 pct = (covered / total * 100) if total > 0 else 0.0
                 
-                # Analyser l'efficacité des tests
+                # Analyser l'efficacitÃ© des tests
                 issues = []
                 is_effective = True
                 
@@ -253,7 +253,7 @@ class TestAuditor:
                     coverage_percent=round(pct, 1),
                     covered_lines=covered,
                     total_lines=total,
-                    missing_lines=missing[:20],  # Limiter à 20 lignes
+                    missing_lines=missing[:20],  # Limiter Ã  20 lignes
                     is_effective=is_effective,
                     issues=issues
                 )
@@ -284,11 +284,11 @@ class TestAuditor:
         return None
     
     def run_full_audit(self) -> Dict[str, CoverageResult]:
-        """Exécute l'audit complet."""
+        """ExÃ©cute l'audit complet."""
         self.scan_source_files()
         self.scan_test_files()
         
-        print("\n📊 Calcul de la couverture...")
+        print("\nðŸ“Š Calcul de la couverture...")
         
         total = len(self.source_files)
         for i, source_path in enumerate(self.source_files.keys(), 1):
@@ -297,12 +297,12 @@ class TestAuditor:
             if result:
                 self.coverage_data[source_path] = result
         
-        print(f"\n  ✓ {len(self.coverage_data)} fichiers analysés")
+        print(f"\n  âœ“ {len(self.coverage_data)} fichiers analysÃ©s")
         return self.coverage_data
     
     def generate_csv_report(self, output_path: Path) -> None:
-        """Génère le rapport CSV."""
-        print(f"\n📝 Génération du rapport: {output_path}")
+        """GÃ©nÃ¨re le rapport CSV."""
+        print(f"\nðŸ“ GÃ©nÃ©ration du rapport: {output_path}")
         
         output_path.parent.mkdir(parents=True, exist_ok=True)
         
@@ -340,10 +340,10 @@ class TestAuditor:
                     action
                 ])
         
-        print(f"  ✓ Rapport généré avec {len(self.coverage_data)} entrées")
+        print(f"  âœ“ Rapport gÃ©nÃ©rÃ© avec {len(self.coverage_data)} entrÃ©es")
     
     def print_summary(self) -> None:
-        """Affiche un résumé de l'audit."""
+        """Affiche un rÃ©sumÃ© de l'audit."""
         effective = sum(1 for r in self.coverage_data.values() if r.is_effective)
         no_tests = sum(1 for r in self.coverage_data.values() if not r.test_paths)
         low_coverage = sum(1 for r in self.coverage_data.values() 
@@ -355,20 +355,20 @@ class TestAuditor:
         )
         
         print("\n" + "=" * 60)
-        print("📊 RÉSUMÉ DE L'AUDIT")
+        print("ðŸ“Š RÃ‰SUMÃ‰ DE L'AUDIT")
         print("=" * 60)
-        print(f"  Fichiers source analysés: {len(self.source_files)}")
+        print(f"  Fichiers source analysÃ©s: {len(self.source_files)}")
         print(f"  Fichiers de test: {len(self.test_files)}")
         print(f"  Couverture moyenne: {avg_coverage:.1f}%")
         print()
-        print(f"  ✅ Tests efficaces (≥{self.threshold}%): {effective}")
-        print(f"  ❌ Sans tests: {no_tests}")
-        print(f"  ⚠️  Couverture insuffisante: {low_coverage}")
+        print(f"  âœ… Tests efficaces (â‰¥{self.threshold}%): {effective}")
+        print(f"  âŒ Sans tests: {no_tests}")
+        print(f"  âš ï¸  Couverture insuffisante: {low_coverage}")
         print("=" * 60)
         
         # Top 10 des fichiers sans couverture
         if no_tests > 0:
-            print("\n🔴 Fichiers prioritaires à tester:")
+            print("\nðŸ”´ Fichiers prioritaires Ã  tester:")
             no_test_files = [
                 (path, self.source_files[path].lines)
                 for path, r in self.coverage_data.items()
@@ -392,7 +392,7 @@ def main():
                         help="Seuil de couverture minimum (%)")
     parser.add_argument("--quick", "-q", 
                         action="store_true",
-                        help="Mode rapide (sans exécution coverage)")
+                        help="Mode rapide (sans exÃ©cution coverage)")
     
     args = parser.parse_args()
     
@@ -404,12 +404,12 @@ def main():
         auditor.scan_source_files()
         auditor.scan_test_files()
         
-        print("\n📋 Mapping source → test:")
+        print("\nðŸ“‹ Mapping source â†’ test:")
         for source_path in sorted(auditor.source_files.keys())[:30]:
             tests = auditor.find_matching_tests(source_path)
-            status = "✓" if tests else "✗"
+            status = "âœ“" if tests else "âœ—"
             tests_str = ", ".join(Path(t).name for t in tests) if tests else "AUCUN"
-            print(f"  {status} {Path(source_path).name} → {tests_str}")
+            print(f"  {status} {Path(source_path).name} â†’ {tests_str}")
     else:
         auditor.run_full_audit()
         auditor.generate_csv_report(Path(args.output))

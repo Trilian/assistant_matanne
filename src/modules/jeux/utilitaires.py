@@ -1,5 +1,5 @@
-﻿"""
-Utilitaires d'intégration pour les pages UI
+"""
+Utilitaires d'integration pour les pages UI
 Fourni des wrappers simples avec fallback automatique BD <-> API
 """
 
@@ -18,12 +18,12 @@ def charger_matchs_avec_fallback(
     prefer_api: bool = True
 ) -> tuple[List[Dict[str, Any]], str]:
     """
-    Charge les matchs avec fallback BD si API échoue
+    Charge les matchs avec fallback BD si API echoue
     
     Args:
         championnat: Nom du championnat
         jours: Nombre de jours
-        prefer_api: Préférer l'API si disponible
+        prefer_api: Preferer l'API si disponible
         
     Returns:
         (liste_matchs, source) où source = "API" ou "BD"
@@ -33,12 +33,12 @@ def charger_matchs_avec_fallback(
     
     if prefer_api:
         try:
-            from src.domains.jeux.logic.api_service import charger_matchs_depuis_api
+            from src.modules.jeux.api_service import charger_matchs_depuis_api
             matchs = charger_matchs_depuis_api(championnat, jours)
             source = "API"
             logger.info(f"✅ {len(matchs)} matchs depuis API")
         except Exception as e:
-            logger.warning(f"⚠️ API échouée: {e}, passage à la BD")
+            logger.warning(f"⚠️ API echouee: {e}, passage à la BD")
     
     # Fallback à la BD
     if not matchs:
@@ -90,13 +90,13 @@ def charger_classement_avec_fallback(championnat: str) -> tuple[List[Dict], str]
     
     # Essayer API d'abord
     try:
-        from src.domains.jeux.logic.api_service import charger_classement_depuis_api
+        from src.modules.jeux.api_service import charger_classement_depuis_api
         classement = charger_classement_depuis_api(championnat)
         if classement:
             source = "API"
             return (classement, source)
     except Exception as e:
-        logger.debug(f"API classement échouée: {e}")
+        logger.debug(f"API classement echouee: {e}")
     
     # Fallback BD
     try:
@@ -132,20 +132,20 @@ def charger_classement_avec_fallback(championnat: str) -> tuple[List[Dict], str]
 @st.cache_data(ttl=1800)  # 30 min
 def charger_historique_equipe_avec_fallback(nom_equipe: str) -> tuple[List[Dict], str]:
     """
-    Charge l'historique d'une équipe avec fallback API -> BD
+    Charge l'historique d'une equipe avec fallback API -> BD
     """
     historique = []
     source = "BD"
     
     # Essayer API
     try:
-        from src.domains.jeux.logic.api_service import charger_historique_equipe_depuis_api
+        from src.modules.jeux.api_service import charger_historique_equipe_depuis_api
         historique = charger_historique_equipe_depuis_api(nom_equipe)
         if historique:
             source = "API"
             return (historique, source)
     except Exception as e:
-        logger.debug(f"API historique échouée: {e}")
+        logger.debug(f"API historique echouee: {e}")
     
     # Fallback BD
     try:
@@ -187,13 +187,13 @@ def charger_tirages_loto_avec_fallback(limite: int = 50) -> tuple[List[Dict], st
     
     # Essayer le scraper
     try:
-        from src.domains.jeux.logic.scraper_loto import charger_tirages_loto
+        from src.modules.jeux.scraper_loto import charger_tirages_loto
         tirages = charger_tirages_loto(limite)
         if tirages:
             source = "Scraper FDJ"
             return (tirages, source)
     except Exception as e:
-        logger.debug(f"⚠️ Scraper FDJ échoué: {e}")
+        logger.debug(f"⚠️ Scraper FDJ echoue: {e}")
     
     # Fallback BD
     try:
@@ -224,20 +224,20 @@ def charger_tirages_loto_avec_fallback(limite: int = 50) -> tuple[List[Dict], st
 @st.cache_data(ttl=3600)  # 1 heure
 def charger_stats_loto_avec_fallback(limite: int = 50) -> tuple[Dict, str]:
     """
-    Charge les stats Loto (fréquences, paires, etc)
+    Charge les stats Loto (frequences, paires, etc)
     """
     stats = {}
     source = "BD"
     
     # Essayer le scraper
     try:
-        from src.domains.jeux.logic.scraper_loto import obtenir_statistiques_loto
+        from src.modules.jeux.scraper_loto import obtenir_statistiques_loto
         stats = obtenir_statistiques_loto(limite)
         if stats:
             source = "Scraper FDJ"
             return (stats, source)
     except Exception as e:
-        logger.debug(f"⚠️ Stats scraper échouées: {e}")
+        logger.debug(f"⚠️ Stats scraper echouees: {e}")
     
     # Fallback BD
     try:
@@ -262,7 +262,7 @@ def charger_stats_loto_avec_fallback(limite: int = 50) -> tuple[Dict, str]:
 
 def bouton_actualiser_api(cle: str):
     """
-    Affiche un bouton "Actualiser" et nettoie le cache si cliqué
+    Affiche un bouton "Actualiser" et nettoie le cache si clique
     
     Usage:
         if bouton_actualiser_api("matchs_ligue1"):
@@ -276,8 +276,8 @@ def bouton_actualiser_api(cle: str):
 
 
 def message_source_donnees(source: str):
-    """Affiche le badge de source des données"""
+    """Affiche le badge de source des donnees"""
     emoji = "🌐" if source == "API" else "💾" if source == "BD" else "🕷️"
     couleur = "blue" if source == "API" else "gray" if source == "BD" else "orange"
-    st.caption(f"{emoji} Données depuis: **{source}**")
+    st.caption(f"{emoji} Donnees depuis: **{source}**")
 

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Fonctions utilitaires pures pour le service de planning.
 
 Ces fonctions peuvent être testées sans base de données ni dépendances externes.
@@ -11,9 +11,9 @@ from typing import Any
 from .constantes import JOURS_SEMAINE, JOURS_SEMAINE_LOWER, TYPES_PROTEINES
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # DATES ET CALENDRIER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def get_weekday_names() -> list[str]:
@@ -58,7 +58,7 @@ def get_weekday_index(day_name: str) -> int:
     Retourne l'index d'un jour de la semaine.
     
     Args:
-        day_name: Nom du jour (insensible à la casse)
+        day_name: Nom du jour (insensible Ã  la casse)
         
     Returns:
         Index (0-6) ou -1 si non trouvé
@@ -83,7 +83,7 @@ def calculate_week_dates(semaine_debut: date) -> list[date]:
         semaine_debut: Date du lundi (début de semaine)
         
     Returns:
-        Liste de 7 dates (lundi à dimanche)
+        Liste de 7 dates (lundi Ã  dimanche)
         
     Examples:
         >>> from datetime import date
@@ -156,9 +156,9 @@ def format_week_label(semaine_debut: date, semaine_fin: date | None = None) -> s
     return f"Semaine du {semaine_debut.strftime('%d/%m/%Y')}"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ÉQUILIBRE NUTRITIONNEL
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def determine_protein_type(
@@ -181,18 +181,18 @@ def determine_protein_type(
         
     Examples:
         >>> determine_protein_type('lundi', ['lundi'], [], [])
-        ('poisson', '🐟 Jour poisson')
+        ('poisson', 'ðŸŸ Jour poisson')
         >>> determine_protein_type('mercredi', [], [], ['mercredi'])
-        ('vegetarien', '🥬 Jour végétarien')
+        ('vegetarien', 'ðŸ¥¬ Jour végétarien')
     """
     if jour_lower in [j.lower() for j in poisson_jours]:
-        return "poisson", "🐟 Jour poisson"
+        return "poisson", "ðŸŸ Jour poisson"
     elif jour_lower in [j.lower() for j in viande_rouge_jours]:
-        return "viande_rouge", "🥩 Jour viande rouge"
+        return "viande_rouge", "ðŸ¥© Jour viande rouge"
     elif jour_lower in [j.lower() for j in vegetarien_jours]:
-        return "vegetarien", "🥬 Jour végétarien"
+        return "vegetarien", "ðŸ¥¬ Jour végétarien"
     else:
-        return "volaille", "🍗 Jour volaille"
+        return "volaille", "ðŸ— Jour volaille"
 
 
 def get_default_protein_schedule() -> dict[str, str]:
@@ -297,9 +297,9 @@ def is_balanced_week(repas_list: list[dict]) -> tuple[bool, list[str]]:
     return len(issues) == 0, issues
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FORMATAGE ET AFFICHAGE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def format_meal_for_display(repas: dict) -> dict:
@@ -325,12 +325,12 @@ def format_meal_for_display(repas: dict) -> dict:
     
     # Emoji par type
     emoji_map = {
-        "petit-dejeuner": "🌅",
-        "dejeuner": "☀️",
-        "gouter": "🍪",
-        "diner": "🌙",
+        "petit-dejeuner": "ðŸŒ…",
+        "dejeuner": "â˜€ï¸",
+        "gouter": "ðŸª",
+        "diner": "ðŸŒ™",
     }
-    emoji = emoji_map.get(type_repas.lower().replace(" ", "-"), "🍽️")
+    emoji = emoji_map.get(type_repas.lower().replace(" ", "-"), "ðŸ½ï¸")
     
     return {
         "id": repas.get("id"),
@@ -395,9 +395,9 @@ def group_meals_by_type(repas_list: list[dict]) -> dict[str, list[dict]]:
     return grouped
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # AGRÉGATION DES COURSES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def aggregate_ingredients(
@@ -502,9 +502,9 @@ def get_rayon_order() -> list[str]:
     ]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # VALIDATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def validate_planning_dates(
@@ -566,9 +566,9 @@ def validate_meal_selection(
     return len(errors) == 0, errors
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # GÉNÉRATION DE PROMPT IA
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def build_planning_prompt_context(
@@ -592,7 +592,7 @@ def build_planning_prompt_context(
     
     lines = [
         f"Semaine du {semaine_debut.strftime('%d/%m/%Y')}",
-        f"Durée: 7 jours (Lundi à Dimanche)",
+        f"Durée: 7 jours (Lundi Ã  Dimanche)",
     ]
     
     if prefs.get("nb_personnes"):
@@ -653,9 +653,9 @@ def parse_ai_planning_response(response: list[dict]) -> list[dict]:
     return parsed
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # EXPORTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 __all__ = [

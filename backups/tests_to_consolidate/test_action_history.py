@@ -1,19 +1,19 @@
-"""Tests unitaires pour le service action_history."""
+﻿"""Tests unitaires pour le service action_history."""
 
 import pytest
 from datetime import datetime, timedelta
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢
 # TESTS ENUMS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢
 
 
 class TestActionTypeEnum:
     """Tests pour l'enum ActionType."""
 
     def test_types_actions_disponibles(self):
-        """Vérifie les types d'actions."""
+        """VÃ©rifie les types d'actions."""
         from src.services.action_history import ActionType
         
         # Recettes
@@ -41,16 +41,16 @@ class TestActionTypeEnum:
             assert "." in action.value  # Format "entity.action"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS MODÃˆLES PYDANTIC
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢
+# TESTS MODÃƒË†LES PYDANTIC
+# Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢
 
 
 class TestActionEntryModel:
-    """Tests pour le modèle ActionEntry."""
+    """Tests pour le modÃ¨le ActionEntry."""
 
     def test_action_entry_creation(self):
-        """Création d'une entrée d'action."""
+        """CrÃ©ation d'une entrÃ©e d'action."""
         from src.services.action_history import ActionEntry, ActionType
         
         entry = ActionEntry(
@@ -60,14 +60,14 @@ class TestActionEntryModel:
             entity_type="recette",
             entity_id=1,
             entity_name="Tarte aux pommes",
-            description="Création d'une nouvelle recette"
+            description="CrÃ©ation d'une nouvelle recette"
         )
         
         assert entry.user_id == "user_1"
         assert entry.action_type == ActionType.RECETTE_CREATED
 
     def test_action_entry_timestamp_auto(self):
-        """Timestamp créé automatiquement."""
+        """Timestamp crÃ©Ã© automatiquement."""
         from src.services.action_history import ActionEntry, ActionType
         
         entry = ActionEntry(
@@ -79,12 +79,12 @@ class TestActionEntryModel:
         )
         
         assert entry.created_at is not None
-        # Devrait être proche de maintenant
+        # Devrait Ãªtre proche de maintenant
         delta = datetime.now() - entry.created_at
         assert delta.seconds < 5
 
     def test_action_entry_avec_details(self):
-        """Entrée avec détails."""
+        """EntrÃ©e avec dÃ©tails."""
         from src.services.action_history import ActionEntry, ActionType
         
         entry = ActionEntry(
@@ -93,7 +93,7 @@ class TestActionEntryModel:
             action_type=ActionType.INVENTAIRE_UPDATED,
             entity_type="inventaire",
             entity_id=5,
-            description="Modification quantité",
+            description="Modification quantitÃ©",
             details={"champ": "quantite", "avant": 10, "apres": 8}
         )
         
@@ -105,7 +105,7 @@ class TestActionFilterModel:
     """Tests pour ActionFilter."""
 
     def test_filter_defaults(self):
-        """Valeurs par défaut du filtre."""
+        """Valeurs par dÃ©faut du filtre."""
         from src.services.action_history import ActionFilter
         
         filtre = ActionFilter()
@@ -124,7 +124,7 @@ class TestActionFilterModel:
         assert len(filtre.action_types) == 2
 
     def test_filter_par_periode(self):
-        """Filtre par période."""
+        """Filtre par pÃ©riode."""
         from src.services.action_history import ActionFilter
         
         maintenant = datetime.now()
@@ -143,7 +143,7 @@ class TestActionStatsModel:
     """Tests pour ActionStats."""
 
     def test_stats_defaults(self):
-        """Valeurs par défaut des stats."""
+        """Valeurs par dÃ©faut des stats."""
         from src.services.action_history import ActionStats
         
         stats = ActionStats()
@@ -152,16 +152,16 @@ class TestActionStatsModel:
         assert stats.actions_today == 0
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢
 # TESTS SERVICE ACTION HISTORY
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢
 
 
 class TestActionHistoryServiceInit:
     """Tests d'initialisation du service."""
 
     def test_service_creation(self):
-        """Création du service."""
+        """CrÃ©ation du service."""
         from src.services.action_history import ActionHistoryService
         
         service = ActionHistoryService()
@@ -169,7 +169,7 @@ class TestActionHistoryServiceInit:
         assert service is not None
 
     def test_service_methodes_requises(self):
-        """Le service a les méthodes requises."""
+        """Le service a les mÃ©thodes requises."""
         from src.services.action_history import ActionHistoryService
         
         service = ActionHistoryService()
@@ -177,9 +177,9 @@ class TestActionHistoryServiceInit:
         assert hasattr(service, 'log_action')
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢
 # TESTS LOGIQUE PURE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢
 
 
 class TestComputeChanges:
@@ -201,7 +201,7 @@ class TestComputeChanges:
 
     def test_compute_changes_suppression(self):
         """Calcul pour suppression (avant seulement)."""
-        old = {"id": 1, "nom": "Article supprimé"}
+        old = {"id": 1, "nom": "Article supprimÃ©"}
         new = None
         
         if new is None:
@@ -228,7 +228,7 @@ class TestCacheActions:
     """Tests pour le cache des actions."""
 
     def test_cache_limite_taille(self):
-        """Cache limité en taille."""
+        """Cache limitÃ© en taille."""
         cache = []
         max_size = 100
         
@@ -248,7 +248,7 @@ class TestCacheActions:
             {"id": 3, "date": datetime(2026, 1, 20)},
         ]
         
-        # Plus récent en premier
+        # Plus rÃ©cent en premier
         triees = sorted(actions, key=lambda x: x["date"], reverse=True)
         
         assert triees[0]["id"] == 3
@@ -273,7 +273,7 @@ class TestFiltrerActions:
         assert len(filtrees) == 2
 
     def test_filtrer_par_date(self):
-        """Filtrage par période."""
+        """Filtrage par pÃ©riode."""
         maintenant = datetime.now()
         
         actions = [
@@ -288,7 +288,7 @@ class TestFiltrerActions:
         assert len(filtrees) == 2  # id 1 et 3
 
     def test_filtrer_par_entite(self):
-        """Filtrage par entité."""
+        """Filtrage par entitÃ©."""
         actions = [
             {"entity_type": "recette", "entity_id": 1},
             {"entity_type": "inventaire", "entity_id": 2},
@@ -337,7 +337,7 @@ class TestStatistiquesActions:
         assert compteur["user_2"] == 1
 
     def test_actions_par_heure(self):
-        """Actions par heure de la journée."""
+        """Actions par heure de la journÃ©e."""
         from collections import Counter
         
         actions = [
@@ -354,22 +354,22 @@ class TestStatistiquesActions:
 
 
 class TestDescriptionAction:
-    """Tests pour la génération de descriptions."""
+    """Tests pour la gÃ©nÃ©ration de descriptions."""
 
     def test_description_recette_created(self):
-        """Description pour création recette."""
+        """Description pour crÃ©ation recette."""
         action_type = "recette.created"
         entity_name = "Tarte aux pommes"
         
         templates = {
-            "recette.created": "Création de la recette '{name}'",
+            "recette.created": "CrÃ©ation de la recette '{name}'",
             "recette.updated": "Modification de la recette '{name}'",
             "recette.deleted": "Suppression de la recette '{name}'",
         }
         
         description = templates[action_type].format(name=entity_name)
         
-        assert description == "Création de la recette 'Tarte aux pommes'"
+        assert description == "CrÃ©ation de la recette 'Tarte aux pommes'"
 
     def test_description_inventaire_updated(self):
         """Description pour modification inventaire."""
@@ -377,6 +377,6 @@ class TestDescriptionAction:
         avant = 10
         apres = 8
         
-        description = f"Modification de {entity_name}: {avant} â†’ {apres}"
+        description = f"Modification de {entity_name}: {avant} Ã¢â€ â€™ {apres}"
         
-        assert "10 â†’ 8" in description
+        assert "10 Ã¢â€ â€™ 8" in description

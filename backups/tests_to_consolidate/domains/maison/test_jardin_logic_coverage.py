@@ -1,58 +1,58 @@
-"""
-Tests de couverture complémentaires pour jardin_logic.py
+﻿"""
+Tests de couverture complÃ©mentaires pour jardin_logic.py
 Objectif: atteindre 80%+ de couverture
-Couvre les lignes non testées: 37, 39, 41, 205, 222-235
+Couvre les lignes non testÃ©es: 37, 39, 41, 205, 222-235
 """
 import pytest
 from datetime import date
 from unittest.mock import patch
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GET_SAISON_ACTUELLE - branches manquantes
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestGetSaisonActuelle:
-    """Tests pour les différentes saisons."""
+    """Tests pour les diffÃ©rentes saisons."""
 
     def test_saison_ete_juin(self):
-        """Teste retour Été en juin."""
-        from src.domains.maison.logic.jardin_logic import get_saison_actuelle
+        """Teste retour Ã‰tÃ© en juin."""
+        from src.modules.maison.logic.jardin_logic import get_saison_actuelle
         
-        with patch("src.domains.maison.logic.jardin_logic.date") as mock_date:
+        with patch("src.modules.maison.logic.jardin_logic.date") as mock_date:
             mock_date.today.return_value = date(2026, 6, 15)
             
             result = get_saison_actuelle()
             
-            assert result == "Été"
+            assert result == "Ã‰tÃ©"
 
     def test_saison_ete_juillet(self):
-        """Teste retour Été en juillet."""
-        from src.domains.maison.logic.jardin_logic import get_saison_actuelle
+        """Teste retour Ã‰tÃ© en juillet."""
+        from src.modules.maison.logic.jardin_logic import get_saison_actuelle
         
-        with patch("src.domains.maison.logic.jardin_logic.date") as mock_date:
+        with patch("src.modules.maison.logic.jardin_logic.date") as mock_date:
             mock_date.today.return_value = date(2026, 7, 15)
             
             result = get_saison_actuelle()
             
-            assert result == "Été"
+            assert result == "Ã‰tÃ©"
 
     def test_saison_ete_aout(self):
-        """Teste retour Été en août."""
-        from src.domains.maison.logic.jardin_logic import get_saison_actuelle
+        """Teste retour Ã‰tÃ© en aoÃ»t."""
+        from src.modules.maison.logic.jardin_logic import get_saison_actuelle
         
-        with patch("src.domains.maison.logic.jardin_logic.date") as mock_date:
+        with patch("src.modules.maison.logic.jardin_logic.date") as mock_date:
             mock_date.today.return_value = date(2026, 8, 15)
             
             result = get_saison_actuelle()
             
-            assert result == "Été"
+            assert result == "Ã‰tÃ©"
 
     def test_saison_automne_septembre(self):
         """Teste retour Automne en septembre."""
-        from src.domains.maison.logic.jardin_logic import get_saison_actuelle
+        from src.modules.maison.logic.jardin_logic import get_saison_actuelle
         
-        with patch("src.domains.maison.logic.jardin_logic.date") as mock_date:
+        with patch("src.modules.maison.logic.jardin_logic.date") as mock_date:
             mock_date.today.return_value = date(2026, 9, 15)
             
             result = get_saison_actuelle()
@@ -61,9 +61,9 @@ class TestGetSaisonActuelle:
 
     def test_saison_automne_octobre(self):
         """Teste retour Automne en octobre."""
-        from src.domains.maison.logic.jardin_logic import get_saison_actuelle
+        from src.modules.maison.logic.jardin_logic import get_saison_actuelle
         
-        with patch("src.domains.maison.logic.jardin_logic.date") as mock_date:
+        with patch("src.modules.maison.logic.jardin_logic.date") as mock_date:
             mock_date.today.return_value = date(2026, 10, 15)
             
             result = get_saison_actuelle()
@@ -72,9 +72,9 @@ class TestGetSaisonActuelle:
 
     def test_saison_automne_novembre(self):
         """Teste retour Automne en novembre."""
-        from src.domains.maison.logic.jardin_logic import get_saison_actuelle
+        from src.modules.maison.logic.jardin_logic import get_saison_actuelle
         
-        with patch("src.domains.maison.logic.jardin_logic.date") as mock_date:
+        with patch("src.modules.maison.logic.jardin_logic.date") as mock_date:
             mock_date.today.return_value = date(2026, 11, 15)
             
             result = get_saison_actuelle()
@@ -82,16 +82,16 @@ class TestGetSaisonActuelle:
             assert result == "Automne"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FILTRER_PAR_STATUS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestFiltrerParStatus:
     """Tests pour filtrer_par_status."""
 
     def test_filtrer_par_status_actif(self):
         """Filtre les plantes actives."""
-        from src.domains.maison.logic.jardin_logic import filtrer_par_status
+        from src.modules.maison.logic.jardin_logic import filtrer_par_status
         
         plantes = [
             {"nom": "Tomate", "status": "actif"},
@@ -106,7 +106,7 @@ class TestFiltrerParStatus:
 
     def test_filtrer_par_status_inactif(self):
         """Filtre les plantes inactives."""
-        from src.domains.maison.logic.jardin_logic import filtrer_par_status
+        from src.modules.maison.logic.jardin_logic import filtrer_par_status
         
         plantes = [
             {"nom": "Tomate", "status": "inactif"},
@@ -120,7 +120,7 @@ class TestFiltrerParStatus:
 
     def test_filtrer_par_status_vide(self):
         """Liste vide retourne liste vide."""
-        from src.domains.maison.logic.jardin_logic import filtrer_par_status
+        from src.modules.maison.logic.jardin_logic import filtrer_par_status
         
         result = filtrer_par_status([], "actif")
         
@@ -128,7 +128,7 @@ class TestFiltrerParStatus:
 
     def test_filtrer_par_status_aucun_match(self):
         """Aucun match retourne liste vide."""
-        from src.domains.maison.logic.jardin_logic import filtrer_par_status
+        from src.modules.maison.logic.jardin_logic import filtrer_par_status
         
         plantes = [{"nom": "Tomate", "status": "actif"}]
         
@@ -137,18 +137,18 @@ class TestFiltrerParStatus:
         assert result == []
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS VALIDER_PLANTE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestValiderPlante:
     """Tests pour valider_plante."""
 
     def test_plante_valide(self):
         """Plante avec nom valide."""
-        from src.domains.maison.logic.jardin_logic import valider_plante
+        from src.modules.maison.logic.jardin_logic import valider_plante
         
-        data = {"nom": "Tomate", "categorie": "Légumes", "frequence_arrosage": 3}
+        data = {"nom": "Tomate", "categorie": "LÃ©gumes", "frequence_arrosage": 3}
         
         valide, erreurs = valider_plante(data)
         
@@ -157,9 +157,9 @@ class TestValiderPlante:
 
     def test_plante_sans_nom(self):
         """Plante sans nom invalide."""
-        from src.domains.maison.logic.jardin_logic import valider_plante
+        from src.modules.maison.logic.jardin_logic import valider_plante
         
-        data = {"categorie": "Légumes"}
+        data = {"categorie": "LÃ©gumes"}
         
         valide, erreurs = valider_plante(data)
         
@@ -168,9 +168,9 @@ class TestValiderPlante:
 
     def test_plante_nom_vide(self):
         """Plante avec nom vide invalide."""
-        from src.domains.maison.logic.jardin_logic import valider_plante
+        from src.modules.maison.logic.jardin_logic import valider_plante
         
-        data = {"nom": "", "categorie": "Légumes"}
+        data = {"nom": "", "categorie": "LÃ©gumes"}
         
         valide, erreurs = valider_plante(data)
         
@@ -178,52 +178,52 @@ class TestValiderPlante:
         assert "nom" in erreurs[0].lower()
 
     def test_plante_categorie_invalide(self):
-        """Catégorie non autorisée."""
-        from src.domains.maison.logic.jardin_logic import valider_plante
+        """CatÃ©gorie non autorisÃ©e."""
+        from src.modules.maison.logic.jardin_logic import valider_plante
         
-        data = {"nom": "Test", "categorie": "CatégorieInconnue"}
+        data = {"nom": "Test", "categorie": "CatÃ©gorieInconnue"}
         
         valide, erreurs = valider_plante(data)
         
         assert valide is False
-        assert any("catégorie" in e.lower() for e in erreurs)
+        assert any("catÃ©gorie" in e.lower() for e in erreurs)
 
     def test_plante_frequence_arrosage_zero(self):
-        """Fréquence d'arrosage à 0 invalide."""
-        from src.domains.maison.logic.jardin_logic import valider_plante
+        """FrÃ©quence d'arrosage Ã  0 invalide."""
+        from src.modules.maison.logic.jardin_logic import valider_plante
         
         data = {"nom": "Tomate", "frequence_arrosage": 0}
         
         valide, erreurs = valider_plante(data)
         
         assert valide is False
-        assert any("fréquence" in e.lower() for e in erreurs)
+        assert any("frÃ©quence" in e.lower() for e in erreurs)
 
     def test_plante_frequence_arrosage_negative(self):
-        """Fréquence d'arrosage négative invalide."""
-        from src.domains.maison.logic.jardin_logic import valider_plante
+        """FrÃ©quence d'arrosage nÃ©gative invalide."""
+        from src.modules.maison.logic.jardin_logic import valider_plante
         
         data = {"nom": "Tomate", "frequence_arrosage": -5}
         
         valide, erreurs = valider_plante(data)
         
         assert valide is False
-        assert any("fréquence" in e.lower() or "arrosage" in e.lower() for e in erreurs)
+        assert any("frÃ©quence" in e.lower() or "arrosage" in e.lower() for e in erreurs)
 
     def test_plante_frequence_arrosage_non_int(self):
-        """Fréquence d'arrosage non-entier invalide."""
-        from src.domains.maison.logic.jardin_logic import valider_plante
+        """FrÃ©quence d'arrosage non-entier invalide."""
+        from src.modules.maison.logic.jardin_logic import valider_plante
         
         data = {"nom": "Tomate", "frequence_arrosage": "deux"}
         
         valide, erreurs = valider_plante(data)
         
         assert valide is False
-        assert any("fréquence" in e.lower() or "arrosage" in e.lower() for e in erreurs)
+        assert any("frÃ©quence" in e.lower() or "arrosage" in e.lower() for e in erreurs)
 
     def test_plante_multiple_erreurs(self):
-        """Plusieurs erreurs à la fois."""
-        from src.domains.maison.logic.jardin_logic import valider_plante
+        """Plusieurs erreurs Ã  la fois."""
+        from src.modules.maison.logic.jardin_logic import valider_plante
         
         data = {"categorie": "Inconnu", "frequence_arrosage": -1}
         

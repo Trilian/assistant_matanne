@@ -1,4 +1,4 @@
-"""Add barcode and price fields to article_inventaire
+﻿"""Add barcode and price fields to article_inventaire
 
 Revision ID: 003_add_barcode_price
 Revises: 
@@ -17,11 +17,11 @@ depends_on = None
 
 
 def upgrade() -> None:
-    # Ajouter colonnes code_barres et prix_unitaire à la table inventaire
+    # Ajouter colonnes code_barres et prix_unitaire Ã  la table inventaire
     op.add_column('inventaire', sa.Column('code_barres', sa.String(50), nullable=True))
     op.add_column('inventaire', sa.Column('prix_unitaire', sa.Float(), nullable=True))
     
-    # Créer index pour code_barres
+    # CrÃ©er index pour code_barres
     op.create_unique_constraint('uq_code_barres', 'inventaire', ['code_barres'])
     op.create_index('ix_inventaire_code_barres', 'inventaire', ['code_barres'], unique=False)
 

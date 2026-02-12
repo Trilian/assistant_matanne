@@ -1,4 +1,4 @@
-"""
+﻿"""
 tests/utils/__init__.py - Package pour les tests Utilités
 """
 

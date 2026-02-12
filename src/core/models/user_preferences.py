@@ -1,9 +1,9 @@
-"""
+﻿"""
 Modèles pour les préférences utilisateur et l'apprentissage IA.
 
 Contient :
 - UserPreference : Préférences alimentaires persistantes
-- RecipeFeedback : Feedbacks 👍/👎 pour apprentissage
+- RecipeFeedback : Feedbacks ðŸ‘/ðŸ‘Ž pour apprentissage
 - OpenFoodFactsCache : Cache des produits scannés
 - ExternalCalendarConfig : Configuration calendriers externes
 """
@@ -36,9 +36,9 @@ def utc_now() -> datetime:
     return datetime.now(timezone.utc)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ÉNUMÉRATIONS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class FeedbackType(str, enum.Enum):
@@ -56,9 +56,9 @@ class CalendarProvider(str, enum.Enum):
     ICAL_URL = "ical_url"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # PRÉFÉRENCES UTILISATEUR
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class UserPreference(Base):
@@ -70,10 +70,10 @@ class UserPreference(Base):
         user_id: Identifiant utilisateur (UUID Supabase ou string)
         nb_adultes: Nombre d'adultes dans le foyer
         jules_present: Si Jules mange avec la famille
-        jules_age_mois: Âge de Jules en mois
+        jules_age_mois: Ã‚ge de Jules en mois
         temps_semaine: Temps de cuisine en semaine (rapide/normal/long)
         temps_weekend: Temps de cuisine le weekend
-        aliments_exclus: Liste JSON des aliments à éviter
+        aliments_exclus: Liste JSON des aliments Ã  éviter
         aliments_favoris: Liste JSON des aliments préférés
         poisson_par_semaine: Nombre de repas poisson souhaités
         vegetarien_par_semaine: Nombre de repas végétariens souhaités
@@ -119,13 +119,13 @@ class UserPreference(Base):
         return f"<UserPreference(user_id='{self.user_id}', adultes={self.nb_adultes})>"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FEEDBACKS RECETTES (APPRENTISSAGE IA)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class RecipeFeedback(Base):
-    """Feedback utilisateur sur une recette (👍/👎).
+    """Feedback utilisateur sur une recette (ðŸ‘/ðŸ‘Ž).
     
     Permet l'apprentissage IA des goûts pour améliorer les suggestions.
     
@@ -174,15 +174,15 @@ class RecipeFeedback(Base):
         return f"<RecipeFeedback(user='{self.user_id}', recette={self.recette_id}, feedback='{self.feedback}')>"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CACHE OPENFOODFACTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class OpenFoodFactsCache(Base):
     """Cache persistant des produits OpenFoodFacts.
     
-    Évite les appels API répétitifs pour les produits déjà scannés.
+    Évite les appels API répétitifs pour les produits déjÃ  scannés.
     
     Attributes:
         code_barres: Code EAN du produit (unique)
@@ -223,9 +223,9 @@ class OpenFoodFactsCache(Base):
         return f"<OpenFoodFactsCache(code='{self.code_barres}', nom='{self.nom}')>"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONFIGURATION CALENDRIERS EXTERNES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class ExternalCalendarConfig(Base):

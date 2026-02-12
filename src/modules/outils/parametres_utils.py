@@ -1,5 +1,5 @@
-﻿"""
-Logique métier du module Paramètres (configuration) - Séparée de l'UI
+"""
+Logique metier du module Paramètres (configuration) - Separee de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
 
@@ -31,7 +31,7 @@ def valider_parametres(data: Dict[str, Any]) -> Tuple[bool, List[str]]:
         if not nom or len(nom) < 2:
             erreurs.append("Le nom de famille doit contenir au moins 2 caractères")
         elif len(nom) > 50:
-            erreurs.append("Le nom de famille ne peut pas dépasser 50 caractères")
+            erreurs.append("Le nom de famille ne peut pas depasser 50 caractères")
     
     # Email
     if "email" in data:
@@ -46,21 +46,21 @@ def valider_parametres(data: Dict[str, Any]) -> Tuple[bool, List[str]]:
         devise = data["devise"]
         devises_supportees = ["EUR", "USD", "GBP", "CHF", "CAD"]
         if devise not in devises_supportees:
-            erreurs.append(f"Devise non supportée. Valeurs acceptées: {', '.join(devises_supportees)}")
+            erreurs.append(f"Devise non supportee. Valeurs acceptees: {', '.join(devises_supportees)}")
     
     # Langue
     if "langue" in data:
         langue = data["langue"]
         langues_supportees = ["fr", "en", "es", "de"]
         if langue not in langues_supportees:
-            erreurs.append(f"Langue non supportée. Valeurs acceptées: {', '.join(langues_supportees)}")
+            erreurs.append(f"Langue non supportee. Valeurs acceptees: {', '.join(langues_supportees)}")
     
     # Thème
     if "theme" in data:
         theme = data["theme"]
         themes_supportes = ["light", "dark", "auto"]
         if theme not in themes_supportes:
-            erreurs.append(f"Thème non supporté. Valeurs acceptées: {', '.join(themes_supportes)}")
+            erreurs.append(f"Thème non supporte. Valeurs acceptees: {', '.join(themes_supportes)}")
     
     return len(erreurs) == 0, erreurs
 
@@ -104,7 +104,7 @@ def valider_email(email: str) -> Tuple[bool, Optional[str]]:
 # ═══════════════════════════════════════════════════════════
 
 def generer_config_defaut() -> Dict[str, Any]:
-    """Génère une configuration par défaut."""
+    """Genère une configuration par defaut."""
     return {
         "nom_famille": "Ma Famille",
         "email": "",
@@ -130,7 +130,7 @@ def fusionner_config(config_actuelle: Dict[str, Any], nouveaux_params: Dict[str,
         nouveaux_params: Nouveaux paramètres
         
     Returns:
-        Configuration fusionnée
+        Configuration fusionnee
     """
     config_fusionnee = config_actuelle.copy()
     config_fusionnee.update(nouveaux_params)
@@ -150,7 +150,7 @@ def comparer_versions(version_actuelle: str, version_cible: str) -> int:
         version_cible: Version cible (ex: "1.3.0")
         
     Returns:
-        -1 si actuelle < cible, 0 si égales, 1 si actuelle > cible
+        -1 si actuelle < cible, 0 si egales, 1 si actuelle > cible
     """
     def parse_version(v: str) -> List[int]:
         return [int(x) for x in v.split(".")]
@@ -159,7 +159,7 @@ def comparer_versions(version_actuelle: str, version_cible: str) -> int:
         v1 = parse_version(version_actuelle)
         v2 = parse_version(version_cible)
         
-        # Comparer élément par élément
+        # Comparer element par element
         for a, b in zip(v1, v2):
             if a < b:
                 return -1
@@ -170,7 +170,7 @@ def comparer_versions(version_actuelle: str, version_cible: str) -> int:
         if len(v1) == len(v2):
             return 0
         
-        # Si longueurs différentes
+        # Si longueurs differentes
         return -1 if len(v1) < len(v2) else 1
         
     except (ValueError, AttributeError):
@@ -179,7 +179,7 @@ def comparer_versions(version_actuelle: str, version_cible: str) -> int:
 
 def version_est_superieure(version_actuelle: str, version_minimale: str) -> bool:
     """
-    Vérifie si version actuelle >= version minimale.
+    Verifie si version actuelle >= version minimale.
     
     Args:
         version_actuelle: Version actuelle
@@ -199,7 +199,7 @@ def formater_version(version: str) -> str:
         version: Version brute (ex: "1.2.3")
         
     Returns:
-        Version formatée (ex: "v1.2.3")
+        Version formatee (ex: "v1.2.3")
     """
     if not version.startswith("v"):
         return f"v{version}"
@@ -212,13 +212,13 @@ def formater_version(version: str) -> str:
 
 def get_preferences_par_categorie(preferences: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
     """
-    Groupe les préférences par catégorie.
+    Groupe les preferences par categorie.
     
     Args:
-        preferences: Dictionnaire de préférences
+        preferences: Dictionnaire de preferences
         
     Returns:
-        Préférences groupées par catégorie
+        Preferences groupees par categorie
     """
     categories = {
         "general": ["nom_famille", "langue", "fuseau_horaire"],
@@ -241,14 +241,14 @@ def get_preferences_par_categorie(preferences: Dict[str, Any]) -> Dict[str, Dict
 
 def exporter_config(config: Dict[str, Any], format: str = "json") -> str:
     """
-    Exporte la configuration dans un format donné.
+    Exporte la configuration dans un format donne.
     
     Args:
         config: Configuration à exporter
         format: Format d'export (json, yaml, ini)
         
     Returns:
-        Configuration exportée en string
+        Configuration exportee en string
     """
     if format == "json":
         import json
@@ -282,29 +282,29 @@ def exporter_config(config: Dict[str, Any], format: str = "json") -> str:
 
 def verifier_sante_config(config: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Vérifie la santé de la configuration.
+    Verifie la sante de la configuration.
     
     Args:
-        config: Configuration à vérifier
+        config: Configuration à verifier
         
     Returns:
-        Rapport de santé
+        Rapport de sante
     """
     problemes = []
     avertissements = []
     
-    # Vérifier paramètres obligatoires
+    # Verifier paramètres obligatoires
     obligatoires = ["nom_famille", "devise", "langue"]
     for param in obligatoires:
         if param not in config or not config[param]:
             problemes.append(f"Paramètre obligatoire manquant: {param}")
     
-    # Vérifier cohérence
+    # Verifier coherence
     if config.get("notifications_email") and not config.get("email"):
-        avertissements.append("Notifications email activées mais pas d'email configuré")
+        avertissements.append("Notifications email activees mais pas d'email configure")
     
     if config.get("sync_calendrier") and not config.get("api_externe"):
-        avertissements.append("Sync calendrier activée mais pas d'API configurée")
+        avertissements.append("Sync calendrier activee mais pas d'API configuree")
     
     # Statut global
     if problemes:
@@ -331,14 +331,14 @@ def formater_parametre_affichage(cle: str, valeur: Any) -> str:
     Formate un paramètre pour l'affichage.
     
     Args:
-        cle: Clé du paramètre
+        cle: Cle du paramètre
         valeur: Valeur du paramètre
         
     Returns:
-        Texte formaté
+        Texte formate
     """
     if isinstance(valeur, bool):
-        return "✅ Activé" if valeur else "❌ Désactivé"
+        return "✅ Active" if valeur else "❌ Desactive"
     elif cle == "devise":
         symboles = {"EUR": "€", "USD": "$", "GBP": "Â£", "CHF": "CHF"}
         return f"{valeur} ({symboles.get(valeur, '')})"

@@ -1,6 +1,6 @@
-"""
-Prédictions ML - Onglet prévisions de l'inventaire.
-Affiche les prédictions et recommandations basées sur le Machine Learning.
+﻿"""
+PrÃedictions ML - Onglet prÃevisions de l'inventaire.
+Affiche les prÃedictions et recommandations basÃees sur le Machine Learning.
 """
 
 import streamlit as st
@@ -11,50 +11,50 @@ from src.services.suggestions import obtenir_service_predictions
 
 
 def render_predictions():
-    """Affiche les prédictions et recommandations ML"""
-    st.subheader("🔮 Prévisions et Recommandations")
+    """Affiche les prÃedictions et recommandations ML"""
+    st.subheader("ðŸ”® PrÃevisions et Recommandations")
     
     try:
         service = get_inventaire_service()
         service_pred = obtenir_service_predictions()
         
         if service is None:
-            st.error("❌ Service inventaire indisponible")
+            st.error("âŒ Service inventaire indisponible")
             return
         
-        # Récupère les données
+        # RÃecupère les donnÃees
         articles = service.get_inventaire_complet()
         historique_complet = service.get_historique(days=90)  # 3 mois d'historique
         
         if not articles:
-            st.info("Aucun article dans l'inventaire pour générer les prédictions")
+            st.info("Aucun article dans l'inventaire pour gÃenÃerer les prÃedictions")
             return
         
-        # Bouton pour générer les prédictions
+        # Bouton pour gÃenÃerer les prÃedictions
         col1, col2, col3 = st.columns([2, 1, 1])
         
         with col1:
-            if st.button("🔄 Générer les prédictions", width='stretch', key="btn_generate_predictions"):
+            if st.button("ðŸ”„ GÃenÃerer les prÃedictions", width='stretch', key="btn_generate_predictions"):
                 st.session_state.predictions_generated = True
                 st.session_state.predictions_data = None
                 st.rerun()
         
         with col2:
-            # Période de prédiction
+            # PÃeriode de prÃediction
             periode = st.selectbox(
-                "Prédiction pour",
+                "PrÃediction pour",
                 ["1 semaine", "1 mois", "3 mois"],
                 key="prediction_period"
             )
         
         with col3:
-            st.metric("📦 Articles", len(articles))
+            st.metric("ðŸ“¦ Articles", len(articles))
         
         st.divider()
         
-        # Affiche les prédictions si générées
+        # Affiche les prÃedictions si gÃenÃerÃees
         if st.session_state.get("predictions_generated", False):
-            with st.spinner("📊 Génération des prédictions ML..."):
+            with st.spinner("ðŸ“Š GÃenÃeration des prÃedictions ML..."):
                 try:
                     predictions = service_pred.generer_predictions(articles, historique_complet)
                     analyse_globale = service_pred.obtenir_analyse_globale(predictions)
@@ -66,38 +66,38 @@ def render_predictions():
                         "recommandations": recommandations
                     }
                 except Exception as e:
-                    st.error(f"❌ Erreur lors de la génération: {str(e)}")
+                    st.error(f"âŒ Erreur lors de la gÃenÃeration: {str(e)}")
                     st.session_state.predictions_generated = False
                     return
         
-        # Affiche les résultats
+        # Affiche les rÃesultats
         if st.session_state.get("predictions_data"):
             data = st.session_state.predictions_data
             predictions = data["predictions"]
             analyse = data["analyse"]
             recommandations = data["recommandations"]
             
-            # Tabs pour les différentes vues
+            # Tabs pour les diffÃerentes vues
             tab_pred, tab_tendances, tab_recom, tab_analyse = st.tabs([
-                "📈 Prédictions",
-                "📊 Tendances",
-                "🔔 Recommandations",
-                "📍 Analyse globale"
+                "ðŸ“ˆ PrÃedictions",
+                "ðŸ“Š Tendances",
+                "ðŸ”” Recommandations",
+                "ðŸ“ Analyse globale"
             ])
             
             with tab_pred:
-                st.write("**Prédictions pour tous les articles**")
+                st.write("**PrÃedictions pour tous les articles**")
                 
-                # Prépare le dataframe
+                # PrÃepare le dataframe
                 df_pred = []
                 for pred in predictions:
                     df_pred.append({
                         "Article": pred.nom,
-                        "Quantité actuelle": pred.quantite_actuelle,
-                        "Prédite (1 mois)": f"{pred.quantite_predite:.1f}",
+                        "QuantitÃe actuelle": pred.quantite_actuelle,
+                        "PrÃedite (1 mois)": f"{pred.quantite_predite:.1f}",
                         "Tendance": pred.tendance,
                         "Confiance": f"{pred.confiance:.0%}",
-                        "Risque rupture": "❌ OUI" if pred.risque_rupture else "✅ Non",
+                        "Risque rupture": "âŒ OUI" if pred.risque_rupture else "âœ… Non",
                         "Jours avant rupture": pred.jours_avant_rupture if pred.jours_avant_rupture else "-"
                     })
                 
@@ -106,24 +106,24 @@ def render_predictions():
                 
                 st.divider()
                 
-                # Filtres et détails
+                # Filtres et dÃetails
                 col1, col2, col3 = st.columns(3)
                 
                 with col1:
                     filter_trend = st.multiselect(
                         "Filtrer par tendance",
-                        ["croissante", "décroissante", "stable"],
-                        default=["croissante", "décroissante", "stable"],
+                        ["croissante", "dÃecroissante", "stable"],
+                        default=["croissante", "dÃecroissante", "stable"],
                         key="filter_trend_pred"
                     )
                 
                 with col2:
-                    filter_risk = st.checkbox("Afficher seulement les articles à risque", key="filter_risk_pred")
+                    filter_risk = st.checkbox("Afficher seulement les articles Ã  risque", key="filter_risk_pred")
                 
                 with col3:
                     min_confiance = st.slider("Confiance minimale", 0, 100, 0, key="min_confiance_pred")
                 
-                # Filtre et affiche les détails
+                # Filtre et affiche les dÃetails
                 filtered_pred = [
                     p for p in predictions 
                     if p.tendance in filter_trend 
@@ -134,12 +134,12 @@ def render_predictions():
                 if filtered_pred:
                     st.write(f"**{len(filtered_pred)} article(s) correspondent aux filtres**")
                     for pred in filtered_pred[:5]:  # Affiche les 5 premiers
-                        with st.expander(f"💡 {pred.nom} - {pred.tendance.upper()}"):
+                        with st.expander(f"ðŸ’¡ {pred.nom} - {pred.tendance.upper()}"):
                             col1, col2, col3 = st.columns(3)
                             
                             with col1:
-                                st.metric("Quantité actuelle", f"{pred.quantite_actuelle:.1f} {pred.unite}")
-                                st.metric("Prédite (1 mois)", f"{pred.quantite_predite:.1f}")
+                                st.metric("QuantitÃe actuelle", f"{pred.quantite_actuelle:.1f} {pred.unite}")
+                                st.metric("PrÃedite (1 mois)", f"{pred.quantite_predite:.1f}")
                             
                             with col2:
                                 st.metric("Consommation/jour", f"{pred.consommation_moyenne:.2f}")
@@ -147,42 +147,42 @@ def render_predictions():
                             
                             with col3:
                                 if pred.risque_rupture:
-                                    st.metric("⚠️ Rupture dans", f"{pred.jours_avant_rupture} j")
+                                    st.metric("âš ï¸ Rupture dans", f"{pred.jours_avant_rupture} j")
                                     st.warning(f"Stock insuffisant dans {pred.jours_avant_rupture} jours!")
                                 else:
-                                    st.metric("Stock", "✨ Sûr")
+                                    st.metric("Stock", "âœ¨ Sûr")
                                     st.success(f"Suffisant pour {pred.jours_avant_rupture} jours")
             
             with tab_tendances:
                 st.write("**Tendances de consommation**")
                 
                 # Groupe par tendance
-                tendances = {"croissante": [], "décroissante": [], "stable": []}
+                tendances = {"croissante": [], "dÃecroissante": [], "stable": []}
                 for pred in predictions:
                     tendances[pred.tendance].append(pred)
                 
                 col1, col2, col3 = st.columns(3)
                 
                 with col1:
-                    st.metric("📈 Croissante", len(tendances["croissante"]))
+                    st.metric("ðŸ“ˆ Croissante", len(tendances["croissante"]))
                     if tendances["croissante"]:
                         with st.expander("Voir les articles"):
                             for p in tendances["croissante"]:
-                                st.write(f"• {p.nom} (+{p.consommation_moyenne:.2f}/jour)")
+                                st.write(f"â€¢ {p.nom} (+{p.consommation_moyenne:.2f}/jour)")
                 
                 with col2:
-                    st.metric("📉 Décroissante", len(tendances["décroissante"]))
-                    if tendances["décroissante"]:
+                    st.metric("ðŸ“‰ DÃecroissante", len(tendances["dÃecroissante"]))
+                    if tendances["dÃecroissante"]:
                         with st.expander("Voir les articles"):
-                            for p in tendances["décroissante"]:
-                                st.write(f"• {p.nom} ({p.consommation_moyenne:.2f}/jour)")
+                            for p in tendances["dÃecroissante"]:
+                                st.write(f"â€¢ {p.nom} ({p.consommation_moyenne:.2f}/jour)")
                 
                 with col3:
-                    st.metric("➡️ Stable", len(tendances["stable"]))
+                    st.metric("âž¡ï¸ Stable", len(tendances["stable"]))
                     if tendances["stable"]:
                         with st.expander("Voir les articles"):
                             for p in tendances["stable"]:
-                                st.write(f"• {p.nom} (~{p.consommation_moyenne:.2f}/jour)")
+                                st.write(f"â€¢ {p.nom} (~{p.consommation_moyenne:.2f}/jour)")
                 
                 st.divider()
                 
@@ -199,7 +199,7 @@ def render_predictions():
                 st.write("**Recommandations d'achat prioritaires**")
                 
                 if recommandations:
-                    # Groupe par priorité
+                    # Groupe par prioritÃe
                     by_priority = {}
                     for rec in recommandations:
                         p = rec.priorite
@@ -207,10 +207,10 @@ def render_predictions():
                             by_priority[p] = []
                         by_priority[p].append(rec)
                     
-                    # Affiche par priorité
+                    # Affiche par prioritÃe
                     for priority in ["CRITIQUE", "HAUTE", "MOYENNE"]:
                         if priority in by_priority:
-                            icon = "❌" if priority == "CRITIQUE" else "⚠" if priority == "HAUTE" else "ℹ"
+                            icon = "âŒ" if priority == "CRITIQUE" else "âš " if priority == "HAUTE" else "â„¹"
                             count = len(by_priority[priority])
                             
                             with st.expander(f"{icon} {priority} ({count})", expanded=(priority=="CRITIQUE")):
@@ -222,14 +222,14 @@ def render_predictions():
                                         st.caption(rec.raison)
                                     
                                     with col2:
-                                        st.metric("Quantité", f"{rec.quantite_recommandee:.0f} {rec.unite}")
+                                        st.metric("QuantitÃe", f"{rec.quantite_recommandee:.0f} {rec.unite}")
                                     
                                     with col3:
                                         st.metric("Stock actuel", f"{rec.quantite_actuelle:.0f}")
                                     
                                     with col4:
-                                        if st.button("✨ Ajouter", key=f"add_rec_{rec.nom}", width='stretch'):
-                                            st.toast(f"✨ {rec.nom} ajouté", icon="🛒")
+                                        if st.button("âœ¨ Ajouter", key=f"add_rec_{rec.nom}", width='stretch'):
+                                            st.toast(f"âœ¨ {rec.nom} ajoutÃe", icon="ðŸ›’")
                 else:
                     st.info("Aucune recommandation d'achat pour le moment")
             
@@ -239,54 +239,54 @@ def render_predictions():
                 col1, col2, col3, col4 = st.columns(4)
                 
                 with col1:
-                    st.metric("📦 Total articles", len(predictions))
+                    st.metric("ðŸ“¦ Total articles", len(predictions))
                 
                 with col2:
                     articles_risque = len([p for p in predictions if p.risque_rupture])
-                    st.metric("❌ En risque", articles_risque)
+                    st.metric("âŒ En risque", articles_risque)
                 
                 with col3:
                     articles_croissance = len([p for p in predictions if p.tendance == "croissante"])
-                    st.metric("📈 Croissance", articles_croissance)
+                    st.metric("ðŸ“ˆ Croissance", articles_croissance)
                 
                 with col4:
                     confiance_moy = sum(p.confiance for p in predictions) / len(predictions) if predictions else 0
-                    st.metric("🎯 Confiance moy", f"{confiance_moy:.0%}")
+                    st.metric("ðŸŽ¯ Confiance moy", f"{confiance_moy:.0%}")
                 
                 st.divider()
                 
-                # Résumé de l'analyse
+                # RÃesumÃe de l'analyse
                 if analyse:
-                    st.write("**Tendance générale**: ")
+                    st.write("**Tendance gÃenÃerale**: ")
                     if analyse.tendance_globale == "croissante":
-                        st.write("📈 **Consommation en augmentation**")
-                        st.info("La consommation générale augmente. Préparez-vous à augmenter vos achats.")
-                    elif analyse.tendance_globale == "décroissante":
-                        st.write("📉 **Consommation en diminution**")
-                        st.info("La consommation générale diminue. Vous pouvez réduire légèrement vos achats.")
+                        st.write("ðŸ“ˆ **Consommation en augmentation**")
+                        st.info("La consommation gÃenÃerale augmente. PrÃeparez-vous Ã  augmenter vos achats.")
+                    elif analyse.tendance_globale == "dÃecroissante":
+                        st.write("ðŸ“‰ **Consommation en diminution**")
+                        st.info("La consommation gÃenÃerale diminue. Vous pouvez rÃeduire lÃegèrement vos achats.")
                     else:
-                        st.write("➡️ **Consommation stable**")
+                        st.write("âž¡ï¸ **Consommation stable**")
                         st.info("La consommation est stable. Maintenez votre rythme d'achat actuel.")
                     
                     st.divider()
                     
-                    # Stats détaillées
+                    # Stats dÃetaillÃees
                     col1, col2 = st.columns(2)
                     
                     with col1:
                         st.write("**Consommation quotidienne moyenne**")
-                        st.metric("Total", f"{analyse.consommation_moyenne_globale:.2f} unités/jour")
+                        st.metric("Total", f"{analyse.consommation_moyenne_globale:.2f} unitÃes/jour")
                         st.metric("Min", f"{analyse.consommation_min:.2f}")
                         st.metric("Max", f"{analyse.consommation_max:.2f}")
                     
                     with col2:
                         st.write("**Distribution des articles**")
                         st.metric("Croissants", f"{analyse.nb_articles_croissance}")
-                        st.metric("Décroissants", f"{analyse.nb_articles_decroissance}")
+                        st.metric("DÃecroissants", f"{analyse.nb_articles_decroissance}")
                         st.metric("Stables", f"{analyse.nb_articles_stables}")
     
     except Exception as e:
-        st.error(f"❌ Erreur: {str(e)}")
+        st.error(f"âŒ Erreur: {str(e)}")
         import traceback
         st.text(traceback.format_exc())
 

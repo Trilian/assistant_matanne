@@ -1,8 +1,8 @@
-﻿"""
+"""
 Module Meubles - Wishlist d'achats par pièce avec budget.
 
-Gestion des achats progressifs de meubles/équipements pour la maison.
-Classement par pièce, priorité et budget prévu.
+Gestion des achats progressifs de meubles/equipements pour la maison.
+Classement par pièce, priorite et budget prevu.
 """
 
 import streamlit as st
@@ -27,19 +27,19 @@ PIECES_LABELS = {
     "bureau": "💻 Bureau",
     "salle_de_bain": "🚿 Salle de bain",
     "garage": "🚗 Garage",
-    "entree": "🚪 Entrée",
-    "exterieur": "🌳 Extérieur",
+    "entree": "🚪 Entree",
+    "exterieur": "🌳 Exterieur",
     "buanderie": "🧺 Buanderie",
     "autre": "📦 Autre"
 }
 
 STATUTS_LABELS = {
-    "souhaite": "💭 Souhaité",
+    "souhaite": "💭 Souhaite",
     "recherche": "🔍 En recherche",
-    "trouve": "✨ Trouvé",
-    "commande": "📦 Commandé",
-    "achete": "✅ Acheté",
-    "annule": "❌ Annulé"
+    "trouve": "✨ Trouve",
+    "commande": "📦 Commande",
+    "achete": "✅ Achete",
+    "annule": "❌ Annule"
 }
 
 PRIORITES_LABELS = {
@@ -56,7 +56,7 @@ PRIORITES_LABELS = {
 # ═══════════════════════════════════════════════════════════
 
 def get_all_meubles(filtre_statut: Optional[str] = None, filtre_piece: Optional[str] = None) -> List[Furniture]:
-    """Récupère tous les meubles avec filtres optionnels"""
+    """Recupère tous les meubles avec filtres optionnels"""
     with obtenir_contexte_db() as db:
         query = db.query(Furniture)
         
@@ -69,13 +69,13 @@ def get_all_meubles(filtre_statut: Optional[str] = None, filtre_piece: Optional[
 
 
 def get_meuble_by_id(meuble_id: int) -> Optional[Furniture]:
-    """Récupère un meuble par son ID"""
+    """Recupère un meuble par son ID"""
     with obtenir_contexte_db() as db:
         return db.query(Furniture).filter(Furniture.id == meuble_id).first()
 
 
 def create_meuble(data: dict) -> Furniture:
-    """Crée un nouveau meuble"""
+    """Cree un nouveau meuble"""
     with obtenir_contexte_db() as db:
         meuble = Furniture(**data)
         db.add(meuble)
@@ -108,7 +108,7 @@ def delete_meuble(meuble_id: int) -> bool:
 
 
 def get_budget_resume() -> dict:
-    """Calcule le résumé du budget"""
+    """Calcule le resume du budget"""
     with obtenir_contexte_db() as db:
         meubles = db.query(Furniture).filter(Furniture.statut != "achete").all()
         
@@ -138,7 +138,7 @@ def get_budget_resume() -> dict:
 # ═══════════════════════════════════════════════════════════
 
 def render_formulaire(meuble: Optional[Furniture] = None):
-    """Formulaire d'ajout/édition de meuble"""
+    """Formulaire d'ajout/edition de meuble"""
     is_edit = meuble is not None
     prefix = "edit" if is_edit else "new"
     
@@ -164,14 +164,14 @@ def render_formulaire(meuble: Optional[Furniture] = None):
             description = st.text_area(
                 "Description",
                 value=meuble.description if is_edit else "",
-                placeholder="Détails, caractéristiques..."
+                placeholder="Details, caracteristiques..."
             )
         
         with col2:
             priorites = list(PRIORITES_LABELS.keys())
             prio_index = priorites.index(meuble.priorite) if is_edit and meuble.priorite in priorites else 2
             priorite = st.selectbox(
-                "Priorité",
+                "Priorite",
                 options=priorites,
                 format_func=lambda x: PRIORITES_LABELS.get(x, x),
                 index=prio_index
@@ -189,7 +189,7 @@ def render_formulaire(meuble: Optional[Furniture] = None):
             col_prix1, col_prix2 = st.columns(2)
             with col_prix1:
                 prix_estime = st.number_input(
-                    "Prix estimé (€)",
+                    "Prix estime (€)",
                     min_value=0.0,
                     value=float(meuble.prix_estime) if is_edit and meuble.prix_estime else 0.0,
                     step=10.0
@@ -202,11 +202,11 @@ def render_formulaire(meuble: Optional[Furniture] = None):
                     step=10.0
                 )
         
-        # Ligne supplémentaire
+        # Ligne supplementaire
         col3, col4 = st.columns(2)
         with col3:
             magasin = st.text_input(
-                "Magasin envisagé",
+                "Magasin envisage",
                 value=meuble.magasin if is_edit else "",
                 placeholder="IKEA, Maisons du Monde, Brocante..."
             )
@@ -252,7 +252,7 @@ def render_formulaire(meuble: Optional[Furniture] = None):
                 st.success("✅ Meuble mis à jour!")
             else:
                 create_meuble(data)
-                st.success("✅ Meuble ajouté à la wishlist!")
+                st.success("✅ Meuble ajoute à la wishlist!")
             
             st.rerun()
 
@@ -288,7 +288,7 @@ def render_meuble_card(meuble: Furniture):
                 st.caption(" | ".join(infos))
         
         with col2:
-            # Statut et priorité
+            # Statut et priorite
             st.markdown(STATUTS_LABELS.get(meuble.statut, meuble.statut))
             st.caption(PRIORITES_LABELS.get(meuble.priorite, meuble.priorite))
         
@@ -310,16 +310,16 @@ def render_meuble_card(meuble: Furniture):
 
 
 def render_budget_summary():
-    """Affiche le résumé budget"""
+    """Affiche le resume budget"""
     resume = get_budget_resume()
     
-    st.subheader("💰 Résumé Budget")
+    st.subheader("💰 Resume Budget")
     
     col1, col2, col3 = st.columns(3)
     with col1:
         st.metric("Articles en wishlist", resume["nb_articles"])
     with col2:
-        st.metric("Budget estimé", f"{resume['total_estime']:.0f}€")
+        st.metric("Budget estime", f"{resume['total_estime']:.0f}€")
     with col3:
         st.metric("Budget max", f"{resume['total_max']:.0f}€")
     
@@ -340,7 +340,7 @@ def render_budget_summary():
 # ═══════════════════════════════════════════════════════════
 
 def render_vue_par_piece():
-    """Affiche les meubles groupés par pièce"""
+    """Affiche les meubles groupes par pièce"""
     meubles = get_all_meubles(filtre_statut=None)
     
     if not meubles:
@@ -390,7 +390,7 @@ def render_onglet_wishlist():
     )
     
     if not meubles:
-        st.info("Aucun meuble trouvé avec ces filtres.")
+        st.info("Aucun meuble trouve avec ces filtres.")
         return
     
     st.caption(f"📋 {len(meubles)} article(s)")
@@ -417,11 +417,11 @@ def render_onglet_budget():
 # ═══════════════════════════════════════════════════════════
 
 def app():
-    """Point d'entrée module Meubles"""
+    """Point d'entree module Meubles"""
     st.title("🛋️ Wishlist Meubles")
-    st.caption("Gérez vos achats de meubles par pièce et budget")
+    st.caption("Gerez vos achats de meubles par pièce et budget")
     
-    # Mode édition
+    # Mode edition
     if "edit_meuble_id" in st.session_state:
         meuble = get_meuble_by_id(st.session_state["edit_meuble_id"])
         if meuble:

@@ -1,4 +1,4 @@
-"""Add est_vegetarien and type_proteines fields to recettes
+﻿"""Add est_vegetarien and type_proteines fields to recettes
 
 Revision ID: 014_add_recette_equilibre_fields
 Revises: 013_add_batch_cooking_tables
@@ -17,20 +17,20 @@ depends_on = None
 
 
 def upgrade() -> None:
-    # SQL direct pour ajouter les colonnes à recettes
+    # SQL direct pour ajouter les colonnes Ã  recettes
     
-    # 1. Ajouter colonne est_vegetarien avec valeur par défaut false
+    # 1. Ajouter colonne est_vegetarien avec valeur par dÃ©faut false
     op.execute("""
         ALTER TABLE recettes 
         ADD COLUMN est_vegetarien BOOLEAN NOT NULL DEFAULT false;
     """)
     
-    # 2. Créer index sur est_vegetarien pour les filtres
+    # 2. CrÃ©er index sur est_vegetarien pour les filtres
     op.execute("""
         CREATE INDEX idx_recettes_est_vegetarien ON recettes (est_vegetarien);
     """)
     
-    # 3. Ajouter colonne type_proteines pour catégoriser les protéines
+    # 3. Ajouter colonne type_proteines pour catÃ©goriser les protÃ©ines
     # Values: 'poisson', 'viande', 'volaille', 'vegetarien', 'mixte'
     op.execute("""
         ALTER TABLE recettes 

@@ -1,8 +1,8 @@
-"""
+﻿"""
 Générateur et parseur de fichiers iCal (.ics).
 
 Fonctionnalités:
-- Génération de fichiers iCal à partir d'événements
+- Génération de fichiers iCal Ã  partir d'événements
 - Parsing de fichiers iCal vers événements
 """
 
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class ICalGenerator:
-    """Génère des fichiers iCal (.ics) à partir des événements."""
+    """Génère des fichiers iCal (.ics) Ã  partir des événements."""
     
     @staticmethod
     def generate_ical(events: list[CalendarEventExternal], calendar_name: str = "Assistant Matanne") -> str:
@@ -24,7 +24,7 @@ class ICalGenerator:
         Génère un fichier iCal complet.
         
         Args:
-            events: Liste d'événements à inclure
+            events: Liste d'événements Ã  inclure
             calendar_name: Nom du calendrier
             
         Returns:

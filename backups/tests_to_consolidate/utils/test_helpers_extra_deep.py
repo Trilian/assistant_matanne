@@ -1,8 +1,8 @@
-"""
+﻿"""
 Tests approfondis pour helpers/data.py, helpers/dates.py et helpers/strings.py
 
 Module: src/utils/helpers/
-Tests créés: ~100 tests
+Tests crÃ©Ã©s: ~100 tests
 Objectif: Atteindre 80%+ de couverture
 """
 
@@ -19,7 +19,7 @@ class TestDataSafeGet:
     """Tests pour safe_get"""
     
     def test_safe_get_single_key(self):
-        """Récupération clé simple"""
+        """RÃ©cupÃ©ration clÃ© simple"""
         from src.utils.helpers.data import safe_get
         
         data = {"a": 1, "b": 2}
@@ -27,7 +27,7 @@ class TestDataSafeGet:
         assert safe_get(data, "b") == 2
     
     def test_safe_get_nested_keys(self):
-        """Récupération clés imbriquées"""
+        """RÃ©cupÃ©ration clÃ©s imbriquÃ©es"""
         from src.utils.helpers.data import safe_get
         
         data = {"a": {"b": {"c": 42}}}
@@ -35,7 +35,7 @@ class TestDataSafeGet:
         assert safe_get(data, "a", "b") == {"c": 42}
     
     def test_safe_get_missing_key_default(self):
-        """Fallback quand clé absente"""
+        """Fallback quand clÃ© absente"""
         from src.utils.helpers.data import safe_get
         
         data = {"a": 1}
@@ -50,7 +50,7 @@ class TestDataSafeGet:
         assert safe_get(data, "a", default=42) == 42
     
     def test_safe_get_non_dict_intermediate(self):
-        """Intermédiaire non-dict retourne default"""
+        """IntermÃ©diaire non-dict retourne default"""
         from src.utils.helpers.data import safe_get
         
         data = {"a": "string"}
@@ -94,7 +94,7 @@ class TestDataGroupBy:
         assert group_by([], "key") == {}
     
     def test_group_by_missing_key(self):
-        """Clé absente crée groupe None"""
+        """ClÃ© absente crÃ©e groupe None"""
         from src.utils.helpers.data import group_by
         
         items = [{"a": 1}, {"type": "X"}]
@@ -104,7 +104,7 @@ class TestDataGroupBy:
         assert "X" in result
     
     def test_group_by_all_same(self):
-        """Tous les items même groupe"""
+        """Tous les items mÃªme groupe"""
         from src.utils.helpers.data import group_by
         
         items = [{"cat": "X", "i": i} for i in range(5)]
@@ -147,21 +147,21 @@ class TestDataDeduplicate:
     """Tests pour deduplicate"""
     
     def test_deduplicate_primitives(self):
-        """Dédup valeurs primitives"""
+        """DÃ©dup valeurs primitives"""
         from src.utils.helpers.data import deduplicate
         
         assert deduplicate([1, 2, 2, 3, 1]) == [1, 2, 3]
         assert deduplicate(["a", "b", "a"]) == ["a", "b"]
     
     def test_deduplicate_with_key(self):
-        """Dédup avec fonction clé"""
+        """DÃ©dup avec fonction clÃ©"""
         from src.utils.helpers.data import deduplicate
         
         items = [{"id": 1, "v": "a"}, {"id": 1, "v": "b"}, {"id": 2, "v": "c"}]
         result = deduplicate(items, key=lambda x: x["id"])
         
         assert len(result) == 2
-        assert result[0]["v"] == "a"  # Premier conservé
+        assert result[0]["v"] == "a"  # Premier conservÃ©
     
     def test_deduplicate_empty(self):
         """Liste vide"""
@@ -186,7 +186,7 @@ class TestDataFlatten:
     """Tests pour flatten"""
     
     def test_flatten_nested(self):
-        """Aplatit listes imbriquées"""
+        """Aplatit listes imbriquÃ©es"""
         from src.utils.helpers.data import flatten
         
         assert flatten([[1, 2], [3, 4], [5]]) == [1, 2, 3, 4, 5]
@@ -285,28 +285,28 @@ class TestDataPickOmit:
     """Tests pour pick et omit"""
     
     def test_pick_keys(self):
-        """Extrait clés spécifiées"""
+        """Extrait clÃ©s spÃ©cifiÃ©es"""
         from src.utils.helpers.data import pick
         
         data = {"a": 1, "b": 2, "c": 3}
         assert pick(data, ["a", "c"]) == {"a": 1, "c": 3}
     
     def test_pick_missing_keys(self):
-        """Clés absentes ignorées"""
+        """ClÃ©s absentes ignorÃ©es"""
         from src.utils.helpers.data import pick
         
         data = {"a": 1}
         assert pick(data, ["a", "z"]) == {"a": 1}
     
     def test_omit_keys(self):
-        """Exclut clés spécifiées"""
+        """Exclut clÃ©s spÃ©cifiÃ©es"""
         from src.utils.helpers.data import omit
         
         data = {"a": 1, "b": 2, "c": 3}
         assert omit(data, ["b"]) == {"a": 1, "c": 3}
     
     def test_omit_all(self):
-        """Exclut toutes les clés"""
+        """Exclut toutes les clÃ©s"""
         from src.utils.helpers.data import omit
         
         data = {"a": 1, "b": 2}
@@ -333,7 +333,7 @@ class TestDatesWeekBounds:
         assert (sun - mon).days == 6
     
     def test_week_bounds_monday(self):
-        """Lundi renvoie même lundi"""
+        """Lundi renvoie mÃªme lundi"""
         from src.utils.helpers.dates import get_week_bounds
         
         mon_input = date(2025, 1, 6)
@@ -342,7 +342,7 @@ class TestDatesWeekBounds:
         assert mon == mon_input
     
     def test_week_bounds_sunday(self):
-        """Dimanche renvoie même dimanche"""
+        """Dimanche renvoie mÃªme dimanche"""
         from src.utils.helpers.dates import get_week_bounds
         
         sun_input = date(2025, 1, 12)
@@ -367,7 +367,7 @@ class TestDatesDateRange:
         assert result[-1] == end
     
     def test_date_range_same_day(self):
-        """Même jour"""
+        """MÃªme jour"""
         from src.utils.helpers.dates import date_range
         
         d = date(2025, 1, 1)
@@ -376,7 +376,7 @@ class TestDatesDateRange:
         assert result == [d]
     
     def test_date_range_week(self):
-        """Semaine complète"""
+        """Semaine complÃ¨te"""
         from src.utils.helpers.dates import date_range
         
         start = date(2025, 1, 6)  # Lundi
@@ -400,7 +400,7 @@ class TestDatesMonthBounds:
         assert last == date(2025, 1, 31)
     
     def test_month_bounds_february_leap(self):
-        """Février année bissextile"""
+        """FÃ©vrier annÃ©e bissextile"""
         from src.utils.helpers.dates import get_month_bounds
         
         d = date(2024, 2, 15)  # 2024 = bissextile
@@ -409,7 +409,7 @@ class TestDatesMonthBounds:
         assert last == date(2024, 2, 29)
     
     def test_month_bounds_february_normal(self):
-        """Février année normale"""
+        """FÃ©vrier annÃ©e normale"""
         from src.utils.helpers.dates import get_month_bounds
         
         d = date(2025, 2, 15)
@@ -418,7 +418,7 @@ class TestDatesMonthBounds:
         assert last == date(2025, 2, 28)
     
     def test_month_bounds_december(self):
-        """Décembre (transition année)"""
+        """DÃ©cembre (transition annÃ©e)"""
         from src.utils.helpers.dates import get_month_bounds
         
         d = date(2025, 12, 15)
@@ -452,7 +452,7 @@ class TestDatesAddBusinessDays:
         assert result.weekday() == 0  # Lundi
     
     def test_add_business_days_zero(self):
-        """0 jours = même date"""
+        """0 jours = mÃªme date"""
         from src.utils.helpers.dates import add_business_days
         
         d = date(2025, 1, 6)
@@ -474,7 +474,7 @@ class TestDatesWeeksBetween:
         assert weeks_between(start, end) == 2
     
     def test_weeks_between_same_day(self):
-        """Même jour = 0 semaines"""
+        """MÃªme jour = 0 semaines"""
         from src.utils.helpers.dates import weeks_between
         
         d = date(2025, 1, 1)
@@ -567,14 +567,14 @@ class TestStringsGenerateId:
         assert result.isalnum()
     
     def test_generate_id_deterministic(self):
-        """Même données = même ID"""
+        """MÃªme donnÃ©es = mÃªme ID"""
         from src.utils.helpers.strings import generate_id
         
         data = {"a": 1, "b": 2}
         assert generate_id(data) == generate_id(data)
     
     def test_generate_id_order_independent(self):
-        """Ordre des clés n'importe pas"""
+        """Ordre des clÃ©s n'importe pas"""
         from src.utils.helpers.strings import generate_id
         
         d1 = {"a": 1, "b": 2}
@@ -582,7 +582,7 @@ class TestStringsGenerateId:
         assert generate_id(d1) == generate_id(d2)
     
     def test_generate_id_different_data(self):
-        """Différentes données = différents IDs"""
+        """DiffÃ©rentes donnÃ©es = diffÃ©rents IDs"""
         from src.utils.helpers.strings import generate_id
         
         id1 = generate_id({"x": 1})
@@ -600,7 +600,7 @@ class TestStringsNormalizeWhitespace:
         assert normalize_whitespace("hello    world") == "hello world"
     
     def test_normalize_whitespace_trim(self):
-        """Supprime espaces début/fin"""
+        """Supprime espaces dÃ©but/fin"""
         from src.utils.helpers.strings import normalize_whitespace
         
         assert normalize_whitespace("  hello  ") == "hello"
@@ -622,17 +622,17 @@ class TestStringsRemoveAccents:
     """Tests pour remove_accents"""
     
     def test_remove_accents_french(self):
-        """Accents français"""
+        """Accents franÃ§ais"""
         from src.utils.helpers.strings import remove_accents
         
-        assert remove_accents("café crème") == "cafe creme"
-        assert remove_accents("où êtes-vous?") == "ou etes-vous?"
+        assert remove_accents("cafÃ© crÃ¨me") == "cafe creme"
+        assert remove_accents("oÃ¹ Ãªtes-vous?") == "ou etes-vous?"
     
     def test_remove_accents_uppercase(self):
         """Majuscules avec accents"""
         from src.utils.helpers.strings import remove_accents
         
-        assert remove_accents("ÉLÉPHANT") == "ELEPHANT"
+        assert remove_accents("Ã‰LÃ‰PHANT") == "ELEPHANT"
     
     def test_remove_accents_no_accents(self):
         """Pas d'accents"""
@@ -641,10 +641,10 @@ class TestStringsRemoveAccents:
         assert remove_accents("hello world") == "hello world"
     
     def test_remove_accents_mixed(self):
-        """Mélange accents/non-accents"""
+        """MÃ©lange accents/non-accents"""
         from src.utils.helpers.strings import remove_accents
         
-        assert remove_accents("Réservé pour été") == "Reserve pour ete"
+        assert remove_accents("RÃ©servÃ© pour Ã©tÃ©") == "Reserve pour ete"
 
 
 class TestStringsCamelSnake:
@@ -658,7 +658,7 @@ class TestStringsCamelSnake:
         assert camel_to_snake("myVariableName") == "my_variable_name"
     
     def test_camel_to_snake_already_lowercase(self):
-        """Déjà lowercase"""
+        """DÃ©jÃ  lowercase"""
         from src.utils.helpers.strings import camel_to_snake
         
         assert camel_to_snake("simple") == "simple"
@@ -687,13 +687,13 @@ class TestStringsPluralize:
         assert pluralize("item", 1) == "1 item"
     
     def test_pluralize_regular(self):
-        """Pluriel régulier"""
+        """Pluriel rÃ©gulier"""
         from src.utils.helpers.strings import pluralize
         
         assert pluralize("item", 5) == "5 items"
     
     def test_pluralize_custom_form(self):
-        """Forme pluriel personnalisée"""
+        """Forme pluriel personnalisÃ©e"""
         from src.utils.helpers.strings import pluralize
         
         assert pluralize("cheval", 2, "chevaux") == "2 chevaux"
@@ -715,13 +715,13 @@ class TestStringsMaskSensitive:
     """Tests pour mask_sensitive"""
     
     def test_mask_sensitive_default(self):
-        """Masquage par défaut (4 visibles)"""
+        """Masquage par dÃ©faut (4 visibles)"""
         from src.utils.helpers.strings import mask_sensitive
         
         assert mask_sensitive("1234567890") == "1234******"
     
     def test_mask_sensitive_custom(self):
-        """Nombre personnalisé de visibles"""
+        """Nombre personnalisÃ© de visibles"""
         from src.utils.helpers.strings import mask_sensitive
         
         assert mask_sensitive("secret123", 3) == "sec******"

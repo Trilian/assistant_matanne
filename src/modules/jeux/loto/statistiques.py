@@ -1,4 +1,4 @@
-"""
+﻿"""
 Module Loto - Composants UI de statistiques
 """
 
@@ -13,12 +13,12 @@ from ._common import (
 def afficher_dernier_tirage(tirages: list):
     """Affiche le dernier tirage avec style"""
     if not tirages:
-        st.info("📊 Aucun tirage enregistré")
+        st.info("ðŸ“Š Aucun tirage enregistrÃe")
         return
     
     dernier = tirages[0]
     
-    st.markdown("### 🎰 Dernier tirage")
+    st.markdown("### ðŸŽ° Dernier tirage")
     
     with st.container(border=True):
         col1, col2 = st.columns([3, 1])
@@ -49,13 +49,13 @@ def afficher_dernier_tirage(tirages: list):
         
         with col2:
             if dernier.get("jackpot_euros"):
-                st.metric("💰 Jackpot", f"{dernier['jackpot_euros']:,}€")
+                st.metric("ðŸ’° Jackpot", f"{dernier['jackpot_euros']:,}â‚¬")
 
 
 def afficher_statistiques_frequences(tirages: list):
-    """Affiche les statistiques de fréquence"""
+    """Affiche les statistiques de frÃequence"""
     if not tirages:
-        st.warning("Pas assez de données pour les statistiques")
+        st.warning("Pas assez de donnÃees pour les statistiques")
         return
     
     freq_data = calculer_frequences_numeros(tirages)
@@ -69,23 +69,23 @@ def afficher_statistiques_frequences(tirages: list):
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.markdown("### 🔥 Numéros Chauds")
-        st.caption("Les plus fréquents")
+        st.markdown("### ðŸ”¥ NumÃeros Chauds")
+        st.caption("Les plus frÃequents")
         for num in chauds_froids.get("chauds", [])[:5]:
             freq = frequences[num]["frequence"]
             pct = frequences[num]["pourcentage"]
             st.write(f"**{num}** - {freq} fois ({pct}%)")
     
     with col2:
-        st.markdown("### ❄️ Numéros Froids")
-        st.caption("Les moins fréquents")
+        st.markdown("### â„ï¸ NumÃeros Froids")
+        st.caption("Les moins frÃequents")
         for num in chauds_froids.get("froids", [])[:5]:
             freq = frequences[num]["frequence"]
             pct = frequences[num]["pourcentage"]
             st.write(f"**{num}** - {freq} fois ({pct}%)")
     
     with col3:
-        st.markdown("### ⏰ En Retard")
+        st.markdown("### â° En Retard")
         st.caption("Pas sortis depuis longtemps")
         for num in chauds_froids.get("retard", [])[:5]:
             ecart = frequences[num]["ecart"]
@@ -93,8 +93,8 @@ def afficher_statistiques_frequences(tirages: list):
     
     st.divider()
     
-    # Graphique de fréquence
-    st.markdown("### 📊 Distribution des fréquences")
+    # Graphique de frÃequence
+    st.markdown("### ðŸ“Š Distribution des frÃequences")
     
     nums = list(range(NUMERO_MIN, NUMERO_MAX + 1))
     freqs = [frequences.get(n, {}).get("frequence", 0) for n in nums]
@@ -106,13 +106,13 @@ def afficher_statistiques_frequences(tirages: list):
             marker_color=["#f5576c" if n in chauds_froids.get("chauds", [])[:10] 
                           else "#667eea" if n in chauds_froids.get("froids", [])[:10]
                           else "#95a5a6" for n in nums],
-            hovertemplate="Numéro %{x}<br>Fréquence: %{y}<extra></extra>"
+            hovertemplate="NumÃero %{x}<br>FrÃequence: %{y}<extra></extra>"
         )
     ])
     
     fig.update_layout(
-        xaxis_title="Numéro",
-        yaxis_title="Fréquence",
+        xaxis_title="NumÃero",
+        yaxis_title="FrÃequence",
         height=300,
         margin=dict(l=20, r=20, t=20, b=40)
     )
@@ -121,44 +121,44 @@ def afficher_statistiques_frequences(tirages: list):
     
     # Avertissement
     st.warning(
-        "⚠️ **Rappel**: Ces statistiques sont purement informatives. "
-        "Chaque tirage est indépendant et aléatoire. "
-        "Un numéro 'en retard' n'a pas plus de chances de sortir!"
+        "âš ï¸ **Rappel**: Ces statistiques sont purement informatives. "
+        "Chaque tirage est indÃependant et alÃeatoire. "
+        "Un numÃero 'en retard' n'a pas plus de chances de sortir!"
     )
 
 
 def afficher_esperance():
-    """Affiche l'espérance mathématique du Loto"""
+    """Affiche l'espÃerance mathÃematique du Loto"""
     
     esp = calculer_esperance_mathematique()
     
-    st.markdown("### 📐 Mathématiques du Loto")
+    st.markdown("### ðŸ“ MathÃematiques du Loto")
     
     with st.container(border=True):
         col1, col2 = st.columns(2)
         
         with col1:
-            st.metric("💸 Coût grille", f"{esp['cout_grille']:.2f}€")
-            st.metric("📉 Espérance", f"{esp['esperance']:+.4f}€")
+            st.metric("ðŸ’¸ Coût grille", f"{esp['cout_grille']:.2f}â‚¬")
+            st.metric("ðŸ“‰ EspÃerance", f"{esp['esperance']:+.4f}â‚¬")
         
         with col2:
-            st.metric("🎯 Gains espérés", f"{esp['gains_esperes']:.4f}€")
-            st.metric("📊 Perte moyenne", f"{esp['perte_moyenne_pct']:.1f}%")
+            st.metric("ðŸŽ¯ Gains espÃerÃes", f"{esp['gains_esperes']:.4f}â‚¬")
+            st.metric("ðŸ“Š Perte moyenne", f"{esp['perte_moyenne_pct']:.1f}%")
         
         st.info(esp["conclusion"])
     
     st.divider()
     
-    st.markdown("### 🎲 Probabilités de gain")
+    st.markdown("### ðŸŽ² ProbabilitÃes de gain")
     
     df_probas = pd.DataFrame([
-        {"Rang": rang, "Gains": f"{GAINS_PAR_RANG.get(rang, 'Jackpot'):,}€" if GAINS_PAR_RANG.get(rang) else "Jackpot", "Probabilité": proba}
+        {"Rang": rang, "Gains": f"{GAINS_PAR_RANG.get(rang, 'Jackpot'):,}â‚¬" if GAINS_PAR_RANG.get(rang) else "Jackpot", "ProbabilitÃe": proba}
         for rang, proba in esp["probabilites"].items()
     ])
     
     st.dataframe(df_probas, hide_index=True, width="stretch")
     
     st.warning(
-        "⚠️ **Rappel**: Vous avez plus de chances de mourir d'une chute de météorite (1/700 000) "
+        "âš ï¸ **Rappel**: Vous avez plus de chances de mourir d'une chute de mÃetÃeorite (1/700 000) "
         "que de gagner le jackpot du Loto (1/19 068 840)!"
     )

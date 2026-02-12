@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour alertes.py
 
 Module: src.ui.components.alertes

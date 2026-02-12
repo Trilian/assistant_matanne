@@ -1,5 +1,5 @@
-"""
-Tests profonds supplémentaires pour errors.py et errors_base.py
+﻿"""
+Tests profonds supplÃ©mentaires pour errors.py et errors_base.py
 
 Cible les fonctions non couvertes pour atteindre 80% de couverture.
 """
@@ -9,16 +9,16 @@ import logging
 from unittest.mock import MagicMock, patch
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: ExceptionApp et sous-classes
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestExceptionAppDetails:
-    """Tests détaillés pour ExceptionApp"""
+    """Tests dÃ©taillÃ©s pour ExceptionApp"""
 
     def test_exception_avec_message_utilisateur(self):
-        """Test message utilisateur personnalisé"""
+        """Test message utilisateur personnalisÃ©"""
         from src.core.errors_base import ExceptionApp
 
         err = ExceptionApp(
@@ -28,7 +28,7 @@ class TestExceptionAppDetails:
         assert err.message_utilisateur == "Message pour l'utilisateur"
 
     def test_exception_avec_details_dict(self):
-        """Test détails en dictionnaire"""
+        """Test dÃ©tails en dictionnaire"""
         from src.core.errors_base import ExceptionApp
 
         details = {"champ": "nom", "valeur": "test", "raison": "trop court"}
@@ -46,7 +46,7 @@ class TestExceptionAppDetails:
         assert str(err) == "Mon message d'erreur"
 
     def test_exception_heritage(self):
-        """Test héritage de Exception"""
+        """Test hÃ©ritage de Exception"""
         from src.core.errors_base import ExceptionApp
 
         err = ExceptionApp("Test")
@@ -55,14 +55,14 @@ class TestExceptionAppDetails:
 
 
 class TestErreurValidationDetails:
-    """Tests détaillés pour ErreurValidation"""
+    """Tests dÃ©taillÃ©s pour ErreurValidation"""
 
     def test_erreur_validation_avec_tous_params(self):
-        """Test avec tous les paramètres"""
+        """Test avec tous les paramÃ¨tres"""
         from src.core.errors import ErreurValidation
 
         err = ErreurValidation(
-            "Validation échouée",
+            "Validation Ã©chouÃ©e",
             details={"champs": ["nom", "email"]},
             message_utilisateur="Veuillez corriger les erreurs",
         )
@@ -81,14 +81,14 @@ class TestErreurValidationDetails:
 
 
 class TestErreurNonTrouveDetails:
-    """Tests détaillés pour ErreurNonTrouve"""
+    """Tests dÃ©taillÃ©s pour ErreurNonTrouve"""
 
     def test_erreur_non_trouve_avec_id(self):
-        """Test avec ID d'entité"""
+        """Test avec ID d'entitÃ©"""
         from src.core.errors import ErreurNonTrouve
 
         err = ErreurNonTrouve(
-            "Recette 42 non trouvée",
+            "Recette 42 non trouvÃ©e",
             details={"type": "Recette", "id": 42},
             message_utilisateur="Cette recette n'existe pas",
         )
@@ -98,7 +98,7 @@ class TestErreurNonTrouveDetails:
 
 
 class TestErreurBaseDeDonneesDetails:
-    """Tests détaillés pour ErreurBaseDeDonnees"""
+    """Tests dÃ©taillÃ©s pour ErreurBaseDeDonnees"""
 
     def test_erreur_bdd_connexion(self):
         """Test erreur de connexion"""
@@ -107,14 +107,14 @@ class TestErreurBaseDeDonneesDetails:
         err = ErreurBaseDeDonnees(
             "Connection refused",
             details={"host": "localhost", "port": 5432},
-            message_utilisateur="Impossible de se connecter à la base de données",
+            message_utilisateur="Impossible de se connecter Ã  la base de donnÃ©es",
         )
 
         assert "localhost" in str(err.details)
 
 
 class TestErreurServiceIADetails:
-    """Tests détaillés pour ErreurServiceIA"""
+    """Tests dÃ©taillÃ©s pour ErreurServiceIA"""
 
     def test_erreur_ia_quota(self):
         """Test erreur quota IA"""
@@ -130,31 +130,31 @@ class TestErreurServiceIADetails:
 
 
 class TestErreurConfigurationDetails:
-    """Tests détaillés pour ErreurConfiguration"""
+    """Tests dÃ©taillÃ©s pour ErreurConfiguration"""
 
     def test_erreur_config_env_var(self):
         """Test erreur variable d'environnement"""
         from src.core.errors_base import ErreurConfiguration
 
         err = ErreurConfiguration(
-            "DATABASE_URL non défini",
+            "DATABASE_URL non dÃ©fini",
             details={"variable": "DATABASE_URL"},
-            message_utilisateur="Configuration incomplète",
+            message_utilisateur="Configuration incomplÃ¨te",
         )
 
         assert err.details["variable"] == "DATABASE_URL"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: Helpers de validation (errors_base.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestExigerChamps:
     """Tests pour exiger_champs"""
 
     def test_exiger_champs_tous_presents(self):
-        """Test tous les champs présents"""
+        """Test tous les champs prÃ©sents"""
         from src.core.errors_base import exiger_champs
 
         data = {"nom": "Tarte", "temps": 30, "portions": 4}
@@ -183,7 +183,7 @@ class TestExigerChamps:
             exiger_champs(data, ["nom", "temps", "portions", "difficulte"])
 
     def test_exiger_champs_valeur_vide(self):
-        """Test valeur vide considérée comme manquante"""
+        """Test valeur vide considÃ©rÃ©e comme manquante"""
         from src.core.errors_base import exiger_champs, ErreurValidation
 
         data = {"nom": "", "temps": 30}
@@ -203,13 +203,13 @@ class TestValiderPlage:
         valider_plage(50, min_val=0, max_val=100, nom_param="prix")
 
     def test_valider_plage_egal_min(self):
-        """Test valeur égale au minimum"""
+        """Test valeur Ã©gale au minimum"""
         from src.core.errors_base import valider_plage
 
         valider_plage(0, min_val=0, max_val=100, nom_param="prix")
 
     def test_valider_plage_egal_max(self):
-        """Test valeur égale au maximum"""
+        """Test valeur Ã©gale au maximum"""
         from src.core.errors_base import valider_plage
 
         valider_plage(100, min_val=0, max_val=100, nom_param="prix")
@@ -273,13 +273,13 @@ class TestValiderType:
             valider_type(None, str, "valeur")
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS: Décorateur gerer_erreurs avancé
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS: DÃ©corateur gerer_erreurs avancÃ©
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGererErreursAdvanced:
-    """Tests avancés pour @gerer_erreurs"""
+    """Tests avancÃ©s pour @gerer_erreurs"""
 
     def test_gerer_erreurs_niveau_warning(self):
         """Test niveau log WARNING"""
@@ -329,12 +329,12 @@ class TestGererErreursAdvanced:
         """Test gestion ErreurLimiteDebit"""
         from src.core.errors import gerer_erreurs, ErreurLimiteDebit
 
-        @gerer_erreurs(afficher_dans_ui=False, valeur_fallback="Quota dépassé")
+        @gerer_erreurs(afficher_dans_ui=False, valeur_fallback="Quota dÃ©passÃ©")
         def func_rate_limit():
             raise ErreurLimiteDebit("Rate limit exceeded")
 
         result = func_rate_limit()
-        assert result == "Quota dépassé"
+        assert result == "Quota dÃ©passÃ©"
 
     def test_gerer_erreurs_erreur_service_externe(self):
         """Test gestion ErreurServiceExterne"""
@@ -348,7 +348,7 @@ class TestGererErreursAdvanced:
         assert result is None
 
     def test_gerer_erreurs_exception_generique(self):
-        """Test gestion exception générique"""
+        """Test gestion exception gÃ©nÃ©rique"""
         from src.core.errors import gerer_erreurs
 
         @gerer_erreurs(afficher_dans_ui=False, valeur_fallback="erreur")
@@ -359,16 +359,16 @@ class TestGererErreursAdvanced:
         assert result == "erreur"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: _is_debug_mode
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestIsDebugMode:
     """Tests pour _is_debug_mode"""
 
     def test_is_debug_mode_false_default(self):
-        """Test mode debug désactivé par défaut"""
+        """Test mode debug dÃ©sactivÃ© par dÃ©faut"""
         from src.core.errors import _is_debug_mode
 
         # Sans mock, devrait retourner False
@@ -381,19 +381,19 @@ class TestIsDebugMode:
 
         with patch("streamlit.session_state", {"debug_mode": True}):
             result = _is_debug_mode()
-            # Peut être True ou False selon l'implémentation
+            # Peut Ãªtre True ou False selon l'implÃ©mentation
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS: Ré-exports
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS: RÃ©-exports
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestReExports:
-    """Tests pour les ré-exports"""
+    """Tests pour les rÃ©-exports"""
 
     def test_exceptions_reexportees(self):
-        """Test exceptions ré-exportées depuis errors.py"""
+        """Test exceptions rÃ©-exportÃ©es depuis errors.py"""
         from src.core.errors import (
             ErreurValidation,
             ErreurNonTrouve,
@@ -405,7 +405,7 @@ class TestReExports:
             ExceptionApp,
         )
 
-        # Vérifier que toutes les exceptions sont disponibles
+        # VÃ©rifier que toutes les exceptions sont disponibles
         assert ErreurValidation is not None
         assert ErreurNonTrouve is not None
         assert ErreurBaseDeDonnees is not None
@@ -416,7 +416,7 @@ class TestReExports:
         assert ExceptionApp is not None
 
     def test_helpers_reexportes(self):
-        """Test helpers ré-exportés depuis errors.py"""
+        """Test helpers rÃ©-exportÃ©s depuis errors.py"""
         from src.core.errors import exiger_champs, valider_plage, valider_type
 
         assert callable(exiger_champs)
@@ -424,9 +424,9 @@ class TestReExports:
         assert callable(valider_type)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: Alias handle_errors
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestHandleErrorsAlias:
@@ -439,7 +439,7 @@ class TestHandleErrorsAlias:
         assert handle_errors is gerer_erreurs
 
     def test_handle_errors_decorator(self):
-        """Test alias fonctionne comme décorateur"""
+        """Test alias fonctionne comme dÃ©corateur"""
         from src.core.errors import handle_errors
 
         @handle_errors(valeur_fallback="default", afficher_dans_ui=False)
@@ -450,40 +450,40 @@ class TestHandleErrorsAlias:
         assert result == "default"
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS: Héritage des exceptions
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS: HÃ©ritage des exceptions
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestExceptionHierarchy:
-    """Tests pour hiérarchie des exceptions"""
+    """Tests pour hiÃ©rarchie des exceptions"""
 
     def test_erreur_validation_herite_exception_app(self):
-        """Test ErreurValidation hérite de ExceptionApp"""
+        """Test ErreurValidation hÃ©rite de ExceptionApp"""
         from src.core.errors import ErreurValidation, ExceptionApp
 
         assert issubclass(ErreurValidation, ExceptionApp)
 
     def test_erreur_non_trouve_herite_exception_app(self):
-        """Test ErreurNonTrouve hérite de ExceptionApp"""
+        """Test ErreurNonTrouve hÃ©rite de ExceptionApp"""
         from src.core.errors import ErreurNonTrouve, ExceptionApp
 
         assert issubclass(ErreurNonTrouve, ExceptionApp)
 
     def test_erreur_bdd_herite_exception_app(self):
-        """Test ErreurBaseDeDonnees hérite de ExceptionApp"""
+        """Test ErreurBaseDeDonnees hÃ©rite de ExceptionApp"""
         from src.core.errors import ErreurBaseDeDonnees, ExceptionApp
 
         assert issubclass(ErreurBaseDeDonnees, ExceptionApp)
 
     def test_erreur_ia_herite_exception_app(self):
-        """Test ErreurServiceIA hérite de ExceptionApp"""
+        """Test ErreurServiceIA hÃ©rite de ExceptionApp"""
         from src.core.errors import ErreurServiceIA, ExceptionApp
 
         assert issubclass(ErreurServiceIA, ExceptionApp)
 
     def test_toutes_exceptions_catchable(self):
-        """Test toutes les exceptions peuvent être catchées par ExceptionApp"""
+        """Test toutes les exceptions peuvent Ãªtre catchÃ©es par ExceptionApp"""
         from src.core.errors import (
             ErreurValidation,
             ErreurNonTrouve,

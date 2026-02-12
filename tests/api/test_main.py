@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour l'API principale (main.py).
 
 Utilise une vraie DB SQLite en mémoire via les fixtures.
@@ -8,9 +8,9 @@ import pytest
 from fastapi.testclient import TestClient
 
 
-# ═══════════════════════════════════════════════════════════════════════
-# DONNÉES DE TEST RÉELLES
-# ═══════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# DONNÃ‰ES DE TEST RÃ‰ELLES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 EXPECTED_ROOT_RESPONSE = {
     "message": "API Assistant Matanne",
@@ -19,9 +19,9 @@ EXPECTED_ROOT_RESPONSE = {
 }
 
 
-# ═══════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS DE BASE (sans DB)
-# ═══════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestImportModule:
@@ -41,9 +41,9 @@ class TestImportModule:
         assert "/docs" in routes
 
 
-# ═══════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ENDPOINTS AVEC DB SQLITE
-# ═══════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestRootEndpoint:
@@ -172,7 +172,7 @@ class TestInventaireEndpoint:
         db.commit()
         db.refresh(ingredient)
         
-        # Ajouter un article test lié à l'ingrédient
+        # Ajouter un article test lié Ã  l'ingrédient
         article = ArticleInventaire(
             ingredient_id=ingredient.id,
             quantite=5,
@@ -250,9 +250,9 @@ class TestAPIVersioning:
             assert response.status_code == 200, f"Endpoint {endpoint} failed"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS AUTHENTIFICATION JWT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAuthentication:
@@ -289,7 +289,7 @@ class TestAuthentication:
     
     def test_authenticated_endpoint_with_mock_user(self, client):
         """Endpoint authentifié fonctionne avec utilisateur mocké."""
-        # Le fixture client a déjà un utilisateur mocké
+        # Le fixture client a déjÃ  un utilisateur mocké
         response = client.get("/api/v1/recettes")
         assert response.status_code == 200
     
@@ -309,9 +309,9 @@ class TestAuthentication:
         assert exc_info.value.status_code == 401
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ENDPOINTS IA
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestIAEndpoints:
@@ -376,9 +376,9 @@ class TestIAEndpoints:
                     assert "contexte" in data
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ROUTES MODIFICATION (PUT/DELETE)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestRecettesModification:
@@ -389,17 +389,17 @@ class TestRecettesModification:
         response = client.put(
             "/api/v1/recettes/999",
             json={
-                "nom": "Recette mise à jour",
+                "nom": "Recette mise Ã  jour",
                 "temps_preparation": 30,
                 "temps_cuisson": 45,
                 "portions": 4
             }
         )
-        # 404 si recette n'existe pas, 200 si mise à jour OK
+        # 404 si recette n'existe pas, 200 si mise Ã  jour OK
         assert response.status_code in (200, 404, 500)
     
     def test_update_recette_success(self, client, db):
-        """PUT met à jour une recette existante."""
+        """PUT met Ã  jour une recette existante."""
         from src.core.models import Recette
         
         # Créer une recette
@@ -415,7 +415,7 @@ class TestRecettesModification:
         db.commit()
         db.refresh(recette)
         
-        # Mettre à jour
+        # Mettre Ã  jour
         response = client.put(
             f"/api/v1/recettes/{recette.id}",
             json={
@@ -457,7 +457,7 @@ class TestRecettesModification:
         
         # Créer une recette
         recette = Recette(
-            nom="Recette à supprimer",
+            nom="Recette Ã  supprimer",
             temps_preparation=10,
             temps_cuisson=20,
             portions=2,

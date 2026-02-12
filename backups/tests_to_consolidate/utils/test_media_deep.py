@@ -1,8 +1,8 @@
-"""
+﻿"""
 Tests approfondis pour media.py (ImageOptimizer, ImageCache)
 
 Module: src/utils/media.py
-Tests créés: ~50 tests
+Tests crÃ©Ã©s: ~50 tests
 Objectif: Atteindre 80%+ de couverture
 """
 
@@ -21,7 +21,7 @@ class TestImageConfig:
     """Tests pour ImageConfig dataclass"""
     
     def test_image_config_default_values(self):
-        """Valeurs par défaut"""
+        """Valeurs par dÃ©faut"""
         from src.utils.media import ImageConfig
         
         config = ImageConfig()
@@ -33,7 +33,7 @@ class TestImageConfig:
         assert config.cache_ttl_seconds == 3600
     
     def test_image_config_custom_values(self):
-        """Valeurs personnalisées"""
+        """Valeurs personnalisÃ©es"""
         from src.utils.media import ImageConfig
         
         config = ImageConfig(
@@ -80,7 +80,7 @@ class TestImageCache:
         assert result == mock_image
     
     def test_image_cache_get_missing(self):
-        """Get clé absente"""
+        """Get clÃ© absente"""
         from src.utils.media import ImageCache
         
         cache = ImageCache()
@@ -115,7 +115,7 @@ class TestImageCache:
         assert "key2" in stats["keys"]
     
     def test_image_cache_ttl_expired(self):
-        """Cache expiré (TTL dépassé)"""
+        """Cache expirÃ© (TTL dÃ©passÃ©)"""
         from src.utils.media import ImageCache
         
         cache = ImageCache(ttl_seconds=1)  # 1 seconde TTL
@@ -127,10 +127,10 @@ class TestImageCache:
         
         result = cache.get("old_key")
         assert result is None
-        assert "old_key" not in cache.cache  # Nettoyé
+        assert "old_key" not in cache.cache  # NettoyÃ©
     
     def test_image_cache_ttl_valid(self):
-        """Cache valide (TTL pas dépassé)"""
+        """Cache valide (TTL pas dÃ©passÃ©)"""
         from src.utils.media import ImageCache
         
         cache = ImageCache(ttl_seconds=3600)
@@ -150,7 +150,7 @@ class TestImageOptimizer:
     """Tests pour ImageOptimizer"""
     
     def test_image_optimizer_init_default(self):
-        """Initialisation avec config par défaut"""
+        """Initialisation avec config par dÃ©faut"""
         from src.utils.media import ImageOptimizer
         
         optimizer = ImageOptimizer()
@@ -159,7 +159,7 @@ class TestImageOptimizer:
         assert optimizer.config.max_height == 1080
     
     def test_image_optimizer_init_custom_config(self):
-        """Initialisation avec config personnalisée"""
+        """Initialisation avec config personnalisÃ©e"""
         from src.utils.media import ImageOptimizer, ImageConfig
         
         config = ImageConfig(max_width=640, max_height=480)
@@ -174,7 +174,7 @@ class TestImageOptimizer:
         
         optimizer = ImageOptimizer()
         
-        # Créer une image mock petite
+        # CrÃ©er une image mock petite
         mock_image = Mock()
         mock_image.width = 800
         mock_image.height = 600
@@ -240,7 +240,7 @@ class TestImageOptimizer:
         optimizer.cache.get = Mock(return_value=cached_image)
         
         mock_image = Mock()
-        mock_image.width = 5000  # Serait redimensionné
+        mock_image.width = 5000  # Serait redimensionnÃ©
         
         result = optimizer.optimize(mock_image, key="cached_key")
         
@@ -306,7 +306,7 @@ class TestGlobalOptimizer:
         assert opt1 is opt2
     
     def test_get_optimizer_creates_instance(self):
-        """get_optimizer crée instance si None"""
+        """get_optimizer crÃ©e instance si None"""
         from src.utils import media
         
         media._global_optimizer = None
@@ -332,7 +332,7 @@ class TestGlobalOptimizer:
     
     @patch("src.utils.media.ImageOptimizer")
     def test_optimize_uploaded_image_custom_config(self, mock_optimizer_class):
-        """optimize_uploaded_image avec config personnalisée"""
+        """optimize_uploaded_image avec config personnalisÃ©e"""
         from src.utils.media import optimize_uploaded_image, ImageConfig
         
         mock_optimizer = Mock()
@@ -347,7 +347,7 @@ class TestGlobalOptimizer:
     
     @patch("src.utils.media.get_optimizer")
     def test_optimize_uploaded_image_with_key(self, mock_get_optimizer):
-        """optimize_uploaded_image avec clé cache"""
+        """optimize_uploaded_image avec clÃ© cache"""
         from src.utils.media import optimize_uploaded_image
         
         mock_optimizer = Mock()
@@ -374,20 +374,20 @@ class TestGlobalOptimizer:
 
 
 # =============================================================================
-# TESTS d'intégration avec PIL (si disponible)
+# TESTS d'intÃ©gration avec PIL (si disponible)
 # =============================================================================
 
 
 class TestImageOptimizerIntegration:
-    """Tests d'intégration avec PIL réel"""
+    """Tests d'intÃ©gration avec PIL rÃ©el"""
     
     @pytest.fixture
     def sample_image_bytes(self):
-        """Crée une image test réelle"""
+        """CrÃ©e une image test rÃ©elle"""
         try:
             from PIL import Image
             
-            # Créer une image RGB 100x100 rouge
+            # CrÃ©er une image RGB 100x100 rouge
             img = Image.new("RGB", (100, 100), color="red")
             buffer = BytesIO()
             img.save(buffer, format="PNG")
@@ -413,7 +413,7 @@ class TestImageOptimizerIntegration:
             from PIL import Image
             from src.utils.media import ImageOptimizer, ImageConfig
             
-            # Créer une grande image 3000x2000
+            # CrÃ©er une grande image 3000x2000
             img = Image.new("RGB", (3000, 2000), color="blue")
             buffer = BytesIO()
             img.save(buffer, format="PNG")
@@ -424,7 +424,7 @@ class TestImageOptimizerIntegration:
             
             result = optimizer.optimize_bytes(image_bytes)
             
-            # Vérifier que l'image a été redimensionnée
+            # VÃ©rifier que l'image a Ã©tÃ© redimensionnÃ©e
             from PIL import Image as PILImage
             result_img = PILImage.open(BytesIO(result))
             
@@ -434,7 +434,7 @@ class TestImageOptimizerIntegration:
             pytest.skip("PIL not installed")
     
     def test_cache_prevents_reoptimization(self, sample_image_bytes):
-        """Le cache évite la ré-optimisation"""
+        """Le cache Ã©vite la rÃ©-optimisation"""
         from src.utils.media import ImageOptimizer
         
         optimizer = ImageOptimizer()
@@ -445,5 +445,5 @@ class TestImageOptimizerIntegration:
         # Second appel - devrait utiliser le cache
         result2 = optimizer.optimize_bytes(sample_image_bytes, key="test")
         
-        # Les deux résultats devraient être identiques
+        # Les deux rÃ©sultats devraient Ãªtre identiques
         assert result1 == result2

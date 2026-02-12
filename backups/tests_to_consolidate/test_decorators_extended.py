@@ -1,5 +1,5 @@
-"""
-Tests étendus pour src/core/decorators.py
+﻿"""
+Tests Ã©tendus pour src/core/decorators.py
 Cible: Couvrir with_db_session, with_cache, with_error_handling
 """
 
@@ -8,17 +8,17 @@ from unittest.mock import Mock, MagicMock, patch
 from datetime import datetime
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS WITH_DB_SESSION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestWithDbSession:
-    """Tests pour le décorateur with_db_session."""
+    """Tests pour le dÃ©corateur with_db_session."""
 
     def test_decorator_creates_session_when_none_provided(self):
-        """Vérifie que le décorateur crée une session si aucune n'est fournie."""
+        """VÃ©rifie que le dÃ©corateur crÃ©e une session si aucune n'est fournie."""
         from src.core.decorators import with_db_session
         from contextlib import contextmanager
 
@@ -35,11 +35,11 @@ class TestWithDbSession:
         # Patch get_db_context pour utiliser notre mock
         with patch("src.core.database.get_db_context", return_value=fake_context()):
             result = ma_fonction({"test": 1})
-            # La session devrait être injectée
+            # La session devrait Ãªtre injectÃ©e
             assert result is not None
 
     def test_decorator_uses_provided_db_session(self):
-        """Vérifie que le décorateur utilise une session existante si fournie."""
+        """VÃ©rifie que le dÃ©corateur utilise une session existante si fournie."""
         from src.core.decorators import with_db_session
         
         existing_session = Mock()
@@ -52,7 +52,7 @@ class TestWithDbSession:
         assert result == existing_session
 
     def test_decorator_uses_provided_session_param(self):
-        """Vérifie que le décorateur supporte le paramètre 'session'."""
+        """VÃ©rifie que le dÃ©corateur supporte le paramÃ¨tre 'session'."""
         from src.core.decorators import with_db_session
         
         existing_session = Mock()
@@ -65,7 +65,7 @@ class TestWithDbSession:
         assert result == existing_session
 
     def test_decorator_preserves_function_metadata(self):
-        """Vérifie que le décorateur préserve les métadonnées de la fonction."""
+        """VÃ©rifie que le dÃ©corateur prÃ©serve les mÃ©tadonnÃ©es de la fonction."""
         from src.core.decorators import with_db_session
         
         @with_db_session
@@ -77,15 +77,15 @@ class TestWithDbSession:
         assert "Documentation" in fonction_documentee.__doc__
 
     def test_decorator_injects_session_param_correctly(self):
-        """Vérifie l'injection correcte du paramètre session vs db."""
+        """VÃ©rifie l'injection correcte du paramÃ¨tre session vs db."""
         from src.core.decorators import with_db_session
         
-        # Fonction avec paramètre 'session'
+        # Fonction avec paramÃ¨tre 'session'
         @with_db_session
         def func_with_session(session=None):
             return session is not None
         
-        # Fonction avec paramètre 'db'
+        # Fonction avec paramÃ¨tre 'db'
         @with_db_session
         def func_with_db(db=None):
             return db is not None
@@ -98,15 +98,15 @@ class TestWithDbSession:
         assert result_session is True
         assert result_db is True
 # TESTS WITH_CACHE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestWithCache:
-    """Tests pour le décorateur with_cache."""
+    """Tests pour le dÃ©corateur with_cache."""
 
     def test_cache_decorator_caches_result(self):
-        """Vérifie que le résultat est mis en cache."""
+        """VÃ©rifie que le rÃ©sultat est mis en cache."""
         from src.core.decorators import with_cache
         
         call_count = 0
@@ -117,18 +117,18 @@ class TestWithCache:
             call_count += 1
             return x * 2
         
-        # Première appel
+        # PremiÃ¨re appel
         result1 = fonction_couteuse(5)
-        # Deuxième appel - devrait utiliser le cache
+        # DeuxiÃ¨me appel - devrait utiliser le cache
         result2 = fonction_couteuse(5)
         
         assert result1 == 10
         assert result2 == 10
-        # En raison du cache, la fonction ne devrait être appelée qu'une fois
-        # Note: selon l'implémentation du cache, ce test peut nécessiter un mock
+        # En raison du cache, la fonction ne devrait Ãªtre appelÃ©e qu'une fois
+        # Note: selon l'implÃ©mentation du cache, ce test peut nÃ©cessiter un mock
 
     def test_cache_decorator_with_different_args(self):
-        """Vérifie que différents arguments génèrent différentes clés."""
+        """VÃ©rifie que diffÃ©rents arguments gÃ©nÃ¨rent diffÃ©rentes clÃ©s."""
         from src.core.decorators import with_cache
         
         @with_cache(ttl=300, key_prefix="test_diff")
@@ -142,7 +142,7 @@ class TestWithCache:
         assert result2 == 30
 
     def test_cache_decorator_preserves_function_metadata(self):
-        """Vérifie que le décorateur préserve les métadonnées."""
+        """VÃ©rifie que le dÃ©corateur prÃ©serve les mÃ©tadonnÃ©es."""
         from src.core.decorators import with_cache
         
         @with_cache(ttl=60, key_prefix="meta")
@@ -154,10 +154,10 @@ class TestWithCache:
         assert "Doc de la fonction" in ma_fonction.__doc__
 
     def test_cache_decorator_ttl_parameter(self):
-        """Vérifie que le paramètre TTL est respecté."""
+        """VÃ©rifie que le paramÃ¨tre TTL est respectÃ©."""
         from src.core.decorators import with_cache
         
-        @with_cache(ttl=1)  # TTL très court
+        @with_cache(ttl=1)  # TTL trÃ¨s court
         def fonction_ttl(x: int) -> int:
             return x
         
@@ -165,31 +165,31 @@ class TestWithCache:
         assert result == 42
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS WITH_ERROR_HANDLING (si existant)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestWithErrorHandling:
-    """Tests pour le décorateur gerer_erreurs."""
+    """Tests pour le dÃ©corateur gerer_erreurs."""
 
     def test_error_handling_catches_exceptions(self):
-        """Vérifie que les exceptions sont capturées."""
+        """VÃ©rifie que les exceptions sont capturÃ©es."""
         from src.core.errors import gerer_erreurs
         
         @gerer_erreurs(afficher_dans_ui=False, valeur_fallback="erreur_geree")
         def fonction_qui_plante():
             raise ValueError("Erreur test")
         
-        # Patch Streamlit pour éviter les appels UI
+        # Patch Streamlit pour Ã©viter les appels UI
         with patch("src.core.errors.st"):
             result = fonction_qui_plante()
-            # Le décorateur devrait retourner la valeur fallback
+            # Le dÃ©corateur devrait retourner la valeur fallback
             assert result == "erreur_geree"
 
     def test_error_handling_preserves_return_on_success(self):
-        """Vérifie que le retour est préservé en cas de succès."""
+        """VÃ©rifie que le retour est prÃ©servÃ© en cas de succÃ¨s."""
         from src.core.errors import gerer_erreurs
         
         @gerer_erreurs(afficher_dans_ui=False, valeur_fallback=None)
@@ -201,7 +201,7 @@ class TestWithErrorHandling:
         assert result["data"] == 42
 
     def test_error_handling_preserves_metadata(self):
-        """Vérifie que les métadonnées sont préservées."""
+        """VÃ©rifie que les mÃ©tadonnÃ©es sont prÃ©servÃ©es."""
         from src.core.errors import gerer_erreurs
         
         @gerer_erreurs(afficher_dans_ui=False)
@@ -209,5 +209,5 @@ class TestWithErrorHandling:
             """Documentation fonction."""
             return True
         
-        # Le nom est préservé grâce à @wraps
+        # Le nom est prÃ©servÃ© grÃ¢ce Ã  @wraps
         assert "ma_fonction_error" in str(ma_fonction_error) or ma_fonction_error.__wrapped__.__name__ == "ma_fonction_error"

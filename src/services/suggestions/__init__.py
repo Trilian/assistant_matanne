@@ -1,4 +1,4 @@
-"""
+﻿"""
 Package de suggestions IA pour la planification de repas.
 
 Ce package fournit des suggestions intelligentes basées sur:

@@ -1,11 +1,11 @@
-"""
+﻿"""
 Service Planning Unifié - Centre de Coordination Familiale
 
-✅ Agrégation complète de TOUS les événements familiaux
-✅ Utilise @avec_session_db, @avec_cache, décorateurs unifiés
-✅ Cache agressif (TTL 30min) pour perfs
-✅ IA intégrée pour générer semaines équilibrées
-✅ Détection intelligente d'alertes (charge, couverture activités, budget)
+âœ… Agrégation complète de TOUS les événements familiaux
+âœ… Utilise @avec_session_db, @avec_cache, décorateurs unifiés
+âœ… Cache agressif (TTL 30min) pour perfs
+âœ… IA intégrée pour générer semaines équilibrées
+âœ… Détection intelligente d'alertes (charge, couverture activités, budget)
 
 Service complet pour le planning familial fusionnant :
 - Planning repas (Planning + Repas)
@@ -44,27 +44,27 @@ from .types import JourCompletSchema, SemaineCompleSchema, SemaineGenereeIASchem
 logger = logging.getLogger(__name__)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SERVICE PLANNING UNIFIÉ
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningAIMixin):
     """
     Service unifié pour le planning familial.
 
-    ✅ Héritage multiple :
-    - BaseService → CRUD optimisé pour CalendarEvent
-    - BaseAIService → IA avec rate limiting auto
-    - PlanningAIMixin → Contextes métier planning
+    âœ… Héritage multiple :
+    - BaseService â†’ CRUD optimisé pour CalendarEvent
+    - BaseAIService â†’ IA avec rate limiting auto
+    - PlanningAIMixin â†’ Contextes métier planning
 
     Fonctionnalités :
-    - ✅ Agrégation complète (repas, activités, projets, routines, events)
-    - ✅ Cache agressif (TTL 30min) invalidé intelligemment
-    - ✅ Calcul charge familiale par jour
-    - ✅ Détection alertes intelligentes
-    - ✅ Génération IA avec contraintes familiales
-    - ✅ Suggestions intelligentes basées sur contexte
+    - âœ… Agrégation complète (repas, activités, projets, routines, events)
+    - âœ… Cache agressif (TTL 30min) invalidé intelligemment
+    - âœ… Calcul charge familiale par jour
+    - âœ… Détection alertes intelligentes
+    - âœ… Génération IA avec contraintes familiales
+    - âœ… Suggestions intelligentes basées sur contexte
     """
 
     def __init__(self):
@@ -81,9 +81,9 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
             service_name="planning",
         )
 
-    # ═══════════════════════════════════════════════════════════
-    # SECTION 1: AGRÉGATION COMPLÈTE SEMAINE
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # SECTION 1: AGRÉGATION COMPLÃˆTE SEMAINE
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     @avec_cache(ttl=1800, key_func=lambda self, date_debut, **kw: f"semaine_complete_{date_debut.isoformat()}")
     @avec_gestion_erreurs(default_return=None)
@@ -163,9 +163,9 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
             alertes_semaine=alertes_semaine,
         )
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # SECTION 2: CHARGEMENT DONNÉES OPTIMISÉ
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     def _charger_repas(self, date_debut: date, date_fin: date, db: Session) -> dict[str, list[dict]]:
         """Charge repas planifiés avec recettes"""
@@ -233,7 +233,7 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
         projets = (
             db.query(Project)
             .filter(
-                Project.statut.in_(["à_faire", "en_cours"]),
+                Project.statut.in_(["Ã _faire", "en_cours"]),
                 (Project.date_fin_prevue == None) | (Project.date_fin_prevue.between(date_debut, date_fin)),
             )
             .all()
@@ -310,9 +310,9 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
 
         return events_dict
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # SECTION 3: CALCUL CHARGE & DÉTECTION ALERTES
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     def _calculer_charge(
         self,
@@ -362,20 +362,20 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
 
         # Surcharge
         if charge_score >= 80:
-            alertes.append("⚠️ Jour très chargé - Penser à prendre du temps")
+            alertes.append("âš ï¸ Jour très chargé - Penser Ã  prendre du temps")
 
         # Pas d'activité pour Jules
         if not any(a.get("pour_jules") for a in activites):
-            alertes.append("👶 Pas d'activité prévue pour Jules")
+            alertes.append("ðŸ‘¶ Pas d'activité prévue pour Jules")
 
         # Projets urgents sans tâches
         projets_urgents = [p for p in projets if p.get("priorite") == "haute"]
         if projets_urgents:
-            alertes.append(f"🔴 {len(projets_urgents)} projet(s) urgent(s)")
+            alertes.append(f"ðŸ”´ {len(projets_urgents)} projet(s) urgent(s)")
 
         # Repas trop nombreux/complexes
         if len(repas) > 3:
-            alertes.append(f"🍽️ {len(repas)} repas ce jour - Vérifier préparation")
+            alertes.append(f"ðŸ½ï¸ {len(repas)} repas ce jour - Vérifier préparation")
 
         return alertes
 
@@ -390,19 +390,19 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
             sum(1 for a in j.activites if a.get("pour_jules")) for j in jours_list
         )
         if activites_jules == 0:
-            alertes.append("👶 Aucune activité Jules cette semaine")
+            alertes.append("ðŸ‘¶ Aucune activité Jules cette semaine")
         elif activites_jules < 3:
-            alertes.append("👶 Peu d'activités pour Jules (recommandé: 3+)")
+            alertes.append("ðŸ‘¶ Peu d'activités pour Jules (recommandé: 3+)")
 
         # Charge globale
         charges_intenses = sum(1 for j in jours_list if j.charge_score >= 80)
         if charges_intenses >= 3:
-            alertes.append("⚠️ Plus de 3 jours très chargés - Risque burnout familial")
+            alertes.append("âš ï¸ Plus de 3 jours très chargés - Risque burnout familial")
 
         # Budget
         budget_total = sum(j.budget_jour for j in jours_list)
-        if budget_total > 500:  # Adapter à votre budget famille
-            alertes.append(f"💰 Budget semaine: {budget_total:.2f}€ - Veiller au budget")
+        if budget_total > 500:  # Adapter Ã  votre budget famille
+            alertes.append(f"ðŸ’° Budget semaine: {budget_total:.2f}â‚¬ - Veiller au budget")
 
         return alertes
 
@@ -426,9 +426,9 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
             "charge_moyenne": int(sum(j.charge_score for j in jours_list) / len(jours_list)) if jours_list else 0,
         }
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # SECTION 4: GÉNÉRATION IA
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     @avec_cache(ttl=1800, key_func=lambda self, date_debut, **kw: f"semaine_ia_{date_debut.isoformat()}")
     @avec_gestion_erreurs(default_return=None)
@@ -466,7 +466,7 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
         )
 
         if not response:
-            logger.warning("❌ Génération IA échouée")
+            logger.warning("âŒ Génération IA échouée")
             return None
 
         return SemaineGenereeIASchema(**response[0]) if response else None
@@ -489,7 +489,7 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
         
         Contexte:
         - Jules a {jules_mois} mois
-        - Budget semaine: {budget}€
+        - Budget semaine: {budget}â‚¬
         - Énergie famille: {energie}
         - Objectifs santé: {', '.join(objectifs_sante) if objectifs_sante else 'Maintenir équilibre'}
         
@@ -501,9 +501,9 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
         - raisons: Justifications (liste)
         """
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # SECTION 5: CRUD ÉVÉNEMENTS CALENDRIER
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     @avec_session_db
     def creer_event(
@@ -534,10 +534,10 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
             # Invalider cache
             self._invalider_cache_semaine(date_debut.date())
             
-            logger.info(f"✅ Événement créé: {titre}")
+            logger.info(f"âœ… Événement créé: {titre}")
             return event
         except Exception as e:
-            logger.error(f"❌ Erreur création événement: {e}")
+            logger.error(f"âŒ Erreur création événement: {e}")
             db.rollback()
             return None
 
@@ -547,21 +547,21 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
         debut_semaine = date_jour - timedelta(days=date_jour.weekday())
         Cache.invalider(pattern=f"semaine_complete_{debut_semaine.isoformat()}")
         Cache.invalider(pattern=f"semaine_ia_{debut_semaine.isoformat()}")
-        logger.debug(f"🔄 Cache semaine invalidé: {debut_semaine}")
+        logger.debug(f"ðŸ”„ Cache semaine invalidé: {debut_semaine}")
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ALIAS DE COMPATIBILITÉ
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 # Alias pour rétro-compatibilité
 PlanningAIService = ServicePlanningUnifie
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FACTORIES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def obtenir_service_planning_unifie() -> ServicePlanningUnifie:
@@ -574,9 +574,9 @@ get_planning_unified_service = obtenir_service_planning_unifie
 get_unified_planning_service = obtenir_service_planning_unifie
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # EXPORTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 __all__ = [

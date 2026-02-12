@@ -1,12 +1,12 @@
 """
-Synchronisation temps réel pour les courses.
+Synchronisation temps rÃeel pour les courses.
 """
 
 from ._common import st, logger, get_realtime_sync_service
 
 
 def _init_realtime_sync():
-    """Initialise la synchronisation temps réel."""
+    """Initialise la synchronisation temps rÃeel."""
     if "realtime_initialized" not in st.session_state:
         st.session_state.realtime_initialized = False
     
@@ -14,23 +14,23 @@ def _init_realtime_sync():
         sync_service = get_realtime_sync_service()
         
         if sync_service.is_configured and not st.session_state.realtime_initialized:
-            # Récupérer l'utilisateur courant
+            # RÃecupÃerer l'utilisateur courant
             user_id = st.session_state.get("user_id", "anonymous")
             user_name = st.session_state.get("user_name", "Utilisateur")
             
-            # Rejoindre le canal de synchronisation (liste par défaut = 1)
+            # Rejoindre le canal de synchronisation (liste par dÃefaut = 1)
             liste_id = st.session_state.get("liste_active_id", 1)
             
             if sync_service.join_list(liste_id, user_id, user_name):
                 st.session_state.realtime_initialized = True
-                logger.info(f"Sync temps réel initialisée pour liste {liste_id}")
+                logger.info(f"Sync temps rÃeel initialisÃee pour liste {liste_id}")
         
     except Exception as e:
-        logger.warning(f"Sync temps réel non disponible: {e}")
+        logger.warning(f"Sync temps rÃeel non disponible: {e}")
 
 
 def render_realtime_status():
-    """Affiche le statut de synchronisation temps réel."""
+    """Affiche le statut de synchronisation temps rÃeel."""
     try:
         sync_service = get_realtime_sync_service()
         
@@ -46,7 +46,7 @@ def render_realtime_status():
         # Statut dans la sidebar
         with st.sidebar:
             st.divider()
-            st.markdown("### 📄 Synchronisation")
+            st.markdown("### ðŸ“„ Synchronisation")
             
             render_sync_status()
             render_presence_indicator()
@@ -61,7 +61,7 @@ def render_realtime_status():
                     render_typing_indicator()
     
     except Exception as e:
-        logger.debug(f"Statut realtime non affiché: {e}")
+        logger.debug(f"Statut realtime non affichÃe: {e}")
 
 
 def _broadcast_article_change(event_type: str, article_data: dict):
@@ -86,7 +86,7 @@ def _broadcast_article_change(event_type: str, article_data: dict):
             sync_service.broadcast_item_deleted(liste_id, article_data.get("id"))
     
     except Exception as e:
-        logger.debug(f"Broadcast non envoyé: {e}")
+        logger.debug(f"Broadcast non envoyÃe: {e}")
 
 
 __all__ = [

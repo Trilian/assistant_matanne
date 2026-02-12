@@ -1,4 +1,4 @@
-"""Tests PART 11 - base_ai_service.py et types.py"""
+﻿"""Tests PART 11 - base_ai_service.py et types.py"""
 import pytest
 from unittest.mock import MagicMock, patch, AsyncMock
 from datetime import datetime

@@ -1,7 +1,7 @@
-"""
+﻿"""
 Module Notifications Push - Configuration et test des alertes.
 
-Fonctionnalités:
+FonctionnalitÃes:
 - Configuration du topic ntfy.sh
 - Test de connexion
 - Envoi manuel de notifications
@@ -17,7 +17,7 @@ from src.services.notifications import (
     ConfigurationNtfy,
     NotificationNtfy,
     ServiceNtfy,
-    # Alias rétrocompatibilité
+    # Alias rÃetrocompatibilitÃe
     get_notification_push_service,
     NotificationPushConfig,
     NotificationPush,
@@ -25,29 +25,29 @@ from src.services.notifications import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONSTANTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 HELP_NTFY = """
 **ntfy.sh** est un service gratuit de notifications push.
 
 ### Comment ça marche?
-1. Installez l'app **ntfy** sur votre téléphone (Android/iOS)
+1. Installez l'app **ntfy** sur votre tÃelÃephone (Android/iOS)
 2. Abonnez-vous au topic de votre famille
-3. Recevez les alertes en temps réel!
+3. Recevez les alertes en temps rÃeel!
 
 ### Avantages:
-- ✅ Gratuit et open-source
-- ✅ Pas de compte requis
-- ✅ Multi-appareils
-- ✅ Fonctionne même hors app Matanne
+- âœ… Gratuit et open-source
+- âœ… Pas de compte requis
+- âœ… Multi-appareils
+- âœ… Fonctionne même hors app Matanne
 """
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # HELPERS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def charger_config() -> NotificationPushConfig:
     """Charge la configuration depuis session_state."""
@@ -61,13 +61,13 @@ def sauvegarder_config(config: NotificationPushConfig):
     st.session_state["notif_config"] = config
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # UI COMPONENTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def render_configuration():
     """Interface de configuration des notifications."""
-    st.subheader("⚙️ Configuration")
+    st.subheader("âš™ï¸ Configuration")
     
     config = charger_config()
     
@@ -105,7 +105,7 @@ def render_configuration():
             format="%dh"
         )
         
-        submitted = st.form_submit_button("💾 Enregistrer", type="primary", use_container_width=True)
+        submitted = st.form_submit_button("ðŸ’¾ Enregistrer", type="primary", use_container_width=True)
         
         if submitted:
             new_config = NotificationPushConfig(
@@ -116,13 +116,13 @@ def render_configuration():
                 heure_digest=heure_digest
             )
             sauvegarder_config(new_config)
-            st.success("✅ Configuration sauvegardée!")
+            st.success("âœ… Configuration sauvegardÃee!")
             st.rerun()
 
 
 def render_abonnement():
     """Interface pour s'abonner aux notifications."""
-    st.subheader("📱 S'abonner aux notifications")
+    st.subheader("ðŸ“± S'abonner aux notifications")
     
     config = charger_config()
     service = get_notification_push_service(config)
@@ -131,7 +131,7 @@ def render_abonnement():
     
     with col1:
         st.markdown("### Scanner le QR Code")
-        st.caption("Avec l'app ntfy sur votre téléphone")
+        st.caption("Avec l'app ntfy sur votre tÃelÃephone")
         
         # Afficher QR Code
         qr_url = service.get_subscribe_qr_url()
@@ -141,7 +141,7 @@ def render_abonnement():
         st.markdown("### Liens directs")
         
         web_url = service.get_web_url()
-        st.markdown(f"🌐 **Web:** [{web_url}]({web_url})")
+        st.markdown(f"ðŸŒ **Web:** [{web_url}]({web_url})")
         
         st.divider()
         
@@ -154,12 +154,12 @@ def render_abonnement():
     
     # Topic actuel
     st.divider()
-    st.info(f"📍 **Topic actuel:** `{config.topic}`")
+    st.info(f"ðŸ“ **Topic actuel:** `{config.topic}`")
 
 
 def render_test():
     """Interface de test des notifications."""
-    st.subheader("🧪 Tester les notifications")
+    st.subheader("ðŸ§ª Tester les notifications")
     
     config = charger_config()
     service = get_notification_push_service(config)
@@ -167,39 +167,39 @@ def render_test():
     col1, col2 = st.columns(2)
     
     with col1:
-        if st.button("🔔 Envoyer test", type="primary", use_container_width=True):
+        if st.button("ðŸ”” Envoyer test", type="primary", use_container_width=True):
             with st.spinner("Envoi en cours..."):
                 resultat = service.test_connexion_sync()
                 
                 if resultat.succes:
-                    st.success(f"✅ {resultat.message}")
+                    st.success(f"âœ… {resultat.message}")
                     st.caption(f"ID: {resultat.notification_id}")
                 else:
-                    st.error(f"❌ {resultat.message}")
+                    st.error(f"âŒ {resultat.message}")
     
     with col2:
-        if st.button("📋 Envoyer digest", use_container_width=True):
-            with st.spinner("Génération du digest..."):
+        if st.button("ðŸ“‹ Envoyer digest", use_container_width=True):
+            with st.spinner("GÃenÃeration du digest..."):
                 import asyncio
                 resultat = asyncio.run(service.envoyer_digest_quotidien())
                 
                 if resultat.succes:
-                    st.success(f"✅ {resultat.message}")
+                    st.success(f"âœ… {resultat.message}")
                 else:
-                    st.error(f"❌ {resultat.message}")
+                    st.error(f"âŒ {resultat.message}")
     
-    # Notification personnalisée
+    # Notification personnalisÃee
     st.divider()
-    st.markdown("### Notification personnalisée")
+    st.markdown("### Notification personnalisÃee")
     
     with st.form("notif_custom"):
-        titre = st.text_input("Titre", value="📢 Message Matanne")
+        titre = st.text_input("Titre", value="ðŸ“¢ Message Matanne")
         message = st.text_area("Message", value="Ceci est un test.", height=100)
         
         col1, col2 = st.columns(2)
         with col1:
             priorite = st.select_slider(
-                "Priorité",
+                "PrioritÃe",
                 options=[1, 2, 3, 4, 5],
                 value=3,
                 format_func=lambda x: {1: "Min", 2: "Basse", 3: "Normale", 4: "Haute", 5: "Urgente"}[x]
@@ -211,7 +211,7 @@ def render_test():
                 default=["bell"]
             )
         
-        if st.form_submit_button("📤 Envoyer", use_container_width=True):
+        if st.form_submit_button("ðŸ“¤ Envoyer", use_container_width=True):
             notification = NotificationPush(
                 titre=titre,
                 message=message,
@@ -223,14 +223,14 @@ def render_test():
                 resultat = service.envoyer_sync(notification)
                 
                 if resultat.succes:
-                    st.success("✅ Notification envoyée!")
+                    st.success("âœ… Notification envoyÃee!")
                 else:
-                    st.error(f"❌ {resultat.message}")
+                    st.error(f"âŒ {resultat.message}")
 
 
 def render_taches_retard():
     """Affiche les tâches en retard et permet d'envoyer des alertes."""
-    st.subheader("⏰ Tâches en retard")
+    st.subheader("â° Tâches en retard")
     
     config = charger_config()
     service = get_notification_push_service(config)
@@ -238,49 +238,49 @@ def render_taches_retard():
     taches_retard = service.obtenir_taches_en_retard()
     taches_jour = service.obtenir_taches_du_jour()
     
-    # Métriques
+    # MÃetriques
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric("⚠️ En retard", len(taches_retard))
+        st.metric("âš ï¸ En retard", len(taches_retard))
     with col2:
-        st.metric("📅 Aujourd'hui", len(taches_jour))
+        st.metric("ðŸ“… Aujourd'hui", len(taches_jour))
     with col3:
         total = len(taches_retard) + len(taches_jour)
-        st.metric("📊 Total à traiter", total)
+        st.metric("ðŸ“Š Total Ã  traiter", total)
     
     st.divider()
     
     # Liste des tâches en retard
     if taches_retard:
-        st.markdown("### ⚠️ Tâches en retard")
+        st.markdown("### âš ï¸ Tâches en retard")
         
         for tache in taches_retard[:10]:
             jours_retard = (date.today() - tache.date_echeance).days
-            urgence = "🔴" if jours_retard > 7 else "🟠" if jours_retard > 3 else "🟡"
+            urgence = "ðŸ”´" if jours_retard > 7 else "ðŸŸ " if jours_retard > 3 else "ðŸŸ¡"
             
             with st.container(border=True):
                 col1, col2, col3 = st.columns([3, 1, 1])
                 
                 with col1:
                     st.markdown(f"**{urgence} {tache.titre}**")
-                    st.caption(f"📅 Prévue: {tache.date_echeance.strftime('%d/%m/%Y')}")
+                    st.caption(f"ðŸ“… PrÃevue: {tache.date_echeance.strftime('%d/%m/%Y')}")
                 
                 with col2:
                     st.markdown(f"**{jours_retard}j** retard")
                 
                 with col3:
-                    if st.button("📤", key=f"notif_{tache.id}", help="Envoyer alerte"):
+                    if st.button("ðŸ“¤", key=f"notif_{tache.id}", help="Envoyer alerte"):
                         import asyncio
                         resultat = asyncio.run(service.envoyer_alerte_tache_retard(tache))
                         if resultat.succes:
-                            st.toast(f"✅ Alerte envoyée pour {tache.titre}")
+                            st.toast(f"âœ… Alerte envoyÃee pour {tache.titre}")
                         else:
-                            st.toast(f"❌ Erreur: {resultat.message}")
+                            st.toast(f"âŒ Erreur: {resultat.message}")
         
-        # Action groupée
+        # Action groupÃee
         st.divider()
         if st.button(
-            f"📤 Envoyer alertes pour {min(5, len(taches_retard))} tâches",
+            f"ðŸ“¤ Envoyer alertes pour {min(5, len(taches_retard))} tâches",
             type="primary",
             use_container_width=True
         ):
@@ -290,41 +290,41 @@ def render_taches_retard():
             with st.spinner("Envoi des alertes..."):
                 resultats = scheduler.lancer_verification_sync()
                 succes = sum(1 for r in resultats if r.succes)
-                st.success(f"✅ {succes}/{len(resultats)} alertes envoyées")
+                st.success(f"âœ… {succes}/{len(resultats)} alertes envoyÃees")
     else:
-        st.success("✅ Aucune tâche en retard! 🎉")
+        st.success("âœ… Aucune tâche en retard! ðŸŽ‰")
     
     # Tâches du jour
     if taches_jour:
         st.divider()
-        st.markdown("### 📅 Tâches du jour")
+        st.markdown("### ðŸ“… Tâches du jour")
         
         for tache in taches_jour[:5]:
-            st.markdown(f"• {tache.titre}")
+            st.markdown(f"â€¢ {tache.titre}")
 
 
 def render_aide():
     """Affiche l'aide sur ntfy.sh."""
-    st.subheader("❓ Aide")
+    st.subheader("â“ Aide")
     st.markdown(HELP_NTFY)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # PAGE PRINCIPALE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def app():
-    """Point d'entrée du module notifications push."""
-    st.title("🔔 Notifications Push")
-    st.caption("Recevez des alertes sur votre téléphone")
+    """Point d'entrÃee du module notifications push."""
+    st.title("ðŸ”” Notifications Push")
+    st.caption("Recevez des alertes sur votre tÃelÃephone")
     
     # Tabs
     tabs = st.tabs([
-        "📱 S'abonner",
-        "⚙️ Configuration",
-        "⏰ Tâches",
-        "🧪 Test",
-        "❓ Aide"
+        "ðŸ“± S'abonner",
+        "âš™ï¸ Configuration",
+        "â° Tâches",
+        "ðŸ§ª Test",
+        "â“ Aide"
     ])
     
     with tabs[0]:

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour stats.py
 
 Module: src.utils.helpers.stats

@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
-Tests supplémentaires pour notifications.py - amélioration de la couverture
+Tests supplÃ©mentaires pour notifications.py - amÃ©lioration de la couverture
 
 Cible les composants non couverts:
 - NotificationType, NotificationCategory enums
@@ -66,7 +66,7 @@ class TestNotification:
     """Tests pour Notification dataclass."""
     
     def test_notification_defaults(self):
-        """Valeurs par défaut correctes."""
+        """Valeurs par dÃ©faut correctes."""
         from src.core.notifications import Notification, NotificationType, NotificationCategory
         
         notif = Notification(titre="Test", message="Message")
@@ -88,7 +88,7 @@ class TestNotification:
         assert notif.is_expired is False
     
     def test_is_expired_true_when_past(self):
-        """is_expired retourne True si date passée."""
+        """is_expired retourne True si date passÃ©e."""
         from src.core.notifications import Notification
         
         notif = Notification(
@@ -108,11 +108,11 @@ class TestNotification:
         assert notif.is_expired is False
     
     def test_age_str_instant(self):
-        """age_str retourne 'À l'instant' pour notification récente."""
+        """age_str retourne 'Ã€ l'instant' pour notification rÃ©cente."""
         from src.core.notifications import Notification
         
         notif = Notification(titre="Test", created_at=datetime.now())
-        assert notif.age_str == "À l'instant"
+        assert notif.age_str == "Ã€ l'instant"
     
     def test_age_str_minutes(self):
         """age_str retourne format minutes."""
@@ -186,7 +186,7 @@ class TestNotification:
         assert d["expires_at"] is not None
     
     def test_from_dict(self):
-        """from_dict crée correctement depuis un dictionnaire."""
+        """from_dict crÃ©e correctement depuis un dictionnaire."""
         from src.core.notifications import Notification, NotificationType
         
         data = {
@@ -223,7 +223,7 @@ class TestNotification:
         assert notif.expires_at is not None
     
     def test_from_dict_handles_invalid_expires(self):
-        """from_dict gère expires_at invalide."""
+        """from_dict gÃ¨re expires_at invalide."""
         from src.core.notifications import Notification
         
         data = {
@@ -272,26 +272,26 @@ class TestNotificationManager:
         assert notif.expires_at is not None
     
     def test_add_auto_icon(self, mock_session_state):
-        """Ajoute icône automatique selon le type."""
+        """Ajoute icÃ´ne automatique selon le type."""
         from src.core.notifications import NotificationManager, NotificationType
         
         notif_success = NotificationManager.add(
             titre="Success",
             type=NotificationType.SUCCESS,
         )
-        assert notif_success.icone == "✅"
+        assert notif_success.icone == "âœ…"
         
         notif_warning = NotificationManager.add(
             titre="Warning",
             type=NotificationType.WARNING,
         )
-        assert notif_warning.icone == "⚠️"
+        assert notif_warning.icone == "âš ï¸"
         
         notif_error = NotificationManager.add(
             titre="Error",
             type=NotificationType.ERROR,
         )
-        assert notif_error.icone == "❌"
+        assert notif_error.icone == "âŒ"
     
     def test_max_notifications_limit(self, mock_session_state):
         """Limite le nombre de notifications."""
@@ -312,17 +312,17 @@ class TestNotificationManager:
         assert result == []
     
     def test_get_all_filters_expired(self, mock_session_state):
-        """Filtre les notifications expirées."""
+        """Filtre les notifications expirÃ©es."""
         from src.core.notifications import NotificationManager
         
-        # Ajouter notification expirée manuellement
+        # Ajouter notification expirÃ©e manuellement
         expired = {
             "id": "exp1",
             "titre": "Expired",
             "message": "",
             "type": "info",
             "category": "systeme",
-            "icone": "ℹ️",
+            "icone": "â„¹ï¸",
             "created_at": datetime.now().isoformat(),
             "expires_at": (datetime.now() - timedelta(hours=1)).isoformat(),
             "read": False,
@@ -335,7 +335,7 @@ class TestNotificationManager:
         assert len(result) == 0
     
     def test_get_all_filters_read(self, mock_session_state):
-        """Filtre les notifications lues si demandé."""
+        """Filtre les notifications lues si demandÃ©."""
         from src.core.notifications import NotificationManager
         
         read_notif = {
@@ -344,7 +344,7 @@ class TestNotificationManager:
             "message": "",
             "type": "info",
             "category": "systeme",
-            "icone": "ℹ️",
+            "icone": "â„¹ï¸",
             "created_at": datetime.now().isoformat(),
             "read": True,
             "dismissed": False,
@@ -359,7 +359,7 @@ class TestNotificationManager:
         assert len(result) == 1
     
     def test_get_all_filters_by_category(self, mock_session_state):
-        """Filtre par catégorie."""
+        """Filtre par catÃ©gorie."""
         from src.core.notifications import NotificationManager, NotificationCategory
         
         notif1 = {
@@ -367,7 +367,7 @@ class TestNotificationManager:
             "titre": "Inventaire",
             "type": "info",
             "category": "inventaire",
-            "icone": "ℹ️",
+            "icone": "â„¹ï¸",
             "created_at": datetime.now().isoformat(),
             "read": False,
             "dismissed": False,
@@ -378,7 +378,7 @@ class TestNotificationManager:
             "titre": "Courses",
             "type": "info",
             "category": "courses",
-            "icone": "ℹ️",
+            "icone": "â„¹ï¸",
             "created_at": datetime.now().isoformat(),
             "read": False,
             "dismissed": False,
@@ -399,7 +399,7 @@ class TestNotificationManager:
             "titre": "Unread",
             "type": "info",
             "category": "systeme",
-            "icone": "ℹ️",
+            "icone": "â„¹ï¸",
             "created_at": datetime.now().isoformat(),
             "read": False,
             "dismissed": False,
@@ -410,7 +410,7 @@ class TestNotificationManager:
             "titre": "Read",
             "type": "info",
             "category": "systeme",
-            "icone": "ℹ️",
+            "icone": "â„¹ï¸",
             "created_at": datetime.now().isoformat(),
             "read": True,
             "dismissed": False,
@@ -430,7 +430,7 @@ class TestNotificationManager:
             "titre": "Test",
             "type": "info",
             "category": "systeme",
-            "icone": "ℹ️",
+            "icone": "â„¹ï¸",
             "created_at": datetime.now().isoformat(),
             "read": False,
             "dismissed": False,
@@ -443,7 +443,7 @@ class TestNotificationManager:
         assert mock_session_state.session_state["_notifications_store"][0]["read"] is True
     
     def test_mark_as_read_not_found(self, mock_session_state):
-        """Retourne False si notification non trouvée."""
+        """Retourne False si notification non trouvÃ©e."""
         from src.core.notifications import NotificationManager
         
         mock_session_state.session_state["_notifications_store"] = []
@@ -493,7 +493,7 @@ class TestNotificationManager:
         assert mock_session_state.session_state["_notifications_store"] == []
     
     def test_clear_all_by_category(self, mock_session_state):
-        """Supprime notifications d'une catégorie."""
+        """Supprime notifications d'une catÃ©gorie."""
         from src.core.notifications import NotificationManager, NotificationCategory
         
         mock_session_state.session_state["_notifications_store"] = [
@@ -507,7 +507,7 @@ class TestNotificationManager:
         assert len(mock_session_state.session_state["_notifications_store"]) == 1
     
     def test_cleanup_expired(self, mock_session_state):
-        """Nettoie les notifications expirées."""
+        """Nettoie les notifications expirÃ©es."""
         from src.core.notifications import NotificationManager
         
         expired = {
@@ -539,7 +539,7 @@ class TestHelperFunctions:
             yield mock_st
     
     def test_notify_info(self, mock_session_state):
-        """notify_info crée notification INFO."""
+        """notify_info crÃ©e notification INFO."""
         from src.core.notifications import notify_info, NotificationType
         
         notif = notify_info("Info Title", "Info message")
@@ -548,7 +548,7 @@ class TestHelperFunctions:
         assert notif.titre == "Info Title"
     
     def test_notify_success(self, mock_session_state):
-        """notify_success crée notification SUCCESS."""
+        """notify_success crÃ©e notification SUCCESS."""
         from src.core.notifications import notify_success, NotificationType
         
         notif = notify_success("Success Title")
@@ -556,7 +556,7 @@ class TestHelperFunctions:
         assert notif.type == NotificationType.SUCCESS
     
     def test_notify_warning(self, mock_session_state):
-        """notify_warning crée notification WARNING avec priority 1."""
+        """notify_warning crÃ©e notification WARNING avec priority 1."""
         from src.core.notifications import notify_warning, NotificationType
         
         notif = notify_warning("Warning Title")
@@ -565,7 +565,7 @@ class TestHelperFunctions:
         assert notif.priority == 1
     
     def test_notify_error(self, mock_session_state):
-        """notify_error crée notification ERROR avec priority 2."""
+        """notify_error crÃ©e notification ERROR avec priority 2."""
         from src.core.notifications import notify_error, NotificationType
         
         notif = notify_error("Error Title")
@@ -574,7 +574,7 @@ class TestHelperFunctions:
         assert notif.priority == 2
     
     def test_notify_stock_bas(self, mock_session_state):
-        """notify_stock_bas crée notification stock bas."""
+        """notify_stock_bas crÃ©e notification stock bas."""
         from src.core.notifications import notify_stock_bas, NotificationCategory
         
         notif = notify_stock_bas("Lait", 0.5, 1.0)
@@ -584,7 +584,7 @@ class TestHelperFunctions:
         assert notif.action_module == "cuisine.inventaire"
     
     def test_notify_peremption_soon(self, mock_session_state):
-        """notify_peremption pour produit expirant bientôt."""
+        """notify_peremption pour produit expirant bientÃ´t."""
         from src.core.notifications import notify_peremption, NotificationType
         
         notif = notify_peremption("Yaourt", 3)
@@ -594,12 +594,12 @@ class TestHelperFunctions:
         assert notif.priority == 1
     
     def test_notify_peremption_expired(self, mock_session_state):
-        """notify_peremption pour produit expiré."""
+        """notify_peremption pour produit expirÃ©."""
         from src.core.notifications import notify_peremption, NotificationType
         
         notif = notify_peremption("Lait", 0)
         
-        assert "EXPIRÉ" in notif.titre
+        assert "EXPIRÃ‰" in notif.titre
         assert notif.type == NotificationType.ERROR
         assert notif.priority == 2
 
@@ -640,7 +640,7 @@ class TestUIComponents:
                 "titre": "Test",
                 "type": "info",
                 "category": "systeme",
-                "icone": "ℹ️",
+                "icone": "â„¹ï¸",
                 "created_at": datetime.now().isoformat(),
                 "read": False,
                 "dismissed": False,
@@ -653,17 +653,17 @@ class TestUIComponents:
         mock_streamlit.markdown.assert_called_once()
     
     def test_render_toast_notifications(self, mock_streamlit):
-        """Affiche les notifications récentes en toast."""
+        """Affiche les notifications rÃ©centes en toast."""
         from src.core.notifications import render_toast_notifications, NotificationType
         
-        # Ajouter notification récente
+        # Ajouter notification rÃ©cente
         mock_streamlit.session_state["_notifications_store"] = [
             {
                 "id": "1",
                 "titre": "Toast Test",
                 "type": "success",
                 "category": "systeme",
-                "icone": "✅",
+                "icone": "âœ…",
                 "created_at": datetime.now().isoformat(),
                 "read": False,
                 "dismissed": False,
@@ -672,5 +672,5 @@ class TestUIComponents:
         ]
         
         render_toast_notifications()
-        # Doit avoir appelé st.success pour la notification success
+        # Doit avoir appelÃ© st.success pour la notification success
         mock_streamlit.success.assert_called()

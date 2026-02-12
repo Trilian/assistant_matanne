@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
-Tests supplémentaires pour les cas limites de decorators.py
+Tests supplÃ©mentaires pour les cas limites de decorators.py
 
 Cible les lignes non couvertes :
 - 126-152: Fallback key_func avec TypeError dans with_cache  
@@ -12,15 +12,15 @@ from unittest.mock import MagicMock, patch
 from pydantic import BaseModel
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Tests key_func TypeError fallback (lignes 126-152)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestWithCacheKeyFuncFallback:
     """Tests pour le fallback TypeError dans with_cache."""
     
     def test_key_func_with_method_and_positional_args(self):
-        """key_func sur méthode avec arguments positionnels."""
+        """key_func sur mÃ©thode avec arguments positionnels."""
         from src.core.decorators import with_cache
         from src.core.cache import Cache
         
@@ -38,19 +38,19 @@ class TestWithCacheKeyFuncFallback:
         result1 = service.get_items(2, 20)
         assert len(result1) == 20
         
-        # Deuxième appel - doit être en cache
+        # DeuxiÃ¨me appel - doit Ãªtre en cache
         result2 = service.get_items(2, 20)
         assert result2 == result1
     
     def test_key_func_raises_typeerror_then_fallback(self):
-        """key_func qui lève TypeError déclenche le fallback."""
+        """key_func qui lÃ¨ve TypeError dÃ©clenche le fallback."""
         from src.core.decorators import with_cache
         from src.core.cache import Cache
         
         Cache.vider()
         call_count = 0
         
-        # Une key_func qui lève TypeError volontairement
+        # Une key_func qui lÃ¨ve TypeError volontairement
         def problematic_key_func(*args, **kwargs):
             nonlocal call_count
             call_count += 1
@@ -64,12 +64,12 @@ class TestWithCacheKeyFuncFallback:
         def fetch_data(page: int = 1, limit: int = 10):
             return {"page": page, "limit": limit}
         
-        # Ceci va déclencher le fallback via TypeError
+        # Ceci va dÃ©clencher le fallback via TypeError
         result = fetch_data(page=5, limit=25)
         assert result["page"] == 5
     
     def test_key_func_fallback_with_self_and_kwargs(self):
-        """Fallback key_func quand self présent et kwargs reconstruits."""
+        """Fallback key_func quand self prÃ©sent et kwargs reconstruits."""
         from src.core.decorators import with_cache
         from src.core.cache import Cache
         
@@ -94,19 +94,19 @@ class TestWithCacheKeyFuncFallback:
         assert result1["id"] == 42
         assert invocation_count == 1
         
-        # Deuxième appel avec mêmes args - en cache
+        # DeuxiÃ¨me appel avec mÃªmes args - en cache
         result2 = service.get_item(42, refresh=True)
         assert result2 == result1
         # invocation_count pourrait ou non augmenter selon le fallback
     
     def test_key_func_with_default_values_in_fallback(self):
-        """Fallback remplit les valeurs par défaut manquantes."""
+        """Fallback remplit les valeurs par dÃ©faut manquantes."""
         from src.core.decorators import with_cache
         from src.core.cache import Cache
         
         Cache.vider()
         
-        # key_func qui nécessite tous les params
+        # key_func qui nÃ©cessite tous les params
         def full_key_func(self, a, b, c="default_c"):
             return f"full_{a}_{b}_{c}"
         
@@ -117,7 +117,7 @@ class TestWithCacheKeyFuncFallback:
         
         service = FullService()
         
-        # Appel sans c, c doit être rempli par défaut
+        # Appel sans c, c doit Ãªtre rempli par dÃ©faut
         result = service.compute(10, "test")
         assert result == "10_test_default_c"
     
@@ -128,7 +128,7 @@ class TestWithCacheKeyFuncFallback:
         
         Cache.vider()
         
-        # key_func qui lève TypeError sur appel positionnel
+        # key_func qui lÃ¨ve TypeError sur appel positionnel
         def kwargs_only_key_func(**kwargs):
             return f"kw_{kwargs.get('x', 0)}"
         
@@ -141,12 +141,12 @@ class TestWithCacheKeyFuncFallback:
         assert result == 15
 
 
-# ═══════════════════════════════════════════════════════════  
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•  
 # Tests afficher_erreur dans with_error_handling (lignes 223-228)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestWithErrorHandlingAfficherErreur:
-    """Tests pour le paramètre afficher_erreur."""
+    """Tests pour le paramÃ¨tre afficher_erreur."""
     
     def test_afficher_erreur_true_shows_streamlit_error(self):
         """afficher_erreur=True appelle st.error()."""
@@ -166,7 +166,7 @@ class TestWithErrorHandlingAfficherErreur:
             assert "Une erreur test" in call_arg
     
     def test_afficher_erreur_true_but_streamlit_not_initialized(self):
-        """afficher_erreur=True mais Streamlit pas initialisé."""
+        """afficher_erreur=True mais Streamlit pas initialisÃ©."""
         from src.core.decorators import with_error_handling
         
         # Mock streamlit.error pour lever une exception
@@ -175,7 +175,7 @@ class TestWithErrorHandlingAfficherErreur:
             def func_streamlit_fails():
                 raise Exception("Erreur interne")
             
-            # Ne doit pas lever d'exception même si st.error échoue
+            # Ne doit pas lever d'exception mÃªme si st.error Ã©choue
             result = func_streamlit_fails()
             assert result is None
     
@@ -194,7 +194,7 @@ class TestWithErrorHandlingAfficherErreur:
             mock_st_error.assert_not_called()
     
     def test_afficher_erreur_with_custom_log_level(self):
-        """afficher_erreur avec log_level personnalisé."""
+        """afficher_erreur avec log_level personnalisÃ©."""
         from src.core.decorators import with_error_handling
         
         with patch("streamlit.error") as mock_st_error:
@@ -212,18 +212,18 @@ class TestWithErrorHandlingAfficherErreur:
             mock_st_error.assert_called_once()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Tests field_mapping dans with_validation (lignes 282-287)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class RecetteInput(BaseModel):
-    """Modèle Pydantic pour validation."""
+    """ModÃ¨le Pydantic pour validation."""
     nom: str
     temps_preparation: int
 
 
 class ArticleInput(BaseModel):
-    """Modèle pour articles."""
+    """ModÃ¨le pour articles."""
     nom: str
     quantite: int = 1
 
@@ -232,7 +232,7 @@ class TestWithValidationFieldMapping:
     """Tests pour field_mapping dans with_validation."""
     
     def test_validation_with_field_mapping(self):
-        """field_mapping mappe correctement les paramètres."""
+        """field_mapping mappe correctement les paramÃ¨tres."""
         from src.core.decorators import with_validation
         
         @with_validation(RecetteInput, field_mapping={"data": "recipe_data"})
@@ -246,7 +246,7 @@ class TestWithValidationFieldMapping:
         assert result["temps_preparation"] == 30
     
     def test_validation_with_field_mapping_invalid_data(self):
-        """field_mapping avec données invalides lève ErreurValidation."""
+        """field_mapping avec donnÃ©es invalides lÃ¨ve ErreurValidation."""
         from src.core.decorators import with_validation
         from src.core.errors_base import ErreurValidation
         
@@ -257,10 +257,10 @@ class TestWithValidationFieldMapping:
         with pytest.raises(ErreurValidation) as exc_info:
             creer_recette_invalid(data={"nom": "Tarte"})  # Manque temps_preparation
         
-        assert "Validation échouée" in str(exc_info.value)
+        assert "Validation Ã©chouÃ©e" in str(exc_info.value)
     
     def test_validation_without_field_mapping_uses_default(self):
-        """Sans field_mapping, utilise 'data' par défaut."""
+        """Sans field_mapping, utilise 'data' par dÃ©faut."""
         from src.core.decorators import with_validation
         
         @with_validation(ArticleInput)
@@ -274,7 +274,7 @@ class TestWithValidationFieldMapping:
         assert result["quantite"] == 5
     
     def test_validation_with_empty_field_mapping(self):
-        """field_mapping vide utilise le défaut."""
+        """field_mapping vide utilise le dÃ©faut."""
         from src.core.decorators import with_validation
         
         @with_validation(ArticleInput, field_mapping={})
@@ -316,12 +316,12 @@ class TestWithValidationFieldMapping:
         assert result == "valeur"
 
 
-# ═══════════════════════════════════════════════════════════
-# Tests additionnels pour couverture complète
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# Tests additionnels pour couverture complÃ¨te
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestWithCacheEdgeCases:
-    """Cas limites supplémentaires pour with_cache."""
+    """Cas limites supplÃ©mentaires pour with_cache."""
     
     def test_cache_hit_with_none_value(self):
         """Cache retourne None comme valeur valide."""
@@ -341,13 +341,13 @@ class TestWithCacheEdgeCases:
         assert result1 is None
         assert call_count == 1
         
-        # Deuxième appel - doit être en cache même si None
+        # DeuxiÃ¨me appel - doit Ãªtre en cache mÃªme si None
         result2 = get_none()
         assert result2 is None
-        # Note: selon implémentation, peut ou non être en cache
+        # Note: selon implÃ©mentation, peut ou non Ãªtre en cache
     
     def test_cache_with_db_param_excluded(self):
-        """Le paramètre 'db' est exclu de la clé de cache."""
+        """Le paramÃ¨tre 'db' est exclu de la clÃ© de cache."""
         from src.core.decorators import with_cache
         from src.core.cache import Cache
         from unittest.mock import MagicMock
@@ -367,16 +367,16 @@ class TestWithCacheEdgeCases:
         result1 = query_with_db(1, db=mock_db1)
         assert call_count == 1
         
-        # Même item_id, db différent - devrait être en cache
+        # MÃªme item_id, db diffÃ©rent - devrait Ãªtre en cache
         result2 = query_with_db(1, db=mock_db2)
         assert result1 == result2
 
 
 class TestWithDbSessionEdgeCases:
-    """Tests supplémentaires pour with_db_session."""
+    """Tests supplÃ©mentaires pour with_db_session."""
     
     def test_session_param_name_used_if_present(self):
-        """Utilise 'session' si c'est le nom du paramètre."""
+        """Utilise 'session' si c'est le nom du paramÃ¨tre."""
         from unittest.mock import MagicMock, patch
         from src.core.decorators import with_db_session
         
@@ -408,7 +408,7 @@ class TestWithDbSessionEdgeCases:
         assert result == 11
     
     def test_db_session_skips_injection_when_db_provided(self):
-        """with_db_session n'injecte pas quand db déjà fourni."""
+        """with_db_session n'injecte pas quand db dÃ©jÃ  fourni."""
         from unittest.mock import MagicMock
         from src.core.decorators import with_db_session
         
@@ -422,7 +422,7 @@ class TestWithDbSessionEdgeCases:
         assert result == "Executed: SELECT *"
     
     def test_db_session_skips_injection_when_session_provided(self):
-        """with_db_session n'injecte pas quand session déjà fourni."""
+        """with_db_session n'injecte pas quand session dÃ©jÃ  fourni."""
         from unittest.mock import MagicMock
         from src.core.decorators import with_db_session
         

@@ -1,12 +1,12 @@
-﻿"""
+"""
 Module Achats Famille - Fonctions helper
 """
 
-from ._common import date, obtenir_contexte_db, FamilyPurchase, CATEGORIES
+from .utils import date, obtenir_contexte_db, FamilyPurchase, CATEGORIES
 
 
 def get_all_purchases(achete: bool = False) -> list:
-    """Récupère tous les achats"""
+    """Recupère tous les achats"""
     try:
         with obtenir_contexte_db() as db:
             return db.query(FamilyPurchase).filter_by(achete=achete).all()
@@ -15,7 +15,7 @@ def get_all_purchases(achete: bool = False) -> list:
 
 
 def get_purchases_by_category(categorie: str, achete: bool = False) -> list:
-    """Récupère les achats par catégorie"""
+    """Recupère les achats par categorie"""
     try:
         with obtenir_contexte_db() as db:
             return db.query(FamilyPurchase).filter(
@@ -27,7 +27,7 @@ def get_purchases_by_category(categorie: str, achete: bool = False) -> list:
 
 
 def get_purchases_by_groupe(groupe: str, achete: bool = False) -> list:
-    """Récupère les achats par groupe (jules, nous, maison)"""
+    """Recupère les achats par groupe (jules, nous, maison)"""
     categories = [k for k, v in CATEGORIES.items() if v["groupe"] == groupe]
     try:
         with obtenir_contexte_db() as db:
@@ -68,7 +68,7 @@ def get_stats() -> dict:
 
 
 def mark_as_bought(purchase_id: int, prix_reel: float = None):
-    """Marque un achat comme effectué"""
+    """Marque un achat comme effectue"""
     try:
         with obtenir_contexte_db() as db:
             purchase = db.get(FamilyPurchase, purchase_id)

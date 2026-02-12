@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests complets pour src/services/notifications.py
 Objectif: Atteindre 80%+ de couverture
 
@@ -7,11 +7,11 @@ Tests couvrant:
 - Notification model validation
 - creer_notification_stock_critique
 - creer_notification_stock_bas
-- creer_notification_peremption (différents jours_avant)
+- creer_notification_peremption (diffÃ©rents jours_avant)
 - ajouter_notification (normal + doublons)
 - obtenir_notifications (tri, filtre non_lues)
-- marquer_lue (succès, échec)
-- supprimer_notification (succès, échec)
+- marquer_lue (succÃ¨s, Ã©chec)
+- supprimer_notification (succÃ¨s, Ã©chec)
 - effacer_toutes_lues
 - obtenir_stats
 - obtenir_alertes_actives
@@ -57,7 +57,7 @@ class TestTypeAlerteEnum:
 
 
 class TestNotificationModel:
-    """Tests du modèle Notification."""
+    """Tests du modÃ¨le Notification."""
 
     def test_notification_minimal(self):
         """Notification avec champs requis minimaux."""
@@ -76,7 +76,7 @@ class TestNotificationModel:
         assert notif.article_id == 1
         assert notif.lue is False
         assert notif.priorite == "moyenne"
-        assert notif.icone == "ℹ️"
+        assert notif.icone == "â„¹ï¸"
 
     def test_notification_complete(self):
         """Notification avec tous les champs."""
@@ -89,7 +89,7 @@ class TestNotificationModel:
             ingredient_id=10,
             titre="Stock critique: Lait",
             message="Le stock de lait est critique!",
-            icone="❌",
+            icone="âŒ",
             lue=True,
             priorite="haute",
             email="test@example.com",
@@ -103,7 +103,7 @@ class TestNotificationModel:
         assert notif.push_envoyee is True
 
     def test_notification_date_creation_auto(self):
-        """Date de création générée automatiquement."""
+        """Date de crÃ©ation gÃ©nÃ©rÃ©e automatiquement."""
         from src.services.notifications import Notification, TypeAlerte
         
         notif = Notification(
@@ -118,7 +118,7 @@ class TestNotificationModel:
         assert isinstance(notif.date_creation, datetime)
 
     def test_notification_titre_min_length(self):
-        """Titre doit avoir au moins 5 caractères."""
+        """Titre doit avoir au moins 5 caractÃ¨res."""
         from src.services.notifications import Notification, TypeAlerte
         from pydantic import ValidationError
         
@@ -132,7 +132,7 @@ class TestNotificationModel:
             )
 
     def test_notification_message_min_length(self):
-        """Message doit avoir au moins 10 caractères."""
+        """Message doit avoir au moins 10 caractÃ¨res."""
         from src.services.notifications import Notification, TypeAlerte
         from pydantic import ValidationError
         
@@ -175,7 +175,7 @@ class TestCreerNotificationStockCritique:
         return NotificationService()
 
     def test_notification_stock_critique(self, service):
-        """Création d'une notification stock critique."""
+        """CrÃ©ation d'une notification stock critique."""
         article = {
             "id": 1,
             "ingredient_id": 10,
@@ -190,11 +190,11 @@ class TestCreerNotificationStockCritique:
         assert notif is not None
         assert "CRITIQUE" in notif.message
         assert notif.priorite == "haute"
-        assert notif.icone == "❌"
+        assert notif.icone == "âŒ"
         assert "Lait" in notif.titre
 
     def test_notification_stock_critique_sans_unite(self, service):
-        """Article sans unité définie."""
+        """Article sans unitÃ© dÃ©finie."""
         article = {
             "id": 2,
             "ingredient_id": 20,
@@ -218,7 +218,7 @@ class TestCreerNotificationStockBas:
         return NotificationService()
 
     def test_notification_stock_bas(self, service):
-        """Création d'une notification stock bas."""
+        """CrÃ©ation d'une notification stock bas."""
         article = {
             "id": 1,
             "ingredient_id": 10,
@@ -233,11 +233,11 @@ class TestCreerNotificationStockBas:
         assert notif is not None
         assert "ALERTE" in notif.message
         assert notif.priorite == "moyenne"
-        assert notif.icone == "⚠️"
+        assert notif.icone == "âš ï¸"
         assert "Beurre" in notif.titre
 
     def test_notification_stock_bas_sans_unite(self, service):
-        """Article sans unité définie."""
+        """Article sans unitÃ© dÃ©finie."""
         article = {
             "id": 3,
             "ingredient_id": 30,
@@ -260,7 +260,7 @@ class TestCreerNotificationPeremption:
         return NotificationService()
 
     def test_peremption_depassee(self, service):
-        """Péremption dépassée (jours <= 0)."""
+        """PÃ©remption dÃ©passÃ©e (jours <= 0)."""
         article = {
             "id": 1,
             "ingredient_id": 10,
@@ -271,12 +271,12 @@ class TestCreerNotificationPeremption:
         notif = service.creer_notification_peremption(article, jours_avant=0)
         
         assert notif is not None
-        assert "EXPIRÉ" in notif.titre
+        assert "EXPIRÃ‰" in notif.titre
         assert notif.priorite == "haute"
-        assert notif.icone == "🚨"
+        assert notif.icone == "ðŸš¨"
 
     def test_peremption_negative(self, service):
-        """Péremption très dépassée (jours < 0)."""
+        """PÃ©remption trÃ¨s dÃ©passÃ©e (jours < 0)."""
         article = {
             "id": 1,
             "ingredient_id": 10,
@@ -287,27 +287,27 @@ class TestCreerNotificationPeremption:
         notif = service.creer_notification_peremption(article, jours_avant=-5)
         
         assert notif is not None
-        assert "EXPIRÉ" in notif.titre
-        assert notif.icone == "🚨"
+        assert "EXPIRÃ‰" in notif.titre
+        assert notif.icone == "ðŸš¨"
 
     def test_peremption_tres_proche(self, service):
-        """Péremption très proche (1-3 jours)."""
+        """PÃ©remption trÃ¨s proche (1-3 jours)."""
         article = {
             "id": 2,
             "ingredient_id": 20,
-            "nom": "Crème fraîche",
+            "nom": "CrÃ¨me fraÃ®che",
             "date_peremption": "2026-02-09",
         }
         
         notif = service.creer_notification_peremption(article, jours_avant=2)
         
         assert notif is not None
-        assert "très proche" in notif.titre
+        assert "trÃ¨s proche" in notif.titre
         assert notif.priorite == "haute"
-        assert notif.icone == "🔴"
+        assert notif.icone == "ðŸ”´"
 
     def test_peremption_3_jours(self, service):
-        """Péremption exactement dans 3 jours."""
+        """PÃ©remption exactement dans 3 jours."""
         article = {
             "id": 3,
             "ingredient_id": 30,
@@ -319,10 +319,10 @@ class TestCreerNotificationPeremption:
         
         assert notif is not None
         assert notif.priorite == "haute"
-        assert notif.icone == "🔴"
+        assert notif.icone == "ðŸ”´"
 
     def test_peremption_proche(self, service):
-        """Péremption proche (> 3 jours)."""
+        """PÃ©remption proche (> 3 jours)."""
         article = {
             "id": 4,
             "ingredient_id": 40,
@@ -335,7 +335,7 @@ class TestCreerNotificationPeremption:
         assert notif is not None
         assert "proche" in notif.titre.lower()
         assert notif.priorite == "moyenne"
-        assert notif.icone == "🟠"
+        assert notif.icone == "ðŸŸ "
 
 
 class TestAjouterNotification:
@@ -367,7 +367,7 @@ class TestAjouterNotification:
         assert len(service.notifications[1]) == 1
 
     def test_ajouter_notification_utilisateur_existant(self, service, notification):
-        """Ajout d'une deuxième notification."""
+        """Ajout d'une deuxiÃ¨me notification."""
         from src.services.notifications import Notification, TypeAlerte
         
         service.ajouter_notification(notification, utilisateur_id=1)
@@ -376,7 +376,7 @@ class TestAjouterNotification:
             type_alerte=TypeAlerte.STOCK_CRITIQUE,
             article_id=2,
             ingredient_id=20,
-            titre="Deuxième notification",
+            titre="DeuxiÃ¨me notification",
             message="Autre message de test",
         )
         
@@ -386,15 +386,15 @@ class TestAjouterNotification:
         assert len(service.notifications[1]) == 2
 
     def test_ajouter_notification_evite_doublon(self, service, notification):
-        """Notifications identiques ne sont pas dupliquées."""
+        """Notifications identiques ne sont pas dupliquÃ©es."""
         from src.services.notifications import Notification, TypeAlerte
         
         service.ajouter_notification(notification, utilisateur_id=1)
         
-        # Même type + même article = doublon
+        # MÃªme type + mÃªme article = doublon
         doublon = Notification(
             type_alerte=TypeAlerte.STOCK_BAS,
-            article_id=1,  # Même article
+            article_id=1,  # MÃªme article
             ingredient_id=10,
             titre="Notification doublon",
             message="Message du doublon ici",
@@ -416,34 +416,34 @@ class TestObtenirNotifications:
         
         service = NotificationService()
         
-        # Notification haute priorité, non lue
+        # Notification haute prioritÃ©, non lue
         n1 = Notification(
             type_alerte=TypeAlerte.STOCK_CRITIQUE,
             article_id=1,
             ingredient_id=10,
             titre="Notification haute",
-            message="Priorité haute ici",
+            message="PrioritÃ© haute ici",
             priorite="haute",
         )
         
-        # Notification moyenne priorité, lue
+        # Notification moyenne prioritÃ©, lue
         n2 = Notification(
             type_alerte=TypeAlerte.STOCK_BAS,
             article_id=2,
             ingredient_id=20,
             titre="Notification moyenne",
-            message="Priorité moyenne ici",
+            message="PrioritÃ© moyenne ici",
             priorite="moyenne",
             lue=True,
         )
         
-        # Notification basse priorité, non lue
+        # Notification basse prioritÃ©, non lue
         n3 = Notification(
             type_alerte=TypeAlerte.ARTICLE_MODIFIE,
             article_id=3,
             ingredient_id=30,
             titre="Notification basse",
-            message="Priorité basse ici",
+            message="PrioritÃ© basse ici",
             priorite="basse",
         )
         
@@ -454,12 +454,12 @@ class TestObtenirNotifications:
         return service
 
     def test_obtenir_toutes_notifications(self, service_with_notifications):
-        """Récupère toutes les notifications."""
+        """RÃ©cupÃ¨re toutes les notifications."""
         notifs = service_with_notifications.obtenir_notifications()
         assert len(notifs) == 3
 
     def test_obtenir_notifications_triees_par_priorite(self, service_with_notifications):
-        """Notifications triées par priorité."""
+        """Notifications triÃ©es par prioritÃ©."""
         notifs = service_with_notifications.obtenir_notifications()
         
         # Tri: haute < moyenne < basse (avec reverse)
@@ -501,7 +501,7 @@ class TestMarquerLue:
         return service
 
     def test_marquer_lue_succes(self, service_with_notification):
-        """Marque une notification comme lue avec succès."""
+        """Marque une notification comme lue avec succÃ¨s."""
         result = service_with_notification.marquer_lue(1)
         
         assert result is True
@@ -553,7 +553,7 @@ class TestSupprimerNotification:
         return service
 
     def test_supprimer_notification_succes(self, service_with_notifications):
-        """Supprime une notification avec succès."""
+        """Supprime une notification avec succÃ¨s."""
         result = service_with_notifications.supprimer_notification(1)
         
         assert result is True
@@ -623,7 +623,7 @@ class TestEffacerToutesLues:
         """Efface toutes les notifications lues."""
         result = service_with_mixed_notifications.effacer_toutes_lues()
         
-        assert result == 2  # 2 notifications effacées
+        assert result == 2  # 2 notifications effacÃ©es
         notifs = service_with_mixed_notifications.obtenir_notifications()
         assert len(notifs) == 1
         assert notifs[0].lue is False
@@ -694,8 +694,8 @@ class TestObtenirStats:
                 type_alerte=TypeAlerte.PEREMPTION_PROCHE,
                 article_id=4,
                 ingredient_id=40,
-                titre="Péremption proche",
-                message="Message péremption proche",
+                titre="PÃ©remption proche",
+                message="Message pÃ©remption proche",
                 priorite="basse",
                 lue=False,
             ),
@@ -725,7 +725,7 @@ class TestObtenirStats:
         assert stats["par_type"]["peremption_proche"] == 1
 
     def test_obtenir_stats_par_priorite(self, service_with_diverse_notifications):
-        """Stats: comptage par priorité."""
+        """Stats: comptage par prioritÃ©."""
         stats = service_with_diverse_notifications.obtenir_stats()
         
         assert stats["par_priorite"]["moyenne"] == 2
@@ -787,9 +787,9 @@ class TestObtenirAlertesActives:
                 article_id=4,
                 ingredient_id=40,
                 titre="Stock lue",
-                message="Message stock déjà lue",
+                message="Message stock dÃ©jÃ  lue",
                 priorite="haute",
-                lue=True,  # Déjà lue - ne doit pas apparaître
+                lue=True,  # DÃ©jÃ  lue - ne doit pas apparaÃ®tre
             ),
         ]
         
@@ -799,21 +799,21 @@ class TestObtenirAlertesActives:
         return service
 
     def test_alertes_actives_critiques(self, service_with_notifications):
-        """Alertes haute priorité dans 'critiques'."""
+        """Alertes haute prioritÃ© dans 'critiques'."""
         alertes = service_with_notifications.obtenir_alertes_actives()
         
         assert len(alertes["critiques"]) == 1
         assert alertes["critiques"][0].priorite == "haute"
 
     def test_alertes_actives_hautes(self, service_with_notifications):
-        """Alertes moyenne priorité dans 'hautes'."""
+        """Alertes moyenne prioritÃ© dans 'hautes'."""
         alertes = service_with_notifications.obtenir_alertes_actives()
         
         assert len(alertes["hautes"]) == 1
         assert alertes["hautes"][0].priorite == "moyenne"
 
     def test_alertes_actives_moyennes(self, service_with_notifications):
-        """Alertes basse priorité dans 'moyennes'."""
+        """Alertes basse prioritÃ© dans 'moyennes'."""
         alertes = service_with_notifications.obtenir_alertes_actives()
         
         assert len(alertes["moyennes"]) == 1
@@ -823,7 +823,7 @@ class TestObtenirAlertesActives:
         """Notifications lues ne sont pas incluses."""
         alertes = service_with_notifications.obtenir_alertes_actives()
         
-        # 4 notifs mais 1 lue → 3 dans les alertes actives
+        # 4 notifs mais 1 lue â†’ 3 dans les alertes actives
         total = (
             len(alertes["critiques"]) +
             len(alertes["hautes"]) +
@@ -865,7 +865,7 @@ class TestEnvoyerEmailAlerte:
         )
 
     def test_envoyer_email_succes(self, service, notification):
-        """Envoi email retourne True et met à jour la notification."""
+        """Envoi email retourne True et met Ã  jour la notification."""
         result = service.envoyer_email_alerte(notification, "test@example.com")
         
         assert result is True
@@ -873,7 +873,7 @@ class TestEnvoyerEmailAlerte:
         assert notification.push_envoyee is True
 
     def test_envoyer_email_met_a_jour_notification(self, service, notification):
-        """L'email est stocké dans la notification."""
+        """L'email est stockÃ© dans la notification."""
         service.envoyer_email_alerte(notification, "autre@example.com")
         
         assert notification.email == "autre@example.com"

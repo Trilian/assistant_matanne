@@ -1,1 +1,1 @@
-"""Tests pour le domaine Planning."""
+﻿"""Tests pour le domaine Planning."""

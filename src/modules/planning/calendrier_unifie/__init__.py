@@ -1,17 +1,17 @@
-"""
-Module Calendrier Familial Unifié - Vue centrale de TOUT
+﻿"""
+Module Calendrier Familial UnifiÃe - Vue centrale de TOUT
 
 Affiche dans une seule vue:
-- 🍽️ Repas (midi, soir, goûters)
-- 🍳 Sessions batch cooking
-- 🛒 Courses planifiées
-- 🎨 Activités famille
-- 🏥 RDV médicaux
-- 📅 Événements divers
+- ðŸ½ï¸ Repas (midi, soir, goûters)
+- ðŸ³ Sessions batch cooking
+- ðŸ›’ Courses planifiÃees
+- ðŸŽ¨ ActivitÃes famille
+- ðŸ¥ RDV mÃedicaux
+- ðŸ“… ÉvÃenements divers
 
-Fonctionnalités:
+FonctionnalitÃes:
 - Vue semaine avec impression
-- Ajout rapide d'événements
+- Ajout rapide d'ÃevÃenements
 - Navigation semaine par semaine
 - Export pour le frigo
 """
@@ -30,10 +30,10 @@ from .components import (
 
 
 def app():
-    """Point d'entrée du module Calendrier Familial Unifié."""
+    """Point d'entrÃee du module Calendrier Familial UnifiÃe."""
     
-    st.title("📅 Calendrier Familial")
-    st.caption("Vue unifiée de toute votre semaine: repas, batch, courses, activités, ménage, RDV")
+    st.title("ðŸ“… Calendrier Familial")
+    st.caption("Vue unifiÃee de toute votre semaine: repas, batch, courses, activitÃes, mÃenage, RDV")
     
     # Navigation
     render_navigation_semaine()
@@ -44,7 +44,7 @@ def app():
     if "cal_semaine_debut" not in st.session_state:
         st.session_state.cal_semaine_debut = get_debut_semaine(date.today())
     
-    # Charger les données
+    # Charger les donnÃees
     with st.spinner("Chargement..."):
         donnees = charger_donnees_semaine(st.session_state.cal_semaine_debut)
         
@@ -55,7 +55,7 @@ def app():
             activites=donnees["activites"],
             events=donnees["events"],
             courses_planifiees=donnees["courses_planifiees"],
-            taches_menage=donnees["taches_menage"],  # Intégration ménage
+            taches_menage=donnees["taches_menage"],  # IntÃegration mÃenage
         )
     
     # Stats en haut
@@ -71,13 +71,13 @@ def app():
     # Mode d'affichage
     mode = st.radio(
         "Vue",
-        ["📋 Liste détaillée", "📊 Grille"],
+        ["ðŸ“‹ Liste dÃetaillÃee", "ðŸ“Š Grille"],
         horizontal=True,
         label_visibility="collapsed",
     )
     
     # Affichage principal
-    if mode == "📋 Liste détaillée":
+    if mode == "ðŸ“‹ Liste dÃetaillÃee":
         render_vue_semaine_liste(semaine)
     else:
         render_vue_semaine_grille(semaine)
@@ -86,7 +86,7 @@ def app():
     render_modal_impression(semaine)
     render_formulaire_ajout_event()
     
-    # Légende
+    # LÃegende
     render_legende()
 
 

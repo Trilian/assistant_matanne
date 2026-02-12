@@ -1,5 +1,5 @@
-"""
-Tests ciblés pour les derniers pourcents de couverture UI.
+﻿"""
+Tests ciblÃ©s pour les derniers pourcents de couverture UI.
 Focus sur layout/init.py et layout/styles.py
 """
 
@@ -12,7 +12,7 @@ class TestLayoutInitialisation:
     """Tests pour layout/init.py."""
 
     def test_initialiser_app_success(self):
-        """Test initialiser_app avec succès."""
+        """Test initialiser_app avec succÃ¨s."""
         from src.ui.layout import init
         
         mock_state = MagicMock()
@@ -26,7 +26,7 @@ class TestLayoutInitialisation:
                         assert result == True
 
     def test_initialiser_app_db_fail(self):
-        """Test initialiser_app avec échec DB."""
+        """Test initialiser_app avec Ã©chec DB."""
         from src.ui.layout import init
         
         with patch('src.ui.layout.init.GestionnaireEtat.initialiser'):
@@ -39,7 +39,7 @@ class TestLayoutInitialisation:
                             pass
 
     def test_initialiser_app_ia_fail(self):
-        """Test initialiser_app avec échec IA."""
+        """Test initialiser_app avec Ã©chec IA."""
         from src.ui.layout import init
         
         mock_state = MagicMock()
@@ -59,14 +59,14 @@ class TestLayoutStyles:
     """Tests pour layout/styles.py."""
 
     def test_styles_module_loaded(self):
-        """Test module styles chargé."""
+        """Test module styles chargÃ©."""
         from src.ui.layout import styles
         
         # Check module is not None
         assert styles is not None
 
     def test_styles_constants(self):
-        """Test constantes CSS si présentes."""
+        """Test constantes CSS si prÃ©sentes."""
         from src.ui.layout import styles
         
         # Check for any CSS string constants
@@ -87,7 +87,7 @@ class TestLayoutFooter:
     """Tests pour layout/footer.py."""
 
     def test_render_footer_function(self):
-        """Test render_footer existe et peut être appelée."""
+        """Test render_footer existe et peut Ãªtre appelÃ©e."""
         from src.ui.layout import footer
         
         if hasattr(footer, 'render_footer'):
@@ -129,7 +129,7 @@ class TestLayoutFooter:
                                 afficher_footer()
 
     def test_afficher_footer_about_click(self):
-        """Test afficher_footer avec clic sur À propos."""
+        """Test afficher_footer avec clic sur Ã€ propos."""
         from src.ui.layout.footer import afficher_footer
         
         with patch('src.ui.layout.footer.obtenir_parametres') as mock_params:
@@ -151,7 +151,7 @@ class TestLayoutHeader:
     """Tests pour layout/header.py."""
 
     def test_render_header_function(self):
-        """Test render_header existe et peut être appelée."""
+        """Test render_header existe et peut Ãªtre appelÃ©e."""
         from src.ui.layout import header
         
         if hasattr(header, 'render_header'):
@@ -278,7 +278,7 @@ class TestBaseModuleSessionKey:
         config = ModuleConfig(
             name="test_key",
             title="Test",
-            icon="🧪",
+            icon="ðŸ§ª",
             service=mock_service
         )
         
@@ -330,7 +330,7 @@ class TestSidebarDebug:
         
         with patch('src.ui.layout.sidebar.obtenir_etat', return_value=mock_state):
             with patch('src.ui.layout.sidebar.GestionnaireEtat') as mock_ge:
-                mock_ge.obtenir_fil_ariane_navigation.return_value = ["Accueil", "Recettes", "Détails"]
+                mock_ge.obtenir_fil_ariane_navigation.return_value = ["Accueil", "Recettes", "DÃ©tails"]
                 mock_ge.revenir = Mock()
                 with patch('streamlit.sidebar') as mock_sb:
                     mock_sb.title = Mock()

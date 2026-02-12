@@ -1,16 +1,5 @@
-"""Domaine Jeux - Paris sportifs et Loto avec prédictions IA."""
+"""Module Jeux - Paris sportifs et Loto."""
 
-# UI
-from .ui import paris, loto
+from . import loto, paris
 
-# Logic
-from .logic import paris as paris_logic_module, loto_logic
-# Backward compatibility alias
-paris_logic = paris_logic_module
-
-__all__ = [
-    # UI
-    "paris", "loto",
-    # Logic
-    "paris_logic", "paris_logic_module", "loto_logic",
-]
+__all__ = ['loto', 'paris']

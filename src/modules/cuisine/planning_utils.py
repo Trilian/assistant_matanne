@@ -1,5 +1,5 @@
-﻿"""
-Logique métier du module Planning (cuisine) - Séparée de l'UI
+"""
+Logique metier du module Planning (cuisine) - Separee de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
 
@@ -7,54 +7,27 @@ from datetime import date, timedelta, datetime
 from typing import Optional, List, Dict, Any
 import logging
 
+from src.modules.shared.constantes import JOURS_SEMAINE
+from src.modules.shared.date_utils import (
+    obtenir_debut_semaine as get_debut_semaine,
+    obtenir_fin_semaine as get_fin_semaine,
+)
+
 logger = logging.getLogger(__name__)
 
 
 # ═══════════════════════════════════════════════════════════
-# CONSTANTES
+# CONSTANTES LOCALES (specifiques au module cuisine)
 # ═══════════════════════════════════════════════════════════
 
-JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
 JOURS_EMOJI = ["📅", "👶", "💡", "🎯", "💰", "⚫", "❌"]
-TYPES_REPAS = ["déjeuner", "dîner"]
-REGIMES = ["Omnivore", "Végétarien", "Végan", "Sans gluten"]
+TYPES_REPAS = ["dejeuner", "dîner"]  # Specifique cuisine (simplifie)
+REGIMES = ["Omnivore", "Vegetarien", "Vegan", "Sans gluten"]
 TEMPS_CUISINE = ["Rapide (< 30 min)", "Moyen (30-60 min)", "Long (> 60 min)"]
 BUDGETS = ["Bas (< 20€)", "Moyen (20-40€)", "Haut (> 40€)"]
 
 
-# ═══════════════════════════════════════════════════════════
-# FONCTIONS DE CALCUL DE DATES
-# ═══════════════════════════════════════════════════════════
-
-def get_debut_semaine(date_ref: date = None) -> date:
-    """
-    Retourne le lundi de la semaine donnée.
-    
-    Args:
-        date_ref: Date de référence (aujourd'hui par défaut)
-        
-    Returns:
-        Date du lundi de la semaine
-    """
-    if date_ref is None:
-        date_ref = date.today()
-    
-    debut = date_ref - timedelta(days=date_ref.weekday())
-    return debut
-
-
-def get_fin_semaine(date_ref: date = None) -> date:
-    """
-    Retourne le dimanche de la semaine donnée.
-    
-    Args:
-        date_ref: Date de référence (aujourd'hui par défaut)
-        
-    Returns:
-        Date du dimanche de la semaine
-    """
-    debut = get_debut_semaine(date_ref)
-    return debut + timedelta(days=6)
+# Note: get_debut_semaine et get_fin_semaine sont importes depuis shared.date_utils
 
 
 def get_dates_semaine(date_ref: date = None) -> List[date]:
@@ -62,7 +35,7 @@ def get_dates_semaine(date_ref: date = None) -> List[date]:
     Retourne la liste des 7 dates de la semaine.
     
     Args:
-        date_ref: Date de référence (aujourd'hui par défaut)
+        date_ref: Date de reference (aujourd'hui par defaut)
         
     Returns:
         Liste des 7 dates (lundi à dimanche)
@@ -73,13 +46,13 @@ def get_dates_semaine(date_ref: date = None) -> List[date]:
 
 def get_numero_semaine(date_ref: date = None) -> int:
     """
-    Retourne le numéro de semaine ISO.
+    Retourne le numero de semaine ISO.
     
     Args:
-        date_ref: Date de référence (aujourd'hui par défaut)
+        date_ref: Date de reference (aujourd'hui par defaut)
         
     Returns:
-        Numéro de semaine (1-53)
+        Numero de semaine (1-53)
     """
     if date_ref is None:
         date_ref = date.today()
@@ -115,7 +88,7 @@ def organiser_repas_par_jour(repas: List[Any]) -> Dict[str, List[Any]]:
 
 def organiser_repas_par_type(repas: List[Any]) -> Dict[str, List[Any]]:
     """
-    Organise une liste de repas par type (déjeuner/dîner).
+    Organise une liste de repas par type (dejeuner/dîner).
     
     Args:
         repas: Liste d'objets Repas
@@ -166,7 +139,7 @@ def calculer_statistiques_planning(planning: Any) -> Dict[str, Any]:
     
     return {
         "total_repas": len(repas),
-        "repas_dejeuner": len(repas_par_type.get("déjeuner", [])),
+        "repas_dejeuner": len(repas_par_type.get("dejeuner", [])),
         "repas_diner": len(repas_par_type.get("dîner", [])),
         "jours_complets": jours_complets,
         "taux_completion": (len(repas) / 14.0) * 100 if repas else 0.0
@@ -198,13 +171,13 @@ def calculer_cout_planning(planning: Any, prix_recettes: Dict[int, float]) -> fl
 
 def calculer_variete_planning(planning: Any) -> Dict[str, Any]:
     """
-    Calcule les métriques de variété d'un planning.
+    Calcule les metriques de variete d'un planning.
     
     Args:
         planning: Objet Planning avec repas
         
     Returns:
-        Dictionnaire avec métriques de variété
+        Dictionnaire avec metriques de variete
     """
     if not planning or not hasattr(planning, 'repas'):
         return {
@@ -217,7 +190,7 @@ def calculer_variete_planning(planning: Any) -> Dict[str, Any]:
     recettes_ids = [r.recette_id for r in repas if hasattr(r, 'recette_id')]
     recettes_uniques = set(recettes_ids)
     
-    # Trouver répétitions
+    # Trouver repetitions
     from collections import Counter
     compteur = Counter(recettes_ids)
     repetees = [(rid, count) for rid, count in compteur.items() if count > 1]
@@ -235,10 +208,10 @@ def calculer_variete_planning(planning: Any) -> Dict[str, Any]:
 
 def valider_repas(data: Dict[str, Any]) -> tuple[bool, Optional[str]]:
     """
-    Valide les données d'un repas.
+    Valide les donnees d'un repas.
     
     Args:
-        data: Données du repas
+        data: Donnees du repas
         
     Returns:
         (est_valide, message_erreur)
@@ -251,32 +224,32 @@ def valider_repas(data: Dict[str, Any]) -> tuple[bool, Optional[str]]:
     if "type_repas" not in data or not data["type_repas"]:
         return False, "Le type de repas est requis"
     
-    # Vérifier type repas valide
+    # Verifier type repas valide
     if data["type_repas"] not in TYPES_REPAS:
-        return False, f"Type de repas invalide. Valeurs autorisées: {', '.join(TYPES_REPAS)}"
+        return False, f"Type de repas invalide. Valeurs autorisees: {', '.join(TYPES_REPAS)}"
     
     # Recette requise
     if "recette_id" not in data or not data["recette_id"]:
-        return False, "Une recette doit être sélectionnée"
+        return False, "Une recette doit être selectionnee"
     
     return True, None
 
 
 def valider_planning(data: Dict[str, Any]) -> tuple[bool, List[str]]:
     """
-    Valide les données d'un planning complet.
+    Valide les donnees d'un planning complet.
     
     Args:
-        data: Données du planning
+        data: Donnees du planning
         
     Returns:
         (est_valide, liste_erreurs)
     """
     erreurs = []
     
-    # Semaine début requise
+    # Semaine debut requise
     if "semaine_debut" not in data or not data["semaine_debut"]:
-        erreurs.append("La date de début de semaine est requise")
+        erreurs.append("La date de debut de semaine est requise")
     
     # Repas
     if "repas" in data and data["repas"]:
@@ -294,7 +267,7 @@ def valider_planning(data: Dict[str, Any]) -> tuple[bool, List[str]]:
 
 def generer_structure_semaine() -> Dict[str, List[str]]:
     """
-    Génère la structure vide d'une semaine (7 jours, 2 repas/jour).
+    Genère la structure vide d'une semaine (7 jours, 2 repas/jour).
     
     Returns:
         Dictionnaire {jour: [types_repas]}
@@ -307,13 +280,13 @@ def generer_structure_semaine() -> Dict[str, List[str]]:
 
 def calculer_contraintes_ia(preferences: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Convertit les préférences utilisateur en contraintes pour l'IA.
+    Convertit les preferences utilisateur en contraintes pour l'IA.
     
     Args:
-        preferences: Préférences utilisateur (régimes, temps, budget, etc.)
+        preferences: Preferences utilisateur (regimes, temps, budget, etc.)
         
     Returns:
-        Contraintes formatées pour l'IA
+        Contraintes formatees pour l'IA
     """
     contraintes = {
         "regimes": preferences.get("regimes", ["Omnivore"]),
@@ -342,7 +315,7 @@ def formater_historique_planning(plannings: List[Any]) -> List[Dict[str, Any]]:
         plannings: Liste d'objets Planning
         
     Returns:
-        Liste de dictionnaires formatés
+        Liste de dictionnaires formates
     """
     resultats = []
     

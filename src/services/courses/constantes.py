@@ -1,4 +1,4 @@
-"""
+﻿"""
 Constantes pour le package courses.
 
 Mappings rayons et priorités pour la catégorisation des articles.

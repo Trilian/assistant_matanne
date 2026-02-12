@@ -1,11 +1,11 @@
-"""
+﻿"""
 Tests pour accueil_logic.py
 Couverture cible: 80%+
 """
 import pytest
 from datetime import date, datetime, timedelta
 
-from src.domains.utils.logic.accueil_logic import (
+from src.modules.outils.accueil_utils import (
     calculer_metriques_dashboard,
     compter_alertes_critiques,
     generer_notifications,
@@ -16,9 +16,9 @@ from src.domains.utils.logic.accueil_logic import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS MÉTRIQUES DASHBOARD
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS MÃ‰TRIQUES DASHBOARD
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalculerMetriques:
@@ -39,9 +39,9 @@ class TestCalculerMetriques:
         assert "timestamp" in result
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ALERTES CRITIQUES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCompterAlertes:
@@ -73,16 +73,16 @@ class TestCompterAlertes:
         assert compter_alertes_critiques(alertes) == 0
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS GÉNÉRATION NOTIFICATIONS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS GÃ‰NÃ‰RATION NOTIFICATIONS
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGenererNotifications:
     """Tests pour generer_notifications."""
 
     def test_aucune_notification(self):
-        """Liste vide si rien à signaler."""
+        """Liste vide si rien Ã  signaler."""
         result = generer_notifications()
         assert result == []
 
@@ -115,9 +115,9 @@ class TestGenererNotifications:
         assert len(result) == 3
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS TRI NOTIFICATIONS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestTrierNotifications:
@@ -150,9 +150,9 @@ class TestTrierNotifications:
         assert result[0]["priorite"] == "haute"
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS VÉRIFICATION DATES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS VÃ‰RIFICATION DATES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestEstCetteSemaine:
@@ -166,7 +166,7 @@ class TestEstCetteSemaine:
         """Demain est probablement cette semaine (sauf dimanche)."""
         demain = date.today() + timedelta(days=1)
         # Si on est samedi ou dimanche, demain pourrait être la semaine prochaine
-        if date.today().weekday() <= 4:  # Lundi à vendredi
+        if date.today().weekday() <= 4:  # Lundi Ã  vendredi
             assert est_cette_semaine(demain) is True
 
     def test_semaine_prochaine(self):

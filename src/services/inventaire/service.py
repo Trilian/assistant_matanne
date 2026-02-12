@@ -1,10 +1,10 @@
-"""
+﻿"""
 Service Inventaire Unifié.
 
-✅ Utilise @avec_session_db et @avec_cache
-✅ Validation Pydantic centralisée
-✅ Type hints complets pour meilleur IDE support
-✅ Services testables sans Streamlit
+âœ… Utilise @avec_session_db et @avec_cache
+âœ… Validation Pydantic centralisée
+âœ… Type hints complets pour meilleur IDE support
+âœ… Services testables sans Streamlit
 """
 
 import logging
@@ -26,9 +26,9 @@ from .types import SuggestionCourses, ArticleImport
 
 logger = logging.getLogger(__name__)
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONSTANTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 CATEGORIES = [
     "Légumes",
@@ -45,19 +45,19 @@ CATEGORIES = [
 EMPLACEMENTS = ["Frigo", "Congélateur", "Placard", "Cave", "Garde-manger"]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SERVICE INVENTAIRE UNIFIÉ
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class ServiceInventaire(BaseService[ArticleInventaire], BaseAIService, InventoryAIMixin):
     """
     Service complet pour l'inventaire.
 
-    ✅ Héritage multiple :
-    - BaseService → CRUD optimisé
-    - BaseAIService → IA avec rate limiting auto
-    - InventoryAIMixin → Contextes métier inventaire
+    âœ… Héritage multiple :
+    - BaseService â†’ CRUD optimisé
+    - BaseAIService â†’ IA avec rate limiting auto
+    - InventoryAIMixin â†’ Contextes métier inventaire
 
     Fonctionnalités:
     - CRUD optimisé avec cache
@@ -76,9 +76,9 @@ class ServiceInventaire(BaseService[ArticleInventaire], BaseAIService, Inventory
             service_name="inventaire",
         )
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # SECTION 1: CRUD & INVENTAIRE
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     @avec_cache(
         ttl=1800,
@@ -146,7 +146,7 @@ class ServiceInventaire(BaseService[ArticleInventaire], BaseAIService, Inventory
                 }
             )
 
-        logger.info(f"✅ Retrieved complete inventory: {len(result)} items")
+        logger.info(f"âœ… Retrieved complete inventory: {len(result)} items")
         return result
 
     @avec_gestion_erreurs(default_return={})
@@ -171,17 +171,17 @@ class ServiceInventaire(BaseService[ArticleInventaire], BaseAIService, Inventory
             if statut in alertes:
                 alertes[statut].append(article)
 
-        logger.info(f"⚠️ Inventory alerts: {sum(len(v) for v in alertes.values())} items")
+        logger.info(f"âš ï¸ Inventory alerts: {sum(len(v) for v in alertes.values())} items")
         return alertes
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # SECTION 2: SUGGESTIONS IA
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     @avec_cache(ttl=3600, key_func=lambda self: "suggestions_courses_ia")
     @avec_gestion_erreurs(default_return=[])
     def suggerer_courses_ia(self) -> list[SuggestionCourses]:  # pragma: no cover
-        """Suggère des articles à ajouter aux courses via IA.
+        """Suggère des articles Ã  ajouter aux courses via IA.
 
         Uses Mistral AI to suggest shopping items based on inventory status.
         Results cached for 1 hour.
@@ -214,7 +214,7 @@ RULES:
 6. quantite: realistic amounts for family use
 7. No explanations, no text, ONLY JSON'''
 
-        logger.info("🤖 Generating shopping suggestions with AI")
+        logger.info("ðŸ¤– Generating shopping suggestions with AI")
 
         # Appel IA avec auto rate limiting & parsing
         suggestions = self.call_with_list_parsing_sync(
@@ -226,12 +226,12 @@ RULES:
             max_tokens=2500,
         )
 
-        logger.info(f"✅ Generated {len(suggestions)} shopping suggestions")
+        logger.info(f"âœ… Generated {len(suggestions)} shopping suggestions")
         return suggestions
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # SECTION 3: HELPERS PRIVÉS
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     def _calculer_statut(self, article: ArticleInventaire, today: date) -> str:
         """Calcule le statut d'un article.
@@ -272,9 +272,9 @@ RULES:
             return None
         return (article.date_peremption - today).days
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # SECTION 4: HISTORIQUE (Tracking modifications)
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     @avec_gestion_erreurs(default_return=True)
     @avec_session_db
@@ -326,7 +326,7 @@ RULES:
         db.add(historique)
         db.commit()
 
-        logger.info(f"📝 Historique enregistré: {type_modification} article #{article.id}")
+        logger.info(f"ðŸ“ Historique enregistré: {type_modification} article #{article.id}")
         return True
 
     @avec_gestion_erreurs(default_return=[])
@@ -381,12 +381,12 @@ RULES:
                 "notes": h.notes,
             })
 
-        logger.info(f"📜 Retrieved {len(result)} historique entries")
+        logger.info(f"ðŸ“œ Retrieved {len(result)} historique entries")
         return result
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # SECTION 5: GESTION ARTICLES (CREATE/UPDATE/DELETE)
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     @avec_gestion_erreurs(default_return=None)
     @avec_session_db
@@ -399,7 +399,7 @@ RULES:
         date_peremption: date | None = None,
         db: Session | None = None,
     ) -> dict[str, Any] | None:
-        """Ajoute un article à l'inventaire.
+        """Ajoute un article Ã  l'inventaire.
 
         Args:
             ingredient_nom: Nom de l'ingrédient
@@ -420,16 +420,16 @@ RULES:
         ).first()
 
         if not ingredient:
-            logger.warning(f"⚠️ Ingrédient '{ingredient_nom}' non trouvé")
+            logger.warning(f"âš ï¸ Ingrédient '{ingredient_nom}' non trouvé")
             return None
 
-        # Vérifier si existe déjà
+        # Vérifier si existe déjÃ 
         existing = db.query(ArticleInventaire).filter(
             ArticleInventaire.ingredient_id == ingredient.id
         ).first()
 
         if existing:
-            logger.warning(f"⚠️ Article '{ingredient_nom}' existe déjà")
+            logger.warning(f"âš ï¸ Article '{ingredient_nom}' existe déjÃ ")
             return None
 
         # Créer l'article
@@ -444,7 +444,7 @@ RULES:
         db.add(article)
         db.commit()
 
-        logger.info(f"✅ Article '{ingredient_nom}' ajouté à l'inventaire")
+        logger.info(f"âœ… Article '{ingredient_nom}' ajouté Ã  l'inventaire")
         self.invalidate_cache()
 
         return {
@@ -467,7 +467,7 @@ RULES:
         date_peremption: date | None = None,
         db: Session | None = None,
     ) -> bool:
-        """Met à jour un article de l'inventaire.
+        """Met Ã  jour un article de l'inventaire.
 
         Args:
             article_id: ID de l'article
@@ -485,7 +485,7 @@ RULES:
         ).first()
 
         if not article:
-            logger.warning(f"⚠️ Article #{article_id} non trouvé")
+            logger.warning(f"âš ï¸ Article #{article_id} non trouvé")
             return False
 
         if quantite is not None:
@@ -525,7 +525,7 @@ RULES:
             date_peremption_apres=date_peremption if date_peremption is not None else None,
         )
         
-        logger.info(f"✅ Article #{article_id} mis à jour")
+        logger.info(f"âœ… Article #{article_id} mis Ã  jour")
         self.invalidate_cache()
 
         return True
@@ -547,20 +547,20 @@ RULES:
         ).first()
 
         if not article:
-            logger.warning(f"⚠️ Article #{article_id} non trouvé")
+            logger.warning(f"âš ï¸ Article #{article_id} non trouvé")
             return False
 
         db.delete(article)
         db.commit()
 
-        logger.info(f"✅ Article #{article_id} supprimé")
+        logger.info(f"âœ… Article #{article_id} supprimé")
         self.invalidate_cache()
 
         return True
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # SECTION 6: GESTION DES PHOTOS
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     @avec_session_db
     @avec_gestion_erreurs(default_return={})
@@ -571,7 +571,7 @@ RULES:
         photo_filename: str,
         db: Session | None = None,
     ) -> dict[str, Any]:
-        """Ajoute une photo à un article.
+        """Ajoute une photo Ã  un article.
         
         Args:
             article_id: ID de l'article
@@ -592,7 +592,7 @@ RULES:
             "filename": article.photo_filename,
         } if article.photo_url else None
 
-        # Met à jour la photo
+        # Met Ã  jour la photo
         article.photo_url = photo_url
         article.photo_filename = photo_filename
         article.photo_uploaded_at = date.today()
@@ -610,7 +610,7 @@ RULES:
             db=db,
         )
 
-        logger.info(f"📸 Photo ajoutée à l'article #{article_id}")
+        logger.info(f"ðŸ“¸ Photo ajoutée Ã  l'article #{article_id}")
         self.invalidate_cache()
 
         return {
@@ -659,7 +659,7 @@ RULES:
             db=db,
         )
 
-        logger.info(f"🗑️  Photo supprimée de l'article #{article_id}")
+        logger.info(f"ðŸ—‘ï¸  Photo supprimée de l'article #{article_id}")
         self.invalidate_cache()
 
         return True
@@ -686,9 +686,9 @@ RULES:
             "uploaded_at": article.photo_uploaded_at,
         }
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # SECTION 8: NOTIFICATIONS & ALERTES
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     @avec_gestion_erreurs(default_return={})
     def generer_notifications_alertes(self) -> dict[str, Any]:
@@ -742,7 +742,7 @@ RULES:
                             stats["peremption_proche"].append(article_data["nom"])
 
         logger.info(
-            f"📬 Notifications générées: "
+            f"ðŸ“¬ Notifications générées: "
             f"Critique={len(stats['stock_critique'])}, "
             f"Bas={len(stats['stock_bas'])}, "
             f"Péremption={len(stats['peremption_proche']) + len(stats['peremption_depassee'])}"
@@ -776,9 +776,9 @@ RULES:
             for notif in notifs
         ]
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # SECTION 9: STATISTIQUES & RAPPORTS
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     @avec_gestion_erreurs(default_return={})
     def get_statistiques(self) -> dict[str, Any]:
@@ -836,12 +836,12 @@ RULES:
             if categories[cat]["articles"] > 0:
                 categories[cat]["seuil_moyen"] /= categories[cat]["articles"]
 
-        logger.info(f"📊 Statistics for {len(categories)} categories")
+        logger.info(f"ðŸ“Š Statistics for {len(categories)} categories")
         return categories
 
     @avec_gestion_erreurs(default_return=[])
     def get_articles_a_prelever(self, date_limite: date | None = None) -> list[dict[str, Any]]:
-        """Récupère articles à utiliser en priorité.
+        """Récupère articles Ã  utiliser en priorité.
 
         Args:
             date_limite: Date limite de péremption (par défaut aujourd'hui + 3 jours)
@@ -866,9 +866,9 @@ RULES:
 
         return a_prelever
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # SECTION 10: IMPORT/EXPORT AVANCÉ
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     @avec_gestion_erreurs(default_return=[])
     def importer_articles(  # pragma: no cover
@@ -878,7 +878,7 @@ RULES:
         """Importe plusieurs articles en batch.
         
         Args:
-            articles_data: Liste des articles à importer (dictionnaires)
+            articles_data: Liste des articles Ã  importer (dictionnaires)
             
         Returns:
             Liste des articles importés avec leurs IDs
@@ -911,7 +911,7 @@ RULES:
                     db.commit()
                     db.refresh(ingredient)
 
-                # Ajoute l'article à l'inventaire
+                # Ajoute l'article Ã  l'inventaire
                 resultat = self.ajouter_article(
                     ingredient_id=ingredient.id,
                     quantite=article_import.quantite,
@@ -926,7 +926,7 @@ RULES:
 
                 resultats.append({
                     "nom": article_import.nom,
-                    "status": "✅",
+                    "status": "âœ…",
                     "message": "Importé avec succès",
                 })
 
@@ -934,11 +934,11 @@ RULES:
                 errors.append(f"Ligne {idx + 2}: {str(e)}")
                 resultats.append({
                     "nom": article_data.get("nom", "?"),
-                    "status": "❌",
+                    "status": "âŒ",
                     "message": str(e),
                 })
 
-        logger.info(f"✅ {len(resultats) - len(errors)}/{len(resultats)} articles importés")
+        logger.info(f"âœ… {len(resultats) - len(errors)}/{len(resultats)} articles importés")
 
         return resultats
 
@@ -1053,17 +1053,17 @@ RULES:
         return rapport
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ALIASES DE COMPATIBILITÉ
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 # Alias pour rétrocompatibilité
 InventaireService = ServiceInventaire
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # INSTANCE SINGLETON - LAZY LOADING
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 _service_inventaire: ServiceInventaire | None = None
 

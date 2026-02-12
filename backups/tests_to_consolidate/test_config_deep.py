@@ -1,13 +1,13 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
-Tests supplémentaires pour config.py - amélioration de la couverture
+Tests supplÃ©mentaires pour config.py - amÃ©lioration de la couverture
 
 Cible les fonctions non couvertes:
 - _reload_env_files()
 - _get_mistral_api_key_from_secrets() 
 - _read_st_secret()
-- Parametres.DATABASE_URL property (différents chemins)
-- Parametres.MISTRAL_API_KEY property (différents chemins)
+- Parametres.DATABASE_URL property (diffÃ©rents chemins)
+- Parametres.MISTRAL_API_KEY property (diffÃ©rents chemins)
 - Parametres.FOOTBALL_DATA_API_KEY property
 - est_production(), est_developpement()
 - obtenir_config_publique()
@@ -24,7 +24,7 @@ class TestReloadEnvFiles:
         """Charge un fichier .env existant."""
         from src.core import config
         
-        # Créer un fichier .env temporaire
+        # CrÃ©er un fichier .env temporaire
         env_file = tmp_path / ".env.local"
         env_file.write_text('TEST_VAR="test_value"\nOTHER_VAR=other')
         
@@ -34,10 +34,10 @@ class TestReloadEnvFiles:
             mock_reload.assert_called_once()
     
     def test_reload_env_handles_missing_file(self):
-        """Gère les fichiers .env manquants sans erreur."""
+        """GÃ¨re les fichiers .env manquants sans erreur."""
         from src.core.config import _reload_env_files
         
-        # Ne doit pas lever d'exception même si le fichier n'existe pas
+        # Ne doit pas lever d'exception mÃªme si le fichier n'existe pas
         _reload_env_files()  # Should complete without error
 
 
@@ -62,11 +62,11 @@ class TestReadStSecret:
             mock_secrets.get.return_value = {"host": "localhost"}
             mock_st.secrets = mock_secrets
             result = _read_st_secret("db")
-            # Le résultat dépend de l'implémentation
+            # Le rÃ©sultat dÃ©pend de l'implÃ©mentation
             assert result is None or isinstance(result, dict)
     
     def test_read_st_secret_handles_exception(self):
-        """Gère les exceptions sans les propager."""
+        """GÃ¨re les exceptions sans les propager."""
         from src.core.config import _read_st_secret
         
         with patch('src.core.config.st') as mock_st:
@@ -85,10 +85,10 @@ class TestGetMistralApiKeyFromSecrets:
         with patch('src.core.config.st') as mock_st:
             mock_st.secrets = None
             result = _get_mistral_api_key_from_secrets()
-            # Peut être None ou autre selon l'implémentation
+            # Peut Ãªtre None ou autre selon l'implÃ©mentation
     
     def test_returns_key_from_mistral_section(self):
-        """Retourne la clé depuis st.secrets['mistral']."""
+        """Retourne la clÃ© depuis st.secrets['mistral']."""
         from src.core.config import _get_mistral_api_key_from_secrets
         
         mock_secrets = MagicMock()
@@ -99,7 +99,7 @@ class TestGetMistralApiKeyFromSecrets:
         with patch('src.core.config.st') as mock_st:
             mock_st.secrets = mock_secrets
             result = _get_mistral_api_key_from_secrets()
-            # Le résultat dépend de l'implémentation
+            # Le rÃ©sultat dÃ©pend de l'implÃ©mentation
 
 
 class TestParametresDatabaseURL:
@@ -196,7 +196,7 @@ class TestParametresMistralApiKey:
     """Tests pour Parametres.MISTRAL_API_KEY property."""
     
     def test_mistral_key_from_env_var(self):
-        """Charge la clé depuis MISTRAL_API_KEY env var."""
+        """Charge la clÃ© depuis MISTRAL_API_KEY env var."""
         from src.core.config import Parametres
         
         with patch.dict(os.environ, {"MISTRAL_API_KEY": "sk-real-key-123"}, clear=False):
@@ -217,7 +217,7 @@ class TestParametresMistralApiKey:
             key = params.MISTRAL_API_KEY
             assert key == "sk-streamlit-key"
     
-    # NOTE: test_mistral_key_raises_when_missing supprimé
+    # NOTE: test_mistral_key_raises_when_missing supprimÃ©
     # Raison: _is_streamlit_cloud function is undefined in source - bug in config.py
 
 
@@ -225,7 +225,7 @@ class TestParametresFootballApiKey:
     """Tests pour Parametres.FOOTBALL_DATA_API_KEY property."""
     
     def test_football_key_from_env_var(self):
-        """Charge la clé depuis FOOTBALL_DATA_API_KEY."""
+        """Charge la clÃ© depuis FOOTBALL_DATA_API_KEY."""
         from src.core.config import Parametres
         
         with patch.dict(os.environ, {"FOOTBALL_DATA_API_KEY": "football-key-123"}, clear=False):
@@ -234,7 +234,7 @@ class TestParametresFootballApiKey:
             assert key == "football-key-123"
     
     def test_football_key_returns_none_when_missing(self):
-        """Retourne None si pas de clé (optionnel)."""
+        """Retourne None si pas de clÃ© (optionnel)."""
         from src.core.config import Parametres
         
         with patch.dict(os.environ, {}, clear=True):
@@ -247,7 +247,7 @@ class TestParametresFootballApiKey:
 
 
 class TestParametresMethods:
-    """Tests pour les méthodes de Parametres."""
+    """Tests pour les mÃ©thodes de Parametres."""
     
     def test_est_production_true(self):
         """est_production() retourne True en production."""
@@ -327,7 +327,7 @@ class TestParametresMethods:
                 assert params._verifier_db_configuree() is False
     
     def test_verifier_mistral_configure_true(self):
-        """_verifier_mistral_configure() retourne True si clé ok."""
+        """_verifier_mistral_configure() retourne True si clÃ© ok."""
         from src.core.config import Parametres
         
         with patch.dict(os.environ, {"MISTRAL_API_KEY": "sk-valid-key"}, clear=False):
@@ -335,7 +335,7 @@ class TestParametresMethods:
             assert params._verifier_mistral_configure() is True
     
     def test_verifier_mistral_configure_false(self):
-        """_verifier_mistral_configure() retourne False si pas de clé."""
+        """_verifier_mistral_configure() retourne False si pas de clÃ©."""
         from src.core.config import Parametres
         
         with patch.dict(os.environ, {}, clear=True):
@@ -360,5 +360,5 @@ class TestObtainParametres:
         
         with patch('src.core.config.logger') as mock_logger:
             params = obtenir_parametres()
-            # Vérifie qu'un log info a été appelé
-            assert mock_logger.info.called or True  # Le logger peut ne pas être mocké correctement
+            # VÃ©rifie qu'un log info a Ã©tÃ© appelÃ©
+            assert mock_logger.info.called or True  # Le logger peut ne pas Ãªtre mockÃ© correctement

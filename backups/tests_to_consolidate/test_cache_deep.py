@@ -1,8 +1,8 @@
-"""
-Tests profonds pour le système de cache et autres modules core.
+﻿"""
+Tests profonds pour le systÃ¨me de cache et autres modules core.
 
 Ces tests utilisent des mocks pour simuler Streamlit session_state
-et exécutent réellement la logique du cache.
+et exÃ©cutent rÃ©ellement la logique du cache.
 """
 
 import pytest
@@ -10,9 +10,9 @@ from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch, PropertyMock
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # MOCK STREAMLIT SESSION STATE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class MockSessionState(dict):
@@ -61,9 +61,9 @@ def mock_session_state():
         yield mock_state
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: Cache (cache.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCacheObtenir:
@@ -86,7 +86,7 @@ class TestCacheObtenir:
         assert result == "ma_valeur"
 
     def test_obtenir_cache_expired(self, mock_session_state):
-        """Test cache expiré retourne sentinelle"""
+        """Test cache expirÃ© retourne sentinelle"""
         from src.core.cache import Cache
 
         Cache.definir("cle_exp", "valeur", ttl=1)
@@ -102,7 +102,7 @@ class TestCacheDefinir:
     """Tests pour Cache.definir"""
 
     def test_definir_simple(self, mock_session_state):
-        """Test définir valeur simple"""
+        """Test dÃ©finir valeur simple"""
         from src.core.cache import Cache
 
         Cache.definir("cle1", "valeur1")
@@ -110,7 +110,7 @@ class TestCacheDefinir:
         assert mock_session_state["cache_donnees"]["cle1"] == "valeur1"
 
     def test_definir_avec_ttl(self, mock_session_state):
-        """Test définir avec TTL"""
+        """Test dÃ©finir avec TTL"""
         from src.core.cache import Cache
 
         Cache.definir("cle2", "valeur2", ttl=600)
@@ -118,7 +118,7 @@ class TestCacheDefinir:
         assert "cle2" in mock_session_state["cache_timestamps"]
 
     def test_definir_avec_dependencies(self, mock_session_state):
-        """Test définir avec dépendances"""
+        """Test dÃ©finir avec dÃ©pendances"""
         from src.core.cache import Cache
 
         Cache.definir("recette_1", {"nom": "Tarte"}, dependencies=["recettes", "recette_1"])
@@ -140,14 +140,14 @@ class TestCacheInvalider:
 
         Cache.invalider(pattern="recettes")
 
-        # recettes_* invalidées
+        # recettes_* invalidÃ©es
         assert "recettes_liste" not in mock_session_state["cache_donnees"]
         assert "recettes_detail_1" not in mock_session_state["cache_donnees"]
-        # autre_cle conservée
+        # autre_cle conservÃ©e
         assert "autre_cle" in mock_session_state["cache_donnees"]
 
     def test_invalider_par_dependencies(self, mock_session_state):
-        """Test invalidation par dépendances"""
+        """Test invalidation par dÃ©pendances"""
         from src.core.cache import Cache
 
         Cache.definir("recette_1", {"id": 1}, dependencies=["recette_1"])
@@ -191,7 +191,7 @@ class TestCacheStats:
     """Tests pour les statistiques du cache"""
 
     def test_stats_hit_increment(self, mock_session_state):
-        """Test incrémentation hits"""
+        """Test incrÃ©mentation hits"""
         from src.core.cache import Cache
 
         Cache.definir("cle", "val", ttl=300)
@@ -201,7 +201,7 @@ class TestCacheStats:
         assert stats["hits"] == 1
 
     def test_stats_miss_increment(self, mock_session_state):
-        """Test incrémentation misses"""
+        """Test incrÃ©mentation misses"""
         from src.core.cache import Cache
 
         Cache.obtenir("cle_inexistante", ttl=300)
@@ -210,16 +210,16 @@ class TestCacheStats:
         assert stats["misses"] == 1
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS: Décorateur @gerer_erreurs (errors.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS: DÃ©corateur @gerer_erreurs (errors.py)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGererErreursDecorateur:
-    """Tests pour le décorateur @gerer_erreurs"""
+    """Tests pour le dÃ©corateur @gerer_erreurs"""
 
     def test_gerer_erreurs_success(self):
-        """Test exécution sans erreur"""
+        """Test exÃ©cution sans erreur"""
         from src.core.errors import gerer_erreurs
 
         @gerer_erreurs()
@@ -274,13 +274,13 @@ class TestGererErreursDecorateur:
             func_raise()
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS: Décorateur @with_cache (decorators.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS: DÃ©corateur @with_cache (decorators.py)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestWithCacheDecorateur:
-    """Tests pour le décorateur @with_cache"""
+    """Tests pour le dÃ©corateur @with_cache"""
 
     def test_with_cache_basic(self, mock_session_state):
         """Test cache basique"""
@@ -299,11 +299,11 @@ class TestWithCacheDecorateur:
 
         assert result1 == "computed"
         assert result2 == "computed"
-        # La fonction n'est appelée qu'une fois (cache hit)
-        # Note: le compteur peut être 1 ou 2 selon l'implémentation
+        # La fonction n'est appelÃ©e qu'une fois (cache hit)
+        # Note: le compteur peut Ãªtre 1 ou 2 selon l'implÃ©mentation
 
     def test_with_cache_custom_prefix(self, mock_session_state):
-        """Test cache avec préfixe personnalisé"""
+        """Test cache avec prÃ©fixe personnalisÃ©"""
         from src.core.decorators import with_cache
 
         @with_cache(key_prefix="custom_prefix", ttl=300)
@@ -330,9 +330,9 @@ class TestWithCacheDecorateur:
         assert result3 == 7
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: Constants (constants.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestConstants:
@@ -359,9 +359,9 @@ class TestConstants:
         assert AI_RATE_LIMIT_HOURLY <= AI_RATE_LIMIT_DAILY
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: State Manager (state.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestStateManager:
@@ -380,9 +380,9 @@ class TestStateManager:
         assert hasattr(StateManager, "__init__") or callable(StateManager)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: Config (config.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestConfig:
@@ -398,15 +398,15 @@ class TestConfig:
         """Test config a DATABASE_URL"""
         from src.core.config import obtenir_parametres
 
-        # Vérifier que la fonction de config retourne les paramètres attendus
+        # VÃ©rifier que la fonction de config retourne les paramÃ¨tres attendus
         params = obtenir_parametres()
-        # Les paramètres peuvent être un objet ou un dict
+        # Les paramÃ¨tres peuvent Ãªtre un objet ou un dict
         assert params is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: Erreurs Base (errors_base.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestExceptionApp:
@@ -419,14 +419,14 @@ class TestExceptionApp:
         assert issubclass(ExceptionApp, Exception)
 
     def test_exception_app_creation(self):
-        """Test création ExceptionApp"""
+        """Test crÃ©ation ExceptionApp"""
         from src.core.errors_base import ExceptionApp
 
         err = ExceptionApp("Test message")
         assert str(err) == "Test message"
 
     def test_exception_app_with_details(self):
-        """Test ExceptionApp avec détails"""
+        """Test ExceptionApp avec dÃ©tails"""
         from src.core.errors_base import ExceptionApp
 
         err = ExceptionApp("Message", details={"key": "value"}, message_utilisateur="User msg")
@@ -434,13 +434,13 @@ class TestExceptionApp:
         assert hasattr(err, "details") or "details" in dir(err)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: Database (database.py)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestDatabaseContext:
-    """Tests pour les fonctions de base de données"""
+    """Tests pour les fonctions de base de donnÃ©es"""
 
     def test_get_db_context_exists(self):
         """Test get_db_context existe"""
@@ -455,26 +455,26 @@ class TestDatabaseContext:
         assert GestionnaireMigrations is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: Edge Cases Validation
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestValidationEdgeCases:
     """Tests pour les cas limites de validation"""
 
     def test_nettoyer_chaine_unicode(self):
-        """Test chaîne unicode"""
+        """Test chaÃ®ne unicode"""
         from src.core.validation import NettoyeurEntrees
 
-        result = NettoyeurEntrees.nettoyer_chaine("Émile café résumé")
-        assert "é" in result.lower() or "e" in result.lower()
+        result = NettoyeurEntrees.nettoyer_chaine("Ã‰mile cafÃ© rÃ©sumÃ©")
+        assert "Ã©" in result.lower() or "e" in result.lower()
 
     def test_nettoyer_chaine_emoji(self):
-        """Test chaîne avec emoji"""
+        """Test chaÃ®ne avec emoji"""
         from src.core.validation import NettoyeurEntrees
 
-        result = NettoyeurEntrees.nettoyer_chaine("Hello 🍕 World")
+        result = NettoyeurEntrees.nettoyer_chaine("Hello ðŸ• World")
         assert "hello" in result.lower()
 
     def test_nettoyer_nombre_scientific(self):
@@ -482,11 +482,11 @@ class TestValidationEdgeCases:
         from src.core.validation import NettoyeurEntrees
 
         result = NettoyeurEntrees.nettoyer_nombre("1e3")
-        # Peut être 1000 ou None selon l'implémentation
+        # Peut Ãªtre 1000 ou None selon l'implÃ©mentation
         assert result is None or result == 1000
 
     def test_nettoyer_date_edge_feb29(self):
-        """Test date 29 février (année bissextile)"""
+        """Test date 29 fÃ©vrier (annÃ©e bissextile)"""
         from src.core.validation import NettoyeurEntrees
 
         # 2024 est bissextile
@@ -494,7 +494,7 @@ class TestValidationEdgeCases:
         assert result == date(2024, 2, 29)
 
     def test_nettoyer_date_invalid_feb29(self):
-        """Test date 29 février (année non bissextile)"""
+        """Test date 29 fÃ©vrier (annÃ©e non bissextile)"""
         from src.core.validation import NettoyeurEntrees
 
         # 2023 n'est pas bissextile

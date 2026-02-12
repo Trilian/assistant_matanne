@@ -1,10 +1,10 @@
-"""
+﻿"""
 Service Planning de Base (REFACTORING PHASE 2)
 
-✅ Utilise @avec_session_db et @avec_cache (Phase 1)
-✅ Validation Pydantic centralisée
-✅ Type hints complets pour meilleur IDE support
-✅ Services testables sans Streamlit
+âœ… Utilise @avec_session_db et @avec_cache (Phase 1)
+âœ… Validation Pydantic centralisée
+âœ… Type hints complets pour meilleur IDE support
+âœ… Services testables sans Streamlit
 """
 
 import logging
@@ -30,19 +30,19 @@ from .utils import (
 logger = logging.getLogger(__name__)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SERVICE PLANNING
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
     """
     Service complet pour le planning hebdomadaire.
 
-    ✅ Héritage multiple :
-    - BaseService → CRUD optimisé
-    - BaseAIService → IA avec rate limiting auto
-    - PlanningAIMixin → Contextes métier planning
+    âœ… Héritage multiple :
+    - BaseService â†’ CRUD optimisé
+    - BaseAIService â†’ IA avec rate limiting auto
+    - PlanningAIMixin â†’ Contextes métier planning
 
     Fonctionnalités:
     - CRUD optimisé avec cache
@@ -61,9 +61,9 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
             service_name="planning",
         )
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # SECTION 1: CRUD & PLANNING (REFACTORED)
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     @avec_cache(ttl=1800, key_func=lambda self, planning_id=None, **kw: f"planning_active")
     @avec_gestion_erreurs(default_return=None)
@@ -101,7 +101,7 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
             )
         
         if not planning:
-            logger.debug(f"ℹ️ Planning not found")
+            logger.debug(f"â„¹ï¸ Planning not found")
             return None
         
         return planning
@@ -132,7 +132,7 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
         )
 
         if not planning:
-            logger.warning(f"⚠️ Planning {planning_id} not found")
+            logger.warning(f"âš ï¸ Planning {planning_id} not found")
             return None
 
         repas_par_jour = {}
@@ -162,12 +162,12 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
             "repas_par_jour": repas_par_jour,
         }
 
-        logger.info(f"✅ Retrieved planning {planning_id} with {len(repas_par_jour)} days")
+        logger.info(f"âœ… Retrieved planning {planning_id} with {len(repas_par_jour)} days")
         return result
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # SECTION 2: SUGGESTIONS ÉQUILIBRÉES (NOUVEAU)
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     @avec_gestion_erreurs(default_return=[])
     @avec_session_db
@@ -252,7 +252,7 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
                         "description": recette.description,
                         "temps_total": (recette.temps_preparation or 0) + (recette.temps_cuisson or 0),
                         "type_repas": "déjeuner" if idx % 2 == 0 else "dîner",
-                        "raison": "📝 Alternative équilibrée",
+                        "raison": "ðŸ“ Alternative équilibrée",
                         "type_proteines": getattr(recette, 'type_proteines', 'mixte'),
                     })
             
@@ -264,12 +264,12 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
                 "suggestions": suggestions_jour[:3],
             })
         
-        logger.info(f"✅ Generated {len(suggestions_globales)} days of balanced suggestions")
+        logger.info(f"âœ… Generated {len(suggestions_globales)} days of balanced suggestions")
         return suggestions_globales
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # SECTION 3: GÉNÉRATION AVEC CHOIX (NOUVEAU)
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     @avec_gestion_erreurs(default_return=None)
     @avec_session_db
@@ -280,11 +280,11 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
         enfants_adaptes: list[int] | None = None,
         db: Session | None = None,
     ) -> Planning | None:
-        """Crée un planning à partir des choix de l'utilisateur.
+        """Crée un planning Ã  partir des choix de l'utilisateur.
         
         Args:
             semaine_debut: Date de début
-            recettes_selection: Mapping jour → recette_id choisi
+            recettes_selection: Mapping jour â†’ recette_id choisi
             enfants_adaptes: IDs des enfants pour adapter (Jules, etc.)
             db: Database session
             
@@ -314,12 +314,12 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
             # Récupérer la recette sélectionnée
             recette_id = recettes_selection.get(jour_key)
             if not recette_id:
-                logger.warning(f"⚠️ No recipe selected for {jour_name}")
+                logger.warning(f"âš ï¸ No recipe selected for {jour_name}")
                 continue
             
             recette = db.query(Recette).filter(Recette.id == recette_id).first()
             if not recette:
-                logger.warning(f"⚠️ Recipe {recette_id} not found for {jour_name}")
+                logger.warning(f"âš ï¸ Recipe {recette_id} not found for {jour_name}")
                 continue
             
             # Créer repas (on crée juste le dîner pour simplifier en départ)
@@ -335,12 +335,12 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
         db.commit()
         db.refresh(planning)
         
-        logger.info(f"✅ Created custom planning for {semaine_debut}")
+        logger.info(f"âœ… Created custom planning for {semaine_debut}")
         return planning
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # SECTION 4: AGRÉGATION COURSES (NOUVEAU)
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     @avec_gestion_erreurs(default_return=[])
     @avec_session_db
@@ -372,7 +372,7 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
         )
         
         if not planning or not planning.repas:
-            logger.warning(f"⚠️ Planning {planning_id} pas trouvé ou pas de repas")
+            logger.warning(f"âš ï¸ Planning {planning_id} pas trouvé ou pas de repas")
             return []
         
         # Agréger les ingrédients
@@ -425,12 +425,12 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
             key=lambda x: (x["rayon"], -x["quantite"])
         )
         
-        logger.info(f"✅ Agrégé {len(courses_list)} ingrédients pour planning {planning_id}")
+        logger.info(f"âœ… Agrégé {len(courses_list)} ingrédients pour planning {planning_id}")
         return courses_list
 
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     # SECTION 5: GÉNÉRATION IA (REFACTORED)
-    # ═══════════════════════════════════════════════════════════
+    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
     @avec_cache(
         ttl=3600,
@@ -485,7 +485,7 @@ RULES:
 5. Adapt to family preferences and dietary restrictions
 6. No explanations, no text, ONLY JSON"""
 
-        logger.info(f"🤖 Generating AI weekly plan starting {semaine_debut}")
+        logger.info(f"ðŸ¤– Generating AI weekly plan starting {semaine_debut}")
 
         # Appel IA avec auto rate limiting & parsing
         planning_data = self.call_with_list_parsing_sync(
@@ -499,7 +499,7 @@ RULES:
 
         # Log de debug pour voir la réponse
         if not planning_data:
-            logger.warning(f"⚠️ Failed to generate planning for {semaine_debut} - no data returned")
+            logger.warning(f"âš ï¸ Failed to generate planning for {semaine_debut} - no data returned")
             logger.debug(f"Checking if we can create default planning instead...")
             
             # Créer un planning par défaut avec des repas simples
@@ -513,7 +513,7 @@ RULES:
             db.add(planning)
             db.flush()
 
-            # Créer repas par défaut (simplement lundi à dimanche)
+            # Créer repas par défaut (simplement lundi Ã  dimanche)
             jours_semaine = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
             for idx, jour_name in enumerate(jours_semaine):
                 date_jour = semaine_debut + timedelta(days=idx)
@@ -522,16 +522,16 @@ RULES:
                     planning_id=planning.id,
                     date_repas=date_jour,
                     type_repas="dejeuner",
-                    notes=f"Repas du {jour_name} - À remplir manuellement",
+                    notes=f"Repas du {jour_name} - Ã€ remplir manuellement",
                 )
                 db.add(repas)
             
             db.commit()
-            logger.info(f"✅ Created default planning for {semaine_debut} with 7 days")
+            logger.info(f"âœ… Created default planning for {semaine_debut} with 7 days")
             return planning
         
         # Planning IA réussi
-        logger.info(f"✅ Generated planning with {len(planning_data)} days using AI")
+        logger.info(f"âœ… Generated planning with {len(planning_data)} days using AI")
 
         # Créer planning en DB
         planning = Planning(
@@ -572,22 +572,22 @@ RULES:
         # Invalider cache
         Cache.invalider(pattern="planning")
 
-        logger.info(f"✅ Generated AI planning for week starting {semaine_debut}")
+        logger.info(f"âœ… Generated AI planning for week starting {semaine_debut}")
         return planning
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ALIAS DE COMPATIBILITÉ
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 # Alias pour rétro-compatibilité
 PlanningService = ServicePlanning
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FACTORIES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 # INSTANCE SINGLETON - LAZY LOADING
@@ -606,9 +606,9 @@ def obtenir_service_planning() -> ServicePlanning:
 get_planning_service = obtenir_service_planning
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # EXPORTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 __all__ = [

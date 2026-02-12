@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour maison.py
 
 Module: src.core.models.maison

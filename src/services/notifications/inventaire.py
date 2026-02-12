@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service de notifications pour l'inventaire.
 
 Gère les notifications locales (en mémoire) pour les alertes de stock
@@ -29,7 +29,7 @@ class ServiceNotificationsInventaire:
     ) -> NotificationInventaire | None:
         """Crée une notification pour stock critique."""
         message = (
-            f"❌ CRITIQUE: {article['nom']} est en stock critique!\n"
+            f"âŒ CRITIQUE: {article['nom']} est en stock critique!\n"
             f"Quantité actuelle: {article['quantite']} {article.get('unite', '')}\n"
             f"Seuil minimum: {article['quantite_min']} {article.get('unite', '')}"
         )
@@ -39,9 +39,9 @@ class ServiceNotificationsInventaire:
             type_alerte=TypeAlerte.STOCK_CRITIQUE,
             article_id=article['id'],
             ingredient_id=article['ingredient_id'],
-            titre=f"⚠️ Stock critique: {article['nom']}",
+            titre=f"âš ï¸ Stock critique: {article['nom']}",
             message=message,
-            icone="❌",
+            icone="âŒ",
             priorite="haute",
         )
 
@@ -51,7 +51,7 @@ class ServiceNotificationsInventaire:
     ) -> NotificationInventaire | None:
         """Crée une notification pour stock bas."""
         message = (
-            f"⚠️ ALERTE: {article['nom']} a un stock bas.\n"
+            f"âš ï¸ ALERTE: {article['nom']} a un stock bas.\n"
             f"Quantité actuelle: {article['quantite']} {article.get('unite', '')}\n"
             f"Seuil minimum: {article['quantite_min']} {article.get('unite', '')}"
         )
@@ -61,9 +61,9 @@ class ServiceNotificationsInventaire:
             type_alerte=TypeAlerte.STOCK_BAS,
             article_id=article['id'],
             ingredient_id=article['ingredient_id'],
-            titre=f"⚠️ Stock bas: {article['nom']}",
+            titre=f"âš ï¸ Stock bas: {article['nom']}",
             message=message,
-            icone="⚠️",
+            icone="âš ï¸",
             priorite="moyenne",
         )
 
@@ -74,25 +74,25 @@ class ServiceNotificationsInventaire:
     ) -> NotificationInventaire | None:
         """Crée une notification pour péremption proche."""
         if jours_avant <= 0:
-            titre = f"🚨 EXPIRÉ: {article['nom']}"
+            titre = f"ðŸš¨ EXPIRÉ: {article['nom']}"
             type_alerte = TypeAlerte.PEREMPTION_DEPASSEE
             priorite = "haute"
-            icone = "🚨"
+            icone = "ðŸš¨"
         elif jours_avant <= 3:
-            titre = f"🔴 Péremption très proche: {article['nom']}"
+            titre = f"ðŸ”´ Péremption très proche: {article['nom']}"
             type_alerte = TypeAlerte.PEREMPTION_PROCHE
             priorite = "haute"
-            icone = "🔴"
+            icone = "ðŸ”´"
         else:
-            titre = f"🟠 Péremption proche: {article['nom']}"
+            titre = f"ðŸŸ  Péremption proche: {article['nom']}"
             type_alerte = TypeAlerte.PEREMPTION_PROCHE
             priorite = "moyenne"
-            icone = "🟠"
+            icone = "ðŸŸ "
 
         message = (
             f"{icone} Date de péremption: {article.get('date_peremption')}\n"
             f"Jours restants: {jours_avant}\n"
-            f"À consommer dès que possible!"
+            f"Ã€ consommer dès que possible!"
         )
 
         return NotificationInventaire(
@@ -127,7 +127,7 @@ class ServiceNotificationsInventaire:
         self._next_id += 1
 
         self.notifications[utilisateur_id].append(notification)
-        logger.info(f"📬 Notification créée: {notification.titre}")
+        logger.info(f"ðŸ“¬ Notification créée: {notification.titre}")
 
         return notification
 
@@ -250,7 +250,7 @@ class ServiceNotificationsInventaire:
     ) -> bool:
         """Envoie une notification par email (stub)."""
         logger.info(
-            f"📧 Email alerte à {email_destinataire}: {notification.titre}"
+            f"ðŸ“§ Email alerte Ã  {email_destinataire}: {notification.titre}"
         )
 
         notification.email = email_destinataire
@@ -259,9 +259,9 @@ class ServiceNotificationsInventaire:
         return True
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SINGLETON
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 _service_notifications_inventaire: ServiceNotificationsInventaire | None = None
 
@@ -272,7 +272,7 @@ def obtenir_service_notifications_inventaire() -> ServiceNotificationsInventaire
 
     if _service_notifications_inventaire is None:
         _service_notifications_inventaire = ServiceNotificationsInventaire()
-        logger.info("✅ Service de notifications inventaire initialisé")
+        logger.info("âœ… Service de notifications inventaire initialisé")
 
     return _service_notifications_inventaire
 

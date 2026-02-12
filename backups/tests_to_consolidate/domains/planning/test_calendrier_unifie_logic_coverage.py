@@ -1,6 +1,6 @@
-"""
+﻿"""
 Tests de couverture pour calendrier_unifie_logic.py
-Objectif: Atteindre ≥80% de couverture
+Objectif: Atteindre â‰¥80% de couverture
 """
 
 import pytest
@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from typing import Optional, List
 from unittest.mock import MagicMock, patch
 
-from src.domains.planning.logic.calendrier_unifie_logic import (
+from src.modules.planning.logic.calendrier_unifie_logic import (
     # Constantes
     TypeEvenement,
     EMOJI_TYPE,
@@ -32,10 +32,10 @@ from src.domains.planning.logic.calendrier_unifie_logic import (
     convertir_activite_en_evenement,
     convertir_event_calendrier_en_evenement,
     convertir_tache_menage_en_evenement,
-    # Génération
+    # GÃ©nÃ©ration
     generer_taches_menage_semaine,
     creer_evenement_courses,
-    # Agrégation
+    # AgrÃ©gation
     agreger_evenements_jour,
     construire_semaine_calendrier,
     # Export
@@ -44,46 +44,46 @@ from src.domains.planning.logic.calendrier_unifie_logic import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EVENEMENT CALENDRIER DATACLASS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestEvenementCalendrier:
     """Tests pour la dataclass EvenementCalendrier."""
     
     def test_creation_basique(self):
-        """Crée un événement avec valeurs minimales."""
+        """CrÃ©e un Ã©vÃ©nement avec valeurs minimales."""
         evt = EvenementCalendrier(
             id="test_1",
             type=TypeEvenement.REPAS_MIDI,
-            titre="Déjeuner",
+            titre="DÃ©jeuner",
             date_jour=date(2024, 1, 15)
         )
         assert evt.id == "test_1"
         assert evt.type == TypeEvenement.REPAS_MIDI
-        assert evt.titre == "Déjeuner"
+        assert evt.titre == "DÃ©jeuner"
         assert evt.date_jour == date(2024, 1, 15)
         
     def test_emoji_property(self):
-        """Vérifie la propriété emoji."""
+        """VÃ©rifie la propriÃ©tÃ© emoji."""
         evt = EvenementCalendrier(
             id="test", type=TypeEvenement.BATCH_COOKING,
             titre="Test", date_jour=date.today()
         )
-        assert evt.emoji == "🍳"
+        assert evt.emoji == "ðŸ³"
         
     def test_emoji_tous_types(self):
-        """Vérifie emoji pour tous les types."""
+        """VÃ©rifie emoji pour tous les types."""
         for type_evt in TypeEvenement:
             evt = EvenementCalendrier(
                 id="test", type=type_evt,
                 titre="Test", date_jour=date.today()
             )
-            assert evt.emoji in EMOJI_TYPE.values() or evt.emoji == "📌"
+            assert evt.emoji in EMOJI_TYPE.values() or evt.emoji == "ðŸ“Œ"
             
     def test_couleur_property(self):
-        """Vérifie la propriété couleur."""
+        """VÃ©rifie la propriÃ©tÃ© couleur."""
         evt = EvenementCalendrier(
             id="test", type=TypeEvenement.COURSES,
             titre="Test", date_jour=date.today()
@@ -91,7 +91,7 @@ class TestEvenementCalendrier:
         assert evt.couleur == "#4DD0E1"
         
     def test_heure_str_avec_heure(self):
-        """Vérifie format heure quand définie."""
+        """VÃ©rifie format heure quand dÃ©finie."""
         evt = EvenementCalendrier(
             id="test", type=TypeEvenement.ACTIVITE,
             titre="Test", date_jour=date.today(),
@@ -100,7 +100,7 @@ class TestEvenementCalendrier:
         assert evt.heure_str == "14:30"
         
     def test_heure_str_sans_heure(self):
-        """Vérifie format heure quand non définie."""
+        """VÃ©rifie format heure quand non dÃ©finie."""
         evt = EvenementCalendrier(
             id="test", type=TypeEvenement.ACTIVITE,
             titre="Test", date_jour=date.today()
@@ -108,11 +108,11 @@ class TestEvenementCalendrier:
         assert evt.heure_str == ""
         
     def test_tous_champs_optionnels(self):
-        """Événement avec tous les champs optionnels."""
+        """Ã‰vÃ©nement avec tous les champs optionnels."""
         evt = EvenementCalendrier(
             id="full_1",
             type=TypeEvenement.RDV_MEDICAL,
-            titre="RDV Pédiatre",
+            titre="RDV PÃ©diatre",
             date_jour=date(2024, 2, 1),
             heure_debut=time(10, 0),
             heure_fin=time(10, 30),
@@ -120,21 +120,21 @@ class TestEvenementCalendrier:
             lieu="Cabinet Dr Martin",
             participants=["Papa", "Maman", "Jules"],
             pour_jules=True,
-            version_jules="Apporter carnet de santé",
+            version_jules="Apporter carnet de santÃ©",
             budget=50.0,
             recette_id=None,
             session_id=None,
-            terminé=False,
-            notes="Prévoir 15 min avant"
+            terminÃ©=False,
+            notes="PrÃ©voir 15 min avant"
         )
         assert evt.lieu == "Cabinet Dr Martin"
         assert len(evt.participants) == 3
         assert evt.budget == 50.0
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS JOUR CALENDRIER DATACLASS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestJourCalendrier:
@@ -142,13 +142,13 @@ class TestJourCalendrier:
     
     @pytest.fixture
     def jour_avec_evenements(self):
-        """Crée un jour avec divers événements."""
+        """CrÃ©e un jour avec divers Ã©vÃ©nements."""
         return JourCalendrier(
             date_jour=date(2024, 1, 15),  # Lundi
             evenements=[
                 EvenementCalendrier(
                     id="repas_1", type=TypeEvenement.REPAS_MIDI,
-                    titre="Pâtes", date_jour=date(2024, 1, 15)
+                    titre="PÃ¢tes", date_jour=date(2024, 1, 15)
                 ),
                 EvenementCalendrier(
                     id="repas_2", type=TypeEvenement.REPAS_SOIR,
@@ -156,7 +156,7 @@ class TestJourCalendrier:
                 ),
                 EvenementCalendrier(
                     id="gouter_1", type=TypeEvenement.GOUTER,
-                    titre="Gâteau", date_jour=date(2024, 1, 15)
+                    titre="GÃ¢teau", date_jour=date(2024, 1, 15)
                 ),
                 EvenementCalendrier(
                     id="batch_1", type=TypeEvenement.BATCH_COOKING,
@@ -176,7 +176,7 @@ class TestJourCalendrier:
                 ),
                 EvenementCalendrier(
                     id="rdv_2", type=TypeEvenement.RDV_AUTRE,
-                    titre="Réunion", date_jour=date(2024, 1, 15)
+                    titre="RÃ©union", date_jour=date(2024, 1, 15)
                 ),
                 EvenementCalendrier(
                     id="menage_1", type=TypeEvenement.MENAGE,
@@ -188,7 +188,7 @@ class TestJourCalendrier:
                 ),
                 EvenementCalendrier(
                     id="entretien_1", type=TypeEvenement.ENTRETIEN,
-                    titre="Chaudière", date_jour=date(2024, 1, 15)
+                    titre="ChaudiÃ¨re", date_jour=date(2024, 1, 15)
                 ),
                 EvenementCalendrier(
                     id="evt_1", type=TypeEvenement.EVENEMENT,
@@ -198,91 +198,91 @@ class TestJourCalendrier:
         )
     
     def test_jour_semaine(self):
-        """Vérifie le jour de la semaine."""
+        """VÃ©rifie le jour de la semaine."""
         jour = JourCalendrier(date_jour=date(2024, 1, 15))  # Lundi
         assert jour.jour_semaine == "Lundi"
         
     def test_jour_semaine_court(self):
-        """Vérifie l'abréviation du jour."""
+        """VÃ©rifie l'abrÃ©viation du jour."""
         jour = JourCalendrier(date_jour=date(2024, 1, 15))
         assert jour.jour_semaine_court == "Lun"
         
     def test_est_aujourdhui_vrai(self):
-        """Vérifie est_aujourdhui pour aujourd'hui."""
+        """VÃ©rifie est_aujourdhui pour aujourd'hui."""
         jour = JourCalendrier(date_jour=date.today())
         assert jour.est_aujourdhui is True
         
     def test_est_aujourdhui_faux(self):
-        """Vérifie est_aujourdhui pour autre jour."""
+        """VÃ©rifie est_aujourdhui pour autre jour."""
         jour = JourCalendrier(date_jour=date(2020, 1, 1))
         assert jour.est_aujourdhui is False
         
     def test_repas_midi_property(self, jour_avec_evenements):
-        """Récupère le repas du midi."""
+        """RÃ©cupÃ¨re le repas du midi."""
         assert jour_avec_evenements.repas_midi is not None
-        assert jour_avec_evenements.repas_midi.titre == "Pâtes"
+        assert jour_avec_evenements.repas_midi.titre == "PÃ¢tes"
         
     def test_repas_soir_property(self, jour_avec_evenements):
-        """Récupère le repas du soir."""
+        """RÃ©cupÃ¨re le repas du soir."""
         assert jour_avec_evenements.repas_soir is not None
         assert jour_avec_evenements.repas_soir.titre == "Salade"
         
     def test_gouter_property(self, jour_avec_evenements):
-        """Récupère le goûter."""
+        """RÃ©cupÃ¨re le goÃ»ter."""
         assert jour_avec_evenements.gouter is not None
-        assert jour_avec_evenements.gouter.titre == "Gâteau"
+        assert jour_avec_evenements.gouter.titre == "GÃ¢teau"
         
     def test_batch_cooking_property(self, jour_avec_evenements):
-        """Récupère la session batch."""
+        """RÃ©cupÃ¨re la session batch."""
         assert jour_avec_evenements.batch_cooking is not None
         
     def test_courses_property(self, jour_avec_evenements):
-        """Récupère les courses."""
+        """RÃ©cupÃ¨re les courses."""
         courses = jour_avec_evenements.courses
         assert len(courses) == 1
         assert courses[0].titre == "Courses Carrefour"
         
     def test_activites_property(self, jour_avec_evenements):
-        """Récupère les activités."""
+        """RÃ©cupÃ¨re les activitÃ©s."""
         assert len(jour_avec_evenements.activites) == 1
         
     def test_rdv_property(self, jour_avec_evenements):
-        """Récupère les RDV (médicaux et autres)."""
+        """RÃ©cupÃ¨re les RDV (mÃ©dicaux et autres)."""
         rdv = jour_avec_evenements.rdv
         assert len(rdv) == 2
         
     def test_taches_menage_property(self, jour_avec_evenements):
-        """Récupère les tâches ménage (menage + entretien)."""
+        """RÃ©cupÃ¨re les tÃ¢ches mÃ©nage (menage + entretien)."""
         taches = jour_avec_evenements.taches_menage
         assert len(taches) == 2  # menage + entretien
         
     def test_taches_jardin_property(self, jour_avec_evenements):
-        """Récupère les tâches jardin."""
+        """RÃ©cupÃ¨re les tÃ¢ches jardin."""
         jardin = jour_avec_evenements.taches_jardin
         assert len(jardin) == 1
         
     def test_autres_evenements_property(self, jour_avec_evenements):
-        """Récupère les autres événements."""
+        """RÃ©cupÃ¨re les autres Ã©vÃ©nements."""
         autres = jour_avec_evenements.autres_evenements
         # Seul EVENEMENT n'est pas dans les types principaux
         assert len(autres) == 1
         assert autres[0].type == TypeEvenement.EVENEMENT
         
     def test_nb_evenements(self, jour_avec_evenements):
-        """Compte les événements."""
+        """Compte les Ã©vÃ©nements."""
         assert jour_avec_evenements.nb_evenements == 12
         
     def test_est_vide_faux(self, jour_avec_evenements):
-        """Jour avec événements n'est pas vide."""
+        """Jour avec Ã©vÃ©nements n'est pas vide."""
         assert jour_avec_evenements.est_vide is False
         
     def test_est_vide_vrai(self):
-        """Jour sans événements est vide."""
+        """Jour sans Ã©vÃ©nements est vide."""
         jour = JourCalendrier(date_jour=date.today())
         assert jour.est_vide is True
         
     def test_a_repas_planifies_avec_midi(self):
-        """Vérifie a_repas_planifies avec midi."""
+        """VÃ©rifie a_repas_planifies avec midi."""
         jour = JourCalendrier(
             date_jour=date.today(),
             evenements=[
@@ -295,7 +295,7 @@ class TestJourCalendrier:
         assert jour.a_repas_planifies is True
         
     def test_a_repas_planifies_avec_soir(self):
-        """Vérifie a_repas_planifies avec soir."""
+        """VÃ©rifie a_repas_planifies avec soir."""
         jour = JourCalendrier(
             date_jour=date.today(),
             evenements=[
@@ -308,7 +308,7 @@ class TestJourCalendrier:
         assert jour.a_repas_planifies is True
         
     def test_a_repas_planifies_sans_repas(self):
-        """Vérifie a_repas_planifies sans repas."""
+        """VÃ©rifie a_repas_planifies sans repas."""
         jour = JourCalendrier(date_jour=date.today())
         assert jour.a_repas_planifies is False
         
@@ -318,7 +318,7 @@ class TestJourCalendrier:
         assert jour.repas_midi is None
         
     def test_gouter_none_si_absent(self):
-        """Retourne None si pas de goûter."""
+        """Retourne None si pas de goÃ»ter."""
         jour = JourCalendrier(date_jour=date.today())
         assert jour.gouter is None
         
@@ -328,9 +328,9 @@ class TestJourCalendrier:
         assert jour.batch_cooking is None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SEMAINE CALENDRIER DATACLASS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestSemaineCalendrier:
@@ -338,7 +338,7 @@ class TestSemaineCalendrier:
     
     @pytest.fixture
     def semaine_complete(self):
-        """Crée une semaine avec des jours et événements."""
+        """CrÃ©e une semaine avec des jours et Ã©vÃ©nements."""
         jours = []
         lundi = date(2024, 1, 15)
         
@@ -373,11 +373,11 @@ class TestSemaineCalendrier:
                     titre=f"Courses {i}", date_jour=jour_date
                 ))
                 
-            # Activité le week-end
+            # ActivitÃ© le week-end
             if i >= 5:
                 evts.append(EvenementCalendrier(
                     id=f"act_{i}", type=TypeEvenement.ACTIVITE,
-                    titre=f"Activité {i}", date_jour=jour_date
+                    titre=f"ActivitÃ© {i}", date_jour=jour_date
                 ))
                 
             jours.append(JourCalendrier(date_jour=jour_date, evenements=evts))
@@ -385,16 +385,16 @@ class TestSemaineCalendrier:
         return SemaineCalendrier(date_debut=lundi, jours=jours)
     
     def test_date_fin(self, semaine_complete):
-        """Vérifie la date de fin (dimanche)."""
+        """VÃ©rifie la date de fin (dimanche)."""
         assert semaine_complete.date_fin == date(2024, 1, 21)
         
     def test_titre(self, semaine_complete):
-        """Vérifie le titre de la semaine."""
+        """VÃ©rifie le titre de la semaine."""
         assert "15/01" in semaine_complete.titre
         assert "21/01/2024" in semaine_complete.titre
         
     def test_nb_repas_planifies(self, semaine_complete):
-        """Compte les repas planifiés."""
+        """Compte les repas planifiÃ©s."""
         # 7 midis + 4 soirs (jours pairs: 0,2,4,6)
         assert semaine_complete.nb_repas_planifies == 11
         
@@ -407,30 +407,30 @@ class TestSemaineCalendrier:
         assert semaine_complete.nb_courses == 2
         
     def test_nb_activites(self, semaine_complete):
-        """Compte les activités."""
+        """Compte les activitÃ©s."""
         assert semaine_complete.nb_activites == 2
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FONCTIONS DATE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFonctionsDate:
     """Tests pour les fonctions utilitaires de date."""
     
     def test_get_debut_semaine_lundi(self):
-        """Début de semaine depuis un lundi reste lundi."""
+        """DÃ©but de semaine depuis un lundi reste lundi."""
         lundi = date(2024, 1, 15)
         assert get_debut_semaine(lundi) == lundi
         
     def test_get_debut_semaine_vendredi(self):
-        """Début de semaine depuis vendredi."""
+        """DÃ©but de semaine depuis vendredi."""
         vendredi = date(2024, 1, 19)
         assert get_debut_semaine(vendredi) == date(2024, 1, 15)
         
     def test_get_debut_semaine_dimanche(self):
-        """Début de semaine depuis dimanche."""
+        """DÃ©but de semaine depuis dimanche."""
         dimanche = date(2024, 1, 21)
         assert get_debut_semaine(dimanche) == date(2024, 1, 15)
         
@@ -445,14 +445,14 @@ class TestFonctionsDate:
         assert get_fin_semaine(dimanche) == dimanche
         
     def test_get_jours_semaine(self):
-        """Génère les 7 jours de la semaine."""
+        """GÃ©nÃ¨re les 7 jours de la semaine."""
         jours = get_jours_semaine(date(2024, 1, 17))  # Mercredi
         assert len(jours) == 7
         assert jours[0] == date(2024, 1, 15)  # Lundi
         assert jours[6] == date(2024, 1, 21)  # Dimanche
         
     def test_get_semaine_precedente(self):
-        """Semaine précédente retourne lundi -7j."""
+        """Semaine prÃ©cÃ©dente retourne lundi -7j."""
         assert get_semaine_precedente(date(2024, 1, 15)) == date(2024, 1, 8)
         
     def test_get_semaine_suivante(self):
@@ -460,9 +460,9 @@ class TestFonctionsDate:
         assert get_semaine_suivante(date(2024, 1, 15)) == date(2024, 1, 22)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONVERSION REPAS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestConvertirRepas:
@@ -473,10 +473,10 @@ class TestConvertirRepas:
         assert convertir_repas_en_evenement(None) is None
         
     def test_repas_diner(self):
-        """Convertit un dîner."""
+        """Convertit un dÃ®ner."""
         repas = MagicMock()
         repas.id = 1
-        repas.type_repas = "dîner"
+        repas.type_repas = "dÃ®ner"
         repas.date_repas = date(2024, 1, 15)
         repas.recette = MagicMock()
         repas.recette.nom = "Gratin"
@@ -492,14 +492,14 @@ class TestConvertirRepas:
         assert evt.titre == "Gratin"
         assert evt.recette_id == 10
         assert evt.version_jules == "Mixer le gratin"
-        assert evt.terminé is True
+        assert evt.terminÃ© is True
         assert evt.notes == "Extra fromage"
         
     def test_repas_dejeuner(self):
-        """Convertit un déjeuner (non dîner)."""
+        """Convertit un dÃ©jeuner (non dÃ®ner)."""
         repas = MagicMock()
         repas.id = 2
-        repas.type_repas = "déjeuner"
+        repas.type_repas = "dÃ©jeuner"
         repas.date_repas = date(2024, 1, 15)
         repas.recette = None
         
@@ -507,19 +507,19 @@ class TestConvertirRepas:
         
         assert evt is not None
         assert evt.type == TypeEvenement.REPAS_MIDI
-        assert evt.titre == "Repas non défini"
+        assert evt.titre == "Repas non dÃ©fini"
         
     def test_repas_sans_recette(self):
-        """Repas sans recette associée."""
+        """Repas sans recette associÃ©e."""
         repas = MagicMock()
         repas.id = 3
-        repas.type_repas = "déjeuner"
+        repas.type_repas = "dÃ©jeuner"
         repas.date_repas = date.today()
         repas.recette = None
         
         evt = convertir_repas_en_evenement(repas)
         
-        assert evt.titre == "Repas non défini"
+        assert evt.titre == "Repas non dÃ©fini"
         assert evt.recette_id is None
         
     def test_repas_avec_erreur(self):
@@ -532,9 +532,9 @@ class TestConvertirRepas:
         assert result is None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONVERSION SESSION BATCH
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestConvertirSessionBatch:
@@ -545,7 +545,7 @@ class TestConvertirSessionBatch:
         assert convertir_session_batch_en_evenement(None) is None
         
     def test_session_complete(self):
-        """Convertit une session batch complète."""
+        """Convertit une session batch complÃ¨te."""
         session = MagicMock()
         session.id = 5
         session.date_session = date(2024, 1, 21)
@@ -553,7 +553,7 @@ class TestConvertirSessionBatch:
         session.recettes_planifiees = ["Recette 1", "Recette 2", "Recette 3"]
         session.avec_jules = True
         session.statut = "terminee"
-        session.notes = "Bien prévoir les contenants"
+        session.notes = "Bien prÃ©voir les contenants"
         
         evt = convertir_session_batch_en_evenement(session)
         
@@ -562,21 +562,21 @@ class TestConvertirSessionBatch:
         assert "3 plats" in evt.titre
         assert evt.heure_debut == time(14, 0)
         assert evt.pour_jules is True
-        assert evt.terminé is True
+        assert evt.terminÃ© is True
         assert evt.session_id == 5
         
     def test_session_sans_recettes(self):
-        """Session sans recettes planifiées."""
+        """Session sans recettes planifiÃ©es."""
         session = MagicMock()
         session.id = 6
         session.date_session = date.today()
         session.recettes_planifiees = None
         session.statut = "planifiee"
-        del session.heure_debut  # Pas d'heure définie
+        del session.heure_debut  # Pas d'heure dÃ©finie
         del session.avec_jules
         del session.notes
         
-        # Redéfinir hasattr behavior
+        # RedÃ©finir hasattr behavior
         evt = convertir_session_batch_en_evenement(session)
         
         assert evt is not None
@@ -591,20 +591,20 @@ class TestConvertirSessionBatch:
         assert result is None
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS CONVERSION ACTIVITÉ
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS CONVERSION ACTIVITÃ‰
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestConvertirActivite:
     """Tests pour convertir_activite_en_evenement."""
     
     def test_activite_none(self):
-        """Retourne None si activité None."""
+        """Retourne None si activitÃ© None."""
         assert convertir_activite_en_evenement(None) is None
         
     def test_activite_standard(self):
-        """Convertit une activité standard."""
+        """Convertit une activitÃ© standard."""
         activite = MagicMock()
         activite.id = 10
         activite.type_activite = "loisir"
@@ -615,7 +615,7 @@ class TestConvertirActivite:
         activite.pour_jules = True
         activite.cout_estime = 0.0
         activite.statut = "planifie"
-        activite.notes = "Prendre goûter"
+        activite.notes = "Prendre goÃ»ter"
         
         evt = convertir_activite_en_evenement(activite)
         
@@ -626,25 +626,25 @@ class TestConvertirActivite:
         assert evt.pour_jules is True
         
     def test_activite_rdv_medical(self):
-        """Activité médicale convertie en RDV_MEDICAL."""
+        """ActivitÃ© mÃ©dicale convertie en RDV_MEDICAL."""
         activite = MagicMock()
         activite.id = 11
-        activite.type_activite = "médical"
+        activite.type_activite = "mÃ©dical"
         activite.titre = "Vaccin"
         activite.date_prevue = date(2024, 2, 1)
         activite.heure_debut = time(10, 0)
         activite.lieu = "Cabinet"
         activite.pour_jules = True
-        activite.statut = "terminé"
+        activite.statut = "terminÃ©"
         
         evt = convertir_activite_en_evenement(activite)
         
         assert evt.type == TypeEvenement.RDV_MEDICAL
-        assert evt.terminé is True
+        assert evt.terminÃ© is True
         
     def test_activite_rdv_medical_variantes(self):
-        """Teste différentes variantes de type médical."""
-        for type_med in ["medical", "santé", "rdv_medical"]:
+        """Teste diffÃ©rentes variantes de type mÃ©dical."""
+        for type_med in ["medical", "santÃ©", "rdv_medical"]:
             activite = MagicMock()
             activite.id = 12
             activite.type_activite = type_med
@@ -663,9 +663,9 @@ class TestConvertirActivite:
         assert result is None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONVERSION EVENT CALENDRIER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestConvertirEventCalendrier:
@@ -676,11 +676,11 @@ class TestConvertirEventCalendrier:
         assert convertir_event_calendrier_en_evenement(None) is None
         
     def test_event_standard(self):
-        """Convertit un événement standard."""
+        """Convertit un Ã©vÃ©nement standard."""
         event = MagicMock()
         event.id = 20
         event.type_event = "standard"
-        event.titre = "Réunion famille"
+        event.titre = "RÃ©union famille"
         event.date_debut = datetime(2024, 1, 20, 16, 0)
         event.lieu = "Maison"
         event.description = "Anniversaire"
@@ -690,15 +690,15 @@ class TestConvertirEventCalendrier:
         
         assert evt is not None
         assert evt.type == TypeEvenement.EVENEMENT
-        assert evt.titre == "Réunion famille"
+        assert evt.titre == "RÃ©union famille"
         assert evt.heure_debut == time(16, 0)
         assert evt.date_jour == date(2024, 1, 20)
         
     def test_event_medical(self):
-        """Événement médical."""
+        """Ã‰vÃ©nement mÃ©dical."""
         event = MagicMock()
         event.id = 21
-        event.type_event = "médical"
+        event.type_event = "mÃ©dical"
         event.titre = "RDV dentiste"
         event.date_debut = datetime(2024, 1, 25, 9, 0)
         
@@ -707,12 +707,12 @@ class TestConvertirEventCalendrier:
         assert evt.type == TypeEvenement.RDV_MEDICAL
         
     def test_event_courses(self):
-        """Événement courses/shopping."""
+        """Ã‰vÃ©nement courses/shopping."""
         for type_c in ["courses", "shopping"]:
             event = MagicMock()
             event.id = 22
             event.type_event = type_c
-            event.titre = "Supermarché"
+            event.titre = "SupermarchÃ©"
             event.date_debut = date(2024, 1, 27)
             
             evt = convertir_event_calendrier_en_evenement(event)
@@ -720,11 +720,11 @@ class TestConvertirEventCalendrier:
             assert evt.type == TypeEvenement.COURSES
             
     def test_event_avec_date_simple(self):
-        """Événement avec date (pas datetime)."""
+        """Ã‰vÃ©nement avec date (pas datetime)."""
         event = MagicMock()
         event.id = 23
         event.type_event = "standard"
-        event.titre = "Journée"
+        event.titre = "JournÃ©e"
         event.date_debut = date(2024, 2, 1)
         
         evt = convertir_event_calendrier_en_evenement(event)
@@ -741,20 +741,20 @@ class TestConvertirEventCalendrier:
         assert result is None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONVERSION TACHE MENAGE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestConvertirTacheMenage:
     """Tests pour convertir_tache_menage_en_evenement."""
     
     def test_tache_none(self):
-        """Retourne None si tâche None."""
+        """Retourne None si tÃ¢che None."""
         assert convertir_tache_menage_en_evenement(None) is None
         
     def test_tache_menage(self):
-        """Convertit une tâche ménage."""
+        """Convertit une tÃ¢che mÃ©nage."""
         tache = MagicMock()
         tache.id = 30
         tache.categorie = "menage"
@@ -775,7 +775,7 @@ class TestConvertirTacheMenage:
         assert "30min" in evt.description
         
     def test_tache_jardin(self):
-        """Tâche catégorie jardin."""
+        """TÃ¢che catÃ©gorie jardin."""
         for cat in ["jardin", "exterieur", "pelouse"]:
             tache = MagicMock()
             tache.id = 31
@@ -789,11 +789,11 @@ class TestConvertirTacheMenage:
             assert evt.type == TypeEvenement.JARDIN
             
     def test_tache_entretien(self):
-        """Tâche catégorie entretien."""
+        """TÃ¢che catÃ©gorie entretien."""
         tache = MagicMock()
         tache.id = 32
         tache.categorie = "autre"
-        tache.nom = "Chaudière"
+        tache.nom = "ChaudiÃ¨re"
         tache.prochaine_fois = date.today()
         
         evt = convertir_tache_menage_en_evenement(tache)
@@ -801,7 +801,7 @@ class TestConvertirTacheMenage:
         assert evt.type == TypeEvenement.ENTRETIEN
         
     def test_tache_en_retard(self):
-        """Tâche en retard marque la note."""
+        """TÃ¢che en retard marque la note."""
         tache = MagicMock()
         tache.id = 33
         tache.categorie = "menage"
@@ -814,7 +814,7 @@ class TestConvertirTacheMenage:
         assert "EN RETARD" in evt.notes
         
     def test_tache_sans_prochaine_fois(self):
-        """Tâche sans date utilise aujourd'hui."""
+        """TÃ¢che sans date utilise aujourd'hui."""
         tache = MagicMock()
         tache.id = 34
         tache.categorie = "menage"
@@ -834,9 +834,9 @@ class TestConvertirTacheMenage:
         assert result is None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GENERER TACHES MENAGE SEMAINE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGenererTachesMenageSemaine:
@@ -850,7 +850,7 @@ class TestGenererTachesMenageSemaine:
         assert result == {}
         
     def test_tache_non_integree(self):
-        """Tâche non intégrée au planning ignorée."""
+        """TÃ¢che non intÃ©grÃ©e au planning ignorÃ©e."""
         tache = MagicMock()
         tache.integrer_planning = False
         
@@ -860,7 +860,7 @@ class TestGenererTachesMenageSemaine:
         assert result == {}
         
     def test_tache_dans_semaine(self):
-        """Tâche avec prochaine_fois dans la semaine."""
+        """TÃ¢che avec prochaine_fois dans la semaine."""
         tache = MagicMock()
         tache.id = 40
         tache.integrer_planning = True
@@ -877,50 +877,50 @@ class TestGenererTachesMenageSemaine:
         assert len(result[date(2024, 1, 17)]) == 1
         
     def test_tache_recurrente_sans_prochaine(self):
-        """Tâche récurrente sans prochaine_fois distribuée sur la semaine."""
+        """TÃ¢che rÃ©currente sans prochaine_fois distribuÃ©e sur la semaine."""
         tache = MagicMock()
-        tache.id = 3  # id % 7 = 3 → Jeudi
+        tache.id = 3  # id % 7 = 3 â†’ Jeudi
         tache.integrer_planning = True
         tache.prochaine_fois = None
         tache.frequence_jours = 7  # Hebdomadaire
         tache.categorie = "menage"
-        tache.nom = "Ménage hebdo"
+        tache.nom = "MÃ©nage hebdo"
         
         result = generer_taches_menage_semaine(
             [tache], date(2024, 1, 15), date(2024, 1, 21)
         )
         
-        # id=3, donc jour offset = 3 → Jeudi 18 janvier
+        # id=3, donc jour offset = 3 â†’ Jeudi 18 janvier
         assert date(2024, 1, 18) in result
         
     def test_tache_frequente(self):
-        """Tâche très fréquente (≤7j) est incluse."""
+        """TÃ¢che trÃ¨s frÃ©quente (â‰¤7j) est incluse."""
         tache = MagicMock()
         tache.id = 1
         tache.integrer_planning = True
         tache.prochaine_fois = None
         tache.frequence_jours = 3  # Tous les 3 jours
         tache.categorie = "menage"
-        tache.nom = "Fréquent"
+        tache.nom = "FrÃ©quent"
         
         result = generer_taches_menage_semaine(
             [tache], date(2024, 1, 15), date(2024, 1, 21)
         )
         
-        # Devrait avoir au moins une entrée
+        # Devrait avoir au moins une entrÃ©e
         assert len(result) >= 1
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CREER EVENEMENT COURSES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCreerEvenementCourses:
     """Tests pour creer_evenement_courses."""
     
     def test_creation_basique(self):
-        """Crée un événement courses basique."""
+        """CrÃ©e un Ã©vÃ©nement courses basique."""
         evt = creer_evenement_courses(
             date_jour=date(2024, 1, 20),
             magasin="Carrefour"
@@ -932,7 +932,7 @@ class TestCreerEvenementCourses:
         assert evt.magasin == "Carrefour"
         
     def test_avec_heure(self):
-        """Crée un événement courses avec heure."""
+        """CrÃ©e un Ã©vÃ©nement courses avec heure."""
         evt = creer_evenement_courses(
             date_jour=date(2024, 1, 20),
             magasin="Leclerc",
@@ -942,7 +942,7 @@ class TestCreerEvenementCourses:
         assert evt.heure_debut == time(10, 30)
         
     def test_avec_id_source(self):
-        """Crée avec ID source explicite."""
+        """CrÃ©e avec ID source explicite."""
         evt = creer_evenement_courses(
             date_jour=date(2024, 1, 20),
             magasin="Lidl",
@@ -952,27 +952,27 @@ class TestCreerEvenementCourses:
         assert evt.id == "courses_100"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS AGREGER EVENEMENTS JOUR
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAgregerEvenementsJour:
     """Tests pour agreger_evenements_jour."""
     
     def test_jour_vide(self):
-        """Agrège un jour sans événements."""
+        """AgrÃ¨ge un jour sans Ã©vÃ©nements."""
         jour = agreger_evenements_jour(date(2024, 1, 15))
         
         assert jour.date_jour == date(2024, 1, 15)
         assert len(jour.evenements) == 0
         
     def test_avec_repas(self):
-        """Agrège avec des repas."""
+        """AgrÃ¨ge avec des repas."""
         repas = MagicMock()
         repas.id = 1
         repas.date_repas = date(2024, 1, 15)
-        repas.type_repas = "déjeuner"
+        repas.type_repas = "dÃ©jeuner"
         repas.recette = None
         
         jour = agreger_evenements_jour(
@@ -984,7 +984,7 @@ class TestAgregerEvenementsJour:
         assert jour.repas_midi is not None
         
     def test_avec_session_batch(self):
-        """Agrège avec session batch."""
+        """AgrÃ¨ge avec session batch."""
         session = MagicMock()
         session.id = 5
         session.date_session = date(2024, 1, 15)
@@ -999,7 +999,7 @@ class TestAgregerEvenementsJour:
         assert jour.batch_cooking is not None
         
     def test_avec_activites(self):
-        """Agrège avec activités."""
+        """AgrÃ¨ge avec activitÃ©s."""
         activite = MagicMock()
         activite.id = 10
         activite.date_prevue = date(2024, 1, 15)
@@ -1014,12 +1014,12 @@ class TestAgregerEvenementsJour:
         assert len(jour.activites) == 1
         
     def test_avec_events(self):
-        """Agrège avec events calendrier."""
+        """AgrÃ¨ge avec events calendrier."""
         event = MagicMock()
         event.id = 20
         event.date_debut = date(2024, 1, 15)
         event.type_event = "standard"
-        event.titre = "Événement"
+        event.titre = "Ã‰vÃ©nement"
         
         jour = agreger_evenements_jour(
             date_jour=date(2024, 1, 15),
@@ -1029,7 +1029,7 @@ class TestAgregerEvenementsJour:
         assert len(jour.autres_evenements) == 1
         
     def test_avec_courses_planifiees(self):
-        """Agrège avec courses planifiées."""
+        """AgrÃ¨ge avec courses planifiÃ©es."""
         courses = [
             {"date": date(2024, 1, 15), "magasin": "Carrefour", "heure": time(10, 0)}
         ]
@@ -1042,7 +1042,7 @@ class TestAgregerEvenementsJour:
         assert len(jour.courses) == 1
         
     def test_avec_taches_menage_pretraitees(self):
-        """Agrège avec tâches ménage déjà converties."""
+        """AgrÃ¨ge avec tÃ¢ches mÃ©nage dÃ©jÃ  converties."""
         tache_evt = EvenementCalendrier(
             id="menage_1", type=TypeEvenement.MENAGE,
             titre="Aspirateur", date_jour=date(2024, 1, 15)
@@ -1056,7 +1056,7 @@ class TestAgregerEvenementsJour:
         assert len(jour.taches_menage) == 1
         
     def test_tri_par_heure(self):
-        """Vérifie que les événements sont triés par heure."""
+        """VÃ©rifie que les Ã©vÃ©nements sont triÃ©s par heure."""
         evt1 = EvenementCalendrier(
             id="e1", type=TypeEvenement.ACTIVITE,
             titre="Tard", date_jour=date(2024, 1, 15),
@@ -1064,7 +1064,7 @@ class TestAgregerEvenementsJour:
         )
         evt2 = EvenementCalendrier(
             id="e2", type=TypeEvenement.ACTIVITE,
-            titre="Tôt", date_jour=date(2024, 1, 15),
+            titre="TÃ´t", date_jour=date(2024, 1, 15),
             heure_debut=time(9, 0)
         )
         
@@ -1073,13 +1073,13 @@ class TestAgregerEvenementsJour:
             taches_menage=[evt1, evt2]
         )
         
-        # Le premier devrait être celui à 9h
+        # Le premier devrait Ãªtre celui Ã  9h
         assert jour.evenements[0].heure_debut == time(9, 0)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONSTRUIRE SEMAINE CALENDRIER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestConstruireSemaineCalendrier:
@@ -1098,13 +1098,13 @@ class TestConstruireSemaineCalendrier:
         repas1 = MagicMock()
         repas1.id = 1
         repas1.date_repas = date(2024, 1, 15)
-        repas1.type_repas = "déjeuner"
+        repas1.type_repas = "dÃ©jeuner"
         repas1.recette = None
         
         repas2 = MagicMock()
         repas2.id = 2
         repas2.date_repas = date(2024, 1, 17)
-        repas2.type_repas = "dîner"
+        repas2.type_repas = "dÃ®ner"
         repas2.recette = None
         
         semaine = construire_semaine_calendrier(
@@ -1115,28 +1115,28 @@ class TestConstruireSemaineCalendrier:
         assert semaine.nb_repas_planifies == 2
         
     def test_avec_taches_menage(self):
-        """Construit avec tâches ménage à distribuer."""
+        """Construit avec tÃ¢ches mÃ©nage Ã  distribuer."""
         tache = MagicMock()
-        tache.id = 0  # id % 7 = 0 → Lundi
+        tache.id = 0  # id % 7 = 0 â†’ Lundi
         tache.integrer_planning = True
         tache.prochaine_fois = date(2024, 1, 15)
         tache.frequence_jours = 7
         tache.categorie = "menage"
-        tache.nom = "Ménage"
+        tache.nom = "MÃ©nage"
         
         semaine = construire_semaine_calendrier(
             date_debut=date(2024, 1, 15),
             taches_menage=[tache]
         )
         
-        # Vérifier qu'il y a au moins une tâche ménage sur la semaine
+        # VÃ©rifier qu'il y a au moins une tÃ¢che mÃ©nage sur la semaine
         total_menage = sum(len(j.taches_menage) for j in semaine.jours)
         assert total_menage >= 1
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EXPORT TEXTE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGenererTexteSemaine:
@@ -1144,7 +1144,7 @@ class TestGenererTexteSemaine:
     
     @pytest.fixture
     def semaine_test(self):
-        """Crée une semaine pour les tests d'export."""
+        """CrÃ©e une semaine pour les tests d'export."""
         lundi = date(2024, 1, 15)
         jours = []
         
@@ -1155,8 +1155,8 @@ class TestGenererTexteSemaine:
             if i == 0:  # Lundi: repas midi avec version Jules
                 evt_midi = EvenementCalendrier(
                     id="midi_0", type=TypeEvenement.REPAS_MIDI,
-                    titre="Pâtes bolognaise", date_jour=jour_date,
-                    version_jules="Mixer finement la sauce avec des pâtes étoiles"
+                    titre="PÃ¢tes bolognaise", date_jour=jour_date,
+                    version_jules="Mixer finement la sauce avec des pÃ¢tes Ã©toiles"
                 )
                 evts.append(evt_midi)
                 
@@ -1164,11 +1164,11 @@ class TestGenererTexteSemaine:
                 evt_soir = EvenementCalendrier(
                     id="soir_0", type=TypeEvenement.REPAS_SOIR,
                     titre="Gratin", date_jour=jour_date,
-                    version_jules="Écraser le gratin"
+                    version_jules="Ã‰craser le gratin"
                 )
                 evts.append(evt_soir)
                 
-            if i == 0:  # Lundi: goûter
+            if i == 0:  # Lundi: goÃ»ter
                 evt_gouter = EvenementCalendrier(
                     id="gouter_0", type=TypeEvenement.GOUTER,
                     titre="Compote maison", date_jour=jour_date
@@ -1192,7 +1192,7 @@ class TestGenererTexteSemaine:
                 )
                 evts.append(evt_courses)
                 
-            if i == 5:  # Samedi: activité
+            if i == 5:  # Samedi: activitÃ©
                 evt_act = EvenementCalendrier(
                     id="act_5", type=TypeEvenement.ACTIVITE,
                     titre="Parc Jules", date_jour=jour_date,
@@ -1200,7 +1200,7 @@ class TestGenererTexteSemaine:
                 )
                 evts.append(evt_act)
                 
-            if i == 3:  # Jeudi: RDV médical
+            if i == 3:  # Jeudi: RDV mÃ©dical
                 evt_rdv = EvenementCalendrier(
                     id="rdv_3", type=TypeEvenement.RDV_MEDICAL,
                     titre="Vaccin Jules", date_jour=jour_date,
@@ -1211,7 +1211,7 @@ class TestGenererTexteSemaine:
             if i == 4:  # Vendredi: RDV autre
                 evt_rdv2 = EvenementCalendrier(
                     id="rdv_4", type=TypeEvenement.RDV_AUTRE,
-                    titre="Réunion école", date_jour=jour_date,
+                    titre="RÃ©union Ã©cole", date_jour=jour_date,
                     heure_debut=time(18, 0)
                 )
                 evts.append(evt_rdv2)
@@ -1221,73 +1221,73 @@ class TestGenererTexteSemaine:
         return SemaineCalendrier(date_debut=lundi, jours=jours)
     
     def test_genere_texte_avec_titre(self, semaine_test):
-        """Vérifie que le titre de semaine est présent."""
+        """VÃ©rifie que le titre de semaine est prÃ©sent."""
         texte = generer_texte_semaine_pour_impression(semaine_test)
         
         assert "SEMAINE DU" in texte
         assert "15/01" in texte
         
     def test_genere_texte_avec_repas_midi(self, semaine_test):
-        """Vérifie repas midi dans le texte."""
+        """VÃ©rifie repas midi dans le texte."""
         texte = generer_texte_semaine_pour_impression(semaine_test)
         
-        assert "🌞 Midi:" in texte
-        assert "Pâtes bolognaise" in texte
+        assert "ðŸŒž Midi:" in texte
+        assert "PÃ¢tes bolognaise" in texte
         
     def test_genere_texte_avec_repas_soir(self, semaine_test):
-        """Vérifie repas soir dans le texte."""
+        """VÃ©rifie repas soir dans le texte."""
         texte = generer_texte_semaine_pour_impression(semaine_test)
         
-        assert "🌙 Soir:" in texte
+        assert "ðŸŒ™ Soir:" in texte
         assert "Gratin" in texte
         
     def test_genere_texte_avec_version_jules(self, semaine_test):
-        """Vérifie version Jules dans le texte."""
+        """VÃ©rifie version Jules dans le texte."""
         texte = generer_texte_semaine_pour_impression(semaine_test)
         
-        assert "👶 Jules:" in texte
+        assert "ðŸ‘¶ Jules:" in texte
         
     def test_genere_texte_avec_gouter(self, semaine_test):
-        """Vérifie goûter dans le texte."""
+        """VÃ©rifie goÃ»ter dans le texte."""
         texte = generer_texte_semaine_pour_impression(semaine_test)
         
-        assert "🍰 Goûter:" in texte
+        assert "ðŸ° GoÃ»ter:" in texte
         
     def test_genere_texte_avec_batch(self, semaine_test):
-        """Vérifie batch cooking dans le texte."""
+        """VÃ©rifie batch cooking dans le texte."""
         texte = generer_texte_semaine_pour_impression(semaine_test)
         
-        assert "🍳 BATCH COOKING" in texte
+        assert "ðŸ³ BATCH COOKING" in texte
         
     def test_genere_texte_avec_courses(self, semaine_test):
-        """Vérifie courses dans le texte."""
+        """VÃ©rifie courses dans le texte."""
         texte = generer_texte_semaine_pour_impression(semaine_test)
         
-        assert "🛒 Courses:" in texte
+        assert "ðŸ›’ Courses:" in texte
         
     def test_genere_texte_avec_activite(self, semaine_test):
-        """Vérifie activité dans le texte."""
+        """VÃ©rifie activitÃ© dans le texte."""
         texte = generer_texte_semaine_pour_impression(semaine_test)
         
-        assert "🎨" in texte
+        assert "ðŸŽ¨" in texte
         assert "Parc Jules" in texte
         
     def test_genere_texte_avec_rdv_medical(self, semaine_test):
-        """Vérifie RDV médical dans le texte."""
+        """VÃ©rifie RDV mÃ©dical dans le texte."""
         texte = generer_texte_semaine_pour_impression(semaine_test)
         
-        assert "🏥" in texte
+        assert "ðŸ¥" in texte
         assert "Vaccin Jules" in texte
         
     def test_genere_texte_avec_rdv_autre(self, semaine_test):
-        """Vérifie RDV autre dans le texte."""
+        """VÃ©rifie RDV autre dans le texte."""
         texte = generer_texte_semaine_pour_impression(semaine_test)
         
-        assert "📅" in texte
-        assert "Réunion école" in texte
+        assert "ðŸ“…" in texte
+        assert "RÃ©union Ã©cole" in texte
         
     def test_genere_texte_jour_vide(self):
-        """Vérifie affichage jour vide."""
+        """VÃ©rifie affichage jour vide."""
         semaine = SemaineCalendrier(
             date_debut=date(2024, 1, 15),
             jours=[JourCalendrier(date_jour=date(2024, 1, 15), evenements=[])]
@@ -1297,10 +1297,10 @@ class TestGenererTexteSemaine:
         
         texte = generer_texte_semaine_pour_impression(semaine)
         
-        assert "(rien de planifié)" in texte
+        assert "(rien de planifiÃ©)" in texte
         
     def test_genere_texte_statistiques(self, semaine_test):
-        """Vérifie les statistiques en fin de texte."""
+        """VÃ©rifie les statistiques en fin de texte."""
         texte = generer_texte_semaine_pour_impression(semaine_test)
         
         assert "repas" in texte.lower()
@@ -1308,9 +1308,9 @@ class TestGenererTexteSemaine:
         assert "courses" in texte.lower()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EXPORT HTML
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGenererHtmlSemaine:
@@ -1318,7 +1318,7 @@ class TestGenererHtmlSemaine:
     
     @pytest.fixture
     def semaine_html_test(self):
-        """Crée une semaine pour tests HTML."""
+        """CrÃ©e une semaine pour tests HTML."""
         lundi = date(2024, 1, 15)
         jours = []
         
@@ -1356,7 +1356,7 @@ class TestGenererHtmlSemaine:
             if i == 3:
                 evts.append(EvenementCalendrier(
                     id="rdv_3", type=TypeEvenement.RDV_MEDICAL,
-                    titre="Pédiatre", date_jour=jour_date,
+                    titre="PÃ©diatre", date_jour=jour_date,
                     heure_debut=time(11, 0)
                 ))
                 
@@ -1365,7 +1365,7 @@ class TestGenererHtmlSemaine:
         return SemaineCalendrier(date_debut=lundi, jours=jours)
     
     def test_genere_html_structure(self, semaine_html_test):
-        """Vérifie structure HTML basique."""
+        """VÃ©rifie structure HTML basique."""
         html = generer_html_semaine_pour_impression(semaine_html_test)
         
         assert "<html>" in html
@@ -1375,80 +1375,80 @@ class TestGenererHtmlSemaine:
         assert "<style>" in html
         
     def test_genere_html_titre(self, semaine_html_test):
-        """Vérifie titre dans HTML."""
+        """VÃ©rifie titre dans HTML."""
         html = generer_html_semaine_pour_impression(semaine_html_test)
         
-        assert "📅 SEMAINE DU" in html
+        assert "ðŸ“… SEMAINE DU" in html
         
     def test_genere_html_repas_midi(self, semaine_html_test):
-        """Vérifie repas midi dans HTML."""
+        """VÃ©rifie repas midi dans HTML."""
         html = generer_html_semaine_pour_impression(semaine_html_test)
         
-        assert "🌞 Midi:" in html
+        assert "ðŸŒž Midi:" in html
         assert "Quiche lorraine" in html
         
     def test_genere_html_repas_soir(self, semaine_html_test):
-        """Vérifie repas soir dans HTML."""
+        """VÃ©rifie repas soir dans HTML."""
         html = generer_html_semaine_pour_impression(semaine_html_test)
         
-        assert "🌙 Soir:" in html
+        assert "ðŸŒ™ Soir:" in html
         assert "Soupe" in html
         
     def test_genere_html_version_jules_tronquee(self, semaine_html_test):
-        """Vérifie version Jules tronquée à 60 chars."""
+        """VÃ©rifie version Jules tronquÃ©e Ã  60 chars."""
         html = generer_html_semaine_pour_impression(semaine_html_test)
         
-        # La version originale fait >60 chars, devrait être tronquée
-        assert "👶" in html
+        # La version originale fait >60 chars, devrait Ãªtre tronquÃ©e
+        assert "ðŸ‘¶" in html
         assert "..." in html  # Indique troncature
         
     def test_genere_html_batch_cooking(self, semaine_html_test):
-        """Vérifie batch cooking dans HTML."""
+        """VÃ©rifie batch cooking dans HTML."""
         html = generer_html_semaine_pour_impression(semaine_html_test)
         
-        assert "🍳 Batch Cooking" in html
+        assert "ðŸ³ Batch Cooking" in html
         
     def test_genere_html_courses(self, semaine_html_test):
-        """Vérifie courses dans HTML."""
+        """VÃ©rifie courses dans HTML."""
         html = generer_html_semaine_pour_impression(semaine_html_test)
         
-        assert "🛒" in html
+        assert "ðŸ›’" in html
         
     def test_genere_html_rdv_medical(self, semaine_html_test):
-        """Vérifie RDV médical dans HTML."""
+        """VÃ©rifie RDV mÃ©dical dans HTML."""
         html = generer_html_semaine_pour_impression(semaine_html_test)
         
-        assert "🏥" in html
-        assert "Pédiatre" in html
+        assert "ðŸ¥" in html
+        assert "PÃ©diatre" in html
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONSTANTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestConstantes:
     """Tests pour les constantes du module."""
     
     def test_jours_semaine_complets(self):
-        """Vérifie les 7 jours complets."""
+        """VÃ©rifie les 7 jours complets."""
         assert len(JOURS_SEMAINE) == 7
         assert JOURS_SEMAINE[0] == "Lundi"
         assert JOURS_SEMAINE[6] == "Dimanche"
         
     def test_jours_semaine_courts(self):
-        """Vérifie les abréviations."""
+        """VÃ©rifie les abrÃ©viations."""
         assert len(JOURS_SEMAINE_COURT) == 7
         assert JOURS_SEMAINE_COURT[0] == "Lun"
         assert JOURS_SEMAINE_COURT[6] == "Dim"
         
     def test_emoji_type_complet(self):
-        """Vérifie tous les types ont un emoji."""
+        """VÃ©rifie tous les types ont un emoji."""
         for type_evt in TypeEvenement:
             assert type_evt in EMOJI_TYPE
             
     def test_couleur_type_complet(self):
-        """Vérifie tous les types ont une couleur."""
+        """VÃ©rifie tous les types ont une couleur."""
         for type_evt in TypeEvenement:
             assert type_evt in COULEUR_TYPE
             assert COULEUR_TYPE[type_evt].startswith("#")

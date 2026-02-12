@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/services/web/pwa.py
 """
 import json

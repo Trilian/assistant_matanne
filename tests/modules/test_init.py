@@ -1,6 +1,6 @@
-"""
-Test minimal d'import pour src/domains/__init__.py
+﻿"""
+Test minimal d'import pour src/modules/__init__.py
 """
 def test_import_domains_init():
-    import src.domains
+    import src.modules
     assert hasattr(src, "domains")

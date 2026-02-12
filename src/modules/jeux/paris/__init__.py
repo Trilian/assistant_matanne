@@ -1,10 +1,10 @@
-"""
-Module Paris Sportifs - Suivi des championnats européens et prédictions IA
+﻿"""
+Module Paris Sportifs - Suivi des championnats europÃeens et prÃedictions IA
 
-Fonctionnalités:
-- Suivi des 5 grands championnats + coupes européennes
-- Prédictions basées sur la forme, H2H, avantage domicile
-- Suivi des paris virtuels et réels
+FonctionnalitÃes:
+- Suivi des 5 grands championnats + coupes europÃeennes
+- PrÃedictions basÃees sur la forme, H2H, avantage domicile
+- Suivi des paris virtuels et rÃeels
 - Dashboard de performance
 """
 
@@ -18,7 +18,7 @@ from .sync import (
     sync_matchs_a_venir,
     refresh_scores_matchs,
 )
-from .helpers import (
+from .utilitaires import (
     charger_championnats_disponibles,
     charger_equipes,
     charger_matchs_a_venir,
@@ -33,103 +33,103 @@ from .crud import (
     supprimer_match,
 )
 from .prediction import afficher_prediction_match
-from .dashboard import afficher_dashboard_performance
+from .tableau_bord import afficher_dashboard_performance
 from .gestion import afficher_gestion_donnees
 
 # Re-export constantes depuis _common
-from ._common import CHAMPIONNATS, logger
+from .utils import CHAMPIONNATS, logger
 
 
 def app():
-    """Point d'entrée du module Paris Sportifs"""
+    """Point d'entrÃee du module Paris Sportifs"""
     
-    st.title("⚽ Paris Sportifs - Prédictions IA")
-    st.caption("Suivi des championnats européens avec prédictions intelligentes")
+    st.title("âš½ Paris Sportifs - PrÃedictions IA")
+    st.caption("Suivi des championnats europÃeens avec prÃedictions intelligentes")
     
     # Tabs principaux
     tabs = st.tabs([
-        "🎯 Prédictions", 
-        "📊 Performance", 
-        "🏆 Classements",
-        "⚙️ Gestion"
+        "ðŸŽ¯ PrÃedictions", 
+        "ðŸ“Š Performance", 
+        "ðŸ† Classements",
+        "âš™ï¸ Gestion"
     ])
     
     # TAB 1: PRÉDICTIONS
     with tabs[0]:
-        st.header("Matchs à venir")
+        st.header("Matchs Ã  venir")
         
-        with st.expander("ℹ️ Comment ça marche"):
+        with st.expander("â„¹ï¸ Comment ça marche"):
             st.markdown("""
-            **🔄 Refresh Scores**: Met à jour les scores des matchs terminés depuis l'API
+            **ðŸ”„ Refresh Scores**: Met Ã  jour les scores des matchs terminÃes depuis l'API
             
-            **📥 Sync Équipes**: Charge les équipes des 5 championnats depuis l'API
+            **ðŸ“¥ Sync Équipes**: Charge les Ãequipes des 5 championnats depuis l'API
             
-            **📅 Sync Matchs**: Charge les matchs à venir avec prédictions IA automatiques
+            **ðŸ“… Sync Matchs**: Charge les matchs Ã  venir avec prÃedictions IA automatiques
             
-            💡 **Conseil**: Faites d'abord "Sync Équipes" puis "Sync Matchs" pour tout automatiser!
+            ðŸ’¡ **Conseil**: Faites d'abord "Sync Équipes" puis "Sync Matchs" pour tout automatiser!
             """)
         
         # Ligne de boutons de synchronisation
         col_btn1, col_btn2, col_btn3 = st.columns(3)
         
         with col_btn1:
-            if st.button("🔄 Refresh Scores", help="Met à jour les scores depuis l'API", use_container_width=True):
-                st.info("🔄 Actualisation en cours...")
+            if st.button("ðŸ”„ Refresh Scores", help="Met Ã  jour les scores depuis l'API", use_container_width=True):
+                st.info("ðŸ”„ Actualisation en cours...")
                 try:
-                    with st.spinner("Mise à jour des scores..."):
-                        logger.info("🔘 Bouton REFRESH cliqué!")
+                    with st.spinner("Mise Ã  jour des scores..."):
+                        logger.info("ðŸ”˜ Bouton REFRESH cliquÃe!")
                         count = refresh_scores_matchs()
-                        logger.info(f"📊 Résultat refresh: {count} matchs")
+                        logger.info(f"ðŸ“Š RÃesultat refresh: {count} matchs")
                         if count > 0:
-                            st.success(f"✅ {count} matchs mis à jour!")
+                            st.success(f"âœ… {count} matchs mis Ã  jour!")
                         else:
-                            st.info("✅ Tous les matchs sont à jour")
+                            st.info("âœ… Tous les matchs sont Ã  jour")
                         st.rerun()
                 except Exception as e:
-                    logger.error(f"❌ Erreur refresh: {e}", exc_info=True)
-                    st.error(f"❌ Erreur: {e}")
+                    logger.error(f"âŒ Erreur refresh: {e}", exc_info=True)
+                    st.error(f"âŒ Erreur: {e}")
         
         with col_btn2:
-            if st.button("📥 Sync Équipes", help="Charge toutes les équipes depuis Football-Data API", use_container_width=True):
-                st.info("⏳ Synchronisation en cours...")
+            if st.button("ðŸ“¥ Sync Équipes", help="Charge toutes les Ãequipes depuis Football-Data API", use_container_width=True):
+                st.info("â³ Synchronisation en cours...")
                 try:
                     with st.spinner("Synchronisation des 5 grands championnats..."):
-                        logger.info("🔘 Bouton SYNC ÉQUIPES cliqué!")
+                        logger.info("ðŸ”˜ Bouton SYNC ÉQUIPES cliquÃe!")
                         resultats = sync_tous_championnats()
-                        logger.info(f"📊 Résultats sync: {resultats}")
+                        logger.info(f"ðŸ“Š RÃesultats sync: {resultats}")
                         total = sum(resultats.values())
                         if total == 0:
-                            st.warning("⚠️ 0 équipes synchronisées - vérifiez la clé API")
+                            st.warning("âš ï¸ 0 Ãequipes synchronisÃees - vÃerifiez la clÃe API")
                         else:
-                            st.success(f"✅ {total} équipes synchronisées!")
+                            st.success(f"âœ… {total} Ãequipes synchronisÃees!")
                             for champ, count in resultats.items():
                                 if count > 0:
-                                    st.caption(f"  • {champ}: {count} équipes")
+                                    st.caption(f"  â€¢ {champ}: {count} Ãequipes")
                         st.rerun()
                 except Exception as e:
-                    logger.error(f"❌ Erreur sync: {e}", exc_info=True)
-                    st.error(f"❌ Erreur: {e}")
+                    logger.error(f"âŒ Erreur sync: {e}", exc_info=True)
+                    st.error(f"âŒ Erreur: {e}")
         
         with col_btn3:
-            if st.button("📅 Sync Matchs", help="Charge les matchs à venir depuis l'API", use_container_width=True):
-                st.info("📅 Chargement des matchs...")
+            if st.button("ðŸ“… Sync Matchs", help="Charge les matchs Ã  venir depuis l'API", use_container_width=True):
+                st.info("ðŸ“… Chargement des matchs...")
                 try:
-                    with st.spinner("Récupération des matchs des 5 championnats..."):
-                        logger.info("🔘 Bouton SYNC MATCHS cliqué!")
+                    with st.spinner("RÃecupÃeration des matchs des 5 championnats..."):
+                        logger.info("ðŸ”˜ Bouton SYNC MATCHS cliquÃe!")
                         resultats = sync_matchs_a_venir(jours=14)
-                        logger.info(f"📊 Résultats sync matchs: {resultats}")
+                        logger.info(f"ðŸ“Š RÃesultats sync matchs: {resultats}")
                         total = sum(resultats.values())
                         if total == 0:
-                            st.info("✅ Tous les matchs sont déjà synchronisés")
+                            st.info("âœ… Tous les matchs sont dÃejÃ  synchronisÃes")
                         else:
-                            st.success(f"✅ {total} nouveaux matchs ajoutés!")
+                            st.success(f"âœ… {total} nouveaux matchs ajoutÃes!")
                             for champ, count in resultats.items():
                                 if count > 0:
-                                    st.caption(f"  • {champ}: {count} matchs")
+                                    st.caption(f"  â€¢ {champ}: {count} matchs")
                         st.rerun()
                 except Exception as e:
-                    logger.error(f"❌ Erreur sync matchs: {e}", exc_info=True)
-                    st.error(f"❌ Erreur: {e}")
+                    logger.error(f"âŒ Erreur sync matchs: {e}", exc_info=True)
+                    st.error(f"âŒ Erreur: {e}")
         
         # Filtres
         col_filtre, col_jours = st.columns([3, 2])
@@ -146,35 +146,35 @@ def app():
             for match in matchs:
                 afficher_prediction_match(match)
         else:
-            st.info("📅 Aucun match prévu dans cette période. "
+            st.info("ðŸ“… Aucun match prÃevu dans cette pÃeriode. "
                    "Ajoutez des matchs dans l'onglet Gestion.")
             
-            with st.expander("🎮 Voir une démo"):
+            with st.expander("ðŸŽ® Voir une dÃemo"):
                 st.markdown("""
                 ### Comment ça marche?
                 
-                1. **Ajoutez des équipes** dans l'onglet Gestion
-                2. **Créez des matchs** entre ces équipes
-                3. **L'IA prédit** les résultats basés sur:
-                   - Forme récente (5 derniers matchs)
+                1. **Ajoutez des Ãequipes** dans l'onglet Gestion
+                2. **CrÃeez des matchs** entre ces Ãequipes
+                3. **L'IA prÃedit** les rÃesultats basÃes sur:
+                   - Forme rÃecente (5 derniers matchs)
                    - Avantage domicile (+12% statistique)
                    - Historique des confrontations
-                   - Régression vers la moyenne
+                   - RÃegression vers la moyenne
                 
-                4. **Enregistrez vos paris** (virtuels ou réels)
-                5. **Suivez votre performance** dans l'onglet dédié
+                4. **Enregistrez vos paris** (virtuels ou rÃeels)
+                5. **Suivez votre performance** dans l'onglet dÃediÃe
                 """)
     
     # TAB 2: PERFORMANCE
     with tabs[1]:
-        st.header("📊 Performance de mes paris")
+        st.header("ðŸ“Š Performance de mes paris")
         afficher_dashboard_performance()
     
     # TAB 3: CLASSEMENTS
     with tabs[2]:
-        st.header("🏆 Classements")
+        st.header("ðŸ† Classements")
         
-        champ_classe = st.selectbox("Sélectionner un championnat", CHAMPIONNATS, key="class_champ")
+        champ_classe = st.selectbox("SÃelectionner un championnat", CHAMPIONNATS, key="class_champ")
         equipes = charger_equipes(champ_classe)
         
         if equipes:
@@ -202,15 +202,15 @@ def app():
                 use_container_width=True
             )
         else:
-            st.info(f"Aucune équipe enregistrée pour {champ_classe}")
+            st.info(f"Aucune Ãequipe enregistrÃee pour {champ_classe}")
     
     # TAB 4: GESTION
     with tabs[3]:
-        st.header("⚙️ Gestion des données")
+        st.header("âš™ï¸ Gestion des donnÃees")
         afficher_gestion_donnees()
 
 
-# Alias pour compatibilité
+# Alias pour compatibilitÃe
 def main():
     app()
 

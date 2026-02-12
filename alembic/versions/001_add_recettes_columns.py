@@ -1,4 +1,4 @@
-"""Add bio local robots nutrition columns to recettes
+﻿"""Add bio local robots nutrition columns to recettes
 
 Revision ID: 001_add_recettes_columns
 Revises: 

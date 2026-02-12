@@ -1,4 +1,4 @@
-"""
+﻿"""
 Header de l'application.
 """
 
@@ -19,7 +19,7 @@ def afficher_header():
     with col1:
         st.markdown(
             f"<div class='main-header'>"
-            f"<h1>🤖 {parametres.APP_NAME}</h1>"
+            f"<h1>ðŸ¤– {parametres.APP_NAME}</h1>"
             f"<p style='color: var(--secondary); margin: 0;'>"
             f"Assistant familial intelligent"
             f"</p></div>",
@@ -28,11 +28,11 @@ def afficher_header():
 
     with col2:
         if etat.agent_ia:
-            badge("🤖 IA Active", "#4CAF50")
+            badge("ðŸ¤– IA Active", "#4CAF50")
         else:
-            badge("🤖 IA Indispo", "#FFC107")
+            badge("ðŸ¤– IA Indispo", "#FFC107")
 
     with col3:
         if etat.notifications_non_lues > 0:
-            if st.button(f"🔔 {etat.notifications_non_lues}"):
+            if st.button(f"ðŸ”” {etat.notifications_non_lues}"):
                 st.session_state.show_notifications = True

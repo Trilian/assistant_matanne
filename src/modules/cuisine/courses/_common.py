@@ -14,8 +14,8 @@ from src.services.web import get_realtime_sync_service
 from src.core.errors_base import ErreurValidation
 from src.core.database import obtenir_contexte_db
 
-# Import du module logique métier séparé
-from src.domains.cuisine.logic.courses_logic import (
+# Import du module logique mÃetier sÃeparÃe
+from src.modules.cuisine.courses.utils import (
     PRIORITY_EMOJIS,
     PRIORITY_ORDER,
     RAYONS_DEFAULT,

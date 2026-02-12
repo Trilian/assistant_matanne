@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour src/ui/layout/header.py
 """
 
@@ -45,7 +45,7 @@ class TestAfficherHeader:
         
         afficher_header()
         
-        mock_badge.assert_called_with("🤖 IA Active", "#4CAF50")
+        mock_badge.assert_called_with("ðŸ¤– IA Active", "#4CAF50")
 
     @patch("src.ui.layout.header.st")
     @patch("src.ui.layout.header.badge")
@@ -61,7 +61,7 @@ class TestAfficherHeader:
         
         afficher_header()
         
-        mock_badge.assert_called_with("🤖 IA Indispo", "#FFC107")
+        mock_badge.assert_called_with("ðŸ¤– IA Indispo", "#FFC107")
 
     @patch("src.ui.layout.header.st")
     @patch("src.ui.layout.header.badge")
@@ -80,4 +80,4 @@ class TestAfficherHeader:
         
         # Button should show notification count
         call = mock_st.button.call_args
-        assert "5" in str(call) or "🔔" in str(call)
+        assert "5" in str(call) or "ðŸ””" in str(call)

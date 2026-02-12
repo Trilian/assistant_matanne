@@ -1,4 +1,4 @@
-"""
+﻿"""
 Fixtures et mocks pour les tests UI Streamlit.
 
 Fournit des utilitaires standardisés pour tester les composants UI:
@@ -15,9 +15,9 @@ from typing import Any, Dict, List, Optional
 import pytest
 
 
-# ═══════════════════════════════════════════════════════════
-# STREAMLIT MOCK ÉTENDU
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# STREAMLIT MOCK Ã‰TENDU
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class SessionStateMock(dict):
     """Mock pour st.session_state supportant accès attribut et dict."""
@@ -150,9 +150,9 @@ def create_streamlit_mock(session_state: Dict[str, Any] = None) -> MagicMock:
     return mock_st
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES PAR DOMAINE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def create_cuisine_session_state() -> Dict[str, Any]:
     """Session state par défaut pour les tests cuisine."""
@@ -232,9 +232,9 @@ def create_ui_test_context(domain: str = None, extra_state: Dict[str, Any] = Non
     return create_streamlit_mock(session_data)
 
 
-# ═══════════════════════════════════════════════════════════
-# DONNÉES FIXTURES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# DONNÃ‰ES FIXTURES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def create_sample_recette() -> dict:
     """Crée une recette de test."""
@@ -250,7 +250,7 @@ def create_sample_recette() -> dict:
         "ingredients": [
             {"nom": "Pâtes", "quantite": 400, "unite": "g"},
             {"nom": "Lardons", "quantite": 200, "unite": "g"},
-            {"nom": "Œufs", "quantite": 4, "unite": ""},
+            {"nom": "Å’ufs", "quantite": 4, "unite": ""},
             {"nom": "Parmesan", "quantite": 100, "unite": "g"},
         ],
         "instructions": "1. Cuire les pâtes\n2. Faire revenir les lardons\n3. Mélanger",
@@ -299,9 +299,9 @@ def create_sample_family_purchase() -> dict:
     }
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # PYTEST FIXTURES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @pytest.fixture
 def mock_st():
@@ -363,9 +363,9 @@ def sample_purchase():
     return create_sample_family_purchase()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONTEXT MANAGERS POUR PATCHER STREAMLIT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @contextmanager
 def patch_streamlit(session_state: Dict[str, Any] = None):
@@ -374,7 +374,7 @@ def patch_streamlit(session_state: Dict[str, Any] = None):
     
     Usage:
         with patch_streamlit({"key": "value"}) as mock_st:
-            from src.domains.cuisine.ui.recettes import app
+            from src.modules.cuisine.recettes import app
             app()
             mock_st.title.assert_called()
     """
@@ -390,12 +390,12 @@ def patch_streamlit_for_module(module_path: str, session_state: Dict[str, Any] =
     Patche streamlit spécifiquement pour un module.
     
     Args:
-        module_path: Chemin du module (e.g., "src.domains.cuisine.ui.recettes")
+        module_path: Chemin du module (e.g., "src.modules.cuisine.recettes")
         session_state: Données session_state
     
     Usage:
-        with patch_streamlit_for_module("src.domains.cuisine.ui.recettes") as mock_st:
-            from src.domains.cuisine.ui.recettes import render_liste
+        with patch_streamlit_for_module("src.modules.cuisine.recettes") as mock_st:
+            from src.modules.cuisine.recettes import render_liste
             render_liste(mock_db)
     """
     mock_st = create_streamlit_mock(session_state)
@@ -415,9 +415,9 @@ def patch_streamlit_for_module(module_path: str, session_state: Dict[str, Any] =
             p.stop()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ASSERTIONS HELPERS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def assert_streamlit_called(mock_st: MagicMock, method: str, times: int = None):
     """

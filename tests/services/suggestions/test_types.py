@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for src/services/suggestions/types.py
 
 Pydantic models for suggestions.

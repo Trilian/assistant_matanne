@@ -1,8 +1,8 @@
-﻿"""
-Fonctions helpers pour charger les données depuis la BD.
+"""
+Fonctions helpers pour charger les donnees depuis la BD.
 """
 
-from ._common import (
+from .utils import (
     st, date, timedelta, logger,
     obtenir_contexte_db, Equipe, Match, PariSportif,
     CHAMPIONNATS,
@@ -15,7 +15,7 @@ def charger_championnats_disponibles():
 
 
 def charger_equipes(championnat: str = None):
-    """Charge les équipes, optionnellement filtrées par championnat"""
+    """Charge les equipes, optionnellement filtrees par championnat"""
     try:
         with obtenir_contexte_db() as session:
             query = session.query(Equipe)
@@ -38,7 +38,7 @@ def charger_equipes(championnat: str = None):
                 for e in equipes
             ]
     except Exception as e:
-        st.error(f"❌ Erreur chargement équipes: {e}")
+        st.error(f"❌ Erreur chargement equipes: {e}")
         return []
 
 
@@ -81,7 +81,7 @@ def charger_matchs_a_venir(jours: int = 7, championnat: str = None):
 
 
 def charger_matchs_recents(equipe_id: int, nb_matchs: int = 10):
-    """Charge les derniers matchs joués par une équipe"""
+    """Charge les derniers matchs joues par une equipe"""
     try:
         with obtenir_contexte_db() as session:
             matchs = session.query(Match).filter(
@@ -99,10 +99,10 @@ def charger_matchs_recents(equipe_id: int, nb_matchs: int = 10):
                     "score_domicile": m.score_domicile,
                     "score_exterieur": m.score_exterieur
                 }
-                for m in reversed(matchs)  # Du plus ancien au plus récent
+                for m in reversed(matchs)  # Du plus ancien au plus recent
             ]
     except Exception as e:
-        st.error(f"❌ Erreur chargement matchs récents: {e}")
+        st.error(f"❌ Erreur chargement matchs recents: {e}")
         return []
 
 

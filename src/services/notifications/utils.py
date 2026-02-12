@@ -1,4 +1,4 @@
-"""
+﻿"""
 Fonctions utilitaires pures pour les notifications push.
 
 Ces fonctions peuvent être testées sans base de données ni dépendances externes.
@@ -12,9 +12,9 @@ from typing import Any
 from src.services.notifications.types import TypeNotification
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # VÉRIFICATION DES PRÉFÉRENCES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def obtenir_mapping_types_notification() -> dict[TypeNotification, str]:
@@ -68,9 +68,9 @@ def verifier_type_notification_active(
     return preferences.get(pref_key, True)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # GESTION DES HEURES SILENCIEUSES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def est_heures_silencieuses(
@@ -151,7 +151,7 @@ def doit_envoyer_notification(
         type_notification: Type de notification
         preferences: Préférences utilisateur
         heure_courante: Heure actuelle (None = auto)
-        nombre_envoyes_cette_heure: Nombre de notifications déjà envoyées cette heure
+        nombre_envoyes_cette_heure: Nombre de notifications déjÃ  envoyées cette heure
         
     Returns:
         Tuple (doit_envoyer, raison)
@@ -179,9 +179,9 @@ def doit_envoyer_notification(
     return True, ""
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONSTRUCTION DE PAYLOADS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def construire_payload_push(notification: dict) -> str:
@@ -241,9 +241,9 @@ def construire_info_abonnement(subscription: dict) -> dict:
     }
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CRÉATION DE NOTIFICATIONS PRÉDÉFINIES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def creer_notification_stock(
@@ -260,12 +260,12 @@ def creer_notification_stock(
         unite: Unité (optionnel)
         
     Returns:
-        Dict notification prêt à envoyer
+        Dict notification prêt Ã  envoyer
     """
     quantite_str = f"{quantite} {unite}".strip() if unite else str(quantite)
     
     return {
-        "title": "📦 Stock bas",
+        "title": "ðŸ“¦ Stock bas",
         "body": f"{nom_article} est presque épuisé ({quantite_str} restant)",
         "notification_type": TypeNotification.STOCK_BAS.value,
         "url": "/?module=cuisine.inventaire",
@@ -292,20 +292,20 @@ def creer_notification_peremption(
         critique: Forcer le mode critique
         
     Returns:
-        Dict notification prêt à envoyer
+        Dict notification prêt Ã  envoyer
     """
     if jours_restants <= 0:
-        title = "⚠️ Produit périmé!"
+        title = "âš ï¸ Produit périmé!"
         body = f"{nom_article} a expiré!"
         notif_type = TypeNotification.PEREMPTION_CRITIQUE.value
         require_interaction = True
     elif jours_restants == 1:
-        title = "🔴 Péremption demain"
+        title = "ðŸ”´ Péremption demain"
         body = f"{nom_article} expire demain"
         notif_type = TypeNotification.PEREMPTION_CRITIQUE.value if critique else TypeNotification.PEREMPTION_ALERTE.value
         require_interaction = critique
     else:
-        title = "🟡 Péremption proche"
+        title = "ðŸŸ¡ Péremption proche"
         body = f"{nom_article} expire dans {jours_restants} jours"
         notif_type = TypeNotification.PEREMPTION_ALERTE.value
         require_interaction = False
@@ -334,10 +334,10 @@ def creer_notification_rappel_repas(
         temps_restant: Temps restant (ex: "30 min")
         
     Returns:
-        Dict notification prêt à envoyer
+        Dict notification prêt Ã  envoyer
     """
     return {
-        "title": f"🍽️ {type_repas.title()} dans {temps_restant}",
+        "title": f"ðŸ½ï¸ {type_repas.title()} dans {temps_restant}",
         "body": f"Au menu: {nom_recette}",
         "notification_type": TypeNotification.RAPPEL_REPAS.value,
         "url": "/?module=planning",
@@ -362,10 +362,10 @@ def creer_notification_liste_partagee(
         nom_liste: Nom de la liste
         
     Returns:
-        Dict notification prêt à envoyer
+        Dict notification prêt Ã  envoyer
     """
     return {
-        "title": "🛒 Liste partagée",
+        "title": "ðŸ›’ Liste partagée",
         "body": f"{partage_par} a partagé la liste '{nom_liste}'",
         "notification_type": TypeNotification.LISTE_PARTAGEE.value,
         "url": "/?module=cuisine.courses",
@@ -391,14 +391,14 @@ def creer_notification_rappel_activite(
         lieu: Lieu (optionnel)
         
     Returns:
-        Dict notification prêt à envoyer
+        Dict notification prêt Ã  envoyer
     """
     body = f"{nom_activite} dans {temps_restant}"
     if lieu:
         body += f" - {lieu}"
     
     return {
-        "title": "📅 Rappel d'activité",
+        "title": "ðŸ“… Rappel d'activité",
         "body": body,
         "notification_type": TypeNotification.RAPPEL_ACTIVITE.value,
         "url": "/?module=planning",
@@ -421,10 +421,10 @@ def creer_notification_rappel_jalon(
         nom_jalon: Nom du jalon
         
     Returns:
-        Dict notification prêt à envoyer
+        Dict notification prêt Ã  envoyer
     """
     return {
-        "title": f"👶 Jalon pour {prenom_enfant}",
+        "title": f"ðŸ‘¶ Jalon pour {prenom_enfant}",
         "body": f"{type_jalon}: {nom_jalon}",
         "notification_type": TypeNotification.RAPPEL_JALON.value,
         "url": "/?module=famille.jules",
@@ -432,9 +432,9 @@ def creer_notification_rappel_jalon(
     }
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # COMPTEUR DE NOTIFICATIONS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def generer_cle_compteur(user_id: str, dt: datetime | None = None) -> str:
@@ -478,7 +478,7 @@ def parser_cle_compteur(key: str) -> tuple[str, datetime | None]:
 
 def doit_reinitialiser_compteur(derniere_cle: str, cle_courante: str) -> bool:
     """
-    Vérifie si le compteur doit être remis à zéro (nouvelle heure).
+    Vérifie si le compteur doit être remis Ã  zéro (nouvelle heure).
     
     Args:
         derniere_cle: Dernière clé utilisée
@@ -490,9 +490,9 @@ def doit_reinitialiser_compteur(derniere_cle: str, cle_courante: str) -> bool:
     return derniere_cle != cle_courante
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # VALIDATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def valider_abonnement(subscription: dict) -> tuple[bool, str]:
@@ -553,9 +553,9 @@ def valider_preferences(preferences: dict) -> tuple[bool, list[str]]:
     return len(warnings) == 0, warnings
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ALIAS RÉTROCOMPATIBILITÉ
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 # Enum alias (pour anciens imports)
 NotificationType = TypeNotification
@@ -581,9 +581,9 @@ validate_subscription = valider_abonnement
 validate_preferences = valider_preferences
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # EXPORTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 __all__ = [
     # Types (français)

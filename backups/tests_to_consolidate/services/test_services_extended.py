@@ -1,4 +1,4 @@
-"""Phase 17: Tests etendus pour les services (CRUD, cache, IA).
+﻿"""Phase 17: Tests etendus pour les services (CRUD, cache, IA).
 
 Ces tests couvrent:
 - Operations CRUD sur services

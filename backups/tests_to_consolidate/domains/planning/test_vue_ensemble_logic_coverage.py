@@ -1,11 +1,11 @@
-"""
-Tests de couverture complémentaires pour vue_ensemble_logic.py
+﻿"""
+Tests de couverture complÃ©mentaires pour vue_ensemble_logic.py
 Objectif: atteindre 80%+ de couverture
 """
 import pytest
 from datetime import date, datetime, timedelta
 
-from src.domains.planning.logic.vue_ensemble_logic import (
+from src.modules.planning.logic.vue_ensemble_logic import (
     analyser_charge_globale,
     est_en_retard,
     analyser_tendances,
@@ -18,15 +18,15 @@ from src.domains.planning.logic.vue_ensemble_logic import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ANALYSER_TENDANCES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestAnalyserTendances:
     """Tests pour analyser_tendances."""
 
     def test_tendances_historique_vide(self):
-        """Historique vide retourne valeurs par défaut."""
+        """Historique vide retourne valeurs par dÃ©faut."""
         result = analyser_tendances([], 30)
         
         assert result["evolution"] == "stable"
@@ -34,7 +34,7 @@ class TestAnalyserTendances:
         assert result["pic_activite"] is None
 
     def test_tendances_avec_historique(self):
-        """Analyse avec historique présent."""
+        """Analyse avec historique prÃ©sent."""
         historique = [
             {"date": date.today() - timedelta(days=i), "type": "test"}
             for i in range(10)
@@ -46,7 +46,7 @@ class TestAnalyserTendances:
         assert result["pic_activite"] is not None
 
     def test_tendances_date_string(self):
-        """Gère les dates en string."""
+        """GÃ¨re les dates en string."""
         historique = [
             {"date": (date.today() - timedelta(days=1)).isoformat()}
         ]
@@ -56,8 +56,8 @@ class TestAnalyserTendances:
         assert result["moyenne_jour"] > 0
 
     def test_tendances_evolution_hausse(self):
-        """Détecte tendance à la hausse."""
-        # Plus d'activité dans les 15 derniers jours
+        """DÃ©tecte tendance Ã  la hausse."""
+        # Plus d'activitÃ© dans les 15 derniers jours
         historique = [
             {"date": (date.today() - timedelta(days=i)).isoformat()}
             for i in range(10)  # 10 items dans les 10 derniers jours
@@ -65,11 +65,11 @@ class TestAnalyserTendances:
         
         result = analyser_tendances(historique, 30)
         
-        # Avec tous les items récents, devrait être hausse
+        # Avec tous les items rÃ©cents, devrait Ãªtre hausse
         assert result["evolution"] in ["hausse", "stable"]
 
     def test_tendances_pic_activite(self):
-        """Identifie le pic d'activité."""
+        """Identifie le pic d'activitÃ©."""
         aujourd_hui = date.today()
         hier = aujourd_hui - timedelta(days=1)
         
@@ -86,37 +86,37 @@ class TestAnalyserTendances:
         assert result["pic_activite"]["nombre"] == 3
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PREVOIR_CHARGE_PROCHAINE_SEMAINE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestPrevoirChargeProchaineSemaine:
     """Tests pour prevoir_charge_prochaine_semaine."""
 
     def test_prevision_semaine_vide(self):
-        """Semaine sans événements."""
+        """Semaine sans Ã©vÃ©nements."""
         result = prevoir_charge_prochaine_semaine([], [])
         
         assert result["evenements"] == 0
         assert result["taches"] == 0
-        assert result["prevision"] == "Semaine légère"
+        assert result["prevision"] == "Semaine lÃ©gÃ¨re"
 
     def test_prevision_semaine_legere(self):
-        """Prévision avec peu d'événements."""
+        """PrÃ©vision avec peu d'Ã©vÃ©nements."""
         debut_semaine = date.today() + timedelta(days=7 - date.today().weekday())
         
         evenements = [
-            {"date": debut_semaine, "titre": "Réunion"},
+            {"date": debut_semaine, "titre": "RÃ©union"},
             {"date": debut_semaine + timedelta(days=1), "titre": "Autre"},
         ]
         
         result = prevoir_charge_prochaine_semaine(evenements, [])
         
         assert result["evenements"] == 2
-        assert result["prevision"] == "Semaine légère"
+        assert result["prevision"] == "Semaine lÃ©gÃ¨re"
 
     def test_prevision_semaine_chargee(self):
-        """Prévision avec beaucoup d'éléments."""
+        """PrÃ©vision avec beaucoup d'Ã©lÃ©ments."""
         debut_semaine = date.today() + timedelta(days=7 - date.today().weekday())
         
         evenements = [{"date": debut_semaine, "titre": f"Evt {i}"} for i in range(10)]
@@ -125,10 +125,10 @@ class TestPrevoirChargeProchaineSemaine:
         result = prevoir_charge_prochaine_semaine(evenements, taches)
         
         assert result["charge_totale"] == 20
-        assert result["prevision"] == "Semaine chargée"
+        assert result["prevision"] == "Semaine chargÃ©e"
 
     def test_prevision_ignore_taches_completees(self):
-        """Ignore les tâches complétées."""
+        """Ignore les tÃ¢ches complÃ©tÃ©es."""
         debut_semaine = date.today() + timedelta(days=7 - date.today().weekday())
         
         taches = [
@@ -141,15 +141,15 @@ class TestPrevoirChargeProchaineSemaine:
         assert result["taches"] == 1
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS IDENTIFIER_TACHES_URGENTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestIdentifierTachesUrgentes:
     """Tests pour identifier_taches_urgentes."""
 
     def test_aucune_tache_urgente(self):
-        """Pas de tâches urgentes."""
+        """Pas de tÃ¢ches urgentes."""
         taches = [
             {"date_limite": date.today() + timedelta(days=10), "complete": False},
         ]
@@ -159,7 +159,7 @@ class TestIdentifierTachesUrgentes:
         assert len(result) == 0
 
     def test_taches_urgentes_identifiees(self):
-        """Identifie les tâches urgentes."""
+        """Identifie les tÃ¢ches urgentes."""
         taches = [
             {"date_limite": date.today() + timedelta(days=1), "complete": False},
             {"date_limite": date.today() + timedelta(days=10), "complete": False},
@@ -170,7 +170,7 @@ class TestIdentifierTachesUrgentes:
         assert len(result) == 1
 
     def test_ignore_taches_completees(self):
-        """Ignore les tâches complétées."""
+        """Ignore les tÃ¢ches complÃ©tÃ©es."""
         taches = [
             {"date_limite": date.today(), "complete": True},
         ]
@@ -180,7 +180,7 @@ class TestIdentifierTachesUrgentes:
         assert len(result) == 0
 
     def test_taches_avec_date_string(self):
-        """Gère les dates en string."""
+        """GÃ¨re les dates en string."""
         taches = [
             {"date_limite": (date.today() + timedelta(days=1)).isoformat(), "complete": False},
         ]
@@ -190,9 +190,9 @@ class TestIdentifierTachesUrgentes:
         assert len(result) == 1
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GENERER_ALERTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestGenererAlertes:
     """Tests pour generer_alertes."""
@@ -204,7 +204,7 @@ class TestGenererAlertes:
         assert len(result) == 0
 
     def test_alerte_taches_en_retard(self):
-        """Alerte pour tâches en retard."""
+        """Alerte pour tÃ¢ches en retard."""
         taches = [
             {"date_limite": date.today() - timedelta(days=1), "complete": False},
         ]
@@ -215,7 +215,7 @@ class TestGenererAlertes:
         assert any(a["type"] == "danger" for a in result)
 
     def test_alerte_taches_urgentes(self):
-        """Alerte pour tâches urgentes."""
+        """Alerte pour tÃ¢ches urgentes."""
         taches = [
             {"date_limite": date.today() + timedelta(days=1), "complete": False},
         ]
@@ -226,9 +226,9 @@ class TestGenererAlertes:
         assert any(a["type"] == "warning" for a in result)
 
     def test_alerte_evenements_aujourdhui(self):
-        """Alerte pour événements aujourd'hui."""
+        """Alerte pour Ã©vÃ©nements aujourd'hui."""
         evenements = [
-            {"date": date.today(), "titre": "Réunion"},
+            {"date": date.today(), "titre": "RÃ©union"},
         ]
         
         result = generer_alertes(evenements, [])
@@ -237,9 +237,9 @@ class TestGenererAlertes:
         assert any(a["type"] == "info" for a in result)
 
     def test_alerte_evenement_date_string(self):
-        """Gère les dates d'événements en string."""
+        """GÃ¨re les dates d'Ã©vÃ©nements en string."""
         evenements = [
-            {"date": date.today().isoformat(), "titre": "Réunion"},
+            {"date": date.today().isoformat(), "titre": "RÃ©union"},
         ]
         
         result = generer_alertes(evenements, [])
@@ -247,15 +247,15 @@ class TestGenererAlertes:
         assert len(result) >= 1
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CALCULER_STATISTIQUES_PERIODE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestCalculerStatistiquesPeriode:
     """Tests pour calculer_statistiques_periode."""
 
     def test_stats_periode_jour(self):
-        """Stats pour période Jour."""
+        """Stats pour pÃ©riode Jour."""
         items = [{"date": date.today()}]
         
         result = calculer_statistiques_periode(items, "Jour")
@@ -264,7 +264,7 @@ class TestCalculerStatistiquesPeriode:
         assert result["total"] == 1
 
     def test_stats_periode_semaine(self):
-        """Stats pour période Semaine."""
+        """Stats pour pÃ©riode Semaine."""
         items = [{"date": date.today() - timedelta(days=i)} for i in range(3)]
         
         result = calculer_statistiques_periode(items, "Semaine")
@@ -273,7 +273,7 @@ class TestCalculerStatistiquesPeriode:
         assert result["total"] == 3
 
     def test_stats_periode_mois(self):
-        """Stats pour période Mois."""
+        """Stats pour pÃ©riode Mois."""
         items = [{"date": date.today() - timedelta(days=i)} for i in range(10)]
         
         result = calculer_statistiques_periode(items, "Mois")
@@ -282,16 +282,16 @@ class TestCalculerStatistiquesPeriode:
         assert result["total"] == 10
 
     def test_stats_periode_annee(self):
-        """Stats pour période Année."""
+        """Stats pour pÃ©riode AnnÃ©e."""
         items = [{"date": date.today() - timedelta(days=i)} for i in range(50)]
         
-        result = calculer_statistiques_periode(items, "Année")
+        result = calculer_statistiques_periode(items, "AnnÃ©e")
         
-        assert result["periode"] == "Année"
+        assert result["periode"] == "AnnÃ©e"
         assert result["total"] == 50
 
     def test_stats_date_string(self):
-        """Gère les dates en string."""
+        """GÃ¨re les dates en string."""
         items = [{"date": date.today().isoformat()}]
         
         result = calculer_statistiques_periode(items, "Jour")
@@ -299,9 +299,9 @@ class TestCalculerStatistiquesPeriode:
         assert result["total"] == 1
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FORMATER_NIVEAU_CHARGE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestFormaterNiveauCharge:
     """Tests pour formater_niveau_charge."""
@@ -312,9 +312,9 @@ class TestFormaterNiveauCharge:
         assert "Libre" in result
 
     def test_formater_leger(self):
-        """Formate niveau Léger."""
-        result = formater_niveau_charge("Léger")
-        assert "Léger" in result
+        """Formate niveau LÃ©ger."""
+        result = formater_niveau_charge("LÃ©ger")
+        assert "LÃ©ger" in result
 
     def test_formater_moyen(self):
         """Formate niveau Moyen."""
@@ -322,14 +322,14 @@ class TestFormaterNiveauCharge:
         assert "Moyen" in result
 
     def test_formater_eleve(self):
-        """Formate niveau Élevé."""
-        result = formater_niveau_charge("Élevé")
-        assert "Élevé" in result
+        """Formate niveau Ã‰levÃ©."""
+        result = formater_niveau_charge("Ã‰levÃ©")
+        assert "Ã‰levÃ©" in result
 
     def test_formater_tres_eleve(self):
-        """Formate niveau Très élevé."""
-        result = formater_niveau_charge("Très élevé")
-        assert "Très élevé" in result
+        """Formate niveau TrÃ¨s Ã©levÃ©."""
+        result = formater_niveau_charge("TrÃ¨s Ã©levÃ©")
+        assert "TrÃ¨s Ã©levÃ©" in result
 
     def test_formater_inconnu(self):
         """Formate niveau inconnu."""
@@ -337,29 +337,29 @@ class TestFormaterNiveauCharge:
         assert "Inconnu" in result
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FORMATER_EVOLUTION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 class TestFormaterEvolution:
     """Tests pour formater_evolution."""
 
     def test_formater_hausse(self):
-        """Formate évolution hausse."""
+        """Formate Ã©volution hausse."""
         result = formater_evolution("hausse")
         assert "Hausse" in result
 
     def test_formater_baisse(self):
-        """Formate évolution baisse."""
+        """Formate Ã©volution baisse."""
         result = formater_evolution("baisse")
         assert "Baisse" in result
 
     def test_formater_stable(self):
-        """Formate évolution stable."""
+        """Formate Ã©volution stable."""
         result = formater_evolution("stable")
         assert "Stable" in result
 
     def test_formater_inconnu(self):
-        """Formate évolution inconnue."""
+        """Formate Ã©volution inconnue."""
         result = formater_evolution("autre")
         assert "Autre" in result

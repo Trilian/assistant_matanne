@@ -1,11 +1,11 @@
-"""
+﻿"""
 Tests pour planificateur_repas.py - Module UI Streamlit de planification des repas.
 Objectif: Atteindre 75%+ de couverture pour le fichier de 854 lignes.
 
-Patterns testés:
+Patterns testÃ©s:
 - Affichage interface Streamlit
-- Sélection de dates et périodes
-- Composition repas (petit-déj, déj, dîner)
+- SÃ©lection de dates et pÃ©riodes
+- Composition repas (petit-dÃ©j, dÃ©j, dÃ®ner)
 - Suggestions IA
 - Modifications planning
 - Exports/partage
@@ -19,8 +19,8 @@ from datetime import date, datetime, timedelta
 from io import BytesIO
 import streamlit as st
 
-# Pour éviter les imports cassés pendant collection globale
-pytest.importorskip("src.domains.cuisine.ui.planificateur_repas", reason="Module can be imported when run in isolation")
+# Pour Ã©viter les imports cassÃ©s pendant collection globale
+pytest.importorskip("src.modules.cuisine.ui.planificateur_repas", reason="Module can be imported when run in isolation")
 
 
 class TestPlanificateurDisplay:
@@ -33,8 +33,8 @@ class TestPlanificateurDisplay:
         mock_title.return_value = None
         mock_sub.return_value = None
         
-        st.title("🍽️ Planificateur de Repas")
-        st.subheader("Semaine de menu équilibrés")
+        st.title("ðŸ½ï¸ Planificateur de Repas")
+        st.subheader("Semaine de menu Ã©quilibrÃ©s")
         
         assert mock_title.called
         assert mock_sub.called
@@ -51,24 +51,24 @@ class TestPlanificateurDisplay:
 
 
 class TestPlanificateurDateSelection:
-    """Tests pour la sélection de dates."""
+    """Tests pour la sÃ©lection de dates."""
     
     @patch('streamlit.date_input')
     def test_selectionner_date_debut(self, mock_date):
-        """Tester la sélection de date de début."""
+        """Tester la sÃ©lection de date de dÃ©but."""
         mock_date.return_value = date(2026, 2, 3)
         
-        date_debut = st.date_input("Date de début")
+        date_debut = st.date_input("Date de dÃ©but")
         
         assert date_debut == date(2026, 2, 3)
         assert mock_date.called
     
     @patch('streamlit.selectbox')
     def test_selectionner_duree_planning(self, mock_selectbox):
-        """Tester la sélection de durée."""
+        """Tester la sÃ©lection de durÃ©e."""
         mock_selectbox.return_value = "7 jours"
         
-        duree = st.selectbox("Durée du planning", ["3 jours", "7 jours", "14 jours"])
+        duree = st.selectbox("DurÃ©e du planning", ["3 jours", "7 jours", "14 jours"])
         
         assert duree == "7 jours"
         assert mock_selectbox.called
@@ -80,31 +80,31 @@ class TestPlanificateurComposition:
     @patch('streamlit.columns')
     @patch('streamlit.write')
     def test_afficher_petit_dejeuner(self, mock_write, mock_col):
-        """Tester l'affichage du petit-déjeuner."""
+        """Tester l'affichage du petit-dÃ©jeuner."""
         mock_col.return_value = [MagicMock(), MagicMock()]
         mock_write.return_value = None
         
         col1, col2 = st.columns(2)
-        st.write("Petit-déjeuner")
+        st.write("Petit-dÃ©jeuner")
         
         assert mock_col.called
         assert mock_write.called
     
     @patch('streamlit.selectbox')
     def test_selectionner_recette_midi(self, mock_selectbox):
-        """Tester la sélection de recette pour le midi."""
-        mock_selectbox.return_value = "Pâtes Carbonara"
+        """Tester la sÃ©lection de recette pour le midi."""
+        mock_selectbox.return_value = "PÃ¢tes Carbonara"
         
-        recette = st.selectbox("Recette Midi", ["Pâtes Carbonara", "Salade", "Soupe"])
+        recette = st.selectbox("Recette Midi", ["PÃ¢tes Carbonara", "Salade", "Soupe"])
         
-        assert recette == "Pâtes Carbonara"
+        assert recette == "PÃ¢tes Carbonara"
     
     @patch('streamlit.multiselect')
     def test_selectionner_ingredients_optionnels(self, mock_multi):
-        """Tester la sélection d'ingrédients optionnels."""
+        """Tester la sÃ©lection d'ingrÃ©dients optionnels."""
         mock_multi.return_value = ["Fromage", "Bacon"]
         
-        ingredients = st.multiselect("Ingrédients optionnels", ["Fromage", "Bacon", "Oeufs"])
+        ingredients = st.multiselect("IngrÃ©dients optionnels", ["Fromage", "Bacon", "Oeufs"])
         
         assert "Fromage" in ingredients
         assert len(ingredients) == 2
@@ -116,12 +116,12 @@ class TestPlanificateurSuggestions:
     @patch('streamlit.button')
     @patch('streamlit.spinner')
     def test_generer_suggestions_ia(self, mock_spinner, mock_btn):
-        """Tester la génération de suggestions IA."""
+        """Tester la gÃ©nÃ©ration de suggestions IA."""
         mock_btn.return_value = True
         mock_spinner.return_value.__enter__ = Mock()
         mock_spinner.return_value.__exit__ = Mock()
         
-        if st.button("Générer suggestions"):
+        if st.button("GÃ©nÃ©rer suggestions"):
             with st.spinner("Calcul des suggestions..."):
                 pass
         
@@ -132,7 +132,7 @@ class TestPlanificateurSuggestions:
         """Tester l'affichage des suggestions alternatives."""
         mock_info.return_value = None
         
-        st.info("Suggestions alternatives basées sur vos préférences")
+        st.info("Suggestions alternatives basÃ©es sur vos prÃ©fÃ©rences")
         
         assert mock_info.called
 
@@ -142,19 +142,19 @@ class TestPlanificateurValidation:
     
     @patch('streamlit.warning')
     def test_avertir_equilibre_proteines(self, mock_warn):
-        """Tester l'avertissement pour déséquilibre protéines."""
+        """Tester l'avertissement pour dÃ©sÃ©quilibre protÃ©ines."""
         mock_warn.return_value = None
         
-        st.warning("⚠️ Semaine faible en protéines")
+        st.warning("âš ï¸ Semaine faible en protÃ©ines")
         
         assert mock_warn.called
     
     @patch('streamlit.success')
     def test_valider_planning_equilibre(self, mock_success):
-        """Tester la validation d'un planning équilibré."""
+        """Tester la validation d'un planning Ã©quilibrÃ©."""
         mock_success.return_value = None
         
-        st.success("✅ Planning équilibré validé!")
+        st.success("âœ… Planning Ã©quilibrÃ© validÃ©!")
         
         assert mock_success.called
 
@@ -187,10 +187,10 @@ class TestPlanificateurExport:
     
     @patch('streamlit.button')
     def test_telecharger_pdf(self, mock_btn):
-        """Tester le téléchargement en PDF."""
+        """Tester le tÃ©lÃ©chargement en PDF."""
         mock_btn.return_value = True
         
-        if st.button("Télécharger PDF"):
+        if st.button("TÃ©lÃ©charger PDF"):
             pass
         
         assert mock_btn.called
@@ -207,7 +207,7 @@ class TestPlanificateurExport:
     
     @patch('streamlit.download_button')
     def test_download_button_csv(self, mock_dl):
-        """Tester le bouton de téléchargement CSV."""
+        """Tester le bouton de tÃ©lÃ©chargement CSV."""
         mock_dl.return_value = None
         
         st.download_button(label="CSV", data="test", file_name="planning.csv")
@@ -223,7 +223,7 @@ class TestPlanificateurFiltrage:
         """Tester le filtrage par allergies."""
         mock_multi.return_value = ["Arachides", "Lait"]
         
-        allergies = st.multiselect("Allergies", ["Arachides", "Lait", "Œufs"])
+        allergies = st.multiselect("Allergies", ["Arachides", "Lait", "Å’ufs"])
         
         assert "Arachides" in allergies
     
@@ -232,18 +232,18 @@ class TestPlanificateurFiltrage:
         """Tester le filtrage par temps."""
         mock_sel.return_value = "<15min"
         
-        temps = st.selectbox("Temps de préparation", ["<15min", "15-30min", ">30min"])
+        temps = st.selectbox("Temps de prÃ©paration", ["<15min", "15-30min", ">30min"])
         
         assert temps == "<15min"
     
     @patch('streamlit.text_input')
     def test_rechercher_recette(self, mock_input):
         """Tester la recherche de recette."""
-        mock_input.return_value = "pâtes"
+        mock_input.return_value = "pÃ¢tes"
         
         recherche = st.text_input("Rechercher recette")
         
-        assert recherche == "pâtes"
+        assert recherche == "pÃ¢tes"
 
 
 class TestPlanificateurInteractions:
@@ -257,7 +257,7 @@ class TestPlanificateurInteractions:
         mock_session.__contains__ = Mock(return_value=False)
         
         if st.button("Sauvegarder"):
-            st.session_state.planning = {"lundi": "Pâtes"}
+            st.session_state.planning = {"lundi": "PÃ¢tes"}
         
         assert mock_btn.called
     
@@ -277,14 +277,14 @@ class TestPlanificateurInteractions:
 
 
 class TestPlanificateurBatchCooking:
-    """Tests pour l'intégration batch cooking."""
+    """Tests pour l'intÃ©gration batch cooking."""
     
     @patch('streamlit.write')
     def test_afficher_conseils_batch_cooking(self, mock_write):
         """Tester l'affichage des conseils batch cooking."""
         mock_write.return_value = None
         
-        st.write("Conseils Batch Cooking: Préparez les sauces le dimanche")
+        st.write("Conseils Batch Cooking: PrÃ©parez les sauces le dimanche")
         
         assert mock_write.called
     
@@ -299,7 +299,7 @@ class TestPlanificateurBatchCooking:
 
 
 class TestPlanificateurJules:
-    """Tests pour l'intégration Jules (enfant)."""
+    """Tests pour l'intÃ©gration Jules (enfant)."""
     
     @patch('streamlit.checkbox')
     def test_inclure_repas_jules(self, mock_check):
@@ -313,11 +313,11 @@ class TestPlanificateurJules:
     @patch('streamlit.selectbox')
     def test_adapter_textures_jules(self, mock_sel):
         """Tester l'adaptation des textures pour Jules."""
-        mock_sel.return_value = "Mixé"
+        mock_sel.return_value = "MixÃ©"
         
-        texture = st.selectbox("Texture", ["Normal", "Mixé", "Écrasé"])
+        texture = st.selectbox("Texture", ["Normal", "MixÃ©", "Ã‰crasÃ©"])
         
-        assert texture == "Mixé"
+        assert texture == "MixÃ©"
 
 
 class TestPlanificateurHistorique:
@@ -326,11 +326,11 @@ class TestPlanificateurHistorique:
     @patch('streamlit.write')
     @patch('streamlit.button')
     def test_afficher_plannings_precedents(self, mock_btn, mock_write):
-        """Tester l'affichage des plannings précédents."""
+        """Tester l'affichage des plannings prÃ©cÃ©dents."""
         mock_write.return_value = None
         mock_btn.return_value = False
         
-        st.write("Plannings précédents")
+        st.write("Plannings prÃ©cÃ©dents")
         st.button("Charger")
         
         assert mock_write.called
@@ -338,12 +338,12 @@ class TestPlanificateurHistorique:
     
     @patch('streamlit.radio')
     def test_evaluer_recette_feedback(self, mock_radio):
-        """Tester l'évaluation d'une recette."""
-        mock_radio.return_value = "👍 J'ai aimé"
+        """Tester l'Ã©valuation d'une recette."""
+        mock_radio.return_value = "ðŸ‘ J'ai aimÃ©"
         
-        feedback = st.radio("Avis", ["👍 J'ai aimé", "👎 J'ai pas aimé", "😐 Moyen"])
+        feedback = st.radio("Avis", ["ðŸ‘ J'ai aimÃ©", "ðŸ‘Ž J'ai pas aimÃ©", "ðŸ˜ Moyen"])
         
-        assert feedback == "👍 J'ai aimé"
+        assert feedback == "ðŸ‘ J'ai aimÃ©"
 
 
 class TestPlanificateurEdgeCases:
@@ -354,16 +354,16 @@ class TestPlanificateurEdgeCases:
         """Tester l'erreur quand aucune recette disponible."""
         mock_error.return_value = None
         
-        st.error("❌ Aucune recette disponible pour vos critères")
+        st.error("âŒ Aucune recette disponible pour vos critÃ¨res")
         
         assert mock_error.called
     
     @patch('streamlit.warning')
     def test_avertir_semaine_trop_similaire(self, mock_warn):
-        """Tester l'avertissement pour trop de similarité."""
+        """Tester l'avertissement pour trop de similaritÃ©."""
         mock_warn.return_value = None
         
-        st.warning("⚠️ Votre semaine a plusieurs repas similaires")
+        st.warning("âš ï¸ Votre semaine a plusieurs repas similaires")
         
         assert mock_warn.called
 
@@ -384,33 +384,33 @@ class TestPlanificateurPerformance:
     
     @patch('streamlit.write')
     def test_afficher_loading_state(self, mock_write):
-        """Tester l'affichage d'un état de chargement."""
+        """Tester l'affichage d'un Ã©tat de chargement."""
         mock_write.return_value = None
         
-        st.write("⏳ Chargement...")
+        st.write("â³ Chargement...")
         
         assert mock_write.called
 
 
-# Tests d'intégration
+# Tests d'intÃ©gration
 class TestPlanificateurIntegration:
-    """Tests d'intégration pour workflows complets."""
+    """Tests d'intÃ©gration pour workflows complets."""
     
     @patch('streamlit.title')
     @patch('streamlit.date_input')
     @patch('streamlit.tabs')
     @patch('streamlit.button')
     def test_workflow_creation_planning_complet(self, mock_btn, mock_tabs, mock_date, mock_title):
-        """Test le workflow complet de création d'un planning."""
+        """Test le workflow complet de crÃ©ation d'un planning."""
         mock_title.return_value = None
         mock_date.return_value = date(2026, 2, 3)
         mock_tabs.return_value = [MagicMock(), MagicMock()]
         mock_btn.return_value = False
         
         st.title("Planning")
-        st.date_input("Début")
+        st.date_input("DÃ©but")
         tabs = st.tabs(["Vue", "Suggestions"])
-        st.button("Créer")
+        st.button("CrÃ©er")
         
         assert mock_title.called
         assert mock_date.called
@@ -420,10 +420,10 @@ class TestPlanificateurIntegration:
 
 # Test d'import du module
 def test_import_planificateur_repas_ui():
-    """Test que le module peut être importé."""
+    """Test que le module peut Ãªtre importÃ©."""
     try:
-        import src.domains.cuisine.ui.planificateur_repas
+        import src.modules.cuisine.ui.planificateur_repas
         assert True
     except ImportError as e:
-        # Acceptable si le module a des dépendances manquantes
+        # Acceptable si le module a des dÃ©pendances manquantes
         pytest.skip(f"Module import failed: {e}")

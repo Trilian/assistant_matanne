@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour batch_cooking.py
 
 Module: src.core.models.batch_cooking

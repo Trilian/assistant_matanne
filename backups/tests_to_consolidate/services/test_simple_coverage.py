@@ -1,4 +1,4 @@
-"""
+﻿"""
 PHASE 13D: Simple Coverage Boosters
 Minimal tests to increase service coverage
 Focus: Import + Factory functions + Basic queries
@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 
 class TestServiceImports:
-    """Test que tous les services peuvent être importés"""
+    """Test que tous les services peuvent Ãªtre importÃ©s"""
 
     def test_import_recette_service(self):
         """Test import recette service"""
@@ -102,34 +102,34 @@ class TestModelImports:
 
 
 class TestDatabaseOperations:
-    """Test operaciones básicas en base de datos"""
+    """Test operaciones bÃ¡sicas en base de datos"""
 
     def test_query_recettes_empty(self, db: Session):
-        """Test que se puede consultar recetas (vacío)"""
+        """Test que se puede consultar recetas (vacÃ­o)"""
         from src.core.models.recettes import Recette
         recipes = db.query(Recette).all()
         assert isinstance(recipes, list)
 
     def test_query_plannings_empty(self, db: Session):
-        """Test que se puede consultar plannings (vacío)"""
+        """Test que se puede consultar plannings (vacÃ­o)"""
         from src.core.models.planning import Planning
         plannings = db.query(Planning).all()
         assert isinstance(plannings, list)
 
     def test_query_articles_courses_empty(self, db: Session):
-        """Test que se puede consultar artículos de compras (vacío)"""
+        """Test que se puede consultar artÃ­culos de compras (vacÃ­o)"""
         from src.core.models.courses import ArticleCourses
         articles = db.query(ArticleCourses).all()
         assert isinstance(articles, list)
 
     def test_query_articles_inventaire_empty(self, db: Session):
-        """Test que se puede consultar artículos inventario (vacío)"""
+        """Test que se puede consultar artÃ­culos inventario (vacÃ­o)"""
         from src.core.models.inventaire import ArticleInventaire
         articles = db.query(ArticleInventaire).all()
         assert isinstance(articles, list)
 
     def test_query_expenses_empty(self, db: Session):
-        """Test que se puede consultar gastos (vacío)"""
+        """Test que se puede consultar gastos (vacÃ­o)"""
         from src.core.models.maison_extended import HouseExpense
         expenses = db.query(HouseExpense).all()
         assert isinstance(expenses, list)
@@ -204,7 +204,7 @@ class TestEnumValues:
     """Test enum values for services"""
 
     def test_categoria_depense_enum_values(self):
-        """Test CategorieDepense tiene valores válidos"""
+        """Test CategorieDepense tiene valores vÃ¡lidos"""
         from src.services.budget import CategorieDepense
         values = list(CategorieDepense)
         assert len(values) > 0

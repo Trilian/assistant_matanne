@@ -1,4 +1,4 @@
-"""Tests pour inventaire."""
+﻿"""Tests pour inventaire."""
 
 import pytest
 from unittest.mock import patch

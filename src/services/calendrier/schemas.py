@@ -1,4 +1,4 @@
-"""
+﻿"""
 Schémas Pydantic pour la synchronisation des calendriers.
 
 Types et modèles de données pour l'import/export de calendriers.

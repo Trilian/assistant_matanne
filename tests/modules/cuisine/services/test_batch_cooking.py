@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for batch_cooking service in cuisine domain.
 Tests meal preparation planning and batch cooking features.
 """
@@ -31,7 +31,7 @@ class TestBatchCookingDisplay:
         mock_subheader.return_value = None
         mock_expander.return_value = MagicMock()
         
-        st.subheader("Semaines à préparer")
+        st.subheader("Semaines Ã  préparer")
         exp = st.expander("Semaine 1")
         
         assert mock_subheader.called
@@ -55,7 +55,7 @@ class TestBatchCookingPlanning:
         """Test selecting recipes for batch cooking."""
         mock_multiselect.return_value = ["Ratatouille", "Poulet rôti"]
         
-        recettes = st.multiselect("Recettes à préparer",
+        recettes = st.multiselect("Recettes Ã  préparer",
                                   ["Ratatouille", "Poulet rôti", "Pâtes"])
         
         assert len(recettes) > 0
@@ -89,7 +89,7 @@ class TestBatchCookingEstimation:
         """Test estimating total cost."""
         mock_metric.return_value = None
         
-        st.metric("Coût total", "45€", "+5€")
+        st.metric("Coût total", "45â‚¬", "+5â‚¬")
         
         assert mock_metric.called
     
@@ -145,7 +145,7 @@ class TestBatchCookingSteps:
         mock_expander.return_value = MagicMock()
         mock_write.return_value = None
         
-        with st.expander("Étape 1"):
+        with st.expander("Ã‰tape 1"):
             st.write("Préparer les légumes")
         
         assert mock_expander.called

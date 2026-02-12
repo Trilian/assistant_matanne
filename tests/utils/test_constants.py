@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/utils/constants.py
 """
 import pytest

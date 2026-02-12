@@ -1,4 +1,4 @@
-"""
+﻿"""
 Composants UI pour les notifications push.
 
 Widgets Streamlit pour demander les permissions et configurer les préférences.
@@ -26,7 +26,7 @@ def afficher_demande_permission_push():
         display: none;
     ">
         <div style="display: flex; align-items: center; gap: 12px;">
-            <span style="font-size: 24px;">🔔</span>
+            <span style="font-size: 24px;">ðŸ””</span>
             <div style="flex: 1;">
                 <div style="font-weight: 600;">Activer les notifications</div>
                 <div style="font-size: 13px; opacity: 0.9;">
@@ -85,7 +85,7 @@ def afficher_demande_permission_push():
                 
                 // Envoyer l'abonnement au serveur
                 console.log('Push subscription:', JSON.stringify(subscription));
-                // TODO: Envoyer à l'API
+                // TODO: Envoyer Ã  l'API
             }}
         }}
         
@@ -131,7 +131,7 @@ def afficher_preferences_notification():
     
     prefs = push_service.obtenir_preferences(user_id)
     
-    st.markdown("### 🔔 Préférences de notifications")
+    st.markdown("### ðŸ”” Préférences de notifications")
     
     with st.form("notification_prefs"):
         st.markdown("**Catégories de notifications:**")
@@ -145,10 +145,10 @@ def afficher_preferences_notification():
         
         with col2:
             rappels_activites = st.checkbox("Rappels d'activités", value=prefs.rappels_activites)
-            mises_a_jour_courses = st.checkbox("Mises à jour courses", value=prefs.mises_a_jour_courses)
+            mises_a_jour_courses = st.checkbox("Mises Ã  jour courses", value=prefs.mises_a_jour_courses)
             rappels_famille = st.checkbox("Rappels famille", value=prefs.rappels_famille)
         
-        mises_a_jour_systeme = st.checkbox("Mises à jour système", value=prefs.mises_a_jour_systeme)
+        mises_a_jour_systeme = st.checkbox("Mises Ã  jour système", value=prefs.mises_a_jour_systeme)
         
         st.markdown("---")
         st.markdown("**Heures de silence:**")
@@ -189,7 +189,7 @@ def afficher_preferences_notification():
                 max_par_heure=max_par_heure,
             )
             push_service.mettre_a_jour_preferences(user_id, new_prefs)
-            st.success("✅ Préférences enregistrées!")
+            st.success("âœ… Préférences enregistrées!")
 
 
 # Alias rétrocompatibilité

@@ -16,11 +16,11 @@ Refonte complète du module Famille avec navigation par cartes et intégration G
 | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
 | `src/core/models/users.py`                 | Modèles UserProfile, GarminToken, GarminActivity, GarminDailySummary, FoodLog, WeekendActivity, FamilyPurchase |
 | `src/services/garmin_sync.py`              | Service OAuth 1.0a Garmin Connect (sync activités + sommeil + stress)                                          |
-| `src/domains/famille/ui/hub_famille.py`    | Hub avec cartes cliquables (Jules, Weekend, Anne, Mathieu, Achats)                                             |
-| `src/domains/famille/ui/jules.py`          | Module Jules: activités adaptées âge, shopping, conseils IA                                                    |
-| `src/domains/famille/ui/suivi_perso.py`    | Suivi perso: switch Anne/Mathieu, Garmin, alimentation                                                         |
-| `src/domains/famille/ui/weekend.py`        | Planning weekend + suggestions IA                                                                              |
-| `src/domains/famille/ui/achats_famille.py` | Wishlist famille par catégorie                                                                                 |
+| `src/modules/famille/ui/hub_famille.py`    | Hub avec cartes cliquables (Jules, Weekend, Anne, Mathieu, Achats)                                             |
+| `src/modules/famille/ui/jules.py`          | Module Jules: activités adaptées âge, shopping, conseils IA                                                    |
+| `src/modules/famille/ui/suivi_perso.py`    | Suivi perso: switch Anne/Mathieu, Garmin, alimentation                                                         |
+| `src/modules/famille/ui/weekend.py`        | Planning weekend + suggestions IA                                                                              |
+| `src/modules/famille/ui/achats_famille.py` | Wishlist famille par catégorie                                                                                 |
 | `sql/015_famille_refonte.sql`              | ✅ Migration SQL déployée sur Supabase                                                                         |
 
 #### Nouvelles tables SQL

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/utils/media.py
 Tests des classes ImageConfig, ImageCache, ImageOptimizer
 """

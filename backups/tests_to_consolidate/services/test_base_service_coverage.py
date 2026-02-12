@@ -1,6 +1,6 @@
-"""
+﻿"""
 Tests complets pour src/services/base_service.py
-Approche simplifiée sans dépendance DB
+Approche simplifiÃ©e sans dÃ©pendance DB
 """
 
 import pytest
@@ -8,9 +8,9 @@ from unittest.mock import Mock, MagicMock, patch
 from datetime import datetime
 
 
-# ═══════════════════════════════════════════════════════════
-# FIXTURES ET MODÈLES FACTICES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# FIXTURES ET MODÃˆLES FACTICES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class FakeColumn:
@@ -25,7 +25,7 @@ class FakeTable:
 
 
 class SimpleFakeModel:
-    """Modèle simple pour tests basiques."""
+    """ModÃ¨le simple pour tests basiques."""
     __name__ = "SimpleFakeModel"
     __table__ = FakeTable()
     id = None
@@ -40,7 +40,7 @@ class SimpleFakeModel:
 
 @pytest.fixture
 def mock_session():
-    """Session DB mockée."""
+    """Session DB mockÃ©e."""
     session = Mock()
     query = Mock()
     session.query.return_value = query
@@ -64,9 +64,9 @@ def base_service():
     return BaseService(SimpleFakeModel, cache_ttl=60)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS INITIALISATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -74,7 +74,7 @@ class TestBaseServiceInitialization:
     """Tests d'initialisation."""
 
     def test_init_model(self):
-        """Test initialisation avec modèle."""
+        """Test initialisation avec modÃ¨le."""
         from src.services.base_service import BaseService
         
         service = BaseService(SimpleFakeModel)
@@ -83,7 +83,7 @@ class TestBaseServiceInitialization:
         assert service.model_name == "SimpleFakeModel"
 
     def test_init_cache_ttl_custom(self):
-        """Test TTL cache personnalisé."""
+        """Test TTL cache personnalisÃ©."""
         from src.services.base_service import BaseService
         
         service = BaseService(SimpleFakeModel, cache_ttl=300)
@@ -91,7 +91,7 @@ class TestBaseServiceInitialization:
         assert service.cache_ttl == 300
 
     def test_init_cache_ttl_default(self):
-        """Test TTL cache par défaut = 60."""
+        """Test TTL cache par dÃ©faut = 60."""
         from src.services.base_service import BaseService
         
         service = BaseService(SimpleFakeModel)
@@ -99,9 +99,9 @@ class TestBaseServiceInitialization:
         assert service.cache_ttl == 60
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS MÉTHODES CRUD (vérification existence)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS MÃ‰THODES CRUD (vÃ©rification existence)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -109,54 +109,54 @@ class TestBaseServiceCRUDInterface:
     """Tests interface CRUD."""
 
     def test_create_method_exists(self, base_service):
-        """Vérifie que create existe."""
+        """VÃ©rifie que create existe."""
         assert hasattr(base_service, 'create')
         assert callable(base_service.create)
 
     def test_get_by_id_method_exists(self, base_service):
-        """Vérifie que get_by_id existe."""
+        """VÃ©rifie que get_by_id existe."""
         assert hasattr(base_service, 'get_by_id')
         assert callable(base_service.get_by_id)
 
     def test_get_all_method_exists(self, base_service):
-        """Vérifie que get_all existe."""
+        """VÃ©rifie que get_all existe."""
         assert hasattr(base_service, 'get_all')
         assert callable(base_service.get_all)
 
     def test_update_method_exists(self, base_service):
-        """Vérifie que update existe."""
+        """VÃ©rifie que update existe."""
         assert hasattr(base_service, 'update')
         assert callable(base_service.update)
 
     def test_delete_method_exists(self, base_service):
-        """Vérifie que delete existe."""
+        """VÃ©rifie que delete existe."""
         assert hasattr(base_service, 'delete')
         assert callable(base_service.delete)
 
     def test_count_method_exists(self, base_service):
-        """Vérifie que count existe."""
+        """VÃ©rifie que count existe."""
         assert hasattr(base_service, 'count')
         assert callable(base_service.count)
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS RECHERCHE AVANCÉE (interface)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS RECHERCHE AVANCÃ‰E (interface)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestBaseServiceAdvancedSearchInterface:
-    """Tests interface recherche avancée."""
+    """Tests interface recherche avancÃ©e."""
 
     def test_advanced_search_method_exists(self, base_service):
-        """Vérifie que advanced_search existe."""
+        """VÃ©rifie que advanced_search existe."""
         assert hasattr(base_service, 'advanced_search')
         assert callable(base_service.advanced_search)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS BULK OPERATIONS (interface)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -164,14 +164,14 @@ class TestBaseServiceBulkInterface:
     """Tests interface bulk operations."""
 
     def test_bulk_create_with_merge_method_exists(self, base_service):
-        """Vérifie que bulk_create_with_merge existe."""
+        """VÃ©rifie que bulk_create_with_merge existe."""
         assert hasattr(base_service, 'bulk_create_with_merge')
         assert callable(base_service.bulk_create_with_merge)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS STATISTIQUES (interface)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -179,19 +179,19 @@ class TestBaseServiceStatsInterface:
     """Tests interface statistiques."""
 
     def test_get_stats_method_exists(self, base_service):
-        """Vérifie que get_stats existe."""
+        """VÃ©rifie que get_stats existe."""
         assert hasattr(base_service, 'get_stats')
         assert callable(base_service.get_stats)
 
     def test_count_by_status_method_exists(self, base_service):
-        """Vérifie que count_by_status existe."""
+        """VÃ©rifie que count_by_status existe."""
         assert hasattr(base_service, 'count_by_status')
         assert callable(base_service.count_by_status)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MIXINS (interface)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -199,14 +199,14 @@ class TestBaseServiceMixinsInterface:
     """Tests interface mixins."""
 
     def test_mark_as_method_exists(self, base_service):
-        """Vérifie que mark_as existe."""
+        """VÃ©rifie que mark_as existe."""
         assert hasattr(base_service, 'mark_as')
         assert callable(base_service.mark_as)
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS _apply_filters (helper privé testable directement)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS _apply_filters (helper privÃ© testable directement)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -222,11 +222,11 @@ class TestApplyFilters:
         assert result == mock_query
 
     def test_apply_filters_simple_equality(self, base_service):
-        """Test filtre égalité simple."""
+        """Test filtre Ã©galitÃ© simple."""
         mock_query = Mock()
         mock_query.filter.return_value = mock_query
         
-        # Mock l'attribut du modèle
+        # Mock l'attribut du modÃ¨le
         SimpleFakeModel.statut = Mock()
         
         result = base_service._apply_filters(mock_query, {"statut": "actif"})
@@ -234,7 +234,7 @@ class TestApplyFilters:
         mock_query.filter.assert_called()
 
     def test_apply_filters_unknown_field_ignored(self, base_service):
-        """Test filtre sur champ inexistant ignoré."""
+        """Test filtre sur champ inexistant ignorÃ©."""
         mock_query = Mock()
         
         # Supprimer l'attribut inexistant
@@ -243,11 +243,11 @@ class TestApplyFilters:
         
         result = base_service._apply_filters(mock_query, {"champ_inexistant": "valeur"})
         
-        # Query non modifiée (filter pas appelé)
+        # Query non modifiÃ©e (filter pas appelÃ©)
         assert result == mock_query
 
     def test_apply_filters_gte_operator(self, base_service):
-        """Test opérateur gte (>=)."""
+        """Test opÃ©rateur gte (>=)."""
         mock_query = Mock()
         mock_query.filter.return_value = mock_query
         
@@ -259,7 +259,7 @@ class TestApplyFilters:
         mock_query.filter.assert_called()
 
     def test_apply_filters_lte_operator(self, base_service):
-        """Test opérateur lte (<=)."""
+        """Test opÃ©rateur lte (<=)."""
         mock_query = Mock()
         mock_query.filter.return_value = mock_query
         
@@ -271,7 +271,7 @@ class TestApplyFilters:
         mock_query.filter.assert_called()
 
     def test_apply_filters_in_operator(self, base_service):
-        """Test opérateur in."""
+        """Test opÃ©rateur in."""
         mock_query = Mock()
         mock_query.filter.return_value = mock_query
         
@@ -286,7 +286,7 @@ class TestApplyFilters:
         mock_query.filter.assert_called()
 
     def test_apply_filters_like_operator(self, base_service):
-        """Test opérateur like."""
+        """Test opÃ©rateur like."""
         mock_query = Mock()
         mock_query.filter.return_value = mock_query
         
@@ -301,9 +301,9 @@ class TestApplyFilters:
         mock_query.filter.assert_called()
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS _model_to_dict (helper privé testable directement)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS _model_to_dict (helper privÃ© testable directement)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -311,7 +311,7 @@ class TestModelToDict:
     """Tests pour _model_to_dict()."""
 
     def test_model_to_dict_basic(self):
-        """Test conversion modèle en dict."""
+        """Test conversion modÃ¨le en dict."""
         from src.services.base_service import BaseService
         
         class MockColumn:
@@ -392,9 +392,9 @@ class TestModelToDict:
         assert result["nom"] is None
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS _with_session (helper privé testable directement)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS _with_session (helper privÃ© testable directement)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -413,7 +413,7 @@ class TestWithSession:
 
     @patch('src.services.base_service.obtenir_contexte_db')
     def test_with_session_creates_session_if_none(self, mock_ctx, base_service):
-        """Test création session si non fournie."""
+        """Test crÃ©ation session si non fournie."""
         mock_session = Mock()
         mock_ctx.return_value.__enter__ = Mock(return_value=mock_session)
         mock_ctx.return_value.__exit__ = Mock(return_value=False)
@@ -425,9 +425,9 @@ class TestWithSession:
         test_func.assert_called_once_with(mock_session)
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS _invalider_cache (helper privé testable directement)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS _invalider_cache (helper privÃ© testable directement)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -436,23 +436,23 @@ class TestInvaliderCache:
 
     @patch('src.services.base_service.Cache')
     def test_invalider_cache_calls_invalider(self, mock_cache, base_service):
-        """Test appel à Cache.invalider."""
+        """Test appel Ã  Cache.invalider."""
         base_service._invalider_cache()
         
         mock_cache.invalider.assert_called()
 
     @patch('src.services.base_service.Cache')
     def test_invalider_cache_uses_model_name(self, mock_cache, base_service):
-        """Test utilisation du nom de modèle."""
+        """Test utilisation du nom de modÃ¨le."""
         base_service._invalider_cache()
         
-        # Doit utiliser le nom du modèle en minuscules
+        # Doit utiliser le nom du modÃ¨le en minuscules
         mock_cache.invalider.assert_called_with(pattern="simplefakemodel")
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MODULE EXPORTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -460,36 +460,36 @@ class TestModuleExports:
     """Tests pour les exports du module."""
 
     def test_base_service_exported(self):
-        """Test BaseService est exporté."""
+        """Test BaseService est exportÃ©."""
         from src.services.base_service import BaseService
         
         assert BaseService is not None
 
     def test_base_service_is_generic(self):
-        """Test BaseService hérite de Generic."""
+        """Test BaseService hÃ©rite de Generic."""
         from src.services.base_service import BaseService
         from typing import Generic
         
         assert hasattr(BaseService, '__orig_bases__')
 
     def test_type_var_t_exists(self):
-        """Test TypeVar T défini."""
+        """Test TypeVar T dÃ©fini."""
         from src.services.base_service import T
         
         assert T is not None
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS SIGNATURE DES MÉTHODES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS SIGNATURE DES MÃ‰THODES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestMethodSignatures:
-    """Tests des signatures de méthodes."""
+    """Tests des signatures de mÃ©thodes."""
 
     def test_advanced_search_parameters(self, base_service):
-        """Test paramètres de advanced_search."""
+        """Test paramÃ¨tres de advanced_search."""
         import inspect
         
         sig = inspect.signature(base_service.advanced_search)
@@ -503,7 +503,7 @@ class TestMethodSignatures:
         assert 'offset' in params
 
     def test_get_all_parameters(self, base_service):
-        """Test paramètres de get_all."""
+        """Test paramÃ¨tres de get_all."""
         import inspect
         
         sig = inspect.signature(base_service.get_all)
@@ -516,7 +516,7 @@ class TestMethodSignatures:
         assert 'desc_order' in params
 
     def test_bulk_create_with_merge_parameters(self, base_service):
-        """Test paramètres de bulk_create_with_merge."""
+        """Test paramÃ¨tres de bulk_create_with_merge."""
         import inspect
         
         sig = inspect.signature(base_service.bulk_create_with_merge)
@@ -527,7 +527,7 @@ class TestMethodSignatures:
         assert 'merge_strategy' in params
 
     def test_get_stats_parameters(self, base_service):
-        """Test paramètres de get_stats."""
+        """Test paramÃ¨tres de get_stats."""
         import inspect
         
         sig = inspect.signature(base_service.get_stats)
@@ -538,21 +538,21 @@ class TestMethodSignatures:
         assert 'additional_filters' in params
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS COUVERTURE SUPPLÉMENTAIRE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS COUVERTURE SUPPLÃ‰MENTAIRE
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestBaseServiceAdditionalCoverage:
-    """Tests supplémentaires pour la couverture."""
+    """Tests supplÃ©mentaires pour la couverture."""
 
     def test_model_name_is_class_name(self, base_service):
-        """Test model_name = __name__ du modèle."""
+        """Test model_name = __name__ du modÃ¨le."""
         assert base_service.model_name == SimpleFakeModel.__name__
 
     def test_apply_filters_with_multiple_filters(self, base_service):
-        """Test plusieurs filtres appliqués."""
+        """Test plusieurs filtres appliquÃ©s."""
         mock_query = Mock()
         mock_query.filter.return_value = mock_query
         
@@ -565,11 +565,11 @@ class TestBaseServiceAdditionalCoverage:
             "nom": {"like": "test"}
         })
         
-        # filter appelé
+        # filter appelÃ©
         assert mock_query.filter.call_count >= 1
 
     def test_apply_filters_gte_and_lte_combined(self, base_service):
-        """Test filtres gte et lte combinés."""
+        """Test filtres gte et lte combinÃ©s."""
         mock_query = Mock()
         mock_query.filter.return_value = mock_query
         
@@ -614,9 +614,9 @@ class TestBaseServiceAdditionalCoverage:
         assert result["c"] == 3
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS LOGGING
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -624,16 +624,16 @@ class TestBaseServiceLogging:
     """Tests du logging."""
 
     def test_logger_exists(self):
-        """Test logger défini dans le module."""
+        """Test logger dÃ©fini dans le module."""
         from src.services import base_service
         
         assert hasattr(base_service, 'logger')
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS CRUD AVEC SESSION MOCKÉE (db= passé directement)
-# Le décorateur @with_db_session utilise db= si fourni
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS CRUD AVEC SESSION MOCKÃ‰E (db= passÃ© directement)
+# Le dÃ©corateur @with_db_session utilise db= si fourni
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -642,7 +642,7 @@ class TestBaseServiceCRUDWithMockedDb:
 
     @patch('src.services.base_service.Cache')
     def test_create_success(self, mock_cache, base_service, mock_session):
-        """Test création réussie."""
+        """Test crÃ©ation rÃ©ussie."""
         # Configure mock session
         mock_session.add.return_value = None
         mock_session.commit.return_value = None
@@ -655,7 +655,7 @@ class TestBaseServiceCRUDWithMockedDb:
 
     @patch('src.services.base_service.Cache')
     def test_get_by_id_cache_hit(self, mock_cache, base_service, mock_session):
-        """Test récupération depuis le cache."""
+        """Test rÃ©cupÃ©ration depuis le cache."""
         cached = SimpleFakeModel(id=1, nom="Cached")
         mock_cache.obtenir.return_value = cached
         
@@ -665,7 +665,7 @@ class TestBaseServiceCRUDWithMockedDb:
 
     @patch('src.services.base_service.Cache')
     def test_get_by_id_cache_miss_db_hit(self, mock_cache, base_service, mock_session):
-        """Test récupération depuis DB quand pas en cache."""
+        """Test rÃ©cupÃ©ration depuis DB quand pas en cache."""
         mock_cache.obtenir.return_value = None
         
         db_entity = SimpleFakeModel(id=1, nom="FromDB")
@@ -677,7 +677,7 @@ class TestBaseServiceCRUDWithMockedDb:
 
     @patch('src.services.base_service.Cache')
     def test_get_by_id_not_found(self, mock_cache, base_service, mock_session):
-        """Test ID non trouvé retourne None."""
+        """Test ID non trouvÃ© retourne None."""
         mock_cache.obtenir.return_value = None
         mock_session.query.return_value.get.return_value = None
         
@@ -707,7 +707,7 @@ class TestBaseServiceCRUDWithMockedDb:
 
     @patch('src.services.base_service.Cache')
     def test_update_success(self, mock_cache, base_service, mock_session):
-        """Test mise à jour réussie."""
+        """Test mise Ã  jour rÃ©ussie."""
         existing = SimpleFakeModel(id=1, nom="Old")
         mock_session.query.return_value.get.return_value = existing
         
@@ -717,7 +717,7 @@ class TestBaseServiceCRUDWithMockedDb:
         mock_session.commit.assert_called()
 
     def test_update_not_found(self, base_service, mock_session):
-        """Test update entité non trouvée."""
+        """Test update entitÃ© non trouvÃ©e."""
         from src.core.errors_base import ErreurNonTrouve
         
         mock_session.query.return_value.get.return_value = None
@@ -727,7 +727,7 @@ class TestBaseServiceCRUDWithMockedDb:
 
     @patch('src.services.base_service.Cache')
     def test_delete_success(self, mock_cache, base_service, mock_session):
-        """Test suppression réussie."""
+        """Test suppression rÃ©ussie."""
         mock_session.query.return_value.filter.return_value.delete.return_value = 1
         
         result = base_service.delete(1, db=mock_session)
@@ -736,7 +736,7 @@ class TestBaseServiceCRUDWithMockedDb:
         mock_session.commit.assert_called()
 
     def test_delete_not_found(self, base_service, mock_session):
-        """Test suppression ID non trouvé."""
+        """Test suppression ID non trouvÃ©."""
         mock_session.query.return_value.filter.return_value.delete.return_value = 0
         
         result = base_service.delete(999, db=mock_session)
@@ -764,14 +764,14 @@ class TestBaseServiceCRUDWithMockedDb:
         assert result == 10
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS RECHERCHE AVANCÉE AVEC SESSION MOCKÉE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS RECHERCHE AVANCÃ‰E AVEC SESSION MOCKÃ‰E
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestAdvancedSearchWithMockedDb:
-    """Tests advanced_search avec session mockée."""
+    """Tests advanced_search avec session mockÃ©e."""
 
     def test_advanced_search_basic(self, base_service, mock_session):
         """Test recherche basique."""
@@ -803,9 +803,9 @@ class TestAdvancedSearchWithMockedDb:
         )
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS BULK ET STATS AVEC SESSION MOCKÉE (via _with_session)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS BULK ET STATS AVEC SESSION MOCKÃ‰E (via _with_session)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -814,7 +814,7 @@ class TestBulkAndStatsWithMockedDb:
 
     @patch('src.services.base_service.Cache')
     def test_bulk_create_new_items(self, mock_cache, base_service, mock_session):
-        """Test création en masse de nouveaux items."""
+        """Test crÃ©ation en masse de nouveaux items."""
         mock_session.query.return_value.filter.return_value.first.return_value = None
         
         def merge_strategy(existing, new):
@@ -825,14 +825,14 @@ class TestBulkAndStatsWithMockedDb:
             {"nom": "Item2", "code": "B"}
         ]
         
-        # Ajouter attribut code au modèle
+        # Ajouter attribut code au modÃ¨le
         SimpleFakeModel.code = Mock()
         
         result = base_service.bulk_create_with_merge(
             items, "code", merge_strategy, db=mock_session
         )
         
-        # Résultat est (created, merged)
+        # RÃ©sultat est (created, merged)
         assert isinstance(result, tuple)
 
     @patch('src.services.base_service.Cache')

@@ -1,4 +1,4 @@
-"""Tests pour backup/types.py - Pydantic models et validation."""
+﻿"""Tests pour backup/types.py - Pydantic models et validation."""
 
 import pytest
 from datetime import datetime
@@ -141,7 +141,7 @@ class TestBackupMetadata:
         assert "created_at" in data
     
     def test_copy_with_update(self):
-        """Test copie avec mise à jour."""
+        """Test copie avec mise Ã  jour."""
         metadata1 = BackupMetadata(id="original", tables_count=5)
         metadata2 = metadata1.model_copy(update={"id": "copy", "total_records": 100})
         
@@ -390,7 +390,7 @@ class TestEdgeCases:
         assert metadata.id == ""
     
     def test_zero_values(self):
-        """Test avec valeurs à zéro."""
+        """Test avec valeurs Ã  zéro."""
         config = BackupConfig(max_backups=0, auto_backup_interval_hours=0)
         assert config.max_backups == 0
         assert config.auto_backup_interval_hours == 0
@@ -427,7 +427,7 @@ class TestEdgeCases:
         paths = [
             "/path/with spaces/backup.json",
             "C:\\Windows\\backup\\file.json.gz",
-            "/données/ñoño/备份.json",
+            "/données/Ã±oÃ±o/å¤‡ä»½.json",
         ]
         
         for path in paths:

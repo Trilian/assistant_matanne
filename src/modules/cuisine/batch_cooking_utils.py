@@ -1,5 +1,5 @@
-"""
-Logique métier du module Batch Cooking - Séparée de l'UI
+﻿"""
+Logique metier du module Batch Cooking - Separee de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
 
@@ -7,56 +7,57 @@ from datetime import date, datetime, time, timedelta
 from typing import Optional, List, Dict, Any
 import logging
 
+from src.modules.shared.constantes import JOURS_SEMAINE
+
 logger = logging.getLogger(__name__)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONSTANTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
 JOURS_EMOJI = {
-    0: "🟡",  # Lundi
-    1: "🟠",  # Mardi
-    2: "🟣",  # Mercredi
-    3: "🟢",  # Jeudi
-    4: "⚫",  # Vendredi
-    5: "🔴",  # Samedi
-    6: "🟢",  # Dimanche
+    0: "ðŸŸ¡",  # Lundi
+    1: "ðŸŸ ",  # Mardi
+    2: "ðŸŸ£",  # Mercredi
+    3: "ðŸŸ¢",  # Jeudi
+    4: "âš«",  # Vendredi
+    5: "ðŸ”´",  # Samedi
+    6: "ðŸŸ¢",  # Dimanche
 }
 
 ROBOTS_INFO = {
-    "cookeo": {"nom": "Cookeo", "emoji": "🍲", "peut_parallele": True, "description": "Cuiseur multi-fonction"},
-    "monsieur_cuisine": {"nom": "Monsieur Cuisine", "emoji": "🤖", "peut_parallele": True, "description": "Robot cuiseur"},
-    "airfryer": {"nom": "Airfryer", "emoji": "🍟", "peut_parallele": True, "description": "Friteuse sans huile"},
-    "multicooker": {"nom": "Multicooker", "emoji": "♨️", "peut_parallele": True, "description": "Cuiseur polyvalent"},
-    "four": {"nom": "Four", "emoji": "🔥", "peut_parallele": True, "description": "Four traditionnel"},
-    "plaques": {"nom": "Plaques", "emoji": "🍳", "peut_parallele": False, "description": "Plaques de cuisson"},
-    "robot_patissier": {"nom": "Robot Pâtissier", "emoji": "🎂", "peut_parallele": True, "description": "Pour pâtisserie"},
-    "mixeur": {"nom": "Mixeur", "emoji": "🥤", "peut_parallele": False, "description": "Mixeur/blender"},
-    "hachoir": {"nom": "Hachoir", "emoji": "🔪", "peut_parallele": False, "description": "Hachoir électrique"},
+    "cookeo": {"nom": "Cookeo", "emoji": "ðŸ²", "peut_parallele": True, "description": "Cuiseur multi-fonction"},
+    "monsieur_cuisine": {"nom": "Monsieur Cuisine", "emoji": "ðŸ¤–", "peut_parallele": True, "description": "Robot cuiseur"},
+    "airfryer": {"nom": "Airfryer", "emoji": "ðŸŸ", "peut_parallele": True, "description": "Friteuse sans huile"},
+    "multicooker": {"nom": "Multicooker", "emoji": "â™¨ï¸", "peut_parallele": True, "description": "Cuiseur polyvalent"},
+    "four": {"nom": "Four", "emoji": "ðŸ”¥", "peut_parallele": True, "description": "Four traditionnel"},
+    "plaques": {"nom": "Plaques", "emoji": "ðŸ³", "peut_parallele": False, "description": "Plaques de cuisson"},
+    "robot_patissier": {"nom": "Robot Pâtissier", "emoji": "ðŸŽ‚", "peut_parallele": True, "description": "Pour pâtisserie"},
+    "mixeur": {"nom": "Mixeur", "emoji": "ðŸ¥¤", "peut_parallele": False, "description": "Mixeur/blender"},
+    "hachoir": {"nom": "Hachoir", "emoji": "ðŸ”ª", "peut_parallele": False, "description": "Hachoir electrique"},
 }
 
 LOCALISATIONS = {
-    "frigo": {"nom": "Réfrigérateur", "emoji": "🧊", "conservation_max_jours": 5},
-    "congelateur": {"nom": "Congélateur", "emoji": "❄️", "conservation_max_jours": 90},
-    "temperature_ambiante": {"nom": "Température ambiante", "emoji": "🏠", "conservation_max_jours": 2},
+    "frigo": {"nom": "Refrigerateur", "emoji": "ðŸ§Š", "conservation_max_jours": 5},
+    "congelateur": {"nom": "Congelateur", "emoji": "â„ï¸", "conservation_max_jours": 90},
+    "temperature_ambiante": {"nom": "Temperature ambiante", "emoji": "ðŸ ", "conservation_max_jours": 2},
 }
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FONCTIONS DE CALCUL DE TEMPS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def calculer_duree_totale_optimisee(etapes: List[Dict[str, Any]]) -> int:
     """
-    Calcule la durée totale optimisée en tenant compte de la parallélisation.
+    Calcule la duree totale optimisee en tenant compte de la parallelisation.
     
     Args:
-        etapes: Liste des étapes avec leurs groupes parallèles et durées
+        etapes: Liste des etapes avec leurs groupes parallèles et durees
         
     Returns:
-        Durée totale estimée en minutes
+        Duree totale estimee en minutes
     """
     if not etapes:
         return 0
@@ -69,7 +70,7 @@ def calculer_duree_totale_optimisee(etapes: List[Dict[str, Any]]) -> int:
             groupes[groupe] = []
         groupes[groupe].append(etape)
     
-    # Pour chaque groupe, prendre la durée max (car parallèle)
+    # Pour chaque groupe, prendre la duree max (car parallèle)
     duree_totale = 0
     for groupe_id in sorted(groupes.keys()):
         etapes_groupe = groupes[groupe_id]
@@ -81,14 +82,14 @@ def calculer_duree_totale_optimisee(etapes: List[Dict[str, Any]]) -> int:
 
 def estimer_heure_fin(heure_debut: time, duree_minutes: int) -> time:
     """
-    Estime l'heure de fin à partir de l'heure de début et de la durée.
+    Estime l'heure de fin Ã  partir de l'heure de debut et de la duree.
     
     Args:
-        heure_debut: Heure de début
-        duree_minutes: Durée en minutes
+        heure_debut: Heure de debut
+        duree_minutes: Duree en minutes
         
     Returns:
-        Heure de fin estimée
+        Heure de fin estimee
     """
     debut_dt = datetime.combine(date.today(), heure_debut)
     fin_dt = debut_dt + timedelta(minutes=duree_minutes)
@@ -97,13 +98,13 @@ def estimer_heure_fin(heure_debut: time, duree_minutes: int) -> time:
 
 def formater_duree(minutes: int) -> str:
     """
-    Formate une durée en minutes en texte lisible.
+    Formate une duree en minutes en texte lisible.
     
     Args:
-        minutes: Durée en minutes
+        minutes: Duree en minutes
         
     Returns:
-        Texte formaté (ex: "2h30" ou "45 min")
+        Texte formate (ex: "2h30" ou "45 min")
     """
     if minutes < 60:
         return f"{minutes} min"
@@ -114,9 +115,9 @@ def formater_duree(minutes: int) -> str:
     return f"{heures}h{mins_restantes:02d}"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FONCTIONS DE VALIDATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def valider_session_batch(
     date_session: date,
@@ -124,7 +125,7 @@ def valider_session_batch(
     robots: List[str],
 ) -> Dict[str, Any]:
     """
-    Valide les données d'une session batch cooking.
+    Valide les donnees d'une session batch cooking.
     
     Args:
         date_session: Date de la session
@@ -136,17 +137,17 @@ def valider_session_batch(
     """
     erreurs = []
     
-    # Vérifier la date
+    # Verifier la date
     if date_session < date.today():
         erreurs.append("La date de session ne peut pas être dans le passé")
     
-    # Vérifier les recettes
+    # Verifier les recettes
     if not recettes_ids:
         erreurs.append("Au moins une recette doit être sélectionnée")
     elif len(recettes_ids) > 10:
         erreurs.append("Maximum 10 recettes par session")
     
-    # Vérifier les robots
+    # Verifier les robots
     robots_valides = set(ROBOTS_INFO.keys())
     robots_inconnus = set(robots) - robots_valides
     if robots_inconnus:
@@ -165,12 +166,12 @@ def valider_preparation(
     localisation: str,
 ) -> Dict[str, Any]:
     """
-    Valide les données d'une préparation.
+    Valide les donnees d'une preparation.
     
     Args:
-        nom: Nom de la préparation
+        nom: Nom de la preparation
         portions: Nombre de portions
-        conservation_jours: Durée de conservation
+        conservation_jours: Duree de conservation
         localisation: Lieu de stockage
         
     Returns:
@@ -197,36 +198,36 @@ def valider_preparation(
     }
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FONCTIONS D'OPTIMISATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def optimiser_ordre_etapes(etapes: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
-    Optimise l'ordre des étapes pour minimiser le temps total.
+    Optimise l'ordre des etapes pour minimiser le temps total.
     
-    Stratégie:
-    1. Démarrer par les cuissons longues (supervision)
-    2. Paralléliser les tâches manuelles pendant les supervisions
+    Strategie:
+    1. Demarrer par les cuissons longues (supervision)
+    2. Paralleliser les tâches manuelles pendant les supervisions
     3. Regrouper les utilisations d'un même robot
     
     Args:
-        etapes: Liste des étapes non ordonnées
+        etapes: Liste des etapes non ordonnees
         
     Returns:
-        Liste des étapes réordonnées avec groupes parallèles assignés
+        Liste des etapes reordonnees avec groupes parallèles assignes
     """
     if not etapes:
         return []
     
-    # Séparer supervision vs actif
+    # Separer supervision vs actif
     etapes_supervision = [e for e in etapes if e.get("est_supervision", False)]
     etapes_actives = [e for e in etapes if not e.get("est_supervision", False)]
     
-    # Trier supervisions par durée décroissante (lancer les plus longues d'abord)
+    # Trier supervisions par duree decroissante (lancer les plus longues d'abord)
     etapes_supervision.sort(key=lambda e: e.get("duree_minutes", 0), reverse=True)
     
-    # Trier actives par robot puis par durée
+    # Trier actives par robot puis par duree
     etapes_actives.sort(key=lambda e: (
         ",".join(e.get("robots", [])),
         e.get("duree_minutes", 0)
@@ -251,11 +252,11 @@ def optimiser_ordre_etapes(etapes: List[Dict[str, Any]]) -> List[Dict[str, Any]]
             etape = etapes_actives[i]
             duree = etape.get("duree_minutes", 0)
             
-            # Vérifier qu'on peut faire cette tâche en parallèle
+            # Verifier qu'on peut faire cette tâche en parallèle
             robots_etape = set(etape.get("robots", []))
             robots_supervision = set(supervision.get("robots", []))
             
-            # Si pas de conflit de robot, on peut paralléliser
+            # Si pas de conflit de robot, on peut paralleliser
             if not robots_etape.intersection(robots_supervision):
                 if temps_utilise + duree <= temps_dispo:
                     etape["groupe_parallele"] = groupe_actuel
@@ -268,7 +269,7 @@ def optimiser_ordre_etapes(etapes: List[Dict[str, Any]]) -> List[Dict[str, Any]]
         
         groupe_actuel += 1
     
-    # Ajouter les étapes actives restantes
+    # Ajouter les etapes actives restantes
     for etape in etapes_actives:
         etape["groupe_parallele"] = groupe_actuel
         etape["ordre"] = len(resultat) + 1
@@ -280,13 +281,13 @@ def optimiser_ordre_etapes(etapes: List[Dict[str, Any]]) -> List[Dict[str, Any]]
 
 def detecter_conflits_robots(etapes: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
-    Détecte les conflits d'utilisation de robots dans les étapes parallèles.
+    Detecte les conflits d'utilisation de robots dans les etapes parallèles.
     
     Args:
-        etapes: Liste des étapes avec groupes parallèles
+        etapes: Liste des etapes avec groupes parallèles
         
     Returns:
-        Liste des conflits détectés
+        Liste des conflits detectes
     """
     conflits = []
     
@@ -298,7 +299,7 @@ def detecter_conflits_robots(etapes: List[Dict[str, Any]]) -> List[Dict[str, Any
             groupes[groupe] = []
         groupes[groupe].append(etape)
     
-    # Vérifier chaque groupe
+    # Verifier chaque groupe
     for groupe_id, etapes_groupe in groupes.items():
         if len(etapes_groupe) < 2:
             continue
@@ -311,32 +312,32 @@ def detecter_conflits_robots(etapes: List[Dict[str, Any]]) -> List[Dict[str, Any
                     robots_utilises[robot] = []
                 robots_utilises[robot].append(etape.get("titre", "?"))
         
-        # Détecter les doublons
+        # Detecter les doublons
         for robot, etapes_robot in robots_utilises.items():
             if len(etapes_robot) > 1:
-                # Vérifier si le robot peut être parallélisé
+                # Verifier si le robot peut être parallelise
                 robot_info = ROBOTS_INFO.get(robot, {})
                 if not robot_info.get("peut_parallele", True):
                     conflits.append({
                         "groupe": groupe_id,
                         "robot": robot,
                         "etapes": etapes_robot,
-                        "message": f"Le {robot_info.get('nom', robot)} ne peut pas être utilisé en parallèle",
+                        "message": f"Le {robot_info.get('nom', robot)} ne peut pas être utilise en parallèle",
                     })
     
     return conflits
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FONCTIONS POUR MODE JULES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def filtrer_etapes_bruyantes(etapes: List[Dict[str, Any]]) -> Dict[str, List[Dict]]:
     """
-    Sépare les étapes bruyantes des étapes calmes.
+    Separe les etapes bruyantes des etapes calmes.
     
     Args:
-        etapes: Liste des étapes
+        etapes: Liste des etapes
         
     Returns:
         Dict avec "bruyantes" et "calmes"
@@ -357,18 +358,18 @@ def identifier_moments_jules(etapes: List[Dict[str, Any]]) -> List[Dict[str, Any
     Critères:
     - Pas de manipulation dangereuse
     - Pas trop bruyant
-    - Activité visuelle intéressante
+    - Activite visuelle interessante
     
     Args:
-        etapes: Liste des étapes
+        etapes: Liste des etapes
         
     Returns:
-        Liste des moments adaptés à Jules
+        Liste des moments adaptes Ã  Jules
     """
     moments_jules = []
     
     activites_securisees = [
-        "mélanger", "verser", "décorer", "observer", "toucher",
+        "melanger", "verser", "decorer", "observer", "toucher",
         "sentir", "goûter", "ranger", "nettoyer"
     ]
     
@@ -376,25 +377,25 @@ def identifier_moments_jules(etapes: List[Dict[str, Any]]) -> List[Dict[str, Any
         titre = etape.get("titre", "").lower()
         description = etape.get("description", "").lower()
         
-        # Vérifier si activité sécurisée
+        # Verifier si activite securisee
         est_securise = any(act in titre or act in description for act in activites_securisees)
         
-        # Vérifier si pas bruyant
+        # Verifier si pas bruyant
         est_calme = not etape.get("alerte_bruit", False)
         
-        # Vérifier si pas de température dangereuse
+        # Verifier si pas de temperature dangereuse
         temp = etape.get("temperature")
         est_froid = temp is None or temp < 50
         
         if est_securise and est_calme and est_froid:
             moments_jules.append({
                 **etape,
-                "conseil_jules": "✅ Jules peut participer en mélangeant/observant",
+                "conseil_jules": "âœ… Jules peut participer en melangeant/observant",
             })
         elif etape.get("est_supervision", False) and est_calme:
             moments_jules.append({
                 **etape,
-                "conseil_jules": "👀 Jules peut observer depuis sa chaise haute",
+                "conseil_jules": "ðŸ‘€ Jules peut observer depuis sa chaise haute",
             })
     
     return moments_jules
@@ -407,12 +408,12 @@ def generer_planning_jules(
     heure_sieste_fin: time = time(15, 0),
 ) -> Dict[str, Any]:
     """
-    Génère un planning adapté aux horaires de Jules.
+    Genère un planning adapte aux horaires de Jules.
     
     Args:
-        etapes: Liste des étapes
-        heure_debut: Heure de début de la session
-        heure_sieste_debut: Heure de début de la sieste
+        etapes: Liste des etapes
+        heure_debut: Heure de debut de la session
+        heure_sieste_debut: Heure de debut de la sieste
         heure_sieste_fin: Heure de fin de la sieste
         
     Returns:
@@ -453,23 +454,23 @@ def generer_planning_jules(
         )
         if nb_bruyantes_sieste > 0:
             planning["conseils"].append(
-                f"⚠️ {nb_bruyantes_sieste} étape(s) bruyante(s) pendant la sieste - "
-                "Réorganiser si possible"
+                f"âš ï¸ {nb_bruyantes_sieste} etape(s) bruyante(s) pendant la sieste - "
+                "Reorganiser si possible"
             )
     
     return planning
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FONCTIONS DE STATISTIQUES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def calculer_statistiques_session(session_data: Dict[str, Any]) -> Dict[str, Any]:
     """
     Calcule les statistiques d'une session batch cooking.
     
     Args:
-        session_data: Données de la session
+        session_data: Donnees de la session
         
     Returns:
         Dict de statistiques
@@ -477,13 +478,13 @@ def calculer_statistiques_session(session_data: Dict[str, Any]) -> Dict[str, Any
     etapes = session_data.get("etapes", [])
     preparations = session_data.get("preparations", [])
     
-    # Stats étapes
+    # Stats etapes
     nb_etapes = len(etapes)
     etapes_terminees = sum(1 for e in etapes if e.get("statut") == "terminee")
     duree_estimee = sum(e.get("duree_minutes", 0) for e in etapes)
     duree_optimisee = calculer_duree_totale_optimisee(etapes)
     
-    # Stats préparations
+    # Stats preparations
     nb_preparations = len(preparations)
     portions_totales = sum(p.get("portions_initiales", 0) for p in preparations)
     
@@ -511,7 +512,7 @@ def calculer_historique_batch(sessions: List[Dict[str, Any]]) -> Dict[str, Any]:
     Calcule les statistiques sur l'historique des sessions.
     
     Args:
-        sessions: Liste des sessions passées
+        sessions: Liste des sessions passees
         
     Returns:
         Dict de statistiques historiques
@@ -529,7 +530,7 @@ def calculer_historique_batch(sessions: List[Dict[str, Any]]) -> Dict[str, Any]:
     temps_total = sum(s.get("duree_reelle", 0) or s.get("duree_estimee", 0) for s in sessions)
     portions_total = sum(s.get("nb_portions_preparees", 0) for s in sessions)
     
-    # Robot le plus utilisé
+    # Robot le plus utilise
     compteur_robots: Dict[str, int] = {}
     for session in sessions:
         for robot in session.get("robots_utilises", []):

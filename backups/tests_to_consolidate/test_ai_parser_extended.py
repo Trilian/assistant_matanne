@@ -1,6 +1,6 @@
-"""
+﻿"""
 Tests pour src/core/ai/parser.py
-Cible: AnalyseurIA - parsing JSON, réparation, stratégies
+Cible: AnalyseurIA - parsing JSON, rÃ©paration, stratÃ©gies
 """
 
 import pytest
@@ -9,41 +9,41 @@ from unittest.mock import Mock, patch
 from pydantic import BaseModel
 
 
-# ═══════════════════════════════════════════════════════════
-# MODÈLES DE TEST
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# MODÃˆLES DE TEST
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class RecetteSimple(BaseModel):
-    """Modèle simple pour tests."""
+    """ModÃ¨le simple pour tests."""
     nom: str
     temps: int
 
 
 class RecetteAvecIngredients(BaseModel):
-    """Modèle avec liste pour tests."""
+    """ModÃ¨le avec liste pour tests."""
     nom: str
     ingredients: list[str]
 
 
 class RecetteOptionnelle(BaseModel):
-    """Modèle avec champs optionnels."""
+    """ModÃ¨le avec champs optionnels."""
     nom: str
     description: str | None = None
     temps: int = 30
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS STRATÉGIE 1: PARSE DIRECT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS STRATÃ‰GIE 1: PARSE DIRECT
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestAnalyseurIAParseDirecte:
-    """Tests pour la stratégie 1: parse direct."""
+    """Tests pour la stratÃ©gie 1: parse direct."""
 
     def test_parse_json_propre(self):
-        """Parse un JSON propre correctement formaté."""
+        """Parse un JSON propre correctement formatÃ©."""
         from src.core.ai.parser import AnalyseurIA
         
         reponse = '{"nom": "Tarte aux pommes", "temps": 45}'
@@ -82,26 +82,26 @@ class TestAnalyseurIAParseDirecte:
         assert "tomates" in result.ingredients
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS STRATÉGIE 2: EXTRACTION JSON
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS STRATÃ‰GIE 2: EXTRACTION JSON
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestAnalyseurIAExtractionJSON:
-    """Tests pour la stratégie 2: extraction JSON."""
+    """Tests pour la stratÃ©gie 2: extraction JSON."""
 
     def test_extraction_json_dans_texte(self):
         """Extrait le JSON d'un texte avec du contenu autour."""
         from src.core.ai.parser import AnalyseurIA
         
-        reponse = '''Voici la recette demandée:
-        {"nom": "Crêpes", "temps": 20}
-        J'espère que ça vous plaira!'''
+        reponse = '''Voici la recette demandÃ©e:
+        {"nom": "CrÃªpes", "temps": 20}
+        J'espÃ¨re que Ã§a vous plaira!'''
         
         result = AnalyseurIA.analyser(reponse, RecetteSimple)
         
-        assert result.nom == "Crêpes"
+        assert result.nom == "CrÃªpes"
         assert result.temps == 20
 
     def test_extraction_json_markdown(self):
@@ -109,40 +109,40 @@ class TestAnalyseurIAExtractionJSON:
         from src.core.ai.parser import AnalyseurIA
         
         reponse = '''```json
-{"nom": "Gâteau", "temps": 90}
+{"nom": "GÃ¢teau", "temps": 90}
 ```'''
         
         result = AnalyseurIA.analyser(reponse, RecetteSimple)
         
-        assert result.nom == "Gâteau"
+        assert result.nom == "GÃ¢teau"
         assert result.temps == 90
 
     def test_extraction_json_triple_backticks(self):
         """Extrait le JSON de triple backticks sans json."""
         from src.core.ai.parser import AnalyseurIA
         
-        reponse = '''Résultat:
+        reponse = '''RÃ©sultat:
 ```
 {"nom": "Mousse chocolat", "temps": 30}
 ```
-Bon appétit!'''
+Bon appÃ©tit!'''
         
         result = AnalyseurIA.analyser(reponse, RecetteSimple)
         
         assert result.nom == "Mousse chocolat"
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS STRATÉGIE 3: RÉPARATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS STRATÃ‰GIE 3: RÃ‰PARATION
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestAnalyseurIAReparation:
-    """Tests pour la stratégie 3: réparation JSON."""
+    """Tests pour la stratÃ©gie 3: rÃ©paration JSON."""
 
     def test_reparation_virgule_finale(self):
-        """Répare un JSON avec virgule finale."""
+        """RÃ©pare un JSON avec virgule finale."""
         from src.core.ai.parser import AnalyseurIA
         
         # JSON invalide avec virgule finale
@@ -153,20 +153,20 @@ class TestAnalyseurIAReparation:
         assert result.nom == "Soupe"
 
     def test_reparation_guillemets_simples(self):
-        """Répare un JSON avec guillemets simples ou utilise fallback."""
+        """RÃ©pare un JSON avec guillemets simples ou utilise fallback."""
         from src.core.ai.parser import AnalyseurIA
         
         reponse = "{'nom': 'Omelette', 'temps': 10}"
         fallback = {"nom": "Omelette", "temps": 10}
         
-        # Le parser peut ou non réparer les guillemets simples
+        # Le parser peut ou non rÃ©parer les guillemets simples
         # On teste avec fallback pour couvrir les deux cas
         result = AnalyseurIA.analyser(reponse, RecetteSimple, valeur_secours=fallback)
         
         assert result.nom == "Omelette"
 
     def test_reparation_cle_sans_guillemets(self):
-        """Répare un JSON avec clés sans guillemets."""
+        """RÃ©pare un JSON avec clÃ©s sans guillemets."""
         from src.core.ai.parser import AnalyseurIA
         
         reponse = '{nom: "Riz", temps: 15}'
@@ -176,29 +176,29 @@ class TestAnalyseurIAReparation:
         assert result.nom == "Riz"
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS STRATÉGIE 5: FALLBACK
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS STRATÃ‰GIE 5: FALLBACK
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestAnalyseurIAFallback:
-    """Tests pour la stratégie 5: fallback."""
+    """Tests pour la stratÃ©gie 5: fallback."""
 
     def test_fallback_utilise_valeur_secours(self):
-        """Utilise la valeur de secours si parse échoue."""
+        """Utilise la valeur de secours si parse Ã©choue."""
         from src.core.ai.parser import AnalyseurIA
         
         reponse = "Ceci n'est pas du JSON valide du tout"
-        fallback = {"nom": "Recette par défaut", "temps": 30}
+        fallback = {"nom": "Recette par dÃ©faut", "temps": 30}
         
         result = AnalyseurIA.analyser(reponse, RecetteSimple, valeur_secours=fallback)
         
-        assert result.nom == "Recette par défaut"
+        assert result.nom == "Recette par dÃ©faut"
         assert result.temps == 30
 
     def test_strict_mode_raises_error(self):
-        """En mode strict, lève une erreur si parse échoue."""
+        """En mode strict, lÃ¨ve une erreur si parse Ã©choue."""
         from src.core.ai.parser import AnalyseurIA
         
         reponse = "Pas du JSON"
@@ -209,7 +209,7 @@ class TestAnalyseurIAFallback:
         assert "Impossible" in str(exc_info.value)
 
     def test_no_fallback_no_strict_raises_error(self):
-        """Sans fallback et sans strict, lève quand même une erreur."""
+        """Sans fallback et sans strict, lÃ¨ve quand mÃªme une erreur."""
         from src.core.ai.parser import AnalyseurIA
         
         reponse = "Pas du JSON du tout !!!@@@"
@@ -218,9 +218,9 @@ class TestAnalyseurIAFallback:
             AnalyseurIA.analyser(reponse, RecetteSimple)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FONCTIONS UTILITAIRES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -240,21 +240,21 @@ class TestAnalyseurIAUtilitaires:
         """Teste l'extraction d'objet JSON."""
         from src.core.ai.parser import AnalyseurIA
         
-        texte = 'Texte avant {"key": "value"} texte après'
+        texte = 'Texte avant {"key": "value"} texte aprÃ¨s'
         result = AnalyseurIA._extraire_objet_json(texte)
         
         assert '"key"' in result
         assert '"value"' in result
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS ANALYSER_LISTE_REPONSE (FONCTION SÉPARÉE)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS ANALYSER_LISTE_REPONSE (FONCTION SÃ‰PARÃ‰E)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 class TestAnalyserListeReponse:
-    """Tests pour analyser_liste_reponse (fonction séparée)."""
+    """Tests pour analyser_liste_reponse (fonction sÃ©parÃ©e)."""
 
     def test_analyser_liste_array(self):
         """Parse une liste JSON directe."""
@@ -269,7 +269,7 @@ class TestAnalyserListeReponse:
         assert result[1].temps == 20
 
     def test_analyser_liste_avec_items_key(self):
-        """Parse une liste avec clé 'items'."""
+        """Parse une liste avec clÃ© 'items'."""
         from src.core.ai.parser import analyser_liste_reponse
         
         reponse = '{"items": [{"nom": "A", "temps": 5}, {"nom": "B", "temps": 10}]}'
@@ -289,9 +289,9 @@ class TestAnalyserListeReponse:
         assert result == []
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EDGE CASES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -299,21 +299,21 @@ class TestAnalyseurIAEdgeCases:
     """Tests pour les cas limites."""
 
     def test_reponse_vide(self):
-        """Gère une réponse vide."""
+        """GÃ¨re une rÃ©ponse vide."""
         from src.core.ai.parser import AnalyseurIA
         
         with pytest.raises(ValueError):
             AnalyseurIA.analyser("", RecetteSimple, strict=True)
 
     def test_reponse_none(self):
-        """Gère une réponse None."""
+        """GÃ¨re une rÃ©ponse None."""
         from src.core.ai.parser import AnalyseurIA
         
         with pytest.raises((ValueError, TypeError, AttributeError)):
             AnalyseurIA.analyser(None, RecetteSimple, strict=True)
 
     def test_json_nested_profond(self):
-        """Parse un JSON profondément imbriqué."""
+        """Parse un JSON profondÃ©ment imbriquÃ©."""
         from src.core.ai.parser import AnalyseurIA
         
         class ModeleProfond(BaseModel):
@@ -326,17 +326,17 @@ class TestAnalyseurIAEdgeCases:
         assert result.niveau1["niveau2"]["niveau3"] == "valeur"
 
     def test_json_caracteres_unicode(self):
-        """Parse un JSON avec caractères Unicode."""
+        """Parse un JSON avec caractÃ¨res Unicode."""
         from src.core.ai.parser import AnalyseurIA
         
-        reponse = '{"nom": "Crème brûlée", "temps": 45}'
+        reponse = '{"nom": "CrÃ¨me brÃ»lÃ©e", "temps": 45}'
         
         result = AnalyseurIA.analyser(reponse, RecetteSimple)
         
-        assert result.nom == "Crème brûlée"
+        assert result.nom == "CrÃ¨me brÃ»lÃ©e"
 
     def test_json_nombres_negatifs(self):
-        """Parse un JSON avec nombres négatifs."""
+        """Parse un JSON avec nombres nÃ©gatifs."""
         from src.core.ai.parser import AnalyseurIA
         
         class ModeleAvecNegatif(BaseModel):
@@ -349,7 +349,7 @@ class TestAnalyseurIAEdgeCases:
         assert result.valeur == -42
 
     def test_json_boolean_values(self):
-        """Parse un JSON avec valeurs booléennes."""
+        """Parse un JSON avec valeurs boolÃ©ennes."""
         from src.core.ai.parser import AnalyseurIA
         
         class ModeleAvecBool(BaseModel):

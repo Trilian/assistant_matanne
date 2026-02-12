@@ -1,10 +1,10 @@
-﻿"""
-Module Sorties Weekend - Imports et constantes partagés
+"""
+Module Sorties Weekend - Imports et constantes partages
 
 Planning et suggestions IA:
 - 📅 Planning weekend (samedi/dimanche)
-- 💡 Idées IA (selon météo + âge Jules + budget)
-- 🗺️ Lieux testés & notés
+- 💡 Idees IA (selon meteo + âge Jules + budget)
+- 🗺️ Lieux testes & notes
 - 💰 Budget sorties
 """
 
@@ -20,19 +20,19 @@ from src.core.ai import ClientIA
 
 TYPES_ACTIVITES = {
     "parc": {"emoji": "🌳", "label": "Parc / Nature"},
-    "musee": {"emoji": "🏛️", "label": "Musée / Expo"},
+    "musee": {"emoji": "🏛️", "label": "Musee / Expo"},
     "piscine": {"emoji": "🏊", "label": "Piscine / Aquatique"},
     "zoo": {"emoji": "🦁", "label": "Zoo / Ferme"},
     "restaurant": {"emoji": "🍽️", "label": "Restaurant"},
-    "cinema": {"emoji": "🎬", "label": "Cinéma"},
+    "cinema": {"emoji": "🎬", "label": "Cinema"},
     "sport": {"emoji": "⚽", "label": "Sport / Loisir"},
     "shopping": {"emoji": "🛍️", "label": "Shopping"},
     "famille": {"emoji": "👨‍👩‍👧", "label": "Visite famille"},
-    "maison": {"emoji": "🏠", "label": "Activité maison"},
+    "maison": {"emoji": "🏠", "label": "Activite maison"},
     "autre": {"emoji": "✨", "label": "Autre"},
 }
 
-METEO_OPTIONS = ["ensoleillé", "nuageux", "pluvieux", "intérieur"]
+METEO_OPTIONS = ["ensoleille", "nuageux", "pluvieux", "interieur"]
 
 
 __all__ = [

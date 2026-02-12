@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour loto_logic.py - Fonctions pures d'analyse du Loto
 """
 
@@ -7,7 +7,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 from typing import Dict, Any, List
 
-from src.domains.jeux.logic.loto_logic import (
+from src.modules.jeux.loto.utils import (
     calculer_frequences_numeros,
     calculer_ecart,
     identifier_numeros_chauds_froids,
@@ -23,9 +23,9 @@ from src.domains.jeux.logic.loto_logic import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Tests Constantes
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestConstantesLoto:
@@ -67,9 +67,9 @@ class TestConstantesLoto:
             assert gain_rang2 > gain_rang3  # 5 bons > 4+chance
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Tests Calcul Fréquences
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalculerFrequencesNumeros:
@@ -132,16 +132,16 @@ class TestCalculerFrequencesNumeros:
         assert result["frequences"][2]["pourcentage"] == 50.0
 
 
-# ═══════════════════════════════════════════════════════════
-# Tests Calcul Écart
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# Tests Calcul Ã‰cart
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalculerEcart:
     """Tests pour calculer_ecart."""
 
     def test_numero_recent(self):
-        """Écart 0 si sorti au dernier tirage."""
+        """Ã‰cart 0 si sorti au dernier tirage."""
         tirages = [
             {"numero_1": 5, "numero_2": 10, "numero_3": 15, "numero_4": 20, "numero_5": 25},
         ]
@@ -150,7 +150,7 @@ class TestCalculerEcart:
         assert ecart == 0
 
     def test_numero_ancien(self):
-        """Écart correct pour numéro pas sorti récemment."""
+        """Ã‰cart correct pour numéro pas sorti récemment."""
         tirages = [
             {"numero_1": 5, "numero_2": 10, "numero_3": 15, "numero_4": 20, "numero_5": 25},
             {"numero_1": 6, "numero_2": 11, "numero_3": 16, "numero_4": 21, "numero_5": 26},
@@ -162,7 +162,7 @@ class TestCalculerEcart:
         assert ecart == 2
 
     def test_numero_jamais_sorti(self):
-        """Écart = nb tirages si jamais sorti."""
+        """Ã‰cart = nb tirages si jamais sorti."""
         tirages = [
             {"numero_1": 1, "numero_2": 2, "numero_3": 3, "numero_4": 4, "numero_5": 5},
             {"numero_1": 6, "numero_2": 7, "numero_3": 8, "numero_4": 9, "numero_5": 10},
@@ -172,9 +172,9 @@ class TestCalculerEcart:
         assert ecart == 2
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Tests Numéros Chauds/Froids
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestIdentifierNumerosChaudsFroids:
@@ -217,8 +217,8 @@ class TestIdentifierNumerosChaudsFroids:
         result = identifier_numeros_chauds_froids(frequences, nb_top=2)
         
         # Retard: plus grand écart en premier
-        assert result["retard"][0] == 2  # Écart 15
-        assert result["retard"][1] == 1  # Écart 5
+        assert result["retard"][0] == 2  # Ã‰cart 15
+        assert result["retard"][1] == 1  # Ã‰cart 5
 
     def test_nb_top_limite(self):
         """Limite le nombre de résultats."""

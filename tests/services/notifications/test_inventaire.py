@@ -1,4 +1,4 @@
-"""Tests pour src/services/notifications/inventaire.py - ServiceNotificationsInventaire.
+﻿"""Tests pour src/services/notifications/inventaire.py - ServiceNotificationsInventaire.
 
 Couverture des fonctionnalités:
 - Création de notifications (stock critique, stock bas, péremption)
@@ -22,9 +22,9 @@ from src.services.notifications.types import (
 )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
@@ -60,9 +60,9 @@ def sample_article_critico():
     }
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS INITIALISATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -96,9 +96,9 @@ class TestServiceNotificationsInit:
         assert Notification is NotificationInventaire
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS CRÉATION NOTIFICATIONS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS CRÃ‰ATION NOTIFICATIONS
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -116,7 +116,7 @@ class TestCreerNotificationStockCritique:
         assert notif.ingredient_id == 20
         assert "Beurre" in notif.titre
         assert notif.priorite == "haute"
-        assert notif.icone == "❌"
+        assert notif.icone == "âŒ"
 
     def test_notification_contient_details(self, service, sample_article_critico):
         """Test que la notification contient les détails de quantité."""
@@ -140,7 +140,7 @@ class TestCreerNotificationStockBas:
         assert notif.article_id == 1
         assert "Lait" in notif.titre
         assert notif.priorite == "moyenne"
-        assert notif.icone == "⚠️"
+        assert notif.icone == "âš ï¸"
 
 
 @pytest.mark.unit
@@ -153,9 +153,9 @@ class TestCreerNotificationPeremption:
         
         assert notif is not None
         assert notif.type_alerte == TypeAlerte.PEREMPTION_DEPASSEE
-        assert "EXPIRÉ" in notif.titre
+        assert "EXPIRÃ‰" in notif.titre
         assert notif.priorite == "haute"
-        assert notif.icone == "🚨"
+        assert notif.icone == "ðŸš¨"
 
     def test_peremption_tres_proche(self, service, sample_article):
         """Test notification péremption très proche (<= 3 jours)."""
@@ -165,7 +165,7 @@ class TestCreerNotificationPeremption:
         assert notif.type_alerte == TypeAlerte.PEREMPTION_PROCHE
         assert "très proche" in notif.titre
         assert notif.priorite == "haute"
-        assert notif.icone == "🔴"
+        assert notif.icone == "ðŸ”´"
 
     def test_peremption_proche(self, service, sample_article):
         """Test notification péremption proche (> 3 jours)."""
@@ -175,7 +175,7 @@ class TestCreerNotificationPeremption:
         assert notif.type_alerte == TypeAlerte.PEREMPTION_PROCHE
         assert "proche" in notif.titre.lower()
         assert notif.priorite == "moyenne"
-        assert notif.icone == "🟠"
+        assert notif.icone == "ðŸŸ "
 
     def test_peremption_zero_jours(self, service, sample_article):
         """Test notification pour jour même de péremption."""
@@ -184,9 +184,9 @@ class TestCreerNotificationPeremption:
         assert notif.type_alerte == TypeAlerte.PEREMPTION_DEPASSEE
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GESTION NOTIFICATIONS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -361,9 +361,9 @@ class TestEffacerToutesLues:
         assert count == 0
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS STATISTIQUES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -423,9 +423,9 @@ class TestObtenirAlertesActives:
         assert len(alertes["hautes"]) == 1
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EMAIL
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit

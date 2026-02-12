@@ -1,4 +1,4 @@
-"""
+﻿"""
 Types et schémas Pydantic pour le package batch_cooking.
 
 Module unifié avec tous les modèles de données pour les services de batch cooking.

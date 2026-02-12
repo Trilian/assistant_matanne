@@ -1,8 +1,8 @@
-﻿"""
-Fonctions CRUD pour les paris, équipes et matchs.
+"""
+Fonctions CRUD pour les paris, equipes et matchs.
 """
 
-from ._common import (
+from .utils import (
     st, date, Decimal, logger,
     obtenir_contexte_db, Equipe, Match, PariSportif,
 )
@@ -31,7 +31,7 @@ def enregistrer_pari(match_id: int, prediction: str, cote: float,
 
 
 def ajouter_equipe(nom: str, championnat: str):
-    """Ajoute une nouvelle équipe"""
+    """Ajoute une nouvelle equipe"""
     try:
         with obtenir_contexte_db() as session:
             equipe = Equipe(
@@ -40,10 +40,10 @@ def ajouter_equipe(nom: str, championnat: str):
             )
             session.add(equipe)
             session.commit()
-            st.success(f"✅ Équipe '{nom}' ajoutée!")
+            st.success(f"✅ Équipe '{nom}' ajoutee!")
             return True
     except Exception as e:
-        st.error(f"❌ Erreur ajout équipe: {e}")
+        st.error(f"❌ Erreur ajout equipe: {e}")
         return False
 
 
@@ -62,7 +62,7 @@ def ajouter_match(equipe_dom_id: int, equipe_ext_id: int,
             )
             session.add(match)
             session.commit()
-            st.success("✅ Match ajouté!")
+            st.success("✅ Match ajoute!")
             return True
     except Exception as e:
         st.error(f"❌ Erreur ajout match: {e}")
@@ -70,7 +70,7 @@ def ajouter_match(equipe_dom_id: int, equipe_ext_id: int,
 
 
 def enregistrer_resultat_match(match_id: int, score_dom: int, score_ext: int):
-    """Enregistre le résultat d'un match"""
+    """Enregistre le resultat d'un match"""
     try:
         with obtenir_contexte_db() as session:
             match = session.query(Match).get(match_id)
@@ -79,7 +79,7 @@ def enregistrer_resultat_match(match_id: int, score_dom: int, score_ext: int):
                 match.score_exterieur = score_ext
                 match.joue = True
                 
-                # Déterminer le résultat
+                # Determiner le resultat
                 if score_dom > score_ext:
                     match.resultat = "1"
                 elif score_ext > score_dom:
@@ -87,7 +87,7 @@ def enregistrer_resultat_match(match_id: int, score_dom: int, score_ext: int):
                 else:
                     match.resultat = "N"
                 
-                # Mettre à jour les paris liés
+                # Mettre à jour les paris lies
                 for pari in match.paris:
                     if pari.statut == "en_attente":
                         if pari.prediction == match.resultat:
@@ -98,38 +98,38 @@ def enregistrer_resultat_match(match_id: int, score_dom: int, score_ext: int):
                             pari.gain = Decimal("0")
                 
                 session.commit()
-                st.success(f"✅ Résultat enregistré: {score_dom}-{score_ext}")
+                st.success(f"✅ Resultat enregistre: {score_dom}-{score_ext}")
                 return True
     except Exception as e:
-        st.error(f"❌ Erreur enregistrement résultat: {e}")
+        st.error(f"❌ Erreur enregistrement resultat: {e}")
         return False
 
 
 def supprimer_match(match_id: int) -> bool:
     """
-    Supprime un match et ses paris associés.
+    Supprime un match et ses paris associes.
     
     Args:
         match_id: ID du match à supprimer
         
     Returns:
-        True si suppression réussie
+        True si suppression reussie
     """
     try:
         with obtenir_contexte_db() as session:
             match = session.query(Match).get(match_id)
             if match:
-                # Supprimer d'abord les paris liés
+                # Supprimer d'abord les paris lies
                 for pari in match.paris:
                     session.delete(pari)
                 
                 # Puis le match
                 session.delete(match)
                 session.commit()
-                logger.info(f"🗑️ Match {match_id} supprimé")
+                logger.info(f"🗑️ Match {match_id} supprime")
                 return True
             else:
-                logger.warning(f"Match {match_id} non trouvé")
+                logger.warning(f"Match {match_id} non trouve")
                 return False
     except Exception as e:
         logger.error(f"❌ Erreur suppression match: {e}")

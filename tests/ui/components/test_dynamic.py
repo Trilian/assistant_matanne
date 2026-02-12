@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests complets pour src/ui/components/dynamic.py
 Couverture cible: >80%
 """
@@ -7,9 +7,9 @@ import pytest
 from unittest.mock import patch, MagicMock
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # MODALE (Modal)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestModale:
@@ -100,9 +100,9 @@ class TestModale:
         mock_btn.assert_called_once()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # LISTE_DYNAMIQUE (DynamicList)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestListeDynamique:
@@ -176,9 +176,9 @@ class TestListeDynamique:
         assert {"a": "nouveau"} in st.session_state.get("add_test_items", [])
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ASSISTANT_ETAPES (Stepper)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAssistantEtapes:
@@ -194,7 +194,7 @@ class TestAssistantEtapes:
         """Test création de AssistantEtapes."""
         from src.ui.components.dynamic import AssistantEtapes
         
-        steps = ["Étape 1", "Étape 2", "Étape 3"]
+        steps = ["Ã‰tape 1", "Ã‰tape 2", "Ã‰tape 3"]
         stepper = AssistantEtapes("test", steps)
         
         assert stepper.key == "test"
@@ -268,9 +268,9 @@ class TestAssistantEtapes:
         assert stepper.is_last_step() is False
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS D'INTÉGRATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS D'INTÃ‰GRATION
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestDynamicIntegration:
@@ -309,9 +309,9 @@ class TestDynamicIntegration:
         assert AssistantEtapes is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS DE RENDER (couverture lignes manquantes)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestModaleRender:
@@ -441,7 +441,7 @@ class TestListeDynamiqueRender:
         from src.ui.components.dynamic import ListeDynamique
         import streamlit as st
         
-        # Le second appel à button (delete) retourne True
+        # Le second appel Ã  button (delete) retourne True
         mock_btn.side_effect = [False, True]
         
         # Setup mocks
@@ -472,7 +472,7 @@ class TestAssistantEtapesRender:
     def test_assistant_etapes_render_first_step(
         self, mock_md, mock_cols, mock_progress
     ):
-        """Test render à la première étape."""
+        """Test render Ã  la première étape."""
         from src.ui.components.dynamic import AssistantEtapes
         
         # Setup mocks
@@ -481,7 +481,7 @@ class TestAssistantEtapesRender:
             col.__enter__ = MagicMock(return_value=col)
             col.__exit__ = MagicMock()
         
-        steps = ["Étape 1", "Étape 2", "Étape 3"]
+        steps = ["Ã‰tape 1", "Ã‰tape 2", "Ã‰tape 3"]
         stepper = AssistantEtapes("render_first", steps)
         
         current = stepper.render()
@@ -496,7 +496,7 @@ class TestAssistantEtapesRender:
     def test_assistant_etapes_render_middle_step(
         self, mock_md, mock_cols, mock_progress
     ):
-        """Test render à l'étape du milieu."""
+        """Test render Ã  l'étape du milieu."""
         from src.ui.components.dynamic import AssistantEtapes
         
         # Setup mocks
@@ -505,7 +505,7 @@ class TestAssistantEtapesRender:
             col.__enter__ = MagicMock(return_value=col)
             col.__exit__ = MagicMock()
         
-        steps = ["Étape 1", "Étape 2", "Étape 3"]
+        steps = ["Ã‰tape 1", "Ã‰tape 2", "Ã‰tape 3"]
         stepper = AssistantEtapes("render_mid", steps)
         
         current = stepper.render()
@@ -520,7 +520,7 @@ class TestAssistantEtapesRender:
     def test_assistant_etapes_render_last_step(
         self, mock_md, mock_cols, mock_progress
     ):
-        """Test render à la dernière étape."""
+        """Test render Ã  la dernière étape."""
         from src.ui.components.dynamic import AssistantEtapes
         
         # Setup mocks
@@ -529,7 +529,7 @@ class TestAssistantEtapesRender:
             col.__enter__ = MagicMock(return_value=col)
             col.__exit__ = MagicMock()
         
-        steps = ["Étape 1", "Étape 2", "Étape 3"]
+        steps = ["Ã‰tape 1", "Ã‰tape 2", "Ã‰tape 3"]
         stepper = AssistantEtapes("render_last", steps)
         
         current = stepper.render()
@@ -539,28 +539,28 @@ class TestAssistantEtapesRender:
 
     @patch("streamlit.session_state", {"next_last_step": 2})
     def test_assistant_etapes_next_at_last(self):
-        """Test next() à la dernière étape - ne change pas."""
+        """Test next() Ã  la dernière étape - ne change pas."""
         from src.ui.components.dynamic import AssistantEtapes
         import streamlit as st
         
         steps = ["A", "B", "C"]
         stepper = AssistantEtapes("next_last", steps)
         
-        # Ne devrait pas changer car déjà à last
+        # Ne devrait pas changer car déjÃ  Ã  last
         stepper.next()
         
         assert st.session_state.get("next_last_step") == 2
 
     @patch("streamlit.session_state", {"prev_first_step": 0})
     def test_assistant_etapes_previous_at_first(self):
-        """Test previous() à la première étape - ne change pas."""
+        """Test previous() Ã  la première étape - ne change pas."""
         from src.ui.components.dynamic import AssistantEtapes
         import streamlit as st
         
         steps = ["A", "B", "C"]
         stepper = AssistantEtapes("prev_first", steps)
         
-        # Ne devrait pas changer car déjà à first
+        # Ne devrait pas changer car déjÃ  Ã  first
         stepper.previous()
         
         assert st.session_state.get("prev_first_step") == 0

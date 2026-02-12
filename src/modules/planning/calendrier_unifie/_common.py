@@ -1,13 +1,13 @@
-"""
-Module Calendrier Familial Unifié - Imports et constantes partagés
+﻿"""
+Module Calendrier Familial UnifiÃe - Imports et constantes partagÃes
 
 Affiche dans une seule vue:
-- 🍽️ Repas (midi, soir, goûters)
-- 🍳 Sessions batch cooking
-- 🛒 Courses planifiées
-- 🎨 Activités famille
-- 🏥 RDV médicaux
-- 📅 Événements divers
+- ðŸ½ï¸ Repas (midi, soir, goûters)
+- ðŸ³ Sessions batch cooking
+- ðŸ›’ Courses planifiÃees
+- ðŸŽ¨ ActivitÃes famille
+- ðŸ¥ RDV mÃedicaux
+- ðŸ“… ÉvÃenements divers
 """
 
 import streamlit as st
@@ -22,8 +22,8 @@ from src.core.models import (
     CalendarEvent,
 )
 
-# Logique métier pure (types et fonctions utilitaires)
-from src.domains.planning.logic.calendrier_unifie_logic import (
+# Logique mÃetier pure (types et fonctions utilitaires)
+from src.modules.planning.calendrier_unifie.utils import (
     TypeEvenement,
     EvenementCalendrier,
     JourCalendrier,
